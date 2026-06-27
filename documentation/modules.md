@@ -108,7 +108,7 @@ Knows who everyone is, how they access the system, and what they are authorized 
 
 ---
 
-## Billing
+## Finance
 
 Handles the financial relationship with clients.
 
