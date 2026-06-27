@@ -1,0 +1,26 @@
+{
+  "name": "@hms/core",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./identity/domain/entities": "./src/identity/domain/entities/index.ts",
+    "./identity/domain/errors": "./src/identity/domain/errors/index.ts",
+    "./identity/domain/events": "./src/identity/domain/events/index.ts",
+    "./identity/domain/structures": "./src/identity/domain/structures/index.ts",
+    "./identity/use-cases": "./src/identity/use-cases/index.ts",
+    "./shared/domain/errors": "./src/shared/domain/errors/index.ts",
+    "./shared/domain/events": "./src/shared/domain/events/index.ts",
+    "./shared/domain/structures": "./src/shared/domain/structures/index.ts",
+    "./shared/constants": "./src/shared/constants/index.ts"
+  },
+  "imports": {
+    "#identity/*": "./src/identity/*",
+    "#shared/*": "./src/shared/*"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2"
+  }
+}

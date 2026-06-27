@@ -1,0 +1,6 @@
+export * from './consent-grated-event'
+export * from './consent-revoked-event'
+export * from './person-created-event'
+export * from './person-updated-event'
+export * from './user-created-event'
+export * from './user-deactivated-event'

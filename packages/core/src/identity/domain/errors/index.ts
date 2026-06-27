@@ -1,0 +1,5 @@
+export * from './active-not-found-error'
+export * from './consent-already-granted-error'
+export * from './consent-already-revoked-error'
+export * from './person-not-found-error'
+export * from './user-not-found-error'
