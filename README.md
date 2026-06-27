@@ -1,159 +1,136 @@
-# Turborepo starter
+<h1 align="center">⚖️ HMS</h1>
 
-This Turborepo starter is maintained by the Turborepo core team.
+A **legal practice management** platform covering the full journey of a case — from first contact to closure. HMS organizes intake, cases, production and execution of legal pieces, documents, communication, and billing into well-bounded modules, supported by **AI**, **electronic signature**, and **WhatsApp** integration.
 
-## Using this example
+## 🚀 Overview
 
-Run the following command:
+HMS gives law firms and legal teams a single, auditable, and secure workflow, offering:
 
-```sh
-npx create-turbo@latest
+-   **Modular Domain:** Modules with clear responsibilities (Engagement, Case Management, Legal Production, Legal Execution, Document Management, Communication, Portal, Identity, Billing, Audit) that communicate through events.
+-   **Assisted AI:** Assisted drafting, document classification, and triage via Mastra AI + DeepSeek — always with human validation before anything takes effect.
+-   **Compliance:** Immutable consent log (LGPD) and an audit trail with hash chaining.
+-   **Complete Environment:** Web platform, API (Server), and shared domain (Core), with local infrastructure via Docker.
+
+## 🛠 Tech Stack
+
+The project is a **monorepo** managed by **Turborepo**, using the modern TypeScript ecosystem:
+
+-   **Management:** [Turborepo](https://turbo.build/) + [pnpm](https://pnpm.io/)
+-   **Language:** [TypeScript](https://www.typescriptlang.org/) 5.9
+-   **Frontend (Web):** [TanStack Start](https://tanstack.com/start) + [React](https://react.dev/) 19
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/) v4 + [shadcn/ui](https://ui.shadcn.com/)
+-   **Data & Navigation:** [TanStack Query](https://tanstack.com/query) + [TanStack Router](https://tanstack.com/router)
+-   **Forms & Validation:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+-   **Backend (Server):** [NestJS](https://nestjs.com/)
+-   **Database:** [Supabase](https://supabase.com/) (PostgreSQL) + [Drizzle ORM](https://orm.drizzle.team/)
+-   **Auth & Storage:** [Supabase Auth](https://supabase.com/docs/guides/auth) + Supabase Storage
+-   **Jobs/Workflows:** [Inngest](https://www.inngest.com/)
+-   **AI:** [Mastra AI](https://mastra.ai/) + DeepSeek V4
+-   **WhatsApp:** [Evolution API](https://doc.evolution-api.com/) v2
+-   **Electronic Signature:** [DocuSeal](https://www.docuseal.com/) (self-hosted)
+-   **Quality:** [Biome](https://biomejs.dev/) + [Vitest](https://vitest.dev/)
+
+## 🏗 Architecture
+
+HMS follows a **domain-driven modular** model (DDD) with **event-based communication** between modules.
+
+-   **Agnostic Core:** The `@hms/core` package holds domain entities, events, and business rules, independent of frameworks.
+-   **Strict Boundaries:** Each module owns its responsibilities — no module reaches into another's scope; integration happens through events and shared references.
+-   **Adapters:** The applications (`web`, `server`) act as adapters that consume the system core.
+
+For details, see the [Infrastructure](documentation/infrastructure.md) and [Module Responsibilities](documentation/modules.md).
+
+## 📂 Project Structure
+
+```bash
+hms/
+├── apps/                  # Runnable applications
+│   ├── web/               # Frontend (TanStack Start + React)
+│   └── server/            # Backend API (NestJS)
+├── packages/              # Shared libraries
+│   └── core/              # Business rules and domain (DDD)
+├── documentation/         # Centralized documentation
+├── volumes/               # Local service configs (Supabase, Kong, Auth)
+└── docker-compose.yaml    # Local infrastructure
 ```
 
-## What's inside?
+## ⚙️ Setup and Installation
 
-This Turborepo includes the following packages/apps:
+### Prerequisites
+-   Node.js 18 or higher.
+-   pnpm 9 (recommended via `corepack enable`).
+-   Docker + Docker Compose (for the local infrastructure).
 
-### Apps and Packages
+### Step by Step
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/hms-society/hms.git
+    cd hms
+    ```
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+2.  **Configure the environment:**
+    Create the `.env` files from the examples (`.env.example`) at the root and in the apps that need them. Ask the team for the Supabase and other service credentials.
 
-### Utilities
+3.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
 
-This Turborepo has some additional tools already setup for you:
+4.  **Start the local infrastructure:**
+    ```bash
+    docker compose up -d
+    ```
+    Brings up local Supabase (Auth, PostgreSQL, Storage, Kong) and Mailpit.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+5.  **Run the project (development mode):**
+    ```bash
+    pnpm dev
+    ```
+    Starts all monorepo applications simultaneously via Turborepo.
 
-### Build
+## 📖 Documentation
 
-To build all apps and packages, run the following command:
+The full documentation lives in the `documentation/` directory. Start here:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+-   [Infrastructure and Technical Decisions](documentation/infrastructure.md)
+-   [Module Responsibilities](documentation/modules.md)
+-   [Design System](documentation/design.md)
+-   [Tooling](documentation/tooling.md)
+-   Rules and Conventions
+    -   [Commit Conventions](documentation/rules/commit-rules.md)
+-   Prompts
+    -   [Pull Request Creation](documentation/prompts/create-pr-prompt.md)
 
-```sh
-cd my-turborepo
-turbo build
+Guidance for AI agents: see [AGENTS.md](AGENTS.md).
+
+## 🧪 Tests
+
+The project uses `Vitest` for automated tests, from the domain in core to the UI.
+
+```bash
+# Frontend tests
+pnpm --filter web test
+
+# Backend tests
+pnpm --filter server test
 ```
 
-Without global `turbo`, use your package manager:
+## ✅ Quality
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm check          # lint + format (Biome) with safe fixes
+pnpm check-types    # type-check across the whole monorepo
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Commits follow the **Conventional Commits** standard, validated by commitlint + husky. See the [Commit Conventions](documentation/rules/commit-rules.md).
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 📝 License
 
-```sh
-turbo build --filter=docs
-```
+Private and proprietary project (`UNLICENSED`). All rights reserved to hms-society.
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+<p align="center">
+  Made with 💜 by <a href="https://github.com/JohnPetros">John Petros</a> 👋🏻
+</p>
