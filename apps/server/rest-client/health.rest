@@ -1,0 +1,4 @@
+@url = {{BASE_URL}}/health
+
+GET {{url}}
+Content-Type: application/json
