@@ -33,6 +33,10 @@ export const Route = createRootRoute({
       },
       {
         rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@600&display=swap',
+      },
+      {
+        rel: 'stylesheet',
         href: globalStyles,
       },
     ],
