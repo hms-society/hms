@@ -19,6 +19,15 @@ export const Route = createRootRoute({
     ],
     links: [
       {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/images/hms-favicon.svg',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
         rel: 'preconnect',
         href: 'https://fonts.googleapis.com',
       },
