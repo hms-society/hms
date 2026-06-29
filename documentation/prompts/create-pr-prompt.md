@@ -208,15 +208,6 @@ gh pr create \
 
 ---
 
-### 6. Code Review Comment
-
-After creating the PR, add a comment to request a code review:
-
-```
-gh pr comment <pr-number> --body "@code review"
-```
-
----
 
 ### 7. Return
 
