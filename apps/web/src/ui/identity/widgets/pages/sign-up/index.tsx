@@ -18,7 +18,7 @@ export const SignUpPage = () => {
 
   return (
     <main className="min-h-screen flex bg-background text-foreground font-sans">
-      <div className="hidden md:flex w-[45%] flex-col justify-between bg-gradient-to-br from-primary to-brand p-12 lg:p-16">
+      <div className="hidden md:flex w-[45%] flex-col justify-between bg-[linear-gradient(225deg,rgba(10,45,48,0.95)_0%,#1B8C93_40%,#4B696B_70%,rgba(6,28,30,0.98)_100%)] p-12 lg:p-16">
         <div>
           <span className="inline-block border-b-[2px] border-primary-foreground pb-0.5 font-serif text-[32px] font-medium text-primary-foreground">
             HMS
