@@ -2,11 +2,11 @@
 set -euo pipefail
 
 PROMPTS_DIR="documentation/prompts"
+SKILLS_DIR=".codex/skills"
 OUT_DIRS=(
   ".cursor/commands"
   ".claude/commands"
   ".opencode/commands"
-  ".claude/commands"
 )
 
 # Garante que existem prompts
@@ -21,6 +21,8 @@ fi
 for dir in "${OUT_DIRS[@]}"; do
   mkdir -p "$dir"
 done
+
+mkdir -p "$SKILLS_DIR"
 
 # Função: tenta criar symlink; se não der, copia
 link_or_copy() {
@@ -48,6 +50,62 @@ link_or_copy() {
   fi
 }
 
+extract_description() {
+  local src="$1"
+
+  awk '
+    NR == 1 && $0 == "---" {
+      in_frontmatter = 1
+      next
+    }
+    in_frontmatter && $0 == "---" {
+      exit
+    }
+    in_frontmatter && $0 ~ /^description:[[:space:]]*/ {
+      sub(/^description:[[:space:]]*/, "", $0)
+      print
+      exit
+    }
+  ' "$src"
+}
+
+write_skill() {
+  local src="$1"
+  local name="$2"
+  local skill_dir="$SKILLS_DIR/$name"
+  local dest="$skill_dir/SKILL.md"
+  local description
+
+  mkdir -p "$skill_dir"
+  description="$(extract_description "$src")"
+
+  {
+    echo "---"
+    echo "name: $name"
+    if [[ -n "$description" ]]; then
+      echo "description: >"
+      echo "  $description"
+    fi
+    echo "---"
+    echo
+    awk '
+      NR == 1 && $0 == "---" {
+        in_frontmatter = 1
+        next
+      }
+      in_frontmatter && $0 == "---" {
+        in_frontmatter = 0
+        next
+      }
+      !in_frontmatter {
+        print
+      }
+    ' "$src"
+  } > "$dest"
+
+  echo "skill:   $dest"
+}
+
 for src in "${PROMPTS[@]}"; do
   filename="$(basename "$src")"
   name="${filename%.md}"
@@ -61,4 +119,6 @@ for src in "${PROMPTS[@]}"; do
     dest="$dir/$name.md"
     link_or_copy "$src" "$dest"
   done
+
+  write_skill "$src" "$name"
 done
