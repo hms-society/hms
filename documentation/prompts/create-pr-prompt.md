@@ -49,24 +49,24 @@ however, are written as plain noun phrases **without a type prefix** (see below)
 The title must be:
 
 - short and direct
-- in English
+- **in Brazilian Portuguese (PT-BR)**
 - a reflection of the essence of the change
 - preferably a **noun phrase** (do not start with a verb)
 
 Prefer noun-phrase formulations such as:
 
-- `Setup of...`
-- `Coverage of...`
-- `Fix for...`
-- `Adjustment of...`
-- `Refactor of...`
+- `Configuração de...`
+- `Cobertura de...`
+- `Correção de...`
+- `Ajuste de...`
+- `Refatoração de...`
 
 Examples:
 
-- `Product listing setup`
-- `Fix for the image loading error`
-- `Fix for navigation to the catalog screen`
-- `Integration test coverage for the sign-up page`
+- `Configuração da listagem de produtos`
+- `Correção do erro de carregamento de imagem`
+- `Correção da navegação para a tela de catálogo`
+- `Cobertura de testes de integração da página de cadastro`
 
 ⚠️ Do **not** add any prefix to the title — neither branch-style prefixes nor
 Conventional Commits types:
@@ -91,48 +91,48 @@ The PR body must follow the template below.
 
 ---
 
-## Goal (required)
+## Objetivo (obrigatório)
 
-Explain why this PR was created and its core purpose.
+Explique por que este PR foi criado e qual é seu propósito principal.
 
-## Related issues (optional)
+## Issues relacionadas (opcional)
 
-Link tasks/bugs using **only** the `resolve` keyword:
+Vincule tarefas/bugs usando **apenas** a palavra-chave `resolve`:
 
 ```
 resolve #123
 resolve #456
 ```
 
-⚠️ Do not use `closes`, `fixes`, or any other variation. Only `resolve`.
+⚠️ Não use `closes`, `fixes` ou qualquer outra variação. Apenas `resolve`.
 
 ---
 
-## Bug cause (optional — fix only)
+## Causa do bug (opcional — apenas para correções)
 
-Describe the technical root cause.
-
----
-
-## Changelog (required)
-
-Technical list of the changes:
-
-- files changed
-- behavior modified
-- rules added
-- refactors performed
+Descreva a causa técnica raiz do problema.
 
 ---
 
-## How to test (required)
+## Changelog (obrigatório)
 
-Clear step-by-step for the reviewer to validate. Reference the relevant commands,
-e.g.:
+Lista técnica das alterações realizadas:
+
+- arquivos modificados
+- comportamentos alterados
+- regras adicionadas
+- refatorações realizadas
+
+---
+
+## Como testar (obrigatório)
+
+Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
+relevantes, ex.:
 
 ```
 pnpm install
-pnpm --filter web dev        # frontend at http://localhost:3000
+pnpm --filter web dev        # frontend em http://localhost:3000
 pnpm --filter server start:dev
 pnpm --filter <pkg> check-types
 ```
@@ -143,12 +143,12 @@ pnpm --filter <pkg> check-types
 
 ---
 
-## Notes (optional)
+## Observações (opcional)
 
-- architecture decisions
-- known limitations
+- decisões de arquitetura
+- limitações conhecidas
 - tradeoffs
-- next steps
+- próximos passos
 
 ---
 
