@@ -1,3 +1,4 @@
+import type { RelationalStatus } from '../structures'
 import type { PersonConsent } from '../structures/person-content'
 import type { PersonType } from '../structures/person-type'
 
@@ -8,6 +9,7 @@ export type Person = {
   email?: string
   phone?: string
   consents: PersonConsent[]
+  relationalStatus: RelationalStatus
   createdAt: Date
   updatedAt: Date
 }
