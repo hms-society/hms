@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
+    "./engagement/domain/entities": "./src/engagement/domain/entities/index.ts",
+    "./engagement/domain/errors": "./src/engagement/domain/errors/index.ts",
+    "./engagement/domain/events": "./src/engagement/domain/events/index.ts",
+    "./engagement/domain/structures": "./src/engagement/domain/structures/index.ts",
+    "./engagement/providers": "./src/engagement/providers/index.ts",
+    "./engagement/use-cases": "./src/engagement/use-cases/index.ts",
     "./identity/domain/entities": "./src/identity/domain/entities/index.ts",
     "./identity/domain/errors": "./src/identity/domain/errors/index.ts",
     "./identity/domain/events": "./src/identity/domain/events/index.ts",
@@ -14,6 +20,7 @@
     "./shared/constants": "./src/shared/constants/index.ts"
   },
   "imports": {
+    "#engagement/*": "./src/engagement/*",
     "#identity/*": "./src/identity/*",
     "#shared/*": "./src/shared/*"
   },
