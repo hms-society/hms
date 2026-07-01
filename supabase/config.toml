@@ -11,4 +11,4 @@ pool_size = 10
 
 # Persistent develop branch configuration on Supabase Cloud
 [remotes.develop]
-project_id = "SEU_BRANCH_PROJECT_ID_AQUI"
+project_id = "qixgnvgaenytqbuslyrn"
