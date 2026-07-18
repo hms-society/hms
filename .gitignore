@@ -18,6 +18,9 @@ coverage/
 **/public/fallback*
 **/html/**
 
+# tmp
+tmp/
+
 # logs
 logs/
 *.log
