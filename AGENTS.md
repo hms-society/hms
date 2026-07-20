@@ -14,6 +14,17 @@ Before writing or changing code, read the documents below. They are the source o
 truth for how this project is meant to look, run, and be organized — do not infer
 these from the code alone.
 
+### 0. [`AGENTS.local.md`](AGENTS.local.md) — read before any task
+
+This file contains repository-local instructions that may vary by workspace or
+execution context.
+
+- **When to read:** always, before running commands or reading, writing, or
+  changing any project file.
+- **How to apply:** treat its instructions as mandatory alongside this file and
+  resolve them before starting the task. If the file does not exist or is empty,
+  continue with the instructions below.
+
 ### 1. [`documentation/design.md`](documentation/design.md) — read before any UI work
 
 The design system for `apps/web`. Defines the full token set (colors in OKLCH,
