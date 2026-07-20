@@ -4,55 +4,20 @@ import { Link } from '@tanstack/react-router'
 import { Button } from '#/ui/shadcn/button'
 import { Input } from '#/ui/shadcn/input'
 
-import { useNavigate } from '@tanstack/react-router'
+import { useSignIn } from '#/ui/identity/hooks'
 
-export const SignUpPage = () => {
+export const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const { mutate: signIn, isPending: loading, error } = useSignIn()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError(null)
-    setLoading(true)
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('cpf-email')?.toString() ?? ''
     const password = formData.get('password')?.toString() ?? ''
 
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
-
-      const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: supabaseKey,
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          data.error_description || data.message || 'Credenciais inválidas.',
-        )
-      }
-
-      // Guardar sessão local
-      localStorage.setItem('hms:token', data.access_token)
-      localStorage.setItem('hms:user', JSON.stringify(data.user))
-
-      // Redirecionar para home
-      navigate({ to: '/home' })
-    } catch (err: any) {
-      setError(err.message || 'Erro de conexão com o servidor de autenticação.')
-    } finally {
-      setLoading(false)
-    }
+    signIn({ email, password })
   }
 
   return (
@@ -110,7 +75,7 @@ export const SignUpPage = () => {
           <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
             {error && (
               <div className='p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-sans'>
-                {error}
+                {error.message}
               </div>
             )}
 
@@ -203,7 +168,7 @@ export const SignUpPage = () => {
               asChild
               className='h-12 w-full rounded-full border-input bg-transparent font-sans text-[15px] font-bold text-foreground shadow-none transition-colors hover:bg-muted'
             >
-              <Link to='/sign-up'>Primeiro acesso?</Link>
+              <Link to={'/sign-up' as any}>Primeiro acesso?</Link>
             </Button>
 
             <p className='mt-2 text-center font-sans text-[14px] text-muted-foreground'>
