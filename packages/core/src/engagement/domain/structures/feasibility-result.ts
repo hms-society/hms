@@ -4,5 +4,4 @@ export const FeasibilityResult = {
   Pending: 'pending',
 } as const
 
-export type FeasibilityResult =
-  (typeof FeasibilityResult)[keyof typeof FeasibilityResult]
+export type FeasibilityResult = (typeof FeasibilityResult)[keyof typeof FeasibilityResult]
