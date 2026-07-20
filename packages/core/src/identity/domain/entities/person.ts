@@ -5,7 +5,7 @@ import type { PersonType } from '../structures/person-type'
 export type Person = {
   id: string
   type: PersonType
-  documentIdNumber: string
+  documentIdNumber?: string
   email?: string
   phone?: string
   consents: PersonConsent[]

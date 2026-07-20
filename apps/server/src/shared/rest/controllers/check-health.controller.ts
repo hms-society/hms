@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-
 import { Controller, Get } from '@nestjs/common'
 
 const { version } = JSON.parse(
@@ -12,11 +11,13 @@ export class CheckHealthController {
   @Get('/health')
   handle() {
     return {
-      status: 'UP',
       version,
       timestamp: new Date().toISOString(),
       services: {
         database: 'UP',
+        evolutionApi: 'UP',
+        supabase: 'UP',
+        redis: 'UP',
       },
     }
   }
