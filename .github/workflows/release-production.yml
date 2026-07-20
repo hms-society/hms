@@ -1,0 +1,55 @@
+name: Release Production
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: release-production-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    name: Create release and tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create GitHub Release from PR metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          TARGET_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$PR_TITLE" =~ (v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "O título do PR precisa conter uma versão no formato vX.Y.Z."
+            exit 1
+          fi
+
+          if [[ -z "${PR_BODY//[[:space:]]/}" ]]; then
+            echo "A descrição do PR precisa conter as principais mudanças da versão."
+            exit 1
+          fi
+
+          TAG_NAME="${BASH_REMATCH[1]}"
+
+          if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "A release $TAG_NAME já existe; nenhuma alteração foi necessária."
+            exit 0
+          fi
+
+          gh release create "$TAG_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$TARGET_SHA" \
+            --title "$PR_TITLE" \
+            --notes "$PR_BODY"
