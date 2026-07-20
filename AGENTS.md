@@ -73,12 +73,6 @@ and helper scripts.
   respect Biome formatting (don't introduce a different formatter); don't bypass
   git hooks.
 
-## Other conventions
-
-- **Commits:** follow [`documentation/rules/commit-rules.md`](documentation/rules/commit-rules.md)
-  (Conventional Commits, enforced by commitlint + husky).
-- **Pull requests:** follow [`documentation/prompts/create-pr-prompt.md`](documentation/prompts/create-pr-prompt.md).
-
 ## Workflow expectations
 
 - Read the relevant document(s) above **before** starting, not after.
