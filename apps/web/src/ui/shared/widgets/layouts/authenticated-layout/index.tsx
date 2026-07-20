@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Home, FolderKanban, Users, } from 'lucide-react'
+import { Home, FolderKanban, Users } from 'lucide-react'
 import { NavbarPill } from '#/ui/engagement/widgets/components/navbar-pill'
 import { Sidebar } from '#/ui/engagement/widgets/components/sidebar'
 
@@ -18,7 +18,7 @@ export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
   ]
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground font-sans">
+    <div className='flex min-h-screen bg-background text-foreground font-sans'>
       {/* Sidebar na Esquerda */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -29,14 +29,12 @@ export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       />
 
       {/* Conteúdo Principal à Direita */}
-      <main className="flex-1 flex flex-col relative min-h-screen">
+      <main className='flex-1 flex flex-col relative min-h-screen'>
         {/* Navbar Pill Flutuante */}
         <NavbarPill />
 
         {/* Área de visualização do conteúdo */}
-        <div className="flex-1 p-8 pt-6">
-          {children}
-        </div>
+        <div className='flex-1 p-8 pt-6'>{children}</div>
       </main>
     </div>
   )
