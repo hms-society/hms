@@ -1,0 +1,14 @@
+# Configuration for Supabase Local & Branches
+# Default configuration for all branches
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+pool_size = 10
+
+# Persistent develop branch configuration on Supabase Cloud
+[remotes.develop]
+project_id = "qixgnvgaenytqbuslyrn"
