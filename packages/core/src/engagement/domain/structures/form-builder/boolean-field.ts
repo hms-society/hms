@@ -1,4 +1,4 @@
-import { FormFieldType } from './form-field-type'
+import type { FormFieldType } from './form-field-type'
 
 export type BooleanField = {
   type: typeof FormFieldType.Boolean

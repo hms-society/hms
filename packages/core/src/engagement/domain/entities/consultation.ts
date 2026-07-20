@@ -1,8 +1,4 @@
-import type {
-  ConsultationChannel,
-  ConsultationModality,
-  FormField,
-} from '../structures'
+import type { ConsultationChannel, ConsultationModality, FormField } from '../structures'
 
 export type Consultation = {
   id: string

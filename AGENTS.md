@@ -1,5 +1,3 @@
-# AGENTS.md
-
 Guidance for AI coding agents working in this repository (HMS).
 
 HMS is a pnpm + Turborepo monorepo:
@@ -80,3 +78,10 @@ and helper scripts.
   applicable documents.
 - If code and documentation disagree, treat the documentation as intent and surface
   the discrepancy instead of silently following the code.
+- When creating a git worktree or branch checkout from this repository, copy only
+  ignored or otherwise untracked local env files (for example `.env`,
+  `.env.development`, `.env.testing`, `.env.production`). Do **not** copy tracked
+  template files such as `.env.example` into the new worktree, even if using a
+  broad pattern like `.env*`. Prefer `git ls-files --others --ignored
+  --exclude-standard -- '.env*'` or an equivalent approach that excludes tracked
+  files.
