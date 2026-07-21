@@ -17,12 +17,14 @@
     "./shared/domain/errors": "./src/shared/domain/errors/index.ts",
     "./shared/domain/events": "./src/shared/domain/events/index.ts",
     "./shared/domain/structures": "./src/shared/domain/structures/index.ts",
-    "./shared/constants": "./src/shared/constants/index.ts"
+    "./shared/constants": "./src/shared/constants/index.ts",
+    "./communication/constants": "./src/communication/constants/index.ts"
   },
   "imports": {
     "#engagement/*": "./src/engagement/*",
     "#identity/*": "./src/identity/*",
-    "#shared/*": "./src/shared/*"
+    "#shared/*": "./src/shared/*",
+    "#communication/*": "./src/communication/*"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

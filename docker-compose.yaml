@@ -207,6 +207,20 @@ services:
       CACHE_REDIS_PREFIX_KEY: evolution
       CACHE_REDIS_SAVE_INSTANCES: "false"
       CACHE_LOCAL_ENABLED: "false"
+
+      # Global Webhook configuration for NestJS backend
+      WEBHOOK_GLOBAL_URL: ${EVOLUTION_WEBHOOK_GLOBAL_URL:-http://host.docker.internal:3000/api/v1/integrations/whatsapp/webhook}
+      WEBHOOK_GLOBAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: "false"
+      WEBHOOK_EVENTS_APPLICATION_STARTUP: "false"
+      WEBHOOK_EVENTS_QRCODE_UPDATED: "true"
+      WEBHOOK_EVENTS_MESSAGES_SET: "true"
+      WEBHOOK_EVENTS_MESSAGES_UPSERT: "true"
+      WEBHOOK_EVENTS_MESSAGES_UPDATE: "true"
+      WEBHOOK_EVENTS_SEND_MESSAGE: "true"
+      WEBHOOK_EVENTS_CONNECTION_UPDATE: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - evolution-instances:/evolution/instances
 
