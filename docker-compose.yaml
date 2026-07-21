@@ -49,7 +49,7 @@ services:
       GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
 
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
-      GOTRUE_MAILER_AUTOCONFIRM: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
 
       GOTRUE_SMTP_HOST: mailpit
       GOTRUE_SMTP_PORT: 1025

@@ -36,6 +36,7 @@ lerna-debug.log*
 .vercel
 .branches
 .temp
+tmp/
 dist
 
 # Vercel
@@ -57,9 +58,10 @@ opencode.json
 .mcp.json
 CLAUDE.md
 GEMINI.md
+AGENTS.local.md
 prompt.md
 
-# Local env files
+# env files
 .env
 .env.development
 .env.testing
