@@ -92,6 +92,7 @@
   },
   "overrides": [
     {
+      "includes": ["apps/server/**"],
       "linter": {
         "rules": {
           "style": {
