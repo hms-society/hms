@@ -5,7 +5,6 @@ export interface SidebarProps {
   isCollapsed: boolean
   setIsCollapsed: (isCollapsed: boolean) => void
   activePath: string
-  setActivePath: (activePath: string) => void
   sidebarItems: {
     label: string
     path: string
@@ -17,7 +16,6 @@ export const Sidebar = ({
   isCollapsed,
   setIsCollapsed,
   activePath,
-  setActivePath,
   sidebarItems,
 }: SidebarProps) => {
   return (
@@ -75,8 +73,7 @@ export const Sidebar = ({
             return (
               <Link
                 key={item.path}
-                to={item.path as any}
-                onClick={() => setActivePath(item.path)}
+                to={item.path}
                 className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium transition-all duration-200 outline-none cursor-pointer ${
                   isCollapsed ? 'justify-center px-0' : 'px-3'
                 } ${

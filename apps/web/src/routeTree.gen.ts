@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as AtendenteRouteImport } from './routes/atendente'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtendenteDashboardRouteImport } from './routes/atendente.dashboard'
+import { Route as AtendenteConsultasRouteImport } from './routes/atendente.consultas'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -23,38 +26,82 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtendenteRoute = AtendenteRouteImport.update({
+  id: '/atendente',
+  path: '/atendente',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtendenteDashboardRoute = AtendenteDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AtendenteRoute,
+} as any)
+const AtendenteConsultasRoute = AtendenteConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => AtendenteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/atendente': typeof AtendenteRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/atendente/consultas': typeof AtendenteConsultasRoute
+  '/atendente/dashboard': typeof AtendenteDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/atendente': typeof AtendenteRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/atendente/consultas': typeof AtendenteConsultasRoute
+  '/atendente/dashboard': typeof AtendenteDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/atendente': typeof AtendenteRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/atendente/consultas': typeof AtendenteConsultasRoute
+  '/atendente/dashboard': typeof AtendenteDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/sign-up'
+  fullPaths:
+    | '/'
+    | '/atendente'
+    | '/home'
+    | '/sign-up'
+    | '/atendente/consultas'
+    | '/atendente/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/sign-up'
-  id: '__root__' | '/' | '/home' | '/sign-up'
+  to:
+    | '/'
+    | '/atendente'
+    | '/home'
+    | '/sign-up'
+    | '/atendente/consultas'
+    | '/atendente/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/atendente'
+    | '/home'
+    | '/sign-up'
+    | '/atendente/consultas'
+    | '/atendente/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AtendenteRoute: typeof AtendenteRouteWithChildren
   HomeRoute: typeof HomeRoute
   SignUpRoute: typeof SignUpRoute
 }
@@ -75,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atendente': {
+      id: '/atendente'
+      path: '/atendente'
+      fullPath: '/atendente'
+      preLoaderRoute: typeof AtendenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,11 +136,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atendente/dashboard': {
+      id: '/atendente/dashboard'
+      path: '/dashboard'
+      fullPath: '/atendente/dashboard'
+      preLoaderRoute: typeof AtendenteDashboardRouteImport
+      parentRoute: typeof AtendenteRoute
+    }
+    '/atendente/consultas': {
+      id: '/atendente/consultas'
+      path: '/consultas'
+      fullPath: '/atendente/consultas'
+      preLoaderRoute: typeof AtendenteConsultasRouteImport
+      parentRoute: typeof AtendenteRoute
+    }
   }
 }
 
+interface AtendenteRouteChildren {
+  AtendenteConsultasRoute: typeof AtendenteConsultasRoute
+  AtendenteDashboardRoute: typeof AtendenteDashboardRoute
+}
+
+const AtendenteRouteChildren: AtendenteRouteChildren = {
+  AtendenteConsultasRoute: AtendenteConsultasRoute,
+  AtendenteDashboardRoute: AtendenteDashboardRoute,
+}
+
+const AtendenteRouteWithChildren = AtendenteRoute._addFileChildren(
+  AtendenteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AtendenteRoute: AtendenteRouteWithChildren,
   HomeRoute: HomeRoute,
   SignUpRoute: SignUpRoute,
 }
