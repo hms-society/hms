@@ -1,8 +1,10 @@
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { EvolutionWebhookGuard } from './evolution-webhook.guard'
+
+import type { ConfigService } from '@nestjs/config'
+import { UnauthorizedException } from '@nestjs/common'
+import type { ExecutionContext } from '@nestjs/common'
 
 describe('EvolutionWebhookGuard', () => {
   let guard: EvolutionWebhookGuard

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { DrizzleDB } from '../../shared/database/database.provider'
 import { WhatsAppWebhookService } from './whatsapp-webhook.service'
+import type { DrizzleDB } from '../../shared/database/database.provider'
 
 describe('WhatsAppWebhookService', () => {
   let service: WhatsAppWebhookService
