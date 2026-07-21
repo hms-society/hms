@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common'
 
 import { EvolutionWebhookGuard } from '../guards/evolution-webhook.guard'
-import { WhatsAppWebhookService } from '../services/whatsapp-webhook.service'
+import type { WhatsAppWebhookService } from '../services/whatsapp-webhook.service'
 
 @Controller('integrations/whatsapp')
 export class WhatsAppWebhookController {
