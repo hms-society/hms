@@ -15,9 +15,9 @@ export const AttendantLayout = ({ children }: AttendantLayoutProps) => {
 })
  
   const sidebarItems = [
-    { label: 'Dashboard',      path: '/atendente/dashboard',    icon: LayoutDashboard },
+    { label: 'Dashboard',      path: '/atendimento/dashboard',    icon: LayoutDashboard },
     { label: 'Meus intakes',   path: '/intakes',      icon: ClipboardList },
-    { label: 'Consultas',      path: '/atendente/consultas',    icon: MonitorCheck },
+    { label: 'Consultas',      path: '/atendimento/consultas',    icon: MonitorCheck },
     { label: 'Minha agenda',   path: '/agenda',       icon: Calendar },
     { label: 'Meus casos',     path: '/casos',        icon: Briefcase },
     { label: 'Comunicação',    path: '/comunicacao',  icon: MessageSquare },

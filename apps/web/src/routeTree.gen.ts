@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as HomeRouteImport } from './routes/home'
-import { Route as AtendenteRouteImport } from './routes/atendente'
+import { Route as AtendimentoRouteImport } from './routes/atendimento'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AtendenteDashboardRouteImport } from './routes/atendente.dashboard'
-import { Route as AtendenteConsultasRouteImport } from './routes/atendente.consultas'
+import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento.dashboard'
+import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento.consultas'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -26,9 +26,9 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AtendenteRoute = AtendenteRouteImport.update({
-  id: '/atendente',
-  path: '/atendente',
+const AtendimentoRoute = AtendimentoRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -36,72 +36,72 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AtendenteDashboardRoute = AtendenteDashboardRouteImport.update({
+const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AtendenteRoute,
+  getParentRoute: () => AtendimentoRoute,
 } as any)
-const AtendenteConsultasRoute = AtendenteConsultasRouteImport.update({
+const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   id: '/consultas',
   path: '/consultas',
-  getParentRoute: () => AtendenteRoute,
+  getParentRoute: () => AtendimentoRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/atendente': typeof AtendenteRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
-  '/atendente/consultas': typeof AtendenteConsultasRoute
-  '/atendente/dashboard': typeof AtendenteDashboardRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/atendente': typeof AtendenteRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
-  '/atendente/consultas': typeof AtendenteConsultasRoute
-  '/atendente/dashboard': typeof AtendenteDashboardRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/atendente': typeof AtendenteRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
-  '/atendente/consultas': typeof AtendenteConsultasRoute
-  '/atendente/dashboard': typeof AtendenteDashboardRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/atendente'
+    | '/atendimento'
     | '/home'
     | '/sign-up'
-    | '/atendente/consultas'
-    | '/atendente/dashboard'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/atendente'
+    | '/atendimento'
     | '/home'
     | '/sign-up'
-    | '/atendente/consultas'
-    | '/atendente/dashboard'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
   id:
     | '__root__'
     | '/'
-    | '/atendente'
+    | '/atendimento'
     | '/home'
     | '/sign-up'
-    | '/atendente/consultas'
-    | '/atendente/dashboard'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AtendenteRoute: typeof AtendenteRouteWithChildren
+  AtendimentoRoute: typeof AtendimentoRouteWithChildren
   HomeRoute: typeof HomeRoute
   SignUpRoute: typeof SignUpRoute
 }
@@ -122,11 +122,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/atendente': {
-      id: '/atendente'
-      path: '/atendente'
-      fullPath: '/atendente'
-      preLoaderRoute: typeof AtendenteRouteImport
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -136,40 +136,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/atendente/dashboard': {
-      id: '/atendente/dashboard'
+    '/atendimento/dashboard': {
+      id: '/atendimento/dashboard'
       path: '/dashboard'
-      fullPath: '/atendente/dashboard'
-      preLoaderRoute: typeof AtendenteDashboardRouteImport
-      parentRoute: typeof AtendenteRoute
+      fullPath: '/atendimento/dashboard'
+      preLoaderRoute: typeof AtendimentoDashboardRouteImport
+      parentRoute: typeof AtendimentoRoute
     }
-    '/atendente/consultas': {
-      id: '/atendente/consultas'
+    '/atendimento/consultas': {
+      id: '/atendimento/consultas'
       path: '/consultas'
-      fullPath: '/atendente/consultas'
-      preLoaderRoute: typeof AtendenteConsultasRouteImport
-      parentRoute: typeof AtendenteRoute
+      fullPath: '/atendimento/consultas'
+      preLoaderRoute: typeof AtendimentoConsultasRouteImport
+      parentRoute: typeof AtendimentoRoute
     }
   }
 }
 
-interface AtendenteRouteChildren {
-  AtendenteConsultasRoute: typeof AtendenteConsultasRoute
-  AtendenteDashboardRoute: typeof AtendenteDashboardRoute
+interface AtendimentoRouteChildren {
+  AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
+  AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
 }
 
-const AtendenteRouteChildren: AtendenteRouteChildren = {
-  AtendenteConsultasRoute: AtendenteConsultasRoute,
-  AtendenteDashboardRoute: AtendenteDashboardRoute,
+const AtendimentoRouteChildren: AtendimentoRouteChildren = {
+  AtendimentoConsultasRoute: AtendimentoConsultasRoute,
+  AtendimentoDashboardRoute: AtendimentoDashboardRoute,
 }
 
-const AtendenteRouteWithChildren = AtendenteRoute._addFileChildren(
-  AtendenteRouteChildren,
+const AtendimentoRouteWithChildren = AtendimentoRoute._addFileChildren(
+  AtendimentoRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AtendenteRoute: AtendenteRouteWithChildren,
+  AtendimentoRoute: AtendimentoRouteWithChildren,
   HomeRoute: HomeRoute,
   SignUpRoute: SignUpRoute,
 }
