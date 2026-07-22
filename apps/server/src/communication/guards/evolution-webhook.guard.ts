@@ -1,6 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { Request } from 'express'
+import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
+import type { ConfigService } from '@nestjs/config'
+import type { Request } from 'express'
 
 @Injectable()
 export class EvolutionWebhookGuard implements CanActivate {
@@ -9,7 +9,7 @@ export class EvolutionWebhookGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>()
     const apiKeyHeader =
-      (request.headers['apikey'] as string | undefined) ||
+      (request.headers.apikey as string | undefined) ||
       (request.headers['x-api-key'] as string | undefined)
 
     const expectedApiKey =
