@@ -107,13 +107,12 @@ export const SignInPage = () => {
                   Senha
                 </label>
 
-                <button
-                  type='button'
-                  disabled={loading}
-                  className='cursor-pointer font-sans text-[13px] font-bold text-brand-accent transition-opacity hover:opacity-80'
-                >
-                  Esqueci minha senha
-                </button>
+                <Link
+                to="/forgot-password"
+                className="font-sans text-[13px] font-bold text-brand-accent transition-opacity hover:opacity-80"
+              >
+                Esqueci minha senha
+              </Link>
               </div>
 
               <div className='relative'>

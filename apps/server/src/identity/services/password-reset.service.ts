@@ -1,31 +1,37 @@
-import { Injectable } from '@nestjs/common'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { Injectable, Inject } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { eq } from 'drizzle-orm'
+import { DRIZZLE, type DrizzleDB } from '../../shared/database/database.provider'
+import { usuario } from '../../shared/database/schema'
+import { SupabaseClient, createClient } from '@supabase/supabase-js'
 
 @Injectable()
 export class PasswordResetService {
   private supabase: SupabaseClient
-
-  constructor() {
-    this.supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-  }
+   constructor(
+      @Inject(DRIZZLE) private readonly db: DrizzleDB,
+      private readonly configService: ConfigService,
+    ) {
+      const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || 'http://127.0.0.1:8000'
+      const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') || 'local-development-service-role-key'
+  
+      this.supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false },
+      })
+    }
 
   async solicitarRedefinicaoSenha(email: string): Promise<void> {
-    const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+    const [dadosUsuario] = await this.db
+      .select()
+      .from(usuario)
+      .where(eq(usuario.email, email))
+
+    if (!dadosUsuario || !dadosUsuario.ativo) {
+      return
+    }
+
+    await this.supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.FRONTEND_URL}/reset-password`,
     })
-
-    if (error) {
-      throw new Error(error.message)
-    }
-  }
-
-  async confirmarRedefinicaoSenha(novaSenha: string): Promise<void> {
-    const { error } = await this.supabase.auth.updateUser({
-      password: novaSenha
-    })
-
-    if (error) {
-      throw new Error(error.message)
-    }
   }
 }
