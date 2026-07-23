@@ -8,17 +8,21 @@ import { SupabaseClient, createClient } from '@supabase/supabase-js'
 @Injectable()
 export class PasswordResetService {
   private supabase: SupabaseClient
-   constructor(
-      @Inject(DRIZZLE) private readonly db: DrizzleDB,
-      private readonly configService: ConfigService,
-    ) {
-      const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || 'http://127.0.0.1:8000'
-      const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') || 'local-development-service-role-key'
-  
-      this.supabase = createClient(supabaseUrl, supabaseKey, {
-        auth: { persistSession: false },
-      })
-    }
+
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly configService: ConfigService,
+  ) {
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || 'http://localhost:8000'
+    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') || 'local-development-service-role-key'
+
+    this.supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { 
+        persistSession: false,
+        flowType: 'implicit', 
+      },
+    })
+  }
 
   async solicitarRedefinicaoSenha(email: string): Promise<void> {
     const [dadosUsuario] = await this.db
@@ -30,8 +34,9 @@ export class PasswordResetService {
       return
     }
 
+
     await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.FRONTEND_URL}/reset-password`,
+      redirectTo: 'http://localhost:3000/reset-password'
     })
   }
 }

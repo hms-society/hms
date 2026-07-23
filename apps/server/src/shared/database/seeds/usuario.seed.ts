@@ -13,8 +13,8 @@ export class usuarioSeed {
     private readonly db: DrizzleDB,
   ) {
     const supabaseUrl = process.env.SUPABASE_URL || 'http://127.0.0.1:8000'
-    const localJwtSecret = 
-      process.env.SUPABASE_JWT_SECRET || 'super-secret-jwt-token-with-at-least-32-characters-long'
+    const localJwtSecret =
+       process.env.SUPABASE_JWT_SECRET || 'super-secret-jwt-token-with-at-least-32-characters-long'
     const serviceRoleJwt = this.generateLocalServiceRoleJwt(localJwtSecret)
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || serviceRoleJwt
 
@@ -26,14 +26,14 @@ export class usuarioSeed {
   private generateLocalServiceRoleJwt(secret: string): string {
     const header = JSON.stringify({ alg: 'HS256', typ: 'JWT' })
     const payload = JSON.stringify({ 
-      role: 'service_role', 
-      iss: 'supabase', 
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600 
-    })
+       role: 'service_role', 
+       iss: 'supabase', 
+       iat: Math.floor(Date.now() / 1000),
+       exp: Math.floor(Date.now() / 1000) + 3600 
+     })
 
     const base64UrlEncode = (str: string) => 
-      Buffer.from(str).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+       Buffer.from(str).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 
     const encodedHeader = base64UrlEncode(header)
     const encodedPayload = base64UrlEncode(payload)
@@ -50,60 +50,71 @@ export class usuarioSeed {
   }
 
   async run() {
-    const email = 'admin@hmsadvogados.com.br'
-    const senha = 'password123'
+    const usuariosParaCriar = [
+      {
+        email: 'admin@hmsadvogados.com.br',
+        senha: 'password123',
+        nome: 'Administrador HMS',
+        tipo: 'interno' as const,
+      },
+      {
+        email: 'viniciuslopes242005@gmail.com',
+        senha: 'password123',
+        nome: 'Vinícius Lopes',
+        tipo: 'interno' as const,
+      }
+    ]
 
-    // Busca usuários existentes no Supabase Auth para evitar conflitos de ID e senha
     const { data: listData, error: listError } = await this.supabase.auth.admin.listUsers()
     
     if (listError) {
       throw new Error(listError.message)
     }
 
-    let userId: string | undefined = listData.users.find(u => u.email === email)?.id
+    for (const novoUsuario of usuariosParaCriar) {
+      let userId: string | undefined = listData.users.find(u => u.email === novoUsuario.email)?.id
 
-    if (userId) {
-      // Se o usuário já existe, garante a atualização da senha e confirmação do e-mail
-      await this.supabase.auth.admin.updateUserById(userId, {
-        password: senha,
-        email_confirm: true,
-      })
-    } else {
-      // Se não existe, cria a conta normalmente
-      const { data: authData, error: authError } = await this.supabase.auth.admin.createUser({
-        email,
-        password: senha,
-        email_confirm: true,
-      })
+      if (userId) {
+        await this.supabase.auth.admin.updateUserById(userId, {
+          password: novoUsuario.senha,
+          email_confirm: true,
+        })
+      } else {
+        const { data: authData, error: authError } = await this.supabase.auth.admin.createUser({
+          email: novoUsuario.email,
+          password: novoUsuario.senha,
+          email_confirm: true,
+        })
 
-      if (authError) {
-        throw new Error(authError.message)
+        if (authError) {
+          throw new Error(authError.message)
+        }
+
+        userId = authData.user?.id
       }
 
-      userId = authData.user?.id
-    }
+      if (!userId) {
+        throw new Error(`Não foi possível recuperar o ID do usuário ${novoUsuario.email} no Supabase Auth.`)
+      }
 
-    if (!userId) {
-      throw new Error('Não foi possível recuperar o ID do usuário no Supabase Auth.')
+      await this.db.insert(usuario).values([
+        {
+          id: userId,
+          nome: novoUsuario.nome,
+          email: novoUsuario.email,
+          senhaHash: '$2b$10$PlaceholderHashForTestingPurposesOnly',
+          perfilTecnicoId: 'b0000000-0000-0000-0000-000000000001',
+          tipo: novoUsuario.tipo,
+          ativo: true,
+          criadoPor: userId,
+        },
+      ]).onConflictDoUpdate({
+        target: usuario.email,
+        set: {
+          id: userId,
+          ativo: true,
+        },
+      })
     }
-
-    await this.db.insert(usuario).values([
-      {
-        id: userId,
-        nome: 'Administrador HMS',
-        email,
-        senhaHash: '$2b$10$PlaceholderHashForTestingPurposesOnly',
-        perfilTecnicoId: 'b0000000-0000-0000-0000-000000000001',
-        tipo: 'interno',
-        ativo: true,
-        criadoPor: userId,
-      },
-    ]).onConflictDoUpdate({
-      target: usuario.email,
-      set: {
-        id: userId,
-        ativo: true,
-      },
-    })
   }
 }

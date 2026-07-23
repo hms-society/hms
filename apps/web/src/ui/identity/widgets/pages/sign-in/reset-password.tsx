@@ -16,32 +16,34 @@ export const ResetPasswordPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    let isMounted = true
+  let isMounted = true
 
-    // Ouve o evento de recuperação ou checa se a sessão já foi estabelecida pelo hash da URL
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!isMounted) return
-      if (event === 'PASSWORD_RECOVERY' || session) {
-        console.log('Sessão de recuperação validada com sucesso.')
-      }
-    })
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (!isMounted) return
 
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (!isMounted) return
-      if (error || !data.session) {
-        const hash = window.location.hash
-        if (!hash || !hash.includes('access_token')) {
-          setErrorMessage('Link de recuperação inválido ou expirado.')
-          setStatus('error')
-        }
-      }
-    })
-
-    return () => {
-      isMounted = false
-      subscription.unsubscribe()
+    if (event === 'PASSWORD_RECOVERY' || session) {
+      console.log('Sessão de recuperação validada com sucesso.')
     }
-  }, [])
+  })
+
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (!isMounted) return
+
+    if (error || !data.session) {
+      const hash = window.location.hash
+
+      if (!hash || !hash.includes('access_token')) {
+        setErrorMessage('Link de recuperação inválido ou expirado.')
+        setStatus('error')
+      }
+    }
+  })
+
+  return () => {
+    isMounted = false
+    subscription.unsubscribe()
+  }
+}, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
