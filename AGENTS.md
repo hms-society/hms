@@ -38,7 +38,7 @@ and tooling, with the reason each tool was chosen.
 
 ### 3. [`documentation/modules.md`](documentation/modules.md) — read before any domain/feature work
 
-The bounded modules of the system (Engagement, Case Management, and others) and the
+The bounded modules of the system (Identity, Document Engine, Case Management, and others) and the
 exact responsibilities each one owns.
 
 - **When to read:** before adding or changing any business/domain logic, entities,

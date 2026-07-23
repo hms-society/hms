@@ -1,10 +1,10 @@
 import { Event } from '#shared/domain/events/event'
-import type { Profile } from '../structures/profile'
+import type { UserStatus } from '../structures'
 
 export class UserCreatedEvent extends Event<{
   userId: string
-  personId: string
-  profile: Profile
+  email: string
+  status: UserStatus
   createdAt: Date
 }> {
   static readonly _NAME = 'identity/user.created'

@@ -15,9 +15,7 @@ export class CheckHealthController {
       timestamp: new Date().toISOString(),
       services: {
         database: 'UP',
-        evolutionApi: 'UP',
         supabase: 'UP',
-        redis: 'UP',
       },
     }
   }

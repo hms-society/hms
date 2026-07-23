@@ -1,12 +1,12 @@
 <h1 align="center">⚖️ HMS</h1>
 
-A **legal practice management** platform covering the full journey of a case — from first contact to closure. HMS organizes intake, cases, production and execution of legal pieces, documents, communication, and billing into well-bounded modules, supported by **AI**, **electronic signature**, and **WhatsApp** integration.
+A **legal practice management** platform covering the full journey of a case — from client registration to closure. HMS organizes scheduling, consultations, cases, production and execution of legal pieces, documents, communication, and billing into well-bounded modules, supported by **AI**, **electronic signature**, and **WhatsApp** integration.
 
 ## 🚀 Overview
 
 HMS gives law firms and legal teams a single, auditable, and secure workflow, offering:
 
--   **Modular Domain:** Modules with clear responsibilities (Engagement, Case Management, Legal Production, Legal Execution, Document Management, Communication, Portal, Identity, Billing, Audit) that communicate through events.
+-   **Modular Domain:** Modules with clear responsibilities (Identity, Scheduling, Consultation, Case Management, Document Engine, Document Production, Legal Production, Legal Execution, Communication, Portal, Billing, Audit) that communicate through events.
 -   **Assisted AI:** Assisted drafting, document classification, and triage via Mastra AI + DeepSeek — always with human validation before anything takes effect.
 -   **Compliance:** Immutable consent log (LGPD) and an audit trail with hash chaining.
 -   **Complete Environment:** Web platform, API (Server), and shared domain (Core), with local infrastructure via Docker.
@@ -26,7 +26,7 @@ The project is a **monorepo** managed by **Turborepo**, using the modern TypeScr
 -   **Auth & Storage:** [Supabase Auth](https://supabase.com/docs/guides/auth) + Supabase Storage
 -   **Jobs/Workflows:** [Inngest](https://www.inngest.com/)
 -   **AI:** [Mastra AI](https://mastra.ai/) + DeepSeek V4
--   **WhatsApp:** [Evolution API](https://doc.evolution-api.com/) v2
+-   **WhatsApp:** Meta Cloud API
 -   **Electronic Signature:** [DocuSeal](https://www.docuseal.com/) (self-hosted)
 -   **Quality:** [Biome](https://biomejs.dev/) + [Vitest](https://vitest.dev/)
 
