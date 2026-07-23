@@ -1,4 +1,4 @@
-export * from './legal-person'
-export * from './natural-person'
-export * from './person'
+export * from './client'
+export * from './client-consent'
+export * from './collaborator'
 export * from './user'

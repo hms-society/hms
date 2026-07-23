@@ -56,10 +56,11 @@ dist
 .opencode/
 opencode.json
 .mcp.json
+prompt.md
+issue.md
 CLAUDE.md
 GEMINI.md
 AGENTS.local.md
-prompt.md
 
 # env files
 .env
