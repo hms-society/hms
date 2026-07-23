@@ -1,6 +1,5 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { forwardRef, useImperativeHandle } from 'react'
+import { useFormContext, Controller } from 'react-hook-form'
 import { Badge } from '#/ui/shadcn/badge'
 import { Avatar, AvatarFallback } from '#/ui/shadcn/avatar'
 import { Label } from '#/ui/shadcn/label'
@@ -11,7 +10,7 @@ import { Calendar } from '#/ui/shadcn/calendar'
 import { Textarea } from '#/ui/shadcn/textarea'
 import { CalendarDays, MapPin, MessageCircle, Video, Monitor, MoreHorizontal, Clock, DoorOpen, AlertTriangle, Info } from 'lucide-react'
 import { ptBR } from 'date-fns/locale'
-import { stepDecisionAgendarSchema, stepDecisionEncerrarSchema, type StepDecisionAgendarData, type StepDecisionEncerrarData } from './schemas/intake-schema'
+import type { IntakeFullData } from './schemas/intake-schema'
 import type { StepRef } from './step-demand'
 
 const canais = [
@@ -43,49 +42,40 @@ interface StepDecisionProps {
 }
 
 export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, setTipoCard }, ref) => {
-  const [modalidade, setModalidade] = useState<'virtual' | 'presencial'>('virtual')
-  const [canalVirtual, setCanalVirtual] = useState('whatsapp')
-  const [advogadoSelecionado, setAdvogadoSelecionado] = useState('')
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-  const [selectedHorario, setSelectedHorario] = useState('')
-
-  const agendarForm = useForm<StepDecisionAgendarData>({
-  resolver: zodResolver(stepDecisionAgendarSchema),
-  defaultValues: {
-    modalidade: 'virtual',
-    canalVirtual: 'whatsapp',
-    local: '',
-    advogado: '',
-    data: new Date(),
-    horario: '',
-  },
-})
-
-  const encerrarForm = useForm<StepDecisionEncerrarData>({
-  resolver: zodResolver(stepDecisionEncerrarSchema),
-  defaultValues: {
-    motivo: '',
-    observacoes: '',
-  },
-})
+  const { control, trigger, watch, setValue, formState } = useFormContext<IntakeFullData>()
+  const errors = formState.errors as Record<string, any>
+  const modalidade = watch('modalidade')
+  const canalVirtual = watch('canalVirtual')
+  const advogadoSelecionado = watch('advogado')
+  const selectedDate = watch('data')
+  const selectedHorario = watch('horario')
 
   useImperativeHandle(ref, () => ({
-    validate: () => new Promise((resolve) => {
-      const form = tipoCard === 'agendar' ? agendarForm : encerrarForm
-      form.handleSubmit(
-        () => resolve(true),
-        () => resolve(false),
-      )()
-    }),
+    validate: async () => {
+      if (tipoCard === 'agendar') {
+        const fields = ['modalidade', 'advogado', 'data', 'horario']
+        if (modalidade === 'virtual') fields.push('canalVirtual')
+        if (modalidade === 'presencial') fields.push('local')
+        return await trigger(fields as any)
+      } else {
+        return await trigger(['motivo'] as any)
+      }
+    },
   }))
 
   const advogado = advogados.find((a) => a.value === advogadoSelecionado)
+
+  const handleMudarTipoCard = (novoTipo: 'agendar' | 'registrar') => {
+    setTipoCard(novoTipo)
+    setValue('tipoCard', novoTipo, { shouldValidate: true })
+  }
 
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-4">
         <button
-          onClick={() => setTipoCard('agendar')}
+          type="button"
+          onClick={() => handleMudarTipoCard('agendar')}
           className={`flex flex-col items-center gap-1 py-4 rounded-xl border-2 transition-colors ${
             tipoCard === 'agendar'
               ? 'border-primary bg-primary/5 text-primary'
@@ -96,7 +86,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
           <span className="text-[13px] font-serif">Agendar consulta</span>
         </button>
         <button
-          onClick={() => setTipoCard('registrar')}
+          type="button"
+          onClick={() => handleMudarTipoCard('registrar')}
           className={`flex flex-col items-center gap-1 py-4 rounded-xl border-2 transition-colors ${
             tipoCard === 'registrar'
               ? 'border-destructive bg-destructive/5 text-destructive'
@@ -125,11 +116,9 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                 { value: 'presencial', label: 'Presencial', icon: MapPin },
               ].map(({ value, label, icon: Icon }) => (
                 <button
+                  type="button"
                   key={value}
-                  onClick={() => {
-                    setModalidade(value as 'virtual' | 'presencial')
-                    agendarForm.setValue('modalidade', value as 'virtual' | 'presencial')
-                  }}
+                  onClick={() => setValue('modalidade', value as 'virtual' | 'presencial', { shouldValidate: true })}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-[13px] font-medium transition-colors ${
                     modalidade === value
                       ? 'border-primary bg-primary text-primary-foreground'
@@ -149,11 +138,9 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
               <div className="grid grid-cols-4 gap-2">
                 {canais.map(({ value, label, icon: Icon }) => (
                   <button
+                    type="button"
                     key={value}
-                    onClick={() => {
-                      setCanalVirtual(value)
-                      agendarForm.setValue('canalVirtual', value, { shouldValidate: true })
-                    }}
+                    onClick={() => setValue('canalVirtual', value, { shouldValidate: true })}
                     className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-lg border-2 text-[12px] transition-colors ${
                       canalVirtual === value
                         ? 'border-primary bg-primary/5 text-primary'
@@ -165,8 +152,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                   </button>
                 ))}
               </div>
-              {agendarForm.formState.errors.canalVirtual && (
-                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.canalVirtual.message}</span>
+              {errors.canalVirtual && (
+                <span className="text-[12px] text-destructive">{errors.canalVirtual.message}</span>
               )}
             </div>
           )}
@@ -176,11 +163,13 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
               <Label>Local <span className="text-destructive">*</span></Label>
               <Controller
                 name="local"
-                control={agendarForm.control}
-                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Endereço ou sala de atendimento"/>}
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} value={field.value ?? ''} placeholder="Endereço ou sala de atendimento" />
+                )}
               />
-              {agendarForm.formState.errors.local && (
-                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.local.message}</span>
+              {errors.local && (
+                <span className="text-[12px] text-destructive">{errors.local.message}</span>
               )}
             </div>
           )}
@@ -189,10 +178,10 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
             <Label>Advogado <span className="text-destructive">*</span></Label>
             <Controller
               name="advogado"
-              control={agendarForm.control}
+              control={control}
               render={({ field }) => (
-                <Select onValueChange={(v) => {field.onChange(v)
-                  setAdvogadoSelecionado(v)}}
+                <Select
+                  onValueChange={(v) => field.onChange(v)}
                   value={field.value ?? ''}
                 >
                   <SelectTrigger className="w-full">
@@ -206,8 +195,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                 </Select>
               )}
             />
-            {agendarForm.formState.errors.advogado && (
-              <span className="text-[12px] text-destructive">{agendarForm.formState.errors.advogado.message}</span>
+            {errors.advogado && (
+              <span className="text-[12px] text-destructive">{errors.advogado.message}</span>
             )}
 
             {advogado && (
@@ -234,10 +223,9 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
           <div className="grid grid-cols-[1.5fr_2fr] gap-6">
             <Calendar
               mode="single"
-              selected={selectedDate}
+              selected={selectedDate ? new Date(selectedDate) : undefined}
               onSelect={(date) => {
-                setSelectedDate(date)
-                if (date) agendarForm.setValue('data', date, { shouldValidate: true })
+                if (date) setValue('data', date, { shouldValidate: true })
               }}
               locale={ptBR}
               className="rounded-xl border border-border p-3"
@@ -245,18 +233,18 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
             />
             <div className="flex flex-col gap-3">
               <span className="text-[13px] text-foreground">
-                {selectedDate?.toLocaleDateString('pt-BR', {
-                  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-                })}
+                {selectedDate
+                  ? new Date(selectedDate).toLocaleDateString('pt-BR', {
+                      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                    })
+                  : 'Selecione uma data'}
               </span>
               <div className="grid grid-cols-2 gap-2">
                 {horarios.map((h) => (
                   <button
+                    type="button"
                     key={h}
-                    onClick={() => {
-                      setSelectedHorario(h)
-                      agendarForm.setValue('horario', h, { shouldValidate: true })
-                    }}
+                    onClick={() => setValue('horario', h, { shouldValidate: true })}
                     className={`py-2 rounded-lg border text-[13px] transition-colors ${
                       selectedHorario === h
                         ? 'border-primary bg-primary/5 text-primary font-medium'
@@ -267,8 +255,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                   </button>
                 ))}
               </div>
-              {agendarForm.formState.errors.horario && (
-                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.horario.message}</span>
+              {errors.horario && (
+                <span className="text-[12px] text-destructive">{errors.horario.message}</span>
               )}
               <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Clock className="w-3 h-3" />
@@ -290,7 +278,7 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
               <Label>Motivo <span className="text-destructive">*</span></Label>
               <Controller
                 name="motivo"
-                control={encerrarForm.control}
+                control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value ?? ''}>
                     <SelectTrigger className="w-full">
@@ -304,8 +292,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                   </Select>
                 )}
               />
-              {encerrarForm.formState.errors.motivo && (
-                <span className="text-[12px] text-destructive">{encerrarForm.formState.errors.motivo.message}</span>
+              {errors.motivo && (
+                <span className="text-[12px] text-destructive">{errors.motivo.message}</span>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
@@ -313,8 +301,8 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, 
                 Observações <span className="text-muted-foreground font-normal">(opcional)</span>
               </Label>
               <Controller
-                name="observacoes"
-                control={encerrarForm.control}
+                name="observacoesEncerramento"
+                control={control}
                 render={({ field }) => (
                   <Textarea
                     {...field}

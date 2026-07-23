@@ -1,36 +1,22 @@
 import { forwardRef, useImperativeHandle } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useFormContext, Controller } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '#/ui/shadcn/select'
 import { Textarea } from '#/ui/shadcn/textarea'
 import { Label } from '#/ui/shadcn/label'
 import { Separator } from '#/ui/shadcn/separator'
-import { stepDemandSchema, type StepDemandData } from './schemas/intake-schema'
+import type { IntakeFullData } from './schemas/intake-schema'
 
 export interface StepRef {
   validate: () => Promise<boolean>
 }
 
 export const StepDemand = forwardRef<StepRef>((_, ref) => {
-  const {control,handleSubmit,formState: { errors },} = useForm<StepDemandData>({
-  resolver: zodResolver(stepDemandSchema),
-  defaultValues: {
-    origem: '',
-    canal: '',
-    areaJuridica: '',
-    temaJuridico: '',
-    urgencia: '',
-    observacoes: '',
-  },
-})
+  const { control, trigger, formState: { errors } } = useFormContext<IntakeFullData>()
 
   useImperativeHandle(ref, () => ({
-    validate: () => new Promise((resolve) => {
-      handleSubmit(
-        () => resolve(true),
-        () => resolve(false),
-      )()
-    }),
+    validate: async () => {
+      return await trigger(['origem', 'canal', 'areaJuridica', 'temaJuridico', 'urgencia'])
+    },
   }))
 
   return (
@@ -42,7 +28,7 @@ export const StepDemand = forwardRef<StepRef>((_, ref) => {
             name="origem"
             control={control}
             render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a origem..." />
                 </SelectTrigger>

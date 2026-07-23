@@ -1,6 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useFormContext } from 'react-hook-form'
 import { Button } from '#/ui/shadcn/button'
 import { Badge } from '#/ui/shadcn/badge'
 import { Avatar, AvatarFallback } from '#/ui/shadcn/avatar'
@@ -8,30 +7,23 @@ import { Label } from '#/ui/shadcn/label'
 import { Input } from '#/ui/shadcn/input'
 import { Separator } from '#/ui/shadcn/separator'
 import { Search, UserRound, ExternalLink, X, UserPlus, FileText, Phone, Mail, Clock, Check } from 'lucide-react'
-import { stepClientSchema, type StepClientData } from './schemas/intake-schema'
+import type { IntakeFullData } from './schemas/intake-schema'
 import type { StepRef } from './step-demand'
 
 export const StepClient = forwardRef<StepRef>((_, ref) => {
-  const [vinculado, setVinculado] = useState(false)
+  const { setValue, trigger, watch, formState: { errors } } = useFormContext<IntakeFullData>()
+
+  const clienteVinculado = watch('clienteVinculado')
   const [busca, setBusca] = useState('')
   const [mostrarResultado, setMostrarResultado] = useState(false)
 
-  const { handleSubmit, setValue, formState: { errors } } = useForm<StepClientData>({
-    resolver: zodResolver(stepClientSchema),
-    defaultValues: { clienteVinculado: false },
-  })
-
   useImperativeHandle(ref, () => ({
-    validate: () => new Promise((resolve) => {
-      handleSubmit(
-        () => resolve(true),
-        () => resolve(false),
-      )()
-    }),
+    validate: async () => {
+      return await trigger(['clienteVinculado'])
+    },
   }))
 
   const handleVincular = () => {
-    setVinculado(true)
     setValue('clienteVinculado', true, { shouldValidate: true })
   }
 
@@ -49,7 +41,7 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
               Vincular pessoa ao intake
             </span>
           </div>
-          {vinculado && (
+          {clienteVinculado && (
             <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5 rounded-pill">
               <Check className="w-3 h-3" />
               Vinculado
@@ -118,6 +110,7 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
                 Ver cadastro
               </Button>
               <button
+                type="button"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setMostrarResultado(false)}
               >
