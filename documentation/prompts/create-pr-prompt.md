@@ -15,6 +15,7 @@ exclusively on the **GitHub CLI (gh)** to keep the process consistent.
 - A Spec (specification) that has been implemented and validated.
 - A Bug Report that has been implemented and validated.
 - A `feat/`, `fix/`, or `refactor/` branch with the changes committed.
+- Every pull request must target the `develop` branch.
 
 ---
 
@@ -190,7 +191,7 @@ Standard command:
 
 ```
 gh pr create \
-  --base main \
+  --base develop \
   --head <branch-name> \
   --title "<PR title>" \
   --body-file pr_body.md
@@ -200,7 +201,7 @@ Or inline:
 
 ```
 gh pr create \
-  --base main \
+  --base develop \
   --head <branch> \
   --title "<PR title>" \
   --body "<formatted description>"
