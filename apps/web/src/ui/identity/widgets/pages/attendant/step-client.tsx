@@ -1,3 +1,6 @@
+import { forwardRef, useImperativeHandle, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '#/ui/shadcn/button'
 import { Badge } from '#/ui/shadcn/badge'
 import { Avatar, AvatarFallback } from '#/ui/shadcn/avatar'
@@ -5,12 +8,32 @@ import { Label } from '#/ui/shadcn/label'
 import { Input } from '#/ui/shadcn/input'
 import { Separator } from '#/ui/shadcn/separator'
 import { Search, UserRound, ExternalLink, X, UserPlus, FileText, Phone, Mail, Clock, Check } from 'lucide-react'
-import { useState } from 'react'
+import { stepClientSchema, type StepClientData } from './schemas/intake-schema'
+import type { StepRef } from './step-demand'
 
-export const StepClient = () => {
+export const StepClient = forwardRef<StepRef>((_, ref) => {
   const [vinculado, setVinculado] = useState(false)
   const [busca, setBusca] = useState('')
   const [mostrarResultado, setMostrarResultado] = useState(false)
+
+  const { handleSubmit, setValue, formState: { errors } } = useForm<StepClientData>({
+    resolver: zodResolver(stepClientSchema),
+    defaultValues: { clienteVinculado: false },
+  })
+
+  useImperativeHandle(ref, () => ({
+    validate: () => new Promise((resolve) => {
+      handleSubmit(
+        () => resolve(true),
+        () => resolve(false),
+      )()
+    }),
+  }))
+
+  const handleVincular = () => {
+    setVinculado(true)
+    setValue('clienteVinculado', true, { shouldValidate: true })
+  }
 
   const handleBuscar = () => {
     if (busca.trim()) setMostrarResultado(true)
@@ -33,7 +56,13 @@ export const StepClient = () => {
             </Badge>
           )}
         </div>
+
+        {errors.clienteVinculado && (
+          <span className="text-[12px] text-destructive">{errors.clienteVinculado.message}</span>
+        )}
+
         <Separator />
+
         <div className="flex flex-col gap-1.5">
           <Label>Buscar por telefone ou nome:</Label>
           <div className="flex gap-2">
@@ -84,7 +113,7 @@ export const StepClient = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Button onClick={() => setVinculado(true)}>
+              <Button onClick={handleVincular}>
                 <ExternalLink />
                 Ver cadastro
               </Button>
@@ -107,4 +136,6 @@ export const StepClient = () => {
       </Button>
     </div>
   )
-}
+})
+
+StepClient.displayName = 'StepClient'

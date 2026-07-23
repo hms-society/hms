@@ -1,3 +1,6 @@
+import { forwardRef, useImperativeHandle, useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge } from '#/ui/shadcn/badge'
 import { Avatar, AvatarFallback } from '#/ui/shadcn/avatar'
 import { Label } from '#/ui/shadcn/label'
@@ -7,8 +10,9 @@ import { Separator } from '#/ui/shadcn/separator'
 import { Calendar } from '#/ui/shadcn/calendar'
 import { Textarea } from '#/ui/shadcn/textarea'
 import { CalendarDays, MapPin, MessageCircle, Video, Monitor, MoreHorizontal, Clock, DoorOpen, AlertTriangle, Info } from 'lucide-react'
-import { useState } from 'react'
 import { ptBR } from 'date-fns/locale'
+import { stepDecisionAgendarSchema, stepDecisionEncerrarSchema, type StepDecisionAgendarData, type StepDecisionEncerrarData } from './schemas/intake-schema'
+import type { StepRef } from './step-demand'
 
 const canais = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
@@ -18,22 +22,8 @@ const canais = [
 ]
 
 const advogados = [
-  {
-    value: 'epaminondas',
-    label: 'Adv. Epaminondas — Trabalhista',
-    nome: 'Adv. Epaminondas',
-    especialidade: 'Trabalhista',
-    iniciais: 'EP',
-    horarios: 12,
-  },
-  {
-    value: 'maria',
-    label: 'Adv. Maria Silva — Civil',
-    nome: 'Adv. Maria Silva',
-    especialidade: 'Civil',
-    iniciais: 'MS',
-    horarios: 8,
-  },
+  { value: 'epaminondas', label: 'Adv. Epaminondas — Trabalhista', nome: 'Adv. Epaminondas', especialidade: 'Trabalhista', iniciais: 'EP', horarios: 12 },
+  { value: 'maria', label: 'Adv. Maria Silva — Civil', nome: 'Adv. Maria Silva', especialidade: 'Civil', iniciais: 'MS', horarios: 8 },
 ]
 
 const horarios = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
@@ -47,14 +37,47 @@ const motivosEncerramento = [
   { value: 'outro', label: 'Outro' },
 ]
 
-export const StepDecision = () => {
-  const [tipoCard, setTipoCard] = useState<'agendar' | 'registrar'>('agendar')
+interface StepDecisionProps {
+  tipoCard: 'agendar' | 'registrar'
+  setTipoCard: (v: 'agendar' | 'registrar') => void
+}
+
+export const StepDecision = forwardRef<StepRef, StepDecisionProps>(({ tipoCard, setTipoCard }, ref) => {
   const [modalidade, setModalidade] = useState<'virtual' | 'presencial'>('virtual')
   const [canalVirtual, setCanalVirtual] = useState('whatsapp')
   const [advogadoSelecionado, setAdvogadoSelecionado] = useState('')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedHorario, setSelectedHorario] = useState('')
-  const [motivoSelecionado, setMotivoSelecionado] = useState('')
+
+  const agendarForm = useForm<StepDecisionAgendarData>({
+  resolver: zodResolver(stepDecisionAgendarSchema),
+  defaultValues: {
+    modalidade: 'virtual',
+    canalVirtual: 'whatsapp',
+    local: '',
+    advogado: '',
+    data: new Date(),
+    horario: '',
+  },
+})
+
+  const encerrarForm = useForm<StepDecisionEncerrarData>({
+  resolver: zodResolver(stepDecisionEncerrarSchema),
+  defaultValues: {
+    motivo: '',
+    observacoes: '',
+  },
+})
+
+  useImperativeHandle(ref, () => ({
+    validate: () => new Promise((resolve) => {
+      const form = tipoCard === 'agendar' ? agendarForm : encerrarForm
+      form.handleSubmit(
+        () => resolve(true),
+        () => resolve(false),
+      )()
+    }),
+  }))
 
   const advogado = advogados.find((a) => a.value === advogadoSelecionado)
 
@@ -103,7 +126,10 @@ export const StepDecision = () => {
               ].map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
-                  onClick={() => setModalidade(value as 'virtual' | 'presencial')}
+                  onClick={() => {
+                    setModalidade(value as 'virtual' | 'presencial')
+                    agendarForm.setValue('modalidade', value as 'virtual' | 'presencial')
+                  }}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-[13px] font-medium transition-colors ${
                     modalidade === value
                       ? 'border-primary bg-primary text-primary-foreground'
@@ -124,7 +150,10 @@ export const StepDecision = () => {
                 {canais.map(({ value, label, icon: Icon }) => (
                   <button
                     key={value}
-                    onClick={() => setCanalVirtual(value)}
+                    onClick={() => {
+                      setCanalVirtual(value)
+                      agendarForm.setValue('canalVirtual', value, { shouldValidate: true })
+                    }}
                     className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-lg border-2 text-[12px] transition-colors ${
                       canalVirtual === value
                         ? 'border-primary bg-primary/5 text-primary'
@@ -136,30 +165,50 @@ export const StepDecision = () => {
                   </button>
                 ))}
               </div>
+              {agendarForm.formState.errors.canalVirtual && (
+                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.canalVirtual.message}</span>
+              )}
             </div>
           )}
 
           {modalidade === 'presencial' && (
             <div className="flex flex-col gap-1.5">
-              <Label>
-                Local <span className="text-destructive">*</span>
-              </Label>
-              <Input placeholder="Endereço ou sala de atendimento" />
+              <Label>Local <span className="text-destructive">*</span></Label>
+              <Controller
+                name="local"
+                control={agendarForm.control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Endereço ou sala de atendimento"/>}
+              />
+              {agendarForm.formState.errors.local && (
+                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.local.message}</span>
+              )}
             </div>
           )}
 
           <div className="flex flex-col gap-2">
             <Label>Advogado <span className="text-destructive">*</span></Label>
-            <Select onValueChange={setAdvogadoSelecionado}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um advogado..." />
-              </SelectTrigger>
-              <SelectContent>
-                {advogados.map((a) => (
-                  <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="advogado"
+              control={agendarForm.control}
+              render={({ field }) => (
+                <Select onValueChange={(v) => {field.onChange(v)
+                  setAdvogadoSelecionado(v)}}
+                  value={field.value ?? ''}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione um advogado..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {advogados.map((a) => (
+                      <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {agendarForm.formState.errors.advogado && (
+              <span className="text-[12px] text-destructive">{agendarForm.formState.errors.advogado.message}</span>
+            )}
 
             {advogado && (
               <div className="flex items-center gap-3 bg-muted/40 border border-border rounded-xl p-3">
@@ -169,7 +218,7 @@ export const StepDecision = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-sans text-foreground">{advogado.nome}</span>
+                  <span className="text-[13px] text-foreground">{advogado.nome}</span>
                   <span className="text-[11px] text-muted-foreground">{advogado.especialidade}</span>
                 </div>
                 <Badge variant="outline" className="ml-auto text-primary border-primary/20 bg-primary/5 rounded-pill">
@@ -186,30 +235,31 @@ export const StepDecision = () => {
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date)
+                if (date) agendarForm.setValue('data', date, { shouldValidate: true })
+              }}
               locale={ptBR}
               className="rounded-xl border border-border p-3"
-              classNames={{
-                root: 'w-[85%]',
-              }}
+              classNames={{ root: 'w-[85%]' }}
             />
             <div className="flex flex-col gap-3">
-              <span className="text-[13px] font-sans text-foreground">
+              <span className="text-[13px] text-foreground">
                 {selectedDate?.toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
+                  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
                 })}
               </span>
               <div className="grid grid-cols-2 gap-2">
                 {horarios.map((h) => (
                   <button
                     key={h}
-                    onClick={() => setSelectedHorario(h)}
+                    onClick={() => {
+                      setSelectedHorario(h)
+                      agendarForm.setValue('horario', h, { shouldValidate: true })
+                    }}
                     className={`py-2 rounded-lg border text-[13px] transition-colors ${
                       selectedHorario === h
-                        ? 'border-primary bg-primary/5 text-primary font-sans'
+                        ? 'border-primary bg-primary/5 text-primary font-medium'
                         : 'border-border text-foreground hover:border-primary/50'
                     }`}
                   >
@@ -217,6 +267,9 @@ export const StepDecision = () => {
                   </button>
                 ))}
               </div>
+              {agendarForm.formState.errors.horario && (
+                <span className="text-[12px] text-destructive">{agendarForm.formState.errors.horario.message}</span>
+              )}
               <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 Duração padrão: 45 min · término calculado automaticamente
@@ -233,29 +286,43 @@ export const StepDecision = () => {
               <AlertTriangle className="w-4 h-4" />
               <span className="text-[14px] font-serif">Motivo do encerramento</span>
             </div>
-
             <div className="flex flex-col gap-1.5">
               <Label>Motivo <span className="text-destructive">*</span></Label>
-              <Select onValueChange={setMotivoSelecionado}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {motivosEncerramento.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
+              <Controller
+                name="motivo"
+                control={encerrarForm.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {motivosEncerramento.map((m) => (
+                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {encerrarForm.formState.errors.motivo && (
+                <span className="text-[12px] text-destructive">{encerrarForm.formState.errors.motivo.message}</span>
+              )}
             </div>
-
-            <div className="flex flex-col gap-1.5 mt-2">
-              <Label className="font-sans font-normal">
-                Observações <span className="text-muted-foreground">(opcional)</span>
+            <div className="flex flex-col gap-1.5">
+              <Label>
+                Observações <span className="text-muted-foreground font-normal">(opcional)</span>
               </Label>
-              <Textarea
-                placeholder="Detalhes sobre o encerramento..."
-                className="resize-none min-h-[90px]"
+              <Controller
+                name="observacoes"
+                control={encerrarForm.control}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    value={field.value ?? ''}
+                    placeholder="Detalhes sobre o encerramento..."
+                    className="resize-none min-h-[90px]"
+                  />
+                )}
               />
             </div>
           </div>
@@ -265,9 +332,10 @@ export const StepDecision = () => {
               O cadastro da pessoa é preservado para futuros intakes
             </span>
           </div>
-
         </div>
       )}
     </div>
   )
-}
+})
+
+StepDecision.displayName = 'StepDecision'
