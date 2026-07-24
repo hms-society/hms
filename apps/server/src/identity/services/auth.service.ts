@@ -81,11 +81,20 @@ export class AuthService {
       return
     }
 
+    if (!data.session) {
+      throw new UnauthorizedException('sessao_nao_criada')
+    }
+
+    const sessionId = this.obterSessionId(
+      data.session.access_token,
+    )
+
     await this.db
       .update(segurancaUsuario)
       .set({
         tentativasFalhas: 0,
         bloqueadoAte: null,
+        sessaoAtivaId: sessionId
       })
       .where(eq(segurancaUsuario.usuarioId, dadosUsuario.id))
 
@@ -152,4 +161,15 @@ export class AuthService {
 
     return Number(param?.valor) || 0
   }
+
+  private obterSessionId(accessToken: string): string {
+  const payload = JSON.parse(
+    Buffer.from(
+      accessToken.split('.')[1],
+      'base64',
+    ).toString(),
+  )
+
+  return payload.session_id
+}
 }

@@ -9,16 +9,35 @@ export class SingleSessionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
-    const user = request.user 
-    const jwtSessionId = user?.sessionId
-
-    if (!user || !jwtSessionId) {
-      throw new UnauthorizedException()
+    
+    // 1. Captura o Token do Header HTTP
+    const authHeader = request.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('token_ausente')
     }
+
+    const token = authHeader.split(' ')[1]
+    
+    // 2. Decodifica o payload do JWT do Supabase
+    let payload: any
+    try {
+      payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+    } catch (e) {
+      throw new UnauthorizedException('token_invalido')
+    }
+
+    const userId = payload.sub
+    const jwtSessionId = payload.session_id
+
+    if (!userId || !jwtSessionId) {
+      throw new UnauthorizedException('payload_incompleto')
+    }
+
+    request.user = payload
 
     const [registro] = await this.db.select({ sessaoAtivaId: segurancaUsuario.sessaoAtivaId })
       .from(segurancaUsuario)
-      .where(eq(segurancaUsuario.usuarioId, user.id))
+      .where(eq(segurancaUsuario.usuarioId, userId))
 
     if (registro?.sessaoAtivaId !== jwtSessionId) {
       throw new UnauthorizedException('sessao_invalidada')
