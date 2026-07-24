@@ -1,0 +1,32 @@
+name: Check PR Source Branch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify if source is develop
+        run: |
+          echo "Branch de origem: ${{ github.head_ref }}"
+          if [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "ERRO: Pull Requests para a branch 'main' só são permitidos a partir da 'develop'!"
+            exit 1
+          fi
+      - name: Validate release PR metadata
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ ! "$PR_TITLE" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "ERRO: O título precisa conter uma versão no formato vX.Y.Z."
+            exit 1
+          fi
+
+          if [[ -z "${PR_BODY//[[:space:]]/}" ]]; then
+            echo "ERRO: A descrição precisa conter as principais mudanças da versão."
+            exit 1
+          fi

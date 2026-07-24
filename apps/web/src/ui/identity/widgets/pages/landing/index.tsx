@@ -42,7 +42,7 @@ export const LandingPage = () => {
             Contato
           </a>
           <Link
-            to='/sign-up'
+            to='/sign-in'
             className='text-brand font-serif text-[1rem] font-bold hover:opacity-75 transition-opacity'
           >
             Login

@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as AtendimentoRouteImport } from './routes/atendimento'
 import { Route as AdvogadoRouteImport } from './routes/advogado'
@@ -18,9 +18,9 @@ import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento.d
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento.consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado.consultas'
 
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeRoute = HomeRouteImport.update({
@@ -128,16 +128,16 @@ export interface RootRouteChildren {
   AdvogadoRoute: typeof AdvogadoRouteWithChildren
   AtendimentoRoute: typeof AtendimentoRouteWithChildren
   HomeRoute: typeof HomeRoute
-  SignUpRoute: typeof SignUpRoute
+  SignInRoute: typeof SignInRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home': {
@@ -223,7 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdvogadoRoute: AdvogadoRouteWithChildren,
   AtendimentoRoute: AtendimentoRouteWithChildren,
   HomeRoute: HomeRoute,
-  SignUpRoute: SignUpRoute,
+  SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -46,6 +46,7 @@ Configured in `turbo.json`. Root scripts fan out to every workspace:
 | `pnpm build`         | `turbo run build`                     |
 | `pnpm dev`           | `turbo run dev` (persistent, no cache)|
 | `pnpm lint`          | `turbo run lint`                      |
+| `pnpm test`          | `turbo run test`                      |
 | `pnpm check-types`   | `turbo run check-types`               |
 | `pnpm format`        | `biome format --write .`              |
 | `pnpm check`         | `biome check --write .`               |
@@ -83,7 +84,7 @@ Single tool for both lint and format, configured in `biome.json` (schema `2.5.1`
 
 ## Testing — Vitest
 
-Both apps use Vitest.
+All workspaces use Vitest for unit tests.
 
 - `apps/web`: `pnpm --filter web test` (`vitest run`)
 - `apps/server`:
@@ -91,6 +92,34 @@ Both apps use Vitest.
   - `pnpm --filter server test:watch` — watch mode
   - `pnpm --filter server test:cov` — coverage
   - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
+- `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
+- `pnpm test` runs the test task across all workspaces through Turborepo.
+
+## CI/CD — GitHub Actions and Coolify
+
+- `.github/workflows/core-package-ci.yaml` validates the shared core package on PRs.
+- `.github/workflows/server-app-ci.yaml` validates and builds the server on PRs.
+- `.github/workflows/web-app-ci.yaml` validates and builds the web app on PRs.
+- `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
+  then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
+  merged PR into `main`.
+- `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations
+  and then triggers the server staging Coolify webhook with `COOLIFY_API_TOKEN` after
+  pushes to `develop`.
+- `.github/workflows/web-app-staging-cd.yml` deploys web staging after pushes to
+  `develop` using `COOLIFY_API_TOKEN`.
+- `.github/workflows/web-app-production-cd.yml` deploys web production after a merged
+  PR into `main` using `COOLIFY_API_TOKEN`.
+- `.github/workflows/release-production.yml` creates the version tag and GitHub Release
+  from the merged PR title and description.
+
+The `production` and `staging` GitHub environments must provide these secrets:
+
+- `COOLIFY_API_TOKEN`
+- `COOLIFY_WEBHOOK_HMS_WEB_APP_PROD` and `COOLIFY_WEBHOOK_HMS_WEB_APP_STG`
+- `COOLIFY_WEBHOOK_HMS_SERVER_APP_PROD` and `COOLIFY_WEBHOOK_HMS_SERVER_APP_STG`
+- `DATABASE_URL_PRODUCTION` and `DATABASE_URL_STG`
+
 
 ## Frontend tooling (`apps/web`)
 

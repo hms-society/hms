@@ -29,3 +29,24 @@ services:
         strip_path: true
         paths:
           - /storage/v1/
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      headers:
+        - authorization
+        - apikey
+        - content-type
+        - x-client-info
+        - x-supabase-api-version
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      credentials: true
+

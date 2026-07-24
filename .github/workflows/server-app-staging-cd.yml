@@ -1,0 +1,53 @@
+name: Server App Staging CD
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server-app-cd-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    name: Migrate and deploy server staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply staging database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STG }}
+        run: pnpm --filter server db:migrate
+
+      - name: Trigger Coolify deployment
+        env:
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK_HMS_SERVER_APP_STG }}
+        run: >-
+          curl --fail-with-body --silent --show-error --request POST
+          --header "Authorization: Bearer $COOLIFY_API_TOKEN" "$COOLIFY_WEBHOOK"
