@@ -88,12 +88,16 @@ All workspaces use Vitest for unit tests.
 
 - `apps/web`: `pnpm --filter web test` (`vitest run`)
 - `apps/server`:
-  - `pnpm --filter server test` — unit
+  - `pnpm --filter server test` — unit and REST integration tests
   - `pnpm --filter server test:watch` — watch mode
   - `pnpm --filter server test:cov` — coverage
   - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
 - `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
 - `pnpm test` runs the test task across all workspaces through Turborepo.
+
+Server REST integration tests use Testcontainers and are configured with
+`fileParallelism: false` so each module fixture can own an isolated database
+without competing container startups.
 
 ## CI/CD — GitHub Actions and Coolify
 
@@ -133,6 +137,10 @@ The `production` and `staging` GitHub environments must provide these secrets:
 
 - **NestJS CLI**: `start` / `dev` (`--watch`) / `debug` / `build` (`nest build`) /
   `prod` (`node dist/main`).
+- The Nest compiler uses `apps/server/webpack.config.cjs` to include the local
+  `@hms/core` workspace package in the server bundle. Other Node dependencies
+  remain external. This ensures production executes compiled JavaScript instead
+  of trying to load the Core package's TypeScript source directly.
 - **Drizzle ORM (drizzle-kit)** for the database:
   ```
   pnpm --filter server db:generate   # generate migrations from schema

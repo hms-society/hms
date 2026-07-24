@@ -1,6 +1,6 @@
 export type EmailThreadMetadata = {
-  subject: string
-  externalThreadId?: string
-  inReplyTo?: string
-  references: string[]
+  readonly subject: string
+  readonly externalThreadId?: string
+  readonly inReplyTo?: string
+  readonly references: readonly string[]
 }

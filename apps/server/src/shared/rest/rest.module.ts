@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 
-import { SharedDatabaseModule } from '../database/database.module'
-import { CheckHealthController } from './controllers'
+import { SharedDatabaseModule } from '@/shared/database/database.module'
+import { CheckHealthController } from '@/shared/rest/controllers'
 
 @Module({
   imports: [SharedDatabaseModule],

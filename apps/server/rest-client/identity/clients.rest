@@ -1,0 +1,31 @@
+@url = {{BASE_URL}}/clients
+@clientId = 5f2a1c9e-7b4d-4e83-9a16-2d6c8f1b3e70
+
+### Lookup client
+POST {{url}}/lookup
+Content-Type: application/json
+
+{
+  "taxId": "123.456.789-00",
+  "phone": "(11) 91234-5678"
+}
+
+### Get client
+GET {{url}}/{{clientId}}
+Content-Type: application/json
+
+### Register natural client
+POST {{url}}
+Content-Type: application/json
+
+{
+  "type": "natural",
+  "name": "Ricardo Alves de Souza",
+  "taxId": "123.456.789-00",
+  "phone": "(12) 99876-3322",
+  "email": "ricardo.alves@gmail.com",
+  "consents": [
+    "data_processing",
+    "whatsapp_communication"
+  ]
+}

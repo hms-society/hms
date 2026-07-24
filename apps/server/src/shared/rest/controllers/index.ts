@@ -1,1 +1,1 @@
-export { CheckHealthController } from './check-health.controller'
+export { CheckHealthController } from '@/shared/rest/controllers/check-health.controller'

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 
-import { DatabaseService } from './database.service'
+import { DrizzleClient } from '@/shared/database/drizzle-client'
 
 @Module({
-  providers: [DatabaseService],
-  exports: [DatabaseService],
+  providers: [DrizzleClient],
+  exports: [DrizzleClient],
 })
 export class SharedDatabaseModule {}

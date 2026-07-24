@@ -1,5 +1,5 @@
 export type AttendantNotificationCandidate = {
-  collaboratorId: string
-  activeAttendanceCount: number
-  lastNotifiedAt?: Date
+  readonly collaboratorId: string
+  readonly activeAttendanceCount: number
+  readonly lastNotifiedAt?: Date
 }

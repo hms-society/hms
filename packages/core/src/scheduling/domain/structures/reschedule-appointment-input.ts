@@ -1,4 +1,4 @@
 export type RescheduleAppointmentInput = {
-  appointmentId: string
-  startsAt: Date
+  readonly appointmentId: string
+  readonly startsAt: Date
 }

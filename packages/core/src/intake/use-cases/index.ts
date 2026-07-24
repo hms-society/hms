@@ -1,0 +1,5 @@
+export * from './close-intake-without-contract-use-case'
+export * from './get-intake-use-case'
+export * from './list-client-intakes-use-case'
+export * from './register-intake-use-case'
+export * from './transition-intake-status-use-case'

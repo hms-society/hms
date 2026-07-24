@@ -1,6 +1,6 @@
 export type ReserveAppointmentInput = {
-  scheduleId: string
-  clientId: string
-  startsAt: Date
-  durationInMinutes: number
+  readonly scheduleId: string
+  readonly clientId: string
+  readonly startsAt: Date
+  readonly durationInMinutes: number
 }

@@ -1,0 +1,70 @@
+@url = {{BASE_URL}}/intakes
+@intakeId = 7d2f5e6a-8d4c-4b3a-9e1f-2c6a7b8d9e01
+@clientId = 4a8f3c21-6b7d-4e90-8f12-3d5c7a9b1e24
+@userId = 91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30
+@legalAreaId = 2e7a9c41-5d6f-4b82-9a13-8c4e6f7b2d50
+@legalTopicId = b3f1d8a6-7c2e-4f90-8a45-1d6b9e3c5f72
+
+### Register intake
+POST {{url}}
+Content-Type: application/json
+
+{
+  "decision": "schedule_consultation",
+  "clientId": "{{clientId}}",
+  "responsibleId": "{{userId}}",
+  "createdBy": "{{userId}}",
+  "updatedBy": "{{userId}}",
+  "origin": "direct",
+  "contactChannel": "whatsapp",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "urgency": "normal",
+  "demandNotes": "Orientação sobre a demanda do cliente"
+}
+
+### Register intake without scheduling
+POST {{url}}
+Content-Type: application/json
+
+{
+  "decision": "register_intake",
+  "clientId": "{{clientId}}",
+  "responsibleId": "{{userId}}",
+  "createdBy": "{{userId}}",
+  "updatedBy": "{{userId}}",
+  "origin": "direct",
+  "contactChannel": "whatsapp",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "urgency": "normal",
+  "demandNotes": "Novo Intake sem agendamento neste momento."
+}
+
+### Get intake
+GET {{url}}/{{intakeId}}
+Content-Type: application/json
+
+### List client intakes
+GET {{url}}/clients/{{clientId}}
+Content-Type: application/json
+
+### Transition intake status
+PATCH {{url}}/{{intakeId}}/status
+Content-Type: application/json
+
+{
+  "expectedVersion": 1,
+  "status": "consultation_completed",
+  "updatedBy": "{{userId}}"
+}
+
+### Close intake without contract
+POST {{url}}/{{intakeId}}/close
+Content-Type: application/json
+
+{
+  "expectedVersion": 1,
+  "closureReason": "fora_do_escopo",
+  "updatedBy": "{{userId}}"
+}

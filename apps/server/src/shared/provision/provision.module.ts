@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { envSchema, EnvProvider } from './env/env-provider'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { envSchema, EnvProvider } from './env/env-provider'
       validate: (config) => envSchema.parse(config),
     }),
   ],
-  providers: [EnvProvider],
-  exports: [EnvProvider],
+  providers: [EnvProvider, DatetimeProvider],
+  exports: [EnvProvider, DatetimeProvider],
 })
 export class ProvisionModule {}

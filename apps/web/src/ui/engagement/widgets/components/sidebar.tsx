@@ -5,7 +5,6 @@ export interface SidebarProps {
   isCollapsed: boolean
   setIsCollapsed: (isCollapsed: boolean) => void
   activePath: string
-  setActivePath: (activePath: string) => void
   sidebarItems: {
     label: string
     path: string
@@ -17,12 +16,11 @@ export const Sidebar = ({
   isCollapsed,
   setIsCollapsed,
   activePath,
-  setActivePath,
   sidebarItems,
 }: SidebarProps) => {
   return (
     <aside
-      className={`flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${
+      className={`hidden lg:flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${
         isCollapsed
           ? 'w-[72px] py-6 justify-between h-screen sticky top-0'
           : 'w-[239px] h-screen sticky top-0'
@@ -70,18 +68,19 @@ export const Sidebar = ({
         <nav className='flex flex-col w-full gap-2'>
           {sidebarItems.map((item) => {
             const Icon = item.icon
-            const isActive = activePath === item.path
+            const isActive =
+              activePath === item.path ||
+              (item.path !== '/home' && activePath.startsWith(`${item.path}/`))
 
             return (
               <Link
                 key={item.path}
                 to={item.path as any}
-                onClick={() => setActivePath(item.path)}
                 className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium transition-all duration-200 outline-none cursor-pointer ${
                   isCollapsed ? 'justify-center px-0' : 'px-3'
                 } ${
                   isActive
-                    ? 'bg-highlight-vivid/20 text-white shadow-xs border-l-4 border-highlight-vivid'
+                    ? 'bg-highlight-vivid/20 text-white ring-1 ring-inset ring-highlight-vivid/40'
                     : 'text-white/70 hover:text-white hover:bg-white/5'
                 }`}
                 title={isCollapsed ? item.label : undefined}

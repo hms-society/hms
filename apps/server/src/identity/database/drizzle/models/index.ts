@@ -1,0 +1,5 @@
+export * from '@/identity/database/drizzle/models/client-consent-model'
+export * from '@/identity/database/drizzle/models/client-model'
+export * from '@/identity/database/drizzle/models/client-type-model'
+export * from '@/identity/database/drizzle/models/consent-type-model'
+export * from '@/identity/database/drizzle/models/tax-id-type-model'

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 
-import { SharedDatabaseModule } from './database/database.module'
-import { ProvisionModule } from './provision/provision.module'
-import { SharedRestModule } from './rest/rest.module'
+import { SharedDatabaseModule } from '@/shared/database/database.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
+import { SharedRestModule } from '@/shared/rest/rest.module'
 
 @Module({
   imports: [ProvisionModule, SharedDatabaseModule, SharedRestModule],

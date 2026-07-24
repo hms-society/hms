@@ -3,7 +3,7 @@ import { join } from 'node:path'
 
 import { Controller, Get, HttpStatus, ServiceUnavailableException } from '@nestjs/common'
 
-import { DatabaseService } from '../../database/database.service'
+import { DrizzleClient } from '@/shared/database/drizzle-client'
 
 const { version } = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
@@ -11,11 +11,11 @@ const { version } = JSON.parse(
 
 @Controller()
 export class CheckHealthController {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly drizzleClient: DrizzleClient) {}
 
   @Get('/health')
   async handle() {
-    const database = await this.databaseService.isHealthy()
+    const database = await this.drizzleClient.isHealthy()
 
     if (!database) {
       throw new ServiceUnavailableException({
