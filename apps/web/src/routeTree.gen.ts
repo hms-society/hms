@@ -64,7 +64,7 @@ export interface FileRoutesByFullPath {
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -74,7 +74,7 @@ export interface FileRoutesByTo {
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -85,7 +85,7 @@ export interface FileRoutesById {
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -97,7 +97,7 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/home'
-    | '/sign-up'
+    | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -107,7 +107,7 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/home'
-    | '/sign-up'
+    | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -117,7 +117,7 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/home'
-    | '/sign-up'
+    | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
