@@ -57,12 +57,6 @@ export class usuarioSeed {
         nome: 'Administrador HMS',
         tipo: 'interno' as const,
       },
-      {
-        email: 'viniciuslopes242005@gmail.com',
-        senha: 'password123',
-        nome: 'Vinícius Lopes',
-        tipo: 'interno' as const,
-      }
     ]
 
     const { data: listData, error: listError } = await this.supabase.auth.admin.listUsers()
