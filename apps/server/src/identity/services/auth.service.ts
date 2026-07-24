@@ -14,8 +14,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {
     const supabaseUrl =
-      this.configService.get<string>('SUPABASE_URL') ||
-      'http://127.0.0.1:8000'
+      this.configService.get<string>('SUPABASE_URL') || 'http://127.0.0.1:8000'
 
     const supabaseKey =
       this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ||
@@ -42,15 +41,16 @@ export class AuthService {
       .select()
       .from(segurancaUsuario)
       .where(eq(segurancaUsuario.usuarioId, dadosUsuario.id))
-    
-    if(seguranca.bloqueadoAte && seguranca.bloqueadoAte < new Date()){
-      await this.db.update(segurancaUsuario)
-      .set({
-        tentativasFalhas: 0,
-        bloqueadoAte: null
-      })
-      .where(eq(segurancaUsuario.usuarioId, dadosUsuario.id))
-      
+
+    if (seguranca.bloqueadoAte && seguranca.bloqueadoAte < new Date()) {
+      await this.db
+        .update(segurancaUsuario)
+        .set({
+          tentativasFalhas: 0,
+          bloqueadoAte: null,
+        })
+        .where(eq(segurancaUsuario.usuarioId, dadosUsuario.id))
+
       seguranca.tentativasFalhas = 0
       seguranca.bloqueadoAte = null
     }
@@ -85,16 +85,14 @@ export class AuthService {
       throw new UnauthorizedException('sessao_nao_criada')
     }
 
-    const sessionId = this.obterSessionId(
-      data.session.access_token,
-    )
+    const sessionId = this.obterSessionId(data.session.access_token)
 
     await this.db
       .update(segurancaUsuario)
       .set({
         tentativasFalhas: 0,
         bloqueadoAte: null,
-        sessaoAtivaId: sessionId
+        sessaoAtivaId: sessionId,
       })
       .where(eq(segurancaUsuario.usuarioId, dadosUsuario.id))
 
@@ -114,9 +112,7 @@ export class AuthService {
   }
 
   private async tratarFalhaLogin(usuarioId: string, registro: any) {
-    const maxTentativas = await this.obterParametro(
-      'SEGURANCA_LOGIN_MAX_TENTATIVAS',
-    )
+    const maxTentativas = await this.obterParametro('SEGURANCA_LOGIN_MAX_TENTATIVAS')
 
     const minutosBloqueio = await this.obterParametro(
       'SEGURANCA_LOGIN_TEMPO_BLOQUEIO_MINUTOS',
@@ -163,13 +159,10 @@ export class AuthService {
   }
 
   private obterSessionId(accessToken: string): string {
-  const payload = JSON.parse(
-    Buffer.from(
-      accessToken.split('.')[1],
-      'base64',
-    ).toString(),
-  )
+    const payload = JSON.parse(
+      Buffer.from(accessToken.split('.')[1], 'base64').toString(),
+    )
 
-  return payload.session_id
-}
+    return payload.session_id
+  }
 }

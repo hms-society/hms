@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common'
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { DRIZZLE, type DrizzleDB } from '../../shared/database/database.provider'
 import { segurancaUsuario } from '../../shared/database/schema'
@@ -9,14 +15,14 @@ export class SingleSessionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
-    
+
     const authHeader = request.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('token_ausente')
     }
 
     const token = authHeader.split(' ')[1]
-    
+
     let payload: any
     try {
       payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
@@ -33,7 +39,8 @@ export class SingleSessionGuard implements CanActivate {
 
     request.user = payload
 
-    const [registro] = await this.db.select({ sessaoAtivaId: segurancaUsuario.sessaoAtivaId })
+    const [registro] = await this.db
+      .select({ sessaoAtivaId: segurancaUsuario.sessaoAtivaId })
       .from(segurancaUsuario)
       .where(eq(segurancaUsuario.usuarioId, userId))
 

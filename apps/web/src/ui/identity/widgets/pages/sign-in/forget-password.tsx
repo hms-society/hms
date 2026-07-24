@@ -72,7 +72,8 @@ export const ForgotPasswordPage = () => {
           </h2>
 
           <p className='max-w-[380px] font-sans text-[16px] leading-relaxed text-primary-foreground/80'>
-            Enviaremos instruções seguras para que você possa criar uma nova senha e voltar a acompanhar seus processos.
+            Enviaremos instruções seguras para que você possa criar uma nova senha e
+            voltar a acompanhar seus processos.
           </p>
         </div>
 
@@ -160,7 +161,7 @@ export const ForgotPasswordPage = () => {
                   Ocorreu um erro ao reenviar. Tente novamente em alguns segundos.
                 </div>
               )}
-              
+
               <Button
                 type='button'
                 onClick={handleResendEmail}

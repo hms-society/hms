@@ -21,7 +21,7 @@ export const Sidebar = ({
   setActivePath,
   sidebarItems,
 }: SidebarProps) => {
-  const { mutate: signOut, isPending} = useSignOut()
+  const { mutate: signOut, isPending } = useSignOut()
   return (
     <aside
       className={`flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${

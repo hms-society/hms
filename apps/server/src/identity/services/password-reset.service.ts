@@ -13,13 +13,16 @@ export class PasswordResetService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly configService: ConfigService,
   ) {
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || 'http://localhost:8000'
-    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') || 'local-development-service-role-key'
+    const supabaseUrl =
+      this.configService.get<string>('SUPABASE_URL') || 'http://localhost:8000'
+    const supabaseKey =
+      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ||
+      'local-development-service-role-key'
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { 
+      auth: {
         persistSession: false,
-        flowType: 'implicit', 
+        flowType: 'implicit',
       },
     })
   }
@@ -34,9 +37,8 @@ export class PasswordResetService {
       return
     }
 
-
     await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:3000/reset-password'
+      redirectTo: 'http://localhost:3000/reset-password',
     })
   }
 }

@@ -11,39 +11,41 @@ export const ResetPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
-  
+
   const { resetPassword } = useResetPassword()
   const navigate = useNavigate()
 
   useEffect(() => {
-  let isMounted = true
+    let isMounted = true
 
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (!isMounted) return
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return
 
-    if (event === 'PASSWORD_RECOVERY' || session) {
-      console.log('Sessão de recuperação validada com sucesso.')
-    }
-  })
-
-  supabase.auth.getSession().then(({ data, error }) => {
-    if (!isMounted) return
-
-    if (error || !data.session) {
-      const hash = window.location.hash
-
-      if (!hash || !hash.includes('access_token')) {
-        setErrorMessage('Link de recuperação inválido ou expirado.')
-        setStatus('error')
+      if (event === 'PASSWORD_RECOVERY' || session) {
+        console.log('Sessão de recuperação validada com sucesso.')
       }
-    }
-  })
+    })
 
-  return () => {
-    isMounted = false
-    subscription.unsubscribe()
-  }
-}, [])
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!isMounted) return
+
+      if (error || !data.session) {
+        const hash = window.location.hash
+
+        if (!hash || !hash.includes('access_token')) {
+          setErrorMessage('Link de recuperação inválido ou expirado.')
+          setStatus('error')
+        }
+      }
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -97,7 +99,8 @@ export const ResetPasswordPage = () => {
           </h2>
 
           <p className='max-w-[380px] font-sans text-[16px] leading-relaxed text-primary-foreground/80'>
-            Crie uma senha forte e segura para proteger suas informações e continuar acompanhando seus processos.
+            Crie uma senha forte e segura para proteger suas informações e continuar
+            acompanhando seus processos.
           </p>
         </div>
 

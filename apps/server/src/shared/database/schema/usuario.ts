@@ -1,4 +1,13 @@
-import { pgTable, uuid, varchar, boolean, timestamp, text, jsonb, pgEnum } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  varchar,
+  boolean,
+  timestamp,
+  text,
+  jsonb,
+  pgEnum,
+} from 'drizzle-orm/pg-core'
 
 export const usuarioTipoEnum = pgEnum('usuario_tipo', [
   'interno',

@@ -10,7 +10,7 @@ export class SessionTestController {
     return {
       message: 'sessão válida e ativa',
       user: request.user,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
   }
 }

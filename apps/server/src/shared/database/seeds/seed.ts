@@ -5,11 +5,8 @@ import { usuarioSeed } from './usuario.seed'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(SeedModule)
-  
-  const seeds = [
-    app.get(ParametroSistemaSeed),
-    app.get(usuarioSeed)
-  ]
+
+  const seeds = [app.get(ParametroSistemaSeed), app.get(usuarioSeed)]
 
   for (const seed of seeds) {
     await seed.run()

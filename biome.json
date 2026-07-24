@@ -83,6 +83,9 @@
     }
   },
   "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
     "formatter": {
       "enabled": true,
       "jsxQuoteStyle": "single",

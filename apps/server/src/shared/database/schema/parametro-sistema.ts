@@ -1,4 +1,12 @@
-import { pgTable, uuid, varchar, jsonb, boolean, timestamp, text } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  varchar,
+  jsonb,
+  boolean,
+  timestamp,
+  text,
+} from 'drizzle-orm/pg-core'
 
 export const parametroSistema = pgTable('parametro_sistema', {
   id: uuid('id').defaultRandom().primaryKey(),

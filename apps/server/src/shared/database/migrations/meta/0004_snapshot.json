@@ -61,9 +61,7 @@
         "parametro_sistema_chave_unique": {
           "name": "parametro_sistema_chave_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "chave"
-          ]
+          "columns": ["chave"]
         }
       },
       "policies": {},
@@ -227,9 +225,7 @@
         "usuario_email_unique": {
           "name": "usuario_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -241,12 +237,7 @@
     "public.usuario_tipo": {
       "name": "usuario_tipo",
       "schema": "public",
-      "values": [
-        "interno",
-        "externo_cliente",
-        "externo_terceiro",
-        "externo_advogado"
-      ]
+      "values": ["interno", "externo_cliente", "externo_terceiro", "externo_advogado"]
     }
   },
   "schemas": {},

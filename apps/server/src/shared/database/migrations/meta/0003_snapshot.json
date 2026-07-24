@@ -61,9 +61,7 @@
         "parametro_sistema_chave_unique": {
           "name": "parametro_sistema_chave_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "chave"
-          ]
+          "columns": ["chave"]
         }
       },
       "policies": {},

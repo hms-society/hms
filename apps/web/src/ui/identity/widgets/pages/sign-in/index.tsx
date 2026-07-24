@@ -108,11 +108,11 @@ export const SignInPage = () => {
                 </label>
 
                 <Link
-                to="/forgot-password"
-                className="font-sans text-[13px] font-bold text-brand-accent transition-opacity hover:opacity-80"
-              >
-                Esqueci minha senha
-              </Link>
+                  to='/forgot-password'
+                  className='font-sans text-[13px] font-bold text-brand-accent transition-opacity hover:opacity-80'
+                >
+                  Esqueci minha senha
+                </Link>
               </div>
 
               <div className='relative'>
