@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Button } from '#/ui/shadcn/button'
 import { Input } from '#/ui/shadcn/input'
@@ -7,7 +7,21 @@ import { useForgotPassword } from '#/ui/identity/hooks/use-forgot-password'
 export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [isEmailSent, setIsEmailSent] = useState(false) // Nova variável para controlar a tela
+  const [resendTimer, setResendTimer] = useState(0)
+
   const { forgotPassword } = useForgotPassword()
+
+  // Uso de setTimeout garante que o ciclo do React respeite a renderização sem sobrepor intervalos
+  useEffect(() => {
+    if (resendTimer <= 0) return
+
+    const timer = setTimeout(() => {
+      setResendTimer((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [resendTimer])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -16,6 +30,22 @@ export const ForgotPasswordPage = () => {
     try {
       await forgotPassword(email)
       setStatus('success')
+      setIsEmailSent(true) // Trava a tela na visão de sucesso
+      setResendTimer(15)
+    } catch (error) {
+      setStatus('error')
+    }
+  }
+
+  const handleResendEmail = async () => {
+    if (resendTimer > 0) return
+
+    setStatus('loading')
+
+    try {
+      await forgotPassword(email)
+      setStatus('success')
+      setResendTimer(15)
     } catch (error) {
       setStatus('error')
     }
@@ -67,13 +97,13 @@ export const ForgotPasswordPage = () => {
             </h1>
 
             <p className='mt-1 font-sans text-[15px] leading-relaxed text-muted-foreground'>
-              {status === 'success'
+              {isEmailSent
                 ? 'Acabamos de enviar um link de recuperação para o seu email. Verifique sua caixa de entrada e spam.'
                 : 'Digite o email associado à sua conta e enviaremos um link para você redefinir sua senha.'}
             </p>
           </div>
 
-          {status !== 'success' ? (
+          {!isEmailSent ? (
             <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
               {status === 'error' && (
                 <div className='p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-sans'>
@@ -124,14 +154,35 @@ export const ForgotPasswordPage = () => {
               </Button>
             </form>
           ) : (
-            <Button
-              type='button'
-              variant='outline'
-              asChild
-              className='mt-4 h-12 w-full rounded-full border-input bg-transparent font-sans text-[15px] font-bold text-foreground shadow-none transition-colors hover:bg-muted'
-            >
-              <Link to={'/sign-in' as any}>Voltar para o login</Link>
-            </Button>
+            <div className='flex flex-col gap-4'>
+              {status === 'error' && (
+                <div className='p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-sans'>
+                  Ocorreu um erro ao reenviar. Tente novamente em alguns segundos.
+                </div>
+              )}
+              
+              <Button
+                type='button'
+                onClick={handleResendEmail}
+                disabled={resendTimer > 0 || status === 'loading'}
+                className='h-12 w-full rounded-full bg-brand font-sans text-[15px] font-bold text-brand-foreground shadow-none transition-opacity hover:opacity-90 disabled:opacity-50'
+              >
+                {status === 'loading'
+                  ? 'Enviando...'
+                  : resendTimer > 0
+                    ? `Reenviar email (${resendTimer}s)`
+                    : 'Reenviar email'}
+              </Button>
+
+              <Button
+                type='button'
+                variant='outline'
+                asChild
+                className='h-12 w-full rounded-full border-input bg-transparent font-sans text-[15px] font-bold text-foreground shadow-none transition-colors hover:bg-muted'
+              >
+                <Link to={'/sign-in' as any}>Voltar para o login</Link>
+              </Button>
+            </div>
           )}
         </div>
       </div>
