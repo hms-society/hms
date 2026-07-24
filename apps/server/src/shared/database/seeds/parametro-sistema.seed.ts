@@ -23,6 +23,12 @@ export class ParametroSistemaSeed {
             descricao: 'Tempo em minutos que o usuário permanece bloqueado após exeder as tentativas de login',
             categoria: 'SEGURANCA'
         },
+        {
+            chave: 'SEGURANCA_SESSAO_TEMPO_INATIVIDADE_MINUTOS',
+            valorJson: { valor: 20 },
+            descricao: 'Tempo máximo de inatividade da sessão antes do encerramento automático',
+            categoria: 'SEGURANCA'
+        },
 ]).onConflictDoNothing()
   }
 

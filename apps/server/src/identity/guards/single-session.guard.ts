@@ -10,7 +10,6 @@ export class SingleSessionGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     
-    // 1. Captura o Token do Header HTTP
     const authHeader = request.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('token_ausente')
@@ -18,7 +17,6 @@ export class SingleSessionGuard implements CanActivate {
 
     const token = authHeader.split(' ')[1]
     
-    // 2. Decodifica o payload do JWT do Supabase
     let payload: any
     try {
       payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
