@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as AtendimentoRouteImport } from './routes/atendimento'
+import { Route as AdvogadoRouteImport } from './routes/advogado'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento.dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento.consultas'
+import { Route as AdvogadoConsultasRouteImport } from './routes/advogado.consultas'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -29,6 +31,11 @@ const HomeRoute = HomeRouteImport.update({
 const AtendimentoRoute = AtendimentoRouteImport.update({
   id: '/atendimento',
   path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoRoute = AdvogadoRouteImport.update({
+  id: '/advogado',
+  path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,29 +53,40 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRoute,
 } as any)
+const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => AdvogadoRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/sign-up': typeof SignUpRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
@@ -76,31 +94,38 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/advogado'
     | '/atendimento'
     | '/home'
     | '/sign-up'
+    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/advogado'
     | '/atendimento'
     | '/home'
     | '/sign-up'
+    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
   id:
     | '__root__'
     | '/'
+    | '/advogado'
     | '/atendimento'
     | '/home'
     | '/sign-up'
+    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdvogadoRoute: typeof AdvogadoRouteWithChildren
   AtendimentoRoute: typeof AtendimentoRouteWithChildren
   HomeRoute: typeof HomeRoute
   SignUpRoute: typeof SignUpRoute
@@ -129,6 +154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/advogado': {
+      id: '/advogado'
+      path: '/advogado'
+      fullPath: '/advogado'
+      preLoaderRoute: typeof AdvogadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -150,8 +182,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRoute
     }
+    '/advogado/consultas': {
+      id: '/advogado/consultas'
+      path: '/consultas'
+      fullPath: '/advogado/consultas'
+      preLoaderRoute: typeof AdvogadoConsultasRouteImport
+      parentRoute: typeof AdvogadoRoute
+    }
   }
 }
+
+interface AdvogadoRouteChildren {
+  AdvogadoConsultasRoute: typeof AdvogadoConsultasRoute
+}
+
+const AdvogadoRouteChildren: AdvogadoRouteChildren = {
+  AdvogadoConsultasRoute: AdvogadoConsultasRoute,
+}
+
+const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(
+  AdvogadoRouteChildren,
+)
 
 interface AtendimentoRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
@@ -169,6 +220,7 @@ const AtendimentoRouteWithChildren = AtendimentoRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdvogadoRoute: AdvogadoRouteWithChildren,
   AtendimentoRoute: AtendimentoRouteWithChildren,
   HomeRoute: HomeRoute,
   SignUpRoute: SignUpRoute,
