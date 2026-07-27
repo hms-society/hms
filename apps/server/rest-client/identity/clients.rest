@@ -21,11 +21,15 @@ Content-Type: application/json
 {
   "type": "natural",
   "name": "Ricardo Alves de Souza",
-  "taxId": "123.456.789-00",
+  "taxId": "529.982.247-25",
   "phone": "(12) 99876-3322",
-  "email": "ricardo.alves@gmail.com",
-  "consents": [
-    "data_processing",
-    "whatsapp_communication"
-  ]
+  "email": "ricardo.alves@example.com"
+}
+
+### Grant client consent
+POST {{url}}/{{clientId}}/consents
+Content-Type: application/json
+
+{
+  "type": "data_processing"
 }

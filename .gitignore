@@ -62,6 +62,9 @@ CLAUDE.md
 GEMINI.md
 AGENTS.local.md
 
+# MCP's
+.playwright-mcp
+
 # env files
 .env
 .env.development

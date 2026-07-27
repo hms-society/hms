@@ -22,13 +22,13 @@ describe('Close Intake Without Contract Controller [POST /intakes/:intakeId/clos
       .post(`/intakes/${intake.id}/close`)
       .send({
         expectedVersion: intake.version,
-        closureReason: 'fora_do_escopo',
+        closureReason: 'out_of_scope',
         updatedBy: intake.updatedBy,
       })
       .expect(201)
 
     expect(response.body.status).toBe('closed_without_contract')
-    expect(response.body.closureReason).toBe('fora_do_escopo')
+    expect(response.body.closureReason).toBe('out_of_scope')
     expect(response.body.closedAt).toEqual(expect.any(String))
   })
 })

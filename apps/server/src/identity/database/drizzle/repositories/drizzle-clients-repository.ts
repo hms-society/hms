@@ -20,17 +20,14 @@ export class DrizzleClientsRepository
     super(drizzle)
   }
 
-  async add(client: ClientCreation): Promise<Client> {
+  async add(client: ClientCreation): Promise<Client | undefined> {
     const [createdClient] = await this.database
       .insert(clientModel)
       .values(this.toDrizzle(client))
+      .onConflictDoNothing()
       .returning()
 
-    if (!createdClient) {
-      throw new Error('Client was not created')
-    }
-
-    return this.clientMapper.toDomain(createdClient)
+    return createdClient ? this.clientMapper.toDomain(createdClient) : undefined
   }
 
   async addMany(clients: ClientCreation[]): Promise<Client[]> {

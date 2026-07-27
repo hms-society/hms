@@ -2,20 +2,20 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 
-import { useIsMobile } from '#/ui/shadcn/hooks/use-mobile.ts'
-import { cn } from '#/ui/shadcn/utils/index.ts'
-import { Button } from '#/ui/shadcn/button.tsx'
-import { Input } from '#/ui/shadcn/input.tsx'
-import { Separator } from '#/ui/shadcn/separator.tsx'
+import { useIsMobile } from '@/ui/shadcn/hooks/use-mobile.ts'
+import { cn } from '@/ui/shadcn/utils/index.ts'
+import { Button } from '@/ui/shadcn/button.tsx'
+import { Input } from '@/ui/shadcn/input.tsx'
+import { Separator } from '@/ui/shadcn/separator.tsx'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '#/ui/shadcn/sheet.tsx'
-import { Skeleton } from '#/ui/shadcn/skeleton.tsx'
-import { Tooltip, TooltipContent, TooltipTrigger } from '#/ui/shadcn/tooltip.tsx'
+} from '@/ui/shadcn/sheet.tsx'
+import { Skeleton } from '@/ui/shadcn/skeleton.tsx'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/shadcn/tooltip.tsx'
 import { PanelLeftIcon } from 'lucide-react'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'

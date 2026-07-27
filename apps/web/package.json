@@ -2,9 +2,6 @@
   "name": "web",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
@@ -20,6 +17,7 @@
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
     "@hms/core": "workspace:^",
+    "@hms/validation": "workspace:^",
     "@hookform/resolvers": "^5.4.0",
     "@shadcn/react": "^0.2.1",
     "@supabase/supabase-js": "^2.110.0",
@@ -31,6 +29,7 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "axios": "^1.18.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",

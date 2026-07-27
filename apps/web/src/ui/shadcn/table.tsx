@@ -2,7 +2,7 @@
 
 import type * as React from 'react'
 
-import { cn } from '#/ui/shadcn/utils/index.ts'
+import { cn } from '@/ui/shadcn/utils/index.ts'
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (

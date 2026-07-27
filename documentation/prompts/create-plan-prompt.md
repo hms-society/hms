@@ -1,182 +1,238 @@
 ---
-description: Criar um plano de implementação do HMS a partir de uma spec técnica.
+description: Create an HMS implementation plan from a technical specification.
 ---
 
-# Prompt: Criar Plano
+# Prompt: Create Plan
 
-**Objetivo:** decompor uma spec técnica do HMS em fases e tarefas atômicas,
-com dependências explícitas, resultados observáveis e validação executável no
-monorepo.
+**Goal:** decompose an HMS technical specification into phases and atomic tasks with
+explicit dependencies, observable outcomes, and executable monorepo validation.
 
-## Entrada
+## Input
 
-- **Spec:** `documentation/features/<modulo>/<feature>/specs/<nome>-spec.md`.
-- **Tickets Jira:** os tickets listados no frontmatter da spec (`jira_tickets`),
-  que podem ser um ou vários.
-- **Contexto opcional:** limite de escopo, prioridade, tickets Jira ou arquivos
-  já alterados.
+- **Spec:** `documentation/features/<module>/<feature>/specs/<name>-spec.md`.
+- **Jira tickets:** one or more tickets listed in the spec frontmatter under
+  `jira_tickets`.
+- **Optional context:** scope limits, priority, Jira tickets, or files already changed.
 
-Bug reports não entram diretamente neste fluxo. Derive uma spec de correção a
-partir do report antes de criar o plano. Se a spec não for fornecida, estiver
-incompleta ou tiver decisões bloqueadoras, registre a pendência e não invente
-tarefas.
+Bug reports do not enter this flow directly. Derive a correction spec from the report
+before creating a plan. If the spec is missing, incomplete, or contains blocking
+decisions, record the open question and do not invent tasks.
 
-## Leitura obrigatória
+## Required reading
 
-Antes de planejar, leia `AGENTS.local.md` e a spec inteira. Depois consulte,
-conforme o escopo:
+Before planning, read `AGENTS.local.md` and the complete spec. Then consult, according
+to scope:
 
-- `documentation/modules.md` — responsabilidade do módulo;
-- `documentation/architecture.md` — fronteiras e fluxos;
-- `documentation/infrastructure.md` — stack e integrações aprovadas;
-- `documentation/design.md` — se houver UI;
-- `documentation/tooling.md` — scripts, filtros pnpm, migrations e arquivos
-  gerados;
-- `documentation/rules/core-package-rules.md` — se houver mudança em
-  `packages/core`.
+- `documentation/modules.md` — module responsibility;
+- `documentation/architecture.md` — boundaries and flows;
+- `documentation/infrastructure.md` — approved stack and integrations;
+- `documentation/design.md` — when UI is involved;
+- `documentation/tooling.md` — scripts, pnpm filters, migrations, and generated files;
+- `documentation/rules/core-package-rules.md` — when `packages/core` changes.
 
-Leia todos os tickets Jira associados à spec quando houver acesso à integração.
-Se houver vários, mantenha a relação entre cada ticket, seus critérios de
-aceite e as tarefas do plano. Não misture requisitos conflitantes sem registrar
-uma pendência.
+Read every Jira ticket associated with the spec when the integration is available. If
+there are several, preserve the relationship between each ticket, its acceptance
+criteria, and plan tasks. Do not merge conflicting requirements without recording an
+open question.
 
-Não referencie `studio`, Hono, Next.js, RPC ou regras que não existem no HMS.
-O transporte HTTP da aplicação é REST via NestJS, salvo evidência explícita de
-um novo padrão aprovado.
+Do not reference Studio, Hono, Next.js, RPC, or rules that do not exist in HMS. The
+application transport is REST through NestJS unless explicit evidence establishes a new
+approved pattern.
 
-## Regras de planejamento
+## Planning rules
 
-1. Use os workspaces reais: `core` (`packages/core`), `server`
-   (`apps/server`) e `web` (`apps/web`). Omita os que não forem tocados.
-2. Comece pelo contrato de domínio quando a mudança tiver domínio compartilhado.
-   Uma mudança apenas de UI ou infraestrutura pode começar diretamente na fase
-   aplicável.
-3. Mantenha a ordem: core → persistência/providers → controllers REST → web.
-   Fases independentes após o contrato comum podem rodar em paralelo.
-4. Cada tarefa implementa ou modifica um artefato ou uma unidade coesa, não uma
-   camada inteira.
-5. Toda tarefa deve informar dependências, caminhos reais ou novos arquivos,
-   resultado observável e workspace/camada.
-6. Uma tarefa que cria ou altera comportamento testável deve ser seguida por
-   uma tarefa de teste. Testes pertencem ao workspace do artefato e usam Vitest;
-   rotas HTTP do server podem usar Supertest e testes de UI podem usar Testing
-   Library quando já houver infraestrutura para isso.
-7. Não crie tarefas de teste para migrations, mappers, configuração ou detalhes
-   internos isolados. Cubra-os pelo use case, controller, rota ou widget que
-   expõe o comportamento.
-8. Não adicione bibliotecas sem justificar e sem consultar
-   `documentation/infrastructure.md`.
-9. Se a spec exigir alteração de arquitetura, tooling, design system ou limite
-   de módulo, crie uma tarefa documental explícita.
+1. Use the real workspaces: `core` (`packages/core`), `server` (`apps/server`), and
+   `web` (`apps/web`). Omit workspaces that are not affected.
+2. Start from the domain contract when the change has shared domain behavior. A UI-only
+   or infrastructure-only change may start in its applicable phase.
+3. Preserve the order: core → persistence/providers → REST controllers → web. Phases
+   that are independent after a common contract may run in parallel.
+4. Each task implements or changes one artifact or cohesive unit, not an entire layer.
+5. Every task states dependencies, real paths or new files, an observable result, and
+   workspace/layer.
+6. A task that creates or changes testable behavior must be followed by an automated
+   test task. Tests belong to the artifact workspace and use Vitest; server HTTP routes
+   may use Supertest, and UI tests use Testing Library when infrastructure exists.
+7. Every plan that changes visible or interactive Web UI must also include a Playwright
+   MCP browser-validation task after implementation and automated UI tests. This is
+   required even when Testing Library coverage exists.
+8. Playwright MCP validation complements automated tests; it does not replace Vitest,
+   Testing Library, type checks, or linting.
+9. Every plan that adds or changes a Server HTTP route must also include a `curl` smoke-
+   validation task against the running Server after route implementation and automated
+   integration tests. This is required even when Supertest coverage exists.
+10. `curl` smoke validation complements automated tests; it must verify representative
+    success, validation/error, and conflict responses, including persisted effects for
+    write routes when applicable.
+11. Do not create isolated test tasks for migrations, mappers, configuration, or internal
+   details. Cover them through the use case, controller, route, or widget that exposes
+   the behavior.
+12. Do not add libraries without justification and without consulting
+    `documentation/infrastructure.md`.
+13. If the spec changes architecture, tooling, design system, or a module boundary,
+    create an explicit documentation task.
 
-## Camadas permitidas
+## Allowed layers
 
-Use somente os nomes abaixo no campo **Camada**:
+Use only these values in the **Layer** field:
 
-- `core` — domínio e contratos em `packages/core`;
-- `database` — Drizzle schema, repositories, mappers e migrations;
-- `provision` — providers e integrações externas;
-- `rest` — controllers, DTOs/schemas e adaptação HTTP NestJS;
-- `ui` — widgets, hooks, contexts, stores e componentes web;
-- `route` — arquivos de rota do TanStack Router;
-- `test` — testes automatizados associados à tarefa;
-- `docs` — arquitetura, rules, design ou tooling.
+- `core` — domain and contracts in `packages/core`;
+- `database` — Drizzle schema, repositories, mappers, and migrations;
+- `provision` — providers and external integrations;
+- `rest` — NestJS controllers, DTOs/schemas, and HTTP adaptation;
+- `ui` — widgets, hooks, contexts, stores, and Web components;
+- `route` — TanStack Router route files;
+- `test` — automated tests, curl route validation, and Playwright MCP browser validation
+  associated with a task;
+- `docs` — architecture, rules, design, or tooling.
 
-## Testes por tarefa
+## Validation per task
 
-O plano deve descrever cenários, não apenas “adicionar testes”. Inclua casos
-válidos, inválidos, transições, autorização/ownership, estados de UI e erros
-relevantes derivados da spec. Use os comandos reais do workspace:
+The plan must describe scenarios, not merely say “add tests.” Include valid and invalid
+cases, transitions, authorization/ownership, UI states, and relevant errors derived from
+the spec. Use the real workspace commands:
 
-| Workspace | Lint/check-types | Testes |
+| Workspace | Lint/type checks | Automated tests |
 |---|---|---|
-| `packages/core` | `pnpm --filter @hms/core lint` e `pnpm --filter @hms/core check-types` | `pnpm --filter @hms/core test` |
-| `apps/server` | `pnpm --filter server lint` e `pnpm --filter server check-types` | `pnpm --filter server test` ou `test:e2e` |
-| `apps/web` | `pnpm --filter web lint` e `pnpm --filter web check-types` | `pnpm --filter web test` |
+| `packages/core` | `pnpm --filter @hms/core lint` and `pnpm --filter @hms/core check-types` | `pnpm --filter @hms/core test` |
+| `apps/server` | `pnpm --filter server lint` and `pnpm --filter server check-types` | `pnpm --filter server test` or `test:e2e` |
+| `apps/web` | `pnpm --filter web lint` and `pnpm --filter web check-types` | `pnpm --filter web test` |
 
-## Saída
+### Required Playwright MCP validation for Web UI
 
-Salve o plano ao lado da spec:
+For every visible or interactive Web UI change, add a dedicated task that uses the
+Playwright MCP against the running application. The task must:
 
-`documentation/features/<modulo>/<feature>/plans/<nome>-plan.md`
+- depend on the UI implementation and its automated test task;
+- identify the real route or consumer that exposes the changed UI;
+- start or reuse the required local Web/Server services using documented commands;
+- exercise the primary user flow and the critical validation/error states from the spec;
+- verify keyboard interaction, focus behavior, and accessible names/state through the
+  browser accessibility snapshot where relevant;
+- inspect browser console errors and failed network requests;
+- verify at least one narrow viewport when responsive behavior is affected;
+- record the observed browser result in the plan task outcome.
 
-Preserve os segmentos intermediários entre `documentation/features/` e
-`specs/`, trocando apenas `specs` por `plans` e `-spec.md` por `-plan.md`.
+Do not use a synthetic standalone HTML page as implementation validation. Test the
+actual application integration point. If the UI has no runnable route or consumer, add
+the missing integration task or record a blocker instead of claiming browser validation.
 
-Use este formato:
+### Required curl validation for Server routes
+
+For every new or changed Server HTTP route, add a dedicated task that uses `curl` against
+the running application. The task must:
+
+- depend on the route implementation and its automated integration test task;
+- start or reuse the required local Server and database services using documented
+  commands;
+- use the real HTTP method, path, headers, and representative JSON payload;
+- verify status code, response shape, and relevant error payloads;
+- cover validation failures and conflict/not-found behavior required by the spec;
+- verify the persisted effect of write routes through a follow-up request or approved
+  repository/database observation;
+- record the command and observed result in the plan task outcome without exposing
+  secrets or personal data.
+
+Do not treat a `.rest` example or a controller unit test as curl validation. If the route
+cannot be exercised against a running application, record the environment blocker rather
+than claiming that the route was smoke-tested.
+
+## Output
+
+Save the plan next to the spec:
+
+`documentation/features/<module>/<feature>/plans/<name>-plan.md`
+
+Preserve intermediate segments between `documentation/features/` and `specs/`, changing
+only `specs` to `plans` and `-spec.md` to `-plan.md`.
+
+Use this format:
 
 ```md
 ---
-description: Plano de implementação da spec <nome> no HMS.
-spec: documentation/features/<modulo>/<feature>/specs/<nome>-spec.md
+description: Implementation plan for the <name> HMS specification.
+spec: documentation/features/<module>/<feature>/specs/<name>-spec.md
 jira_tickets:
   - PROJ-123
   - PROJ-456
 status: open
 ---
 
-## Pendências
+## Open questions
 
-- [ ] <pendência, impacto e ação necessária>
+- [ ] <open question, impact, and required action>
 
-## Dependências de fases
+## Phase dependencies
 
-| Fase | Objetivo | Depende de | Paralela com |
+| Phase | Objective | Depends on | Parallel with |
 |---|---|---|---|
-| F1 | <objetivo> | - | - |
-| F2 | <objetivo> | F1 | F3 |
+| F1 | <objective> | - | - |
+| F2 | <objective> | F1 | F3 |
 
-## F1 — Core: domínio e contratos
+## F1 — Core: domain and contracts
 
-### Tarefas
+### Tasks
 
-- [ ] **T1.1** — <implementar ou alterar artefato em `packages/core/...`>
-  - **Depende de:** -
-  - **Resultado observável:** <comportamento verificável>
-  - **Camada:** `core`
+- [ ] **T1.1** — <implement or change an artifact under `packages/core/...`>
+  - **Depends on:** -
+  - **Observable result:** <verifiable behavior>
+  - **Layer:** `core`
 
-- [ ] **T1.1t** — <testar o artefato>
-  - **Depende de:** T1.1
-  - **Resultado observável:** <cenários cobertos>
-  - **Camada:** `test`
+- [ ] **T1.1t** — <test the artifact>
+  - **Depends on:** T1.1
+  - **Observable result:** <covered scenarios>
+  - **Layer:** `test`
   - **Workspace:** `@hms/core`
 
-## F2 — Server: persistência e REST
+## F2 — Server: persistence and REST
 
-### Tarefas
+### Tasks
 
-- [ ] **T2.1** — <migration/repository/provider em `apps/server/...`>
-  - **Depende de:** T1.1
-  - **Resultado observável:** <resultado verificável>
-  - **Camada:** `database`
+- [ ] **T2.1** — <migration/repository/provider under `apps/server/...`>
+  - **Depends on:** T1.1
+  - **Observable result:** <verifiable result>
+  - **Layer:** `database`
 
-- [ ] **T2.2** — <controller REST em `apps/server/...`>
-  - **Depende de:** T2.1
-  - **Resultado observável:** <rota, status e payload esperados>
-  - **Camada:** `rest`
+- [ ] **T2.2** — <REST controller under `apps/server/...`>
+  - **Depends on:** T2.1
+  - **Observable result:** <expected route, status, and payload>
+  - **Layer:** `rest`
 
-- [ ] **T2.2t** — <testar controller/rota>
-  - **Depende de:** T2.2
-  - **Resultado observável:** <cenários HTTP cobertos>
-  - **Camada:** `test`
+- [ ] **T2.2t** — <test the controller/route>
+  - **Depends on:** T2.2
+  - **Observable result:** <covered HTTP scenarios>
+  - **Layer:** `test`
   - **Workspace:** `server`
 
-## F3 — Web: rota e interface
+- [ ] **T2.2v** — <validate the running route with curl>
+  - **Depends on:** T2.2t
+  - **Observable result:** <status codes, payloads, error cases, and persisted effect>
+  - **Layer:** `test`
+  - **Workspace:** `server`
 
-### Tarefas
+## F3 — Web: route and interface
 
-- [ ] **T3.1** — <rota/widget/hook em `apps/web/src/...`>
-  - **Depende de:** T2.2
-  - **Resultado observável:** <estados e interação verificáveis>
-  - **Camada:** `ui`
+### Tasks
 
-- [ ] **T3.1t** — <testar rota/widget>
-  - **Depende de:** T3.1
-  - **Resultado observável:** <cenários de comportamento e acessibilidade>
-  - **Camada:** `test`
+- [ ] **T3.1** — <route/widget/hook under `apps/web/src/...`>
+  - **Depends on:** T2.2
+  - **Observable result:** <verifiable states and interaction>
+  - **Layer:** `ui`
+
+- [ ] **T3.1t** — <test the route/widget with Vitest and Testing Library>
+  - **Depends on:** T3.1
+  - **Observable result:** <behavior and accessibility scenarios covered>
+  - **Layer:** `test`
+  - **Workspace:** `web`
+
+- [ ] **T3.1v** — <validate the implemented UI with Playwright MCP>
+  - **Depends on:** T3.1t
+  - **Observable result:** <real browser flow, accessibility, responsive viewport,
+    console, and network observations>
+  - **Layer:** `test`
   - **Workspace:** `web`
 ```
 
-Adapte o template ao escopo real: não crie fases vazias, não force uma fase
-`core` quando a spec não toca domínio e não agrupe tarefas independentes apenas
-para reduzir a quantidade de IDs.
+Adapt the template to the actual scope: do not create empty phases, do not force a Core
+phase when the spec does not touch domain behavior, and do not group independent tasks
+only to reduce the number of IDs.

@@ -1,11 +1,11 @@
 export const IntakeClosureReason = {
-  OutOfScope: 'fora_do_escopo',
-  LegallyUnviable: 'inviavel_juridicamente',
-  ClientWithdrew: 'cliente_desistiu',
-  UnableToContact: 'sem_contato',
-  NoShow: 'nao_compareceu',
-  Referred: 'encaminhado',
-  Other: 'outro',
+  OutOfScope: 'out_of_scope',
+  LegallyUnviable: 'legally_unviable',
+  ClientWithdrew: 'client_withdrew',
+  UnableToContact: 'unable_to_contact',
+  NoShow: 'no_show',
+  Referred: 'referred',
+  Other: 'other',
 } as const
 
 export type IntakeClosureReason =

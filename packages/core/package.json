@@ -44,6 +44,7 @@
     "./shared/domain/events": "./src/shared/domain/events/index.ts",
     "./shared/domain/structures": "./src/shared/domain/structures/index.ts",
     "./shared/interfaces": "./src/shared/interfaces/index.ts",
+    "./shared/responses/rest-response": "./src/shared/responses/rest-response.ts",
     "./shared/constants": "./src/shared/constants/index.ts"
   },
   "imports": {

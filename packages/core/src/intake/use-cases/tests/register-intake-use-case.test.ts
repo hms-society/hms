@@ -75,7 +75,7 @@ describe('Register Intake Use Case', () => {
   it('registers an Intake already closed using the datetime provider', async () => {
     const registeredIntake = IntakeFaker.fake({
       status: 'closed_without_contract',
-      closureReason: 'cliente_desistiu',
+      closureReason: 'client_withdrew',
       closedAt: currentDate,
     })
     repository.add.mockResolvedValue(registeredIntake)
@@ -83,7 +83,7 @@ describe('Register Intake Use Case', () => {
 
     await useCase.execute({
       decision: 'close_without_contract',
-      closureReason: 'cliente_desistiu',
+      closureReason: 'client_withdrew',
       clientId: registeredIntake.clientId,
       responsibleId: registeredIntake.responsibleId,
       createdBy: registeredIntake.createdBy,
@@ -99,7 +99,7 @@ describe('Register Intake Use Case', () => {
     expect(repository.add).toHaveBeenCalledWith(
       expect.objectContaining({
         status: 'closed_without_contract',
-        closureReason: 'cliente_desistiu',
+        closureReason: 'client_withdrew',
         closedAt: currentDate,
       }),
     )
@@ -112,7 +112,7 @@ describe('Register Intake Use Case', () => {
     await expect(
       useCase.execute({
         decision: 'close_without_contract',
-        closureReason: 'outro',
+        closureReason: 'other',
         clientId: intake.clientId,
         responsibleId: intake.responsibleId,
         createdBy: intake.createdBy,

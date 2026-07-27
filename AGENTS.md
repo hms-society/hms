@@ -23,7 +23,20 @@ execution context.
   resolve them before starting the task. If the file does not exist or is empty,
   continue with the instructions below.
 
-### 1. [`documentation/design.md`](documentation/design.md) — read before any UI work
+### 1. [`documentation/rules/rules.md`](documentation/rules/rules.md) — read before selecting task rules
+
+This file is the router for repository-specific implementation and testing rules.
+It applies the **dynamic context discovery** pattern so agents load rules according
+to both the paths touched and the architectural behavior affected.
+
+- **When to read:** always, immediately after `AGENTS.local.md` and before reading
+  or changing task files.
+- **How to apply:** identify the likely scope, use its routing table to select all
+  applicable rule documents, read those documents in full, and repeat discovery
+  whenever the task expands into another layer. Do not load every rule by default
+  and do not rely only on keywords from the request.
+
+### 2. [`documentation/design.md`](documentation/design.md) — read before any UI work
 
 The design system for `apps/web`. Defines the full token set (colors in OKLCH,
 typography, spacing, radius, shadows) and the rationale behind them.
@@ -34,7 +47,7 @@ typography, spacing, radius, shadows) and the rationale behind them.
   family, body uses the sans family. Respect light/dark behavior. Cross-check your
   output against the documented contrast/accessibility notes.
 
-### 2. [`documentation/infrastructure.md`](documentation/infrastructure.md) — read before adding deps or wiring tech
+### 3. [`documentation/infrastructure.md`](documentation/infrastructure.md) — read before adding deps or wiring tech
 
 The approved technology stack across front-end, back-end, database, auth, testing,
 and tooling, with the reason each tool was chosen.
@@ -47,7 +60,7 @@ and tooling, with the reason each tool was chosen.
   library for a concern the stack already covers. If a genuinely new tool is
   needed, flag it rather than introducing it silently.
 
-### 3. [`documentation/modules.md`](documentation/modules.md) — read before any domain/feature work
+### 4. [`documentation/modules.md`](documentation/modules.md) — read before any domain/feature work
 
 The bounded modules of the system (Identity, Document Engine, Case Management, and others) and the
 exact responsibilities each one owns.
@@ -59,7 +72,7 @@ exact responsibilities each one owns.
   shared references. Mirror this boundary in both `packages/core` (domain) and the
   app layers (`apps/server`, `apps/web`).
 
-### 4. [`documentation/tooling.md`](documentation/tooling.md) — read before running commands or changing config
+### 5. [`documentation/tooling.md`](documentation/tooling.md) — read before running commands or changing config
 
 The developer tooling: package manager (pnpm), monorepo orchestration (Turborepo),
 linting/formatting (BiomeJS), testing (Vitest), database (drizzle-kit), git hooks,
@@ -73,7 +86,11 @@ and helper scripts.
 
 ## Workflow expectations
 
-- Read the relevant document(s) above **before** starting, not after.
+- Always read `AGENTS.local.md` and the rules router first. Read the dynamically
+  selected rule documents and the relevant documents above **before** starting,
+  not after.
+- Re-run dynamic context discovery when implementation reaches files or behavior
+  outside the initial scope.
 - When a change spans UI + a new dependency + domain logic, read all of the
   applicable documents.
 - If code and documentation disagree, treat the documentation as intent and surface

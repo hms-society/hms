@@ -43,10 +43,10 @@ export class IdentityModuleFixture {
     )
   }
 
-  registerClient(overrides: Partial<NaturalClientCreation> = {}) {
+  async registerClient(overrides: Partial<NaturalClientCreation> = {}) {
     const draft = ClientFaker.fake(overrides)
 
-    return this.clientsRepository.add({
+    const client = await this.clientsRepository.add({
       type: 'natural',
       name: draft.type === 'natural' ? draft.name : 'Cliente de teste',
       taxId: draft.type === 'natural' ? draft.taxId : ClientFaker.fake().taxId,
@@ -54,6 +54,9 @@ export class IdentityModuleFixture {
       email: draft.email,
       address: draft.address,
     })
+
+    if (!client) throw new Error('Test client was not created')
+    return client
   }
 
   seedClients(overrides: Partial<NaturalClientCreation>[]) {

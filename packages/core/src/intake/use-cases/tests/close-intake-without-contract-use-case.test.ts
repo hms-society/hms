@@ -25,7 +25,7 @@ describe('Close Intake Without Contract Use Case', () => {
     const closedIntake = IntakeFaker.fake({
       id: currentIntake.id,
       status: 'closed_without_contract',
-      closureReason: 'outro',
+      closureReason: 'other',
       closureNotes: 'Não houve retorno',
       closedAt: currentDate,
     })
@@ -37,7 +37,7 @@ describe('Close Intake Without Contract Use Case', () => {
       useCase.execute({
         intakeId: currentIntake.id,
         expectedVersion: currentIntake.version,
-        closureReason: 'outro',
+        closureReason: 'other',
         closureNotes: 'Não houve retorno',
         updatedBy: closedIntake.updatedBy,
       }),
@@ -48,7 +48,7 @@ describe('Close Intake Without Contract Use Case', () => {
       expectedVersion: currentIntake.version,
       changes: {
         status: 'closed_without_contract',
-        closureReason: 'outro',
+        closureReason: 'other',
         closureNotes: 'Não houve retorno',
         closedAt: currentDate,
         updatedBy: closedIntake.updatedBy,
@@ -65,7 +65,7 @@ describe('Close Intake Without Contract Use Case', () => {
       useCase.execute({
         intakeId: currentIntake.id,
         expectedVersion: currentIntake.version,
-        closureReason: 'outro',
+        closureReason: 'other',
         updatedBy: currentIntake.updatedBy,
       }),
     ).rejects.toBeInstanceOf(InvalidIntakeClosureError)

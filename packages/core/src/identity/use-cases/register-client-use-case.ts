@@ -1,13 +1,8 @@
-import type {
-  Client,
-  ClientConsentCreation,
-  ClientCreation,
-  ClientDetails,
-} from '../domain/entities'
+import type { Client, ClientCreation, ClientDetails } from '../domain/entities'
 import { ClientAlreadyExistsError, InvalidClientDataError } from '../domain/errors'
-import type { Address, ConsentType, TaxId } from '../domain/structures'
-import type { ClientConsentsRepository, ClientsRepository } from '../interfaces'
-import type { DatetimeProvider, UseCase } from '#shared/interfaces'
+import type { Address, TaxId } from '../domain/structures'
+import type { ClientsRepository } from '../interfaces'
+import type { UseCase } from '#shared/interfaces'
 
 export type RegisterClientRequest = {
   readonly type: Client['type']
@@ -18,20 +13,16 @@ export type RegisterClientRequest = {
   readonly phone?: string
   readonly email?: string
   readonly address?: Address
-  readonly consents?: readonly ConsentType[]
 }
 
 export class RegisterClientUseCase
   implements UseCase<RegisterClientRequest, ClientDetails>
 {
-  constructor(
-    private readonly clientsRepository: ClientsRepository,
-    private readonly clientConsentsRepository: ClientConsentsRepository,
-    private readonly datetimeProvider: DatetimeProvider,
-  ) {}
+  constructor(private readonly clientsRepository: ClientsRepository) {}
 
   async execute(request: RegisterClientRequest): Promise<ClientDetails> {
     const taxId = this.parseTaxId(request.taxId, request.type)
+    const clientCreation = this.createClientCreation(request, taxId)
     const existingClient = await this.clientsRepository.findByTaxId(taxId)
 
     if (existingClient) {
@@ -39,11 +30,14 @@ export class RegisterClientUseCase
     }
 
     const client = await this.clientsRepository.add(
-      this.createClientCreation(request, taxId),
+      clientCreation,
     )
-    const consents = await this.addConsents(client.id, request.consents)
 
-    return { client, consents }
+    if (!client) {
+      throw new ClientAlreadyExistsError()
+    }
+
+    return { client, consents: [] }
   }
 
   private createClientCreation(
@@ -58,6 +52,12 @@ export class RegisterClientUseCase
     }
 
     if (request.type === 'natural') {
+      if (request.legalName?.trim() || request.tradeName?.trim()) {
+        throw new InvalidClientDataError(
+          'Dados de pessoa jurídica não são compatíveis com pessoa natural.',
+        )
+      }
+
       if (!request.name?.trim()) {
         throw new InvalidClientDataError('Nome completo é obrigatório.')
       }
@@ -68,6 +68,12 @@ export class RegisterClientUseCase
         name: request.name.trim(),
         taxId: taxId as TaxId<'cpf'>,
       }
+    }
+
+    if (request.name?.trim()) {
+      throw new InvalidClientDataError(
+        'Nome de pessoa natural não é compatível com pessoa jurídica.',
+      )
     }
 
     if (!request.legalName?.trim()) {
@@ -83,24 +89,15 @@ export class RegisterClientUseCase
     }
   }
 
-  private async addConsents(clientId: string, consentTypes: readonly ConsentType[] = []) {
-    const uniqueConsentTypes = [...new Set(consentTypes)]
-    if (uniqueConsentTypes.length === 0) return []
-
-    const consents: ClientConsentCreation[] = uniqueConsentTypes.map((type) => ({
-      clientId,
-      type,
-      grantedAt: this.datetimeProvider.now(),
-    }))
-
-    return this.clientConsentsRepository.addMany(consents)
-  }
-
   private parseTaxId(value: string, type: Client['type']): TaxId {
     const normalizedValue = value.replace(/\D/g, '')
     const expectedLength = type === 'natural' ? 11 : 14
+    const valid =
+      normalizedValue.length === expectedLength &&
+      !this.hasRepeatedDigits(normalizedValue) &&
+      this.isValidCheckDigits(normalizedValue)
 
-    if (normalizedValue.length !== expectedLength) {
+    if (!valid) {
       throw new InvalidClientDataError(
         `${type === 'natural' ? 'CPF' : 'CNPJ'} inválido para o tipo de cliente informado.`,
       )
@@ -110,6 +107,30 @@ export class RegisterClientUseCase
       type: type === 'natural' ? 'cpf' : 'cnpj',
       value: normalizedValue,
     }
+  }
+
+  private isValidCheckDigits(value: string) {
+    const firstWeight = value.length === 11 ? 10 : 5
+    const first = this.calculateCheckDigit(value.slice(0, -2), firstWeight)
+    const second = this.calculateCheckDigit(value.slice(0, -1), firstWeight + 1)
+
+    return first === Number(value.at(-2)) && second === Number(value.at(-1))
+  }
+
+  private calculateCheckDigit(value: string, initialWeight: number) {
+    let weight = initialWeight
+    const total = value.split('').reduce((sum, digit) => {
+      const result = sum + Number(digit) * weight
+      weight = weight === 2 ? 9 : weight - 1
+      return result
+    }, 0)
+
+    const remainder = total % 11
+    return remainder < 2 ? 0 : 11 - remainder
+  }
+
+  private hasRepeatedDigits(value: string) {
+    return /^([0-9])\1+$/.test(value)
   }
 
   private normalizePhone(value?: string) {

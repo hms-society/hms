@@ -1,42 +1,40 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { IntakeDemandDraft } from '@hms/core/intake/domain/structures'
-import { Link } from '@tanstack/react-router'
 import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  ClipboardList,
-  ListChecks,
-  MessageSquareText,
-} from 'lucide-react'
+  intakeContactChannelSchema,
+  intakeOriginSchema,
+  intakeUrgencySchema,
+} from '@hms/validation/intake'
+import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Button } from '#/ui/shadcn/button'
+import { Button } from '@/ui/shadcn/button'
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '#/ui/shadcn/field'
-import { NativeSelect, NativeSelectOption } from '#/ui/shadcn/native-select'
-import { Textarea } from '#/ui/shadcn/textarea'
-import { AuthenticatedLayout } from '#/ui/shared/widgets/layouts/authenticated-layout'
+} from '@/ui/shadcn/field'
+import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
+import { Textarea } from '@/ui/shadcn/textarea'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
 const demandDraftStorageKey = 'hms:new-intake:demand-draft'
 
 const demandSchema = z.object({
-  origin: z.enum(['direct', 'referral', 'website', 'social_media', 'other'], {
+  origin: z.enum(intakeOriginSchema.options, {
     error: 'Selecione a origem do contato.',
   }),
-  contactChannel: z.enum(['whatsapp', 'email', 'phone', 'in_person'], {
+  contactChannel: z.enum(intakeContactChannelSchema.options, {
     error: 'Selecione o canal de contato.',
   }),
   legalArea: z.string().min(1, 'Selecione a área jurídica.'),
   legalTopic: z.string().min(1, 'Selecione o tema jurídico.'),
-  urgency: z.enum(['normal', 'high', 'urgent'], {
+  urgency: z.enum(intakeUrgencySchema.options, {
     error: 'Selecione o grau de urgência.',
   }),
   notes: z.string().trim().max(2000, 'Use no máximo 2.000 caracteres.').optional(),
@@ -126,13 +124,13 @@ export const NewIntakePage = () => {
   }
 
   return (
-    <AuthenticatedLayout>
+    <AppLayout>
       <div className='mx-auto flex w-full max-w-6xl flex-col gap-5'>
         <Link
           to='/intakes'
           className='inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary outline-none hover:text-brand focus-visible:rounded-md focus-visible:ring-3 focus-visible:ring-ring/50'
         >
-          <ArrowLeft aria-hidden='true' className='size-4' />
+          <Icon name='arrow-left' className='size-4' />
           Intakes
         </Link>
 
@@ -144,7 +142,7 @@ export const NewIntakePage = () => {
             </p>
           </div>
           <div className='inline-flex w-fit items-center gap-2 rounded-full bg-secondary px-3 py-2 text-xs font-semibold text-secondary-foreground'>
-            <ListChecks aria-hidden='true' className='size-4 text-primary' />
+            <Icon name='list-checks' className='size-4 text-primary' />
             Etapa 1 de 3
           </div>
         </header>
@@ -185,7 +183,7 @@ export const NewIntakePage = () => {
             <div className='flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between'>
               <div className='flex items-center gap-3'>
                 <span className='flex size-9 items-center justify-center rounded-lg bg-secondary text-primary'>
-                  <MessageSquareText aria-hidden='true' className='size-4' />
+                  <Icon name='message-square-text' className='size-4' />
                 </span>
                 <div>
                   <h2 className='font-sans text-sm font-semibold'>Dados da demanda</h2>
@@ -322,7 +320,7 @@ export const NewIntakePage = () => {
             <div aria-live='polite'>
               {demandSaved && (
                 <p className='flex items-center gap-2 text-sm font-medium text-highlight-foreground'>
-                  <Check aria-hidden='true' className='size-4' />
+                  <Icon name='check' className='size-4' />
                   Demanda salva no rascunho desta sessão.
                 </p>
               )}
@@ -335,16 +333,16 @@ export const NewIntakePage = () => {
               className='rounded-full border-primary px-5 text-primary hover:bg-secondary'
             >
               Próximo
-              <ArrowRight aria-hidden='true' />
+              <Icon name='arrow-right' />
             </Button>
           </footer>
         </form>
 
         <aside className='sr-only' aria-label='Regra de persistência'>
-          <ClipboardList />O Intake ainda não foi criado. Somente o rascunho local da
-          demanda foi salvo.
+          <Icon name='clipboard-list' />O Intake ainda não foi criado. Somente o rascunho
+          local da demanda foi salvo.
         </aside>
       </div>
-    </AuthenticatedLayout>
+    </AppLayout>
   )
 }

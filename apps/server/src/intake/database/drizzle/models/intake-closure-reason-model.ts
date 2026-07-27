@@ -1,11 +1,11 @@
 import { pgEnum } from 'drizzle-orm/pg-core'
 
 export const intakeClosureReasonModel = pgEnum('intake_closure_reason', [
-  'fora_do_escopo',
-  'inviavel_juridicamente',
-  'cliente_desistiu',
-  'sem_contato',
-  'nao_compareceu',
-  'encaminhado',
-  'outro',
+  'out_of_scope',
+  'legally_unviable',
+  'client_withdrew',
+  'unable_to_contact',
+  'no_show',
+  'referred',
+  'other',
 ])

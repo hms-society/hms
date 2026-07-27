@@ -2,7 +2,8 @@ import type { Client, ClientCreation } from '../domain/entities'
 import type { TaxId } from '../domain/structures'
 
 export interface ClientsRepository {
-  add(client: ClientCreation): Promise<Client>
+  /** Returns undefined when the tax identifier collides with an existing client. */
+  add(client: ClientCreation): Promise<Client | undefined>
   addMany(clients: ClientCreation[]): Promise<Client[]>
   findById(clientId: string): Promise<Client | undefined>
   findByTaxId(taxId: TaxId): Promise<Client | undefined>

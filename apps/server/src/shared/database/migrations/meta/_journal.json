@@ -15,6 +15,13 @@
       "when": 1784933233645,
       "tag": "0001_majestic_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785176651197,
+      "tag": "0002_red_steve_rogers",
+      "breakpoints": true
     }
   ]
 }

@@ -1,18 +1,8 @@
-import { Button } from '#/ui/shadcn/button'
-import { Card, CardHeader, CardContent } from '#/ui/shadcn/card'
-import {
-  Calendar,
-  Users,
-  FileText,
-  ShieldCheck,
-  Scale,
-  Clock,
-  MessageSquare,
-  MapPin,
-  Phone,
-  Mail,
-} from 'lucide-react'
+import { Button } from '@/ui/shadcn/button'
+import { Card, CardHeader, CardContent } from '@/ui/shadcn/card'
 import { Link } from '@tanstack/react-router'
+
+import { Icon } from '@/ui/shared/widgets/components/icon'
 
 export const LandingPage = () => {
   return (
@@ -70,7 +60,7 @@ export const LandingPage = () => {
               asChild
             >
               <Link to='/'>
-                <Calendar className='w-6 h-6 text-white' />
+                <Icon name='calendar' className='w-6 h-6 text-white' />
                 <span className='text-white font-serif text-[15px] font-bold'>
                   Agende sua Consulta
                 </span>
@@ -120,7 +110,7 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <Users className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon name='users' className='w-6 h-6 text-brand shrink-0 mt-1' />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Gestão da jornada do cliente
                 </h3>
@@ -136,7 +126,7 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <FileText className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon name='file-text' className='w-6 h-6 text-brand shrink-0 mt-1' />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Produção documental inteligente
                 </h3>
@@ -151,7 +141,7 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <ShieldCheck className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon name='shield-check' className='w-6 h-6 text-brand shrink-0 mt-1' />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Execução com controle humano
                 </h3>
@@ -167,7 +157,7 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <Scale className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon name='scale' className='w-6 h-6 text-brand shrink-0 mt-1' />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Consultoria jurídica estratégica
                 </h3>
@@ -183,7 +173,7 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <Clock className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon name='clock' className='w-6 h-6 text-brand shrink-0 mt-1' />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Acompanhamento em tempo real
                 </h3>
@@ -199,7 +189,10 @@ export const LandingPage = () => {
           <Card className='bg-card-surface border-none'>
             <CardHeader className='pb-2'>
               <div className='flex items-start gap-3'>
-                <MessageSquare className='w-6 h-6 text-brand shrink-0 mt-1' />
+                <Icon
+                  name='message-square'
+                  className='w-6 h-6 text-brand shrink-0 mt-1'
+                />
                 <h3 className='text-[16px] lg:text-[18px] font-bold text-brand'>
                   Comunicação direta e ágil
                 </h3>
@@ -238,7 +231,7 @@ export const LandingPage = () => {
           <div className='flex flex-col gap-4'>
             <h4 className='text-[18px] font-bold text-brand'>Endereço</h4>
             <div className='flex items-start gap-3'>
-              <MapPin className='w-5 h-5 text-brand mt-0.5 shrink-0' />
+              <Icon name='map-pin' className='w-5 h-5 text-brand mt-0.5 shrink-0' />
               <p className='font-sans text-[14px] text-gray-600 leading-relaxed'>
                 Av. Paulista, 1000, Sala 301 / São Paulo – SP,
                 <br />
@@ -246,11 +239,11 @@ export const LandingPage = () => {
               </p>
             </div>
             <div className='flex items-center gap-3'>
-              <Phone className='w-5 h-5 text-brand shrink-0' />
+              <Icon name='phone' className='w-5 h-5 text-brand shrink-0' />
               <p className='font-sans text-[14px] text-gray-600'>+55 (11) 3456-7890</p>
             </div>
             <div className='flex items-center gap-3'>
-              <Mail className='w-5 h-5 text-brand shrink-0' />
+              <Icon name='mail' className='w-5 h-5 text-brand shrink-0' />
               <p className='font-sans text-[14px] text-gray-600'>
                 contato@hmsadvogados.com.br
               </p>

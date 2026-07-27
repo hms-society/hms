@@ -1,0 +1,23 @@
+{
+  "name": "@hms/validation",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./identity": "./src/identity/index.ts",
+    "./intake": "./src/intake/index.ts",
+    "./shared": "./src/shared/index.ts"
+  },
+  "scripts": {
+    "lint": "biome lint src",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hms/core": "workspace:^",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2",
+    "vitest": "^4.1.9"
+  }
+}

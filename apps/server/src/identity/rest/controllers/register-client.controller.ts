@@ -1,15 +1,16 @@
-import { Body, Inject, Post } from '@nestjs/common'
-import type {
-  ClientConsentsRepository,
-  ClientsRepository,
-} from '@hms/core/identity/interfaces'
+import { Body, HttpStatus, Inject, Post, UsePipes } from '@nestjs/common'
+import { ApiResponse } from '@nestjs/swagger'
+import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { RegisterClientUseCase } from '@hms/core/identity/use-cases'
+import { registerClientRequestSchema } from '@hms/validation/identity'
+import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { ClientsController } from '@/identity/decorators'
-import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { ClientDetailsResponseDto } from '@/identity/rest/dtos/client-details-response.dto'
+import { ErrorResponseDto } from '@/shared/rest/dtos'
 
-type RequestBody = Parameters<RegisterClientUseCase['execute']>[0]
+class RegisterClientControllerRequestBody extends createZodDto(registerClientRequestSchema) {}
 
 @ClientsController()
 export class RegisterClientController {
@@ -18,19 +19,28 @@ export class RegisterClientController {
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)
     clientsRepository: ClientsRepository,
-    @Inject(IDENTITY_REPOSITORIES.clientConsents)
-    clientConsentsRepository: ClientConsentsRepository,
-    datetimeProvider: DatetimeProvider,
   ) {
-    this.useCase = new RegisterClientUseCase(
-      clientsRepository,
-      clientConsentsRepository,
-      datetimeProvider,
-    )
+    this.useCase = new RegisterClientUseCase(clientsRepository)
   }
 
   @Post()
-  handle(@Body() body: RequestBody) {
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'The client was registered successfully.',
+    type: ClientDetailsResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'The client data are invalid.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'A client with the same tax identifier already exists.',
+    type: ErrorResponseDto,
+  })
+  @UsePipes(ZodValidationPipe)
+  handle(@Body() body: RegisterClientControllerRequestBody) {
     return this.useCase.execute(body)
   }
 }

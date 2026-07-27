@@ -1,3 +1,5 @@
+const bundledWorkspacePackages = ['@hms/core', '@hms/validation']
+
 module.exports = (options) => {
   const [nodeExternals] = options.externals
 
@@ -7,7 +9,12 @@ module.exports = (options) => {
       (context, callback) => {
         const request = context.request
 
-        if (request === '@hms/core' || request?.startsWith('@hms/core/')) {
+        if (
+          bundledWorkspacePackages.some(
+            (packageName) =>
+              request === packageName || request?.startsWith(`${packageName}/`),
+          )
+        ) {
           return callback()
         }
 

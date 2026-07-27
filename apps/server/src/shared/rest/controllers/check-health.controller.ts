@@ -2,8 +2,10 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { Controller, Get, HttpStatus, ServiceUnavailableException } from '@nestjs/common'
+import { ApiResponse } from '@nestjs/swagger'
 
 import { DrizzleClient } from '@/shared/database/drizzle-client'
+import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
 
 const { version } = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
@@ -14,6 +16,16 @@ export class CheckHealthController {
   constructor(private readonly drizzleClient: DrizzleClient) {}
 
   @Get('/health')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The application and its dependencies are healthy.',
+    type: HealthResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.SERVICE_UNAVAILABLE,
+    description: 'One or more application dependencies are unavailable.',
+    type: ErrorResponseDto,
+  })
   async handle() {
     const database = await this.drizzleClient.isHealthy()
 

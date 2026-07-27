@@ -44,6 +44,11 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
+## API reference
+
+When the server is running, open [http://localhost:3333/docs](http://localhost:3333/docs)
+to browse the Scalar REST API reference generated from the NestJS controllers.
+
 ## Run tests
 
 ```bash

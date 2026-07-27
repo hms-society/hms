@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { supabase } from '#/ui/shared/api/client'
+import { supabase } from '@/ui/shared/api/client'
 
 export const useSignIn = () => {
   const navigate = useNavigate()

@@ -72,7 +72,7 @@ export const intakeModel = pgTable(
     ),
     check(
       'intakes_other_closure_notes_check',
-      sql`${table.closureReason} <> 'outro'
+      sql`${table.closureReason} <> 'other'
         OR (
           ${table.closureNotes} IS NOT NULL
           AND char_length(btrim(${table.closureNotes})) > 0

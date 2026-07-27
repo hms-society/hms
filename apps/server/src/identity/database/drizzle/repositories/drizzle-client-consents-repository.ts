@@ -34,6 +34,35 @@ export class DrizzleClientConsentsRepository
     return createdConsents.map((consent) => this.consentMapper.toDomain(consent))
   }
 
+  async add(consent: ClientConsentCreation): Promise<ClientConsent | undefined> {
+    const [createdConsent] = await this.database
+      .insert(clientConsentModel)
+      .values(consent)
+      .onConflictDoNothing()
+      .returning()
+
+    return createdConsent ? this.consentMapper.toDomain(createdConsent) : undefined
+  }
+
+  async findActiveByClientIdAndType(
+    clientId: string,
+    type: ClientConsent['type'],
+  ): Promise<ClientConsent | undefined> {
+    const [consent] = await this.database
+      .select()
+      .from(clientConsentModel)
+      .where(
+        and(
+          eq(clientConsentModel.clientId, clientId),
+          eq(clientConsentModel.type, type),
+          isNull(clientConsentModel.revokedAt),
+        ),
+      )
+      .limit(1)
+
+    return consent ? this.consentMapper.toDomain(consent) : undefined
+  }
+
   async findByClientId(clientId: string): Promise<ClientConsent[]> {
     const consents = await this.database
       .select()

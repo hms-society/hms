@@ -1,20 +1,22 @@
 import { Link } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight, LogOut, type LucideIcon } from 'lucide-react'
 
-export interface SidebarProps {
+import type { IconName } from '@/ui/shared/widgets/components/icon'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+
+export type SidebarProps = {
   isCollapsed: boolean
-  setIsCollapsed: (isCollapsed: boolean) => void
+  onToggle: (isCollapsed: boolean) => void
   activePath: string
   sidebarItems: {
     label: string
     path: string
-    icon: LucideIcon
+    icon: IconName
   }[]
 }
 
 export const Sidebar = ({
   isCollapsed,
-  setIsCollapsed,
+  onToggle,
   activePath,
   sidebarItems,
 }: SidebarProps) => {
@@ -26,9 +28,7 @@ export const Sidebar = ({
           : 'w-[239px] h-screen sticky top-0'
       }`}
     >
-      {/* Topo do Sidebar */}
       <div className='w-full flex flex-col items-start px-4 pt-4 gap-6'>
-        {/* Logo e Botão de Retrair */}
         <div
           className={`relative flex w-full items-center ${isCollapsed ? 'flex-col gap-3 justify-center' : 'justify-center min-h-[64px]'}`}
         >
@@ -42,32 +42,29 @@ export const Sidebar = ({
               </div>
               <button
                 type='button'
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={() => onToggle(!isCollapsed)}
                 className='absolute right-0 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer'
                 title='Retrair'
               >
-                <ChevronLeft className='w-5 h-5' />
+                <Icon name='chevron-left' className='w-5 h-5' />
               </button>
             </>
           ) : (
             <button
               type='button'
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => onToggle(!isCollapsed)}
               className='p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer'
               title='Expandir'
             >
-              <ChevronRight className='w-5 h-5' />
+              <Icon name='chevron-right' className='w-5 h-5' />
             </button>
           )}
         </div>
 
-        {/* Divisor */}
         <div className='w-full h-0.5 bg-white' />
 
-        {/* Itens do Menu */}
         <nav className='flex flex-col w-full gap-2'>
           {sidebarItems.map((item) => {
-            const Icon = item.icon
             const isActive =
               activePath === item.path ||
               (item.path !== '/home' && activePath.startsWith(`${item.path}/`))
@@ -86,6 +83,7 @@ export const Sidebar = ({
                 title={isCollapsed ? item.label : undefined}
               >
                 <Icon
+                  name={item.icon}
                   className={`w-5 h-5 shrink-0 ${isActive ? 'text-highlight-vivid' : ''}`}
                 />
                 {!isCollapsed && <span className='text-sm'>{item.label}</span>}
@@ -105,7 +103,7 @@ export const Sidebar = ({
           }`}
           title={isCollapsed ? 'Sair' : undefined}
         >
-          <LogOut className='w-5 h-5 shrink-0' />
+          <Icon name='log-out' className='w-5 h-5 shrink-0' />
           {!isCollapsed && <span className='text-sm'>Sair</span>}
         </button>
       </div>

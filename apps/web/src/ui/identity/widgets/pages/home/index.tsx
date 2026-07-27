@@ -1,8 +1,8 @@
-import { AuthenticatedLayout } from '#/ui/shared/widgets/layouts/authenticated-layout'
+import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
 export const HomePage = () => {
   return (
-    <AuthenticatedLayout>
+    <AppLayout>
       <div className='flex flex-col items-center justify-center min-h-[70vh] text-center max-w-2xl mx-auto'>
         <h1 className='font-serif text-4xl md:text-5xl font-medium text-brand mb-4'>
           Bem-vindo ao HMS
@@ -13,6 +13,6 @@ export const HomePage = () => {
           de busca na barra inferior para localizar protocolos e documentos.
         </p>
       </div>
-    </AuthenticatedLayout>
+    </AppLayout>
   )
 }

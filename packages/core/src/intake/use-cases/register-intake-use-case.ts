@@ -38,7 +38,7 @@ export class RegisterIntakeUseCase implements UseCase<Request, Intake> {
 
     if (
       decision === 'close_without_contract' &&
-      request.closureReason === 'outro' &&
+      request.closureReason === 'other' &&
       !request.closureNotes?.trim()
     ) {
       throw new InvalidIntakeClosureError(

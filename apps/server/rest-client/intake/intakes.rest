@@ -65,6 +65,6 @@ Content-Type: application/json
 
 {
   "expectedVersion": 1,
-  "closureReason": "fora_do_escopo",
+  "closureReason": "out_of_scope",
   "updatedBy": "{{userId}}"
 }

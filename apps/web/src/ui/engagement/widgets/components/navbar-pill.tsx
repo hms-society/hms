@@ -1,13 +1,12 @@
-import { Bell, Search } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '#/ui/shadcn/avatar'
-import { Input } from '#/ui/shadcn/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/shadcn/avatar'
+import { Input } from '@/ui/shadcn/input'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 
 export const NavbarPill = () => {
   return (
     <nav className='sticky top-6 mx-auto z-50 flex items-center justify-between w-[1127px] max-w-[calc(100%-3rem)] h-[68px] px-5 rounded-[50px] bg-hms-sidebar-foreground shadow-[0_4px_4px_0_rgba(19,76,80,0.25)] border border-[#134C50]/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 transition-all'>
-      {/* Esquerda: Barra de Pesquisa */}
       <div className='flex w-[400px] max-w-[60%] h-10 px-[14px] items-center gap-[10px] shrink rounded-[20px] bg-white text-[#134C50] shadow-xs m-auto'>
-        <Search className='w-5 h-5 text-[#134C50]/60 shrink-0' />
+        <Icon name='search' className='w-5 h-5 text-[#134C50]/60 shrink-0' />
         <Input
           type='search'
           placeholder='Pesquisar Protocolo, documento...'
@@ -21,7 +20,7 @@ export const NavbarPill = () => {
           className='relative flex items-center justify-center p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/40'
           title='Notificações'
         >
-          <Bell className='w-5 h-5' />
+          <Icon name='bell' className='w-5 h-5' />
           <span className='absolute top-1.5 right-1.5 flex h-2 w-2'>
             <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75' />
             <span className='relative inline-flex rounded-full h-2 w-2 bg-brand-accent' />

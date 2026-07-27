@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
-import { Button } from '#/ui/shadcn/button'
-import { Input } from '#/ui/shadcn/input'
+import { Button } from '@/ui/shadcn/button'
+import { Input } from '@/ui/shadcn/input'
 
-import { useSignIn } from '#/ui/identity/hooks'
+import { useSignIn } from '@/ui/identity/hooks'
 
 export const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false)

@@ -43,7 +43,7 @@ export class CloseIntakeWithoutContractUseCase implements UseCase<Request, Intak
 
     const closureNotes = request.closureNotes?.trim() || undefined
 
-    if (request.closureReason === 'outro' && !closureNotes) {
+    if (request.closureReason === 'other' && !closureNotes) {
       throw new InvalidIntakeClosureError(
         'Uma observação é obrigatória quando o motivo for outro.',
       )
