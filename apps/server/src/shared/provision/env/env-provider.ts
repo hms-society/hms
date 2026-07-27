@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1).url(),
-  SERVER_APP_PORT: z.coerce.number().default(3333),
-  SERVER_APP_MODE: z.enum(['dev', 'prod', 'staging']),
+  HMS_SERVER_APP_PORT: z.coerce.number().default(3333),
+  HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'staging']),
 })
 
 type Env = z.infer<typeof envSchema>

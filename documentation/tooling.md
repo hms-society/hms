@@ -101,21 +101,24 @@ All workspaces use Vitest for unit tests.
 - `.github/workflows/server-app-ci.yaml` validates and builds the server on PRs.
 - `.github/workflows/web-app-ci.yaml` validates and builds the web app on PRs.
 - `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
-  then triggers the server production Coolify webhook after a merged PR into `main`.
+  then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
+  merged PR into `main`.
 - `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations
-  and then triggers the server staging Coolify webhook after pushes to `develop`.
+  and then triggers the server staging Coolify webhook with `COOLIFY_API_TOKEN` after
+  pushes to `develop`.
 - `.github/workflows/web-app-staging-cd.yml` deploys web staging after pushes to
-  `develop`.
+  `develop` using `COOLIFY_API_TOKEN`.
 - `.github/workflows/web-app-production-cd.yml` deploys web production after a merged
-  PR into `main`.
+  PR into `main` using `COOLIFY_API_TOKEN`.
 - `.github/workflows/release-production.yml` creates the version tag and GitHub Release
   from the merged PR title and description.
 
 The `production` and `staging` GitHub environments must provide these secrets:
 
-- `COOLIFY_WEBHOOK_WEB_PROD` and `COOLIFY_WEBHOOK_WEB_STG`
-- `COOLIFY_WEBHOOK_SERVER_PROD` and `COOLIFY_WEBHOOK_SERVER_STG`
-- `DATABASE_URL_PRODUCTION` and `DATABASE_URL_STAGING`
+- `COOLIFY_API_TOKEN`
+- `COOLIFY_WEBHOOK_HMS_WEB_APP_PROD` and `COOLIFY_WEBHOOK_HMS_WEB_APP_STG`
+- `COOLIFY_WEBHOOK_HMS_SERVER_APP_PROD` and `COOLIFY_WEBHOOK_HMS_SERVER_APP_STG`
+- `DATABASE_URL_PRODUCTION` and `DATABASE_URL_STG`
 
 
 ## Frontend tooling (`apps/web`)

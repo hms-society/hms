@@ -1,144 +1,221 @@
-# Modules Responsibilities
+# Responsabilidades dos Módulos
 
-Each module owns a clear set of responsibilities. No module reaches into another's scope. They communicate through events and shared references.
-
----
-
-## Engagement
-
-Handles the entire journey from first contact to signed contract.
-
-- Receives and registers new leads from any source (referral, union, walk-in, future digital channels).
-- Records intake information and tracks it through a qualification pipeline.
-- Conducts triage to decide next steps: schedule consultation, request more information, or close.
-- Schedules and records legal consultations (virtual or in-person).
-- Evaluates legal viability of the potential case.
-- Formalizes the engagement when the client signs. At this point, the intake becomes a client and a case is opened in the Case module.
-- Closes intakes that don't convert, with a recorded reason.
+Cada módulo é responsável por um conjunto claro de atribuições. Nenhum módulo
+invade o escopo de outro. Eles se comunicam por meio de eventos e referências
+compartilhadas.
 
 ---
 
-## Case Management
+## Intake
 
-Owns the lifecycle of a legal case from opening to closure.
+Organiza o ciclo de entrada de uma nova demanda no escritório, desde o primeiro
+contato até a contratação ou o encerramento sem contratação.
 
-- Creates the case when a client is formally engaged.
-- Manages the document checklist: tracks which documents are required, which have arrived, and which are still missing.
-- Enforces the production gate: legal work cannot begin until the checklist is approved.
-- Manages the case team: who is the lead lawyer, supporting lawyer, designated paralegal, intern, supervisor. Publishes team composition so other modules can verify authorization.
-- Holds the checklist template catalog and rules for team composition by case type.
-- Tracks case status across its full lifecycle.
-- Handles the closure ritual when a case reaches its conclusion.
+Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassian.net/wiki/x/AYAY).
 
----
+- Registra a demanda, o canal de contato, a origem, o responsável operacional e
+  o cliente relacionado.
+- Mantém o estado, a linha do tempo e o histórico de cada Intake.
+- Coordena a abertura do Intake com a reserva de uma consulta no Agendamento.
+- Reflete a realização da consulta e registra a decisão de viabilidade.
+- Controla a passagem para formalização e reflete a contratação como desfecho
+  terminal.
+- Permite e registra o encerramento sem contratação durante a jornada ativa.
+- Disponibiliza o histórico de Intakes por cliente.
+- Publica eventos relevantes para os demais módulos sem alterar seus dados
+  internos.
 
-## Legal Production
-
-Produces legal documents (petitions, motions, contracts, opinions).
-
-- Creates legal pieces from scratch or from templates, with optional AI drafting support.
-- Maintains immutable version history of every piece.
-- Manages the review and approval workflow: a lawyer from the case team reviews, requests adjustments, or approves.
-- Ensures only a lawyer assigned to the case can approve a piece.
-- Records the final act of filing, distribution, or delivery.
-- Detects document gaps during production and triggers case regression when the underlying dossier is invalidated.
+O Intake não mantém o cadastro do cliente, a disponibilidade da agenda, o
+conteúdo da consulta, os documentos de formalização, as informações financeiras
+ou o andamento jurídico posterior à contratação.
 
 ---
 
-## Legal Execution
+## Catálogo Jurídico
 
-Tracks the case after filing until closure.
+Centraliza a classificação jurídica usada em toda a HMS, mantendo as áreas
+jurídicas e os temas pertencentes a cada área.
 
-- Manages deadlines, hearings, and tasks associated with the case.
-- Distinguishes between procedural deadlines (with legal consequences) and operational ones.
-- Records case progress and judicial movements.
-- Monitors time-in-status to detect stalled cases.
-- Records the case outcome (favorable ruling, settlement, delivery, withdrawal).
-- Initiates the closure process, which may trigger financial settlement in Billing.
+Requisito de produto: [PRD — Módulo de Catálogo Jurídico](https://plataformahms.atlassian.net/wiki/x/AQAT).
 
----
+- Cadastra, edita, disponibiliza e indisponibiliza áreas jurídicas e temas.
+- Garante que cada tema pertença a uma única área.
+- Impede nomes duplicados, desconsiderando diferenças de maiúsculas, minúsculas
+  e espaços periféricos.
+- Oferece áreas e temas para colaboradores, consultas, templates e configurações
+  de pacotes.
+- Permite pesquisa e filtros do catálogo.
+- Preserva áreas e temas usados anteriormente, mesmo quando ficam indisponíveis
+  para novas associações.
+- Registra alterações administrativas.
 
-## Document Management
-
-Receives, classifies, validates, and governs every document that enters the platform.
-
-- Creates document batches automatically when files arrive from any channel (WhatsApp, portal, email, internal upload).
-- Routes unidentified batches to a triage inbox for manual association.
-- Processes documents through AI/OCR to suggest classification, assess quality, and detect duplicates.
-- Requires human validation before any AI classification takes effect.
-- Controls document access classification (internal, client-visible, restricted, confidential, partner-released) which governs visibility across portals.
-- Handles document exceptions: waivers, provisional acceptance, deferred submission.
+O Catálogo Jurídico fornece a classificação comum, mas não cadastra colaboradores,
+classifica consultas, mantém templates, configura pacotes nem produz documentos.
 
 ---
 
-## Communication
+## Motor Documental
 
-Governs all recorded interactions with people and internal notifications.
+Recebe arquivos enviados ao HMS, identifica a qual cliente pertencem e governa
+sua entrada na plataforma antes que sejam usados por consultas, casos ou outros
+fluxos de trabalho.
 
-- Registers every communication (inbound and outbound) in a central log tied to a person, intake, or case.
-- Receives WhatsApp messages and translates them into internal events.
-- Prepares and routes assisted messages for human approval before sending.
-- Tracks communications that require action, with deadlines.
-- Dispatches internal notifications to team members (new document arrived, deadline approaching, task assigned).
-- Enforces consent rules: no message is sent without the person's active consent for that channel.
+Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/x/FoAT).
 
----
+- Cria um lote de documentos para cada ocorrência válida recebida pelo WhatsApp
+  ou e-mail, os únicos canais compatíveis com o MVP.
+- Preserva o identificador do lote, os arquivos originais, o canal, o remetente e
+  o horário de recebimento.
+- Mantém remetente e cliente como conceitos separados, pois a pessoa que envia
+  os arquivos pode não ser o cliente a quem pertencem.
+- Encaminha todo lote sem cliente confirmado para a caixa de triagem de lotes
+  órfãos como pendente.
+- Usa correspondências determinísticas de identificadores fiscais, contatos e
+  nomes para sugerir no máximo um cliente quando as evidências forem seguras e
+  inequívocas; a IA generativa não decide o cliente.
+- Apresenta as evidências objetivas por trás de uma sugestão de cliente sem
+  tratá-las como prova de identidade ou validade documental.
+- Exige que um colaborador autenticado e autorizado confirme toda associação de
+  cliente; uma sugestão nunca vincula um lote automaticamente.
+- Permite que o colaborador rejeite a sugestão, pesquise manualmente entre os
+  clientes existentes ou registre que não foi possível identificar o cliente.
+- Mantém um lote não identificado como pendente para que seja revisado depois que
+  o cliente for cadastrado ou novas informações estiverem disponíveis.
+- Vincula todo o lote a um cliente no MVP sem exigir que o atendente selecione uma
+  consulta, um caso ou um item da lista de verificação.
+- Permite rejeitar lotes pendentes por um motivo registrado, sem excluir
+  permanentemente seus arquivos ou notificar automaticamente o remetente.
+- Permite somente a um administrador autorizado restaurar um lote rejeitado para
+  o status pendente.
+- Preserva quem realizou cada decisão de triagem e quando ela ocorreu.
+- Disponibiliza os arquivos vinculados aos fluxos de trabalho autorizados a
+  jusante sem pressupor classificação, autenticidade, suficiência jurídica ou
+  aprovação da lista de verificação.
+- Não divide nem mescla lotes no MVP.
 
-## Portal
-
-Provides external access to clients and third parties (unions, external lawyers, partners).
-
-- Serves a simplified, read-only view of case status, documents, and progress to clients.
-- Serves a restricted, audited view to third parties based on explicit permissions.
-- Does not decide what is visible — each originating module publishes what is released. Portal only serves what has been cleared.
-- Records every external access attempt (successful or denied) for audit purposes.
-- Manages third-party registration, user accounts, and permission grants with expiration.
-
----
-
-## Identity
-
-Knows who everyone is, how they access the system, and what they are authorized to do globally.
-
-- Maintains a unique person registry with duplicate detection by tax ID.
-- Links persons to system users via Supabase Auth.
-- Assigns one of nine fixed profiles that determine system-wide authorization.
-- Records LGPD consent grants and revocations as an immutable, append-only log.
-- Does not manage case-level roles (that belongs to Case), external access (Portal), or commercial status (Engagement/Case).
-
----
-
-## Finance
-
-Handles the financial relationship with clients.
-
-- Creates fee agreements when a client is engaged.
-- Issues invoices and tracks payments.
-- Manages collection processes for overdue invoices.
-- Receives the case closure event to trigger final financial settlement.
-- This module is currently greenfield: the data model exists, but business rules have not yet been specified with the client.
+A classificação documental, a avaliação de qualidade, a detecção de duplicatas, a
+classificação de acesso, a associação à lista de verificação, as dispensas, a
+aceitação provisória e o envio posterior continuam sendo responsabilidades futuras
+deste módulo, mas não fazem parte do MVP atual.
 
 ---
 
-## Audit
+## Produção Documental
 
-Maintains a probative, immutable record of events with legal or regulatory weight.
+Produz pacotes de documentos reutilizáveis para consultas, formalizações e casos.
 
-- Receives and stores events that could serve as evidence in regulatory inquiries (bar association, data protection authority, judicial expert).
-- Records consent changes, external access attempts, piece approvals, authorized exceptions, permission grants, and blocked AI actions.
-- Guarantees append-only integrity with chained hashing.
-- Exposes cross-context queries that no single module can answer alone: all actions on a person's data, all approvals by a lawyer, all exceptions in a period.
-- Does not store operational history (each module keeps its own). Only stores the subset with probative value.
-- Does not make decisions or block operations. It observes and records.
+Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/x/AQAQ).
+
+- É responsável pelos modelos de origem usados para produzir documentos.
+- Configura pacotes de documentos padrão para uma área jurídica e um ou mais
+  temas jurídicos, incluindo a ordem de cada modelo, o momento da geração e o
+  status de obrigatoriedade.
+- Instancia pacotes a partir da configuração atual, de modo que alterações
+  posteriores na configuração não afetem pacotes já criados.
+- Preserva versões manuais e geradas por IA imutáveis, mantendo uma única versão
+  ativa.
+- Acompanha documentos gerados por IA ou redigidos manualmente durante a revisão
+  e aprovação.
+- Permite que um documento em redação manual retorne à geração por IA sem excluir
+  seu histórico de produção anterior.
+- Mantém imutáveis os documentos aprovados dentro do pacote confirmado.
+- Confirma um pacote somente quando ele contém pelo menos um documento e todos os
+  documentos incluídos foram aprovados.
+- Publica eventos de produção para que a consulta, a formalização ou o caso
+  responsável possa avançar em seu fluxo sem assumir a propriedade do estado dos
+  documentos.
 
 ---
 
-## What is not a module
+## Comunicação
 
-**Analytics** is not a module. It is a read model layer that subscribes to events from all modules and maintains pre-calculated projections for the 12 MVP indicators. It has no domain logic, no rules, and no vocabulary of its own. It may have its own database for performance, but that is an infrastructure choice, not a domain boundary.
+Governa todas as interações registradas com pessoas e as notificações internas.
 
-**Infrastructure** is not a module. Event bus, read model storage, AI/OCR integration, immutable log storage, SLA timers, and dual-approval utilities are shared technical mechanisms. They live below the modules, not alongside them.
+- Registra toda comunicação (recebida e enviada) em um log central vinculado a
+  uma pessoa, triagem ou caso.
+- Envia mensagens automáticas pelo WhatsApp após eventos autorizados, sem manter
+  atendimento humano integrado ao canal.
+- Recebe documentos enviados pelo WhatsApp e publica eventos para o Motor
+  Documental.
+- Mantém o atendimento humano centralizado no e-mail.
+- Envia notificações internas aos membros da equipe (novo documento recebido,
+  prazo se aproximando, tarefa atribuída).
+- Impõe as regras de consentimento: nenhuma mensagem é enviada sem o consentimento
+  ativo da pessoa para aquele canal.
 
-**AI Governance** is not a module. Each module that uses AI owns its own suggestions, validation rules, confidence thresholds, and blocking policies. The rule "a human validates before AI takes effect" is an invariant inside each module, not a central policy.
+---
 
-**Platform/Configuration** is not a module. Every catalog (checklist templates, piece templates, role catalogs, consent types, SLA rules, system parameters) lives inside the module that consumes it. Configuration follows its instance.
+## Identidade
+
+Sabe quem são todas as pessoas, como elas acessam o sistema e quais autorizações
+possuem globalmente.
+
+Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/x/BIAC).
+
+- Mantém um cadastro único de pessoas, com detecção de duplicatas por identificador
+  fiscal.
+- Vincula pessoas a usuários do sistema por meio do Supabase Auth.
+- Atribui um dos nove perfis fixos que determinam a autorização em todo o sistema.
+- Registra concessões e revogações de consentimento da LGPD em um log imutável e
+  somente de acréscimos.
+- Não gerencia papéis no nível do caso, acesso externo pelo Portal nem o ciclo de
+  vida de consultas e casos.
+
+---
+
+## Agendamento
+
+É responsável pela disponibilidade dos colaboradores e pelas reservas de
+compromissos.
+
+Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/x/AYAT).
+
+- Configura a duração padrão dos compromissos na agenda de cada colaborador.
+- Registra a disponibilidade semanal como intervalos de horário local agrupados
+  por dia da semana.
+- Registra períodos bloqueados inclusivos, com datas sem horário, para férias,
+  audiências e outras indisponibilidades de dia inteiro.
+- Calcula horários disponíveis a partir da disponibilidade semanal, dos períodos
+  bloqueados e dos compromissos existentes.
+- Reserva, cancela e remarca compromissos para clientes.
+- Não é responsável pelo conteúdo ou resultado jurídico de uma consulta. A
+  Consulta mantém apenas uma referência ao compromisso de agendamento.
+
+---
+
+## Consulta
+
+É responsável pela consulta jurídica realizada a partir de um compromisso
+agendado.
+
+Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlassian.net/wiki/x/A4AH).
+
+- Cria uma consulta para um cliente e um advogado designado a partir da referência
+  de um compromisso do módulo de Agendamento.
+- Registra modalidade, canal, ocorrência, ausência, resumo e documentos solicitados.
+- Não calcula disponibilidade nem reserva horário na agenda de um colaborador.
+
+---
+
+## O que não é um módulo
+
+**Analytics** não é um módulo. É uma camada de modelo de leitura que se inscreve
+nos eventos de todos os módulos e mantém projeções pré-calculadas para os 12
+indicadores do MVP. Não possui lógica de domínio, regras nem vocabulário próprios.
+Pode ter um banco de dados próprio por motivos de desempenho, mas isso é uma
+escolha de infraestrutura, não uma fronteira de domínio.
+
+**Infraestrutura** não é um módulo. Barramento de eventos, armazenamento de modelos
+de leitura, integração com IA/OCR, armazenamento de logs imutáveis, temporizadores
+de SLA e utilitários de aprovação dupla são mecanismos técnicos compartilhados.
+Eles ficam abaixo dos módulos, não ao lado deles.
+
+**Governança de IA** não é um módulo. Cada módulo que usa IA é responsável por suas
+próprias sugestões, regras de validação, limiares de confiança e políticas de
+bloqueio. A regra de que uma pessoa deve validar antes que a IA produza efeitos é
+uma invariante dentro de cada módulo, não uma política central.
+
+**Plataforma/Configuração** não é um módulo. Cada catálogo (modelos de listas de
+verificação, modelos de peças, catálogos de papéis, tipos de consentimento, regras
+de SLA e parâmetros do sistema) vive dentro do módulo que o consome. A configuração
+acompanha sua instância.

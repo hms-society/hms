@@ -13,7 +13,12 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AtendimentoRouteImport } from './routes/atendimento'
+import { Route as AdvogadoRouteImport } from './routes/advogado'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento.dashboard'
+import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento.consultas'
+import { Route as AdvogadoConsultasRouteImport } from './routes/advogado.consultas'
 
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
@@ -33,6 +38,14 @@ const HomeRoute = HomeRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+const AtendimentoRoute = AtendimentoRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoRoute = AdvogadoRouteImport.update({
+  id: '/advogado',
+  path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,28 +53,58 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AtendimentoRoute,
+} as any)
+const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => AtendimentoRoute,
+} as any)
+const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => AdvogadoRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/atendimento/dashboard': typeof AtendimentoDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -75,11 +118,42 @@ export interface FileRouteTypes {
     | '/home'
     | '/reset-password'
     | '/sign-in'
+  fullPaths:
+    | '/'
+    | '/advogado'
+    | '/atendimento'
+    | '/home'
+    | '/sign-in'
+    | '/advogado/consultas'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/advogado'
+    | '/atendimento'
+    | '/home'
+    | '/sign-in'
+    | '/advogado/consultas'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/advogado'
+    | '/atendimento'
+    | '/home'
+    | '/sign-in'
+    | '/advogado/consultas'
+    | '/atendimento/consultas'
+    | '/atendimento/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  AdvogadoRoute: typeof AdvogadoRouteWithChildren
+  AtendimentoRoute: typeof AtendimentoRouteWithChildren
   HomeRoute: typeof HomeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
@@ -113,6 +187,18 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advogado': {
+      id: '/advogado'
+      path: '/advogado'
+      fullPath: '/advogado'
+      preLoaderRoute: typeof AdvogadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -122,12 +208,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atendimento/dashboard': {
+      id: '/atendimento/dashboard'
+      path: '/dashboard'
+      fullPath: '/atendimento/dashboard'
+      preLoaderRoute: typeof AtendimentoDashboardRouteImport
+      parentRoute: typeof AtendimentoRoute
+    }
+    '/atendimento/consultas': {
+      id: '/atendimento/consultas'
+      path: '/consultas'
+      fullPath: '/atendimento/consultas'
+      preLoaderRoute: typeof AtendimentoConsultasRouteImport
+      parentRoute: typeof AtendimentoRoute
+    }
+    '/advogado/consultas': {
+      id: '/advogado/consultas'
+      path: '/consultas'
+      fullPath: '/advogado/consultas'
+      preLoaderRoute: typeof AdvogadoConsultasRouteImport
+      parentRoute: typeof AdvogadoRoute
+    }
   }
 }
+
+interface AdvogadoRouteChildren {
+  AdvogadoConsultasRoute: typeof AdvogadoConsultasRoute
+}
+
+const AdvogadoRouteChildren: AdvogadoRouteChildren = {
+  AdvogadoConsultasRoute: AdvogadoConsultasRoute,
+}
+
+const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(
+  AdvogadoRouteChildren,
+)
+
+interface AtendimentoRouteChildren {
+  AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
+  AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
+}
+
+const AtendimentoRouteChildren: AtendimentoRouteChildren = {
+  AtendimentoConsultasRoute: AtendimentoConsultasRoute,
+  AtendimentoDashboardRoute: AtendimentoDashboardRoute,
+}
+
+const AtendimentoRouteWithChildren = AtendimentoRoute._addFileChildren(
+  AtendimentoRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  AdvogadoRoute: AdvogadoRouteWithChildren,
+  AtendimentoRoute: AtendimentoRouteWithChildren,
   HomeRoute: HomeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,

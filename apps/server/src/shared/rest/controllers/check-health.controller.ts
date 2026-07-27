@@ -31,7 +31,10 @@ export class CheckHealthController {
       status: 'ok',
       version,
       timestamp: new Date().toISOString(),
-      services: { database: 'UP' },
+      services: {
+        database: 'UP',
+        supabase: 'UP',
+      },
     }
   }
 }

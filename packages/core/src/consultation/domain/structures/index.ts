@@ -1,0 +1,5 @@
+export * from './consultation-channel'
+export * from './consultation-modality'
+export * from './consultation-status'
+export * from './consultation-suggestion-status'
+export * from './consultation-suggestion-target'

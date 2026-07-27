@@ -4,7 +4,7 @@ import { Input } from '#/ui/shadcn/input'
 
 export const NavbarPill = () => {
   return (
-    <nav className='sticky top-6 mx-auto z-50 flex items-center justify-between w-[1127px] max-w-[calc(100%-3rem)] h-[68px] px-5 rounded-[50px] bg-hms-sidebar-foreground shadow-[0_4px_4px_0_rgba(19,76,80,0.25)] border border-[#134C50]/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 transition-all'>
+   <nav className='mt-6 mx-auto z-50 flex items-center justify-between w-[1127px] max-w-[calc(100%-3rem)] h-[68px] px-5 rounded-[50px] bg-hms-sidebar-foreground shadow-[0_4px_4px_0_rgba(19,76,80,0.25)] border border-[#134C50]/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 transition-all'>
       {/* Esquerda: Barra de Pesquisa */}
       <div className='flex w-[400px] max-w-[60%] h-10 px-[14px] items-center gap-[10px] shrink rounded-[20px] bg-white text-[#134C50] shadow-xs m-auto'>
         <Search className='w-5 h-5 text-[#134C50]/60 shrink-0' />

@@ -9,10 +9,14 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
-      "#engagement/*": ["./src/engagement/*"],
+      "#communication/*": ["./src/communication/*"],
+      "#consultation/*": ["./src/consultation/*"],
+      "#document-engine/*": ["./src/document-engine/*"],
+      "#document-production/*": ["./src/document-production/*"],
       "#identity/*": ["./src/identity/*"],
+      "#legal-catalog/*": ["./src/legal-catalog/*"],
+      "#scheduling/*": ["./src/scheduling/*"],
       "#shared/*": ["./src/shared/*"]
     }
   },
