@@ -9,7 +9,7 @@ export interface AuthenticatedLayoutProps {
 
 export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [activePath, setActivePath] = useState('/home')
+  const [activePath] = useState('/home')
 
   const sidebarItems = [
     { label: 'Início', path: '/home', icon: Home },
@@ -24,7 +24,6 @@ export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         activePath={activePath}
-        setActivePath={setActivePath}
         sidebarItems={sidebarItems}
       />
 
