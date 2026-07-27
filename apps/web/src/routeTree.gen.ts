@@ -38,6 +38,8 @@ const HomeRoute = HomeRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtendimentoRoute = AtendimentoRouteImport.update({
   id: '/atendimento',
   path: '/atendimento',
@@ -71,9 +73,9 @@ const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
@@ -83,9 +85,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
@@ -96,9 +98,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/advogado': typeof AdvogadoRouteWithChildren
   '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
@@ -108,21 +110,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/home' | '/reset-password' | '/sign-in'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/home' | '/reset-password' | '/sign-in'
-  id:
-    | '__root__'
-    | '/'
-    | '/forgot-password'
-    | '/home'
-    | '/reset-password'
-    | '/sign-in'
   fullPaths:
     | '/'
     | '/advogado'
     | '/atendimento'
+    | '/forgot-password'
     | '/home'
+    | '/reset-password'
     | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
@@ -132,7 +126,9 @@ export interface FileRouteTypes {
     | '/'
     | '/advogado'
     | '/atendimento'
+    | '/forgot-password'
     | '/home'
+    | '/reset-password'
     | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
@@ -142,7 +138,9 @@ export interface FileRouteTypes {
     | '/'
     | '/advogado'
     | '/atendimento'
+    | '/forgot-password'
     | '/home'
+    | '/reset-password'
     | '/sign-in'
     | '/advogado/consultas'
     | '/atendimento/consultas'
@@ -151,9 +149,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
   AdvogadoRoute: typeof AdvogadoRouteWithChildren
   AtendimentoRoute: typeof AtendimentoRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   HomeRoute: typeof HomeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
@@ -187,6 +185,8 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atendimento': {
       id: '/atendimento'
       path: '/atendimento'
@@ -240,9 +240,7 @@ const AdvogadoRouteChildren: AdvogadoRouteChildren = {
   AdvogadoConsultasRoute: AdvogadoConsultasRoute,
 }
 
-const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(
-  AdvogadoRouteChildren,
-)
+const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(AdvogadoRouteChildren)
 
 interface AtendimentoRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
@@ -260,9 +258,9 @@ const AtendimentoRouteWithChildren = AtendimentoRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ForgotPasswordRoute: ForgotPasswordRoute,
   AdvogadoRoute: AdvogadoRouteWithChildren,
   AtendimentoRoute: AtendimentoRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   HomeRoute: HomeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
@@ -272,7 +270,6 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true

@@ -63,7 +63,7 @@ export const stepDecisionSchema = z
       if (!data.motivo || data.motivo.trim() === '') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Selecione o motivo do encerramento', 
+          message: 'Selecione o motivo do encerramento',
           path: ['motivo'],
         })
       }

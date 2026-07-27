@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
 import { DRIZZLE, type DrizzleDB } from '../database.provider'
 import { usuario } from '../schema'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'

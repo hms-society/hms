@@ -34,7 +34,7 @@ export const ResetPasswordPage = () => {
       if (error || !data.session) {
         const hash = window.location.hash
 
-        if (!hash || !hash.includes('access_token')) {
+        if (!hash?.includes('access_token')) {
           setErrorMessage('Link de recuperação inválido ou expirado.')
           setStatus('error')
         }

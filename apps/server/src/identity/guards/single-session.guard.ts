@@ -17,7 +17,7 @@ export class SingleSessionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
 
     const authHeader = request.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith('Bearer ')) {
       throw new UnauthorizedException('token_ausente')
     }
 
@@ -26,7 +26,7 @@ export class SingleSessionGuard implements CanActivate {
     let payload: any
     try {
       payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-    } catch (e) {
+    } catch (_e) {
       throw new UnauthorizedException('token_invalido')
     }
 

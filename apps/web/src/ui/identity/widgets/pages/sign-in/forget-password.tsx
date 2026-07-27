@@ -32,7 +32,7 @@ export const ForgotPasswordPage = () => {
       setStatus('success')
       setIsEmailSent(true) // Trava a tela na visão de sucesso
       setResendTimer(15)
-    } catch (error) {
+    } catch (_error) {
       setStatus('error')
     }
   }
@@ -46,7 +46,7 @@ export const ForgotPasswordPage = () => {
       await forgotPassword(email)
       setStatus('success')
       setResendTimer(15)
-    } catch (error) {
+    } catch (_error) {
       setStatus('error')
     }
   }

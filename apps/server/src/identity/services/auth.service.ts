@@ -33,7 +33,7 @@ export class AuthService {
       .from(usuario)
       .where(eq(usuario.email, identificador))
 
-    if (!dadosUsuario || !dadosUsuario.ativo) {
+    if (!dadosUsuario?.ativo) {
       throw new UnauthorizedException('Email ou senha inválidos')
     }
 

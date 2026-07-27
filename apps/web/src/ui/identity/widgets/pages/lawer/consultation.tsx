@@ -89,7 +89,7 @@ export const Consultation = () => {
 
   const toggleDay = (id: string) => {
     setSchedule((prev) =>
-      prev.map((day) => (day.id === id ? { ...day, active: !day.active } : day))
+      prev.map((day) => (day.id === id ? { ...day, active: !day.active } : day)),
     )
   }
 
@@ -110,8 +110,8 @@ export const Consultation = () => {
       prev.map((day) =>
         day.id === selectedDayId
           ? { ...day, slots: [...day.slots, { start: startTime, end: endTime }] }
-          : day
-      )
+          : day,
+      ),
     )
     setModalOpen(false)
   }
@@ -128,7 +128,20 @@ export const Consultation = () => {
     const startObj = new Date(`${startDate}T00:00:00`)
     const endObj = endDate ? new Date(`${endDate}T00:00:00`) : startObj
 
-    const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+    const months = [
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez',
+    ]
 
     let formattedDate = ''
     if (startDate === endDate || !endDate) {
@@ -153,29 +166,29 @@ export const Consultation = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-ring font-serif text-[24px] font-semibold">
+    <div className='flex flex-col gap-6 max-w-5xl'>
+      <div className='flex flex-col gap-1'>
+        <h1 className='text-ring font-serif text-[24px] font-semibold'>
           Configurar agenda
         </h1>
-        <p className="text-muted-foreground font-sans text-[14px]">
+        <p className='text-muted-foreground font-sans text-[14px]'>
           Defina sua disponibilidade semanal, duração de consulta e bloqueios
         </p>
       </div>
-      <div className="bg-card border border-border rounded-xl p-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Timer className="w-5 h-5 text-primary shrink-0" />
-          <div className="flex flex-col">
-            <span className="text-[14px] font-semibold text-foreground">
+      <div className='bg-card border border-border rounded-xl p-5 flex items-center justify-between'>
+        <div className='flex items-center gap-3'>
+          <Timer className='w-5 h-5 text-primary shrink-0' />
+          <div className='flex flex-col'>
+            <span className='text-[14px] font-semibold text-foreground'>
               Duração padrão da consulta
             </span>
-            <span className="text-[12px] text-muted-foreground">
+            <span className='text-[12px] text-muted-foreground'>
               Tempo reservado para cada agendamento
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           {(
             [
               { id: '30min', label: '30 min' },
@@ -186,7 +199,7 @@ export const Consultation = () => {
             <Button
               key={item.id}
               variant={duration === item.id ? 'default' : 'outline'}
-              className="rounded-full px-4"
+              className='rounded-full px-4'
               onClick={() => setDuration(item.id)}
             >
               {item.label}
@@ -194,14 +207,14 @@ export const Consultation = () => {
           ))}
         </div>
       </div>
-      <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-border">
-          <CalendarDays className="w-5 h-5 text-primary shrink-0" />
-          <span className="text-[15px] font-semibold text-foreground">
+      <div className='bg-card border border-border rounded-xl p-5 flex flex-col gap-5'>
+        <div className='flex items-center gap-2 pb-3 border-b border-border'>
+          <CalendarDays className='w-5 h-5 text-primary shrink-0' />
+          <span className='text-[15px] font-semibold text-foreground'>
             Disponibilidade semanal
           </span>
         </div>
-        <div className="flex flex-col divide-y divide-border/40">
+        <div className='flex flex-col divide-y divide-border/40'>
           {schedule.map((day) => (
             <div
               key={day.id}
@@ -209,41 +222,36 @@ export const Consultation = () => {
                 !day.active ? 'opacity-60 bg-muted/20' : ''
               }`}
             >
-              <Switch
-                checked={day.active}
-                onCheckedChange={() => toggleDay(day.id)}
-              />
-              <span className="w-32 text-[14px] font-medium text-foreground">
+              <Switch checked={day.active} onCheckedChange={() => toggleDay(day.id)} />
+              <span className='w-32 text-[14px] font-medium text-foreground'>
                 {day.name}
               </span>
               {day.active ? (
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className='flex items-center gap-3 flex-wrap'>
                   {day.slots.map((slot, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
+                    <div key={idx} className='flex items-center gap-2'>
                       {idx > 0 && (
-                        <span className="text-[13px] text-muted-foreground px-1">
-                          e
-                        </span>
+                        <span className='text-[13px] text-muted-foreground px-1'>e</span>
                       )}
-                      <div className="flex items-center gap-1.5 bg-muted/50 border border-border px-3 py-1.5 rounded-lg text-[13px] text-foreground">
+                      <div className='flex items-center gap-1.5 bg-muted/50 border border-border px-3 py-1.5 rounded-lg text-[13px] text-foreground'>
                         <span>{slot.start}</span>
-                        <span className="text-muted-foreground">—</span>
+                        <span className='text-muted-foreground'>—</span>
                         <span>{slot.end}</span>
                       </div>
                     </div>
                   ))}
 
                   <Button
-                    variant="outline"
-                    size="icon"
-                    className="size-7 rounded-lg text-primary"
+                    variant='outline'
+                    size='icon'
+                    className='size-7 rounded-lg text-primary'
                     onClick={() => handleOpenAddModal(day.id)}
                   >
                     <Plus />
                   </Button>
                 </div>
               ) : (
-                <span className="text-[13px] text-muted-foreground italic">
+                <span className='text-[13px] text-muted-foreground italic'>
                   Indisponível
                 </span>
               )}
@@ -252,46 +260,43 @@ export const Consultation = () => {
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-5">
-        <div className="flex items-center justify-between pb-3 border-b border-border">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-primary shrink-0" />
-            <span className="text-[15px] font-semibold text-foreground">
+      <div className='bg-card border border-border rounded-xl p-5 flex flex-col gap-5'>
+        <div className='flex items-center justify-between pb-3 border-b border-border'>
+          <div className='flex items-center gap-2'>
+            <CalendarDays className='w-5 h-5 text-primary shrink-0' />
+            <span className='text-[15px] font-semibold text-foreground'>
               Bloqueios de agenda
             </span>
           </div>
 
-          <Button 
-            onClick={handleOpenAddBlockModal}
-            className="rounded-full px-4 gap-1.5"
-          >
+          <Button onClick={handleOpenAddBlockModal} className='rounded-full px-4 gap-1.5'>
             <Plus />
             Adicionar bloqueio
           </Button>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className='flex flex-col gap-3'>
           {blocks.map((block) => (
             <div
               key={block.id}
-              className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors"
+              className='flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors'
             >
-              <div className="flex items-start gap-3">
-                <span className="w-2 h-2 rounded-full border-2 border-foreground shrink-0 mt-1.5" />
-                <div className="flex flex-col">
-                  <span className="text-[14px] font-semibold text-foreground">
+              <div className='flex items-start gap-3'>
+                <span className='w-2 h-2 rounded-full border-2 border-foreground shrink-0 mt-1.5' />
+                <div className='flex flex-col'>
+                  <span className='text-[14px] font-semibold text-foreground'>
                     {block.dateText}
                   </span>
-                  <span className="text-[12px] text-muted-foreground">
+                  <span className='text-[12px] text-muted-foreground'>
                     {block.description}
                   </span>
                 </div>
               </div>
 
               <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:text-destructive"
+                variant='ghost'
+                size='icon'
+                className='size-8 text-muted-foreground hover:text-destructive'
                 onClick={() => removeBlock(block.id)}
               >
                 <Trash2 />
@@ -301,46 +306,46 @@ export const Consultation = () => {
         </div>
       </div>
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-[420px] rounded-2xl p-6">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="font-serif text-[18px] text-foreground">
+        <DialogContent className='sm:max-w-[420px] rounded-2xl p-6'>
+          <DialogHeader className='pb-4 border-b border-border'>
+            <DialogTitle className='font-serif text-[18px] text-foreground'>
               Adicionar intervalo
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-[13px] text-foreground">Horário inicial</Label>
+          <div className='grid grid-cols-2 gap-4 py-4'>
+            <div className='flex flex-col gap-2'>
+              <Label className='text-[13px] text-foreground'>Horário inicial</Label>
               <Input
-                type="time"
+                type='time'
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-[13px] text-foreground">Horário final</Label>
+            <div className='flex flex-col gap-2'>
+              <Label className='text-[13px] text-foreground'>Horário final</Label>
               <Input
-                type="time"
+                type='time'
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t border-border flex items-center justify-end gap-3">
+          <DialogFooter className='pt-4 border-t border-border flex items-center justify-end gap-3'>
             <Button
-              type="button"
-              variant="brand"
+              type='button'
+              variant='brand'
               onClick={() => setModalOpen(false)}
-              className="rounded-full px-5"
+              className='rounded-full px-5'
             >
               Cancelar
             </Button>
             <Button
-              type="button"
+              type='button'
               onClick={handleAddSlot}
-              className="rounded-full px-5 gap-1.5"
+              className='rounded-full px-5 gap-1.5'
             >
               Adicionar intervalo
             </Button>
@@ -348,60 +353,61 @@ export const Consultation = () => {
         </DialogContent>
       </Dialog>
       <Dialog open={modalBlockOpen} onOpenChange={setModalBlockOpen}>
-        <DialogContent className="sm:max-w-[420px] rounded-2xl p-6">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="font-serif text-[18px] text-foreground">
+        <DialogContent className='sm:max-w-[420px] rounded-2xl p-6'>
+          <DialogHeader className='pb-4 border-b border-border'>
+            <DialogTitle className='font-serif text-[18px] text-foreground'>
               Adicionar bloqueio
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <Label className="text-[13px] text-foreground">Data inicial</Label>
+          <div className='flex flex-col gap-4 py-4'>
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Data inicial</Label>
                 <Input
-                  type="date"
+                  type='date'
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <Label className="text-[13px] text-foreground">Data final</Label>
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Data final</Label>
                 <Input
-                  type="date"
+                  type='date'
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-[13px] text-foreground">
-                Motivo <span className="text-muted-foreground font-normal">(opcional)</span>
+            <div className='flex flex-col gap-2'>
+              <Label className='text-[13px] text-foreground'>
+                Motivo{' '}
+                <span className='text-muted-foreground font-normal'>(opcional)</span>
               </Label>
               <Input
-                type="text"
-                placeholder="Ex.: audiência, férias ou compromisso"
+                type='text'
+                placeholder='Ex.: audiência, férias ou compromisso'
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
               />
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t border-border flex items-center justify-end gap-3">
+          <DialogFooter className='pt-4 border-t border-border flex items-center justify-end gap-3'>
             <Button
-              type="button"
-              variant="brand"
+              type='button'
+              variant='brand'
               onClick={() => setModalBlockOpen(false)}
-              className="rounded-full px-5"
+              className='rounded-full px-5'
             >
               Cancelar
             </Button>
             <Button
-              type="button"
+              type='button'
               onClick={handleAddBlock}
-              className="rounded-full px-5 gap-1.5"
+              className='rounded-full px-5 gap-1.5'
             >
               Adicionar bloqueio
             </Button>

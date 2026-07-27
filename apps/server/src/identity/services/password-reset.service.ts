@@ -33,7 +33,7 @@ export class PasswordResetService {
       .from(usuario)
       .where(eq(usuario.email, email))
 
-    if (!dadosUsuario || !dadosUsuario.ativo) {
+    if (!dadosUsuario?.ativo) {
       return
     }
 

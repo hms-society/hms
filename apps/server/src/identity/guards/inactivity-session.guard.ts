@@ -10,19 +10,18 @@ import { DRIZZLE, type DrizzleDB } from '../../shared/database/database.provider
 import { usuario, parametroSistema } from 'src/shared/database/schema'
 
 @Injectable()
-export class inactivitySessionGuard implements CanActivate {
+export class InactivitySessionGuard implements CanActivate {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const user = request.user
 
-    if (!user.sub) {
+    if (!user?.sub) {
       throw new UnauthorizedException('usuario_nao_identificado')
     }
 
     const userId = user.sub
-
     const [dadosUsuario] = await this.db
       .select({ ultimoAcessoEm: usuario.ultimoAcessoEm })
       .from(usuario)
@@ -37,11 +36,10 @@ export class inactivitySessionGuard implements CanActivate {
       .from(parametroSistema)
       .where(eq(parametroSistema.chave, 'SEGURANCA_SESSAO_TEMPO_INATIVIDADE_MINUTOS'))
 
-    const minutos = Number(parametro.valor)
+    const minutos = Number(parametro?.valor) || 20
 
     if (dadosUsuario.ultimoAcessoEm) {
       const limite = dadosUsuario.ultimoAcessoEm.getTime() + minutos * 60 * 1000
-
       if (Date.now() > limite) {
         throw new UnauthorizedException('sessao_expirada')
       }
