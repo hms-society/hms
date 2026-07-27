@@ -13,12 +13,19 @@ import {
 import type { Request, Response } from 'express'
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { EnvProvider } from '../provision/env/env-provider'
+import { DatabaseService } from '../database/database.service'
+import { integracaoEvento } from '../database/schema/integracao-evento'
+import { InngestService } from '../provision/inngest/inngest.service'
 
 @Controller('integrations/whatsapp/webhook')
 export class WhatsappWebhookController {
   private readonly logger = new Logger(WhatsappWebhookController.name)
 
-  constructor(private readonly envProvider: EnvProvider) {}
+  constructor(
+    private readonly envProvider: EnvProvider,
+    private readonly databaseService: DatabaseService,
+    private readonly inngestService: InngestService,
+  ) {}
 
   @Get()
   verifyWebhook(
@@ -28,6 +35,7 @@ export class WhatsappWebhookController {
     @Res() res: Response,
   ) {
     const configuredVerifyToken = this.envProvider.get('WHATSAPP_WEBHOOK_VERIFY_TOKEN')
+    console.log(configuredVerifyToken)
 
     if (mode === 'subscribe' && verifyToken === configuredVerifyToken) {
       this.logger.log('Webhook verified successfully')
@@ -40,7 +48,7 @@ export class WhatsappWebhookController {
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  handleWebhook(@Req() req: Request) {
+  async handleWebhook(@Req() req: Request) {
     this.logger.log('Incoming webhook request received')
     this.logger.log(`Headers: ${JSON.stringify(req.headers)}`)
     this.logger.log(`Body: ${JSON.stringify(req.body)}`)
@@ -73,11 +81,43 @@ export class WhatsappWebhookController {
       throw new ForbiddenException('Invalid signature')
     }
 
-    // Payload is valid
     const payload = req.body
     this.logger.log(`Received valid WhatsApp webhook payload: ${JSON.stringify(payload)}`)
 
-    // TODO: Process payload and dispatch to Inngest / Core modules
+    if (this.databaseService.db) {
+      try {
+        await this.databaseService.db.insert(integracaoEvento).values({
+          provedor: 'whatsapp',
+          payload,
+          status: 'sucesso',
+        })
+      } catch (err: any) {
+        this.logger.error(`Failed to store webhook event: ${err.message}`)
+        try {
+          await this.databaseService.db.insert(integracaoEvento).values({
+            provedor: 'whatsapp',
+            payload,
+            status: 'falha_transitoria',
+            erro: err.message || String(err),
+          })
+        } catch (_innerErr) {
+          this.logger.error('Failed to log failure event to database')
+        }
+      }
+    } else {
+      this.logger.error('Database client is not initialized in DatabaseService')
+    }
+
+    // Dispatch to Inngest
+    try {
+      await this.inngestService.client.send({
+        name: 'whatsapp/event.received',
+        data: payload,
+      })
+    } catch (inngestErr: any) {
+      this.logger.error(`Failed to dispatch event to Inngest: ${inngestErr.message}`)
+    }
+
     return { status: 'success' }
   }
 }

@@ -5,4 +5,5 @@
 //
 //   export * from './accounts'
 //
-export {}
+export * from './integracao-evento'
+

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { WhatsappWebhookController } from './whatsapp-webhook.controller'
 import { EnvProvider } from '../provision/env/env-provider'
+import { DatabaseService } from '../database/database.service'
+import { InngestService } from '../provision/inngest/inngest.service'
 import type { Request, Response } from 'express'
 import { ForbiddenException, HttpStatus } from '@nestjs/common'
 import { createHmac } from 'node:crypto'
@@ -8,6 +10,11 @@ import { createHmac } from 'node:crypto'
 describe('WhatsappWebhookController', () => {
   let controller: WhatsappWebhookController
   let mockEnvProvider: EnvProvider
+  let mockDatabaseService: DatabaseService
+  let mockInngestService: InngestService
+  let mockInsert: any
+  let mockValues: any
+  let mockInngestSend: any
 
   beforeEach(() => {
     mockEnvProvider = {
@@ -18,8 +25,31 @@ describe('WhatsappWebhookController', () => {
       }),
     } as unknown as EnvProvider
 
-    controller = new WhatsappWebhookController(mockEnvProvider)
+    mockValues = vi.fn().mockResolvedValue(undefined as any)
+    mockInsert = vi.fn().mockReturnValue({
+      values: mockValues,
+    })
+
+    mockDatabaseService = {
+      db: {
+        insert: mockInsert,
+      },
+    } as unknown as DatabaseService
+
+    mockInngestSend = vi.fn().mockResolvedValue(undefined as any)
+    mockInngestService = {
+      client: {
+        send: mockInngestSend,
+      },
+    } as unknown as InngestService
+
+    controller = new WhatsappWebhookController(
+      mockEnvProvider,
+      mockDatabaseService,
+      mockInngestService,
+    )
   })
+
 
   describe('verifyWebhook (GET)', () => {
     it('should successfully verify the webhook and return the challenge', () => {
@@ -50,7 +80,7 @@ describe('WhatsappWebhookController', () => {
   })
 
   describe('handleWebhook (POST)', () => {
-    it('should successfully process a valid payload with correct signature', () => {
+    it('should successfully process a valid payload with correct signature', async () => {
       const payload = { object: 'whatsapp_business_account', entry: [] }
       const payloadString = JSON.stringify(payload)
       const rawBody = Buffer.from(payloadString)
@@ -66,22 +96,37 @@ describe('WhatsappWebhookController', () => {
         body: payload,
       } as unknown as Request
 
-      const result = controller.handleWebhook(mockRequest)
+      const result = await controller.handleWebhook(mockRequest)
 
       expect(result).toEqual({ status: 'success' })
+      expect(mockInsert).toHaveBeenCalled()
+      expect(mockValues).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provedor: 'whatsapp',
+          payload,
+          status: 'sucesso',
+        }),
+      )
+      expect(mockInngestSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'whatsapp/event.received',
+          data: payload,
+        }),
+      )
     })
 
-    it('should throw ForbiddenException if x-hub-signature-256 header is missing', () => {
+
+    it('should throw ForbiddenException if x-hub-signature-256 header is missing', async () => {
       const mockRequest = {
         headers: {},
         rawBody: Buffer.from(''),
         body: {},
       } as unknown as Request
 
-      expect(() => controller.handleWebhook(mockRequest)).toThrow(ForbiddenException)
+      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(ForbiddenException)
     })
 
-    it('should throw ForbiddenException if signature does not match', () => {
+    it('should throw ForbiddenException if signature does not match', async () => {
       const rawBody = Buffer.from('some payload')
       const mockRequest = {
         headers: {
@@ -91,7 +136,7 @@ describe('WhatsappWebhookController', () => {
         body: {},
       } as unknown as Request
 
-      expect(() => controller.handleWebhook(mockRequest)).toThrow(ForbiddenException)
+      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(ForbiddenException)
     })
   })
 })

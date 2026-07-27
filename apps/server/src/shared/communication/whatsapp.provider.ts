@@ -19,9 +19,6 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
 
-    // Determine the template name based on the automatic message kind.
-    // In Meta Cloud API, we must use pre-approved templates for outbound messages.
-    // For local development, we fallback to 'hello_world' since it is pre-approved by default on all test accounts.
     let templateName = 'hello_world'
     let languageCode = 'en_US'
 
