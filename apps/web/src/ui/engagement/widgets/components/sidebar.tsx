@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, LogOut, type LucideIcon } from 'lucide-react'
+import { useSignOut } from '#/ui/identity/hooks/use-sign-out'
 
 export interface SidebarProps {
   isCollapsed: boolean
@@ -18,6 +19,7 @@ export const Sidebar = ({
   activePath,
   sidebarItems,
 }: SidebarProps) => {
+  const { mutate: signOut, isPending } = useSignOut()
   return (
     <aside
       className={`flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${
@@ -98,6 +100,8 @@ export const Sidebar = ({
         <div className='w-full h-px bg-white/10 mb-4' />
         <button
           type='button'
+          onClick={() => signOut()}
+          disabled={isPending}
           className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer ${
             isCollapsed ? 'justify-center px-0' : 'px-3'
           }`}

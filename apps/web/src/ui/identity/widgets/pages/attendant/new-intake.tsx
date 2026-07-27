@@ -29,14 +29,14 @@ export const NovoIntake = () => {
       urgencia: '',
       observacoes: '',
       clienteVinculado: false,
-      tipoCard: 'agendar', 
+      tipoCard: 'agendar',
       modalidade: 'virtual',
       canalVirtual: 'whatsapp',
       local: '',
       advogado: '',
       data: new Date(),
       horario: '',
-      motivo: ''
+      motivo: '',
     },
   })
   const { reset } = methods
@@ -47,9 +47,9 @@ export const NovoIntake = () => {
     { number: 3, label: 'Decisão' },
   ]
   const handleResetForm = () => {
-    reset() 
-    setTipoCard('agendar') 
-    setCurrentStep(1) 
+    reset()
+    setTipoCard('agendar')
+    setCurrentStep(1)
   }
   const handleNext = async () => {
     let isValid = false
@@ -77,18 +77,14 @@ export const NovoIntake = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen bg-background p-8 flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-foreground font-serif text-[20px] font-semibold">
+      <div className='min-h-screen bg-background p-8 flex flex-col gap-6'>
+        <div className='flex items-center justify-between'>
+          <h1 className='text-foreground font-serif text-[20px] font-semibold'>
             Novo intake
           </h1>
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             {currentStep === 3 && tipoCard === 'agendar' && (
-              <Button
-                variant="brand"
-                className="rounded-pill"
-                onClick={handleResetForm}
-              >
+              <Button variant='brand' className='rounded-pill' onClick={handleResetForm}>
                 <X />
                 Cancelar
               </Button>
@@ -117,7 +113,7 @@ export const NovoIntake = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 border-b border-border">
+        <div className='grid grid-cols-3 border-b border-border'>
           {steps.map((step) => (
             <div
               key={step.number}
@@ -136,12 +132,12 @@ export const NovoIntake = () => {
               >
                 {step.number}
               </span>
-              <span className="text-[14px] font-sans">{step.label}</span>
+              <span className='text-[14px] font-sans'>{step.label}</span>
             </div>
           ))}
         </div>
 
-        <div className="bg-card rounded-xl p-8">
+        <div className='bg-card rounded-xl p-8'>
           <div className={currentStep === 1 ? 'block' : 'hidden'}>
             <StepDemand ref={step1Ref} />
           </div>
@@ -149,32 +145,24 @@ export const NovoIntake = () => {
             <StepClient ref={step2Ref} />
           </div>
           <div className={currentStep === 3 ? 'block' : 'hidden'}>
-            <StepDecision
-              ref={step3Ref}
-              tipoCard={tipoCard}
-              setTipoCard={setTipoCard}
-            />
+            <StepDecision ref={step3Ref} tipoCard={tipoCard} setTipoCard={setTipoCard} />
           </div>
         </div>
 
         <Separator />
 
-        <div className="flex justify-between">
+        <div className='flex justify-between'>
           <Button
-            variant="brand"
+            variant='brand'
             onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 1))}
             disabled={currentStep === 1}
-            className="rounded-pill"
+            className='rounded-pill'
           >
             <ArrowLeft />
             Anterior
           </Button>
           {currentStep < 3 && (
-            <Button
-              variant="brand"
-              onClick={handleNext}
-              className="rounded-pill"
-            >
+            <Button variant='brand' onClick={handleNext} className='rounded-pill'>
               Próximo
               <ArrowRight />
             </Button>

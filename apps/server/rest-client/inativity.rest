@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3333
+@email = admin@hmsadvogados.com.br
+@senha = password123
+
+
+### 1 login
+# @name login
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "identificador": "{{email}}",
+  "senha": "{{senha}}"
+}
+
+###
+
+@token = {{login.response.body.accessToken}}
+
+
+### 2 Acessar rota protegida depois do login
+GET {{baseUrl}}/session-test
+Authorization: Bearer {{token}}
+
+
+### 3 Aguardar o tempo configurado
+### Não executar nada
+
+
+### 4 Acessar rota após o tempo de inatvidade
+GET {{baseUrl}}/session-test
+Authorization: Bearer {{token}}

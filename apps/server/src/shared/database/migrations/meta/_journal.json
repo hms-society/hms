@@ -1,1 +1,34 @@
-{ "version": "7", "dialect": "postgresql", "entries": [] }
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784741326320,
+      "tag": "0001_neat_tigra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784754097747,
+      "tag": "0002_futuristic_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784758680709,
+      "tag": "0003_tired_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784760926375,
+      "tag": "0004_glamorous_onslaught",
+      "breakpoints": true
+    }
+  ]
+}
