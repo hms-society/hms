@@ -240,7 +240,9 @@ const AdvogadoRouteChildren: AdvogadoRouteChildren = {
   AdvogadoConsultasRoute: AdvogadoConsultasRoute,
 }
 
-const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(AdvogadoRouteChildren)
+const AdvogadoRouteWithChildren = AdvogadoRoute._addFileChildren(
+  AdvogadoRouteChildren,
+)
 
 interface AtendimentoRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
@@ -270,6 +272,7 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
