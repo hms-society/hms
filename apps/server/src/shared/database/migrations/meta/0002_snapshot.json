@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "id": "26faadf2-aa4e-4a34-b37d-eee9ed87ca34",
   "prevId": "10a353c3-3f8c-44ff-bace-8b0d337adc0b",
   "version": "7",
@@ -6,6 +7,15 @@
   "tables": {
     "public.intakes": {
       "name": "intakes",
+=======
+  "id": "08055d5f-01c0-4341-bb6b-9e6d668548cf",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.parametro_sistema": {
+      "name": "parametro_sistema",
+>>>>>>> develop
       "schema": "",
       "columns": {
         "id": {
@@ -15,6 +25,7 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+<<<<<<< HEAD
         "sequence_number": {
           "name": "sequence_number",
           "type": "serial",
@@ -81,10 +92,27 @@
         },
         "demand_notes": {
           "name": "demand_notes",
+=======
+        "chave": {
+          "name": "chave",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_json": {
+          "name": "valor_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+>>>>>>> develop
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
+<<<<<<< HEAD
         "status": {
           "name": "status",
           "type": "intake_status",
@@ -127,12 +155,30 @@
         },
         "updated_at": {
           "name": "updated_at",
+=======
+        "categoria": {
+          "name": "categoria",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editavel_em_runtime": {
+          "name": "editavel_em_runtime",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+>>>>>>> develop
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         }
       },
+<<<<<<< HEAD
       "indexes": {
         "intakes_sequence_number_uidx": {
           "name": "intakes_sequence_number_uidx",
@@ -592,6 +638,24 @@
       ]
     }
   },
+=======
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "parametro_sistema_chave_unique": {
+          "name": "parametro_sistema_chave_unique",
+          "nullsNotDistinct": false,
+          "columns": ["chave"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+>>>>>>> develop
   "schemas": {},
   "sequences": {},
   "roles": {},
@@ -602,4 +666,8 @@
     "schemas": {},
     "tables": {}
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop

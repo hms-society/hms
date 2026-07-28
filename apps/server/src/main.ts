@@ -28,6 +28,13 @@ async function bootstrap() {
 
   // biome-ignore lint/correctness/useHookAtTopLevel: Nest global filter registration is not a React hook.
   app.useGlobalFilters(new GlobalErrorHandler(app.get(HttpAdapterHost)))
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  })
+
   await app.listen(process.env.PORT ?? 3333)
 }
 

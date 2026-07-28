@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AtendimentoRouteImport } from './routes/atendimento'
+import { Route as AdvogadoRouteImport } from './routes/advogado'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as IntakesNewRouteImport } from './routes/intakes/new'
@@ -20,9 +24,29 @@ const SignInRoute = SignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtendimentoRoute = AtendimentoRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoRoute = AdvogadoRouteImport.update({
+  id: '/advogado',
+  path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +67,22 @@ const IntakesNewRoute = IntakesNewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/intakes/new': typeof IntakesNewRoute
   '/intakes/': typeof IntakesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/intakes/new': typeof IntakesNewRoute
   '/intakes': typeof IntakesIndexRoute
@@ -58,7 +90,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteWithChildren
+  '/atendimento': typeof AtendimentoRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/home': typeof HomeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/intakes/new': typeof IntakesNewRoute
   '/intakes/': typeof IntakesIndexRoute
@@ -73,7 +109,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdvogadoRoute: typeof AdvogadoRouteWithChildren
+  AtendimentoRoute: typeof AtendimentoRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   HomeRoute: typeof HomeRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   IntakesNewRoute: typeof IntakesNewRoute
   IntakesIndexRoute: typeof IntakesIndexRoute
@@ -88,11 +128,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home': {
       id: '/home'
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advogado': {
+      id: '/advogado'
+      path: '/advogado'
+      fullPath: '/advogado'
+      preLoaderRoute: typeof AdvogadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,7 +189,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdvogadoRoute: AdvogadoRouteWithChildren,
+  AtendimentoRoute: AtendimentoRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   HomeRoute: HomeRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   IntakesNewRoute: IntakesNewRoute,
   IntakesIndexRoute: IntakesIndexRoute,
@@ -131,7 +203,6 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
