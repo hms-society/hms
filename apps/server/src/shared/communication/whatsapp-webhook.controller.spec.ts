@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { WhatsappWebhookController } from './whatsapp-webhook.controller'
 import { EnvProvider } from '../provision/env/env-provider'
-import { DatabaseService } from '../database/database.service'
 import { InngestService } from '../provision/inngest/inngest.service'
 import type { Request, Response } from 'express'
 import { ForbiddenException, HttpStatus } from '@nestjs/common'
@@ -10,10 +9,7 @@ import { createHmac } from 'node:crypto'
 describe('WhatsappWebhookController', () => {
   let controller: WhatsappWebhookController
   let mockEnvProvider: EnvProvider
-  let mockDatabaseService: DatabaseService
   let mockInngestService: InngestService
-  let mockInsert: any
-  let mockValues: any
   let mockInngestSend: any
 
   beforeEach(() => {
@@ -25,17 +21,6 @@ describe('WhatsappWebhookController', () => {
       }),
     } as unknown as EnvProvider
 
-    mockValues = vi.fn().mockResolvedValue(undefined as any)
-    mockInsert = vi.fn().mockReturnValue({
-      values: mockValues,
-    })
-
-    mockDatabaseService = {
-      db: {
-        insert: mockInsert,
-      },
-    } as unknown as DatabaseService
-
     mockInngestSend = vi.fn().mockResolvedValue(undefined as any)
     mockInngestService = {
       client: {
@@ -43,13 +28,8 @@ describe('WhatsappWebhookController', () => {
       },
     } as unknown as InngestService
 
-    controller = new WhatsappWebhookController(
-      mockEnvProvider,
-      mockDatabaseService,
-      mockInngestService,
-    )
+    controller = new WhatsappWebhookController(mockEnvProvider, mockInngestService)
   })
-
 
   describe('verifyWebhook (GET)', () => {
     it('should successfully verify the webhook and return the challenge', () => {
@@ -59,7 +39,12 @@ describe('WhatsappWebhookController', () => {
         send: vi.fn(),
       } as unknown as Response
 
-      controller.verifyWebhook('subscribe', 'challenge_str_123', 'verify-token-123', mockResponse)
+      controller.verifyWebhook(
+        'subscribe',
+        'challenge_str_123',
+        'verify-token-123',
+        mockResponse,
+      )
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK)
       expect(mockResponse.type).toHaveBeenCalledWith('text/plain')
@@ -74,7 +59,12 @@ describe('WhatsappWebhookController', () => {
       } as unknown as Response
 
       expect(() =>
-        controller.verifyWebhook('subscribe', 'challenge_str_123', 'wrong-token', mockResponse),
+        controller.verifyWebhook(
+          'subscribe',
+          'challenge_str_123',
+          'wrong-token',
+          mockResponse,
+        ),
       ).toThrow(ForbiddenException)
     })
   })
@@ -85,7 +75,9 @@ describe('WhatsappWebhookController', () => {
       const payloadString = JSON.stringify(payload)
       const rawBody = Buffer.from(payloadString)
 
-      const expectedHash = createHmac('sha256', 'secret-456').update(rawBody).digest('hex')
+      const expectedHash = createHmac('sha256', 'secret-456')
+        .update(rawBody)
+        .digest('hex')
       const signature = `sha256=${expectedHash}`
 
       const mockRequest = {
@@ -99,14 +91,6 @@ describe('WhatsappWebhookController', () => {
       const result = await controller.handleWebhook(mockRequest)
 
       expect(result).toEqual({ status: 'success' })
-      expect(mockInsert).toHaveBeenCalled()
-      expect(mockValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          provedor: 'whatsapp',
-          payload,
-          status: 'sucesso',
-        }),
-      )
       expect(mockInngestSend).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'whatsapp/event.received',
@@ -115,7 +99,6 @@ describe('WhatsappWebhookController', () => {
       )
     })
 
-
     it('should throw ForbiddenException if x-hub-signature-256 header is missing', async () => {
       const mockRequest = {
         headers: {},
@@ -123,7 +106,9 @@ describe('WhatsappWebhookController', () => {
         body: {},
       } as unknown as Request
 
-      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(ForbiddenException)
+      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(
+        ForbiddenException,
+      )
     })
 
     it('should throw ForbiddenException if signature does not match', async () => {
@@ -136,7 +121,9 @@ describe('WhatsappWebhookController', () => {
         body: {},
       } as unknown as Request
 
-      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(ForbiddenException)
+      await expect(controller.handleWebhook(mockRequest)).rejects.toThrow(
+        ForbiddenException,
+      )
     })
   })
 })

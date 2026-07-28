@@ -8,7 +8,7 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { rawBody: true })
 
   const openApiConfig = new DocumentBuilder()
     .setTitle('HMS REST API')

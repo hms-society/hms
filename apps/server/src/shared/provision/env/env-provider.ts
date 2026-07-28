@@ -9,6 +9,10 @@ export const envSchema = z.object({
   HMS_WEB_APP_URL: z.url(),
   SUPABASE_URL: z.url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  WHATSAPP_API_TOKEN: z.string().default(''),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().default(''),
+  WHATSAPP_APP_SECRET: z.string().default(''),
 })
 
 type Env = z.infer<typeof envSchema>
