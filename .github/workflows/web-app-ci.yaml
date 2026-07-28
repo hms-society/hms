@@ -22,6 +22,10 @@ jobs:
   checks:
     name: Web app checks
     runs-on: ubuntu-latest
+    env:
+      VITE_HMS_SERVER_APP_URL: http://localhost:3333
+      VITE_SUPABASE_URL: http://localhost:8000
+      VITE_SUPABASE_KEY: test-anon-key
 
     steps:
       - name: Checkout

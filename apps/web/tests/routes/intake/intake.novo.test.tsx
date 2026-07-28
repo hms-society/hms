@@ -5,6 +5,8 @@ import { test } from '../../fixtures/auth-fixture'
 import { ROUTES } from '../../../src/constants/routes'
 
 const BACKEND_URL = 'http://hms-api.test'
+const LEGAL_AREA_ID = '47dfd634-75e9-41e4-a47e-05114f923bd0'
+const LEGAL_TOPIC_ID = '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d'
 const CLIENT_ID = '09ee728b-80f6-4234-899c-ca40c75c841f'
 
 async function openNewIntake(page: Page) {
@@ -56,6 +58,25 @@ async function mockNextResponse(
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route(`${BACKEND_URL}/legal-catalog/areas`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: LEGAL_AREA_ID, name: 'Trabalhista' }]),
+    })
+  })
+
+  await page.route(
+    `${BACKEND_URL}/legal-catalog/areas/${LEGAL_AREA_ID}/topics`,
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: LEGAL_TOPIC_ID, name: 'Verbas rescisórias' }]),
+      })
+    },
+  )
+
   await page.route('**/clients/lookup', async (route) => {
     await route.fulfill({
       status: 200,

@@ -21,8 +21,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm exec vite dev --port 3100',
+    command: 'pnpm exec vite dev --host 127.0.0.1 --port 3100',
     url: WEB_APP_URL,
+    timeout: 120_000,
     reuseExistingServer: !process.env.CI,
     env: {
       VITE_HMS_SERVER_APP_URL: 'http://hms-api.test',
