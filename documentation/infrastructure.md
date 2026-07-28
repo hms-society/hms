@@ -106,6 +106,52 @@ Meta Cloud API webhook
 * **Meta Cloud API:** Official WhatsApp integration used only for automatic messages and receiving documents.
 * **Meta Webhooks:** Deliver incoming messages, documents, and delivery-status updates to NestJS.
 
+#### Local Testing & Tunneling (Webhooks)
+
+To receive webhooks on your local NestJS instance during development, configure a secure public HTTPS endpoint using a tunnel (e.g. `ngrok`):
+
+1. **Environment Variables:** Set the following keys in your backend `.env` (`apps/server/.env`):
+   - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`: A custom string of your choice (e.g., `vibecoding`).
+   - `WHATSAPP_APP_SECRET`: The App Secret obtained from the Meta App Dashboard (used to verify event signatures).
+2. **Expose Server:** Start ngrok forwarding to the NestJS port (`3333`):
+   ```bash
+   ngrok http --url=your-subdomain.ngrok-free.dev 3333
+   ```
+3. **Configure Meta Dashboard:** In the Meta App Dashboard under **WhatsApp > Configuration**, set the Callback URL to `https://your-subdomain.ngrok-free.dev/integrations/whatsapp/webhook` and enter your verify token. Then, subscribe to the `messages` event field under **Webhook fields**.
+
+#### Webhook Lifecycle Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Usuário (WhatsApp)
+    participant Meta as Meta Cloud API
+    participant Ngrok as Ngrok Tunnel
+    participant Nest as NestJS Server (Port 3333)
+
+    Note over Meta, Nest: Webhook Validation (GET)
+    Meta->>Ngrok: GET /integrations/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=vibecoding&hub.challenge=123
+    Ngrok->>Nest: GET /integrations/whatsapp/webhook
+    Note over Nest: Validates if hub.verify_token matches WHATSAPP_WEBHOOK_VERIFY_TOKEN
+    Nest-->>Ngrok: 200 OK (body: challenge)
+    Ngrok-->>Meta: 200 OK (body: challenge)
+
+    Note over Meta, Nest: Event Delivery (POST)
+    User->>Meta: Sends message / document
+    Meta->>Ngrok: POST /integrations/whatsapp/webhook (X-Hub-Signature-256: sha256=...)
+    Ngrok->>Nest: POST /integrations/whatsapp/webhook
+    Note over Nest: Computes HMAC-SHA256(rawBody, WHATSAPP_APP_SECRET)
+    Note over Nest: Safely compares signatures (timingSafeEqual)
+    alt Valid Signature
+        Nest-->>Ngrok: 200 OK (status: success)
+        Ngrok-->>Meta: 200 OK
+    else Invalid Signature
+        Nest-->>Ngrok: 403 Forbidden
+        Ngrok-->>Meta: 403 Forbidden
+    end
+```
+
+
 ### Back-end Tests
 
 * **Vitest:** Unit tests for services, business rules, schemas, and helpers.
