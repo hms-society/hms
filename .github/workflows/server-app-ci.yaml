@@ -29,7 +29,7 @@ jobs:
       HMS_WEB_APP_URL: http://localhost:3000
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       SUPABASE_URL: http://localhost:8000
-      SUPABASE_SERVICE_ROLE_KEY: test-service-role-key
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.test-signature
       WHATSAPP_API_TOKEN: test-whatsapp-api-token
       WHATSAPP_PHONE_NUMBER_ID: test-phone-number-id
       WHATSAPP_WEBHOOK_VERIFY_TOKEN: test-verify-token
