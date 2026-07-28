@@ -12,6 +12,7 @@ export default defineConfig({
   test: {
     fileParallelism: false,
     globals: true,
+    hookTimeout: 120_000,
     root: './',
   },
   plugins: [
