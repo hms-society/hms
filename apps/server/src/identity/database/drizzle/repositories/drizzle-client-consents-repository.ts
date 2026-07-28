@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import type {
   ClientConsent,
   ClientConsentCreation,
@@ -18,6 +18,7 @@ export class DrizzleClientConsentsRepository
 {
   constructor(
     drizzle: DrizzleClient,
+    @Inject(DrizzleClientConsentMapper)
     private readonly consentMapper: DrizzleClientConsentMapper,
   ) {
     super(drizzle)

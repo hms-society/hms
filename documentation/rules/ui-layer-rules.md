@@ -55,28 +55,44 @@ non-React hooks, types, constants, and utilities remain in `.ts` files.
 
 ## UI implementation conventions
 
-### Define functions with function notation
+### Shared code conventions
 
-Functions in the UI layer use function notation:
+Apply [`code-conventions-rules.md`](code-conventions-rules.md) for function
+declarations, naming, handler prefixes, and the order of values and functions in
+hook/controller destructuring. The UI-specific rules below refine those shared
+conventions where necessary.
+
+### Action hooks
+
+Hooks that encapsulate an application action use the
+`use<Name>Action` naming pattern and are declared as exported arrow functions:
 
 ```ts
-function formatClientName(client: Client): string {
-  return client.type === 'natural' ? client.name : client.legalName
+export const useForgotPasswordAction = () => {
+  const { requestPasswordReset } = useAuthContext()
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: (email: string) => requestPasswordReset(email),
+  })
+
+  return {
+    error,
+    forgotPassword: mutate,
+    isPending,
+  }
 }
 ```
 
-React component definitions are the only exception and may use the established
-component form:
+Action hooks should follow this structure:
 
-```tsx
-export const ClientCard = ({ client }: ClientCardProps) => {
-  return <div>{client.name}</div>
-}
-```
+1. obtain dependencies from application contexts or providers;
+2. configure the underlying mutation/query and destructure its status values;
+3. expose the operation through a domain-specific name instead of leaking a
+   generic `mutate` function;
+4. return the operation together with its `error` and loading/status values.
 
-Use function notation for helpers, hooks, event handlers, service utilities, and
-other UI functions. Do not define those functions as arrow functions. When a
-callback needs to be extracted or named, define it with `function` as well.
+The action hook owns request orchestration and lifecycle callbacks. Page or
+widget hooks consume the action hook and own local form state, UI state, and
+interaction handlers.
 
 ### Mirror widget structure for nested components
 
@@ -126,24 +142,6 @@ The hook must remain the single owner of the widget's behavior. Nested widgets
 apply the same rule in their own hooks and must not reach into a parent's local
 state except through explicit props or callbacks.
 
-### Use uppercase names for module-level constants
-
-Every constant declared outside a React function uses an uppercase name in
-`SCREAMING_SNAKE_CASE`, including labels, maps, regular expressions, defaults,
-and configuration objects:
-
-```ts
-const CONSENT_LABELS = {
-  data_processing: 'Tratamento de dados',
-} as const
-
-const CPF_PATTERN = /^\d{11}$/
-```
-
-Constants scoped inside a React function may use a local name when their lifetime
-and meaning are limited to that render. Types and functions are not constants and
-follow their own naming rules.
-
 ### Use shared HTTP status constants
 
 Web UI code must use `HTTP_STATUS_CODE` from
@@ -162,15 +160,6 @@ This applies to every status-code branch, including `notFound`, `conflict`, and
 `unprocessableEntity`. Keep transport-to-domain mapping in the REST adapter or
 owning widget hook as appropriate, but always use the shared constant for the
 comparison.
-
-### Prefix user-interaction handlers with `handle`
-
-Functions that handle user events or UI interactions use the `handle` prefix and
-describe the event or action, such as `handleSubmit`, `handleClose`,
-`handleSearch`, or `handleConsentChange`. This naming applies to handlers defined
-in widget hooks and handlers passed to component props. Avoid ambiguous names such
-as `submit`, `close`, `search`, or `onClick` for implementation functions; reserve
-`on*` names for callback props and external contracts.
 
 ## Widgets expose widget-specific prop types
 
@@ -252,6 +241,36 @@ must reuse `ROUTES` rather than duplicate path literals.
 values. Configuration such as sidebar items stores a `RouteName`, allowing the
 consumer to resolve the canonical path through `ROUTES[item.route]`.
 
+`ROUTES` must describe the route tree that actually exists in the web app. Remove
+stale paths instead of keeping placeholders for future screens. When a route is
+renamed, update the route file, route constants, sidebar configuration, and
+navigation consumers together.
+
+## Route protection uses one middleware
+
+Protected routes use the shared middleware from:
+
+```text
+apps/web/src/middlewares/require-auth-middleware.ts
+```
+
+Attach it through `beforeLoad: requireAuthMiddleware`. Do not create a separate
+`requireAuth` helper for individual routes or duplicate Supabase session checks
+inside route files. The middleware must consult the provisioned auth provider,
+redirect unauthenticated users to `ROUTES.login`, and return the authenticated
+session in the before-load result.
+
+Authentication is a route concern, not a widget concern. Widgets may still use
+the shared auth context to render and perform actions after the route is loaded.
+
+## Imperative navigation uses the application hook
+
+Components and application hooks must use
+`apps/web/src/ui/shared/hooks/use-navigation.ts` for imperative navigation. The
+hook maps a typed `RouteName` to the TanStack Router path through `ROUTES`.
+Import `useNavigate` directly only inside this wrapper or in infrastructure code
+that is not a UI interaction. Declarative internal links use `Anchor`.
+
 ## Sidebar configuration is profile-driven
 
 Sidebar entries belong in `apps/web/src/constants/sidebar-items.ts`, not inside
@@ -299,6 +318,37 @@ Do not create transparent generic wrappers such as an HMS-wide `useQuery` that
 merely forwards options. Prefer domain-specific hooks such as `useIntakesQuery`,
 where query keys, service calls, response handling, and domain naming can remain
 consistent.
+
+Query hooks must also hide TanStack Query's generic result names from their
+consumers. Destructure and rename `data`, `error`, and loading state inside the
+owning hook, then return names that describe the domain value and operation:
+
+```ts
+export const useLegalAreasQuery = () => {
+  const { legalCatalogService } = useRestContext()
+  const {
+    data: legalAreas = [],
+    error: legalAreasError,
+    isLoading: isLoadingLegalAreas,
+  } = useQuery({
+    queryKey: ['legal-catalog', 'areas'],
+    queryFn: async () => {
+      const response = await legalCatalogService.listLegalAreas()
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+  })
+
+  return { legalAreas, legalAreasError, isLoadingLegalAreas }
+}
+```
+
+The consuming widget hook should use the semantic result directly rather than
+repeating aliases such as `data: legalAreas` or `error: legalAreasError`. A query
+that depends on a selected identifier must expose the dependency in its query
+key and disable the request until that identifier is available.
 
 The same rule applies to realtime APIs. A Supabase realtime subscription may be
 encapsulated by a domain-specific hook that owns subscribe, unsubscribe, event
@@ -360,6 +410,29 @@ export type RestContextValue = {
 }
 ```
 
+The application auth context is a shared composition boundary and belongs at:
+
+```text
+apps/web/src/ui/shared/contexts/auth-context/
+```
+
+Keep its provider hook, consumer hook, and value type colocated there. Identity
+widgets consume `useAuthContext`; they do not own or recreate the context.
+
+The auth context must delegate authentication operations to the concrete provider
+from `apps/web/src/provision/auth/supabase/`. It may own React state,
+subscription lifecycle, and the value exposed to consumers, but it must not call
+`createClient` or access `supabaseClient.auth` directly.
+
+There is one application sidebar:
+
+```text
+apps/web/src/ui/shared/widgets/layouts/app-layout/sidebar/
+```
+
+Do not create feature-specific duplicate sidebars. Sidebar actions, including
+sign-out, belong to that widget and consume shared application contexts.
+
 The provider hook owns dependency construction, state, effects, and derived
 values needed to assemble the context. It returns the complete context value and
 must not contain business rules. Keep the provider component declarative; it only
@@ -399,11 +472,12 @@ change.
 The web REST layer lives outside `ui`, under `apps/web/src/rest`, and is composed
 at the UI application boundary.
 
-Transport and module services use function factories that return objects. Do not
-implement them as classes. Returned operations use method shorthand:
+Transport and module services use the shared PascalCase factory convention and
+return objects. Do not implement them as classes. Returned operations use method
+shorthand:
 
 ```ts
-export function IntakeService(restClient: RestClient): IntakeRestService {
+export const IntakeService = (restClient: RestClient): IntakeRestService => {
   return {
     getIntake(intakeId) {
       return restClient.get<Intake>(`/intakes/${intakeId}`)

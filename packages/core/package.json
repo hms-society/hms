@@ -34,6 +34,8 @@
     "./intake/interfaces": "./src/intake/interfaces/index.ts",
     "./intake/use-cases": "./src/intake/use-cases/index.ts",
     "./legal-catalog/domain/entities": "./src/legal-catalog/domain/entities/index.ts",
+    "./legal-catalog/interfaces": "./src/legal-catalog/interfaces/index.ts",
+    "./legal-catalog/use-cases": "./src/legal-catalog/use-cases/index.ts",
     "./scheduling/domain/entities": "./src/scheduling/domain/entities/index.ts",
     "./scheduling/domain/errors": "./src/scheduling/domain/errors/index.ts",
     "./scheduling/domain/events": "./src/scheduling/domain/events/index.ts",

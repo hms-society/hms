@@ -1,6 +1,6 @@
 import type { INestApplication, Type } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
-import { Test, type TestingModule } from '@nestjs/testing'
+import { Test, type TestingModule, type TestingModuleBuilder } from '@nestjs/testing'
 
 import { DatabaseFixture } from '@/shared/database/fixtures/database-fixture'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
@@ -14,12 +14,16 @@ export class RestFixture {
     private readonly databaseFixture: DatabaseFixture,
   ) {}
 
-  static async register(metadata: TestingModuleMetadata) {
+  static async register(
+    metadata: TestingModuleMetadata,
+    configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+  ) {
     const databaseFixture = await DatabaseFixture.register()
     let app: INestApplication | undefined
 
     try {
-      const moduleRef = await Test.createTestingModule(metadata).compile()
+      const builder = Test.createTestingModule(metadata)
+      const moduleRef = await (configure?.(builder) ?? builder).compile()
       app = moduleRef.createNestApplication()
       // biome-ignore lint/correctness/useHookAtTopLevel: Nest global filter registration is not a React hook.
       app.useGlobalFilters(new GlobalErrorHandler(app.get(HttpAdapterHost)))

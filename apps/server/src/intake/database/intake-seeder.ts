@@ -11,7 +11,15 @@ export class IntakeSeeder {
     private readonly intakesRepository: IntakesRepository,
   ) {}
 
-  seed(intakes: IntakeCreation[]) {
-    this.intakesRepository.addMany(intakes)
+  seed(intakes: IntakeCreation[] = []) {
+    return this.intakesRepository.addMany(intakes)
+  }
+
+  clear() {
+    return this.intakesRepository.removeAll()
+  }
+
+  run() {
+    return this.seed()
   }
 }

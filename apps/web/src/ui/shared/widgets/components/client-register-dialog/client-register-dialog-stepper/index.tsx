@@ -1,5 +1,4 @@
 import { cn } from '@/ui/shadcn/utils'
-import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import type { ClientRegisterDialogState } from '../use-client-register-dialog'
 import { useClientRegisterDialogStepper } from './use-client-register-dialog-stepper'
@@ -11,29 +10,33 @@ export type ClientRegisterDialogStepperProps = {
 export const ClientRegisterDialogStepper = ({
   state,
 }: ClientRegisterDialogStepperProps) => {
-  const { steps } = useClientRegisterDialogStepper(state)
+  const { currentStep, currentStepNumber, steps, stepsCount } =
+    useClientRegisterDialogStepper(state)
 
   return (
-    <nav aria-label='Etapas do cadastro' className='overflow-x-auto pb-1'>
-      <ol className='flex min-w-max items-center gap-2 font-sans text-xs text-muted-foreground'>
+    <nav aria-label='Etapas do cadastro' className='mt-2 font-sans'>
+      <div className='mb-2 flex items-center justify-between gap-4 text-xs'>
+        <span className='font-semibold text-foreground'>
+          Etapa {currentStepNumber} de {stepsCount}
+        </span>
+        <span className='truncate text-muted-foreground'>{currentStep.label}</span>
+      </div>
+      <ol className='grid grid-cols-5 gap-1.5'>
         {steps.map(function renderStep(step) {
           return (
-            <li key={step.key} className='flex items-center gap-2'>
+            <li key={step.key} aria-current={step.isCurrent ? 'step' : undefined}>
               <span
-                aria-current={step.isCurrent ? 'step' : undefined}
+                aria-hidden='true'
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full border px-2.5 py-1.5',
-                  step.isCurrent && 'border-primary bg-primary text-primary-foreground',
-                  step.isCompleted && 'border-primary/40 text-primary',
+                  'block h-1.5 rounded-full bg-muted',
+                  (step.isCurrent || step.isCompleted) && 'bg-primary',
                 )}
-              >
-                <Icon name={step.isCompleted ? 'check' : 'circle'} />
-                <span>{step.label}</span>
-                {step.isCurrent && <span className='sr-only'>(atual)</span>}
+              />
+              <span className='sr-only'>
+                {step.label}
+                {step.isCurrent ? ' (atual)' : ''}
+                {step.isCompleted ? ' (concluída)' : ''}
               </span>
-              {step.hasSeparator && (
-                <Icon name='arrow-right' className='size-3 text-muted-foreground/60' />
-              )}
             </li>
           )
         })}

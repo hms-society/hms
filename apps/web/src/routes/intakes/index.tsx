@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { ROUTES } from '@/constants/routes'
-import { IntakesPage } from '@/ui/intake/widgets/pages/intakes'
+import { IntakesPage } from '@/ui/intake/widgets/pages/intakes-page'
 
-export const Route = createFileRoute(`${ROUTES.intakes}/`)({
+export const Route = createFileRoute('/intakes/')({
   component: IntakesPage,
 })

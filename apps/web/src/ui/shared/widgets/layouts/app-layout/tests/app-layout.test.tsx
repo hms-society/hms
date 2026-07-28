@@ -6,11 +6,13 @@ import { CollaboratorProfile } from '@hms/core/identity/domain/structures'
 import { ROUTES } from '@/constants/routes'
 import { SIDEBAR_ITEMS } from '@/constants/sidebar-items'
 import { AppLayout } from '../index'
+import { useSignOutAction } from '../sidebar/use-sign-out-action'
 import { useAppLayout } from '../use-app-layout'
 import type { AnchorProps } from '../../../components/anchor'
 
-const { anchorOnClickMock } = vi.hoisted(() => ({
+const { anchorOnClickMock, signOutMock } = vi.hoisted(() => ({
   anchorOnClickMock: vi.fn(),
+  signOutMock: vi.fn(),
 }))
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
@@ -28,11 +30,16 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   ),
 }))
 
+vi.mock('../sidebar/use-sign-out-action', () => ({
+  useSignOutAction: vi.fn(),
+}))
+
 vi.mock('../use-app-layout', () => ({
   useAppLayout: vi.fn(),
 }))
 
 const useAppLayoutMock = vi.mocked(useAppLayout)
+const useSignOutMock = vi.mocked(useSignOutAction)
 
 describe('AppLayout', () => {
   const handleSidebarToggle = vi.fn()
@@ -42,6 +49,11 @@ describe('AppLayout', () => {
   beforeEach(() => {
     handleSidebarToggle.mockReset()
     anchorOnClickMock.mockReset()
+    signOutMock.mockReset()
+    useSignOutMock.mockReturnValue({
+      mutate: signOutMock,
+      isPending: false,
+    } as unknown as ReturnType<typeof useSignOutAction>)
     useAppLayoutMock.mockReturnValue({
       pathname: ROUTES.intakes,
       isSidebarCollapsed: false,

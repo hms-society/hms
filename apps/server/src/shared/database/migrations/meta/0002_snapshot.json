@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "id": "26faadf2-aa4e-4a34-b37d-eee9ed87ca34",
   "prevId": "10a353c3-3f8c-44ff-bace-8b0d337adc0b",
   "version": "7",
@@ -7,15 +6,6 @@
   "tables": {
     "public.intakes": {
       "name": "intakes",
-=======
-  "id": "08055d5f-01c0-4341-bb6b-9e6d668548cf",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "public.parametro_sistema": {
-      "name": "parametro_sistema",
->>>>>>> develop
       "schema": "",
       "columns": {
         "id": {
@@ -25,7 +15,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-<<<<<<< HEAD
         "sequence_number": {
           "name": "sequence_number",
           "type": "serial",
@@ -92,27 +81,10 @@
         },
         "demand_notes": {
           "name": "demand_notes",
-=======
-        "chave": {
-          "name": "chave",
-          "type": "varchar(150)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "valor_json": {
-          "name": "valor_json",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "descricao": {
-          "name": "descricao",
->>>>>>> develop
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-<<<<<<< HEAD
         "status": {
           "name": "status",
           "type": "intake_status",
@@ -155,30 +127,12 @@
         },
         "updated_at": {
           "name": "updated_at",
-=======
-        "categoria": {
-          "name": "categoria",
-          "type": "varchar(80)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "editavel_em_runtime": {
-          "name": "editavel_em_runtime",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "atualizado_em": {
-          "name": "atualizado_em",
->>>>>>> develop
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         }
       },
-<<<<<<< HEAD
       "indexes": {
         "intakes_sequence_number_uidx": {
           "name": "intakes_sequence_number_uidx",
@@ -365,12 +319,8 @@
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
           "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -571,23 +521,12 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-      "values": [
-        "whatsapp",
-        "email",
-        "phone",
-        "in_person"
-      ]
+      "values": ["whatsapp", "email", "phone", "in_person"]
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-      "values": [
-        "direct",
-        "referral",
-        "website",
-        "social_media",
-        "other"
-      ]
+      "values": ["direct", "referral", "website", "social_media", "other"]
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -605,19 +544,12 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-      "values": [
-        "normal",
-        "high",
-        "urgent"
-      ]
+      "values": ["normal", "high", "urgent"]
     },
     "public.client_type": {
       "name": "client_type",
       "schema": "public",
-      "values": [
-        "natural",
-        "legal"
-      ]
+      "values": ["natural", "legal"]
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -632,30 +564,9 @@
     "public.tax_id_type": {
       "name": "tax_id_type",
       "schema": "public",
-      "values": [
-        "cpf",
-        "cnpj"
-      ]
+      "values": ["cpf", "cnpj"]
     }
   },
-=======
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "parametro_sistema_chave_unique": {
-          "name": "parametro_sistema_chave_unique",
-          "nullsNotDistinct": false,
-          "columns": ["chave"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {},
->>>>>>> develop
   "schemas": {},
   "sequences": {},
   "roles": {},
@@ -666,8 +577,4 @@
     "schemas": {},
     "tables": {}
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> develop

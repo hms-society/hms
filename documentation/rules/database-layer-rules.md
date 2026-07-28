@@ -119,11 +119,17 @@ Use the following write vocabulary:
 - `add(input)` inserts one record.
 - `addMany(inputs)` inserts several records.
 - `replace(id, changes, ...)` updates an existing record.
+- `remove(id)` removes one record.
+- `removeAll()` removes all records, only for explicit maintenance or seed
+  workflows that require a full reset.
 
 Do not use the ambiguous method name `save` for inserts or updates. Use explicit
 parameter names such as `intakeId`, `changes`, and `expectedVersion` instead of
 generic names such as `id`, `data`, or `value` when context would otherwise be
 lost.
+
+Do not use `delete` or `deleteAll` as repository method names; use `remove` or
+`removeAll` instead.
 
 Creation and update inputs are domain types, not database types. A repository
 must not accept a Drizzle model or expose query-builder details in its contract.
@@ -192,6 +198,27 @@ by another module.
 
 Register and export the seeder from the module's database module so application
 bootstrap and integration tests can reuse the same entry point.
+
+Seeders must also follow these rules:
+
+- expose `clear()` for destructive reset and `run()` for data insertion;
+- implement `clear()` through the injected repository contracts and their
+  `removeAll()` methods; never import `DrizzleClient`, `DrizzleDB`, models,
+  query builders, or SQL into a seeder or the seed orchestration entrypoint;
+- implement `run()` through repository methods, normally `addMany()`, and pass
+  domain creation records rather than persistence rows;
+- use domain fakers for generated development records. Fixed credentials or
+  other values required to make a development account usable may remain
+  explicit;
+- keep cleanup ownership inside module seeders. When foreign keys require an
+  order, the central orchestrator must call the module `clear()` methods in
+  dependency order before calling their `run()` methods;
+- centralize execution in `apps/server/src/shared/database/seed.ts`. It must
+  verify `HMS_SERVER_APP_MODE === 'dev'` before any cleanup or insertion, abort
+  in every other mode, and close the Nest application context in a `finally`
+  block;
+- expose the operation through the server's `db:seed` command. Running seeds
+  must never be part of application bootstrap or production deployment.
 
 ## Server imports use aliases
 

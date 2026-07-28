@@ -10,7 +10,9 @@ import { ClientsController } from '@/identity/decorators'
 import { ClientDetailsResponseDto } from '@/identity/rest/dtos/client-details-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
-class RegisterClientControllerRequestBody extends createZodDto(registerClientRequestSchema) {}
+class RegisterClientControllerRequestBody extends createZodDto(
+  registerClientRequestSchema,
+) {}
 
 @ClientsController()
 export class RegisterClientController {

@@ -508,7 +508,7 @@ Not applicable.
 - **Alternative:** keep field values in component state or validate each step through
   ad hoc handlers.
 - **Evidence:** the approved frontend stack requires React Hook Form and Zod for forms;
-  `apps/web/src/ui/intake/widgets/pages/new-intake/index.tsx` provides the current
+  `apps/web/src/ui/intake/widgets/pages/new-intake-page/index.tsx` provides the current
   `useForm` + `zodResolver` + `FieldError` pattern.
 - **Trade-off:** the multi-step form must validate selected field groups while sharing a
   single typed draft, but it avoids diverging state and duplicated validation rules.
@@ -562,7 +562,7 @@ References:
   message translates to `Aligns Client, consents, and the Intake boundary`;
 - `design/hms.pen` — frames `ajF8M`, `hfLfd`, `u7yjFZ`, `yO9zK`, `CmxME`, and `v30SR`;
 - `documentation/modules.md` and `documentation/design.md`;
-- `apps/web/src/ui/intake/widgets/pages/new-intake/index.tsx` — current React Hook Form,
+- `apps/web/src/ui/intake/widgets/pages/new-intake-page/index.tsx` — current React Hook Form,
   Zod, and `Field` reference;
 - `apps/web/src/ui/shadcn/dialog.tsx` and `checkbox.tsx`;
 - `packages/core/src/identity/` and `apps/server/src/identity/` — current contracts and

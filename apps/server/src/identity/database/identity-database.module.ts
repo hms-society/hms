@@ -5,10 +5,12 @@ import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositorie
 import {
   DrizzleClientConsentMapper,
   DrizzleClientMapper,
+  DrizzleUserMapper,
 } from '@/identity/database/drizzle/mappers'
 import {
   DrizzleClientConsentsRepository,
   DrizzleClientsRepository,
+  DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 
@@ -17,8 +19,10 @@ import { IdentitySeeder } from '@/identity/database/identity-seeder'
   providers: [
     DrizzleClientMapper,
     DrizzleClientConsentMapper,
+    DrizzleUserMapper,
     DrizzleClientsRepository,
     DrizzleClientConsentsRepository,
+    DrizzleUsersRepository,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -27,11 +31,16 @@ import { IdentitySeeder } from '@/identity/database/identity-seeder'
       provide: IDENTITY_REPOSITORIES.clientConsents,
       useExisting: DrizzleClientConsentsRepository,
     },
+    {
+      provide: IDENTITY_REPOSITORIES.users,
+      useExisting: DrizzleUsersRepository,
+    },
     IdentitySeeder,
   ],
   exports: [
     IDENTITY_REPOSITORIES.clients,
     IDENTITY_REPOSITORIES.clientConsents,
+    IDENTITY_REPOSITORIES.users,
     IdentitySeeder,
   ],
 })

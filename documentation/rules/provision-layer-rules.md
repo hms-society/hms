@@ -1,11 +1,12 @@
 ---
-description: Rules for shared infrastructure providers used by server modules.
+description: Rules for infrastructure providers and external adapters used by server and web modules.
 ---
 
 # Provision Layer Rules
 
 These rules apply to shared providers under
-`apps/server/src/shared/provision`.
+`apps/server/src/shared/provision` and external adapters under
+`apps/web/src/provision`.
 
 ## Shared providers have one server implementation
 
@@ -73,6 +74,39 @@ rules or orchestrate module use cases.
 
 Environment access must be wrapped by the shared environment provider instead of
 reading `process.env` throughout feature modules.
+
+## Web integrations use a client plus a factory
+
+Web integrations with third-party services use this shape:
+
+```text
+apps/web/src/provision/<concern>/<provider>/
+├── <provider>-client.ts
+└── <provider>-provider.ts
+```
+
+The client file creates the configured singleton client. The provider file is a
+factory that receives an optional client dependency, defaulting to that singleton,
+and returns the application or core contract implemented by the integration:
+
+```ts
+export const SupabaseAuthProvider = (
+  client: SupabaseClient = supabaseClient,
+): AuthProvider => {
+  return {
+    // adapter operations
+  }
+}
+```
+
+This keeps the provider replaceable in tests and keeps third-party calls out of
+contexts, widgets, route middleware, and services. A web Supabase auth provider
+may use only browser-safe public configuration; service-role credentials belong
+to server infrastructure and must never be bundled into the web app.
+
+The provider should map third-party responses to core structures and preserve the
+core provider contract. The shared auth context consumes the factory result and
+owns only React state and subscription lifecycle.
 
 ## Provider tests use mocks, not fakers
 

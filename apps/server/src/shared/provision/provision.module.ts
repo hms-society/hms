@@ -8,6 +8,7 @@ import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '../../.env'],
       validate: (config) => envSchema.parse(config),
     }),
   ],

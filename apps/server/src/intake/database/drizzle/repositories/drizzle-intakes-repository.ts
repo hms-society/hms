@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import type {
   IntakesRepository,
   UpdateIntakesRepositoryParams,
@@ -17,7 +17,7 @@ export class DrizzleIntakesRepository
 {
   constructor(
     drizzle: DrizzleClient,
-    private readonly intakeMapper: DrizzleIntakeMapper,
+    @Inject(DrizzleIntakeMapper) private readonly intakeMapper: DrizzleIntakeMapper,
   ) {
     super(drizzle)
   }
@@ -48,6 +48,10 @@ export class DrizzleIntakesRepository
       .returning()
 
     return createdIntakes.map((intake) => this.intakeMapper.toDomain(intake))
+  }
+
+  async removeAll(): Promise<void> {
+    await this.database.delete(intakeModel)
   }
 
   async findById(intakeId: string): ReturnType<IntakesRepository['findById']> {

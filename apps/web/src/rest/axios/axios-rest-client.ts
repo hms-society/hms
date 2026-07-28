@@ -1,10 +1,46 @@
 import axios from 'axios'
 
+import type { AuthSession } from '@hms/core/identity/domain/structures'
+import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import { request } from './utils'
 
-export const AxiosRestClient = (baseUrl?: string): RestClient => {
+export const AxiosRestClient = (
+  baseUrl?: string,
+  getSession?: () => Promise<AuthSession | null>,
+  onUnauthorized?: () => Promise<void>,
+): RestClient => {
   const client = axios.create({ baseURL: baseUrl })
+
+  if (getSession) {
+    client.interceptors.request.use(async (config) => {
+      const session = await getSession()
+
+      if (session) {
+        config.headers.Authorization = `Bearer ${session.accessToken}`
+      } else {
+        config.headers.Authorization = undefined
+      }
+
+      return config
+    })
+  }
+
+  if (onUnauthorized) {
+    client.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (
+          axios.isAxiosError(error) &&
+          error.response?.status === HTTP_STATUS_CODE.unauthorized
+        ) {
+          await onUnauthorized()
+        }
+
+        return Promise.reject(error)
+      },
+    )
+  }
 
   return {
     get<ResponseBody>(url: string) {

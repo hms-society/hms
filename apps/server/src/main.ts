@@ -4,6 +4,7 @@ import { apiReference } from '@scalar/nestjs-api-reference'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from '@/app.module'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
 
 async function bootstrap() {
@@ -29,8 +30,10 @@ async function bootstrap() {
   // biome-ignore lint/correctness/useHookAtTopLevel: Nest global filter registration is not a React hook.
   app.useGlobalFilters(new GlobalErrorHandler(app.get(HttpAdapterHost)))
 
+  const envProvider = app.get(EnvProvider)
+
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: envProvider.get('HMS_WEB_APP_URL'),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   })

@@ -19,15 +19,18 @@ export const STEP_INDEX: Record<ClientRegisterDialogState, number> = {
 
 export function useClientRegisterDialogStepper(state: ClientRegisterDialogState) {
   const currentIndex = STEP_INDEX[state]
+  const currentStep = STEPS[currentIndex]
 
   return {
+    currentStep,
+    currentStepNumber: currentIndex + 1,
     steps: STEPS.map(function getStepState(step, index) {
       return {
         ...step,
         isCurrent: index === currentIndex,
         isCompleted: index < currentIndex,
-        hasSeparator: index < STEPS.length - 1,
       }
     }),
+    stepsCount: STEPS.length,
   }
 }

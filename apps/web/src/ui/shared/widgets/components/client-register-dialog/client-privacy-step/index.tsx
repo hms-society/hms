@@ -21,7 +21,7 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
       <div>
         <h2 className='font-serif text-2xl'>Privacidade e consentimentos</h2>
         <p className='mt-1 text-sm text-muted-foreground'>
-          Estas escolhas são independentes e nenhuma delas impede a criação do Client.
+          Estas escolhas são independentes e nenhuma delas impede a criação do cliente.
         </p>
       </div>
       <div className='rounded-lg border border-brand-accent/30 bg-accent/50 p-4 text-sm'>
@@ -69,7 +69,7 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
           {controller.asyncError}
         </p>
       )}
-      <div className='flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end'>
+      <div className='-mx-5 -mb-5 flex flex-col-reverse gap-2 border-t border-border bg-muted/20 px-5 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'

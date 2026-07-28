@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import type { Client, ClientCreation } from '@hms/core/identity/domain/entities'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { and, desc, eq } from 'drizzle-orm'
@@ -15,7 +15,7 @@ export class DrizzleClientsRepository
 {
   constructor(
     drizzle: DrizzleClient,
-    private readonly clientMapper: DrizzleClientMapper,
+    @Inject(DrizzleClientMapper) private readonly clientMapper: DrizzleClientMapper,
   ) {
     super(drizzle)
   }
@@ -39,6 +39,10 @@ export class DrizzleClientsRepository
       .returning()
 
     return createdClients.map((client) => this.clientMapper.toDomain(client))
+  }
+
+  async removeAll(): Promise<void> {
+    await this.database.delete(clientModel)
   }
 
   async findById(clientId: string): Promise<Client | undefined> {

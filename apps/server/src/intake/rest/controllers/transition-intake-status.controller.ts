@@ -1,4 +1,12 @@
-import { Body, HttpStatus, Inject, Param, Patch, UsePipes } from '@nestjs/common'
+import {
+  Body,
+  HttpStatus,
+  Inject,
+  Param,
+  Patch,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { TransitionIntakeStatusUseCase } from '@hms/core/intake/use-cases'
@@ -9,12 +17,14 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakesController } from '@/intake/decorators'
 import { IntakeResponseDto } from '@/intake/rest/dtos/intake-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { AuthGuard } from '@/identity/guards'
 
 class TransitionIntakeStatusControllerRequestBody extends createZodDto(
   transitionIntakeStatusSchema,
 ) {}
 
 @IntakesController()
+@UseGuards(AuthGuard)
 export class TransitionIntakeStatusController {
   private readonly useCase: TransitionIntakeStatusUseCase
 

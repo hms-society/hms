@@ -35,7 +35,7 @@ export const ClientSearchResultStep = ({
             {controller.asyncError}
           </p>
         )}
-        <div className='flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end'>
+        <div className='-mx-5 -mb-5 flex flex-col-reverse gap-2 border-t border-border bg-muted/20 px-5 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
           <Button
             type='button'
             variant='outline'
@@ -78,7 +78,7 @@ export const ClientSearchResultStep = ({
           {controller.asyncError}
         </p>
       )}
-      <div className='flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end'>
+      <div className='-mx-5 -mb-5 flex flex-col-reverse gap-2 border-t border-border bg-muted/20 px-5 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'

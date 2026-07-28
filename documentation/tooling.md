@@ -63,7 +63,8 @@ dependencies build before their dependents.
   - `apps/server` — `moduleResolution: nodenext`, decorators (NestJS).
   - `packages/core` — `bundler` resolution; exposes subpaths via `exports` and
     internal `#identity/*` / `#shared/*` via `imports`.
-- Type-check without emitting: `pnpm check-types` (or per workspace).
+- Type-check without emitting: `pnpm check-types` at the monorepo level, or the
+  workspace-specific `check:types` script for `apps/web` and `apps/server`.
 
 ## Linting & formatting — BiomeJS
 
@@ -79,9 +80,19 @@ Single tool for both lint and format, configured in `biome.json` (schema `2.5.1`
   ```
   pnpm format          # format the whole repo (write)
   pnpm check           # lint + format + safe fixes (write)
-  pnpm --filter web lint
-  pnpm --filter web check
+  pnpm --filter web check:code
+  pnpm --filter web check:types
+  pnpm --filter server check:code
+  pnpm --filter server check:types
   ```
+
+The application workspaces keep code and type validation as separate checks:
+
+- `check:code` runs Biome checks;
+- `check:types` runs TypeScript without emitting files.
+
+The shared packages currently retain their package-specific `lint` and
+`check-types` scripts.
 
 ## Testing — Vitest
 
@@ -145,9 +156,9 @@ The `production` and `staging` GitHub environments must provide these secrets:
   directly.
 - **Drizzle ORM (drizzle-kit)** for the database:
   ```
-  pnpm --filter server db:generate   # generate migrations from schema
-  pnpm --filter server db:migrate    # apply migrations
-  pnpm --filter server db:push       # push schema directly (dev)
+  pnpm --filter server db:migration:generate  # generate migrations from schema
+  pnpm --filter server db:migration:apply     # apply migrations
+  pnpm --filter server db:schema:push        # push schema directly (dev)
   pnpm --filter server db:studio     # open Drizzle Studio
   ```
 
@@ -169,6 +180,8 @@ Bring it up with `docker compose up`.
 
 - `install-skills.sh` — installs the agent skills used in this repo
   (`frontend-design`, `caveman-commit`) via `npx skills add`.
+- `generate-supabase-keys.sh` — generates local `ANON_KEY` and
+  `SUPABASE_SERVICE_ROLE_KEY` values signed with the `JWT_SECRET` from `.env`.
 - `sync-commands.sh` — turns the prompts in `documentation/prompts/*.md` into
   slash-command files for editors/agents (`.cursor/commands`, `.claude/commands`,
   `.opencode/commands`), symlinking when possible and copying as a fallback.

@@ -255,23 +255,12 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-      "values": [
-        "whatsapp",
-        "email",
-        "phone",
-        "in_person"
-      ]
+      "values": ["whatsapp", "email", "phone", "in_person"]
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-      "values": [
-        "direct",
-        "referral",
-        "website",
-        "social_media",
-        "other"
-      ]
+      "values": ["direct", "referral", "website", "social_media", "other"]
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -288,11 +277,7 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-      "values": [
-        "normal",
-        "high",
-        "urgent"
-      ]
+      "values": ["normal", "high", "urgent"]
     }
   },
   "schemas": {},

@@ -9,6 +9,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 const services = {
   intakeService: {},
   identityService: {},
+  legalCatalogService: {},
 }
 
 vi.mock('../use-rest-context-provider', () => ({
@@ -19,7 +20,9 @@ describe('RestContext', () => {
   it('throws when the consumer is outside the provider', () => {
     expect(() =>
       renderHook(() => useRestContext(), {
-        wrapper: ({ children }) => <RestContext.Provider value={null}>{children}</RestContext.Provider>,
+        wrapper: ({ children }) => (
+          <RestContext.Provider value={null}>{children}</RestContext.Provider>
+        ),
       }),
     ).toThrow(AppError)
   })

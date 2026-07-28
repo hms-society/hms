@@ -1,13 +1,15 @@
-import { Body, HttpStatus, Inject, Post, UsePipes } from '@nestjs/common'
+import { Body, HttpStatus, Inject, Post, UseGuards, UsePipes } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
+import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
+
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { RegisterIntakeUseCase } from '@hms/core/intake/use-cases'
 import { registerIntakeSchema } from '@hms/validation/intake'
-import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakesController } from '@/intake/decorators'
+import { AuthGuard } from '@/identity/guards'
 import { IntakeResponseDto } from '@/intake/rest/dtos/intake-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
@@ -16,6 +18,7 @@ type RequestBody = Parameters<RegisterIntakeUseCase['execute']>[0]
 class RegisterIntakeControllerRequestBody extends createZodDto(registerIntakeSchema) {}
 
 @IntakesController()
+@UseGuards(AuthGuard)
 export class RegisterIntakesController {
   private readonly useCase: RegisterIntakeUseCase
 

@@ -9,10 +9,11 @@
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
+    "test:integration": "playwright test",
+    "test:integration:ui": "playwright test --ui",
     "format": "biome format",
-    "lint": "biome lint src",
-    "check": "biome check src",
-    "check-types": "tsc --noEmit"
+    "check:code": "biome check src",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
@@ -50,6 +51,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "^1.132.0",

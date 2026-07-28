@@ -1,10 +1,13 @@
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/ui/shadcn/dialog'
+import { Button } from '@/ui/shadcn/button'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import { ClientIdentificationStep } from './client-identification-step'
 import { ClientPrivacyStep } from './client-privacy-step'
@@ -26,20 +29,35 @@ export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent
         ref={controller.dialogContentRef}
-        className='flex max-h-[min(90vh,48rem)] max-w-3xl flex-col gap-0 overflow-hidden p-0 font-sans'
+        showCloseButton={false}
+        className='flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 font-sans sm:max-h-[min(90dvh,48rem)] sm:max-w-3xl'
         aria-describedby='client-register-dialog-description'
       >
-        <DialogHeader className='shrink-0 border-b px-6 py-5 pr-12'>
-          <DialogTitle className='font-serif text-2xl'>
+        <DialogClose asChild>
+          <Button
+            type='button'
+            variant='ghost'
+            size='icon'
+            className='absolute top-3 right-3 z-10 rounded-full sm:top-4 sm:right-4'
+            aria-label='Fechar diálogo'
+          >
+            <Icon name='x' />
+          </Button>
+        </DialogClose>
+        <DialogHeader className='shrink-0 border-b border-border bg-muted/20 px-5 py-5 pr-16 sm:px-8 sm:py-6 sm:pr-20'>
+          <DialogTitle className='text-balance font-serif text-2xl leading-tight'>
             Identificar ou cadastrar cliente
           </DialogTitle>
-          <DialogDescription id='client-register-dialog-description'>
-            Consulte um cadastro existente ou registre um novo Client com os dados
+          <DialogDescription
+            id='client-register-dialog-description'
+            className='max-w-2xl leading-5'
+          >
+            Consulte um cadastro existente ou registre um novo cliente com os dados
             necessários.
           </DialogDescription>
           <ClientRegisterDialogStepper state={controller.state} />
         </DialogHeader>
-        <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6'>
+        <div className='min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-8 sm:py-7'>
           {controller.state === 'identification' && (
             <ClientIdentificationStep controller={controller} />
           )}

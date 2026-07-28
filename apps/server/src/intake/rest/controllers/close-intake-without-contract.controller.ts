@@ -1,4 +1,12 @@
-import { Body, HttpStatus, Inject, Param, Post, UsePipes } from '@nestjs/common'
+import {
+  Body,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import { CloseIntakeWithoutContractUseCase } from '@hms/core/intake/use-cases'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
@@ -8,6 +16,7 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakesController } from '@/intake/decorators'
+import { AuthGuard } from '@/identity/guards'
 import { IntakeResponseDto } from '@/intake/rest/dtos/intake-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
@@ -16,6 +25,7 @@ class CloseIntakeWithoutContractControllerRequestBody extends createZodDto(
 ) {}
 
 @IntakesController()
+@UseGuards(AuthGuard)
 export class CloseIntakeWithoutContractController {
   private readonly useCase: CloseIntakeWithoutContractUseCase
 

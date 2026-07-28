@@ -1,14 +1,16 @@
-import { Get, HttpStatus, Inject, Param } from '@nestjs/common'
+import { Get, HttpStatus, Inject, Param, UseGuards } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { GetIntakeUseCase } from '@hms/core/intake/use-cases'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakesController } from '@/intake/decorators'
+import { AuthGuard } from '@/identity/guards'
 import { IntakeResponseDto } from '@/intake/rest/dtos/intake-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 @IntakesController()
+@UseGuards(AuthGuard)
 export class GetIntakesController {
   private readonly useCase: GetIntakeUseCase
 

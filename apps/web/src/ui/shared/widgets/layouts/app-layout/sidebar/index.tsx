@@ -2,6 +2,7 @@ import { ROUTES } from '@/constants/routes'
 import type { SidebarItem } from '@/constants/sidebar-items'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useSignOutAction } from './use-sign-out-action'
 
 export type SidebarProps = {
   isCollapsed: boolean
@@ -16,6 +17,7 @@ export const Sidebar = ({
   sidebarItems,
   onToggle,
 }: SidebarProps) => {
+  const { mutate: signOut, isPending } = useSignOutAction()
   const normalizedActivePath = activePath.replace(/\/$/, '') || '/'
 
   return (
@@ -102,6 +104,8 @@ export const Sidebar = ({
         <div className='w-full h-px bg-white/10 mb-4' />
         <button
           type='button'
+          onClick={() => signOut()}
+          disabled={isPending}
           className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
             isCollapsed ? 'justify-center px-0' : 'px-3'
           }`}

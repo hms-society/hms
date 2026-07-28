@@ -128,6 +128,8 @@ export function useClientRegisterDialog({
   )
 
   async function handleLookup(event?: BaseSyntheticEvent) {
+    event?.stopPropagation()
+
     await identificationForm.handleSubmit(async function handleLookupSubmit(criteria) {
       if (requestLock) return
 
@@ -312,7 +314,7 @@ export function useClientRegisterDialog({
 
       if (pending.length > 0) {
         setAsyncError(
-          `O Client foi criado, mas há consentimentos pendentes: ${pending
+          `O cliente foi criado, mas há consentimentos pendentes: ${pending
             .map(function getConsentLabel(type) {
               return CONSENT_LABELS[type]
             })
@@ -328,6 +330,8 @@ export function useClientRegisterDialog({
   )
 
   async function handleSubmitRegistration(event?: BaseSyntheticEvent) {
+    event?.stopPropagation()
+
     await registrationForm.handleSubmit(async function handleRegistrationSubmit(values) {
       if (requestLock) return
 
@@ -367,7 +371,7 @@ export function useClientRegisterDialog({
       }
 
       setAsyncError(
-        'Não foi possível criar o Client. Verifique os dados e tente novamente.',
+        'Não foi possível criar o cliente. Verifique os dados e tente novamente.',
       )
     })(event)
   }

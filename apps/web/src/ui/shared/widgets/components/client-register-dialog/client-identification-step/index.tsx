@@ -19,7 +19,8 @@ export const ClientIdentificationStep = ({
   return (
     <form onSubmit={controller.handleLookup} className='flex flex-col gap-6'>
       <div>
-        <p className='font-sans text-sm text-muted-foreground'>
+        <h2 className='font-serif text-xl'>Consulte o cadastro</h2>
+        <p className='mt-1 max-w-2xl font-sans text-sm leading-5 text-muted-foreground'>
           Consulte se a pessoa já está cadastrada antes de iniciar um novo registro.
         </p>
       </div>
@@ -68,11 +69,11 @@ export const ClientIdentificationStep = ({
           {controller.asyncError}
         </p>
       )}
-      <p aria-live='polite' className='text-sm text-muted-foreground'>
+      <span aria-live='polite' className='sr-only'>
         {busy ? 'Buscando cadastro…' : ''}
-      </p>
+      </span>
 
-      <div className='flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end'>
+      <div className='-mx-5 -mb-5 flex flex-col-reverse gap-2 border-t border-border bg-muted/20 px-5 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'

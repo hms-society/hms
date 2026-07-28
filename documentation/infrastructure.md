@@ -158,6 +158,10 @@ docker-compose.yml
 
 ├── supabase-storage
 
+├── supabase-meta / postgres-meta
+
+├── supabase-studio
+
 ├── supabase-rest
 
 ├── supabase-kong

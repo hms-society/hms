@@ -56,6 +56,8 @@ describe('ClientRegisterDialog', () => {
     ).toBeTruthy()
     expect(screen.getByLabelText('CPF ou CNPJ')).toBeTruthy()
     expect(screen.getByRole('navigation', { name: 'Etapas do cadastro' })).toBeTruthy()
+    expect(screen.getByText('Etapa 1 de 5')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Fechar diálogo' })).toBeTruthy()
     expect(
       screen
         .getByRole('navigation', { name: 'Etapas do cadastro' })
@@ -75,12 +77,15 @@ describe('ClientRegisterDialog', () => {
     identityService.lookupClient.mockResolvedValue(
       new RestResponse({ body: clientDetails }),
     )
+    const outerSubmit = vi.fn()
     render(
-      <ClientRegisterDialog
-        open
-        onOpenChange={onOpenChange}
-        onClientSelected={onClientSelected}
-      />,
+      <form onSubmit={outerSubmit}>
+        <ClientRegisterDialog
+          open
+          onOpenChange={onOpenChange}
+          onClientSelected={onClientSelected}
+        />
+      </form>,
     )
 
     fireEvent.change(screen.getByLabelText('CPF ou CNPJ'), {
@@ -90,6 +95,7 @@ describe('ClientRegisterDialog', () => {
 
     expect(await screen.findByText('Cliente já cadastrado')).toBeTruthy()
     expect(screen.getByText('Maria Aparecida')).toBeTruthy()
+    expect(outerSubmit).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Abrir cadastro' }))
 
     expect(onClientSelected).toHaveBeenCalledWith(clientDetails)

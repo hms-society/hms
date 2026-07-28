@@ -6,6 +6,41 @@ HMS is a pnpm + Turborepo monorepo:
 - `apps/server` — NestJS backend
 - `packages/core` — shared domain (entities, errors, events, constants) consumed by both apps
 
+## MCP availability and usage
+
+The development environment provides the following MCP servers. Use them when
+the task matches their purpose; do not invoke them for repository work that can
+be completed reliably from the local source and tooling alone.
+
+### Playwright (`mcp__playwright__*`)
+
+Use Playwright to validate browser behavior in `apps/web`, especially after UI,
+route, authentication, form, or REST integration changes. It can navigate the
+running application, inspect the accessibility snapshot, interact with fields
+and controls, capture console messages, and inspect network requests and
+responses. Prefer snapshots, console output, and network inspection for
+diagnosis; use screenshots when visual confirmation is needed. Start the web
+application and any required backend services before using it.
+
+### Context7 (`mcp__context7__*`)
+
+Use Context7 when implementation depends on current documentation for a library,
+framework, SDK, API, CLI, or cloud service. Resolve the library identifier with
+`mcp__context7__resolve_library_id` and then query the relevant documentation
+with `mcp__context7__query_docs`. Prefer Context7 over relying on memory or
+outdated examples, and do not use it as a substitute for reading repository
+source or local project rules.
+
+### Pencil (`mcp__pencil__*`)
+
+Use Pencil for `.pen` files, Pencil node inspection or editing, design-system
+work, and design-to-code or visual validation tasks tied to Pencil designs.
+Before any other Pencil operation, call
+`mcp__pencil__get_editor_state` with `include_schema: true` when the current
+editor schema is not already known. `.pen` files are encrypted: never read or
+search them with shell commands, `Read`, or `Grep`; use only the Pencil MCP
+tools. Use the Pencil design skill when the task involves Pencil workflows.
+
 ## Required reading
 
 Before writing or changing code, read the documents below. They are the source of
@@ -95,6 +130,12 @@ and helper scripts.
   applicable documents.
 - If code and documentation disagree, treat the documentation as intent and surface
   the discrepancy instead of silently following the code.
+- When dynamic context discovery identifies a recurring path, layer, or behavior
+  that is not mapped by `documentation/rules/rules.md`, ask the user whether the
+  convention should be codified as a rule under `documentation/rules/` before
+  silently treating it as repository policy. If the gap is specific to a single
+  change, do not block implementation unnecessarily; report the unmapped scope
+  and the user's decision in the final summary.
 - When creating a git worktree or branch checkout from this repository, copy only
   ignored or otherwise untracked local env files (for example `.env`,
   `.env.development`, `.env.testing`, `.env.production`). Do **not** copy tracked

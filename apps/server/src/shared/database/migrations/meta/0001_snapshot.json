@@ -319,12 +319,8 @@
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
           "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -525,23 +521,12 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-      "values": [
-        "whatsapp",
-        "email",
-        "phone",
-        "in_person"
-      ]
+      "values": ["whatsapp", "email", "phone", "in_person"]
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-      "values": [
-        "direct",
-        "referral",
-        "website",
-        "social_media",
-        "other"
-      ]
+      "values": ["direct", "referral", "website", "social_media", "other"]
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -559,19 +544,12 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-      "values": [
-        "normal",
-        "high",
-        "urgent"
-      ]
+      "values": ["normal", "high", "urgent"]
     },
     "public.client_type": {
       "name": "client_type",
       "schema": "public",
-      "values": [
-        "natural",
-        "legal"
-      ]
+      "values": ["natural", "legal"]
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -586,10 +564,7 @@
     "public.tax_id_type": {
       "name": "tax_id_type",
       "schema": "public",
-      "values": [
-        "cpf",
-        "cnpj"
-      ]
+      "values": ["cpf", "cnpj"]
     }
   },
   "schemas": {},

@@ -101,8 +101,8 @@ observável e os testes previstos também precisam estar atendidos.
   transporte sem uma decisão documentada e aprovada.
 - Migrations Drizzle ficam em `apps/server/src/shared/database/migrations/`.
   Após mudanças de schema, gere a migration com
-  `pnpm --filter server db:generate`, revise o SQL e aplique-a apenas no
-  ambiente local apropriado com `pnpm --filter server db:migrate`.
+  `pnpm --filter server db:migration:generate`, revise o SQL e aplique-a apenas
+  no ambiente local apropriado com `pnpm --filter server db:migration:apply`.
 - Não edite `apps/web/src/routeTree.gen.ts` manualmente. Depois de criar ou
   remover uma rota, execute `pnpm --filter web generate-routes`.
 - UI deve usar os tokens e padrões de `documentation/design.md`, incluindo

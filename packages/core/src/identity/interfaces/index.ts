@@ -1,3 +1,5 @@
+export * from './auth-provider'
 export * from './client-consents-repository'
 export * from './clients-repository'
 export * from './identity-service'
+export * from './users-repository'

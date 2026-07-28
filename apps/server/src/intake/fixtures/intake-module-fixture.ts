@@ -6,6 +6,8 @@ import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
+import { IdentityModule } from '@/identity/identity.module'
+import { AuthGuard } from '@/identity/guards'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
@@ -21,11 +23,14 @@ export class IntakeModuleFixture {
   }
 
   static async register(controller: Type<unknown>) {
-    const restFixture = await RestFixture.register({
-      imports: [IntakeDatabaseModule],
-      controllers: [controller],
-      providers: [DatetimeProvider],
-    })
+    const restFixture = await RestFixture.register(
+      {
+        imports: [IdentityModule, IntakeDatabaseModule],
+        controllers: [controller],
+        providers: [DatetimeProvider],
+      },
+      (builder) => builder.overrideGuard(AuthGuard).useValue({ canActivate: () => true }),
+    )
 
     return new IntakeModuleFixture(
       restFixture,

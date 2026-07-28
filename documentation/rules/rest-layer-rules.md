@@ -89,6 +89,34 @@ Do not declare aliases such as `RequestParams`, `RequestQuery`, or
 `ControllerRequest` merely to rename primitive route inputs. Type those parameters
 directly unless a framework DTO is required for validation or transformation.
 
+## Controllers document HTTP responses
+
+Every controller action must declare its successful response and each expected
+error response with NestJS Swagger `@ApiResponse` decorators. Use `HttpStatus`
+constants instead of numeric literals, write a concise description, and provide
+the response DTO through `type` whenever the response has a JSON body. Standard
+REST errors use `ErrorResponseDto`:
+
+```ts
+@ApiResponse({
+  status: HttpStatus.OK,
+  description: 'The client was returned successfully.',
+  type: ClientDetailsResponseDto,
+})
+@ApiResponse({
+  status: HttpStatus.NOT_FOUND,
+  description: 'The client was not found.',
+  type: ErrorResponseDto,
+})
+handle() {
+  // ...
+}
+```
+
+Keep the documented statuses synchronized with the global REST error handler and
+the use case behavior. Responses without a body may omit `type`; all other
+successful and error responses must describe their payload explicitly.
+
 ## Routes reflect resource ownership
 
 Use nested route segments when listing a resource by its owner. For client
@@ -179,6 +207,20 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
 The service method names and signatures must remain aligned with the core
 interface. Changes to a controller route or payload require updating the core
 contract and its application adapter together.
+
+## Web REST transport owns session headers
+
+`apps/web/src/rest/axios/axios-rest-client.ts` is the web transport boundary. It
+may receive a session accessor from the shared REST context and inject the current
+Bearer token into requests. Web module services must not import Supabase, read the
+auth context, or assemble authorization headers themselves.
+
+The REST context belongs under `apps/web/src/ui/shared/contexts/rest-context/` and
+may depend on the shared auth context to provide the session accessor. Keep auth
+state and Supabase operations in the auth provider/context boundary.
+
+When a service factory is added or changed, verify its HTTP mapping at the
+appropriate REST boundary with the existing workspace validation commands.
 
 ## Server imports use aliases
 

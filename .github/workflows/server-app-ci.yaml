@@ -41,11 +41,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm --filter server lint
+      - name: Code checks
+        run: pnpm --filter server check:code
 
-      - name: Check types
-        run: pnpm --filter server check-types
+      - name: Type checks
+        run: pnpm --filter server check:types
 
       - name: Test
         run: pnpm --filter server test
