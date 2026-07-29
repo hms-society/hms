@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import { Avatar as AvatarPrimitive } from 'radix-ui'
 
-import { cn } from '#/ui/shadcn/utils/index.ts'
+import { cn } from '@/ui/shadcn/utils/index.ts'
 
 function Avatar({
   className,

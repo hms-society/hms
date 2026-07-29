@@ -82,17 +82,34 @@ multiple modules. An `interfaces/index.ts` barrel must only re-export declaratio
 Implementations and infrastructure-specific details must remain outside
 `packages/core`.
 
+Identity authentication follows the same separation:
+
+- `AuthProvider` is the behavioral contract and belongs in
+  `packages/core/src/identity/interfaces`;
+- `AuthCredentials`, `AuthSession`, `AuthStateChange`,
+  `AuthStateChangeListener`, and `AuthUser` are shared data structures and belong
+  in `packages/core/src/identity/domain/structures`;
+- Supabase implementations belong in an application provision layer, not in the
+  core package.
+
+Consumers must import auth data structures from the structures barrel and the
+provider contract from the interfaces barrel. Do not place provider-specific
+types or Supabase imports in `packages/core`.
+
 ## Only entities have identity
 
-Only declarations inside an `entities` directory may own an identity field named
-`id`. A structure represents a value, state, configuration, or relationship without
-an identity of its own and therefore must never declare an `id` property.
+Only declarations inside an `entities` directory may own a local domain identity
+field named `id`. A structure represents a value, state, configuration, or
+relationship without an identity of its own and therefore normally must not
+declare an `id` property.
 
 If a domain concept needs an `id` so it can be referenced, edited, removed, or tracked
 independently, model it as an entity instead of a structure. Do not remove a necessary
 identity merely to keep the declaration in `structures`.
 
 Structures may contain explicitly named references to entities, such as
-`consultationId` or `legalAreaId`. These fields identify another entity and do not
-give the structure an identity of its own. A bare `id` field is prohibited in every
-file under a `structures` directory.
+`consultationId` or `legalAreaId`. External identity projections are the narrow
+exception: `AuthUser` may expose the provider's subject `id` because it represents
+an external authentication identity, not a core aggregate entity. No other
+structure should add a bare `id` field without documenting the same external
+identity rationale.

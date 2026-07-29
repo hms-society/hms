@@ -11854,20 +11854,19 @@
       "fill": "#F5F2ED",
       "children": [
         {
-          "id": "z9TSo",
+          "id": "e7t5t",
           "type": "ref",
-          "ref": "u7g6V",
-          "name": "Sidebar",
+          "ref": "JHgr1",
+          "name": "Sidebar Atendente",
+          "width": 200,
           "height": "fill_container",
+          "x": 0,
+          "y": 0,
           "descendants": {
-            "Vw2gZ": {
+            "iXRxS": {
               "fill": "$sidebar-primary"
             },
-            "Vw2gZ/U1bnRK": {
-              "fill": "$sidebar-primary-foreground"
-            },
-            "Vw2gZ/f2LJ2": {
-              "fill": "$sidebar-primary-foreground",
+            "iXRxS/f2LJ2": {
               "fontWeight": "600"
             }
           }
@@ -16606,16 +16605,6 @@
                   "gap": 7,
                   "children": [
                     {
-                      "type": "text",
-                      "id": "k4CPfK",
-                      "name": "Rótulo Responsável",
-                      "fill": "$foreground",
-                      "content": "Consequência",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 11,
-                      "fontWeight": "700"
-                    },
-                    {
                       "type": "frame",
                       "id": "H346VA",
                       "name": "Seleção Responsável",
@@ -16676,183 +16665,6 @@
                           "icon": "chevron-down",
                           "library": "lucide",
                           "fill": "$muted-foreground"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "GlpWO",
-                  "name": "Origem e canal",
-                  "width": "fill_container",
-                  "gap": 12,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "Dm7Z8",
-                      "name": "Campo Origem",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 7,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "TugDT",
-                          "name": "Rótulo Origem",
-                          "fill": "$foreground",
-                          "content": "Status final",
-                          "fontFamily": "$font-sans",
-                          "fontSize": 11,
-                          "fontWeight": "700"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "G4PkIb",
-                          "name": "Seleção Origem",
-                          "width": "fill_container",
-                          "height": 38,
-                          "fill": "$card",
-                          "cornerRadius": 6,
-                          "stroke": "$border",
-                          "strokeWidth": 1,
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "k0wsH1",
-                              "name": "Valor Origem",
-                              "width": "fill_container",
-                              "gap": 8,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "icon",
-                                  "id": "n3EfBP",
-                                  "name": "Ícone Origem",
-                                  "width": 14,
-                                  "height": 14,
-                                  "icon": "circle-minus",
-                                  "library": "lucide",
-                                  "fill": "$destructive"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "PvB4k",
-                                  "name": "Placeholder Origem",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "Encerrado sem contratação",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 12,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "icon",
-                              "id": "wXWxK",
-                              "x": 188,
-                              "y": 12,
-                              "name": "Abrir Origem",
-                              "enabled": false,
-                              "width": 14,
-                              "height": 14,
-                              "icon": "chevron-down",
-                              "library": "lucide",
-                              "fill": "$muted-foreground"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "u4Ou1",
-                      "name": "Campo Canal",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 7,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "YOktm",
-                          "name": "Rótulo Canal",
-                          "fill": "$foreground",
-                          "content": "Cliente",
-                          "fontFamily": "$font-sans",
-                          "fontSize": 11,
-                          "fontWeight": "700"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "S4rst",
-                          "name": "Seleção Canal",
-                          "width": "fill_container",
-                          "height": 38,
-                          "fill": "$card",
-                          "cornerRadius": 6,
-                          "stroke": "$border",
-                          "strokeWidth": 1,
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "dJYLa",
-                              "name": "Valor Canal",
-                              "width": "fill_container",
-                              "gap": 8,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "icon",
-                                  "id": "Fk5s6",
-                                  "name": "Ícone Canal",
-                                  "width": 14,
-                                  "height": 14,
-                                  "icon": "user-round",
-                                  "library": "lucide",
-                                  "fill": "$primary"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "RtLOu",
-                                  "name": "Placeholder Canal",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "Cadastro preservado",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 12,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "icon",
-                              "id": "d9t1cS",
-                              "x": 188,
-                              "y": 12,
-                              "name": "Abrir Canal",
-                              "enabled": false,
-                              "width": 14,
-                              "height": 14,
-                              "icon": "chevron-down",
-                              "library": "lucide",
-                              "fill": "$muted-foreground"
-                            }
-                          ]
                         }
                       ]
                     }
@@ -18259,7 +18071,7 @@
                                   "id": "uf15R",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -18884,7 +18696,7 @@
                                       "id": "Z1nBL",
                                       "name": "Status Text",
                                       "fill": "#636058",
-                                      "content": "Consultando base de Pessoas...",
+                                      "content": "Consultando base de clientes...",
                                       "fontFamily": "Plus Jakarta Sans",
                                       "fontSize": 12,
                                       "fontWeight": "normal"
@@ -18954,7 +18766,7 @@
                                   "id": "oObHx",
                                   "name": "Buscar Label",
                                   "fill": "#FFFFFF",
-                                  "content": "Buscar pessoa",
+                                  "content": "Buscar cliente",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 13,
                                   "fontWeight": "500"
@@ -19127,7 +18939,7 @@
                                   "id": "o1cdU",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -19137,7 +18949,7 @@
                                   "id": "mY5TH",
                                   "name": "Dialog Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Módulo · Gestão de Pessoas",
+                                  "content": "Módulo · Gestão de Clientes",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -19576,7 +19388,7 @@
                                   "id": "K00pF",
                                   "name": "Alert Text",
                                   "fill": "#7A5C1F",
-                                  "content": "Pessoa já cadastrada no sistema",
+                                  "content": "Cliente já cadastrado no sistema",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 14,
                                   "fontWeight": "500"
@@ -19590,7 +19402,7 @@
                               "fill": "#636058",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "O CPF/CNPJ informado já possui um registro ativo. Não é possível criar um novo cadastro com este documento.",
+                              "content": "O CPF/CNPJ informado já possui um cliente ativo. Não é possível criar um novo cliente com este documento.",
                               "lineHeight": 1.6,
                               "fontFamily": "Plus Jakarta Sans",
                               "fontSize": 12,
@@ -20036,7 +19848,7 @@
                                   "id": "VU8Hy",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -20046,7 +19858,7 @@
                                   "id": "iN1bm",
                                   "name": "Dialog Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Módulo · Gestão de Pessoas",
+                                  "content": "Módulo · Gestão de Clientes",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -20485,7 +20297,7 @@
                                   "id": "B8xMtE",
                                   "name": "Success Text",
                                   "fill": "#1A5C50",
-                                  "content": "Nenhum cadastro encontrado",
+                                  "content": "Nenhum cliente encontrado",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 14,
                                   "fontWeight": "500"
@@ -20499,7 +20311,7 @@
                               "fill": "#636058",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "O CPF/CNPJ e o telefone informados não possuem registro no sistema. Você pode prosseguir com a criação de um novo cadastro.",
+                              "content": "O CPF/CNPJ e o telefone informados não correspondem a nenhum cliente no sistema. Você pode prosseguir com a criação de um novo cliente.",
                               "lineHeight": 1.6,
                               "fontFamily": "Plus Jakarta Sans",
                               "fontSize": 12,
@@ -20629,7 +20441,7 @@
                                   "fill": "#9B9688",
                                   "textGrowth": "fixed-width",
                                   "width": "fill_container",
-                                  "content": "Prossiga para a etapa de Cadastro para informar os dados completos da pessoa.",
+                                  "content": "Prossiga para a etapa de Cadastro para informar os dados completos do cliente.",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 11,
                                   "fontWeight": "normal"
@@ -20891,7 +20703,7 @@
                                   "id": "F6Sni",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -20901,7 +20713,7 @@
                                   "id": "EKQvI",
                                   "name": "Dialog Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Módulo · Gestão de Pessoas",
+                                  "content": "Módulo · Gestão de Clientes",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -21570,7 +21382,7 @@
                                               "id": "RtRN0",
                                               "name": "L",
                                               "fill": "#636058",
-                                              "content": "Tipo de pessoa",
+                                              "content": "Tipo de cliente",
                                               "fontFamily": "Plus Jakarta Sans",
                                               "fontSize": 12,
                                               "fontWeight": "500"
@@ -23546,7 +23358,7 @@
                                   "id": "cYfJY",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -23556,7 +23368,7 @@
                                   "id": "bhgBB",
                                   "name": "Dialog Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Módulo · Gestão de Pessoas",
+                                  "content": "Módulo · Gestão de Clientes",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -23986,7 +23798,7 @@
                                   "id": "SkYl2",
                                   "name": "Form Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Registre os consentimentos obtidos da pessoa para uso de dados e canais de contato.",
+                                  "content": "Registre os consentimentos obtidos do cliente para uso de dados e canais de contato.",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -24649,7 +24461,7 @@
                                   "id": "bzkaz",
                                   "name": "Dialog Title",
                                   "fill": "$foreground",
-                                  "content": "Cadastro de pessoa",
+                                  "content": "Cadastro de cliente",
                                   "fontFamily": "Fraunces",
                                   "fontSize": 20,
                                   "fontWeight": "600"
@@ -24659,7 +24471,7 @@
                                   "id": "loCvP",
                                   "name": "Dialog Subtitle",
                                   "fill": "$muted-foreground",
-                                  "content": "Módulo · Gestão de Pessoas",
+                                  "content": "Módulo · Gestão de Clientes",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 12,
                                   "fontWeight": "normal"
@@ -25079,7 +24891,7 @@
                                   "id": "kA7vW",
                                   "name": "Form Title",
                                   "fill": "#1C2C2A",
-                                  "content": "Revisão do cadastro",
+                                  "content": "Revisão do cliente",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 15,
                                   "fontWeight": "500"
@@ -26065,7 +25877,7 @@
                                   "fill": "#1A5C50",
                                   "textGrowth": "fixed-width",
                                   "width": "fill_container",
-                                  "content": "Ao concluir, o cadastro é criado e vinculado automaticamente ao intake que originou esse atendimento.",
+                                  "content": "Ao concluir, o cliente é criado e vinculado automaticamente ao intake que originou esse atendimento.",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 11,
                                   "fontWeight": "normal"

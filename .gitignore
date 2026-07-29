@@ -10,6 +10,8 @@ node_modules/
 
 # testing
 coverage/
+playwright-report/
+test-results/
 
 # production
 **/build/*
@@ -61,6 +63,9 @@ issue.md
 CLAUDE.md
 GEMINI.md
 AGENTS.local.md
+
+# MCP's
+.playwright-mcp
 
 # env files
 .env

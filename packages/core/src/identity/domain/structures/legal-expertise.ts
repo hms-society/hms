@@ -1,4 +1,4 @@
 export type LegalExpertise = {
-  legalAreaId: string
-  legalTopicIds: [string, ...string[]]
+  readonly legalAreaId: string
+  readonly legalTopicIds: readonly [string, ...string[]]
 }

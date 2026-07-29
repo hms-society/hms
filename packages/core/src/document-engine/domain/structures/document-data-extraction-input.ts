@@ -1,3 +1,3 @@
 export type DocumentDataExtractionInput = {
-  fileIds: string[]
+  readonly fileIds: readonly string[]
 }

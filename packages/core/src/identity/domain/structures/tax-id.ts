@@ -6,6 +6,6 @@ export const TaxIdType = {
 type TaxIdType = (typeof TaxIdType)[keyof typeof TaxIdType]
 
 export type TaxId<TType extends TaxIdType = TaxIdType> = {
-  type: TType
-  value: string
+  readonly type: TType
+  readonly value: string
 }

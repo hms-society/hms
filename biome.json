@@ -70,6 +70,9 @@
     "indentWidth": 2,
     "lineWidth": 90
   },
+  "files": {
+    "includes": ["**", "!**/routeTree.gen.ts"]
+  },
   "css": {
     "parser": {
       "tailwindDirectives": true

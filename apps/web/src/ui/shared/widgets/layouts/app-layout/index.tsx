@@ -1,0 +1,29 @@
+import type { PropsWithChildren } from 'react'
+
+import { useAppLayout } from './use-app-layout'
+import { Sidebar } from './sidebar'
+import { Navbar } from './navbar'
+
+export type AppLayoutProps = PropsWithChildren
+
+export const AppLayout = ({ children }: AppLayoutProps) => {
+  const { isSidebarCollapsed, pathname, sidebarItems, handleSidebarToggle } =
+    useAppLayout()
+
+  return (
+    <div className='flex min-h-screen bg-background text-foreground font-sans'>
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggle={handleSidebarToggle}
+        activePath={pathname}
+        sidebarItems={sidebarItems}
+      />
+
+      <main className='relative flex min-h-screen min-w-0 flex-1 flex-col'>
+        <Navbar />
+
+        <div className='flex-1 px-4 pt-6 pb-8 sm:px-8'>{children}</div>
+      </main>
+    </div>
+  )
+}

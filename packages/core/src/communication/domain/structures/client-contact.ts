@@ -1,8 +1,8 @@
 export type ClientContact = {
-  clientId: string
-  phone: string
-  email?: string
-  whatsappConsentActive: boolean
-  emailConsentActive: boolean
-  updatedAt: Date
+  readonly clientId: string
+  readonly phone: string
+  readonly email?: string
+  readonly whatsappConsentActive: boolean
+  readonly emailConsentActive: boolean
+  readonly updatedAt: Date
 }

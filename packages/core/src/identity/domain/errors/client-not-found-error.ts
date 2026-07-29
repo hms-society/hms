@@ -1,4 +1,4 @@
-import { NotFoundError } from '#shared/domain/errors/not-found-error.ts'
+import { NotFoundError } from '#shared/domain/errors/not-found-error'
 
 export class ClientNotFoundError extends NotFoundError {
   constructor() {

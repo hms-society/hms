@@ -1,25 +1,36 @@
 import type { Address, TaxId } from '../structures'
 
 type ClientBase = {
-  id: string
-  email?: string
-  phone: string
-  address?: Address
-  createdAt: Date
-  updatedAt: Date
+  readonly id: string
+  readonly email?: string
+  readonly phone?: string
+  readonly address?: Address
+  readonly createdAt: Date
+  readonly updatedAt: Date
 }
 
-type NaturalClient = ClientBase & {
-  type: 'natural'
-  name: string
-  taxId: TaxId<'cpf'>
+export type NaturalClient = ClientBase & {
+  readonly type: 'natural'
+  readonly name: string
+  readonly taxId: TaxId<'cpf'>
 }
 
-type LegalClient = ClientBase & {
-  type: 'legal'
-  legalName: string
-  tradeName?: string
-  taxId: TaxId<'cnpj'>
+export type LegalClient = ClientBase & {
+  readonly type: 'legal'
+  readonly legalName: string
+  readonly tradeName?: string
+  readonly taxId: TaxId<'cnpj'>
 }
 
 export type Client = NaturalClient | LegalClient
+
+export type NaturalClientCreation = Omit<NaturalClient, 'createdAt' | 'id' | 'updatedAt'>
+
+export type LegalClientCreation = Omit<LegalClient, 'createdAt' | 'id' | 'updatedAt'>
+
+export type ClientCreation = NaturalClientCreation | LegalClientCreation
+
+export type ClientDetails = {
+  readonly client: Client
+  readonly consents: readonly import('./client-consent').ClientConsent[]
+}

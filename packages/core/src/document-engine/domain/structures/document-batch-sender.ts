@@ -1,15 +1,15 @@
 import type { DocumentBatchChannel } from './document-batch-channel'
 
 type WhatsAppDocumentBatchSender = {
-  channel: typeof DocumentBatchChannel.WhatsApp
-  phone: string
-  externalReference?: string
+  readonly channel: typeof DocumentBatchChannel.WhatsApp
+  readonly phone: string
+  readonly externalReference?: string
 }
 
 type EmailDocumentBatchSender = {
-  channel: typeof DocumentBatchChannel.Email
-  email: string
-  externalReference?: string
+  readonly channel: typeof DocumentBatchChannel.Email
+  readonly email: string
+  readonly externalReference?: string
 }
 
 export type DocumentBatchSender = WhatsAppDocumentBatchSender | EmailDocumentBatchSender

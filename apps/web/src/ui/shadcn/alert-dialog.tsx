@@ -1,8 +1,8 @@
 import type * as React from 'react'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
 
-import { cn } from '#/ui/shadcn/utils/index.ts'
-import { Button } from '#/ui/shadcn/button.tsx'
+import { cn } from '@/ui/shadcn/utils/index.ts'
+import { Button } from '@/ui/shadcn/button.tsx'
 
 function AlertDialog({
   ...props

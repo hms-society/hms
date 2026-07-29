@@ -1,4 +1,4 @@
-import { ConflictError } from '#shared/domain/errors/conflict-error.ts'
+import { ConflictError } from '#shared/domain/errors/conflict-error'
 
 export class ClientConsentAlreadyRevokedError extends ConflictError {
   constructor(consentType: string) {

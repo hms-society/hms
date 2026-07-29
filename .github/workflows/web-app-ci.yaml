@@ -22,6 +22,10 @@ jobs:
   checks:
     name: Web app checks
     runs-on: ubuntu-latest
+    env:
+      VITE_HMS_SERVER_APP_URL: http://localhost:3333
+      VITE_SUPABASE_URL: http://localhost:8000
+      VITE_SUPABASE_KEY: test-anon-key
 
     steps:
       - name: Checkout
@@ -41,14 +45,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm --filter web lint
+      - name: Code checks
+        run: pnpm --filter web check:code
 
-      - name: Check types
-        run: pnpm --filter web check-types
+      - name: Type checks
+        run: pnpm --filter web check:types
 
       - name: Test
         run: pnpm --filter web test
+
+      - name: Install Playwright browser
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Route integration tests
+        run: pnpm --filter web test:integration
 
       - name: Build
         run: pnpm --filter web build

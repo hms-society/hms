@@ -1,7 +1,7 @@
 import { createRootRoute } from '@tanstack/react-router'
 
 import globalStyles from '../ui/shared/styles/global.css?url'
-import { RootLayout } from '#/ui/shared/widgets/layouts/root-layout'
+import { RootLayout } from '@/ui/shared/widgets/layouts/root-layout'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -14,7 +14,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'HMS — Gestão Jurídica',
       },
     ],
     links: [

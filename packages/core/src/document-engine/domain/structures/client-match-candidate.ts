@@ -1,8 +1,8 @@
 export type ClientMatchCandidate = {
-  clientId: string
-  displayName: string
-  taxIdType: 'cpf' | 'cnpj'
-  taxId: string
-  phone?: string
-  email?: string
+  readonly clientId: string
+  readonly displayName: string
+  readonly taxIdType: 'cpf' | 'cnpj'
+  readonly taxId: string
+  readonly phone?: string
+  readonly email?: string
 }

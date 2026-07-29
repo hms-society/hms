@@ -1,16 +1,16 @@
 type ConsultationDocumentPackageContext = {
-  type: 'consultation'
-  consultationId: string
+  readonly type: 'consultation'
+  readonly consultationId: string
 }
 
 type FormalizationDocumentPackageContext = {
-  type: 'formalization'
-  formalizationId: string
+  readonly type: 'formalization'
+  readonly formalizationId: string
 }
 
 type CaseDocumentPackageContext = {
-  type: 'case'
-  caseId: string
+  readonly type: 'case'
+  readonly caseId: string
 }
 
 export type DocumentPackageContext =

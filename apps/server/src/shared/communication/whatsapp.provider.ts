@@ -53,7 +53,9 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Failed to send WhatsApp message: ${response.status} - ${errorText}`)
+      throw new Error(
+        `Failed to send WhatsApp message: ${response.status} - ${errorText}`,
+      )
     }
 
     const responseData = (await response.json()) as {
