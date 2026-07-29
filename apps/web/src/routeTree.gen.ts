@@ -32,6 +32,7 @@ import { Route as ConsultasComunicacaoRouteImport } from './routes/consultas/com
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
+import { Route as ClienteMeusCasosRouteImport } from './routes/cliente/meus-casos'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
@@ -155,6 +156,11 @@ const ClientePrivacidadeRoute = ClientePrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => ClienteRouteRoute,
 } as any)
+const ClienteMeusCasosRoute = ClienteMeusCasosRouteImport.update({
+  id: '/meus-casos',
+  path: '/meus-casos',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
 const ClienteMensagensRoute = ClienteMensagensRouteImport.update({
   id: '/mensagens',
   path: '/mensagens',
@@ -171,14 +177,14 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
-  id: '/meus-casos/',
-  path: '/meus-casos/',
-  getParentRoute: () => ClienteRouteRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClienteMeusCasosRoute,
 } as any)
 const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
-  id: '/meus-casos/$caseId',
-  path: '/meus-casos/$caseId',
-  getParentRoute: () => ClienteRouteRoute,
+  id: '/$caseId',
+  path: '/$caseId',
+  getParentRoute: () => ClienteMeusCasosRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
+  '/cliente/meus-casos': typeof ClienteMeusCasosRouteWithChildren
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
@@ -249,6 +256,7 @@ export interface FileRoutesById {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
+  '/cliente/meus-casos': typeof ClienteMeusCasosRouteWithChildren
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
@@ -281,6 +289,7 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
+    | '/cliente/meus-casos'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
+    | '/cliente/meus-casos'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
@@ -539,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientePrivacidadeRouteImport
       parentRoute: typeof ClienteRouteRoute
     }
+    '/cliente/meus-casos': {
+      id: '/cliente/meus-casos'
+      path: '/meus-casos'
+      fullPath: '/cliente/meus-casos'
+      preLoaderRoute: typeof ClienteMeusCasosRouteImport
+      parentRoute: typeof ClienteRouteRoute
+    }
     '/cliente/mensagens': {
       id: '/cliente/mensagens'
       path: '/mensagens'
@@ -562,17 +579,17 @@ declare module '@tanstack/react-router' {
     }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
-      path: '/meus-casos'
+      path: '/'
       fullPath: '/cliente/meus-casos/'
       preLoaderRoute: typeof ClienteMeusCasosIndexRouteImport
-      parentRoute: typeof ClienteRouteRoute
+      parentRoute: typeof ClienteMeusCasosRoute
     }
     '/cliente/meus-casos/$caseId': {
       id: '/cliente/meus-casos/$caseId'
-      path: '/meus-casos/$caseId'
+      path: '/$caseId'
       fullPath: '/cliente/meus-casos/$caseId'
       preLoaderRoute: typeof ClienteMeusCasosCaseIdRouteImport
-      parentRoute: typeof ClienteRouteRoute
+      parentRoute: typeof ClienteMeusCasosRoute
     }
   }
 }
@@ -602,18 +619,29 @@ const AtendimentoRouteRouteChildren: AtendimentoRouteRouteChildren = {
 const AtendimentoRouteRouteWithChildren =
   AtendimentoRouteRoute._addFileChildren(AtendimentoRouteRouteChildren)
 
-interface ClienteRouteRouteChildren {
-  ClienteMensagensRoute: typeof ClienteMensagensRoute
-  ClientePrivacidadeRoute: typeof ClientePrivacidadeRoute
+interface ClienteMeusCasosRouteChildren {
   ClienteMeusCasosCaseIdRoute: typeof ClienteMeusCasosCaseIdRoute
   ClienteMeusCasosIndexRoute: typeof ClienteMeusCasosIndexRoute
 }
 
-const ClienteRouteRouteChildren: ClienteRouteRouteChildren = {
-  ClienteMensagensRoute: ClienteMensagensRoute,
-  ClientePrivacidadeRoute: ClientePrivacidadeRoute,
+const ClienteMeusCasosRouteChildren: ClienteMeusCasosRouteChildren = {
   ClienteMeusCasosCaseIdRoute: ClienteMeusCasosCaseIdRoute,
   ClienteMeusCasosIndexRoute: ClienteMeusCasosIndexRoute,
+}
+
+const ClienteMeusCasosRouteWithChildren =
+  ClienteMeusCasosRoute._addFileChildren(ClienteMeusCasosRouteChildren)
+
+interface ClienteRouteRouteChildren {
+  ClienteMensagensRoute: typeof ClienteMensagensRoute
+  ClienteMeusCasosRoute: typeof ClienteMeusCasosRouteWithChildren
+  ClientePrivacidadeRoute: typeof ClientePrivacidadeRoute
+}
+
+const ClienteRouteRouteChildren: ClienteRouteRouteChildren = {
+  ClienteMensagensRoute: ClienteMensagensRoute,
+  ClienteMeusCasosRoute: ClienteMeusCasosRouteWithChildren,
+  ClientePrivacidadeRoute: ClientePrivacidadeRoute,
 }
 
 const ClienteRouteRouteWithChildren = ClienteRouteRoute._addFileChildren(
