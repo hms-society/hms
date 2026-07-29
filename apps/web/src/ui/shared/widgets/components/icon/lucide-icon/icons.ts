@@ -104,6 +104,7 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   search: Search,
   shield: Shield,
   send: Send,
+  shield: Shield,
   'shield-check': ShieldCheck,
   'calendar-check': CalendarCheck,
   'calendar-clock': CalendarClock,

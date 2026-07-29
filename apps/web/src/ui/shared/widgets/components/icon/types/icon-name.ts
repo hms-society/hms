@@ -39,6 +39,7 @@ export type IconName =
   | 'search'
   | 'shield'
   | 'send'
+  | 'shield'
   | 'shield-check'
   | 'calendar-check'
   | 'calendar-clock'

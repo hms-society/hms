@@ -27,8 +27,8 @@ const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
 
 const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Meus Casos', route: 'clientMyCases', icon: 'file-text' },
-  { label: 'Mensagens', route: 'clientMessages', icon: 'message-square' },
-  { label: 'Privacidade & LGPD', route: 'clientPrivacy', icon: 'shield-check' },
+  { label: 'Mensagens', route: 'clientMessages', icon: 'message-circle' },
+  { label: 'Privacidade & LGPD', route: 'clientPrivacy', icon: 'shield' },
 ]
 
 export const SIDEBAR_ITEMS: SidebarItems = {
