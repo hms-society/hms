@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ComunicacaoRouteImport } from './routes/comunicacao'
 import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
 import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
@@ -24,11 +23,6 @@ import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/d
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
 
-const ComunicacaoRoute = ComunicacaoRouteImport.update({
-  id: '/comunicacao',
-  path: '/comunicacao',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
   id: '/intakes',
   path: '/intakes',
@@ -100,7 +94,6 @@ export interface FileRoutesByFullPath {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
-  '/comunicacao': typeof ComunicacaoRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
-  '/comunicacao': typeof ComunicacaoRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -132,7 +124,6 @@ export interface FileRoutesById {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
-  '/comunicacao': typeof ComunicacaoRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -150,7 +141,6 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/intakes'
-    | '/comunicacao'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -165,7 +155,6 @@ export interface FileRouteTypes {
     | '/'
     | '/advogado'
     | '/atendimento'
-    | '/comunicacao'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -181,7 +170,6 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/intakes'
-    | '/comunicacao'
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -198,7 +186,6 @@ export interface RootRouteChildren {
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
-  ComunicacaoRoute: typeof ComunicacaoRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -207,13 +194,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/comunicacao': {
-      id: '/comunicacao'
-      path: '/comunicacao'
-      fullPath: '/comunicacao'
-      preLoaderRoute: typeof ComunicacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/intakes': {
       id: '/intakes'
       path: '/intakes'
@@ -352,7 +332,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
-  ComunicacaoRoute: ComunicacaoRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   HomeIndexRoute: HomeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
