@@ -1,4 +1,4 @@
 export type AvailableSlot = {
-  startsAt: Date
-  endsAt: Date
+  readonly startsAt: Date
+  readonly endsAt: Date
 }

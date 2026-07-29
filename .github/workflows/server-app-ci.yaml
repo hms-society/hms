@@ -22,6 +22,18 @@ jobs:
   checks:
     name: Server app checks
     runs-on: ubuntu-latest
+    env:
+      PORT: '3333'
+      HMS_SERVER_APP_PORT: '3333'
+      HMS_SERVER_APP_MODE: dev
+      HMS_WEB_APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      SUPABASE_URL: http://localhost:8000
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.test-signature
+      WHATSAPP_API_TOKEN: test-whatsapp-api-token
+      WHATSAPP_PHONE_NUMBER_ID: test-phone-number-id
+      WHATSAPP_WEBHOOK_VERIFY_TOKEN: test-verify-token
+      WHATSAPP_APP_SECRET: test-app-secret
 
     steps:
       - name: Checkout
@@ -41,11 +53,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm --filter server lint
+      - name: Code checks
+        run: pnpm --filter server check:code
 
-      - name: Check types
-        run: pnpm --filter server check-types
+      - name: Type checks
+        run: pnpm --filter server check:types
 
       - name: Test
         run: pnpm --filter server test

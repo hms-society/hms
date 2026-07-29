@@ -1,9 +1,9 @@
 export type Address = {
-  street: string
-  number: string
-  complement?: string
-  district: string
-  city: string
-  state: string
-  zipCode: string
+  readonly street: string
+  readonly number: string
+  readonly complement?: string
+  readonly district: string
+  readonly city: string
+  readonly state: string
+  readonly zipCode: string
 }

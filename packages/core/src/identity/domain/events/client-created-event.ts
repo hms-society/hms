@@ -2,7 +2,7 @@ import { Event } from '#shared/domain/events/event'
 
 export class ClientCreatedEvent extends Event<{
   clientId: string
-  phone: string
+  phone?: string
   email?: string
   createdAt: Date
 }> {

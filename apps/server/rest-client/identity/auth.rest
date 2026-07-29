@@ -1,0 +1,18 @@
+@url = {{BASE_URL}}/auth
+
+### Sign in
+POST {{url}}/sign-in
+Content-Type: application/json
+
+{
+  "identifier": "atendente@hmsadvogados.com.br",
+  "password": "123456"
+}
+
+### Forgot password
+POST {{url}}/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}

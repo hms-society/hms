@@ -1,21 +1,21 @@
 type SenderPhoneMatchEvidence = {
-  type: 'sender-phone-match'
+  readonly type: 'sender-phone-match'
 }
 
 type SenderEmailMatchEvidence = {
-  type: 'sender-email-match'
+  readonly type: 'sender-email-match'
 }
 
 type TaxIdMatchEvidence = {
-  type: 'tax-id-match'
-  taxIdType: 'cpf' | 'cnpj'
-  maskedTaxId: string
-  matchedFileCount: number
+  readonly type: 'tax-id-match'
+  readonly taxIdType: 'cpf' | 'cnpj'
+  readonly maskedTaxId: string
+  readonly matchedFileCount: number
 }
 
 type ClientNameMatchEvidence = {
-  type: 'client-name-match'
-  matchedFileCount: number
+  readonly type: 'client-name-match'
+  readonly matchedFileCount: number
 }
 
 export type ClientSuggestionEvidence =

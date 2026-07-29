@@ -1,0 +1,5 @@
+export { GetClientController } from '@/identity/rest/controllers/get-client.controller'
+export { GrantClientConsentController } from '@/identity/rest/controllers/grant-client-consent.controller'
+export { LookupClientController } from '@/identity/rest/controllers/lookup-client.controller'
+export { RegisterClientController } from '@/identity/rest/controllers/register-client.controller'
+export { SignInController } from '@/identity/rest/controllers/sign-in.controller'

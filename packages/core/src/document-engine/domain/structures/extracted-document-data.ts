@@ -1,7 +1,7 @@
 export type ExtractedDocumentData = {
-  fileId: string
-  taxIds: string[]
-  phones: string[]
-  emails: string[]
-  names: string[]
+  readonly fileId: string
+  readonly taxIds: readonly string[]
+  readonly phones: readonly string[]
+  readonly emails: readonly string[]
+  readonly names: readonly string[]
 }
