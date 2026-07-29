@@ -1,11 +1,9 @@
-import type { Profile } from '../structures/profile'
+import type { UserStatus } from '../structures'
 
 export type User = {
   id: string
-  personId: string
-  profile: Profile
-  jobTitle?: string
-  active: boolean
+  email: string
+  status: UserStatus
   createdAt: Date
   updatedAt: Date
 }

@@ -47,7 +47,6 @@
 
 * **Supabase PostgreSQL:** Main application database, used for application users, tenants, permissions, files, metadata, and product data.
 * **Drizzle Migrations:** Version-controlled management of database changes.
-* **Separate PostgreSQL for Evolution API:** Dedicated database for Evolution’s internal data, separate from the main application database.
 
 ### Authentication and Authorization
 
@@ -77,7 +76,7 @@
 Typical flow:
 
 ```text
-Evolution webhook
+Meta Cloud API webhook
 
 → NestJS validates and records the event
 
@@ -85,7 +84,7 @@ Evolution webhook
 
 → Inngest executes the workflow
 
-→ Mastra AI / Resend / Evolution / PostgreSQL
+→ Inngest / Resend / Meta Cloud API / PostgreSQL
 ```
 
 ### AI
@@ -104,18 +103,61 @@ Evolution webhook
 
 ### WhatsApp
 
-* **Evolution API v2:** Main integration with WhatsApp.
-* **Redis:** Cache and state for Evolution API.
-* **Evolution PostgreSQL:** Dedicated database for sessions, instances, and Evolution’s internal data.
-* **Evolution Manager on Coolify:** Administrative interface used in staging/production, protected by Cloudflare Access, Basic Auth, or IP allowlist.
-* **No local Evolution Manager:** Locally, only the API runs.
+* **Meta Cloud API:** Official WhatsApp integration used only for automatic messages and receiving documents.
+* **Meta Webhooks:** Deliver incoming messages, documents, and delivery-status updates to NestJS.
+
+#### Local Testing & Tunneling (Webhooks)
+
+To receive webhooks on your local NestJS instance during development, configure a secure public HTTPS endpoint using a tunnel (e.g. `ngrok`):
+
+1. **Environment Variables:** Set the following keys in your backend `.env` (`apps/server/.env`):
+   - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`: A custom string of your choice (e.g., `vibecoding`).
+   - `WHATSAPP_APP_SECRET`: The App Secret obtained from the Meta App Dashboard (used to verify event signatures).
+2. **Expose Server:** Start ngrok forwarding to the NestJS port (`3333`):
+   ```bash
+   ngrok http --url=your-subdomain.ngrok-free.dev 3333
+   ```
+3. **Configure Meta Dashboard:** In the Meta App Dashboard under **WhatsApp > Configuration**, set the Callback URL to `https://your-subdomain.ngrok-free.dev/integrations/whatsapp/webhook` and enter your verify token. Then, subscribe to the `messages` event field under **Webhook fields**.
+
+#### Webhook Lifecycle Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Usuário (WhatsApp)
+    participant Meta as Meta Cloud API
+    participant Ngrok as Ngrok Tunnel
+    participant Nest as NestJS Server (Port 3333)
+
+    Note over Meta, Nest: Webhook Validation (GET)
+    Meta->>Ngrok: GET /integrations/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=vibecoding&hub.challenge=123
+    Ngrok->>Nest: GET /integrations/whatsapp/webhook
+    Note over Nest: Validates if hub.verify_token matches WHATSAPP_WEBHOOK_VERIFY_TOKEN
+    Nest-->>Ngrok: 200 OK (body: challenge)
+    Ngrok-->>Meta: 200 OK (body: challenge)
+
+    Note over Meta, Nest: Event Delivery (POST)
+    User->>Meta: Sends message / document
+    Meta->>Ngrok: POST /integrations/whatsapp/webhook (X-Hub-Signature-256: sha256=...)
+    Ngrok->>Nest: POST /integrations/whatsapp/webhook
+    Note over Nest: Computes HMAC-SHA256(rawBody, WHATSAPP_APP_SECRET)
+    Note over Nest: Safely compares signatures (timingSafeEqual)
+    alt Valid Signature
+        Nest-->>Ngrok: 200 OK (status: success)
+        Ngrok-->>Meta: 200 OK
+    else Invalid Signature
+        Nest-->>Ngrok: 403 Forbidden
+        Ngrok-->>Meta: 403 Forbidden
+    end
+```
+
 
 ### Back-end Tests
 
 * **Vitest:** Unit tests for services, business rules, schemas, and helpers.
 * **Supertest:** HTTP integration tests for the NestJS server.
 * **Testcontainers:** Spins up real databases/services in tests when needed.
-* **FakeWhatsAppProvider:** Mock of Evolution API in the main automated tests.
+* **FakeWhatsAppProvider:** In-memory provider used in the main automated tests.
 * **Route integration tests:** Validate controllers, middlewares, authentication, permissions, contracts, and HTTP responses.
 
 ---
@@ -149,7 +191,6 @@ packages/
 * **Single Docker Compose:** Starts the entire local infrastructure without depending on `supabase start`.
 * **Local Supabase via Docker:** Auth, PostgreSQL, Storage, PostgREST, Kong, and Mailpit.
 * **templates-server:** Internal container that serves the HTML templates for local Supabase Auth.
-* **Local Evolution API:** Runs with its own PostgreSQL and Redis.
 * **NestJS and TanStack Start outside Docker:** Run via `pnpm dev`.
 
 Local services:
@@ -169,19 +210,13 @@ docker-compose.yml
 
 ├── mailpit
 
-├── templates-server
-
-├── evolution-api
-
-├── evolution-db
-
-└── redis
+└── templates-server
 ```
 
 ### Staging and Production
 
 * **Managed Supabase in São Paulo:** Auth, PostgreSQL, and Storage.
-* **Coolify:** Deploys the server, web app, Evolution API, Evolution Manager, Redis, and Evolution PostgreSQL.
+* **Coolify:** Deploys the server and web app. WhatsApp is consumed as a managed Meta Cloud API.
 * **Hostinger VPS:** Main server for Coolify.
 * **Cloudflare:** DNS, proxy, TLS, basic WAF, and domain protection.
 * **Coolify integrated Traefik:** Internal reverse proxy for containers.
@@ -203,10 +238,6 @@ Ports that should not be public:
 ```text
 5432 — PostgreSQL
 
-6379 — Redis
-
-8080 — Direct Evolution access
-
 3000 — Direct front-end access
 
 3001 — Direct server access
@@ -227,18 +258,11 @@ api.yourdomain.com
 
 → NestJS server
 
-evolution-api.yourdomain.com
-
-→ Protected Evolution API
-
-evolution-manager.yourdomain.com
-
-→ Protected Evolution Manager
 ```
 
 ### Tests and CI
 
-* **Local/test Docker Compose:** Base for running Supabase Auth, Storage, DB, Mailpit, Redis, and Evolution API when needed.
+* **Local/test Docker Compose:** Base for running Supabase Auth, Storage, DB, and Mailpit. WhatsApp tests use the Meta test number and a public webhook tunnel.
 * **Vitest:** Unit and integration tests.
 * **Supertest:** HTTP server tests.
 * **Testing Library:** Front-end component and route tests.
@@ -281,10 +305,8 @@ evolution-manager.yourdomain.com
 
 ### WhatsApp
 
-* **Evolution API v2**
-* **Dedicated PostgreSQL**
-* **Redis**
-* **Evolution Manager on Coolify**
+* **Meta Cloud API**
+* **Meta Webhooks**
 
 ### Electronic Signature
 
@@ -308,7 +330,7 @@ evolution-manager.yourdomain.com
 * **REST API:** DocuSeal exposes a complete REST API for creating templates, sending documents for signature, pre-filling fields, and checking status. SDKs are available for JavaScript, TypeScript, Python, PHP, Ruby, Java, C#, and Go.
 * **Webhooks:** Real-time notifications when documents are signed, allowing NestJS to automatically update the client status in the database.
 * **Embedding:** Embeddable components, React and HTML, to include the signature form directly inside the HMS system interface.
-* **Database:** Internal SQLite database inside the container’s `/data` volume. No external database dependency. Migration to Evolution PostgreSQL is possible in the future if needed.
+* **Database:** Internal SQLite database inside the container’s `/data` volume. No external database dependency.
 * **Storage:** Templates, filled PDFs, signed PDFs, and audit certificates remain in DocuSeal’s `/data` volume. After signing, NestJS copies the signed PDF to Supabase Storage, inside the client folder, via webhook.
 * **Audit trail:** Automatically generated with signer email, IP, timestamps, and document hash. Embedded as the final page of the signed PDF and stored in the database.
 * **Legal validity:** Simple electronic signature with legal validity in Brazil under MP 2.200-2/2001, Law 14.063/2020, and articles 104/107 of the Civil Code. Covers power of attorney, legal fee agreement, poverty declaration, and intake form. Does not replace ICP-Brasil signature, meaning the lawyer’s digital certificate, for petitions and judicial acts.
@@ -320,7 +342,7 @@ evolution-manager.yourdomain.com
 
 1. The lawyer decides to formalize the engagement in the HMS system.
 2. NestJS calls the DocuSeal API and creates a submission with `template_id` plus pre-filled, read-only client data.
-3. DocuSeal generates the filled PDF and sends the signature link by email through Resend, or the system sends it via WhatsApp through Evolution API.
+3. DocuSeal generates the filled PDF and sends the signature link by email through Resend, or the system sends it through the Meta Cloud API.
 4. The client opens the link on their phone and signs with a finger or typed signature.
 5. DocuSeal embeds the signature in the PDF and generates an audit certificate.
 6. DocuSeal triggers a webhook to NestJS.
@@ -363,9 +385,7 @@ The backup strategy follows the 3-2-1 rule: 3 copies of the data, on 2 different
 | Data                               | Source                   | Backup format                 |
 | ---------------------------------- | ------------------------ | ----------------------------- |
 | Supabase PostgreSQL, main database | Managed Supabase         | Compressed pg_dump, `.sql.gz` |
-| Evolution API PostgreSQL           | Container on the VPS     | Compressed pg_dump, `.sql.gz` |
 | DocuSeal, SQLite + signed PDFs     | Container `/data` volume | Full volume `tar.gz`          |
-| Redis, Evolution API               | Container on the VPS     | RDB snapshot, `dump.rdb`      |
 | Environment variables and configs  | Coolify / `.env` files   | Encrypted copy                |
 
 ### Recommended Tool: rclone
@@ -390,11 +410,11 @@ rclone config
 
 ### Monitoring and Alerts
 
-* The script should send success/failure notifications through a webhook to NestJS or directly through Resend/WhatsApp via Evolution API.
+* The script should send success/failure notifications through a webhook to NestJS or directly through Resend/Meta Cloud API.
 * Quarterly restoration test: start an isolated environment, restore the backup, and validate data integrity.
 
 ### Note on Managed Supabase
 
-Managed Supabase, the main application database, is the primary copy in the 3-2-1 rule, with automatic daily backups handled by Supabase itself. The backup script adds offsite copies, Google Drive and Dropbox, for the other VPS services: Evolution, DocuSeal, Redis, and configs.
+Managed Supabase, the main application database, is the primary copy in the 3-2-1 rule, with automatic daily backups handled by Supabase itself. The backup script adds offsite copies, Google Drive and Dropbox, for DocuSeal and configs.
 
 For full autonomy, it is also recommended to keep a periodic `pg_dump` of Supabase as an additional copy in the remote storage providers, especially for migration or disaster-recovery scenarios.
