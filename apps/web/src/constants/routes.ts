@@ -17,6 +17,10 @@ export const ROUTES = {
   clientPrivacy: '/cliente/privacidade',
   clients: '/clientes',
   collaborators: '/colaboradores',
+  client: '/cliente',
+  clientMyCases: '/cliente/meus-casos',
+  clientMessages: '/cliente/mensagens',
+  clientPrivacy: '/cliente/privacidade',
 } as const
 
 export type RouteName = keyof typeof ROUTES
