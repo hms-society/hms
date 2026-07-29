@@ -1,6 +1,6 @@
 import type { Provider } from '@nestjs/common'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 
 export const DRIZZLE = 'DRIZZLE'
 export type DrizzleDB = ReturnType<DrizzleClient['requireDatabase']>

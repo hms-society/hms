@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { SharedDatabaseModule } from '@/shared/database/database.module'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import {
   DrizzleLegalAreaMapper,

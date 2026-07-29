@@ -2,7 +2,7 @@ import { Injectable, type OnModuleDestroy } from '@nestjs/common'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres, { type Sql } from 'postgres'
 
-import * as schema from '@/shared/database/schema'
+import * as schema from '@/shared/database/drizzle/schema'
 
 export type Database = PostgresJsDatabase<typeof schema>
 
