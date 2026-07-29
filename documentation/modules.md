@@ -156,6 +156,8 @@ Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atla
   fiscal.
 - Vincula pessoas a usuários do sistema por meio do Supabase Auth.
 - Atribui um dos nove perfis fixos que determinam a autorização em todo o sistema.
+- Associa cada colaborador jurídico a uma ou mais áreas jurídicas, com um ou mais
+  temas pertencentes a cada área selecionada.
 - Registra concessões e revogações de consentimento da LGPD em um log imutável e
   somente de acréscimos.
 - Não gerencia papéis no nível do caso, acesso externo pelo Portal nem o ciclo de
