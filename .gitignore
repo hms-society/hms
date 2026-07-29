@@ -63,6 +63,7 @@ issue.md
 CLAUDE.md
 GEMINI.md
 AGENTS.local.md
+.obsidian/
 
 # MCP's
 .playwright-mcp
