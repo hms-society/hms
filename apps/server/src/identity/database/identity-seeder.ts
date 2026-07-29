@@ -17,14 +17,20 @@ type UserSeed = {
   status: UserCreation['status']
 }
 
-const DEFAULT_CLIENTS: ClientCreation[] = ClientFaker.fakeMany().map(
-  ({ id, createdAt, updatedAt, ...client }) => client,
-)
+const DEFAULT_CLIENTS: ClientCreation[] = [
+  ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+  ...ClientFaker.fakeMany(9),
+].map(({ id, createdAt, updatedAt, ...client }) => client)
 
 const DEFAULT_USERS: UserSeed[] = [
   {
     email: 'atendente@hmsadvogados.com.br',
     password: '123456',
+    status: 'active',
+  },
+  {
+    email: 'client@hms.br',
+    password: 'password123',
     status: 'active',
   },
 ]
