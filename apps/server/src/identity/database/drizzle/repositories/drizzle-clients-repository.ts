@@ -3,8 +3,8 @@ import type { Client, ClientCreation } from '@hms/core/identity/domain/entities'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { and, desc, eq } from 'drizzle-orm'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientModel } from '@/identity/database/drizzle/models'
 import { DrizzleClientMapper } from '@/identity/database/drizzle/mappers'
 

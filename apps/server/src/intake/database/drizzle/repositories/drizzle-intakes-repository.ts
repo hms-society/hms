@@ -5,8 +5,8 @@ import type {
 } from '@hms/core/intake/interfaces'
 import { and, desc, eq, sql } from 'drizzle-orm'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { DrizzleIntakeMapper } from '@/intake/database/drizzle/mappers/drizzle-intake-mapper'
 import { intakeModel } from '@/intake/database/drizzle/models'
 

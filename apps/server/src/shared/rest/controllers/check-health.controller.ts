@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { Controller, Get, HttpStatus, ServiceUnavailableException } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
 
 const { version } = JSON.parse(
