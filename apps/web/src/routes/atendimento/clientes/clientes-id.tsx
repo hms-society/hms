@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/ui/shadcn/select'
 
-export const Route = createFileRoute('/atendimento/clientes')({
+export const Route = createFileRoute('/atendimento/clientes/clientes-id')({
   component: ClientesPage,
 })
 
@@ -81,7 +81,7 @@ const MOCK_COMMUNICATIONS = [
 
 function ClientesPage() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 mt-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 mt-22">
       <Anchor
         route="home"
         className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -130,7 +130,7 @@ function ClientesPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center gap-8 border-b border-border overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-25 border-b border-border overflow-x-auto no-scrollbar">
         {[
           { id: 1, label: 'Dados cadastrais' },
           { id: 2, label: 'Intakes' },
