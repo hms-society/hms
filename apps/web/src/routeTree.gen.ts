@@ -21,6 +21,7 @@ import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-passwor
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AtendimentoClientesRouteImport } from './routes/atendimento/clientes'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
 
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
@@ -83,6 +84,11 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
+const AtendimentoClientesRoute = AtendimentoClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AtendimentoRouteRoute,
+} as any)
 const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
   id: '/consultas',
   path: '/consultas',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/clientes': typeof AtendimentoClientesRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/intakes/novo': typeof IntakesNovoRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/clientes': typeof AtendimentoClientesRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/intakes/novo': typeof IntakesNovoRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/advogado/consultas': typeof AdvogadoConsultasRoute
+  '/atendimento/clientes': typeof AtendimentoClientesRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/intakes/novo': typeof IntakesNovoRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/intakes'
     | '/advogado/consultas'
+    | '/atendimento/clientes'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/intakes/novo'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/advogado/consultas'
+    | '/atendimento/clientes'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/intakes/novo'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/intakes'
     | '/advogado/consultas'
+    | '/atendimento/clientes'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/intakes/novo'
@@ -278,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
+    '/atendimento/clientes': {
+      id: '/atendimento/clientes'
+      path: '/clientes'
+      fullPath: '/atendimento/clientes'
+      preLoaderRoute: typeof AtendimentoClientesRouteImport
+      parentRoute: typeof AtendimentoRouteRoute
+    }
     '/advogado/consultas': {
       id: '/advogado/consultas'
       path: '/consultas'
@@ -301,11 +320,13 @@ const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
 )
 
 interface AtendimentoRouteRouteChildren {
+  AtendimentoClientesRoute: typeof AtendimentoClientesRoute
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
   AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
 }
 
 const AtendimentoRouteRouteChildren: AtendimentoRouteRouteChildren = {
+  AtendimentoClientesRoute: AtendimentoClientesRoute,
   AtendimentoConsultasRoute: AtendimentoConsultasRoute,
   AtendimentoDashboardRoute: AtendimentoDashboardRoute,
 }

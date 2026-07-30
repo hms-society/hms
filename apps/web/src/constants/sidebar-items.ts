@@ -22,6 +22,7 @@ const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Dashboard', route: 'attendantDashboard', icon: 'layout-dashboard' },
   { label: 'Intakes', route: 'intakes', icon: 'file-text' },
   { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+  { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
 export const SIDEBAR_ITEMS: SidebarItems = {

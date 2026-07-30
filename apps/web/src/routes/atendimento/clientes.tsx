@@ -1,0 +1,227 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
+import { Badge } from '@/ui/shadcn/badge'
+import { Button } from '@/ui/shadcn/button'
+import { Card, CardContent } from '@/ui/shadcn/card'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+import { Anchor } from '@/ui/shared/widgets/components/anchor'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
+
+export const Route = createFileRoute('/atendimento/clientes')({
+  component: ClientesPage,
+})
+
+const MOCK_COMMUNICATIONS = [
+  {
+    id: '1',
+    channel: 'phone',
+    direction: 'Passiva',
+    badges: [
+      { label: 'Auto', bg: 'bg-blue-50 text-blue-600' },
+      { label: 'Interno', bg: 'bg-muted text-muted-foreground' },
+    ],
+    content: 'Cliente perguntou sobre andamento da consulta agendada para a próxima semana.',
+    author: 'Atend. Júlia',
+    time: 'há 2 dias',
+  },
+  {
+    id: '2',
+    channel: 'phone',
+    direction: 'Ativa',
+    badges: [{ label: 'Liberado ao cliente', bg: 'bg-emerald-100 text-emerald-800' }],
+    content: 'Ligação para confirmar documentos pendentes necessários para o checklist do caso.',
+    author: 'Paralegal João',
+    time: 'há 5 dias',
+  },
+  {
+    id: '3',
+    channel: 'mail',
+    direction: 'Passiva',
+    badges: [{ label: 'Email', bg: 'bg-muted text-muted-foreground' }],
+    content: (
+      <div className="flex flex-col gap-2">
+        <p className="font-medium text-foreground">Assunto: Reenvio de documento — protocolo #MSG-0502</p>
+        <p>Bom dia,</p>
+        <p>Segue em anexo o RG solicitado, desta vez digitalizado com melhor qualidade. Fico no aguardo da confirmação de recebimento e da próxima etapa do processo.</p>
+        <p>Qualquer coisa, estou à disposição.</p>
+        <p>Att,<br/>Carlos</p>
+      </div>
+    ),
+    author: 'Cliente (Carlos)',
+    time: 'há 6 dias',
+  },
+  {
+    id: '4',
+    channel: 'phone',
+    direction: 'Passiva',
+    badges: [
+      { label: 'Auto', bg: 'bg-blue-50 text-blue-600' },
+      { label: 'Interno', bg: 'bg-muted text-muted-foreground' },
+    ],
+    content: 'Cliente enviou RG e comprovante de residência pelo WhatsApp oficial.',
+    author: 'Atend. Júlia',
+    time: 'há 1 semana',
+  },
+  {
+    id: '5',
+    channel: 'user',
+    direction: 'Ativa',
+    badges: [{ label: 'Interno', bg: 'bg-muted text-muted-foreground' }],
+    content: 'Consulta inicial realizada presencialmente — caso previdenciário avaliado com viabilidade positiva.',
+    author: 'Adv. Hudson Marcelo',
+    time: 'há 3 semanas',
+  },
+]
+
+function ClientesPage() {
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 mt-8">
+      <Anchor
+        route="home"
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+      >
+        <Icon name="arrow-left" className="size-4" />
+        Voltar
+      </Anchor>
+
+      <Card className="shadow-sm">
+        <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar className="size-14 bg-emerald-100">
+              <AvatarFallback className="text-lg font-medium text-emerald-800 bg-transparent">
+                MA
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-semibold text-foreground">
+                  Maria Aparecida dos Santos
+                </h1>
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-transparent shadow-none">
+                  Cliente
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Icon name="id-card" className="size-4" />
+                  123.456.789-00
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Icon name="phone" className="size-4" />
+                  (12) 98765-4321
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Icon name="mail" className="size-4" />
+                  maria.santos@email.com
+                </span>
+              </div>
+            </div>
+          </div>
+          <Button className="bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6">
+            <Icon name="plus" />
+            Novo intake
+          </Button>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center gap-8 border-b border-border overflow-x-auto no-scrollbar">
+        {[
+          { id: 1, label: 'Dados cadastrais' },
+          { id: 2, label: 'Intakes' },
+          { id: 3, label: 'Casos' },
+          { id: 4, label: 'Comunicações', active: true },
+          { id: 5, label: 'Documentos' },
+        ].map((tab) => (
+          <div
+            key={tab.id}
+            className={`flex items-center gap-2 pb-3 cursor-pointer whitespace-nowrap border-b-2 transition-colors ${
+              tab.active
+                ? 'border-[#134C50] text-[#134C50]'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <span className={`flex size-5 items-center justify-center rounded-full border text-[10px] ${tab.active ? 'border-[#134C50]' : 'border-current'}`}>
+              {tab.id}
+            </span>
+            <span className="text-sm font-medium">{tab.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
+        <div className="flex items-center gap-3">
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[120px] bg-card h-9">
+              <SelectValue placeholder="Canal" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Canal</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[120px] bg-card h-9">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tipo</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[120px] bg-card h-9">
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Período</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button className="bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6">
+          <Icon name="plus" />
+          Registrar comunicação
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {MOCK_COMMUNICATIONS.map((item) => (
+          <Card key={item.id} className="shadow-none border-border/60">
+            <CardContent className="p-4 flex gap-4">
+              <div className="shrink-0 flex size-10 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
+                <Icon name={item.channel as any} className="size-5" />
+              </div>
+              <div className="flex-1 space-y-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {item.direction}
+                    </span>
+                    {item.badges.map((badge, idx) => (
+                      <Badge key={idx} className={`shadow-none border-transparent font-medium ${badge.bg}`}>
+                        {badge.label}
+                      </Badge>
+                    ))}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {item.time}
+                  </span>
+                </div>
+                <div className="text-sm text-foreground leading-relaxed">
+                  {item.content}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                  <Icon name="user" className="size-3.5" />
+                  <span>{item.author}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
