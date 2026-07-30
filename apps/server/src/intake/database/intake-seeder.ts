@@ -45,18 +45,18 @@ export class IntakeSeeder {
     const responsibleId = attendant?.id || references?.responsibleIds[0] || clients[0]?.id
 
     if (!responsibleId || clients.length === 0) {
-      return
+      throw new Error('Intake seed requirements are not met')
     }
 
     const areas = await this.database.select().from(legalAreaModel)
     const topics = await this.database.select().from(legalTopicModel)
 
     if (areas.length === 0 || topics.length === 0) {
-      return
+      throw new Error('Legal areas and topics are required')
     }
 
     const testClient = clients.find((c) => c.email === 'client@hms.br')
-    const intakesToSeed: any[] = []
+    const intakesToSeed: IntakeCreation[] = []
 
     if (testClient) {
       // 1. Consultation Scheduled
@@ -131,6 +131,6 @@ export class IntakeSeeder {
       })
     }
 
-    await this.database.insert(intakeModel).values(intakesToSeed)
+    return this.seed(intakesToSeed)
   }
 }

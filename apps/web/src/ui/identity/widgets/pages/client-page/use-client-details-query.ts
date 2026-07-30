@@ -19,6 +19,6 @@ export const useClientDetailsQuery = (clientId?: string) => {
     },
     enabled: !!clientId,
   })
-
+  
   return { clientDetails, clientDetailsError, isLoadingClientDetails }
 }
