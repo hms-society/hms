@@ -3,3 +3,4 @@ export { GrantClientConsentController } from '@/identity/rest/controllers/grant-
 export { LookupClientController } from '@/identity/rest/controllers/lookup-client.controller'
 export { RegisterClientController } from '@/identity/rest/controllers/register-client.controller'
 export { SignInController } from '@/identity/rest/controllers/sign-in.controller'
+export {ListClientsController} from '@/identity/rest/controllers/list-clients.controller'

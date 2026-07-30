@@ -9,6 +9,7 @@ import {
   LookupClientController,
   RegisterClientController,
   SignInController,
+  ListClientsController,
 } from '@/identity/rest/controllers'
 import { SupabaseAuthProvider } from '@/identity/providers'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -21,6 +22,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RegisterClientController,
     GrantClientConsentController,
     SignInController,
+    ListClientsController
   ],
   providers: [
     SupabaseAuthProvider,
