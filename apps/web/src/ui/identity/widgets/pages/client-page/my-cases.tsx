@@ -10,15 +10,15 @@ export const MeusCasos = () => {
   const greeting = hours < 12 ? 'Bom dia' : hours < 18 ? 'Boa tarde' : 'Boa noite'
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col gap-8 w-full max-w-none flex-1 p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header Banner & Cases Card */}
-      <Card className="flex flex-col p-8 gap-8 bg-card border border-border/60 shadow-sm relative overflow-hidden w-full">
+      <Card className="flex flex-col p-8 gap-8 bg-card border border-border/60 shadow-sm relative overflow-hidden w-full flex-1">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         {/* Banner Top Row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 !w-full z-10 !h-full">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-semibold font-serif text-brand dark:text-primary">
+            <h1 className="text-3xl md:text-4xl  lg:mt-5 font-semibold font-serif text-brand dark:text-primary">
               Olá, {clientName}! {greeting}!
             </h1>
             <p className="text-muted-foreground text-md md:text-lg">
@@ -32,7 +32,7 @@ export const MeusCasos = () => {
         </div>
 
         {/* Cases Section */}
-        <div className="z-10 w-full">
+        <div className="z-10 w-full flex-1 flex flex-col">
           <CaseSection isLoading={isLoading} error={error} clientIntakes={clientIntakes} />
         </div>
       </Card>

@@ -75,6 +75,10 @@ export const CaseCard = ({ intake }: CaseCardProps) => {
         <h3 className="font- text-2xl font-medium text-foreground group-hover:text-primary transition-colors duration-200">
           {getActionType(intake.legalAreaId)}
         </h3>
+        <span className="font-light text-sm tracking-wider text-muted-foreground">
+          Notas:
+           {intake.demandNotes}
+        </span>
       </div>
 
       {/* Bottom Footer */}
