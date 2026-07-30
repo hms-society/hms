@@ -19,17 +19,21 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
   return (
     <div className='flex flex-col gap-6'>
       <div>
-        <h2 className='font-serif text-2xl'>Privacidade e consentimentos</h2>
-        <p className='mt-1 text-sm text-muted-foreground'>
+        <h2 className='font-serif text-xl font-semibold text-foreground sm:text-2xl'>
+          Privacidade e consentimentos
+        </h2>
+        <p className='mt-1 text-xs text-muted-foreground leading-relaxed sm:text-sm'>
           Estas escolhas são independentes e nenhuma delas impede a criação do cliente.
         </p>
       </div>
-      <div className='rounded-lg border border-brand-accent/30 bg-accent/50 p-4 text-sm'>
-        <p className='font-medium'>Texto provisório para desenvolvimento</p>
-        <p className='mt-1 text-muted-foreground'>
+      <div className='rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs sm:text-sm'>
+        <p className='font-medium text-foreground'>Texto provisório para desenvolvimento</p>
+        <p className='mt-0.5 text-xs text-muted-foreground'>
           A redação final dos consentimentos depende da validação jurídica da HMS.
         </p>
       </div>
+
+      {/* Lista de Consentimentos */}
       <fieldset className='grid gap-3'>
         <legend className='sr-only'>Consentimentos disponíveis</legend>
         {consentFields.map(function renderConsentField({ type, copy, fieldName }) {
@@ -40,23 +44,29 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
               control={form.control}
               render={function renderConsentController({ field }) {
                 return (
-                  <Field orientation='horizontal' className='rounded-xl border p-4'>
+                  <Field
+                    orientation='horizontal'
+                    className='flex items-start gap-3.5 rounded-xl border border-border bg-card/60 p-4 transition-colors hover:bg-card'
+                  >
                     <Checkbox
                       id={`client-consent-${type}`}
                       checked={field.value ?? false}
                       onCheckedChange={getConsentChangeHandler(field.onChange)}
                       onBlur={field.onBlur}
+                      className='mt-0.5'
                     />
-                    <div className='flex-1'>
+                    <div className='flex-1 space-y-1'>
                       <FieldLabel
                         htmlFor={`client-consent-${type}`}
-                        className='font-medium'
+                        className='text-xs sm:text-sm font-medium text-foreground cursor-pointer'
                       >
                         {copy.label}
                       </FieldLabel>
-                      <FieldDescription>{copy.description}</FieldDescription>
+                      <FieldDescription className='text-xs text-muted-foreground leading-relaxed'>
+                        {copy.description}
+                      </FieldDescription>
                     </div>
-                    <Icon name='shield-check' className='text-muted-foreground' />
+                    <Icon name='shield-check' className='size-4 text-muted-foreground/70 shrink-0 mt-0.5' />
                   </Field>
                 )
               }}
@@ -64,22 +74,30 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
           )
         })}
       </fieldset>
+
       {controller.asyncError && (
-        <p role='alert' className='text-sm text-destructive'>
+        <p role='alert' className='text-xs font-medium text-destructive'>
           {controller.asyncError}
         </p>
       )}
-      <div className='-mx-5 -mb-5 flex flex-col-reverse gap-2 border-t border-border bg-muted/20 px-5 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+
+      {/* Footer de Ações Unificado */}
+      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'
+          className='rounded-pill text-sm font-medium h-9 px-6'
           onClick={controller.handleBackToRegistration}
         >
           Voltar
         </Button>
-        <Button type='button' onClick={controller.handleContinueToReview}>
+        <Button
+          type='button'
+          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          onClick={controller.handleContinueToReview}
+        >
           Revisar cadastro
-          <Icon name='arrow-right' />
+          <Icon name='arrow-right' className='size-3.5' />
         </Button>
       </div>
     </div>
