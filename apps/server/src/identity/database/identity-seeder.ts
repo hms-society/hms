@@ -80,9 +80,24 @@ export class IdentitySeeder {
     )
 
     await this.usersRepository.addMany(userCreations)
+    return userCreations
   }
 
-  run(authProvider: AuthProvider | undefined = this.authProvider) {
-    return Promise.all([this.seedUsers(DEFAULT_USERS, authProvider), this.seed()])
+  async run(authProvider: AuthProvider | undefined = this.authProvider) {
+    const seededUsers = await this.seedUsers(DEFAULT_USERS, authProvider)
+    const clientUser = seededUsers.find((u) => u.email === 'client@hms.br')
+
+    const clientsToSeed = [
+      {
+        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+        id: clientUser?.id,
+      },
+      ...ClientFaker.fakeMany(9),
+    ].map(({ id, createdAt, updatedAt, ...client }) => ({
+      ...client,
+      id,
+    }))
+
+    await this.seed(clientsToSeed as any)
   }
 }

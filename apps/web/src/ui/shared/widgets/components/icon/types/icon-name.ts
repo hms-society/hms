@@ -24,6 +24,8 @@ export type IconName =
   | 'bell'
   | 'chevron-left'
   | 'chevron-right'
+  | 'chevron-down'
+  | 'chevron-up'
   | 'clock'
   | 'list-checks'
   | 'log-out'

@@ -3,7 +3,7 @@ description: "Warm off-white canvas with deep teal brand identity — primary ac
 
 colors:
   # Superfície e texto
-  background: "oklch(0.978 0.005 75)"
+  background: "oklch(0.962 0.007 80.8)"
   foreground: "oklch(0.260 0.020 190)"
   card: "oklch(1 0 0)"
   card-foreground: "oklch(0.260 0.020 190)"
@@ -356,7 +356,7 @@ Todas as cores sao definidas em OKLCH para uniformidade perceptual. O tema e imp
 - **Destructive** (vermelho, hue ~26): acoes destrutivas, erros
 
 ### Superficies
-Light mode usa um canvas off-white quente (`oklch(0.978 0.005 75)`) — nao branco puro, para reduzir fadiga visual. Cards e popovers sao brancos puros para criar hierarquia sutil via elevacao.
+Light mode usa um canvas off-white quente (`oklch(0.962 0.007 80.8)` ou `#F5F2ED`) — nao branco puro, para reduzir fadiga visual. Cards e popovers sao brancos puros para criar hierarquia sutil via elevacao.
 
 Dark mode usa um preto quente (`oklch(0.150 0.005 80)`) com cards levemente elevados (`oklch(0.195 0.008 80)`).
 

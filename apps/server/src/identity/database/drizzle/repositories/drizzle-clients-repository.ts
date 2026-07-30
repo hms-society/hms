@@ -82,6 +82,7 @@ export class DrizzleClientsRepository
 
   private toDrizzle(client: ClientCreation) {
     return {
+      id: (client as any).id ?? undefined,
       type: client.type,
       name: client.type === 'natural' ? client.name : null,
       legalName: client.type === 'legal' ? client.legalName : null,
