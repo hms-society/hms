@@ -3,8 +3,8 @@ import type { LegalTopicCreation } from '@hms/core/legal-catalog/domain/entities
 import type { LegalTopicsRepository } from '@hms/core/legal-catalog/interfaces'
 import { and, asc, eq } from 'drizzle-orm'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
 import { DrizzleLegalTopicMapper } from '@/legal-catalog/database/drizzle/mappers'
 

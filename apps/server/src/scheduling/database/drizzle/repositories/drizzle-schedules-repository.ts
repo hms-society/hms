@@ -11,8 +11,8 @@ import type {
 } from '@hms/core/scheduling/domain/structures'
 import type { BlockedPeriod, Schedule } from '@hms/core/scheduling/domain/entities'
 
-import { DRIZZLE, type DrizzleDB } from '@/shared/database/database.provider'
-import { schedules, blockedPeriods } from '@/shared/database/schema/scheduling'
+import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.provider'
+import { schedules, blockedPeriods } from '@/shared/database/drizzle/schema/scheduling'
 
 @Injectable()
 export class DrizzleSchedulesRepository implements SchedulesRepository {

@@ -3,8 +3,8 @@ import type { User, UserCreation } from '@hms/core/identity/domain/entities'
 import type { UsersRepository } from '@hms/core/identity/interfaces'
 import { sql } from 'drizzle-orm'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { DrizzleUserMapper } from '@/identity/database/drizzle/mappers'
 import { userModel } from '@/identity/database/drizzle/models'
 

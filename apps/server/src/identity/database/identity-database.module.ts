@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { SharedDatabaseModule } from '@/shared/database/database.module'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import {
   DrizzleClientConsentMapper,
