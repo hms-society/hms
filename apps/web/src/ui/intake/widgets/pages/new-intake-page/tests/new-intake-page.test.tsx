@@ -162,7 +162,7 @@ describe('NewIntakePage', () => {
     const submitButton = screen.getByRole('button', { name: 'Criar intake' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
-    fireEvent.submit(submitButton.closest('form') as HTMLFormElement)
+    fireEvent.click(submitButton)
 
     expect(handleReset).toHaveBeenCalledOnce()
     expect(handleSubmit).toHaveBeenCalledOnce()
@@ -196,7 +196,11 @@ describe('NewIntakePage', () => {
     renderNewIntakePage()
 
     expect(screen.getByRole('link', { name: 'Voltar' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Encerrar atendimento' }))
+    const closeButtons = screen.getAllByRole('button', {
+      name: 'Encerrar atendimento',
+    })
+
+    fireEvent.click(closeButtons[0])
 
     expect(handleRequestClosure).toHaveBeenCalledOnce()
   })

@@ -16,7 +16,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import { ClientStep } from './client-step'
 import { DecisionStep } from './decision-step'
-import { DemandStep } from './demand-step'
+import { StepDemand } from './demand-step'
 import { useNewIntake } from './use-new-intake'
 
 const STEPS = ['Demanda', 'Cliente', 'Decisão'] as const
@@ -51,8 +51,14 @@ export const NewIntakePage = () => {
 
   return (
     <FormProvider {...form}>
+      {/* 
+        Ajustes aplicados na tag form:
+        - pt-20 (ou pt-24): Empurra o formulário para baixo da barra verde do Header
+        - pb-12 e px-4 sm:px-6: Garante margem inferior e recuo nas laterais para celular
+        - max-w-5xl / max-w-6xl: Limita a largura para manter um bom layout visual
+      */}
       <form
-        className='mx-auto flex w-full flex-col gap-5'
+        className='mx-auto flex w-full max-w-5xl flex-col gap-5 pt-20 pb-12 px-4 sm:px-6'
         onSubmit={handleSubmit}
         noValidate
       >
@@ -133,7 +139,7 @@ export const NewIntakePage = () => {
 
         {currentStep < 3 ? (
           <section className='rounded-xl border border-border bg-card p-4 sm:p-6'>
-            {currentStep === 1 && <DemandStep />}
+            {currentStep === 1 && <StepDemand />}
             {currentStep === 2 && <ClientStep />}
           </section>
         ) : (
@@ -146,12 +152,13 @@ export const NewIntakePage = () => {
           </p>
         )}
 
-        <footer className='flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4'>
+        <footer className='flex flex-wrap items-center justify-end gap-2 pt-4'>
           {currentStep > 1 && (
             <Button
               type='button'
-              variant='outline'
+              variant='brand'
               className='rounded-pill'
+              size='sm'
               onClick={handlePrevious}
               disabled={isSubmitting}
             >
@@ -163,8 +170,9 @@ export const NewIntakePage = () => {
           {currentStep < 3 ? (
             <Button
               type='button'
-              variant='outline'
+              variant='brand'
               className='rounded-pill'
+              size='sm'
               onClick={handleNext}
             >
               Próximo
@@ -176,12 +184,13 @@ export const NewIntakePage = () => {
                 type='button'
                 variant='outline'
                 className='rounded-pill'
+                size='sm'
                 onClick={handleReset}
               >
                 <Icon name='x' />
                 Cancelar
               </Button>
-              <Button type='submit' className='rounded-pill' disabled={isSubmitting}>
+              <Button type='submit' className='rounded-pill' size='sm' disabled={isSubmitting}>
                 <Icon name='plus' />
                 {isSubmitting ? 'Criando...' : 'Criar intake'}
               </Button>
