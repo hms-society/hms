@@ -223,11 +223,29 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    const clients = await this.seed()
+    const clientUser = seededUsers.find((u) => u.email === 'client@hms.br')
+
+    const clientsToSeed = [
+      {
+        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+        id: clientUser?.id,
+      },
+      ...ClientFaker.fakeMany(9),
+    ].map(({ id, createdAt, updatedAt, ...client }) => ({
+      ...client,
+      id,
+    }))
+
+    const clients = await this.seed(clientsToSeed as any)
 
     return {
       clients,
-      collaborators: [seededAdministrator, attendant, lawyer, paralegal].filter(
+      collaborators: [
+        administratorCreated,
+        attendantCreated,
+        lawyerCreated,
+        paralegal,
+      ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,
       ),

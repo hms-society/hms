@@ -7,7 +7,7 @@
 
 :root {
   /* Superfície e texto */
-  --background: oklch(0.978 0.005 75);
+  --background: oklch(92.225% 0.04129 80.297);
   --foreground: oklch(0.26 0.02 190);
   --card: oklch(96.715% 0.00011 271.152);
   --card-foreground: oklch(0.26 0.02 190);
@@ -181,7 +181,7 @@
 @theme {
   /* --- SISTEMA DE CORES (OKLCH) --- */
   /* Superfície e texto */
-  --color-background: oklch(0.978 0.005 75);
+  --color-background: oklch(0.962 0.007 80.8); /* #F5F2ED */
   --color-foreground: oklch(0.26 0.02 190);
   --color-card: oklch(1 0 0);
   --color-card-foreground: oklch(0.26 0.02 190);
