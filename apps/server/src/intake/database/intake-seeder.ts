@@ -1,4 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { DRIZZLE, type DrizzleDB } from '@/shared/database/database.provider'
+import { clientModel } from '@/identity/database/drizzle/models'
+import { userModel } from '@/identity/database/drizzle/models/user-model'
+import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
+import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import type { IntakeCreation } from '@hms/core/intake/domain/entities'
 import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
@@ -36,44 +42,100 @@ export class IntakeSeeder {
     return this.intakesRepository.removeAll()
   }
 
-  run(references: IntakeSeedReferences) {
-    if (
-      references.clientIds.length === 0 ||
-      references.responsibleIds.length === 0 ||
-      references.actorIds.length === 0
-    ) {
-      throw new Error('Intake seed references are required')
+  async run(references: IntakeSeedReferences) {
+    const clients = await this.database.select().from(clientModel)
+    const users = await this.database.select().from(userModel)
+    
+    const attendant = users.find((u) => u.email === 'attendant@hmsadvogados.com.br')
+    const responsibleId = attendant?.id || references.responsibleIds[0] || clients[0]?.id
+
+    if (!responsibleId || clients.length === 0) {
+      throw new Error('Intake seed requirements are not met')
     }
 
-    const intakes = Array.from({ length: DEFAULT_INTAKE_COUNT }, (_, index) => {
-      const intake = IntakeFaker.fake({
-        clientId: references.clientIds[index % references.clientIds.length],
-        responsibleId:
-          references.responsibleIds[index % references.responsibleIds.length],
-        createdBy: references.actorIds[index % references.actorIds.length],
-        updatedBy: references.actorIds[index % references.actorIds.length],
-        legalAreaId: references.legalAreaId,
-        legalTopicId: references.legalTopicId,
+    const areas = await this.database.select().from(legalAreaModel)
+    const topics = await this.database.select().from(legalTopicModel)
+
+    if (areas.length === 0 || topics.length === 0) {
+      throw new Error('Legal areas and topics are required')
+    }
+
+    const testClient = clients.find((c) => c.email === 'client@hms.br')
+    const intakesToSeed: IntakeCreation[] = []
+
+    if (testClient) {
+      // 1. Consultation Scheduled
+      const civArea = areas.find((a) => a.name === 'Cível') || areas[0]
+      const civTopic = topics.find((t) => t.legalAreaId === civArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'whatsapp',
+        legalAreaId: civArea.id,
+        legalTopicId: civTopic.id,
+        urgency: 'normal',
+        demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
+        status: IntakeStatus.ConsultationScheduled,
       })
 
-      return {
-        clientId: intake.clientId,
-        responsibleId: intake.responsibleId,
-        createdBy: intake.createdBy,
-        updatedBy: intake.updatedBy,
-        origin: intake.origin,
-        contactChannel: intake.contactChannel,
-        legalAreaId: intake.legalAreaId,
-        legalTopicId: intake.legalTopicId,
-        urgency: intake.urgency,
-        demandNotes: intake.demandNotes,
-        status: intake.status,
-        closureReason: intake.closureReason,
-        closureNotes: intake.closureNotes,
-        closedAt: intake.closedAt,
-      }
-    })
+      // 2. Registered (Pending docs)
+      const trabArea = areas.find((a) => a.name === 'Trabalhista') || areas[0]
+      const trabTopic = topics.find((t) => t.legalAreaId === trabArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'whatsapp',
+        legalAreaId: trabArea.id,
+        legalTopicId: trabTopic.id,
+        urgency: 'high',
+        demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
+        status: IntakeStatus.Registered,
+      })
 
-    return this.seed(intakes)
+      // 3. Contracted
+      const famArea = areas.find((a) => a.name === 'Família') || areas[0]
+      const famTopic = topics.find((t) => t.legalAreaId === famArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'email',
+        legalAreaId: famArea.id,
+        legalTopicId: famTopic.id,
+        urgency: 'normal',
+        demandNotes: 'Divórcio consensual e partilha de bens.',
+        status: IntakeStatus.Contracted,
+      })
+    }
+
+    // Seed 1 simple intake for the other seeded clients
+    for (const client of clients) {
+      if (client.email === 'client@hms.br') continue
+      const area = areas[Math.floor(Math.random() * areas.length)]
+      const topic = topics.find((t) => t.legalAreaId === area.id) || topics[0]
+      intakesToSeed.push({
+        clientId: client.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'phone',
+        legalAreaId: area.id,
+        legalTopicId: topic.id,
+        urgency: 'normal',
+        demandNotes: 'Consulta inicial sobre direito contratual.',
+        status: IntakeStatus.Registered,
+      })
+    }
+
+    return this.seed(intakesToSeed)
   }
 }
