@@ -27,6 +27,7 @@ import {
   PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/atendimento/clientes/')({
   component: ClientesListPage,
@@ -71,6 +72,33 @@ const STATUS_STYLES: Record<ClientStatus, { badge: string; avatar: string }> = {
 }
 
 function ClientesListPage() {
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('status')
+  const [origin, setOrigin] = useState('origem')
+  const [responsavel, setResponsavel] = useState('responsavel')
+
+  const filteredClients = MOCK_CLIENTS.filter((client) => {
+  const matchesSearch =
+    search === '' ||
+    client.name.toLowerCase().includes(search.toLowerCase()) ||
+    client.document.includes(search) ||
+    client.phone.includes(search)
+
+  const matchesStatus =
+    status === 'status' ||
+    client.status.toLowerCase() === status
+
+  const matchesOrigin =
+    origin === 'origem' ||
+    (origin === 'direta' && client.origin === 'Direta HMS') ||
+    (origin === 'via-terceiro' && client.origin === 'Via terceiro') ||
+    (origin === 'indicação' && client.origin === 'Indicação') ||
+    (origin === 'campanha' && client.origin === 'Campanha')
+
+  return matchesSearch && matchesStatus && matchesOrigin
+})
+
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 mt-25">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -86,23 +114,29 @@ function ClientesListPage() {
 
       <div className="relative">
         <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-        <Input 
-          placeholder="Buscar por nome, CPF, CNPJ ou telefone..." 
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nome, CPF, CNPJ ou telefone..."
           className="pl-9 bg-card border-border/60 shadow-sm"
         />
+
       </div>
 
       <div className="flex items-center gap-3">
         <span className="text-sm text-muted-foreground mr-1">Filtros</span>
-        <Select defaultValue="status">
+        <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="w-[160px] bg-card h-9 border-border/60 shadow-sm">
             <SelectValue placeholder="Status relacional" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="status">Status relacional</SelectItem>
+            <SelectItem value="cliente">Cliente</SelectItem>
+            <SelectItem value="interessado">Interessado</SelectItem>
+            <SelectItem value="potencial">Potencial</SelectItem>
           </SelectContent>
         </Select>
-        <Select defaultValue="responsavel">
+        <Select value={responsavel} onValueChange={setResponsavel}>
           <SelectTrigger className="w-[160px] bg-card h-9 border-border/60 shadow-sm">
             <SelectValue placeholder="Responsável HMS" />
           </SelectTrigger>
@@ -110,12 +144,18 @@ function ClientesListPage() {
             <SelectItem value="responsavel">Responsável HMS</SelectItem>
           </SelectContent>
         </Select>
-        <Select defaultValue="origem">
+        <Select value={origin} onValueChange={setOrigin}>
           <SelectTrigger className="w-[120px] bg-card h-9 border-border/60 shadow-sm">
             <SelectValue placeholder="Origem" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="origem">Origem</SelectItem>
+            <SelectItem value="direta">Direta HMS</SelectItem>
+            <SelectItem value="indicação">Indicação</SelectItem>
+            <SelectItem value="campanha">Campanha</SelectItem>
+            <SelectItem value="via-terceiro">Via terceiro</SelectItem>
+            <SelectItem value="retorno">Retorno</SelectItem>
+            <SelectItem value="outro">Outro</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -133,7 +173,7 @@ function ClientesListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_CLIENTS.map((client) => (
+            {filteredClients.map((client) => (
               <TableRow key={client.id} className="cursor-pointer">
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
