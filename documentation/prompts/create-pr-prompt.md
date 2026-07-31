@@ -44,7 +44,6 @@ however, are written as plain noun phrases **without a type prefix** (see below)
   - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
   - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
 
-
 ---
 
 ### 2. Title Definition
@@ -117,6 +116,7 @@ Identifique e liste os autores originais de cada arquivo que você alterou (cons
   * `caminho/do/arquivo` -> Autor/Codeowner
 - [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
   - *Detalhes do alinhamento:* ...
+
 
 
 ---

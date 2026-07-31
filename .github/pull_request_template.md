@@ -16,6 +16,13 @@ Marque os módulos e **liste os caminhos completos (no menor nível possível)**
   *Arquivos alterados:* 
   - 
 
+## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
+Se o PR altera arquivos existentes, liste os **Codeowners / Autores originais** de cada caminho de arquivo modificado (identifique-os no histórico do Git/Git Blame):
+- [ ] Identifiquei os autores originais dos arquivos alterados:
+  * *Caminho do arquivo* -> *Autor/Codeowner:* __________________________________
+- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
+  - *Com quem você alinhou e detalhes do alinhamento:* __________________________________
+
 ## 🧪 Checklist de Qualidade e Validação
 Marque as opções abaixo após realizá-las localmente em sua máquina (todas são obrigatórias para aceitação do PR):
 - [ ] Executei `pnpm test` e todos os testes passaram com sucesso.
