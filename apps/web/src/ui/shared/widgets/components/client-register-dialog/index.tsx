@@ -30,7 +30,7 @@ export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
       <DialogContent
         ref={controller.dialogContentRef}
         showCloseButton={false}
-        className='flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 font-sans sm:max-h-[min(90dvh,48rem)] sm:max-w-3xl'
+        className='flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-lg sm:max-h-[min(90dvh,48rem)] sm:max-w-3xl'
         aria-describedby='client-register-dialog-description'
       >
         <DialogClose asChild>
@@ -38,26 +38,29 @@ export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
             type='button'
             variant='ghost'
             size='icon'
-            className='absolute top-3 right-3 z-10 rounded-full sm:top-4 sm:right-4'
+            className='absolute top-4 right-4 z-10 size-8 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground'
             aria-label='Fechar diálogo'
           >
-            <Icon name='x' />
+            <Icon name='x' className='size-4' />
           </Button>
         </DialogClose>
-        <DialogHeader className='shrink-0 border-b border-border bg-muted/20 px-5 py-5 pr-16 sm:px-8 sm:py-6 sm:pr-20'>
-          <DialogTitle className='text-balance font-serif text-2xl leading-tight'>
+        <DialogHeader className='shrink-0 space-y-1.5 border-b border-border bg-muted/30 px-6 py-5 pr-14 sm:px-8 sm:py-6 sm:pr-16'>
+          <DialogTitle className='text-balance font-serif text-xl font-semibold text-foreground sm:text-2xl'>
             Identificar ou cadastrar cliente
           </DialogTitle>
           <DialogDescription
             id='client-register-dialog-description'
-            className='max-w-2xl leading-5'
+            className='max-w-2xl text-xs text-muted-foreground leading-relaxed sm:text-sm'
           >
             Consulte um cadastro existente ou registre um novo cliente com os dados
             necessários.
           </DialogDescription>
-          <ClientRegisterDialogStepper state={controller.state} />
+
+          <div className='pt-2'>
+            <ClientRegisterDialogStepper state={controller.state} />
+          </div>
         </DialogHeader>
-        <div className='min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-8 sm:py-7'>
+        <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-7'>
           {controller.state === 'identification' && (
             <ClientIdentificationStep controller={controller} />
           )}

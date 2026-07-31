@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  grantClientConsentSchema,
-  lookupClientSchema,
-  registerClientSchema,
-} from '..'
+import { grantClientConsentSchema, lookupClientSchema, registerClientSchema } from '..'
 
 const cpf = '52998224725'
 const cnpj = '11222333000181'

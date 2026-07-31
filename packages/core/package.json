@@ -39,6 +39,7 @@
     "./scheduling/domain/entities": "./src/scheduling/domain/entities/index.ts",
     "./scheduling/domain/errors": "./src/scheduling/domain/errors/index.ts",
     "./scheduling/domain/events": "./src/scheduling/domain/events/index.ts",
+    "./scheduling/domain/use-cases": "./src/scheduling/domain/use-cases/index.ts",
     "./scheduling/domain/structures": "./src/scheduling/domain/structures/index.ts",
     "./scheduling/interfaces": "./src/scheduling/interfaces/index.ts",
     "./shared/domain/entities": "./src/shared/domain/entities/index.ts",

@@ -178,6 +178,18 @@ A interface nao deve:
 5. **Consistencia operacional.** Padroes equivalentes devem manter os mesmos
    nomes, comportamentos, estados e posicoes ao longo dos modulos.
 
+### Especialidades dos colaboradores jurídicos
+
+O cadastro de um colaborador com perfil jurídico permite associar uma ou mais
+áreas jurídicas. Cada área selecionada forma um grupo independente com seus
+próprios temas jurídicos, permitindo múltipla seleção de temas dentro daquela
+área.
+
+O formulário inicia com um grupo **Área jurídica + Temas jurídicos** e oferece a
+ação `Adicionar área de atuação`. Áreas já selecionadas não podem ser repetidas.
+Remover uma área remove apenas os temas daquele grupo. Perfis administrativos não
+exibem nem persistem especialidades jurídicas.
+
 ### Identificacao de cliente na triagem documental
 
 A identificacao do cliente usa exibicao progressiva: busca manual e correspondencia

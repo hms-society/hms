@@ -6,8 +6,8 @@ import type {
 import type { ClientConsentsRepository } from '@hms/core/identity/interfaces'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 
-import { DrizzleClient } from '@/shared/database/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientConsentModel } from '@/identity/database/drizzle/models'
 import { DrizzleClientConsentMapper } from '@/identity/database/drizzle/mappers'
 

@@ -2,7 +2,7 @@ import { Injectable, type OnModuleDestroy } from '@nestjs/common'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres, { type Sql } from 'postgres'
 
-import * as schema from '@/shared/database/schema'
+import * as schema from '@/shared/database/drizzle/schema'
 
 export type Database = PostgresJsDatabase<typeof schema>
 
@@ -15,6 +15,7 @@ export class DrizzleClient implements OnModuleDestroy {
     const databaseUrl = process.env.DATABASE_URL
 
     if (databaseUrl) {
+      console.log('DATABASE_URL =', databaseUrl)
       this.client = postgres(databaseUrl, {
         connect_timeout: 5,
         idle_timeout: 10,

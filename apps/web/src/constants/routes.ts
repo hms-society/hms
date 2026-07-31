@@ -7,7 +7,6 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   resetPassword: '/redefinir-senha',
   attendant: '/atendimento',
-  attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',

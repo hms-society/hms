@@ -10,12 +10,12 @@ type CollaboratorBase = {
 
 type AdministrativeCollaborator = CollaboratorBase & {
   profile: 'admin' | 'attendant'
-  legalExpertise?: never
+  legalExpertises?: never
 }
 
 type LegalCollaborator = CollaboratorBase & {
   profile: 'lawyer' | 'paralegal' | 'supervisor'
-  legalExpertise: LegalExpertise
+  legalExpertises: readonly [LegalExpertise, ...LegalExpertise[]]
 }
 
 export type Collaborator = AdministrativeCollaborator | LegalCollaborator
