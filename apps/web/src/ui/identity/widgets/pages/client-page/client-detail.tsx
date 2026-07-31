@@ -1,9 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent } from '@/ui/shadcn/card'
-import { Icon } from '@/ui/shared/widgets/components/icon'
+import { Icon, type IconName } from '@/ui/shared/widgets/components/icon'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import {
   Select,
@@ -16,102 +15,52 @@ import { useMaskPhone } from '@/ui/shared/hooks/use-mask-phone'
 import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
 
-export const Route = createFileRoute('/atendimento/clientes/$clienteId')({
-  component: ClientesPage,
-})
-
-const MOCK_COMMUNICATIONS = [
-  {
-    id: '1',
-    channel: 'phone',
-    direction: 'Passiva',
-    badges: [
-      { label: 'Auto', bg: 'bg-blue-50 text-blue-600' },
-      { label: 'Interno', bg: 'bg-muted text-muted-foreground' },
-    ],
-    content: 'Cliente perguntou sobre andamento da consulta agendada para a próxima semana.',
-    author: 'Atend. Júlia',
-    time: 'há 2 dias',
-  },
-  {
-    id: '2',
-    channel: 'phone',
-    direction: 'Ativa',
-    badges: [{ label: 'Liberado ao cliente', bg: 'bg-emerald-100 text-emerald-800' }],
-    content: 'Ligação para confirmar documentos pendentes necessários para o checklist do caso.',
-    author: 'Paralegal João',
-    time: 'há 5 dias',
-  },
-  {
-    id: '3',
-    channel: 'mail',
-    direction: 'Passiva',
-    badges: [{ label: 'Email', bg: 'bg-muted text-muted-foreground' }],
-    content: (
-      <div className="flex flex-col gap-2">
-        <p className="font-medium text-foreground">Assunto: Reenvio de documento — protocolo #MSG-0502</p>
-        <p>Bom dia,</p>
-        <p>Segue em anexo o RG solicitado, desta vez digitalizado com melhor qualidade. Fico no aguardo da confirmação de recebimento e da próxima etapa do processo.</p>
-        <p>Qualquer coisa, estou à disposição.</p>
-        <p>Att,<br/>Carlos</p>
-      </div>
-    ),
-    author: 'Cliente (Carlos)',
-    time: 'há 6 dias',
-  },
-  {
-    id: '4',
-    channel: 'phone',
-    direction: 'Passiva',
-    badges: [
-      { label: 'Auto', bg: 'bg-blue-50 text-blue-600' },
-      { label: 'Interno', bg: 'bg-muted text-muted-foreground' },
-    ],
-    content: 'Cliente enviou RG e comprovante de residência pelo WhatsApp oficial.',
-    author: 'Atend. Júlia',
-    time: 'há 1 semana',
-  },
-  {
-    id: '5',
-    channel: 'user',
-    direction: 'Ativa',
-    badges: [{ label: 'Interno', bg: 'bg-muted text-muted-foreground' }],
-    content: 'Consulta inicial realizada presencialmente — caso previdenciário avaliado com viabilidade positiva.',
-    author: 'Adv. Hudson Marcelo',
-    time: 'há 3 semanas',
-  },
-]
+const CHANNEL_ICON_MAP: Record<string, IconName> = {
+  whatsapp: 'message-square',
+  email: 'mail',
+  phone: 'phone',
+}
 
 function getInitials(name: string) {
   if (!name) return 'UN'
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
 }
 
-function ClientesPage() {
-  const { clienteId } = Route.useParams()
+type ClientDetailsPageProps = {
+  clientId: string
+}
+
+export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const { identityService, intakeService } = useRestContext()
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
   const { data: clientData, isLoading: isLoadingClient, error: clientError } = useQuery({
-    queryKey: ['client', clienteId],
+    queryKey: ['client', clientId],
     queryFn: async () => {
-      const response = await identityService.getClient(clienteId)
+      const response = await identityService.getClient(clientId)
       if (response.isFailure) response.throwError()
       return response.body
     },
   })
 
   const { data: intakesData, isLoading: isLoadingIntakes } = useQuery({
-    queryKey: ['intakes', 'client', clienteId],
+    queryKey: ['intakes', 'client', clientId],
     queryFn: async () => {
-      const response = await intakeService.listClientIntake(clienteId)
+      const response = await intakeService.listClientIntake(clientId)
       if (response.isFailure) return []
       return response.body
     },
     enabled: !!clientData,
   })
+
+  const { 
+    data: communications = [], 
+    isLoading: isLoadingCommunications, 
+    isError: isErrorCommunications 
+  } = useClientCommunicationsQuery(clientId)
 
   if (isLoadingClient || isLoadingIntakes) {
     return (
@@ -266,39 +215,49 @@ function ClientesPage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {MOCK_COMMUNICATIONS.map((item) => (
-          <Card key={item.id} className="shadow-none border-border/60">
-            <CardContent className="p-4 flex gap-4">
-              <div className="shrink-0 flex size-10 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
-                <Icon name={item.channel as any} className="size-5" />
-              </div>
-              <div className="flex-1 space-y-2.5">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {item.direction}
+        {isLoadingCommunications ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">Carregando histórico...</div>
+        ) : isErrorCommunications ? (
+          <div className="p-4 text-center text-sm text-destructive border border-destructive/20 bg-destructive/10 rounded-lg">
+            Erro ao se conectar com a API de histórico.
+          </div>
+        ) : communications.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">Nenhuma comunicação registrada.</div>
+        ) : (
+          communications.map((item: any) => (
+            <Card key={item.id} className="shadow-none border-border/60">
+              <CardContent className="p-4 flex gap-4">
+                <div className="shrink-0 flex size-10 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
+                  <Icon name={CHANNEL_ICON_MAP[item.channel] || 'info'} className="size-5" />
+                </div>
+                <div className="flex-1 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {item.direction === 'inbound' ? 'Recebida' : 'Enviada'}
+                      </span>
+                      {item.direction === 'inbound' ? (
+                        <Badge className="shadow-none border-transparent font-medium bg-blue-50 text-blue-600">Cliente</Badge>
+                      ) : (
+                        <Badge className="shadow-none border-transparent font-medium bg-muted text-muted-foreground">Interno</Badge>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.createdAt))}
                     </span>
-                    {item.badges.map((badge, idx) => (
-                      <Badge key={idx} className={`shadow-none border-transparent font-medium ${badge.bg}`}>
-                        {badge.label}
-                      </Badge>
-                    ))}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {item.time}
-                  </span>
+                  <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                    {item.content}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                    <Icon name="user" className="size-3.5" />
+                    <span>{item.author}</span>
+                  </div>
                 </div>
-                <div className="text-sm text-foreground leading-relaxed">
-                  {item.content}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                  <Icon name="user" className="size-3.5" />
-                  <span>{item.author}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   )

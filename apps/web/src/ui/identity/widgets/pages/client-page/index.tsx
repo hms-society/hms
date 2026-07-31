@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -28,13 +28,9 @@ import {
   PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { useClientsQuery } from './use-clients-query'
+import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useMaskPhone } from '@/ui/shared/hooks/use-mask-phone'
 import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
-
-export const Route = createFileRoute('/atendimento/clientes/')({
-  component: ClientesListPage,
-})
 
 type ClientStatus = 'Cliente' | 'Interessado' | 'Potencial'
 
@@ -66,7 +62,7 @@ function getInitials(name: string) {
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
 }
 
-function ClientesListPage() {
+export function ClientsListPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -212,7 +208,7 @@ function ClientesListPage() {
                   <TableRow 
                     key={client.id} 
                     className="cursor-pointer"
-                    onClick={() => navigate({ to: '/atendimento/clientes/$clienteId', params: { clienteId: client.id } })}
+                    onClick={() => navigate({ to: '/clientes/$clienteId', params: { clienteId: client.id } })}
                   >
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">

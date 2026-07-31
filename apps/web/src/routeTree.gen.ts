@@ -18,12 +18,12 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
-import { Route as AtendimentoClientesIndexRouteImport } from './routes/atendimento/clientes/index'
-import { Route as AtendimentoClientesClienteIdRouteImport } from './routes/atendimento/clientes/$clienteId'
 
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
   id: '/intakes',
@@ -70,10 +70,20 @@ const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
   path: '/forgot-password/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientesIndexRoute = ClientesIndexRouteImport.update({
+  id: '/clientes/',
+  path: '/clientes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
+} as any)
+const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
+  id: '/clientes/$clienteId',
+  path: '/clientes/$clienteId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
@@ -90,18 +100,6 @@ const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
-const AtendimentoClientesIndexRoute =
-  AtendimentoClientesIndexRouteImport.update({
-    id: '/clientes/',
-    path: '/clientes/',
-    getParentRoute: () => AtendimentoRouteRoute,
-  } as any)
-const AtendimentoClientesClienteIdRoute =
-  AtendimentoClientesClienteIdRouteImport.update({
-    id: '/clientes/$clienteId',
-    path: '/clientes/$clienteId',
-    getParentRoute: () => AtendimentoRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -111,14 +109,14 @@ export interface FileRoutesByFullPath {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes/': typeof ClientesIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
-  '/atendimento/clientes/': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,14 +125,14 @@ export interface FileRoutesByTo {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes': typeof ClientesIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
   '/home': typeof HomeIndexRoute
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
-  '/atendimento/clientes': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -145,14 +143,14 @@ export interface FileRoutesById {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes/': typeof ClientesIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
-  '/atendimento/clientes/': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -164,14 +162,14 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/intakes/novo'
+    | '/clientes/'
     | '/forgot-password/'
     | '/home/'
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
-    | '/atendimento/clientes/$clienteId'
-    | '/atendimento/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -180,14 +178,14 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/intakes/novo'
+    | '/clientes'
     | '/forgot-password'
     | '/home'
     | '/intakes'
     | '/login'
     | '/redefinir-senha'
-    | '/atendimento/clientes/$clienteId'
-    | '/atendimento/clientes'
   id:
     | '__root__'
     | '/'
@@ -197,14 +195,14 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/intakes/novo'
+    | '/clientes/'
     | '/forgot-password/'
     | '/home/'
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
-    | '/atendimento/clientes/$clienteId'
-    | '/atendimento/clientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,6 +210,8 @@ export interface RootRouteChildren {
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
+  ClientesClienteIdRoute: typeof ClientesClienteIdRoute
+  ClientesIndexRoute: typeof ClientesIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -283,12 +283,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clientes/': {
+      id: '/clientes/'
+      path: '/clientes'
+      fullPath: '/clientes/'
+      preLoaderRoute: typeof ClientesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes/novo': {
       id: '/intakes/novo'
       path: '/novo'
       fullPath: '/intakes/novo'
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
+    }
+    '/clientes/$clienteId': {
+      id: '/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/clientes/$clienteId'
+      preLoaderRoute: typeof ClientesClienteIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/atendimento/dashboard': {
       id: '/atendimento/dashboard'
@@ -311,20 +325,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoConsultasRouteImport
       parentRoute: typeof AdvogadoRouteRoute
     }
-    '/atendimento/clientes/': {
-      id: '/atendimento/clientes/'
-      path: '/clientes'
-      fullPath: '/atendimento/clientes/'
-      preLoaderRoute: typeof AtendimentoClientesIndexRouteImport
-      parentRoute: typeof AtendimentoRouteRoute
-    }
-    '/atendimento/clientes/$clienteId': {
-      id: '/atendimento/clientes/$clienteId'
-      path: '/clientes/$clienteId'
-      fullPath: '/atendimento/clientes/$clienteId'
-      preLoaderRoute: typeof AtendimentoClientesClienteIdRouteImport
-      parentRoute: typeof AtendimentoRouteRoute
-    }
   }
 }
 
@@ -343,15 +343,11 @@ const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
 interface AtendimentoRouteRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
   AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
-  AtendimentoClientesClienteIdRoute: typeof AtendimentoClientesClienteIdRoute
-  AtendimentoClientesIndexRoute: typeof AtendimentoClientesIndexRoute
 }
 
 const AtendimentoRouteRouteChildren: AtendimentoRouteRouteChildren = {
   AtendimentoConsultasRoute: AtendimentoConsultasRoute,
   AtendimentoDashboardRoute: AtendimentoDashboardRoute,
-  AtendimentoClientesClienteIdRoute: AtendimentoClientesClienteIdRoute,
-  AtendimentoClientesIndexRoute: AtendimentoClientesIndexRoute,
 }
 
 const AtendimentoRouteRouteWithChildren =
@@ -376,6 +372,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
+  ClientesClienteIdRoute: ClientesClienteIdRoute,
+  ClientesIndexRoute: ClientesIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   HomeIndexRoute: HomeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,

@@ -17,7 +17,7 @@ export class CommunicationSeeder {
 
   async run() {
     const db = this.drizzleClient.requireDatabase()
-    const clients = await db.select().from(clientModel).limit(5)
+    const clients = await db.select().from(clientModel)
     const users = await db.select().from(userModel).limit(1)
 
     if (clients.length === 0 || users.length === 0) return

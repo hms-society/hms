@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-export interface ListClientsParams {
+type UseClientsQueryProps = {
   page: number
   limit: number
   search?: string
 }
 
-export function useClientsQuery(params: ListClientsParams) {
+export function useClientsQuery({ page, limit, search }: UseClientsQueryProps) {
   const { identityService } = useRestContext()
 
   return useQuery({
-    queryKey: ['clients', params],
+    queryKey: ['clients', { page, limit, search }],
     queryFn: async () => {
-      const response = await identityService.listClients(params)
+      const response = await identityService.listClients({ page, limit, search })
       if (response.isFailure) response.throwError()
       return response.body
     },

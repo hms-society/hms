@@ -11,7 +11,7 @@ export const ROUTES = {
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
-  clients: '/atendimento/clientes',
+  clients: '/clientes',
 } as const
 
 export type RouteName = keyof typeof ROUTES
