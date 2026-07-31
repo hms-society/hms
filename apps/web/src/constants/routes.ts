@@ -20,6 +20,7 @@ export const ROUTES = {
   paralegalCommunication: '/comunicacao',
   client: '/cliente',
   clientMyCases: '/cliente/meus-casos',
+  clientMyCaseDetails: '/cliente/meus-casos/$caseId',
   clientMessages: '/cliente/mensagens',
   clientPrivacy: '/cliente/privacidade',
 } as const
