@@ -196,7 +196,6 @@ function ClientesPage() {
                   <Icon name="mail" className="size-4" />
                   {client.email || 'Não informado'}
                 </span>
-                {/* Exibe um pequeno badge se houver consentimentos de privacidade aceitos pelo cliente */}
                 {consents.length > 0 && (
                   <span className="flex items-center gap-1.5 text-emerald-600/90" title="Termos de privacidade aceitos">
                     <Icon name="shield-check" className="size-4" />
@@ -264,10 +263,6 @@ function ClientesPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button className="bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6">
-          <Icon name="plus" />
-          Registrar comunicação
-        </Button>
       </div>
 
       <div className="flex flex-col gap-4">
