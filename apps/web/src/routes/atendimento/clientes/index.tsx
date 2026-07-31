@@ -57,7 +57,7 @@ const ORIGIN_LABELS: Record<string, string> = {
   direct: 'Direta HMS',
   referral: 'Indicação',
   website: 'Site',
-  social_media: 'Campanha',
+  social_media: 'Redes sociais',
   other: 'Outro',
 }
 
@@ -92,8 +92,6 @@ function ClientesListPage() {
       (origin === 'direta' && clientOriginLabel === 'Direta HMS') ||
       (origin === 'indicação' && clientOriginLabel === 'Indicação') ||
       (origin === 'campanha' && clientOriginLabel === 'Campanha') ||
-      (origin === 'via-terceiro' && clientOriginLabel === 'Via terceiro') ||
-      (origin === 'retorno' && clientOriginLabel === 'Retorno') ||
       (origin === 'outro' && clientOriginLabel === 'Outro')
 
     return matchesStatus && matchesOrigin
@@ -110,7 +108,7 @@ function ClientesListPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 mt-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 mt-25">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-serif font-semibold text-foreground">Clientes</h1>
@@ -162,12 +160,11 @@ function ClientesListPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="origem">Origem</SelectItem>
-            <SelectItem value="direta">Direta HMS</SelectItem>
-            <SelectItem value="indicação">Indicação</SelectItem>
-            <SelectItem value="campanha">Campanha</SelectItem>
-            <SelectItem value="via-terceiro">Via terceiro</SelectItem>
-            <SelectItem value="retorno">Retorno</SelectItem>
-            <SelectItem value="outro">Outro</SelectItem>
+            <SelectItem value="direct">Direta HMS</SelectItem>
+            <SelectItem value="referral">Indicação</SelectItem>
+            <SelectItem value="website">Site</SelectItem>
+            <SelectItem value="social_media">Redes sociais</SelectItem>
+            <SelectItem value="other">Outro</SelectItem>
           </SelectContent>
         </Select>
       </div>
