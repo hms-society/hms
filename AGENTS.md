@@ -88,6 +88,34 @@ with `mcp__context7__query_docs`. Prefer Context7 over relying on memory or
 outdated examples, and do not use it as a substitute for reading repository
 source or local project rules.
 
+### Atlassian HMS (`mcp__codex_apps__atlassian_hms_*`)
+
+Use the Atlassian HMS MCP for internal Jira and Confluence knowledge, especially
+PRDs, product requirements, architecture decisions, and related delivery
+context. Use it when the repository points to an internal Atlassian page or when
+the requested information is not available in the workspace.
+
+For internal knowledge requests, follow this workflow:
+
+1. Search with `mcp__codex_apps__atlassian_hms_search` using the product or
+   feature vocabulary from the request.
+2. Prefer the canonical page linked by the repository documentation. When search
+   returns duplicate pages, choose the current page with the latest meaningful
+   version and verify its title, parent, and update metadata.
+3. Read the complete page with
+   `mcp__codex_apps__atlassian_hms_getconfluencepage` before summarizing or using
+   its requirements.
+4. Use the Confluence CQL or Jira JQL variants only when the task explicitly
+   requires a structured query; otherwise use the general HMS search tool.
+5. Cite the relevant Atlassian page in the final response and identify conflicts
+   between the internal source, local documentation, and implementation.
+
+Treat Atlassian HMS reads as evidence gathering. Do not create, update, comment
+on, transition, or otherwise mutate Jira or Confluence content unless the user
+explicitly requests that external change. If the MCP is unavailable or access is
+denied, report the limitation and continue with local sources when they are
+enough; do not present an inferred summary as the canonical PRD.
+
 ### Pencil (`mcp__pencil__*`)
 
 Use Pencil for `.pen` files, Pencil node inspection or editing, design-system
