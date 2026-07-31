@@ -1,5 +1,4 @@
 import { defineConfig } from 'drizzle-kit'
-console.log(process.env.DATABASE_URL)
 
 const databaseUrl = process.env.DATABASE_URL
 
@@ -9,8 +8,8 @@ if (!databaseUrl) {
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './src/shared/database/schema.ts',
-  out: './src/shared/database/migrations',
+  schema: './src/shared/database/drizzle/schema.ts',
+  out: './src/shared/database/drizzle/migrations',
   dbCredentials: {
     url: databaseUrl,
   },

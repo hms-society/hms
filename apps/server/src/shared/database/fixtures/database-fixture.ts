@@ -71,8 +71,11 @@ export class DatabaseFixture {
 
     try {
       await migrate(drizzle(migrationClient), {
-        migrationsFolder: resolve(process.cwd(), 'src/shared/database/migrations'),
-      })
+      migrationsFolder: resolve(
+        process.cwd(),
+        'src/shared/database/drizzle/migrations',
+      ),
+    })
     } finally {
       await migrationClient.end()
     }
