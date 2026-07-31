@@ -2297,7 +2297,7 @@
                           "id": "v6pTE",
                           "name": "Label 6",
                           "fill": "$muted-foreground",
-                          "content": "Formalização",
+                          "content": "Formalização iniciada",
                           "textAlign": "center",
                           "fontFamily": "$font-sans",
                           "fontSize": 10,
@@ -4072,7 +4072,7 @@
                           "id": "ckb0j",
                           "name": "Label Formalização",
                           "fill": "$muted-foreground",
-                          "content": "Formalização",
+                          "content": "Formalização iniciada",
                           "textAlign": "center",
                           "fontFamily": "$font-sans",
                           "fontSize": 10,
@@ -6392,7 +6392,7 @@
                           "id": "nyOgZ",
                           "name": "Label Formalização",
                           "fill": "$muted-foreground",
-                          "content": "Formalização",
+                          "content": "Formalização iniciada",
                           "textAlign": "center",
                           "fontFamily": "$font-sans",
                           "fontSize": 10,
@@ -8977,7 +8977,7 @@
                           "id": "FPM5T",
                           "name": "Label Formalização",
                           "fill": "$foreground",
-                          "content": "Formalização",
+                          "content": "Formalização iniciada",
                           "textAlign": "center",
                           "fontFamily": "$font-sans",
                           "fontSize": 10,
@@ -9988,7 +9988,7 @@
                                   "id": "t4wAe",
                                   "name": "Form Label",
                                   "fill": "$muted-foreground",
-                                  "content": "Formalização",
+                                  "content": "Formalização iniciada",
                                   "fontFamily": "$font-sans",
                                   "fontSize": 12,
                                   "fontWeight": "500"
@@ -170019,9 +170019,55 @@
                     },
                     {
                       "type": "frame",
+                      "id": "n7XBib",
+                      "layoutPosition": "absolute",
+                      "x": 444,
+                      "y": 7,
+                      "name": "Filtro por cliente",
+                      "width": 146,
+                      "height": 38,
+                      "fill": "$card",
+                      "cornerRadius": 8,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yKa3s",
+                          "name": "Colaborador selecionado",
+                          "fill": "$foreground",
+                          "content": "Todos os clientes",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "ZhdCv",
+                          "name": "Abrir colaboradores",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "search",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "d4PGj",
+                      "layoutPosition": "absolute",
+                      "x": 598,
+                      "y": 7,
                       "name": "Filtro por colaborador",
-                      "width": 196,
+                      "width": 188,
                       "height": 38,
                       "fill": "$card",
                       "cornerRadius": 8,
@@ -170052,6 +170098,49 @@
                           "width": 15,
                           "height": 15,
                           "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AWti7",
+                      "layoutPosition": "absolute",
+                      "x": 794,
+                      "y": 7,
+                      "name": "Filtro por status",
+                      "width": 140,
+                      "height": 38,
+                      "fill": "$card",
+                      "cornerRadius": 8,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rjBhs",
+                          "name": "Colaborador selecionado",
+                          "fill": "$foreground",
+                          "content": "Todos os status",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "AL6Rk",
+                          "name": "Abrir colaboradores",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "list-filter",
                           "library": "lucide",
                           "fill": "$muted-foreground"
                         }
@@ -172977,9 +173066,55 @@
                     },
                     {
                       "type": "frame",
+                      "id": "L7Rfw",
+                      "layoutPosition": "absolute",
+                      "x": 444,
+                      "y": 7,
+                      "name": "Filtro por cliente",
+                      "width": 146,
+                      "height": 38,
+                      "fill": "$card",
+                      "cornerRadius": 8,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "OCh8s",
+                          "name": "Colaborador selecionado",
+                          "fill": "$foreground",
+                          "content": "Todos os clientes",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "JDhym",
+                          "name": "Abrir colaboradores",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "search",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "LKgGb",
+                      "layoutPosition": "absolute",
+                      "x": 598,
+                      "y": 7,
                       "name": "Filtro por colaborador",
-                      "width": 196,
+                      "width": 188,
                       "height": 38,
                       "fill": "$card",
                       "cornerRadius": 8,
@@ -173010,6 +173145,49 @@
                           "width": 15,
                           "height": 15,
                           "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "i0ZmuW",
+                      "layoutPosition": "absolute",
+                      "x": 794,
+                      "y": 7,
+                      "name": "Filtro por status",
+                      "width": 140,
+                      "height": 38,
+                      "fill": "$card",
+                      "cornerRadius": 8,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Ss6KC",
+                          "name": "Colaborador selecionado",
+                          "fill": "$foreground",
+                          "content": "Todos os status",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "YP2dk",
+                          "name": "Abrir colaboradores",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "list-filter",
                           "library": "lucide",
                           "fill": "$muted-foreground"
                         }
@@ -175278,7 +175456,7 @@
       "context": "Modal central de detalhes de uma consulta agendada",
       "clip": true,
       "width": 560,
-      "height": 535,
+      "height": 586,
       "fill": "$card",
       "cornerRadius": 12,
       "stroke": "$border",
@@ -175519,100 +175697,6 @@
           "fill": "$border",
           "width": 504,
           "height": 1
-        },
-        {
-          "type": "frame",
-          "id": "x2ZWsV",
-          "x": 28,
-          "y": 462,
-          "name": "Remarcar agendamento",
-          "context": "Edita os dados do agendamento",
-          "width": 240,
-          "height": 42,
-          "fill": "$primary",
-          "cornerRadius": 8,
-          "stroke": "$primary",
-          "strokeWidth": 1.5,
-          "strokeAlignment": "inner",
-          "gap": 6,
-          "padding": [
-            8,
-            14
-          ],
-          "justifyContent": "center",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "xXsBk",
-              "x": 0,
-              "y": 0,
-              "name": "Icon",
-              "enabled": false,
-              "width": 14,
-              "height": 14,
-              "icon": "calendar-clock",
-              "library": "lucide",
-              "fill": "$primary-foreground"
-            },
-            {
-              "type": "text",
-              "id": "h5qLBv",
-              "name": "Label",
-              "fill": "$primary-foreground",
-              "content": "Remarcar",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "Z5w0m",
-          "x": 292,
-          "y": 462,
-          "name": "Cancelar agendamento",
-          "context": "Abre a confirmação de cancelamento",
-          "width": 240,
-          "height": 42,
-          "fill": "$card",
-          "cornerRadius": 8,
-          "stroke": "$destructive",
-          "strokeWidth": 1,
-          "strokeAlignment": "inner",
-          "gap": 6,
-          "padding": [
-            8,
-            14
-          ],
-          "justifyContent": "center",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "q9j5ZL",
-              "x": 0,
-              "y": 0,
-              "name": "Icon",
-              "enabled": false,
-              "width": 14,
-              "height": 14,
-              "icon": "x",
-              "library": "lucide",
-              "fill": "$destructive"
-            },
-            {
-              "type": "text",
-              "id": "jy2qs",
-              "name": "Label",
-              "fill": "$destructive",
-              "content": "Cancelar agendamento",
-              "fontFamily": "$font-sans",
-              "fontSize": 10,
-              "fontWeight": "700"
-            }
-          ]
         },
         {
           "type": "frame",
@@ -175882,82 +175966,215 @@
           "y": 398,
           "name": "Seção de consulta",
           "width": 504,
-          "height": 56,
+          "height": 82,
           "fill": "$secondary",
-          "cornerRadius": 8,
+          "cornerRadius": 10,
           "stroke": "$border",
           "strokeWidth": 1,
-          "gap": 12,
-          "padding": [
-            10,
-            16
-          ],
-          "alignItems": "center",
+          "layout": "none",
           "children": [
             {
-              "id": "hI5mX",
-              "type": "ref",
-              "ref": "yR4IE",
-              "name": "Abrir consulta",
+              "type": "frame",
+              "id": "CuhLz",
               "x": 16,
-              "y": 10,
-              "width": 176,
+              "y": 34,
+              "name": "Linha de ação da consulta",
+              "width": 472,
               "height": 36,
-              "fill": "$card",
-              "stroke": "$primary",
-              "strokeWidth": 1,
-              "cornerRadius": 8,
-              "padding": [
-                9,
-                14
-              ],
-              "gap": 6,
-              "descendants": {
-                "CfQKb": {
-                  "icon": "arrow-up-right",
-                  "fill": "$primary",
-                  "enabled": true
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "hI5mX",
+                  "type": "ref",
+                  "ref": "yR4IE",
+                  "name": "Abrir consulta",
+                  "x": 0,
+                  "y": 0,
+                  "width": 176,
+                  "height": 36,
+                  "fill": "$card",
+                  "stroke": "$primary",
+                  "strokeWidth": 1,
+                  "cornerRadius": 8,
+                  "padding": [
+                    9,
+                    14
+                  ],
+                  "gap": 6,
+                  "descendants": {
+                    "CfQKb": {
+                      "icon": "arrow-up-right",
+                      "fill": "$primary",
+                      "enabled": true
+                    },
+                    "BCKt5": {
+                      "content": "Abrir consulta",
+                      "fill": "$primary",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  }
                 },
-                "BCKt5": {
-                  "content": "Abrir consulta",
-                  "fill": "$primary",
-                  "fontSize": 11,
-                  "fontWeight": "600"
+                {
+                  "id": "EHKfW",
+                  "type": "ref",
+                  "ref": "pShsk",
+                  "name": "Presença — Aguardando realização",
+                  "x": 188,
+                  "y": 4,
+                  "fill": "$muted",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "width": 218,
+                  "height": 28,
+                  "cornerRadius": 999,
+                  "padding": [
+                    4,
+                    10
+                  ],
+                  "gap": 6,
+                  "descendants": {
+                    "p455S7": {
+                      "icon": "clock-3",
+                      "fill": "$muted-foreground",
+                      "width": 14,
+                      "height": 14
+                    },
+                    "BECld": {
+                      "content": "Presença do cliente: Aguardando realização",
+                      "fill": "$muted-foreground",
+                      "fontSize": 8.5,
+                      "fontWeight": "600"
+                    }
+                  }
                 }
-              }
+              ]
             },
             {
-              "id": "EHKfW",
-              "type": "ref",
-              "ref": "pShsk",
-              "name": "Presença — Aguardando realização",
-              "x": 204,
-              "y": 14,
-              "fill": "$muted",
-              "stroke": "$border",
-              "strokeWidth": 1,
-              "width": 218,
-              "height": 28,
-              "cornerRadius": 999,
-              "padding": [
-                4,
-                10
-              ],
+              "type": "icon",
+              "id": "m40BVR",
+              "x": 16,
+              "y": 10,
+              "name": "Ícone da seção",
+              "width": 14,
+              "height": 14,
+              "icon": "calendar-check",
+              "library": "lucide",
+              "fill": "$brand"
+            },
+            {
+              "type": "text",
+              "id": "aT8an",
+              "x": 38,
+              "y": 11,
+              "name": "Label da seção",
+              "fill": "$brand",
+              "content": "CONSULTA",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "n5dagm",
+          "x": 28,
+          "y": 516,
+          "name": "Actions",
+          "width": 504,
+          "gap": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "x2ZWsV",
+              "name": "Remarcar agendamento",
+              "context": "Edita os dados do agendamento",
+              "width": "fill_container",
+              "height": 42,
+              "fill": "$primary",
+              "cornerRadius": 8,
+              "stroke": "$primary",
+              "strokeWidth": 1.5,
+              "strokeAlignment": "inner",
               "gap": 6,
-              "descendants": {
-                "p455S7": {
-                  "icon": "clock-3",
-                  "fill": "$muted-foreground",
+              "padding": [
+                8,
+                14
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "xXsBk",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Icon",
+                  "enabled": false,
                   "width": 14,
-                  "height": 14
+                  "height": 14,
+                  "icon": "calendar-clock",
+                  "library": "lucide",
+                  "fill": "$primary-foreground"
                 },
-                "BECld": {
-                  "content": "Presença · Aguardando realização",
-                  "fill": "$muted-foreground",
-                  "fontSize": 8.5,
-                  "fontWeight": "600"
+                {
+                  "type": "text",
+                  "id": "h5qLBv",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Remarcar",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "700"
                 }
-              }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Z5w0m",
+              "name": "Cancelar agendamento",
+              "context": "Abre a confirmação de cancelamento",
+              "width": "fill_container",
+              "height": 42,
+              "fill": "$card",
+              "cornerRadius": 8,
+              "stroke": "$destructive",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "gap": 6,
+              "padding": [
+                8,
+                14
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "q9j5ZL",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Icon",
+                  "enabled": false,
+                  "width": 14,
+                  "height": 14,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$destructive"
+                },
+                {
+                  "type": "text",
+                  "id": "jy2qs",
+                  "name": "Label",
+                  "fill": "$destructive",
+                  "content": "Cancelar agendamento",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
             }
           ]
         }
@@ -176200,100 +176417,6 @@
           "fill": "$border",
           "width": 504,
           "height": 1
-        },
-        {
-          "type": "frame",
-          "id": "w4GaX",
-          "x": 28,
-          "y": 606,
-          "name": "Confirmar reagendamento",
-          "context": "Confirma a nova data e horário",
-          "width": 240,
-          "height": 42,
-          "fill": "$primary",
-          "cornerRadius": 8,
-          "stroke": "$primary",
-          "strokeWidth": 1.5,
-          "strokeAlignment": "inner",
-          "gap": 6,
-          "padding": [
-            8,
-            14
-          ],
-          "justifyContent": "center",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "j9Nnn2",
-              "x": 0,
-              "y": 0,
-              "name": "Icon",
-              "enabled": false,
-              "width": 14,
-              "height": 14,
-              "icon": "plus",
-              "library": "lucide",
-              "fill": "$primary"
-            },
-            {
-              "type": "text",
-              "id": "hlZe9",
-              "name": "Label",
-              "fill": "$primary-foreground",
-              "content": "Confirmar reagendamento",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "Acf1O",
-          "x": 292,
-          "y": 606,
-          "name": "Cancelar remarcação",
-          "context": "Cancela o reagendamento e fecha o modal",
-          "width": 240,
-          "height": 42,
-          "fill": "$card",
-          "cornerRadius": 8,
-          "stroke": "$border",
-          "strokeWidth": 1.5,
-          "strokeAlignment": "inner",
-          "gap": 6,
-          "padding": [
-            8,
-            14
-          ],
-          "justifyContent": "center",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "icon",
-              "id": "AEfiR",
-              "x": 0,
-              "y": 0,
-              "name": "Icon",
-              "enabled": false,
-              "width": 14,
-              "height": 14,
-              "icon": "x",
-              "library": "lucide",
-              "fill": "$muted-foreground"
-            },
-            {
-              "type": "text",
-              "id": "BqAUs",
-              "name": "Label",
-              "fill": "$foreground",
-              "content": "Cancelar remarcação",
-              "fontFamily": "$font-sans",
-              "fontSize": 11,
-              "fontWeight": "700"
-            }
-          ]
         },
         {
           "type": "frame",
@@ -176884,6 +177007,106 @@
               "icon": "x",
               "library": "lucide",
               "fill": "$secondary-foreground"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "v6iowD",
+          "x": 28,
+          "y": 606,
+          "name": "Ações",
+          "gap": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "w4GaX",
+              "name": "Confirmar reagendamento",
+              "context": "Confirma a nova data e horário",
+              "width": 240,
+              "height": 42,
+              "fill": "$primary",
+              "cornerRadius": 8,
+              "stroke": "$primary",
+              "strokeWidth": 1.5,
+              "strokeAlignment": "inner",
+              "gap": 6,
+              "padding": [
+                8,
+                14
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "j9Nnn2",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Icon",
+                  "enabled": false,
+                  "width": 14,
+                  "height": 14,
+                  "icon": "plus",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "hlZe9",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Confirmar reagendamento",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Acf1O",
+              "name": "Cancelar remarcação",
+              "context": "Cancela o reagendamento e fecha o modal",
+              "width": 240,
+              "height": 42,
+              "fill": "$card",
+              "cornerRadius": 8,
+              "stroke": "$border",
+              "strokeWidth": 1.5,
+              "strokeAlignment": "inner",
+              "gap": 6,
+              "padding": [
+                8,
+                14
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "AEfiR",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Icon",
+                  "enabled": false,
+                  "width": 14,
+                  "height": 14,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$muted-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "BqAUs",
+                  "name": "Label",
+                  "fill": "$foreground",
+                  "content": "Cancelar remarcação",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                }
+              ]
             }
           ]
         }
@@ -178345,10 +178568,34 @@
                       "id": "DAXyv",
                       "name": "Detalhes da criação",
                       "fill": "$muted-foreground",
-                      "content": "Cliente: José Carlos da Silva · Atendente: Maria Costa · Área: Trabalhista · Tema: Verbas rescisórias · Consulta: 01/07/2026 · 09:00 · Virtual",
+                      "content": "Cliente: José Carlos da Silva · Área: Trabalhista · Tema: Verbas rescisórias · Consulta: 01/07/2026 · 09:00 · Virtual",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SAWl7",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "oFD2z",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178438,10 +178685,34 @@
                       "id": "U52ZGM",
                       "name": "Detalhe do evento",
                       "fill": "$muted-foreground",
-                      "content": "De: 30/06 · 16:00 · Para: 01/07 · 09:00 · Maria",
+                      "content": "De: 30/06 · 16:00 · Para: 01/07 · 09:00",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "v0xffJ",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kkbaF",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178531,10 +178802,34 @@
                       "id": "K9n4Q",
                       "name": "Detalhe do evento",
                       "fill": "$muted-foreground",
-                      "content": "Motivo: indisponibilidade do cliente · Maria",
+                      "content": "Motivo: indisponibilidade do cliente",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "E6o5yG",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lOdWD",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178618,6 +178913,30 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jKRM6",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nN421",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Adv. Epaminondas · Advogado",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178707,10 +179026,34 @@
                       "id": "dcV0p",
                       "name": "Detalhe do evento",
                       "fill": "$muted-foreground",
-                      "content": "Resultado: viável · Adv. Epaminondas",
+                      "content": "Resultado: viável",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mV4aP",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "puoaA",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Adv. Epaminondas · Advogado",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178758,9 +179101,9 @@
                   "name": "Dot Consulta",
                   "width": 20,
                   "height": 20,
-                  "fill": "$muted",
+                  "fill": "$highlight",
                   "cornerRadius": 10,
-                  "stroke": "$muted-foreground",
+                  "stroke": "#065F46",
                   "strokeWidth": 1,
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -178773,7 +179116,7 @@
                       "height": 10,
                       "icon": "pencil",
                       "library": "lucide",
-                      "fill": "$muted-foreground"
+                      "fill": "#065F46"
                     }
                   ]
                 },
@@ -178794,6 +179137,30 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oKWlM",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PMRwR",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Adv. Epaminondas · Advogado",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178877,6 +179244,30 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qQhCy",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Y8NQQ",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Adv. Epaminondas · Advogado",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -178966,10 +179357,34 @@
                       "id": "S6K92f",
                       "name": "Detalhe do evento",
                       "fill": "$muted-foreground",
-                      "content": "Motivo: desistência do cliente · Maria",
+                      "content": "Motivo: desistência do cliente",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UtZVk",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "A3FPS",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179053,6 +179468,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "b1LKs5",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: José Carlos da Silva · Depois: Carla Drummond",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ESonL",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qxwWb",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179136,6 +179585,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "HgyrZ",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: Trabalhista · Depois: Previdenciário",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "RWLD3",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "KTb86",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179219,6 +179702,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "F6BEMD",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: Verbas rescisórias · Depois: Aposentadoria por tempo",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UINm7",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "D3nQH",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179302,6 +179819,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RjoXT",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: Entrada direta HMS · Depois: Indicação",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "f9eEc",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tnDAn",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179385,6 +179936,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Q2PUSc",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: WhatsApp · Depois: E-mail",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kezKc",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "K0ddgI",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179468,6 +180053,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "trqZU",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: Maria Costa · Depois: Renata Sales",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "a8ScO",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "K3hMx",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179551,6 +180170,40 @@
                       "fontFamily": "$font-sans",
                       "fontSize": 10,
                       "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YnKoK",
+                      "name": "Detalhe do evento",
+                      "fill": "$muted-foreground",
+                      "content": "Antes: Normal · Depois: Alta",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Miba0",
+                      "name": "Ator Badge",
+                      "fill": "$muted",
+                      "cornerRadius": 999,
+                      "padding": [
+                        2,
+                        6
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jSOSH",
+                          "name": "Ator",
+                          "fill": "$muted-foreground",
+                          "content": "Maria Costa · Atendente",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 8,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -179568,89 +180221,6 @@
                       "name": "TM Consulta",
                       "fill": "$foreground",
                       "content": "04/07 · 10:12",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 9,
-                      "fontWeight": "500"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "fV6b9",
-              "name": "Atividade Observações atualizadas",
-              "width": "fill_container",
-              "cornerRadius": 6,
-              "stroke": "#00000000",
-              "strokeWidth": {
-                "bottom": 1
-              },
-              "gap": 12,
-              "padding": [
-                6,
-                4
-              ],
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "yTCVg",
-                  "name": "Dot Consulta",
-                  "width": 20,
-                  "height": 20,
-                  "fill": "$muted",
-                  "cornerRadius": 10,
-                  "stroke": "$muted-foreground",
-                  "strokeWidth": 1,
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "GLwrC",
-                      "name": "DI Consulta",
-                      "width": 10,
-                      "height": 10,
-                      "icon": "pencil",
-                      "library": "lucide",
-                      "fill": "$muted-foreground"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "BKS30",
-                  "name": "Mid Consulta",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 2,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "hSQxm",
-                      "name": "ET Consulta",
-                      "fill": "$foreground",
-                      "content": "Observações atualizadas",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 10,
-                      "fontWeight": "500"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "wcBIp",
-                  "name": "Right Consulta",
-                  "layout": "vertical",
-                  "gap": 1,
-                  "alignItems": "end",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Rrjfe",
-                      "name": "TM Consulta",
-                      "fill": "$foreground",
-                      "content": "04/07 · 10:13",
                       "fontFamily": "$font-sans",
                       "fontSize": 9,
                       "fontWeight": "500"
