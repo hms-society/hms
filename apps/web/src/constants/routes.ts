@@ -4,13 +4,15 @@ export const ROUTES = {
   home: '/home',
   intakes: '/intakes',
   newIntake: '/intakes/novo',
-  forgotPassword: '/forgot-password',
+  requestPasswordReset: '/pedir-redefinir-senha',
   resetPassword: '/redefinir-senha',
+  invite: '/convite',
   attendant: '/atendimento',
   attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
+  collaborators: '/colaboradores',
 } as const
 
 export type RouteName = keyof typeof ROUTES

@@ -43,6 +43,13 @@
       "when": 1785269811710,
       "tag": "0005_cool_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785345980719,
+      "tag": "0006_left_terror",
+      "breakpoints": true
     }
   ]
 }

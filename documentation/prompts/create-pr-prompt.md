@@ -1,231 +1,138 @@
 ---
-description: Prompt for creating standardized pull requests via gh, with a clear noun-phrase title, structured body, and validation checklist.
+name: create-pr
+description: Criar Pull Requests do HMS via gh, com commits, rastreabilidade Jira/Confluence e checklist de validação.
 ---
 
-# Prompt: Create PR
+# Criar PR
 
-**Goal:** Standardize the creation of Pull Requests (PRs), ensuring clear
-descriptions that make code review and task tracking easier. The workflow relies
-exclusively on the **GitHub CLI (gh)** to keep the process consistent.
+O Orchestrator prepara e publica o Pull Request usando exclusivamente a GitHub
+CLI (`gh`). O PR deve manter a rastreabilidade da Spec, do PRD no Confluence e
+dos tickets Jira, sem transformar esses registros em GitHub Issues ou
+milestones.
 
----
+## Entrada
 
-## Input
+- Spec ou Bug Report implementado e validado;
+- branch de trabalho baseada em `develop`;
+- link do PRD no Confluence, quando houver;
+- todas as chaves/URLs de `jira_tickets`, quando houver.
 
-- A Spec (specification) that has been implemented and validated.
-- A Bug Report that has been implemented and validated.
-- A `feat/`, `fix/`, or `refactor/` branch with the changes committed.
-- Every pull request must target the `develop` branch.
+## Leitura e preflight
 
----
+Antes de criar commits ou abrir o PR, leia:
 
-## Project Context
+- `documentation/github-flow.md`;
+- `documentation/rules/commit-rules.md`;
+- `documentation/rules/rules.md` e as Rules aplicáveis ao diff;
+- `documentation/prompts/commit-code-prompt.md`.
 
-This is a pnpm + Turborepo monorepo:
+Consulte a Spec, o PRD no Confluence e todos os tickets Jira associados quando
+a integração estiver disponível. Preserve as referências e não altere status,
+comentários ou critérios de aceite automaticamente.
 
-- `apps/web` — TanStack Start + React frontend (Tailwind v4, shadcn/ui)
-- `apps/server` — NestJS backend
-- `packages/core` — shared domain (entities, errors, events) consumed by both apps
+Execute o preflight documentado pelo projeto:
 
-Commits follow **Conventional Commits**, enforced by commitlint + husky. PR titles,
-however, are written as plain noun phrases **without a type prefix** (see below).
-
----
-
-## Execution Guidelines
-
-### 1. Context Analysis
-
-- Review the implemented Spec and the changelog of the changes made.
-- Identify:
-
-  - technical impact (which of `web` / `server` / `core` is affected)
-  - design decisions taken
-  - risks and side effects
-
----
-
-### 2. Title Definition
-
-The title must be:
-
-- short and direct
-- **in Brazilian Portuguese (PT-BR)**
-- a reflection of the essence of the change
-- preferably a **noun phrase** (do not start with a verb)
-
-Prefer noun-phrase formulations such as:
-
-- `Configuração de...`
-- `Cobertura de...`
-- `Correção de...`
-- `Ajuste de...`
-- `Refatoração de...`
-
-Examples:
-
-- `Configuração da listagem de produtos`
-- `Correção do erro de carregamento de imagem`
-- `Correção da navegação para a tela de catálogo`
-- `Cobertura de testes de integração da página de cadastro`
-
-⚠️ Do **not** add any prefix to the title — neither branch-style prefixes nor
-Conventional Commits types:
-
-```
-feat/        feat(scope):
-fix/         fix:
-refactor/    chore:
+```bash
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
 ```
 
----
+Use filtros de workspace quando forem suficientes e registre comandos
+omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
 
-### 3. Body Structure
+## Título
 
-The PR body must follow the template below.
+Use um título curto, em PT-BR, como frase nominal, sem prefixo Conventional
+Commit e sem chave Jira. Exemplos: `Correção do carregamento de clientes` ou
+`Configuração do cadastro de colaboradores`.
 
-**Formatting rules:**
+## Commits pendentes
 
-- use Markdown
-- do not use a top-level `#` heading
-- use `##` and lower levels
+Se houver alterações não commitadas:
 
----
+1. inspecione `git status --short`, `git diff` e `git diff --cached`;
+2. preserve arquivos staged e alterações fora do escopo;
+3. agrupe por responsabilidade semântica;
+4. crie commits atômicos usando Conventional Commits, conforme
+   `commit-rules.md` e `commit-code-prompt.md`;
+5. não use `git add .`, `--no-verify`, `--amend`, rebase ou comandos destrutivos;
+6. só abra o PR quando a branch estiver limpa quanto aos arquivos da entrega.
 
-## Objetivo (obrigatório)
+Formato:
 
-Explique por que este PR foi criado e qual é seu propósito principal.
-
-## Issues relacionadas (opcional)
-
-Vincule tarefas/bugs usando **apenas** a palavra-chave `resolve`:
-
-```
-resolve #123
-resolve #456
-```
-
-⚠️ Não use `closes`, `fixes` ou qualquer outra variação. Apenas `resolve`.
-
----
-
-## Causa do bug (opcional — apenas para correções)
-
-Descreva a causa técnica raiz do problema.
-
----
-
-## Changelog (obrigatório)
-
-Lista técnica das alterações realizadas:
-
-- arquivos modificados
-- comportamentos alterados
-- regras adicionadas
-- refatorações realizadas
-
----
-
-## Como testar (obrigatório)
-
-Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
-relevantes, ex.:
-
-```
-pnpm install
-pnpm --filter web dev        # frontend em http://localhost:3000
-pnpm --filter server start:dev
-pnpm --filter <pkg> check-types
+```text
+<type>(<scope>): <subject>
 ```
 
-1. …
-2. …
-3. …
+## Corpo do PR
 
----
+Use Markdown sem título principal (`#`) e inclua:
 
-## Observações (opcional)
+### Objetivo
 
-- decisões de arquitetura
-- limitações conhecidas
-- tradeoffs
-- próximos passos
+Explique o propósito central da alteração.
 
----
+### Tickets Jira relacionados
 
-### 4. Commit and Push
+Liste todas as chaves ou URLs, sem usar palavras-chave de fechamento do GitHub:
 
-Before opening the PR, make sure all changes are committed and the branch is pushed
-to the remote — `gh pr create` opens a PR from commits that already exist on the
-remote branch, so uncommitted or unpushed work will not be included.
-
-1. Check the working tree:
-
-   ```
-   git status
-   ```
-
-2. Stage and commit any pending changes. Commit messages **must** follow
-   **Conventional Commits** (enforced by commitlint + husky):
-
-   ```
-   git add .
-   git commit -m "<type>(<scope>): <subject>"
-   ```
-
-3. Push the branch to the remote (first push sets the upstream):
-
-   ```
-   git push -u origin <branch-name>
-   ```
-
-⚠️ Do not skip the hooks (e.g. `--no-verify`) — the commit must pass commitlint.
-
----
-
-### 5. Creation via gh CLI
-
-⚠️ Do not use the GitHub MCP. ⚠️ Do not use MCP APIs. Use **gh** exclusively.
-
-Standard command:
-
-```
-gh pr create \
-  --base develop \
-  --head <branch-name> \
-  --title "<PR title>" \
-  --body-file pr_body.md
+```md
+- PROJ-123 — <relação com a alteração>
+- PROJ-456 — <relação com a alteração>
 ```
 
-Or inline:
+Se não houver ticket, informe `Nenhum ticket Jira associado.` Não crie um
+ticket ou GitHub Issue automaticamente.
 
-```
+### PRD no Confluence
+
+Inclua o link da página quando houver e descreva divergências de produto ou
+limitações conhecidas. Se o PRD não for aplicável, informe isso explicitamente.
+
+### Causa do bug
+
+Inclua somente para correções: descreva a causa técnica raiz.
+
+### Changelog
+
+Liste arquivos, comportamento alterado, contratos, regras e refatorações
+relevantes.
+
+### Como testar
+
+Descreva passos reproduzíveis e os comandos executados, incluindo fluxo de
+integração/e2e quando aplicável.
+
+### Observações
+
+Registre decisões arquiteturais, migrations, efeitos colaterais, limitações,
+trade-offs e próximos passos.
+
+## Criação e revisão
+
+Crie o PR para `develop`:
+
+```bash
 gh pr create \
   --base develop \
   --head <branch> \
-  --title "<PR title>" \
-  --body "<formatted description>"
+  --title "<título em PT-BR>" \
+  --body-file <arquivo-do-corpo>
 ```
 
----
+Após a criação, obtenha o número e a URL reais:
 
-
-### 7. Return
-
-After creation:
-
-```
-gh pr view --web
+```bash
+gh pr view --json number,url
 ```
 
-or
+Solicite a revisão automatizada apenas depois de o PR estar publicado:
 
+```bash
+gh pr comment <numero-do-pr> --body "@codex review"
 ```
-gh pr view --json url
-```
 
-Return:
-
-- link to the created PR
-- final title
-- summary of the generated body
+Informe título, URL, número, branch, commits, validações, referências Jira e
+Confluence, resultado da revisão e quaisquer pendências preservadas.

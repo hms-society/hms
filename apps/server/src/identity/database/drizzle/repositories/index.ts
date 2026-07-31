@@ -1,3 +1,7 @@
 export * from '@/identity/database/drizzle/repositories/drizzle-client-consents-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-clients-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-collaborator-registration-attempts-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-collaborators-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-identity-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-identity-transaction'
 export * from '@/identity/database/drizzle/repositories/drizzle-users-repository'

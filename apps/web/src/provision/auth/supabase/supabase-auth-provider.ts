@@ -31,19 +31,6 @@ export const SupabaseAuthProvider = (
   client: SupabaseClient = supabaseClient,
 ): AuthProvider => {
   return {
-    async createUser({ identifier, password }: AuthCredentials): Promise<AuthUser> {
-      const { data, error } = await client.auth.signUp({
-        email: identifier,
-        password,
-      })
-
-      if (error) throwDomainAuthError(error)
-
-      if (!data.user) throw new AppError('Supabase did not create the user')
-
-      return toUser(data.user)
-    },
-
     async signIn({ identifier, password }: AuthCredentials): Promise<AuthSession> {
       const { data, error } = await client.auth.signInWithPassword({
         email: identifier,

@@ -150,12 +150,13 @@ Governa todas as interações registradas com pessoas e as notificações intern
 Sabe quem são todas as pessoas, como elas acessam o sistema e quais autorizações
 possuem globalmente.
 
-Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/x/BIAC).
+Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232).
 
 - Mantém um cadastro único de pessoas, com detecção de duplicatas por identificador
   fiscal.
 - Vincula pessoas a usuários do sistema por meio do Supabase Auth.
-- Atribui um dos nove perfis fixos que determinam a autorização em todo o sistema.
+- Atribui um dos cinco perfis fixos que determinam a autorização em todo o sistema:
+  Administrador, Atendente, Advogado, Paralegal ou Supervisor.
 - Associa cada colaborador jurídico a uma ou mais áreas jurídicas, com um ou mais
   temas pertencentes a cada área selecionada.
 - Registra concessões e revogações de consentimento da LGPD em um log imutável e

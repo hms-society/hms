@@ -8,6 +8,7 @@ export class DrizzleUserMapper {
       id: drizzleUser.id,
       email: drizzleUser.email,
       status: drizzleUser.status,
+      lastAccessAt: drizzleUser.lastAccessAt ?? undefined,
       createdAt: drizzleUser.createdAt,
       updatedAt: drizzleUser.updatedAt,
     }

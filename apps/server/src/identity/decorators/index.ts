@@ -1,2 +1,5 @@
 export * from './auth-controller.decorator'
 export * from '@/identity/decorators/clients-controller.decorator'
+export * from '@/identity/decorators/collaborators-controller.decorator'
+export * from '@/identity/decorators/current-auth.decorator'
+export * from '@/identity/decorators/current-collaborator.decorator'

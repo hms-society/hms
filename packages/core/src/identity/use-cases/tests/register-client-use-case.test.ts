@@ -67,12 +67,24 @@ describe('RegisterClientUseCase', () => {
   })
 
   it.each([
-    ['an invalid CPF', { type: 'natural' as const, name: 'Maria', taxId: '529.982.247-26' }],
-    ['a repeated CPF', { type: 'natural' as const, name: 'Maria', taxId: '111.111.111-11' }],
-    ['a CPF with the legal type', { type: 'legal' as const, legalName: 'Empresa', taxId: cpf }],
+    [
+      'an invalid CPF',
+      { type: 'natural' as const, name: 'Maria', taxId: '529.982.247-26' },
+    ],
+    [
+      'a repeated CPF',
+      { type: 'natural' as const, name: 'Maria', taxId: '111.111.111-11' },
+    ],
+    [
+      'a CPF with the legal type',
+      { type: 'legal' as const, legalName: 'Empresa', taxId: cpf },
+    ],
     ['a missing natural name', { type: 'natural' as const, taxId: cpf }],
     ['a missing legal name', { type: 'legal' as const, taxId: cnpj }],
-    ['an incompatible legal name', { type: 'natural' as const, name: 'Maria', legalName: 'Empresa', taxId: cpf }],
+    [
+      'an incompatible legal name',
+      { type: 'natural' as const, name: 'Maria', legalName: 'Empresa', taxId: cpf },
+    ],
   ])('rejects %s before persistence', async (_, request) => {
     const useCase = new RegisterClientUseCase(clientsRepository)
 

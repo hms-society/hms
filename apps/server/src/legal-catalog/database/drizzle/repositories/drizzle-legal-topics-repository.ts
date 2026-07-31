@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { LegalTopicCreation } from '@hms/core/legal-catalog/domain/entities'
 import type { LegalTopicsRepository } from '@hms/core/legal-catalog/interfaces'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -43,6 +43,17 @@ export class DrizzleLegalTopicsRepository
       .orderBy(asc(legalTopicModel.name))
 
     return records.map(({ topic }) => this.legalTopicMapper.toDomain(topic))
+  }
+
+  async findByIds(legalTopicIds: readonly string[]) {
+    if (legalTopicIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(legalTopicModel)
+      .where(inArray(legalTopicModel.id, legalTopicIds))
+
+    return records.map((record) => this.legalTopicMapper.toDomain(record))
   }
 
   async removeAll() {

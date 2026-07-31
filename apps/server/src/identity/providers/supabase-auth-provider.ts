@@ -18,6 +18,8 @@ import type {
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
+import { isValidSupabaseServerKey } from './is-valid-supabase-server-key'
+
 @Injectable()
 export class SupabaseAuthProvider implements AuthProvider {
   private readonly supabase: SupabaseClient
@@ -32,40 +34,13 @@ export class SupabaseAuthProvider implements AuthProvider {
       )
     }
 
-    if (supabaseKey.split('.').length !== 3) {
-      throw new Error('Supabase service role key must be a valid JWT')
+    if (!isValidSupabaseServerKey(supabaseKey)) {
+      throw new Error('Supabase server key must be a legacy JWT or an sb_secret key')
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false },
     })
-  }
-
-  async createUser({ identifier, password }: AuthCredentials): Promise<AuthUser> {
-    const { data: users, error: listError } = await this.supabase.auth.admin.listUsers()
-
-    if (listError) throw listError
-
-    const existingUser = users.users.find((user) => user.email === identifier)
-
-    if (existingUser) {
-      const { data, error } = await this.supabase.auth.admin.updateUserById(
-        existingUser.id,
-        { password, email_confirm: true },
-      )
-
-      if (error || !data.user) throw error ?? new Error('Supabase user was not updated')
-      return this.toUser(data.user)
-    }
-
-    const { data, error } = await this.supabase.auth.admin.createUser({
-      email: identifier,
-      password,
-      email_confirm: true,
-    })
-
-    if (error || !data.user) throw error ?? new Error('Supabase user was not created')
-    return this.toUser(data.user)
   }
 
   async signIn({ identifier, password }: AuthCredentials): Promise<AuthSession> {

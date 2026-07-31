@@ -22,6 +22,63 @@ responses. Prefer snapshots, console output, and network inspection for
 diagnosis; use screenshots when visual confirmation is needed. Start the web
 application and any required backend services before using it.
 
+#### Required authenticated-browser workflow
+
+For an authenticated flow, do not treat a successful navigation or a mocked
+transport as sufficient evidence. Use this sequence:
+
+1. Confirm the local dependencies before opening the browser:
+   `docker compose ps -a`, `curl http://localhost:8000/auth/v1/health`, and
+   `curl http://localhost:3333/health`. The database and Auth containers must be
+   healthy, and the server must finish Nest bootstrap without
+   `UnknownDependenciesException`.
+2. Start `pnpm --filter server dev` and `pnpm --filter web dev` in persistent
+   terminal sessions. Record the sessions so they can be stopped with Ctrl-C
+   after validation. Do not begin browser assertions while either process is
+   still compiling or restarting.
+3. Resolve the seed credentials from
+   `apps/server/src/identity/database/identity-seeder.ts` and the local env.
+   For the current seed, the administrator is
+   `admin@hmsadvogados.com.br`; never assume a credential without checking the
+   source and `HMS_USER_SEED_PASSWORD` first.
+4. Navigate to `/login`, capture a fresh accessibility snapshot, fill the
+   visible email and password fields, submit, and wait for the authenticated
+   destination. Verify both the URL and authenticated content before testing a
+   protected route.
+5. Navigate to the protected route and validate real server-backed behavior.
+   For Identity, verify `/colaboradores`, filters/search URL state, row actions,
+   details, and the relevant form/dialog. Use the real REST/Auth services for
+   this pass; `page.route` mocks belong only to isolated route/widget tests and
+   must be labeled as such in the evidence.
+6. After each navigation or state-changing interaction, take a new
+   `browser_snapshot`. Accessibility refs are ephemeral: never reuse a ref from
+   an older snapshot after navigation or re-render. Prefer role/name or the
+   current snapshot ref over CSS selectors.
+7. Inspect `browser_console_messages` at the end of each flow and inspect
+   `browser_network_requests` for failed API calls. Any console error, 4xx/5xx
+   response, hydration warning, or auth refresh failure must be recorded and
+   classified as fixed, pre-existing, or blocking; do not call a flow green
+   solely because the test reached the expected URL.
+8. Exercise at least one narrow viewport and keyboard path for UI changes. If
+   the Contract includes responsive, theme, focus, or accessibility behavior,
+   validate each explicitly rather than inferring it from a desktop snapshot.
+
+Common recovery checks:
+
+- If Auth returns `ECONNREFUSED` or the hostname `supabase-db` is unresolved,
+  inspect `docker compose ps -a` and `docker logs supabase-db`; recreate the
+  affected container only after confirming bind-mount paths are files, not
+  directories, then wait for health before restarting Auth.
+- If Nest reports an unknown dependency during bootstrap, fix module imports or
+  exports before using Playwright. REST fixtures may override guards and can
+  hide application-composition errors.
+- If `/auth/v1/token?grant_type=refresh_token` returns 400, start a fresh browser
+  context/session or sign in again before diagnosing the feature; stale tokens
+  must not be reported as a feature failure.
+- If the browser process is left running, stop the recorded Web/Server sessions
+  after the run and leave shared Docker services unchanged unless the task
+  explicitly requests teardown.
+
 ### Context7 (`mcp__context7__*`)
 
 Use Context7 when implementation depends on current documentation for a library,
@@ -130,6 +187,9 @@ and helper scripts.
   applicable documents.
 - If code and documentation disagree, treat the documentation as intent and surface
   the discrepancy instead of silently following the code.
+- Whenever implementation work reveals or introduces a business-rule change,
+  update the corresponding PRD before concluding the task, and keep the code,
+  design, and repository documentation aligned with that decision.
 - When dynamic context discovery identifies a recurring path, layer, or behavior
   that is not mapped by `documentation/rules/rules.md`, ask the user whether the
   convention should be codified as a rule under `documentation/rules/` before

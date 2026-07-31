@@ -5,14 +5,16 @@ const MOBILE_BREAKPOINT = 768
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
-  React.useEffect(() => {
+  React.useEffect(function subscribeToViewportChanges() {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
+    function handleViewportChange() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
-    mql.addEventListener('change', onChange)
+    mql.addEventListener('change', handleViewportChange)
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener('change', onChange)
+    return function unsubscribeFromViewportChanges() {
+      mql.removeEventListener('change', handleViewportChange)
+    }
   }, [])
 
   return !!isMobile

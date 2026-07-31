@@ -1,0 +1,76 @@
+@url = {{BASE_URL}}/collaborators
+@authUrl = {{BASE_URL}}/auth
+@accessToken = {{ACCESS_TOKEN}}
+@legalAreaId = {{LEGAL_AREA_ID}}
+@legalTopicId = {{LEGAL_TOPIC_ID}}
+
+### List collaborators
+GET {{url}}?page=1&pageSize=20&profile=lawyer&status=active&search={{COLLABORATOR_SEARCH}}
+Authorization: Bearer {{accessToken}}
+
+### Get current collaborator
+GET {{url}}/me
+Authorization: Bearer {{accessToken}}
+
+### Get collaborator details
+GET {{url}}/{{COLLABORATOR_ID}}
+Authorization: Bearer {{accessToken}}
+
+### Register collaborator
+POST {{url}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "{{COLLABORATOR_EMAIL}}",
+  "professionalName": "{{COLLABORATOR_NAME}}",
+  "jobTitle": "{{COLLABORATOR_JOB_TITLE}}",
+  "profile": "lawyer",
+  "legalExpertises": [
+    {
+      "legalAreaId": "{{legalAreaId}}",
+      "legalTopicIds": ["{{legalTopicId}}"]
+    }
+  ]
+}
+
+### Complete collaborator sign-in
+POST {{authUrl}}/complete-sign-in
+Authorization: Bearer {{accessToken}}
+
+### Resend collaborator invitation
+POST {{url}}/{{COLLABORATOR_ID}}/invitation/resend
+Authorization: Bearer {{accessToken}}
+
+### Deactivate collaborator
+POST {{url}}/{{COLLABORATOR_ID}}/deactivate
+Authorization: Bearer {{accessToken}}
+
+### Reactivate collaborator
+POST {{url}}/{{COLLABORATOR_ID}}/reactivate
+Authorization: Bearer {{accessToken}}
+
+### Cancel collaborator invitation
+POST {{url}}/{{COLLABORATOR_ID}}/invitation/cancel
+Authorization: Bearer {{accessToken}}
+
+### Remove cancelled collaborator
+DELETE {{url}}/{{COLLABORATOR_ID}}
+Authorization: Bearer {{accessToken}}
+
+### Update collaborator
+PATCH {{url}}/{{COLLABORATOR_ID}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "professionalName": "{{COLLABORATOR_NAME}} atualizado",
+  "jobTitle": "{{COLLABORATOR_JOB_TITLE}}",
+  "profile": "lawyer",
+  "legalExpertises": [
+    {
+      "legalAreaId": "{{legalAreaId}}",
+      "legalTopicIds": ["{{legalTopicId}}"]
+    }
+  ]
+}
