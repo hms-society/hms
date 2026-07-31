@@ -51,12 +51,6 @@ export const NewIntakePage = () => {
 
   return (
     <FormProvider {...form}>
-      {/* 
-        Ajustes aplicados na tag form:
-        - pt-20 (ou pt-24): Empurra o formulário para baixo da barra verde do Header
-        - pb-12 e px-4 sm:px-6: Garante margem inferior e recuo nas laterais para celular
-        - max-w-5xl / max-w-6xl: Limita a largura para manter um bom layout visual
-      */}
       <form
         className='mx-auto flex w-full max-w-5xl flex-col gap-5 pt-20 pb-12 px-4 sm:px-6'
         onSubmit={handleSubmit}
