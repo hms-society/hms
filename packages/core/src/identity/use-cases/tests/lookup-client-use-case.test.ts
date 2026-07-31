@@ -27,7 +27,10 @@ describe('LookupClientUseCase', () => {
       client,
       consents: [],
     })
-    expect(clientsRepository.findByTaxId).toHaveBeenCalledWith({ type: 'cpf', value: cpf })
+    expect(clientsRepository.findByTaxId).toHaveBeenCalledWith({
+      type: 'cpf',
+      value: cpf,
+    })
   })
 
   it('normalizes a valid CNPJ before lookup', async () => {
@@ -35,9 +38,11 @@ describe('LookupClientUseCase', () => {
     clientsRepository.findByTaxId.mockResolvedValue(client)
     const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
 
-    await expect(useCase.execute({ taxId: '11.222.333/0001-81' })).resolves.toMatchObject({
-      client,
-    })
+    await expect(useCase.execute({ taxId: '11.222.333/0001-81' })).resolves.toMatchObject(
+      {
+        client,
+      },
+    )
   })
 
   it('prioritizes tax ID when phone is also provided', async () => {
@@ -63,21 +68,25 @@ describe('LookupClientUseCase', () => {
   })
 
   it('rejects an ambiguous phone match', async () => {
-    clientsRepository.findByPhone.mockResolvedValue([ClientFaker.fake(), ClientFaker.fake()])
+    clientsRepository.findByPhone.mockResolvedValue([
+      ClientFaker.fake(),
+      ClientFaker.fake(),
+    ])
     const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
 
     await expect(useCase.execute({ phone: '11999999999' })).rejects.toThrow()
   })
 
-  it.each(['529.982.247-26', '111.111.111-11', '123'])(
-    'rejects invalid tax ID %s before repository access',
-    async (taxId) => {
-      const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
+  it.each([
+    '529.982.247-26',
+    '111.111.111-11',
+    '123',
+  ])('rejects invalid tax ID %s before repository access', async (taxId) => {
+    const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
 
-      await expect(useCase.execute({ taxId })).rejects.toThrow('CPF ou CNPJ inválido')
-      expect(clientsRepository.findByTaxId).not.toHaveBeenCalled()
-    },
-  )
+    await expect(useCase.execute({ taxId })).rejects.toThrow('CPF ou CNPJ inválido')
+    expect(clientsRepository.findByTaxId).not.toHaveBeenCalled()
+  })
 
   it('rejects empty criteria', async () => {
     const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
@@ -89,6 +98,8 @@ describe('LookupClientUseCase', () => {
     clientsRepository.findByTaxId.mockResolvedValue(undefined)
     const useCase = new LookupClientUseCase(clientsRepository, clientConsentsRepository)
 
-    await expect(useCase.execute({ taxId: cpf })).rejects.toThrow('Cliente não encontrado')
+    await expect(useCase.execute({ taxId: cpf })).rejects.toThrow(
+      'Cliente não encontrado',
+    )
   })
 })

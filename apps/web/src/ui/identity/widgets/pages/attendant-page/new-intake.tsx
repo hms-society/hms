@@ -4,10 +4,10 @@ import { Check, ArrowRight, ArrowLeft, X, DoorOpen } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { StepDemand } from './step-demand'
 import { StepClient } from './step-client'
 import { StepDecision } from './step-decision'
 import { intakeFullSchema, type IntakeFullData } from './schemas/intake-schema'
+import { StepDemand } from './step-demand'
 import type { StepRef } from './step-demand'
 
 export const NovoIntake = () => {
