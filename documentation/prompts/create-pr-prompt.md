@@ -38,10 +38,12 @@ however, are written as plain noun phrases **without a type prefix** (see below)
 
 - Review the implemented Spec and the changelog of the changes made.
 - Identify:
+  - Technical impact (which of `web` / `server` / `core` is affected)
+  - Design decisions taken
+  - Risks and side effects
+  - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
+  - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
 
-  - technical impact (which of `web` / `server` / `core` is affected)
-  - design decisions taken
-  - risks and side effects
 
 ---
 
@@ -82,47 +84,40 @@ refactor/    chore:
 
 ### 3. Body Structure
 
-The PR body must follow the template below.
+The PR body must follow the structure defined in `.github/pull_request_template.md`.
 
 **Formatting rules:**
-
-- use Markdown
-- do not use a top-level `#` heading
-- use `##` and lower levels
-
----
-
-## Objetivo (obrigatório)
-
-Explique por que este PR foi criado e qual é seu propósito principal.
-
-## Issues relacionadas (opcional)
-
-Vincule tarefas/bugs usando **apenas** a palavra-chave `resolve`:
-
-```
-resolve #123
-resolve #456
-```
-
-⚠️ Não use `closes`, `fixes` ou qualquer outra variação. Apenas `resolve`.
+- Use Markdown
+- List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.
+- Identify and list the original authors/codeowners of each modified file using `git log` or `git blame` history, under the alignment section.
 
 ---
 
-## Causa do bug (opcional — apenas para correções)
+## 📝 Descrição das Alterações (obrigatório)
+Explique por que este PR foi criado, qual é seu propósito principal e quais problemas ele resolve.
 
-Descreva a causa técnica raiz do problema.
+## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
+Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
+- [ ] `apps/web` (Frontend / Interface)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `apps/server` (Backend / API)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `packages/core` (Regras de Domínio)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `supabase` (Banco de dados / Migrations / Seeders)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
 
----
+## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
+Identifique e liste os autores originais de cada arquivo que você alterou (consulte o histórico do Git):
+- [ ] Identifiquei os autores originais dos arquivos alterados:
+  * `caminho/do/arquivo` -> Autor/Codeowner
+- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
+  - *Detalhes do alinhamento:* ...
 
-## Changelog (obrigatório)
-
-Lista técnica das alterações realizadas:
-
-- arquivos modificados
-- comportamentos alterados
-- regras adicionadas
-- refatorações realizadas
 
 ---
 
