@@ -21,11 +21,12 @@ import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
-import { Route as ClienteMeusCasosRouteImport } from './routes/cliente/meus-casos'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
+import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
+import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
   id: '/intakes',
@@ -87,11 +88,6 @@ const ClientePrivacidadeRoute = ClientePrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => ClienteRouteRoute,
 } as any)
-const ClienteMeusCasosRoute = ClienteMeusCasosRouteImport.update({
-  id: '/meus-casos',
-  path: '/meus-casos',
-  getParentRoute: () => ClienteRouteRoute,
-} as any)
 const ClienteMensagensRoute = ClienteMensagensRouteImport.update({
   id: '/mensagens',
   path: '/mensagens',
@@ -112,6 +108,16 @@ const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
+const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
+  id: '/meus-casos/',
+  path: '/meus-casos/',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
+const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
+  id: '/meus-casos/$caseId',
+  path: '/meus-casos/$caseId',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,7 +129,6 @@ export interface FileRoutesByFullPath {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
-  '/cliente/meus-casos': typeof ClienteMeusCasosRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -131,6 +136,8 @@ export interface FileRoutesByFullPath {
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,7 +148,6 @@ export interface FileRoutesByTo {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
-  '/cliente/meus-casos': typeof ClienteMeusCasosRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
@@ -149,6 +155,8 @@ export interface FileRoutesByTo {
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
+  '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,7 +169,6 @@ export interface FileRoutesById {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
-  '/cliente/meus-casos': typeof ClienteMeusCasosRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -169,6 +176,8 @@ export interface FileRoutesById {
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,7 +191,6 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
-    | '/cliente/meus-casos'
     | '/cliente/privacidade'
     | '/intakes/novo'
     | '/forgot-password/'
@@ -190,6 +198,8 @@ export interface FileRouteTypes {
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
+    | '/cliente/meus-casos/$caseId'
+    | '/cliente/meus-casos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -200,7 +210,6 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
-    | '/cliente/meus-casos'
     | '/cliente/privacidade'
     | '/intakes/novo'
     | '/forgot-password'
@@ -208,6 +217,8 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/login'
     | '/redefinir-senha'
+    | '/cliente/meus-casos/$caseId'
+    | '/cliente/meus-casos'
   id:
     | '__root__'
     | '/'
@@ -219,7 +230,6 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
-    | '/cliente/meus-casos'
     | '/cliente/privacidade'
     | '/intakes/novo'
     | '/forgot-password/'
@@ -227,6 +237,8 @@ export interface FileRouteTypes {
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
+    | '/cliente/meus-casos/$caseId'
+    | '/cliente/meus-casos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -327,13 +339,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientePrivacidadeRouteImport
       parentRoute: typeof ClienteRouteRoute
     }
-    '/cliente/meus-casos': {
-      id: '/cliente/meus-casos'
-      path: '/meus-casos'
-      fullPath: '/cliente/meus-casos'
-      preLoaderRoute: typeof ClienteMeusCasosRouteImport
-      parentRoute: typeof ClienteRouteRoute
-    }
     '/cliente/mensagens': {
       id: '/cliente/mensagens'
       path: '/mensagens'
@@ -361,6 +366,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/advogado/consultas'
       preLoaderRoute: typeof AdvogadoConsultasRouteImport
       parentRoute: typeof AdvogadoRouteRoute
+    }
+    '/cliente/meus-casos/': {
+      id: '/cliente/meus-casos/'
+      path: '/meus-casos'
+      fullPath: '/cliente/meus-casos/'
+      preLoaderRoute: typeof ClienteMeusCasosIndexRouteImport
+      parentRoute: typeof ClienteRouteRoute
+    }
+    '/cliente/meus-casos/$caseId': {
+      id: '/cliente/meus-casos/$caseId'
+      path: '/meus-casos/$caseId'
+      fullPath: '/cliente/meus-casos/$caseId'
+      preLoaderRoute: typeof ClienteMeusCasosCaseIdRouteImport
+      parentRoute: typeof ClienteRouteRoute
     }
   }
 }
@@ -392,14 +411,16 @@ const AtendimentoRouteRouteWithChildren =
 
 interface ClienteRouteRouteChildren {
   ClienteMensagensRoute: typeof ClienteMensagensRoute
-  ClienteMeusCasosRoute: typeof ClienteMeusCasosRoute
   ClientePrivacidadeRoute: typeof ClientePrivacidadeRoute
+  ClienteMeusCasosCaseIdRoute: typeof ClienteMeusCasosCaseIdRoute
+  ClienteMeusCasosIndexRoute: typeof ClienteMeusCasosIndexRoute
 }
 
 const ClienteRouteRouteChildren: ClienteRouteRouteChildren = {
   ClienteMensagensRoute: ClienteMensagensRoute,
-  ClienteMeusCasosRoute: ClienteMeusCasosRoute,
   ClientePrivacidadeRoute: ClientePrivacidadeRoute,
+  ClienteMeusCasosCaseIdRoute: ClienteMeusCasosCaseIdRoute,
+  ClienteMeusCasosIndexRoute: ClienteMeusCasosIndexRoute,
 }
 
 const ClienteRouteRouteWithChildren = ClienteRouteRoute._addFileChildren(
