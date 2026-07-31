@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import { UnauthorizedException } from '@nestjs/common'
 import type {
@@ -9,6 +10,7 @@ import type {
   UserCreation,
 } from '@hms/core/identity/domain/entities'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
+import type { AuthAdministrationProvider } from '@hms/core/identity/interfaces'
 import {
   ClientFaker,
   CollaboratorCreationFaker,
@@ -17,6 +19,7 @@ import {
 
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { AuthModule } from '@/identity/auth.module'
+import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import {
   DrizzleClientConsentsRepository,
   DrizzleCollaboratorsRepository,
@@ -29,6 +32,17 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+
+const authAdministrationFixture: AuthAdministrationProvider = {
+  createUser: async (email) => ({ id: randomUUID(), email }),
+  removeUser: async () => undefined,
+  inviteUserByEmail: async (email) => ({ id: randomUUID(), email }),
+  resendInvitation: async (email) => ({ id: randomUUID(), email }),
+  findUserByEmail: async () => undefined,
+  setInvitationAttemptId: async () => undefined,
+  setUserBanned: async () => undefined,
+  revokeSession: async () => undefined,
+}
 
 type NaturalClientCreation = Extract<ClientCreation, { type: 'natural' }>
 type AdministrativeCollaboratorCreation = Extract<
@@ -65,29 +79,36 @@ export class IdentityModuleFixture {
         providers: [DatetimeProvider, ActiveAdminGuard],
       },
       (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              auth?: { accessToken: string; user: AuthUser }
-              user?: AuthUser
-              identity?: { auth: { accessToken: string; user: AuthUser }; user: AuthUser }
-            }>()
+        builder
+          .overrideProvider(IDENTITY_PROVIDERS.authAdministration)
+          .useValue(authAdministrationFixture)
+          .overrideGuard(AuthGuard)
+          .useValue({
+            canActivate: (context: ExecutionContext) => {
+              const request = context.switchToHttp().getRequest<{
+                headers: { authorization?: string }
+                auth?: { accessToken: string; user: AuthUser }
+                user?: AuthUser
+                identity?: {
+                  auth: { accessToken: string; user: AuthUser }
+                  user: AuthUser
+                }
+              }>()
 
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
+              if (!authentication.user || !request.headers.authorization) {
+                throw new UnauthorizedException('Authentication token is required')
+              }
 
-            const auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            request.user = authentication.user
-            request.auth = auth
-            request.identity = { auth, user: authentication.user }
-            return true
-          },
-        }),
+              const auth = {
+                accessToken: 'fixture-access-token',
+                user: authentication.user,
+              }
+              request.user = authentication.user
+              request.auth = auth
+              request.identity = { auth, user: authentication.user }
+              return true
+            },
+          }),
     )
 
     return new IdentityModuleFixture(
