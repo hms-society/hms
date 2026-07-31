@@ -357,7 +357,8 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
               <div className='flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border/50 mt-1'>
                 <Clock className='w-3.5 h-3.5 text-primary shrink-0' />
                 <span>
-                  Duração padrão: <strong>45 min</strong> · término calculado automaticamente
+                  Duração padrão: <strong>45 min</strong> · término calculado
+                  automaticamente
                 </span>
               </div>
             </div>

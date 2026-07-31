@@ -27,7 +27,9 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
         </p>
       </div>
       <div className='rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs sm:text-sm'>
-        <p className='font-medium text-foreground'>Texto provisório para desenvolvimento</p>
+        <p className='font-medium text-foreground'>
+          Texto provisório para desenvolvimento
+        </p>
         <p className='mt-0.5 text-xs text-muted-foreground'>
           A redação final dos consentimentos depende da validação jurídica da HMS.
         </p>
@@ -66,7 +68,10 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
                         {copy.description}
                       </FieldDescription>
                     </div>
-                    <Icon name='shield-check' className='size-4 text-muted-foreground/70 shrink-0 mt-0.5' />
+                    <Icon
+                      name='shield-check'
+                      className='size-4 text-muted-foreground/70 shrink-0 mt-0.5'
+                    />
                   </Field>
                 )
               }}

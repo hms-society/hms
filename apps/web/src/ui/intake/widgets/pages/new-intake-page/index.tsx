@@ -190,7 +190,12 @@ export const NewIntakePage = () => {
                 <Icon name='x' />
                 Cancelar
               </Button>
-              <Button type='submit' className='rounded-pill' size='sm' disabled={isSubmitting}>
+              <Button
+                type='submit'
+                className='rounded-pill'
+                size='sm'
+                disabled={isSubmitting}
+              >
                 <Icon name='plus' />
                 {isSubmitting ? 'Criando...' : 'Criar intake'}
               </Button>

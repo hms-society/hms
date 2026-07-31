@@ -45,7 +45,10 @@ export const ClientIdentificationStep = ({
           <FieldDescription className='text-[11px] text-muted-foreground'>
             Use CPF para pessoa natural ou CNPJ para pessoa jurídica.
           </FieldDescription>
-          <FieldError id='client-lookup-tax-id-error' className='text-xs text-destructive'>
+          <FieldError
+            id='client-lookup-tax-id-error'
+            className='text-xs text-destructive'
+          >
             {errors.taxId?.message}
           </FieldError>
         </Field>
@@ -86,22 +89,22 @@ export const ClientIdentificationStep = ({
       </span>
       <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
-            type='button'
-            variant='outline'
-            className='rounded-pill text-sm font-medium h-9 px-6'
-            onClick={controller.handleClearIdentification}
-            disabled={busy}
-          >
-            Limpar
-          </Button>
-          <Button
-            type='submit'
-            className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
-            disabled={controller.isBusy}
-          >
-            <Icon name='search' className='size-3.5' />
-            {busy ? 'Buscando…' : 'Buscar cliente'}
-          </Button>
+          type='button'
+          variant='outline'
+          className='rounded-pill text-sm font-medium h-9 px-6'
+          onClick={controller.handleClearIdentification}
+          disabled={busy}
+        >
+          Limpar
+        </Button>
+        <Button
+          type='submit'
+          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          disabled={controller.isBusy}
+        >
+          <Icon name='search' className='size-3.5' />
+          {busy ? 'Buscando…' : 'Buscar cliente'}
+        </Button>
       </div>
     </form>
   )

@@ -55,7 +55,7 @@ export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
             Consulte um cadastro existente ou registre um novo cliente com os dados
             necessários.
           </DialogDescription>
-          
+
           <div className='pt-2'>
             <ClientRegisterDialogStepper state={controller.state} />
           </div>

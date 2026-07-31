@@ -35,7 +35,9 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
         <CardHeader className='flex-row items-center justify-between gap-4 px-5 py-4 border-b border-border/60'>
           <div className='flex items-center gap-2'>
             <Icon name='id-card' className='size-4 text-primary' />
-            <h3 className='font-serif text-sm font-semibold text-foreground'>Identificação</h3>
+            <h3 className='font-serif text-sm font-semibold text-foreground'>
+              Identificação
+            </h3>
           </div>
           <Button
             type='button'
@@ -53,7 +55,9 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             return (
               <div key={row.label} className='flex items-center justify-between gap-4'>
                 <span className='text-muted-foreground'>{row.label}</span>
-                <span className='text-right font-medium text-foreground'>{row.value}</span>
+                <span className='text-right font-medium text-foreground'>
+                  {row.value}
+                </span>
               </div>
             )
           })}
@@ -63,9 +67,14 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
         <CardHeader className='flex-row items-center justify-between gap-4 px-5 py-4 border-b border-border/60'>
           <div className='flex items-center gap-2'>
             <Icon name='list-plus' className='size-4 text-primary' />
-            <h3 className='font-serif text-sm font-semibold text-foreground'>Complementares</h3>
+            <h3 className='font-serif text-sm font-semibold text-foreground'>
+              Complementares
+            </h3>
           </div>
-          <Badge variant='outline' className='h-5 px-2 text-[10px] font-normal rounded-full border-border'>
+          <Badge
+            variant='outline'
+            className='h-5 px-2 text-[10px] font-normal rounded-full border-border'
+          >
             {complementaryFieldsFilled} de 9 preenchidos
           </Badge>
           <Button
@@ -87,7 +96,9 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             return (
               <div key={row.label} className='flex items-center justify-between gap-4'>
                 <span className='text-muted-foreground'>{row.label}</span>
-                <span className='text-right font-medium text-foreground'>{row.value}</span>
+                <span className='text-right font-medium text-foreground'>
+                  {row.value}
+                </span>
               </div>
             )
           })}
@@ -98,7 +109,9 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             return (
               <div key={row.label} className='flex items-center justify-between gap-4'>
                 <span className='text-muted-foreground'>{row.label}</span>
-                <span className='text-right font-medium text-foreground'>{row.value}</span>
+                <span className='text-right font-medium text-foreground'>
+                  {row.value}
+                </span>
               </div>
             )
           })}
@@ -108,7 +121,9 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
         <CardHeader className='flex-row items-center justify-between gap-4 px-5 py-4 border-b border-border/60'>
           <div className='flex items-center gap-2'>
             <Icon name='shield-check' className='size-4 text-primary' />
-            <h3 className='font-serif text-sm font-semibold text-foreground'>Privacidade</h3>
+            <h3 className='font-serif text-sm font-semibold text-foreground'>
+              Privacidade
+            </h3>
           </div>
           <Button
             type='button'
@@ -164,7 +179,10 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
       )}
 
       {controller.asyncError && (
-        <p role='alert' className='rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive'>
+        <p
+          role='alert'
+          className='rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive'
+        >
           {controller.asyncError}
         </p>
       )}

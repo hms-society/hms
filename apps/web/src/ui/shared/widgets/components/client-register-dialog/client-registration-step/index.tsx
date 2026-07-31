@@ -52,12 +52,17 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
             <NativeSelectOption value='natural'>Pessoa natural</NativeSelectOption>
             <NativeSelectOption value='legal'>Pessoa jurídica</NativeSelectOption>
           </NativeSelect>
-          <FieldError className='text-xs text-destructive'>{errors.type?.message}</FieldError>
+          <FieldError className='text-xs text-destructive'>
+            {errors.type?.message}
+          </FieldError>
         </Field>
 
         {type === 'natural' ? (
           <Field data-invalid={Boolean(errors.name)}>
-            <FieldLabel htmlFor='client-registration-name' className='text-xs font-medium'>
+            <FieldLabel
+              htmlFor='client-registration-name'
+              className='text-xs font-medium'
+            >
               Nome completo
             </FieldLabel>
             <Input
@@ -67,12 +72,17 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
               aria-invalid={Boolean(errors.name)}
               {...form.register('name')}
             />
-            <FieldError className='text-xs text-destructive'>{errors.name?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {errors.name?.message}
+            </FieldError>
           </Field>
         ) : (
           <>
             <Field data-invalid={Boolean(errors.legalName)}>
-              <FieldLabel htmlFor='client-registration-legal-name' className='text-xs font-medium'>
+              <FieldLabel
+                htmlFor='client-registration-legal-name'
+                className='text-xs font-medium'
+              >
                 Razão social
               </FieldLabel>
               <Input
@@ -82,10 +92,15 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
                 aria-invalid={Boolean(errors.legalName)}
                 {...form.register('legalName')}
               />
-              <FieldError className='text-xs text-destructive'>{errors.legalName?.message}</FieldError>
+              <FieldError className='text-xs text-destructive'>
+                {errors.legalName?.message}
+              </FieldError>
             </Field>
             <Field>
-              <FieldLabel htmlFor='client-registration-trade-name' className='text-xs font-medium'>
+              <FieldLabel
+                htmlFor='client-registration-trade-name'
+                className='text-xs font-medium'
+              >
                 Nome fantasia{' '}
                 <span className='font-normal text-muted-foreground'>(opcional)</span>
               </FieldLabel>
@@ -99,7 +114,10 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
         )}
 
         <Field data-invalid={Boolean(errors.taxId)}>
-          <FieldLabel htmlFor='client-registration-tax-id' className='text-xs font-medium'>
+          <FieldLabel
+            htmlFor='client-registration-tax-id'
+            className='text-xs font-medium'
+          >
             {type === 'natural' ? 'CPF' : 'CNPJ'}
           </FieldLabel>
           <Input
@@ -109,17 +127,27 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
             {...form.register('taxId')}
             onChange={handleTaxIdChange}
           />
-          <FieldError className='text-xs text-destructive'>{errors.taxId?.message}</FieldError>
+          <FieldError className='text-xs text-destructive'>
+            {errors.taxId?.message}
+          </FieldError>
         </Field>
       </FieldGroup>
 
       <div className='flex flex-col gap-3 pt-2 border-t border-border/60'>
         <h3 className='font-serif text-sm font-semibold text-foreground'>
-          Contato <span className='font-sans font-normal text-xs text-muted-foreground'>(opcional)</span>
+          Contato{' '}
+          <span className='font-sans font-normal text-xs text-muted-foreground'>
+            (opcional)
+          </span>
         </h3>
         <div className='grid gap-4 sm:grid-cols-2'>
           <Field data-invalid={Boolean(errors.email)}>
-            <FieldLabel htmlFor='client-registration-email' className='text-xs font-medium'>E-mail</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-email'
+              className='text-xs font-medium'
+            >
+              E-mail
+            </FieldLabel>
             <Input
               id='client-registration-email'
               type='email'
@@ -128,10 +156,17 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
               aria-invalid={Boolean(errors.email)}
               {...form.register('email')}
             />
-            <FieldError className='text-xs text-destructive'>{errors.email?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {errors.email?.message}
+            </FieldError>
           </Field>
           <Field>
-            <FieldLabel htmlFor='client-registration-phone' className='text-xs font-medium'>Telefone</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-phone'
+              className='text-xs font-medium'
+            >
+              Telefone
+            </FieldLabel>
             <Input
               id='client-registration-phone'
               autoComplete='tel'
@@ -146,7 +181,10 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
       <div className='flex flex-col gap-3 pt-2 border-t border-border/60'>
         <div>
           <h3 className='font-serif text-sm font-semibold text-foreground'>
-            Endereço <span className='font-sans font-normal text-xs text-muted-foreground'>(opcional)</span>
+            Endereço{' '}
+            <span className='font-sans font-normal text-xs text-muted-foreground'>
+              (opcional)
+            </span>
           </h3>
           <FieldDescription className='text-[11px] text-muted-foreground mt-0.5'>
             Se informar um campo, preencha todos os campos obrigatórios do endereço.
@@ -155,27 +193,46 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
 
         <div className='grid gap-3 sm:grid-cols-[1fr_8rem]'>
           <Field data-invalid={Boolean(addressErrors?.street)}>
-            <FieldLabel htmlFor='client-registration-street' className='text-xs font-medium'>Logradouro</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-street'
+              className='text-xs font-medium'
+            >
+              Logradouro
+            </FieldLabel>
             <Input
               id='client-registration-street'
               className='h-9 text-xs'
               aria-invalid={Boolean(addressErrors?.street)}
               {...form.register('address.street')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.street?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.street?.message}
+            </FieldError>
           </Field>
           <Field data-invalid={Boolean(addressErrors?.number)}>
-            <FieldLabel htmlFor='client-registration-number' className='text-xs font-medium'>Número</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-number'
+              className='text-xs font-medium'
+            >
+              Número
+            </FieldLabel>
             <Input
               id='client-registration-number'
               className='h-8 text-xs'
               aria-invalid={Boolean(addressErrors?.number)}
               {...form.register('address.number')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.number?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.number?.message}
+            </FieldError>
           </Field>
           <Field>
-            <FieldLabel htmlFor='client-registration-complement' className='text-xs font-medium'>Complemento</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-complement'
+              className='text-xs font-medium'
+            >
+              Complemento
+            </FieldLabel>
             <Input
               id='client-registration-complement'
               className='h-9 text-xs'
@@ -183,27 +240,46 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
             />
           </Field>
           <Field data-invalid={Boolean(addressErrors?.district)}>
-            <FieldLabel htmlFor='client-registration-district' className='text-xs font-medium'>Bairro</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-district'
+              className='text-xs font-medium'
+            >
+              Bairro
+            </FieldLabel>
             <Input
               id='client-registration-district'
               className='h-9 text-xs'
               aria-invalid={Boolean(addressErrors?.district)}
               {...form.register('address.district')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.district?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.district?.message}
+            </FieldError>
           </Field>
           <Field data-invalid={Boolean(addressErrors?.city)}>
-            <FieldLabel htmlFor='client-registration-city' className='text-xs font-medium'>Cidade</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-city'
+              className='text-xs font-medium'
+            >
+              Cidade
+            </FieldLabel>
             <Input
               id='client-registration-city'
               className='h-9 text-xs'
               aria-invalid={Boolean(addressErrors?.city)}
               {...form.register('address.city')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.city?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.city?.message}
+            </FieldError>
           </Field>
           <Field data-invalid={Boolean(addressErrors?.state)}>
-            <FieldLabel htmlFor='client-registration-state' className='text-xs font-medium'>Estado</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-state'
+              className='text-xs font-medium'
+            >
+              Estado
+            </FieldLabel>
             <Input
               id='client-registration-state'
               maxLength={2}
@@ -211,17 +287,26 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
               aria-invalid={Boolean(addressErrors?.state)}
               {...form.register('address.state')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.state?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.state?.message}
+            </FieldError>
           </Field>
           <Field data-invalid={Boolean(addressErrors?.zipCode)}>
-            <FieldLabel htmlFor='client-registration-zip-code' className='text-xs font-medium'>CEP</FieldLabel>
+            <FieldLabel
+              htmlFor='client-registration-zip-code'
+              className='text-xs font-medium'
+            >
+              CEP
+            </FieldLabel>
             <Input
               id='client-registration-zip-code'
               className='h-9 text-xs'
               aria-invalid={Boolean(addressErrors?.zipCode)}
               {...form.register('address.zipCode')}
             />
-            <FieldError className='text-xs text-destructive'>{addressErrors?.zipCode?.message}</FieldError>
+            <FieldError className='text-xs text-destructive'>
+              {addressErrors?.zipCode?.message}
+            </FieldError>
           </Field>
         </div>
       </div>
