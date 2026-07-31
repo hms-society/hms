@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -67,6 +67,7 @@ function getInitials(name: string) {
 }
 
 function ClientesListPage() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('status')
@@ -82,10 +83,13 @@ function ClientesListPage() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  const filteredClients = backendClients.filter((client: any) => {
-    const matchesStatus = status === 'status' || client.status.toLowerCase() === status
+  const filteredClients = backendClients.filter((item: any) => {
+    const client = item.client || item
+    const itemStatus = client.status || 'Cliente'
+    const matchesStatus = status === 'status' || itemStatus.toLowerCase() === status
 
-    const clientOriginLabel = ORIGIN_LABELS[client.origin] || client.origin || 'Direta HMS'
+    const itemOrigin = item.latestOrigin || client.origin || 'direct'
+    const clientOriginLabel = ORIGIN_LABELS[itemOrigin] || itemOrigin || 'Direta HMS'
     
     const matchesOrigin =
       origin === 'origem' ||
@@ -195,13 +199,21 @@ function ClientesListPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredClients.map((client: any) => {
+              filteredClients.map((item: any) => {
+                const client = item.client || item
                 const displayName = client.name || client.legalName || 'Nome não informado'
-                const statusStyle = STATUS_STYLES[client.status as ClientStatus] || STATUS_STYLES.Potencial
-                const displayOrigin = ORIGIN_LABELS[client.origin] || client.origin || 'Direta HMS'
+                const clientStatus = client.status || 'Cliente'
+                const statusStyle = STATUS_STYLES[clientStatus as ClientStatus] || STATUS_STYLES.Potencial
+                const itemOrigin = item.latestOrigin || client.origin || 'direct'
+                const displayOrigin = ORIGIN_LABELS[itemOrigin] || itemOrigin || 'Direta HMS'
+                const intakesCount = item.intakeCount || client.intakesCount || 0
 
                 return (
-                  <TableRow key={client.id} className="cursor-pointer">
+                  <TableRow 
+                    key={client.id} 
+                    className="cursor-pointer"
+                    onClick={() => navigate({ to: '/atendimento/clientes/$clienteId', params: { clienteId: client.id } })}
+                  >
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <Avatar className={`size-8 ${statusStyle.avatar}`}>
@@ -216,10 +228,10 @@ function ClientesListPage() {
                     <TableCell className="text-muted-foreground">{client.phone ? maskPhone(client.phone) : '-'}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={`border-transparent shadow-none font-medium ${statusStyle.badge}`}>
-                        {client.status}
+                        {clientStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{client.intakesCount}</TableCell>
+                    <TableCell className="text-muted-foreground">{intakesCount}</TableCell>
                     <TableCell className="text-muted-foreground">{displayOrigin}</TableCell>
                   </TableRow>
                 )

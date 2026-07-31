@@ -23,7 +23,7 @@ import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/d
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
 import { Route as AtendimentoClientesIndexRouteImport } from './routes/atendimento/clientes/index'
-import { Route as AtendimentoClientesClientesIdRouteImport } from './routes/atendimento/clientes/clientes-id'
+import { Route as AtendimentoClientesClienteIdRouteImport } from './routes/atendimento/clientes/$clienteId'
 
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
   id: '/intakes',
@@ -96,10 +96,10 @@ const AtendimentoClientesIndexRoute =
     path: '/clientes/',
     getParentRoute: () => AtendimentoRouteRoute,
   } as any)
-const AtendimentoClientesClientesIdRoute =
-  AtendimentoClientesClientesIdRouteImport.update({
-    id: '/clientes/clientes-id',
-    path: '/clientes/clientes-id',
+const AtendimentoClientesClienteIdRoute =
+  AtendimentoClientesClienteIdRouteImport.update({
+    id: '/clientes/$clienteId',
+    path: '/clientes/$clienteId',
     getParentRoute: () => AtendimentoRouteRoute,
   } as any)
 
@@ -117,7 +117,7 @@ export interface FileRoutesByFullPath {
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/clientes-id': typeof AtendimentoClientesClientesIdRoute
+  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
   '/atendimento/clientes/': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -133,7 +133,7 @@ export interface FileRoutesByTo {
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/clientes-id': typeof AtendimentoClientesClientesIdRoute
+  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
   '/atendimento/clientes': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRoutesById {
@@ -151,7 +151,7 @@ export interface FileRoutesById {
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
-  '/atendimento/clientes/clientes-id': typeof AtendimentoClientesClientesIdRoute
+  '/atendimento/clientes/$clienteId': typeof AtendimentoClientesClienteIdRoute
   '/atendimento/clientes/': typeof AtendimentoClientesIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,7 +170,7 @@ export interface FileRouteTypes {
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
-    | '/atendimento/clientes/clientes-id'
+    | '/atendimento/clientes/$clienteId'
     | '/atendimento/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -186,7 +186,7 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/login'
     | '/redefinir-senha'
-    | '/atendimento/clientes/clientes-id'
+    | '/atendimento/clientes/$clienteId'
     | '/atendimento/clientes'
   id:
     | '__root__'
@@ -203,7 +203,7 @@ export interface FileRouteTypes {
     | '/intakes/'
     | '/login/'
     | '/redefinir-senha/'
-    | '/atendimento/clientes/clientes-id'
+    | '/atendimento/clientes/$clienteId'
     | '/atendimento/clientes/'
   fileRoutesById: FileRoutesById
 }
@@ -318,11 +318,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoClientesIndexRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
-    '/atendimento/clientes/clientes-id': {
-      id: '/atendimento/clientes/clientes-id'
-      path: '/clientes/clientes-id'
-      fullPath: '/atendimento/clientes/clientes-id'
-      preLoaderRoute: typeof AtendimentoClientesClientesIdRouteImport
+    '/atendimento/clientes/$clienteId': {
+      id: '/atendimento/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/atendimento/clientes/$clienteId'
+      preLoaderRoute: typeof AtendimentoClientesClienteIdRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
   }
@@ -343,14 +343,14 @@ const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
 interface AtendimentoRouteRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
   AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
-  AtendimentoClientesClientesIdRoute: typeof AtendimentoClientesClientesIdRoute
+  AtendimentoClientesClienteIdRoute: typeof AtendimentoClientesClienteIdRoute
   AtendimentoClientesIndexRoute: typeof AtendimentoClientesIndexRoute
 }
 
 const AtendimentoRouteRouteChildren: AtendimentoRouteRouteChildren = {
   AtendimentoConsultasRoute: AtendimentoConsultasRoute,
   AtendimentoDashboardRoute: AtendimentoDashboardRoute,
-  AtendimentoClientesClientesIdRoute: AtendimentoClientesClientesIdRoute,
+  AtendimentoClientesClienteIdRoute: AtendimentoClientesClienteIdRoute,
   AtendimentoClientesIndexRoute: AtendimentoClientesIndexRoute,
 }
 

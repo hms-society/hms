@@ -12,8 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/shadcn/select'
+import { useMaskPhone } from '@/ui/shared/hooks/use-mask-phone'
+import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
+import { useQuery } from '@tanstack/react-query'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-export const Route = createFileRoute('/atendimento/clientes/clientes-id')({
+export const Route = createFileRoute('/atendimento/clientes/$clienteId')({
   component: ClientesPage,
 })
 
@@ -79,11 +83,83 @@ const MOCK_COMMUNICATIONS = [
   },
 ]
 
+function getInitials(name: string) {
+  if (!name) return 'UN'
+  return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
+}
+
 function ClientesPage() {
+  const { clienteId } = Route.useParams()
+  const { identityService, intakeService } = useRestContext()
+  const maskTaxId = useMaskTaxId()
+  const maskPhone = useMaskPhone()
+
+  const { data: clientData, isLoading: isLoadingClient, error: clientError } = useQuery({
+    queryKey: ['client', clienteId],
+    queryFn: async () => {
+      const response = await identityService.getClient(clienteId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+  })
+
+  const { data: intakesData, isLoading: isLoadingIntakes } = useQuery({
+    queryKey: ['intakes', 'client', clienteId],
+    queryFn: async () => {
+      const response = await intakeService.listClientIntake(clienteId)
+      if (response.isFailure) return []
+      return response.body
+    },
+    enabled: !!clientData,
+  })
+
+  if (isLoadingClient || isLoadingIntakes) {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 mt-22 py-12">
+        <span className="text-sm text-muted-foreground">Carregando ficha do cliente...</span>
+      </div>
+    )
+  }
+
+  if (clientError || !clientData) {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 mt-22 py-12">
+        <span className="text-sm text-destructive">Erro ao carregar dados do cliente.</span>
+      </div>
+    )
+  }
+
+  const { client, consents } = clientData
+  const intakes = intakesData || []
+
+  const displayName = client.type === 'natural' ? client.name : (client.tradeName || client.legalName)
+  const initials = getInitials(displayName || 'UN')
+  const status = intakes.length > 1 ? 'Cliente' : intakes.length === 1 ? 'Interessado' : 'Potencial'
+
+  const statusStyles: Record<string, { badge: string; avatar: string; text: string }> = {
+    Cliente: {
+      badge: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100',
+      avatar: 'bg-emerald-100',
+      text: 'text-emerald-800',
+    },
+    Interessado: {
+      badge: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+      avatar: 'bg-amber-100',
+      text: 'text-amber-800',
+    },
+    Potencial: {
+      badge: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
+      avatar: 'bg-purple-100',
+      text: 'text-purple-800',
+    },
+  }
+
+  const currentStyle = statusStyles[status] || statusStyles.Potencial
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 mt-22">
       <Anchor
-        route="home"
+        route="clients"
         className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <Icon name="arrow-left" className="size-4" />
@@ -93,33 +169,40 @@ function ClientesPage() {
       <Card className="shadow-sm">
         <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="size-14 bg-emerald-100">
-              <AvatarFallback className="text-lg font-medium text-emerald-800 bg-transparent">
-                MA
+            <Avatar className={`size-14 ${currentStyle.avatar}`}>
+              <AvatarFallback className={`text-lg font-medium bg-transparent ${currentStyle.text}`}>
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-semibold text-foreground">
-                  Maria Aparecida dos Santos
+                  {displayName}
                 </h1>
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-transparent shadow-none">
-                  Cliente
+                <Badge variant="secondary" className={`border-transparent shadow-none ${currentStyle.badge}`}>
+                  {status}
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Icon name="id-card" className="size-4" />
-                  123.456.789-00
+                  {client.taxId?.value ? maskTaxId(client.taxId.value) : '-'}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Icon name="phone" className="size-4" />
-                  (12) 98765-4321
+                  {client.phone ? maskPhone(client.phone) : 'Não informado'}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Icon name="mail" className="size-4" />
-                  maria.santos@email.com
+                  {client.email || 'Não informado'}
                 </span>
+                {/* Exibe um pequeno badge se houver consentimentos de privacidade aceitos pelo cliente */}
+                {consents.length > 0 && (
+                  <span className="flex items-center gap-1.5 text-emerald-600/90" title="Termos de privacidade aceitos">
+                    <Icon name="shield-check" className="size-4" />
+                    {consents.length} consentimento(s)
+                  </span>
+                )}
               </div>
             </div>
           </div>
