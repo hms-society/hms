@@ -2,9 +2,9 @@
 title: Avaliação — tela dedicada de convite do colaborador
 spec: ./spec.md
 parent_spec: ../../spec.md
-status: in_progress
+status: completed
 spec_revision: 1
-last_updated_at: 2026-07-30
+last_updated_at: 2026-07-31
 ---
 
 # Evidências
@@ -28,5 +28,6 @@ last_updated_at: 2026-07-30
 
 # Veredito
 
-`in_progress` — a rota e a tela estão implementadas e os sensores locais passaram;
-falta a validação integrada do e-mail e a execução dos gates do CI.
+`accepted` — a rota e a tela estão implementadas; sensores, Quality Gate e build
+do CI passaram no HEAD `16c2a3b`. O link real de e-mail continua dependente da
+infraestrutura de entrega do ambiente, conforme limitação registrada.

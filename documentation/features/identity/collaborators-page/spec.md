@@ -1,6 +1,6 @@
 ---
 title: Gestão e cadastro de colaboradores
-status: in_progress
+status: completed
 revision: 6
 source:
   type: prd
@@ -26,10 +26,17 @@ scope:
   - apps/server/src/shared/database/drizzle/migrations
   - documentation/modules.md
   - design/hms.pen
-last_updated_at: 2026-07-30
+last_updated_at: 2026-07-31
 ---
 
 # Contexto e objetivo
+
+## Encerramento
+
+Implementação aceita pelo Judge Implementation Final. O commit avaliado é
+`16c2a3b4bec5dd6437a54ec40236382de2b3b0c4`, com Quality Gate e build do CI
+verdes no PR [#19](https://github.com/hms-society/hms/pull/19). Evidências completas:
+[`evaluation.md`](./evaluation.md).
 
 O módulo de Identidade já representa contas, perfis e especialidades de
 colaboradores no domínio, mas ainda não permite que um administrador consulte a

@@ -2,7 +2,7 @@
 title: Avaliação — edição de perfil do colaborador
 spec: ./spec.md
 parent_spec: ../../spec.md
-status: in_progress
+status: completed
 spec_revision: 1
 last_updated_at: 2026-07-30
 ---
@@ -15,8 +15,12 @@ web compartilhado pela tabela e pela ficha do colaborador.
 
 # Evidências
 
-Serão registradas após a implementação e a execução dos sensores aplicáveis.
+Sensores locais e o CI do PR cobriram os contratos Core/Validation, controller
+REST, adapter/serviço Web, rota e formulário com e-mail imutável. O fluxo
+autenticado local abriu o diálogo preenchido; o submit REST e a persistência são
+cobertos pelos testes de rota/controller e pela suíte integrada.
 
 # Veredito
 
-`in_progress` — implementação em andamento.
+`accepted` — implementação concluída, com Quality Gate e build do CI verdes no
+HEAD publicado da Spec.

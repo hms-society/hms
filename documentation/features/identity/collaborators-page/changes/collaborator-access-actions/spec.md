@@ -1,6 +1,6 @@
 ---
 title: Ações administrativas de acesso do colaborador
-status: in_progress
+status: completed
 revision: 3
 source:
   type: direct-request
@@ -18,7 +18,7 @@ scope:
   - apps/web/src/ui/shadcn/dropdown-menu.tsx
   - apps/web/src/ui/shared/widgets/components/icon
   - design/hms.pen
-last_updated_at: 2026-07-30
+last_updated_at: 2026-07-31
 ---
 
 # Contexto e objetivo

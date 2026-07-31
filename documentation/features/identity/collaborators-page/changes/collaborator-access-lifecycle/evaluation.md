@@ -2,9 +2,9 @@
 title: Avaliação — ciclo de acesso e detalhes do colaborador
 spec: ./spec.md
 parent_spec: ../../spec.md
-status: in_progress
+status: completed
 spec_revision: 1
-last_updated_at: 2026-07-30
+last_updated_at: 2026-07-31
 ---
 
 # Evidências
@@ -21,5 +21,5 @@ last_updated_at: 2026-07-30
 
 # Veredito
 
-`in_progress` — implementação e sensores locais passaram; ainda falta o Quality
-Gate/build do CI e a integração HTTP/Auth completa.
+`accepted` — implementação, integração HTTP/Auth aplicável, Quality Gate e build
+do CI passaram no HEAD `16c2a3b`.

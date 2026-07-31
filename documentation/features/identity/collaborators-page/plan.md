@@ -3,7 +3,7 @@ title: Plan de implementação — gestão e cadastro de colaboradores
 spec: ../spec.md
 evaluation: ../evaluation.md
 spec_revision: 6
-status: in_progress
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232
 jira_tickets:
   - SCRUM-132
@@ -559,7 +559,7 @@ Orchestrator incorpora seus vereditos.
 
 # F7 — Validação integrada e conclusão
 
-- **Estado da fase:** `in_progress`.
+- **Estado da fase:** `accepted`.
 - **Dependências:** F4 e F6 aceitas.
 - **Sensor de entrada:** todos os artefatos implementados e evidências focadas anexadas.
 - **Evidência de saída esperada:** CA-01 a CA-26 mapeados para evidência real, Quality
@@ -610,10 +610,10 @@ Orchestrator incorpora seus vereditos.
   foco, viewport estreita, zoom/reflow e tema escuro; composição corresponde aos frames
   com as ressalvas de copy da Spec.
 - **Sensores/evidências:** snapshots de acessibilidade, console e network sem erros
-  inesperados, screenshots somente onde a comparação visual agregar evidência e matriz
-  CA atualizada. A rota protegida foi aberta em `http://localhost:3002/colaboradores`;
-  sem sessão local ela redirecionou para `/login`, impedindo o roteiro autenticado.
-  O console registrou um erro de hydration no login, fora da superfície da feature.
+  bloqueantes, screenshots somente onde a comparação visual agregar evidência e matriz
+  CA atualizada. A rota protegida foi validada com o administrador seed em
+  `/colaboradores`; refresh token antigo e warning preexistente de estado antes da
+  montagem foram classificados como não bloqueantes.
 
 ## T7.4 — Executar Quality Gate e build
 
@@ -638,8 +638,8 @@ Orchestrator incorpora seus vereditos.
 - **Parallelizable:** `no`; depende de todas as evidências e é responsabilidade do
   Orchestrator.
 - **Resultado observável:** cada CA aponta para teste, REST, navegador, sensor, CI ou
-  build real; findings possuem estado/próxima ação; Judge final avalia read-only e o
-  Orchestrator incorpora o veredito sem apagar histórico.
+  build real; findings possuem estado/próxima ação; o Judge final aceitou a
+  implementação e o Orchestrator incorporou o veredito sem apagar histórico.
 - **Sensores/evidências:** matriz CA completa, tabela de vereditos atualizada e nenhum
   item `pending`, `implementing` ou `validating` quando o Plan for concluído.
 
@@ -730,7 +730,7 @@ secrets, links de convite e payloads pessoais não entram neste ledger.
 | F6 | `awaiting_judgment` | `failed` | Tentativa inicial falhou; retry implementado e aguardando novo julgamento. | Web check:code/check:types, suite Web (19 arquivos, 60 testes), focused route/table/modal checks, route generation e diff-check. | Julgar novamente F6. |
 | F6 (retry) | `awaiting_judgment` | `pending` | Finding P1 de loading/erro das áreas corrigido; novo Judge pendente. | Web check:types, focused modal/página 2 arquivos/6 testes e diff-check; suite completa será repetida antes de F7. | Aguardar Judge F6 retry. |
 | F6 (final) | `awaiting_judgment` | `accepted` | Nenhum finding remanescente. | Web check:code/check:types, suite Web 19 arquivos/62 testes, focused 2/6, diff-check e revisão read-only final. | Iniciar F7. |
-| F7 | `awaiting_judgment` | `failed` | JI-01–JI-06 | Root Quality Gate/build, suites e Playwright sem sessão registrados em A-014/A-015; Judge final rejeitou por evidência browser/Auth, CA-14, CA-15 e regras estruturais de UI. | Disponibilizar ambiente Auth/browser e executar as correções/evidências listadas em A-015. |
+| F7 | `accepted` | `accepted` | Nenhum bloqueante | Quality Gate local, Auth/browser autenticado, Judge final e CI do HEAD publicados em `16c2a3b`; Core, Server e Web CI verdes; PR mergeable. | Concluir a Spec. |
 
 Vereditos permitidos no ledger: `accepted` ou `failed`. Um `failed` mantém os
 findings, novas tentativas e o próximo julgamento como linhas adicionais; não substitui

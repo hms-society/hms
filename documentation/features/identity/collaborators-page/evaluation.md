@@ -229,7 +229,24 @@ Evidências determinantes:
 
 ### Condições para conclusão da Spec
 
-A implementação pode seguir para commit/PR. O status da Spec permanece
-`in_progress` até o CI validar o `HEAD` publicado, o PR estar mergeable e as
-conversas bloqueantes serem resolvidas. O Judge não substitui o Quality Gate do
-CI nem autoriza marcar a Spec como `completed` antes dessas condições.
+A implementação foi publicada no commit `16c2a3b4bec5dd6437a54ec40236382de2b3b0c4`.
+
+## Quality Gate CI final — 2026-07-31
+
+| Workflow | Resultado |
+|---|---|
+| [Core Package CI](https://github.com/hms-society/hms/actions/runs/30635819359) | passou |
+| [Server App CI](https://github.com/hms-society/hms/actions/runs/30635817217) | passou; testes, build e imagem Docker |
+| [Web App CI](https://github.com/hms-society/hms/actions/runs/30635817532) | passou; testes, Playwright de rotas, build e imagem Docker |
+| PR #19 | mergeable; sem reviews/conversas bloqueantes |
+
+O primeiro Server App CI falhou porque a fixture de controller dependia do Auth
+local, indisponível no runner. A fixture foi isolada com um provider administrativo
+fake; os testes do adapter Supabase continuam cobrindo a integração do provider e
+o fluxo autenticado real foi validado localmente com Playwright.
+
+## Veredito de encerramento
+
+`accepted` — a Spec pode ser concluída. O Plan F7 foi aceito, o CI do HEAD publicado
+está verde e o PR está mergeable. Warnings preexistentes de refresh token e estado
+antes da montagem permanecem registrados como não bloqueantes.

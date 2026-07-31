@@ -1,6 +1,6 @@
 ---
 title: Ciclo de acesso e detalhes do colaborador
-status: in_progress
+status: completed
 revision: 1
 source:
   type: direct-request
@@ -8,7 +8,7 @@ source:
 parent_spec: ../../spec.md
 parent_plan: ../../plan.md
 evaluation: ./evaluation.md
-last_updated_at: 2026-07-30
+last_updated_at: 2026-07-31
 ---
 
 # Contexto e objetivo

@@ -1,6 +1,6 @@
 ---
 title: Edição de perfil do colaborador
-status: open
+status: completed
 revision: 1
 source:
   type: direct-request
@@ -12,7 +12,8 @@ scope:
   - apps/server/src/identity
   - apps/web/src/rest/services/identity-service.ts
   - apps/web/src/ui/identity/widgets
-last_updated_at: 2026-07-30
+evaluation: ./evaluation.md
+last_updated_at: 2026-07-31
 ---
 
 # Contexto

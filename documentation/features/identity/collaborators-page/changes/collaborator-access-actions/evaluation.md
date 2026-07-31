@@ -2,7 +2,7 @@
 title: Avaliação — ações administrativas de acesso do colaborador
 spec: ./spec.md
 parent_spec: ../../spec.md
-status: in_progress
+status: completed
 spec_revision: 3
 last_updated_at: 2026-07-31
 ---
@@ -44,9 +44,8 @@ integração server-side, mutações REST e dialogs de confirmação.
 
 # Quality Gate e build
 
-Os sensores focados locais passaram. Build local não foi executado por decisão
-explícita da task; o Quality Gate completo e o build permanecem obrigatórios no
-CI antes do status `completed`.
+Os sensores focados locais passaram. O Quality Gate e o build do CI passaram no
+HEAD `16c2a3b`, incluindo Server/Web/Core e imagens Docker.
 
 # Findings e limitações
 
@@ -63,5 +62,5 @@ CI antes do status `completed`.
 
 # Decisão
 
-A mudança está implementada no código, mas permanece `in_progress` até integração
-HTTP/Auth, Quality Gate e build do CI.
+A mudança está concluída e aceita; warnings preexistentes de hydration e estado
+pré-mount permanecem não bloqueantes.
