@@ -8,4 +8,5 @@ export type RestContextValue = {
   identityService: ReturnType<typeof IdentityService>
   legalCatalogService: ReturnType<typeof LegalCatalogService>
   communicationService: ReturnType<typeof CommunicationService>
+  schedulingService?: any
 }
