@@ -29,7 +29,7 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
 
       if (params.search) searchParams.append('search', params.search)
 
-      return restClient.get(`\clients?${searchParams.toString()}`)
+      return restClient.get(`/clients?${searchParams.toString()}`)
     },
   }
 }
