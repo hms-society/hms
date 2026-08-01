@@ -149,7 +149,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const currentStyle = statusStyles[status] || statusStyles.Potencial
 
   return (
-    <div className='mx-auto flex w-full max-w-5xl flex-col gap-6 mt-22'>
+    <div className='mx-auto flex w-full max-w-5xl flex-col gap-6 mt-22 px-4 sm:px-0'>
       <Anchor
         route='clients'
         className='inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground'
@@ -210,7 +210,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
         </CardContent>
       </Card>
 
-      <div className='flex items-center gap-25 border-b border-border overflow-x-auto no-scrollbar'>
+      <div className='flex items-center justify-between border-b border-border w-full gap-2 sm:gap-4 overflow-x-auto no-scrollbar'>
         {[
           { id: 1, label: 'Dados cadastrais' },
           { id: 2, label: 'Intakes' },
@@ -220,24 +220,24 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
         ].map((tab) => (
           <div
             key={tab.id}
-            className={`flex items-center gap-2 pb-3 cursor-pointer whitespace-nowrap border-b-2 transition-colors ${
+            className={`flex items-center gap-1.5 sm:gap-2 pb-3 cursor-pointer whitespace-nowrap border-b-2 transition-colors flex-1 justify-center px-1 sm:px-2 ${
               tab.active
                 ? 'border-[#134C50] text-[#134C50]'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <span
-              className={`flex size-5 items-center justify-center rounded-full border text-[10px] ${tab.active ? 'border-[#134C50]' : 'border-current'}`}
+              className={`flex size-4 sm:size-5 items-center justify-center rounded-full border text-[9px] sm:text-[10px] shrink-0 ${tab.active ? 'border-[#134C50]' : 'border-current'}`}
             >
               {tab.id}
             </span>
-            <span className='text-sm font-medium'>{tab.label}</span>
+            <span className='text-xs sm:text-sm font-medium'>{tab.label}</span>
           </div>
         ))}
       </div>
 
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2'>
-        <div className='flex items-center gap-3'>
+        <div className='flex flex-wrap items-center gap-3'>
           <Select value={channelFilter} onValueChange={setChannelFilter}>
             <SelectTrigger className='w-[160px] bg-card h-9'>
               <SelectValue placeholder='Canal' />
