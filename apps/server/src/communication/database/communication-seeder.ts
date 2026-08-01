@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common'
-import { fakerPT_BR as faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
