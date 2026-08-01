@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -37,6 +38,10 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
+  const [channelFilter, setChannelFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [periodFilter, setPeriodFilter] = useState('all')
+
   const { data: clientData, isLoading: isLoadingClient, error: clientError } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
@@ -61,6 +66,29 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
     isLoading: isLoadingCommunications, 
     isError: isErrorCommunications 
   } = useClientCommunicationsQuery(clientId)
+
+  const filteredCommunications = communications.filter((item: any) => {
+    if (channelFilter !== 'all' && item.channel !== channelFilter) {
+      return false
+    }
+
+    if (typeFilter !== 'all' && item.direction !== typeFilter) {
+      return false
+    }
+
+    if (periodFilter !== 'all') {
+      const itemDate = new Date(item.createdAt).getTime()
+      const now = Date.now()
+      const diffDays = (now - itemDate) / (1000 * 60 * 60 * 24)
+
+      if (periodFilter === '7days' && diffDays > 7) return false
+      if (periodFilter === '30days' && diffDays > 30) return false
+      if (periodFilter === '6months' && diffDays > 180) return false
+      if (periodFilter === '1year' && diffDays > 365) return false
+    }
+
+    return true
+  })
 
   if (isLoadingClient || isLoadingIntakes) {
     return (
@@ -187,28 +215,38 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
         <div className="flex items-center gap-3">
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[120px] bg-card h-9">
+          <Select value={channelFilter} onValueChange={setChannelFilter}>
+            <SelectTrigger className="w-[160px] bg-card h-9">
               <SelectValue placeholder="Canal" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Canal</SelectItem>
+              <SelectItem value="all">Todos os canais</SelectItem>
+              <SelectItem value="whatsapp">WhatsApp</SelectItem>
+              <SelectItem value="email">E-mail</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[120px] bg-card h-9">
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[140px] bg-card h-9">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tipo</SelectItem>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              <SelectItem value="inbound">Recebidas</SelectItem>
+              <SelectItem value="outbound">Enviadas</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[120px] bg-card h-9">
+
+          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+            <SelectTrigger className="w-[150px] bg-card h-9">
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Período</SelectItem>
+              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="7days">Últimos 7 dias</SelectItem>
+              <SelectItem value="30days">Últimos 30 dias</SelectItem>
+              <SelectItem value="6months">Últimos 6 meses</SelectItem>
+              <SelectItem value="1year">Último ano</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -221,10 +259,10 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
           <div className="p-4 text-center text-sm text-destructive border border-destructive/20 bg-destructive/10 rounded-lg">
             Erro ao se conectar com a API de histórico.
           </div>
-        ) : communications.length === 0 ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">Nenhuma comunicação registrada.</div>
+        ) : filteredCommunications.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">Nenhuma comunicação encontrada com os filtros selecionados.</div>
         ) : (
-          communications.map((item: any) => (
+          filteredCommunications.map((item: any) => (
             <Card key={item.id} className="shadow-none border-border/60">
               <CardContent className="p-4 flex gap-4">
                 <div className="shrink-0 flex size-10 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
