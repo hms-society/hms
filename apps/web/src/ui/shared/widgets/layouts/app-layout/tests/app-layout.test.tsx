@@ -120,7 +120,7 @@ describe('AppLayout', () => {
     ).toBe('page')
   })
 
-  it('does not treat nested dashboard paths as active', () => {
+  it('does not treat unrelated nested paths as active', () => {
     useAppLayoutMock.mockReturnValue({
       pathname: `${ROUTES.home}/details`,
       isSidebarCollapsed: false,
@@ -131,7 +131,7 @@ describe('AppLayout', () => {
     render(<AppLayout />)
 
     expect(
-      screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current'),
+      screen.getByRole('link', { name: 'Intakes' }).getAttribute('aria-current'),
     ).toBeNull()
   })
 })

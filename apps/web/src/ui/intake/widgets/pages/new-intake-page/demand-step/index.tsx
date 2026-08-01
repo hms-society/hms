@@ -1,6 +1,6 @@
-import { Controller } from 'react-hook-form'
-
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/ui/shadcn/field'
+import { forwardRef, useImperativeHandle } from 'react'
+import { Controller, useFormContext } from 'react-hook-form'
+import { Label } from '@/ui/shadcn/label'
 import {
   Select,
   SelectContent,
@@ -8,12 +8,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/shadcn/select'
+import { Separator } from '@/ui/shadcn/separator'
 import { Textarea } from '@/ui/shadcn/textarea'
-import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import { useDemandStep } from './use-demand-step'
+import { useDemandStep } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-demand-step'
 
-export const DemandStep = () => {
+export interface StepRef {
+  validate: () => Promise<boolean>
+}
+
+export const StepDemand = forwardRef<StepRef>((_, ref) => {
+  const { trigger } = useFormContext()
   const {
     control,
     errors,
@@ -26,41 +31,34 @@ export const DemandStep = () => {
     handleLegalAreaChange,
   } = useDemandStep()
 
-  return (
-    <div className='flex flex-col gap-6'>
-      <div className='flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between'>
-        <div className='flex items-center gap-3'>
-          <span className='flex size-9 items-center justify-center rounded-lg bg-secondary text-primary'>
-            <Icon name='message-square-text' />
-          </span>
-          <div>
-            <h2 className='font-sans text-base font-semibold text-foreground'>
-              Dados da demanda
-            </h2>
-            <p className='text-sm text-muted-foreground'>
-              Classifique o contato para orientar o atendimento.
-            </p>
-          </div>
-        </div>
-        <p className='text-xs text-muted-foreground'>* Campos obrigatórios</p>
-      </div>
+  useImperativeHandle(ref, () => ({
+    validate: async () => {
+      return await trigger([
+        'origin',
+        'contactChannel',
+        'legalAreaId',
+        'legalTopicId',
+        'urgency',
+      ])
+    },
+  }))
 
-      <div className='grid gap-5 md:grid-cols-2'>
-        <Field data-invalid={Boolean(errors.origin)}>
-          <FieldLabel htmlFor='origin'>Origem *</FieldLabel>
+  return (
+    <div className='flex flex-col gap-5'>
+      <div className='grid grid-cols-2 gap-4'>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='origin'>
+            Origem <span className='text-destructive'>*</span>
+          </Label>
           <Controller
             name='origin'
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger
-                  id='origin'
-                  className='w-full'
-                  aria-invalid={Boolean(errors.origin)}
-                >
-                  <SelectValue placeholder='Selecione a origem' />
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                <SelectTrigger id='origin' className='w-full' size='sm'>
+                  <SelectValue placeholder='Selecione a origem...' />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side='bottom' sideOffset={4} avoidCollisions={false}>
                   <SelectItem value='direct'>Entrada direta HMS</SelectItem>
                   <SelectItem value='referral'>Indicação</SelectItem>
                   <SelectItem value='website'>Site do HMS</SelectItem>
@@ -70,56 +68,63 @@ export const DemandStep = () => {
               </Select>
             )}
           />
-          <FieldError>{errors.origin?.message}</FieldError>
-        </Field>
+          {errors.origin && (
+            <span className='text-[12px] text-destructive'>
+              {errors.origin.message as string}
+            </span>
+          )}
+        </div>
 
-        <Field data-invalid={Boolean(errors.contactChannel)}>
-          <FieldLabel htmlFor='contact-channel'>Canal de contato *</FieldLabel>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='contactChannel'>
+            Canal de contato <span className='text-destructive'>*</span>
+          </Label>
           <Controller
             name='contactChannel'
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger
-                  id='contact-channel'
-                  className='w-full'
-                  aria-invalid={Boolean(errors.contactChannel)}
-                >
-                  <SelectValue placeholder='Selecione o canal' />
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                <SelectTrigger id='contactChannel' className='w-full' size='sm'>
+                  <SelectValue placeholder='Selecione o canal de contato...' />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='whatsapp'>WhatsApp</SelectItem>
                   <SelectItem value='email'>E-mail</SelectItem>
                   <SelectItem value='phone'>Telefone</SelectItem>
-                  <SelectItem value='in_person'>Presencial</SelectItem>
+                  <SelectItem value='in_person'>Escritório / Presencial</SelectItem>
                 </SelectContent>
               </Select>
             )}
           />
-          <FieldError>{errors.contactChannel?.message}</FieldError>
-        </Field>
+          {errors.contactChannel && (
+            <span className='text-[12px] text-destructive'>
+              {errors.contactChannel.message as string}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className='grid gap-5 border-t border-border pt-6 lg:grid-cols-3'>
-        <Field data-invalid={Boolean(errors.legalAreaId)}>
-          <FieldLabel htmlFor='legal-area'>Área jurídica *</FieldLabel>
+      <Separator />
+      <div className='grid grid-cols-3 gap-4'>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='legalAreaId'>
+            Área jurídica <span className='text-destructive'>*</span>
+          </Label>
           <Controller
             name='legalAreaId'
             control={control}
             render={({ field }) => (
               <Select
-                value={field.value}
                 onValueChange={handleLegalAreaChange}
+                value={field.value ?? ''}
                 disabled={isLoadingLegalAreas}
               >
-                <SelectTrigger
-                  id='legal-area'
-                  className='w-full'
-                  aria-invalid={Boolean(errors.legalAreaId)}
-                >
+                <SelectTrigger id='legalAreaId' className='w-full' size='sm'>
                   <SelectValue
                     placeholder={
-                      isLoadingLegalAreas ? 'Carregando áreas…' : 'Selecione a área'
+                      isLoadingLegalAreas
+                        ? 'Carregando áreas...'
+                        : 'Escolha a Área Jurídica'
                     }
                   />
                 </SelectTrigger>
@@ -133,32 +138,33 @@ export const DemandStep = () => {
               </Select>
             )}
           />
-          <FieldError>{errors.legalAreaId?.message}</FieldError>
-        </Field>
-
-        <Field data-invalid={Boolean(errors.legalTopicId)}>
-          <FieldLabel htmlFor='legal-topic'>Tema jurídico *</FieldLabel>
+          {errors.legalAreaId && (
+            <span className='text-[12px] text-destructive'>
+              {errors.legalAreaId.message as string}
+            </span>
+          )}
+        </div>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='legalTopicId'>
+            Tema jurídico <span className='text-destructive'>*</span>
+          </Label>
           <Controller
             name='legalTopicId'
             control={control}
             render={({ field }) => (
               <Select
-                value={field.value}
                 onValueChange={field.onChange}
-                disabled={!selectedLegalAreaId}
+                value={field.value ?? ''}
+                disabled={!selectedLegalAreaId || isLoadingLegalTopics}
               >
-                <SelectTrigger
-                  id='legal-topic'
-                  className='w-full'
-                  aria-invalid={Boolean(errors.legalTopicId)}
-                >
+                <SelectTrigger id='legalTopicId' className='w-full' size='sm'>
                   <SelectValue
                     placeholder={
                       !selectedLegalAreaId
                         ? 'Escolha a área primeiro'
                         : isLoadingLegalTopics
-                          ? 'Carregando temas…'
-                          : 'Selecione o tema'
+                          ? 'Carregando temas...'
+                          : 'Escolha o Tema Jurídico'
                     }
                   />
                 </SelectTrigger>
@@ -172,22 +178,23 @@ export const DemandStep = () => {
               </Select>
             )}
           />
-          <FieldError>{errors.legalTopicId?.message}</FieldError>
-        </Field>
-
-        <Field data-invalid={Boolean(errors.urgency)}>
-          <FieldLabel htmlFor='urgency'>Grau de urgência *</FieldLabel>
+          {errors.legalTopicId && (
+            <span className='text-[12px] text-destructive'>
+              {errors.legalTopicId.message as string}
+            </span>
+          )}
+        </div>
+        <div className='flex flex-col gap-1.5'>
+          <Label htmlFor='urgency'>
+            Grau de urgência <span className='text-destructive'>*</span>
+          </Label>
           <Controller
             name='urgency'
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger
-                  id='urgency'
-                  className='w-full'
-                  aria-invalid={Boolean(errors.urgency)}
-                >
-                  <SelectValue placeholder='Selecione a urgência' />
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                <SelectTrigger id='urgency' className='w-full' size='sm'>
+                  <SelectValue placeholder='Selecione o Nível de Urgência' />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='normal'>Normal</SelectItem>
@@ -197,19 +204,24 @@ export const DemandStep = () => {
               </Select>
             )}
           />
-          <FieldError>{errors.urgency?.message}</FieldError>
-        </Field>
+          {errors.urgency && (
+            <span className='text-[12px] text-destructive'>
+              {errors.urgency.message as string}
+            </span>
+          )}
+        </div>
       </div>
-
       {legalCatalogError && (
-        <p role='alert' className='text-sm text-destructive'>
+        <span className='text-[12px] text-destructive'>
           Não foi possível carregar o catálogo jurídico. Tente novamente.
-        </p>
+        </span>
       )}
 
-      <Field data-invalid={Boolean(errors.notes)}>
-        <FieldLabel htmlFor='notes'>Observações</FieldLabel>
-        <FieldDescription>Opcional, até 2.000 caracteres.</FieldDescription>
+      <div className='flex flex-col gap-1.5'>
+        <Label htmlFor='notes'>
+          Observações{' '}
+          <span className='text-muted-foreground font-normal'>(opcional)</span>
+        </Label>
         <Controller
           name='notes'
           control={control}
@@ -218,14 +230,19 @@ export const DemandStep = () => {
               {...field}
               id='notes'
               value={field.value ?? ''}
-              placeholder='Relato do cliente e anotações relevantes para o atendimento'
-              className='min-h-32 resize-y'
-              aria-invalid={Boolean(errors.notes)}
+              placeholder='Relato do lead, anotações do atendente...'
+              className='resize-none min-h-[140px]'
             />
           )}
         />
-        <FieldError>{errors.notes?.message}</FieldError>
-      </Field>
+        {errors.notes && (
+          <span className='text-[12px] text-destructive'>
+            {errors.notes.message as string}
+          </span>
+        )}
+      </div>
     </div>
   )
-}
+})
+
+StepDemand.displayName = 'StepDemand'

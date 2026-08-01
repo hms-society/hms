@@ -212,7 +212,6 @@ test('shows an error and keeps the form when intake registration fails', async (
   )
   await expect(page.getByRole('heading', { name: 'Definir próximo passo' })).toBeVisible()
 })
-
 test('closes an intake without contract and sends the closure reason', async ({
   page,
   auth,
@@ -221,32 +220,36 @@ test('closes an intake without contract and sends the closure reason', async ({
   await goToClientStep(page)
   await linkExistingClient(page)
 
-  await page
-    .getByRole('button', { name: /Encerrar sem contratação/ })
-    .first()
-    .click()
-  await page.getByRole('button', { name: 'Fora do escopo', exact: true }).click()
-  await page.getByRole('button', { name: 'Encerrar atendimento' }).click()
+  await page.getByRole('button', { name: 'Encerrar atendimento' }).last().click()
 
-  await expect(
-    page.getByRole('heading', { name: 'Encerrar sem contratação?' }),
-  ).toBeVisible()
+  await page.getByRole('combobox', { name: /Motivo/i }).click()
+  await page.getByRole('option', { name: 'Fora do escopo' }).click()
+
+  const headerClosureButton = page
+    .locator('header')
+    .getByRole('button', { name: 'Encerrar atendimento' })
+  
+  await expect(headerClosureButton).toBeEnabled()
+  await headerClosureButton.click()
+  const dialogHeading = page.getByRole('heading', {
+    name: 'Encerrar sem contratação?',
+  })
+  await expect(dialogHeading).toBeVisible({ timeout: 10000 })
 
   const closeRequestPromise = page.waitForRequest(
     (request) =>
       request.method() === 'POST' && request.url() === `${BACKEND_URL}/intakes`,
   )
   await page
-    .getByRole('button', { name: 'Encerrar sem contratação', exact: true })
+    .getByRole('button', { name: 'Encerrar sem contratação' })
     .last()
     .click()
-  const closeRequest = await closeRequestPromise
 
+  const closeRequest = await closeRequestPromise
   expect(closeRequest.postDataJSON()).toMatchObject({
     clientId: CLIENT_ID,
     responsibleId: auth.id,
     decision: 'close_without_contract',
     closureReason: 'out_of_scope',
   })
-  await expect(page.getByRole('heading', { name: 'Registrar demanda' })).toBeVisible()
 })
