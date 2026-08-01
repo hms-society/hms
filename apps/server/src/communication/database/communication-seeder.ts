@@ -8,9 +8,7 @@ import { userModel } from '@/identity/database/drizzle/models/user-model'
 
 @Injectable()
 export class CommunicationSeeder {
-  constructor(
-    @Inject(DrizzleClient) private readonly drizzleClient: DrizzleClient,
-  ) {}
+  constructor(@Inject(DrizzleClient) private readonly drizzleClient: DrizzleClient) {}
 
   async clear() {
     const db = this.drizzleClient.requireDatabase()
@@ -31,19 +29,12 @@ export class CommunicationSeeder {
       const totalMessages = faker.number.int({ min: 5, max: 20 })
 
       const communications = Array.from({ length: totalMessages }, () => {
-        const direction = faker.helpers.arrayElement([
-          'inbound',
-          'outbound',
-        ] as const)
+        const direction = faker.helpers.arrayElement(['inbound', 'outbound'] as const)
 
         return {
           clientId: client.id,
           authorId: direction === 'outbound' ? authorId : null,
-          channel: faker.helpers.arrayElement([
-            'whatsapp',
-            'email',
-            'phone',
-          ] as const),
+          channel: faker.helpers.arrayElement(['whatsapp', 'email', 'phone'] as const),
           direction,
           content: faker.lorem.sentences({
             min: 1,
@@ -55,9 +46,7 @@ export class CommunicationSeeder {
         }
       })
 
-      communications.sort(
-        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-      )
+      communications.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
       return communications
     })

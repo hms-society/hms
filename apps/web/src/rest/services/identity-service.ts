@@ -22,14 +22,14 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
       return restClient.post<ClientConsent>(`/clients/${clientId}/consents`, { type })
     },
 
-    listClients: async (params: {page: number; limit: number; search: string}) => {
+    listClients: async (params: { page: number; limit: number; search: string }) => {
       const searchParams = new URLSearchParams()
       searchParams.append('page', params.page.toString())
       searchParams.append('limit', params.limit.toString())
 
-      if(params.search) searchParams.append('search', params.search)
+      if (params.search) searchParams.append('search', params.search)
 
       return restClient.get(`\clients?${searchParams.toString()}`)
-    }
+    },
   }
 }

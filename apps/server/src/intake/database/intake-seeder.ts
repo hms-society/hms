@@ -39,7 +39,8 @@ export class IntakeSeeder {
     const userId = users[0].id
     const areaId = areas[0].id
 
-    const topics = await db.select()
+    const topics = await db
+      .select()
       .from(legalTopicModel)
       .where(eq(legalTopicModel.legalAreaId, areaId))
       .limit(2)
@@ -88,7 +89,7 @@ export class IntakeSeeder {
         urgency: 'urgent',
         demandNotes: 'Nova solicitação urgente via site.',
         status: IntakeStatus.Registered,
-      }
+      },
     ]
 
     return this.seed(mockIntakes)

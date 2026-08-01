@@ -7,6 +7,12 @@ import { SharedModule } from '@/shared/shared.module'
 import { CommunicationModule } from './communication/communication.module'
 
 @Module({
-  imports: [SharedModule, IdentityModule, LegalCatalogModule, IntakeModule, CommunicationModule],
+  imports: [
+    SharedModule,
+    IdentityModule,
+    LegalCatalogModule,
+    IntakeModule,
+    CommunicationModule,
+  ],
 })
 export class AppModule {}

@@ -3,7 +3,10 @@ import type { ClientDetails } from '@hms/core/identity/domain/entities'
 import type { ConsentType } from '@hms/core/identity/domain/structures'
 
 export interface IdentityService {
-  lookupClient(criteria: { taxId?: string; phone?: string }): Promise<RestResponse<ClientDetails>>
+  lookupClient(criteria: {
+    taxId?: string
+    phone?: string
+  }): Promise<RestResponse<ClientDetails>>
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>
   registerClient(request: unknown): Promise<RestResponse<ClientDetails>>
   grantClientConsent(clientId: string, type: ConsentType): Promise<RestResponse<unknown>>
@@ -11,7 +14,9 @@ export interface IdentityService {
     page: number
     limit: number
     search?: string
-  }): Promise<RestResponse<{ data: unknown[]; total: number; page: number; limit: number }>>
+  }): Promise<
+    RestResponse<{ data: unknown[]; total: number; page: number; limit: number }>
+  >
 }
 
 export const IdentityService = (restClient: any): IdentityService => ({

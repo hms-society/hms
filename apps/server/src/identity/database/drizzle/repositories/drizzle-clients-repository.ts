@@ -81,11 +81,19 @@ export class DrizzleClientsRepository
     return clients.map((client) => this.clientMapper.toDomain(client))
   }
 
-  async findAll({page,limit,search,}: {page: number, limit: number, search?: string}) {
+  async findAll({
+    page,
+    limit,
+    search,
+  }: {
+    page: number
+    limit: number
+    search?: string
+  }) {
     const offset = (Math.max(page, 1) - 1) * limit
 
     let whereClause: SQL | undefined = undefined
-    
+
     if (search) {
       const searchPattern = `%${search}%`
       whereClause = or(

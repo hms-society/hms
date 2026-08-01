@@ -62,7 +62,7 @@ export class ListClientsUseCase {
         email: client.email ?? null,
         status,
         intakesCount: intakeCount,
-        origin: latestOrigin ?? 'Direta HMS', 
+        origin: latestOrigin ?? 'Direta HMS',
       }
     })
 

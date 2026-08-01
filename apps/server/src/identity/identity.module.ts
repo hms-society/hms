@@ -22,7 +22,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RegisterClientController,
     GrantClientConsentController,
     SignInController,
-    ListClientsController
+    ListClientsController,
   ],
   providers: [
     SupabaseAuthProvider,

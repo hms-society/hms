@@ -13,7 +13,7 @@ export class ListClientCommunicationsController {
   @Get('clients/:clientId')
   async handle(@Param('clientId') clientId: string) {
     const db = this.drizzleClient.requireDatabase()
-    
+
     const records = await db
       .select({
         id: communicationModel.id,
@@ -28,7 +28,7 @@ export class ListClientCommunicationsController {
       .where(eq(communicationModel.clientId, clientId))
       .orderBy(desc(communicationModel.createdAt))
 
-    return records.map(record => ({
+    return records.map((record) => ({
       id: record.id,
       channel: record.channel,
       direction: record.direction,

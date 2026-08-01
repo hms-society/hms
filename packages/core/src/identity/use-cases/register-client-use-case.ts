@@ -29,9 +29,7 @@ export class RegisterClientUseCase
       throw new ClientAlreadyExistsError()
     }
 
-    const client = await this.clientsRepository.add(
-      clientCreation,
-    )
+    const client = await this.clientsRepository.add(clientCreation)
 
     if (!client) {
       throw new ClientAlreadyExistsError()
