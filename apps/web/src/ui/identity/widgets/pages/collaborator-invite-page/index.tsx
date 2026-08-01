@@ -5,9 +5,16 @@ import { Input } from '@/ui/shadcn/input'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import { useCollaboratorInvitePage } from './use-collaborator-invite-page'
+import {
+  useCollaboratorInvitePage,
+  type CollaboratorInviteSearch,
+} from './use-collaborator-invite-page'
 
-export function CollaboratorInvitePage() {
+type CollaboratorInvitePageProps = {
+  inviteSearch?: CollaboratorInviteSearch
+}
+
+export function CollaboratorInvitePage({ inviteSearch }: CollaboratorInvitePageProps) {
   const {
     confirmPassword,
     errorMessage,
@@ -15,15 +22,13 @@ export function CollaboratorInvitePage() {
     handlePasswordChange,
     handleSubmit,
     handleTogglePasswordVisibility,
-    hasCheckedSession,
+    inviteUnavailableMessage,
+    isInviteUnavailable,
     isLoading,
     password,
-    session,
     showPassword,
     status,
-  } = useCollaboratorInvitePage()
-
-  const isInviteUnavailable = hasCheckedSession && !session
+  } = useCollaboratorInvitePage(inviteSearch)
 
   return (
     <main className='flex min-h-screen bg-background font-sans text-foreground'>
@@ -67,7 +72,7 @@ export function CollaboratorInvitePage() {
           </p>
 
           {isInviteUnavailable ? (
-            <InviteErrorState message='Link de convite inválido ou expirado.' />
+            <InviteErrorState message={inviteUnavailableMessage} />
           ) : status === 'success' ? (
             <p role='status' className='mt-12 text-sm text-brand'>
               Senha criada. Redirecionando para a HMS…

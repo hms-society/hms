@@ -1,5 +1,6 @@
 import type { CollaboratorSummary } from '../domain/entities'
 import {
+  CollaboratorAuthUserAlreadyConfirmedError,
   CollaboratorInvitationNotPendingError,
   CollaboratorNotFoundError,
   UserNotFoundError,
@@ -42,12 +43,20 @@ export class ResendCollaboratorInvitationUseCase
     if (!user) throw new UserNotFoundError()
     if (user.status !== 'invited') throw new CollaboratorInvitationNotPendingError()
 
+    const existingAuthUser = await this.authAdministrationProvider.findUserByEmail(
+      user.email,
+    )
+    if (existingAuthUser?.isConfirmed) {
+      throw new CollaboratorAuthUserAlreadyConfirmedError()
+    }
+
     await this.authAdministrationProvider.resendInvitation(
       user.email,
       invitationRedirectTo,
     )
 
     const summary = await this.collaboratorsRepository.findSummaryByUserId(user.id)
+    console.log({ summary })
     if (!summary) throw new CollaboratorNotFoundError()
 
     return summary

@@ -5,6 +5,7 @@ import type {
   AuthAdministrationUser,
   AuthUser,
 } from '@hms/core/identity/domain/structures'
+import { AppError, ConflictError } from '@hms/core/shared/domain/errors'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
@@ -23,11 +24,13 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     const serviceRoleKey = this.envProvider.get('SUPABASE_SERVICE_ROLE_KEY')
 
     if (!serviceRoleKey) {
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for Auth administration')
+      throw new AppError(
+        'A chave de administração do Supabase é obrigatória para gerenciar o Auth.',
+      )
     }
 
     if (!isValidSupabaseServerKey(serviceRoleKey)) {
-      throw new Error('Supabase server key must be a legacy JWT or an sb_secret key')
+      throw new AppError('A chave de administração do Supabase é inválida.')
     }
 
     this.supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -40,8 +43,10 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
       redirectTo,
     })
 
-    if (error || !data.user) {
-      throw error ?? new Error('Supabase did not create the invited user')
+    if (error)
+      this.throwAuthError(error, 'Não foi possível enviar o convite para o colaborador.')
+    if (!data.user) {
+      throw new AppError('O Supabase não retornou o usuário convidado.')
     }
 
     return this.toAuthUser(data.user)
@@ -58,8 +63,9 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
       email_confirm: true,
     })
 
-    if (error || !data.user) {
-      throw error ?? new Error('Supabase did not create the user')
+    if (error) this.throwAuthError(error, 'Não foi possível criar o usuário no Auth.')
+    if (!data.user) {
+      throw new AppError('O Supabase não retornou o usuário criado.')
     }
 
     return this.toAuthUser(data.user)
@@ -68,7 +74,7 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
   async removeUser(userId: string): Promise<void> {
     const { error } = await this.supabase.auth.admin.deleteUser(userId)
 
-    if (error) throw error
+    if (error) this.throwAuthError(error, 'Não foi possível remover o usuário do Auth.')
   }
 
   async findUserByEmail(email: string): Promise<AuthAdministrationUser | undefined> {
@@ -81,7 +87,9 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
         perPage: USERS_PAGE_SIZE,
       })
 
-      if (error) throw error
+      if (error) {
+        this.throwAuthError(error, 'Não foi possível consultar os usuários do Auth.')
+      }
 
       const user = data.users.find(
         (candidate) =>
@@ -99,8 +107,14 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     const { data: currentUser, error: currentUserError } =
       await this.supabase.auth.admin.getUserById(userId)
 
-    if (currentUserError || !currentUser.user) {
-      throw currentUserError ?? new Error('Supabase user was not found')
+    if (currentUserError) {
+      this.throwAuthError(
+        currentUserError,
+        'Não foi possível consultar o usuário no Auth.',
+      )
+    }
+    if (!currentUser.user) {
+      throw new AppError('O usuário não foi encontrado no Auth.')
     }
 
     const { error } = await this.supabase.auth.admin.updateUserById(userId, {
@@ -110,7 +124,12 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
       },
     })
 
-    if (error) throw error
+    if (error) {
+      this.throwAuthError(
+        error,
+        'Não foi possível registrar a tentativa de convite no Auth.',
+      )
+    }
   }
 
   async setUserBanned(userId: string, isBanned: boolean): Promise<void> {
@@ -118,13 +137,15 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
       ban_duration: isBanned ? SUPABASE_LONG_TERM_BAN_DURATION : 'none',
     })
 
-    if (error) throw error
+    if (error) {
+      this.throwAuthError(error, 'Não foi possível atualizar o bloqueio do usuário.')
+    }
   }
 
   async revokeSession(accessToken: string): Promise<void> {
     const { error } = await this.supabase.auth.admin.signOut(accessToken, 'local')
 
-    if (error) throw error
+    if (error) this.throwAuthError(error, 'Não foi possível revogar a sessão do Auth.')
   }
 
   private toAdministrationUser(user: User): AuthAdministrationUser {
@@ -133,6 +154,7 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     return {
       authUserId: user.id,
       email: user.email,
+      isConfirmed: Boolean(user.email_confirmed_at),
       ...(typeof invitationAttemptId === 'string' ? { invitationAttemptId } : {}),
     }
   }
@@ -146,5 +168,24 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
 
   private normalizeEmail(email: string): string {
     return email.trim().toLowerCase()
+  }
+
+  private throwAuthError(error: unknown, fallbackMessage: string): never {
+    const authError = this.getAuthError(error)
+
+    if (authError.code === 'email_exists') {
+      throw new ConflictError(
+        'Este e-mail já possui uma conta no Auth. O colaborador precisa concluir o acesso ou ser reconciliado.',
+      )
+    }
+
+    throw new AppError(fallbackMessage)
+  }
+
+  private getAuthError(error: unknown): { code?: string } {
+    if (!error || typeof error !== 'object') return {}
+
+    const candidate = error as { code?: unknown }
+    return typeof candidate.code === 'string' ? { code: candidate.code } : {}
   }
 }

@@ -7,6 +7,7 @@ export class AuthAdministrationUserFaker {
     return {
       authUserId: faker.string.uuid(),
       email: faker.internet.email(),
+      isConfirmed: false,
       invitationAttemptId: faker.string.uuid(),
       ...overrides,
     }

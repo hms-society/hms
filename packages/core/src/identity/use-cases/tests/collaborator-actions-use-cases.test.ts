@@ -20,6 +20,7 @@ import { DeactivateCollaboratorUseCase } from '../deactivate-collaborator-use-ca
 import { ReactivateCollaboratorUseCase } from '../reactivate-collaborator-use-case'
 import { RemoveCancelledCollaboratorUseCase } from '../remove-cancelled-collaborator-use-case'
 import { ResendCollaboratorInvitationUseCase } from '../resend-collaborator-invitation-use-case'
+import { AuthAdministrationUserFaker } from '../../domain/structures/fakers'
 
 describe('Collaborator action use cases', () => {
   let usersRepository: MockProxy<UsersRepository>
@@ -45,6 +46,9 @@ describe('Collaborator action use cases', () => {
     })
     collaboratorsRepository.findById.mockResolvedValue(collaborator)
     usersRepository.findById.mockResolvedValue(user)
+    authAdministrationProvider.findUserByEmail.mockResolvedValue(
+      AuthAdministrationUserFaker.fake({ isConfirmed: false }),
+    )
     collaboratorsRepository.findSummaryByUserId.mockResolvedValue(summary)
     authAdministrationProvider.resendInvitation.mockResolvedValue({
       id: user.id,
@@ -71,6 +75,31 @@ describe('Collaborator action use cases', () => {
       user.email,
       'http://localhost:3000/convite',
     )
+  })
+
+  it('rejects resend when Auth already confirmed the collaborator', async () => {
+    const collaborator = CollaboratorFaker.administrative({ userId: 'confirmed-user' })
+    const user = UserFaker.fake({ id: 'confirmed-user', status: 'invited' })
+    collaboratorsRepository.findById.mockResolvedValue(collaborator)
+    usersRepository.findById.mockResolvedValue(user)
+    authAdministrationProvider.findUserByEmail.mockResolvedValue(
+      AuthAdministrationUserFaker.fake({ isConfirmed: true }),
+    )
+
+    const useCase = new ResendCollaboratorInvitationUseCase(
+      usersRepository,
+      collaboratorsRepository,
+      authAdministrationProvider,
+      authorizeAdministrator,
+    )
+
+    await expect(
+      useCase.execute({
+        authUser: AuthUserFaker.fake(),
+        collaboratorId: collaborator.id,
+      }),
+    ).rejects.toThrow('já confirmou o acesso no Auth')
+    expect(authAdministrationProvider.resendInvitation).not.toHaveBeenCalled()
   })
 
   it('rejects resend for an active collaborator without calling Auth', async () => {

@@ -427,11 +427,17 @@ export function CollaboratorsPage({
               {getCollaboratorActionDescription(selectedAction)}
             </AlertDialogDescription>
             {actionError && (
-              <p role='alert' className='text-sm text-destructive'>
-                {actionError instanceof Error
-                  ? actionError.message
-                  : 'Não foi possível concluir a ação.'}
-              </p>
+              <div
+                role='alert'
+                className='rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive'
+              >
+                <p className='font-semibold'>Não foi possível concluir a ação.</p>
+                <p className='mt-1'>
+                  {actionError instanceof Error
+                    ? actionError.message
+                    : 'Tente novamente ou atualize a situação do colaborador.'}
+                </p>
+              </div>
             )}
           </AlertDialogHeader>
           <AlertDialogFooter className='m-0 rounded-none bg-muted/50 p-4'>

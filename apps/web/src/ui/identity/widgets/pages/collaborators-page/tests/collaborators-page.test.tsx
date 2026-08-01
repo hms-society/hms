@@ -275,4 +275,27 @@ describe('CollaboratorsPage', () => {
 
     expect(handleConfirmAction).toHaveBeenCalledOnce()
   })
+
+  it('shows the domain error message inside the action dialog', () => {
+    useCollaboratorsPageMock.mockReturnValue(
+      createController({
+        actionError: new Error(
+          'Este colaborador já confirmou o acesso no Auth. Ele deve entrar pela tela de login para ativar o cadastro local.',
+        ),
+        selectedAction: { kind: 'resend', collaborator: invitedCollaborator },
+        getCollaboratorActionButtonLabel: vi.fn(() => 'Reenviar convite' as const),
+        getCollaboratorActionDescription: vi.fn(
+          () => 'Um novo e-mail de acesso será enviado para este colaborador.',
+        ),
+        getCollaboratorActionIcon: vi.fn(() => 'mail' as const),
+        getCollaboratorActionTitle: vi.fn(() => 'Reenviar convite?' as const),
+      }),
+    )
+
+    render(<CollaboratorsPage />)
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'Este colaborador já confirmou o acesso no Auth.',
+    )
+  })
 })

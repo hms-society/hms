@@ -7,7 +7,14 @@ import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 type InviteStatus = 'idle' | 'error' | 'success'
 
-export function useCollaboratorInvitePage() {
+export type CollaboratorInviteSearch = {
+  code?: string
+  error?: string
+  error_code?: string
+  error_description?: string
+}
+
+export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {}) {
   const {
     getSession,
     isLoading: isLoadingSession,
@@ -22,6 +29,12 @@ export function useCollaboratorInvitePage() {
   const [status, setStatus] = useState<InviteStatus>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [hasCheckedSession, setHasCheckedSession] = useState(false)
+  const hasInviteError = Boolean(
+    search.error || search.error_code || search.error_description,
+  )
+  const hasInviteToken = Boolean(search.code) || hasHashInviteToken()
+  const isInviteUnavailable =
+    hasCheckedSession && (!session || !hasInviteToken || hasInviteError)
 
   useEffect(
     function markSessionAsChecked() {
@@ -97,6 +110,8 @@ export function useCollaboratorInvitePage() {
     confirmPassword,
     errorMessage,
     hasCheckedSession,
+    inviteUnavailableMessage: getInviteUnavailableMessage(search),
+    isInviteUnavailable,
     isLoading: isLoadingSession || isPending,
     password,
     session,
@@ -112,3 +127,18 @@ export function useCollaboratorInvitePage() {
 export type CollaboratorInvitePageController = ReturnType<
   typeof useCollaboratorInvitePage
 >
+
+function hasHashInviteToken() {
+  if (typeof window === 'undefined') return false
+
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  return Boolean(hash.get('access_token') && hash.get('refresh_token'))
+}
+
+function getInviteUnavailableMessage(search: CollaboratorInviteSearch) {
+  if (search.error || search.error_code || search.error_description) {
+    return 'O link de convite é inválido ou expirou. Solicite um novo convite ao administrador.'
+  }
+
+  return 'Abra esta página pelo link recebido no convite. Se o link expirou, solicite um novo convite ao administrador.'
+}

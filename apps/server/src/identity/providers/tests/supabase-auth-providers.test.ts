@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient, type User } from '@supabase/supabase
 import { SupabaseAuthAdministrationProvider } from '@/identity/providers/supabase-auth-administration-provider'
 import { SupabaseAuthProvider } from '@/identity/providers/supabase-auth-provider'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { AppError, ConflictError } from '@hms/core/shared/domain/errors'
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(),
@@ -160,7 +161,30 @@ describe('SupabaseAuthAdministrationProvider', () => {
 
     await expect(
       provider.inviteUserByEmail('person@example.com', 'http://localhost:3000/convite'),
-    ).rejects.toBe(error)
+    ).rejects.toMatchObject({
+      message: 'Não foi possível enviar o convite para o colaborador.',
+    })
+    await expect(
+      provider.inviteUserByEmail('person@example.com', 'http://localhost:3000/convite'),
+    ).rejects.toBeInstanceOf(AppError)
+  })
+
+  it('maps an existing Auth email to a conflict when resending an invitation', async () => {
+    inviteUserByEmail.mockResolvedValue({
+      data: { user: null },
+      error: { code: 'email_exists' },
+    })
+    const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
+
+    await expect(
+      provider.resendInvitation('person@example.com', 'http://localhost:3000/convite'),
+    ).rejects.toMatchObject({
+      message:
+        'Este e-mail já possui uma conta no Auth. O colaborador precisa concluir o acesso ou ser reconciliado.',
+    })
+    await expect(
+      provider.resendInvitation('person@example.com', 'http://localhost:3000/convite'),
+    ).rejects.toBeInstanceOf(ConflictError)
   })
 
   it('looks up emails case-insensitively and ignores user metadata markers', async () => {
@@ -200,6 +224,7 @@ describe('SupabaseAuthAdministrationProvider', () => {
     await expect(provider.findUserByEmail(' person@example.com ')).resolves.toEqual({
       authUserId: 'second-page-user',
       email: 'Person@Example.com',
+      isConfirmed: false,
       invitationAttemptId: 'attempt-1',
     })
     expect(listUsers).toHaveBeenNthCalledWith(1, { page: 1, perPage: 1000 })

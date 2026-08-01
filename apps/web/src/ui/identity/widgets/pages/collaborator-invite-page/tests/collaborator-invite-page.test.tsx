@@ -57,7 +57,9 @@ function createWrapper() {
 }
 
 function renderPage() {
-  return render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+  return render(<CollaboratorInvitePage inviteSearch={{ code: 'invite-code' }} />, {
+    wrapper: createWrapper(),
+  })
 }
 
 function getInviteForm() {
@@ -135,6 +137,33 @@ describe('CollaboratorInvitePage', () => {
     renderPage()
 
     expect(await screen.findByRole('alert')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Criar minha senha' })).toBeNull()
+  })
+
+  it('shows an unavailable state when the invite URL contains an auth error', async () => {
+    render(
+      <CollaboratorInvitePage
+        inviteSearch={{
+          error: 'access_denied',
+          error_code: 'otp_expired',
+          error_description: 'Email link is invalid or has expired',
+        }}
+      />,
+      { wrapper: createWrapper() },
+    )
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'O link de convite é inválido ou expirou.',
+    )
+    expect(screen.queryByRole('button', { name: 'Criar minha senha' })).toBeNull()
+  })
+
+  it('shows an unavailable state when the URL has no invite token', async () => {
+    render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'Abra esta página pelo link recebido no convite.',
+    )
     expect(screen.queryByRole('button', { name: 'Criar minha senha' })).toBeNull()
   })
 
