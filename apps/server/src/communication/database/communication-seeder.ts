@@ -1,4 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
+import { fakerPT_BR as faker } from '@faker-js/faker'
+
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
@@ -17,6 +19,7 @@ export class CommunicationSeeder {
 
   async run() {
     const db = this.drizzleClient.requireDatabase()
+
     const clients = await db.select().from(clientModel)
     const users = await db.select().from(userModel).limit(1)
 
@@ -24,40 +27,40 @@ export class CommunicationSeeder {
 
     const authorId = users[0].id
 
-    const mockCommunications = clients.flatMap(client => [
-      {
-        clientId: client.id,
-        authorId: null,
-        channel: 'whatsapp' as const,
-        direction: 'inbound' as const,
-        content: 'Olá, gostaria de saber sobre o andamento da minha solicitação.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-      },
-      {
-        clientId: client.id,
-        authorId,
-        channel: 'whatsapp' as const,
-        direction: 'outbound' as const,
-        content: 'Olá! Seu processo está na fase de coleta de documentos. Pode nos enviar seu RG?',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 47),
-      },
-      {
-        clientId: client.id,
-        authorId: null,
-        channel: 'email' as const,
-        direction: 'inbound' as const,
-        content: 'Segue em anexo o documento solicitado.\n\nAtt,\nCliente',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      },
-      {
-        clientId: client.id,
-        authorId,
-        channel: 'phone' as const,
-        direction: 'outbound' as const,
-        content: 'Ligação de alinhamento com o cliente para confirmar o recebimento dos documentos.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      }
-    ])
+    const mockCommunications = clients.flatMap((client) => {
+      const totalMessages = faker.number.int({ min: 5, max: 20 })
+
+      const communications = Array.from({ length: totalMessages }, () => {
+        const direction = faker.helpers.arrayElement([
+          'inbound',
+          'outbound',
+        ] as const)
+
+        return {
+          clientId: client.id,
+          authorId: direction === 'outbound' ? authorId : null,
+          channel: faker.helpers.arrayElement([
+            'whatsapp',
+            'email',
+            'phone',
+          ] as const),
+          direction,
+          content: faker.lorem.sentences({
+            min: 1,
+            max: 4,
+          }),
+          createdAt: faker.date.recent({
+            days: 60,
+          }),
+        }
+      })
+
+      communications.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      )
+
+      return communications
+    })
 
     await db.insert(communicationModel).values(mockCommunications)
   }
