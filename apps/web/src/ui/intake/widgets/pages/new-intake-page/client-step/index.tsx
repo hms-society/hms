@@ -5,7 +5,7 @@ import { Field, FieldError } from '@/ui/shadcn/field'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ClientRegisterDialog } from '@/ui/shared/widgets/components/client-register-dialog'
 
-import { useClientStep } from './use-client-step'
+import { useClientStep } from '@/ui/intake/widgets/pages/new-intake-page/client-step/use-client-step'
 
 export const ClientStep = () => {
   const {
@@ -71,17 +71,17 @@ export const ClientStep = () => {
           <div className='flex shrink-0 flex-row gap-2 sm:w-44 sm:flex-col'>
             <Button
               type='button'
-              size='lg'
-              className='h-16 min-h-16 flex-1 justify-center rounded-lg shadow-xs sm:w-full'
+              size='sm'
+              className='h-10 min-h-10 flex-1 justify-center rounded-lg shadow-xs sm:w-full'
             >
               <Icon name='external-link' />
               Ver cadastro
             </Button>
             <Button
               type='button'
-              size='lg'
+              size='sm'
               variant='outline'
-              className='h-16 min-h-16 flex-1 justify-center rounded-lg border-border/80 bg-card text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:w-full'
+              className='h-10 min-h-10 flex-1 justify-center rounded-lg border-border/80 bg-card text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:w-full'
               onClick={handleChangeClient}
             >
               <Icon name='refresh-cw' />
@@ -107,6 +107,7 @@ export const ClientStep = () => {
             </div>
             <Button
               type='button'
+              size='sm'
               className='w-full shrink-0 rounded-pill sm:w-auto'
               onClick={() => handleClientDialogChange(true)}
             >

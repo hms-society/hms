@@ -7,6 +7,7 @@ import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
+import { SchedulingService } from '@/rest/services/scheduling-service'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
