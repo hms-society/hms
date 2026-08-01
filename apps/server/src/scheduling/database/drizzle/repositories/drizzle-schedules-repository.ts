@@ -48,29 +48,35 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
   }
 
   async findById(id: string): Promise<Schedule | null> {
-    const schedule = await this.db.query.schedules.findFirst({
-      where: eq(schedules.id, id),
-      with: {
-        blockedPeriods: true,
-      },
+    const [scheduleRow] = await this.db
+      .select()
+      .from(schedules)
+      .where(eq(schedules.id, id))
+
+    if (!scheduleRow) return null
+
+    const blockedPeriods = await this.findBlockedPeriodsByScheduleId(id)
+
+    return this.mapToScheduleDomain({
+      ...scheduleRow,
+      blockedPeriods,
     })
-
-    if (!schedule) return null
-
-    return this.mapToScheduleDomain(schedule)
   }
 
   async findByCollaboratorId(collaboratorId: string): Promise<Schedule | null> {
-    const schedule = await this.db.query.schedules.findFirst({
-      where: eq(schedules.collaboratorId, collaboratorId),
-      with: {
-        blockedPeriods: true,
-      },
+    const [scheduleRow] = await this.db
+      .select()
+      .from(schedules)
+      .where(eq(schedules.collaboratorId, collaboratorId))
+
+    if (!scheduleRow) return null
+
+    const blockedPeriods = await this.findBlockedPeriodsByScheduleId(scheduleRow.id)
+
+    return this.mapToScheduleDomain({
+      ...scheduleRow,
+      blockedPeriods,
     })
-
-    if (!schedule) return null
-
-    return this.mapToScheduleDomain(schedule)
   }
 
   async createSchedule(data: CreateScheduleInput) {
