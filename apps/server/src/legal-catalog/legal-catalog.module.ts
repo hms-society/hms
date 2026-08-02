@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { IdentityModule } from '@/identity/identity.module'
+import { AuthModule } from '@/identity/auth.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { LegalCatalogDatabaseModule } from '@/legal-catalog/database/legal-catalog-database.module'
 import {
@@ -9,7 +9,8 @@ import {
 } from '@/legal-catalog/rest/controllers'
 
 @Module({
-  imports: [IdentityModule, LegalCatalogDatabaseModule, ProvisionModule],
+  imports: [AuthModule, LegalCatalogDatabaseModule, ProvisionModule],
   controllers: [ListLegalAreasController, ListLegalTopicsController],
+  exports: [LegalCatalogDatabaseModule],
 })
 export class LegalCatalogModule {}

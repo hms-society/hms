@@ -17,22 +17,30 @@ export function useResetPasswordPage() {
     useResetPasswordAction()
   const { navigateTo } = useNavigation()
 
-  useEffect(() => {
-    if (!sessionChecked || sessionReady) return
+  useEffect(
+    function validateRecoverySession() {
+      if (!sessionChecked || sessionReady) return
 
-    setErrorMessage('Link de recuperação inválido ou expirado.')
-    setStatus('error')
-  }, [sessionChecked, sessionReady])
+      setErrorMessage('Link de recuperação inválido ou expirado.')
+      setStatus('error')
+    },
+    [sessionChecked, sessionReady],
+  )
 
-  useEffect(() => {
-    if (status !== 'success') return
+  useEffect(
+    function scheduleLoginRedirect() {
+      if (status !== 'success') return
 
-    const timer = window.setTimeout(() => {
-      navigateTo('login')
-    }, REDIRECT_DELAY_MS)
+      const timer = window.setTimeout(function redirectToLogin() {
+        navigateTo('login')
+      }, REDIRECT_DELAY_MS)
 
-    return () => window.clearTimeout(timer)
-  }, [navigateTo, status])
+      return function clearLoginRedirect() {
+        window.clearTimeout(timer)
+      }
+    },
+    [navigateTo, status],
+  )
 
   function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {
     setPassword(event.target.value)
@@ -43,7 +51,9 @@ export function useResetPasswordPage() {
   }
 
   function handleTogglePasswordVisibility() {
-    setShowPassword((previousValue) => !previousValue)
+    setShowPassword(function togglePasswordVisibility(previousValue) {
+      return !previousValue
+    })
   }
 
   function handleResetPasswordSuccess() {
@@ -80,15 +90,15 @@ export function useResetPasswordPage() {
   return {
     confirmPassword,
     errorMessage,
-    handleConfirmPasswordChange,
-    handlePasswordChange,
-    handleSubmit,
-    handleTogglePasswordVisibility,
     isLoading,
     password,
     sessionChecked,
     sessionReady,
     showPassword,
     status,
+    handleConfirmPasswordChange,
+    handlePasswordChange,
+    handleSubmit,
+    handleTogglePasswordVisibility,
   }
 }

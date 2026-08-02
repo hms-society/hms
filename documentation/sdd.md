@@ -1,164 +1,303 @@
-# Spec-Driven Development (SDD) no Stardust
+# Spec-Driven Development (SDD) no HMS
 
-## O que é
+## Objetivo
 
-SDD é o modelo de desenvolvimento adotado pelo Stardust em que **nenhum código é escrito antes de existir uma especificação técnica formal derivada de um PRD**. Toda feature, correção ou refatoração percorre uma cadeia documental rastreável antes de virar código:
+O SDD transforma uma demanda de feature em uma entrega verificável. Todo o
+fluxo ocorre na mesma task/thread. O Orchestrator coordena Builders, Judges e
+sensores como subagentes da task atual; nenhuma fase cria nova thread.
 
-```
-milestone → PRD → spec técnica → implementação direta ou plano → código → revisão
-```
-
-O objetivo é eliminar ambiguidade antes da implementação, permitindo que desenvolvedores e agentes de IA executem tarefas dentro de limites bem definidos.
-
----
-
-## Pipeline
-
-O pipeline é orquestrado por prompts dedicados em `documentation/prompts/`. Cada prompt cobre uma etapa do ciclo de vida e define entradas, saídas e restrições de forma prescritiva.
-
-### 1. PRD — `create-prd-prompt.md`
-
-**Entrada:** milestone do GitHub, esboço da funcionalidade, screenshots ou código existente.
-**Saída:** descrição da milestone atualizada no GitHub.
-
-- A **milestone do GitHub é a única fonte de verdade** do PRD — nunca um arquivo local `prd.md`.
-- O prompt detecta automaticamente o modo de operação:
-  - **Prospectivo:** feature nova → discovery com perguntas antes de redigir.
-  - **Retrospectivo:** feature já implementada → auditoria contra a milestone e a codebase.
-- Foco exclusivo em comportamento de produto; sem decisões de arquitetura ou código.
-- Divergências entre milestone e implementação são registradas explicitamente, nunca reconciliadas por suposição.
-
-### 2. Spec Técnica — `create-spec-prompt.md`
-
-**Entrada:** PRD finalizado (milestone), esboço da tarefa, acesso à codebase.
-**Saída:** `documentation/features/<domínio>/specs/<nome>-spec.md`
-
-- Ponte estritamente definida entre o PRD e o código.
-- Nível de detalhe suficiente para que a implementação seja direta e sem ambiguidades.
-- Define **contratos, não código**: assinaturas TypeScript (nome, parâmetros tipados, retorno) com uma linha de responsabilidade.
-- Organizada por camadas (core, REST, RPC, database, UI, queue, provision).
-- Decisões de design registradas com:
-  - Alternativas consideradas
-  - Motivo da escolha
-  - Impactos e trade-offs
-- Se o PRD estiver ausente ou incompleto, a spec **não pode começar**.
-- A pesquisa da codebase é delegada a subagentes por app/pacote; decisões ficam com o agente principal.
-
-### 3. Plano de Implementação — `create-plan-prompt.md`
-
-**Entrada:** spec técnica.
-**Saída:** `documentation/plan.md`
-
-- Transforma a spec em fases e tarefas atômicas com dependências explícitas.
-- Use esta etapa quando a spec exigir coordenação sofisticada: múltiplas fases, múltiplos apps/camadas, dependências não triviais, paralelização, migrations complexas ou contratos novos entre bordas.
-- Ordem bottom-up obrigatória:
-  - **F1 — Core:** domínio, structures, use cases.
-  - **F2, F3, F4 — Apps** (server, web, studio): só iniciam após F1 concluída; podem rodar em paralelo entre si.
-- Cada tarefa possui:
-  - Camada explícita (`core`, `database`, `rest`, `rpc`, `ui`, `queue`, `provision`, `ai`, `web`, `studio`)
-  - Dependências entre tarefas
-  - Resultado observável verificável sem ambiguidade
-- Apps não impactados são omitidos do plano.
-
-### 4. Implementação Direta — `implement-spec-prompt.md`
-
-**Entrada:** spec técnica pequena.
-**Saída:** código implementado na codebase, sem plano formal.
-
-- Caminho leve para specs pequenas, fixes pontuais e mudanças com baixo acoplamento.
-- Não cria `plan.md`, não usa subagentes e não quebra a entrega em fases formais.
-- Só deve ser usado quando:
-  - a spec está clara;
-  - a ordem de execução é evidente;
-  - poucos arquivos serão alterados;
-  - não há contratos novos entre múltiplas apps;
-  - a validação cabe em `typecheck`, `codecheck` e testes locais do workspace afetado.
-- Se durante a leitura a tarefa se revelar ampla ou ambígua, o fluxo deve parar e migrar para `create-plan` + `implement-plan`.
-- Continua obrigatório ler `documentation/rules/rules.md` e as regras das camadas alteradas antes de editar código.
-
-### 5. Implementação Planejada — `implement-plan-prompt.md`
-
-**Entrada:** `documentation/plan.md` (ou caminho alternativo).
-**Saída:** código implementado na codebase, checkboxes atualizados no `plan.md`.
-
-- **Regra Mestra:** antes de tocar qualquer camada, ler o arquivo de regras correspondente em `documentation/rules/`. Sem exceções.
-- Ordem de implementação: core → drivers/infra → API layer → UI.
-- Nunca implementar camada consumidora antes da camada que ela consome.
-- Verificação obrigatória após cada tarefa:
-  - `npm run codecheck` (lint e formatação)
-  - `npm run typecheck`
-  - `npm run test`
-- O progresso é rastreado nos checkboxes do próprio `plan.md`.
-- Planos parcialmente concluídos são retomados a partir da primeira tarefa pendente.
-
-### 6. Revisão — `conclude-spec-prompt.md`
-
-**Entrada:** spec técnica que guiou a implementação.
-**Saída:** spec fechada, PRD atualizado, resumo estruturado para PR.
-
-Executa três fases sequenciais:
-
-**Fase 1 — Verificação:**
-- Testes passando (`npm run test`)
-- Cobertura de testes para novos comportamentos
-- Validação de requisitos contra a spec
-- Validação de limites arquiteturais
-- Revisão de qualidade de código
-
-**Fase 2 — Consolidação documental:**
-- Spec marcada como `status: closed`
-- PRD atualizado na milestone do GitHub
-- `documentation/architecture.md` atualizado (se aplicável)
-- Rules atualizadas (se novos padrões foram introduzidos)
-
-**Fase 3 — Comunicação:**
-- Resumo de revisão com estrutura obrigatória:
-  - O que foi feito
-  - Por que foi feito assim
-  - O que mudou em relação à spec original
-  - Pontos de atenção para o revisor (migrations, contratos, decisões irreversíveis, side effects)
-  - Checklist final
-
----
-
-## Fluxo para Bugs — `create-bug-report-prompt.md`
-
-Bugs seguem um caminho em duas etapas documentais antes de entrar no pipeline principal:
-
-```
-relato do problema → bug report → spec de correção separada → implementação direta ou plano → revisão
+```text
+PRD no Confluence, ticket Jira, report ou demanda direta
+→ Spec (Contract + solução técnica)
+→ Judge Spec
+→ Plan opcional
+→ Builders
+→ sensores aplicáveis
+→ Judge Implementation
+→ preflight local
+→ evaluation.md
+→ PR + Quality Gate + build no CI
+→ Spec completed
 ```
 
-- O bug report documenta sintoma, impacto, evidências, diagnóstico e um direcionamento curto de correção.
-- O bug report **não** contém plano de implementação, tarefas, fases ou seções do tipo “o que criar/modificar/remover”.
-- A spec de correção é criada depois, apenas quando solicitada, em **arquivo próprio** dentro de `documentation/features/<domínio>/specs/`, usando o bug report como insumo.
-- Bug report e spec **não** coexistem no mesmo `.md`.
-- Specs de correção pequenas podem seguir direto para `implement-spec`; specs complexas devem passar por `create-plan` + `implement-plan`.
+Specs são usadas para entregas relacionadas a uma feature: novas features,
+alterações de comportamento, correções e mudanças técnicas necessárias para
+uma feature. Manutenções transversais sem Contract de feature seguem fluxo
+direto.
 
+## Organização dos artefatos
+
+Cada feature mantém seus artefatos no próprio diretório:
+
+```text
+documentation/features/<domínio>/<feature>/
+├── spec.md
+├── plan.md          # opcional para implementações maiores
+└── evaluation.md    # obrigatório após implementação/julgamento
+```
+
+Qualquer alteração posterior em feature já implementada pode usar
+`changes/<nome-da-mudanca>/spec.md` dentro da feature. Use nomes curtos em
+kebab-case; crie `plan.md` somente quando o tamanho ou risco exigir fases e
+ledger. `evaluation.md` é obrigatório após implementação ou julgamento, mesmo
+sem Plan; Specs abandonadas antes da implementação são a única exceção. O ticket
+permanece no frontmatter. Para
+bugs ou security, o relatório completo permanece no Jira; para evolução de
+produto, o ticket ou demanda é a origem da mudança. A Spec contém o Contract da
+alteração e referencia a origem por URL direta quando o controle de acesso for
+compatível.
+
+## Origem e estrutura da Spec
+
+Uma Spec pode ter PRD no Confluence, ticket Jira, report ou demanda direta como
+origem. O PRD não é obrigatório para correções ou tarefas técnicas, mas toda
+Spec possui Contract. Quando houver rastreabilidade de trabalho, a demanda é
+representada por um ticket Jira; GitHub Issues e milestones não são fontes de
+verdade do produto ou da execução.
+
+```yaml
 ---
+title: <título>
+status: draft
+revision: 1
 
-## Onde encontrar cada artefato
+source:
+  type: <prd|jira-ticket|report|direct-request>
+  ref: <confluence-url|jira-url|report-url|path|codex-task>
 
-| Artefato | Localização |
-|---|---|
-| PRD | Milestone do GitHub (nunca arquivo local) |
-| Spec técnica | `documentation/features/<domínio>/specs/<nome>-spec.md` |
-| Bug report | `documentation/features/<domínio>/reports/<nome>-bug-report.md` |
-| Spec de correção derivada de bug | `documentation/features/<domínio>/specs/<nome>-fix-spec.md` |
-| Plano de implementação | `documentation/plan.md` |
-| Regras por camada | `documentation/rules/` (índice em `rules.md`) |
-| Prompts do pipeline | `documentation/prompts/` |
-| Implementação direta | `documentation/prompts/implement-spec-prompt.md` |
-| Implementação planejada | `documentation/prompts/implement-plan-prompt.md` |
+prd: <confluence-url, opcional>
+jira_tickets:
+  - <PROJ-123>
+plan: <opcional>
 
+scope:
+  - <workspace|diretório|arquivo>
+
+last_updated_at: YYYY-MM-DD
 ---
+```
 
-## Princípios
+Valores de `status`: `draft`, `open`, `in_progress`, `completed` e
+`cancelled`. O arquivo da Spec é a sua identidade; não é necessário um campo
+`id` separado.
 
-1. **Código é derivado, nunca ponto de partida.** Toda mudança nasce de uma cadeia documental rastreável.
-2. **Ambiguidade se resolve antes do código.** Se a spec tem lacunas, registrar em pendências e perguntar — nunca inventar.
-3. **Cada camada tem suas regras.** Ler as regras antes de implementar é obrigatório, não opcional.
-4. **Escolha o peso certo.** Specs pequenas podem ir direto para `implement-spec`; specs com dependências relevantes exigem plano formal.
-5. **Bottom-up sempre que houver dependência entre camadas.** Core antes de infra, infra antes de API, API antes de UI.
-6. **Verificação contínua.** Lint, typecheck e testes passam no escopo afetado; em plano formal, passam após cada tarefa.
-7. **Documentação acompanha o código.** Spec, PRD, arquitetura e rules são atualizados junto com a implementação, nunca depois.
+A estrutura do corpo da Spec é:
+
+1. contexto e objetivo;
+2. escopo e fora de escopo;
+3. Contract;
+4. estado atual;
+5. solução técnica;
+6. plano de validação;
+7. plano de validação;
+8. estado e referência para `evaluation.md`;
+9. alinhamento documental;
+10. amendments.
+
+O Contract vem antes da solução técnica. Use somente `RF-*` e `CA-*` como IDs
+obrigatórios:
+
+- `RF-*`: requisito funcional;
+- `CA-*`: critério de aceitação verificável.
+
+Segurança, performance e arquitetura entram como critérios de aceitação ou
+restrições técnicas específicas. Não use `RN-*`, `RNF-*` ou `RA-*` como IDs
+obrigatórios.
+
+Cada Spec deve declarar premissas e questões pendentes. Antes de `open`, toda
+questão pendente deve estar resolvida e toda premissa crítica deve estar
+confirmada ou explicitamente aceita com risco e validação.
+
+## Rastreabilidade
+
+```text
+PRD do Confluence/ticket Jira/report
+→ RF
+→ CA
+→ tarefa do Plan, quando existir
+→ código e testes
+→ evidência
+→ Judge
+```
+
+A matriz de validação da Spec deve relacionar cada `CA-*` à evidência esperada.
+Na conclusão, `evaluation.md` relaciona os critérios à evidência real, registra
+os vereditos dos Judges, o Quality Gate, o build e os findings remanescentes.
+A Spec mantém o Contract, o status e o link para a avaliação. O Plan registra
+fases, tarefas, tentativas, findings e próxima ação.
+
+## Ciclo de vida
+
+```text
+draft
+  → Judge Spec: accepted
+open
+  → implementação iniciada
+in_progress
+  → sensores + Judge Implementation + CI/build
+completed
+```
+
+`cancelled` encerra uma Spec abandonada com motivo registrado. `failed` é
+veredito de Judge; `blocked` é estado operacional de Plan ou tarefa.
+
+Se o Contract mudar depois de `open`, pause, atualize o PRD no Confluence quando
+aplicável, incremente `revision`, registre amendment e execute novamente o Judge
+Spec. Não altere o status do ticket Jira automaticamente.
+Uma alteração técnica pode atualizar a solução e revalidar apenas os critérios
+afetados. Uma alteração editorial não exige nova avaliação.
+
+## Onde e quando registrar mudanças
+
+O Orchestrator deve classificar cada mudança, finding e lição no momento em que
+for identificado e persistir no artefato correto, sem esperar uma solicitação
+posterior:
+
+| Tipo de mudança | Onde registrar | Quando |
+|---|---|---|
+| Contract, RF/CA, regra de produto ou escopo | `spec.md` e PRD quando aplicável | Antes do próximo Builder; incremente `revision`, registre amendment e execute novamente o `Judge Spec`. |
+| Fase, tarefa, finding, tentativa ou próxima ação operacional | `plan.md`, quando existir | Durante a implementação, imediatamente após a descoberta ou sensor/Judge. |
+| Evidência, veredito, decisão de implementação ou lição específica da feature | `evaluation.md` | Após o Judge correspondente e novamente no `conclude-spec`. |
+| Regra, arquitetura ou convenção de tooling reutilizável | `documentation/rules/*.md`, Architecture, tooling ou este SDD | Na conclusão, após decisão do usuário quando for mudança normativa. |
+| Contexto temporário, credenciais, logs ou detalhes sensíveis | task/sessão atual ou Jira, conforme a política | Não persistir na pasta da feature nem copiar conteúdo sensível para o repositório. |
+
+A Spec deve apontar para `plan.md` e `evaluation.md` quando existirem. Um
+finding só está tratado quando a correção/evidência e o destino documental foram
+atualizados.
+
+## Orquestração de agentes
+
+Todos os subagentes são criados diretamente pelo Orchestrator e são irmãos:
+
+```text
+Orchestrator
+├── Builder Direct | Builder F<n>
+├── Builder F<n>-T<m>, quando houver paralelismo real
+├── Builder Fix QG-<n>, para correções
+└── Judge Spec ou Judge Implementation
+```
+
+Builder é o único papel de implementação. O contexto do nome indica o escopo:
+
+- `Builder Direct`: Spec pequena;
+- `Builder F<n>`: escopo principal de uma fase;
+- `Builder F<n>-T<m>`: tarefa atômica independente;
+- `Builder Fix QG-<n>`: correção de finding ou Quality Gate.
+
+O Orchestrator decide se há paralelismo real, garante paths sem sobreposição e
+integra o diff. Nenhum Builder cria subagentes. Judges são read-only e irmãos
+dos Builders.
+
+Para uma Spec pequena, use `implement-spec` com um `Builder Direct`. Para uma
+Spec com fases dependentes, use `create-plan` e `implement-plan`. O Plan é
+opcional.
+
+## Sensores e execução
+
+Validações oficiais:
+
+| Script | Uso |
+| --- | --- |
+| `pnpm format` | aplicar formatação; não é gate |
+| `pnpm lint` | lint e consistência estática |
+| `pnpm check-types` | contratos TypeScript |
+| `pnpm test` | comportamento automatizado |
+| integração/e2e do workspace | APIs, banco, rotas e fluxos integrados, quando aplicável |
+
+Revisão arquitetural é evidência da avaliação quando fronteiras ou dependências
+mudam. Build não é sensor SDD; é validação final do artefato no CI.
+
+Durante o ciclo curto:
+
+```text
+format → lint → check-types → test
+```
+
+O ciclo curto é o sensor padrão de cada fase. Não execute `build` a cada fase ou
+a cada retry: o build é um gate caro do artefato integrado e deve rodar uma vez
+no Quality Gate final, salvo mudança explícita em bundler, exports, ambiente,
+Docker, workflows ou artefatos gerados.
+
+Antes do Judge e do PR, execute os sensores aplicáveis no escopo integrado.
+Faça revisão arquitetural quando imports, módulos ou fronteiras mudarem e
+execute a integração/e2e do workspace quando contratos ou fluxos reais mudarem.
+
+Antes do PR, faça um preflight local. O Quality Gate do CI repete os checks e
+permanece a fonte oficial. O build roda depois do Quality Gate no CI. Build
+local é recomendado quando houver mudanças em bundler, rotas, exports,
+ambiente, Docker, workflows ou artefatos gerados.
+
+Se o Quality Gate falhar, a Spec permanece `in_progress`. O Orchestrator
+aciona `Builder Fix QG-<n>` quando a correção estiver no escopo, reexecuta os
+sensores afetados e aciona novo Judge quando a evidência for invalidada.
+
+Cada fase recebe um único Judge Implementation depois dos sensores. Não repita
+o Judge apenas por decurso de tempo ou por uma nova execução dos mesmos
+comandos; repita-o somente depois de um Builder Fix, mudança de evidência ou
+alteração de escopo que invalide o veredito anterior. Depois de todas as fases
+aceitas, faça uma única avaliação final integrada.
+
+Antes de iniciar a fase final, faça um preflight dos pré-requisitos externos:
+serviços locais, banco, Auth/Mailpit, credenciais de teste e Playwright. Se um
+pré-requisito estiver indisponível, registre o bloqueio antes do Judge final em
+vez de repetir julgamentos sem evidência nova.
+
+## Avaliação
+
+O `Judge Spec` avalia se o Contract e a solução são claros, rastreáveis e
+implementáveis. O `Judge Implementation` avalia o diff contra o Contract,
+Rules, Architecture, testes, sensores e segurança proporcional ao risco.
+
+Não existe um papel separado obrigatório de `Judge Conclusion`. O workflow
+`conclude-spec` executa o fechamento; em Specs pequenas, o Judge Implementation
+final já é o veredito de conclusão. Em Plans ou mudanças de alto risco, o
+Orchestrator pode acionar um novo `Judge Implementation` para avaliar a
+integração completa.
+
+As avaliações e evidências finais são registradas em `evaluation.md`. A Spec
+mantém apenas o resumo de estado, o veredito final e o link para a avaliação;
+pareceres extensos permanecem no contexto da task, e o Plan conserva o histórico
+operacional necessário.
+
+## Atualização documental
+
+Qualquer agente pode identificar uma lacuna documental e reportar documento,
+evidência, tipo e ação sugerida. Em workflows SDD, o Orchestrator controla as
+fontes de verdade; fora deles, essa responsabilidade pertence ao agente
+principal da task.
+
+Bug Reports e Security Reports individuais pertencem ao Jira, não ao
+repositório. O repositório mantém o prompt de criação, Specs derivadas, código,
+testes de regressão e documentação técnica sanitizada. Não persista exploits,
+credenciais, PII, logs de produção ou detalhes operacionais sensíveis.
+
+Atualizações normativas necessárias para orientar a implementação acontecem
+antes do Builder. Sincronizações factuais e aprendizados generalizáveis são
+resolvidos em `conclude-spec`, que também audita se cada mudança foi registrada
+no artefato correto. O PRD deve ser atualizado na página do Confluence
+correspondente; não crie `prd.md`, milestone ou GitHub Issue como substituto.
+Mudanças em PRD, novas Rules globais, fronteiras arquiteturais ou expansão de
+escopo exigem decisão do usuário.
+
+## MCPs
+
+MCPs são ferramentas de contexto, não sensores. Use-os conforme o escopo:
+
+- Context7: consultar documentação atualizada;
+- Pencil: consultar e validar design;
+- Playwright: inspecionar fluxos reais no navegador;
+
+Playwright MCP não substitui `test:integration` quando o comportamento precisa
+ser protegido por teste automatizado.
+
+## Fontes de verdade
+
+1. revisão humana explícita;
+2. PRD no Confluence ou origem declarada da demanda;
+3. Contract da Spec;
+4. Architecture e Rules;
+5. solução técnica da Spec;
+6. Plan;
+7. implementação atual.
+
+Conflitos materiais devem ser resolvidos antes de continuar.

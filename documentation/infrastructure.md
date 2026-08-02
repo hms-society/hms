@@ -14,6 +14,7 @@
 
 * **TanStack Query:** Manages requests, cache, synchronization, and asynchronous state between the front-end and the NestJS server.
 * **TanStack Router:** Manages navigation, typed routes, loaders, page protection, and natural integration with TanStack Start.
+* **nuqs:** Provides typed, synchronized URL query-state parsers for page filters and pagination.
 * **Supabase Auth Client:** Used on the front-end for session management, login, logout, refresh tokens, and authenticated reads from Supabase Storage.
 
 ### Forms and Validation

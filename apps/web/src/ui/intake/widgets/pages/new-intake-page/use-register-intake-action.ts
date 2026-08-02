@@ -8,7 +8,7 @@ type RegisterIntakeRequest = Parameters<IntakeService['registerIntake']>[0]
 export const useRegisterIntakeAction = () => {
   const { intakeService } = useRestContext()
   const { mutateAsync, isPending, error } = useMutation({
-    mutationFn: async (request: RegisterIntakeRequest) => {
+    mutationFn: async function registerIntakeRequest(request: RegisterIntakeRequest) {
       const response = await intakeService.registerIntake(request)
 
       if (response.isFailure) response.throwError()

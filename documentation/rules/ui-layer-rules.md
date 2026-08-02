@@ -111,12 +111,62 @@ client-register-dialog/
         └── use-client-identification.ts
 ```
 
-Do not define a nested component as a local component inside its parent's
-`index.tsx`. Give it its own widget directory, entry point, prop type, and hook
-when necessary. Internal widgets follow this rule even when they are not reused
-outside their parent.
+This is mandatory: do not define a nested component as a local component inside
+its parent's `index.tsx`. Every internal component must be promoted to an
+internal widget with its own widget directory and `index.tsx` entry point. Give
+it an exported widget-specific prop type and a colocated hook when it owns
+behavior, even when the widget is not reused outside its parent.
 
 ### Keep UI logic inside the owning widget hook
+
+Widgets with non-trivial interface behavior must have a colocated
+`use-<widget-name>.ts` hook. Non-trivial behavior includes local state, effects,
+refs, form state or validation, field arrays, request/action orchestration,
+derived UI state, transitions, and user-interaction handlers. A widget may omit
+the hook only when it is a pure prop-to-markup renderer with no behavior of its
+own.
+
+The widget `index.tsx` is a composition and rendering boundary. Its component
+must be declared as an exported `const` using the widget-specific props type:
+
+```tsx
+export const CollaboratorRegisterDialog = (
+  props: CollaboratorRegisterDialogProps,
+) => {
+  const controller = useCollaboratorRegisterDialog(props)
+
+  return <DialogContent>{/* markup and hook wiring */}</DialogContent>
+}
+```
+
+Do not declare behavior-owning widget entry points with `export function`, and do
+not keep their state, effects, form setup, derived state, request orchestration,
+or handler implementations in `index.tsx`. The entry point may render markup,
+compose nested widgets, and use trivial inline callbacks only to adapt a prop
+or provide an item index; the behavior itself belongs in the hook. Do not add
+standalone helper or formatter functions outside the component and its owning
+hook in a `.tsx` file.
+
+Functions declared inside a widget hook must use the `function` form, including
+helpers, interaction handlers, lifecycle callbacks, and async submit handlers:
+
+```ts
+export function useCollaboratorRegisterDialog(props: CollaboratorRegisterDialogProps) {
+  function handleClose() {
+    // interface behavior
+  }
+
+  async function handleSubmit() {
+    // submit behavior
+  }
+
+  return { handleClose, handleSubmit }
+}
+```
+
+Do not declare widget-hook behavior as arrow-function variables. This rule
+applies to widget and page controller hooks; the exported-arrow convention for
+`use<Name>Action` hooks remains the explicit exception described above.
 
 All UI logic belongs in the owning widget's hook. This includes local state,
 effects, subscriptions, form state and validation, request orchestration,
@@ -141,6 +191,19 @@ export function useClientCard(client: Client) {
 The hook must remain the single owner of the widget's behavior. Nested widgets
 apply the same rule in their own hooks and must not reach into a parent's local
 state except through explicit props or callbacks.
+
+Page-owned hooks live beside the page widget under its feature directory, for
+example `widgets/pages/<page>/use-<page>.ts`. Query hooks, action hooks and query
+keys that exist only for that page stay within the same page boundary. Every
+named function in a page hook—including helpers and interaction handlers—must be
+declared with the `function` form; do not use arrow-function declarations for
+page-hook behavior.
+
+When a hook is consumed by more than one widget, it is a feature-level shared
+hook and must live under `apps/web/src/ui/<module>/hooks/`. It must not remain
+inside the first widget that used it. A hook that is exclusive to one component
+widget remains colocated with that widget. The placement follows actual
+consumers: do not promote a hook merely because it might be reused later.
 
 ### Use shared HTTP status constants
 

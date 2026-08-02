@@ -71,7 +71,7 @@
     "lineWidth": 90
   },
   "files": {
-    "includes": ["**", "!**/routeTree.gen.ts"]
+    "includes": ["**", "!**/routeTree.gen.ts", "!**/dist/**", "!**/.output/**"]
   },
   "css": {
     "parser": {

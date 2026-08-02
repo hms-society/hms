@@ -8,10 +8,10 @@ export const useSignOutAction = () => {
   const { signOut } = useAuthContext()
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async function signOutRequest() {
       await signOut()
     },
-    onSuccess: () => {
+    onSuccess: function navigateAfterSignOut() {
       navigateTo('login')
     },
   })

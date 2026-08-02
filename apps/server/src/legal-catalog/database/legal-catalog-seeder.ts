@@ -42,7 +42,7 @@ export class LegalCatalogSeeder {
 
   async run() {
     const areas = await this.legalAreasRepository.addMany(DEFAULT_LEGAL_AREAS)
-    const topics: LegalTopicCreation[] = areas.flatMap((area) =>
+    const topicCreations: LegalTopicCreation[] = areas.flatMap((area) =>
       (DEFAULT_LEGAL_TOPICS[area.name] ?? []).map((name) => ({
         legalAreaId: area.id,
         name,
@@ -50,6 +50,8 @@ export class LegalCatalogSeeder {
       })),
     )
 
-    await this.legalTopicsRepository.addMany(topics)
+    const topics = await this.legalTopicsRepository.addMany(topicCreations)
+
+    return { areas, topics }
   }
 }

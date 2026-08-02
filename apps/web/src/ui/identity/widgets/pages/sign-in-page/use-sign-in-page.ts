@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useSignInAction } from './use-sign-in-action'
@@ -14,7 +14,9 @@ export function useSignInPage() {
   const { handleSubmit: handleFormSubmit, register } = useForm<SignInFormValues>()
 
   function handleTogglePasswordVisibility() {
-    setShowPassword((previousValue) => !previousValue)
+    setShowPassword(function togglePasswordVisibility(previousValue) {
+      return !previousValue
+    })
   }
 
   function handleSignIn(values: SignInFormValues) {
@@ -22,11 +24,15 @@ export function useSignInPage() {
     signIn({ email, password })
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    void handleFormSubmit(handleSignIn)(event)
+  }
+
   return {
     error,
     isLoading,
     showPassword,
-    handleSubmit: handleFormSubmit(handleSignIn),
+    handleSubmit,
     handleTogglePasswordVisibility,
     register,
   }
