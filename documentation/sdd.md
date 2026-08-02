@@ -49,11 +49,11 @@ compatível.
 
 ## Origem e estrutura da Spec
 
-Uma Spec pode ter PRD no Confluence, ticket Jira, report ou demanda direta como
-origem. O PRD não é obrigatório para correções ou tarefas técnicas, mas toda
-Spec possui Contract. Quando houver rastreabilidade de trabalho, a demanda é
-representada por um ticket Jira; GitHub Issues e milestones não são fontes de
-verdade do produto ou da execução.
+Uma Spec pode ter uma ou mais fontes, como PRD no Confluence, ticket Jira,
+report, design ou demanda direta. O PRD não é obrigatório para correções ou
+tarefas técnicas, mas toda Spec possui Contract. Quando houver rastreabilidade
+de trabalho, a demanda é representada por um ticket Jira; GitHub Issues e
+milestones não são fontes de verdade do produto ou da execução.
 
 ```yaml
 ---
@@ -61,9 +61,10 @@ title: <título>
 status: draft
 revision: 1
 
-source:
-  type: <prd|jira-ticket|report|direct-request>
-  ref: <confluence-url|jira-url|report-url|path|codex-task>
+sources:
+  - type: <prd|jira-ticket|report|direct-request|design>
+    ref: <confluence-url|jira-url|report-url|path|codex-task|design-ref>
+    role: <product_requirements|delivery_scope|technical_context|visual_reference>
 
 prd: <confluence-url, opcional>
 jira_tickets:
@@ -94,10 +95,10 @@ A estrutura do corpo da Spec é:
 9. alinhamento documental;
 10. amendments.
 
-O Contract vem antes da solução técnica. Use somente `RF-*` e `CA-*` como IDs
+O Contract vem antes da solução técnica. Use somente `REQ-*` e `CA-*` como IDs
 obrigatórios:
 
-- `RF-*`: requisito funcional;
+- `REQ-*`: requisito do produto ou da solução;
 - `CA-*`: critério de aceitação verificável.
 
 Segurança, performance e arquitetura entram como critérios de aceitação ou
@@ -112,7 +113,7 @@ confirmada ou explicitamente aceita com risco e validação.
 
 ```text
 PRD do Confluence/ticket Jira/report
-→ RF
+→ REQ
 → CA
 → tarefa do Plan, quando existir
 → código e testes
@@ -155,7 +156,7 @@ posterior:
 
 | Tipo de mudança | Onde registrar | Quando |
 |---|---|---|
-| Contract, RF/CA, regra de produto ou escopo | `spec.md` e PRD quando aplicável | Antes do próximo Builder; incremente `revision`, registre amendment e execute novamente o `Judge Spec`. |
+| Contract, REQ/CA, regra de produto ou escopo | `spec.md` e PRD quando aplicável | Antes do próximo Builder; incremente `revision`, registre amendment e execute novamente o `Judge Spec`. |
 | Fase, tarefa, finding, tentativa ou próxima ação operacional | `plan.md`, quando existir | Durante a implementação, imediatamente após a descoberta ou sensor/Judge. |
 | Evidência, veredito, decisão de implementação ou lição específica da feature | `evaluation.md` | Após o Judge correspondente e novamente no `conclude-spec`. |
 | Regra, arquitetura ou convenção de tooling reutilizável | `documentation/rules/*.md`, Architecture, tooling ou este SDD | Na conclusão, após decisão do usuário quando for mudança normativa. |
