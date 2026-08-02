@@ -39,8 +39,9 @@ origem de feature sem Spec      → create-spec
 Spec draft                      → Judge Spec
 Spec open pequena               → implement-spec / Builder Direct
 Spec open complexa              → create-plan
-Plan pending                    → implement-plan / Builders
-implementação concluída         → sensores + Judge Implementation
+Plan criado                     → Judge Plan
+Plan accepted                   → implement-plan / Builders
+implementação concluída         → sensores + Judge Implementation único
 entrega aceita                  → conclude-spec
 ```
 
@@ -56,7 +57,8 @@ Orchestrator
 ├── Builder Direct | Builder F<n>
 ├── Builder F<n>-T<m>
 ├── Builder Fix QG-<n>
-└── Judge Spec | Judge Implementation
+├── Judge Spec | Judge Plan
+└── Judge Implementation
 ```
 
 Builders e Judges são irmãos. Nenhum subagente cria outro subagente. O Builder
@@ -66,10 +68,12 @@ Spec, diff e evidências oficiais, nunca a narrativa do Builder.
 ## Evaluations e evidências
 
 - O `Judge Spec` avalia Contract, rastreabilidade e solução técnica.
-- O `Judge Implementation` avalia implementação direta, fase integrada ou
-  diff final de integração.
-- Um novo Judge Implementation é criado quando uma correção invalida o
-  veredito anterior ou quando o Plan/risco exige avaliação integrada.
+- O `Judge Plan` avalia necessidade, decomposição, dependências, paths,
+  fronteiras do HMS, sensores e rastreabilidade do Plan antes dos Builders.
+- O `Judge Implementation` avalia uma implementação direta ou o diff integrado
+  final de um Plan; não é criado por fase.
+- Um novo Judge Implementation só é criado depois de uma correção que invalide
+  o diff ou as evidências do veredito final.
 - Não existe `Judge Conclusion` separado obrigatório.
 - `conclude-spec` é o workflow de fechamento: atualiza `evaluation.md` com o
   resultado final e atualiza na Spec o status, o veredito resumido e a
@@ -94,7 +98,8 @@ conflitos normativos e expansão material de escopo exigem decisão do usuário.
 
 Se o Quality Gate falhar, mantenha a Spec `in_progress`, registre o finding e
 crie `Builder Fix QG-<n>` quando a correção estiver no escopo. Reexecute os
-sensores afetados e acione novo Judge se o diff ou a evidência forem invalidados.
+sensores afetados e acione novo Judge somente se o diff ou a evidência final
+forem invalidados.
 
 Após três falhas consecutivas pelo mesmo motivo, apresente o histórico e peça
 decisão ao usuário.

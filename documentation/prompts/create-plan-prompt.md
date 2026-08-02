@@ -9,6 +9,14 @@ Crie Plan somente quando a Spec `open` possuir fases dependentes, múltiplos
 workspaces, migration relevante, risco elevado ou necessidade real de ledger.
 Para Spec pequena, use `implement-spec` diretamente.
 
+Antes de escrever o Plan, leia `AGENTS.local.md`, `documentation/sdd.md`,
+`documentation/modules.md`, `documentation/tooling.md`,
+`documentation/infrastructure.md`, a Spec, o PRD/ticket de origem e as Rules
+descobertas por `documentation/rules/rules.md`. Inspecione os paths reais da
+codebase. No HMS, considere explicitamente as fronteiras entre
+`packages/core`, `apps/server` e `apps/web`; inclua database, Auth, REST,
+provision, UI e validação de browser somente quando o escopo os tocar.
+
 O Orchestrator cria o Plan na task atual e mantém a relação com a revisão da
 Spec:
 
@@ -35,11 +43,21 @@ Inclua:
 - campo `parallelizable` e motivo quando aplicável;
 - sensores e evidências esperados por fase;
 - riscos, findings ativos, tentativas, estado e próxima ação;
-- vereditos do Judge Implementation por fase.
+- sensores e evidências oficiais por fase, usando os comandos de
+  `documentation/tooling.md` e reservando build para o Quality Gate final,
+  salvo exceção justificada;
+- veredito do `Judge Plan` antes de iniciar a implementação;
+- um veredito do `Judge Implementation` para a entrega integrada após todas as
+  fases e sensores.
 
 Estados de tarefa: `pending`, `implementing`, `validating`, `verified`.
 Estados de fase: `pending`, `in_progress`, `awaiting_judgment`, `failed`,
 `accepted`.
 
 Somente o Orchestrator atualiza o Plan. Builders implementam; Judges avaliam
-read-only. Todos são subagentes da task atual. Não use nova thread.
+read-only. Depois de criar o Plan, acione `judge-plan-agent` como subagente
+irmão read-only na task atual. Em `failed`, registre os findings, ajuste o Plan
+e execute o Judge novamente; em `accepted`, altere o estado operacional para
+`pending`/pronto e roteie para `implement-plan`. O `Judge Plan` não avalia
+código e não substitui `Judge Spec` ou `Judge Implementation`. Todos são
+subagentes da task atual. Não use nova thread.

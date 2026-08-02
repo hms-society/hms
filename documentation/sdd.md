@@ -11,6 +11,7 @@ PRD no Confluence, ticket Jira, report ou demanda direta
 → Spec (Contract + solução técnica)
 → Judge Spec
 → Plan opcional
+→ Judge Plan, quando houver Plan
 → Builders
 → sensores aplicáveis
 → Judge Implementation
@@ -135,7 +136,9 @@ draft
 open
   → implementação iniciada
 in_progress
-  → sensores + Judge Implementation + CI/build
+  → fases + sensores
+  → Judge Implementation único da entrega integrada
+  → CI/build
 completed
 ```
 
@@ -175,7 +178,8 @@ Orchestrator
 ├── Builder Direct | Builder F<n>
 ├── Builder F<n>-T<m>, quando houver paralelismo real
 ├── Builder Fix QG-<n>, para correções
-└── Judge Spec ou Judge Implementation
+├── Judge Spec | Judge Plan
+└── Judge Implementation único da entrega
 ```
 
 Builder é o único papel de implementação. O contexto do nome indica o escopo:
@@ -188,6 +192,12 @@ Builder é o único papel de implementação. O contexto do nome indica o escopo
 O Orchestrator decide se há paralelismo real, garante paths sem sobreposição e
 integra o diff. Nenhum Builder cria subagentes. Judges são read-only e irmãos
 dos Builders.
+
+Quando existir `plan.md`, o Orchestrator aciona um único `Judge Plan` antes do
+primeiro Builder. O Judge valida a necessidade, a decomposição, as dependências,
+os paths, as fronteiras dos módulos e as evidências previstas; não avalia
+código. Um veredito `failed` exige ajuste do Plan e nova avaliação. Somente um
+Plan `accepted` pode avançar para `implement-plan`.
 
 Para uma Spec pequena, use `implement-spec` com um `Builder Direct`. Para uma
 Spec com fases dependentes, use `create-plan` e `implement-plan`. O Plan é
@@ -229,14 +239,14 @@ local é recomendado quando houver mudanças em bundler, rotas, exports,
 ambiente, Docker, workflows ou artefatos gerados.
 
 Se o Quality Gate falhar, a Spec permanece `in_progress`. O Orchestrator
-aciona `Builder Fix QG-<n>` quando a correção estiver no escopo, reexecuta os
-sensores afetados e aciona novo Judge quando a evidência for invalidada.
+aciona `Builder Fix QG-<n>` quando a correção estiver no escopo e reexecuta
+somente os sensores afetados. Não crie um Judge por fase, retry ou nova
+execução dos mesmos comandos.
 
-Cada fase recebe um único Judge Implementation depois dos sensores. Não repita
-o Judge apenas por decurso de tempo ou por uma nova execução dos mesmos
-comandos; repita-o somente depois de um Builder Fix, mudança de evidência ou
-alteração de escopo que invalide o veredito anterior. Depois de todas as fases
-aceitas, faça uma única avaliação final integrada.
+Depois de todas as fases concluídas e dos sensores integrados, acione no máximo
+um `Judge Implementation` para a entrega completa. Se um finding exigir
+correção, registre-o, aplique o Builder Fix, reexecute os sensores invalidados e
+somente então repita o Judge final.
 
 Antes de iniciar a fase final, faça um preflight dos pré-requisitos externos:
 serviços locais, banco, Auth/Mailpit, credenciais de teste e Playwright. Se um
@@ -246,14 +256,14 @@ vez de repetir julgamentos sem evidência nova.
 ## Avaliação
 
 O `Judge Spec` avalia se o Contract e a solução são claros, rastreáveis e
-implementáveis. O `Judge Implementation` avalia o diff contra o Contract,
-Rules, Architecture, testes, sensores e segurança proporcional ao risco.
+implementáveis. O `Judge Implementation` avalia uma única implementação
+integrada — direta ou resultante de um Plan — contra o Contract, Rules,
+Architecture, testes, sensores e segurança proporcional ao risco.
 
 Não existe um papel separado obrigatório de `Judge Conclusion`. O workflow
-`conclude-spec` executa o fechamento; em Specs pequenas, o Judge Implementation
-final já é o veredito de conclusão. Em Plans ou mudanças de alto risco, o
-Orchestrator pode acionar um novo `Judge Implementation` para avaliar a
-integração completa.
+`conclude-spec` executa o fechamento; o único `Judge Implementation` da entrega
+é o veredito de conclusão técnica. O Orchestrator só o repete após uma mudança
+que invalide o diff ou as evidências.
 
 As avaliações e evidências finais são registradas em `evaluation.md`. A Spec
 mantém apenas o resumo de estado, o veredito final e o link para a avaliação;
