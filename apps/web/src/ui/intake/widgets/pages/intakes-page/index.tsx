@@ -4,7 +4,7 @@ import { Anchor } from '@/ui/shared/widgets/components/anchor'
 
 export const IntakesPage = () => {
   return (
-    <div className='mx-auto flex min-h-[65vh] w-full max-w-6xl items-center justify-center'>
+    <div className='mx-auto flex w-full max-w-6xl flex-col items-center pt-20 pb-12 px-6'>
       <section className='flex max-w-xl flex-col items-center text-center'>
         <span className='mb-5 flex size-12 items-center justify-center rounded-xl bg-secondary text-primary'>
           <Icon name='file-text' className='size-5' />
