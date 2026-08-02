@@ -68,7 +68,10 @@ export const SignInPage = () => {
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
             {error && (
-              <div className='p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-sans'>
+              <div
+                role='alert'
+                className='rounded-lg border border-destructive/20 bg-destructive/10 p-3 font-sans text-sm text-destructive'
+              >
                 {error.message}
               </div>
             )}
