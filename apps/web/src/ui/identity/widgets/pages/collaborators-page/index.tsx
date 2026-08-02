@@ -429,7 +429,7 @@ export function CollaboratorsPage({
             {actionError && (
               <div
                 role='alert'
-                className='rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive'
+                className='w-full rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive sm:col-span-2'
               >
                 <p className='font-semibold'>Não foi possível concluir a ação.</p>
                 <p className='mt-1'>
