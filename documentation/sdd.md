@@ -11,6 +11,7 @@ PRD no Confluence, ticket Jira, report ou demanda direta
 → Spec (Contract + solução técnica)
 → Judge Spec
 → Plan opcional
+→ Judge Plan, quando houver Plan
 → Builders
 → sensores aplicáveis
 → Judge Implementation
@@ -49,11 +50,11 @@ compatível.
 
 ## Origem e estrutura da Spec
 
-Uma Spec pode ter PRD no Confluence, ticket Jira, report ou demanda direta como
-origem. O PRD não é obrigatório para correções ou tarefas técnicas, mas toda
-Spec possui Contract. Quando houver rastreabilidade de trabalho, a demanda é
-representada por um ticket Jira; GitHub Issues e milestones não são fontes de
-verdade do produto ou da execução.
+Uma Spec pode ter uma ou mais fontes, como PRD no Confluence, ticket Jira,
+report, design ou demanda direta. O PRD não é obrigatório para correções ou
+tarefas técnicas, mas toda Spec possui Contract. Quando houver rastreabilidade
+de trabalho, a demanda é representada por um ticket Jira; GitHub Issues e
+milestones não são fontes de verdade do produto ou da execução.
 
 ```yaml
 ---
@@ -61,9 +62,10 @@ title: <título>
 status: draft
 revision: 1
 
-source:
-  type: <prd|jira-ticket|report|direct-request>
-  ref: <confluence-url|jira-url|report-url|path|codex-task>
+sources:
+  - type: <prd|jira-ticket|report|direct-request|design>
+    ref: <confluence-url|jira-url|report-url|path|codex-task|design-ref>
+    role: <product_requirements|delivery_scope|technical_context|visual_reference>
 
 prd: <confluence-url, opcional>
 jira_tickets:
@@ -94,10 +96,10 @@ A estrutura do corpo da Spec é:
 9. alinhamento documental;
 10. amendments.
 
-O Contract vem antes da solução técnica. Use somente `RF-*` e `CA-*` como IDs
+O Contract vem antes da solução técnica. Use somente `REQ-*` e `CA-*` como IDs
 obrigatórios:
 
-- `RF-*`: requisito funcional;
+- `REQ-*`: requisito do produto ou da solução;
 - `CA-*`: critério de aceitação verificável.
 
 Segurança, performance e arquitetura entram como critérios de aceitação ou
@@ -112,7 +114,7 @@ confirmada ou explicitamente aceita com risco e validação.
 
 ```text
 PRD do Confluence/ticket Jira/report
-→ RF
+→ REQ
 → CA
 → tarefa do Plan, quando existir
 → código e testes
@@ -134,7 +136,9 @@ draft
 open
   → implementação iniciada
 in_progress
-  → sensores + Judge Implementation + CI/build
+  → fases + sensores
+  → Judge Implementation único da entrega integrada
+  → CI/build
 completed
 ```
 
@@ -155,7 +159,7 @@ posterior:
 
 | Tipo de mudança | Onde registrar | Quando |
 |---|---|---|
-| Contract, RF/CA, regra de produto ou escopo | `spec.md` e PRD quando aplicável | Antes do próximo Builder; incremente `revision`, registre amendment e execute novamente o `Judge Spec`. |
+| Contract, REQ/CA, regra de produto ou escopo | `spec.md` e PRD quando aplicável | Antes do próximo Builder; incremente `revision`, registre amendment e execute novamente o `Judge Spec`. |
 | Fase, tarefa, finding, tentativa ou próxima ação operacional | `plan.md`, quando existir | Durante a implementação, imediatamente após a descoberta ou sensor/Judge. |
 | Evidência, veredito, decisão de implementação ou lição específica da feature | `evaluation.md` | Após o Judge correspondente e novamente no `conclude-spec`. |
 | Regra, arquitetura ou convenção de tooling reutilizável | `documentation/rules/*.md`, Architecture, tooling ou este SDD | Na conclusão, após decisão do usuário quando for mudança normativa. |
@@ -174,7 +178,8 @@ Orchestrator
 ├── Builder Direct | Builder F<n>
 ├── Builder F<n>-T<m>, quando houver paralelismo real
 ├── Builder Fix QG-<n>, para correções
-└── Judge Spec ou Judge Implementation
+├── Judge Spec | Judge Plan
+└── Judge Implementation único da entrega
 ```
 
 Builder é o único papel de implementação. O contexto do nome indica o escopo:
@@ -187,6 +192,12 @@ Builder é o único papel de implementação. O contexto do nome indica o escopo
 O Orchestrator decide se há paralelismo real, garante paths sem sobreposição e
 integra o diff. Nenhum Builder cria subagentes. Judges são read-only e irmãos
 dos Builders.
+
+Quando existir `plan.md`, o Orchestrator aciona um único `Judge Plan` antes do
+primeiro Builder. O Judge valida a necessidade, a decomposição, as dependências,
+os paths, as fronteiras dos módulos e as evidências previstas; não avalia
+código. Um veredito `failed` exige ajuste do Plan e nova avaliação. Somente um
+Plan `accepted` pode avançar para `implement-plan`.
 
 Para uma Spec pequena, use `implement-spec` com um `Builder Direct`. Para uma
 Spec com fases dependentes, use `create-plan` e `implement-plan`. O Plan é
@@ -228,14 +239,14 @@ local é recomendado quando houver mudanças em bundler, rotas, exports,
 ambiente, Docker, workflows ou artefatos gerados.
 
 Se o Quality Gate falhar, a Spec permanece `in_progress`. O Orchestrator
-aciona `Builder Fix QG-<n>` quando a correção estiver no escopo, reexecuta os
-sensores afetados e aciona novo Judge quando a evidência for invalidada.
+aciona `Builder Fix QG-<n>` quando a correção estiver no escopo e reexecuta
+somente os sensores afetados. Não crie um Judge por fase, retry ou nova
+execução dos mesmos comandos.
 
-Cada fase recebe um único Judge Implementation depois dos sensores. Não repita
-o Judge apenas por decurso de tempo ou por uma nova execução dos mesmos
-comandos; repita-o somente depois de um Builder Fix, mudança de evidência ou
-alteração de escopo que invalide o veredito anterior. Depois de todas as fases
-aceitas, faça uma única avaliação final integrada.
+Depois de todas as fases concluídas e dos sensores integrados, acione no máximo
+um `Judge Implementation` para a entrega completa. Se um finding exigir
+correção, registre-o, aplique o Builder Fix, reexecute os sensores invalidados e
+somente então repita o Judge final.
 
 Antes de iniciar a fase final, faça um preflight dos pré-requisitos externos:
 serviços locais, banco, Auth/Mailpit, credenciais de teste e Playwright. Se um
@@ -245,14 +256,14 @@ vez de repetir julgamentos sem evidência nova.
 ## Avaliação
 
 O `Judge Spec` avalia se o Contract e a solução são claros, rastreáveis e
-implementáveis. O `Judge Implementation` avalia o diff contra o Contract,
-Rules, Architecture, testes, sensores e segurança proporcional ao risco.
+implementáveis. O `Judge Implementation` avalia uma única implementação
+integrada — direta ou resultante de um Plan — contra o Contract, Rules,
+Architecture, testes, sensores e segurança proporcional ao risco.
 
 Não existe um papel separado obrigatório de `Judge Conclusion`. O workflow
-`conclude-spec` executa o fechamento; em Specs pequenas, o Judge Implementation
-final já é o veredito de conclusão. Em Plans ou mudanças de alto risco, o
-Orchestrator pode acionar um novo `Judge Implementation` para avaliar a
-integração completa.
+`conclude-spec` executa o fechamento; o único `Judge Implementation` da entrega
+é o veredito de conclusão técnica. O Orchestrator só o repete após uma mudança
+que invalide o diff ou as evidências.
 
 As avaliações e evidências finais são registradas em `evaluation.md`. A Spec
 mantém apenas o resumo de estado, o veredito final e o link para a avaliação;

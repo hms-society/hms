@@ -172229,11 +172229,11 @@
     {
       "type": "frame",
       "id": "e9hQ5V",
-      "x": 11626,
+      "x": 11409,
       "y": -7433,
       "name": "Agenda de Consultas - Visão semanal",
       "clip": true,
-      "width": 1200,
+      "width": 1417,
       "height": 900,
       "fill": "#F5F2ED",
       "children": [

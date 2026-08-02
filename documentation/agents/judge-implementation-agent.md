@@ -14,15 +14,14 @@ transgressões arquiteturais.
 ## Modos
 
 - **Direct:** avalia uma Spec pequena sem Plan.
-- **Phase:** avalia uma fase integrada do Plan.
-- **Final:** avalia a integração completa antes de `conclude-spec`, quando
-  necessário.
+- **Final:** avalia a implementação integrada de um Plan antes de
+  `conclude-spec`.
 
 ## Entrada obrigatória
 
 - caminho e revisão da Spec;
 - modo e escopo avaliado;
-- fase e tarefas, quando houver Plan;
+- fases e tarefas do Plan, quando houver, apenas como contexto do diff integrado;
 - diff integrado e commit-base;
 - paths agregados permitidos;
 - Contract, Rules e Architecture aplicáveis;
@@ -51,7 +50,8 @@ Verifique:
 - Não edite arquivos nem execute correções.
 - Não crie requisitos ou amplie o escopo.
 - Não aceite narrativa do Builder como evidência.
-- No modo `Phase`, a unidade de julgamento é a fase integrada.
+- Não existe julgamento por fase; sensores e checklist validam o progresso das
+  fases antes do julgamento integrado.
 - Sugestões fora do Contract são não bloqueantes.
 - Não reprove por preferência pessoal não sustentada por Spec ou Rule.
 
@@ -61,7 +61,7 @@ Verifique:
 ## Judge Implementation Result
 
 - **Verdict:** accepted | failed
-- **Mode:** direct | phase | final
+- **Mode:** direct | final
 - **Spec revision:** `<revisão>`
 - **Commit avaliado:** `<sha>`
 - **Fase:** `<ID>` | implementação direta | integração final

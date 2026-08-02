@@ -47,9 +47,10 @@ produto, registre a demanda do ticket como origem da mudança.
 title: <título>
 status: draft
 revision: 1
-source:
-  type: <prd|jira-ticket|report|direct-request>
-  ref: <confluence-url|jira-url|report-url|path|codex-task>
+sources:
+  - type: <prd|jira-ticket|report|direct-request|design>
+    ref: <confluence-url|jira-url|report-url|path|codex-task|design-ref>
+    role: <product_requirements|delivery_scope|technical_context|visual_reference>
 prd: <confluence-url, opcional>
 jira_tickets:
   - <PROJ-123>
@@ -64,20 +65,20 @@ plano de validação, referência para `evaluation.md`, alinhamento documental e
 amendments. As avaliações e evidências finais não são duplicadas na Spec: são
 registradas em `evaluation.md` após a implementação ou julgamento.
 
-Use somente `RF-*` e `CA-*` como IDs obrigatórios:
+Use somente `REQ-*` e `CA-*` como IDs obrigatórios:
 
 ```md
-| CA | RF | Dado | Quando | Então | Evidência esperada |
+| CA | REQ | Dado | Quando | Então | Evidência esperada |
 |---|---|---|---|---|---|
-| CA-01 | RF-01 | pré-condição | ação | resultado | teste/browser/sensor |
+| CA-01 | REQ-01 | pré-condição | ação | resultado | teste/browser/sensor |
 ```
 
 Segurança, performance e arquitetura entram como critérios de aceitação ou
 restrições técnicas. Não use `RN-*`, `RNF-*`, `RA-*`, comentários
 `harness:evidence`, gates próprios ou baselines.
 
-Quando `source.type` for `report`, prefira a URL direta do ticket Jira. Para
-Security Reports, só use a URL se o repositório tiver controle de acesso
+Quando uma fonte `report` estiver presente, prefira a URL direta do ticket Jira.
+Para Security Reports, só use a URL se o repositório tiver controle de acesso
 compatível; nunca copie o conteúdo sensível do ticket.
 
 Declare as validações aplicáveis conforme `documentation/tooling.md`: `pnpm format`,

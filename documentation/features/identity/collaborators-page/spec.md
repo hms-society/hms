@@ -2,9 +2,10 @@
 title: Gestão e cadastro de colaboradores
 status: completed
 revision: 6
-source:
-  type: prd
-  ref: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232
+sources:
+  - type: prd
+    ref: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232
+    role: product_requirements
 prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232
 jira_tickets:
   - SCRUM-132
