@@ -8,7 +8,6 @@ export const ROUTES = {
   resetPassword: '/redefinir-senha',
   invite: '/convite',
   attendant: '/atendimento',
-  attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
