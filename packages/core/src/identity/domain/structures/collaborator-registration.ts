@@ -4,7 +4,7 @@ type AdministrativeCollaboratorRegistration = {
   readonly email: string
   readonly professionalName: string
   readonly jobTitle?: string
-  readonly profile: 'admin' | 'attendant'
+  readonly profile: 'admin' | 'attendant' | 'client'
   readonly legalExpertises?: never
 }
 

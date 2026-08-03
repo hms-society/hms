@@ -52,7 +52,7 @@ const authAdministrationFixture: AuthAdministrationProvider = {
 type NaturalClientCreation = Extract<ClientCreation, { type: 'natural' }>
 type AdministrativeCollaboratorCreation = Extract<
   CollaboratorCreation,
-  { profile: 'admin' | 'attendant' }
+  { profile: 'admin' | 'attendant' | 'client' }
 >
 
 export class IdentityModuleFixture {
