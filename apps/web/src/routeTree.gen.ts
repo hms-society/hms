@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TriagemRouteRouteImport } from './routes/triagem/route'
 import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
 import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TriagemIndexRouteImport } from './routes/triagem/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
 import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
@@ -29,6 +31,11 @@ import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/c
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 
+const TriagemRouteRoute = TriagemRouteRouteImport.update({
+  id: '/triagem',
+  path: '/triagem',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
   id: '/intakes',
   path: '/intakes',
@@ -48,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TriagemIndexRoute = TriagemIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TriagemRouteRoute,
 } as any)
 const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
   id: '/redefinir-senha/',
@@ -132,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
+  '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
@@ -147,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/login/': typeof LoginIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/triagem/': typeof TriagemIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -167,6 +181,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginIndexRoute
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
+  '/triagem': typeof TriagemIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,6 +189,7 @@ export interface FileRoutesById {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
+  '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
@@ -189,6 +205,7 @@ export interface FileRoutesById {
   '/login/': typeof LoginIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/triagem/': typeof TriagemIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,6 +214,7 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/intakes'
+    | '/triagem'
     | '/advogado/comunicacao'
     | '/advogado/consultas'
     | '/atendimento/consultas'
@@ -212,6 +230,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/triagem/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,12 +251,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
+    | '/triagem'
   id:
     | '__root__'
     | '/'
     | '/advogado'
     | '/atendimento'
     | '/intakes'
+    | '/triagem'
     | '/advogado/comunicacao'
     | '/advogado/consultas'
     | '/atendimento/consultas'
@@ -253,6 +274,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/triagem/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,6 +282,7 @@ export interface RootRouteChildren {
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
+  TriagemRouteRoute: typeof TriagemRouteRouteWithChildren
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
@@ -273,6 +296,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/triagem': {
+      id: '/triagem'
+      path: '/triagem'
+      fullPath: '/triagem'
+      preLoaderRoute: typeof TriagemRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes': {
       id: '/intakes'
       path: '/intakes'
@@ -300,6 +330,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/triagem/': {
+      id: '/triagem/'
+      path: '/'
+      fullPath: '/triagem/'
+      preLoaderRoute: typeof TriagemIndexRouteImport
+      parentRoute: typeof TriagemRouteRoute
     }
     '/redefinir-senha/': {
       id: '/redefinir-senha/'
@@ -450,11 +487,24 @@ const IntakesRouteRouteWithChildren = IntakesRouteRoute._addFileChildren(
   IntakesRouteRouteChildren,
 )
 
+interface TriagemRouteRouteChildren {
+  TriagemIndexRoute: typeof TriagemIndexRoute
+}
+
+const TriagemRouteRouteChildren: TriagemRouteRouteChildren = {
+  TriagemIndexRoute: TriagemIndexRoute,
+}
+
+const TriagemRouteRouteWithChildren = TriagemRouteRoute._addFileChildren(
+  TriagemRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
+  TriagemRouteRoute: TriagemRouteRouteWithChildren,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,

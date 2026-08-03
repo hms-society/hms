@@ -40,6 +40,10 @@ const DEFAULT_USERS: UserSeed[] = [
     email: 'lawyer@hmsadvogados.com.br',
     status: 'active',
   },
+  {
+    email: 'paralegal@hmsadvogados.com.br',
+    status: 'active',
+  },
 ]
 
 type AdministrativeCollaboratorCreation = Extract<
@@ -49,8 +53,9 @@ type AdministrativeCollaboratorCreation = Extract<
 type LegalCollaboratorSeed = {
   professionalName: string
   jobTitle?: string
-  profile: 'lawyer'
+  profile: 'lawyer' | 'paralegal'
 }
+
 
 const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   profile: 'admin'
@@ -72,6 +77,12 @@ const DEFAULT_LAWYER: LegalCollaboratorSeed = {
   professionalName: 'Advogado de desenvolvimento',
   jobTitle: 'Advogado',
   profile: 'lawyer',
+}
+
+const DEFAULT_PARALEGAL: LegalCollaboratorSeed ={
+  professionalName: 'Paralegal de desenvolvimento',
+  jobTitle: 'Paralegal',
+  profile: 'paralegal',
 }
 
 @Injectable()
@@ -174,8 +185,11 @@ export class IdentitySeeder {
     const lawyerUser = seededUsers.find(
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
+    const paralegalUser = seededUsers.find(
+      ({ email }) => email === 'paralegal@hmsadvogados.com.br',
+    )
 
-    if (!adminUser || !attendantUser || !lawyerUser) {
+    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -197,7 +211,13 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    if (!seededAdministrator || !attendant || !lawyer) {
+    const paralegal = await this.collaboratorsRepository.add({
+      userId: paralegalUser.id,
+      ...DEFAULT_PARALEGAL,
+      legalExpertises: [lawyerLegalExpertise],
+    })
+
+    if (!seededAdministrator || !attendant || !lawyer || !paralegal) {
       throw new AppError('Default seed collaborators were not created')
     }
 
@@ -206,7 +226,7 @@ export class IdentitySeeder {
     return {
       clients,
       users: seededUsers,
-      collaborators: [seededAdministrator, attendant, lawyer],
+      collaborators: [seededAdministrator, attendant, lawyer, paralegal],
     }
   }
 }

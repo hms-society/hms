@@ -14,6 +14,10 @@ export const ROUTES = {
   lawyerCommunication: '/advogado/comunicacao',
   clients: '/clientes',
   collaborators: '/colaboradores',
+  paralegalCases: '/casos',
+  paralegalDocuments: '/documentos',
+  paralegalTriage: '/triagem',
+  paralegalCommunication: '/comunicacao',
 } as const
 
 export type RouteName = keyof typeof ROUTES
