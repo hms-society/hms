@@ -41,7 +41,7 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
-    await app.get(IdentitySeeder).run(
+    const identitySeed = await app.get(IdentitySeeder).run(
       authAdministrationProvider,
       {
         legalAreaId: legalArea.id,
@@ -49,7 +49,13 @@ async function bootstrap() {
       },
       seedPassword,
     )
-    await app.get(IntakeSeeder).run()
+    await app.get(IntakeSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      responsibleIds: identitySeed.collaborators.map(({ id }) => id),
+      actorIds: identitySeed.users.map(({ id }) => id),
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+    })
   } finally {
     await app.close()
   }

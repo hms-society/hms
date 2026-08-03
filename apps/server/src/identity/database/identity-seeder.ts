@@ -184,19 +184,29 @@ export class IdentitySeeder {
       ...DEFAULT_ADMINISTRATOR,
     } satisfies CollaboratorCreation
 
-    await this.collaboratorsRepository.add(administrator)
+    const seededAdministrator = await this.collaboratorsRepository.add(administrator)
 
-    await this.collaboratorsRepository.add({
+    const attendant = await this.collaboratorsRepository.add({
       userId: attendantUser.id,
       ...DEFAULT_ATTENDANT,
     })
 
-    await this.collaboratorsRepository.add({
+    const lawyer = await this.collaboratorsRepository.add({
       userId: lawyerUser.id,
       ...DEFAULT_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    await this.seed()
+    if (!seededAdministrator || !attendant || !lawyer) {
+      throw new AppError('Default seed collaborators were not created')
+    }
+
+    const clients = await this.seed()
+
+    return {
+      clients,
+      users: seededUsers,
+      collaborators: [seededAdministrator, attendant, lawyer],
+    }
   }
 }

@@ -1,5 +1,7 @@
 export { CloseIntakeWithoutContractController } from '@/intake/rest/controllers/close-intake-without-contract.controller'
 export { GetIntakesController } from '@/intake/rest/controllers/get-intake.controller'
+export { ListIntakeResponsiblesController } from '@/intake/rest/controllers/list-intake-responsibles.controller'
 export { ListClientIntakesController } from '@/intake/rest/controllers/list-client-intakes.controller'
+export { ListIntakesController } from '@/intake/rest/controllers/list-intakes.controller'
 export { RegisterIntakesController } from '@/intake/rest/controllers/register-intake.controller'
 export { TransitionIntakeStatusController } from '@/intake/rest/controllers/transition-intake-status.controller'

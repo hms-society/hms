@@ -159939,30 +159939,6 @@
                               "fontFamily": "$font-serif",
                               "fontSize": 26,
                               "fontWeight": "600"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "e2VgN",
-                              "name": "Active Count",
-                              "fill": "$secondary",
-                              "cornerRadius": 999,
-                              "padding": [
-                                3,
-                                9
-                              ],
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "lZc6u",
-                                  "name": "Count Label",
-                                  "fill": "$highlight-foreground",
-                                  "content": "142 demandas ativas",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "600"
-                                }
-                              ]
                             }
                           ]
                         },
@@ -160345,54 +160321,6 @@
                   "layout": "vertical",
                   "gap": 10,
                   "children": [
-                    {
-                      "type": "frame",
-                      "id": "GmPJW",
-                      "name": "Cabeçalho da fila",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "tdGWj",
-                          "name": "Título da fila",
-                          "gap": 8,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "zwhfY",
-                              "name": "Ícone da fila",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "inbox",
-                              "library": "lucide",
-                              "fill": "$primary"
-                            },
-                            {
-                              "type": "text",
-                              "id": "ywIBt",
-                              "name": "Texto da fila",
-                              "fill": "$foreground",
-                              "content": "Demandas em atendimento",
-                              "fontFamily": "$font-sans",
-                              "fontSize": 13,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "lVVCp",
-                          "name": "Ordenação",
-                          "width": "fit_content(11)",
-                          "height": "fit_content(11)",
-                          "gap": 5,
-                          "alignItems": "center"
-                        }
-                      ]
-                    },
                     {
                       "type": "frame",
                       "id": "iLxPj",

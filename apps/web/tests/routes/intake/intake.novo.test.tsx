@@ -228,7 +228,7 @@ test('closes an intake without contract and sends the closure reason', async ({
   const headerClosureButton = page
     .locator('header')
     .getByRole('button', { name: 'Encerrar atendimento' })
-  
+
   await expect(headerClosureButton).toBeEnabled()
   await headerClosureButton.click()
   const dialogHeading = page.getByRole('heading', {
@@ -240,10 +240,7 @@ test('closes an intake without contract and sends the closure reason', async ({
     (request) =>
       request.method() === 'POST' && request.url() === `${BACKEND_URL}/intakes`,
   )
-  await page
-    .getByRole('button', { name: 'Encerrar sem contratação' })
-    .last()
-    .click()
+  await page.getByRole('button', { name: 'Encerrar sem contratação' }).last().click()
 
   const closeRequest = await closeRequestPromise
   expect(closeRequest.postDataJSON()).toMatchObject({

@@ -21,6 +21,7 @@ import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
@@ -87,6 +88,11 @@ const IntakesNovoRoute = IntakesNovoRouteImport.update({
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
 } as any)
+const IntakesIntakeIdRoute = IntakesIntakeIdRouteImport.update({
+  id: '/$intakeId',
+  path: '/$intakeId',
+  getParentRoute: () => IntakesRouteRoute,
+} as any)
 const ColaboradoresColaboradorIdRoute =
   ColaboradoresColaboradorIdRouteImport.update({
     id: '/colaboradores/$colaboradorId',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
   '/convite': typeof ConviteIndexRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/colaboradores/'
     | '/convite/'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/colaboradores'
     | '/convite'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/colaboradores/'
     | '/convite/'
@@ -319,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
+    '/intakes/$intakeId': {
+      id: '/intakes/$intakeId'
+      path: '/$intakeId'
+      fullPath: '/intakes/$intakeId'
+      preLoaderRoute: typeof IntakesIntakeIdRouteImport
+      parentRoute: typeof IntakesRouteRoute
+    }
     '/colaboradores/$colaboradorId': {
       id: '/colaboradores/$colaboradorId'
       path: '/colaboradores/$colaboradorId'
@@ -376,11 +395,13 @@ const AtendimentoRouteRouteWithChildren =
   AtendimentoRouteRoute._addFileChildren(AtendimentoRouteRouteChildren)
 
 interface IntakesRouteRouteChildren {
+  IntakesIntakeIdRoute: typeof IntakesIntakeIdRoute
   IntakesNovoRoute: typeof IntakesNovoRoute
   IntakesIndexRoute: typeof IntakesIndexRoute
 }
 
 const IntakesRouteRouteChildren: IntakesRouteRouteChildren = {
+  IntakesIntakeIdRoute: IntakesIntakeIdRoute,
   IntakesNovoRoute: IntakesNovoRoute,
   IntakesIndexRoute: IntakesIndexRoute,
 }

@@ -47,6 +47,6 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RemoveCancelledCollaboratorController,
     UpdateCollaboratorController,
   ],
-  exports: [AuthModule, ActiveAdminGuard],
+  exports: [AuthModule, IdentityDatabaseModule, ActiveAdminGuard],
 })
 export class IdentityModule {}
