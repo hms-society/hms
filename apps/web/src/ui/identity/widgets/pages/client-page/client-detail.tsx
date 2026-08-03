@@ -149,7 +149,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const currentStyle = statusStyles[status] || statusStyles.Potencial
 
   return (
-    <div className='mx-auto flex w-full max-w-5xl flex-col gap-6 mt-22 px-4 sm:px-0'>
+    <div className='mx-auto flex w-full max-w-5xl flex-col gap-6 mt-5 px-4 sm:px-0'>
       <Anchor
         route='clients'
         className='inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground'
