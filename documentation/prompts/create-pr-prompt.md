@@ -17,7 +17,21 @@ milestones.
 - link do PRD no Confluence, quando houver;
 - todas as chaves/URLs de `jira_tickets`, quando houver.
 
-## Leitura e preflight
+---
+
+## Execution Guidelines
+
+### 1. Context Analysis
+
+- Review the implemented Spec and the changelog of the changes made.
+- Identify:
+  - Technical impact (which of `web` / `server` / `core` is affected)
+  - Design decisions taken
+  - Risks and side effects
+  - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
+  - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
+
+---
 
 Antes de criar commits ou abrir o PR, leia:
 
@@ -42,6 +56,12 @@ pnpm build
 Use filtros de workspace quando forem suficientes e registre comandos
 omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
 
+The PR body must follow the structure defined in `.github/pull_request_template.md`.
+
+**Formatting rules:**
+- Use Markdown
+- List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.
+- Identify and list the original authors/codeowners of each modified file using `git log` or `git blame` history, under the alignment section.
 ## Título
 
 Use um título curto, em PT-BR, como frase nominal, sem prefixo Conventional
@@ -74,6 +94,45 @@ Use Markdown sem título principal (`#`) e inclua:
 
 Explique o propósito central da alteração.
 
+## 📝 Descrição das Alterações (obrigatório)
+Explique por que este PR foi criado, qual é seu propósito principal e quais problemas ele resolve.
+
+## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
+Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
+- [ ] `apps/web` (Frontend / Interface)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `apps/server` (Backend / API)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `packages/core` (Regras de Domínio)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `supabase` (Banco de dados / Migrations / Seeders)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+
+## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
+Identifique e liste os autores originais de cada arquivo que você alterou (consulte o histórico do Git):
+- [ ] Identifiquei os autores originais dos arquivos alterados:
+  * `caminho/do/arquivo` -> Autor/Codeowner
+- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
+  - *Detalhes do alinhamento:* ...
+
+
+
+---
+
+## Como testar (obrigatório)
+
+Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
+relevantes, ex.:
+
+```
+pnpm install
+pnpm --filter web dev        # frontend em http://localhost:3000
+pnpm --filter server start:dev
+pnpm --filter <pkg> check-types
 ### Tickets Jira relacionados
 
 Liste todas as chaves ou URLs, sem usar palavras-chave de fechamento do GitHub:
