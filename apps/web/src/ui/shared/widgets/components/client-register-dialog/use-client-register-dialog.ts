@@ -3,10 +3,10 @@ import { useForm, useWatch, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 
-import type { ClientDetails } from '@hms/core/identity/domain/entities'
 import type { ConsentType } from '@hms/core/identity/domain/structures'
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import { lookupClientSchema, registerClientSchema } from '@hms/validation/identity'
+import type { ClientDetails, ClientConsent } from '@hms/core/identity/domain/entities'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
@@ -287,7 +287,7 @@ export function useClientRegisterDialog({
               ...currentDetails.consents.filter(function isDifferentConsent(consent) {
                 return consent.type !== type
               }),
-              response.body,
+              response.body as ClientConsent,
             ],
           }
           continue
@@ -425,6 +425,7 @@ export function useClientRegisterDialog({
     dialogContentRef,
     identificationForm,
     registrationForm,
+    isBusy: Boolean(requestLock),
     handleLookup,
     handleClearIdentification,
     handleSearchAnotherClient,
@@ -438,7 +439,6 @@ export function useClientRegisterDialog({
     handleContinueToReview,
     handleSubmitRegistration,
     handleRetryPendingConsents,
-    isBusy: Boolean(requestLock),
   }
 }
 

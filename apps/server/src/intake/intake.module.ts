@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { ProvisionModule } from '@/shared/provision/provision.module'
-import { IdentityModule } from '@/identity/identity.module'
+import { AuthModule } from '@/identity/auth.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import {
   CloseIntakeWithoutContractController,
@@ -12,7 +12,7 @@ import {
 } from '@/intake/rest/controllers'
 
 @Module({
-  imports: [IdentityModule, IntakeDatabaseModule, ProvisionModule],
+  imports: [AuthModule, IntakeDatabaseModule, ProvisionModule],
   controllers: [
     RegisterIntakesController,
     GetIntakesController,

@@ -60,7 +60,6 @@ export class DrizzleClientConsentsRepository
         ),
       )
       .limit(1)
-
     return consent ? this.consentMapper.toDomain(consent) : undefined
   }
 

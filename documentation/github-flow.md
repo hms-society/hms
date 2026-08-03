@@ -201,7 +201,7 @@ Merging a PR into `develop` creates a push that automatically triggers:
 
 | Workflow | Execution order |
 | --- | --- |
-| `server-app-staging-cd.yml` | Install dependencies, apply migrations, then trigger the server Coolify webhook |
+| `server-app-staging-cd.yml` | Install dependencies, apply migrations, reset and seed staging, then trigger the server Coolify webhook |
 | `web-app-staging-cd.yml` | Trigger the web Coolify webhook |
 
 The jobs use the `staging` GitHub Environment. Coolify clones the private
@@ -305,6 +305,10 @@ through its consuming applications.
 - `COOLIFY_WEBHOOK_HMS_WEB_APP_STG`
 - `COOLIFY_WEBHOOK_HMS_SERVER_APP_STG`
 - `DATABASE_URL_STG`
+- `HMS_USER_SEED_PASSWORD_STG`
+- `HMS_WEB_APP_URL_STG`
+- `SUPABASE_URL_STG`
+- `SUPABASE_SERVICE_ROLE_KEY_STG`
 
 ### `production`
 

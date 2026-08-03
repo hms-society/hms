@@ -1,0 +1,39 @@
+name: Check PR Size
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  check-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate PR additions
+        id: calculate-additions
+        run: |
+          # Garantir que a branch base está disponível para comparação
+          git fetch origin ${{ github.base_ref }}
+          
+          # Calcula as adições excluindo arquivos de lock e configurações de ferramentas
+          ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD \
+            | grep -v -E "pnpm-lock.yaml|package-lock.json|yarn.lock|biome.json" \
+            | awk '{add += $1} END {print add}')
+          
+          # Define 0 se o resultado for vazio
+          ADDITIONS=${ADDITIONS:-0}
+          
+          echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+          echo "Total de linhas adicionadas (excluindo lock/config): $ADDITIONS"
+          
+          if [ "$ADDITIONS" -gt 5000 ]; then
+            echo "::error::Este Pull Request adiciona $ADDITIONS linhas (excedendo o limite máximo de 5000 linhas)!"
+            echo "Por favor, quebre este Pull Request em partes menores e focadas para facilitar a revisão de código."
+            exit 1
+          fi

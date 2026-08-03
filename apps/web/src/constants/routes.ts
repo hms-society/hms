@@ -4,8 +4,9 @@ export const ROUTES = {
   home: '/home',
   intakes: '/intakes',
   newIntake: '/intakes/novo',
-  forgotPassword: '/forgot-password',
+  requestPasswordReset: '/pedir-redefinir-senha',
   resetPassword: '/redefinir-senha',
+  invite: '/convite',
   attendant: '/atendimento',
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
@@ -14,6 +15,8 @@ export const ROUTES = {
   clientMyCaseDetails: '/cliente/meus-casos/$caseId',
   clientMessages: '/cliente/mensagens',
   clientPrivacy: '/cliente/privacidade',
+  clients: '/clientes',
+  collaborators: '/colaboradores',
 } as const
 
 export type RouteName = keyof typeof ROUTES

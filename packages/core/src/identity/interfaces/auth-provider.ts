@@ -6,7 +6,6 @@ import type {
 } from '../domain/structures'
 
 export interface AuthProvider {
-  createUser(credentials: AuthCredentials): Promise<AuthUser>
   signIn(credentials: AuthCredentials): Promise<AuthSession>
   signUp(credentials: AuthCredentials): Promise<AuthSession | null>
   signOut(): Promise<void>

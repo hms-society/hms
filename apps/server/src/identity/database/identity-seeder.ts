@@ -1,9 +1,16 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
-import type { ClientCreation, UserCreation } from '@hms/core/identity/domain/entities'
-import { ClientFaker } from '@hms/core/identity/domain/entities/fakers'
 import type {
-  AuthProvider,
+  ClientCreation,
+  CollaboratorCreation,
+  UserCreation,
+} from '@hms/core/identity/domain/entities'
+import { ClientFaker } from '@hms/core/identity/domain/entities/fakers'
+import type { LegalExpertise } from '@hms/core/identity/domain/structures'
+import type {
+  AuthAdministrationProvider,
   ClientsRepository,
+  CollaboratorRegistrationAttemptsRepository,
+  CollaboratorsRepository,
   UsersRepository,
 } from '@hms/core/identity/interfaces'
 
@@ -13,7 +20,6 @@ import { AppError } from '@hms/core/shared/domain/errors'
 
 type UserSeed = {
   email: string
-  password: string
   status: UserCreation['status']
 }
 
@@ -24,16 +30,54 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
 
 const DEFAULT_USERS: UserSeed[] = [
   {
-    email: 'atendente@hmsadvogados.com.br',
-    password: '123456',
+    email: 'admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'lawyer@hmsadvogados.com.br',
     status: 'active',
   },
   {
     email: 'client@hms.br',
-    password: 'password123',
     status: 'active',
   },
 ]
+
+type AdministrativeCollaboratorCreation = Extract<
+  CollaboratorCreation,
+  { legalExpertises?: never }
+>
+type LegalCollaboratorSeed = {
+  professionalName: string
+  jobTitle?: string
+  profile: 'lawyer'
+}
+
+const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
+  profile: 'admin'
+} = {
+  professionalName: 'Administrador de desenvolvimento',
+  jobTitle: 'Administrador',
+  profile: 'admin',
+}
+
+const DEFAULT_ATTENDANT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
+  profile: 'attendant'
+} = {
+  professionalName: 'Atendente de desenvolvimento',
+  jobTitle: 'Atendente',
+  profile: 'attendant',
+}
+
+const DEFAULT_LAWYER: LegalCollaboratorSeed = {
+  professionalName: 'Advogado de desenvolvimento',
+  jobTitle: 'Advogado',
+  profile: 'lawyer',
+}
 
 @Injectable()
 export class IdentitySeeder {
@@ -42,62 +86,122 @@ export class IdentitySeeder {
     private readonly clientsRepository: ClientsRepository,
     @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
+    private readonly collaboratorsRepository: CollaboratorsRepository,
+    @Inject(IDENTITY_REPOSITORIES.registrationAttempts)
+    private readonly registrationAttemptsRepository: CollaboratorRegistrationAttemptsRepository,
     @Optional()
-    @Inject(IDENTITY_PROVIDERS.auth)
-    private readonly authProvider?: AuthProvider,
+    @Inject(IDENTITY_PROVIDERS.authAdministration)
+    private readonly authAdministrationProvider?: AuthAdministrationProvider,
   ) {}
 
   seed(clients: ClientCreation[] = DEFAULT_CLIENTS) {
     return this.clientsRepository.addMany(clients)
   }
 
-  async clear() {
+  async clear(
+    authAdministrationProvider: AuthAdministrationProvider | undefined = this
+      .authAdministrationProvider,
+  ) {
+    if (!authAdministrationProvider) {
+      throw new AppError('AuthAdministrationProvider is required to clear users')
+    }
+
+    const authCleanupResults = await Promise.allSettled(
+      DEFAULT_USERS.map(async ({ email }) => {
+        const authUser = await authAdministrationProvider.findUserByEmail(email)
+        if (authUser) await authAdministrationProvider.removeUser(authUser.authUserId)
+      }),
+    )
+
     await this.clientsRepository.removeAll()
+    await this.registrationAttemptsRepository.removeAll()
+    await this.collaboratorsRepository.removeAll()
     await this.usersRepository.removeAll()
+
+    const authCleanupFailure = authCleanupResults.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected',
+    )
+    if (authCleanupFailure) throw authCleanupFailure.reason
   }
 
   async seedUsers(
     users: UserSeed[] = DEFAULT_USERS,
-    authProvider: AuthProvider | undefined = this.authProvider,
+    authAdministrationProvider: AuthAdministrationProvider | undefined = this
+      .authAdministrationProvider,
+    password?: string,
   ) {
-    if (!authProvider) {
-      throw new AppError('AuthProvider is required to seed users')
+    if (!authAdministrationProvider) {
+      throw new AppError('AuthAdministrationProvider is required to seed users')
+    }
+    if (!password) {
+      throw new AppError('HMS_USER_SEED_PASSWORD is required to seed users')
     }
 
     const userCreations = await Promise.all(
       users.map(async (user): Promise<UserCreation> => {
-        const authUser = await authProvider.createUser({
-          identifier: user.email,
-          password: user.password,
-        })
+        const authUser =
+          (await authAdministrationProvider.findUserByEmail(user.email)) ??
+          (await authAdministrationProvider.createUser(user.email, password))
 
         return {
-          id: authUser.id,
+          id: 'authUserId' in authUser ? authUser.authUserId : authUser.id,
           email: user.email,
           status: user.status,
         }
       }),
     )
 
-    await this.usersRepository.addMany(userCreations)
-    return userCreations
+    return this.usersRepository.addMany(userCreations)
   }
 
-  async run(authProvider: AuthProvider | undefined = this.authProvider) {
-    const seededUsers = await this.seedUsers(DEFAULT_USERS, authProvider)
-    const clientUser = seededUsers.find((u) => u.email === 'client@hms.br')
+  async run(
+    authAdministrationProvider: AuthAdministrationProvider | undefined = this
+      .authAdministrationProvider,
+    lawyerLegalExpertise?: LegalExpertise,
+    seedPassword?: string,
+  ) {
+    if (!lawyerLegalExpertise) {
+      throw new AppError('Default lawyer legal expertise is required')
+    }
 
-    const clientsToSeed = [
-      {
-        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
-        id: clientUser?.id,
-      },
-      ...ClientFaker.fakeMany(9),
-    ].map(({ id, createdAt, updatedAt, ...client }) => ({
-      ...client,
-      id,
-    }))
+    const seededUsers = await this.seedUsers(
+      DEFAULT_USERS,
+      authAdministrationProvider,
+      seedPassword,
+    )
+    const adminUser = seededUsers.find(
+      ({ email }) => email === 'admin@hmsadvogados.com.br',
+    )
+    const attendantUser = seededUsers.find(
+      ({ email }) => email === 'attendant@hmsadvogados.com.br',
+    )
+    const lawyerUser = seededUsers.find(
+      ({ email }) => email === 'lawyer@hmsadvogados.com.br',
+    )
 
-    await this.seed(clientsToSeed as any)
+    if (!adminUser || !attendantUser || !lawyerUser) {
+      throw new AppError('Default seed users were not created')
+    }
+
+    const administrator = {
+      userId: adminUser.id,
+      ...DEFAULT_ADMINISTRATOR,
+    } satisfies CollaboratorCreation
+
+    await this.collaboratorsRepository.add(administrator)
+
+    await this.collaboratorsRepository.add({
+      userId: attendantUser.id,
+      ...DEFAULT_ATTENDANT,
+    })
+
+    await this.collaboratorsRepository.add({
+      userId: lawyerUser.id,
+      ...DEFAULT_LAWYER,
+      legalExpertises: [lawyerLegalExpertise],
+    })
+
+    await this.seed()
   }
 }

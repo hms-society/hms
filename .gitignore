@@ -63,6 +63,7 @@ issue.md
 CLAUDE.md
 GEMINI.md
 AGENTS.local.md
+.obsidian/
 
 # MCP's
 .playwright-mcp
@@ -71,4 +72,5 @@ AGENTS.local.md
 .env
 .env.development
 .env.testing
+.env.staging
 .env.production

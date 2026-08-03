@@ -4,27 +4,32 @@ import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
 import { IntakeService } from '@/rest/services/intake-service'
 import { IdentityService } from '@/rest/services/identity-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
+import { CommunicationService } from '@/rest/services/communication-service'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
-import { SchedulingService } from '@/rest/services/scheduling-service'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
 
-export const useRestContextProvider = (): RestContextValue => {
+export function useRestContextProvider(): RestContextValue {
   const { getSession, signOut } = useAuthContext()
   const { navigateTo } = useNavigation()
   const isHandlingUnauthorized = useRef(false)
-  const handleUnauthorized = useCallback(async () => {
-    if (isHandlingUnauthorized.current) return
+  const handleUnauthorized = useCallback(
+    async function handleUnauthorized() {
+      if (isHandlingUnauthorized.current) return
 
-    isHandlingUnauthorized.current = true
-    await signOut()
-    await navigateTo('login')
-  }, [navigateTo, signOut])
+      isHandlingUnauthorized.current = true
+      await signOut()
+      await navigateTo('login')
+    },
+    [navigateTo, signOut],
+  )
 
   const restClient = useMemo(
-    () => AxiosRestClient(BROWSER_ENV.hmsServerAppUrl, getSession, handleUnauthorized),
+    function createRestClient() {
+      return AxiosRestClient(BROWSER_ENV.hmsServerAppUrl, getSession, handleUnauthorized)
+    },
     [getSession, handleUnauthorized],
   )
 
@@ -32,6 +37,6 @@ export const useRestContextProvider = (): RestContextValue => {
     intakeService: IntakeService(restClient),
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
-    schedulingService: SchedulingService(restClient),
+    communicationService: CommunicationService(restClient),
   }
 }

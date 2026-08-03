@@ -20,6 +20,14 @@ export const IntakesController = () => Controller('intakes')
 Controllers in that group use `@IntakesController()` instead of repeating
 `@Controller('intakes')`.
 
+## Route parameters use semantic names
+
+Every dynamic route segment must identify the resource or relationship it
+represents. Use names such as `:clientId`, `:collaboratorId`, `:intakeId` and
+`:legalAreaId`; never use a generic `:id`. The controller's `@Param()` key and
+the local variable must match the route placeholder exactly, and REST examples,
+tests and documentation must preserve the same name.
+
 ## One controller represents one application action
 
 Create one controller class per use case or REST action. A controller must only:

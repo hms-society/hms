@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { LegalAreaCreation } from '@hms/core/legal-catalog/domain/entities'
 import type { LegalAreasRepository } from '@hms/core/legal-catalog/interfaces'
-import { asc, eq } from 'drizzle-orm'
+import { asc, eq, inArray } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -34,6 +34,17 @@ export class DrizzleLegalAreasRepository
       .from(legalAreaModel)
       .where(eq(legalAreaModel.active, true))
       .orderBy(asc(legalAreaModel.name))
+
+    return records.map((record) => this.legalAreaMapper.toDomain(record))
+  }
+
+  async findByIds(legalAreaIds: readonly string[]) {
+    if (legalAreaIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(legalAreaModel)
+      .where(inArray(legalAreaModel.id, legalAreaIds))
 
     return records.map((record) => this.legalAreaMapper.toDomain(record))
   }

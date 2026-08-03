@@ -21,6 +21,7 @@ const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
 const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Intakes', route: 'intakes', icon: 'file-text' },
   { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+  { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
 const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [
@@ -34,6 +35,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+    { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
   ],
   [CollaboratorProfile.Attendant]: ATTENDANT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Lawyer]: LAWYER_SIDEBAR_ITEMS,

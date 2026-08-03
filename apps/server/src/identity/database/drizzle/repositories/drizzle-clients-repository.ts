@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { Client, ClientCreation } from '@hms/core/identity/domain/entities'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
-import { and, desc, eq } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientModel } from '@/identity/database/drizzle/models'
 import { DrizzleClientMapper } from '@/identity/database/drizzle/mappers'
+import { intakeModel } from '@/intake/database'
+import { type SQL, and, desc, eq, or, ilike, sql } from 'drizzle-orm'
 
 @Injectable()
 export class DrizzleClientsRepository
@@ -78,6 +79,59 @@ export class DrizzleClientsRepository
       .orderBy(desc(clientModel.createdAt))
 
     return clients.map((client) => this.clientMapper.toDomain(client))
+  }
+
+  async findAll({
+    page,
+    limit,
+    search,
+  }: {
+    page: number
+    limit: number
+    search?: string
+  }) {
+    const offset = (Math.max(page, 1) - 1) * limit
+
+    let whereClause: SQL | undefined
+
+    if (search) {
+      const searchPattern = `%${search}%`
+      whereClause = or(
+        ilike(clientModel.name, searchPattern),
+        ilike(clientModel.legalName, searchPattern),
+        ilike(clientModel.tradeName, searchPattern),
+        ilike(clientModel.taxIdValue, searchPattern),
+        ilike(clientModel.phone, searchPattern),
+      )
+    }
+
+    const records = await this.database
+      .select({
+        client: clientModel,
+        intakeCount: sql<number>`count(${intakeModel.id})::int`,
+        latestOrigin: sql<string>`(array_agg(${intakeModel.origin} ORDER BY ${intakeModel.createdAt} DESC))[1]`,
+      })
+      .from(clientModel)
+      .leftJoin(intakeModel, eq(clientModel.id, intakeModel.clientId))
+      .where(whereClause)
+      .groupBy(clientModel.id)
+      .orderBy(desc(clientModel.createdAt))
+      .limit(limit)
+      .offset(offset)
+
+    const [totalCountResult] = await this.database
+      .select({ count: sql<number>`count(${clientModel.id})::int` })
+      .from(clientModel)
+      .where(whereClause)
+
+    return {
+      data: records.map((record) => ({
+        client: this.clientMapper.toDomain(record.client),
+        intakeCount: record.intakeCount,
+        latestOrigin: record.latestOrigin,
+      })),
+      total: totalCountResult?.count ?? 0,
+    }
   }
 
   private toDrizzle(client: ClientCreation) {
