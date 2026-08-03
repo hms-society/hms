@@ -43,6 +43,7 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'client@hms.br',
+    password: 'password123',
     status: 'active',
   },
 ]
@@ -211,21 +212,32 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    await this.collaboratorsRepository.add({
+    const clientCollaborator = await this.collaboratorsRepository.add({
       userId: clientUser.id,
       ...DEFAULT_CLIENT,
     })
 
-    const clientsToSeed = DEFAULT_CLIENTS.map((client) => {
-      if (client.email === 'client@hms.br') {
-        return {
-          ...client,
-          id: clientUser.id,
-        }
-      }
-      return client
-    })
+    if (!seededAdministrator || !attendant || !lawyer || !clientCollaborator) {
+      throw new AppError('Default seed collaborators were not created')
+    }
 
-    await this.seed(clientsToSeed)
+    const clientsToSeed = [
+      {
+        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+        id: clientUser?.id,
+      },
+      ...ClientFaker.fakeMany(9),
+    ].map(({ id, createdAt, updatedAt, ...client }) => ({
+      ...client,
+      id,
+    })) satisfies ClientCreation[]
+
+    const clients = await this.seed(clientsToSeed)
+
+    return {
+      clients,
+      users: seededUsers,
+      collaborators: [seededAdministrator, attendant, lawyer, clientCollaborator],
+    }
   }
 }
