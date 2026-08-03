@@ -23,9 +23,10 @@ type UserSeed = {
   status: UserCreation['status']
 }
 
-const DEFAULT_CLIENTS: ClientCreation[] = ClientFaker.fakeMany().map(
-  ({ id, createdAt, updatedAt, ...client }) => client,
-)
+const DEFAULT_CLIENTS: ClientCreation[] = [
+  ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+  ...ClientFaker.fakeMany(9),
+].map(({ id, createdAt, updatedAt, ...client }) => client)
 
 const DEFAULT_USERS: UserSeed[] = [
   {
@@ -42,6 +43,10 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'paralegal@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'client@hms.br',
     status: 'active',
   },
 ]
@@ -187,8 +192,9 @@ export class IdentitySeeder {
     const paralegalUser = seededUsers.find(
       ({ email }) => email === 'paralegal@hmsadvogados.com.br',
     )
+    const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
 
-    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser) {
+    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -214,7 +220,17 @@ export class IdentitySeeder {
       throw new AppError('Default seed collaborators were not created')
     }
 
-    const clients = await this.seed()
+    const clientsToSeed = DEFAULT_CLIENTS.map((client) => {
+      if (client.email === 'client@hms.br') {
+        return {
+          ...client,
+          id: clientUser.id,
+        }
+      }
+      return client
+    })
+
+    const clients = await this.seed(clientsToSeed)
 
     return {
       clients,
