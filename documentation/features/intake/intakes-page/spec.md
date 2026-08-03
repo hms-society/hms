@@ -3,6 +3,7 @@ title: Listagem operacional de Intakes
 status: completed
 revision: 3
 verdict: accepted
+commit: 8b0c165
 sources:
   - type: prd
     ref: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2719765/PRD+M+dulo+de+Intake

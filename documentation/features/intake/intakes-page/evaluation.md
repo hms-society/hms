@@ -139,5 +139,5 @@ ports read-only e não duplica dados entre Intake e Identidade; nenhuma migratio
 foi criada. O PRD canônico de Intake (Confluence, página 2719765, versão 2)
 foi verificado e não exige atualização externa.
 
-Commit avaliado: será preenchido após a criação do commit desta entrega.
+Commit avaliado: `8b0c165` (`feat(intake): add operational intake list`).
 PR: inexistente no momento da avaliação; revisão automatizada não foi solicitada.
