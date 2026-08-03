@@ -11,11 +11,8 @@ export const ROUTES = {
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
-<<<<<<< HEAD
   clients: '/clientes',
-=======
   collaborators: '/colaboradores',
->>>>>>> origin/develop
 } as const
 
 export type RouteName = keyof typeof ROUTES

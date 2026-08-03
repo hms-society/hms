@@ -35,7 +35,6 @@ async function bootstrap() {
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(CommunicationSeeder).clear()
 
-
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
 
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
@@ -63,4 +62,7 @@ async function bootstrap() {
   }
 }
 
-bootstrap()
+bootstrap().catch((err) => {
+  console.error('SEED FAILED:', err)
+  process.exit(1)
+})

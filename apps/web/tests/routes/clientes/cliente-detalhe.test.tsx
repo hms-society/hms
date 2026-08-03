@@ -31,30 +31,33 @@ test.beforeEach(async ({ page }) => {
     })
   })
 
-  await page.route(`${BACKEND_URL}/communications/clients/${CLIENT_ID}`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([
-        {
-          id: 'msg-1',
-          channel: 'whatsapp',
-          direction: 'inbound',
-          content: 'Olá, gostaria de saber sobre o meu caso.',
-          author: 'Cliente',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'msg-2',
-          channel: 'email',
-          direction: 'outbound',
-          content: 'Prezada Kristie, enviamos a documentação anexa.',
-          author: 'atendente@hmsadvogados.com.br',
-          createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-        }
-      ]),
-    })
-  })
+  await page.route(
+    `${BACKEND_URL}/communications/clients/${CLIENT_ID}`,
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'msg-1',
+            channel: 'whatsapp',
+            direction: 'inbound',
+            content: 'Olá, gostaria de saber sobre o meu caso.',
+            author: 'Cliente',
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: 'msg-2',
+            channel: 'email',
+            direction: 'outbound',
+            content: 'Prezada Kristie, enviamos a documentação anexa.',
+            author: 'atendente@hmsadvogados.com.br',
+            createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+          },
+        ]),
+      })
+    },
+  )
 })
 
 test('renders client details and communications in the correct tab', async ({ page }) => {
@@ -66,7 +69,9 @@ test('renders client details and communications in the correct tab', async ({ pa
   await page.getByText('Comunicações').click()
 
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).toBeVisible()
 })
 
 test('filters communications by selected channel', async ({ page }) => {
@@ -79,7 +84,9 @@ test('filters communications by selected channel', async ({ page }) => {
   await page.getByRole('option', { name: 'WhatsApp' }).click()
 
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).not.toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).not.toBeVisible()
 })
 
 test('filters communications by selected type', async ({ page }) => {
@@ -92,23 +99,31 @@ test('filters communications by selected type', async ({ page }) => {
   await page.getByRole('option', { name: 'Recebidas' }).click()
 
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).not.toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).not.toBeVisible()
 })
 
 test('filters communications by selected period', async ({ page }) => {
   await page.goto(`/clientes/${CLIENT_ID}`)
   await page.getByText('Comunicações').click()
 
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).toBeVisible()
 
   await page.getByRole('combobox').filter({ hasText: 'Todo o período' }).click()
   await page.getByRole('option', { name: 'Últimos 7 dias' }).click()
 
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).not.toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).not.toBeVisible()
 })
 
-test('displays empty state message when no communications match filters', async ({ page }) => {
+test('displays empty state message when no communications match filters', async ({
+  page,
+}) => {
   await page.goto(`/clientes/${CLIENT_ID}`)
   await page.getByText('Comunicações').click()
 
@@ -118,23 +133,36 @@ test('displays empty state message when no communications match filters', async 
   await page.getByRole('combobox').filter({ hasText: 'Todos os tipos' }).click()
   await page.getByRole('option', { name: 'Enviadas' }).click()
 
-  await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).not.toBeVisible()
-  await expect(page.getByText('Prezada Kristie, enviamos a documentação anexa.')).not.toBeVisible()
-  await expect(page.getByText('Nenhuma comunicação encontrada com os filtros selecionados.')).toBeVisible()
+  await expect(
+    page.getByText('Olá, gostaria de saber sobre o meu caso.'),
+  ).not.toBeVisible()
+  await expect(
+    page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
+  ).not.toBeVisible()
+  await expect(
+    page.getByText('Nenhuma comunicação encontrada com os filtros selecionados.'),
+  ).toBeVisible()
 })
 
 test('displays error message when communication API fails', async ({ page }) => {
-  await page.route(`${BACKEND_URL}/communications/clients/${CLIENT_ID}`, async (route) => {
-    await route.fulfill({
-      status: 500,
-      contentType: 'application/json',
-      body: JSON.stringify({ message: 'Internal Server Error' }),
-    })
-  })
+  await page.route(
+    `${BACKEND_URL}/communications/clients/${CLIENT_ID}`,
+    async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Internal Server Error' }),
+      })
+    },
+  )
 
   await page.goto(`/clientes/${CLIENT_ID}`)
   await page.getByText('Comunicações').click()
 
-  await expect(page.getByText('Erro ao se conectar com a API de histórico.')).toBeVisible({ timeout: 15000 })
-  await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).not.toBeVisible()
+  await expect(page.getByText('Erro ao se conectar com a API de histórico.')).toBeVisible(
+    { timeout: 15000 },
+  )
+  await expect(
+    page.getByText('Olá, gostaria de saber sobre o meu caso.'),
+  ).not.toBeVisible()
 })

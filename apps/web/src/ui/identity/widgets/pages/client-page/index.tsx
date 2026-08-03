@@ -77,6 +77,7 @@ export function ClientsListPage() {
   const limit = 20
 
   const { data, isLoading } = useClientsQuery({ page, limit, search })
+  console.log(data)
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
