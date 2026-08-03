@@ -47,6 +47,7 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'client@hms.br',
+    password: 'password123',
     status: 'active',
   },
 ]
@@ -87,6 +88,14 @@ const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   professionalName: 'Paralegal de desenvolvimento',
   jobTitle: 'Paralegal',
   profile: 'paralegal',
+}
+
+const DEFAULT_CLIENT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
+  profile: 'client'
+} = {
+  professionalName: 'Cliente de desenvolvimento',
+  jobTitle: 'Cliente',
+  profile: 'client',
 }
 
 @Injectable()
@@ -216,26 +225,32 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    if (!seededAdministrator || !attendant || !lawyer) {
+    const clientCollaborator = await this.collaboratorsRepository.add({
+      userId: clientUser.id,
+      ...DEFAULT_CLIENT,
+    })
+
+    if (!seededAdministrator || !attendant || !lawyer || !clientCollaborator) {
       throw new AppError('Default seed collaborators were not created')
     }
 
-    const clientsToSeed = DEFAULT_CLIENTS.map((client) => {
-      if (client.email === 'client@hms.br') {
-        return {
-          ...client,
-          id: clientUser.id,
-        }
-      }
-      return client
-    })
+    const clientsToSeed = [
+      {
+        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+        id: clientUser?.id,
+      },
+      ...ClientFaker.fakeMany(9),
+    ].map(({ id, createdAt, updatedAt, ...client }) => ({
+      ...client,
+      id,
+    })) satisfies ClientCreation[]
 
     const clients = await this.seed(clientsToSeed)
 
     return {
       clients,
       users: seededUsers,
-      collaborators: [seededAdministrator, attendant, lawyer],
+      collaborators: [seededAdministrator, attendant, lawyer, clientCollaborator],
     }
   }
 }
