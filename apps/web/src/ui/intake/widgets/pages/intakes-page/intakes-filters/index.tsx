@@ -56,7 +56,7 @@ export const IntakesFilters = ({
           aria-label='Buscar intake'
           value={searchParams.search ?? ''}
           onChange={(event) => onUpdate({ search: event.target.value || null })}
-          placeholder='Buscar por ID, pessoa ou demanda'
+          placeholder='Buscar por ID ou pessoa'
           className='h-10 rounded-full bg-card pl-10 text-xs shadow-sm'
         />
       </div>

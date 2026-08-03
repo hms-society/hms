@@ -72,7 +72,7 @@ não descreve a listagem.
 ### Incluído
 
 - tabela operacional autenticada em `/intakes`;
-- busca por ID exibido do Intake, nome do Cliente e CPF/CNPJ;
+- busca por ID exibido do Intake e nome do Cliente;
 - tabs de status e filtros complementares por responsável, origem, canal de contato
   e período de registro;
 - paginação, ordenação determinística e contagens por status;
@@ -107,7 +107,7 @@ não descreve a listagem.
 |---|---|---|
 | REQ-01 | A rota autenticada `/intakes` deve exibir uma tabela paginada de dados reais, com uma linha por Intake. | PRD REQ-001; SCRUM-133 |
 | REQ-02 | A tabela deve exibir ID do Intake, data de registro, Cliente, Demanda, canal de contato, status e ações, sem coluna de próxima ação. | PRD REQ-001; SCRUM-133; design `rRdSU` |
-| REQ-03 | A busca deve localizar por ID exibido, nome do Cliente ou CPF/CNPJ normalizado, sem pesquisar o texto integral da Demanda. | PRD REQ-002; SCRUM-133 |
+| REQ-03 | A busca deve localizar por ID exibido ou nome do Cliente, sem pesquisar o texto integral da Demanda. | PRD REQ-002; SCRUM-133; decisão registrada na revisão do PR #24 |
 | REQ-04 | O status deve ser filtrado por tabs e os filtros complementares devem abranger responsável, origem, canal de contato e período de registro. | PRD REQ-002; SCRUM-133; design `rRdSU` |
 | REQ-05 | Busca e filtros devem ser combinados por interseção, persistidos na URL e removíveis individualmente ou em conjunto. | PRD REQ-002; SCRUM-133 |
 | REQ-06 | A consulta deve ser paginada, ordenada por registro mais recente e retornar contagens coerentes para `Todos` e para cada status do PRD. | SCRUM-133; design `rRdSU` |
@@ -124,7 +124,7 @@ não descreve a listagem.
 |---|---|---|---|---|---|
 | CA-01 | REQ-01 | usuário autenticado e Intakes persistidos | acessa `/intakes` | visualiza uma tabela com uma linha por Intake e paginação derivada do servidor | teste de widget + integração de rota + navegador real |
 | CA-02 | REQ-02 | uma página com Intakes distintos | a tabela é renderizada | aparecem ID, registro, Cliente, Demanda, canal, status e ações; não aparece próxima ação | teste de widget + snapshot de acessibilidade |
-| CA-03 | REQ-03 | Intakes de Clientes e IDs distintos | pesquisa separadamente por ID exibido, nome ou CPF/CNPJ com e sem pontuação | somente os registros correspondentes são retornados e o texto da Demanda não é usado como critério | teste dos use cases/repositories + integração REST + browser integration |
+| CA-03 | REQ-03 | Intakes de Clientes e IDs distintos | pesquisa separadamente por ID exibido ou nome | somente os registros correspondentes são retornados e o texto da Demanda não é usado como critério | teste dos use cases/repositories + integração REST + browser integration |
 | CA-04 | REQ-04 | Intakes distribuídos pelos estados válidos | seleciona cada tab | a URL, a requisição e a tabela refletem exatamente o status selecionado, com indicador textual/semântico ativo | teste de hook + integração de rota |
 | CA-05 | REQ-04, REQ-05 | filtros complementares disponíveis | combina responsável, origem, canal e intervalo de calendário | o servidor aplica a interseção, a URL preserva os valores e a página volta para 1 | teste de hook + integração REST + integração de rota |
 | CA-06 | REQ-05 | dois ou mais filtros ativos | remove um chip ou aciona `Limpar filtros` | o filtro individual some sem afetar os demais, ou todos os opcionais são removidos; status volta a `Todos` somente ao limpar tudo | teste de widget/hook + integração de rota |
@@ -149,7 +149,7 @@ não descreve a listagem.
 
 | Parâmetro | Tipo e default | Regra |
 |---|---|---|
-| `search` | string opcional | trim; comparação sem diferenciar caixa; aceita `INT-0142`, `142`, nome e CPF/CNPJ com ou sem pontuação |
+| `search` | string opcional | trim; comparação sem diferenciar caixa; aceita `INT-0142`, `142` ou nome |
 | `status` | um dos seis status do PRD, opcional | ausência significa `Todos`; `registered` e valores desconhecidos são removidos pela validação da rota e normalizados no servidor |
 | `responsibleId` | UUID opcional | filtra pela referência do responsável |
 | `origin` | `IntakeOrigin` opcional | filtra pela origem existente no domínio |
@@ -243,7 +243,7 @@ tratamento compatível e risco explícito acima, sem alterar o PRD nesta entrega
   consulta somente tabelas de Intake, recebe IDs de Cliente já resolvidos e retorna
   referências, campos do Intake, paginação e contagens.
 - Criar em Identidade um port read-only específico para a composição: resolve IDs de
-  Clientes por nome/CPF/CNPJ e lê, em lote, resumos mascarados de Clientes e nomes
+  Clientes por nome e lê, em lote, resumos mascarados de Clientes e nomes
   profissionais de responsáveis. Sua implementação consulta somente tabelas de
   Identidade e não conhece Intake.
 - Manter o agregado `Intake` e os repositórios transacionais sem nomes, documentos ou
@@ -265,8 +265,8 @@ tratamento compatível e risco explícito acima, sem alterar o PRD nesta entrega
   com os demais filtros. Um resultado de Clientes vazio não pode remover um Intake que
   corresponda pelo protocolo.
 - Projetar somente os campos do Contract e mascarar CPF/CNPJ dentro da implementação
-  de Identidade antes de cruzar o port. O documento normalizado pode participar do
-  predicado de busca de Identidade, mas não do payload ou de logs.
+  de Identidade antes de cruzar o port. O documento integral não participa da busca,
+  do payload ou de logs.
 - Criar `ListIntakesController` em `GET /intakes`, com AuthGuard, parâmetros Swagger,
   DTO de página e respostas `200` e `401` documentadas.
 - Reutilizar a política de autenticação no endpoint individual acessado pelo boundary
