@@ -6,7 +6,7 @@ export const useResetPasswordAction = () => {
   const { getSession, isLoading, session, updatePassword } = useAuthContext()
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: async (password: string) => {
+    mutationFn: async function resetPasswordRequest(password: string) {
       const currentSession = await getSession()
 
       if (!currentSession) {
@@ -22,8 +22,8 @@ export const useResetPasswordAction = () => {
   return {
     error,
     isLoading: isPending,
-    resetPassword: mutate,
     sessionReady: Boolean(session),
     sessionChecked: !isLoading,
+    resetPassword: mutate,
   }
 }

@@ -425,6 +425,7 @@ export function useClientRegisterDialog({
     dialogContentRef,
     identificationForm,
     registrationForm,
+    isBusy: Boolean(requestLock),
     handleLookup,
     handleClearIdentification,
     handleSearchAnotherClient,
@@ -438,7 +439,6 @@ export function useClientRegisterDialog({
     handleContinueToReview,
     handleSubmitRegistration,
     handleRetryPendingConsents,
-    isBusy: Boolean(requestLock),
   }
 }
 

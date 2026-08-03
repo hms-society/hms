@@ -14,17 +14,48 @@ async function bootstrap() {
 
   try {
     const envProvider = app.get(EnvProvider)
-    if (envProvider.get('HMS_SERVER_APP_MODE') !== 'dev') {
-      throw new AppError('Database seed is only allowed when HMS_SERVER_APP_MODE=dev')
+    const mode = envProvider.get('HMS_SERVER_APP_MODE')
+    if (mode !== 'dev' && mode !== 'stg') {
+      throw new AppError(
+        'Database seed is only allowed when HMS_SERVER_APP_MODE=dev or stg',
+      )
+    }
+
+    const seedPassword = envProvider.get('HMS_USER_SEED_PASSWORD')
+    if (!seedPassword) {
+      throw new AppError('HMS_USER_SEED_PASSWORD is required when seeding dev or staging')
     }
 
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
-    await app.get(IdentitySeeder).clear()
+    await app.get(IntakeSeeder).clear()
+    await app.get(LegalCatalogSeeder).clear()
+
+    const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
+    await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(CommunicationSeeder).clear()
 
-    await app.get(IdentitySeeder).run(app.get(IDENTITY_PROVIDERS.auth))
-    await app.get(LegalCatalogSeeder).run()
+
+    await app.get(IdentitySeeder).clear(authAdministrationProvider)
+
+    const legalCatalog = await app.get(LegalCatalogSeeder).run()
+    const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
+    const legalTopic = legalCatalog.topics.find(
+      (topic) => topic.legalAreaId === legalArea?.id && topic.name === 'Contratos',
+    )
+
+    if (!legalArea || !legalTopic) {
+      throw new AppError('Default lawyer legal expertise could not be seeded')
+    }
+
+    await app.get(IdentitySeeder).run(
+      authAdministrationProvider,
+      {
+        legalAreaId: legalArea.id,
+        legalTopicIds: [legalTopic.id],
+      },
+      seedPassword,
+    )
     await app.get(IntakeSeeder).run()
     await app.get(CommunicationSeeder).run()
   } finally {

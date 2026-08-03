@@ -2,27 +2,35 @@ import { Module } from '@nestjs/common'
 
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { IdentityUsersDatabaseModule } from '@/identity/database/identity-users-database.module'
 import {
   DrizzleClientConsentMapper,
   DrizzleClientMapper,
-  DrizzleUserMapper,
+  DrizzleCollaboratorMapper,
+  DrizzleCollaboratorRegistrationAttemptMapper,
 } from '@/identity/database/drizzle/mappers'
 import {
   DrizzleClientConsentsRepository,
   DrizzleClientsRepository,
-  DrizzleUsersRepository,
+  DrizzleCollaboratorRegistrationAttemptsRepository,
+  DrizzleCollaboratorsRepository,
+  DrizzleIdentityTransaction,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 
 @Module({
-  imports: [SharedDatabaseModule],
+  imports: [SharedDatabaseModule, IdentityUsersDatabaseModule, LegalCatalogModule],
   providers: [
     DrizzleClientMapper,
     DrizzleClientConsentMapper,
-    DrizzleUserMapper,
+    DrizzleCollaboratorMapper,
+    DrizzleCollaboratorRegistrationAttemptMapper,
     DrizzleClientsRepository,
     DrizzleClientConsentsRepository,
-    DrizzleUsersRepository,
+    DrizzleCollaboratorsRepository,
+    DrizzleCollaboratorRegistrationAttemptsRepository,
+    DrizzleIdentityTransaction,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -32,15 +40,26 @@ import { IdentitySeeder } from '@/identity/database/identity-seeder'
       useExisting: DrizzleClientConsentsRepository,
     },
     {
-      provide: IDENTITY_REPOSITORIES.users,
-      useExisting: DrizzleUsersRepository,
+      provide: IDENTITY_REPOSITORIES.collaborators,
+      useExisting: DrizzleCollaboratorsRepository,
+    },
+    {
+      provide: IDENTITY_REPOSITORIES.registrationAttempts,
+      useExisting: DrizzleCollaboratorRegistrationAttemptsRepository,
+    },
+    {
+      provide: IDENTITY_REPOSITORIES.transaction,
+      useExisting: DrizzleIdentityTransaction,
     },
     IdentitySeeder,
   ],
   exports: [
+    IdentityUsersDatabaseModule,
     IDENTITY_REPOSITORIES.clients,
     IDENTITY_REPOSITORIES.clientConsents,
-    IDENTITY_REPOSITORIES.users,
+    IDENTITY_REPOSITORIES.collaborators,
+    IDENTITY_REPOSITORIES.registrationAttempts,
+    IDENTITY_REPOSITORIES.transaction,
     IdentitySeeder,
   ],
 })

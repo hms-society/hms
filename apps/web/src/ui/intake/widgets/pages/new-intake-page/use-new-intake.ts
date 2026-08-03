@@ -1,6 +1,6 @@
 import { intakeFormSchema, type IntakeFormData } from '@hms/validation/intake'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useState, type BaseSyntheticEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { AppError } from '@hms/core/shared/domain/errors'
@@ -69,7 +69,7 @@ export function useNewIntake() {
       ? { title: 'Novo intake', description: '' }
       : STEP_CONTENT[currentStep as keyof typeof STEP_CONTENT]
 
-  const handleSubmit = form.handleSubmit(async (data) => {
+  async function submitIntake(data: IntakeFormData) {
     if (!user) throw new AppError('An authenticated user is required')
 
     const request = {
@@ -103,7 +103,11 @@ export function useNewIntake() {
     }
     form.reset(DEFAULT_VALUES)
     setCurrentStep(1)
-  })
+  }
+
+  function handleSubmit(event?: BaseSyntheticEvent) {
+    return form.handleSubmit(submitIntake)(event)
+  }
 
   function handleReset() {
     form.reset(DEFAULT_VALUES)
@@ -112,7 +116,9 @@ export function useNewIntake() {
   }
 
   function handlePrevious() {
-    setCurrentStep((step) => Math.max(step - 1, 1))
+    setCurrentStep(function getPreviousStep(step) {
+      return Math.max(step - 1, 1)
+    })
   }
 
   async function handleNext() {
@@ -123,7 +129,9 @@ export function useNewIntake() {
 
     if (isValid) {
       if (currentStep === 1) form.clearErrors('clientId')
-      setCurrentStep((step) => Math.min(step + 1, 3))
+      setCurrentStep(function getNextStep(step) {
+        return Math.min(step + 1, 3)
+      })
     }
   }
 

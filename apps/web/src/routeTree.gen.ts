@@ -14,13 +14,21 @@ import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route
 import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
+import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
+<<<<<<< HEAD
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
+=======
+import { Route as ConviteIndexRouteImport } from './routes/convite/index'
+import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
+import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
+>>>>>>> origin/develop
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
@@ -50,6 +58,12 @@ const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
   path: '/redefinir-senha/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedirRedefinirSenhaIndexRoute =
+  PedirRedefinirSenhaIndexRouteImport.update({
+    id: '/pedir-redefinir-senha/',
+    path: '/pedir-redefinir-senha/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
@@ -65,9 +79,14 @@ const HomeIndexRoute = HomeIndexRouteImport.update({
   path: '/home/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
-  id: '/forgot-password/',
-  path: '/forgot-password/',
+const ConviteIndexRoute = ConviteIndexRouteImport.update({
+  id: '/convite/',
+  path: '/convite/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColaboradoresIndexRoute = ColaboradoresIndexRouteImport.update({
+  id: '/colaboradores/',
+  path: '/colaboradores/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientesIndexRoute = ClientesIndexRouteImport.update({
@@ -80,11 +99,20 @@ const IntakesNovoRoute = IntakesNovoRouteImport.update({
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
 } as any)
+<<<<<<< HEAD
 const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
   id: '/clientes/$clienteId',
   path: '/clientes/$clienteId',
   getParentRoute: () => rootRouteImport,
 } as any)
+=======
+const ColaboradoresColaboradorIdRoute =
+  ColaboradoresColaboradorIdRouteImport.update({
+    id: '/colaboradores/$colaboradorId',
+    path: '/colaboradores/$colaboradorId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+>>>>>>> origin/develop
 const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -109,13 +137,21 @@ export interface FileRoutesByFullPath {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+<<<<<<< HEAD
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
+=======
+  '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/novo': typeof IntakesNovoRoute
+  '/colaboradores/': typeof ColaboradoresIndexRoute
+  '/convite/': typeof ConviteIndexRoute
+>>>>>>> origin/develop
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
 }
 export interface FileRoutesByTo {
@@ -125,13 +161,21 @@ export interface FileRoutesByTo {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+<<<<<<< HEAD
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes': typeof ClientesIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
+=======
+  '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/novo': typeof IntakesNovoRoute
+  '/colaboradores': typeof ColaboradoresIndexRoute
+  '/convite': typeof ConviteIndexRoute
+>>>>>>> origin/develop
   '/home': typeof HomeIndexRoute
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
+  '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
 }
 export interface FileRoutesById {
@@ -143,13 +187,21 @@ export interface FileRoutesById {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+<<<<<<< HEAD
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
+=======
+  '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/novo': typeof IntakesNovoRoute
+  '/colaboradores/': typeof ColaboradoresIndexRoute
+  '/convite/': typeof ConviteIndexRoute
+>>>>>>> origin/develop
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
 }
 export interface FileRouteTypes {
@@ -162,13 +214,21 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+<<<<<<< HEAD
     | '/clientes/$clienteId'
     | '/intakes/novo'
     | '/clientes/'
     | '/forgot-password/'
+=======
+    | '/colaboradores/$colaboradorId'
+    | '/intakes/novo'
+    | '/colaboradores/'
+    | '/convite/'
+>>>>>>> origin/develop
     | '/home/'
     | '/intakes/'
     | '/login/'
+    | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -178,13 +238,21 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+<<<<<<< HEAD
     | '/clientes/$clienteId'
     | '/intakes/novo'
     | '/clientes'
     | '/forgot-password'
+=======
+    | '/colaboradores/$colaboradorId'
+    | '/intakes/novo'
+    | '/colaboradores'
+    | '/convite'
+>>>>>>> origin/develop
     | '/home'
     | '/intakes'
     | '/login'
+    | '/pedir-redefinir-senha'
     | '/redefinir-senha'
   id:
     | '__root__'
@@ -195,13 +263,21 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+<<<<<<< HEAD
     | '/clientes/$clienteId'
     | '/intakes/novo'
     | '/clientes/'
     | '/forgot-password/'
+=======
+    | '/colaboradores/$colaboradorId'
+    | '/intakes/novo'
+    | '/colaboradores/'
+    | '/convite/'
+>>>>>>> origin/develop
     | '/home/'
     | '/intakes/'
     | '/login/'
+    | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
   fileRoutesById: FileRoutesById
 }
@@ -210,11 +286,18 @@ export interface RootRouteChildren {
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
+<<<<<<< HEAD
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
+=======
+  ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
+  ConviteIndexRoute: typeof ConviteIndexRoute
+>>>>>>> origin/develop
   HomeIndexRoute: typeof HomeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  PedirRedefinirSenhaIndexRoute: typeof PedirRedefinirSenhaIndexRoute
   RedefinirSenhaIndexRoute: typeof RedefinirSenhaIndexRoute
 }
 
@@ -255,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RedefinirSenhaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedir-redefinir-senha/': {
+      id: '/pedir-redefinir-senha/'
+      path: '/pedir-redefinir-senha'
+      fullPath: '/pedir-redefinir-senha/'
+      preLoaderRoute: typeof PedirRedefinirSenhaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -276,11 +366,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password/': {
-      id: '/forgot-password/'
-      path: '/forgot-password'
-      fullPath: '/forgot-password/'
-      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+    '/convite/': {
+      id: '/convite/'
+      path: '/convite'
+      fullPath: '/convite/'
+      preLoaderRoute: typeof ConviteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colaboradores/': {
+      id: '/colaboradores/'
+      path: '/colaboradores'
+      fullPath: '/colaboradores/'
+      preLoaderRoute: typeof ColaboradoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes/': {
@@ -297,11 +394,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
+<<<<<<< HEAD
     '/clientes/$clienteId': {
       id: '/clientes/$clienteId'
       path: '/clientes/$clienteId'
       fullPath: '/clientes/$clienteId'
       preLoaderRoute: typeof ClientesClienteIdRouteImport
+=======
+    '/colaboradores/$colaboradorId': {
+      id: '/colaboradores/$colaboradorId'
+      path: '/colaboradores/$colaboradorId'
+      fullPath: '/colaboradores/$colaboradorId'
+      preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+>>>>>>> origin/develop
       parentRoute: typeof rootRouteImport
     }
     '/atendimento/dashboard': {
@@ -372,11 +477,18 @@ const rootRouteChildren: RootRouteChildren = {
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
+<<<<<<< HEAD
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
+=======
+  ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  ColaboradoresIndexRoute: ColaboradoresIndexRoute,
+  ConviteIndexRoute: ConviteIndexRoute,
+>>>>>>> origin/develop
   HomeIndexRoute: HomeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
+  PedirRedefinirSenhaIndexRoute: PedirRedefinirSenhaIndexRoute,
   RedefinirSenhaIndexRoute: RedefinirSenhaIndexRoute,
 }
 export const routeTree = rootRouteImport

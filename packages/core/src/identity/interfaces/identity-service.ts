@@ -1,15 +1,27 @@
-import { RestResponse } from '@hms/core/shared/responses/rest-response'
-import type { ClientDetails } from '@hms/core/identity/domain/entities'
-import type { ConsentType } from '@hms/core/identity/domain/structures'
+import type { RestResponse } from '#shared/responses/rest-response.ts'
+
+import type {
+  ClientConsent,
+  ClientDetails,
+  CollaboratorSummary,
+} from '../domain/entities'
+import type {
+  CollaboratorListQuery,
+  CollaboratorRegistration,
+  ConsentType,
+} from '../domain/structures'
+import type { CollaboratorUpdate } from '../domain/entities'
+import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
+import type { LookupClientRequest, RegisterClientRequest } from '../use-cases'
 
 export interface IdentityService {
-  lookupClient(criteria: {
-    taxId?: string
-    phone?: string
-  }): Promise<RestResponse<ClientDetails>>
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>
-  registerClient(request: unknown): Promise<RestResponse<ClientDetails>>
-  grantClientConsent(clientId: string, type: ConsentType): Promise<RestResponse<unknown>>
+  lookupClient(request: LookupClientRequest): Promise<RestResponse<ClientDetails>>
+  registerClient(request: RegisterClientRequest): Promise<RestResponse<ClientDetails>>
+  grantClientConsent(
+    clientId: string,
+    type: ConsentType,
+  ): Promise<RestResponse<ClientConsent>>
   listClients(params: {
     page: number
     limit: number
@@ -17,33 +29,31 @@ export interface IdentityService {
   }): Promise<
     RestResponse<{ data: unknown[]; total: number; page: number; limit: number }>
   >
+  listCollaborators(
+    query: CollaboratorListQuery,
+  ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
+  getCollaborator(collaboratorId: string): Promise<RestResponse<CollaboratorSummary>>
+  listCollaboratorJobTitles(): Promise<RestResponse<readonly string[]>>
+  getCurrentCollaborator(): Promise<RestResponse<CollaboratorSummary>>
+  registerCollaborator(
+    request: CollaboratorRegistration,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  updateCollaborator(
+    collaboratorId: string,
+    changes: CollaboratorUpdate,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  resendCollaboratorInvitation(
+    collaboratorId: string,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  deactivateCollaborator(
+    collaboratorId: string,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  reactivateCollaborator(
+    collaboratorId: string,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  cancelCollaboratorInvitation(
+    collaboratorId: string,
+  ): Promise<RestResponse<CollaboratorSummary>>
+  removeCollaborator(collaboratorId: string): Promise<RestResponse<void>>
+  completeSignIn(): Promise<RestResponse<CollaboratorSummary>>
 }
-
-export const IdentityService = (restClient: any): IdentityService => ({
-  async lookupClient(criteria) {
-    return restClient.post('/clients/lookup', criteria)
-  },
-
-  async getClient(clientId) {
-    return restClient.get(`/clients/${clientId}`)
-  },
-
-  async registerClient(request) {
-    return restClient.post('/clients', request)
-  },
-
-  async grantClientConsent(clientId, type) {
-    return restClient.post(`/clients/${clientId}/consents`, { type })
-  },
-
-  async listClients(params) {
-    const searchParams = new URLSearchParams()
-    searchParams.append('page', params.page.toString())
-    searchParams.append('limit', params.limit.toString())
-    if (params.search) {
-      searchParams.append('search', params.search)
-    }
-
-    return restClient.get(`/clients?${searchParams.toString()}`)
-  },
-})

@@ -18,6 +18,12 @@ vi.mock('@tanstack/react-router-devtools', () => ({
 vi.mock('@tanstack/react-devtools', () => ({
   TanStackDevtools: () => null,
 }))
+vi.mock('nuqs/adapters/tanstack-router', () => ({
+  NuqsAdapter: ({ children }: PropsWithChildren) => <>{children}</>,
+}))
+vi.mock('@/ui/shadcn/sonner', () => ({
+  Toaster: () => null,
+}))
 
 import { RootLayout } from '../index'
 

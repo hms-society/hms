@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-export const useLegalTopicsQuery = (legalAreaId: string) => {
+export function useLegalTopicsQuery(legalAreaId: string) {
   const { legalCatalogService } = useRestContext()
   const {
     data: legalTopics = [],
@@ -10,7 +10,7 @@ export const useLegalTopicsQuery = (legalAreaId: string) => {
     isLoading: isLoadingLegalTopics,
   } = useQuery({
     queryKey: ['legal-catalog', 'topics', legalAreaId],
-    queryFn: async () => {
+    queryFn: async function fetchLegalTopics() {
       const response = await legalCatalogService.listLegalTopics(legalAreaId)
 
       if (response.isFailure) response.throwError()
