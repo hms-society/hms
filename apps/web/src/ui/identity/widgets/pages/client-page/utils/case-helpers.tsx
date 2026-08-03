@@ -1,35 +1,57 @@
-import { Badge } from "@/ui/shadcn/badge"
-import { IntakeStatus } from "@hms/core/intake/domain/structures"
+import { Badge } from '@/ui/shadcn/badge'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 
 export const getStatusBadge = (status?: IntakeStatus, className?: string) => {
   if (!status) return null
   switch (status) {
     case IntakeStatus.Registered:
-      return <Badge variant="atention" className={className}>Em análise de documentos</Badge>
+      return (
+        <Badge variant='secondary' className={className}>
+          Em análise de documentos
+        </Badge>
+      )
     case IntakeStatus.ConsultationScheduled:
       return (
-        <Badge variant="success" className={`bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-none ${className || ''}`}>
+        <Badge variant='info' className={className}>
           Consulta Agendada
         </Badge>
       )
     case IntakeStatus.ConsultationCompleted:
-      return <Badge variant="wating" className={className}>Consulta Realizada</Badge>
+      return (
+        <Badge variant='success' className={className}>
+          Consulta Realizada
+        </Badge>
+      )
     case IntakeStatus.ViabilityRegistered:
       return (
-        <Badge variant="atention" className={className}>Em análise de viabilidade</Badge>
+        <Badge variant='atention' className={className}>
+          Em análise de viabilidade
+        </Badge>
       )
     case IntakeStatus.InFormalization:
-      return <Badge variant="default" className={className}>Em formalização</Badge>
+      return (
+        <Badge variant='default' className={className}>
+          Em formalização
+        </Badge>
+      )
     case IntakeStatus.Contracted:
       return (
-        <Badge className={`bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-none ${className || ''}`}>
+        <Badge variant='success' className={className}>
           Contratado
         </Badge>
       )
     case IntakeStatus.ClosedWithoutContract:
-      return <Badge variant="outline" className={className}>Encerrado</Badge>
+      return (
+        <Badge variant='outline' className={className}>
+          Encerrado
+        </Badge>
+      )
     default:
-      return <Badge variant="outline" className={className}>{status}</Badge>
+      return (
+        <Badge variant='outline' className={className}>
+          {status}
+        </Badge>
+      )
   }
 }
 
