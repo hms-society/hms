@@ -23,28 +23,26 @@ export const Sidebar = ({
   return (
     <aside
       aria-label='Navegação principal'
-      className={`hidden lg:flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${
-        isCollapsed
-          ? 'w-[72px] py-6 justify-between h-screen sticky top-0'
-          : 'w-[239px] h-screen sticky top-0'
+      className={`sticky top-0 z-20 hidden h-screen shrink-0 flex-col items-start border-r border-white/15 bg-hms-sidebar-foreground transition-all duration-300 lg:flex ${
+        isCollapsed ? 'w-16 py-6' : 'w-[200px]'
       }`}
     >
-      <div className='w-full flex flex-col items-start px-4 pt-4 gap-6'>
+      <div className='flex w-full flex-col items-start gap-4 px-2 pt-3'>
         <div
-          className={`relative flex w-full items-center ${isCollapsed ? 'flex-col gap-3 justify-center' : 'justify-center min-h-[64px]'}`}
+          className={`relative flex w-full items-center ${isCollapsed ? 'flex-col justify-center gap-3' : 'min-h-16 justify-center'}`}
         >
           {!isCollapsed ? (
             <>
-              <div className='flex flex-col bg-white rounded p-4 items-center justify-center w-24'>
-                <span className='font-serif font-bold text-brand text-lg tracking-wide'>
+              <div className='flex h-16 w-24 flex-col items-center justify-center rounded-md bg-white'>
+                <span className='font-serif text-lg font-bold tracking-wide text-brand'>
                   HMS
                 </span>
-                <hr className='h-1 w-full bg-brand-accent rounded-full mt-1' />
+                <hr className='mt-1 h-1 w-16 rounded-full bg-brand-accent' />
               </div>
               <button
                 type='button'
                 onClick={() => onToggle(true)}
-                className='absolute right-0 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-highlight-vivid'
+                className='absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-highlight-vivid'
                 title='Retrair'
                 aria-label='Retrair menu lateral'
               >
@@ -55,7 +53,7 @@ export const Sidebar = ({
             <button
               type='button'
               onClick={() => onToggle(false)}
-              className='p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-highlight-vivid'
+              className='cursor-pointer rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-highlight-vivid'
               title='Expandir'
               aria-label='Expandir menu lateral'
             >
@@ -64,9 +62,9 @@ export const Sidebar = ({
           )}
         </div>
 
-        <div className='w-full h-0.5 bg-white' />
+        <div className='h-px w-full bg-white/25' />
 
-        <nav className='flex flex-col w-full gap-2' aria-label='Seções'>
+        <nav className='flex w-full flex-col gap-1' aria-label='Seções'>
           {sidebarItems.map((item) => {
             const routePath = ROUTES[item.route]
             const normalizedRoutePath = routePath.replace(/\/$/, '') || '/'
@@ -79,7 +77,7 @@ export const Sidebar = ({
               <Anchor
                 key={item.route}
                 route={item.route}
-                className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium transition-all duration-200 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
+                className={`flex w-full cursor-pointer items-center gap-3 rounded-md py-2.5 font-medium outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
                   isCollapsed ? 'justify-center px-0' : 'px-3'
                 } ${
                   isActive
@@ -101,12 +99,12 @@ export const Sidebar = ({
       </div>
 
       <div className='w-full px-4 pb-4 mt-auto'>
-        <div className='w-full h-px bg-white/10 mb-4' />
+        <div className='mb-3 h-px w-full bg-white/15' />
         <button
           type='button'
           onClick={() => signOut()}
           disabled={isPending}
-          className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-md py-2.5 font-medium text-white/70 transition-all duration-200 hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
             isCollapsed ? 'justify-center px-0' : 'px-3'
           }`}
           title={isCollapsed ? 'Sair' : undefined}

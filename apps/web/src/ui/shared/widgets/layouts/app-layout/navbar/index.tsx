@@ -4,41 +4,40 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 
 export const Navbar = () => {
   return (
-    <nav className='absolute top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between w-[1127px] max-w-[calc(100%-3rem)] h-[68px] px-5 rounded-[50px] bg-hms-sidebar-foreground shadow-[0_4px_4px_0_rgba(19,76,80,0.25)] border border-[#134C50]/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 transition-all'>
-      <div className='flex w-[400px] max-w-[60%] h-10 px-[14px] items-center gap-[10px] shrink rounded-[20px] bg-white text-[#134C50] shadow-xs m-auto'>
-        <Icon name='search' className='w-5 h-5 text-[#134C50]/60 shrink-0' />
+    <nav className='sticky top-3 z-30 flex h-12 items-center justify-between gap-4 rounded-full border border-brand/20 bg-hms-sidebar-foreground px-4 shadow-md'>
+      <div className='mx-auto flex h-8 w-full max-w-[25rem] items-center gap-2 rounded-full bg-card px-3 text-brand shadow-xs'>
+        <Icon name='search' className='size-3.5 shrink-0 text-brand/60' />
         <Input
           type='search'
-          placeholder='Pesquisar Protocolo, documento...'
-          className='border-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-none p-0 h-full w-full text-[#134C50] placeholder:text-[#134C50]/50'
+          placeholder='Pesquisar por protocolo, documento...'
+          className='h-full w-full border-none bg-transparent p-0 text-xs text-brand shadow-none placeholder:text-brand/50 focus-visible:border-none focus-visible:ring-0'
         />
       </div>
 
-      <div className='flex items-center gap-3'>
+      <div className='flex shrink-0 items-center gap-2'>
         <button
           type='button'
-          className='relative flex items-center justify-center p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/40'
+          className='relative flex items-center justify-center rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/40'
           title='Notificações'
         >
-          <Icon name='bell' className='w-5 h-5' />
-          <span className='absolute top-1.5 right-1.5 flex h-2 w-2'>
-            <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75' />
-            <span className='relative inline-flex rounded-full h-2 w-2 bg-brand-accent' />
+          <Icon name='bell' className='size-4' />
+          <span className='absolute top-1 right-1 flex size-1.5'>
+            <span className='relative inline-flex size-1.5 rounded-full bg-brand-accent' />
           </span>
         </button>
 
-        <div className='h-6 w-px bg-white/20' />
+        <div className='h-5 w-px bg-white/20' />
 
         <button
           type='button'
-          className='outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-full cursor-pointer hover:opacity-90 transition-opacity'
+          className='cursor-pointer rounded-full outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white/40'
         >
           <Avatar size='default' className='border border-white/20'>
             <AvatarImage
               src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'
               alt='Usuário'
             />
-            <AvatarFallback className='bg-white/10 text-white font-sans text-xs'>
+            <AvatarFallback className='bg-brand-highlight text-xs font-sans text-white'>
               US
             </AvatarFallback>
           </Avatar>
