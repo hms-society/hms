@@ -1,4 +1,6 @@
 export * from '@/intake/database/drizzle/models'
 export * from '@/identity/database/drizzle/models'
 export * from '@/legal-catalog/database/drizzle/models'
+export * from '@/communication/database/drizzle/models/communication-model'
+export * from '@/shared/database/drizzle/schema/integracao-evento'
 export * from '@/shared/database/drizzle/schema/scheduling'

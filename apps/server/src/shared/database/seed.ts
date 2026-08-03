@@ -5,6 +5,8 @@ import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
+import { CommunicationSeeder } from '@/communication/database/communication-seeder'
+import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
 
@@ -27,9 +29,10 @@ async function bootstrap() {
 
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
-    const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
 
+    const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
+    await app.get(CommunicationSeeder).clear()
 
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
     const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
@@ -56,9 +59,13 @@ async function bootstrap() {
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
     })
+    await app.get(CommunicationSeeder).run()
   } finally {
     await app.close()
   }
 }
 
-bootstrap()
+bootstrap().catch((err) => {
+  console.error('SEED FAILED:', err)
+  process.exit(1)
+})

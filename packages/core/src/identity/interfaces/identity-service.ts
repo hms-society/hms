@@ -22,6 +22,13 @@ export interface IdentityService {
     clientId: string,
     type: ConsentType,
   ): Promise<RestResponse<ClientConsent>>
+  listClients(params: {
+    page: number
+    limit: number
+    search?: string
+  }): Promise<
+    RestResponse<{ data: unknown[]; total: number; page: number; limit: number }>
+  >
   listCollaborators(
     query: CollaboratorListQuery,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>

@@ -40,6 +40,23 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
       return restClient.post<ClientConsent>(`/clients/${clientId}/consents`, { type })
     },
 
+    listClients(params) {
+      const searchParams = new URLSearchParams()
+      searchParams.append('page', params.page.toString())
+      searchParams.append('limit', params.limit.toString())
+
+      if (params.search) {
+        searchParams.append('search', params.search)
+      }
+
+      return restClient.get<{
+        data: unknown[]
+        total: number
+        page: number
+        limit: number
+      }>(`/clients?${searchParams.toString()}`)
+    },
+
     listCollaborators(query) {
       return restClient.get<PaginationResponse<CollaboratorSummary>>(
         createCollaboratorsPath(query),
