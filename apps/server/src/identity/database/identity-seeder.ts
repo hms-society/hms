@@ -79,6 +79,14 @@ const DEFAULT_LAWYER: LegalCollaboratorSeed = {
   profile: 'lawyer',
 }
 
+const DEFAULT_CLIENT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
+  profile: 'client'
+} = {
+  professionalName: 'Cliente de desenvolvimento',
+  jobTitle: 'Cliente',
+  profile: 'client',
+}
+
 @Injectable()
 export class IdentitySeeder {
   constructor(
@@ -179,8 +187,9 @@ export class IdentitySeeder {
     const lawyerUser = seededUsers.find(
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
+    const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
 
-    if (!adminUser || !attendantUser || !lawyerUser) {
+    if (!adminUser || !attendantUser || !lawyerUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -200,6 +209,11 @@ export class IdentitySeeder {
       userId: lawyerUser.id,
       ...DEFAULT_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
+    })
+
+    await this.collaboratorsRepository.add({
+      userId: clientUser.id,
+      ...DEFAULT_CLIENT,
     })
 
     await this.seed()
