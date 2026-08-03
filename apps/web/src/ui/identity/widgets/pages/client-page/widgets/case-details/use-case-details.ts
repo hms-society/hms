@@ -1,7 +1,7 @@
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { IntakeStatus } from "@hms/core/intake/domain/structures"
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 
 export function useCaseDetails() {
   const { caseId } = useParams({ from: '/cliente/meus-casos/$caseId' })
@@ -55,19 +55,44 @@ export function useCaseDetails() {
 
   // Document list based on current status and area
   const getDocuments = () => {
+    const hasPendency =
+      caseDetails?.status === IntakeStatus.Registered ||
+      caseDetails?.status === IntakeStatus.ViabilityRegistered
+
     return [
-      { name: 'Documento de Identidade (RG/CNH)', status: 'approved', updatedAt: '2026-07-28' },
+      {
+        name: 'Documento de Identidade (RG/CNH)',
+        status: 'approved',
+        updatedAt: '2026-07-28',
+      },
       { name: 'Comprovante de Residência', status: 'approved', updatedAt: '2026-07-28' },
-      { name: 'Procuração Assinada', status: caseDetails?.status === IntakeStatus.Registered ? 'pending' : 'approved', updatedAt: '2026-07-29' },
-      { name: 'Contrato de Honorários', status: activeStep >= 3 ? 'approved' : 'pending', updatedAt: '2026-07-29' },
-      { name: 'Declaração de Hipossuficiência', status: 'pending', updatedAt: '-' },
+      {
+        name: 'Procuração Assinada',
+        status: caseDetails?.status === IntakeStatus.Registered ? 'pending' : 'approved',
+        updatedAt: '2026-07-29',
+      },
+      {
+        name: 'Contrato de Honorários',
+        status: activeStep >= 3 || !hasPendency ? 'approved' : 'pending',
+        updatedAt: '2026-07-29',
+      },
+      {
+        name: 'Declaração de Hipossuficiência',
+        status: hasPendency ? 'pending' : 'approved',
+        updatedAt: '-',
+      },
     ]
   }
 
   // Vertical timeline
   const getTimeline = () => {
     const timeline = [
-      { date: '28/07/2026', time: '14:32', title: 'Caso registrado', desc: 'Sua solicitação de atendimento foi recebida pelo escritório.' },
+      {
+        date: '28/07/2026',
+        time: '14:32',
+        title: 'Caso registrado',
+        desc: 'Sua solicitação de atendimento foi recebida pelo escritório.',
+      },
     ]
 
     if (caseDetails?.status !== IntakeStatus.Registered) {
@@ -107,13 +132,15 @@ export function useCaseDetails() {
         sender: 'Dra. Patrícia Silva',
         role: 'Advogada Responsável',
         date: 'Hoje, às 09:15',
-        content: 'Olá! Analisei as notas do seu caso. Precisamos que nos envie a declaração de hipossuficiência assinada para dar andamento gratuito se for o caso.',
+        content:
+          'Olá! Analisei as notas do seu caso. Precisamos que nos envie a declaração de hipossuficiência assinada para dar andamento gratuito se for o caso.',
       },
       {
         sender: 'Secretaria HMS',
         role: 'Atendimento',
         date: 'Ontem, às 14:00',
-        content: 'Seja bem-vindo(a) ao HMS. Caso tenha dúvidas sobre a documentação exigida, você pode mandar mensagem diretamente por este canal.',
+        content:
+          'Seja bem-vindo(a) ao HMS. Caso tenha dúvidas sobre a documentação exigida, você pode mandar mensagem diretamente por este canal.',
       },
     ]
   }

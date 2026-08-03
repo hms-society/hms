@@ -18,7 +18,7 @@ export const getStatusBadge = (status?: IntakeStatus, className?: string) => {
       )
     case IntakeStatus.ConsultationCompleted:
       return (
-        <Badge variant='success' className={className}>
+        <Badge variant='info' className={className}>
           Consulta Realizada
         </Badge>
       )
