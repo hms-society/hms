@@ -5,6 +5,7 @@ import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
+import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
 
@@ -27,7 +28,12 @@ async function bootstrap() {
 
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
+    await app.get(IntakeSeeder).clear()
+    await app.get(LegalCatalogSeeder).clear()
+
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
+    await app.get(IdentitySeeder).clear(authAdministrationProvider)
+    await app.get(CommunicationSeeder).clear()
 
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
 
@@ -41,7 +47,7 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
-    const identitySeed = await app.get(IdentitySeeder).run(
+    await app.get(IdentitySeeder).run(
       authAdministrationProvider,
       {
         legalAreaId: legalArea.id,
@@ -49,16 +55,14 @@ async function bootstrap() {
       },
       seedPassword,
     )
-    await app.get(IntakeSeeder).run({
-      clientIds: identitySeed.clients.map(({ id }) => id),
-      responsibleIds: identitySeed.collaborators.map(({ id }) => id),
-      actorIds: identitySeed.users.map(({ id }) => id),
-      legalAreaId: legalArea.id,
-      legalTopicId: legalTopic.id,
-    })
+    await app.get(IntakeSeeder).run()
+    await app.get(CommunicationSeeder).run()
   } finally {
     await app.close()
   }
 }
 
-bootstrap()
+bootstrap().catch((err) => {
+  console.error('SEED FAILED:', err)
+  process.exit(1)
+})

@@ -4,7 +4,7 @@ import { IntakeModule } from '@/intake/intake.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedModule } from '@/shared/shared.module'
-import { SchedulingModule } from './scheduling/database/drizzle/repositories/scheduling.module'
+import { CommunicationModule } from './communication/communication.module'
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { SchedulingModule } from './scheduling/database/drizzle/repositories/sch
     IdentityModule,
     LegalCatalogModule,
     IntakeModule,
-    SchedulingModule,
+    CommunicationModule,
   ],
 })
 export class AppModule {}

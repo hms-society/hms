@@ -15,3 +15,4 @@ export { RemoveCancelledCollaboratorController } from '@/identity/rest/controlle
 export { UpdateCollaboratorController } from '@/identity/rest/controllers/update-collaborator.controller'
 export { RegisterClientController } from '@/identity/rest/controllers/register-client.controller'
 export { SignInController } from '@/identity/rest/controllers/sign-in.controller'
+export { ListClientsController } from '@/identity/rest/controllers/list-clients.controller'

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { INTAKE_LIST_REPOSITORIES } from '@/intake/constants/intake-list-repositories'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
