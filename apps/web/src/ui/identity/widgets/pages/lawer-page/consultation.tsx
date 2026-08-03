@@ -190,7 +190,6 @@ export const Consultation = () => {
 
   return (
     <div className='flex flex-col gap-6 max-w-5xl pt-20 md:pt-24 px-4 sm:px-6 w-full mx-auto pb-10'>
-      {/* Título */}
       <div className='flex flex-col gap-1'>
         <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
           Configurar agenda
@@ -200,7 +199,6 @@ export const Consultation = () => {
         </p>
       </div>
 
-      {/* Duração Padrão */}
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
         <div className='flex items-center gap-3'>
           <Timer className='w-5 h-5 text-primary shrink-0' />
@@ -244,8 +242,6 @@ export const Consultation = () => {
           })}
         </div>
       </div>
-
-      {/* Disponibilidade Semanal */}
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>
           <CalendarDays className='w-5 h-5 text-primary shrink-0' />
@@ -268,7 +264,6 @@ export const Consultation = () => {
                   !day.active ? 'opacity-60 bg-muted/20' : ''
                 }`}
               >
-                {/* Switch + Nome do Dia */}
                 <div className='flex items-center gap-3 min-w-[160px]'>
                   <Switch
                     checked={day.active}
@@ -280,8 +275,6 @@ export const Consultation = () => {
                     {day.name}
                   </span>
                 </div>
-
-                {/* Slots de Horário + Botão de Adicionar */}
                 <div className='flex items-center justify-between sm:justify-end gap-3 flex-1 w-full sm:w-auto pl-11 sm:pl-0'>
                   {day.active ? (
                     <div className='flex items-center gap-2 flex-wrap flex-1 sm:justify-start'>
@@ -326,8 +319,6 @@ export const Consultation = () => {
           )}
         </div>
       </div>
-
-      {/* Bloqueios de Agenda */}
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border'>
           <div className='flex items-center gap-2'>
@@ -383,8 +374,6 @@ export const Consultation = () => {
           )}
         </div>
       </div>
-
-      {/* Modal Intervalo */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
@@ -441,8 +430,6 @@ export const Consultation = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Modal Bloqueio */}
       <Dialog open={modalBlockOpen} onOpenChange={setModalBlockOpen}>
         <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
