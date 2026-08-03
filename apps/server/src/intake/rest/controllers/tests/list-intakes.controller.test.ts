@@ -79,6 +79,11 @@ describe('List Intakes Controller [GET /intakes]', () => {
         responsibleId: responsible.id,
         status: IntakeListStatus.ConsultationScheduled,
       },
+      {
+        clientId: client.id,
+        responsibleId: responsible.id,
+        status: 'registered',
+      },
     ])
 
     const response = await request(fixture.app.getHttpServer())
@@ -92,11 +97,12 @@ describe('List Intakes Controller [GET /intakes]', () => {
       total: 2,
       totalPages: 2,
       statusCounts: {
-        all: 2,
+        all: 3,
         byStatus: {
           [IntakeListStatus.Contracted]: 1,
           [IntakeListStatus.ConsultationScheduled]: 1,
         },
+        compatibility: { registered: 1 },
       },
     })
     expect(response.body.items).toHaveLength(1)
