@@ -214,11 +214,13 @@ Seeders must also follow these rules:
   order, the central orchestrator must call the module `clear()` methods in
   dependency order before calling their `run()` methods;
 - centralize execution in `apps/server/src/shared/database/seed.ts`. It must
-  verify `HMS_SERVER_APP_MODE === 'dev'` before any cleanup or insertion, abort
-  in every other mode, and close the Nest application context in a `finally`
-  block;
+  verify `HMS_SERVER_APP_MODE` is `dev` or `stg` before any cleanup or insertion,
+  abort in every other mode, require `HMS_USER_SEED_PASSWORD` in `dev` and `stg`, and
+  close the Nest application context in a `finally` block;
 - expose the operation through the server's `db:seed` command. Running seeds
-  must never be part of application bootstrap or production deployment.
+  must never be part of application bootstrap or production deployment. Staging
+  deployment explicitly runs the seed after migrations, so its database is
+  reset and repopulated on every server deployment.
 
 ## Server imports use aliases
 

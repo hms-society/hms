@@ -16,7 +16,9 @@ export function useClientStep() {
   const clientInitials = clientName
     .split(' ')
     .slice(0, 2)
-    .map((part) => part.charAt(0))
+    .map(function getInitial(part) {
+      return part.charAt(0)
+    })
     .join('')
     .toUpperCase()
   const formattedTaxId = client?.taxId.value.replace(

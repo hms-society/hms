@@ -549,7 +549,7 @@ flowchart TD
   H --> I["POST /clients without consents"]
   I -->|"409"| C
   I -->|"201"| J["Client created"]
-  J --> L["POST /clients/:id/consents per type"]
+  J --> L["POST /clients/:clientId/consents per type"]
   L -->|"all complete"| K
   L -->|"partial failure"| M["Keep clientId and pending types"]
   M --> L

@@ -11,12 +11,12 @@ function createSupabaseClient(): SupabaseClient {
   })
 }
 
-const hotSupabaseClient = import.meta.hot?.data.supabaseClient as
+const hotSupabaseClient = import.meta.hot?.data?.supabaseClient as
   | SupabaseClient
   | undefined
 
 export const supabaseClient = hotSupabaseClient ?? createSupabaseClient()
 
-if (import.meta.hot) {
+if (import.meta.hot?.data) {
   import.meta.hot.data.supabaseClient = supabaseClient
 }

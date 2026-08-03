@@ -24,7 +24,6 @@ describe('useAuthContextProvider', () => {
 
   beforeEach(() => {
     authProvider = {
-      createUser: vi.fn(),
       getSession: vi.fn().mockResolvedValue(SESSION),
       getUser: vi.fn(),
       onAuthStateChange: vi.fn((listener: AuthStateChangeListener) => {

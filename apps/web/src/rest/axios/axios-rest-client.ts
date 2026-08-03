@@ -5,12 +5,17 @@ import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import { request } from './utils'
 
+const REST_REQUEST_TIMEOUT_MS = 15_000
+
 export const AxiosRestClient = (
   baseUrl?: string,
   getSession?: () => Promise<AuthSession | null>,
   onUnauthorized?: () => Promise<void>,
 ): RestClient => {
-  const client = axios.create({ baseURL: baseUrl })
+  const client = axios.create({
+    baseURL: baseUrl,
+    timeout: REST_REQUEST_TIMEOUT_MS,
+  })
 
   if (getSession) {
     client.interceptors.request.use(async (config) => {

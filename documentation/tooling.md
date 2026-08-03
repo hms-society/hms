@@ -119,9 +119,9 @@ without competing container startups.
 - `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
   then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
   merged PR into `main`.
-- `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations
-  and then triggers the server staging Coolify webhook with `COOLIFY_API_TOKEN` after
-  pushes to `develop`.
+- `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations,
+  resets and seeds staging, and then triggers the server staging Coolify webhook
+  with `COOLIFY_API_TOKEN` after pushes to `develop`.
 - `.github/workflows/web-app-staging-cd.yml` deploys web staging after pushes to
   `develop` using `COOLIFY_API_TOKEN`.
 - `.github/workflows/web-app-production-cd.yml` deploys web production after a merged
@@ -135,6 +135,10 @@ The `production` and `staging` GitHub environments must provide these secrets:
 - `COOLIFY_WEBHOOK_HMS_WEB_APP_PROD` and `COOLIFY_WEBHOOK_HMS_WEB_APP_STG`
 - `COOLIFY_WEBHOOK_HMS_SERVER_APP_PROD` and `COOLIFY_WEBHOOK_HMS_SERVER_APP_STG`
 - `DATABASE_URL_PRODUCTION` and `DATABASE_URL_STG`
+- `HMS_USER_SEED_PASSWORD_STG`
+- `HMS_WEB_APP_URL_STG`
+- `SUPABASE_URL_STG`
+- `SUPABASE_SERVICE_ROLE_KEY_STG`
 
 
 ## Frontend tooling (`apps/web`)

@@ -1,35 +1,52 @@
 import { Module } from '@nestjs/common'
 
+import { AuthModule } from '@/identity/auth.module'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
-import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
-import { AuthGuard } from '@/identity/guards'
+import { ActiveAdminGuard } from '@/identity/guards'
 import {
   GetClientController,
   GrantClientConsentController,
+  CompleteSignInController,
+  GetCurrentCollaboratorController,
   LookupClientController,
+  ListCollaboratorsController,
+  ListCollaboratorJobTitlesController,
+  GetCollaboratorController,
+  RegisterCollaboratorController,
+  ResendCollaboratorInvitationController,
+  DeactivateCollaboratorController,
+  ReactivateCollaboratorController,
+  CancelCollaboratorInvitationController,
+  RemoveCancelledCollaboratorController,
+  UpdateCollaboratorController,
   RegisterClientController,
   SignInController,
 } from '@/identity/rest/controllers'
-import { SupabaseAuthProvider } from '@/identity/providers'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 
 @Module({
-  imports: [IdentityDatabaseModule, ProvisionModule],
+  imports: [AuthModule, IdentityDatabaseModule, LegalCatalogModule, ProvisionModule],
+  providers: [ActiveAdminGuard],
   controllers: [
     GetClientController,
     LookupClientController,
     RegisterClientController,
     GrantClientConsentController,
     SignInController,
+    RegisterCollaboratorController,
+    CompleteSignInController,
+    GetCurrentCollaboratorController,
+    ListCollaboratorsController,
+    ListCollaboratorJobTitlesController,
+    GetCollaboratorController,
+    ResendCollaboratorInvitationController,
+    DeactivateCollaboratorController,
+    ReactivateCollaboratorController,
+    CancelCollaboratorInvitationController,
+    RemoveCancelledCollaboratorController,
+    UpdateCollaboratorController,
   ],
-  providers: [
-    SupabaseAuthProvider,
-    {
-      provide: IDENTITY_PROVIDERS.auth,
-      useExisting: SupabaseAuthProvider,
-    },
-    AuthGuard,
-  ],
-  exports: [IDENTITY_PROVIDERS.auth, AuthGuard],
+  exports: [AuthModule, ActiveAdminGuard],
 })
 export class IdentityModule {}

@@ -1,3 +1,7 @@
 export * from '@/identity/database/drizzle/types/entities/drizzle-client'
 export * from '@/identity/database/drizzle/types/entities/drizzle-client-consent'
+export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator'
+export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-legal-expertise'
+export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-legal-expertise-topic'
+export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-registration-attempt'
 export * from '@/identity/database/drizzle/types/entities/drizzle-user'
