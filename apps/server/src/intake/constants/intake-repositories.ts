@@ -1,3 +1,4 @@
 export const INTAKE_REPOSITORIES = {
-  intakes: 'intakes',
-}
+  intakes: Symbol('INTAKE_REPOSITORIES.intakes'),
+  intakeList: Symbol('INTAKE_LIST_REPOSITORIES.intakeList'),
+} as const

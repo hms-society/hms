@@ -1,9 +1,10 @@
 import type { INestApplication, Type } from '@nestjs/common'
 import type { Intake, IntakeCreation } from '@hms/core/intake/domain/entities'
 import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
-import { IntakeStatus } from '@hms/core/intake/domain/structures'
+import { IntakeClosureReason, IntakeStatus } from '@hms/core/intake/domain/structures'
 
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { DrizzleIntakeListRepository } from '@/intake/database/drizzle/repositories'
 import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { IdentityModule } from '@/identity/identity.module'
@@ -22,11 +23,15 @@ export class IntakeModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller: Type<unknown>) {
+  get intakeListRepository(): DrizzleIntakeListRepository {
+    return this.restFixture.get(DrizzleIntakeListRepository)
+  }
+
+  static async register(controller?: Type<unknown>) {
     const restFixture = await RestFixture.register(
       {
         imports: [IdentityModule, IntakeDatabaseModule],
-        controllers: [controller],
+        controllers: controller ? [controller] : [],
         providers: [DatetimeProvider],
       },
       (builder) => builder.overrideGuard(AuthGuard).useValue({ canActivate: () => true }),
@@ -60,6 +65,18 @@ export class IntakeModuleFixture {
       status: IntakeStatus.ConsultationScheduled,
       ...overrides,
     })
+    const isClosedWithoutContract = draft.status === IntakeStatus.ClosedWithoutContract
+    const closureReason = isClosedWithoutContract
+      ? (draft.closureReason ?? IntakeClosureReason.ClientWithdrew)
+      : undefined
+    const closureNotes = isClosedWithoutContract
+      ? closureReason === IntakeClosureReason.Other
+        ? draft.closureNotes?.trim() || 'Fixture closure notes'
+        : draft.closureNotes
+      : undefined
+    const closedAt = isClosedWithoutContract
+      ? (draft.closedAt ?? draft.createdAt)
+      : undefined
 
     return {
       clientId: draft.clientId,
@@ -72,7 +89,10 @@ export class IntakeModuleFixture {
       legalTopicId: draft.legalTopicId,
       urgency: draft.urgency,
       demandNotes: draft.demandNotes,
-      status: IntakeStatus.ConsultationScheduled,
+      status: draft.status,
+      closureReason,
+      closureNotes,
+      closedAt,
     }
   }
 }
