@@ -20,8 +20,10 @@ import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
+import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
+import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
@@ -82,6 +84,11 @@ const ColaboradoresIndexRoute = ColaboradoresIndexRouteImport.update({
   path: '/colaboradores/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientesIndexRoute = ClientesIndexRouteImport.update({
+  id: '/clientes/',
+  path: '/clientes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
@@ -93,6 +100,11 @@ const ColaboradoresColaboradorIdRoute =
     path: '/colaboradores/$colaboradorId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
+  id: '/clientes/$clienteId',
+  path: '/clientes/$clienteId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -117,8 +129,10 @@ export interface FileRoutesByFullPath {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
   '/home/': typeof HomeIndexRoute
@@ -134,8 +148,10 @@ export interface FileRoutesByTo {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
   '/convite': typeof ConviteIndexRoute
   '/home': typeof HomeIndexRoute
@@ -153,8 +169,10 @@ export interface FileRoutesById {
   '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
+  '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
   '/home/': typeof HomeIndexRoute
@@ -173,8 +191,10 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/clientes/'
     | '/colaboradores/'
     | '/convite/'
     | '/home/'
@@ -190,8 +210,10 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/clientes'
     | '/colaboradores'
     | '/convite'
     | '/home'
@@ -208,8 +230,10 @@ export interface FileRouteTypes {
     | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
+    | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/clientes/'
     | '/colaboradores/'
     | '/convite/'
     | '/home/'
@@ -224,7 +248,9 @@ export interface RootRouteChildren {
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
+  ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
@@ -312,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ColaboradoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clientes/': {
+      id: '/clientes/'
+      path: '/clientes'
+      fullPath: '/clientes/'
+      preLoaderRoute: typeof ClientesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes/novo': {
       id: '/intakes/novo'
       path: '/novo'
@@ -324,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/colaboradores/$colaboradorId'
       fullPath: '/colaboradores/$colaboradorId'
       preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes/$clienteId': {
+      id: '/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/clientes/$clienteId'
+      preLoaderRoute: typeof ClientesClienteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atendimento/dashboard': {
@@ -394,7 +434,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
+  ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,
   HomeIndexRoute: HomeIndexRoute,

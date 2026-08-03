@@ -21,6 +21,7 @@ import {
   UpdateCollaboratorController,
   RegisterClientController,
   SignInController,
+  ListClientsController,
 } from '@/identity/rest/controllers'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -34,6 +35,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RegisterClientController,
     GrantClientConsentController,
     SignInController,
+    ListClientsController,
     RegisterCollaboratorController,
     CompleteSignInController,
     GetCurrentCollaboratorController,

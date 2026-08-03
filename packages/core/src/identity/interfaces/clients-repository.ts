@@ -9,4 +9,12 @@ export interface ClientsRepository {
   findById(clientId: string): Promise<Client | undefined>
   findByTaxId(taxId: TaxId): Promise<Client | undefined>
   findByPhone(phone: string): Promise<Client[]>
+  findAll(params: { page: number; limit: number; search?: string }): Promise<{
+    data: {
+      client: Client
+      intakeCount: number
+      latestOrigin: string | null
+    }[]
+    total: number
+  }>
 }
