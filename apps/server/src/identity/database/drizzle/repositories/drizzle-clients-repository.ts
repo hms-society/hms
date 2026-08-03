@@ -92,7 +92,7 @@ export class DrizzleClientsRepository
   }) {
     const offset = (Math.max(page, 1) - 1) * limit
 
-    let whereClause: SQL | undefined = undefined
+    let whereClause: SQL | undefined
 
     if (search) {
       const searchPattern = `%${search}%`
