@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Inngest, type InngestFunction } from 'inngest'
+import { eq, like } from 'drizzle-orm'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
 import { DrizzleClient } from '../../database/drizzle/drizzle-client'
 import { integracaoEvento } from '../../database/drizzle/schema/integracao-evento'
+import { clientModel } from '@/identity/database/drizzle/models'
 
 @Injectable()
 export class InngestService {
@@ -43,6 +45,22 @@ export class InngestService {
                 const media = message.type === 'document' ? message.document : message.image
                 const sender = message.from
 
+                const [client] = await db
+                  .select()
+                  .from(clientModel)
+                  .where(like(clientModel.phone, `%${sender.slice(-8)}`))
+                  .limit(1)
+
+                if (!client) {
+                  await db.insert(integracaoEvento).values({
+                    provedor: 'whatsapp',
+                    payload: message,
+                    status: 'falha_definitiva',
+                    erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
+                  })
+                  continue 
+                }
+
                 const [evento] = await db.insert(integracaoEvento).values({
                   provedor: 'whatsapp',
                   payload: message,
@@ -54,6 +72,7 @@ export class InngestService {
                   data: {
                     eventoId: evento.id,
                     sender: sender,
+                    clientId: client.id,
                     mimeType: media.mime_type,
                     originalName: media.filename || `${media.id}.${media.mime_type.split('/')[1]}`
                   }

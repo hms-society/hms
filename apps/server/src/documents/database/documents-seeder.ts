@@ -6,7 +6,6 @@ import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
-import { DocumentBatch } from '@hms/core/document-engine/domain/entities'
 
 @Injectable()
 export class DocumentsSeeder {
@@ -28,46 +27,56 @@ export class DocumentsSeeder {
 
   async run() {
     const db = this.drizzleClient.requireDatabase()
-
+    
     const users = await db.select().from(userModel).limit(1)
-    const clients = await db.select().from(clientModel).limit(10)
+    const clients = await db.select().from(clientModel).limit(3)
 
-    if (users.length === 0 || clients.length === 0) return null
+    if (users.length === 0 || clients.length === 0) {
+      this.logger.warn('Usuários ou Clientes insuficientes para popular os documentos.')
+      return []
+    }
 
     const userId = users[0].id
 
-    const dummyFiles = [
+    const batchScenarios = [
       {
-        name: 'contrato_social_simulado.pdf',
-        content: 'PDF_DUMMY_CONTENT_123',
-        mime: 'application/pdf',
+        client: clients[0],
+        channel: DocumentChannel.InternalUpload,
+        sender: clients[0].email || 'cliente@hms.com.br',
+        files: [
+          { name: 'rg_cnh_cliente_alpha.pdf', mime: 'application/pdf', content: 'PDF_RG_CONTENT_111' },
+          { name: 'comprovante_residencia_alpha.jpg', mime: 'image/jpeg', content: 'JPG_RES_CONTENT_222' },
+        ],
       },
       {
-        name: 'comprovante_endereco_simulado.jpg',
-        content: 'JPG_DUMMY_CONTENT_456',
-        mime: 'image/jpeg',
+        client: clients[1] || clients[0],
+        channel: DocumentChannel.Whatsapp,
+        sender: (clients[1] || clients[0]).phone || '5511999999999',
+        files: [
+          { name: 'procuracao_assinada.pdf', mime: 'application/pdf', content: 'PDF_PROC_CONTENT_333' },
+        ],
       },
       {
-        name: 'cartao_cnpj.pdf',
-        content: 'PDF_DUMMY_CONTENT_789',
-        mime: 'application/pdf',
-      },
-      {
-        name: 'balanco_patrimonial.pdf',
-        content: 'PDF_DUMMY_CONTENT_101',
-        mime: 'application/pdf',
-      },
+        client: clients[2] || clients[0],
+        channel: DocumentChannel.ClientPortal,
+        sender: (clients[2] || clients[0]).email || 'cliente@hms.com.br',
+        files: [
+          { name: 'contrato_social_empresa.pdf', mime: 'application/pdf', content: 'PDF_SOC_CONTENT_444' },
+          { name: 'extrato_bancario.pdf', mime: 'application/pdf', content: 'PDF_EXT_CONTENT_555' },
+        ],
+      }
     ]
 
-    const batches: any[] = []
+    const createdBatches:any = []
 
-    for (const client of clients) {
+    for (const scenario of batchScenarios) {
       const uploadedFiles = await Promise.all(
-        dummyFiles.map(async (file) => {
+        scenario.files.map(async (file) => {
           const buffer = Buffer.from(file.content)
-          const timestamp = Date.now()
-
-          const storagePath = `seed/${userId}/${client.id}/${timestamp}-${file.name}`
+          const timestamp = new Date().getTime()
+          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+          
+          const storagePath = `seed/${scenario.client.id}/${timestamp}-${safeName}`
 
           await this.storageProvider.upload(storagePath, buffer, file.mime)
 
@@ -81,16 +90,16 @@ export class DocumentsSeeder {
       )
 
       const batch = await this.createDocumentBatchUseCase.execute({
-        channel: DocumentChannel.InternalUpload,
-        sender: 'admin@hms.com.br',
+        channel: scenario.channel,
+        sender: scenario.sender,
         createdBy: userId,
-        clientId: client.id,
+        clientId: scenario.client.id, 
         files: uploadedFiles,
       })
 
-      batches.push(batch)
+      createdBatches.push(batch)
     }
 
-    return batches
+    return createdBatches
   }
 }

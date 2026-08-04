@@ -13,7 +13,7 @@ export const documentBatchModel = pgTable(
     channel: documentChannelModel('channel').notNull(),
     sender: text('sender').notNull(),
     inTriageBox: boolean('in_triage_box').default(false).notNull(),
-    clientId: uuid('client_id').references(() => clientModel.id, { onDelete: 'set null' }),
+    clientId: uuid('client_id').references(() => clientModel.id, { onDelete: 'set null' }).notNull(),
     intakeId: uuid('intake_id').references(() => intakeModel.id, { onDelete: 'set null' }),
     createdBy: uuid('created_by').references(() => userModel.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),

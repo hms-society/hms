@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpStatus,
   BadRequestException,
+  Body,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { ApiResponse, ApiBearerAuth, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger'
@@ -42,17 +43,36 @@ export class InternalUploadController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: { files: { type: 'array', items: { type: 'string', format: 'binary' } } },
+      required: ['clientId', 'files'],
+      properties: {
+        clientId: {
+          type: 'string',
+          format: 'uuid',
+          description: 'ID do cliente vinculado ao lote documental',
+        },
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
     },
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Lote processado com sucesso.',
+    description: 'Lote recebido, processado e identificado com sucesso.',
   })
   async handle(
     @UploadedFiles() rawFiles: Array<MulterFile>,
+    @Body('clientId') clientId: string,
     @CurrentUser() authUser: AuthUser,
   ) {
+    if (!clientId) {
+      throw new BadRequestException('O ID do cliente (clientId) é obrigatório para a criação do lote.')
+    }
+
     if (!rawFiles || rawFiles.length === 0) {
       throw new BadRequestException('Nenhum arquivo enviado.')
     }
@@ -61,8 +81,10 @@ export class InternalUploadController {
       rawFiles.map(async (file) => {
         const timestamp = new Date().getTime()
         const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const storagePath = `internal/${authUser.id}/${timestamp}-${safeName}`
+        const storagePath = `internal/${clientId}/${timestamp}-${safeName}` 
+
         await this.storageProvider.upload(storagePath, file.buffer, file.mimetype)
+
         return {
           storagePath,
           originalName: file.originalname,
@@ -76,6 +98,7 @@ export class InternalUploadController {
       channel: DocumentChannel.InternalUpload,
       sender: authUser.email || authUser.id,
       createdBy: authUser.id,
+      clientId: clientId,
       files: uploadedFiles,
     })
 
