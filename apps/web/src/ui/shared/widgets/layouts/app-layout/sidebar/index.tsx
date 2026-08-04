@@ -67,7 +67,7 @@ export const Sidebar = ({
         <div className='w-full h-0.5 bg-white' />
 
         <nav className='flex flex-col w-full gap-2' aria-label='Seções'>
-          {sidebarItems.map((item) => {
+          {sidebarItems?.map((item) => {
             const routePath = ROUTES[item.route]
             const normalizedRoutePath = routePath.replace(/\/$/, '') || '/'
             const isActive =
