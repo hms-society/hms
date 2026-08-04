@@ -36,7 +36,7 @@ export const BottomDetails = () => {
     )
   }
 
-  if (error) throw new Error('Case details not found')
+  if (error) return null
 
   const pendingDocs = documents.filter((doc) => doc.status === 'pending')
 
