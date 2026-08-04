@@ -24,7 +24,7 @@ export const getStatusBadge = (status?: IntakeStatus, className?: string) => {
       )
     case IntakeStatus.ViabilityRegistered:
       return (
-        <Badge variant='atention' className={className}>
+        <Badge variant='attention' className={className}>
           Em análise de viabilidade
         </Badge>
       )
