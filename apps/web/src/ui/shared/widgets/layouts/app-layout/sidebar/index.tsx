@@ -79,9 +79,9 @@ export const Sidebar = ({
               <Anchor
                 key={item.route}
                 route={item.route}
-                className={`flex items-center gap-3 w-full py-2.5 rounded-md font-medium transition-all duration-200 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
+                className={`relative flex items-center gap-3 w-full py-2.5 rounded-md font-medium transition-all duration-200 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-highlight-vivid ${
                   isCollapsed ? 'justify-center px-0' : 'px-3'
-                } ${
+                }  ${
                   isActive
                     ? 'bg-highlight-vivid/20 text-white ring-1 ring-inset ring-highlight-vivid/40'
                     : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -89,11 +89,19 @@ export const Sidebar = ({
                 title={isCollapsed ? item.label : undefined}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <Icon
-                  name={item.icon}
-                  className={`w-5 h-5 shrink-0 ${isActive ? 'text-highlight-vivid' : ''}`}
-                />
-                {!isCollapsed && <span className='text-sm'>{item.label}</span>}
+                <div className='relative flex items-center justify-center shrink-0'>
+                  <Icon
+                    name={item.icon}
+                    className={`w-5 h-5 shrink-0 ${isActive ? 'text-highlight-vivid' : ''}`}
+                  />
+                  {item.route === 'lawyerCommunication' && isCollapsed && (
+                    <span className='absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-destructive animate-pulse' />
+                  )}
+                </div>
+                {!isCollapsed && <span className='text-sm flex-1'>{item.label}</span>}
+                {item.route === 'lawyerCommunication' && !isCollapsed && (
+                  <span className='h-2 w-2 rounded-full bg-destructive shrink-0 mr-1 animate-pulse' />
+                )}
               </Anchor>
             )
           })}
