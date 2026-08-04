@@ -11,23 +11,8 @@ export function useConsultation() {
 
   const { schedule, isLoading, isError, error } = useSchedule()
   const [duration, setDuration] = useState<'30min' | '45min' | '1h'>('45min')
-  const updateDurationMutation = useMutation({
-    mutationFn: async (minutes: number) => {
-      if (!schedule?.id) throw new Error('Agenda não encontrada')
 
-      const response = await schedulingService.updateDuration(schedule.id, minutes)
-
-      if (response.isFailure) {
-        response.throwError()
-      }
-
-      return response.body
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
-    },
-  })
-  const getOrCreateScheduleId = async () => {
+  const getOrCreateScheduleId = async (): Promise<string> => {
     if (!user) throw new Error('Usuário não autenticado')
 
     let scheduleId =
@@ -53,6 +38,23 @@ export function useConsultation() {
 
     return scheduleId
   }
+
+  const updateDurationMutation = useMutation({
+    mutationFn: async (minutes: number) => {
+      const scheduleId = await getOrCreateScheduleId()
+
+      const response = await schedulingService.updateDuration(scheduleId, minutes)
+
+      if (response.isFailure) {
+        response.throwError()
+      }
+
+      return response.body
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+    },
+  })
 
   const updateAvailabilityMutation = useMutation({
     mutationFn: async (weeklyAvailability: unknown) => {
@@ -81,11 +83,13 @@ export function useConsultation() {
       reason?: string
     }) => {
       const scheduleId = await getOrCreateScheduleId()
+      const startsOn = payload.startDate
+      const endsOn = payload.endDate || payload.startDate
 
       const response = await schedulingService.addBlock({
         scheduleId,
-        startsOn: payload.startDate,
-        endsOn: payload.endDate,
+        startsOn,
+        endsOn,
         reason: payload.reason,
       })
 
@@ -99,12 +103,17 @@ export function useConsultation() {
       queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
     },
   })
-
   const removeBlockMutation = useMutation({
     mutationFn: async (blockId: string) => {
+      if (!blockId) throw new Error('ID do bloqueio não informado')
+
       const response = await schedulingService.removeBlock(blockId)
-      if (response.isFailure) response.throwError()
-      return response.body
+
+      if (response?.isFailure) {
+        response.throwError()
+      }
+
+      return response?.body
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
