@@ -19,7 +19,7 @@ const badgeVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         success:
           'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-none',
-        wating:
+        waiting:
           'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 border-none',
         atention:
           'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-none',
