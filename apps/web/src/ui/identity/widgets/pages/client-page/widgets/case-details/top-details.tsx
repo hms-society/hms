@@ -23,7 +23,7 @@ export const TopDetails = () => {
     )
   }
 
-  if (!caseDetails || error) throw new Error('Case details not found')
+  if (!caseDetails || error) return null
 
   return (
     <Card className='flex flex-col md:flex-row justify-between items-start md:items-center p-8 gap-6 bg-card border border-border/60 shadow-sm relative overflow-hidden'>
