@@ -32,6 +32,10 @@ import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useMaskPhone } from '@/ui/shared/hooks/use-mask-phone'
 import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
 
+import { ConsultationTabs } from '../lawyer-page/consultation-tabs'
+import { ConsultationDetails } from '../lawyer-page/consultation-details'
+import { AttendanceForm } from '../lawyer-page/attendance-form'
+
 type ClientStatus = 'Cliente' | 'Interessado' | 'Potencial'
 
 const STATUS_STYLES: Record<ClientStatus, { badge: string; avatar: string }> = {
@@ -67,8 +71,17 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-export function ClientsListPage() {
+interface ClientsListPageProps {
+  onSelectClient?: (clientData: any) => void
+  showAddButton?: boolean
+}
+
+
+export function ClientsListPage({onSelectClient, showAddButton = true, }: ClientsListPageProps) {
   const navigate = useNavigate()
+  const [selectedClientData, setSelectedClientData] = useState<any | null>(null)
+  const [activeTab, setActiveTab] = useState<'details' | 'form' | 'package'>('details')
+
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('status')
@@ -113,6 +126,65 @@ export function ClientsListPage() {
     if (page < totalPages) setPage((p) => p + 1)
   }
 
+  const handleRowClick = (item: any) => {
+    const client = item.client || item
+    const displayName = client.name || client.legalName || 'Nome não informado'
+    const itemOrigin = item.latestOrigin || client.origin || 'direct'
+    const displayOrigin = ORIGIN_LABELS[itemOrigin] || itemOrigin || 'Direta HMS'
+
+    const payload = {
+      client: {
+        name: displayName,
+        cpf: client.taxId?.value ? maskTaxId(client.taxId.value) : '',
+        phone: client.phone ? maskPhone(client.phone) : '',
+        email: client.email || '',
+        cityState: client.cityState || '',
+        statusTag: client.status || 'Cliente',
+      },
+      intakeSource: {
+        intakeCode: item.intakeCode || 'INT-0112',
+        source: displayOrigin,
+        channel: item.channel || 'WhatsApp',
+        urgency: item.urgency || 'Normal',
+        openedAt: item.openedAt || '20 Jun 2026',
+        attendant: item.attendant || 'Maria Santos',
+      },
+      demandContext: item.demandContext || '',
+    }
+
+    if (onSelectClient) {
+      onSelectClient(payload)
+    } else {
+      navigate({
+        to: '/clientes/$clienteId',
+        params: { clienteId: client.id },
+      })
+    }
+  
+  }
+
+  if (selectedClientData && !onSelectClient) {
+    return (
+      <div className='w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-8 font-sans'>
+        <ConsultationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {activeTab === 'details' && (
+          <ConsultationDetails
+            client={selectedClientData.client}
+            intakeSource={selectedClientData.intakeSource}
+            demandContext={selectedClientData.demandContext}
+            onBack={() => setSelectedClientData(null)}
+            onContinueForm={() => setActiveTab('form')}
+          />
+        )}
+
+        {activeTab === 'form' && (
+          <AttendanceForm onBack={() => setActiveTab('details')} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className='mx-auto flex w-full max-w-6xl flex-col gap-6 mt-5'>
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
@@ -120,10 +192,12 @@ export function ClientsListPage() {
           <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>
           <p className='text-sm text-muted-foreground'>{total} cadastros</p>
         </div>
-        <Button className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'>
-          <Icon name='plus' />
-          Novo cliente
-        </Button>
+        {showAddButton && (
+          <Button className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'>
+            <Icon name='plus' />
+            Novo cliente
+          </Button>
+        )}
       </div>
 
       <div className='relative'>
@@ -226,12 +300,7 @@ export function ClientsListPage() {
                   <TableRow
                     key={client.id}
                     className='cursor-pointer'
-                    onClick={() =>
-                      navigate({
-                        to: '/clientes/$clienteId',
-                        params: { clienteId: client.id },
-                      })
-                    }
+                    onClick={() => handleRowClick(item)}
                   >
                     <TableCell className='font-medium'>
                       <div className='flex items-center gap-3'>
