@@ -3,7 +3,10 @@ import { useNavigate } from '@tanstack/react-router'
 import { ROUTES, type RouteName } from '@/constants/routes'
 
 export type Navigation = {
-  navigateTo: (route: RouteName) => Promise<void>
+  navigateTo: (
+    route: RouteName,
+    options?: { params?: Record<string, string> },
+  ) => Promise<void>
   navigateCollaboratorsSearch: (
     search:
       | Record<string, unknown>
