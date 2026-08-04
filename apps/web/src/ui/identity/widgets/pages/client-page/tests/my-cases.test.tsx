@@ -53,9 +53,8 @@ describe('MeusCasos Page', () => {
 
     render(<MeusCasos />)
 
-    expect(screen.getByText('Olá, Cliente Teste!')).toBeTruthy()
-    // Skeletons are rendered as part of CaseSection loading state
-    expect(screen.queryByText('Nenhum caso encontrado')).toBeNull()
+    expect(screen.getByText(/Olá, Cliente Teste!/i)).toBeDefined()
+    expect(screen.queryByText(/Nenhum caso encontrado/i)).toBeNull()
   })
 
   it('renders empty state when client has no cases', () => {
@@ -68,10 +67,10 @@ describe('MeusCasos Page', () => {
 
     render(<MeusCasos />)
 
-    expect(screen.getByText('Nenhum caso encontrado')).toBeTruthy()
+    expect(screen.getByText(/Nenhum caso encontrado/i)).toBeDefined()
     expect(
-      screen.getByText('Você ainda não possui solicitações de atendimento cadastradas.'),
-    ).toBeTruthy()
+      screen.getByText(/Você ainda não possui solicitações de atendimento cadastradas/i),
+    ).toBeDefined()
   })
 
   it('renders the case cards when cases are returned', () => {
@@ -84,9 +83,9 @@ describe('MeusCasos Page', () => {
 
     render(<MeusCasos />)
 
-    expect(screen.getByText('Caso #42')).toBeTruthy()
-    expect(screen.getByText('Notas: Notas de teste do caso.')).toBeTruthy()
-    expect(screen.getByText('Consulta Realizada')).toBeTruthy()
+    expect(screen.getByText('Caso #42')).toBeDefined()
+    expect(screen.getByText(/Notas:\s*Notas de teste do caso\./i)).toBeDefined()
+    expect(screen.getByText('Consulta Realizada')).toBeDefined()
   })
 
   it('renders error message when loading fails', () => {
@@ -100,7 +99,8 @@ describe('MeusCasos Page', () => {
     render(<MeusCasos />)
 
     expect(
-      screen.getByText('Não foi possível carregar seus casos. Por favor, tente novamente mais tarde.'),
-    ).toBeTruthy()
+      screen.getByText(/Não foi possível carregar seus casos. Por favor, tente novamente mais tarde./i),
+    ).toBeDefined()
   })
 })
+
