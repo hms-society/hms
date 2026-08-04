@@ -35,9 +35,7 @@ describe('useClientDetailsQuery', () => {
 
   it('loads client details through the identity service when clientId is provided', async () => {
     const clientDetails = { client: { id: 'client-1', name: 'John Doe' }, consents: [] }
-    identityService.getClient.mockResolvedValue(
-      new RestResponse({ body: clientDetails }),
-    )
+    identityService.getClient.mockResolvedValue(new RestResponse({ body: clientDetails }))
 
     const { result } = renderHook(() => useClientDetailsQuery('client-1'), {
       wrapper: createWrapper(),
