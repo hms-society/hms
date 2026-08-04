@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import type { PropsWithChildren } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const navigateToMock = vi.fn()
@@ -52,7 +51,7 @@ describe('CaseDetails Page', () => {
   it('renders error block when loading details fails or case is missing', () => {
     useCaseDetailsMock.mockReturnValue({
       caseId: 'intake-1',
-      caseDetails: null,
+      caseDetails: undefined,
       steps: [],
       activeStep: 0,
       documents: [],
@@ -75,7 +74,7 @@ describe('CaseDetails Page', () => {
   it('renders loading skeletons when case details is loading', () => {
     useCaseDetailsMock.mockReturnValue({
       caseId: 'intake-1',
-      caseDetails: null,
+      caseDetails: undefined,
       steps: [],
       activeStep: 0,
       documents: [],
