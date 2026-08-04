@@ -66,7 +66,9 @@ describe('CaseDetails Page', () => {
 
     expect(screen.getByText('Erro ao carregar detalhes')).toBeTruthy()
     expect(
-      screen.getByText('Não foi possível recuperar os dados do seu caso. Por favor, tente novamente.'),
+      screen.getByText(
+        'Não foi possível recuperar os dados do seu caso. Por favor, tente novamente.',
+      ),
     ).toBeTruthy()
   })
 
@@ -99,14 +101,28 @@ describe('CaseDetails Page', () => {
       ],
       activeStep: 1,
       documents: [
-        { name: 'Documento de Identidade (RG/CNH)', status: 'approved', updatedAt: '2026-07-28' },
+        {
+          name: 'Documento de Identidade (RG/CNH)',
+          status: 'approved',
+          updatedAt: '2026-07-28',
+        },
         { name: 'Contrato de Honorários', status: 'pending', updatedAt: '-' },
       ],
       timeline: [
-        { date: '28/07/2026', time: '14:32', title: 'Caso registrado', desc: 'Desc timeline' },
+        {
+          date: '28/07/2026',
+          time: '14:32',
+          title: 'Caso registrado',
+          desc: 'Desc timeline',
+        },
       ],
       messages: [
-        { sender: 'Secretaria HMS', role: 'Atendimento', date: 'Hoje', content: 'Mensagem de teste' },
+        {
+          sender: 'Secretaria HMS',
+          role: 'Atendimento',
+          date: 'Hoje',
+          content: 'Mensagem de teste',
+        },
       ],
       error: null,
       isLoading: false,

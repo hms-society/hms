@@ -99,8 +99,9 @@ describe('MeusCasos Page', () => {
     render(<MeusCasos />)
 
     expect(
-      screen.getByText(/Não foi possível carregar seus casos. Por favor, tente novamente mais tarde./i),
+      screen.getByText(
+        /Não foi possível carregar seus casos. Por favor, tente novamente mais tarde./i,
+      ),
     ).toBeDefined()
   })
 })
-
