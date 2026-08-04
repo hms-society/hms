@@ -26,4 +26,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   }
+  ,
+  "references": [
+    { "path": "../../packages/core" }
+  ]
 }

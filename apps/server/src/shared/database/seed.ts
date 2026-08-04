@@ -8,6 +8,7 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
+import { DocumentsSeeder } from '@/documents/database/documents-seeder'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule)
@@ -30,6 +31,7 @@ async function bootstrap() {
     await app.get(LegalCatalogSeeder).clear()
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
+    await app.get(DocumentsSeeder).clear()
 
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
@@ -57,6 +59,7 @@ async function bootstrap() {
     )
     await app.get(IntakeSeeder).run()
     await app.get(CommunicationSeeder).run()
+    await app.get(DocumentsSeeder).run()
   } finally {
     await app.close()
   }
