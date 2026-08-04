@@ -14,8 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
-import type { BlockedPeriod } from '@hms/core/scheduling/domain/entities'
-import { useConsultation } from './use-consultation'
+import { useConsultation } from './use-schedule'
 
 const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },
@@ -27,18 +26,31 @@ const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'sunday', name: 'Domingo', active: false, slots: [] },
 ]
 
-function formatBlockedDateRange(startsOn: string, endsOn?: string) {
-  if (!startsOn) return ''
-
-  const [startYear, startMonth, startDay] = startsOn.split('-').map(Number)
-  const start = new Date(startYear, startMonth - 1, startDay)
-
-  if (!endsOn || startsOn === endsOn) {
-    return format(start, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
+  if (!startsOn || startsOn.includes('NaN') || startsOn === 'Data inválida') {
+    return 'Data inválida'
   }
 
-  const [endYear, endMonth, endDay] = endsOn.split('-').map(Number)
-  const end = new Date(endYear, endMonth - 1, endDay)
+  const parseDate = (str: string) => {
+    if (!str || str.includes('NaN')) return null
+    const datePart = str.split('T')[0].split(' ')[0]
+    const [year, month, day] = datePart.split('-').map(Number)
+
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return null
+    return new Date(year, month - 1, day)
+  }
+
+  const start = parseDate(startsOn)
+  if (!start) return 'Data inválida'
+
+  const end = parseDate(endsOn ?? '')
+
+  const startIso = startsOn.split('T')[0].split(' ')[0]
+  const endIso = endsOn ? endsOn.split('T')[0].split(' ')[0] : null
+
+  if (!end || startIso === endIso) {
+    return format(start, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+  }
 
   const isSameMonth =
     start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
@@ -50,7 +62,7 @@ function formatBlockedDateRange(startsOn: string, endsOn?: string) {
   return `${format(start, "dd 'de' MMM", { locale: ptBR })} a ${format(end, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}`
 }
 
-export const Consultation = () => {
+export const Schedule = () => {
   const {
     schedule,
     isLoading,
@@ -78,7 +90,7 @@ export const Consultation = () => {
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
   const weeklyAvailability =
     rawAvailability.length > 0 ? rawAvailability : DEFAULT_WEEKLY_AVAILABILITY
-  const blockedPeriods: BlockedPeriod[] = schedule?.blockedPeriods ?? []
+  const blockedPeriods = schedule?.blockedPeriods ?? []
 
   const currentDuration =
     schedule?.appointmentDurationInMinutes ??
@@ -163,6 +175,7 @@ export const Consultation = () => {
         endDate: endDate || startDate,
         reason: blockReason.trim() || 'Bloqueio de agenda',
       })
+
       setModalBlockOpen(false)
       setStartDate('')
       setEndDate('')
@@ -189,7 +202,7 @@ export const Consultation = () => {
   }
 
   return (
-    <div className='flex flex-col gap-6 max-w-5xl pt-20 md:pt-24 px-4 sm:px-6 w-full mx-auto pb-10'>
+    <div className='flex flex-col gap-6 max-w-5xl pt-4 md:pt-8 px-4 sm:px-6 w-full mx-auto pb-10'>
       <div className='flex flex-col gap-1'>
         <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
           Configurar agenda
@@ -242,6 +255,7 @@ export const Consultation = () => {
           })}
         </div>
       </div>
+
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>
           <CalendarDays className='w-5 h-5 text-primary shrink-0' />
@@ -319,6 +333,7 @@ export const Consultation = () => {
           )}
         </div>
       </div>
+
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border'>
           <div className='flex items-center gap-2'>
@@ -339,34 +354,40 @@ export const Consultation = () => {
 
         <div className='flex flex-col gap-3'>
           {blockedPeriods.length > 0 ? (
-            blockedPeriods.map((block: BlockedPeriod) => (
-              <div
-                key={block.id}
-                className='flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors border border-border/50 gap-3'
-              >
-                <div className='flex items-start gap-3 min-w-0'>
-                  <span className='w-2 h-2 rounded-full border-2 border-primary shrink-0 mt-1.5' />
-                  <div className='flex flex-col truncate'>
-                    <span className='text-[13px] sm:text-[14px] font-semibold text-foreground truncate'>
-                      {formatBlockedDateRange(block.startsOn, block.endsOn)}
-                    </span>
-                    <span className='text-[12px] text-muted-foreground truncate'>
-                      {block.reason || 'Sem descrição'}
-                    </span>
-                  </div>
-                </div>
+            blockedPeriods.map((block: any) => {
+              const start = block.startsOn ?? block.startDate ?? block.start_date
+              const end = block.endsOn ?? block.endDate ?? block.end_date
+              const reason = block.reason ?? block.description ?? block.blockReason
 
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  disabled={isRemovingBlock}
-                  className='size-8 text-muted-foreground hover:text-destructive shrink-0'
-                  onClick={() => handleRemoveBlock(block.id)}
+              return (
+                <div
+                  key={block.id}
+                  className='flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors border border-border/50 gap-3'
                 >
-                  <Trash2 className='size-4' />
-                </Button>
-              </div>
-            ))
+                  <div className='flex items-start gap-3 min-w-0'>
+                    <span className='w-2 h-2 rounded-full border-2 border-primary shrink-0 mt-1.5' />
+                    <div className='flex flex-col truncate'>
+                      <span className='text-[13px] sm:text-[14px] font-semibold text-foreground truncate'>
+                        {formatBlockedDateRange(start, end)}
+                      </span>
+                      <span className='text-[12px] text-muted-foreground truncate'>
+                        {reason || 'Sem descrição'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    disabled={isRemovingBlock}
+                    className='size-8 text-muted-foreground hover:text-destructive shrink-0'
+                    onClick={() => handleRemoveBlock(block.id)}
+                  >
+                    <Trash2 className='size-4' />
+                  </Button>
+                </div>
+              )
+            })
           ) : (
             <p className='text-xs text-muted-foreground italic py-2'>
               Nenhum bloqueio cadastrado para esta agenda.
@@ -374,6 +395,7 @@ export const Consultation = () => {
           )}
         </div>
       </div>
+
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
@@ -430,6 +452,7 @@ export const Consultation = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <Dialog open={modalBlockOpen} onOpenChange={setModalBlockOpen}>
         <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
