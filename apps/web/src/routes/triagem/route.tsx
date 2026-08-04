@@ -5,10 +5,10 @@ import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
 export const Route = createFileRoute('/triagem')({
   beforeLoad: requireAuthMiddleware,
-   component: () => (
-     <AppLayout>
-       <Outlet />
-     </AppLayout>
-   ),
-   ssr: false,
- })
+  component: () => (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  ),
+  ssr: false,
+})

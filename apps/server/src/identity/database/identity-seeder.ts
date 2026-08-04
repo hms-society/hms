@@ -56,7 +56,6 @@ type LegalCollaboratorSeed = {
   profile: 'lawyer' | 'paralegal'
 }
 
-
 const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   profile: 'admin'
 } = {
@@ -79,7 +78,7 @@ const DEFAULT_LAWYER: LegalCollaboratorSeed = {
   profile: 'lawyer',
 }
 
-const DEFAULT_PARALEGAL: LegalCollaboratorSeed ={
+const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   professionalName: 'Paralegal de desenvolvimento',
   jobTitle: 'Paralegal',
   profile: 'paralegal',
@@ -215,7 +214,7 @@ export class IdentitySeeder {
       userId: paralegalUser.id,
       ...DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
-  })
+    })
 
     await this.seed()
   }

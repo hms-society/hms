@@ -280,7 +280,7 @@ export const Consultation = () => {
                     <div className='flex items-center gap-2 flex-wrap flex-1 sm:justify-start'>
                       {day.slots?.map((slot, idx) => (
                         <div
-                          key={idx}
+                          key={`${day.id}-${slot.start}-${slot.end}`}
                           className='flex items-center gap-1.5 bg-muted/50 border border-border px-2.5 py-1 rounded-lg text-[13px] text-foreground group'
                         >
                           <span>{slot.start}</span>
