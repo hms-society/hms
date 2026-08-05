@@ -21,6 +21,7 @@ const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
     route: 'lawyerCommunication',
     icon: 'messages-square',
   },
+  { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
 const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
