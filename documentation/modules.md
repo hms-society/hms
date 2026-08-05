@@ -11,7 +11,7 @@ compartilhadas.
 Organiza o ciclo de entrada de uma nova demanda no escritório, desde o primeiro
 contato até a contratação ou o encerramento sem contratação.
 
-Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassian.net/wiki/x/AYAY).
+Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassian.net/wiki/x/FYAp).
 
 - Registra a demanda, o canal de contato, a origem, o responsável operacional e
   o cliente relacionado.
@@ -60,7 +60,7 @@ Recebe arquivos enviados ao HMS, identifica a qual cliente pertencem e governa
 sua entrada na plataforma antes que sejam usados por consultas, casos ou outros
 fluxos de trabalho.
 
-Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/x/FoAT).
+Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/x/AYAp).
 
 - Cria um lote de documentos para cada ocorrência válida recebida pelo WhatsApp
   ou e-mail, os únicos canais compatíveis com o MVP.
@@ -104,7 +104,7 @@ deste módulo, mas não fazem parte do MVP atual.
 
 Produz pacotes de documentos reutilizáveis para consultas, formalizações e casos.
 
-Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/x/AQAQ).
+Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/x/AYAn).
 
 - É responsável pelos modelos de origem usados para produzir documentos.
 - Configura pacotes de documentos padrão para uma área jurídica e um ou mais
@@ -131,6 +131,8 @@ Requisito de produto: [PRD — Módulo de Produção Documental](https://platafo
 
 Governa todas as interações registradas com pessoas e as notificações internas.
 
+Requisito de produto: [PRD — Módulo de Comunicação](https://plataformahms.atlassian.net/wiki/x/FoAn)
+
 - Registra toda comunicação (recebida e enviada) em um log central vinculado a
   uma pessoa, triagem ou caso.
 - Envia mensagens automáticas pelo WhatsApp após eventos autorizados, sem manter
@@ -150,7 +152,7 @@ Governa todas as interações registradas com pessoas e as notificações intern
 Sabe quem são todas as pessoas, como elas acessam o sistema e quais autorizações
 possuem globalmente.
 
-Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232).
+Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/x/CAAi).
 
 - Mantém um cadastro único de pessoas, com detecção de duplicatas por identificador
   fiscal.
@@ -171,7 +173,7 @@ Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atla
 É responsável pela disponibilidade dos colaboradores e pelas reservas de
 compromissos.
 
-Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/x/AYAT).
+Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/x/AQAp).
 
 - Configura a duração padrão dos compromissos na agenda de cada colaborador.
 - Registra a disponibilidade semanal como intervalos de horário local agrupados
@@ -191,11 +193,24 @@ Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atl
 É responsável pela consulta jurídica realizada a partir de um compromisso
 agendado.
 
-Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlassian.net/wiki/x/A4AH).
+Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlassian.net/wiki/x/AQAo).
 
 - Cria uma consulta para um cliente e um advogado designado a partir da referência
   de um compromisso do módulo de Agendamento.
-- Registra modalidade, canal, ocorrência, ausência, resumo e documentos solicitados.
+- Registra modalidade, canal, ocorrência, ausência, questão jurídica principal,
+  fatos relevantes, possíveis pedidos, riscos, orientação e observações.
+- Mantém uma estrutura-base para a ficha de atendimento e permite que
+  administradores configurem seções e campos adicionais por área jurídica e por
+  tema jurídico.
+- Compõe cada ficha a partir da estrutura-base, da configuração da área e da
+  configuração do tema, preservando na consulta uma cópia imutável da versão
+  aplicada.
+- Permite realizar o atendimento somente com a estrutura-base quando não existir
+  configuração adicional ativa, registrando a ausência como pendência
+  administrativa sem bloquear o advogado.
+- Pode reutilizar o construtor técnico de formulários usado por experiências como
+  os modelos de Honorários, sem compartilhar entre os domínios suas configurações,
+  respostas, permissões ou regras de ciclo de vida.
 - Não calcula disponibilidade nem reserva horário na agenda de um colaborador.
 
 ---
