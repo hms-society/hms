@@ -31,6 +31,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
+    { label: 'Documentos', route: 'documentSpecifications', icon: 'file-text' },
   ],
   [CollaboratorProfile.Attendant]: ATTENDANT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Lawyer]: LAWYER_SIDEBAR_ITEMS,
