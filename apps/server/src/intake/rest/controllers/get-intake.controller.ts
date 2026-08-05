@@ -1,5 +1,5 @@
 import { Get, HttpStatus, Inject, Param, UseGuards } from '@nestjs/common'
-import { ApiResponse } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { GetIntakeUseCase } from '@hms/core/intake/use-cases'
 
@@ -11,6 +11,7 @@ import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 @IntakesController()
 @UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class GetIntakesController {
   private readonly useCase: GetIntakeUseCase
 
@@ -27,6 +28,11 @@ export class GetIntakesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The intake was not found.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Authentication is required.',
     type: ErrorResponseDto,
   })
   handle(@Param('intakeId') intakeId: string) {

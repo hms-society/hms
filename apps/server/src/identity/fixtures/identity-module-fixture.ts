@@ -21,6 +21,10 @@ import { IdentityDatabaseModule } from '@/identity/database/identity-database.mo
 import { AuthModule } from '@/identity/auth.module'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import {
+  DrizzleIntakeClientsRepository,
+  DrizzleIntakeResponsiblesRepository,
+} from '@/identity/database/drizzle/repositories'
+import {
   DrizzleClientConsentsRepository,
   DrizzleCollaboratorsRepository,
   DrizzleClientsRepository,
@@ -28,6 +32,7 @@ import {
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { ActiveAdminGuard, AuthGuard } from '@/identity/guards'
+import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -58,6 +63,7 @@ export class IdentityModuleFixture {
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly identitySeeder: IdentitySeeder,
+    private readonly legalCatalogSeeder: LegalCatalogSeeder,
     private readonly authentication: { user?: AuthUser },
   ) {}
 
@@ -65,7 +71,15 @@ export class IdentityModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller: Type<unknown>) {
+  get intakeClientsRepository(): DrizzleIntakeClientsRepository {
+    return this.restFixture.get(DrizzleIntakeClientsRepository)
+  }
+
+  get intakeResponsiblesRepository(): DrizzleIntakeResponsiblesRepository {
+    return this.restFixture.get(DrizzleIntakeResponsiblesRepository)
+  }
+
+  static async register(controller?: Type<unknown>) {
     const authentication: { user?: AuthUser } = {}
     const restFixture = await RestFixture.register(
       {
@@ -75,7 +89,7 @@ export class IdentityModuleFixture {
           LegalCatalogModule,
           ProvisionModule,
         ],
-        controllers: [controller],
+        controllers: controller ? [controller] : [],
         providers: [DatetimeProvider, ActiveAdminGuard],
       },
       (builder) =>
@@ -118,6 +132,7 @@ export class IdentityModuleFixture {
       restFixture.get(DrizzleCollaboratorsRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(IdentitySeeder),
+      restFixture.get(LegalCatalogSeeder),
       authentication,
     )
   }
@@ -139,7 +154,7 @@ export class IdentityModuleFixture {
 
   async registerCollaborator(
     user: User,
-    overrides: Partial<AdministrativeCollaboratorCreation> = {},
+    overrides: Partial<CollaboratorCreation> = {},
   ): Promise<Collaborator> {
     const draft = CollaboratorCreationFaker.administrative({
       userId: user.id,
@@ -199,6 +214,10 @@ export class IdentityModuleFixture {
         }
       }),
     )
+  }
+
+  seedLegalCatalog() {
+    return this.legalCatalogSeeder.run()
   }
 
   registerConsents(consents: ClientConsentCreation[]) {
