@@ -168,6 +168,11 @@ export const INTAKE_REPOSITORIES = {
 } as const
 ```
 
+All repository tokens must be `Symbol` values. Do not use string tokens such as
+`'identity:clients-repository'`, even when the string is namespaced. Consumers
+must always import and use the exported token constant; they must not recreate a
+symbol or use a token literal directly.
+
 The module database provider must register the concrete repository and bind the
 token with `useExisting`. Export the token so consumers inject the interface
 without depending on the Drizzle implementation:
