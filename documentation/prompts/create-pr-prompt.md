@@ -1,197 +1,233 @@
 ---
 name: create-pr
-description: Criar Pull Requests do HMS via gh, com commits, rastreabilidade Jira/Confluence e checklist de validação.
+description: Criar Pull Requests do HMS via gh, com rastreabilidade, limite de tamanho e validação reproduzível.
 ---
 
 # Criar PR
 
-O Orchestrator prepara e publica o Pull Request usando exclusivamente a GitHub
-CLI (`gh`). O PR deve manter a rastreabilidade da Spec, do PRD no Confluence e
-dos tickets Jira, sem transformar esses registros em GitHub Issues ou
-milestones.
+Prepare e publique Pull Requests do HMS usando a GitHub CLI (`gh`). O resultado
+deve ser pequeno o suficiente para revisão, rastreável à Spec/PRD/ticket e
+acompanhado de instruções de teste que outra pessoa consiga executar.
+
+## Regras obrigatórias
+
+- Escreva título, corpo, comentários de acompanhamento e respostas de review em
+  português do Brasil. O comando literal `@codex review` é uma exceção técnica.
+- Cada PR pode conter no máximo **5.000 linhas alteradas**. Conte adições e
+  remoções antes de publicar e confirme o número no GitHub depois da criação.
+- Não misture camadas ou responsabilidades sem explicar a dependência no corpo
+  do PR.
+- Não inclua `.env`, credenciais, artefatos locais ou alterações preexistentes
+  do usuário.
+- Não declare um teste como aprovado se ele não foi executado; registre o
+  comando, o resultado e qualquer limitação de ambiente.
+- Não use palavras-chave de fechamento automático para Jira ou GitHub Issues.
 
 ## Entrada
 
 - Spec ou Bug Report implementado e validado;
-- branch de trabalho baseada em `develop`;
-- link do PRD no Confluence, quando houver;
-- todas as chaves/URLs de `jira_tickets`, quando houver.
+- branch de trabalho baseada em `develop`, ou branch de um PR pai quando a
+  entrega for empilhada;
+- links do PRD no Confluence e chaves Jira, quando existirem;
+- alterações commitadas de forma atômica e sem arquivos da entrega pendentes.
 
----
+## Fluxo
 
-## Execution Guidelines
+### 1. Inspecionar contexto e escopo
 
-### 1. Context Analysis
-
-- Review the implemented Spec and the changelog of the changes made.
-- Identify:
-  - Technical impact (which of `web` / `server` / `core` is affected)
-  - Design decisions taken
-  - Risks and side effects
-  - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
-  - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
-
----
-
-Antes de criar commits ou abrir o PR, leia:
+Leia antes de criar commits ou abrir o PR:
 
 - `documentation/github-flow.md`;
 - `documentation/rules/commit-rules.md`;
-- `documentation/rules/rules.md` e as Rules aplicáveis ao diff;
-- `documentation/prompts/commit-code-prompt.md`.
+- `documentation/rules/rules.md` e todas as Rules aplicáveis ao diff;
+- `documentation/prompts/commit-code-prompt.md`;
+- `.github/pull_request_template.md`;
+- a Spec, o Plan e `evaluation.md`, quando existirem.
 
-Consulte a Spec, o PRD no Confluence e todos os tickets Jira associados quando
-a integração estiver disponível. Preserve as referências e não altere status,
-comentários ou critérios de aceite automaticamente.
+Consulte o PRD no Confluence e os tickets Jira associados quando a integração
+estiver disponível. Preserve as referências; não altere status, comentários ou
+critérios de aceite externos sem autorização explícita.
 
-Execute o preflight documentado pelo projeto:
+Defina `PR_BASE` como `origin/develop` ou como a branch remota do PR pai quando
+esta for uma entrega empilhada. Liste o escopo real com:
 
 ```bash
+PR_BASE=origin/develop
+git status --short
+git diff --stat "$PR_BASE"...HEAD
+git diff --name-status "$PR_BASE"...HEAD
+```
+
+Identifique impacto em `apps/web`, `apps/server`, `packages/core`, banco,
+documentação e tooling. Para cada arquivo alterado, consulte o histórico para
+registrar autores/codeowners relevantes na seção de alinhamento.
+
+### 2. Verificar o limite de 5.000 linhas
+
+Calcule adições e remoções da branch em relação à base:
+
+```bash
+PR_BASE=origin/develop
+git diff --numstat "$PR_BASE"...HEAD
+git diff --shortstat "$PR_BASE"...HEAD
+git diff --numstat "$PR_BASE"...HEAD | awk '{ additions += $1; deletions += $2 } END { print additions + deletions, "linhas alteradas" }'
+```
+
+Se o total ultrapassar 5.000 linhas, **não abra um PR único**. Divida a entrega
+por responsabilidade semântica. A divisão preferencial é:
+
+1. PR base em `develop` com contratos/core, backend, migrations/seeders e testes
+   necessários para expor a capacidade;
+2. PR frontend empilhado sobre a branch do primeiro PR, com adapter web, rotas,
+   UI, testes de navegador e documentação específica da interface.
+
+Use outras divisões somente quando a arquitetura exigir. Para PRs empilhados:
+
+- o PR filho deve declarar `Depende de #<número>` e usar a branch do PR pai como
+  base;
+- não crie dependência circular;
+- mantenha cada PR com no máximo 5.000 linhas alteradas;
+- descreva a ordem de merge e o ajuste da base do PR filho após o merge do pai;
+- publique e valide cada branch separadamente.
+
+Depois de criar o PR, confira `additions`, `deletions` e `changedFiles` com:
+
+```bash
+gh pr view <numero> --json additions,deletions,changedFiles,url
+```
+
+### 3. Validar antes de publicar
+
+Execute o preflight suficiente para o escopo, preferindo os filtros do
+workspace quando forem adequados:
+
+```bash
+pnpm format
 pnpm lint
 pnpm check-types
 pnpm test
 pnpm build
 ```
 
-Use filtros de workspace quando forem suficientes e registre comandos
-omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
+Para UI, valide também fluxo autenticado real com Playwright quando aplicável:
+login, rota protegida, estados principais, viewport estreita, teclado,
+console e rede. Para backend/REST, valide health checks, autenticação,
+contratos HTTP e integração com banco real quando a suíte exigir.
 
-The PR body must follow the structure defined in `.github/pull_request_template.md`.
+Registre no PR:
 
-**Formatting rules:**
-- Use Markdown
-- List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.
-- Identify and list the original authors/codeowners of each modified file using `git log` or `git blame` history, under the alignment section.
-## Título
+- comandos executados e resultados;
+- testes omitidos e motivo;
+- warnings preexistentes;
+- falhas de infraestrutura separadas de falhas da feature;
+- evidências manuais e URLs/rotas exercitadas.
 
-Use um título curto, em PT-BR, como frase nominal, sem prefixo Conventional
-Commit e sem chave Jira. Exemplos: `Correção do carregamento de clientes` ou
-`Configuração do cadastro de colaboradores`.
+### 4. Preparar commits
 
-## Commits pendentes
-
-Se houver alterações não commitadas:
+Se houver alterações pendentes:
 
 1. inspecione `git status --short`, `git diff` e `git diff --cached`;
-2. preserve arquivos staged e alterações fora do escopo;
+2. preserve staged changes e alterações fora do escopo;
 3. agrupe por responsabilidade semântica;
-4. crie commits atômicos usando Conventional Commits, conforme
-   `commit-rules.md` e `commit-code-prompt.md`;
-5. não use `git add .`, `--no-verify`, `--amend`, rebase ou comandos destrutivos;
-6. só abra o PR quando a branch estiver limpa quanto aos arquivos da entrega.
+4. crie commits atômicos conforme `commit-rules.md`;
+5. não use `git add .`, `--no-verify`, `--amend`, rebase ou comandos destrutivos.
 
-Formato:
-
-```text
-<type>(<scope>): <subject>
-```
+Só publique quando os arquivos da entrega estiverem commitados e a branch
+estiver limpa quanto ao escopo do PR.
 
 ## Corpo do PR
 
-Use Markdown sem título principal (`#`) e inclua:
+Siga `.github/pull_request_template.md`, sem adicionar um título Markdown de
+nível 1. O corpo deve conter, nesta ordem:
 
-### Objetivo
+### Descrição e objetivo
 
-Explique o propósito central da alteração.
+Explique o problema, o resultado entregue e por que o PR existe.
 
-## 📝 Descrição das Alterações (obrigatório)
-Explique por que este PR foi criado, qual é seu propósito principal e quais problemas ele resolve.
+### Dependências e tamanho
 
-## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
-Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
-- [ ] `apps/web` (Frontend / Interface)
-  *Arquivos alterados:* 
-  - (Caminho completo de cada arquivo...)
-- [ ] `apps/server` (Backend / API)
-  *Arquivos alterados:* 
-  - (Caminho completo de cada arquivo...)
-- [ ] `packages/core` (Regras de Domínio)
-  *Arquivos alterados:* 
-  - (Caminho completo de cada arquivo...)
-- [ ] `supabase` (Banco de dados / Migrations / Seeders)
-  *Arquivos alterados:* 
-  - (Caminho completo de cada arquivo...)
+Informe a branch base, PR pai/filho quando houver, ordem de merge e total de
+linhas alteradas. Se for um PR independente, declare isso.
 
-## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
-Identifique e liste os autores originais de cada arquivo que você alterou (consulte o histórico do Git):
-- [ ] Identifiquei os autores originais dos arquivos alterados:
-  * `caminho/do/arquivo` -> Autor/Codeowner
-- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
-  - *Detalhes do alinhamento:* ...
+### Módulos e caminhos específicos afetados
 
+Marque os módulos e liste todos os caminhos completos no menor nível possível:
 
+- `apps/web`;
+- `apps/server`;
+- `packages/core`;
+- `supabase`/banco/migrations/seeders;
+- documentação e tooling, quando relevantes.
 
----
+Não substitua a lista por apenas nomes de pastas.
 
-## Como testar (obrigatório)
+### Alinhamento com autores/codeowners
 
-Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
-relevantes, ex.:
-
-```
-pnpm install
-pnpm --filter web dev        # frontend em http://localhost:3000
-pnpm --filter server start:dev
-pnpm --filter <pkg> check-types
-### Tickets Jira relacionados
-
-Liste todas as chaves ou URLs, sem usar palavras-chave de fechamento do GitHub:
-
-```md
-- PROJ-123 — <relação com a alteração>
-- PROJ-456 — <relação com a alteração>
-```
-
-Se não houver ticket, informe `Nenhum ticket Jira associado.` Não crie um
-ticket ou GitHub Issue automaticamente.
-
-### PRD no Confluence
-
-Inclua o link da página quando houver e descreva divergências de produto ou
-limitações conhecidas. Se o PRD não for aplicável, informe isso explicitamente.
-
-### Causa do bug
-
-Inclua somente para correções: descreva a causa técnica raiz.
+Para cada arquivo existente relevante, informe o autor encontrado no histórico
+ou o codeowner aplicável. Registre o alinhamento realizado. Se não houve
+alinhamento externo, diga isso explicitamente em vez de marcar a caixa sem
+evidência.
 
 ### Changelog
 
-Liste arquivos, comportamento alterado, contratos, regras e refatorações
-relevantes.
+Liste comportamento, contratos, regras, migrations, seeds, testes e refactors
+importantes.
 
 ### Como testar
 
-Descreva passos reproduzíveis e os comandos executados, incluindo fluxo de
-integração/e2e quando aplicável.
+Escreva um roteiro reproduzível e detalhado:
 
-### Observações
+1. pré-requisitos e serviços locais;
+2. instalação e comandos para iniciar server/web;
+3. sensores automatizados por workspace;
+4. credenciais seed obtidas do código e ambiente local, sem expor segredos;
+5. fluxo manual autenticado, incluindo rota, dados esperados e estados de
+   erro/vazio/carregamento;
+6. viewport estreita, teclado e acessibilidade quando houver UI;
+7. console, rede e respostas 4xx/5xx;
+8. limitações e resultados observados.
 
-Registre decisões arquiteturais, migrations, efeitos colaterais, limitações,
-trade-offs e próximos passos.
+### Jira, PRD e observações
 
-## Criação e revisão
+Liste todas as chaves/URLs Jira e o link do Confluence, descrevendo divergências
+ou decisões. Se não houver, escreva `Nenhum ticket Jira associado` ou `PRD não
+aplicável`. Inclua causa raiz somente em correções de bug.
 
-Crie o PR para `develop`:
+## Publicar e revisar
+
+Publique a branch e crie o PR com título nominal curto em PT-BR, sem prefixo de
+Conventional Commit e sem chave Jira:
 
 ```bash
+git push -u origin <branch>
 gh pr create \
-  --base develop \
+  --base <base> \
   --head <branch> \
   --title "<título em PT-BR>" \
   --body-file <arquivo-do-corpo>
+gh pr view --json number,url,baseRefName,headRefName,additions,deletions,changedFiles
 ```
 
-Após a criação, obtenha o número e a URL reais:
-
-```bash
-gh pr view --json number,url
-```
-
-Solicite a revisão automatizada apenas depois de o PR estar publicado:
+Após o PR estar publicado, solicite a revisão automatizada:
 
 ```bash
 gh pr comment <numero-do-pr> --body "@codex review"
 ```
 
-Informe título, URL, número, branch, commits, validações, referências Jira e
-Confluence, resultado da revisão e quaisquer pendências preservadas.
+Para comentários inline ou conversas, busque o estado thread-aware com a rotina
+de `gh-address-comments`/GraphQL. Separe comentários informativos de pedidos
+acionáveis. Para cada pedido acionável:
+
+1. corrija o código/documentação ou registre a decisão de não alterar;
+2. execute os sensores afetados;
+3. responda em português citando o commit e a evidência;
+4. resolva a thread somente depois da resposta;
+5. confirme que não restam threads acionáveis abertas.
+
+Não declare o PR concluído enquanto houver conflito com a base, check relevante
+pendente/falho ou conversa bloqueante não tratada.
+
+## Entrega ao usuário
+
+Informe título, número, URL, branch, base, commits, tamanho do PR, validações,
+referências Jira/Confluence, conversas resolvidas e pendências preservadas.
