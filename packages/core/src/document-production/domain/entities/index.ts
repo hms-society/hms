@@ -1,5 +1,6 @@
 export * from './document'
 export * from './document-package'
 export * from './document-specification'
+export * from './document-specification-creation'
 export * from './document-version'
 export * from './package-document'

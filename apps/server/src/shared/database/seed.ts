@@ -8,6 +8,7 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
+import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule)
@@ -27,6 +28,7 @@ async function bootstrap() {
     }
 
     await app.get(IntakeSeeder).clear()
+    await app.get(DocumentProductionSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
 
@@ -34,6 +36,10 @@ async function bootstrap() {
     await app.get(CommunicationSeeder).clear()
 
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
+    await app.get(DocumentProductionSeeder).run({
+      legalAreas: legalCatalog.areas,
+      legalTopics: legalCatalog.topics,
+    })
     const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
     const legalTopic = legalCatalog.topics.find(
       (topic) => topic.legalAreaId === legalArea?.id && topic.name === 'Contratos',

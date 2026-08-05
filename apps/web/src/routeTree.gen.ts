@@ -15,6 +15,7 @@ import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
 import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
+import { Route as ModelosDeDocumentosIndexRouteImport } from './routes/modelos-de-documentos/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
@@ -58,6 +59,12 @@ const PedirRedefinirSenhaIndexRoute =
   PedirRedefinirSenhaIndexRouteImport.update({
     id: '/pedir-redefinir-senha/',
     path: '/pedir-redefinir-senha/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ModelosDeDocumentosIndexRoute =
+  ModelosDeDocumentosIndexRouteImport.update({
+    id: '/modelos-de-documentos/',
+    path: '/modelos-de-documentos/',
     getParentRoute: () => rootRouteImport,
   } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
 }
@@ -165,6 +173,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeIndexRoute
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
+  '/modelos-de-documentos': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
 }
@@ -187,6 +196,7 @@ export interface FileRoutesById {
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
 }
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/home/'
     | '/intakes/'
     | '/login/'
+    | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/intakes'
     | '/login'
+    | '/modelos-de-documentos'
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
   id:
@@ -251,6 +263,7 @@ export interface FileRouteTypes {
     | '/home/'
     | '/intakes/'
     | '/login/'
+    | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
   fileRoutesById: FileRoutesById
@@ -267,6 +280,7 @@ export interface RootRouteChildren {
   ConviteIndexRoute: typeof ConviteIndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  ModelosDeDocumentosIndexRoute: typeof ModelosDeDocumentosIndexRoute
   PedirRedefinirSenhaIndexRoute: typeof PedirRedefinirSenhaIndexRoute
   RedefinirSenhaIndexRoute: typeof RedefinirSenhaIndexRoute
 }
@@ -313,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/pedir-redefinir-senha'
       fullPath: '/pedir-redefinir-senha/'
       preLoaderRoute: typeof PedirRedefinirSenhaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/': {
+      id: '/modelos-de-documentos/'
+      path: '/modelos-de-documentos'
+      fullPath: '/modelos-de-documentos/'
+      preLoaderRoute: typeof ModelosDeDocumentosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login/': {
@@ -462,6 +483,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConviteIndexRoute: ConviteIndexRoute,
   HomeIndexRoute: HomeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
+  ModelosDeDocumentosIndexRoute: ModelosDeDocumentosIndexRoute,
   PedirRedefinirSenhaIndexRoute: PedirRedefinirSenhaIndexRoute,
   RedefinirSenhaIndexRoute: RedefinirSenhaIndexRoute,
 }
