@@ -71,6 +71,13 @@
       "when": 1785792115367,
       "tag": "0009_new_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785887997472,
+      "tag": "0010_cloudy_snowbird",
+      "breakpoints": true
     }
   ]
 }
