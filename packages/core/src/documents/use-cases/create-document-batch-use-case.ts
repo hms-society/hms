@@ -62,7 +62,7 @@ export class CreateDocumentBatchUseCase {
       channel: request.channel,
       sender: request.sender,
       inTriageBox,
-      clientId: string,
+      clientId: resolvedClientId,
       intakeId: request.intakeId,
       createdBy: request.createdBy,
       files: request.files,

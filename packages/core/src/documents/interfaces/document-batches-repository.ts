@@ -10,7 +10,7 @@ export type CreateDocumentBatchRecord = {
   channel: DocumentChannel
   sender: string
   inTriageBox: boolean
-  clientId: string
+  clientId?: string
   intakeId?: string
   createdBy?: string
   files: CreateDocumentBatchFileRecord[]
