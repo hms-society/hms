@@ -71,7 +71,9 @@ describe('AppLayout', () => {
 
     expect(screen.getByText('Test content')).toBeTruthy()
     expect(screen.getByLabelText('Navegação principal')).toBeTruthy()
-    expect(screen.getByPlaceholderText('Pesquisar Protocolo, documento...')).toBeTruthy()
+    expect(
+      screen.getByPlaceholderText('Pesquisar por protocolo, documento...'),
+    ).toBeTruthy()
   })
 
   it('calls the sidebar toggle handler when collapse is requested', () => {

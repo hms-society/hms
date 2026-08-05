@@ -611,3 +611,17 @@ an appropriate token exists.
 Headings use the documented serif family; body copy, controls, and navigation use
 the documented sans family. Preserve accessible names, visible keyboard focus,
 semantic elements, and non-color indicators for state.
+
+### Spacing utilities require a box-generating element
+
+Vertical spacing utilities such as `space-y-*` only separate child elements when
+those children participate in layout as boxes. When a `span` or another inline
+element is used as a label inside a spacing container, add `block` or
+`inline-block` when needed so the spacing is rendered consistently:
+
+```tsx
+<div className='space-y-2'>
+  <span className='block text-xs font-semibold'>Label</span>
+  <SelectTrigger />
+</div>
+```
