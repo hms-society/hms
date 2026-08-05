@@ -1,4 +1,6 @@
 export * from './consultation'
+export * from './consultation-form-field'
+export * from './consultation-form-template'
 export * from './consultation-suggestion'
 export * from './identified-risk'
 export * from './potential-legal-request'

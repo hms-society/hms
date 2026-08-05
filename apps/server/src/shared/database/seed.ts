@@ -59,6 +59,13 @@ async function bootstrap() {
       legalTopicId: legalTopic.id,
     })
     await app.get(CommunicationSeeder).run()
+    await app.get(IntakeSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      responsibleIds: identitySeed.collaborators.map(({ id }) => id),
+      actorIds: identitySeed.users.map(({ id }) => id),
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+    })
   } finally {
     await app.close()
   }

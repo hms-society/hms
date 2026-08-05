@@ -3,6 +3,7 @@ export const ROUTES = {
   login: '/login',
   home: '/home',
   intakes: '/intakes',
+  intakeDetails: '/intakes/$intakeId',
   newIntake: '/intakes/novo',
   requestPasswordReset: '/pedir-redefinir-senha',
   resetPassword: '/redefinir-senha',

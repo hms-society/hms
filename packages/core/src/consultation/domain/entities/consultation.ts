@@ -1,5 +1,6 @@
 import type {
   ConsultationChannel,
+  ConsultationFormResponse,
   ConsultationModality,
   ConsultationStatus,
 } from '../structures'
@@ -10,6 +11,7 @@ import type { ConsultationSuggestion } from './consultation-suggestion'
 
 type ConsultationBase = {
   id: string
+  intakeId?: string
   appointmentId: string
   clientId: string
   assignedLawyerId: string
@@ -22,6 +24,8 @@ type ConsultationBase = {
   potentialLegalRequests: PotentialLegalRequest[]
   identifiedRisks: IdentifiedRisk[]
   suggestions: ConsultationSuggestion[]
+  formTemplateId?: string
+  formResponses: ConsultationFormResponse[]
   createdAt: Date
   updatedAt: Date
 }

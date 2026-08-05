@@ -8,7 +8,19 @@ import type {
 import { IntakeListStatus as IntakeListStatusValues } from '@hms/core/intake/domain/structures'
 import type { IntakeListResponse } from '@hms/core/intake/interfaces'
 import { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
-import { and, count, desc, eq, gte, inArray, lte, or, sql, type SQL } from 'drizzle-orm'
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -32,8 +44,7 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
     const pageSize = this.normalizePageSize(query.pageSize)
     const baseWhere = this.buildBaseWhere(query)
     const statusCounts = await this.loadStatusCounts(baseWhere)
-    const publicWhere = this.addPublicStatusFilter(baseWhere)
-    const where = this.addStatusFilter(publicWhere, query.status)
+    const where = this.addStatusFilter(baseWhere, query.status)
 
     const records = await this.database
       .select({
@@ -85,7 +96,14 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
         : clientIds
           ? sql`false`
           : undefined
-      const searchCondition = this.combineOr(protocolCondition, clientCondition)
+      const demandCondition = ilike(
+        intakeModel.demandNotes,
+        `%${this.escapeLikePattern(search)}%`,
+      )
+      const searchCondition = this.combineOr(
+        this.combineOr(protocolCondition, clientCondition),
+        demandCondition,
+      )
 
       conditions.push(searchCondition ?? sql`false`)
     } else if (clientIds) {
@@ -132,13 +150,6 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
 
     const statusCondition = eq(intakeModel.status, status)
     return baseWhere ? and(baseWhere, statusCondition) : statusCondition
-  }
-
-  private addPublicStatusFilter(baseWhere: SQL | undefined): SQL {
-    const publicStatusCondition = inArray(intakeModel.status, PUBLIC_STATUSES)
-    return baseWhere
-      ? (and(baseWhere, publicStatusCondition) ?? publicStatusCondition)
-      : publicStatusCondition
   }
 
   private async loadStatusCounts(baseWhere: SQL | undefined): Promise<StatusCounts> {
@@ -198,6 +209,10 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
   private combineOr(first: SQL | undefined, second: SQL | undefined): SQL | undefined {
     if (first && second) return or(first, second)
     return first ?? second
+  }
+
+  private escapeLikePattern(value: string) {
+    return value.replace(/[\\%_]/g, '\\$&')
   }
 
   private parseSequenceNumber(search: string): number | undefined {

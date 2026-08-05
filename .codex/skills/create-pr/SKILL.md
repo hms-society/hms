@@ -136,37 +136,5 @@ Solicite a revisão automatizada apenas depois de o PR estar publicado:
 gh pr comment <numero-do-pr> --body "@codex review"
 ```
 
-## Loop pós-publicação do PR
-
-Depois de solicitar a revisão, aguarde e acompanhe o Quality Gate do `HEAD`
-atual. O ciclo só termina quando todos os checks obrigatórios estiverem verdes,
-o PR estiver mergeable e não houver conversa bloqueante pendente.
-
-1. Consulte os checks e o SHA do `HEAD` do PR:
-
-   ```bash
-   gh pr view <numero-do-pr> --json commits,mergeable,statusCheckRollup,reviews,comments
-   ```
-
-   Use the last commit SHA from `.commits[-1].oid` as the `HEAD` being
-   validated.
-
-2. Aguarde os workflows oficiais do commit publicado. Use `gh run watch
-   <run-id> --exit-status` ou equivalente e registre o resultado de cada
-   workflow.
-3. Se um check falhar, leia os logs, corrija somente problemas dentro do
-   escopo, execute os sensores locais aplicáveis, crie um novo commit e faça
-   push. Depois reinicie o loop a partir do novo SHA; checks de um HEAD anterior
-   não validam o commit corrigido.
-4. Após cada novo push, aguarde novamente Core, Server, Web e quaisquer outros
-   checks obrigatórios antes de concluir.
-5. Confirme que o PR continua mergeable e que reviews/conversas bloqueantes
-   foram resolvidas. Registre checks ignorados ou não aplicáveis como
-   limitações explícitas.
-
-Este prompt publica, valida e acompanha o PR, mas nunca executa merge, fecha o
-PR ou altera a branch de destino automaticamente. A decisão de merge permanece
-com o usuário/revisor autorizado.
-
 Informe título, URL, número, branch, commits, validações, referências Jira e
 Confluence, resultado da revisão e quaisquer pendências preservadas.

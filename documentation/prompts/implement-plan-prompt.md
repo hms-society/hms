@@ -28,23 +28,22 @@ Para cada fase:
    não execute `build` por fase ou por retry, salvo alteração em bundler,
    exports, ambiente, Docker, workflows ou artefatos gerados;
 8. marque tarefas `verified` somente após os sensores aplicáveis;
-9. crie exatamente um `Judge Implementation` `Phase F<n>` read-only irmão dos
-   Builders, após os sensores;
-10. em `failed`, registre imediatamente o finding no Plan e em `evaluation.md`,
-    crie Builder Fix, reabra tarefas afetadas e repita somente os
-    sensores invalidados; crie novo Judge apenas quando o diff ou a evidência
-    tiver mudado; em `accepted`, aceite a fase e avance.
+9. marque a fase como pronta após os sensores; não crie Judge Implementation
+   por fase;
+10. em caso de falha de sensor, registre o finding no Plan e em
+    `evaluation.md`, crie Builder Fix, reabra tarefas afetadas e repita somente
+    os sensores invalidados; avance quando a fase estiver validada.
 
 Builders não criam subagentes nem editam Plan. Judges não editam arquivos. O
 Orchestrator registra no Plan decisões, evidências resumidas, findings,
 tentativas e próxima ação; registra as avaliações formais e evidências finais em
 `evaluation.md`, mantendo na Spec apenas o resumo e a referência para esse
-arquivo. Cada Judge deve deixar sua evidência e decisão persistidas antes de
-avançar para a próxima fase.
+arquivo. O Orchestrator deve persistir evidências de fase no Plan e o veredito
+integrado no `evaluation.md`.
 
-Após todas as fases aceitas, execute sensores integrados. Quando a integração
-exigir avaliação adicional, faça antes um preflight de banco, Auth, serviços
-locais, credenciais de teste e Playwright. Então crie um único `Judge
+Após todas as fases validadas, execute sensores integrados. Faça um preflight de
+banco, Auth, serviços locais, credenciais de teste e Playwright quando aplicável.
+Então crie no máximo um `Judge
 Implementation Final`; o `build` roda somente no Quality Gate final. Depois
 encaminhe para `conclude-spec`.
 

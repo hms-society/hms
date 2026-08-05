@@ -2,9 +2,10 @@
 title: Edição de perfil do colaborador
 status: completed
 revision: 1
-source:
-  type: direct-request
-  ref: codex-task
+sources:
+  - type: direct-request
+    ref: codex-task
+    role: delivery_scope
 parent_spec: ../../spec.md
 scope:
   - packages/core/src/identity

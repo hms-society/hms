@@ -8,7 +8,7 @@ type FormalizationDocumentPackageContext = {
   readonly formalizationId: string
 }
 
-type CaseDocumentPackageContext = {
+type LegalProductionDocumentPackageContext = {
   readonly type: 'case'
   readonly caseId: string
 }
@@ -16,4 +16,4 @@ type CaseDocumentPackageContext = {
 export type DocumentPackageContext =
   | ConsultationDocumentPackageContext
   | FormalizationDocumentPackageContext
-  | CaseDocumentPackageContext
+  | LegalProductionDocumentPackageContext

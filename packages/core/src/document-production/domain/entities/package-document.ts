@@ -3,7 +3,7 @@ import type { PackageDocumentStatus } from '../structures'
 type PackageDocumentBase = {
   id: string
   documentId: string
-  templateId?: string
+  documentSpecificationId?: string
   createdAt: Date
   updatedAt: Date
 }
