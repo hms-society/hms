@@ -216,6 +216,39 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    await this.seed()
-  }
+    const administratorCreated = await this.collaboratorsRepository.add(administrator)
+
+const attendantCreated = await this.collaboratorsRepository.add({
+  userId: attendantUser.id,
+  ...DEFAULT_ATTENDANT,
+})
+
+const lawyerCreated = await this.collaboratorsRepository.add({
+  userId: lawyerUser.id,
+  ...DEFAULT_LAWYER,
+  legalExpertises: [lawyerLegalExpertise],
+})
+
+const paralegalCreated = await this.collaboratorsRepository.add({
+  userId: paralegalUser.id,
+  ...DEFAULT_PARALEGAL,
+  legalExpertises: [lawyerLegalExpertise],
+})
+
+const clients = await this.seed()
+
+return {
+  clients,
+  collaborators: [
+    administratorCreated,
+    attendantCreated,
+    lawyerCreated,
+    paralegalCreated,
+  ].filter(
+    (collaborator): collaborator is NonNullable<typeof collaborator> =>
+      collaborator !== undefined,
+  ),
+  users: seededUsers,
+}
+}
 }
