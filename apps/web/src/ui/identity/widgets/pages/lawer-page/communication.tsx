@@ -54,6 +54,10 @@ export const LawyerCommunicationPage = () => {
   // Construct the active chat conversation
   const activeChat: ClientConversation | undefined = activeClient
     ? {
+        avatar: {
+          name: activeClient.name || activeClient.legalName || 'Nome não informado',
+          colorSeed: activeClient.id,
+        },
         id: activeClient.id,
         name: activeClient.name || activeClient.legalName || 'Nome não informado',
         lastMessage: '',
@@ -108,6 +112,10 @@ export const LawyerCommunicationPage = () => {
   const conversations: ClientConversation[] = clients.map((item: any) => {
     const c = item.client || item
     return {
+      avatar: {
+        name: c.name || c.legalName || 'Nome não informado',
+        colorSeed: c.id,
+      },
       id: c.id,
       name: c.name || c.legalName || 'Nome não informado',
       lastMessage: localMessages[c.id]?.length

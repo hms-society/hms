@@ -1,3 +1,5 @@
+import { useWatch } from 'react-hook-form'
+
 import {
   CONSENT_TYPES,
   type ClientRegisterDialogController,
@@ -19,7 +21,8 @@ type ReviewRow = {
 }
 
 export function useClientReviewStep(controller: ClientRegisterDialogController) {
-  const draft = controller.draft as RegistrationForm
+  const draft = useWatch({ control: controller.registrationForm.control }) as RegistrationForm
+
   const clientName = draft.type === 'natural' ? draft.name : draft.legalName
   const address = draft.address
   const addressRows: ReviewRow[] = [

@@ -9,9 +9,9 @@
   /* Superfície e texto */
   --background: oklch(0.978 0.005 75);
   --foreground: oklch(0.26 0.02 190);
-  --card: oklch(1 0 0);
+  --card: oklch(96.715% 0.00011 271.152);
   --card-foreground: oklch(0.26 0.02 190);
-  --popover: oklch(1 0 0);
+  --popover: oklch(99.573% 0.00296 143.37);
   --popover-foreground: oklch(0.26 0.02 190);
   --card-surface: oklch(0.993 0.04 98);
 

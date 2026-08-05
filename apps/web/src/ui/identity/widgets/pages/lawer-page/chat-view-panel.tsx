@@ -1,10 +1,10 @@
 import { Card } from '@/ui/shadcn/card'
 import { Button } from '@/ui/shadcn/button'
-import { Avatar } from '@/ui/shadcn/avatar'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { MessageGroup, Message, MessageContent, MessageFooter } from '@/ui/shadcn/message'
 import { Bubble, BubbleContent } from '@/ui/shadcn/bubble'
+import { CollaboratorAvatar } from '../../components/collaborator-avatar'
 
 import type { ClientConversation } from './chat-list-panel'
 
@@ -26,12 +26,11 @@ export const ChatViewPanel = ({
       {/* Chat Header */}
       <div className='flex justify-between items-center border-b border-border/60 pb-4 shrink-0'>
         <div className='flex items-center gap-3'>
-          <Avatar className='size-12 bg-primary/20 text-primary font-medium flex items-center justify-center rounded-full'>
-            {activeChat.name
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
-          </Avatar>
+          <CollaboratorAvatar
+            name={activeChat.avatar.name}
+            colorSeed={activeChat.avatar.colorSeed}
+            className='size-12'
+          />
           <div className='flex flex-col'>
             <h3 className='font-semibold text-lg text-foreground leading-snug'>
               {activeChat.name}
