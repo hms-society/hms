@@ -216,16 +216,15 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    if (!seededAdministrator || !attendant || !lawyer || !paralegal) {
-      throw new AppError('Default seed collaborators were not created')
-    }
-
     const clients = await this.seed()
 
     return {
       clients,
+      collaborators: [seededAdministrator, attendant, lawyer, paralegal].filter(
+        (collaborator): collaborator is NonNullable<typeof collaborator> =>
+          collaborator !== undefined,
+      ),
       users: seededUsers,
-      collaborators: [seededAdministrator, attendant, lawyer, paralegal],
     }
   }
 }
