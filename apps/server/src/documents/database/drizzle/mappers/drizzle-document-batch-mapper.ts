@@ -1,5 +1,5 @@
 import type { DrizzleDocumentBatch } from '../types/entities/drizzle-document-batch'
-import type { DocumentBatch } from '@hms/core/documents/domain/entities/document-batch.ts'
+import type { DocumentBatch } from '@hms/core/documents/domain/entities'
 
 export class DrizzleDocumentBatchMapper {
   toDomain(record: DrizzleDocumentBatch): DocumentBatch {

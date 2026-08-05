@@ -4,8 +4,8 @@ import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import type {
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
-} from '@hms/core/documents/interfaces/document-batches-repository.ts'
-import type { DocumentBatch } from '@hms/core/documents/domain/entities/document-batch.ts'
+} from '@hms/core/documents/interfaces'
+import type { DocumentBatch } from '@hms/core/documents/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
 

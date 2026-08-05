@@ -2,7 +2,6 @@
   "name": "@hms/core",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "exports": {
     "./communication/domain/entities": "./src/communication/domain/entities/index.ts",
     "./communication/domain/errors": "./src/communication/domain/errors/index.ts",
@@ -51,7 +50,10 @@
     "./shared/responses/rest-response": "./src/shared/responses/rest-response.ts",
     "./shared/responses/pagination-response": "./src/shared/responses/pagination-response.ts",
     "./shared/constants": "./src/shared/constants/index.ts",
-    "./documents/*": "./src/documents/*"
+    "./documents/domain/entities": "./src/documents/domain/entities/index.ts",
+    "./documents/domain/structures": "./src/documents/domain/structures/index.ts",
+    "./documents/interfaces": "./src/documents/interfaces/index.ts",
+    "./documents/use-cases": "./src/documents/use-cases/index.ts"
   },
   "imports": {
     "#communication/*": "./src/communication/*",

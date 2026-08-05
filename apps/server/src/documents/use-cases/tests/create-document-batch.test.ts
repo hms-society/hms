@@ -5,8 +5,8 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { documentBatchFileModel } from '@/documents/database/drizzle/models/document-batch-file-model'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
-import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases/create-document-batch-use-case.js'
-import { DocumentChannel } from '@hms/core/documents/domain/structures/document-channel.js'
+import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
+import { DocumentChannel } from '@hms/core/documents/domain/structures'
 import { DocumentsModule } from '@/documents/database/documents.module'
 
 describe('Create Document Batch Use Case', () => {

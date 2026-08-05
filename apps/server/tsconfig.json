@@ -27,7 +27,4 @@
     "noFallthroughCasesInSwitch": false
   }
   ,
-  "references": [
-    { "path": "../../packages/core" }
-  ]
 }
