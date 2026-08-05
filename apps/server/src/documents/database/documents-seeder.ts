@@ -9,8 +9,6 @@ import { clientModel, userModel } from '@/identity/database/drizzle/models'
 
 @Injectable()
 export class DocumentsSeeder {
-  private readonly logger = new Logger(DocumentsSeeder.name)
-
   constructor(
     @Inject(CreateDocumentBatchUseCase)
     private readonly createDocumentBatchUseCase: CreateDocumentBatchUseCase,
@@ -22,61 +20,54 @@ export class DocumentsSeeder {
 
   async clear() {
     const db = this.drizzleClient.requireDatabase()
-    await db.execute(sql`TRUNCATE document_batches CASCADE`)
+    await db.execute(sql`TRUNCATE document_batches, document_batch_files CASCADE`)
   }
 
   async run() {
+    await this.clear()
     const db = this.drizzleClient.requireDatabase()
-    
-    const users = await db.select().from(userModel).limit(1)
-    const clients = await db.select().from(clientModel).limit(3)
 
-    if (users.length === 0 || clients.length === 0) {
-      this.logger.warn('Usuários ou Clientes insuficientes para popular os documentos.')
-      return []
-    }
+    const users = await db.select().from(userModel).limit(5)
+    const clients = await db.select().from(clientModel).limit(10)
 
-    const userId = users[0].id
+    if (users.length === 0 || clients.length === 0) return null
 
-    const batchScenarios = [
+    const dummyFiles = [
       {
-        client: clients[0],
-        channel: DocumentChannel.InternalUpload,
-        sender: clients[0].email || 'cliente@hms.com.br',
-        files: [
-          { name: 'rg_cnh_cliente_alpha.pdf', mime: 'application/pdf', content: 'PDF_RG_CONTENT_111' },
-          { name: 'comprovante_residencia_alpha.jpg', mime: 'image/jpeg', content: 'JPG_RES_CONTENT_222' },
-        ],
+        name: 'contrato_social_simulado.pdf',
+        content: 'PDF_DUMMY_CONTENT_123',
+        mime: 'application/pdf',
       },
       {
-        client: clients[1] || clients[0],
-        channel: DocumentChannel.Whatsapp,
-        sender: (clients[1] || clients[0]).phone || '5511999999999',
-        files: [
-          { name: 'procuracao_assinada.pdf', mime: 'application/pdf', content: 'PDF_PROC_CONTENT_333' },
-        ],
+        name: 'comprovante_endereco_simulado.jpg',
+        content: 'JPG_DUMMY_CONTENT_456',
+        mime: 'image/jpeg',
       },
       {
-        client: clients[2] || clients[0],
-        channel: DocumentChannel.ClientPortal,
-        sender: (clients[2] || clients[0]).email || 'cliente@hms.com.br',
-        files: [
-          { name: 'contrato_social_empresa.pdf', mime: 'application/pdf', content: 'PDF_SOC_CONTENT_444' },
-          { name: 'extrato_bancario.pdf', mime: 'application/pdf', content: 'PDF_EXT_CONTENT_555' },
-        ],
-      }
+        name: 'cartao_cnpj.pdf',
+        content: 'PDF_DUMMY_CONTENT_789',
+        mime: 'application/pdf',
+      },
+      {
+        name: 'balanco_patrimonial.pdf',
+        content: 'PDF_DUMMY_CONTENT_101',
+        mime: 'application/pdf',
+      },
     ]
 
-    const createdBatches:any = []
+    const batches: any[] = []
 
-    for (const scenario of batchScenarios) {
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i]
+      const user = users[i % users.length]
+      
+      const batchName = `LOTE-${Date.now()}`
+
       const uploadedFiles = await Promise.all(
-        scenario.files.map(async (file) => {
+        dummyFiles.map(async (file) => {
           const buffer = Buffer.from(file.content)
-          const timestamp = new Date().getTime()
-          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
           
-          const storagePath = `seed/${scenario.client.id}/${timestamp}-${safeName}`
+          const storagePath = `seed/${client.id}/${batchName}/${file.name}`
 
           await this.storageProvider.upload(storagePath, buffer, file.mime)
 
@@ -90,16 +81,17 @@ export class DocumentsSeeder {
       )
 
       const batch = await this.createDocumentBatchUseCase.execute({
-        channel: scenario.channel,
-        sender: scenario.sender,
-        createdBy: userId,
-        clientId: scenario.client.id, 
+        readableId: batchName,
+        channel: DocumentChannel.InternalUpload,
+        sender: 'admin@hms.com.br',
+        createdBy: user.id,
+        clientId: client.id,
         files: uploadedFiles,
       })
 
-      createdBatches.push(batch)
+      batches.push(batch)
     }
 
-    return createdBatches
+    return batches
   }
 }

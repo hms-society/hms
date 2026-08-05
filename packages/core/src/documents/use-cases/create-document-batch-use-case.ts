@@ -13,6 +13,7 @@ type CreateDocumentBatchRequest = {
   clientId?: string
   intakeId?: string
   createdBy?: string
+  readableId?: string
 }
 
 export class CreateDocumentBatchUseCase {
