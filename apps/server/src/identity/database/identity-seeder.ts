@@ -175,6 +175,7 @@ export class IdentitySeeder {
       authAdministrationProvider,
       seedPassword,
     )
+
     const adminUser = seededUsers.find(
       ({ email }) => email === 'admin@hmsadvogados.com.br',
     )
@@ -197,58 +198,39 @@ export class IdentitySeeder {
       ...DEFAULT_ADMINISTRATOR,
     } satisfies CollaboratorCreation
 
-    const seededAdministrator = await this.collaboratorsRepository.add(administrator)
+    const administratorCreated = await this.collaboratorsRepository.add(administrator)
 
-    const attendant = await this.collaboratorsRepository.add({
+    const attendantCreated = await this.collaboratorsRepository.add({
       userId: attendantUser.id,
       ...DEFAULT_ATTENDANT,
     })
 
-    const lawyer = await this.collaboratorsRepository.add({
+    const lawyerCreated = await this.collaboratorsRepository.add({
       userId: lawyerUser.id,
       ...DEFAULT_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    await this.collaboratorsRepository.add({
+    const paralegalCreated = await this.collaboratorsRepository.add({
       userId: paralegalUser.id,
       ...DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    const administratorCreated = await this.collaboratorsRepository.add(administrator)
+    const clients = await this.seed()
 
-const attendantCreated = await this.collaboratorsRepository.add({
-  userId: attendantUser.id,
-  ...DEFAULT_ATTENDANT,
-})
-
-const lawyerCreated = await this.collaboratorsRepository.add({
-  userId: lawyerUser.id,
-  ...DEFAULT_LAWYER,
-  legalExpertises: [lawyerLegalExpertise],
-})
-
-const paralegalCreated = await this.collaboratorsRepository.add({
-  userId: paralegalUser.id,
-  ...DEFAULT_PARALEGAL,
-  legalExpertises: [lawyerLegalExpertise],
-})
-
-const clients = await this.seed()
-
-return {
-  clients,
-  collaborators: [
-    administratorCreated,
-    attendantCreated,
-    lawyerCreated,
-    paralegalCreated,
-  ].filter(
-    (collaborator): collaborator is NonNullable<typeof collaborator> =>
-      collaborator !== undefined,
-  ),
-  users: seededUsers,
-}
-}
+    return {
+      clients,
+      collaborators: [
+        administratorCreated,
+        attendantCreated,
+        lawyerCreated,
+        paralegalCreated,
+      ].filter(
+        (collaborator): collaborator is NonNullable<typeof collaborator> =>
+          collaborator !== undefined,
+      ),
+      users: seededUsers,
+    }
+  }
 }
