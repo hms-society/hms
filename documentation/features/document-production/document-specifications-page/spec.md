@@ -635,7 +635,7 @@ Com banco e Auth saudáveis, servidor e web reais em execução:
 Status: `in_progress`. Implementação aceita pelos Judges e sensores específicos;
 o Quality Gate integrado local mantém falhas preexistentes/harness classificadas
 em [`evaluation.md`](./evaluation.md). O build passou; o commit de implementação
-avaliado é `9f3a9bc`.
+avaliado é `1e5cb6a`.
 
 # Alinhamento documental
 
