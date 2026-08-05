@@ -6,6 +6,7 @@ export type IconName =
   | 'check'
   | 'circle'
   | 'clipboard-list'
+  | 'copy'
   | 'file-text'
   | 'layout-dashboard'
   | 'inbox'

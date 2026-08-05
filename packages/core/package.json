@@ -19,6 +19,8 @@
     "./document-production/domain/errors": "./src/document-production/domain/errors/index.ts",
     "./document-production/domain/events": "./src/document-production/domain/events/index.ts",
     "./document-production/domain/structures": "./src/document-production/domain/structures/index.ts",
+    "./document-production/interfaces": "./src/document-production/interfaces/index.ts",
+    "./document-production/use-cases": "./src/document-production/use-cases/index.ts",
     "./identity/domain/entities": "./src/identity/domain/entities/index.ts",
     "./identity/domain/entities/fakers": "./src/identity/domain/entities/fakers/index.ts",
     "./identity/domain/errors": "./src/identity/domain/errors/index.ts",
