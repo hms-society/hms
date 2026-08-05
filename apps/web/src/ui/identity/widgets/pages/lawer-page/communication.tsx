@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
+import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
 
 import {
   ChatListPanel,
@@ -6,128 +8,87 @@ import {
   type ClientConversation,
 } from './chat-list-panel'
 import { ChatViewPanel } from './chat-view-panel'
-
-const INITIAL_CONVERSATIONS: ClientConversation[] = [
-  {
-    id: '1',
-    name: 'João Silva',
-    lastMessage: 'Enviei os documentos da CNH e comprovante de residência.',
-    channel: 'whatsapp',
-    updatedAt: '14:32',
-    unread: true,
-    caseNumber: 'Caso #042',
-    messages: [
-      {
-        id: 'm1',
-        content: 'Olá! Sou o Dr. Advogado de desenvolvimento. Em que posso ajudar hoje?',
-        direction: 'outbound',
-        channel: 'whatsapp',
-        createdAt: '14:15',
-        sender: 'Advogado de desenvolvimento',
-      },
-      {
-        id: 'm2',
-        content:
-          'Olá doutor! Estou com dúvidas sobre os documentos para a ação contratual.',
-        direction: 'inbound',
-        channel: 'whatsapp',
-        createdAt: '14:20',
-        sender: 'João Silva',
-      },
-      {
-        id: 'm3',
-        content:
-          'Pode nos enviar por aqui o seu documento de identidade e o comprovante de residência atualizado para análise.',
-        direction: 'outbound',
-        channel: 'whatsapp',
-        createdAt: '14:25',
-        sender: 'Advogado de desenvolvimento',
-      },
-      {
-        id: 'm4',
-        content: 'Enviei os documentos da CNH e comprovante de residência.',
-        direction: 'inbound',
-        channel: 'whatsapp',
-        createdAt: '14:32',
-        sender: 'João Silva',
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Maria Santos',
-    lastMessage: 'A consulta de amanhã está confirmada no mesmo horário?',
-    channel: 'whatsapp',
-    updatedAt: 'Ontem',
-    unread: false,
-    caseNumber: 'Caso #015',
-    messages: [
-      {
-        id: 'm5',
-        content: 'Olá Maria, a sua consulta de retorno foi pré-agendada.',
-        direction: 'outbound',
-        channel: 'whatsapp',
-        createdAt: 'Ontem - 10:00',
-        sender: 'Secretaria HMS',
-      },
-      {
-        id: 'm6',
-        content: 'A consulta de amanhã está confirmada no mesmo horário?',
-        direction: 'inbound',
-        channel: 'whatsapp',
-        createdAt: 'Ontem - 10:15',
-        sender: 'Maria Santos',
-      },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Pedro Souza',
-    lastMessage: 'Obrigado pelo retorno. Aguardo o andamento.',
-    channel: 'email',
-    updatedAt: '3 dias atrás',
-    unread: false,
-    caseNumber: 'Caso #029',
-    messages: [
-      {
-        id: 'm7',
-        content:
-          'Prezado Pedro, informamos que o protocolo de sua petição inicial foi realizado com sucesso.',
-        direction: 'outbound',
-        channel: 'email',
-        createdAt: '3 dias atrás',
-        sender: 'Advogado de desenvolvimento',
-      },
-      {
-        id: 'm8',
-        content: 'Obrigado pelo retorno. Aguardo o andamento.',
-        direction: 'inbound',
-        channel: 'email',
-        createdAt: '3 dias atrás',
-        sender: 'Pedro Souza',
-      },
-    ],
-  },
-]
+import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export const LawyerCommunicationPage = () => {
-  const [conversations, setConversations] =
-    useState<ClientConversation[]>(INITIAL_CONVERSATIONS)
-  const [selectedId, setSelectedId] = useState<string>('1')
+  const { unreadChatIds, markAsRead } = useCommunication()
+  const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [localMessages, setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
 
-  const activeChat = conversations.find((c) => c.id === selectedId) || conversations[0]
+  // Fetch clients from the database
+  const { data: clientsData, isLoading: isLoadingClients } = useClientsQuery({
+    page: 1,
+    limit: 50,
+    search: searchQuery,
+  })
+
+  const clients = (clientsData?.data ?? []) as any[]
+
+  // Automatically select the first client if none is selected
+  useEffect(() => {
+    if (clients.length > 0 && !selectedId) {
+      const firstClient = clients[0].client || clients[0]
+      setSelectedId(firstClient.id)
+    }
+  }, [clients, selectedId])
+
+  // Mark selected client's chat as read
+  useEffect(() => {
+    if (selectedId) {
+      markAsRead(selectedId)
+    }
+  }, [selectedId, markAsRead])
+
+  // Fetch communications for the selected client
+  const { data: realMessages } = useClientCommunicationsQuery(selectedId)
+
+  // Find the active client item
+  const activeClientItem = clients.find((item: any) => {
+    const c = item.client || item
+    return c.id === selectedId
+  })
+  const activeClient = activeClientItem?.client || activeClientItem
+
+  // Construct the active chat conversation
+  const activeChat: ClientConversation | undefined = activeClient
+    ? {
+        id: activeClient.id,
+        name: activeClient.name || activeClient.legalName || 'Nome não informado',
+        lastMessage: '',
+        channel: 'whatsapp',
+        updatedAt: '',
+        unread: false,
+        caseNumber: activeClientItem?.intakeCount
+          ? `Intakes: ${activeClientItem.intakeCount}`
+          : 'Sem intakes',
+        messages: [
+          ...(realMessages?.map((msg: any) => ({
+            id: msg.id,
+            content: msg.content,
+            direction: msg.direction,
+            channel: msg.channel,
+            createdAt: new Date(msg.createdAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            sender: msg.author || 'Cliente',
+          })) || []),
+          ...(localMessages[selectedId] || []),
+        ],
+      }
+    : undefined
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!messageText.trim()) return
+    if (!messageText.trim() || !selectedId) return
 
     const newMessage: ChatMessage = {
       id: `new-${Date.now()}`,
       content: messageText,
       direction: 'outbound',
-      channel: activeChat.channel,
+      channel: 'whatsapp',
       createdAt: new Date().toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
@@ -135,32 +96,33 @@ export const LawyerCommunicationPage = () => {
       sender: 'Advogado de desenvolvimento',
     }
 
-    setConversations((prev) =>
-      prev.map((c) => {
-        if (c.id === selectedId) {
-          return {
-            ...c,
-            lastMessage: messageText,
-            updatedAt: newMessage.createdAt,
-            messages: [...c.messages, newMessage],
-          }
-        }
-        return c
-      }),
-    )
+    setLocalMessages((prev) => ({
+      ...prev,
+      [selectedId]: [...(prev[selectedId] || []), newMessage],
+    }))
 
     setMessageText('')
   }
 
-  const filteredConversations = conversations.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  // Construct conversations list for ChatListPanel
+  const conversations: ClientConversation[] = clients.map((item: any) => {
+    const c = item.client || item
+    return {
+      id: c.id,
+      name: c.name || c.legalName || 'Nome não informado',
+      lastMessage: localMessages[c.id]?.length
+        ? localMessages[c.id][localMessages[c.id].length - 1].content
+        : 'Clique para ver a conversa',
+      channel: 'whatsapp',
+      updatedAt: '',
+      unread: unreadChatIds.includes(c.id),
+      caseNumber: item.intakeCount ? `Intakes: ${item.intakeCount}` : 'Sem intakes',
+      messages: [],
+    }
+  })
 
   const handleSelectChat = (id: string) => {
     setSelectedId(id)
-    setConversations((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, unread: false } : c)),
-    )
   }
 
   return (
@@ -175,20 +137,34 @@ export const LawyerCommunicationPage = () => {
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 w-full flex-1 min-h-[600px]'>
-        <ChatListPanel
-          conversations={filteredConversations}
-          selectedId={selectedId}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onSelectChat={handleSelectChat}
-        />
+        {isLoadingClients ? (
+          <div className='lg:col-span-3 flex items-center justify-center h-[400px] text-muted-foreground'>
+            Carregando clientes...
+          </div>
+        ) : (
+          <>
+            <ChatListPanel
+              conversations={conversations}
+              selectedId={selectedId}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSelectChat={handleSelectChat}
+            />
 
-        <ChatViewPanel
-          activeChat={activeChat}
-          messageText={messageText}
-          onMessageChange={setMessageText}
-          onSendMessage={handleSendMessage}
-        />
+            {activeChat ? (
+              <ChatViewPanel
+                activeChat={activeChat}
+                messageText={messageText}
+                onMessageChange={setMessageText}
+                onSendMessage={handleSendMessage}
+              />
+            ) : (
+              <div className='lg:col-span-2 flex items-center justify-center border border-dashed rounded-xl p-8 bg-muted/5 text-muted-foreground'>
+                Selecione um cliente para visualizar o chat.
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

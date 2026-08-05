@@ -1,10 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
+import { eq } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
+import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
+import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
+import { encrypt } from '@/shared/utils/crypto'
 
 @Injectable()
 export class CommunicationSeeder {
@@ -12,6 +17,7 @@ export class CommunicationSeeder {
 
   async clear() {
     const db = this.drizzleClient.requireDatabase()
+    await db.delete(privateMessageModel)
     await db.delete(communicationModel)
   }
 
@@ -25,6 +31,7 @@ export class CommunicationSeeder {
 
     const authorId = users[0].id
 
+    // Seed normal communications
     const mockCommunications = clients.flatMap((client) => {
       const totalMessages = faker.number.int({ min: 5, max: 20 })
 
@@ -52,5 +59,51 @@ export class CommunicationSeeder {
     })
 
     await db.insert(communicationModel).values(mockCommunications)
+
+    // Seed private messages between lawyer and clients for their intakes
+    const lawyers = await db
+      .select()
+      .from(collaboratorModel)
+      .where(eq(collaboratorModel.profile, 'lawyer'))
+      .limit(1)
+
+    const intakes = await db.select().from(intakeModel)
+
+    if (lawyers.length > 0 && intakes.length > 0) {
+      const lawyer = lawyers[0]
+
+      const mockPrivateMessages = intakes.flatMap((intake) => {
+        const totalMessages = faker.number.int({ min: 3, max: 10 })
+
+        const privateMessages = Array.from({ length: totalMessages }, () => {
+          const direction = faker.helpers.arrayElement(['inbound', 'outbound'] as const)
+          const isFileMessage = faker.datatype.boolean(0.2) // 20% chance of being only a file
+
+          return {
+            clientId: intake.clientId,
+            collaboratorId: lawyer.id,
+            intakeId: intake.id,
+            clientPhone: faker.phone.number(),
+            direction,
+            content: isFileMessage
+              ? null
+              : encrypt(faker.lorem.sentences({ min: 1, max: 3 })),
+            fileIds: isFileMessage ? [faker.string.uuid()] : [],
+            createdAt: faker.date.between({
+              from: intake.createdAt,
+              to: new Date(),
+            }),
+          }
+        })
+
+        privateMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+
+        return privateMessages
+      })
+
+      if (mockPrivateMessages.length > 0) {
+        await db.insert(privateMessageModel).values(mockPrivateMessages)
+      }
+    }
   }
 }

@@ -9,13 +9,19 @@ export const useClientCommunicationsQuery = (clientId: string) => {
     queryFn: async () => {
       const response: any = await communicationService.listClientCommunications(clientId)
 
-      if (Array.isArray(response)) return response
-      if (response?.body && Array.isArray(response.body)) return response.body
-      if (response?.data && Array.isArray(response.data)) return response.data
+      let communications: any[] = []
+      if (Array.isArray(response)) {
+        communications = response
+      } else if (response?.body && Array.isArray(response.body)) {
+        communications = response.body
+      } else if (response?.data && Array.isArray(response.data)) {
+        communications = response.data
+      } else if (response?.isFailure) {
+        response.throwError()
+      }
 
-      if (response?.isFailure) response.throwError()
-
-      return []
+      // Filter out whatsapp communication channel
+      return communications.filter((item: any) => item.channel !== 'whatsapp')
     },
     enabled: !!clientId,
   })

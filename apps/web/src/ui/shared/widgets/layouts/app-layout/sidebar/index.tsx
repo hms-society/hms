@@ -3,6 +3,7 @@ import type { SidebarItem } from '@/constants/sidebar-items'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useSignOutAction } from './use-sign-out-action'
+import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export type SidebarProps = {
   isCollapsed: boolean
@@ -18,6 +19,7 @@ export const Sidebar = ({
   onToggle,
 }: SidebarProps) => {
   const { mutate: signOut, isPending } = useSignOutAction()
+  const { hasUnread } = useCommunication()
   const normalizedActivePath = activePath.replace(/\/$/, '') || '/'
 
   return (
@@ -94,12 +96,12 @@ export const Sidebar = ({
                     name={item.icon}
                     className={`w-5 h-5 shrink-0 ${isActive ? 'text-highlight-vivid' : ''}`}
                   />
-                  {item.route === 'lawyerCommunication' && isCollapsed && (
+                  {item.route === 'lawyerCommunication' && isCollapsed && hasUnread && (
                     <span className='absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-destructive animate-pulse' />
                   )}
                 </div>
                 {!isCollapsed && <span className='text-sm flex-1'>{item.label}</span>}
-                {item.route === 'lawyerCommunication' && !isCollapsed && (
+                {item.route === 'lawyerCommunication' && !isCollapsed && hasUnread && (
                   <span className='h-2 w-2 rounded-full bg-destructive shrink-0 mr-1 animate-pulse' />
                 )}
               </Anchor>
