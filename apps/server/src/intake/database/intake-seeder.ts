@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DRIZZLE, type DrizzleDB } from '@/shared/database/database.provider'
+import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.provider'
 import { clientModel } from '@/identity/database/drizzle/models'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'

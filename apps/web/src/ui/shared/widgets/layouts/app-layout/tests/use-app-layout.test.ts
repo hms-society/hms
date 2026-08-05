@@ -6,6 +6,7 @@ import { CollaboratorProfile } from '@hms/core/identity/domain/structures'
 import { SIDEBAR_ITEMS } from '@/constants/sidebar-items'
 import { useUrlPathname } from '@/ui/shared/hooks/use-url-pathname'
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
+import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useAppLayout } from '../use-app-layout'
 
 vi.mock('@/ui/shared/hooks/use-url-pathname', () => ({
@@ -16,12 +17,25 @@ vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
   useCurrentCollaboratorQuery: vi.fn(),
 }))
 
+vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
+  useAuthContext: vi.fn(),
+}))
+
 const useUrlPathnameMock = vi.mocked(useUrlPathname)
 const useCurrentCollaboratorQueryMock = vi.mocked(useCurrentCollaboratorQuery)
+const useAuthContextMock = vi.mocked(useAuthContext)
 
 describe('useAppLayout', () => {
   beforeEach(() => {
     useUrlPathnameMock.mockReturnValue('/intakes')
+    useAuthContextMock.mockReturnValue({
+      user: {
+        id: 'attendant-id',
+        email: 'attendant@example.com',
+        role: CollaboratorProfile.Attendant,
+      },
+      signOut: vi.fn(),
+    } as any)
     useCurrentCollaboratorQueryMock.mockReturnValue({
       currentCollaborator: {
         collaboratorId: 'attendant-id',

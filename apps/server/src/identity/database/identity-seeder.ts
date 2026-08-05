@@ -20,6 +20,7 @@ import { AppError } from '@hms/core/shared/domain/errors'
 
 type UserSeed = {
   email: string
+  password?: string
   status: UserCreation['status']
 }
 
