@@ -1,0 +1,1 @@
+ALTER TYPE "public"."collaborator_profile" ADD VALUE 'client';

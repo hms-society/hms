@@ -3,7 +3,7 @@ import type { LegalExpertise } from '../structures'
 type AdministrativeCollaboratorUpdate = {
   readonly professionalName: string
   readonly jobTitle?: string
-  readonly profile: 'admin' | 'attendant'
+  readonly profile: 'admin' | 'attendant' | 'client'
   readonly legalExpertises?: never
 }
 

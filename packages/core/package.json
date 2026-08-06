@@ -67,8 +67,10 @@
     "lint": "biome lint src",
     "check-types": "tsc --noEmit"
   },
+  "dependencies": {
+    "@faker-js/faker": "^10.5.0"
+  },
   "devDependencies": {
-    "@faker-js/faker": "^10.5.0",
     "typescript": "5.9.2",
     "vitest": "4.1.9",
     "vitest-mock-extended": "^5.1.0"
