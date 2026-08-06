@@ -22,14 +22,13 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'group/tabs-list inline-flex items-center justify-center text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col',
+  'group/tabs-list inline-flex items-center text-muted-foreground',
   {
     variants: {
       variant: {
-        default:
-          'w-fit rounded-lg bg-muted p-[3px]',
+        default: 'w-fit rounded-lg bg-muted p-[3px]',
         line:
-          'w-full flex-row justify-start gap-8 rounded-none bg-transparent p-0 border-b border-border',
+          'w-full flex-row justify-start gap-8 rounded-none border-b border-border bg-transparent p-0',
       },
     },
     defaultVariants: {
@@ -53,7 +52,6 @@ function TabsList({
     />
   )
 }
-
 function TabsTrigger({
   className,
   ...props
@@ -62,14 +60,16 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all outline-none shrink-0 cursor-pointer pb-3 pt-2 text-muted-foreground hover:text-foreground border-b-[3px] border-transparent data-[state=active]:border-[#134C50] data-[state=active]:text-[#134C50] -mb-[1px]',
+        'relative inline-flex items-center justify-center gap-2 whitespace-nowrap px-2 py-3 text-sm font-medium text-muted-foreground transition-colors outline-none shrink-0 cursor-pointer',
+        'after:absolute after:bottom-[-1px] after:left-0 after:h-[3px] after:w-full after:scale-x-0 after:bg-[#134C50] after:transition-transform after:duration-200',
+        'data-[state=active]:text-[#134C50]',
+        'data-[state=active]:after:scale-x-100',
         className
       )}
       {...props}
     />
   )
 }
-
 function TabsContent({
   className,
   ...props

@@ -167,7 +167,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
       
       <Tabs value={activeTab || 'documentos'} onValueChange={setActiveTab} className="w-full mt-2">
         <div className="w-full overflow-x-auto scrollbar-hide">
-          <TabsList variant="line" className="min-w-max gap-25 overflow-y-hidden">
+          <TabsList variant="line" className="w-full justify-between">
             <TabsTrigger value="dados-cadastrais">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-current text-[11px] font-semibold">
                 1
