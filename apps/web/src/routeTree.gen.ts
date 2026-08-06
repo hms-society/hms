@@ -22,6 +22,8 @@ import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
+import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
+import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
@@ -96,6 +98,17 @@ const ClientesIndexRoute = ClientesIndexRouteImport.update({
   path: '/clientes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelosDeDocumentosNovoRoute = ModelosDeDocumentosNovoRouteImport.update({
+  id: '/modelos-de-documentos/novo',
+  path: '/modelos-de-documentos/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelosDeDocumentosDocumentSpecificationIdRoute =
+  ModelosDeDocumentosDocumentSpecificationIdRouteImport.update({
+    id: '/modelos-de-documentos/$documentSpecificationId',
+    path: '/modelos-de-documentos/$documentSpecificationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
@@ -139,6 +152,8 @@ export interface FileRoutesByFullPath {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
@@ -159,6 +174,8 @@ export interface FileRoutesByTo {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
   '/convite': typeof ConviteIndexRoute
@@ -181,6 +198,8 @@ export interface FileRoutesById {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/convite/': typeof ConviteIndexRoute
@@ -204,6 +223,8 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/clientes/'
     | '/colaboradores/'
     | '/convite/'
@@ -224,6 +245,8 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/clientes'
     | '/colaboradores'
     | '/convite'
@@ -245,6 +268,8 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/clientes/'
     | '/colaboradores/'
     | '/convite/'
@@ -263,6 +288,8 @@ export interface RootRouteChildren {
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  ModelosDeDocumentosDocumentSpecificationIdRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  ModelosDeDocumentosNovoRoute: typeof ModelosDeDocumentosNovoRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
@@ -366,6 +393,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/modelos-de-documentos/novo': {
+      id: '/modelos-de-documentos/novo'
+      path: '/modelos-de-documentos/novo'
+      fullPath: '/modelos-de-documentos/novo'
+      preLoaderRoute: typeof ModelosDeDocumentosNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/$documentSpecificationId': {
+      id: '/modelos-de-documentos/$documentSpecificationId'
+      path: '/modelos-de-documentos/$documentSpecificationId'
+      fullPath: '/modelos-de-documentos/$documentSpecificationId'
+      preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes/novo': {
       id: '/intakes/novo'
       path: '/novo'
@@ -457,6 +498,9 @@ const rootRouteChildren: RootRouteChildren = {
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  ModelosDeDocumentosDocumentSpecificationIdRoute:
+    ModelosDeDocumentosDocumentSpecificationIdRoute,
+  ModelosDeDocumentosNovoRoute: ModelosDeDocumentosNovoRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,

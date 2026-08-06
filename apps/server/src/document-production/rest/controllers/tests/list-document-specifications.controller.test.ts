@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
+import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 
 import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
 import { ListDocumentSpecificationsController } from '@/document-production/rest/controllers'
@@ -173,13 +174,19 @@ function createSpecification(
   return {
     name: 'Modelo de teste',
     description: 'Descrição de teste',
-    content: 'Conteúdo de teste',
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Conteúdo de teste' }],
+        },
+      ],
+    } as unknown as DocumentTemplateContent,
     variables: [],
     application: {
       scope: 'global',
       moment: 'consultation',
-      legalAreaIds: [],
-      legalTopicIdsByArea: {},
     },
     isRequired: false,
     status: 'available',

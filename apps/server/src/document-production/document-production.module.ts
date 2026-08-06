@@ -4,11 +4,23 @@ import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
-import { ListDocumentSpecificationsController } from '@/document-production/rest/controllers'
+import {
+  CreateDocumentSpecificationController,
+  GetDocumentSpecificationController,
+  ListDocumentSpecificationsController,
+  UpdateDocumentSpecificationConfigurationController,
+  UpdateDocumentSpecificationTemplateController,
+} from '@/document-production/rest/controllers'
 
 @Module({
   imports: [IdentityModule, LegalCatalogModule, DocumentProductionDatabaseModule],
-  controllers: [ListDocumentSpecificationsController],
+  controllers: [
+    CreateDocumentSpecificationController,
+    GetDocumentSpecificationController,
+    ListDocumentSpecificationsController,
+    UpdateDocumentSpecificationConfigurationController,
+    UpdateDocumentSpecificationTemplateController,
+  ],
   providers: [DocumentProductionSeeder],
   exports: [DocumentProductionSeeder],
 })

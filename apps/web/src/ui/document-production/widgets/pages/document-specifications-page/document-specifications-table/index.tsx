@@ -1,4 +1,5 @@
 import type { DocumentSpecificationListItem } from '@hms/core/document-production/domain/structures'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/ui/shadcn/button'
 import { Badge } from '@/ui/shadcn/badge'
 import {
@@ -80,15 +81,20 @@ export const DocumentSpecificationsTable = ({
             <TableCell className='px-3 py-2'>
               <div className='flex items-center gap-2'>
                 <Button
-                  type='button'
+                  asChild
                   variant='brand'
                   size='sm'
                   className='h-9 rounded-full px-3 text-xs'
                   aria-label={`Editar ${item.name}`}
-                  onClick={() => onEdit?.(item)}
                 >
-                  <Icon name='pencil' />
-                  Editar
+                  <Link
+                    to='/modelos-de-documentos/$documentSpecificationId'
+                    params={{ documentSpecificationId: item.documentSpecificationId }}
+                    onClick={() => onEdit?.(item)}
+                  >
+                    <Icon name='pencil' />
+                    Editar
+                  </Link>
                 </Button>
                 <Button
                   type='button'

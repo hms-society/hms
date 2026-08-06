@@ -1,4 +1,4 @@
-import { ConflictError } from '#shared/domain/errors/conflict-error.ts'
+import { ConflictError } from '#shared/domain/errors/conflict-error'
 
 import type { PackageDocumentStatus } from '../structures'
 

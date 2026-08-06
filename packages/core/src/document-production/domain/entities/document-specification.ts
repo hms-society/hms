@@ -1,6 +1,7 @@
 import type {
   DocumentSpecificationApplication,
   DocumentSpecificationStatus,
+  DocumentTemplateContent,
   DocumentTemplateVariable,
 } from '../structures'
 
@@ -10,7 +11,7 @@ export type DocumentSpecification = {
   description: string
   application: DocumentSpecificationApplication
   isRequired: boolean
-  content: string
+  content: DocumentTemplateContent
   variables: readonly DocumentTemplateVariable[]
   status: DocumentSpecificationStatus
   createdAt: Date

@@ -14,6 +14,18 @@ Orchestrator → Builder Direct → sensores → Judge Implementation Direct
 1. Leia Spec, Architecture, Rules e `documentation/tooling.md`. Preserve o link
    do PRD no Confluence e todas as chaves de `jira_tickets`; consulte-os quando
    a integração estiver disponível, sem alterar seus estados automaticamente.
+   Se a Spec referenciar um arquivo `.pen`, `design/hms.pen` ou nodes Pencil, a
+   validação Pencil é obrigatória: antes de qualquer outra operação Pencil,
+   obtenha o estado do editor com schema; inspecione os nodes canônicos
+   referenciados e capture screenshot do Pencil e screenshot do Playwright para
+   cada tela/node/estado correspondente, usando viewport e estado equivalentes
+   quando possível. A comparação visual node a node é obrigatória; snapshot de
+   acessibilidade, DOM ou screenshot isolado do Playwright não a substitui.
+   Registre no `evaluation.md`, por node, as duas evidências e as divergências.
+   Se o arquivo ou node não existir, classifique a validação como
+   `visual_validation_blocked`/`limited`, registre o erro e não declare a
+   comparação concluída. Nunca leia `.pen` com shell, Read ou Grep; use somente
+   as operações Pencil.
 2. Congele a revisão e o commit-base.
 3. Crie `Builder Direct` como subagente e envie Contract, resultado observável,
    paths, Rules, Architecture e MCPs aplicáveis.

@@ -14,6 +14,7 @@ export const ROUTES = {
   clients: '/clientes',
   collaborators: '/colaboradores',
   documentSpecifications: '/modelos-de-documentos',
+  newDocumentSpecification: '/modelos-de-documentos/novo',
 } as const
 
 export type RouteName = keyof typeof ROUTES
