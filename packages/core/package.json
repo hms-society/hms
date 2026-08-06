@@ -10,6 +10,8 @@
     "./communication/interfaces": "./src/communication/interfaces/index.ts",
     "./consultation/domain/entities": "./src/consultation/domain/entities/index.ts",
     "./consultation/domain/structures": "./src/consultation/domain/structures/index.ts",
+    "./consultation/interfaces": "./src/consultation/interfaces/index.ts",
+    "./consultation/use-cases": "./src/consultation/use-cases/index.ts",
     "./document-engine/domain/entities": "./src/document-engine/domain/entities/index.ts",
     "./document-engine/domain/errors": "./src/document-engine/domain/errors/index.ts",
     "./document-engine/domain/events": "./src/document-engine/domain/events/index.ts",

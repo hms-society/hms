@@ -1,0 +1,1 @@
+export type { ConsultationsRepository } from './consultations-repository'

@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import {
   ArrowLeft,
-  Phone,
-  Mail,
-  MapPin,
   Calendar,
   Clock,
   Video,
@@ -15,20 +12,10 @@ import {
   ArrowRight,
   MessageSquare,
   Link as LinkIcon,
-  RefreshCw,
 } from 'lucide-react'
 
 import { Button } from '@/ui/shadcn/button'
 import { Badge } from '@/ui/shadcn/badge'
-
-export interface ClientData {
-  name?: string
-  cpf?: string
-  phone?: string
-  email?: string
-  cityState?: string
-  statusTag?: string
-}
 
 export interface IntakeSourceData {
   intakeCode?: string
@@ -46,10 +33,8 @@ export interface ScheduleData {
 }
 
 interface ConsultationDetailsProps {
-  onBack?: () => void
   onContinueForm?: () => void
   onUpdateAttendanceStatus?: (status: 'confirmed' | 'rescheduled' | 'absent') => Promise<void> | void
-  client?: ClientData
   intakeSource?: IntakeSourceData
   demandContext?: string
   schedule?: ScheduleData
@@ -57,10 +42,8 @@ interface ConsultationDetailsProps {
 }
 
 export function ConsultationDetails({
-  onBack,
   onContinueForm,
   onUpdateAttendanceStatus,
-  client,
   intakeSource,
   demandContext,
   schedule = {
@@ -81,72 +64,25 @@ export function ConsultationDetails({
     }
   }
 
-  const getInitials = (name?: string) => {
-    if (!name) return '--'
-    const parts = name.trim().split(' ')
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-  }
-
   return (
     <div className="space-y-6 pb-12 font-sans">
-      {onBack && (
-        <div>
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-xs text-teal-800 hover:text-teal-900 font-medium transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Voltar
-          </button>
-        </div>
-      )}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-        <div className="md:col-span-7 flex items-start gap-4 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0">
-          <div className="w-14 h-14 rounded-full bg-teal-100/70 text-teal-800 font-serif font-bold text-lg flex items-center justify-center shrink-0">
-            {isLoading ? '...' : getInitials(client?.name)}
-          </div>
-
-          <div className="space-y-2.5 flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-serif font-bold text-slate-800 truncate">
-                {isLoading ? 'Carregando...' : client?.name || 'Cliente não identificado'}
-              </h1>
-              {client?.statusTag && (
-                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[11px] font-normal rounded-full px-2.5 flex items-center gap-1">
-                  <RefreshCw className="w-3 h-3" />
-                  {client.statusTag}
-                </Badge>
-              )}
-            </div>
-
-            <p className="text-xs text-slate-500 font-mono">
-              CPF <span className="font-semibold text-slate-700">{client?.cpf || '—'}</span>
-            </p>
-
-            <div className="flex items-center gap-2 flex-wrap text-xs text-slate-600">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full border border-slate-200/80">
-                <Phone className="w-3 h-3 text-slate-400" />
-                {client?.phone || 'Sem telefone'}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full border border-slate-200/80">
-                <Mail className="w-3 h-3 text-slate-400" />
-                {client?.email || 'Sem e-mail'}
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-400 flex items-center gap-1 pt-0.5">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              {client?.cityState || 'Localização não informada'}
-            </p>
-          </div>
-        </div>
-
-        <div className="md:col-span-5 grid grid-cols-2 gap-y-3 gap-x-4 text-xs font-sans">
+      <div>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 text-xs text-teal-800 font-medium cursor-default"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+        </button>
+      </div>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+          Informações da Origem (Intake)
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-y-3 gap-x-4 text-xs font-sans">
           <div>
             <span className="text-slate-400 block mb-0.5">Intake</span>
             <span className="font-semibold text-teal-700 hover:underline cursor-pointer flex items-center gap-1">
-              <LinkIcon className="w-3 h-3" /> {intakeSource?.intakeCode || '—'}
+              <LinkIcon className="w-3 h-3" /> {isLoading ? '...' : intakeSource?.intakeCode || '—'}
             </span>
           </div>
           <div>
@@ -224,7 +160,7 @@ export function ConsultationDetails({
               variant="outline"
               size="sm"
               onClick={() => handleStatusChange('rescheduled')}
-              className={`rounded-full h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800  ${
+              className={`rounded-full h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800 ${
                 attendanceStatus === 'rescheduled' ? 'bg-teal-100 border-teal-700' : ''
               }`}
             >

@@ -1,0 +1,4 @@
+export * from './create-consultation-from-appointment-use-case'
+export * from './start-consultation-use-case'
+export * from './complete-consultation-use-case'
+export * from './register-no-show-use-case'
