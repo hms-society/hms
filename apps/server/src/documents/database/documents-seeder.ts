@@ -1,5 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { sql } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
 import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
 import { DocumentChannel } from '@hms/core/documents/domain/structures'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
@@ -25,6 +26,7 @@ export class DocumentsSeeder {
 
   async run() {
     await this.clear()
+
     const db = this.drizzleClient.requireDatabase()
 
     const users = await db.select().from(userModel).limit(5)
@@ -56,40 +58,42 @@ export class DocumentsSeeder {
     ]
 
     const batches: any[] = []
+    const batchesPerClient = 3
 
-    for (let i = 0; i < clients.length; i++) {
-      const client = clients[i]
-      const user = users[i % users.length]
-      
-      const batchName = `LOTE-${Date.now()}`
+    for (const [index, client] of clients.entries()) {
+      const user = users[index % users.length]
 
-      const uploadedFiles = await Promise.all(
-        dummyFiles.map(async (file) => {
-          const buffer = Buffer.from(file.content)
-          
-          const storagePath = `seed/${client.id}/${batchName}/${file.name}`
+      for (let batchIndex = 1; batchIndex <= batchesPerClient; batchIndex++) {
+        const batchName = `LOTE-${client.id}-${batchIndex}-${randomUUID()}`
 
-          await this.storageProvider.upload(storagePath, buffer, file.mime)
+        const uploadedFiles = await Promise.all(
+          dummyFiles.map(async (file) => {
+            const buffer = Buffer.from(file.content)
 
-          return {
-            storagePath,
-            originalName: file.name,
-            mimeType: file.mime,
-            sizeBytes: buffer.length,
-          }
-        }),
-      )
+            const storagePath = `seed/${client.id}/${batchName}/${file.name}`
 
-      const batch = await this.createDocumentBatchUseCase.execute({
-        readableId: batchName,
-        channel: DocumentChannel.InternalUpload,
-        sender: 'admin@hms.com.br',
-        createdBy: user.id,
-        clientId: client.id,
-        files: uploadedFiles,
-      })
+            await this.storageProvider.upload(storagePath, buffer, file.mime)
 
-      batches.push(batch)
+            return {
+              storagePath,
+              originalName: file.name,
+              mimeType: file.mime,
+              sizeBytes: buffer.length,
+            }
+          }),
+        )
+
+        const batch = await this.createDocumentBatchUseCase.execute({
+          readableId: batchName,
+          channel: DocumentChannel.InternalUpload,
+          sender: 'admin@hms.com.br',
+          createdBy: user.id,
+          clientId: client.id,
+          files: uploadedFiles,
+        })
+
+        batches.push(batch)
+      }
     }
 
     return batches
