@@ -1,5 +1,4 @@
 import { Card } from '@/ui/shadcn/card'
-import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Button } from '@/ui/shadcn/button'
 import { Skeleton } from '@/ui/shadcn/skeleton'
