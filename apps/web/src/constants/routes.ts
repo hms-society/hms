@@ -22,6 +22,7 @@ export const ROUTES = {
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',
   paralegalCommunication: '/comunicacao',
+  documentSpecifications: '/modelos-de-documentos',
 } as const
 
 export type RouteName = keyof typeof ROUTES
