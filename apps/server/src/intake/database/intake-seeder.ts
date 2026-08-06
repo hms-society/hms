@@ -5,7 +5,6 @@ import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import type { IntakeCreation } from '@hms/core/intake/domain/entities'
-import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
