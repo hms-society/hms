@@ -153157,7 +153157,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -153491,7 +153492,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -154019,7 +154021,8 @@
                                                   "width": "fill_container",
                                                   "content": "Mariana Costa Silva",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -154088,7 +154091,8 @@
                                                   "width": "fill_container",
                                                   "content": "284.***.***-19",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -154167,7 +154171,8 @@
                                                   "width": "fill_container",
                                                   "content": "Rua das Palmeiras, 147",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -154236,7 +154241,8 @@
                                                   "width": "fill_container",
                                                   "content": "01452-001",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -154304,7 +154310,8 @@
                                               "fill": "$muted-foreground",
                                               "content": "Campo obrigatório antes da validação.",
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 7
+                                              "fontSize": 7,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -188405,7 +188412,8 @@
                           "fill": "$muted-foreground",
                           "content": "Revise os documentos recebidos e encaminhe cada um para validação.",
                           "fontFamily": "$font-sans",
-                          "fontSize": 11
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -188926,7 +188934,8 @@
                                   "width": "fill_container",
                                   "content": "Portal do cliente · mariana.silva@email.com",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189034,7 +189043,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189255,7 +189265,8 @@
                                   "width": "fill_container",
                                   "content": "WhatsApp · +55 21 99876-5432",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189363,7 +189374,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "13:08",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189584,7 +189596,8 @@
                                   "width": "fill_container",
                                   "content": "E-mail · ana.lima@email.com",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189673,7 +189686,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "17:45",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -189894,7 +189908,8 @@
                                   "width": "fill_container",
                                   "content": "Portal do cliente · documentos@alvorada.com.br",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -190002,7 +190017,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "16:20",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -190223,7 +190239,8 @@
                                   "width": "fill_container",
                                   "content": "Portal do cliente · rafael.nunes@email.com",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -190331,7 +190348,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "15:02",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -190552,7 +190570,8 @@
                                   "width": "fill_container",
                                   "content": "WhatsApp · +55 11 98765-1098",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -190641,7 +190660,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "11:26",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 8
+                                  "fontSize": 8,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -191672,7 +191692,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -191971,7 +191992,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -192498,7 +192520,8 @@
                                                   "width": "fill_container",
                                                   "content": "Mariana Costa Silva",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -192567,7 +192590,8 @@
                                                   "width": "fill_container",
                                                   "content": "284.***.***-19",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -192646,7 +192670,8 @@
                                                   "width": "fill_container",
                                                   "content": "Rua das Palmeiras, 147",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -192715,7 +192740,8 @@
                                                   "width": "fill_container",
                                                   "content": "01452-001",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -193135,7 +193161,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -193434,7 +193461,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -194750,7 +194778,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -195049,7 +195078,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -195612,7 +195642,8 @@
                                                   "width": "fill_container",
                                                   "content": "Mariana Costa Silva",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -195681,7 +195712,8 @@
                                                   "width": "fill_container",
                                                   "content": "284.***.***-19",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -195760,7 +195792,8 @@
                                                   "width": "fill_container",
                                                   "content": "Rua das Palmeiras, 147",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -195829,7 +195862,8 @@
                                                   "width": "fill_container",
                                                   "content": "01452-001",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -196234,7 +196268,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -196533,7 +196568,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -197210,7 +197246,8 @@
                                                   "width": "fill_container",
                                                   "content": "Mariana Costa Silva",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -197283,7 +197320,8 @@
                                                   "width": "fill_container",
                                                   "content": "284.***.***-19",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -197366,7 +197404,8 @@
                                                   "width": "fill_container",
                                                   "content": "Rua das Palmeiras, 147",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -197439,7 +197478,8 @@
                                                   "width": "fill_container",
                                                   "content": "01452-001",
                                                   "fontFamily": "$font-sans",
-                                                  "fontSize": 9
+                                                  "fontSize": 9,
+                                                  "fontWeight": "normal"
                                                 },
                                                 {
                                                   "type": "icon",
@@ -197510,7 +197550,8 @@
                                               "fill": "$muted-foreground",
                                               "content": "Campo obrigatório antes da validação.",
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 7
+                                              "fontSize": 7,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -197816,7 +197857,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -198115,7 +198157,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -199029,7 +199072,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "Mariana Costa Silva · Portal do cliente · recebido hoje às 14:32",
                                   "fontFamily": "$font-sans",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -199328,7 +199372,8 @@
                                               "content": "Rua das Palmeiras, 147\nJardim América · São Paulo/SP",
                                               "lineHeight": 1.25,
                                               "fontFamily": "$font-sans",
-                                              "fontSize": 9
+                                              "fontSize": 9,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
