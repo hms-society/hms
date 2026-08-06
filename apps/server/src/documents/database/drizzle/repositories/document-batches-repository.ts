@@ -8,10 +8,10 @@ import type {
 import type { DocumentBatch } from '@hms/core/documents/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
+import { eq, desc, inArray } from 'drizzle-orm' // inArray adicionado
 
 @Injectable()
-export class DrizzleDocumentBatchesRepository
-  extends DrizzleRepository
+export class DrizzleDocumentBatchesRepository extends DrizzleRepository
   implements DocumentBatchesRepository
 {
   constructor(
@@ -59,7 +59,30 @@ export class DrizzleDocumentBatchesRepository
       return this.mapper.toDomain({
         ...createdBatch,
         files: createdFiles,
-      })
+      } as any)
     })
+  }
+
+  async findById(clientId:string): Promise<DocumentBatch[]> {
+    const batches = await this.database
+      .select()
+      .from(documentBatchModel)
+      .where(eq(documentBatchModel.clientId, clientId))
+      .orderBy(desc(documentBatchModel.createdAt))
+
+    if (batches.length === 0) return []
+
+    const batchIds = batches.map((b) => b.id)
+    const files = await this.database
+      .select()
+      .from(documentBatchFileModel)
+      .where(inArray(documentBatchFileModel.batchId, batchIds))
+
+    const records = batches.map((batch) => ({
+      ...batch,
+      files: files.filter((f) => f.batchId === batch.id),
+    }))
+
+    return records.map((record) => this.mapper.toDomain(record as any))
   }
 }

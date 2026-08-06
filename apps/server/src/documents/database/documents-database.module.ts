@@ -4,12 +4,12 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
 import { DrizzleDocumentBatchMapper } from './drizzle/mappers/drizzle-document-batch-mapper'
-import { DrizzleDailyCountersRepository } from './drizzle/repositories/drizzle-daily-counters-repository'
-import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/drizzle-document-batches-repository'
+import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/document-batches-repository'
 import { DocumentsSeeder } from './documents-seeder'
 import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 
 @Module({
   imports: [

@@ -2,10 +2,34 @@ import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useClientDocumentsQuery } from '@/ui/shared/hooks/use-client-documents-query'
 
-export function ClientDocumentsTab() {
+type ClientDocumentsTabProps = {
+  clientId: string
+}
+
+export function ClientDocumentsTab({ clientId }: ClientDocumentsTabProps) {
+  const { data: batches = [], isLoading, isError } = useClientDocumentsQuery(clientId)
+
+  if (isLoading) {
+    return (
+    <div className="flex justify-center items-center h-40">
+        <span className="text-sm text-muted-foreground">Carregando documentos...</span>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <span className="text-sm text-destructive">Erro ao carregar os documentos.</span>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6 pt-2">
+      {/* Filtros */}
       <div className="flex items-center gap-4">
         <NativeSelect size="sm" className="w-32 bg-card">
           <NativeSelectOption value="">Canal</NativeSelectOption>
@@ -21,104 +45,60 @@ export function ClientDocumentsTab() {
           <Icon name="triangle-alert" className="w-3.5 h-3.5" /> Revisão pendente (1)
         </Badge>
       </div>
+
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col border border-border rounded-xl bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between px-5 py-3 bg-muted/40 border-b border-border text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span className="font-mono tracking-wide">LOTE-20260620-0031</span>
-              <span className="flex items-center gap-1.5"><Icon name="message-square" className="w-3.5 h-3.5" /> WhatsApp</span>
-            </div>
-            <span>20/06/2026</span>
+        {batches.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-card border border-border rounded-xl">
+            Nenhum lote de documentos encontrado.
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                  <Icon name="file-text" className="w-5 h-5" />
+        ) : (
+          batches.map((batch: any) => (
+            <div key={batch.id} className="flex flex-col border border-border rounded-xl bg-card overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-5 py-3 bg-muted/40 border-b border-border text-xs text-muted-foreground">
+                <div className="flex items-center gap-4">
+                  <span className="font-mono tracking-wide">{batch.readableId}</span>
+                  <span className="flex items-center gap-1.5 capitalize">
+                    <Icon name={batch.channel === 'whatsapp' ? 'message-square' : 'arrow-up'} className="w-3.5 h-3.5" />
+                    {batch.channel === 'whatsapp' ? 'WhatsApp' : 'Upload interno'}
+                  </span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">RG_frente_verso.jpg</span>
-                  <span className="text-xs text-muted-foreground">Documento de identificação</span>
-                </div>
+                <span>
+                  {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(batch.createdAt))}
+                </span>
               </div>
-              <div className="flex items-center gap-6">
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium">Validado</Badge>
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><Icon name="eye" className="w-4 h-4" /></Button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                  <Icon name="file-text" className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">comprovante_residencia.pdf</span>
-                  <span className="text-xs text-muted-foreground">Comprovante de residência</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium">Validado</Badge>
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><Icon name="eye" className="w-4 h-4" /></Button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                  <Icon name="file-text" className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">extrato_inss.pdf</span>
-                  <span className="text-xs text-muted-foreground">Extrato previdenciário — a confirmar</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none shadow-none font-medium">Revisão humana pendente</Badge>
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><Icon name="eye" className="w-4 h-4" /></Button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col border border-border rounded-xl bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between px-5 py-3 bg-muted/40 border-b border-border text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span className="font-mono tracking-wide">LOTE-20260115-0009</span>
-              <span className="flex items-center gap-1.5"><Icon name="arrow-up" className="w-3.5 h-3.5" /> Upload interno · Atend. Júlia</span>
-            </div>
-            <span>15/01/2026</span>
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                  <Icon name="file-text" className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">contrato_assinado.pdf</span>
-                  <span className="text-xs text-muted-foreground">Contrato de honorários</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium">Validado</Badge>
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><Icon name="eye" className="w-4 h-4" /></Button>
+              
+              <div className="flex flex-col">
+                {batch.files && batch.files.length > 0 ? (
+                  batch.files.map((file: any) => (
+                    <div key={file.id} className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
+                          <Icon name="file-text" className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-foreground">{file.originalName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {file.mimeType} • {(file.sizeBytes / 1024).toFixed(2)} KB
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium">
+                          Recebido
+                        </Badge>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
+                          <Icon name="eye" className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-5 py-4 text-xs text-muted-foreground text-center">Nenhum arquivo processado neste lote.</div>
+                )}
               </div>
             </div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border last:border-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground">
-                  <Icon name="file-text" className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">procuracao.pdf</span>
-                  <span className="text-xs text-muted-foreground">Procuração ad judicia</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium">Validado</Badge>
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><Icon name="eye" className="w-4 h-4" /></Button>
-              </div>
-            </div>
-          </div>
-        </div>
+          ))
+        )}
       </div>
     </div>
   )

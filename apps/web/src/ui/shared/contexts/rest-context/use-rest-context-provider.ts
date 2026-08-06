@@ -10,6 +10,7 @@ import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
+import { documentService } from '@/rest/services/document-service'
 
 export function useRestContextProvider(): RestContextValue {
   const { getSession, signOut } = useAuthContext()
@@ -38,5 +39,6 @@ export function useRestContextProvider(): RestContextValue {
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
+    documentService: documentService(restClient)
   }
 }

@@ -219,7 +219,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
         </TabsContent>
 
         <TabsContent value="documentos" className="mt-4 outline-none">
-          <ClientDocumentsTab />
+          <ClientDocumentsTab  clientId={clientId}/>
         </TabsContent>
       </Tabs>
     </div>
