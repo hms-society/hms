@@ -21,11 +21,23 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
     private readonly db: DrizzleDB,
   ) {}
 
-  private toCalendarDate(date: Date): CalendarDate {
-    const year = date.getUTCFullYear()
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-    const day = String(date.getUTCDate()).padStart(2, '0')
-    return `${year}-${month}-${day}` as CalendarDate
+  private toCalendarDate(date: Date | string | null | undefined): CalendarDate {
+    if (!date) return '' as CalendarDate
+
+    if (typeof date === 'string') {
+      if (date.includes('NaN')) return '' as CalendarDate
+      return date.split('T')[0].split(' ')[0] as CalendarDate
+    }
+
+    if (date instanceof Date) {
+      if (isNaN(date.getTime())) return '' as CalendarDate
+      const year = date.getUTCFullYear()
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(date.getUTCDate()).padStart(2, '0')
+      return `${year}-${month}-${day}` as CalendarDate
+    }
+
+    return '' as CalendarDate
   }
 
   private mapToScheduleDomain(schedule: any): Schedule {
@@ -37,9 +49,9 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
       weeklyAvailability: (schedule.weeklyAvailability ?? []) as WeeklyAvailability[],
       blockedPeriods: (schedule.blockedPeriods ?? []).map((bp: any) => ({
         id: bp.id,
-        startsOn: this.toCalendarDate(new Date(bp.startDate)),
-        endsOn: this.toCalendarDate(new Date(bp.endDate)),
-        reason: bp.description,
+        startsOn: bp.startsOn ?? this.toCalendarDate(bp.startDate),
+        endsOn: bp.endsOn ?? this.toCalendarDate(bp.endDate),
+        reason: bp.reason ?? bp.description ?? '',
         createdAt: bp.createdAt,
       })),
       createdAt: schedule.createdAt,
@@ -55,11 +67,11 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
 
     if (!scheduleRow) return null
 
-    const blockedPeriods = await this.findBlockedPeriodsByScheduleId(id)
+    const blocked = await this.findBlockedPeriodsByScheduleId(id)
 
     return this.mapToScheduleDomain({
       ...scheduleRow,
-      blockedPeriods,
+      blockedPeriods: blocked,
     })
   }
 
@@ -71,11 +83,11 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
 
     if (!scheduleRow) return null
 
-    const blockedPeriods = await this.findBlockedPeriodsByScheduleId(scheduleRow.id)
+    const blocked = await this.findBlockedPeriodsByScheduleId(scheduleRow.id)
 
     return this.mapToScheduleDomain({
       ...scheduleRow,
-      blockedPeriods,
+      blockedPeriods: blocked,
     })
   }
 
@@ -100,15 +112,17 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
 
     return results.map((item) => ({
       id: item.id,
-      startsOn: this.toCalendarDate(new Date(item.startDate)),
-      endsOn: this.toCalendarDate(new Date(item.endDate)),
-      reason: item.description,
+      startsOn: this.toCalendarDate(item.startDate),
+      endsOn: this.toCalendarDate(item.endDate),
+      reason: item.description ?? '',
       createdAt: item.createdAt,
     }))
   }
+
   async deleteBlockedPeriod(id: string): Promise<void> {
     await this.db.delete(blockedPeriods).where(eq(blockedPeriods.id, id))
   }
+
   async updateWeeklyAvailability(scheduleId: string, weeklyAvailability: unknown) {
     const [updated] = await this.db
       .update(schedules)
@@ -121,6 +135,7 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
 
     return updated
   }
+
   async updateDefaultDuration(scheduleId: string, defaultDurationMinutes: number) {
     const [updated] = await this.db
       .update(schedules)
@@ -135,21 +150,32 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
   }
 
   async createBlockedPeriod(data: CreateBlockedPeriodInput): Promise<BlockedPeriod> {
+    const cleanStart = data.startsOn.includes('T')
+      ? data.startsOn
+      : `${data.startsOn}T00:00:00.000Z`
+
+    const cleanEnd = data.endsOn.includes('T')
+      ? data.endsOn
+      : `${data.endsOn}T23:59:59.999Z`
+
+    const startDate = new Date(cleanStart)
+    const endDate = new Date(cleanEnd)
+
     const [created] = await this.db
       .insert(blockedPeriods)
       .values({
         scheduleId: data.scheduleId,
-        startDate: new Date(`${data.startsOn}T00:00:00`),
-        endDate: new Date(`${data.endsOn}T23:59:59`),
+        startDate,
+        endDate,
         description: data.reason ?? '',
       })
       .returning()
 
     return {
       id: created.id,
-      startsOn: data.startsOn,
-      endsOn: data.endsOn,
-      reason: created.description,
+      startsOn: this.toCalendarDate(created.startDate),
+      endsOn: this.toCalendarDate(created.endDate),
+      reason: created.description ?? '',
       createdAt: created.createdAt,
     }
   }
