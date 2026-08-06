@@ -10,7 +10,7 @@ type CollaboratorBase = {
 }
 
 type AdministrativeCollaborator = CollaboratorBase & {
-  readonly profile: 'admin' | 'attendant'
+  readonly profile: 'admin' | 'attendant' | 'client'
   readonly legalExpertises?: never
 }
 

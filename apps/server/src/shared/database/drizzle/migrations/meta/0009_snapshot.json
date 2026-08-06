@@ -1555,7 +1555,7 @@
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
-      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor"]
+      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
     },
     "public.consent_type": {
       "name": "consent_type",

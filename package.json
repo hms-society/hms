@@ -10,6 +10,8 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check-types": "turbo run check-types",
+    "validate": "pnpm check && pnpm check-types && pnpm test",
+    "seed": "pnpm --filter server db:seed",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -21,6 +21,7 @@ type Env = z.infer<typeof envSchema>
 @Injectable()
 export class EnvProvider {
   constructor(@Inject(ConfigService) private configService: ConfigService<Env, true>) {}
+
   get<Key extends keyof Env>(key: Key) {
     return this.configService.get<Env[Key]>(key, { infer: true })
   }
