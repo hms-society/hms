@@ -7,11 +7,8 @@ export function useMeusCasos() {
   const clientId = user?.id
   console.log(user?.id)
 
-  const {
-    clientDetails,
-    clientDetailsError,
-    isLoadingClientDetails,
-  } = useClientDetailsQuery(clientId)
+  const { clientDetails, clientDetailsError, isLoadingClientDetails } =
+    useClientDetailsQuery(clientId)
 
   const {
     clientIntakes = [],
@@ -20,7 +17,7 @@ export function useMeusCasos() {
   } = useClientIntakesQuery(clientId)
 
   console.log({ clientIntakes })
-  console.log({clientDetails, clientDetailsError})
+  console.log({ clientDetails, clientDetailsError })
   const clientName = clientDetails?.client
     ? clientDetails.client.type === 'natural'
       ? clientDetails.client.name

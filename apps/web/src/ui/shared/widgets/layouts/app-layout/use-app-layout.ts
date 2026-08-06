@@ -21,8 +21,7 @@ export function useAppLayout() {
     currentCollaborator?.profile ||
     (user?.role as CollaboratorProfile) ||
     CollaboratorProfile.Attendant
-  const sidebarItems =
-    SIDEBAR_ITEMS[role] || SIDEBAR_ITEMS[CollaboratorProfile.Attendant]
+  const sidebarItems = SIDEBAR_ITEMS[role] || SIDEBAR_ITEMS[CollaboratorProfile.Attendant]
 
   return {
     pathname,

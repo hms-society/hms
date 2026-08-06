@@ -10,13 +10,6 @@ import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { clientModel, userModel } from '@/identity/database/drizzle/models'
-import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
-import { IntakeStatus } from '@hms/core/intake/domain/structures'
-import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.provider'
-
-const DEFAULT_INTAKE_COUNT = 25
 
 export type IntakeSeedReferences = {
   clientIds: readonly string[]
@@ -45,7 +38,7 @@ export class IntakeSeeder {
   async run(references: IntakeSeedReferences) {
     const clients = await this.database.select().from(clientModel)
     const users = await this.database.select().from(userModel)
-    
+
     const attendant = users.find((u) => u.email === 'attendant@hmsadvogados.com.br')
     const responsibleId = attendant?.id || references.responsibleIds[0] || clients[0]?.id
 
