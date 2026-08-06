@@ -3,7 +3,6 @@ import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.prov
 import { clientModel } from '@/identity/database/drizzle/models'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
-import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import type { IntakeCreation } from '@hms/core/intake/domain/entities'
 import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'

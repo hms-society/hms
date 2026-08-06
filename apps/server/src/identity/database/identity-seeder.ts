@@ -44,8 +44,10 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'paralegal@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
     email: 'client@hms.br',
-    password: 'password123',
     status: 'active',
   },
 ]
@@ -86,6 +88,8 @@ const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   professionalName: 'Paralegal de desenvolvimento',
   jobTitle: 'Paralegal',
   profile: 'paralegal',
+}
+
 const DEFAULT_CLIENT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   profile: 'client'
 } = {
@@ -199,10 +203,9 @@ export class IdentitySeeder {
       ({ email }) => email === 'paralegal@hmsadvogados.com.br',
     )
 
-    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser) {
     const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
 
-    if (!adminUser || !attendantUser || !lawyerUser || !clientUser) {
+    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -234,7 +237,13 @@ export class IdentitySeeder {
       ...DEFAULT_CLIENT,
     })
 
-    if (!seededAdministrator || !attendant || !lawyer || !clientCollaborator) {
+    if (
+      !administratorCreated ||
+      !attendantCreated ||
+      !lawyerCreated ||
+      !paralegalCreated ||
+      !clientCollaborator
+    ) {
       throw new AppError('Default seed collaborators were not created')
     }
 
@@ -258,12 +267,12 @@ export class IdentitySeeder {
         attendantCreated,
         lawyerCreated,
         paralegalCreated,
+        clientCollaborator,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,
       ),
       users: seededUsers,
-      collaborators: [seededAdministrator, attendant, lawyer, clientCollaborator],
     }
   }
 }
