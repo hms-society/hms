@@ -11,6 +11,10 @@ export const ROUTES = {
   attendantConsultations: '/atendimento/consultas',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
+  clientMyCases: '/cliente/meus-casos',
+  clientMyCaseDetails: '/cliente/meus-casos/$caseId',
+  clientMessages: '/cliente/mensagens',
+  clientPrivacy: '/cliente/privacidade',
   clients: '/clientes',
   collaborators: '/colaboradores',
 } as const

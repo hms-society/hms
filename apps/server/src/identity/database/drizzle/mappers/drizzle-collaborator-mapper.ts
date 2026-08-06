@@ -20,7 +20,8 @@ export class DrizzleCollaboratorMapper {
 
     if (
       record.collaborator.profile === 'admin' ||
-      record.collaborator.profile === 'attendant'
+      record.collaborator.profile === 'attendant' ||
+      record.collaborator.profile === 'client'
     ) {
       return {
         id: record.collaborator.id,
@@ -60,7 +61,8 @@ export class DrizzleCollaboratorMapper {
 
     if (
       record.collaborator.profile === 'admin' ||
-      record.collaborator.profile === 'attendant'
+      record.collaborator.profile === 'attendant' ||
+      record.collaborator.profile === 'client'
     ) {
       return {
         ...base,

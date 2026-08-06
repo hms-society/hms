@@ -6,4 +6,5 @@ export const collaboratorProfileModel = pgEnum('collaborator_profile', [
   'lawyer',
   'paralegal',
   'supervisor',
+  'client',
 ])

@@ -6,6 +6,7 @@ export const collaboratorProfileSchema = z.enum(CollaboratorProfile)
 export const administrativeCollaboratorProfileSchema = z.enum([
   CollaboratorProfile.Admin,
   CollaboratorProfile.Attendant,
+  CollaboratorProfile.Client,
 ])
 
 export const legalCollaboratorProfileSchema = z.enum([

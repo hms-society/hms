@@ -30,4 +30,3 @@ Marque as opções abaixo após realizá-las localmente em sua máquina (todas s
 - [ ] Executei `pnpm check` (Biome) e o código está devidamente formatado e sem alertas de qualidade/linter.
 - [ ] Validei as alterações manualmente no navegador/Postman para garantir o funcionamento correto.
 - [ ] Garanti que estas modificações **não quebram** fluxos ou páginas existentes de outros desenvolvedores.
-

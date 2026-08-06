@@ -25,6 +25,12 @@ const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
+const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [
+  { label: 'Meus Casos', route: 'clientMyCases', icon: 'file-text' },
+  { label: 'Mensagens', route: 'clientMessages', icon: 'message-circle' },
+  { label: 'Privacidade & LGPD', route: 'clientPrivacy', icon: 'shield' },
+]
+
 export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Admin]: [
     { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },
@@ -36,4 +42,5 @@ export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Lawyer]: LAWYER_SIDEBAR_ITEMS,
   [CollaboratorProfile.Paralegal]: LAWYER_SIDEBAR_ITEMS,
   [CollaboratorProfile.Supervisor]: LAWYER_SIDEBAR_ITEMS,
+  [CollaboratorProfile.Client]: CLIENT_SIDEBAR_ITEMS,
 }
