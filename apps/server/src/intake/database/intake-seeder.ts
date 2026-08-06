@@ -11,8 +11,6 @@ import type { IntakesRepository } from '@hms/core/intake/interfaces'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 
-const DEFAULT_INTAKE_COUNT = 25
-
 export type IntakeSeedReferences = {
   clientIds: readonly string[]
   responsibleIds: readonly string[]
