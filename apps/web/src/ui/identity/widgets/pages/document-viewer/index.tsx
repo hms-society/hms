@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@supabase/supabase-js'
@@ -7,6 +7,10 @@ import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent } from '@/ui/shadcn/card'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useDocumentFileQuery } from '@/ui/shared/hooks/use-document-file-query'
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+import { Document as PdfDocument, Page, pdfjs } from 'react-pdf'
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -22,6 +26,7 @@ function formatBytes(bytes: number) {
 }
 
 export function DocumentViewerPage() {
+  const [numPages, setNumPages] = useState<number>(0)
   const { fileId } = useParams({ from: '/documentos/$fileId' })
   
   const { data: file, isLoading: isLoadingFile, isError: isErrorFile } = useDocumentFileQuery(fileId)
@@ -149,11 +154,40 @@ export function DocumentViewerPage() {
                     <span className="text-sm">Não foi possível carregar a URL do arquivo.</span>
                   </div>
                 ) : format === 'PDF' ? (
-                  <iframe
-                    src={`${fileUrl}#toolbar=0&navpanes=0`}
-                    className="absolute inset-0 w-full h-full border-none bg-white"
-                    title={file.originalName}
-                  />
+                  <div className="absolute inset-0 overflow-auto bg-white">
+                    <div className="flex justify-center py-4">
+                      <PdfDocument
+                        file={fileUrl}
+                        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                        loading={
+                          <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
+                            <Icon name="refresh-cw" className="w-8 h-8 animate-spin" />
+                            <span className="text-sm">Renderizando PDF...</span>
+                          </div>
+                        }
+                        error={
+                          <div className="flex flex-col items-center gap-2 py-10 text-destructive">
+                            <Icon name="triangle-alert" className="w-8 h-8" />
+                            <span className="text-sm">
+                              Não foi possível renderizar o PDF.
+                            </span>
+                          </div>
+                        }
+                      >
+                        {Array.from({length: numPages}, (_, index) => (
+                          <Page
+                          key={index}
+                          pageNumber={index + 1}
+                          width={700}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                          className="mb-4 shadow-sm"
+                        />
+                        ))}
+                        
+                      </PdfDocument>
+                    </div>
+                  </div>
                 ) : ['JPG', 'JPEG', 'PNG', 'WEBP'].includes(format) ? (
                   <img
                     src={fileUrl}
@@ -163,8 +197,12 @@ export function DocumentViewerPage() {
                 ) : (
                   <div className="flex flex-col items-center text-muted-foreground p-8 text-center">
                     <Icon name="file-text" className="w-16 h-16 opacity-20 mb-4" />
-                    <p className="text-sm">O formato {format} não possui visualizador web nativo.</p>
-                    <p className="text-xs mt-1">Utilize o botão de download para abri-lo localmente.</p>
+                    <p className="text-sm">
+                      O formato {format} não possui visualizador web nativo.
+                    </p>
+                    <p className="text-xs mt-1">
+                      Utilize o botão de download para abri-lo localmente.
+                    </p>
                   </div>
                 )}
               </div>
