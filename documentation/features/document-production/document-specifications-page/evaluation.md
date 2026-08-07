@@ -1,18 +1,18 @@
 ---
 spec: ./spec.md
 spec_revision: 7
-status: in_progress
-commit: 9f8e728
+status: completed
+commit: e131eb8
 ---
 
 # Evaluation — Página de modelos de documentos
 
 ## Veredito atual
 
-Implementação aceita pelos Judges e sensores específicos da feature. A Spec
-permanece `in_progress` somente até o PR registrar Quality Gate/CI verde. O
-Quality Gate local, o teste de Intake e o Playwright mockado da feature
-passaram. Não há finding de produto ou arquitetura bloqueante na feature.
+Implementação aceita pelos Judges, sensores locais e Quality Gate oficial. A
+Spec está `completed`: PR #41 está aberto, mergeable e com Core, Server, Web e
+check-size verdes. Não há finding de produto ou arquitetura bloqueante na
+feature.
 
 ## Matriz de evidências reais
 
@@ -45,6 +45,10 @@ passaram. Não há finding de produto ou arquitetura bloqueante na feature.
 | `pnpm --filter web exec playwright test tests/routes/document-production/document-specifications.index.test.tsx --reporter=line` | passou, 1/1; a fixture usa a chave de sessão Supabase compatível, a rota protegida alcança o heading e a query `search` é validada |
 | `pnpm build` | passou; server webpack e web Vite/Nitro concluídos; repetiu apenas o aviso do arquivo de teste na árvore de rotas |
 | Browser real, sem `page.route` | preflight Docker/Auth/Server saudável; login fresco; rota, busca, filtro, URL, API 200 e viewport estreito validados |
+| [PR #41 — Core package checks](https://github.com/hms-society/hms/actions/runs/31222119809/job/93008728539) | passou |
+| [PR #41 — Server app checks](https://github.com/hms-society/hms/actions/runs/31222119810/job/93008728409) | passou |
+| [PR #41 — Web app checks](https://github.com/hms-society/hms/actions/runs/31222119813/job/93008728577) | passou |
+| [PR #41 — check-size](https://github.com/hms-society/hms/actions/runs/31222119812/job/93008728349) | passou; 45 linhas alteradas contra `origin/develop` |
 
 ## Juízes
 
@@ -88,8 +92,6 @@ preflight posteriores passaram.
 
 ## Handoff
 
-Antes de marcar a Spec como `completed`, é necessário obter CI verde no PR,
-resolver os checks bloqueantes do branch e registrar o hash do commit avaliado
-neste arquivo e na Spec. Até lá, o veredito operacional permanece
-`in_progress`, com a implementação da feature aceita e os findings acima
-classificados.
+Spec concluída após CI verde no PR #41, branch mergeable e hash avaliado
+registrado neste arquivo. Os findings restantes são limitações não bloqueantes
+de tooling/ambiente e não impedem a entrega.

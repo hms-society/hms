@@ -2,7 +2,7 @@
 spec: ./spec.md
 evaluation: ./evaluation.md
 spec_revision: 7
-status: in_progress
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
 jira_tickets:
   - SCRUM-134
@@ -15,10 +15,10 @@ jira_tickets:
 | Campo | Estado |
 |---|---|
 | Plan | `accepted` |
-| Spec | `in_progress`, revisão 7 |
-| Fase atual | F4 — Integração, browser e Quality Gate (`in_progress`) |
-| Próxima ação | create-pr e aguardar CI |
-| Implementação | F1–F3 concluídas; Builder Fix pós-Judge concluído; Quality Gate local e sensor Playwright da feature verdes |
+| Spec | `completed`, revisão 7 |
+| Fase atual | F4 — Integração, browser e Quality Gate (`accepted`) |
+| Próxima ação | nenhuma; PR #41 mergeable com CI verde |
+| Implementação | F1–F4 concluídas; Builder Fix pós-Judge concluído; Quality Gate local e CI oficial verdes |
 | Judge Plan | `accepted` |
 | Judge Implementation | `accepted` na 2ª tentativa; JI-01–JI-04 corrigidos |
 
@@ -75,7 +75,7 @@ Fora de escopo:
 
 - PRD canônico: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673), página Confluence `2588673`, versão 6, atualizada em 05/08/2026. A seção 11.2 fixa uma aplicação por modelo, momento único e estados `available`/`unavailable`; a seção 11.4 exige busca, quatro filtros e paginação.
 - Ticket: [SCRUM-134](https://plataformahms.atlassian.net/browse/SCRUM-134), “Implementar página de documentos”, história pendente, prioridade Medium. O ticket confirma a leitura administrativa, a busca/filtros/paginação, a ausência da coluna **Atualizado** e o acesso restrito.
-- Spec vigente: [`spec.md`](./spec.md), revisão 7, `status: in_progress`.
+- Spec vigente: [`spec.md`](./spec.md), revisão 7, `status: completed`.
 
 ### Pencil e design
 
@@ -161,7 +161,7 @@ Estados de fase: `pending`, `in_progress`, `awaiting_judgment`, `failed`,
 | F1 — Core e validação | `accepted` | Judge Plan aceito | contratos compilam e o caso de uso passa pelos sensores do pacote |
 | F2 — Persistência, seed e REST | `accepted` | F1 aceita | banco, seed e `GET` autenticado funcionam com integração HTTP real |
 | F3 — Web, rota e experiência | `accepted` | F2 aceita | rota protegida consome API real e estados/URL/sidebar são cobertos |
-| F4 — Integração e Quality Gate | `in_progress` | F1–F3 aceitas | browser real e sensores específicos aceitos; gate global pendente por findings classificados |
+| F4 — Integração e Quality Gate | `accepted` | F1–F3 aceitas | browser real, sensores específicos, Quality Gate local e CI oficial aceitos |
 
 ### F1 — Core e validação
 

@@ -1,6 +1,6 @@
 ---
 title: Página de modelos de documentos
-status: in_progress
+status: completed
 revision: 7
 sources:
   - type: jira-ticket
@@ -632,10 +632,8 @@ Com banco e Auth saudáveis, servidor e web reais em execução:
 
 # Avaliação
 
-Status: `in_progress`. Implementação aceita pelos Judges e sensores específicos;
-o Quality Gate integrado local mantém falhas preexistentes/harness classificadas
-em [`evaluation.md`](./evaluation.md). O build passou; o commit avaliado será
-registrado após a criação do commit e do PR.
+Status: `completed`. Implementação aceita pelos Judges, Quality Gate local e CI
+do PR #41; Core, Server, Web e `check-size` passaram e o PR está mergeable.
 
 # Alinhamento documental
 
