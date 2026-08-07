@@ -1,7 +1,7 @@
 export const DocumentGenerationMoment = {
   Consultation: 'consultation',
   Formalization: 'formalization',
-  Case: 'case',
+  LegalProduction: 'legal_production',
 } as const
 
 export type DocumentGenerationMoment =

@@ -48,17 +48,18 @@ export class ListDocumentSpecificationsUseCase
 
     await Promise.all(
       records.map(async (record) => {
-        if (record.application.scope !== 'legal_context') return
+        const application = record.application
+        if (application.scope !== 'legal_context') return
 
-        const selections = record.application.legalAreaIds.map((legalAreaId) => ({
+        const selections = application.legalAreaIds.map((legalAreaId) => ({
           legalAreaId,
-          legalTopicIds: record.application.legalTopicIdsByArea[legalAreaId] ?? [],
+          legalTopicIds: application.legalTopicIdsByArea[legalAreaId] ?? [],
         }))
         const resolutions = await this.legalExpertiseCatalogProvider.resolve(selections)
 
         applications.set(record.documentSpecificationId, {
           scope: 'legal_context',
-          moment: record.application.moment,
+          moment: application.moment,
           legalExpertises: resolutions.map((resolution) => ({
             legalAreaId: resolution.legalArea.id,
             legalAreaName: resolution.legalArea.name,

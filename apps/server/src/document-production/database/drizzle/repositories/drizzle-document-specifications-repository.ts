@@ -103,15 +103,19 @@ export class DrizzleDocumentSpecificationsRepository
     const items = specifications.map((specification) => {
       const domain = this.mapper.toDomain(specification)
       const legalAreaIds = areasBySpecification.get(specification.id) ?? []
+      const application =
+        domain.application.scope === 'legal_context'
+          ? {
+              ...domain.application,
+              legalAreaIds,
+              legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
+            }
+          : domain.application
       return {
         documentSpecificationId: domain.id,
         name: domain.name,
         description: domain.description,
-        application: {
-          ...domain.application,
-          legalAreaIds,
-          legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
-        },
+        application,
         isRequired: domain.isRequired,
         status: domain.status,
       }
@@ -148,21 +152,20 @@ export class DrizzleDocumentSpecificationsRepository
 
       for (const [index, specification] of specifications.entries()) {
         const record = records[index]
-        if (!record || specification.application.scope !== 'legal_context') continue
+        const application = specification.application
+        if (!record || application.scope !== 'legal_context') continue
         await transaction.insert(documentSpecificationLegalAreaModel).values(
-          specification.application.legalAreaIds.map((legalAreaId) => ({
+          application.legalAreaIds.map((legalAreaId) => ({
             documentSpecificationId: record.id,
             legalAreaId,
           })),
         )
-        const topics = specification.application.legalAreaIds.flatMap((legalAreaId) =>
-          (specification.application.legalTopicIdsByArea[legalAreaId] ?? []).map(
-            (legalTopicId) => ({
-              documentSpecificationId: record.id,
-              legalAreaId,
-              legalTopicId,
-            }),
-          ),
+        const topics = application.legalAreaIds.flatMap((legalAreaId) =>
+          (application.legalTopicIdsByArea[legalAreaId] ?? []).map((legalTopicId) => ({
+            documentSpecificationId: record.id,
+            legalAreaId,
+            legalTopicId,
+          })),
         )
         if (topics.length)
           await transaction.insert(documentSpecificationLegalTopicModel).values(topics)

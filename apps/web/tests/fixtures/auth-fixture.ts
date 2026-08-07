@@ -1,6 +1,6 @@
 import { test as base } from '@playwright/test'
 
-const AUTH_STORAGE_KEY = 'supabase.auth.token'
+const AUTH_STORAGE_KEY = 'sb-supabase-auth-token'
 
 const AUTHENTICATED_USER = {
   id: '6ecbc5b0-a145-4e0c-9167-31b54fb8318c',
