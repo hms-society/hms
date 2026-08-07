@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@supabase/supabase-js'
@@ -25,26 +26,30 @@ export function DocumentViewerPage() {
   
   const { data: file, isLoading: isLoadingFile, isError: isErrorFile } = useDocumentFileQuery(fileId)
 
-  const { data: signedUrl, isLoading: isLoadingUrl } = useQuery({
-    queryKey: ['signed-url', file?.storagePath],
+  const { data: fileUrl, isLoading: isLoadingUrl, isError: isErrorUrl } = useQuery({
+    queryKey: ['document-blob', file?.storagePath],
     queryFn: async () => {
       if (!file?.storagePath) return null
       
       const { data, error } = await supabase.storage
         .from('document_batches')
-        .createSignedUrl(file.storagePath, 3600)
+        .download(file.storagePath)
         
       if (error) {
-        if (file.mimeType.includes('pdf')) {
-          return '/seed-files/documento-teste.pdf'
-        }
-        return '/seed-files/imagem-teste.jpg'
+        throw error
       }
       
-      return data.signedUrl
+      return URL.createObjectURL(data)
     },
     enabled: !!file?.storagePath,
+    retry: false
   })
+
+  useEffect(() => {
+    return () => {
+      if (fileUrl) URL.revokeObjectURL(fileUrl)
+    }
+  }, [fileUrl])
 
   if (isLoadingFile) {
     return (
@@ -57,7 +62,7 @@ export function DocumentViewerPage() {
   if (isErrorFile || !file) {
     return (
       <div className="flex h-screen items-center justify-center text-destructive">
-        Erro ao carregar o arquivo.
+        Erro ao carregar os metadados do arquivo.
       </div>
     )
   }
@@ -69,9 +74,9 @@ export function DocumentViewerPage() {
   }).format(new Date(file.createdAt))
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 mt-5 px-4 sm:px-8 pb-10">
+    <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-6 mt-5 px-4 sm:px-8 pb-10">
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex w-full max-w-4xl flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-serif font-bold text-[#134C50]">Editor de validação</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -88,7 +93,7 @@ export function DocumentViewerPage() {
         </Button>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden rounded-xl bg-card w-full lg:w-2/3">
+      <Card className="shadow-sm border-border overflow-hidden rounded-xl bg-card w-full max-w-4xl">
         
         <div className="flex flex-col gap-1 border-b border-border px-6 py-5">
           <div className="flex items-center gap-3">
@@ -114,35 +119,46 @@ export function DocumentViewerPage() {
                 <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card">
                   <Icon name="zoom-out" className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="w-8 h-8 rounded-lg bg-card"
+                  onClick={() => fileUrl ? window.open(fileUrl, '_blank') : undefined}
+                  disabled={!fileUrl}
+                >
                   <Icon name="download" className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </div>
             </div>
 
             <div className="flex flex-col items-center justify-center py-6 px-6 min-h-[500px]">
-              <div className="w-full max-w-2xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden">
+              <div className="w-full max-w-2xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden relative">
                 {isLoadingUrl ? (
                   <div className="flex flex-col items-center text-muted-foreground gap-2">
                     <Icon name="refresh-cw" className="w-8 h-8 animate-spin" />
                     <span className="text-sm">Gerando visualização segura...</span>
                   </div>
-                ) : !signedUrl ? (
+                ) : isErrorUrl ? (
+                  <div className="flex flex-col items-center text-destructive gap-2 p-8 text-center bg-destructive/5 rounded-lg border border-destructive/20">
+                    <Icon name="triangle-alert" className="w-8 h-8" />
+                    <span className="text-sm font-medium">O arquivo físico não foi encontrado no Storage ou o acesso foi negado pela política RLS.</span>
+                  </div>
+                ) : !fileUrl ? (
                   <div className="flex flex-col items-center text-muted-foreground gap-2">
                     <Icon name="triangle-alert" className="w-8 h-8" />
-                    <span className="text-sm">Não foi possível carregar o arquivo.</span>
+                    <span className="text-sm">Não foi possível carregar a URL do arquivo.</span>
                   </div>
                 ) : format === 'PDF' ? (
                   <iframe
-                    src={`${signedUrl}#toolbar=0&navpanes=0`}
-                    className="w-full h-full border-none bg-white"
+                    src={`${fileUrl}#toolbar=0&navpanes=0`}
+                    className="absolute inset-0 w-full h-full border-none bg-white"
                     title={file.originalName}
                   />
                 ) : ['JPG', 'JPEG', 'PNG', 'WEBP'].includes(format) ? (
                   <img
-                    src={signedUrl}
+                    src={fileUrl}
                     alt={file.originalName}
-                    className="w-full h-full object-contain p-2"
+                    className="absolute inset-0 w-full h-full object-contain p-2"
                   />
                 ) : (
                   <div className="flex flex-col items-center text-muted-foreground p-8 text-center">
@@ -153,7 +169,7 @@ export function DocumentViewerPage() {
                 )}
               </div>
 
-              {format === 'PDF' && (
+              {format === 'PDF' && !isErrorUrl && (
                 <Badge variant="outline" className="mt-4 bg-white text-muted-foreground px-3 py-1 shadow-sm font-medium">
                   Modo de Leitura
                 </Badge>
