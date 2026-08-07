@@ -17,8 +17,8 @@ jira_tickets:
 | Plan | `accepted` |
 | Spec | `in_progress`, revisão 7 |
 | Fase atual | F4 — Integração, browser e Quality Gate (`in_progress`) |
-| Próxima ação | conclude-spec |
-| Implementação | F1–F3 concluídas; Builder Fix pós-Judge concluído; F4 sensores e preflight repetidos |
+| Próxima ação | create-pr e aguardar CI |
+| Implementação | F1–F3 concluídas; Builder Fix pós-Judge concluído; Quality Gate local e sensor Playwright da feature verdes |
 | Judge Plan | `accepted` |
 | Judge Implementation | `accepted` na 2ª tentativa; JI-01–JI-04 corrigidos |
 
@@ -103,8 +103,7 @@ Decisões visuais para a implementação:
   `Fraunces` para headings e `Plus Jakarta Sans` para corpo/controles;
 - usar texto e ícone para obrigatoriedade/estado, com foco visível e sem
   depender somente de cor;
-- remover visualmente o botão **Novo modelo**, ações por linha e a coluna
-  **Ação**, conforme a exceção explícita da Spec;
+- manter visualmente a coluna **Ação** com os controles **Editar** e **Duplicar**;
 - tratar loading, erro, base vazia, consulta sem resultados, viewport estreito
   e tema escuro como estados de runtime derivados do Contract: o Pencil não
   possui frames canônicos para esses estados;
@@ -321,8 +320,8 @@ Fluxos mínimos do browser:
 - reload/share de URL filtrada e paginada reproduz controles e request;
 - base vazia, consulta sem resultado com **Limpar filtros**, falha com
   **Tentar novamente**;
-- ausência de **Novo modelo**, **Editar**, **Duplicar**, ações de disponibilidade,
-  **Ação** e **Atualizado**;
+- ausência de **Novo modelo**, ações de disponibilidade e **Atualizado**; presença
+  de **Ação**, **Editar** e **Duplicar**;
 - perfil não administrador não recebe o item de sidebar e não acessa a rota;
 - teclado em busca, selects e paginação, foco visível e viewport estreito;
 - zoom/reflow, tema escuro e comparação visual com `K2Fvp` no fluxo real;
@@ -370,9 +369,9 @@ artefatos de migration. O CI continua sendo a fonte oficial do Quality Gate.
 | R-006 | worktree sujo | ativo, não bloqueante | alterações alheias podem contaminar diff | não reverter nem editar paths fora deste feature; revisar diff antes do handoff | reavaliar no Quality Gate |
 | R-007 | ambiente browser/Auth | aberto | sem serviços saudáveis não há evidência real | preflight obrigatório e classificação de bloqueio antes do Judge final | executar somente em F4 |
 | R-008 | migration operacional | aberto | migration aditiva pode falhar em aplicação, deixar schema parcial ou invalidar o seed | gerar migration pelo Drizzle, revisar SQL/constraints antes de aplicar, aplicar primeiro em fixture/staging controlado; em falha, preservar o artefato, interromper o seed e fazer forward-fix ou rollback operacional aprovado, sem editar migration já aplicada | validar SQL, fixture e procedimento de recuperação em F2-T1/F2-T2 |
-| R-009 | sensor global preexistente | classificado, não bloqueante para F2 | `pnpm --filter server test` falha em Intake com `total: 3` esperado `2`, fora dos paths da feature | teste dedicado da feature passou 4/4; falha reproduzida isoladamente em `src/intake/rest/controllers/tests/list-intakes.controller.test.ts`; preservar e reportar sem alterar escopo | reavaliar no Quality Gate integrado |
-| R-010 | harness Playwright mockado | aberto, não bloqueante para sensores unitários | fixture de rota protegida sofre `beforeLoad` no SSR antes do `localStorage`; fluxo redireciona para `/login` e não prova a página | `generate-routes`, check:code, check:types e 6 testes determinísticos passaram; autenticação real será validada via login no F4 | corrigir harness ou classificar no Judge após fluxo real |
-| R-011 | suíte global preexistente | classificado, não bloqueante para a feature | `pnpm test` falha em testes de Identity/Intake fora dos paths da feature | testes core/validation/REST/UI da feature passaram; falhas globais reproduzidas e preservadas | reavaliar no CI sem atribuir à feature |
+| R-009 | sensor global | resolvido | teste de Intake passou 2/2; a falha anterior não foi reproduzida | registrar no Quality Gate local |
+| R-010 | harness Playwright mockado | resolvido | fixture corrigida para `sb-supabase-auth-token`; sensor da rota da feature passou 1/1 | manter sensor separado do fluxo real |
+| R-011 | suíte global | resolvido | `pnpm test` passou nos quatro workspaces, com 310 testes | registrar no Quality Gate local |
 | R-012 | transporte Playwright MCP | classificado, não bloqueante para evidência alternativa | MCP não abriu por perfis Chrome órfãos; após encerrar processos órfãos, o transporte permaneceu fechado | fluxo real equivalente executado com Playwright direto contra login/Auth/REST/Web, sem `page.route`; nenhum erro de console/network | registrar no Judge como limitação de ferramenta |
 
 Tentativas de implementação F1 e F2 concluídas. F1 teve sensores verdes; F2 teve

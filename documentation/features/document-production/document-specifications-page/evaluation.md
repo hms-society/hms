@@ -2,7 +2,7 @@
 spec: ./spec.md
 spec_revision: 7
 status: in_progress
-commit: pending
+commit: 9f8e728
 ---
 
 # Evaluation — Página de modelos de documentos
@@ -10,10 +10,9 @@ commit: pending
 ## Veredito atual
 
 Implementação aceita pelos Judges e sensores específicos da feature. A Spec
-permanece `in_progress` porque o Quality Gate integrado local não está verde:
-`pnpm test` mantém uma falha preexistente de Intake e o Playwright mockado falha
-no harness de autenticação/SSR. O build final passou. Não há finding de produto
-ou arquitetura bloqueante na feature.
+permanece `in_progress` somente até o PR registrar Quality Gate/CI verde. O
+Quality Gate local, o teste de Intake e o Playwright mockado da feature
+passaram. Não há finding de produto ou arquitetura bloqueante na feature.
 
 ## Matriz de evidências reais
 
@@ -34,15 +33,16 @@ ou arquitetura bloqueante na feature.
 
 | Comando / evidência | Resultado |
 |---|---|
-| `pnpm format` | passou; formatou 1.348 arquivos e corrigiu 8 arquivos |
+| `pnpm format` | passou; formatou 992 arquivos e corrigiu 2 arquivos |
 | `pnpm lint` | passou; core e validation sem erros |
 | `pnpm check-types` | passou nos packages roteados pelo script raiz; `server check:types` e `web check:types` também passaram |
-| `pnpm --filter server check:code` | passou, 262 arquivos |
+| `pnpm --filter server check:code` | passou, 263 arquivos; 1 warning preexistente fora da feature |
 | `pnpm --filter web generate-routes` | passou com aviso não bloqueante sobre `routes/modelos-de-documentos/index.test.ts` |
-| `pnpm --filter web check:code` | passou com 6 warnings preexistentes fora da feature |
+| `pnpm --filter web check:code` | passou com 12 warnings preexistentes fora da feature |
 | `pnpm --filter server exec vitest run src/document-production/rest/controllers/tests/list-document-specifications.controller.test.ts` | passou, 7/7 |
-| `pnpm test` | falhou somente em `list-intakes.controller.test.ts`: esperado `total: 2`, recebido `total: 3`; web 134/134 e server 22/23 arquivos passaram |
-| `pnpm --filter web test:integration` | sensor mockado falhou no redirect/SSR do fixture: 7 passaram, 5 falharam, 1 interrompido e 30 não executados; o teste da feature não alcança o heading por redirecionar para `/login` antes do localStorage |
+| `pnpm --filter server exec vitest run src/intake/rest/controllers/tests/list-intakes.controller.test.ts --reporter=verbose` | passou, 2/2; o resultado anterior `total: 3` não foi reproduzido |
+| `pnpm test` | passou nos 4 workspaces: Core 21 arquivos/93 testes, Validation 3/9, Server 23/68 e Web 35/140 |
+| `pnpm --filter web exec playwright test tests/routes/document-production/document-specifications.index.test.tsx --reporter=line` | passou, 1/1; a fixture usa a chave de sessão Supabase compatível, a rota protegida alcança o heading e a query `search` é validada |
 | `pnpm build` | passou; server webpack e web Vite/Nitro concluídos; repetiu apenas o aviso do arquivo de teste na árvore de rotas |
 | Browser real, sem `page.route` | preflight Docker/Auth/Server saudável; login fresco; rota, busca, filtro, URL, API 200 e viewport estreito validados |
 
@@ -65,8 +65,8 @@ preflight posteriores passaram.
 
 | ID | Estado | Classificação | Evidência / ação |
 |---|---|---|---|
-| R-009 / R-011 | classificado, não bloqueante | suíte global preexistente | Falha de Intake e falhas globais já reproduzidas fora dos paths da feature; preservar para correção própria |
-| R-010 | aberto, não bloqueante | harness Playwright mockado | `beforeLoad` protegido executa antes do localStorage; fluxo real sem mock foi usado como evidência oficial |
+| R-009 / R-011 | resolvido | suíte global | `pnpm test` integrado passou nos 4 workspaces; a falha anterior de Intake não foi reproduzida |
+| R-010 | resolvido | harness Playwright mockado | a fixture foi corrigida para `sb-supabase-auth-token`; o sensor da rota da feature passou 1/1 com o `webServer` oficial e variáveis isoladas do Playwright |
 | R-012 | resolvido como limitação de ferramenta | transporte Playwright | MCP real funcionou nesta validação após login fresco; não é falha de produto |
 | R-013 | não bloqueante | configuração de geração de rotas | `index.test.ts` dentro de `routes/` gera aviso; build e geração passam; deve ser renomeado/excluído em manutenção futura |
 | R-014 | não bloqueante | serialização do snapshot | Snapshot omitiu conteúdo de duas células, mas API, `innerText`, estilos computados e DOM real confirmam os valores |
