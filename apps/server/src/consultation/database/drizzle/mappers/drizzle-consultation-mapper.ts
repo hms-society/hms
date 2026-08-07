@@ -9,6 +9,49 @@ import type {
 import type { consultationModel } from '@/shared/database/drizzle/schema/consultation'
 
 type ConsultationRecord = typeof consultationModel.$inferSelect & {
+  assignedLawyer?: {
+    id: string
+    name?: string
+    email?: string
+    [key: string]: any
+  }
+  intake?: {
+    id: string
+    sequenceNumber?: number
+    origin?: string
+    contactChannel?: string
+    urgency?: string
+    demandNotes?: string | null
+    status?: string
+    responsibleId?: string
+    createdBy?: string
+    attendantName?: string
+    [key: string]: any
+  }
+  client?: {
+    id: string
+    type?: string
+    name?: string | null
+    legalName?: string | null
+    tradeName?: string | null
+    taxIdType?: string
+    taxIdValue?: string
+    phone?: string | null
+    email?: string | null
+    city?: string | null
+    state?: string | null
+    [key: string]: any
+  }
+  legalArea?: {
+    id: string
+    name?: string
+    [key: string]: any
+  }
+  legalTopic?: {
+    id: string
+    name?: string
+    [key: string]: any
+  }
   facts?: Array<{
     id: string
     description: string
@@ -35,7 +78,7 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
 
 export class DrizzleConsultationMapper {
   static toDomain(record: ConsultationRecord): Consultation {
-    return {
+    const domainObject = {
       id: record.id,
       appointmentId: record.appointmentId,
       clientId: record.clientId,
@@ -53,6 +96,62 @@ export class DrizzleConsultationMapper {
       noShowAt: record.noShowAt ?? undefined,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
+
+      assignedLawyer: record.assignedLawyer
+        ? {
+            id: record.assignedLawyer.id,
+            name: record.assignedLawyer.name ?? record.assignedLawyer.professionalName,
+            email: record.assignedLawyer.email,
+          }
+        : undefined,
+
+     intake: record.intake
+  ? {
+      id: record.intake.id,
+      code: record.intake.sequenceNumber
+        ? `INT-${String(record.intake.sequenceNumber).padStart(4, '0')}`
+        : record.intake.code,
+      origin: record.intake.origin,
+      contactChannel: record.intake.contactChannel,
+      urgency: record.intake.urgency,
+      demandNotes: record.intake.demandNotes ?? undefined,
+      status: record.intake.status,
+      responsibleId: record.intake.responsibleId,
+      createdBy: record.intake.createdBy,
+      attendantName: record.intake.attendantName,
+    }
+  : undefined,
+
+      client: record.client
+        ? {
+            id: record.client.id,
+            type: record.client.type,
+            name: record.client.name ?? undefined,
+            legalName: record.client.legalName ?? undefined,
+            tradeName: record.client.tradeName ?? undefined,
+            taxIdType: record.client.taxIdType,
+            taxIdValue: record.client.taxIdValue,
+            phone: record.client.phone ?? undefined,
+            email: record.client.email ?? undefined,
+            city: record.client.city ?? undefined,
+            state: record.client.state ?? undefined,
+          }
+        : undefined,
+
+      legalArea: record.legalArea
+        ? {
+            id: record.legalArea.id,
+            name: record.legalArea.name,
+          }
+        : undefined,
+
+      legalTopic: record.legalTopic
+        ? {
+            id: record.legalTopic.id,
+            name: record.legalTopic.name,
+          }
+        : undefined,
+
       relevantFacts: (record.facts ?? []).map((fact) => ({
         id: fact.id,
         description: fact.description,
@@ -68,6 +167,7 @@ export class DrizzleConsultationMapper {
       })),
       suggestions: (record.suggestions ?? []).map((sug) => ({
         id: sug.id,
+        consultationId: record.id,
         target: sug.target as ConsultationSuggestionTarget,
         content: sug.content,
         status: sug.status as ConsultationSuggestionStatus,
@@ -75,7 +175,9 @@ export class DrizzleConsultationMapper {
         reviewedAt: sug.reviewedAt ?? undefined,
         reviewedByCollaboratorId: sug.reviewedByCollaboratorId ?? undefined,
       })),
-    } as Consultation
+    }
+
+    return domainObject as unknown as Consultation
   }
 
   static toPersistence(entity: Consultation) {

@@ -7,6 +7,7 @@ import { AppModule } from '@/app.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true })
 

@@ -7,13 +7,20 @@ import {
   RegisterNoShowUseCase,
   StartConsultationUseCase,
   CompleteConsultationUseCase,
+  GetConsultationByIdUseCase,
 } from '@hms/core/consultation/use-cases'
+
+import { ConsultationsController } from './rest/controllers/consultations-controller'
 
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
+  controllers: [
+    ConsultationsController,
+  ],
   providers: [
     DrizzleClient,
+    DrizzleConsultationsRepository,
     {
       provide: CONSULTATIONS_REPOSITORY,
       useClass: DrizzleConsultationsRepository,
@@ -42,12 +49,19 @@ export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
         new CompleteConsultationUseCase(repo),
       inject: [CONSULTATIONS_REPOSITORY],
     },
+    {
+      provide: GetConsultationByIdUseCase,
+      useFactory: (repo: DrizzleConsultationsRepository) =>
+        new GetConsultationByIdUseCase(repo),
+      inject: [CONSULTATIONS_REPOSITORY],
+    },
   ],
   exports: [
     CreateConsultationUseCase,
     RegisterNoShowUseCase,
     StartConsultationUseCase,
     CompleteConsultationUseCase,
+    GetConsultationByIdUseCase,
   ],
 })
 export class ConsultationModule {}

@@ -84,9 +84,70 @@ export const consultationSuggestionModel = pgTable('consultation_suggestions', {
   reviewedByCollaboratorId: uuid('reviewed_by_collaborator_id').references(() => collaboratorModel.id),
 })
 
-export const consultationRelations = relations(consultationModel, ({ many }) => ({
+export const consultationRelations = relations(consultationModel, ({ one, many }) => ({
+  assignedLawyer: one(collaboratorModel, {
+    fields: [consultationModel.assignedLawyerId],
+    references: [collaboratorModel.id],
+  }),
+  intake: one(intakeModel, {
+    fields: [consultationModel.intakeId],
+    references: [intakeModel.id],
+  }),
+  client: one(clientModel, {
+    fields: [consultationModel.clientId],
+    references: [clientModel.id],
+  }),
+  legalArea: one(legalAreaModel, {
+    fields: [consultationModel.legalAreaId],
+    references: [legalAreaModel.id],
+  }),
+  legalTopic: one(legalTopicModel, {
+    fields: [consultationModel.legalTopicId],
+    references: [legalTopicModel.id],
+  }),
+
   facts: many(consultationRelevantFactModel),
   potentialRequests: many(consultationPotentialLegalRequestModel),
   identifiedRisks: many(consultationIdentifiedRiskModel),
   suggestions: many(consultationSuggestionModel),
 }))
+
+export const consultationRelevantFactRelations = relations(
+  consultationRelevantFactModel,
+  ({ one }) => ({
+    consultation: one(consultationModel, {
+      fields: [consultationRelevantFactModel.consultationId],
+      references: [consultationModel.id],
+    }),
+  }),
+)
+
+export const consultationPotentialLegalRequestRelations = relations(
+  consultationPotentialLegalRequestModel,
+  ({ one }) => ({
+    consultation: one(consultationModel, {
+      fields: [consultationPotentialLegalRequestModel.consultationId],
+      references: [consultationModel.id],
+    }),
+  }),
+)
+
+export const consultationIdentifiedRiskRelations = relations(
+  consultationIdentifiedRiskModel,
+  ({ one }) => ({
+    consultation: one(consultationModel, {
+      fields: [consultationIdentifiedRiskModel.consultationId],
+      references: [consultationModel.id],
+    }),
+  }),
+)
+
+export const consultationSuggestionRelations = relations(
+  consultationSuggestionModel,
+  ({ one }) => ({
+    consultation: one(consultationModel, {
+      fields: [consultationSuggestionModel.consultationId],
+      references: [consultationModel.id],
+    }),
+  }),
+)

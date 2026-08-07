@@ -15,25 +15,37 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
   }
 
   async findById(id: string): Promise<Consultation | null> {
-    const record = await this.db.query.consultationModel.findFirst({
-      where: eq(schema.consultationModel.id, id),
-      with: {
-        facts: true,
-        potentialRequests: true,
-        identifiedRisks: true,
-        suggestions: true,
-      },
-    })
+  const record = await this.db.query.consultationModel.findFirst({
+    where: eq(schema.consultationModel.id, id),
+    with: {
+      assignedLawyer: true,
+      intake: true,
+      client: true,
+      legalArea: true,
+      legalTopic: true,
+      facts: true,
+      potentialRequests: true,
+      identifiedRisks: true,
+      suggestions: true,
+    },
+  })
 
-    if (!record) return null
+  if (!record) return null
 
-    return DrizzleConsultationMapper.toDomain(record as any)
-  }
+  console.log('intake raw:', JSON.stringify(record.intake, null, 2)) // ← aqui
+
+  return DrizzleConsultationMapper.toDomain(record as any)
+}
 
   async findByAppointmentId(appointmentId: string): Promise<Consultation | null> {
     const record = await this.db.query.consultationModel.findFirst({
       where: eq(schema.consultationModel.appointmentId, appointmentId),
       with: {
+        assignedLawyer: true,
+        intake: true,
+        client: true,
+        legalArea: true,
+        legalTopic: true,
         facts: true,
         potentialRequests: true,
         identifiedRisks: true,

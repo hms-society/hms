@@ -2,21 +2,21 @@ import { ConsultationStatus, ConsultationModality } from '../domain/structures'
 import type { Consultation } from '../domain/entities'
 import type { ConsultationsRepository } from '../interfaces/consultations-repository'
 
-export type CreateConsultationInput = {
-  id: string
-  appointmentId: string
-  clientId: string
-  assignedLawyerId: string
-  legalAreaId: string
-  legalTopicId: string
-  modality: ConsultationModality
+export class CreateConsultationDto {
+  id!: string
+  appointmentId!: string
+  clientId!: string
+  assignedLawyerId!: string
+  legalAreaId!: string
+  legalTopicId!: string
+  modality!: any
   channel?: string
 }
 
 export class CreateConsultationUseCase {
   constructor(private readonly consultationsRepository: ConsultationsRepository) {}
 
-  async execute(input: CreateConsultationInput): Promise<Consultation> {
+  async execute(input: CreateConsultationDto): Promise<Consultation> {
     const existing = await this.consultationsRepository.findByAppointmentId(
       input.appointmentId,
     )
