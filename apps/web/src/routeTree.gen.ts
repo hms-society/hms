@@ -28,13 +28,13 @@ import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/i
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
-import { Route as ConsultasComunicacaoRouteImport } from './routes/consultas/comunicacao'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 
@@ -134,11 +134,6 @@ const IntakesNovoRoute = IntakesNovoRouteImport.update({
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
 } as any)
-const ConsultasComunicacaoRoute = ConsultasComunicacaoRouteImport.update({
-  id: '/comunicacao',
-  path: '/comunicacao',
-  getParentRoute: () => ConsultasRouteRoute,
-} as any)
 const ColaboradoresColaboradorIdRoute =
   ColaboradoresColaboradorIdRouteImport.update({
     id: '/colaboradores/$colaboradorId',
@@ -170,6 +165,11 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
+const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
+  id: '/advogado/comunicacao',
+  path: '/advogado/comunicacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -189,13 +189,13 @@ export interface FileRoutesByFullPath {
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/consultas/comunicacao': typeof ConsultasComunicacaoRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
@@ -215,13 +215,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/consultas/comunicacao': typeof ConsultasComunicacaoRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/agenda': typeof AgendaIndexRoute
   '/clientes': typeof ClientesIndexRoute
@@ -246,13 +246,13 @@ export interface FileRoutesById {
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/consultas/comunicacao': typeof ConsultasComunicacaoRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
@@ -278,13 +278,13 @@ export interface FileRouteTypes {
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
-    | '/consultas/comunicacao'
     | '/intakes/novo'
     | '/agenda/'
     | '/clientes/'
@@ -304,13 +304,13 @@ export interface FileRouteTypes {
     | '/'
     | '/atendimento'
     | '/cliente'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
-    | '/consultas/comunicacao'
     | '/intakes/novo'
     | '/agenda'
     | '/clientes'
@@ -334,13 +334,13 @@ export interface FileRouteTypes {
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
-    | '/consultas/comunicacao'
     | '/intakes/novo'
     | '/agenda/'
     | '/clientes/'
@@ -365,6 +365,7 @@ export interface RootRouteChildren {
   ConsultasRouteRoute: typeof ConsultasRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   TriagemRouteRoute: typeof TriagemRouteRouteWithChildren
+  AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
@@ -511,13 +512,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
-    '/consultas/comunicacao': {
-      id: '/consultas/comunicacao'
-      path: '/comunicacao'
-      fullPath: '/consultas/comunicacao'
-      preLoaderRoute: typeof ConsultasComunicacaoRouteImport
-      parentRoute: typeof ConsultasRouteRoute
-    }
     '/colaboradores/$colaboradorId': {
       id: '/colaboradores/$colaboradorId'
       path: '/colaboradores/$colaboradorId'
@@ -559,6 +553,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/atendimento/consultas'
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
+    }
+    '/advogado/comunicacao': {
+      id: '/advogado/comunicacao'
+      path: '/advogado/comunicacao'
+      fullPath: '/advogado/comunicacao'
+      preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
@@ -621,12 +622,10 @@ const ClienteRouteRouteWithChildren = ClienteRouteRoute._addFileChildren(
 )
 
 interface ConsultasRouteRouteChildren {
-  ConsultasComunicacaoRoute: typeof ConsultasComunicacaoRoute
   ConsultasIndexRoute: typeof ConsultasIndexRoute
 }
 
 const ConsultasRouteRouteChildren: ConsultasRouteRouteChildren = {
-  ConsultasComunicacaoRoute: ConsultasComunicacaoRoute,
   ConsultasIndexRoute: ConsultasIndexRoute,
 }
 
@@ -668,6 +667,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsultasRouteRoute: ConsultasRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   TriagemRouteRoute: TriagemRouteRouteWithChildren,
+  AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,
