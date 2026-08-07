@@ -104,7 +104,6 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   phone: Phone,
   scale: Scale,
   search: Search,
-  shield: Shield,
   send: Send,
   shield: Shield,
   'shield-check': ShieldCheck,

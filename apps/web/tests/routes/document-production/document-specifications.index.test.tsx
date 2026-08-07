@@ -25,7 +25,9 @@ test('renders the protected document specifications route and preserves the API 
   await expect(page.getByRole('columnheader', { name: 'Obrigatoriedade' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Atualizado' })).toHaveCount(0)
-  await expect(page.getByRole('columnheader', { name: 'Ação', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('columnheader', { name: 'Ação', exact: true }),
+  ).toBeVisible()
   const request = await requestPromise
   expect(new URL(request.url()).searchParams.get('search')).toBe('Procuração')
 })

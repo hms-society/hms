@@ -21,7 +21,9 @@ type ReviewRow = {
 }
 
 export function useClientReviewStep(controller: ClientRegisterDialogController) {
-  const draft = useWatch({ control: controller.registrationForm.control }) as RegistrationForm
+  const draft = useWatch({
+    control: controller.registrationForm.control,
+  }) as RegistrationForm
 
   const clientName = draft.type === 'natural' ? draft.name : draft.legalName
   const address = draft.address
