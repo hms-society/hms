@@ -62,7 +62,7 @@ export class RealDocumentsSeeder {
       throw new Error('Nenhum cliente encontrado para criar os documentos.')
     }
 
-    const localPath = 'C:\\Users\\vinic\\Downloads\\testes'
+    const localPath = 'src/documents/database/seed-assets'
     const fileNames = await readdir(localPath)
 
     if (fileNames.length === 0) {

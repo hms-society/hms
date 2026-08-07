@@ -32,7 +32,7 @@ export function DocumentViewerPage() {
   const MIN_ZOOM = 0.5
   const MAX_ZOOM = 2
   const ZOOM_STEP = 0.25
-  const BASE_PAGE_WIDTH = 700
+  const BASE_PAGE_WIDTH = 900 // Largura base aumentada
 
   const handleZoomIn = () => {
   setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
@@ -86,16 +86,16 @@ export function DocumentViewerPage() {
     setIsDragging(false)
   }
 
-  const handleDownload = () => {
-    if (!fileUrl || !file) return
+  // const handleDownload = () => {
+  //   if (!fileUrl || !file) return
 
-    const link = document.createElement('a')
-    link.href = fileUrl
-    link.download = file.originalName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+  //   const link = document.createElement('a')
+  //   link.href = fileUrl
+  //   link.download = file.originalName
+  //   document.body.appendChild(link)
+  //   link.click()
+  //   document.body.removeChild(link)
+  // }
 
   const pageWidth = BASE_PAGE_WIDTH * zoom
   
@@ -149,9 +149,9 @@ export function DocumentViewerPage() {
   }).format(new Date(file.createdAt))
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-6 mt-5 px-4 sm:px-8 pb-10">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col items-center gap-6 mt-5 px-4 sm:px-8 pb-10">
       
-      <div className="flex w-full max-w-4xl flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex w-full max-w-6xl flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-serif font-bold text-[#134C50]">Editor de validação</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -168,7 +168,7 @@ export function DocumentViewerPage() {
         </Button>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden rounded-xl bg-card w-full max-w-4xl">
+      <Card className="shadow-sm border-border overflow-hidden rounded-xl bg-card w-full max-w-6xl">
         
         <div className="flex flex-col gap-1 border-b border-border px-6 py-5">
           <div className="flex items-center gap-3">
@@ -194,7 +194,7 @@ export function DocumentViewerPage() {
                 <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card" onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}>
                   <Icon name="zoom-out" className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                <Button 
+                {/* <Button 
                   variant="outline" 
                   size="icon" 
                   className="w-8 h-8 rounded-lg bg-card"
@@ -202,12 +202,12 @@ export function DocumentViewerPage() {
                   disabled={!fileUrl}
                 >
                   <Icon name="download" className="w-4 h-4 text-muted-foreground" />
-                </Button>
+                </Button> */}
               </div>
             </div>
 
             <div className="flex flex-col items-center justify-center py-6 px-6 min-h-[500px]">
-              <div className="w-full max-w-2xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden relative">
+              <div className="w-full max-w-5xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden relative">
                 {isLoadingUrl ? (
                   <div className="flex flex-col items-center text-muted-foreground gap-2">
                     <Icon name="refresh-cw" className="w-8 h-8 animate-spin" />
