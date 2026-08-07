@@ -5,15 +5,15 @@ import type { LegalExpertiseCatalogProvider } from '#legal-catalog/interfaces'
 import { fakeDocumentSpecification } from '../../domain/entities/fakers'
 import { InvalidDocumentSpecificationConfigurationError } from '../../domain/errors'
 import type { CreateDocumentSpecificationInput } from '../../domain/structures'
-import type { DocumentSpecificationsRepository } from '../../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../../interfaces'
 import { CreateDocumentSpecificationUseCase } from '../create-document-specification-use-case'
 
 describe('Create Document Specification Use Case', () => {
-  let repository: MockProxy<DocumentSpecificationsRepository>
+  let repository: MockProxy<DocumentSpecificationMutationRepository>
   let catalogProvider: MockProxy<LegalExpertiseCatalogProvider>
 
   beforeEach(() => {
-    repository = mock<DocumentSpecificationsRepository>()
+    repository = mock<DocumentSpecificationMutationRepository>()
     catalogProvider = mock<LegalExpertiseCatalogProvider>()
     repository.add.mockResolvedValue(fakeDocumentSpecification())
     catalogProvider.validateActive.mockResolvedValue(true)

@@ -13,7 +13,7 @@ import {
   type DocumentSpecificationApplication,
   type DocumentTemplateContent,
 } from '../domain/structures'
-import type { DocumentSpecificationsRepository } from '../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../interfaces'
 
 type Request = CreateDocumentSpecificationInput
 
@@ -26,7 +26,7 @@ export class CreateDocumentSpecificationUseCase
   implements UseCase<Request, DocumentSpecification>
 {
   constructor(
-    private readonly specificationsRepository: DocumentSpecificationsRepository,
+    private readonly specificationsRepository: DocumentSpecificationMutationRepository,
     private readonly legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
   ) {}
 

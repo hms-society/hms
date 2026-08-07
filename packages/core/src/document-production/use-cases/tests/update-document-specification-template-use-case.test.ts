@@ -7,14 +7,14 @@ import {
   InvalidDocumentTemplateError,
 } from '../../domain/errors'
 import type { DocumentTemplateContent } from '../../domain/structures'
-import type { DocumentSpecificationsRepository } from '../../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../../interfaces'
 import { UpdateDocumentSpecificationTemplateUseCase } from '../update-document-specification-template-use-case'
 
 describe('Update Document Specification Template Use Case', () => {
-  let repository: MockProxy<DocumentSpecificationsRepository>
+  let repository: MockProxy<DocumentSpecificationMutationRepository>
 
   beforeEach(() => {
-    repository = mock<DocumentSpecificationsRepository>()
+    repository = mock<DocumentSpecificationMutationRepository>()
   })
 
   it('validates tokens, trims variables and updates only the template boundary', async () => {

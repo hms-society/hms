@@ -14,6 +14,14 @@ export interface DocumentSpecificationsRepository {
   list(
     query: DocumentSpecificationListQuery,
   ): Promise<PaginationResponse<DocumentSpecificationListRecord>>
+  addMany(
+    specifications: readonly DocumentSpecificationCreation[],
+  ): Promise<readonly DocumentSpecification[]>
+  removeAll(): Promise<void>
+}
+
+export interface DocumentSpecificationMutationRepository
+  extends DocumentSpecificationsRepository {
   add(specification: DocumentSpecificationCreation): Promise<DocumentSpecification>
   findById(documentSpecificationId: string): Promise<DocumentSpecification | undefined>
   replaceConfiguration(
@@ -25,8 +33,4 @@ export interface DocumentSpecificationsRepository {
     changes: DocumentSpecificationTemplateUpdate,
   ): Promise<DocumentSpecification | undefined>
   remove(documentSpecificationId: string): Promise<boolean>
-  addMany(
-    specifications: readonly DocumentSpecificationCreation[],
-  ): Promise<readonly DocumentSpecification[]>
-  removeAll(): Promise<void>
 }

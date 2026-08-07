@@ -9,15 +9,15 @@ import {
   InvalidDocumentTemplateError,
 } from '../../domain/errors'
 import type { DocumentTemplateContent } from '../../domain/structures'
-import type { DocumentSpecificationsRepository } from '../../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../../interfaces'
 import { UpdateDocumentSpecificationConfigurationUseCase } from '../update-document-specification-configuration-use-case'
 
 describe('Update Document Specification Configuration Use Case', () => {
-  let repository: MockProxy<DocumentSpecificationsRepository>
+  let repository: MockProxy<DocumentSpecificationMutationRepository>
   let catalogProvider: MockProxy<LegalExpertiseCatalogProvider>
 
   beforeEach(() => {
-    repository = mock<DocumentSpecificationsRepository>()
+    repository = mock<DocumentSpecificationMutationRepository>()
     catalogProvider = mock<LegalExpertiseCatalogProvider>()
     catalogProvider.validateActive.mockResolvedValue(true)
   })

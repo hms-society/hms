@@ -13,6 +13,9 @@ export interface DocumentProductionService {
   listDocumentSpecifications(
     query?: DocumentSpecificationListQuery,
   ): Promise<RestResponse<PaginationResponse<DocumentSpecificationListItem>>>
+}
+
+export interface DocumentProductionManagementService extends DocumentProductionService {
   createDocumentSpecification(
     request: CreateDocumentSpecificationInput,
   ): Promise<RestResponse<DocumentSpecificationDetails>>

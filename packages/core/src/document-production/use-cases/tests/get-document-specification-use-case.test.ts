@@ -4,14 +4,14 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import type { DocumentSpecification } from '../../domain/entities'
 import { fakeDocumentSpecification } from '../../domain/entities/fakers'
 import { DocumentSpecificationNotFoundError } from '../../domain/errors'
-import type { DocumentSpecificationsRepository } from '../../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../../interfaces'
 import { GetDocumentSpecificationUseCase } from '../get-document-specification-use-case'
 
 describe('Get Document Specification Use Case', () => {
-  let repository: MockProxy<DocumentSpecificationsRepository>
+  let repository: MockProxy<DocumentSpecificationMutationRepository>
 
   beforeEach(() => {
-    repository = mock<DocumentSpecificationsRepository>()
+    repository = mock<DocumentSpecificationMutationRepository>()
   })
 
   it('returns the specification found by id', async () => {

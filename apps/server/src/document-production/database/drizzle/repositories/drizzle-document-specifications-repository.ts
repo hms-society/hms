@@ -22,6 +22,7 @@ import {
   documentSpecificationModel,
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
+import { serializeDocumentTemplateContent } from '@/document-production/database/drizzle/mappers/drizzle-document-specification-mapper'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -136,7 +137,7 @@ export class DrizzleDocumentSpecificationsRepository
           specifications.map((specification) => ({
             name: specification.name,
             description: specification.description,
-            content: specification.content,
+            content: serializeDocumentTemplateContent(specification.content),
             variables: [...specification.variables],
             moment: specification.application.moment,
             scope: specification.application.scope,
@@ -155,14 +156,13 @@ export class DrizzleDocumentSpecificationsRepository
             legalAreaId,
           })),
         )
-        const topics = specification.application.legalAreaIds.flatMap((legalAreaId) =>
-          (specification.application.legalTopicIdsByArea[legalAreaId] ?? []).map(
-            (legalTopicId) => ({
-              documentSpecificationId: record.id,
-              legalAreaId,
-              legalTopicId,
-            }),
-          ),
+        const application = specification.application
+        const topics = application.legalAreaIds.flatMap((legalAreaId) =>
+          (application.legalTopicIdsByArea[legalAreaId] ?? []).map((legalTopicId) => ({
+            documentSpecificationId: record.id,
+            legalAreaId,
+            legalTopicId,
+          })),
         )
         if (topics.length)
           await transaction.insert(documentSpecificationLegalTopicModel).values(topics)

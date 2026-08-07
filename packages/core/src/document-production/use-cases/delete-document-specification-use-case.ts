@@ -1,7 +1,7 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 
 import { DocumentSpecificationNotFoundError } from '../domain/errors'
-import type { DocumentSpecificationsRepository } from '../interfaces'
+import type { DocumentSpecificationMutationRepository } from '../interfaces'
 
 type Request = {
   readonly documentSpecificationId: string
@@ -9,7 +9,7 @@ type Request = {
 
 export class DeleteDocumentSpecificationUseCase implements UseCase<Request, void> {
   constructor(
-    private readonly specificationsRepository: DocumentSpecificationsRepository,
+    private readonly specificationsRepository: DocumentSpecificationMutationRepository,
   ) {}
 
   async execute({ documentSpecificationId }: Request): Promise<void> {
