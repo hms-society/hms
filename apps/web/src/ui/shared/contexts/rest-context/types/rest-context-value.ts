@@ -2,7 +2,7 @@ import type { IntakeService } from '@/rest/services/intake-service'
 import type { IdentityService } from '@/rest/services/identity-service'
 import type { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import type { CommunicationService } from '@/rest/services/communication-service'
-import type {documentService} from '@/rest/services/document-service'
+import type { documentService } from '@/rest/services/document-service'
 
 export type RestContextValue = {
   intakeService: ReturnType<typeof IntakeService>

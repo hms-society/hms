@@ -3,7 +3,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export function useDocumentFileQuery(fileId: string) {
   const { documentService } = useRestContext()
-  
+
   return useQuery({
     queryKey: ['document-file', fileId],
     queryFn: async () => {

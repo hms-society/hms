@@ -2,7 +2,10 @@ import type { DocumentBatch, DocumentBatchFile } from '../domain/entities/docume
 import type { DocumentBatchStatus } from '../domain/structures/document-batch-status'
 import type { DocumentBatchChannel } from '../domain/structures/document-batch-channel'
 
-export type CreateDocumentBatchFileRecord = Omit<DocumentBatchFile, 'id' | 'batchId' | 'createdAt'>
+export type CreateDocumentBatchFileRecord = Omit<
+  DocumentBatchFile,
+  'id' | 'batchId' | 'createdAt'
+>
 
 export type CreateDocumentBatchRecord = {
   readableId: string

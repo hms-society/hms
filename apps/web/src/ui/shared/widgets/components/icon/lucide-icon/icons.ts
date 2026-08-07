@@ -59,7 +59,7 @@ import {
   X,
   ZoomIn,
   ZoomOut,
-  Download
+  Download,
 } from 'lucide-react'
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
 import type { IconName } from '../types'
@@ -125,5 +125,5 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   x: X,
   'zoom-in': ZoomIn,
   'zoom-out': ZoomOut,
-  'download': Download
+  download: Download,
 }

@@ -7,7 +7,5 @@ export const dailyCounterModel = pgTable(
     date: date('date', { mode: 'string' }).notNull(),
     count: integer('count').default(0).notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.context, table.date] }),
-  ],
+  (table) => [primaryKey({ columns: [table.context, table.date] })],
 )

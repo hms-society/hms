@@ -19,8 +19,7 @@ export class DocumentsSeeder {
     private readonly drizzleClient: DrizzleClient,
   ) {}
 
-  async clear() {
-  }
+  async clear() {}
 
   async run() {
     await this.clear()

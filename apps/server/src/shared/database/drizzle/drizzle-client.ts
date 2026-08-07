@@ -18,7 +18,7 @@ export class DrizzleClient implements OnModuleDestroy {
         connect_timeout: 5,
         idle_timeout: 10,
         max: 3,
-        onnotice: () => {}
+        onnotice: () => {},
       })
       this.database = drizzle(this.client, { schema })
     }

@@ -1,4 +1,12 @@
-import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { documentBatchStatusModel } from './document-batch-status-model'
 import { documentChannelModel } from './document-channel-model'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
@@ -13,11 +21,21 @@ export const documentBatchModel = pgTable(
     channel: documentChannelModel('channel').notNull(),
     sender: text('sender').notNull(),
     inTriageBox: boolean('in_triage_box').default(false).notNull(),
-    clientId: uuid('client_id').references(() => clientModel.id, { onDelete: 'set null' }),
-    intakeId: uuid('intake_id').references(() => intakeModel.id, { onDelete: 'set null' }),
-    createdBy: uuid('created_by').references(() => userModel.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+    clientId: uuid('client_id').references(() => clientModel.id, {
+      onDelete: 'set null',
+    }),
+    intakeId: uuid('intake_id').references(() => intakeModel.id, {
+      onDelete: 'set null',
+    }),
+    createdBy: uuid('created_by').references(() => userModel.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex('document_batches_readable_id_uidx').on(table.readableId),

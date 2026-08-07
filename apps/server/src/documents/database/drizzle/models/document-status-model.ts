@@ -6,5 +6,5 @@ export const documentStatusModel = pgEnum('document_status', [
   'illegible',
   'incomplete',
   'duplicate',
-  'processing_failure'
+  'processing_failure',
 ])

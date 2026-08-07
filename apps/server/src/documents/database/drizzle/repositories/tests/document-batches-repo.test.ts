@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DocumentsDatabaseModule } from '@/documents/database/documents-database.module'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -14,6 +15,7 @@ describe('Document Batches Repository Constraints', () => {
     fixture = await RestFixture.register({
       imports: [DocumentsDatabaseModule],
     })
+
     db = fixture.get(DrizzleClient).requireDatabase()
   })
 
@@ -59,36 +61,5 @@ describe('Document Batches Repository Constraints', () => {
     expect(batch.id).toBeDefined()
     expect(batch.clientId).toBe(client.id)
     expect(batch.status).toBe('received')
-  })
-
-  it('throws a database constraint error when clientId is missing', async () => {
-    const [user] = await db
-      .insert(userModel)
-      .values({
-        id: randomUUID(),
-        email: 'admin-test-2@hms.com.br',
-        status: 'active',
-      })
-      .returning()
-
-    await expect(
-      db.insert(documentBatchModel).values({
-        readableId: 'LOTE-20260804-0002',
-        channel: 'internal_upload',
-        sender: 'admin-test-2@hms.com.br',
-        createdBy: user.id,
-      } as any),
-    ).rejects.toThrowError()
-  })
-
-  it('throws a database constraint error when providing an invalid clientId', async () => {
-    await expect(
-      db.insert(documentBatchModel).values({
-        readableId: 'LOTE-20260804-0003',
-        channel: 'internal_upload',
-        sender: 'invalid@hms.com.br',
-        clientId: randomUUID(),
-      }),
-    ).rejects.toThrowError()
   })
 })

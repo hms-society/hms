@@ -10,7 +10,13 @@ import {
   Body,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
-import { ApiResponse, ApiBearerAuth, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger'
+import {
+  ApiResponse,
+  ApiBearerAuth,
+  ApiTags,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
@@ -70,7 +76,9 @@ export class InternalUploadController {
     @CurrentUser() authUser: AuthUser,
   ) {
     if (!clientId) {
-      throw new BadRequestException('O ID do cliente (clientId) é obrigatório para a criação do lote.')
+      throw new BadRequestException(
+        'O ID do cliente (clientId) é obrigatório para a criação do lote.',
+      )
     }
 
     if (!rawFiles || rawFiles.length === 0) {
@@ -81,7 +89,7 @@ export class InternalUploadController {
       rawFiles.map(async (file) => {
         const timestamp = new Date().getTime()
         const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const storagePath = `internal/${clientId}/${timestamp}-${safeName}` 
+        const storagePath = `internal/${clientId}/${timestamp}-${safeName}`
 
         await this.storageProvider.upload(storagePath, file.buffer, file.mimetype)
 

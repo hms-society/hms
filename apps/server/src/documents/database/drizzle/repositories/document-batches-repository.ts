@@ -5,13 +5,17 @@ import type {
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
 } from '@hms/core/document-engine/interfaces'
-import type { DocumentBatch, DocumentBatchFile } from '@hms/core/document-engine/domain/entities'
+import type {
+  DocumentBatch,
+  DocumentBatchFile,
+} from '@hms/core/document-engine/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
-import { eq, desc, inArray } from 'drizzle-orm' 
+import { eq, desc, inArray } from 'drizzle-orm'
 
 @Injectable()
-export class DrizzleDocumentBatchesRepository extends DrizzleRepository
+export class DrizzleDocumentBatchesRepository
+  extends DrizzleRepository
   implements DocumentBatchesRepository
 {
   constructor(
@@ -42,8 +46,8 @@ export class DrizzleDocumentBatchesRepository extends DrizzleRepository
         throw new Error('Failed to create document batch')
       }
 
-      let createdFiles: typeof documentBatchFileModel.$inferSelect[] = []
-      
+      let createdFiles: (typeof documentBatchFileModel.$inferSelect)[] = []
+
       if (batch.files.length > 0) {
         const filesToInsert = batch.files.map((file) => ({
           ...file,
@@ -63,7 +67,7 @@ export class DrizzleDocumentBatchesRepository extends DrizzleRepository
     })
   }
 
-  async findById(clientId:string): Promise<DocumentBatch[]> {
+  async findById(clientId: string): Promise<DocumentBatch[]> {
     const batches = await this.database
       .select()
       .from(documentBatchModel)
@@ -88,21 +92,22 @@ export class DrizzleDocumentBatchesRepository extends DrizzleRepository
 
   async findFileById(fileId: string): Promise<DocumentBatchFile | undefined> {
     const [record] = await this.database
-    .select()
-    .from(documentBatchFileModel)
-    .where(eq(documentBatchFileModel.id, fileId))
+      .select()
+      .from(documentBatchFileModel)
+      .where(eq(documentBatchFileModel.id, fileId))
 
-    if(!record){return undefined}
+    if (!record) {
+      return undefined
+    }
 
-    return{
+    return {
       id: record.id,
-      batchId:record.batchId,
+      batchId: record.batchId,
       storagePath: record.storagePath,
       originalName: record.originalName,
       mimeType: record.mimeType,
       sizeBytes: record.sizeBytes,
-      createdAt: record.createdAt
+      createdAt: record.createdAt,
     }
   }
-
 }

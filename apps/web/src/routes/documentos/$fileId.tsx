@@ -5,16 +5,13 @@ import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
 export const Route = createFileRoute('/documentos/$fileId')({
   beforeLoad: requireAuthMiddleware,
-  component:RouteComponent
+  component: RouteComponent,
 })
 
-function RouteComponent(){
-  return(
+function RouteComponent() {
+  return (
     <AppLayout>
-      <DocumentViewerPage/>
+      <DocumentViewerPage />
     </AppLayout>
   )
 }
-
-
-

@@ -6,7 +6,10 @@ import { createClient } from '@supabase/supabase-js'
 
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
-import { DocumentBatchChannel, DocumentBatchStatus } from '@hms/core/document-engine/domain/structures'
+import {
+  DocumentBatchChannel,
+  DocumentBatchStatus,
+} from '@hms/core/document-engine/domain/structures'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel } from '@/identity/database/drizzle/models'
@@ -29,9 +32,7 @@ export class RealDocumentsSeeder {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const { data: buckets } = await supabase.storage.listBuckets()
-    const bucketExists = buckets?.some(
-      (bucket) => bucket.name === 'document_batches',
-    )
+    const bucketExists = buckets?.some((bucket) => bucket.name === 'document_batches')
 
     if (!bucketExists) {
       await supabase.storage.createBucket('document_batches', {
@@ -46,7 +47,6 @@ export class RealDocumentsSeeder {
         fileSizeLimit: 10485760,
       })
     }
-
   }
 
   async run() {

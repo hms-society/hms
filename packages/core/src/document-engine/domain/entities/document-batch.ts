@@ -2,7 +2,7 @@ import type {
   DocumentBatchDiscardReason,
   DocumentBatchSender,
   DocumentBatchStatus,
-  DocumentBatchChannel
+  DocumentBatchChannel,
 } from '../structures'
 
 export type DocumentBatchFile = {

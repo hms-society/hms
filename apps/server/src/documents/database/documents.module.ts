@@ -21,7 +21,7 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
-    GetDocumentFileController
+    GetDocumentFileController,
   ],
   providers: [
     ProcessWhatsappBatchWorker,

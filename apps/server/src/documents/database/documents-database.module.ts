@@ -13,11 +13,7 @@ import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-cou
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
-  imports: [
-    SharedDatabaseModule, 
-    ProvisionModule, 
-    IdentityDatabaseModule 
-  ],
+  imports: [SharedDatabaseModule, ProvisionModule, IdentityDatabaseModule],
   providers: [
     DrizzleDocumentBatchMapper,
     DrizzleDailyCountersRepository,
@@ -53,14 +49,14 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
       ],
     },
     DocumentsSeeder,
-    RealDocumentsSeeder
+    RealDocumentsSeeder,
   ],
   exports: [
     DOCUMENTS_REPOSITORIES.dailyCounters,
     DOCUMENTS_REPOSITORIES.documentBatches,
     CreateDocumentBatchUseCase,
     DocumentsSeeder,
-    RealDocumentsSeeder
+    RealDocumentsSeeder,
   ],
 })
 export class DocumentsDatabaseModule {}

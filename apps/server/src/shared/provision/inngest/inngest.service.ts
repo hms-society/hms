@@ -42,7 +42,8 @@ export class InngestService {
 
             for (const message of messages) {
               if (message.type === 'document' || message.type === 'image') {
-                const media = message.type === 'document' ? message.document : message.image
+                const media =
+                  message.type === 'document' ? message.document : message.image
                 const sender = message.from
 
                 const [client] = await db
@@ -58,14 +59,17 @@ export class InngestService {
                     status: 'falha_definitiva',
                     erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
                   })
-                  continue 
+                  continue
                 }
 
-                const [evento] = await db.insert(integracaoEvento).values({
-                  provedor: 'whatsapp',
-                  payload: message,
-                  status: 'recebido'
-                }).returning()
+                const [evento] = await db
+                  .insert(integracaoEvento)
+                  .values({
+                    provedor: 'whatsapp',
+                    payload: message,
+                    status: 'recebido',
+                  })
+                  .returning()
 
                 await step.sendEvent('dispatch-document-batch', {
                   name: 'documents/whatsapp.batch.received',
@@ -74,8 +78,9 @@ export class InngestService {
                     sender: sender,
                     clientId: client.id,
                     mimeType: media.mime_type,
-                    originalName: media.filename || `${media.id}.${media.mime_type.split('/')[1]}`
-                  }
+                    originalName:
+                      media.filename || `${media.id}.${media.mime_type.split('/')[1]}`,
+                  },
                 })
               }
             }

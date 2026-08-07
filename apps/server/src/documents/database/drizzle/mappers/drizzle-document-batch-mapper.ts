@@ -24,6 +24,6 @@ export class DrizzleDocumentBatchMapper {
       })),
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
-    } as DocumentBatch 
+    } as DocumentBatch
   }
 }

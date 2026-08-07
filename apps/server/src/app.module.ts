@@ -13,7 +13,7 @@ import { DocumentsModule } from './documents/database/documents.module'
     LegalCatalogModule,
     IntakeModule,
     CommunicationModule,
-    DocumentsModule
+    DocumentsModule,
   ],
 })
 export class AppModule {}

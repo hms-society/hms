@@ -14,7 +14,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
+  import.meta.env.VITE_SUPABASE_KEY,
 )
 
 function formatBytes(bytes: number) {
@@ -22,7 +22,7 @@ function formatBytes(bytes: number) {
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  return parseFloat((bytes / k ** i).toFixed(2)) + ' ' + sizes[i]
 }
 
 export function DocumentViewerPage() {
@@ -35,8 +35,8 @@ export function DocumentViewerPage() {
   const BASE_PAGE_WIDTH = 900 // Largura base aumentada
 
   const handleZoomIn = () => {
-  setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
-}
+    setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
+  }
 
   const handleZoomOut = () => {
     setZoom((prev) => Math.max(MIN_ZOOM, prev - ZOOM_STEP))
@@ -98,26 +98,34 @@ export function DocumentViewerPage() {
   // }
 
   const pageWidth = BASE_PAGE_WIDTH * zoom
-  
-  const { data: file, isLoading: isLoadingFile, isError: isErrorFile } = useDocumentFileQuery(fileId)
 
-  const { data: fileUrl, isLoading: isLoadingUrl, isError: isErrorUrl } = useQuery({
+  const {
+    data: file,
+    isLoading: isLoadingFile,
+    isError: isErrorFile,
+  } = useDocumentFileQuery(fileId)
+
+  const {
+    data: fileUrl,
+    isLoading: isLoadingUrl,
+    isError: isErrorUrl,
+  } = useQuery({
     queryKey: ['document-blob', file?.storagePath],
     queryFn: async () => {
       if (!file?.storagePath) return null
-      
+
       const { data, error } = await supabase.storage
         .from('document_batches')
         .download(file.storagePath)
-        
+
       if (error) {
         throw error
       }
-      
+
       return URL.createObjectURL(data)
     },
     enabled: !!file?.storagePath,
-    retry: false
+    retry: false,
   })
 
   useEffect(() => {
@@ -128,7 +136,7 @@ export function DocumentViewerPage() {
 
   if (isLoadingFile) {
     return (
-      <div className="flex h-screen items-center justify-center text-muted-foreground">
+      <div className='flex h-screen items-center justify-center text-muted-foreground'>
         Carregando visualizador...
       </div>
     )
@@ -136,63 +144,79 @@ export function DocumentViewerPage() {
 
   if (isErrorFile || !file) {
     return (
-      <div className="flex h-screen items-center justify-center text-destructive">
+      <div className='flex h-screen items-center justify-center text-destructive'>
         Erro ao carregar os metadados do arquivo.
       </div>
     )
   }
 
   const format = file.mimeType.split('/')[1]?.toUpperCase() || 'ARQUIVO'
-  const formattedDate = new Intl.DateTimeFormat('pt-BR', { 
-    dateStyle: 'short', 
-    timeStyle: 'short' 
+  const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
   }).format(new Date(file.createdAt))
 
   return (
-    <div className="mx-auto flex w-full max-w-[1400px] flex-col items-center gap-6 mt-5 px-4 sm:px-8 pb-10">
-      
-      <div className="flex w-full max-w-6xl flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className='mx-auto flex w-full max-w-[1400px] flex-col items-center gap-6 mt-5 px-4 sm:px-8 pb-10'>
+      <div className='flex w-full max-w-6xl flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div>
-          <h1 className="text-2xl font-serif font-bold text-[#134C50]">Editor de validação</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className='text-2xl font-serif font-bold text-[#134C50]'>
+            Editor de validação
+          </h1>
+          <p className='text-sm text-muted-foreground mt-1'>
             Revise o documento, confirme o vínculo e registre a decisão final.
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          className="rounded-pill gap-2 border-border/80 text-foreground"
+        <Button
+          variant='outline'
+          className='rounded-pill gap-2 border-border/80 text-foreground'
           onClick={() => window.history.back()}
         >
-          <Icon name="arrow-left" className="w-4 h-4" />
+          <Icon name='arrow-left' className='w-4 h-4' />
           Voltar aos documentos
         </Button>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden rounded-xl bg-card w-full max-w-6xl">
-        
-        <div className="flex flex-col gap-1 border-b border-border px-6 py-5">
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-foreground">{file.originalName}</h2>
-            <Badge variant="secondary" className="bg-muted text-xs font-semibold text-muted-foreground shadow-none">
+      <Card className='shadow-sm border-border overflow-hidden rounded-xl bg-card w-full max-w-6xl'>
+        <div className='flex flex-col gap-1 border-b border-border px-6 py-5'>
+          <div className='flex items-center gap-3'>
+            <h2 className='text-base font-bold text-foreground'>{file.originalName}</h2>
+            <Badge
+              variant='secondary'
+              className='bg-muted text-xs font-semibold text-muted-foreground shadow-none'
+            >
               {format}
             </Badge>
           </div>
-          <span className="text-xs text-muted-foreground">
+          <span className='text-xs text-muted-foreground'>
             Portal do cliente • Recebido em {formattedDate}
           </span>
         </div>
 
-        <CardContent className="p-0">
-          <div className="flex flex-col bg-[#F4F4F5]">
-            
-            <div className="flex items-center justify-between px-6 py-4">
-              <span className="text-sm font-semibold text-foreground">Documento original</span>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card" onClick={handleZoomIn} disabled={zoom >= MAX_ZOOM}>
-                  <Icon name="zoom-in" className="w-4 h-4 text-muted-foreground" />
+        <CardContent className='p-0'>
+          <div className='flex flex-col bg-[#F4F4F5]'>
+            <div className='flex items-center justify-between px-6 py-4'>
+              <span className='text-sm font-semibold text-foreground'>
+                Documento original
+              </span>
+              <div className='flex items-center gap-2'>
+                <Button
+                  variant='outline'
+                  size='icon'
+                  className='w-8 h-8 rounded-lg bg-card'
+                  onClick={handleZoomIn}
+                  disabled={zoom >= MAX_ZOOM}
+                >
+                  <Icon name='zoom-in' className='w-4 h-4 text-muted-foreground' />
                 </Button>
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card" onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}>
-                  <Icon name="zoom-out" className="w-4 h-4 text-muted-foreground" />
+                <Button
+                  variant='outline'
+                  size='icon'
+                  className='w-8 h-8 rounded-lg bg-card'
+                  onClick={handleZoomOut}
+                  disabled={zoom <= MIN_ZOOM}
+                >
+                  <Icon name='zoom-out' className='w-4 h-4 text-muted-foreground' />
                 </Button>
                 {/* <Button 
                   variant="outline" 
@@ -206,57 +230,72 @@ export function DocumentViewerPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center py-6 px-6 min-h-[500px]">
-              <div className="w-full max-w-5xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden relative">
+            <div className='flex flex-col items-center justify-center py-6 px-6 min-h-[500px]'>
+              <div className='w-full max-w-5xl bg-white border border-border/50 shadow-sm rounded-md aspect-[1/1.4] flex items-center justify-center overflow-hidden relative'>
                 {isLoadingUrl ? (
-                  <div className="flex flex-col items-center text-muted-foreground gap-2">
-                    <Icon name="refresh-cw" className="w-8 h-8 animate-spin" />
-                    <span className="text-sm">Gerando visualização segura...</span>
+                  <div className='flex flex-col items-center text-muted-foreground gap-2'>
+                    <Icon name='refresh-cw' className='w-8 h-8 animate-spin' />
+                    <span className='text-sm'>Gerando visualização segura...</span>
                   </div>
                 ) : isErrorUrl ? (
-                  <div className="flex flex-col items-center text-destructive gap-2 p-8 text-center bg-destructive/5 rounded-lg border border-destructive/20">
-                    <Icon name="triangle-alert" className="w-8 h-8" />
-                    <span className="text-sm font-medium">O arquivo físico não foi encontrado no Storage ou o acesso foi negado pela política RLS.</span>
+                  <div className='flex flex-col items-center text-destructive gap-2 p-8 text-center bg-destructive/5 rounded-lg border border-destructive/20'>
+                    <Icon name='triangle-alert' className='w-8 h-8' />
+                    <span className='text-sm font-medium'>
+                      O arquivo físico não foi encontrado no Storage ou o acesso foi
+                      negado pela política RLS.
+                    </span>
                   </div>
                 ) : !fileUrl ? (
-                  <div className="flex flex-col items-center text-muted-foreground gap-2">
-                    <Icon name="triangle-alert" className="w-8 h-8" />
-                    <span className="text-sm">Não foi possível carregar a URL do arquivo.</span>
+                  <div className='flex flex-col items-center text-muted-foreground gap-2'>
+                    <Icon name='triangle-alert' className='w-8 h-8' />
+                    <span className='text-sm'>
+                      Não foi possível carregar a URL do arquivo.
+                    </span>
                   </div>
                 ) : format === 'PDF' ? (
-                  <div className="absolute inset-0 overflow-auto bg-white" ref={viewerRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} style={{
-                    cursor: canPan ? isDragging ? 'grabbing' : 'grab' : 'default'
-                  }}>
-                    <div className="flex justify-start py-4 px-4 min-w-max" onDragStart={(e) => e.preventDefault()}>
+                  <div
+                    className='absolute inset-0 overflow-auto bg-white'
+                    ref={viewerRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    style={{
+                      cursor: canPan ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                    }}
+                  >
+                    <div
+                      className='flex justify-start py-4 px-4 min-w-max'
+                      onDragStart={(e) => e.preventDefault()}
+                    >
                       <PdfDocument
                         file={fileUrl}
                         onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                         loading={
-                          <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
-                            <Icon name="refresh-cw" className="w-8 h-8 animate-spin" />
-                            <span className="text-sm">Renderizando PDF...</span>
+                          <div className='flex flex-col items-center gap-2 py-10 text-muted-foreground'>
+                            <Icon name='refresh-cw' className='w-8 h-8 animate-spin' />
+                            <span className='text-sm'>Renderizando PDF...</span>
                           </div>
                         }
                         error={
-                          <div className="flex flex-col items-center gap-2 py-10 text-destructive">
-                            <Icon name="triangle-alert" className="w-8 h-8" />
-                            <span className="text-sm">
+                          <div className='flex flex-col items-center gap-2 py-10 text-destructive'>
+                            <Icon name='triangle-alert' className='w-8 h-8' />
+                            <span className='text-sm'>
                               Não foi possível renderizar o PDF.
                             </span>
                           </div>
                         }
                       >
-                        {Array.from({length: numPages}, (_, index) => (
+                        {Array.from({ length: numPages }, (_, index) => (
                           <Page
-                          key={index}
-                          pageNumber={index + 1}
-                          width={pageWidth}
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                          className="mb-4 shadow-sm"
-                        />
+                            key={index}
+                            pageNumber={index + 1}
+                            width={pageWidth}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                            className='mb-4 shadow-sm'
+                          />
                         ))}
-                        
                       </PdfDocument>
                     </div>
                   </div>
@@ -264,15 +303,15 @@ export function DocumentViewerPage() {
                   <img
                     src={fileUrl}
                     alt={file.originalName}
-                    className="absolute inset-0 w-full h-full object-contain p-2"
+                    className='absolute inset-0 w-full h-full object-contain p-2'
                   />
                 ) : (
-                  <div className="flex flex-col items-center text-muted-foreground p-8 text-center">
-                    <Icon name="file-text" className="w-16 h-16 opacity-20 mb-4" />
-                    <p className="text-sm">
+                  <div className='flex flex-col items-center text-muted-foreground p-8 text-center'>
+                    <Icon name='file-text' className='w-16 h-16 opacity-20 mb-4' />
+                    <p className='text-sm'>
                       O formato {format} não possui visualizador web nativo.
                     </p>
-                    <p className="text-xs mt-1">
+                    <p className='text-xs mt-1'>
                       Utilize o botão de download para abri-lo localmente.
                     </p>
                   </div>
@@ -280,25 +319,28 @@ export function DocumentViewerPage() {
               </div>
 
               {format === 'PDF' && !isErrorUrl && (
-                <Badge variant="outline" className="mt-4 bg-white text-muted-foreground px-3 py-1 shadow-sm font-medium">
+                <Badge
+                  variant='outline'
+                  className='mt-4 bg-white text-muted-foreground px-3 py-1 shadow-sm font-medium'
+                >
                   Modo de Leitura
                 </Badge>
               )}
             </div>
 
-            <div className="flex items-center justify-between px-6 py-3 border-t border-border/40 bg-card/50">
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Arquivo</span>
-                <span className="text-xs font-semibold text-foreground">
+            <div className='flex items-center justify-between px-6 py-3 border-t border-border/40 bg-card/50'>
+              <div className='flex flex-col'>
+                <span className='text-[10px] uppercase font-semibold text-muted-foreground'>
+                  Arquivo
+                </span>
+                <span className='text-xs font-semibold text-foreground'>
                   {format} - {formatBytes(file.sizeBytes)}
                 </span>
               </div>
             </div>
-
           </div>
         </CardContent>
       </Card>
-      
     </div>
   )
 }

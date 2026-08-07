@@ -13,7 +13,7 @@ export type CreateDocumentBatchRequest = {
   clientId?: string
   intakeId?: string
   createdBy?: string
-  readableId?: string 
+  readableId?: string
 }
 
 export class CreateDocumentBatchUseCase {
@@ -54,7 +54,7 @@ export class CreateDocumentBatchUseCase {
 
     const count = await this.dailyCountersRepository.incrementAndGet('LOTE', dateString)
     const sequence = String(count).padStart(4, '0')
-    
+
     const readableId = request.readableId ?? `LOTE-${dateStringNoDashes}-${sequence}`
 
     return this.documentBatchesRepository.add({
