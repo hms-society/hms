@@ -32,8 +32,8 @@ async function bootstrap() {
     await app.get(LegalCatalogSeeder).clear()
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
-    await app.get(DocumentsSeeder).clear()
     await app.get(RealDocumentsSeeder).clear()
+    await app.get(DocumentsSeeder).clear()
 
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
@@ -61,8 +61,8 @@ async function bootstrap() {
     )
     await app.get(IntakeSeeder).run()
     await app.get(CommunicationSeeder).run()
-    await app.get(DocumentsSeeder).run()
     await app.get(RealDocumentsSeeder).run()
+    await app.get(DocumentsSeeder).run()
   } finally {
     await app.close()
   }

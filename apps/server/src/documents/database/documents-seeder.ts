@@ -20,8 +20,6 @@ export class DocumentsSeeder {
   ) {}
 
   async clear() {
-    const db = this.drizzleClient.requireDatabase()
-    await db.execute(sql`TRUNCATE document_batches, document_batch_files CASCADE`)
   }
 
   async run() {
