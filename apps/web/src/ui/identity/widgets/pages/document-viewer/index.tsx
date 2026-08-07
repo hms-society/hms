@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@supabase/supabase-js'
@@ -26,8 +26,78 @@ function formatBytes(bytes: number) {
 }
 
 export function DocumentViewerPage() {
-  const [numPages, setNumPages] = useState<number>(0)
+  const [numPages, setNumPages] = useState(0)
+  const [zoom, setZoom] = useState(1)
   const { fileId } = useParams({ from: '/documentos/$fileId' })
+  const MIN_ZOOM = 0.5
+  const MAX_ZOOM = 2
+  const ZOOM_STEP = 0.25
+  const BASE_PAGE_WIDTH = 700
+
+  const handleZoomIn = () => {
+  setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
+}
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(MIN_ZOOM, prev - ZOOM_STEP))
+  }
+
+  const [isDragging, setIsDragging] = useState(false)
+
+  const viewerRef = useRef<HTMLDivElement>(null)
+
+  const dragStart = useRef({
+    x: 0,
+    y: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+  })
+
+  const canPan = zoom > 1
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!canPan || !viewerRef.current) return
+
+    event.preventDefault()
+
+    setIsDragging(true)
+
+    dragStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      scrollLeft: viewerRef.current.scrollLeft,
+      scrollTop: viewerRef.current.scrollTop,
+    }
+  }
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !viewerRef.current) return
+
+    const container = viewerRef.current
+
+    const walkX = event.clientX - dragStart.current.x
+    const walkY = event.clientY - dragStart.current.y
+
+    container.scrollLeft = dragStart.current.scrollLeft - walkX
+    container.scrollTop = dragStart.current.scrollTop - walkY
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleDownload = () => {
+    if (!fileUrl || !file) return
+
+    const link = document.createElement('a')
+    link.href = fileUrl
+    link.download = file.originalName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const pageWidth = BASE_PAGE_WIDTH * zoom
   
   const { data: file, isLoading: isLoadingFile, isError: isErrorFile } = useDocumentFileQuery(fileId)
 
@@ -118,17 +188,17 @@ export function DocumentViewerPage() {
             <div className="flex items-center justify-between px-6 py-4">
               <span className="text-sm font-semibold text-foreground">Documento original</span>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card">
+                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card" onClick={handleZoomIn} disabled={zoom >= MAX_ZOOM}>
                   <Icon name="zoom-in" className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card">
+                <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-card" onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}>
                   <Icon name="zoom-out" className="w-4 h-4 text-muted-foreground" />
                 </Button>
                 <Button 
                   variant="outline" 
                   size="icon" 
                   className="w-8 h-8 rounded-lg bg-card"
-                  onClick={() => fileUrl ? window.open(fileUrl, '_blank') : undefined}
+                  onClick={handleDownload}
                   disabled={!fileUrl}
                 >
                   <Icon name="download" className="w-4 h-4 text-muted-foreground" />
@@ -154,8 +224,10 @@ export function DocumentViewerPage() {
                     <span className="text-sm">Não foi possível carregar a URL do arquivo.</span>
                   </div>
                 ) : format === 'PDF' ? (
-                  <div className="absolute inset-0 overflow-auto bg-white">
-                    <div className="flex justify-center py-4">
+                  <div className="absolute inset-0 overflow-auto bg-white" ref={viewerRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} style={{
+                    cursor: canPan ? isDragging ? 'grabbing' : 'grab' : 'default'
+                  }}>
+                    <div className="flex justify-start py-4 px-4 min-w-max" onDragStart={(e) => e.preventDefault()}>
                       <PdfDocument
                         file={fileUrl}
                         onLoadSuccess={({ numPages }) => setNumPages(numPages)}
@@ -178,7 +250,7 @@ export function DocumentViewerPage() {
                           <Page
                           key={index}
                           pageNumber={index + 1}
-                          width={700}
+                          width={pageWidth}
                           renderTextLayer={false}
                           renderAnnotationLayer={false}
                           className="mb-4 shadow-sm"
