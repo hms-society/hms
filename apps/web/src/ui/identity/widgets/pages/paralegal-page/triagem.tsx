@@ -212,9 +212,9 @@ export function Triagem() {
   return (
     <div className='flex-1 space-y-6 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6 max-w-7xl font-sans mx-auto'>
       <div className='space-y-1'>
-        <h1 className='text-xl sm:text-2xl font-bold tracking-tight text-slate-900 font-serif'>
+        <PageTitle className='text-xl font-bold text-slate-900 sm:text-2xl'>
           Caixa de Triagem de Lotes Órfãos
-        </h1>
+        </PageTitle>
         <p className='text-xs sm:text-sm text-slate-500 font-sans leading-relaxed'>
           Lotes documentais recebidos sem associação identificada - vincule cada lote a
           uma Pessoa ou Intake para prosseguir com a classificação.
@@ -608,3 +608,4 @@ export function Triagem() {
     </div>
   )
 }
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'

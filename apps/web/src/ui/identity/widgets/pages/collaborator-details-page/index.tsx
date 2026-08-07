@@ -5,6 +5,7 @@ import { CollaboratorEditDialog } from '@/ui/identity/widgets/components/collabo
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,12 +96,12 @@ export const CollaboratorDetailsPage = ({
             className='size-16 text-xl'
           />
           <div className='min-w-0'>
-            <h1
+            <PageTitle
               id='collaborator-details-title'
-              className='font-serif text-2xl font-semibold'
+              className='text-2xl font-semibold text-primary-foreground'
             >
               {collaborator.professionalName}
-            </h1>
+            </PageTitle>
             <p className='mt-1 text-sm text-primary-foreground/70'>
               {getProfileLabel(collaborator.profile)}
               {collaborator.jobTitle ? ` · ${collaborator.jobTitle}` : ''}

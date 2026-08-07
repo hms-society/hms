@@ -1,12 +1,28 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ReactNode } from 'react'
 
 import type { DocumentSpecificationListItem } from '@hms/core/document-production/domain/structures'
 import { DocumentSpecificationsPage } from '..'
 import { useDocumentCatalogQuery } from '../use-document-catalog-query'
 import { useDocumentSpecificationsQuery } from '../use-document-specifications-query'
 import { useDocumentTopicsQuery } from '../use-document-topics-query'
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, ...props }: { children: ReactNode; [key: string]: unknown }) => (
+    <a href='/modelos-de-documentos/spec-1' {...props}>
+      {children}
+    </a>
+  ),
+}))
+vi.mock('@/ui/shared/widgets/components/anchor', () => ({
+  Anchor: ({ children, route }: { children: ReactNode; route: string }) => (
+    <a href={route === 'newDocumentSpecification' ? '/modelos-de-documentos/novo' : '/'}>
+      {children}
+    </a>
+  ),
+}))
 
 vi.mock('../use-document-catalog-query', () => ({
   useDocumentCatalogQuery: vi.fn(),
@@ -92,7 +108,10 @@ describe('DocumentSpecificationsPage', () => {
     expect(screen.getAllByText('Consulta').length).toBeGreaterThan(0)
     expect(screen.getByRole('columnheader', { name: 'Modelo' })).toBeDefined()
     expect(screen.getByRole('columnheader', { name: 'Ação' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Editar Procuração' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Editar Procuração' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Novo modelo' }).getAttribute('href')).toBe(
+      '/modelos-de-documentos/novo',
+    )
     expect(screen.getByRole('button', { name: 'Duplicar Procuração' })).toBeDefined()
     expect(screen.queryByRole('columnheader', { name: 'Atualizado' })).toBeNull()
   })

@@ -1,6 +1,7 @@
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 
 export const IntakesPage = () => {
   return (
@@ -9,7 +10,7 @@ export const IntakesPage = () => {
         <span className='mb-5 flex size-12 items-center justify-center rounded-xl bg-secondary text-primary'>
           <Icon name='file-text' className='size-5' />
         </span>
-        <h1 className='text-3xl font-medium'>Intakes</h1>
+        <PageTitle className='text-3xl'>Intakes</PageTitle>
         <p className='mt-3 max-w-[60ch] text-sm leading-6 text-muted-foreground'>
           Registre uma nova demanda e vincule o cliente antes de definir o desfecho
           inicial.

@@ -12,6 +12,7 @@ import {
 } from '@/ui/shadcn/alert-dialog'
 import { Button } from '@/ui/shadcn/button'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import { ClientStep } from './client-step'
@@ -66,9 +67,9 @@ export const NewIntakePage = () => {
 
         <header className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <div className='max-w-2xl'>
-            <h1 className='text-[26px] font-medium text-foreground'>
+            <PageTitle className='text-[26px] text-foreground'>
               {stepContent.title}
-            </h1>
+            </PageTitle>
             {stepContent.description && (
               <p className='mt-1 text-xs leading-relaxed text-muted-foreground'>
                 {stepContent.description}

@@ -28,6 +28,7 @@ import {
   PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useMaskPhone } from '@/ui/shared/hooks/use-mask-phone'
 import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
@@ -117,7 +118,9 @@ export function ClientsListPage() {
     <div className='mx-auto flex w-full max-w-6xl flex-col gap-6 mt-5'>
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div>
-          <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>
+          <PageTitle className='text-2xl font-semibold text-foreground'>
+            Clientes
+          </PageTitle>
           <p className='text-sm text-muted-foreground'>{total} cadastros</p>
         </div>
         <Button className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'>

@@ -7,6 +7,8 @@ import { CollaboratorEditDialog } from '@/ui/identity/widgets/components/collabo
 import { CollaboratorFilterSelect } from '@/ui/identity/widgets/components/collaborator-filter-select'
 import { CollaboratorsTableSkeleton } from '@/ui/identity/widgets/components/collaborators-table-skeleton'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
+import { TableSurface } from '@/ui/shared/widgets/components/table-surface'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -82,15 +84,7 @@ export function CollaboratorsPage({
     <main className='mx-auto w-full space-y-7' aria-labelledby='collaborators-page-title'>
       <header className='flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between'>
         <div>
-          <p className='mb-2 text-xs font-semibold tracking-[0.16em] text-brand-accent'>
-            EQUIPE
-          </p>
-          <h1
-            id='collaborators-page-title'
-            className='font-serif text-4xl font-medium tracking-tight text-brand'
-          >
-            Colaboradores
-          </h1>
+          <PageTitle id='collaborators-page-title'>Colaboradores</PageTitle>
           <p className='mt-2 max-w-2xl text-sm text-muted-foreground'>
             Gerencie os acessos e as responsabilidades da equipe HMS.
           </p>
@@ -186,10 +180,7 @@ export function CollaboratorsPage({
         </div>
       </section>
 
-      <section
-        className='overflow-hidden rounded-xl border border-border bg-card shadow-sm'
-        aria-label='Lista de colaboradores'
-      >
+      <TableSurface ariaLabel='Lista de colaboradores'>
         {isLoadingCollaborators ? (
           <CollaboratorsTableSkeleton />
         ) : collaboratorsPageError ? (
@@ -402,7 +393,7 @@ export function CollaboratorsPage({
             )}
           </div>
         )}
-      </section>
+      </TableSurface>
       <AlertDialog
         open={Boolean(selectedAction)}
         onOpenChange={(open) => {
