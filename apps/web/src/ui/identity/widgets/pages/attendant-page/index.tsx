@@ -1,7 +1,9 @@
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
+
 export const Dashboard = () => {
   return (
     <div className=''>
-      <h1>Dashboard</h1>
+      <PageTitle>Dashboard</PageTitle>
     </div>
   )
 }

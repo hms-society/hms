@@ -1,6 +1,7 @@
 import { Card } from '@/ui/shadcn/card'
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 import { useMeusCasos } from './use-meus-casos'
 import { CaseSection } from './widgets/case-section'
 
@@ -18,9 +19,9 @@ export const MeusCasos = () => {
         {/* Banner Top Row */}
         <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-6 '>
           <div className='flex flex-col gap-2'>
-            <h1 className='text-3xl md:text-4xl  lg:mt-5 font-semibold font-serif text-brand dark:text-primary'>
+            <PageTitle className='text-3xl md:text-4xl lg:mt-5 font-semibold dark:text-primary'>
               Olá, {clientName}! {greeting}!
-            </h1>
+            </PageTitle>
             <p className='text-muted-foreground text-md md:text-lg'>
               Acompanhe o andamento das suas solicitações ou inicie um novo atendimento.
             </p>

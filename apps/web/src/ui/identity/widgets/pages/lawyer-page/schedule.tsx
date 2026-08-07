@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from '@/ui/shadcn/dialog'
 import { useConsultation } from './use-schedule'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 
 const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },
@@ -204,9 +205,9 @@ export const Schedule = () => {
   return (
     <div className='flex flex-col gap-6 max-w-5xl pt-4 md:pt-8 px-4 sm:px-6 w-full mx-auto pb-10'>
       <div className='flex flex-col gap-1'>
-        <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
+        <PageTitle className='text-[20px] font-semibold text-ring sm:text-[24px]'>
           Configurar agenda
-        </h1>
+        </PageTitle>
         <p className='text-muted-foreground font-sans text-[13px] sm:text-[14px]'>
           Defina sua disponibilidade semanal, duração de consulta e bloqueios
         </p>

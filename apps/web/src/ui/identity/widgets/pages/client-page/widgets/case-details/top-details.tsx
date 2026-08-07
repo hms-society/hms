@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useCaseDetails } from './use-case-details'
 import { Skeleton } from '@/ui/shadcn/skeleton'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 
 export const TopDetails = () => {
   const { caseDetails, isLoading, error } = useCaseDetails()
@@ -29,9 +30,9 @@ export const TopDetails = () => {
     <Card className='flex flex-col md:flex-row justify-between items-start md:items-center p-8 gap-6 bg-card border border-border/60 shadow-sm relative overflow-hidden'>
       <div className='absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none' />
       <div className='flex flex-col gap-2 z-10'>
-        <h1 className='text-3xl md:text-4xl font-semibold font-serif text-brand dark:text-primary'>
+        <PageTitle className='text-3xl md:text-4xl font-semibold dark:text-primary'>
           {getActionType(caseDetails.legalAreaId)}
-        </h1>
+        </PageTitle>
         <span className='text-muted-foreground text-sm font-mono'>
           Caso #{caseDetails.sequenceNumber} • ID: {caseDetails.id.slice(0, 8)}
         </span>

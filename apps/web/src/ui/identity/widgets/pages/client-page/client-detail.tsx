@@ -4,6 +4,7 @@ import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent } from '@/ui/shadcn/card'
 import { Icon, type IconName } from '@/ui/shared/widgets/components/icon'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import {
   Select,
@@ -170,7 +171,9 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
             </Avatar>
             <div className='flex flex-col gap-1.5'>
               <div className='flex items-center gap-3'>
-                <h1 className='text-xl font-semibold text-foreground'>{displayName}</h1>
+                <PageTitle className='text-xl font-semibold text-foreground'>
+                  {displayName}
+                </PageTitle>
                 <Badge
                   variant='secondary'
                   className={`border-transparent shadow-none ${currentStyle.badge}`}

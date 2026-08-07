@@ -9,6 +9,7 @@ import { StepDecision } from './step-decision'
 import { intakeFullSchema, type IntakeFullData } from './schemas/intake-schema'
 import { StepDemand } from './step-demand'
 import type { StepRef } from './step-demand'
+import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 
 export const NovoIntake = () => {
   const [currentStep, setCurrentStep] = useState(1)
@@ -79,9 +80,9 @@ export const NovoIntake = () => {
     <FormProvider {...methods}>
       <div className='min-h-screen bg-background p-8 flex flex-col gap-6'>
         <div className='flex items-center justify-between'>
-          <h1 className='text-foreground font-serif text-[20px] font-semibold'>
+          <PageTitle className='text-[20px] font-semibold text-foreground'>
             Novo intake
-          </h1>
+          </PageTitle>
           <div className='flex items-center gap-2'>
             {currentStep === 3 && tipoCard === 'agendar' && (
               <Button variant='brand' className='rounded-pill' onClick={handleResetForm}>
