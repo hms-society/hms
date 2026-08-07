@@ -28,9 +28,10 @@ import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
+import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
-import { Route as DocumentosFileIdRouteImport } from './routes/documentos/$fileId'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
+import { Route as ClientesNovoRouteImport } from './routes/clientes/novo'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
@@ -136,15 +137,15 @@ const AgendaIndexRoute = AgendaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AgendaRouteRoute,
 } as any)
+const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
+  id: '/lotes-documentos/$fileId',
+  path: '/lotes-documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
-} as any)
-const DocumentosFileIdRoute = DocumentosFileIdRouteImport.update({
-  id: '/documentos/$fileId',
-  path: '/documentos/$fileId',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ColaboradoresColaboradorIdRoute =
   ColaboradoresColaboradorIdRouteImport.update({
@@ -152,6 +153,11 @@ const ColaboradoresColaboradorIdRoute =
     path: '/colaboradores/$colaboradorId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ClientesNovoRoute = ClientesNovoRouteImport.update({
+  id: '/clientes/novo',
+  path: '/clientes/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
   id: '/clientes/$clienteId',
   path: '/clientes/$clienteId',
@@ -201,9 +207,10 @@ export interface FileRoutesByFullPath {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -228,9 +235,10 @@ export interface FileRoutesByTo {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/agenda': typeof AgendaIndexRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
@@ -260,9 +268,10 @@ export interface FileRoutesById {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
-  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -293,9 +302,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
-    | '/documentos/$fileId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/agenda/'
     | '/clientes/'
     | '/colaboradores/'
@@ -320,9 +330,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
-    | '/documentos/$fileId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/agenda'
     | '/clientes'
     | '/colaboradores'
@@ -351,9 +362,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
-    | '/documentos/$fileId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/agenda/'
     | '/clientes/'
     | '/colaboradores/'
@@ -379,8 +391,9 @@ export interface RootRouteChildren {
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   TriagemRouteRoute: typeof TriagemRouteRouteWithChildren
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
+  ClientesNovoRoute: typeof ClientesNovoRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
-  DocumentosFileIdRoute: typeof DocumentosFileIdRoute
+  LotesDocumentosFileIdRoute: typeof LotesDocumentosFileIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
@@ -526,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaIndexRouteImport
       parentRoute: typeof AgendaRouteRoute
     }
+    '/lotes-documentos/$fileId': {
+      id: '/lotes-documentos/$fileId'
+      path: '/lotes-documentos/$fileId'
+      fullPath: '/lotes-documentos/$fileId'
+      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes/novo': {
       id: '/intakes/novo'
       path: '/novo'
@@ -533,18 +553,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
-    '/documentos/$fileId': {
-      id: '/documentos/$fileId'
-      path: '/documentos/$fileId'
-      fullPath: '/documentos/$fileId'
-      preLoaderRoute: typeof DocumentosFileIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/colaboradores/$colaboradorId': {
       id: '/colaboradores/$colaboradorId'
       path: '/colaboradores/$colaboradorId'
       fullPath: '/colaboradores/$colaboradorId'
       preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes/novo': {
+      id: '/clientes/novo'
+      path: '/clientes/novo'
+      fullPath: '/clientes/novo'
+      preLoaderRoute: typeof ClientesNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes/$clienteId': {
@@ -689,8 +709,9 @@ const rootRouteChildren: RootRouteChildren = {
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   TriagemRouteRoute: TriagemRouteRouteWithChildren,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
+  ClientesNovoRoute: ClientesNovoRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
-  DocumentosFileIdRoute: DocumentosFileIdRoute,
+  LotesDocumentosFileIdRoute: LotesDocumentosFileIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,

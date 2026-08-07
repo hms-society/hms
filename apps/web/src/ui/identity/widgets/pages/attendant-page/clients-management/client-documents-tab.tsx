@@ -86,7 +86,7 @@ function DocumentBatchCard({ batch }: DocumentBatchCardProps) {
                     className='text-muted-foreground'
                     onClick={() =>
                       navigate({
-                        to: '/documentos/$fileId',
+                        to: '/lotes-documentos/$fileId',
                         params: { fileId: file.id },
                       })
                     }

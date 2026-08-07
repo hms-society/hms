@@ -1,15 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ClientsListPage } from '@/ui/identity/widgets/pages/attendant-page/clients-management/index'
+import { NewClientPage } from '@/ui/identity/widgets/pages/attendant-page/clients-management/new-client-page'
 import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
-export const Route = createFileRoute('/clientes/')({
+
+export const Route = createFileRoute('/clientes/novo')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
   return (
     <AppLayout>
-      <ClientsListPage />
+        <NewClientPage/>
     </AppLayout>
   )
 }
+

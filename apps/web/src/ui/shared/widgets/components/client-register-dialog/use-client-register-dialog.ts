@@ -172,8 +172,9 @@ export function useClientRegisterDialog({
 
   function handleSelectExistingClient() {
     if (searchResult?.kind !== 'existing') return
-    onClientSelected(searchResult.details)
+
     onOpenChange(false)
+    onClientSelected(searchResult.details)
   }
 
   function handleContinueToRegistration() {

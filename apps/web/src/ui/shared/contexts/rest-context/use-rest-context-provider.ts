@@ -41,11 +41,8 @@ export function useRestContextProvider(): RestContextValue {
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
-<<<<<<< HEAD
     documentService: documentService(restClient),
-=======
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),
->>>>>>> origin/develop
   }
 }

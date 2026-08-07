@@ -16,13 +16,8 @@ import {
   Circle,
   ChevronLeft,
   ChevronRight,
-<<<<<<< HEAD
   ChevronUp,
   ChevronDown,
-=======
-  ChevronDown,
-  ChevronUp,
->>>>>>> origin/develop
   ClipboardList,
   Copy,
   Clock,
@@ -99,13 +94,8 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   bell: Bell,
   'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
-<<<<<<< HEAD
   'chevron-up': ChevronUp,
   'chevron-down': ChevronDown,
-=======
-  'chevron-down': ChevronDown,
-  'chevron-up': ChevronUp,
->>>>>>> origin/develop
   clock: Clock,
   'list-checks': ListChecks,
   'log-out': LogOut,

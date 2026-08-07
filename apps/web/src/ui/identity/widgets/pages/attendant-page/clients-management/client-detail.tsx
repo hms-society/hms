@@ -10,8 +10,9 @@ import { useMaskTaxId } from '@/ui/shared/hooks/use-mask-tax-id'
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useQueryState } from 'nuqs'
-import { ClientCommunicationsTab } from './client-communications-tab'
+import { ClientCommunicationsTab } from '../../client-page/client-communications-tab'
 import { ClientDocumentsTab } from './client-documents-tab'
+import { useNavigate } from '@tanstack/react-router'
 
 function getInitials(name: string) {
   if (!name) return 'UN'
@@ -32,6 +33,7 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'documentos' })
+  const navigate = useNavigate()
 
   const {
     data: clientData,
@@ -158,10 +160,16 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
               </div>
             </div>
           </div>
-          <Button className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'>
-            <Icon name='plus' />
+          <Button 
+            className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'
+            onClick={() =>
+              navigate({
+                to: '/intakes'
+              })
+            }
+          >
             Novo intake
-          </Button>
+        </Button>
         </CardContent>
       </Card>
 

@@ -28,11 +28,11 @@ function formatBytes(bytes: number) {
 export function DocumentViewerPage() {
   const [numPages, setNumPages] = useState(0)
   const [zoom, setZoom] = useState(1)
-  const { fileId } = useParams({ from: '/documentos/$fileId' })
+  const { fileId } = useParams({ from: '/lotes-documentos/$fileId' })
   const MIN_ZOOM = 0.5
   const MAX_ZOOM = 2
   const ZOOM_STEP = 0.25
-  const BASE_PAGE_WIDTH = 900 // Largura base aumentada
+  const BASE_PAGE_WIDTH = 900 
 
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))

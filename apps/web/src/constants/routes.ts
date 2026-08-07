@@ -18,7 +18,7 @@ export const ROUTES = {
   clientPrivacy: '/cliente/privacidade',
   clients: '/clientes',
   collaborators: '/colaboradores',
-  documentViewer: '/documentos',
+  documentBatch: '/lotes-documentos',
   paralegalCases: '/casos',
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',
