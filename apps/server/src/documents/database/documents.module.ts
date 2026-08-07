@@ -3,14 +3,13 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
-
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
 import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
-
 import { listClientDocumentBatch } from '@hms/core/documents/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/documents/interfaces'
 import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
+import { GetDocumentFileController } from '../rest/controllers/get-document-file.controller'
 
 @Module({
   imports: [
@@ -22,6 +21,7 @@ import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositori
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
+    GetDocumentFileController
   ],
   providers: [
     ProcessWhatsappBatchWorker,

@@ -22,6 +22,7 @@ import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as DocumentosFileIdRouteImport } from './routes/documentos/$fileId'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
@@ -94,6 +95,11 @@ const IntakesNovoRoute = IntakesNovoRouteImport.update({
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
 } as any)
+const DocumentosFileIdRoute = DocumentosFileIdRouteImport.update({
+  id: '/documentos/$fileId',
+  path: '/documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ColaboradoresColaboradorIdRoute =
   ColaboradoresColaboradorIdRouteImport.update({
     id: '/colaboradores/$colaboradorId',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/documentos/$fileId': typeof DocumentosFileIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/atendimento/dashboard'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/documentos/$fileId'
     | '/intakes/novo'
     | '/clientes/'
     | '/colaboradores/'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/atendimento/dashboard'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/documentos/$fileId'
     | '/intakes/novo'
     | '/clientes'
     | '/colaboradores'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/atendimento/dashboard'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/documentos/$fileId'
     | '/intakes/novo'
     | '/clientes/'
     | '/colaboradores/'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  DocumentosFileIdRoute: typeof DocumentosFileIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
+    '/documentos/$fileId': {
+      id: '/documentos/$fileId'
+      path: '/documentos/$fileId'
+      fullPath: '/documentos/$fileId'
+      preLoaderRoute: typeof DocumentosFileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colaboradores/$colaboradorId': {
       id: '/colaboradores/$colaboradorId'
       path: '/colaboradores/$colaboradorId'
@@ -436,6 +456,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  DocumentosFileIdRoute: DocumentosFileIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,

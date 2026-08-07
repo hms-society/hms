@@ -10,6 +10,7 @@ import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
+import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
   imports: [
@@ -52,12 +53,14 @@ import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-cou
       ],
     },
     DocumentsSeeder,
+    RealDocumentsSeeder
   ],
   exports: [
     DOCUMENTS_REPOSITORIES.dailyCounters,
     DOCUMENTS_REPOSITORIES.documentBatches,
     CreateDocumentBatchUseCase,
     DocumentsSeeder,
+    RealDocumentsSeeder
   ],
 })
 export class DocumentsDatabaseModule {}

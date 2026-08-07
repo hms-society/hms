@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
-import { CreateDocumentBatchUseCase } from '../create-document-batch'
+import { CreateDocumentBatchUseCase } from '../create-document-batch-use-case'
 import { DocumentChannel } from '../../domain/structures/document-channel'
 import { DocumentBatchStatus } from '../../domain/structures/document-batch-status'
 import type { ClientsRepository } from '#identity/interfaces/clients-repository'

@@ -16,6 +16,8 @@ import {
   Circle,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   ClipboardList,
   Clock,
   Coins,
@@ -55,6 +57,9 @@ import {
   Users,
   Video,
   X,
+  ZoomIn,
+  ZoomOut,
+  Download
 } from 'lucide-react'
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
 import type { IconName } from '../types'
@@ -85,6 +90,8 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   bell: Bell,
   'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
+  'chevron-up': ChevronUp,
+  'chevron-down': ChevronDown,
   clock: Clock,
   'list-checks': ListChecks,
   'log-out': LogOut,
@@ -116,4 +123,7 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   'user-x': UserRoundX,
   video: Video,
   x: X,
+  'zoom-in': ZoomIn,
+  'zoom-out': ZoomOut,
+  'download': Download
 }

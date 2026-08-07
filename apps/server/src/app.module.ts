@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-
 import { IntakeModule } from '@/intake/intake.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'

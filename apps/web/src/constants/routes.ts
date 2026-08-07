@@ -13,6 +13,7 @@ export const ROUTES = {
   lawyerConsultations: '/advogado/consultas',
   clients: '/clientes',
   collaborators: '/colaboradores',
+  documentViewer: '/documentos'
 } as const
 
 export type RouteName = keyof typeof ROUTES

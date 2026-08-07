@@ -5,10 +5,10 @@ import type {
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
 } from '@hms/core/documents/interfaces'
-import type { DocumentBatch } from '@hms/core/documents/domain/entities'
+import type { DocumentBatch, DocumentBatchFile } from '@hms/core/documents/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
-import { eq, desc, inArray } from 'drizzle-orm' // inArray adicionado
+import { eq, desc, inArray } from 'drizzle-orm' 
 
 @Injectable()
 export class DrizzleDocumentBatchesRepository extends DrizzleRepository
@@ -85,4 +85,24 @@ export class DrizzleDocumentBatchesRepository extends DrizzleRepository
 
     return records.map((record) => this.mapper.toDomain(record as any))
   }
+
+  async findFileById(fileId: string): Promise<DocumentBatchFile | undefined> {
+    const [record] = await this.database
+    .select()
+    .from(documentBatchFileModel)
+    .where(eq(documentBatchFileModel.id, fileId))
+
+    if(!record){return undefined}
+
+    return{
+      id: record.id,
+      batchId:record.batchId,
+      storagePath: record.storagePath,
+      originalName: record.originalName,
+      mimeType: record.mimeType,
+      sizeBytes: record.sizeBytes,
+      createdAt: record.createdAt
+    }
+  }
+
 }
