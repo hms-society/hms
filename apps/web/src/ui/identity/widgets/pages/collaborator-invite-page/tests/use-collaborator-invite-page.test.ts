@@ -29,7 +29,11 @@ const useNavigationMock = vi.mocked(useNavigation)
 
 const session = {
   accessToken: 'access-token',
-  user: { id: 'user-id', email: 'invitee@example.com' },
+  user: {
+    id: 'user-id',
+    email: 'invitee@example.com',
+    invitedAt: '2026-08-07T10:00:00.000Z',
+  },
 }
 
 const getSession = vi.fn()

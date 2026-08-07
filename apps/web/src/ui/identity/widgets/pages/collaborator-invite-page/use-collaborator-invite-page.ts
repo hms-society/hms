@@ -33,8 +33,10 @@ export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {})
     search.error || search.error_code || search.error_description,
   )
   const hasInviteToken = Boolean(search.code) || hasHashInviteToken()
+  const hasInviteSession = Boolean(session?.user.invitedAt)
   const isInviteUnavailable =
-    hasCheckedSession && (!session || !hasInviteToken || hasInviteError)
+    hasCheckedSession &&
+    (!session || (!hasInviteToken && !hasInviteSession) || hasInviteError)
 
   useEffect(
     function markSessionAsChecked() {

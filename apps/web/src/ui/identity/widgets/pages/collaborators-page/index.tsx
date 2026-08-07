@@ -82,9 +82,6 @@ export function CollaboratorsPage({
     <main className='mx-auto w-full space-y-7' aria-labelledby='collaborators-page-title'>
       <header className='flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between'>
         <div>
-          <p className='mb-2 text-xs font-semibold tracking-[0.16em] text-brand-accent'>
-            EQUIPE
-          </p>
           <h1
             id='collaborators-page-title'
             className='font-serif text-4xl font-medium tracking-tight text-brand'

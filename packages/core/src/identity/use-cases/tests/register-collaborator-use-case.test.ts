@@ -212,6 +212,36 @@ describe('Register Collaborator Use Case', () => {
     expect(collaborator.userId).toBe(authUser.id)
   })
 
+  it('replaces an orphaned invited user before persisting the collaborator', async () => {
+    const registration = createAdministrativeRegistration()
+    const { authUser, summary } = prepareSuccessfulRegistration(registration)
+    const orphanedUser = UserFaker.fake({
+      id: 'orphaned-user-id',
+      email: registration.email,
+      status: 'invited',
+    })
+    transactionUsersRepository.findByEmail.mockResolvedValue(orphanedUser)
+    transactionCollaboratorsRepository.findByUserId.mockResolvedValue(undefined)
+
+    await expect(
+      useCase.execute({
+        authUser: authenticatedUser,
+        ...registration,
+      }),
+    ).resolves.toBe(summary)
+
+    expect(transactionCollaboratorsRepository.findByUserId).toHaveBeenCalledWith(
+      orphanedUser.id,
+    )
+    expect(transactionUsersRepository.removeById).toHaveBeenCalledWith(orphanedUser.id)
+    expect(transactionUsersRepository.addMany).toHaveBeenCalledWith([
+      { id: authUser.id, email: registration.email, status: 'invited' },
+    ])
+    expect(transactionCollaboratorsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: authUser.id }),
+    )
+  })
+
   it.each([
     ['missing authentication', false, undefined],
     ['a missing local user', true, undefined],

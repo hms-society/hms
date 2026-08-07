@@ -540,7 +540,15 @@ export class RegisterCollaboratorUseCase
     const existingByEmail = await scope.usersRepository.findByEmail(email)
 
     if (existingByEmail && existingByEmail.id !== authUserId) {
-      throw new CollaboratorEmailAlreadyExistsError()
+      const linkedCollaborator = await scope.collaboratorsRepository.findByUserId(
+        existingByEmail.id,
+      )
+
+      if (!linkedCollaborator && existingByEmail.status === 'invited') {
+        await scope.usersRepository.removeById(existingByEmail.id)
+      } else {
+        throw new CollaboratorEmailAlreadyExistsError()
+      }
     }
 
     if (existingById) {

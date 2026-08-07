@@ -38,7 +38,11 @@ const useNavigationMock = vi.mocked(useNavigation)
 
 const session = {
   accessToken: 'access-token',
-  user: { id: 'user-id', email: 'invitee@example.com' },
+  user: {
+    id: 'user-id',
+    email: 'invitee@example.com',
+    invitedAt: '2026-08-07T10:00:00.000Z',
+  },
 }
 
 const getSession = vi.fn()
@@ -158,7 +162,24 @@ describe('CollaboratorInvitePage', () => {
     expect(screen.queryByRole('button', { name: 'Criar minha senha' })).toBeNull()
   })
 
-  it('shows an unavailable state when the URL has no invite token', async () => {
+  it('keeps the password form available when Supabase has consumed the invite token', async () => {
+    render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+
+    expect(await screen.findByRole('button', { name: 'Criar minha senha' })).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('blocks a regular authenticated session without an invite token', async () => {
+    useAuthContextMock.mockReturnValue({
+      getSession,
+      isLoading: false,
+      session: {
+        ...session,
+        user: { id: 'user-id', email: 'user@example.com' },
+      },
+      updatePassword,
+    } as never)
+
     render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
 
     expect((await screen.findByRole('alert')).textContent).toContain(

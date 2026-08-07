@@ -130,6 +130,7 @@ export class SupabaseAuthProvider implements AuthProvider {
       id: user.id,
       email: user.email,
       role: user.user_metadata?.role,
+      ...(user.invited_at ? { invitedAt: user.invited_at } : {}),
     }
   }
 

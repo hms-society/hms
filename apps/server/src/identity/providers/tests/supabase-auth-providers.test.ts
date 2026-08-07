@@ -76,6 +76,18 @@ describe('SupabaseAuthProvider', () => {
     })
     expect(getUser).toHaveBeenCalledWith('access-token')
   })
+
+  it('preserves the invitation timestamp in the common auth contract', async () => {
+    const user = createUser({ invited_at: '2026-08-07T10:00:00.000Z' })
+    getUser.mockResolvedValue({ data: { user }, error: null })
+    const provider = new SupabaseAuthProvider(createEnvProvider())
+
+    await expect(provider.getUser('access-token')).resolves.toEqual({
+      id: user.id,
+      email: user.email,
+      invitedAt: user.invited_at,
+    })
+  })
 })
 
 describe('SupabaseAuthAdministrationProvider', () => {
