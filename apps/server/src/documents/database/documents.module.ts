@@ -6,8 +6,8 @@ import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
 import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
-import { listClientDocumentBatch } from '@hms/core/documents/use-cases'
-import type { DocumentBatchesRepository } from '@hms/core/documents/interfaces'
+import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
 import { GetDocumentFileController } from '../rest/controllers/get-document-file.controller'
 
@@ -26,13 +26,13 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
   providers: [
     ProcessWhatsappBatchWorker,
     {
-      provide: listClientDocumentBatch,
+      provide: ListClientDocumentBatchUseCase,
       useFactory: (repository: DocumentBatchesRepository) => {
-        return new listClientDocumentBatch(repository)
+        return new ListClientDocumentBatchUseCase(repository)
       },
       inject: [DOCUMENTS_REPOSITORIES.documentBatches],
     },
   ],
-  exports: [listClientDocumentBatch],
+  exports: [ListClientDocumentBatchUseCase],
 })
 export class DocumentsModule {}

@@ -4,9 +4,9 @@ import { basename, extname, join } from 'node:path'
 import { sql } from 'drizzle-orm'
 import { createClient } from '@supabase/supabase-js'
 
-import type { DocumentBatchesRepository } from '@hms/core/documents/interfaces'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
-import { DocumentChannel, DocumentBatchStatus } from '@hms/core/documents/domain/structures'
+import { DocumentBatchChannel, DocumentBatchStatus } from '@hms/core/document-engine/domain/structures'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel } from '@/identity/database/drizzle/models'
@@ -126,7 +126,7 @@ export class RealDocumentsSeeder {
       const batch = await this.documentBatchesRepository.add({
         readableId,
         status: DocumentBatchStatus.Identified,
-        channel: DocumentChannel.Whatsapp,
+        channel: DocumentBatchChannel.WhatsApp,
         sender: '5511999999999',
         inTriageBox: false,
         clientId: client.id,

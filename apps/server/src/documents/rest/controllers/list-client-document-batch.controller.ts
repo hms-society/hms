@@ -1,10 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common'
-import { listClientDocumentBatch } from '@hms/core/documents/use-cases'
-
+import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 @Controller('document-batches')
 export class ListClientDocumentController {
   constructor(
-    private readonly listClientDocumentBatchesUseCase: listClientDocumentBatch,
+    private readonly listClientDocumentBatchesUseCase: ListClientDocumentBatchUseCase,
   ) {}
 
   @Get('clients/:clientId')

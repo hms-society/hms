@@ -5,8 +5,8 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { documentBatchFileModel } from '@/documents/database/drizzle/models/document-batch-file-model'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
-import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
-import { DocumentChannel } from '@hms/core/documents/domain/structures'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import { DocumentsModule } from '@/documents/database/documents.module'
 
 describe('Create Document Batch Use Case', () => {
@@ -54,7 +54,7 @@ describe('Create Document Batch Use Case', () => {
 
   it('creates a batch with readable ID, correct status, and attached files', async () => {
     const batch = await useCase.execute({
-      channel: DocumentChannel.InternalUpload,
+      channel: DocumentBatchChannel.InternalUpload,
       sender: 'admin@hms.com.br',
       createdBy: testUserId,
       clientId: testClientId,
@@ -91,14 +91,14 @@ describe('Create Document Batch Use Case', () => {
 
   it('increments the daily counter for readable IDs', async () => {
     const batch1 = await useCase.execute({
-      channel: DocumentChannel.Whatsapp,
+      channel: DocumentBatchChannel.Whatsapp,
       sender: '5511999999999',
       clientId: testClientId,
       files: [],
     })
 
     const batch2 = await useCase.execute({
-      channel: DocumentChannel.ClientPortal,
+      channel: DocumentBatchChannel.ClientPortal,
       sender: 'client@hms.com.br',
       clientId: testClientId,
       files: [],

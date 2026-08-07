@@ -6,7 +6,7 @@ import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositori
 import { DrizzleDocumentBatchMapper } from './drizzle/mappers/drizzle-document-batch-mapper'
 import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/document-batches-repository'
 import { DocumentsSeeder } from './documents-seeder'
-import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'

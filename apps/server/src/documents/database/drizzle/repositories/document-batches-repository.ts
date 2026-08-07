@@ -4,8 +4,8 @@ import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import type {
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
-} from '@hms/core/documents/interfaces'
-import type { DocumentBatch, DocumentBatchFile } from '@hms/core/documents/domain/entities'
+} from '@hms/core/document-engine/interfaces'
+import type { DocumentBatch, DocumentBatchFile } from '@hms/core/document-engine/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
 import { eq, desc, inArray } from 'drizzle-orm' 
@@ -28,8 +28,8 @@ export class DrizzleDocumentBatchesRepository extends DrizzleRepository
         .insert(documentBatchModel)
         .values({
           readableId: batch.readableId,
-          status: batch.status,
-          channel: batch.channel,
+          status: batch.status as any,
+          channel: batch.channel as any,
           sender: batch.sender,
           inTriageBox: batch.inTriageBox,
           clientId: batch.clientId,

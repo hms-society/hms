@@ -1,19 +1,19 @@
 import type { DocumentBatch, DocumentBatchFile } from '../domain/entities/document-batch'
-import { DocumentChannel } from '../domain/structures/document-channel'
+import { DocumentBatchChannel } from '../domain/structures/document-batch-channel'
 import { DocumentBatchStatus } from '../domain/structures/document-batch-status'
-import type { ClientsRepository } from '#identity/interfaces/clients-repository.ts'
-import type { DatetimeProvider } from '#shared/interfaces/datetime-provider.ts'
+import type { ClientsRepository } from '../../identity/interfaces/clients-repository'
+import type { DatetimeProvider } from '../../shared/interfaces/datetime-provider'
 import type { DailyCountersRepository } from '../interfaces/daily-counters-repository'
 import type { DocumentBatchesRepository } from '../interfaces/document-batches-repository'
 
-type CreateDocumentBatchRequest = {
-  channel: DocumentChannel
+export type CreateDocumentBatchRequest = {
+  channel: DocumentBatchChannel
   sender: string
   files: Omit<DocumentBatchFile, 'id' | 'batchId' | 'createdAt'>[]
   clientId?: string
   intakeId?: string
   createdBy?: string
-  readableId?: string
+  readableId?: string 
 }
 
 export class CreateDocumentBatchUseCase {
@@ -29,10 +29,10 @@ export class CreateDocumentBatchUseCase {
     let inTriageBox = true
     let resolvedClientId = request.clientId
 
-    if (request.channel === DocumentChannel.InternalUpload) {
+    if (request.channel === DocumentBatchChannel.InternalUpload) {
       status = DocumentBatchStatus.Identified
       inTriageBox = false
-    } else if (request.channel === DocumentChannel.Whatsapp) {
+    } else if (request.channel === DocumentBatchChannel.WhatsApp) {
       const clients = await this.clientsRepository.findByPhone(request.sender)
 
       if (clients && clients.length === 1) {
@@ -54,7 +54,8 @@ export class CreateDocumentBatchUseCase {
 
     const count = await this.dailyCountersRepository.incrementAndGet('LOTE', dateString)
     const sequence = String(count).padStart(4, '0')
-    const readableId = `LOTE-${dateStringNoDashes}-${sequence}`
+    
+    const readableId = request.readableId ?? `LOTE-${dateStringNoDashes}-${sequence}`
 
     return this.documentBatchesRepository.add({
       readableId,

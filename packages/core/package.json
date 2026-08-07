@@ -15,6 +15,7 @@
     "./document-engine/domain/events": "./src/document-engine/domain/events/index.ts",
     "./document-engine/domain/structures": "./src/document-engine/domain/structures/index.ts",
     "./document-engine/interfaces": "./src/document-engine/interfaces/index.ts",
+    "./document-engine/use-cases": "./src/document-engine/use-cases/index.ts",
     "./document-production/domain/entities": "./src/document-production/domain/entities/index.ts",
     "./document-production/domain/errors": "./src/document-production/domain/errors/index.ts",
     "./document-production/domain/events": "./src/document-production/domain/events/index.ts",
@@ -49,11 +50,7 @@
     "./shared/interfaces": "./src/shared/interfaces/index.ts",
     "./shared/responses/rest-response": "./src/shared/responses/rest-response.ts",
     "./shared/responses/pagination-response": "./src/shared/responses/pagination-response.ts",
-    "./shared/constants": "./src/shared/constants/index.ts",
-    "./documents/domain/entities": "./src/documents/domain/entities/index.ts",
-    "./documents/domain/structures": "./src/documents/domain/structures/index.ts",
-    "./documents/interfaces": "./src/documents/interfaces/index.ts",
-    "./documents/use-cases": "./src/documents/use-cases/index.ts"
+    "./shared/constants": "./src/shared/constants/index.ts"
   },
   "imports": {
     "#communication/*": "./src/communication/*",

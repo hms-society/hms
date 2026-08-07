@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Inject, HttpStatus } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
-import { GetDocumentFileUseCase } from '@hms/core/documents/use-cases'
-import type { DocumentBatchesRepository } from '@hms/core/documents/interfaces'
+import { GetDocumentFileUseCase } from '@hms/core/document-engine/use-cases'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 import { DOCUMENTS_REPOSITORIES } from '@/documents/database/drizzle/constants/documents-repositories'
 

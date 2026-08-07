@@ -1,5 +1,5 @@
 import type { DrizzleDocumentBatch } from '../types/entities/drizzle-document-batch'
-import type { DocumentBatch } from '@hms/core/documents/domain/entities'
+import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
 
 export class DrizzleDocumentBatchMapper {
   toDomain(record: DrizzleDocumentBatch): DocumentBatch {
@@ -24,6 +24,6 @@ export class DrizzleDocumentBatchMapper {
       })),
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
-    }
+    } as DocumentBatch 
   }
 }

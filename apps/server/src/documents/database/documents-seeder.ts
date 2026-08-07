@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
-import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
-import { DocumentChannel } from '@hms/core/documents/domain/structures'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -83,7 +83,7 @@ export class DocumentsSeeder {
 
         const batch = await this.createDocumentBatchUseCase.execute({
           readableId: batchName,
-          channel: DocumentChannel.InternalUpload,
+          channel: DocumentBatchChannel.InternalUpload,
           sender: 'admin@hms.com.br',
           createdBy: user.id,
           clientId: client.id,

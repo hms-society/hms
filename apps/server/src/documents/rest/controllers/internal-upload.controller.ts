@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { ApiResponse, ApiBearerAuth, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger'
-import { CreateDocumentBatchUseCase } from '@hms/core/documents/use-cases'
-import { DocumentChannel } from '@hms/core/documents/domain/structures'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { AuthGuard } from '@/identity/guards'
@@ -95,7 +95,7 @@ export class InternalUploadController {
     )
 
     const batch = await this.createDocumentBatchUseCase.execute({
-      channel: DocumentChannel.InternalUpload,
+      channel: DocumentBatchChannel.InternalUpload,
       sender: authUser.email || authUser.id,
       createdBy: authUser.id,
       clientId: clientId,
