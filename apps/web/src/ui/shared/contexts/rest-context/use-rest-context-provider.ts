@@ -5,6 +5,7 @@ import { IntakeService } from '@/rest/services/intake-service'
 import { IdentityService } from '@/rest/services/identity-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { CommunicationService } from '@/rest/services/communication-service'
+import { DocumentProductionService } from '@/rest/services/document-production-service'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { SchedulingService } from '@/rest/services/scheduling-service'
@@ -40,5 +41,6 @@ export function useRestContextProvider(): RestContextValue {
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
     schedulingService: SchedulingService(restClient),
+    documentProductionService: DocumentProductionService(restClient),
   }
 }

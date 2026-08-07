@@ -189,6 +189,7 @@ export class IdentitySeeder {
       authAdministrationProvider,
       seedPassword,
     )
+
     const adminUser = seededUsers.find(
       ({ email }) => email === 'admin@hmsadvogados.com.br',
     )
@@ -202,7 +203,6 @@ export class IdentitySeeder {
       ({ email }) => email === 'paralegal@hmsadvogados.com.br',
     )
     const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
-
     if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
@@ -212,20 +212,20 @@ export class IdentitySeeder {
       ...DEFAULT_ADMINISTRATOR,
     } satisfies CollaboratorCreation
 
-    const seededAdministrator = await this.collaboratorsRepository.add(administrator)
+    const administratorCreated = await this.collaboratorsRepository.add(administrator)
 
-    const attendant = await this.collaboratorsRepository.add({
+    const attendantCreated = await this.collaboratorsRepository.add({
       userId: attendantUser.id,
       ...DEFAULT_ATTENDANT,
     })
 
-    const lawyer = await this.collaboratorsRepository.add({
+    const lawyerCreated = await this.collaboratorsRepository.add({
       userId: lawyerUser.id,
       ...DEFAULT_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    const paralegal = await this.collaboratorsRepository.add({
+    const paralegalCreated = await this.collaboratorsRepository.add({
       userId: paralegalUser.id,
       ...DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
@@ -237,10 +237,10 @@ export class IdentitySeeder {
     })
 
     if (
-      !seededAdministrator ||
-      !attendant ||
-      !lawyer ||
-      !paralegal ||
+      !administratorCreated ||
+      !attendantCreated ||
+      !lawyerCreated ||
+      !paralegalCreated ||
       !clientCollaborator
     ) {
       throw new AppError('Default seed collaborators were not created')
@@ -262,10 +262,10 @@ export class IdentitySeeder {
     return {
       clients,
       collaborators: [
-        seededAdministrator,
-        attendant,
-        lawyer,
-        paralegal,
+        administratorCreated,
+        attendantCreated,
+        lawyerCreated,
+        paralegalCreated,
         clientCollaborator,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
