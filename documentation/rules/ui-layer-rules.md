@@ -33,6 +33,29 @@ Generated or installed shadcn primitives belong under `apps/web/src/ui/shadcn`.
 Application widgets may compose those primitives, but feature code must not copy
 or fork a primitive into a feature directory merely to change its presentation.
 
+### Prefer shadcn primitives for every UI control
+
+Before creating a control or reaching for a native HTML element, look for an
+existing shadcn primitive under `apps/web/src/ui/shadcn`. Prefer the shadcn
+component whenever an equivalent exists, preserving its accessibility behavior,
+keyboard interaction, state model, and design tokens. Extend its presentation
+through composition, `className`, or supported variants; do not recreate the
+primitive with manually styled markup.
+
+Select fields must always use the shadcn `Select` composition
+(`Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, and `SelectItem`)
+when a select is required. Do not use a manually styled native `<select>` as a
+substitute. The same preference applies to shadcn equivalents such as buttons,
+checkboxes, switches, tabs, dialogs, popovers, inputs, and form controls.
+
+A native element is allowed only when no suitable shadcn primitive exists, when
+native browser behavior is an explicit requirement, or when the Contract
+explicitly requires it. In those cases, record the reason in the implementation
+evidence and keep the control aligned with the documented design tokens and
+accessibility requirements. If the needed shadcn primitive is missing, add the
+canonical primitive under `apps/web/src/ui/shadcn` before introducing a custom
+feature-local replacement.
+
 Business decisions and use-case orchestration do not belong in widgets, pages, or
 hooks. The UI consumes core contracts through application adapters.
 
@@ -59,7 +82,7 @@ non-React hooks, types, constants, and utilities remain in `.ts` files.
 
 Apply [`code-conventions-rules.md`](code-conventions-rules.md) for function
 declarations, naming, handler prefixes, and the order of values and functions in
-hook/controller destructuring. The UI-specific rules below refine those shared
+hook-result destructuring. The UI-specific rules below refine those shared
 conventions where necessary.
 
 ### Action hooks
@@ -126,6 +149,21 @@ derived UI state, transitions, and user-interaction handlers. A widget may omit
 the hook only when it is a pure prop-to-markup renderer with no behavior of its
 own.
 
+This requirement applies to every widget under `apps/web/src/ui`, including
+single-use child widgets such as editors, toolbars, pickers, panels, dialogs,
+and empty states. A widget is behavior-owning when its entry point uses React
+state, effects, refs, memoized derived data, editor/form APIs, validation,
+drag-and-drop, dialogs, or interaction handlers. That behavior must be moved to
+the colocated `use-<widget-name>.ts` hook; it must not be hidden in a local
+helper or a nested component inside `index.tsx`.
+
+The implementation gate is explicit: before implementation is accepted, and
+before the final Judge Implementation runs, inspect every touched widget
+`index.tsx` and its nested widget tree. A behavior-owning widget without its
+own hook is a blocking architecture finding, even when the UI works and the
+widget is used only once. The Judge must fail the implementation until the hook
+exists and the entry point is reduced to markup composition and wiring.
+
 The widget `index.tsx` is a composition and rendering boundary. Its component
 must be declared as an exported `const` using the widget-specific props type:
 
@@ -133,7 +171,7 @@ must be declared as an exported `const` using the widget-specific props type:
 export const CollaboratorRegisterDialog = (
   props: CollaboratorRegisterDialogProps,
 ) => {
-  const controller = useCollaboratorRegisterDialog(props)
+  const collaboratorDialog = useCollaboratorRegisterDialog(props)
 
   return <DialogContent>{/* markup and hook wiring */}</DialogContent>
 }
@@ -165,7 +203,7 @@ export function useCollaboratorRegisterDialog(props: CollaboratorRegisterDialogP
 ```
 
 Do not declare widget-hook behavior as arrow-function variables. This rule
-applies to widget and page controller hooks; the exported-arrow convention for
+applies to widget and page hooks; the exported-arrow convention for
 `use<Name>Action` hooks remains the explicit exception described above.
 
 All UI logic belongs in the owning widget's hook. This includes local state,
@@ -175,8 +213,9 @@ point is responsible for rendering markup, passing props, and wiring DOM events
 to handlers exposed by the hook; it must not contain the logic behind those
 handlers.
 
-Prefer a widget controller returned by the hook when a widget has multiple
-states or interactions:
+When a widget has multiple states or interactions, use a named, widget-specific
+result object returned by its hook. Never name that local result `controller`;
+the name must describe the widget or page it belongs to:
 
 ```ts
 export function useClientCard(client: Client) {

@@ -31,6 +31,48 @@ e premissas críticas confirmadas ou explicitamente aceitas com risco.
 
 ## Arquivo e Contract
 
+### Contract visual obrigatório
+
+Quando a demanda mencionar Pencil, .pen, Node IDs, frames, screenshots ou um
+design alvo, a referência visual faz parte do Contract da feature. Ela não é
+inspiração opcional nem pode ser substituída por uma interpretação genérica do
+agente.
+
+O Contract deve:
+
+- registrar todos os Node IDs e screenshots fornecidos, com tela/estado,
+  viewport e papel de cada referência;
+- descrever a hierarquia, regiões, alinhamentos, largura/altura, espaçamento,
+  tipografia, cores, bordas, estados, controles, copy e comportamento de cada
+  região visual relevante;
+- distinguir o canvas da página do shell compartilhado (sidebar, navbar e
+  AppLayout). Um screenshot recortado do conteúdo não autoriza remover o shell,
+  e um shell visível no alvo não pode ser omitido;
+- transformar a referência em requisitos RF-* e critérios CA-*, incluindo
+  validação na mesma viewport do alvo;
+- exigir screenshot comparável, snapshot de acessibilidade/layout e comparação
+  explícita por Node ID na validação final de UI.
+
+É proibido substituir o layout alvo por um card genérico, header, sidebar, grid,
+fluxo ou composição alternativa sem registrar a divergência, explicar o impacto
+e obter decisão explícita de produto. Testes de rota, snapshots de markup ou
+asserções DOM isoladas não comprovam fidelidade visual.
+
+Se o Pencil MCP estiver indisponível, o Contract deve registrar a limitação e
+não pode declarar fidelidade visual por inferência. Screenshots e documentação
+já disponíveis podem servir como evidência parcial, mas não liberam a
+implementação. A Spec deve permanecer bloqueada/draft e não pode ser
+encaminhada para implement-spec ou create-plan até que o alvo seja
+inspecionado no Pencil, os Node IDs sejam confirmados e a referência visual
+seja aceita.
+
+Esse gate é obrigatório para qualquer requisito de UI dependente de Pencil:
+Pencil indisponível, Node ID não confirmado, screenshot incompatível ou
+divergência visual sem decisão explícita de produto significa
+blocked_for_implementation. O Judge Spec deve reprovar ou manter a Spec
+bloqueada nesses casos, mesmo que o Contract funcional, os testes ou o código
+pareçam suficientes.
+
 Crie `documentation/features/<domínio>/<feature>/spec.md`. O `plan.md` é
 opcional e só deve ser criado quando o tamanho, risco ou dependências exigirem
 fases e ledger; `evaluation.md` é obrigatório após a implementação/julgamento,
@@ -96,7 +138,11 @@ Acione `judge-spec-agent` como subagente read-only `Judge Spec` na task atual.
 Envie a origem, Spec, pesquisa, Architecture e Rules, sem narrativa persuasiva.
 
 - `failed`: encaminhe findings ao Orchestrator, corrija e avalie novamente;
-- `accepted`: altere a Spec para `status: open` e roteie para `implement-spec`
-  ou `create-plan`.
+- `accepted`: somente quando o Contract funcional e o Contract visual
+  estiverem aceitos; então altere a Spec para `status: open` e roteie para
+  `implement-spec` ou `create-plan`.
+- `blocked_for_implementation`: mantenha a Spec em `draft`/bloqueada quando
+  o Pencil, os Node IDs, a referência visual ou a decisão sobre divergências
+  não estiverem confirmados. Não encaminhe para implementação.
 
 Não crie nova thread para pesquisa ou julgamento.

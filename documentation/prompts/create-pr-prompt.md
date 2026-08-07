@@ -58,6 +58,21 @@ omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
 
 The PR body must follow the structure defined in `.github/pull_request_template.md`.
 
+## Limite de tamanho e divisão
+
+Antes de publicar cada PR, calcule o diff completo contra a branch base e some
+as linhas adicionadas e removidas (`git diff --numstat`). Nenhum PR pode exceder
+5.000 linhas alteradas. O limite vale para o PR inteiro, incluindo arquivos
+gerados e migrations, não para commits individuais, e não pode ser contornado
+dividindo a mesma entrega apenas em commits.
+
+Se o diff exceder 5.000 linhas, interrompa a publicação e divida a entrega em
+PRs menores e coesos. Organize-os por fatias verticais ou por etapas de
+dependência que possam ser revisadas, testadas e integradas com segurança; não
+faça cortes arbitrários por arquivo ou por quantidade de linhas. Cada PR deve
+ter objetivo, escopo, testes, rastreabilidade e revisão próprios. Registre as
+dependências e a ordem de integração quando um PR depender de outro.
+
 **Formatting rules:**
 - Use Markdown
 - List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.

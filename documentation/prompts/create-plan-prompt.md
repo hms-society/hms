@@ -30,12 +30,17 @@ e tarefa do Plan.
 Inclua:
 
 - objetivo, escopo e fora de escopo;
+- inventário visual Pencil autossuficiente quando a Spec possuir referências
+  `.pen`: para cada node, registre ID, tela/estado, elementos e comportamento a
+  reproduzir, dimensões relevantes e critério de verificação; não basta listar
+  os IDs ou apontar para a Spec;
 - fases ordenadas e dependências;
 - tarefas com paths, resultado observável e IDs `RF-*`/`CA-*`;
 - campo `parallelizable` e motivo quando aplicável;
 - sensores e evidências esperados por fase;
 - riscos, findings ativos, tentativas, estado e próxima ação;
-- vereditos do Judge Implementation por fase.
+- checkpoints de sensores por fase e um único veredito do Judge Implementation
+  final para a implementação inteira.
 
 Estados de tarefa: `pending`, `implementing`, `validating`, `verified`.
 Estados de fase: `pending`, `in_progress`, `awaiting_judgment`, `failed`,

@@ -44,9 +44,25 @@ tickets Jira sem instrução explícita.
 Atualizações normativas que alteram produto, Contract, Rules globais ou
 fronteiras arquiteturais exigem decisão do usuário.
 
-Crie o commit e PR, solicite Codex Review e aguarde Quality Gate e build do
-`HEAD` atual. O Quality Gate repete os sensores oficiais; build é a validação
-final do artefato no CI.
+Antes de criar cada PR, calcule o diff completo contra a branch base e some as
+linhas adicionadas e removidas (`git diff --numstat`). Nenhum PR pode exceder
+5.000 linhas alteradas. O limite vale para o PR inteiro, não para commits
+individuais, e não pode ser contornado repartindo a mesma entrega apenas em
+commits.
+
+Se o diff exceder 5.000 linhas, divida a entrega em PRs menores e coesos, com
+responsabilidades claras, dependências explícitas e validação própria. Prefira
+dividir por fatias verticais ou por etapas de dependência que possam ser
+revisadas e integradas com segurança; não faça cortes arbitrários por arquivo
+ou por quantidade de linhas. Cada PR deve ter objetivo, escopo, testes,
+rastreabilidade e revisão próprios. Registre na Spec e em `evaluation.md` a
+ordem dos PRs, seus limites de escopo e os links correspondentes. Só conclua a
+Spec depois que todos os PRs necessários tiverem passado pelo Quality Gate e
+estiverem mergeable.
+
+Crie cada commit e PR, solicite Codex Review e aguarde Quality Gate e build do
+`HEAD` correspondente. O Quality Gate repete os sensores oficiais; build é a
+validação final do artefato no CI.
 
 Se Quality Gate ou build falhar, mantenha a Spec `in_progress`, registre a
 falha em `evaluation.md`; crie `Builder Fix QG-<n>` quando a correção estiver no

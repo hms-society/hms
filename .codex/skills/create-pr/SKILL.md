@@ -19,7 +19,21 @@ milestones.
 - link do PRD no Confluence, quando houver;
 - todas as chaves/URLs de `jira_tickets`, quando houver.
 
-## Leitura e preflight
+---
+
+## Execution Guidelines
+
+### 1. Context Analysis
+
+- Review the implemented Spec and the changelog of the changes made.
+- Identify:
+  - Technical impact (which of `web` / `server` / `core` is affected)
+  - Design decisions taken
+  - Risks and side effects
+  - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
+  - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
+
+---
 
 Antes de criar commits ou abrir o PR, leia:
 
@@ -44,6 +58,27 @@ pnpm build
 Use filtros de workspace quando forem suficientes e registre comandos
 omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
 
+The PR body must follow the structure defined in `.github/pull_request_template.md`.
+
+## Limite de tamanho e divisão
+
+Antes de publicar cada PR, calcule o diff completo contra a branch base e some
+as linhas adicionadas e removidas (`git diff --numstat`). Nenhum PR pode exceder
+5.000 linhas alteradas. O limite vale para o PR inteiro, incluindo arquivos
+gerados e migrations, não para commits individuais, e não pode ser contornado
+dividindo a mesma entrega apenas em commits.
+
+Se o diff exceder 5.000 linhas, interrompa a publicação e divida a entrega em
+PRs menores e coesos. Organize-os por fatias verticais ou por etapas de
+dependência que possam ser revisadas, testadas e integradas com segurança; não
+faça cortes arbitrários por arquivo ou por quantidade de linhas. Cada PR deve
+ter objetivo, escopo, testes, rastreabilidade e revisão próprios. Registre as
+dependências e a ordem de integração quando um PR depender de outro.
+
+**Formatting rules:**
+- Use Markdown
+- List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.
+- Identify and list the original authors/codeowners of each modified file using `git log` or `git blame` history, under the alignment section.
 ## Título
 
 Use um título curto, em PT-BR, como frase nominal, sem prefixo Conventional
@@ -76,6 +111,45 @@ Use Markdown sem título principal (`#`) e inclua:
 
 Explique o propósito central da alteração.
 
+## 📝 Descrição das Alterações (obrigatório)
+Explique por que este PR foi criado, qual é seu propósito principal e quais problemas ele resolve.
+
+## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
+Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
+- [ ] `apps/web` (Frontend / Interface)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `apps/server` (Backend / API)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `packages/core` (Regras de Domínio)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `supabase` (Banco de dados / Migrations / Seeders)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+
+## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
+Identifique e liste os autores originais de cada arquivo que você alterou (consulte o histórico do Git):
+- [ ] Identifiquei os autores originais dos arquivos alterados:
+  * `caminho/do/arquivo` -> Autor/Codeowner
+- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
+  - *Detalhes do alinhamento:* ...
+
+
+
+---
+
+## Como testar (obrigatório)
+
+Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
+relevantes, ex.:
+
+```
+pnpm install
+pnpm --filter web dev        # frontend em http://localhost:3000
+pnpm --filter server start:dev
+pnpm --filter <pkg> check-types
 ### Tickets Jira relacionados
 
 Liste todas as chaves ou URLs, sem usar palavras-chave de fechamento do GitHub:
@@ -135,38 +209,6 @@ Solicite a revisão automatizada apenas depois de o PR estar publicado:
 ```bash
 gh pr comment <numero-do-pr> --body "@codex review"
 ```
-
-## Loop pós-publicação do PR
-
-Depois de solicitar a revisão, aguarde e acompanhe o Quality Gate do `HEAD`
-atual. O ciclo só termina quando todos os checks obrigatórios estiverem verdes,
-o PR estiver mergeable e não houver conversa bloqueante pendente.
-
-1. Consulte os checks e o SHA do `HEAD` do PR:
-
-   ```bash
-   gh pr view <numero-do-pr> --json commits,mergeable,statusCheckRollup,reviews,comments
-   ```
-
-   Use the last commit SHA from `.commits[-1].oid` as the `HEAD` being
-   validated.
-
-2. Aguarde os workflows oficiais do commit publicado. Use `gh run watch
-   <run-id> --exit-status` ou equivalente e registre o resultado de cada
-   workflow.
-3. Se um check falhar, leia os logs, corrija somente problemas dentro do
-   escopo, execute os sensores locais aplicáveis, crie um novo commit e faça
-   push. Depois reinicie o loop a partir do novo SHA; checks de um HEAD anterior
-   não validam o commit corrigido.
-4. Após cada novo push, aguarde novamente Core, Server, Web e quaisquer outros
-   checks obrigatórios antes de concluir.
-5. Confirme que o PR continua mergeable e que reviews/conversas bloqueantes
-   foram resolvidas. Registre checks ignorados ou não aplicáveis como
-   limitações explícitas.
-
-Este prompt publica, valida e acompanha o PR, mas nunca executa merge, fecha o
-PR ou altera a branch de destino automaticamente. A decisão de merge permanece
-com o usuário/revisor autorizado.
 
 Informe título, URL, número, branch, commits, validações, referências Jira e
 Confluence, resultado da revisão e quaisquer pendências preservadas.

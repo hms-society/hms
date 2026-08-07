@@ -41,7 +41,7 @@ Avoid redundant names when the surrounding context already provides the
 meaning:
 
 ```ts
-const controller = new FetchLastWeekRankingWinnersController()
+const rankingWinners = new FetchLastWeekRankingWinnersController()
 ```
 
 is preferred over:
@@ -123,7 +123,7 @@ implementation functions.
 
 ## Function declarations
 
-Use function declarations for helpers, page/controller hooks, event handlers,
+Use function declarations for helpers, page/widget hooks, event handlers,
 service utilities, and other named functions:
 
 ```ts
@@ -145,8 +145,8 @@ as PascalCase arrow functions assigned to constants.
 
 ## Declaration and destructuring order
 
-Keep values and state before functions in declaration lists and destructured
-controller results. Use this order when a hook returns a widget controller:
+Keep values and state before functions in declaration lists and destructured hook
+results. Use this order when a hook returns a widget-specific result object:
 
 1. data, state, status, and derived values;
 2. event handlers and other named functions;
@@ -165,8 +165,8 @@ const {
 } = useSignInPage()
 ```
 
-Keep the returned object in the same order as the public controller contract so
-the hook and its consumer communicate the same shape consistently.
+Keep the returned object in the same order as the public hook contract so the
+hook and its consumer communicate the same shape consistently.
 
 ## File naming
 
