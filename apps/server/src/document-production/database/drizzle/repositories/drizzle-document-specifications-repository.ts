@@ -27,7 +27,6 @@ import {
   documentSpecificationModel,
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
-import { serializeDocumentTemplateContent } from '@/document-production/database/drizzle/mappers/drizzle-document-specification-mapper'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import type { Database } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -145,7 +144,7 @@ export class DrizzleDocumentSpecificationsRepository
           specifications.map((specification) => ({
             name: specification.name,
             description: specification.description,
-            content: serializeDocumentTemplateContent(specification.content),
+            content: specification.content,
             variables: [...specification.variables],
             moment: specification.application.moment,
             scope: specification.application.scope,
@@ -165,7 +164,6 @@ export class DrizzleDocumentSpecificationsRepository
             legalAreaId,
           })),
         )
-        const application = specification.application
         const topics = application.legalAreaIds.flatMap((legalAreaId) =>
           (application.legalTopicIdsByArea[legalAreaId] ?? []).map((legalTopicId) => ({
             documentSpecificationId: record.id,
@@ -189,7 +187,7 @@ export class DrizzleDocumentSpecificationsRepository
         .values({
           name: specification.name,
           description: specification.description,
-          content: serializeDocumentTemplateContent(specification.content),
+          content: specification.content,
           variables: [...specification.variables],
           moment: specification.application.moment,
           scope: specification.application.scope,
@@ -251,7 +249,7 @@ export class DrizzleDocumentSpecificationsRepository
       const [record] = await transaction
         .update(documentSpecificationModel)
         .set({
-          content: serializeDocumentTemplateContent(changes.content),
+          content: changes.content,
           variables: [...changes.variables],
           updatedAt: new Date(),
         })

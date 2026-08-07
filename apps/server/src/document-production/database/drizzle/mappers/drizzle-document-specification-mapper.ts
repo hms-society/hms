@@ -6,11 +6,13 @@ import type {
 
 import type { DrizzleDocumentSpecification } from '@/document-production/database/drizzle/types'
 
-export function serializeDocumentTemplateContent(content: DocumentTemplateContent) {
-  return JSON.stringify(content)
-}
+function parseDocumentTemplateContent(content: unknown): DocumentTemplateContent {
+  if (content && typeof content === 'object' && 'type' in content)
+    return content as DocumentTemplateContent
 
-function parseDocumentTemplateContent(content: string): DocumentTemplateContent {
+  if (typeof content !== 'string')
+    throw new Error('Document specification content is invalid')
+
   try {
     const parsed: unknown = JSON.parse(content)
     if (parsed && typeof parsed === 'object' && 'type' in parsed)
