@@ -1,4 +1,4 @@
-import type { DocumentProductionService as DocumentProductionRestService } from '@hms/core/document-production/interfaces'
+import type { DocumentProductionManagementService } from '@hms/core/document-production/interfaces'
 import type {
   CreateDocumentSpecificationInput,
   DocumentSpecificationConfigurationUpdate,
@@ -32,7 +32,7 @@ function createPath(query: DocumentSpecificationListQuery = {}) {
 
 export const DocumentProductionService = (
   restClient: RestClient,
-): DocumentProductionRestService => {
+): DocumentProductionManagementService => {
   return {
     listDocumentSpecifications(query = {}) {
       return restClient.get<PaginationResponse<DocumentSpecificationListItem>>(
