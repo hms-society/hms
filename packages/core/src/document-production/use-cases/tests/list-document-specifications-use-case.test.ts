@@ -109,6 +109,8 @@ describe('List Document Specifications Use Case', () => {
           application: {
             scope: 'global',
             moment: 'formalization',
+            legalAreaIds: [],
+            legalTopicIdsByArea: {},
           },
           isRequired: false,
           status: 'unavailable',
