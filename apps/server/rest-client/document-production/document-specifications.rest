@@ -1,0 +1,14 @@
+@baseUrl = http://localhost:3333
+@token = replace-with-bearer-token
+
+### List document specifications
+GET {{baseUrl}}/document-specifications?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Filter document specifications
+GET {{baseUrl}}/document-specifications?search=contrato&moment=formalization&status=available
+Authorization: Bearer {{token}}
+
+### Reject invalid query
+GET {{baseUrl}}/document-specifications?pageSize=0
+Authorization: Bearer {{token}}

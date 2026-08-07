@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "id": "baf39da7-6321-493b-96f2-784f65a720bd",
+=======
+  "id": "d16ba18e-0c37-4111-8055-3a11fab60d5c",
+>>>>>>> origin/develop
   "prevId": "76ccc2fb-dacc-4e8b-9848-cce59519aad2",
   "version": "7",
   "dialect": "postgresql",
@@ -1028,6 +1032,235 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+<<<<<<< HEAD
+=======
+    "public.document_specification_legal_areas": {
+      "name": "document_specification_legal_areas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "document_specification_id": {
+          "name": "document_specification_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_area_id": {
+          "name": "legal_area_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "document_specification_legal_areas_uidx": {
+          "name": "document_specification_legal_areas_uidx",
+          "columns": [
+            {
+              "expression": "document_specification_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "legal_area_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "document_specification_legal_areas_document_specification_id_document_specifications_id_fk": {
+          "name": "document_specification_legal_areas_document_specification_id_document_specifications_id_fk",
+          "tableFrom": "document_specification_legal_areas",
+          "tableTo": "document_specifications",
+          "columnsFrom": ["document_specification_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_specification_legal_topics": {
+      "name": "document_specification_legal_topics",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "document_specification_legal_area_id": {
+          "name": "document_specification_legal_area_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_topic_id": {
+          "name": "legal_topic_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "document_specification_legal_topics_uidx": {
+          "name": "document_specification_legal_topics_uidx",
+          "columns": [
+            {
+              "expression": "document_specification_legal_area_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "legal_topic_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "document_specification_legal_topics_document_specification_legal_area_id_document_specification_legal_areas_id_fk": {
+          "name": "document_specification_legal_topics_document_specification_legal_area_id_document_specification_legal_areas_id_fk",
+          "tableFrom": "document_specification_legal_topics",
+          "tableTo": "document_specification_legal_areas",
+          "columnsFrom": ["document_specification_legal_area_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_specifications": {
+      "name": "document_specifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "variables": {
+          "name": "variables",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'"
+        },
+        "moment": {
+          "name": "moment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_required": {
+          "name": "is_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'available'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "document_specifications_moment_check": {
+          "name": "document_specifications_moment_check",
+          "value": "\"document_specifications\".\"moment\" in ('consultation', 'formalization', 'legal_production')"
+        },
+        "document_specifications_scope_check": {
+          "name": "document_specifications_scope_check",
+          "value": "\"document_specifications\".\"scope\" in ('global', 'legal_context')"
+        },
+        "document_specifications_status_check": {
+          "name": "document_specifications_status_check",
+          "value": "\"document_specifications\".\"status\" in ('available', 'unavailable')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+>>>>>>> origin/develop
     "public.communications": {
       "name": "communications",
       "schema": "",
@@ -1277,6 +1510,7 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+<<<<<<< HEAD
     },
     "public.daily_counters": {
       "name": "daily_counters",
@@ -1562,6 +1796,8 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+=======
+>>>>>>> origin/develop
     }
   },
   "enums": {
@@ -1614,7 +1850,11 @@
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
+<<<<<<< HEAD
       "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor"]
+=======
+      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
+>>>>>>> origin/develop
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -1655,6 +1895,7 @@
       "name": "communication_direction",
       "schema": "public",
       "values": ["inbound", "outbound"]
+<<<<<<< HEAD
     },
     "public.document_batch_status": {
       "name": "document_batch_status",
@@ -1674,6 +1915,8 @@
       "name": "document_channel",
       "schema": "public",
       "values": ["whatsapp", "client_portal", "third_party_portal", "internal_upload"]
+=======
+>>>>>>> origin/develop
     }
   },
   "schemas": {},

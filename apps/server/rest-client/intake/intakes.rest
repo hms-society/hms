@@ -5,6 +5,14 @@
 @legalAreaId = 2e7a9c41-5d6f-4b82-9a13-8c4e6f7b2d50
 @legalTopicId = b3f1d8a6-7c2e-4f90-8a45-1d6b9e3c5f72
 
+### List intakes
+GET {{url}}?search=&status=consultation_scheduled&responsibleId={{userId}}&origin=direct&contactChannel=whatsapp&page=1&pageSize=20
+Authorization: Bearer {{accessToken}}
+
+### List intake responsible options
+GET {{url}}/responsibles
+Authorization: Bearer {{accessToken}}
+
 ### Register intake
 POST {{url}}
 Content-Type: application/json
@@ -44,6 +52,7 @@ Content-Type: application/json
 ### Get intake
 GET {{url}}/{{intakeId}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ### List client intakes
 GET {{url}}/clients/{{clientId}}

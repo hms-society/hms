@@ -6,6 +6,7 @@
     "./identity": "./src/identity/index.ts",
     "./intake": "./src/intake/index.ts",
     "./legal-catalog": "./src/legal-catalog/index.ts",
+    "./document-production": "./src/document-production/index.ts",
     "./shared": "./src/shared/index.ts"
   },
   "scripts": {

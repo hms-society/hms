@@ -9,11 +9,21 @@ export const ROUTES = {
   invite: '/convite',
   attendant: '/atendimento',
   attendantConsultations: '/atendimento/consultas',
+  lawyerSchedule: '/agenda',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
+  clientMyCases: '/cliente/meus-casos',
+  clientMyCaseDetails: '/cliente/meus-casos/$caseId',
+  clientMessages: '/cliente/mensagens',
+  clientPrivacy: '/cliente/privacidade',
   clients: '/clientes',
   collaborators: '/colaboradores',
   documentViewer: '/documentos',
+  paralegalCases: '/casos',
+  paralegalDocuments: '/documentos',
+  paralegalTriage: '/triagem',
+  paralegalCommunication: '/comunicacao',
+  documentSpecifications: '/modelos-de-documentos',
 } as const
 
 export type RouteName = keyof typeof ROUTES

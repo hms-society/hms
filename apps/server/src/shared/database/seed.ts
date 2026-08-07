@@ -10,6 +10,7 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { DocumentsSeeder } from '@/documents/database/documents-seeder'
 import { RealDocumentsSeeder } from '@/documents/database/real-documents-seeder'
+import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule)
@@ -29,6 +30,7 @@ async function bootstrap() {
     }
 
     await app.get(IntakeSeeder).clear()
+    await app.get(DocumentProductionSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
     await app.get(IntakeSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
@@ -36,12 +38,15 @@ async function bootstrap() {
     await app.get(DocumentsSeeder).clear()
 
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
+
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(CommunicationSeeder).clear()
 
-    await app.get(IdentitySeeder).clear(authAdministrationProvider)
-
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
+    await app.get(DocumentProductionSeeder).run({
+      legalAreas: legalCatalog.areas,
+      legalTopics: legalCatalog.topics,
+    })
     const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
     const legalTopic = legalCatalog.topics.find(
       (topic) => topic.legalAreaId === legalArea?.id && topic.name === 'Contratos',
@@ -51,7 +56,7 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
-    await app.get(IdentitySeeder).run(
+    const identitySeed = await app.get(IdentitySeeder).run(
       authAdministrationProvider,
       {
         legalAreaId: legalArea.id,
@@ -59,7 +64,13 @@ async function bootstrap() {
       },
       seedPassword,
     )
-    await app.get(IntakeSeeder).run()
+    await app.get(IntakeSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      responsibleIds: identitySeed.collaborators.map(({ id }) => id),
+      actorIds: identitySeed.users.map(({ id }) => id),
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+    })
     await app.get(CommunicationSeeder).run()
     await app.get(RealDocumentsSeeder).run()
     await app.get(DocumentsSeeder).run()

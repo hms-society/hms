@@ -5,7 +5,7 @@ import type {
   CollaboratorSummary,
   CollaboratorUpdate,
 } from '@hms/core/identity/domain/entities'
-import type { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
+import { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
 import type { CollaboratorsRepository } from '@hms/core/identity/interfaces'
 import type {
   LegalExpertiseCatalogProvider,
@@ -184,13 +184,13 @@ export class DrizzleCollaboratorsRepository
       }),
     )
 
-    return {
+    return new PaginationResponse(
       items,
       page,
       pageSize,
       total,
-      totalPages: Math.ceil(total / pageSize),
-    }
+      Math.ceil(total / pageSize),
+    )
   }
 
   async listAvailableJobTitles(): Promise<readonly string[]> {

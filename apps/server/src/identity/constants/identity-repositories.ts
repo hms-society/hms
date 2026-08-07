@@ -1,7 +1,9 @@
 export const IDENTITY_REPOSITORIES = {
-  clients: 'identity:clients-repository',
-  clientConsents: 'identity:client-consents-repository',
-  users: 'identity:users-repository',
+  clients: Symbol('IDENTITY_REPOSITORIES.clients'),
+  intakeClients: Symbol('IDENTITY_REPOSITORIES.intakeClients'),
+  intakeResponsibles: Symbol('IDENTITY_REPOSITORIES.intakeResponsibles'),
+  clientConsents: Symbol('IDENTITY_REPOSITORIES.clientConsents'),
+  users: Symbol('IDENTITY_REPOSITORIES.users'),
   collaborators: Symbol('IDENTITY_REPOSITORIES.collaborators'),
   registrationAttempts: Symbol('IDENTITY_REPOSITORIES.registrationAttempts'),
   transaction: Symbol('IDENTITY_REPOSITORIES.transaction'),

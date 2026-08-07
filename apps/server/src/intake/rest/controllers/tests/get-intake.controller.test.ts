@@ -20,6 +20,7 @@ describe('Get Intakes Controller [GET /intakes/:intakeId]', () => {
 
     const response = await request(fixture.app.getHttpServer())
       .get(`/intakes/${intake.id}`)
+      .set('Authorization', 'Bearer fixture-access-token')
       .expect(200)
 
     expect(response.body.id).toBe(intake.id)
@@ -30,6 +31,7 @@ describe('Get Intakes Controller [GET /intakes/:intakeId]', () => {
 
     const response = await request(fixture.app.getHttpServer())
       .get(`/intakes/${intakeId}`)
+      .set('Authorization', 'Bearer fixture-access-token')
       .expect(404)
 
     expect(response.body).toEqual({

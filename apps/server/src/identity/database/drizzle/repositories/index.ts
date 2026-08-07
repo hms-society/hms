@@ -5,3 +5,5 @@ export * from '@/identity/database/drizzle/repositories/drizzle-collaborators-re
 export * from '@/identity/database/drizzle/repositories/drizzle-identity-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-identity-transaction'
 export * from '@/identity/database/drizzle/repositories/drizzle-users-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-intake-clients-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-intake-responsibles-repository'

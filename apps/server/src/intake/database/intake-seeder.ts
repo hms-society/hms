@@ -1,20 +1,28 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
-import type { IntakeCreation } from '@hms/core/intake/domain/entities'
-import type { IntakesRepository } from '@hms/core/intake/interfaces'
-import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { clientModel, userModel } from '@/identity/database/drizzle/models'
+import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.provider'
+import { clientModel } from '@/identity/database/drizzle/models'
+import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
+import type { IntakeCreation } from '@hms/core/intake/domain/entities'
+import type { IntakesRepository } from '@hms/core/intake/interfaces'
+
+import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
+
+export type IntakeSeedReferences = {
+  clientIds: readonly string[]
+  responsibleIds: readonly string[]
+  actorIds: readonly string[]
+  legalAreaId: string
+  legalTopicId: string
+}
 
 @Injectable()
 export class IntakeSeeder {
   constructor(
+    @Inject(DRIZZLE) private readonly database: DrizzleDB,
     @Inject(INTAKE_REPOSITORIES.intakes)
     private readonly intakesRepository: IntakesRepository,
-    @Inject(DrizzleClient)
-    private readonly drizzleClient: DrizzleClient,
   ) {}
 
   seed(intakes: IntakeCreation[] = []) {
@@ -25,73 +33,100 @@ export class IntakeSeeder {
     return this.intakesRepository.removeAll()
   }
 
-  async run() {
-    const db = this.drizzleClient.requireDatabase()
+  async run(references: IntakeSeedReferences) {
+    const clients = await this.database.select().from(clientModel)
+    const users = await this.database.select().from(userModel)
 
-    const clients = await db.select().from(clientModel).limit(3)
-    const users = await db.select().from(userModel).limit(1)
-    const areas = await db.select().from(legalAreaModel).limit(1)
+    const attendant = users.find((u) => u.email === 'attendant@hmsadvogados.com.br')
+    const responsibleId = attendant?.id || references.responsibleIds[0] || clients[0]?.id
 
-    if (clients.length < 2 || users.length === 0 || areas.length === 0) {
-      return []
+    if (!responsibleId || clients.length === 0) {
+      throw new Error('Intake seed requirements are not met')
     }
 
-    const userId = users[0].id
-    const areaId = areas[0].id
+    const areas = await this.database.select().from(legalAreaModel)
+    const topics = await this.database.select().from(legalTopicModel)
 
-    const topics = await db
-      .select()
-      .from(legalTopicModel)
-      .where(eq(legalTopicModel.legalAreaId, areaId))
-      .limit(2)
+    if (areas.length === 0 || topics.length === 0) {
+      throw new Error('Legal areas and topics are required')
+    }
 
-    if (topics.length === 0) return []
+    const testClient = clients.find((c) => c.email === 'client@hms.br')
+    const intakesToSeed: IntakeCreation[] = []
 
-    const topicId = topics[0].id
-    const altTopicId = topics[1]?.id ?? topicId
-
-    const mockIntakes: IntakeCreation[] = [
-      {
-        clientId: clients[0].id,
-        responsibleId: userId,
-        createdBy: userId,
-        updatedBy: userId,
+    if (testClient) {
+      // 1. Consultation Scheduled
+      const civArea = areas.find((a) => a.name === 'Cível') || areas[0]
+      const civTopic = topics.find((t) => t.legalAreaId === civArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
         origin: 'direct',
         contactChannel: 'whatsapp',
-        legalAreaId: areaId,
-        legalTopicId: topicId,
+        legalAreaId: civArea.id,
+        legalTopicId: civTopic.id,
         urgency: 'normal',
-        demandNotes: 'Primeira demanda de entrada direta.',
-        status: IntakeStatus.ConsultationCompleted,
-      },
-      {
-        clientId: clients[0].id,
-        responsibleId: userId,
-        createdBy: userId,
-        updatedBy: userId,
-        origin: 'referral',
-        contactChannel: 'email',
-        legalAreaId: areaId,
-        legalTopicId: altTopicId,
-        urgency: 'high',
-        demandNotes: 'Segunda demanda vinculada via indicação.',
-        status: IntakeStatus.Contracted,
-      },
-      {
-        clientId: clients[1].id,
-        responsibleId: userId,
-        createdBy: userId,
-        updatedBy: userId,
-        origin: 'website',
-        contactChannel: 'phone',
-        legalAreaId: areaId,
-        legalTopicId: topicId,
-        urgency: 'urgent',
-        demandNotes: 'Nova solicitação urgente via site.',
-        status: IntakeStatus.Registered,
-      },
-    ]
+        demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
+        status: IntakeStatus.ConsultationScheduled,
+      })
 
-    return this.seed(mockIntakes)
+      // 2. Registered (Pending docs)
+      const trabArea = areas.find((a) => a.name === 'Trabalhista') || areas[0]
+      const trabTopic = topics.find((t) => t.legalAreaId === trabArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'whatsapp',
+        legalAreaId: trabArea.id,
+        legalTopicId: trabTopic.id,
+        urgency: 'high',
+        demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
+        status: IntakeStatus.Registered,
+      })
+
+      // 3. Contracted
+      const famArea = areas.find((a) => a.name === 'Família') || areas[0]
+      const famTopic = topics.find((t) => t.legalAreaId === famArea.id) || topics[0]
+      intakesToSeed.push({
+        clientId: testClient.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'email',
+        legalAreaId: famArea.id,
+        legalTopicId: famTopic.id,
+        urgency: 'normal',
+        demandNotes: 'Divórcio consensual e partilha de bens.',
+        status: IntakeStatus.Contracted,
+      })
+    }
+
+    // Seed 1 simple intake for the other seeded clients
+    for (const client of clients) {
+      if (client.email === 'client@hms.br') continue
+      const area = areas[Math.floor(Math.random() * areas.length)]
+      const topic = topics.find((t) => t.legalAreaId === area.id) || topics[0]
+      intakesToSeed.push({
+        clientId: client.id,
+        responsibleId,
+        createdBy: responsibleId,
+        updatedBy: responsibleId,
+        origin: 'direct',
+        contactChannel: 'phone',
+        legalAreaId: area.id,
+        legalTopicId: topic.id,
+        urgency: 'normal',
+        demandNotes: 'Consulta inicial sobre direito contratual.',
+        status: IntakeStatus.Registered,
+      })
+    }
+
+    return this.seed(intakesToSeed)
   }
 }
