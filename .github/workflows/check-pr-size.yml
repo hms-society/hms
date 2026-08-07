@@ -21,10 +21,13 @@ jobs:
           # Garantir que a branch base está disponível para comparação
           git fetch origin ${{ github.base_ref }}
           
-          # Calcula as adições excluindo arquivos de lock e configurações de ferramentas
+          # Considera apenas arquivos de implementação, estilos, SQL e testes.
+          # Documentação, configurações, assets e lockfiles não entram no limite.
           ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD \
-            | grep -v -E "pnpm-lock.yaml|package-lock.json|yarn.lock|biome.json" \
-            | awk '{add += $1} END {print add}')
+            | awk -F '\t' '
+                $3 ~ /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|css|scss|sql)$/ { add += $1 }
+                END { print add }
+              ')
           
           # Define 0 se o resultado for vazio
           ADDITIONS=${ADDITIONS:-0}
