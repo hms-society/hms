@@ -117,16 +117,16 @@ Explique por que este PR foi criado, qual é seu propósito principal e quais pr
 ## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
 Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
 - [ ] `apps/web` (Frontend / Interface)
-  *Arquivos alterados:* 
+  *Arquivos alterados:*
   - (Caminho completo de cada arquivo...)
 - [ ] `apps/server` (Backend / API)
-  *Arquivos alterados:* 
+  *Arquivos alterados:*
   - (Caminho completo de cada arquivo...)
 - [ ] `packages/core` (Regras de Domínio)
-  *Arquivos alterados:* 
+  *Arquivos alterados:*
   - (Caminho completo de cada arquivo...)
 - [ ] `supabase` (Banco de dados / Migrations / Seeders)
-  *Arquivos alterados:* 
+  *Arquivos alterados:*
   - (Caminho completo de cada arquivo...)
 
 ## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
