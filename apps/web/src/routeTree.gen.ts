@@ -15,6 +15,7 @@ import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
 import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
 import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
+import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TriagemIndexRouteImport } from './routes/triagem/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
@@ -66,6 +67,11 @@ const AtendimentoRouteRoute = AtendimentoRouteRouteImport.update({
 const AgendaRouteRoute = AgendaRouteRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoRouteRoute = AdvogadoRouteRouteImport.update({
+  id: '/advogado',
+  path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -166,9 +172,9 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
 const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
-  id: '/advogado/comunicacao',
-  path: '/advogado/comunicacao',
-  getParentRoute: () => rootRouteImport,
+  id: '/comunicacao',
+  path: '/comunicacao',
+  getParentRoute: () => AdvogadoRouteRoute,
 } as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
@@ -183,6 +189,7 @@ const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
@@ -213,6 +220,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
@@ -240,6 +248,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/advogado'
     | '/agenda'
     | '/atendimento'
     | '/cliente'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/advogado'
     | '/atendimento'
     | '/cliente'
     | '/advogado/comunicacao'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/advogado'
     | '/agenda'
     | '/atendimento'
     | '/cliente'
@@ -359,13 +371,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AgendaRouteRoute: typeof AgendaRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   ClienteRouteRoute: typeof ClienteRouteRouteWithChildren
   ConsultasRouteRoute: typeof ConsultasRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   TriagemRouteRoute: typeof TriagemRouteRouteWithChildren
-  AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
@@ -419,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AgendaRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advogado': {
+      id: '/advogado'
+      path: '/advogado'
+      fullPath: '/advogado'
+      preLoaderRoute: typeof AdvogadoRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -556,10 +575,10 @@ declare module '@tanstack/react-router' {
     }
     '/advogado/comunicacao': {
       id: '/advogado/comunicacao'
-      path: '/advogado/comunicacao'
+      path: '/comunicacao'
       fullPath: '/advogado/comunicacao'
       preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
     }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
@@ -577,6 +596,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdvogadoRouteRouteChildren {
+  AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
+}
+
+const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
+  AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
+}
+
+const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
+  AdvogadoRouteRouteChildren,
+)
 
 interface AgendaRouteRouteChildren {
   AgendaIndexRoute: typeof AgendaIndexRoute
@@ -661,13 +692,13 @@ const TriagemRouteRouteWithChildren = TriagemRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AgendaRouteRoute: AgendaRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   ClienteRouteRoute: ClienteRouteRouteWithChildren,
   ConsultasRouteRoute: ConsultasRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   TriagemRouteRoute: TriagemRouteRouteWithChildren,
-  AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,

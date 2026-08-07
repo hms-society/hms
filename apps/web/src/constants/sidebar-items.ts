@@ -20,7 +20,7 @@ const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
   {
     label: 'Central de Comunicação',
     route: 'lawyerCommunication',
-    icon: 'messages-square',
+    icon: 'message-square',
   },
   { label: 'Minha Agenda', route: 'lawyerSchedule', icon: 'calendar' },
   { label: 'Clientes', route: 'clients', icon: 'users' },
