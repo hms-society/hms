@@ -265,7 +265,7 @@ describe('useDocumentSpecificationPage', () => {
             content: [{ type: 'text', text: 'Template atualizado' }],
           },
         ],
-      }),
+      } as unknown as DocumentTemplateContent),
     )
     await waitFor(() => expect(result.current.isTemplateDirty).toBe(true))
     await waitFor(() => expect(result.current.isConfigurationDirty).toBe(true))
