@@ -7,7 +7,7 @@ import type {
   IntakeUrgency,
 } from '../structures'
 
-export interface Intake extends Entity {
+export type Intake = Entity & {
   sequenceNumber: number
   clientId: string
   responsibleId: string
