@@ -12,6 +12,35 @@ export type CreateConsultationRequest = {
 
 export type UpdateConsultationRequest = Partial<CreateConsultationRequest>
 
+export type UpdateClientQualificationRequest = {
+  name?: string
+  legalName?: string
+  tradeName?: string
+  taxIdValue?: string
+  phone?: string
+  email?: string
+  origin?: string
+  linkedThirdParty?: string
+  hmsResponsible?: string
+  rg?: string
+  birthDate?: string
+  maritalStatus?: string
+  nationality?: string
+  profession?: string
+  stateRegistration?: string
+  constitutionDate?: string
+  legalNature?: string
+  legalRepresentative?: string
+  representativeRole?: string
+  zipCode?: string
+  street?: string
+  number?: string
+  complement?: string
+  district?: string
+  city?: string
+  state?: string
+}
+
 export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClient>) => {
   return {
     async getConsultationById(consultationId: string) {
@@ -40,8 +69,18 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       return restClient.patch<any>(`/consultations/${consultationId}/no-show`)
     },
 
-    async rescheduleConsultation(consultationId: string, newDate: string) {
-      return restClient.patch<any>(`/consultations/${consultationId}/reschedule`, { newDate })
+    async rescheduleConsultation(consultationId: string) {
+      return restClient.patch<any>(`/consultations/${consultationId}/reschedule`)
+    },
+
+    async updateQualification(
+      consultationId: string,
+      request: UpdateClientQualificationRequest,
+    ) {
+      return restClient.patch<any>(
+        `/consultations/${consultationId}/qualification`,
+        request,
+      )
     },
 
     async completeConsultation(consultationId: string, summary?: string) {

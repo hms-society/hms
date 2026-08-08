@@ -17,10 +17,7 @@ import {
   CreateConsultationDto,
 } from '@hms/core/consultation/use-cases'
 import { DrizzleConsultationsRepository } from '../../repository/drizzle-consultations-repository'
-
-export interface RescheduleConsultationDto {
-  newDate: string
-}
+import { UpdateClientQualificationDto } from './dto/update-client-qualification.dto'
 
 @Controller('consultations')
 export class ConsultationsController {
@@ -54,10 +51,7 @@ export class ConsultationsController {
   }
 
   @Patch(':id/reschedule')
-  async reschedule(
-    @Param('id') id: string,
-    @Body() dto: RescheduleConsultationDto,
-  ) {
+  async reschedule(@Param('id') id: string) {
     try {
       const consultation = await this.consultationsRepository.findById(id)
 
@@ -65,19 +59,19 @@ export class ConsultationsController {
         throw new NotFoundException('Consulta não encontrada.')
       }
 
-      if (typeof (consultation as any).reschedule === 'function') {
-        ;(consultation as any).reschedule(new Date(dto.newDate))
-      } else {
-        consultation.status = 'rescheduled' as any
-        consultation.updatedAt = new Date()
-      }
+      consultation.status = 'pending' as any
+      consultation.updatedAt = new Date()
 
       await this.consultationsRepository.save(consultation)
 
       return consultation
     } catch (error) {
       console.error('ERRO DETALHADO NO RESCHEDULE:', error)
-      if (error instanceof NotFoundException) throw error
+
+      if (error instanceof NotFoundException) {
+        throw error
+      }
+
       throw new InternalServerErrorException('Erro ao remarcar consulta.')
     }
   }
@@ -99,6 +93,31 @@ export class ConsultationsController {
     } catch (error) {
       console.error('ERRO DETALHADO NO COMPLETE:', error)
       throw error
+    }
+  }
+
+  @Patch(':id/qualification')
+  async updateQualification(
+    @Param('id') id: string,
+    @Body() dto: UpdateClientQualificationDto,
+  ) {
+    try {
+      const consultation = await this.consultationsRepository.findById(id)
+
+      if (!consultation || !consultation.clientId) {
+        throw new NotFoundException('Consulta ou cliente vinculado não encontrado.')
+      }
+
+      await this.consultationsRepository.updateClientQualification(
+        consultation.clientId,
+        dto,
+      )
+
+      return { message: 'Qualificação do cliente atualizada com sucesso.' }
+    } catch (error) {
+      console.error('ERRO DETALHADO NO UPDATE QUALIFICATION:', error)
+      if (error instanceof NotFoundException) throw error
+      throw new InternalServerErrorException('Erro ao atualizar qualificação do cliente.')
     }
   }
 
@@ -124,6 +143,28 @@ export class ConsultationsController {
       }
 
       throw new InternalServerErrorException('Erro ao buscar a consulta.')
+    }
+  }
+
+  @Patch(':id/reset')
+  async resetStatus(@Param('id') id: string) {
+    try {
+      const consultation = await this.consultationsRepository.findById(id)
+
+      if (!consultation) {
+        throw new NotFoundException('Consulta não encontrada.')
+      }
+
+      consultation.status = 'pending' as any
+      consultation.updatedAt = new Date()
+
+      await this.consultationsRepository.save(consultation)
+
+      return consultation
+    } catch (error) {
+      console.error('ERRO DETALHADO NO RESET:', error)
+      if (error instanceof NotFoundException) throw error
+      throw new InternalServerErrorException('Erro ao redefinir status da consulta.')
     }
   }
 }

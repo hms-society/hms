@@ -4,25 +4,24 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 export function useConsultation(consultationId?: string) {
   const { consultationService } = useRestContext()
   const queryClient = useQueryClient()
-
- const {
-  data: consultation,
-  isLoading,
-  isError,
-  error,
-} = useQuery({
-  queryKey: ['consultation', consultationId],
-  queryFn: async () => {
-    if (!consultationId) return null
-    const response = await consultationService.getConsultationById(consultationId)
-    if (response.isFailure) response.throwError()
-    console.log('consultation raw:', JSON.stringify(response.body, null, 2))
-    return response.body
-  },
-  enabled: Boolean(consultationId),
-})
-
   
+  const {
+    data: consultation,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['consultation', consultationId],
+    queryFn: async () => {
+      if (!consultationId) return null
+      const response = await consultationService.getConsultationById(consultationId)
+      if (response.isFailure) response.throwError()
+      console.log('consultation raw:', JSON.stringify(response.body, null, 2))
+      return response.body
+    },
+    enabled: Boolean(consultationId),
+  })
+
   const startConsultationMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await consultationService.startConsultation(id)
@@ -53,10 +52,9 @@ export function useConsultation(consultationId?: string) {
     },
   })
 
-
   const rescheduleMutation = useMutation({
-    mutationFn: async ({ id, newDate }: { id: string; newDate: string }) => {
-      const response = await consultationService.rescheduleConsultation(id, newDate)
+    mutationFn: async (id: string) => {
+      const response = await consultationService.rescheduleConsultation(id)
 
       if (response.isFailure) {
         response.throwError()
@@ -64,10 +62,43 @@ export function useConsultation(consultationId?: string) {
 
       return response.body
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['consultation', variables.id] })
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ['consultation', id],
+      })
     },
   })
+
+  const completeConsultationMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await consultationService.completeConsultation(id)
+
+      if (response.isFailure) {
+        response.throwError()
+      }
+
+      return response.body
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ['consultation', id],
+      })
+    },
+  })
+
+const updateQualificationMutation = useMutation({
+  mutationFn: async (dto: any) => {
+    if (!consultationId) return
+    const response = await consultationService.updateQualification(consultationId, dto)
+    if (response.isFailure) response.throwError()
+    return response.body
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['consultation', consultationId] })
+  },
+})
+
+
 
   return {
     consultation,
@@ -80,5 +111,9 @@ export function useConsultation(consultationId?: string) {
     isMarkingNoShow: markNoShowMutation.isPending,
     rescheduleConsultation: rescheduleMutation.mutateAsync,
     isRescheduling: rescheduleMutation.isPending,
+    completeConsultation: completeConsultationMutation.mutateAsync,
+    isCompleting: completeConsultationMutation.isPending,
+    updateQualification: updateQualificationMutation.mutateAsync,
+    isUpdatingQualification: updateQualificationMutation.isPending,
   }
 }

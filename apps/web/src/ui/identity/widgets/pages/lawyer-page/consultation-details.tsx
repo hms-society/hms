@@ -30,14 +30,13 @@ export interface ConsultationDetailsProps {
   onContinueForm?: () => void
 }
 
-const MOCK_SCHEDULED_AT = '2026-08-06T14:00:00.000Z'
-
 const originMap: Record<string, string> = {
   social_media: 'Redes Sociais',
   website: 'Website / Plataforma',
   referral: 'Indicação',
   phone: 'Telefone',
   active_search: 'Busca Ativa',
+  direct: 'Entrada direta HMS'
 }
 
 const channelMap: Record<string, string> = {
@@ -74,36 +73,37 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
     const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false)
 
     const statusLower = consultation?.status?.toLowerCase()
-    const canBeStarted = statusLower === 'pending' || statusLower === 'scheduled'
+    const isPending = statusLower === 'pending'
+    const isCompleted = statusLower === 'completed'
 
-    const handleStatusChange = async (status: 'confirmed' | 'rescheduled' | 'absent') => {
+    const canBeStarted = isPending
+    const canMarkNoShow = isPending
+
+    const handleStatusAction = async (
+      action: 'toggle_start' | 'toggle_absent',
+    ) => {
       if (!consultationId) return
 
       try {
-        if (status === 'confirmed') {
-          if (!canBeStarted) {
-            setFeedbackBanner({
-              type: 'info',
-              message: 'Apenas consultas pendentes podem ser iniciadas.',
-            })
-            return
-          }
+        if (action === 'toggle_start') {
           await startConsultation(consultationId)
+
           setFeedbackBanner({
             type: 'success',
             message: 'Consulta iniciada com sucesso!',
           })
-        } else if (status === 'absent') {
+        } else {
           await markNoShow(consultationId)
+
           setFeedbackBanner({
             type: 'danger',
             message: 'Ausência registrada com sucesso.',
           })
         }
-      } catch (error) {
+      } catch {
         setFeedbackBanner({
           type: 'danger',
-          message: 'Ocorreu um erro ao atualizar o status. Tente novamente.',
+          message: 'Ocorreu um erro ao atualizar o status.',
         })
       }
     }
@@ -114,11 +114,13 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       try {
         setIsSubmittingReschedule(true)
         const combinedIsoDate = new Date(`${selectedDate}T${selectedTime}:00`).toISOString()
-        
-        await rescheduleConsultation({
-          id: consultationId,
-          newDate: combinedIsoDate,
-        })
+
+        await rescheduleConsultation(consultationId)
+
+        if (consultation) {
+          consultation.status = 'pending' as any
+          ;(consultation as any).scheduledAt = combinedIsoDate
+        }
 
         setIsRescheduleModalOpen(false)
         setSelectedDate('')
@@ -126,7 +128,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
 
         setFeedbackBanner({
           type: 'info',
-          message: `Agendamento remarcado com sucesso para ${new Date(combinedIsoDate).toLocaleDateString('pt-BR')} às ${selectedTime}.`,
+          message: `Consulta remarcada para ${new Date(combinedIsoDate).toLocaleDateString('pt-BR')} às ${selectedTime}.`,
         })
       } catch (error) {
         setFeedbackBanner({
@@ -138,20 +140,12 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       }
     }
 
+    const intakeObj = consultation?.intake as any
     const demandContext =
+      intakeObj?.demand_notes ||
+      intakeObj?.demandNotes ||
       consultation?.primaryLegalQuestion ||
-      consultation?.guidanceProvided ||
-      consultation?.notes ||
-      consultation?.intake?.demandNotes
-
-    const attendanceStatus: 'confirmed' | 'rescheduled' | 'absent' | null =
-      statusLower === 'in_progress' || statusLower === 'completed'
-        ? 'confirmed'
-        : statusLower === 'no_show'
-        ? 'absent'
-        : statusLower === 'rescheduled'
-        ? 'rescheduled'
-        : null
+      consultation?.notes
 
     const client = consultation?.client
     const displayName = client?.name || client?.legalName || client?.tradeName || 'Cliente HMS Teste'
@@ -177,9 +171,8 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           : 'São José dos Campos - SP',
     }
 
-    const intakeObj = consultation?.intake
     const rawOrigin = intakeObj?.origin || intakeObj?.source || consultation?.channel
-    const rawChannel = intakeObj?.contactChannel || (consultation?.modality === 'PRESENTIAL' ? 'in_person' : 'video_call')
+    const rawChannel = intakeObj?.contactChannel || intakeObj?.contact_channel || (consultation?.modality === 'PRESENTIAL' ? 'in_person' : 'video_call')
     const rawUrgency = intakeObj?.urgency || 'normal'
 
     const urgencyMap: Record<string, string> = {
@@ -202,19 +195,21 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       openedAt: consultation?.createdAt
         ? new Date(consultation.createdAt).toLocaleDateString('pt-BR')
         : '—',
-      attendant: intakeObj?.attendantName || 'Sistema',
+      attendant: intakeObj?.attendantName || intakeObj?.attendant_name || 'Sistema',
     }
 
+    const currentScheduledAt = (consultation as any)?.scheduledAt || (consultation as any)?.appointmentDate || consultation?.startedAt
+
     const schedule = {
-      dateTime: MOCK_SCHEDULED_AT
-        ? new Date(MOCK_SCHEDULED_AT).toLocaleString('pt-BR', {
+      dateTime: currentScheduledAt
+        ? new Date(currentScheduledAt).toLocaleString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
           })
-        : '—',
+        : '06/08/2026 08:00',
       format: consultation?.modality === 'PRESENTIAL' ? 'Presencial' : 'Virtual',
       lawyer:
         consultation?.assignedLawyer?.name ||
@@ -225,20 +220,19 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
     const todayString = new Date().toISOString().split('T')[0]
 
     return (
-      <div ref={ref} className="space-y-6 pb-12 font-sans">
+      <div ref={ref} className="space-y-4 sm:space-y-6 pb-8 sm:pb-12 font-sans px-3 sm:px-0 max-w-7xl mx-auto">
         <div>
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs text-teal-800 font-medium cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-teal-800 font-medium cursor-pointer hover:underline"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Voltar
           </button>
         </div>
-
         {feedbackBanner && (
           <div
-            className={`p-4 rounded-xl text-xs font-medium flex items-center justify-between shadow-sm transition-all animate-in fade-in slide-in-from-top-2 ${
+            className={`p-3.5 sm:p-4 rounded-xl text-xs font-medium flex items-start sm:items-center justify-between gap-3 shadow-sm transition-all animate-in fade-in slide-in-from-top-2 ${
               feedbackBanner.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                 : feedbackBanner.type === 'danger'
@@ -248,214 +242,213 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           >
             <div className="flex items-center gap-2">
               {feedbackBanner.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               ) : feedbackBanner.type === 'danger' ? (
-                <XCircle className="w-4 h-4 text-red-600" />
+                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
               ) : (
-                <RotateCcw className="w-4 h-4 text-teal-600" />
+                <RotateCcw className="w-4 h-4 text-teal-600 shrink-0" />
               )}
-              <span>{feedbackBanner.message}</span>
+              <span className="break-words">{feedbackBanner.message}</span>
             </div>
             <button
+              type="button"
               onClick={() => setFeedbackBanner(null)}
-              className="text-slate-400 hover:text-slate-600 text-xs font-bold px-1"
+              className="text-slate-400 hover:text-slate-600 text-xs font-bold px-1 shrink-0"
             >
               ✕
             </button>
           </div>
         )}
-
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-          <div className="flex items-start gap-4 flex-1">
-            <div className="w-14 h-14 rounded-full bg-teal-50 text-teal-800 font-bold text-lg flex items-center justify-center shrink-0 border border-teal-100">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start gap-4 flex-1">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-teal-50 text-teal-800 font-bold text-base sm:text-lg flex items-center justify-center shrink-0 border border-teal-100">
               {isLoading ? '...' : clientData.initials}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold text-slate-800 font-serif">
+                <h2 className="text-base sm:text-lg font-bold text-slate-800 font-serif break-words">
                   {isLoading ? 'Carregando cliente...' : clientData.name}
                 </h2>
-                <Badge className="bg-teal-50 text-teal-800 border-teal-200 text-[10px] font-normal px-2.5 py-0.5 rounded-full">
-                  {clientData.badge}
-                </Badge>
               </div>
 
-              <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
+              <div className="text-xs text-slate-500 font-medium flex items-center gap-2 flex-wrap">
                 <span>{clientData.taxIdLabel}</span>
                 <span className="font-semibold text-slate-700">
                   {isLoading ? '...' : clientData.taxIdValue}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap text-xs">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50">
-                  <Phone className="w-3 h-3 text-slate-400" />
-                  {isLoading ? '...' : clientData.phone}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50 truncate max-w-full">
+                  <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span className="truncate">{isLoading ? '...' : clientData.phone}</span>
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50">
-                  <Mail className="w-3 h-3 text-slate-400" />
-                  {isLoading ? '...' : clientData.email}
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50 truncate max-w-full">
+                  <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span className="truncate">{isLoading ? '...' : clientData.email}</span>
                 </span>
               </div>
 
               <div className="flex items-center gap-1 text-xs text-slate-400 pt-0.5">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>{isLoading ? '...' : clientData.location}</span>
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{isLoading ? '...' : clientData.location}</span>
               </div>
             </div>
           </div>
 
           <div className="hidden lg:block w-px h-28 bg-slate-200" />
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-y-3 gap-x-8 text-xs font-sans min-w-[280px]">
+          <div className="block lg:hidden w-full h-px bg-slate-100 my-1" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-y-3 gap-x-4 sm:gap-x-8 text-xs font-sans w-full lg:w-auto lg:min-w-[280px]">
             <div>
               <span className="text-slate-400 block mb-0.5">Intake</span>
-              <span className="font-semibold text-teal-700 cursor-pointer flex items-center gap-1">
-                <LinkIcon className="w-3 h-3" /> {isLoading ? '...' : intakeSource.intakeCode}
+              <span className="font-semibold text-teal-700 cursor-pointer flex items-center gap-1 truncate">
+                <LinkIcon className="w-3 h-3 shrink-0" /> {isLoading ? '...' : intakeSource.intakeCode}
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block mb-0.5">Origem</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 block truncate">
                 {isLoading ? '...' : intakeSource.source}
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block mb-0.5">Canal</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 block truncate">
                 {isLoading ? '...' : intakeSource.channel}
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block mb-0.5">Urgência</span>
-              <Badge className="bg-teal-100/80 text-teal-800 border-none text-[10px] font-medium px-2 py-0">
+              <Badge className="bg-teal-100/80 text-teal-800 border-none text-[10px] font-medium px-2 py-0 inline-block">
                 {intakeSource.urgency}
               </Badge>
             </div>
 
             <div>
               <span className="text-slate-400 block mb-0.5">Aberto em</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 block truncate">
                 {isLoading ? '...' : intakeSource.openedAt}
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block mb-0.5">Atendente</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 block truncate">
                 {isLoading ? '...' : intakeSource.attendant}
               </span>
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-3">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 space-y-3">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-            <MessageSquare className="w-4 h-4 text-slate-400" />
+            <MessageSquare className="w-4 h-4 text-slate-400 shrink-0" />
             <span>Contexto da demanda</span>
           </div>
-          <p className="text-sm font-serif text-slate-800 leading-relaxed">
+          <p className="text-sm font-serif text-slate-800 leading-relaxed break-words">
             {isLoading
               ? 'Carregando detalhes...'
               : demandContext || 'Nenhum contexto detalhado registrado para esta consulta.'}
           </p>
         </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-5">
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 border-b border-slate-100 pb-3">
-            <CalendarIcon className="w-4 h-4 text-slate-400" />
-            <span>Agendamento</span>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <CalendarIcon className="w-4 h-4 text-slate-400 shrink-0" />
+              <span>Agendamento</span>
+            </div>
+            {statusLower === 'rescheduled' && (
+              <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] font-medium px-2.5 py-0.5 shrink-0">
+                Remarcado
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2.5 gap-1 sm:gap-0">
               <span className="text-slate-500 flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-slate-400" /> Horário
+                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Horário
               </span>
               <span className="font-semibold text-slate-800">
-                {isLoading ? '...' : schedule.dateTime}
+                06/08/2026 14:30
               </span>
             </div>
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2.5 gap-1 sm:gap-0">
               <span className="text-slate-500 flex items-center gap-2">
-                <Video className="w-3.5 h-3.5 text-slate-400" /> Formato
+                <Video className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Formato
               </span>
               <span className="font-semibold text-slate-800">
                 {isLoading ? '...' : schedule.format}
               </span>
             </div>
 
-            <div className="flex items-center justify-between pb-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-1 gap-1 sm:gap-0">
               <span className="text-slate-500 flex items-center gap-2">
-                <User className="w-3.5 h-3.5 text-slate-400" /> Advogado
+                <User className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Advogado
               </span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 truncate">
                 {isLoading ? '...' : schedule.lawyer}
               </span>
             </div>
           </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+            <span className="text-xs text-slate-500 font-medium">Atualizar presença / status:</span>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
-            <span className="text-xs text-slate-500 font-medium">Atualizar presença:</span>
-
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setIsRescheduleModalOpen(true)}
-                disabled={statusLower === 'completed' || statusLower === 'no_show'}
-                className={`rounded-full h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800 ${
-                  attendanceStatus === 'rescheduled' ? 'bg-teal-100 border-teal-700' : ''
-                }`}
+                disabled={isCompleted}
+                className="rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800 hover:bg-teal-50 cursor-pointer w-full sm:w-auto justify-center"
               >
-                <RotateCcw className="w-3.5 h-3.5" /> Remarcar
+                <RotateCcw className="w-3.5 h-3.5 shrink-0" /> Remarcar
               </Button>
 
               <Button
                 type="button"
                 size="sm"
-                onClick={() => handleStatusChange('confirmed')}
+                onClick={() => handleStatusAction('toggle_start')}
                 disabled={!canBeStarted}
-                className={`rounded-full h-8 text-xs font-medium gap-1.5 px-4 bg-teal-800 hover:bg-teal-900 text-white ${
-                  attendanceStatus === 'confirmed'
-                    ? 'ring-2 ring-teal-900 bg-teal-900'
-                    : !canBeStarted
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
+                className={`rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 transition-all w-full sm:w-auto justify-center ${
+                  canBeStarted
+                    ? 'bg-teal-800 hover:bg-teal-900 text-white cursor-pointer'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                <Check className="w-3.5 h-3.5" />
-                {canBeStarted ? 'Iniciar consulta' : 'Presença confirmada'}
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                Iniciar consulta
               </Button>
 
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
-                onClick={() => handleStatusChange('absent')}
-                disabled={statusLower === 'completed'}
-                className={`rounded-full h-8 text-xs font-medium gap-1.5 px-4 bg-red-700 hover:bg-red-800 text-white ${
-                  attendanceStatus === 'absent' ? 'ring-2 ring-red-900 bg-red-900' : ''
+                onClick={() => handleStatusAction('toggle_absent')}
+                disabled={!canMarkNoShow}
+                className={`rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 transition-all w-full sm:w-auto justify-center ${
+                  canMarkNoShow
+                    ? 'bg-red-700 hover:bg-red-800 text-white cursor-pointer'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                <UserX className="w-3.5 h-3.5" /> Marcar ausência
+                <UserX className="w-3.5 h-3.5 shrink-0" />
+                Marcar ausência
               </Button>
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-2xl border border-teal-600/60 p-6 sm:p-8 shadow-sm flex items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-teal-600/60 p-4 sm:p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 flex items-center justify-center shrink-0 border border-teal-100">
               <FileEdit className="w-5 h-5" />
             </div>
-            <p className="text-sm font-semibold text-slate-800 font-sans">
+            <p className="text-xs sm:text-sm font-semibold text-slate-800 font-sans">
               Continue o preenchimento da ficha
             </p>
           </div>
@@ -463,28 +456,30 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           <Button
             type="button"
             onClick={onContinueForm}
-            className="bg-teal-800 hover:bg-teal-900 text-white text-xs font-semibold rounded-full px-5 h-10 gap-2 shrink-0 shadow-sm"
+            className="bg-teal-800 hover:bg-teal-900 text-white text-xs font-semibold rounded-full px-5 h-10 gap-2 w-full sm:w-auto justify-center shrink-0 shadow-sm cursor-pointer"
           >
             Continuar ficha <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
+
+        {/* Modal de Remarcação Responsivo */}
         {isRescheduleModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-lg p-6 space-y-6 relative">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-lg p-5 sm:p-6 space-y-5 sm:space-y-6 relative max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start sm:items-center justify-between border-b border-slate-100 pb-3.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center shrink-0">
                     <RotateCcw className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-800 font-serif">Remarcar Consulta</h3>
-                    <p className="text-xs text-slate-500 font-sans">Selecione uma nova data e horário disponível</p>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-800 font-serif">Remarcar Consulta</h3>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-sans">Selecione uma nova data e horário disponível</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsRescheduleModalOpen(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -508,13 +503,13 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                   <label className="block text-xs font-semibold text-slate-700 mb-2">
                     Horários disponíveis
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {AVAILABLE_SLOTS.map((slot) => (
                       <button
                         key={slot}
                         type="button"
                         onClick={() => setSelectedTime(slot)}
-                        className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all ${
+                        className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer ${
                           selectedTime === slot
                             ? 'bg-teal-800 text-white border-teal-800 shadow-sm'
                             : 'border-slate-200 text-slate-700 hover:border-teal-600 hover:bg-teal-50/50'
@@ -527,13 +522,13 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-4 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsRescheduleModalOpen(false)}
-                  className="rounded-full text-xs font-medium h-9 px-4"
+                  className="rounded-full text-xs font-medium h-9 px-4 cursor-pointer w-full sm:w-auto"
                 >
                   Cancelar
                 </Button>
@@ -542,7 +537,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                   size="sm"
                   disabled={!selectedDate || !selectedTime || isSubmittingReschedule}
                   onClick={handleConfirmReschedule}
-                  className="bg-teal-800 hover:bg-teal-900 text-white rounded-full text-xs font-semibold h-9 px-5 shadow-sm"
+                  className="bg-teal-800 hover:bg-teal-900 text-white rounded-full text-xs font-semibold h-9 px-5 shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 w-full sm:w-auto"
                 >
                   {isSubmittingReschedule ? 'Confirmando...' : 'Confirmar remarcação'}
                 </Button>

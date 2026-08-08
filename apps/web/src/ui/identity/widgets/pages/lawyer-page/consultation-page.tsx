@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ConsultationTabs } from './consultation-tabs'
 import { ConsultationDetails } from './consultation-details'
-import { AttendanceForm } from './attendance-form'
+import { AttendanceForm } from './attendance-form/attendance-form'
 
 export function ConsultationPage() {
   const [activeTab, setActiveTab] = useState<'details' | 'form' | 'package'>('details')
@@ -13,13 +13,16 @@ export function ConsultationPage() {
 
       {activeTab === 'details' && (
         <ConsultationDetails
-          consultationId={testConsultationId} 
+          consultationId={testConsultationId}
           onContinueForm={() => setActiveTab('form')}
         />
       )}
 
       {activeTab === 'form' && (
-        <AttendanceForm onBack={() => setActiveTab('details')} />
+        <AttendanceForm
+          consultationId={testConsultationId}
+          onBack={() => setActiveTab('details')}
+        />
       )}
     </div>
   )

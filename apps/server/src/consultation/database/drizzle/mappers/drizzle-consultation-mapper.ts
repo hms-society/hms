@@ -16,18 +16,20 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
     [key: string]: any
   }
   intake?: {
-    id: string
-    sequenceNumber?: number
-    origin?: string
-    contactChannel?: string
-    urgency?: string
-    demandNotes?: string | null
-    status?: string
-    responsibleId?: string
-    createdBy?: string
-    attendantName?: string
-    [key: string]: any
-  }
+  id: string
+  sequenceNumber?: number
+  origin?: string
+  contactChannel?: string
+  legalAreaId?: string
+  legalTopicId?: string
+  urgency?: string
+  demandNotes?: string | null
+  status?: string
+  responsibleId?: string
+  createdBy?: string
+  attendantName?: string
+  [key: string]: any
+}
   client?: {
     id: string
     type?: string
@@ -38,6 +40,24 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
     taxIdValue?: string
     phone?: string | null
     email?: string | null
+    origin?: string | null
+    linkedThirdParty?: string | null
+    hmsResponsible?: string | null
+    rg?: string | null
+    birthDate?: string | null
+    maritalStatus?: string | null
+    nationality?: string | null
+    profession?: string | null
+    stateRegistration?: string | null
+    constitutionDate?: string | null
+    legalNature?: string | null
+    legalRepresentative?: string | null
+    representativeRole?: string | null
+    zipCode?: string | null
+    street?: string | null
+    number?: string | null
+    complement?: string | null
+    district?: string | null
     city?: string | null
     state?: string | null
     [key: string]: any
@@ -105,7 +125,7 @@ export class DrizzleConsultationMapper {
           }
         : undefined,
 
-     intake: record.intake
+      intake: record.intake
   ? {
       id: record.intake.id,
       code: record.intake.sequenceNumber
@@ -113,6 +133,8 @@ export class DrizzleConsultationMapper {
         : record.intake.code,
       origin: record.intake.origin,
       contactChannel: record.intake.contactChannel,
+      legalAreaId: record.intake.legalAreaId,
+      legalTopicId: record.intake.legalTopicId,
       urgency: record.intake.urgency,
       demandNotes: record.intake.demandNotes ?? undefined,
       status: record.intake.status,
@@ -133,24 +155,42 @@ export class DrizzleConsultationMapper {
             taxIdValue: record.client.taxIdValue,
             phone: record.client.phone ?? undefined,
             email: record.client.email ?? undefined,
+            origin: record.client.origin ?? undefined,
+            linkedThirdParty: record.client.linkedThirdParty ?? undefined,
+            hmsResponsible: record.client.hmsResponsible ?? undefined,
+            rg: record.client.rg ?? undefined,
+            birthDate: record.client.birthDate ?? undefined,
+            maritalStatus: record.client.maritalStatus ?? undefined,
+            nationality: record.client.nationality ?? undefined,
+            profession: record.client.profession ?? undefined,
+            stateRegistration: record.client.stateRegistration ?? undefined,
+            constitutionDate: record.client.constitutionDate ?? undefined,
+            legalNature: record.client.legalNature ?? undefined,
+            legalRepresentative: record.client.legalRepresentative ?? undefined,
+            representativeRole: record.client.representativeRole ?? undefined,
+            zipCode: record.client.zipCode ?? undefined,
+            street: record.client.street ?? undefined,
+            number: record.client.number ?? undefined,
+            complement: record.client.complement ?? undefined,
+            district: record.client.district ?? undefined,
             city: record.client.city ?? undefined,
             state: record.client.state ?? undefined,
           }
         : undefined,
+        legalArea: record.legalArea
+          ? {
+              id: record.legalArea.id,
+              name: record.legalArea.name,
+            }
+          : undefined,
 
-      legalArea: record.legalArea
-        ? {
-            id: record.legalArea.id,
-            name: record.legalArea.name,
-          }
-        : undefined,
-
-      legalTopic: record.legalTopic
-        ? {
-            id: record.legalTopic.id,
-            name: record.legalTopic.name,
-          }
-        : undefined,
+        legalTopic: record.legalTopic
+          ? {
+              id: record.legalTopic.id,
+              legalAreaId: record.legalTopic.legalAreaId,
+              name: record.legalTopic.name,
+            }
+          : undefined,
 
       relevantFacts: (record.facts ?? []).map((fact) => ({
         id: fact.id,

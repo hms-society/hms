@@ -3,11 +3,13 @@ import { X, Search, FileText, Check } from 'lucide-react'
 import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 
-interface FormOption {
+export interface FormOption {
   id: string
   title: string
-  area: string
-  theme: string
+  area?: string
+  theme?: string
+  legalAreaId?: string  
+  legalTopicId?: string 
 }
 
 interface SelectFormDialogProps {
@@ -74,8 +76,6 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
             <X className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Busca */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-700">Buscar ficha</label>
           <div className="relative">
