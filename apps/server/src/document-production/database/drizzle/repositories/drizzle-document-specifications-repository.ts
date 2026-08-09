@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
 import type { DocumentSpecificationsRepository } from '@hms/core/document-production/interfaces'
-import type { DocumentSpecificationListQuery } from '@hms/core/document-production/domain/structures'
+import type {
+  DocumentSpecificationConfigurationUpdate,
+  DocumentSpecificationListQuery,
+  DocumentSpecificationTemplateUpdate,
+} from '@hms/core/document-production/domain/structures'
 import { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
 import {
   and,
@@ -15,6 +19,7 @@ import {
   sql,
   type SQL,
 } from 'drizzle-orm'
+import { PgTransaction } from 'drizzle-orm/pg-core'
 
 import {
   documentSpecificationLegalAreaModel,
@@ -23,7 +28,10 @@ import {
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import type { Database } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+
+type DocumentProductionDatabaseExecutor = Database | PgTransaction<any, any, any>
 
 @Injectable()
 export class DrizzleDocumentSpecificationsRepository
@@ -149,20 +157,19 @@ export class DrizzleDocumentSpecificationsRepository
       for (const [index, specification] of specifications.entries()) {
         const record = records[index]
         if (!record || specification.application.scope !== 'legal_context') continue
+        const application = specification.application
         await transaction.insert(documentSpecificationLegalAreaModel).values(
-          specification.application.legalAreaIds.map((legalAreaId) => ({
+          application.legalAreaIds.map((legalAreaId) => ({
             documentSpecificationId: record.id,
             legalAreaId,
           })),
         )
-        const topics = specification.application.legalAreaIds.flatMap((legalAreaId) =>
-          (specification.application.legalTopicIdsByArea[legalAreaId] ?? []).map(
-            (legalTopicId) => ({
-              documentSpecificationId: record.id,
-              legalAreaId,
-              legalTopicId,
-            }),
-          ),
+        const topics = application.legalAreaIds.flatMap((legalAreaId) =>
+          (application.legalTopicIdsByArea[legalAreaId] ?? []).map((legalTopicId) => ({
+            documentSpecificationId: record.id,
+            legalAreaId,
+            legalTopicId,
+          })),
         )
         if (topics.length)
           await transaction.insert(documentSpecificationLegalTopicModel).values(topics)
@@ -173,8 +180,183 @@ export class DrizzleDocumentSpecificationsRepository
     return created.map((record) => this.mapper.toDomain(record))
   }
 
+  async add(specification: DocumentSpecificationCreation) {
+    return this.database.transaction(async (transaction) => {
+      const [record] = await transaction
+        .insert(documentSpecificationModel)
+        .values({
+          name: specification.name,
+          description: specification.description,
+          content: specification.content,
+          variables: [...specification.variables],
+          moment: specification.application.moment,
+          scope: specification.application.scope,
+          isRequired: specification.isRequired,
+          status: specification.status,
+        })
+        .returning()
+
+      if (!record) throw new Error('Document specification was not created')
+
+      await this.replaceAssociations(transaction, record.id, specification.application)
+
+      return this.toDomain(transaction, record)
+    })
+  }
+
+  async findById(documentSpecificationId: string) {
+    const [record] = await this.database
+      .select()
+      .from(documentSpecificationModel)
+      .where(eq(documentSpecificationModel.id, documentSpecificationId))
+      .limit(1)
+
+    return record ? this.toDomain(this.database, record) : undefined
+  }
+
+  async replaceConfiguration(
+    documentSpecificationId: string,
+    changes: DocumentSpecificationConfigurationUpdate,
+  ) {
+    return this.database.transaction(async (transaction) => {
+      const [record] = await transaction
+        .update(documentSpecificationModel)
+        .set({
+          name: changes.name,
+          description: changes.description,
+          moment: changes.application.moment,
+          scope: changes.application.scope,
+          isRequired: changes.isRequired,
+          status: changes.status,
+          ...(changes.content !== undefined ? { content: changes.content } : {}),
+          ...(changes.variables !== undefined
+            ? { variables: [...changes.variables] }
+            : {}),
+          updatedAt: new Date(),
+        })
+        .where(eq(documentSpecificationModel.id, documentSpecificationId))
+        .returning()
+
+      if (!record) return undefined
+
+      await this.replaceAssociations(transaction, record.id, changes.application)
+
+      return this.toDomain(transaction, record)
+    })
+  }
+
+  async replaceTemplate(
+    documentSpecificationId: string,
+    changes: DocumentSpecificationTemplateUpdate,
+  ) {
+    return this.database.transaction(async (transaction) => {
+      const [record] = await transaction
+        .update(documentSpecificationModel)
+        .set({
+          content: changes.content,
+          variables: [...changes.variables],
+          updatedAt: new Date(),
+        })
+        .where(eq(documentSpecificationModel.id, documentSpecificationId))
+        .returning()
+
+      return record ? this.toDomain(transaction, record) : undefined
+    })
+  }
+
+  async remove(documentSpecificationId: string) {
+    const deleted = await this.database
+      .delete(documentSpecificationModel)
+      .where(eq(documentSpecificationModel.id, documentSpecificationId))
+      .returning({ id: documentSpecificationModel.id })
+
+    return deleted.length > 0
+  }
+
   async removeAll() {
     await this.database.delete(documentSpecificationModel)
+  }
+
+  private async toDomain(
+    database: DocumentProductionDatabaseExecutor,
+    record: typeof documentSpecificationModel.$inferSelect,
+  ) {
+    if (record.scope === 'global') return this.mapper.toDomain(record)
+
+    const [legalAreas, legalTopics] = await Promise.all([
+      database
+        .select()
+        .from(documentSpecificationLegalAreaModel)
+        .where(
+          eq(documentSpecificationLegalAreaModel.documentSpecificationId, record.id),
+        ),
+      database
+        .select()
+        .from(documentSpecificationLegalTopicModel)
+        .where(
+          eq(documentSpecificationLegalTopicModel.documentSpecificationId, record.id),
+        ),
+    ])
+    const legalTopicIdsByArea: Record<string, string[]> = {}
+    for (const topic of legalTopics) {
+      const topics = legalTopicIdsByArea[topic.legalAreaId] ?? []
+      topics.push(topic.legalTopicId)
+      legalTopicIdsByArea[topic.legalAreaId] = topics
+    }
+
+    const domain = this.mapper.toDomain(record)
+    return {
+      ...domain,
+      application: {
+        ...domain.application,
+        legalAreaIds: legalAreas.map(({ legalAreaId }) => legalAreaId),
+        legalTopicIdsByArea,
+      },
+    }
+  }
+
+  private async replaceAssociations(
+    database: DocumentProductionDatabaseExecutor,
+    documentSpecificationId: string,
+    application: DocumentSpecificationConfigurationUpdate['application'],
+  ) {
+    await database
+      .delete(documentSpecificationLegalTopicModel)
+      .where(
+        eq(
+          documentSpecificationLegalTopicModel.documentSpecificationId,
+          documentSpecificationId,
+        ),
+      )
+    await database
+      .delete(documentSpecificationLegalAreaModel)
+      .where(
+        eq(
+          documentSpecificationLegalAreaModel.documentSpecificationId,
+          documentSpecificationId,
+        ),
+      )
+
+    if (application.scope !== 'legal_context') return
+
+    if (application.legalAreaIds.length) {
+      await database.insert(documentSpecificationLegalAreaModel).values(
+        application.legalAreaIds.map((legalAreaId) => ({
+          documentSpecificationId,
+          legalAreaId,
+        })),
+      )
+    }
+
+    const topics = application.legalAreaIds.flatMap((legalAreaId) =>
+      (application.legalTopicIdsByArea[legalAreaId] ?? []).map((legalTopicId) => ({
+        documentSpecificationId,
+        legalAreaId,
+        legalTopicId,
+      })),
+    )
+    if (topics.length)
+      await database.insert(documentSpecificationLegalTopicModel).values(topics)
   }
 
   private buildWhere(query: DocumentSpecificationListQuery): SQL | undefined {
