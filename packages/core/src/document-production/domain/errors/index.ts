@@ -1,2 +1,5 @@
 export * from './document-package-cannot-be-confirmed-error'
+export * from './document-specification-not-found-error'
+export * from './invalid-document-specification-configuration-error'
 export * from './invalid-package-document-status-transition-error'
+export * from './invalid-document-template-error'
