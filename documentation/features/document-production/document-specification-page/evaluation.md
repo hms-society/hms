@@ -768,6 +768,7 @@ delivery_prs:
   shared: https://github.com/hms-society/hms/pull/47
   listing: https://github.com/hms-society/hms/pull/49
   editor: https://github.com/hms-society/hms/pull/50
+  documentation: https://github.com/hms-society/hms/pull/53
 remote_ci:
   - PRs #47, #49, #50 e #52 estão mergeable; o único check Supabase foi skipped
     por ausência de mudanças em `supabase`.
