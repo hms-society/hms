@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { ClientsListPage } from '@/ui/identity/widgets/pages/attendant-page/clients-management'
+import { ClientsListPage } from '@/ui/identity/widgets/pages/intake-client-procedures/clients-management'
 
 export const Route = createFileRoute('/atendimento/dashboard')({
   component: ClientsListPage,

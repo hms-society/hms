@@ -8,8 +8,8 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { DocumentsSeeder } from '@/documents/database/documents-seeder'
-import { RealDocumentsSeeder } from '@/documents/database/real-documents-seeder'
+import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
+import { RealDocumentsSeeder } from '@/document-engine/database/real-documents-seeder'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 
 async function bootstrap() {

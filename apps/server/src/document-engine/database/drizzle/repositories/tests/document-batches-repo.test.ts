@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
-import { DocumentsDatabaseModule } from '@/documents/database/documents-database.module'
+import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
 import { documentBatchModel } from '../../models/document-batch-model'

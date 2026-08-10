@@ -12,7 +12,7 @@ import { SchedulingService } from '@/rest/services/scheduling-service'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
-import { documentService } from '@/rest/services/document-service'
+import { documentService } from '@/rest/services/DocumentEngineService'
 
 export function useRestContextProvider(): RestContextValue {
   const { getSession, signOut } = useAuthContext()

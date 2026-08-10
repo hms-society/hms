@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { NewClientPage } from '@/ui/identity/widgets/pages/attendant-page/clients-management/new-client-page'
+import { NewClientPage } from '@/ui/identity/widgets/pages/intake-client-procedures/clients-management/new-client-page'
 import { AppLayout } from '@/ui/shared/widgets/layouts/app-layout'
 
 export const Route = createFileRoute('/clientes/novo')({

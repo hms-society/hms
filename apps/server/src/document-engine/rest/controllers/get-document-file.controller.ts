@@ -3,14 +3,14 @@ import { ApiResponse } from '@nestjs/swagger'
 import { GetDocumentFileUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
-import { DOCUMENTS_REPOSITORIES } from '@/documents/database/drizzle/constants/documents-repositories'
+import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 
 @Controller('documents')
 export class GetDocumentFileController {
   private readonly useCase: GetDocumentFileUseCase
 
   constructor(
-    @Inject(DOCUMENTS_REPOSITORIES.documentBatches)
+    @Inject(DOCUMENT_ENGINE.documentBatches)
     documentBatchesRepository: DocumentBatchesRepository,
   ) {
     this.useCase = new GetDocumentFileUseCase(documentBatchesRepository)

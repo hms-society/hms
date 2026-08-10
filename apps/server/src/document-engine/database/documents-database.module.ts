@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
-import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
+import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { DrizzleDocumentBatchMapper } from './drizzle/mappers/drizzle-document-batch-mapper'
 import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/document-batches-repository'
 import { DocumentsSeeder } from './documents-seeder'
@@ -19,11 +19,11 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DrizzleDailyCountersRepository,
     DrizzleDocumentBatchesRepository,
     {
-      provide: DOCUMENTS_REPOSITORIES.dailyCounters,
+      provide: DOCUMENT_ENGINE.dailyCounters,
       useExisting: DrizzleDailyCountersRepository,
     },
     {
-      provide: DOCUMENTS_REPOSITORIES.documentBatches,
+      provide: DOCUMENT_ENGINE.documentBatches,
       useExisting: DrizzleDocumentBatchesRepository,
     },
     {
@@ -42,8 +42,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
         )
       },
       inject: [
-        DOCUMENTS_REPOSITORIES.documentBatches,
-        DOCUMENTS_REPOSITORIES.dailyCounters,
+        DOCUMENT_ENGINE.documentBatches,
+        DOCUMENT_ENGINE.dailyCounters,
         IDENTITY_REPOSITORIES.clients,
         DatetimeProvider,
       ],
@@ -52,8 +52,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     RealDocumentsSeeder,
   ],
   exports: [
-    DOCUMENTS_REPOSITORIES.dailyCounters,
-    DOCUMENTS_REPOSITORIES.documentBatches,
+    DOCUMENT_ENGINE.dailyCounters,
+    DOCUMENT_ENGINE.documentBatches,
     CreateDocumentBatchUseCase,
     DocumentsSeeder,
     RealDocumentsSeeder,

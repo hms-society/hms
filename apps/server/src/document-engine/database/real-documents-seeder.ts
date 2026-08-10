@@ -2,67 +2,57 @@ import { Injectable, Inject } from '@nestjs/common'
 import { readdir, stat, readFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import { sql } from 'drizzle-orm'
-import { createClient } from '@supabase/supabase-js'
 
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
-import { DOCUMENTS_REPOSITORIES } from './drizzle/constants/documents-repositories'
+import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import {
   DocumentBatchChannel,
   DocumentBatchStatus,
 } from '@hms/core/document-engine/domain/structures'
 
+import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { clientModel } from '@/identity/database/drizzle/models'
-import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { getMimeTypeFromExtension } from '../utils/mime-type.map'
+import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 
 @Injectable()
 export class RealDocumentsSeeder {
   constructor(
-    @Inject(DOCUMENTS_REPOSITORIES.documentBatches)
+    @Inject(DOCUMENT_ENGINE.documentBatches)
     private readonly documentBatchesRepository: DocumentBatchesRepository,
     @Inject(DrizzleClient)
     private readonly drizzleClient: DrizzleClient,
-    @Inject(EnvProvider)
-    private readonly envProvider: EnvProvider,
+    @Inject(STORAGE_PROVIDER)
+    private readonly storageProvider: StorageProvider,
+    @Inject(IDENTITY_REPOSITORIES.clients)
+    private readonly clientsRepository: ClientsRepository,
   ) {}
 
   async clear() {
-    const supabaseUrl = this.envProvider.get('SUPABASE_URL')
-    const supabaseKey = this.envProvider.get('SUPABASE_SERVICE_ROLE_KEY')
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const db = this.drizzleClient.requireDatabase()
 
-    const { data: buckets } = await supabase.storage.listBuckets()
-    const bucketExists = buckets?.some((bucket) => bucket.name === 'document_batches')
-
-    if (!bucketExists) {
-      await supabase.storage.createBucket('document_batches', {
-        public: false,
-        allowedMimeTypes: [
-          'application/pdf',
-          'image/jpeg',
-          'image/png',
-          'application/msword',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        ],
-        fileSizeLimit: 10485760,
-      })
-    }
+    await db.execute(sql`
+      DELETE FROM document_batches
+    `)
   }
 
   async run() {
     const db = this.drizzleClient.requireDatabase()
 
-    const supabaseUrl = this.envProvider.get('SUPABASE_URL')
-    const supabaseKey = this.envProvider.get('SUPABASE_SERVICE_ROLE_KEY')
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const { data: clientRecords } = await this.clientsRepository.findAll({
+      page: 1,
+      limit: 15,
+    })
 
-    const clients = await db.select().from(clientModel)
+    const clients = clientRecords.map(({ client }) => client)
 
     if (clients.length === 0) {
       throw new Error('Nenhum cliente encontrado para criar os documentos.')
     }
 
-    const localPath = 'src/documents/database/seed-assets'
+    const localPath = 'src/document-engine/database/seed-assets'
     const fileNames = await readdir(localPath)
 
     if (fileNames.length === 0) {
@@ -86,33 +76,13 @@ export class RealDocumentsSeeder {
 
           const fileStat = await stat(fullPath)
           const buffer = await readFile(fullPath)
-          const extension = extname(fileName).toLowerCase()
 
-          const mimeType =
-            extension === '.pdf'
-              ? 'application/pdf'
-              : extension === '.jpg' || extension === '.jpeg'
-                ? 'image/jpeg'
-                : extension === '.png'
-                  ? 'image/png'
-                  : extension === '.doc'
-                    ? 'application/msword'
-                    : extension === '.docx'
-                      ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                      : 'application/octet-stream'
+          const extension = extname(fileName)
+          const mimeType = getMimeTypeFromExtension(extension)
 
           const storagePath = `seed/${client.id}/${readableId}/${fileName}`
 
-          const { error } = await supabase.storage
-            .from('document_batches')
-            .upload(storagePath, buffer, {
-              contentType: mimeType,
-              upsert: true,
-            })
-
-          if (error) {
-            throw error
-          }
+          await this.storageProvider.upload(storagePath, buffer, mimeType)
 
           return {
             storagePath,
@@ -134,8 +104,8 @@ export class RealDocumentsSeeder {
       })
 
       await db.execute(sql`
-        UPDATE document_batches 
-        SET created_at = NOW() + INTERVAL '1 day' 
+        UPDATE document_batches
+        SET created_at = NOW() + INTERVAL '1 day'
         WHERE readable_id = ${readableId}
       `)
 
