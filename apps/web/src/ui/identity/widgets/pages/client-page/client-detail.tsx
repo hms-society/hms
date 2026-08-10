@@ -256,7 +256,6 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='all'>Todos os canais</SelectItem>
-              <SelectItem value='whatsapp'>WhatsApp</SelectItem>
               <SelectItem value='email'>E-mail</SelectItem>
             </SelectContent>
           </Select>

@@ -33,12 +33,12 @@ export class IntakeSeeder {
     return this.intakesRepository.removeAll()
   }
 
-  async run(references: IntakeSeedReferences) {
+  async run(references?: IntakeSeedReferences) {
     const clients = await this.database.select().from(clientModel)
     const users = await this.database.select().from(userModel)
 
     const attendant = users.find((u) => u.email === 'attendant@hmsadvogados.com.br')
-    const responsibleId = attendant?.id || references.responsibleIds[0] || clients[0]?.id
+    const responsibleId = attendant?.id || references?.responsibleIds[0] || clients[0]?.id
 
     if (!responsibleId || clients.length === 0) {
       throw new Error('Intake seed requirements are not met')
@@ -63,11 +63,11 @@ export class IntakeSeeder {
         responsibleId,
         createdBy: responsibleId,
         updatedBy: responsibleId,
-        origin: 'direct',
-        contactChannel: 'whatsapp',
+        origin: 'direct' as const,
+        contactChannel: 'whatsapp' as const,
         legalAreaId: civArea.id,
         legalTopicId: civTopic.id,
-        urgency: 'normal',
+        urgency: 'normal' as const,
         demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
         status: IntakeStatus.ConsultationScheduled,
       })
@@ -80,11 +80,11 @@ export class IntakeSeeder {
         responsibleId,
         createdBy: responsibleId,
         updatedBy: responsibleId,
-        origin: 'direct',
-        contactChannel: 'whatsapp',
+        origin: 'direct' as const,
+        contactChannel: 'whatsapp' as const,
         legalAreaId: trabArea.id,
         legalTopicId: trabTopic.id,
-        urgency: 'high',
+        urgency: 'high' as const,
         demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
         status: IntakeStatus.Registered,
       })
@@ -97,11 +97,11 @@ export class IntakeSeeder {
         responsibleId,
         createdBy: responsibleId,
         updatedBy: responsibleId,
-        origin: 'direct',
-        contactChannel: 'email',
+        origin: 'direct' as const,
+        contactChannel: 'email' as const,
         legalAreaId: famArea.id,
         legalTopicId: famTopic.id,
-        urgency: 'normal',
+        urgency: 'normal' as const,
         demandNotes: 'Divórcio consensual e partilha de bens.',
         status: IntakeStatus.Contracted,
       })
@@ -117,11 +117,11 @@ export class IntakeSeeder {
         responsibleId,
         createdBy: responsibleId,
         updatedBy: responsibleId,
-        origin: 'direct',
-        contactChannel: 'phone',
+        origin: 'direct' as const,
+        contactChannel: 'phone' as const,
         legalAreaId: area.id,
         legalTopicId: topic.id,
-        urgency: 'normal',
+        urgency: 'normal' as const,
         demandNotes: 'Consulta inicial sobre direito contratual.',
         status: IntakeStatus.Registered,
       })
