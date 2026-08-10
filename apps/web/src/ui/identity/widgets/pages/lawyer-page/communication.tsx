@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
+import { useSendCommunicationMutation } from '@/ui/shared/hooks/use-send-communication-mutation'
 
 import {
   ChatListPanel,
@@ -16,6 +17,8 @@ export const LawyerCommunicationPage = () => {
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [localMessages, setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
+
+  const sendCommunicationMutation = useSendCommunicationMutation()
 
   // Fetch clients from the database
   const { data: clientsData, isLoading: isLoadingClients } = useClientsQuery({
@@ -86,26 +89,24 @@ export const LawyerCommunicationPage = () => {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!messageText.trim() || !selectedId) return
+    if (!messageText.trim() || !selectedId || sendCommunicationMutation.isPending) return
 
-    const newMessage: ChatMessage = {
-      id: `new-${Date.now()}`,
-      content: messageText,
-      direction: 'outbound',
-      channel: 'whatsapp',
-      createdAt: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      sender: 'Advogado de desenvolvimento',
-    }
-
-    setLocalMessages((prev) => ({
-      ...prev,
-      [selectedId]: [...(prev[selectedId] || []), newMessage],
-    }))
-
+    const textToSend = messageText
     setMessageText('')
+
+    sendCommunicationMutation.mutate(
+      {
+        clientId: selectedId,
+        content: textToSend,
+        channel: 'whatsapp',
+      },
+      {
+        onError: () => {
+          // If sending fails, restore message text
+          setMessageText(textToSend)
+        },
+      },
+    )
   }
 
   // Construct conversations list for ChatListPanel
