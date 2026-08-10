@@ -1,1 +1,6 @@
 export * from './list-document-specifications-use-case'
+export * from './create-document-specification-use-case'
+export * from './get-document-specification-use-case'
+export * from './update-document-specification-configuration-use-case'
+export * from './update-document-specification-template-use-case'
+export * from './delete-document-specification-use-case'

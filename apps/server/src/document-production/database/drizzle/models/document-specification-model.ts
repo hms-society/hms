@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import {
   boolean,
   check,
@@ -16,7 +17,7 @@ export const documentSpecificationModel = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     name: text('name').notNull(),
     description: text('description').notNull(),
-    content: text('content').notNull(),
+    content: jsonb('content').$type<DocumentTemplateContent>().notNull(),
     variables: jsonb('variables').$type<unknown[]>().notNull().default([]),
     moment: text('moment').notNull(),
     scope: text('scope').notNull(),
@@ -45,6 +46,10 @@ export const documentSpecificationModel = pgTable(
     check(
       'document_specifications_variables_check',
       sql`jsonb_typeof(${table.variables}) = 'array'`,
+    ),
+    check(
+      'document_specifications_content_check',
+      sql`jsonb_typeof(${table.content}) = 'object' AND ${table.content}->>'type' = 'doc' AND (${table.content}->'content' IS NULL OR jsonb_typeof(${table.content}->'content') = 'array')`,
     ),
     index('document_specifications_name_normalized_idx').on(
       sql`lower(trim(${table.name}))`,

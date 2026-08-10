@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 
 import { privateMessageModel } from '../models/private-message-model'
 import { DrizzlePrivateMessageMapper } from '../mappers/drizzle-private-message-mapper'
@@ -12,6 +13,11 @@ export class DrizzlePrivateMessagesRepository
   extends DrizzleRepository
   implements PrivateMessagesRepository
 {
+  // biome-ignore lint/complexity/noUselessConstructor: NestJS needs constructor metadata for injection.
+  constructor(drizzle: DrizzleClient) {
+    super(drizzle)
+  }
+
   async findById(
     privateMessageId: string,
   ): ReturnType<PrivateMessagesRepository['findById']> {

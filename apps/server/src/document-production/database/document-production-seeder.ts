@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
+import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import type { DocumentSpecificationsRepository } from '@hms/core/document-production/interfaces'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -7,6 +8,26 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
+}
+
+type DocumentTemplateSeed = {
+  readonly name: string
+  readonly description: string
+  readonly moment: DocumentSpecificationCreation['application']['moment']
+  readonly isRequired: boolean
+  readonly scope: 'global' | 'legal_context'
+}
+
+function createTemplateContent(name: string): DocumentTemplateContent {
+  return {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: `Conteúdo inicial de ${name}` }],
+      },
+    ],
+  } as unknown as DocumentTemplateContent
 }
 
 const DOCUMENT_TEMPLATES = [
@@ -31,7 +52,7 @@ const DOCUMENT_TEMPLATES = [
     isRequired: true,
     scope: 'legal_context' as const,
   },
-] as const
+] as const satisfies readonly DocumentTemplateSeed[]
 
 @Injectable()
 export class DocumentProductionSeeder {
@@ -56,18 +77,16 @@ export class DocumentProductionSeeder {
     if (!area || !topic)
       throw new Error('Document production seed references are required')
 
-    return this.seed(
-      DOCUMENT_TEMPLATES.map((template) => ({
+    const specifications: DocumentSpecificationCreation[] = DOCUMENT_TEMPLATES.map(
+      (template) => ({
         ...template,
-        content: `Conteúdo inicial de ${template.name}`,
+        content: createTemplateContent(template.name),
         variables: [],
         application:
           template.scope === 'global'
             ? {
                 scope: 'global' as const,
                 moment: template.moment,
-                legalAreaIds: [],
-                legalTopicIdsByArea: {},
               }
             : {
                 scope: 'legal_context' as const,
@@ -76,7 +95,9 @@ export class DocumentProductionSeeder {
                 legalTopicIdsByArea: { [area.id]: [topic.id] },
               },
         status: 'available' as const,
-      })),
+      }),
     )
+
+    return this.seed(specifications)
   }
 }
