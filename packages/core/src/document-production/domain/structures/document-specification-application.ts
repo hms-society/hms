@@ -3,8 +3,6 @@ import type { DocumentGenerationMoment } from './document-generation-moment'
 type GlobalDocumentSpecificationApplication = {
   readonly scope: 'global'
   readonly moment: DocumentGenerationMoment
-  readonly legalAreaIds: readonly string[]
-  readonly legalTopicIdsByArea: Readonly<Record<string, readonly string[]>>
 }
 
 type LegalContextDocumentSpecificationApplication = {

@@ -25,6 +25,8 @@ export const ROUTES = {
   clientMessages: '/cliente/mensagens',
   clientPrivacy: '/cliente/privacidade',
   documentSpecifications: '/modelos-de-documentos',
+  newDocumentSpecification: '/modelos-de-documentos/novo',
+  documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
 } as const
 
 export type RouteName = keyof typeof ROUTES
