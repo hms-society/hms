@@ -1,13 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Inngest, type InngestFunction } from 'inngest'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { clientModel } from '@/identity/database/drizzle/models/client-model'
+import { eq } from 'drizzle-orm'
 
 @Injectable()
 export class InngestService {
   private readonly logger = new Logger(InngestService.name)
   public readonly client: Inngest
 
-  constructor(readonly _whatsappProvider: WhatsappProvider) {
+  constructor(
+    private readonly drizzleClient: DrizzleClient,
+    readonly _whatsappProvider: WhatsappProvider,
+  ) {
     this.client = new Inngest({ id: 'hms-server' })
   }
 
@@ -23,15 +30,61 @@ export class InngestService {
           this.logger.log('Inngest processando evento whatsapp/event.received')
           const payload = event.data
 
-          // TODO: Identificar a natureza do evento recebido e executar o job correspondente:
-          // 1. Agendamento (Respostas de botões interativos ou mensagens contendo palavras-chave de agendamento)
-          // 2. Documentos (Eventos contendo arquivos de mídia: imagens, vídeos, PDFs, etc.)
-          // 3. Texto Livre (Mensagens normais de texto ou legendas que alimentam o atendimento humano)
-
           await step.run('process-whatsapp-event', async () => {
-            this.logger.log(
-              `Executando passo no Inngest com payload: ${JSON.stringify(payload)}`,
-            )
+            const entries = payload?.entry ?? []
+            for (const entry of entries) {
+              const changes = entry?.changes ?? []
+              for (const change of changes) {
+                const value = change?.value
+                const messages = value?.messages ?? []
+
+                for (const msg of messages) {
+                  const fromPhone = msg?.from
+                  if (!fromPhone) continue
+
+                  let content = ''
+                  if (msg.type === 'text' && msg.text?.body) {
+                    content = msg.text.body
+                  } else if (msg.type === 'image') {
+                    content = msg.image?.caption || '[Imagem recebida]'
+                  } else if (msg.type === 'document') {
+                    content = msg.document?.caption || '[Documento recebido]'
+                  } else if (msg.type === 'interactive') {
+                    content =
+                      msg.interactive?.button_reply?.title ||
+                      msg.interactive?.list_reply?.title ||
+                      '[Resposta interativa]'
+                  } else {
+                    content = `[Mensagem ${msg.type ?? 'desconhecida'}]`
+                  }
+
+                  const db = this.drizzleClient.requireDatabase()
+                  const [client] = await db
+                    .select({ id: clientModel.id })
+                    .from(clientModel)
+                    .where(eq(clientModel.phone, fromPhone))
+                    .limit(1)
+
+                  if (client) {
+                    await db.insert(communicationModel).values({
+                      clientId: client.id,
+                      authorId: null,
+                      channel: 'whatsapp',
+                      direction: 'inbound',
+                      content,
+                    })
+
+                    this.logger.log(
+                      `Mensagem inbound salva para o cliente ${client.id} (Telefone: ${fromPhone})`,
+                    )
+                  } else {
+                    this.logger.warn(
+                      `Mensagem recebida de número não cadastrado: ${fromPhone}`,
+                    )
+                  }
+                }
+              }
+            }
           })
         },
       ),
