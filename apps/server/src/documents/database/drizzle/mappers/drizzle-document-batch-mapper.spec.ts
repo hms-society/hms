@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { DrizzleDocumentBatchMapper } from './drizzle-document-batch-mapper'
-import { DocumentBatchChannel, DocumentBatchStatus } from '@hms/core/document-engine/domain/structures'
+import {
+  DocumentBatchChannel,
+  DocumentBatchStatus,
+} from '@hms/core/document-engine/domain/structures'
 
 describe('DrizzleDocumentBatchMapper', () => {
   it('should accurately map a raw Drizzle record to the domain DocumentBatch entity handling null coalescing', () => {
@@ -15,7 +18,7 @@ describe('DrizzleDocumentBatchMapper', () => {
       sender: '5511999999999',
       inTriageBox: false,
       clientId: 'client-uuid',
-      intakeId: null, 
+      intakeId: null,
       createdBy: null,
       files: [
         {
@@ -25,11 +28,11 @@ describe('DrizzleDocumentBatchMapper', () => {
           originalName: 'documento.pdf',
           mimeType: 'application/pdf',
           sizeBytes: 1048576,
-          createdAt: date
-        }
+          createdAt: date,
+        },
       ],
       createdAt: date,
-      updatedAt: date
+      updatedAt: date,
     }
 
     const result = mapper.toDomain(rawRecord as any)
@@ -42,7 +45,7 @@ describe('DrizzleDocumentBatchMapper', () => {
       sender: '5511999999999',
       inTriageBox: false,
       clientId: 'client-uuid',
-      intakeId: undefined, 
+      intakeId: undefined,
       createdBy: undefined,
       files: [
         {
@@ -52,11 +55,11 @@ describe('DrizzleDocumentBatchMapper', () => {
           originalName: 'documento.pdf',
           mimeType: 'application/pdf',
           sizeBytes: 1048576,
-          createdAt: date
-        }
+          createdAt: date,
+        },
       ],
       createdAt: date,
-      updatedAt: date
+      updatedAt: date,
     })
   })
 })
