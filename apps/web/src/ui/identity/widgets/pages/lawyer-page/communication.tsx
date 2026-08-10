@@ -19,6 +19,9 @@ export const LawyerCommunicationPage = () => {
   const [localMessages, setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
 
   const sendCommunicationMutation = useSendCommunicationMutation()
+  if(sendCommunicationMutation.isSuccess) {
+    console.log(selectedId)
+  }
 
   // Fetch clients from the database
   const { data: clientsData, isLoading: isLoadingClients } = useClientsQuery({
@@ -102,7 +105,6 @@ export const LawyerCommunicationPage = () => {
       },
       {
         onError: () => {
-          // If sending fails, restore message text
           setMessageText(textToSend)
         },
       },

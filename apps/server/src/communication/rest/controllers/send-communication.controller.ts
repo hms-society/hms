@@ -80,11 +80,17 @@ export class SendCommunicationController {
       if (!client.phone) {
         throw new BadRequestException('Client has no phone number registered')
       }
-      const result = await this.whatsappProvider.sendTextMessage(
-        client.phone,
-        body.content,
-      )
-      externalId = result.externalMessageId
+      try {
+        const result = await this.whatsappProvider.sendTextMessage(
+          client.phone,
+          body.content,
+        )
+        externalId = result.externalMessageId
+      } catch (error: any) {
+        throw new BadRequestException(
+          `Falha ao enviar mensagem de WhatsApp: ${error.message || error}`,
+        )
+      }
     }
 
     const [record] = await db

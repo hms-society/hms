@@ -53,6 +53,15 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
+      try {
+        const errorJson = JSON.parse(errorText)
+        const metaError = errorJson?.error
+        if (metaError) {
+          throw new Error(`Meta API [Erro ${metaError.code}]: ${metaError.message}`)
+        }
+      } catch (e: any) {
+        if (e.message?.startsWith('Meta API')) throw e
+      }
       throw new Error(
         `Failed to send WhatsApp message: ${response.status} - ${errorText}`,
       )
@@ -97,6 +106,15 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
+      try {
+        const errorJson = JSON.parse(errorText)
+        const metaError = errorJson?.error
+        if (metaError) {
+          throw new Error(`Meta API [Erro ${metaError.code}]: ${metaError.message}`)
+        }
+      } catch (e: any) {
+        if (e.message?.startsWith('Meta API')) throw e
+      }
       throw new Error(
         `Failed to send WhatsApp text message: ${response.status} - ${errorText}`,
       )
