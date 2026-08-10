@@ -288,7 +288,7 @@ export function DocumentViewerPage() {
                       >
                         {Array.from({ length: numPages }, (_, index) => (
                           <Page
-                            key={index}
+                            key={`page-${index + 1}`}
                             pageNumber={index + 1}
                             width={pageWidth}
                             renderTextLayer={false}
