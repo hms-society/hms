@@ -25,13 +25,16 @@ describe('CreateDocumentBatchUseCase', () => {
     datetimeProvider.now.mockReturnValue(fixedDate)
     dailyCountersRepository.incrementAndGet.mockResolvedValue(1)
 
-    documentBatchesRepository.add.mockImplementation(async (batch) => ({
-      id: 'mocked-batch-id',
-      ...batch,
-      createdAt: fixedDate,
-      updatedAt: fixedDate,
-      files: [],
-    }) as any)
+    documentBatchesRepository.add.mockImplementation(
+      async (batch) =>
+        ({
+          id: 'mocked-batch-id',
+          ...batch,
+          createdAt: fixedDate,
+          updatedAt: fixedDate,
+          files: [],
+        }) as any,
+    )
 
     useCase = new CreateDocumentBatchUseCase(
       documentBatchesRepository,
@@ -56,9 +59,7 @@ describe('CreateDocumentBatchUseCase', () => {
   })
 
   it('should identify the batch and link to the client when WhatsApp sender matches exactly one client', async () => {
-    clientsRepository.findByPhone.mockResolvedValue([
-      { id: 'client-123' } as any,
-    ])
+    clientsRepository.findByPhone.mockResolvedValue([{ id: 'client-123' } as any])
 
     const result = await useCase.execute({
       channel: DocumentBatchChannel.WhatsApp,
@@ -105,7 +106,7 @@ describe('CreateDocumentBatchUseCase', () => {
 
   it('should use the provided readableId instead of generating a new one', async () => {
     const customReadableId = 'CUSTOM-LOTE-999'
-    
+
     const result = await useCase.execute({
       channel: DocumentBatchChannel.InternalUpload,
       sender: 'internal-user-id',

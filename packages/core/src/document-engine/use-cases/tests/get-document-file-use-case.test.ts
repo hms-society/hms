@@ -37,7 +37,7 @@ describe('GetDocumentFileUseCase', () => {
     documentBatchesRepository.findFileById.mockResolvedValue(undefined)
 
     await expect(useCase.execute({ fileId: 'missing-file' })).rejects.toThrow(
-      DocumentFileNotFoundError
+      DocumentFileNotFoundError,
     )
   })
 })

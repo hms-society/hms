@@ -76,7 +76,9 @@ export const ClientStep = () => {
               type='button'
               size='sm'
               className='h-10 min-h-10 flex-1 justify-center rounded-lg shadow-xs sm:w-full'
-              onClick={() => {navigate({to:'/clientes/$clienteId', params: {clienteId: clientId}})}}
+              onClick={() => {
+                navigate({ to: '/clientes/$clienteId', params: { clienteId: clientId } })
+              }}
             >
               <Icon name='external-link' />
               Ver cadastro

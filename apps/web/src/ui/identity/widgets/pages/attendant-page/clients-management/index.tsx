@@ -119,7 +119,12 @@ export function ClientsListPage() {
           <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>
           <p className='text-sm text-muted-foreground'>{total} cadastros</p>
         </div>
-        <Button className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6' onClick={()=>{navigate({to:'/clientes/novo'})}}>
+        <Button
+          className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'
+          onClick={() => {
+            navigate({ to: '/clientes/novo' })
+          }}
+        >
           <Icon name='plus' />
           Novo cliente
         </Button>

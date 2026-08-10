@@ -160,16 +160,16 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
               </div>
             </div>
           </div>
-          <Button 
+          <Button
             className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'
             onClick={() =>
               navigate({
-                to: '/intakes'
+                to: '/intakes',
               })
             }
           >
             Novo intake
-        </Button>
+          </Button>
         </CardContent>
       </Card>
 
@@ -217,11 +217,11 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
           </TabsList>
         </div>
 
-        <TabsContent value='dados-cadastrais' className='mt-4 outline-none'></TabsContent>
+        <TabsContent value='dados-cadastrais' className='mt-4 outline-none' />
 
-        <TabsContent value='intakes' className='mt-4 outline-none'></TabsContent>
+        <TabsContent value='intakes' className='mt-4 outline-none' />
 
-        <TabsContent value='casos' className='mt-4 outline-none'></TabsContent>
+        <TabsContent value='casos' className='mt-4 outline-none' />
 
         <TabsContent value='comunicacoes' className='mt-4 outline-none'>
           <ClientCommunicationsTab clientId={clientId} />

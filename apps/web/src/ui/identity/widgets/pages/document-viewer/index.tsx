@@ -32,7 +32,7 @@ export function DocumentViewerPage() {
   const MIN_ZOOM = 0.5
   const MAX_ZOOM = 2
   const ZOOM_STEP = 0.25
-  const BASE_PAGE_WIDTH = 900 
+  const BASE_PAGE_WIDTH = 900
 
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
