@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/ui/shadcn/table'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { Anchor } from '@/ui/shared/widgets/components/anchor'
+import { TableSurface } from '@/ui/shared/widgets/components/table-surface'
 import { DocumentSpecificationsApplication } from '../document-specifications-application'
 
 export type DocumentSpecificationsTableProps = {
@@ -23,31 +25,21 @@ export const DocumentSpecificationsTable = ({
   onEdit,
   onDuplicate,
 }: DocumentSpecificationsTableProps) => (
-  <div className='overflow-x-auto rounded-lg border border-border bg-card'>
-    <Table className='min-w-[64rem]'>
+  <TableSurface ariaLabel='Lista de modelos de documentos'>
+    <Table className='w-full min-w-[64rem]'>
       <TableHeader>
         <TableRow>
-          <TableHead className='w-[18rem] px-3 py-2.5 text-[11px] tracking-[0.035em]'>
-            Modelo
-          </TableHead>
-          <TableHead className='px-3 py-2.5 text-[11px] tracking-[0.035em]'>
-            Aplicação
-          </TableHead>
-          <TableHead className='w-[8.75rem] px-3 py-2.5 text-[11px] tracking-[0.035em]'>
-            Obrigatoriedade
-          </TableHead>
-          <TableHead className='w-[7rem] px-3 py-2.5 text-[11px] tracking-[0.035em]'>
-            Estado
-          </TableHead>
-          <TableHead className='w-[11rem] px-3 py-2.5 text-[11px] tracking-[0.035em]'>
-            Ação
-          </TableHead>
+          <TableHead className='w-[18rem]'>Modelo</TableHead>
+          <TableHead>Aplicação</TableHead>
+          <TableHead className='w-[8.75rem]'>Obrigatoriedade</TableHead>
+          <TableHead className='w-[7rem]'>Estado</TableHead>
+          <TableHead className='w-[11rem] text-right'>Ação</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {items.map((item) => (
-          <TableRow key={item.documentSpecificationId} tabIndex={0} className='h-16'>
-            <TableCell className='max-w-[18rem] px-3 py-2'>
+          <TableRow key={item.documentSpecificationId} tabIndex={0}>
+            <TableCell className='max-w-[18rem]'>
               <div className='text-sm font-semibold leading-5'>{item.name}</div>
               <div
                 className='mt-0.5 truncate text-xs leading-5 text-muted-foreground'
@@ -56,10 +48,10 @@ export const DocumentSpecificationsTable = ({
                 {item.description}
               </div>
             </TableCell>
-            <TableCell className='px-3 py-2'>
+            <TableCell>
               <DocumentSpecificationsApplication item={item} />
             </TableCell>
-            <TableCell className='px-3 py-2'>
+            <TableCell>
               <span className='inline-flex items-center gap-1.5 text-xs font-semibold'>
                 <Icon
                   name={item.isRequired ? 'shield-check' : 'circle'}
@@ -68,27 +60,29 @@ export const DocumentSpecificationsTable = ({
                 {item.isRequired ? 'Obrigatório' : 'Opcional'}
               </span>
             </TableCell>
-            <TableCell className='px-3 py-2'>
-              <Badge
-                variant={item.status === 'available' ? 'secondary' : 'outline'}
-                className='rounded-xl px-2 py-1 text-xs'
-              >
+            <TableCell>
+              <Badge variant={item.status === 'available' ? 'secondary' : 'outline'}>
                 <Icon name={item.status === 'available' ? 'check' : 'clock'} />
                 {item.status === 'available' ? 'Disponível' : 'Indisponível'}
               </Badge>
             </TableCell>
-            <TableCell className='px-3 py-2'>
-              <div className='flex items-center gap-2'>
+            <TableCell className='text-right'>
+              <div className='flex items-center justify-end gap-2'>
                 <Button
-                  type='button'
+                  asChild
                   variant='brand'
                   size='sm'
                   className='h-9 rounded-full px-3 text-xs'
                   aria-label={`Editar ${item.name}`}
-                  onClick={() => onEdit?.(item)}
                 >
-                  <Icon name='pencil' />
-                  Editar
+                  <Anchor
+                    route='documentSpecification'
+                    params={{ documentSpecificationId: item.documentSpecificationId }}
+                    onClick={() => onEdit?.(item)}
+                  >
+                    <Icon name='pencil' />
+                    Editar
+                  </Anchor>
                 </Button>
                 <Button
                   type='button'
@@ -106,5 +100,5 @@ export const DocumentSpecificationsTable = ({
         ))}
       </TableBody>
     </Table>
-  </div>
+  </TableSurface>
 )

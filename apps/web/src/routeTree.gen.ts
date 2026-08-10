@@ -30,6 +30,8 @@ import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/i
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
 import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
+import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
+import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesNovoRouteImport } from './routes/clientes/novo'
@@ -149,6 +151,17 @@ const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
   path: '/lotes-documentos/$fileId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelosDeDocumentosNovoRoute = ModelosDeDocumentosNovoRouteImport.update({
+  id: '/modelos-de-documentos/novo',
+  path: '/modelos-de-documentos/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelosDeDocumentosDocumentSpecificationIdRoute =
+  ModelosDeDocumentosDocumentSpecificationIdRouteImport.update({
+    id: '/modelos-de-documentos/$documentSpecificationId',
+    path: '/modelos-de-documentos/$documentSpecificationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
@@ -225,6 +238,8 @@ export interface FileRoutesByFullPath {
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -255,6 +270,8 @@ export interface FileRoutesByTo {
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda': typeof AgendaIndexRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
@@ -290,6 +307,8 @@ export interface FileRoutesById {
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
+  '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -326,6 +345,8 @@ export interface FileRouteTypes {
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/agenda/'
     | '/clientes/'
     | '/colaboradores/'
@@ -356,6 +377,8 @@ export interface FileRouteTypes {
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/agenda'
     | '/clientes'
     | '/colaboradores'
@@ -390,6 +413,8 @@ export interface FileRouteTypes {
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
+    | '/modelos-de-documentos/$documentSpecificationId'
+    | '/modelos-de-documentos/novo'
     | '/agenda/'
     | '/clientes/'
     | '/colaboradores/'
@@ -419,6 +444,8 @@ export interface RootRouteChildren {
   ClientesNovoRoute: typeof ClientesNovoRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
   LotesDocumentosFileIdRoute: typeof LotesDocumentosFileIdRoute
+  ModelosDeDocumentosDocumentSpecificationIdRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRoute
+  ModelosDeDocumentosNovoRoute: typeof ModelosDeDocumentosNovoRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
@@ -576,6 +603,18 @@ declare module '@tanstack/react-router' {
       path: '/lotes-documentos/$fileId'
       fullPath: '/lotes-documentos/$fileId'
       preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
+    '/modelos-de-documentos/novo': {
+      id: '/modelos-de-documentos/novo'
+      path: '/modelos-de-documentos/novo'
+      fullPath: '/modelos-de-documentos/novo'
+      preLoaderRoute: typeof ModelosDeDocumentosNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/$documentSpecificationId': {
+      id: '/modelos-de-documentos/$documentSpecificationId'
+      path: '/modelos-de-documentos/$documentSpecificationId'
+      fullPath: '/modelos-de-documentos/$documentSpecificationId'
+      preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intakes/novo': {
@@ -764,6 +803,9 @@ const rootRouteChildren: RootRouteChildren = {
   ClientesNovoRoute: ClientesNovoRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
   LotesDocumentosFileIdRoute: LotesDocumentosFileIdRoute,
+  ModelosDeDocumentosDocumentSpecificationIdRoute:
+    ModelosDeDocumentosDocumentSpecificationIdRoute,
+  ModelosDeDocumentosNovoRoute: ModelosDeDocumentosNovoRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,
