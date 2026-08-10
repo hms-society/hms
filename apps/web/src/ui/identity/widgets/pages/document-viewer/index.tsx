@@ -138,6 +138,7 @@ export const DocumentViewerPage = () => {
                     <div
                       className='absolute inset-0 overflow-auto bg-white'
                       ref={viewerRef}
+                      role='application'
                       onMouseDown={handleMouseDown}
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUp}
@@ -148,7 +149,7 @@ export const DocumentViewerPage = () => {
                     >
                       <div
                         className='flex justify-start py-4 px-4 min-w-max'
-                        onDragStart={(event) => event.preventDefault()}
+                        draggable={false}
                       >
                         <PdfDocument
                           file={fileUrl}
@@ -172,16 +173,18 @@ export const DocumentViewerPage = () => {
                             </div>
                           }
                         >
-                          {Array.from({ length: numPages }, (_, index) => (
-                            <Page
-                              key={`page-${index + 1}`}
-                              pageNumber={index + 1}
-                              width={pageWidth}
-                              renderTextLayer={false}
-                              renderAnnotationLayer={false}
-                              className='mb-4 shadow-sm'
-                            />
-                          ))}
+                          {Array.from({ length: numPages }, (_, index) => index + 1).map(
+                            (pageNumber) => (
+                              <Page
+                                key={pageNumber}
+                                pageNumber={pageNumber}
+                                width={pageWidth}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                                className='mb-4 shadow-sm'
+                              />
+                            ),
+                          )}
                         </PdfDocument>
                       </div>
                     </div>

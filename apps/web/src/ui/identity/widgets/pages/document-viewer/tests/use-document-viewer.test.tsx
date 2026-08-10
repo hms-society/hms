@@ -1,9 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import{
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 
 import { useDocumentViewer } from '../widgets/use-document-viewer'
@@ -52,9 +49,7 @@ const createWrapper = () => {
   })
 
   return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 }
 
