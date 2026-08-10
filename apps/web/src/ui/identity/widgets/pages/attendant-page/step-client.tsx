@@ -1,11 +1,15 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { toast } from 'sonner'
+import { useSearch } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/ui/shadcn/button'
 import { Badge } from '@/ui/shadcn/badge'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Label } from '@/ui/shadcn/label'
 import { Input } from '@/ui/shadcn/input'
 import { Separator } from '@/ui/shadcn/separator'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import {
   Search,
   UserRound,
@@ -15,7 +19,6 @@ import {
   FileText,
   Phone,
   Mail,
-  Clock,
   Check,
 } from 'lucide-react'
 import type { IntakeFullData } from './schemas/intake-schema'
@@ -29,9 +32,35 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
     formState: { errors },
   } = useFormContext<IntakeFullData>()
 
+  const search = useSearch({ strict: false })
+  const activeClientId =
+    (search as { clienteId?: string; clientId?: string })?.clienteId ||
+    (search as { clienteId?: string; clientId?: string })?.clientId
+
+  const { identityService } = useRestContext()
+
   const clienteVinculado = watch('clienteVinculado')
   const [busca, setBusca] = useState('')
-  const [mostrarResultado, setMostrarResultado] = useState(false)
+  const [mostrarResultado, setMostrarResultado] = useState(
+    Boolean(clienteVinculado || activeClientId),
+  )
+
+  const { data: clientDetails } = useQuery({
+    queryKey: ['client', activeClientId],
+    queryFn: async () => {
+      if (!activeClientId) return null
+      const res = await identityService.getClient(activeClientId)
+      return res.isSuccessful ? res.body : null
+    },
+    enabled: Boolean(activeClientId),
+  })
+
+  useEffect(() => {
+    if (activeClientId) {
+      setValue('clienteVinculado', true, { shouldValidate: true })
+      setMostrarResultado(true)
+    }
+  }, [activeClientId, setValue])
 
   useImperativeHandle(ref, () => ({
     validate: async () => {
@@ -43,9 +72,32 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
     setValue('clienteVinculado', true, { shouldValidate: true })
   }
 
+  const handleVerCadastro = () => {
+    toast.info('Essa funcionalidade será feita.')
+  }
+
   const handleBuscar = () => {
     if (busca.trim()) setMostrarResultado(true)
   }
+
+  const clientName = clientDetails
+    ? clientDetails.client.type === 'natural'
+      ? clientDetails.client.name
+      : clientDetails.client.tradeName || clientDetails.client.legalName
+    : busca.trim()
+
+  const clientInitials = clientName
+    ? clientName
+        .split(' ')
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+    : ''
+
+  const clientTaxId = clientDetails?.client.taxId?.value || ''
+  const clientPhone = clientDetails?.client.phone || ''
+  const clientEmail = clientDetails?.client.email || ''
 
   return (
     <div className='flex flex-col gap-5'>
@@ -101,13 +153,13 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
             <div className='flex items-start gap-3'>
               <Avatar>
                 <AvatarFallback className='bg-primary/15 text-primary text-[13px] font-bold'>
-                  RA
+                  {clientInitials || 'CL'}
                 </AvatarFallback>
               </Avatar>
               <div className='flex flex-col gap-1'>
                 <div className='flex items-center gap-2'>
                   <span className='text-[14px] font-semibold text-foreground'>
-                    Ricardo Alves
+                    {clientName}
                   </span>
                   <Badge
                     variant='outline'
@@ -116,24 +168,36 @@ export const StepClient = forwardRef<StepRef>((_, ref) => {
                     Interessado
                   </Badge>
                 </div>
-                <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
-                  <FileText className='w-3.5 h-3.5' /> 123.456.789-00
-                </span>
-                <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
-                  <Phone className='w-3.5 h-3.5' /> (12) 98765-4321
-                </span>
-                <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
-                  <Mail className='w-3.5 h-3.5' /> ricardo.alves@email.com
-                </span>
-                <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
-                  <Clock className='w-3.5 h-3.5' /> 1 intake anterior (encerrado)
-                </span>
+                {clientTaxId && (
+                  <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
+                    <FileText className='w-3.5 h-3.5' /> {clientTaxId}
+                  </span>
+                )}
+                {clientPhone && (
+                  <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
+                    <Phone className='w-3.5 h-3.5' /> {clientPhone}
+                  </span>
+                )}
+                {clientEmail && (
+                  <span className='flex items-center gap-1.5 text-[12px] text-muted-foreground'>
+                    <Mail className='w-3.5 h-3.5' /> {clientEmail}
+                  </span>
+                )}
               </div>
             </div>
             <div className='flex items-center gap-2 shrink-0'>
-              <Button size='lg' className='h-14 min-h-14' onClick={handleVincular}>
+              <Button size='lg' className='h-14 min-h-14' onClick={handleVerCadastro}>
                 <ExternalLink />
                 Ver cadastro
+              </Button>
+              <Button
+                size='lg'
+                variant='outline'
+                className='h-14 min-h-14'
+                onClick={handleVincular}
+              >
+                <Check className='w-4 h-4' />
+                Vincular
               </Button>
               <button
                 type='button'
