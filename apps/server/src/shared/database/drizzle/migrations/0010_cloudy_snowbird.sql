@@ -1,1 +1,0 @@
-ALTER TABLE "document_batches" ALTER COLUMN "client_id" SET NOT NULL;
