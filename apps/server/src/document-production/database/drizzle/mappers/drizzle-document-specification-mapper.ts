@@ -6,6 +6,18 @@ import type { DrizzleDocumentSpecification } from '@/document-production/databas
 export class DrizzleDocumentSpecificationMapper {
   toDomain(record: DrizzleDocumentSpecification): DocumentSpecification {
     const variables = record.variables as DocumentSpecification['variables']
+    const application: DocumentSpecificationApplication =
+      record.scope === 'global'
+        ? {
+            scope: 'global',
+            moment: record.moment as DocumentSpecificationApplication['moment'],
+          }
+        : {
+            scope: 'legal_context',
+            moment: record.moment as DocumentSpecificationApplication['moment'],
+            legalAreaIds: [],
+            legalTopicIdsByArea: {},
+          }
 
     return {
       id: record.id,
@@ -13,12 +25,7 @@ export class DrizzleDocumentSpecificationMapper {
       description: record.description,
       content: record.content,
       variables,
-      application: {
-        scope: record.scope as DocumentSpecificationApplication['scope'],
-        moment: record.moment as DocumentSpecificationApplication['moment'],
-        legalAreaIds: [],
-        legalTopicIdsByArea: {},
-      },
+      application,
       isRequired: record.isRequired,
       status: record.status as DocumentSpecification['status'],
       createdAt: record.createdAt,
