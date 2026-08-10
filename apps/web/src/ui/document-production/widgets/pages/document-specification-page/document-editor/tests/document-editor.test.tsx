@@ -40,7 +40,7 @@ afterEach(() => {
 })
 
 beforeEach(() => {
-  Range.prototype.getClientRects = () => []
+  Range.prototype.getClientRects = () => ({ length: 0, item: () => null }) as DOMRectList
   Range.prototype.getBoundingClientRect = () => new DOMRect()
 })
 

@@ -13,6 +13,7 @@ export class DrizzlePrivateMessagesRepository
   extends DrizzleRepository
   implements PrivateMessagesRepository
 {
+  // biome-ignore lint/complexity/noUselessConstructor: NestJS needs constructor metadata for injection.
   constructor(drizzle: DrizzleClient) {
     super(drizzle)
   }
