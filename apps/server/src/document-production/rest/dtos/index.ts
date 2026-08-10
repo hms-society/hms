@@ -1,3 +1,7 @@
 export * from './document-specification-list-item-response.dto'
 export * from './document-specification-list-query.dto'
+export * from './document-specification-response.dto'
 export * from './document-specifications-page-response.dto'
+export * from './create-document-specification-request.dto'
+export * from './update-document-specification-configuration-request.dto'
+export * from './update-document-specification-template-request.dto'
