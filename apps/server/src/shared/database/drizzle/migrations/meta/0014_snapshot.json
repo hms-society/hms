@@ -1,6 +1,6 @@
 {
-  "id": "30b8c5e0-737e-483c-a3ad-a5a55743b2bf",
-  "prevId": "0fe8b09e-bd60-43b5-bae1-abe5cae6fddf",
+  "id": "6b13247b-9b8f-447e-8ace-da5404d505c8",
+  "prevId": "30b8c5e0-737e-483c-a3ad-a5a55743b2bf",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -319,8 +319,12 @@
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -555,8 +559,12 @@
           "name": "collaborator_legal_expertises_collaborator_id_collaborators_id_fk",
           "tableFrom": "collaborator_legal_expertises",
           "tableTo": "collaborators",
-          "columnsFrom": ["collaborator_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "collaborator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -619,8 +627,12 @@
           "name": "collaborator_legal_expertise_topics_expertise_id_collaborator_legal_expertises_id_fk",
           "tableFrom": "collaborator_legal_expertise_topics",
           "tableTo": "collaborator_legal_expertises",
-          "columnsFrom": ["expertise_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "expertise_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -719,8 +731,12 @@
           "name": "collaborators_user_id_users_id_fk",
           "tableFrom": "collaborators",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1016,8 +1032,12 @@
           "name": "legal_topics_legal_area_id_legal_areas_id_fk",
           "tableFrom": "legal_topics",
           "tableTo": "legal_areas",
-          "columnsFrom": ["legal_area_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "legal_area_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1067,8 +1087,12 @@
           "name": "document_specification_legal_areas_document_specification_id_document_specifications_id_fk",
           "tableFrom": "document_specification_legal_areas",
           "tableTo": "document_specifications",
-          "columnsFrom": ["document_specification_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_specification_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1076,7 +1100,10 @@
       "compositePrimaryKeys": {
         "document_specification_legal_areas_pk": {
           "name": "document_specification_legal_areas_pk",
-          "columns": ["document_specification_id", "legal_area_id"]
+          "columns": [
+            "document_specification_id",
+            "legal_area_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -1129,8 +1156,14 @@
           "name": "document_specification_legal_topics_area_fk",
           "tableFrom": "document_specification_legal_topics",
           "tableTo": "document_specification_legal_areas",
-          "columnsFrom": ["document_specification_id", "legal_area_id"],
-          "columnsTo": ["document_specification_id", "legal_area_id"],
+          "columnsFrom": [
+            "document_specification_id",
+            "legal_area_id"
+          ],
+          "columnsTo": [
+            "document_specification_id",
+            "legal_area_id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1138,7 +1171,11 @@
       "compositePrimaryKeys": {
         "document_specification_legal_topics_pk": {
           "name": "document_specification_legal_topics_pk",
-          "columns": ["document_specification_id", "legal_area_id", "legal_topic_id"]
+          "columns": [
+            "document_specification_id",
+            "legal_area_id",
+            "legal_topic_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -1171,7 +1208,7 @@
         },
         "content": {
           "name": "content",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
@@ -1290,6 +1327,10 @@
         "document_specifications_variables_check": {
           "name": "document_specifications_variables_check",
           "value": "jsonb_typeof(\"document_specifications\".\"variables\") = 'array'"
+        },
+        "document_specifications_content_check": {
+          "name": "document_specifications_content_check",
+          "value": "jsonb_typeof(\"document_specifications\".\"content\") = 'object' AND \"document_specifications\".\"content\"->>'type' = 'doc' AND (\"document_specifications\".\"content\"->'content' IS NULL OR jsonb_typeof(\"document_specifications\".\"content\"->'content') = 'array')"
         }
       },
       "isRLSEnabled": false
@@ -1351,8 +1392,12 @@
           "name": "communications_client_id_clients_id_fk",
           "tableFrom": "communications",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1360,8 +1405,12 @@
           "name": "communications_author_id_users_id_fk",
           "tableFrom": "communications",
           "tableTo": "users",
-          "columnsFrom": ["author_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1441,8 +1490,12 @@
           "name": "private_messages_client_id_clients_id_fk",
           "tableFrom": "private_messages",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1553,8 +1606,12 @@
           "name": "blocked_periods_schedule_id_schedules_id_fk",
           "tableFrom": "blocked_periods",
           "tableTo": "schedules",
-          "columnsFrom": ["schedule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1618,7 +1675,9 @@
         "schedules_collaborator_id_unique": {
           "name": "schedules_collaborator_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["collaborator_id"]
+          "columns": [
+            "collaborator_id"
+          ]
         }
       },
       "policies": {},
@@ -1643,12 +1702,23 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-      "values": ["whatsapp", "email", "phone", "in_person"]
+      "values": [
+        "whatsapp",
+        "email",
+        "phone",
+        "in_person"
+      ]
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-      "values": ["direct", "referral", "website", "social_media", "other"]
+      "values": [
+        "direct",
+        "referral",
+        "website",
+        "social_media",
+        "other"
+      ]
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -1666,17 +1736,31 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-      "values": ["normal", "high", "urgent"]
+      "values": [
+        "normal",
+        "high",
+        "urgent"
+      ]
     },
     "public.client_type": {
       "name": "client_type",
       "schema": "public",
-      "values": ["natural", "legal"]
+      "values": [
+        "natural",
+        "legal"
+      ]
     },
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
-      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
+      "values": [
+        "admin",
+        "attendant",
+        "lawyer",
+        "paralegal",
+        "supervisor",
+        "client"
+      ]
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -1691,32 +1775,56 @@
     "public.registration_attempt_status": {
       "name": "registration_attempt_status",
       "schema": "public",
-      "values": ["pending_auth", "auth_invited", "completed", "reconciliation_required"]
+      "values": [
+        "pending_auth",
+        "auth_invited",
+        "completed",
+        "reconciliation_required"
+      ]
     },
     "public.tax_id_type": {
       "name": "tax_id_type",
       "schema": "public",
-      "values": ["cpf", "cnpj"]
+      "values": [
+        "cpf",
+        "cnpj"
+      ]
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-      "values": ["invited", "active", "disabled"]
+      "values": [
+        "invited",
+        "active",
+        "disabled"
+      ]
     },
     "public.user_type": {
       "name": "user_type",
       "schema": "public",
-      "values": ["internal", "external_client", "external_third_party", "external_lawyer"]
+      "values": [
+        "internal",
+        "external_client",
+        "external_third_party",
+        "external_lawyer"
+      ]
     },
     "public.communication_channel": {
       "name": "communication_channel",
       "schema": "public",
-      "values": ["whatsapp", "email", "phone"]
+      "values": [
+        "whatsapp",
+        "email",
+        "phone"
+      ]
     },
     "public.communication_direction": {
       "name": "communication_direction",
       "schema": "public",
-      "values": ["inbound", "outbound"]
+      "values": [
+        "inbound",
+        "outbound"
+      ]
     }
   },
   "schemas": {},

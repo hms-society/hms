@@ -4,6 +4,8 @@ import { Check, ArrowRight, ArrowLeft, X, DoorOpen } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSearch } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { StepClient } from './step-client'
 import { StepDecision } from './step-decision'
 import { intakeFullSchema, type IntakeFullData } from './schemas/intake-schema'
@@ -11,6 +13,11 @@ import { StepDemand } from './step-demand'
 import type { StepRef } from './step-demand'
 
 export const NovoIntake = () => {
+  const search = useSearch({ strict: false })
+  const activeClientId =
+    (search as { clienteId?: string; clientId?: string })?.clienteId ||
+    (search as { clienteId?: string; clientId?: string })?.clientId
+
   const [currentStep, setCurrentStep] = useState(1)
   const [tipoCard, setTipoCard] = useState<'agendar' | 'registrar'>('agendar')
 
@@ -28,14 +35,14 @@ export const NovoIntake = () => {
       temaJuridico: '',
       urgencia: '',
       observacoes: '',
-      clienteVinculado: false,
+      clienteVinculado: Boolean(activeClientId),
       tipoCard: 'agendar',
       modalidade: 'virtual',
       canalVirtual: 'whatsapp',
       local: '',
-      advogado: '',
+      advogado: 'epaminondas',
       data: new Date(),
-      horario: '',
+      horario: '10:00',
       motivo: '',
     },
   })
@@ -70,8 +77,13 @@ export const NovoIntake = () => {
     if (isValid) {
       const data = methods.getValues()
       console.log('Dados salvos com sucesso:', data)
+      toast.success(
+        'Agendamento confirmado com sucesso! Essa funcionalidade será executada em breve.',
+      )
       setCurrentStep(1)
       handleResetForm()
+    } else {
+      toast.error('Preencha os campos obrigatórios do agendamento para continuar.')
     }
   }
 
@@ -161,10 +173,31 @@ export const NovoIntake = () => {
             <ArrowLeft />
             Anterior
           </Button>
-          {currentStep < 3 && (
+          {currentStep < 3 ? (
             <Button variant='brand' onClick={handleNext} className='rounded-pill'>
               Próximo
               <ArrowRight />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSave}
+              className={`rounded-pill ${
+                tipoCard === 'registrar'
+                  ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                  : ''
+              }`}
+            >
+              {tipoCard === 'registrar' ? (
+                <>
+                  <DoorOpen />
+                  Encerrar atendimento
+                </>
+              ) : (
+                <>
+                  <Check />
+                  Confirmar agendamento
+                </>
+              )}
             </Button>
           )}
         </div>

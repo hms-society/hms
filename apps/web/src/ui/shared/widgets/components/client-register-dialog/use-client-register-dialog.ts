@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type BaseSyntheticEvent } from 'react'
-import { useForm, useWatch, type UseFormReturn } from 'react-hook-form'
+import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 
@@ -104,7 +104,6 @@ export function useClientRegisterDialog({
     defaultValues: EMPTY_REGISTRATION,
     mode: 'onTouched',
   })
-  const draft = useWatch({ control: registrationForm.control })
 
   const resetFlow = useCallback(
     function resetFlow() {
@@ -421,7 +420,6 @@ export function useClientRegisterDialog({
     asyncError,
     requestLock,
     createdClientDetails,
-    draft,
     dialogContentRef,
     identificationForm,
     registrationForm,

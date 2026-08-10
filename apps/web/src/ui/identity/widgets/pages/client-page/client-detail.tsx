@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -39,6 +40,7 @@ type ClientDetailsPageProps = {
 }
 
 export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
+  const navigate = useNavigate()
   const { identityService, intakeService } = useRestContext()
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
@@ -148,6 +150,13 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
 
   const currentStyle = statusStyles[status] || statusStyles.Potencial
 
+  const handleNovoIntake = () => {
+    navigate({
+      to: '/atendimento/consultas',
+      search: { clientId: client.id },
+    })
+  }
+
   return (
     <div className='mx-auto flex w-full max-w-5xl flex-col gap-6 mt-5 px-4 sm:px-0'>
       <Anchor
@@ -203,7 +212,10 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
               </div>
             </div>
           </div>
-          <Button className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'>
+          <Button
+            onClick={handleNovoIntake}
+            className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'
+          >
             <Icon name='plus' />
             Novo intake
           </Button>
@@ -244,7 +256,6 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='all'>Todos os canais</SelectItem>
-              <SelectItem value='whatsapp'>WhatsApp</SelectItem>
               <SelectItem value='email'>E-mail</SelectItem>
             </SelectContent>
           </Select>

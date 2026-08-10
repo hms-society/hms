@@ -2,7 +2,7 @@
 spec: ./spec.md
 spec_revision: 7
 status: in_progress
-commit: 1e5cb6a
+commit: working tree (uncommitted)
 ---
 
 # Evaluation — Página de modelos de documentos
@@ -10,10 +10,10 @@ commit: 1e5cb6a
 ## Veredito atual
 
 Implementação aceita pelos Judges e sensores específicos da feature. A Spec
-permanece `in_progress` porque o Quality Gate integrado local não está verde:
-`pnpm test` mantém uma falha preexistente de Intake e o Playwright mockado falha
-no harness de autenticação/SSR. O build final passou. Não há finding de produto
-ou arquitetura bloqueante na feature.
+permanece `in_progress` porque ainda não há Quality Gate/PR CI verde registrado
+para o HEAD atual. O Quality Gate local, o teste de Intake e o Playwright
+mockado passaram. Não há finding de produto ou arquitetura bloqueante na
+feature.
 
 ## Matriz de evidências reais
 
@@ -41,8 +41,9 @@ ou arquitetura bloqueante na feature.
 | `pnpm --filter web generate-routes` | passou com aviso não bloqueante sobre `routes/modelos-de-documentos/index.test.ts` |
 | `pnpm --filter web check:code` | passou com 6 warnings preexistentes fora da feature |
 | `pnpm --filter server exec vitest run src/document-production/rest/controllers/tests/list-document-specifications.controller.test.ts` | passou, 7/7 |
-| `pnpm test` | falhou somente em `list-intakes.controller.test.ts`: esperado `total: 2`, recebido `total: 3`; web 134/134 e server 22/23 arquivos passaram |
-| `pnpm --filter web test:integration` | sensor mockado falhou no redirect/SSR do fixture: 7 passaram, 5 falharam, 1 interrompido e 30 não executados; o teste da feature não alcança o heading por redirecionar para `/login` antes do localStorage |
+| `pnpm --filter server exec vitest run src/intake/rest/controllers/tests/list-intakes.controller.test.ts --reporter=verbose` | passou, 2/2; o resultado anterior `total: 3` não foi reproduzido |
+| `pnpm test` | passou nos 4 workspaces: Core 25 arquivos/110 testes, Validation 7/19, Server 30/90 e Web 39/164 |
+| `pnpm --filter web exec playwright test` | passou, 38/38; o teste mockado da feature alcançou a rota protegida e validou a query `search` |
 | `pnpm build` | passou; server webpack e web Vite/Nitro concluídos; repetiu apenas o aviso do arquivo de teste na árvore de rotas |
 | Browser real, sem `page.route` | preflight Docker/Auth/Server saudável; login fresco; rota, busca, filtro, URL, API 200 e viewport estreito validados |
 
@@ -65,8 +66,8 @@ preflight posteriores passaram.
 
 | ID | Estado | Classificação | Evidência / ação |
 |---|---|---|---|
-| R-009 / R-011 | classificado, não bloqueante | suíte global preexistente | Falha de Intake e falhas globais já reproduzidas fora dos paths da feature; preservar para correção própria |
-| R-010 | aberto, não bloqueante | harness Playwright mockado | `beforeLoad` protegido executa antes do localStorage; fluxo real sem mock foi usado como evidência oficial |
+| R-009 / R-011 | resolvido | suíte global | `pnpm test` integrado passou nos 4 workspaces; a falha anterior de Intake não foi reproduzida |
+| R-010 | resolvido | harness Playwright mockado | `pnpm --filter web exec playwright test` passou 38/38 com o `webServer` oficial e as variáveis isoladas do Playwright |
 | R-012 | resolvido como limitação de ferramenta | transporte Playwright | MCP real funcionou nesta validação após login fresco; não é falha de produto |
 | R-013 | não bloqueante | configuração de geração de rotas | `index.test.ts` dentro de `routes/` gera aviso; build e geração passam; deve ser renomeado/excluído em manutenção futura |
 | R-014 | não bloqueante | serialização do snapshot | Snapshot omitiu conteúdo de duas células, mas API, `innerText`, estilos computados e DOM real confirmam os valores |
