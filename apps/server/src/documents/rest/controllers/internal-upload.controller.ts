@@ -87,7 +87,7 @@ export class InternalUploadController {
 
     const uploadedFiles = await Promise.all(
       rawFiles.map(async (file) => {
-        const timestamp = new Date().getTime()
+        const timestamp = Date.now()
         const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')
         const storagePath = `internal/${clientId}/${timestamp}-${safeName}`
 

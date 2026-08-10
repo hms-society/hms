@@ -9,7 +9,7 @@ export class ProcessWhatsappBatchWorker implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    if (!this.inngestService || !this.inngestService.client) {
+    if (!this.inngestService?.client) {
       return
     }
 

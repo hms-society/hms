@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { sql } from 'drizzle-orm'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'

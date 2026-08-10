@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Inngest, type InngestFunction } from 'inngest'
-import { eq, like } from 'drizzle-orm'
+import { like } from 'drizzle-orm'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
 import { DrizzleClient } from '../../database/drizzle/drizzle-client'
 import { integracaoEvento } from '../../database/drizzle/schema/integracao-evento'
@@ -8,7 +8,6 @@ import { clientModel } from '@/identity/database/drizzle/models'
 
 @Injectable()
 export class InngestService {
-  private readonly logger = new Logger(InngestService.name)
   public readonly client: Inngest
   private readonly dynamicFunctions: InngestFunction.Like[] = []
 
