@@ -36,7 +36,7 @@ function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
     const datePart = str.split('T')[0].split(' ')[0]
     const [year, month, day] = datePart.split('-').map(Number)
 
-    if (isNaN(year) || isNaN(month) || isNaN(day)) return null
+    if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return null
     return new Date(year, month - 1, day)
   }
 
