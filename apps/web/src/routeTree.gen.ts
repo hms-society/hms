@@ -29,9 +29,9 @@ import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
-import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
 import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
 import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
+import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesNovoRouteImport } from './routes/clientes/novo'
@@ -146,11 +146,6 @@ const AgendaIndexRoute = AgendaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AgendaRouteRoute,
 } as any)
-const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
-  id: '/lotes-documentos/$fileId',
-  path: '/lotes-documentos/$fileId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ModelosDeDocumentosNovoRoute = ModelosDeDocumentosNovoRouteImport.update({
   id: '/modelos-de-documentos/novo',
   path: '/modelos-de-documentos/novo',
@@ -162,6 +157,11 @@ const ModelosDeDocumentosDocumentSpecificationIdRoute =
     path: '/modelos-de-documentos/$documentSpecificationId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
+  id: '/lotes-documentos/$fileId',
+  path: '/lotes-documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
@@ -598,11 +598,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaIndexRouteImport
       parentRoute: typeof AgendaRouteRoute
     }
-    '/lotes-documentos/$fileId': {
-      id: '/lotes-documentos/$fileId'
-      path: '/lotes-documentos/$fileId'
-      fullPath: '/lotes-documentos/$fileId'
-      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
     '/modelos-de-documentos/novo': {
       id: '/modelos-de-documentos/novo'
       path: '/modelos-de-documentos/novo'
@@ -615,6 +610,13 @@ declare module '@tanstack/react-router' {
       path: '/modelos-de-documentos/$documentSpecificationId'
       fullPath: '/modelos-de-documentos/$documentSpecificationId'
       preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lotes-documentos/$fileId': {
+      id: '/lotes-documentos/$fileId'
+      path: '/lotes-documentos/$fileId'
+      fullPath: '/lotes-documentos/$fileId'
+      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intakes/novo': {
