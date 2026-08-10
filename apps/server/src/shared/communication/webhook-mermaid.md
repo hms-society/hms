@@ -1,12 +1,10 @@
 # Fluxo Completo de Integração do WhatsApp (Inbound & Outbound)
 
-Este documento descreve e ilustra a arquitetura completa de comunicação via WhatsApp no HMS, cobrindo o fluxo de entrada (**Inbound** via Webhook e Inngest) e o fluxo de saída (**Outbound** via API REST, Provedores e Jobs).
+Este documento descreve a arquitetura de integração do WhatsApp no HMS, detalhando os papéis da tabela `private_messages` (mensagens diretas entre Advogado/Colaborador e Cliente) e da tabela `communications` (notificações oficiais do sistema/e-mail).
 
 ---
 
 ## 🎨 Diagrama Unificado da Arquitetura WhatsApp (Inbound & Outbound)
-
-O diagrama a seguir unifica os caminhos de entrada (cliente ➔ sistema) e de saída (advogado/sistema ➔ cliente), demonstrando como as tabelas do banco de dados (`communications`), os jobs do Inngest e as APIs REST se integram:
 
 ```mermaid
 graph TD
@@ -37,42 +35,44 @@ graph TD
 
     %% Banco de Dados
     subgraph Database ["Persistência (Drizzle ORM)"]
-        DBCommunications[("🗄️ Tabela communications<br/>(inbound & outbound)")]:::db
+        DBPrivateMsgs[("🗄️ Tabela private_messages<br/>(Advogado ↔ Cliente / WhatsApp)")]:::db
+        DBCommunications[("🗄️ Tabela communications<br/>(Notificações Oficiais / E-mail)")]:::db
         DBClients[("🗄️ Tabela clients<br/>(busca por telefone)")]:::db
     end
 
-    %% FLUXO INBOUND (Entrada)
-    Cliente -->|"1. Envia mensagem ou mídia"| MetaAPI
+    %% FLUXO INBOUND (Entrada no Chat WhatsApp)
+    Cliente -->|"1. Envia mensagem via WhatsApp"| MetaAPI
     MetaAPI -->|"2. Dispara Webhook HTTP POST"| WebhookCtrl
     WebhookCtrl -->|"3. Valida HMAC-SHA256 & despacha"| InngestJob
     WebhookCtrl -.->|"4. Responde 200 OK (< 3s)"| MetaAPI
-    InngestJob -->|"5. Busca cliente pelo telefone"| DBClients
-    InngestJob -->|"6. Salva registro (direction: inbound)"| DBCommunications
+    InngestJob -->|"5. Busca cliente por telefone"| DBClients
+    InngestJob -->|"6. Registra em private_messages (direction: inbound)"| DBPrivateMsgs
 
-    %% FLUXO OUTBOUND (Saída Manual via UI)
-    ChatUI -->|"7. Advogado digita e envia resposta"| ReactQuery
-    ReactQuery -->|"8. Requisição HTTP POST"| SendCtrl
-    SendCtrl -->|"9. Valida cliente & autorização"| DBClients
+    %% FLUXO OUTBOUND (Saída pelo Advogado na UI)
+    ChatUI -->|"7. Advogado digita e envia mensagem"| ReactQuery
+    ReactQuery -->|"8. Requisição HTTP POST /communications/send"| SendCtrl
+    SendCtrl -->|"9. Valida cliente & autorização do advogado"| DBClients
     SendCtrl -->|"10. Dispara envio de mensagem de texto"| WhatsappProv
-    SendCtrl -->|"11. Grava registro (direction: outbound)"| DBCommunications
+    SendCtrl -->|"11. Registra mensagem criptografada em private_messages"| DBPrivateMsgs
     WhatsappProv -->|"12. POST /v25.0/{phone_number_id}/messages"| MetaAPI
-    MetaAPI -->|"13. Entrega mensagem no celular do cliente"| Cliente
+    MetaAPI -->|"13. Entrega no celular do cliente"| Cliente
 
     %% ATUALIZAÇÃO REATIVA DA UI
-    DBCommunications -.->|"14. Re-fetch / React Query Invalidation"| ChatUI
+    DBPrivateMsgs -.->|"14. Invalidação de Cache & Atualização da UI"| ChatUI
+
+    %% NOTIFICAÇÕES OFICIAIS DO SISTEMA
+    HMS_Server -.->|"Notificações Automáticas / E-mails Oficiais"| DBCommunications
 ```
 
 ---
 
 ## ⏱️ Diagrama de Sequência Cronológico (End-to-End)
 
-Este diagrama de sequência detalha a ordem exata de execução das chamadas nos fluxos de entrada (webhook/Inngest) e saída (API/Provedor/Meta API):
-
 ```mermaid
 sequenceDiagram
     autonumber
     actor Cliente as 👤 Cliente (WhatsApp)
-    actor Advogado as ⚖️ Advogado (HMS Web)
+    actor Advogado as ⚖️ Advogado (Colaborador HMS)
     participant Meta as 🌐 Meta Cloud API
     participant WebhookCtrl as 🔌 WhatsappWebhookController
     participant Inngest as ⚡ Inngest (whatsapp/event.received)
@@ -80,47 +80,43 @@ sequenceDiagram
     participant Provider as 📤 WhatsappProvider
     participant DB as 🗄️ Banco de Dados (Drizzle)
 
-    Note over Cliente, Inngest: 📥 FLUXO INBOUND (Recebimento de Mensagem)
+    Note over Cliente, Inngest: 📥 FLUXO INBOUND (Mensagem Recebida do Cliente)
     Cliente->>Meta: Envia mensagem de texto no WhatsApp
     Meta->>WebhookCtrl: POST /integrations/whatsapp/webhook (x-hub-signature-256)
     activate WebhookCtrl
-    Note over WebhookCtrl: Valida HMAC-SHA256 com WHATSAPP_APP_SECRET
     WebhookCtrl->>Inngest: despacha evento 'whatsapp/event.received'
-    WebhookCtrl-->>Meta: 200 OK (resposta imediata)
+    WebhookCtrl-->>Meta: 200 OK (resposta em < 3s)
     deactivate WebhookCtrl
 
     activate Inngest
     Inngest->>DB: Busca clientModel onde client.phone == msg.from
     alt Cliente Encontrado
-        Inngest->>DB: Insere em communications (direction: 'inbound', channel: 'whatsapp')
-    else Cliente Não Cadastrado
-        Note over Inngest: Emite alerta log (Warning)
+        Inngest->>DB: Insere em private_messages (direction: 'inbound', client_id, content)
+    else Cliente Não Encontrado
+        Note over Inngest: Emite aviso log (Warning)
     end
     deactivate Inngest
 
-    Note over Advogado, Cliente: 📤 FLUXO OUTBOUND (Envio de Mensagem pela Central)
+    Note over Advogado, Cliente: 📤 FLUXO OUTBOUND (Advogado responde na Central)
     Advogado->>SendCtrl: POST /communications/send { clientId, content, channel: 'whatsapp' }
     activate SendCtrl
     SendCtrl->>DB: Busca cliente e valida telefone
     SendCtrl->>Provider: sendTextMessage(phone, content)
     activate Provider
-    Provider->>Meta: POST /v25.0/{phone_number_id}/messages (Bearer Token)
+    Provider->>Meta: POST /v25.0/{phone_number_id}/messages
     Meta-->>Provider: 200 OK { messages: [{ id: externalId }] }
     deactivate Provider
-    SendCtrl->>DB: Insere em communications (direction: 'outbound', authorId: req.user.id)
-    SendCtrl-->>Advogado: 201 Created { id, content, channel, direction, externalId }
+    SendCtrl->>DB: Insere em private_messages (collaborator_id, client_id, direction: 'outbound')
+    SendCtrl-->>Advogado: 201 Created { id, content, createdAt, externalId }
     deactivate SendCtrl
-    Meta->>Cliente: Entrega mensagem no aplicativo WhatsApp
+    Meta->>Cliente: Entrega mensagem no celular do cliente
 ```
 
 ---
 
-## 🔍 Resumo dos Componentes
+## 🔍 Separação de Responsabilidades entre Tabelas
 
-| Componente | Responsabilidade | Tipo de Comunicação |
-| :--- | :--- | :--- |
-| **`WhatsappWebhookController`** | Recebe e valida assinaturas HMAC dos webhooks da Meta, encaminhando eventos ao Inngest. | Inbound (Entrada) |
-| **`InngestService`** | Roteia e processa mensagens assíncronas do evento `whatsapp/event.received`, gravando como `inbound` no banco. | Inbound (Entrada) |
-| **`SendCommunicationController`** | Endpoint REST `POST /communications/send` acionado pela UI para envio de mensagens pelos advogados. | Outbound (Saída) |
-| **`WhatsappProvider`** | Envia mensagens de texto livre (`sendTextMessage`) e de modelo/template (`sendAutomaticMessage`) chamando a API da Meta. | Outbound (Saída) |
-| **`communications` (DB)** | Tabela centralizada contendo os logs unificados de mensagens (`inbound` e `outbound`) em todos os canais. | Persistência |
+| Tabela | Finalidade | Principais Atributos | Atores Envolvidos |
+| :--- | :--- | :--- | :--- |
+| **`private_messages`** | **Chat e Operações CRUD da Central de Comunicação**. Mensagens diretas de conversa entre o advogado e o cliente (WhatsApp / demandas de atendimento). | `client_id`, `collaborator_id`, `intake_id`, `content` (criptografado), `file_ids`, `direction` | Advogado (Colaborador) ↔ Cliente |
+| **`communications`** | **Histórico de Notificações Oficiais do Sistema**. Envios automatizados (disparos de e-mail, termos contratuais, confirmações do sistema). | `client_id`, `author_id`, `channel` (`email`, `phone`, `whatsapp`), `content` | Sistema HMS ➔ Cliente |

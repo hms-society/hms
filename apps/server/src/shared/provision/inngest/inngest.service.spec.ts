@@ -35,14 +35,24 @@ describe('InngestService', () => {
     const fromPhone = '5519971659516'
     const clientId = 'c75a40a8-b648-43e5-8f4b-70c8f583e782'
 
-    // Mock DB queries
-    mockSelect.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: clientId }]),
+    const collaboratorId = '0b2e88a0-2f3b-48bb-a0f1-0bc4b9be38f0'
+    const intakeId = '9e0b83e4-84c6-4796-a519-74d754be00f3'
+
+    // Mock DB queries for client lookup and intake lookup
+    mockSelect.mockImplementation(() => ({
+      from: () => ({
+        where: () => ({
+          limit: () =>
+            Promise.resolve([
+              { id: clientId, phone: fromPhone, responsibleId: collaboratorId },
+            ]),
+          orderBy: () => ({
+            limit: () =>
+              Promise.resolve([{ id: intakeId, responsibleId: collaboratorId }]),
+          }),
         }),
       }),
-    })
+    }))
 
     const mockValues = vi.fn().mockResolvedValue([])
     mockInsert.mockReturnValue({
@@ -87,10 +97,10 @@ describe('InngestService', () => {
     expect(mockValues).toHaveBeenCalledWith(
       expect.objectContaining({
         clientId,
-        authorId: null,
-        channel: 'whatsapp',
+        collaboratorId,
+        intakeId,
+        clientPhone: fromPhone,
         direction: 'inbound',
-        content: 'Olá, gostaria de um atendimento.',
       }),
     )
   })

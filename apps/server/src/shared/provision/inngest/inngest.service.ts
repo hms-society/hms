@@ -2,9 +2,11 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Inngest, type InngestFunction } from 'inngest'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
-import { eq } from 'drizzle-orm'
+import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
+import { eq, desc } from 'drizzle-orm'
+import { encrypt } from '@/shared/utils/crypto'
 
 @Injectable()
 export class InngestService {
@@ -42,41 +44,58 @@ export class InngestService {
                   const fromPhone = msg?.from
                   if (!fromPhone) continue
 
-                  let content = ''
+                  let rawContent = ''
                   if (msg.type === 'text' && msg.text?.body) {
-                    content = msg.text.body
+                    rawContent = msg.text.body
                   } else if (msg.type === 'image') {
-                    content = msg.image?.caption || '[Imagem recebida]'
+                    rawContent = msg.image?.caption || '[Imagem recebida]'
                   } else if (msg.type === 'document') {
-                    content = msg.document?.caption || '[Documento recebido]'
+                    rawContent = msg.document?.caption || '[Documento recebido]'
                   } else if (msg.type === 'interactive') {
-                    content =
+                    rawContent =
                       msg.interactive?.button_reply?.title ||
                       msg.interactive?.list_reply?.title ||
                       '[Resposta interativa]'
                   } else {
-                    content = `[Mensagem ${msg.type ?? 'desconhecida'}]`
+                    rawContent = `[Mensagem ${msg.type ?? 'desconhecida'}]`
                   }
 
                   const db = this.drizzleClient.requireDatabase()
                   const [client] = await db
-                    .select({ id: clientModel.id })
+                    .select({ id: clientModel.id, phone: clientModel.phone })
                     .from(clientModel)
                     .where(eq(clientModel.phone, fromPhone))
                     .limit(1)
 
                   if (client) {
-                    await db.insert(communicationModel).values({
-                      clientId: client.id,
-                      authorId: null,
-                      channel: 'whatsapp',
-                      direction: 'inbound',
-                      content,
-                    })
+                    const [intake] = await db
+                      .select({
+                        id: intakeModel.id,
+                        responsibleId: intakeModel.responsibleId,
+                      })
+                      .from(intakeModel)
+                      .where(eq(intakeModel.clientId, client.id))
+                      .orderBy(desc(intakeModel.createdAt))
+                      .limit(1)
 
-                    this.logger.log(
-                      `Mensagem inbound salva para o cliente ${client.id} (Telefone: ${fromPhone})`,
-                    )
+                    if (intake) {
+                      await db.insert(privateMessageModel).values({
+                        clientId: client.id,
+                        collaboratorId: intake.responsibleId,
+                        intakeId: intake.id,
+                        clientPhone: fromPhone,
+                        direction: 'inbound',
+                        content: encrypt(rawContent),
+                      })
+
+                      this.logger.log(
+                        `Mensagem privada inbound salva para o cliente ${client.id} (Telefone: ${fromPhone})`,
+                      )
+                    } else {
+                      this.logger.warn(
+                        `Mensagem recebida de cliente sem atendimento (intake) ativo: ${client.id}`,
+                      )
+                    }
                   } else {
                     this.logger.warn(
                       `Mensagem recebida de número não cadastrado: ${fromPhone}`,

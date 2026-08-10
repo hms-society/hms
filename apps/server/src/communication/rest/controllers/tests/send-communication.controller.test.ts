@@ -10,7 +10,8 @@ import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
-import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
+import { decrypt } from '@/shared/utils/crypto'
 import { eq } from 'drizzle-orm'
 
 describe('Send Communication Controller [POST /communications/send]', () => {
@@ -100,13 +101,14 @@ describe('Send Communication Controller [POST /communications/send]', () => {
     const db = drizzleClient.requireDatabase()
     const records = await db
       .select()
-      .from(communicationModel)
-      .where(eq(communicationModel.clientId, clientId))
+      .from(privateMessageModel)
+      .where(eq(privateMessageModel.clientId, clientId))
 
     expect(records.length).toBe(1)
-    expect(records[0].content).toBe('Olá, este é um teste.')
+    expect(records[0].content ? decrypt(records[0].content) : '').toBe(
+      'Olá, este é um teste.',
+    )
     expect(records[0].direction).toBe('outbound')
-    expect(records[0].channel).toBe('whatsapp')
   })
 
   it('returns 400 when client has no phone number', async () => {

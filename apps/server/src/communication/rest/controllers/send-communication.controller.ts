@@ -15,9 +15,12 @@ import { AuthGuard } from '@/identity/guards'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { SendCommunicationDto } from '../dtos/send-communication.dto'
-import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
-import { eq } from 'drizzle-orm'
+import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
+import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
+import { eq, desc } from 'drizzle-orm'
+import { encrypt } from '@/shared/utils/crypto'
 
 @Controller('communications')
 @UseGuards(AuthGuard)
@@ -53,6 +56,24 @@ export class SendCommunicationController {
       throw new NotFoundException('Client not found')
     }
 
+    const [collaborator] = await db
+      .select({
+        id: collaboratorModel.id,
+        professionalName: collaboratorModel.professionalName,
+      })
+      .from(collaboratorModel)
+      .where(eq(collaboratorModel.userId, req.user.id))
+      .limit(1)
+
+    const [intake] = await db
+      .select({
+        id: intakeModel.id,
+      })
+      .from(intakeModel)
+      .where(eq(intakeModel.clientId, body.clientId))
+      .orderBy(desc(intakeModel.createdAt))
+      .limit(1)
+
     let externalId: string | undefined
 
     if (body.channel === 'whatsapp') {
@@ -67,23 +88,24 @@ export class SendCommunicationController {
     }
 
     const [record] = await db
-      .insert(communicationModel)
+      .insert(privateMessageModel)
       .values({
         clientId: body.clientId,
-        authorId: req.user.id,
-        channel: body.channel,
+        collaboratorId: collaborator?.id || req.user.id,
+        intakeId: intake?.id || body.clientId,
+        clientPhone: client.phone,
         direction: 'outbound',
-        content: body.content,
+        content: encrypt(body.content),
       })
       .returning()
 
     return {
       id: record.id,
-      channel: record.channel,
+      channel: body.channel,
       direction: record.direction,
-      content: record.content,
+      content: body.content,
       createdAt: record.createdAt.toISOString(),
-      author: req.user.email || 'Advogado',
+      author: collaborator?.professionalName || req.user.email || 'Advogado',
       externalId,
     }
   }
