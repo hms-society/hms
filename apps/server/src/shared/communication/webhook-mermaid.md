@@ -36,7 +36,6 @@ graph TD
     %% Banco de Dados
     subgraph Database ["Persistência (Drizzle ORM)"]
         DBPrivateMsgs[("🗄️ Tabela private_messages<br/>(Advogado ↔ Cliente / WhatsApp)")]:::db
-        DBCommunications[("🗄️ Tabela communications<br/>(Notificações Oficiais / E-mail)")]:::db
         DBClients[("🗄️ Tabela clients<br/>(busca por telefone)")]:::db
     end
 
@@ -59,9 +58,6 @@ graph TD
 
     %% ATUALIZAÇÃO REATIVA DA UI
     DBPrivateMsgs -.->|"14. Invalidação de Cache & Atualização da UI"| ChatUI
-
-    %% NOTIFICAÇÕES OFICIAIS DO SISTEMA
-    HMS_Server -.->|"Notificações Automáticas / E-mails Oficiais"| DBCommunications
 ```
 
 ---
@@ -119,4 +115,3 @@ sequenceDiagram
 | Tabela | Finalidade | Principais Atributos | Atores Envolvidos |
 | :--- | :--- | :--- | :--- |
 | **`private_messages`** | **Chat e Operações CRUD da Central de Comunicação**. Mensagens diretas de conversa entre o advogado e o cliente (WhatsApp / demandas de atendimento). | `client_id`, `collaborator_id`, `intake_id`, `content` (criptografado), `file_ids`, `direction` | Advogado (Colaborador) ↔ Cliente |
-| **`communications`** | **Histórico de Notificações Oficiais do Sistema**. Envios automatizados (disparos de e-mail, termos contratuais, confirmações do sistema). | `client_id`, `author_id`, `channel` (`email`, `phone`, `whatsapp`), `content` | Sistema HMS ➔ Cliente |
