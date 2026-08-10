@@ -7,7 +7,7 @@ import {
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-describe('Document specification migration 0013', () => {
+describe('Document specification migration 0014', () => {
   let container: StartedPostgreSqlContainer
   let database: Sql
   let migrationSql: string
@@ -44,7 +44,7 @@ describe('Document specification migration 0013', () => {
     `
 
     migrationSql = await readFile(
-      new URL('../0013_noisy_true_believers.sql', import.meta.url),
+      new URL('../0014_noisy_true_believers.sql', import.meta.url),
       'utf8',
     )
     for (const statement of migrationSql.split('--> statement-breakpoint')) {
