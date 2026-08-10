@@ -1,7 +1,11 @@
 import type { DocumentProductionService as DocumentProductionRestService } from '@hms/core/document-production/interfaces'
 import type {
+  CreateDocumentSpecificationInput,
+  DocumentSpecificationConfigurationUpdate,
+  DocumentSpecificationDetails,
   DocumentSpecificationListItem,
   DocumentSpecificationListQuery,
+  DocumentSpecificationTemplateUpdate,
 } from '@hms/core/document-production/domain/structures'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import type { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
@@ -28,10 +32,51 @@ function createPath(query: DocumentSpecificationListQuery = {}) {
 
 export const DocumentProductionService = (
   restClient: RestClient,
-): DocumentProductionRestService => ({
-  listDocumentSpecifications(query = {}) {
-    return restClient.get<PaginationResponse<DocumentSpecificationListItem>>(
-      createPath(query),
-    )
-  },
-})
+): DocumentProductionRestService => {
+  return {
+    listDocumentSpecifications(query = {}) {
+      return restClient.get<PaginationResponse<DocumentSpecificationListItem>>(
+        createPath(query),
+      )
+    },
+
+    createDocumentSpecification(request: CreateDocumentSpecificationInput) {
+      return restClient.post<DocumentSpecificationDetails>(
+        '/document-specifications',
+        request,
+      )
+    },
+
+    getDocumentSpecification(documentSpecificationId: string) {
+      return restClient.get<DocumentSpecificationDetails>(
+        `/document-specifications/${documentSpecificationId}`,
+      )
+    },
+
+    updateDocumentSpecificationConfiguration(
+      documentSpecificationId: string,
+      request: DocumentSpecificationConfigurationUpdate,
+    ) {
+      return restClient.patch<DocumentSpecificationDetails>(
+        `/document-specifications/${documentSpecificationId}/configuration`,
+        request,
+      )
+    },
+
+    updateDocumentSpecificationTemplate(
+      documentSpecificationId: string,
+      request: DocumentSpecificationTemplateUpdate,
+    ) {
+      return restClient.patch<DocumentSpecificationDetails>(
+        `/document-specifications/${documentSpecificationId}/template`,
+        request,
+      )
+    },
+
+    deleteDocumentSpecification(documentSpecificationId: string) {
+      return restClient.delete<void>(
+        `/document-specifications/${documentSpecificationId}`,
+      )
+    },
+  }
+}
