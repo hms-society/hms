@@ -53,6 +53,7 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
+      console.log(errorText)
       try {
         const errorJson = JSON.parse(errorText)
         const metaError = errorJson?.error
@@ -85,6 +86,9 @@ export class WhatsappProvider implements IWhatsappProvider {
   async sendTextMessage(phone: string, text: string): Promise<SendWhatsappMessageResult> {
     const token = this.envProvider.get('WHATSAPP_API_TOKEN')
     const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
+
+    if (!token) throw new Error('Token not found')
+    if (!phoneNumberId) throw new Error('Phone number id not found')
 
     const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
 

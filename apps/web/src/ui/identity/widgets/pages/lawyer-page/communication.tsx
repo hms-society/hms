@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
 import { useSendCommunicationMutation } from '@/ui/shared/hooks/use-send-communication-mutation'
+import { toast } from 'sonner'
 
 import {
   ChatListPanel,
@@ -104,8 +105,9 @@ export const LawyerCommunicationPage = () => {
         channel: 'whatsapp',
       },
       {
-        onError: () => {
+        onError: (error: any) => {
           setMessageText(textToSend)
+          toast.error(error?.message || 'Falha ao entregar a mensagem.')
         },
       },
     )
