@@ -164,7 +164,8 @@ export function ClientDetailsPage({ clientId }: ClientDetailsPageProps) {
             className='bg-[#134C50] text-white hover:bg-[#134C50]/90 rounded-full px-6'
             onClick={() =>
               navigate({
-                to: '/intakes',
+                to: '/atendimento/consultas',
+                search: { clientId: client.id },
               })
             }
           >

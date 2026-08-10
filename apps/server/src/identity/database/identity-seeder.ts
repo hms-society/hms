@@ -202,9 +202,7 @@ export class IdentitySeeder {
     const paralegalUser = seededUsers.find(
       ({ email }) => email === 'paralegal@hmsadvogados.com.br',
     )
-
     const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
-
     if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
@@ -232,6 +230,7 @@ export class IdentitySeeder {
       ...DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
     })
+
     const clientCollaborator = await this.collaboratorsRepository.add({
       userId: clientUser.id,
       ...DEFAULT_CLIENT,

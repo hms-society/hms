@@ -12,10 +12,7 @@ export const ROUTES = {
   lawyerSchedule: '/agenda',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
-  clientMyCases: '/cliente/meus-casos',
-  clientMyCaseDetails: '/cliente/meus-casos/$caseId',
-  clientMessages: '/cliente/mensagens',
-  clientPrivacy: '/cliente/privacidade',
+  lawyerCommunication: '/advogado/comunicacao',
   clients: '/clientes',
   collaborators: '/colaboradores',
   documentBatch: '/lotes-documentos',
@@ -23,6 +20,11 @@ export const ROUTES = {
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',
   paralegalCommunication: '/comunicacao',
+  client: '/cliente',
+  clientMyCases: '/cliente/meus-casos',
+  clientMyCaseDetails: '/cliente/meus-casos/$caseId',
+  clientMessages: '/cliente/mensagens',
+  clientPrivacy: '/cliente/privacidade',
   documentSpecifications: '/modelos-de-documentos',
 } as const
 

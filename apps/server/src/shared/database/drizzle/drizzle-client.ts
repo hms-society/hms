@@ -15,7 +15,7 @@ export class DrizzleClient implements OnModuleDestroy {
     if (databaseUrl) {
       console.log('DATABASE_URL =', databaseUrl)
       this.client = postgres(databaseUrl, {
-        connect_timeout: 5,
+        connect_timeout: 12,
         idle_timeout: 10,
         max: 3,
         onnotice: () => {},

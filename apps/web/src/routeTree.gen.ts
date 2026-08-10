@@ -15,6 +15,7 @@ import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
 import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
 import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
+import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TriagemIndexRouteImport } from './routes/triagem/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
@@ -37,6 +38,7 @@ import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privaci
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 
@@ -68,6 +70,11 @@ const AtendimentoRouteRoute = AtendimentoRouteRouteImport.update({
 const AgendaRouteRoute = AgendaRouteRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoRouteRoute = AdvogadoRouteRouteImport.update({
+  id: '/advogado',
+  path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -183,6 +190,11 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
+const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
+  id: '/comunicacao',
+  path: '/comunicacao',
+  getParentRoute: () => AdvogadoRouteRoute,
+} as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -196,12 +208,14 @@ const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -228,8 +242,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -257,12 +273,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -291,12 +309,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/advogado'
     | '/agenda'
     | '/atendimento'
     | '/cliente'
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
@@ -323,8 +343,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/advogado'
     | '/atendimento'
     | '/cliente'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
@@ -351,12 +373,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/advogado'
     | '/agenda'
     | '/atendimento'
     | '/cliente'
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/cliente/mensagens'
@@ -384,6 +408,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AgendaRouteRoute: typeof AgendaRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   ClienteRouteRoute: typeof ClienteRouteRouteWithChildren
@@ -446,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AgendaRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advogado': {
+      id: '/advogado'
+      path: '/advogado'
+      fullPath: '/advogado'
+      preLoaderRoute: typeof AdvogadoRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -602,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
+    '/advogado/comunicacao': {
+      id: '/advogado/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/advogado/comunicacao'
+      preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
+    }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
       path: '/meus-casos'
@@ -618,6 +657,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdvogadoRouteRouteChildren {
+  AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
+}
+
+const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
+  AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
+}
+
+const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
+  AdvogadoRouteRouteChildren,
+)
 
 interface AgendaRouteRouteChildren {
   AgendaIndexRoute: typeof AgendaIndexRoute
@@ -702,6 +753,7 @@ const TriagemRouteRouteWithChildren = TriagemRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AgendaRouteRoute: AgendaRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   ClienteRouteRoute: ClienteRouteRouteWithChildren,
