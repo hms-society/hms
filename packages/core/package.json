@@ -15,6 +15,7 @@
     "./document-engine/domain/events": "./src/document-engine/domain/events/index.ts",
     "./document-engine/domain/structures": "./src/document-engine/domain/structures/index.ts",
     "./document-engine/interfaces": "./src/document-engine/interfaces/index.ts",
+    "./document-engine/use-cases": "./src/document-engine/use-cases/index.ts",
     "./document-production/domain/entities": "./src/document-production/domain/entities/index.ts",
     "./document-production/domain/errors": "./src/document-production/domain/errors/index.ts",
     "./document-production/domain/events": "./src/document-production/domain/events/index.ts",

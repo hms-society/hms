@@ -15,6 +15,7 @@ export const ROUTES = {
   lawyerCommunication: '/advogado/comunicacao',
   clients: '/clientes',
   collaborators: '/colaboradores',
+  documentBatch: '/lotes-documentos',
   paralegalCases: '/casos',
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',

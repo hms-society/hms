@@ -1,0 +1,5 @@
+@baseUrl = http://localhost:3333
+@clientId = adc35945-a999-4399-9149-01286f4c2df9
+
+GET {{baseUrl}}/document-batches/clients/{{clientId}}
+Content-Type: application/json
