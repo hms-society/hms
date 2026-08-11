@@ -14,8 +14,8 @@ import {
 import type { Request, Response } from 'express'
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
+import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { InngestService } from '@/shared/provision/inngest/inngest.service'
 
 @Controller('integrations/whatsapp/webhook')
 export class WhatsappWebhookController {
@@ -23,7 +23,7 @@ export class WhatsappWebhookController {
 
   constructor(
     private readonly envProvider: EnvProvider,
-    private readonly inngestService: InngestService,
+    private readonly inngest: InngestClient,
   ) {}
 
   @Get()
@@ -98,7 +98,7 @@ export class WhatsappWebhookController {
     this.logger.log(`Received valid WhatsApp webhook payload: ${JSON.stringify(payload)}`)
 
     try {
-      await this.inngestService.client.send({
+      await this.inngest.send({
         name: 'whatsapp/event.received',
         data: payload,
       })
