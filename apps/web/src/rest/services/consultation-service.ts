@@ -6,11 +6,30 @@ export type CreateConsultationRequest = {
   intakeId?: string
   modality: 'PRESENTIAL' | 'VIRTUAL'
   channel?: string
-  primaryLegalQuestion?: string
   notes?: string
 }
 
 export type UpdateConsultationRequest = Partial<CreateConsultationRequest>
+
+export type CompleteConsultationRequest = {
+  legalAreaId?: string
+  legalTopicId?: string
+  primaryLegalQuestion?: string
+  guidanceProvided?: string
+  notes?: string
+  viability?: string
+  decision?: string
+  relevantFacts?: Array<{
+    id?: string
+    description: string
+    date?: string
+  }>
+  potentialLegalRequests?: Array<{
+    id?: string
+    title: string
+    summary?: string
+  }>
+}
 
 export type UpdateClientQualificationRequest = {
   name?: string
@@ -83,8 +102,14 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       )
     },
 
-    async completeConsultation(consultationId: string, summary?: string) {
-      return restClient.patch<any>(`/consultations/${consultationId}/complete`, { summary })
+    async completeConsultation(
+      consultationId: string,
+      request: CompleteConsultationRequest,
+    ) {
+      return restClient.patch<any>(
+        `/consultations/${consultationId}/complete`,
+        request,
+      )
     },
 
     async cancelConsultation(consultationId: string, reason?: string) {

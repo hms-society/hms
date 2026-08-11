@@ -9,7 +9,7 @@ import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
 
 export const consultationModel = pgTable('consultations', {
   id: uuid('id').defaultRandom().primaryKey(),
-  appointmentId: uuid('appointment_id').notNull().unique(),
+  appointmentId: uuid('appointment_id'),
   intakeId: uuid('intake_id').references(() => intakeModel.id),
   clientId: uuid('client_id')
     .notNull()
@@ -34,6 +34,8 @@ export const consultationModel = pgTable('consultations', {
   primaryLegalQuestion: text('primary_legal_question'),
   guidanceProvided: text('guidance_provided'),
   notes: text('notes'),
+  viability: text('viability'),
+  decision: text('decision'),
 
   startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
   completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
@@ -61,6 +63,7 @@ export const consultationPotentialLegalRequestModel = pgTable('consultation_pote
     .notNull()
     .references(() => consultationModel.id, { onDelete: 'cascade' }),
   description: text('description').notNull(),
+  summary: text('summary'),
 })
 
 export const consultationIdentifiedRiskModel = pgTable('consultation_identified_risks', {

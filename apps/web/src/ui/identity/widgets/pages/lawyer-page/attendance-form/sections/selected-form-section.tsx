@@ -1,4 +1,3 @@
-// sections/selected-form-section.tsx
 import { FileText } from 'lucide-react'
 import { Button } from '@/ui/shadcn/button'
 

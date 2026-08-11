@@ -18,6 +18,7 @@ import {
 } from '@hms/core/consultation/use-cases'
 import { DrizzleConsultationsRepository } from '../../repository/drizzle-consultations-repository'
 import { UpdateClientQualificationDto } from './dto/update-client-qualification.dto'
+import { CompleteConsultationDto } from './dto/complete-consultation-dto'
 
 @Controller('consultations')
 export class ConsultationsController {
@@ -43,7 +44,8 @@ export class ConsultationsController {
   @Patch(':id/start')
   async start(@Param('id') id: string) {
     try {
-      return await this.startConsultationUseCase.execute(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      return await this.startConsultationUseCase.execute(consultationId)
     } catch (error) {
       console.error('ERRO DETALHADO NO START:', error)
       throw error
@@ -53,7 +55,8 @@ export class ConsultationsController {
   @Patch(':id/reschedule')
   async reschedule(@Param('id') id: string) {
     try {
-      const consultation = await this.consultationsRepository.findById(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      const consultation = await this.consultationsRepository.findById(consultationId)
 
       if (!consultation) {
         throw new NotFoundException('Consulta não encontrada.')
@@ -79,7 +82,8 @@ export class ConsultationsController {
   @Patch(':id/no-show')
   async registerNoShow(@Param('id') id: string) {
     try {
-      return await this.registerNoShowUseCase.execute(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      return await this.registerNoShowUseCase.execute(consultationId)
     } catch (error) {
       console.error('ERRO DETALHADO NO NO-SHOW:', error)
       throw error
@@ -87,9 +91,17 @@ export class ConsultationsController {
   }
 
   @Patch(':id/complete')
-  async complete(@Param('id') id: string) {
+  async complete(
+    @Param('id') id: string,
+    @Body() dto: CompleteConsultationDto,
+  ) {
     try {
-      return await this.completeConsultationUseCase.execute(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+
+      return await this.completeConsultationUseCase.execute({
+        consultationId,
+        ...dto,
+      })
     } catch (error) {
       console.error('ERRO DETALHADO NO COMPLETE:', error)
       throw error
@@ -102,7 +114,8 @@ export class ConsultationsController {
     @Body() dto: UpdateClientQualificationDto,
   ) {
     try {
-      const consultation = await this.consultationsRepository.findById(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      const consultation = await this.consultationsRepository.findById(consultationId)
 
       if (!consultation || !consultation.clientId) {
         throw new NotFoundException('Consulta ou cliente vinculado não encontrado.')
@@ -124,7 +137,8 @@ export class ConsultationsController {
   @Get(':id')
   async findById(@Param('id') id: string) {
     try {
-      const consultation = await this.getConsultationByIdUseCase.execute(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      const consultation = await this.getConsultationByIdUseCase.execute(consultationId)
 
       if (!consultation) {
         throw new NotFoundException('Consulta não encontrada.')
@@ -149,7 +163,8 @@ export class ConsultationsController {
   @Patch(':id/reset')
   async resetStatus(@Param('id') id: string) {
     try {
-      const consultation = await this.consultationsRepository.findById(id)
+      const consultationId = typeof id === 'object' ? (id as any).id : id
+      const consultation = await this.consultationsRepository.findById(consultationId)
 
       if (!consultation) {
         throw new NotFoundException('Consulta não encontrada.')

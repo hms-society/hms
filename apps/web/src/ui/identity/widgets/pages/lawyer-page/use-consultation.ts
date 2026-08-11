@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import type { CompleteConsultationRequest } from '@/rest/services/consultation-service'
 
 export function useConsultation(consultationId?: string) {
   const { consultationService } = useRestContext()
   const queryClient = useQueryClient()
-  
+
   const {
     data: consultation,
     isLoading,
@@ -16,7 +17,6 @@ export function useConsultation(consultationId?: string) {
       if (!consultationId) return null
       const response = await consultationService.getConsultationById(consultationId)
       if (response.isFailure) response.throwError()
-      console.log('consultation raw:', JSON.stringify(response.body, null, 2))
       return response.body
     },
     enabled: Boolean(consultationId),
@@ -70,8 +70,13 @@ export function useConsultation(consultationId?: string) {
   })
 
   const completeConsultationMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await consultationService.completeConsultation(id)
+    mutationFn: async (data: CompleteConsultationRequest & { consultationId?: string }) => {
+      const id = data.consultationId || consultationId
+      if (!id) throw new Error('ID da consulta não fornecido.')
+
+      const { consultationId: _, ...payload } = data
+
+      const response = await consultationService.completeConsultation(id, payload)
 
       if (response.isFailure) {
         response.throwError()
@@ -79,26 +84,25 @@ export function useConsultation(consultationId?: string) {
 
       return response.body
     },
-    onSuccess: (_, id) => {
+    onSuccess: (_, variables) => {
+      const id = variables.consultationId || consultationId
       queryClient.invalidateQueries({
         queryKey: ['consultation', id],
       })
     },
   })
 
-const updateQualificationMutation = useMutation({
-  mutationFn: async (dto: any) => {
-    if (!consultationId) return
-    const response = await consultationService.updateQualification(consultationId, dto)
-    if (response.isFailure) response.throwError()
-    return response.body
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['consultation', consultationId] })
-  },
-})
-
-
+  const updateQualificationMutation = useMutation({
+    mutationFn: async (dto: any) => {
+      if (!consultationId) return
+      const response = await consultationService.updateQualification(consultationId, dto)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consultation', consultationId] })
+    },
+  })
 
   return {
     consultation,

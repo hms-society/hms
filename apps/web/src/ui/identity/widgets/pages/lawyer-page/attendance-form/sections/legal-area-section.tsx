@@ -56,7 +56,7 @@ export function LegalAreaSection({
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-xs font-medium text-slate-700">Área jurídica *</label>
+          <label className="text-xs font-medium text-slate-700">Área jurídica</label>
           <select
             value={legalAreaId}
             onChange={(e) => {
@@ -75,7 +75,7 @@ export function LegalAreaSection({
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-slate-700">Tema jurídico *</label>
+          <label className="text-xs font-medium text-slate-700">Tema jurídico</label>
           <select
             value={legalTopicId}
             onChange={(e) => setLegalTopicId(e.target.value)}

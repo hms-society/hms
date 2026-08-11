@@ -36,7 +36,7 @@ const originMap: Record<string, string> = {
   referral: 'Indicação',
   phone: 'Telefone',
   active_search: 'Busca Ativa',
-  direct: 'Entrada direta HMS'
+  direct: 'Entrada direta HMS',
 }
 
 const channelMap: Record<string, string> = {
@@ -49,7 +49,7 @@ const channelMap: Record<string, string> = {
 
 const AVAILABLE_SLOTS = [
   '08:00', '09:00', '10:00', '11:00',
-  '13:30', '14:30', '15:30', '16:30', '17:30'
+  '13:30', '14:30', '15:30', '16:30', '17:30',
 ]
 
 export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetailsProps>(
@@ -61,7 +61,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       markNoShow,
       rescheduleConsultation,
     } = useConsultation(consultationId)
-
+    
     const [feedbackBanner, setFeedbackBanner] = useState<{
       type: 'success' | 'danger' | 'info'
       message: string
@@ -130,7 +130,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           type: 'info',
           message: `Consulta remarcada para ${new Date(combinedIsoDate).toLocaleDateString('pt-BR')} às ${selectedTime}.`,
         })
-      } catch (error) {
+      } catch {
         setFeedbackBanner({
           type: 'danger',
           message: 'Ocorreu um erro ao remarcar a consulta. Tente novamente.',
@@ -141,20 +141,17 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
     }
 
     const intakeObj = consultation?.intake as any
-    const demandContext =
-      intakeObj?.demand_notes ||
-      intakeObj?.demandNotes ||
-      consultation?.primaryLegalQuestion ||
-      consultation?.notes
+    const demandContext = intakeObj?.demandNotes || consultation?.primaryLegalQuestion
 
     const client = consultation?.client
-    const displayName = client?.name || client?.legalName || client?.tradeName || 'Cliente HMS Teste'
+    const displayName = client?.name || client?.legalName || client?.tradeName || 'Cliente sem nome'
 
     const clientData = {
       name: displayName,
       initials: displayName !== 'Cliente sem nome'
         ? displayName
             .split(' ')
+            .filter(Boolean)
             .map((n: string) => n[0])
             .slice(0, 2)
             .join('')
@@ -162,17 +159,17 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
         : 'CL',
       badge: client?.type === 'legal' ? 'Pessoa Jurídica' : 'Pessoa Física',
       taxIdLabel: client?.taxIdType ? String(client.taxIdType).toUpperCase() : 'CPF/CNPJ',
-      taxIdValue: client?.taxIdValue || client?.cpf || '123.456.789-00',
-      phone: client?.phone || '(12) 98765-4321',
-      email: client?.email || 'cliente@email.com',
+      taxIdValue: client?.taxIdValue || '—',
+      phone: client?.phone || '—',
+      email: client?.email || '—',
       location:
         client?.city && client?.state
           ? `${client.city} - ${client.state}`
-          : 'São José dos Campos - SP',
+          : '—',
     }
 
-    const rawOrigin = intakeObj?.origin || intakeObj?.source || consultation?.channel
-    const rawChannel = intakeObj?.contactChannel || intakeObj?.contact_channel || (consultation?.modality === 'PRESENTIAL' ? 'in_person' : 'video_call')
+    const rawOrigin = intakeObj?.origin || client?.origin || consultation?.channel
+    const rawChannel = intakeObj?.contactChannel || (consultation?.modality === 'PRESENTIAL' ? 'in_person' : 'video_call')
     const rawUrgency = intakeObj?.urgency || 'normal'
 
     const urgencyMap: Record<string, string> = {
@@ -195,10 +192,15 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       openedAt: consultation?.createdAt
         ? new Date(consultation.createdAt).toLocaleDateString('pt-BR')
         : '—',
-      attendant: intakeObj?.attendantName || intakeObj?.attendant_name || 'Sistema',
+      attendant:
+        (consultation as any)?.attendant?.name ||
+        intakeObj?.responsible?.professionalName ||
+        intakeObj?.responsible?.professional_name ||
+        client?.hmsResponsible ||
+        'Nenhum',
     }
 
-    const currentScheduledAt = (consultation as any)?.scheduledAt || (consultation as any)?.appointmentDate || consultation?.startedAt
+    const currentScheduledAt = (consultation as any)?.scheduledAt || (consultation as any)?.appointmentDate || consultation?.startedAt || consultation?.createdAt
 
     const schedule = {
       dateTime: currentScheduledAt
@@ -209,12 +211,12 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             hour: '2-digit',
             minute: '2-digit',
           })
-        : '06/08/2026 08:00',
+        : '—',
       format: consultation?.modality === 'PRESENTIAL' ? 'Presencial' : 'Virtual',
       lawyer:
         consultation?.assignedLawyer?.name ||
         consultation?.assignedLawyer?.professionalName ||
-        'Advogado de desenvolvimento',
+        'Não atribuído',
     }
 
     const todayString = new Date().toISOString().split('T')[0]
@@ -230,6 +232,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             <ArrowLeft className="w-3.5 h-3.5" /> Voltar
           </button>
         </div>
+
         {feedbackBanner && (
           <div
             className={`p-3.5 sm:p-4 rounded-xl text-xs font-medium flex items-start sm:items-center justify-between gap-3 shadow-sm transition-all animate-in fade-in slide-in-from-top-2 ${
@@ -259,6 +262,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             </button>
           </div>
         )}
+
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
           <div className="flex flex-col sm:flex-row items-start gap-4 flex-1">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-teal-50 text-teal-800 font-bold text-base sm:text-lg flex items-center justify-center shrink-0 border border-teal-100">
@@ -299,6 +303,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
 
           <div className="hidden lg:block w-px h-28 bg-slate-200" />
           <div className="block lg:hidden w-full h-px bg-slate-100 my-1" />
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-y-3 gap-x-4 sm:gap-x-8 text-xs font-sans w-full lg:w-auto lg:min-w-[280px]">
             <div>
               <span className="text-slate-400 block mb-0.5">Intake</span>
@@ -343,6 +348,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 space-y-3">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
             <MessageSquare className="w-4 h-4 text-slate-400 shrink-0" />
@@ -354,6 +360,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
               : demandContext || 'Nenhum contexto detalhado registrado para esta consulta.'}
           </p>
         </div>
+
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 space-y-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
@@ -373,7 +380,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Horário
               </span>
               <span className="font-semibold text-slate-800">
-                06/08/2026 14:30
+                {isLoading ? '...' : schedule.dateTime}
               </span>
             </div>
 
@@ -395,6 +402,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
               </span>
             </div>
           </div>
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
             <span className="text-xs text-slate-500 font-medium">Atualizar presença / status:</span>
 
@@ -443,6 +451,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-2xl border border-teal-600/60 p-4 sm:p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 flex items-center justify-center shrink-0 border border-teal-100">
@@ -462,7 +471,6 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           </Button>
         </div>
 
-        {/* Modal de Remarcação Responsivo */}
         {isRescheduleModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-lg p-5 sm:p-6 space-y-5 sm:space-y-6 relative max-h-[90vh] overflow-y-auto">
@@ -547,7 +555,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
         )}
       </div>
     )
-  }
+  },
 )
 
 ConsultationDetails.displayName = 'ConsultationDetails'

@@ -12,24 +12,32 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
   assignedLawyer?: {
     id: string
     name?: string
+    professionalName?: string
     email?: string
     [key: string]: any
   }
   intake?: {
-  id: string
-  sequenceNumber?: number
-  origin?: string
-  contactChannel?: string
-  legalAreaId?: string
-  legalTopicId?: string
-  urgency?: string
-  demandNotes?: string | null
-  status?: string
-  responsibleId?: string
-  createdBy?: string
-  attendantName?: string
-  [key: string]: any
-}
+    id: string
+    sequenceNumber?: number
+    origin?: string
+    contactChannel?: string
+    legalAreaId?: string
+    legalTopicId?: string
+    urgency?: string
+    demandNotes?: string | null
+    status?: string
+    responsibleId?: string
+    createdBy?: string
+    attendantName?: string
+    responsible?: {
+      id: string
+      name?: string
+      professionalName?: string
+      email?: string
+      [key: string]: any
+    }
+    [key: string]: any
+  }
   client?: {
     id: string
     type?: string
@@ -80,6 +88,7 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
   potentialRequests?: Array<{
     id: string
     description: string
+    summary?: string | null
   }>
   identifiedRisks?: Array<{
     id: string
@@ -111,6 +120,8 @@ export class DrizzleConsultationMapper {
       primaryLegalQuestion: record.primaryLegalQuestion ?? undefined,
       guidanceProvided: record.guidanceProvided ?? undefined,
       notes: record.notes ?? undefined,
+      viability: (record as any).viability ?? undefined,
+      decision: (record as any).decision ?? undefined,
       startedAt: record.startedAt ?? undefined,
       completedAt: record.completedAt ?? undefined,
       noShowAt: record.noShowAt ?? undefined,
@@ -120,29 +131,46 @@ export class DrizzleConsultationMapper {
       assignedLawyer: record.assignedLawyer
         ? {
             id: record.assignedLawyer.id,
-            name: record.assignedLawyer.name ?? record.assignedLawyer.professionalName,
+            name:
+              record.assignedLawyer.professionalName ??
+              record.assignedLawyer.name ??
+              'Não informado',
             email: record.assignedLawyer.email,
+          }
+        : undefined,
+      attendant: record.intake?.responsible
+        ? {
+            id: record.intake.responsible.id,
+            name:
+              record.intake.responsible.professionalName ??
+              record.intake.responsible.professional_name ??
+              record.intake.responsible.name ??
+              'Sistema',
+            email: record.intake.responsible.email,
           }
         : undefined,
 
       intake: record.intake
-  ? {
-      id: record.intake.id,
-      code: record.intake.sequenceNumber
-        ? `INT-${String(record.intake.sequenceNumber).padStart(4, '0')}`
-        : record.intake.code,
-      origin: record.intake.origin,
-      contactChannel: record.intake.contactChannel,
-      legalAreaId: record.intake.legalAreaId,
-      legalTopicId: record.intake.legalTopicId,
-      urgency: record.intake.urgency,
-      demandNotes: record.intake.demandNotes ?? undefined,
-      status: record.intake.status,
-      responsibleId: record.intake.responsibleId,
-      createdBy: record.intake.createdBy,
-      attendantName: record.intake.attendantName,
-    }
-  : undefined,
+        ? {
+            id: record.intake.id,
+            code: record.intake.sequenceNumber
+              ? `INT-${String(record.intake.sequenceNumber).padStart(4, '0')}`
+              : record.intake.code,
+            origin: record.intake.origin,
+            contactChannel: record.intake.contactChannel,
+            legalAreaId: record.intake.legalAreaId,
+            legalTopicId: record.intake.legalTopicId,
+            urgency: record.intake.urgency,
+            demandNotes: record.intake.demandNotes ?? undefined,
+            status: record.intake.status,
+            responsibleId: record.intake.responsibleId,
+            createdBy: record.intake.createdBy,
+            attendantName:
+              record.intake.responsible?.professionalName ??
+              record.intake.responsible?.name ??
+              record.intake.attendantName,
+          }
+        : undefined,
 
       client: record.client
         ? {
@@ -177,20 +205,21 @@ export class DrizzleConsultationMapper {
             state: record.client.state ?? undefined,
           }
         : undefined,
-        legalArea: record.legalArea
-          ? {
-              id: record.legalArea.id,
-              name: record.legalArea.name,
-            }
-          : undefined,
 
-        legalTopic: record.legalTopic
-          ? {
-              id: record.legalTopic.id,
-              legalAreaId: record.legalTopic.legalAreaId,
-              name: record.legalTopic.name,
-            }
-          : undefined,
+      legalArea: record.legalArea
+        ? {
+            id: record.legalArea.id,
+            name: record.legalArea.name,
+          }
+        : undefined,
+
+      legalTopic: record.legalTopic
+        ? {
+            id: record.legalTopic.id,
+            legalAreaId: record.legalTopic.legalAreaId,
+            name: record.legalTopic.name,
+          }
+        : undefined,
 
       relevantFacts: (record.facts ?? []).map((fact) => ({
         id: fact.id,
@@ -200,6 +229,7 @@ export class DrizzleConsultationMapper {
       potentialLegalRequests: (record.potentialRequests ?? []).map((req) => ({
         id: req.id,
         description: req.description,
+        summary: req.summary ?? undefined,
       })),
       identifiedRisks: (record.identifiedRisks ?? []).map((risk) => ({
         id: risk.id,
@@ -234,6 +264,8 @@ export class DrizzleConsultationMapper {
       primaryLegalQuestion: entity.primaryLegalQuestion ?? null,
       guidanceProvided: entity.guidanceProvided ?? null,
       notes: entity.notes ?? null,
+      viability: (entity as any).viability ?? null,
+      decision: (entity as any).decision ?? null,
       startedAt: entity.startedAt ?? null,
       completedAt: entity.completedAt ?? null,
       noShowAt: entity.noShowAt ?? null,

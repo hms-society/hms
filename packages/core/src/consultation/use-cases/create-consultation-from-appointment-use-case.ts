@@ -9,7 +9,7 @@ export class CreateConsultationDto {
   assignedLawyerId!: string
   legalAreaId!: string
   legalTopicId!: string
-  modality!: any
+  modality!: ConsultationModality
   channel?: string
 }
 

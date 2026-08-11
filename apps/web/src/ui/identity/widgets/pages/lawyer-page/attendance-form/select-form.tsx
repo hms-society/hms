@@ -1,15 +1,28 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { X, Search, FileText, Check } from 'lucide-react'
 import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export interface FormOption {
   id: string
   title: string
   area?: string
   theme?: string
-  legalAreaId?: string  
-  legalTopicId?: string 
+  legalAreaId?: string
+  legalTopicId?: string
+}
+
+interface LegalAreaOption {
+  id: string
+  name: string
+}
+
+interface LegalTopicOption {
+  id: string
+  legalAreaId?: string
+  name: string
 }
 
 interface SelectFormDialogProps {
@@ -18,45 +31,70 @@ interface SelectFormDialogProps {
   onSelect: (form: FormOption) => void
 }
 
-const AVAILABLE_FORMS: FormOption[] = [
-  {
-    id: '1',
-    title: 'Triagem trabalhista inicial',
-    area: 'Trabalhista',
-    theme: 'Verbas rescisórias',
-  },
-  {
-    id: '2',
-    title: 'Entrevista inicial trabalhista',
-    area: 'Trabalhista',
-    theme: 'Relação de emprego',
-  },
-  {
-    id: '3',
-    title: 'Triagem previdenciária inicial',
-    area: 'Previdenciário',
-    theme: 'Aposentadoria por idade',
-  },
-]
+const AVAILABLE_FORMS: FormOption[] = []
 
 export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialogProps) {
+  const { legalCatalogService } = useRestContext()
+
   const [search, setSearch] = useState('')
-  const [selectedArea, setSelectedArea] = useState('Todas as áreas')
-  const [selectedTheme, setSelectedTheme] = useState('Todos os temas')
-  const [selectedId, setSelectedId] = useState('1')
+  const [selectedArea, setSelectedArea] = useState('')
+  const [selectedTheme, setSelectedTheme] = useState('')
+  const [selectedId, setSelectedId] = useState('')
+
+  const { data: areasData } = useQuery({
+    queryKey: ['legal-areas'],
+    queryFn: async () => {
+      const response = await legalCatalogService.listLegalAreas()
+
+      if (response.isFailure) return []
+
+      return (response.body as LegalAreaOption[]) ?? []
+    },
+    enabled: isOpen,
+  })
+
+  const { data: topicsData } = useQuery({
+    queryKey: ['legal-topics', selectedArea],
+    queryFn: async () => {
+      if (!selectedArea) return []
+
+      const response = await legalCatalogService.listLegalTopics(selectedArea)
+
+      if (response.isFailure) return []
+
+      return (response.body as LegalTopicOption[]) ?? []
+    },
+    enabled: isOpen && Boolean(selectedArea),
+  })
 
   if (!isOpen) return null
 
-  const filteredForms = AVAILABLE_FORMS.filter((f) => {
-    const matchesSearch = f.title.toLowerCase().includes(search.toLowerCase())
-    const matchesArea = selectedArea === 'Todas as áreas' || f.area === selectedArea
-    const matchesTheme = selectedTheme === 'Todos os temas' || f.theme === selectedTheme
+  const areas = areasData ?? []
+  const topics = topicsData ?? []
+
+  const filteredForms = AVAILABLE_FORMS.filter((form) => {
+    const matchesSearch = form.title.toLowerCase().includes(search.toLowerCase())
+    const matchesArea =
+      !selectedArea || form.legalAreaId === selectedArea
+    const matchesTheme =
+      !selectedTheme || form.legalTopicId === selectedTheme
+
     return matchesSearch && matchesArea && matchesTheme
   })
 
+  const handleAreaChange = (areaId: string) => {
+    setSelectedArea(areaId)
+    setSelectedTheme('')
+    setSelectedId('')
+  }
+
   const handleConfirm = () => {
-    const found = AVAILABLE_FORMS.find((f) => f.id === selectedId)
-    if (found) onSelect(found)
+    const found = AVAILABLE_FORMS.find((form) => form.id === selectedId)
+
+    if (found) {
+      onSelect(found)
+    }
+
     onClose()
   }
 
@@ -68,18 +106,29 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
             <h3 className="text-base font-bold text-slate-800 font-serif">
               Selecionar ficha de atendimento
             </h3>
+
             <p className="text-xs text-slate-500">
               Filtre pelo contexto jurídico ou pesquise pelo nome da ficha.
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
+
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-700">Buscar ficha</label>
+          <label className="text-xs font-medium text-slate-700">
+            Buscar ficha
+          </label>
+
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -88,75 +137,108 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
             />
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-slate-700">Área jurídica</label>
+            <label className="text-xs font-medium text-slate-700">
+              Área jurídica
+            </label>
+
             <select
               value={selectedArea}
-              onChange={(e) => setSelectedArea(e.target.value)}
+              onChange={(e) => handleAreaChange(e.target.value)}
               className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700"
             >
-              <option>Todas as áreas</option>
-              <option>Trabalhista</option>
-              <option>Previdenciário</option>
+              <option value="">Todas as áreas</option>
+
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
             </select>
           </div>
+
           <div>
-            <label className="text-xs font-medium text-slate-700">Tema jurídico</label>
+            <label className="text-xs font-medium text-slate-700">
+              Tema jurídico
+            </label>
+
             <select
               value={selectedTheme}
               onChange={(e) => setSelectedTheme(e.target.value)}
-              className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700"
+              disabled={!selectedArea}
+              className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 disabled:bg-slate-50 disabled:text-slate-400"
             >
-              <option>Todos os temas</option>
-              <option>Verbas rescisórias</option>
-              <option>Relação de emprego</option>
-              <option>Aposentadoria por idade</option>
+              <option value="">Todos os temas</option>
+
+              {topics.map((topic) => (
+                <option key={topic.id} value={topic.id}>
+                  {topic.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
+
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-medium text-slate-700">Fichas encontradas</span>
+            <span className="font-medium text-slate-700">
+              Fichas encontradas
+            </span>
+
             <span>{filteredForms.length} resultados</span>
           </div>
 
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-            {filteredForms.map((item) => {
-              const isSelected = selectedId === item.id
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setSelectedId(item.id)}
-                  className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-emerald-50/60 border-emerald-300'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
-                  }`}
-                >
+            {filteredForms.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">
+                Nenhuma ficha disponível.
+              </div>
+            ) : (
+              filteredForms.map((item) => {
+                const isSelected = selectedId === item.id
+
+                return (
                   <div
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                    key={item.id}
+                    onClick={() => setSelectedId(item.id)}
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                       isSelected
-                        ? 'border-emerald-700 bg-emerald-700 text-white'
-                        : 'border-slate-300 bg-white'
+                        ? 'bg-emerald-50/60 border-emerald-300'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        isSelected
+                          ? 'border-emerald-700 bg-emerald-700 text-white'
+                          : 'border-slate-300 bg-white'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      )}
+                    </div>
 
-                  <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                    <FileText className="w-4 h-4 text-slate-400 shrink-0" />
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-800 truncate">{item.title}</p>
-                    <p className="text-[11px] text-slate-500">
-                      {item.area} · {item.theme}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 truncate">
+                        {item.title}
+                      </p>
+
+                      <p className="text-[11px] text-slate-500">
+                        {item.area} · {item.theme}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })
+            )}
           </div>
         </div>
+
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <Button
             variant="outline"
@@ -165,11 +247,14 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
           >
             Cancelar
           </Button>
+
           <Button
             onClick={handleConfirm}
-            className="bg-teal-800 hover:bg-teal-900 text-white rounded-full h-9 text-xs px-5 gap-1.5"
+            disabled={!selectedId}
+            className="bg-teal-800 hover:bg-teal-900 text-white rounded-full h-9 text-xs px-5 gap-1.5 disabled:opacity-50"
           >
-            <Check className="w-3.5 h-3.5" /> Usar ficha
+            <Check className="w-3.5 h-3.5" />
+            Usar ficha
           </Button>
         </div>
       </div>

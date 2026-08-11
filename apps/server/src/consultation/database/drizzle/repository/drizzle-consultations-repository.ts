@@ -15,6 +15,19 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
     return this.drizzleClient.requireDatabase()
   }
 
+  private parseNullableDate(dateStr?: string | Date | null): Date | undefined {
+    if (!dateStr) return undefined
+    if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? undefined : dateStr
+    if (typeof dateStr === 'string' && !dateStr.trim()) return undefined
+    const parsed = new Date(dateStr)
+    return isNaN(parsed.getTime()) ? undefined : parsed
+  }
+
+  private parseNullableString(str?: string | null): string | undefined {
+    if (!str || !str.trim()) return undefined
+    return str.trim()
+  }
+
   async findById(id: string): Promise<Consultation | null> {
     const record = await this.db.query.consultationModel.findFirst({
       where: eq(schema.consultationModel.id, id),
@@ -33,9 +46,24 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (!record) return null
 
-    console.log('intake raw:', JSON.stringify(record.intake, null, 2))
+    let responsibleCollaborator: any = null
 
-    return DrizzleConsultationMapper.toDomain(record as any)
+    if (record.intake?.responsibleId) {
+      const found = await this.db.query.collaboratorModel.findFirst({
+        where: eq(schema.collaboratorModel.id, record.intake.responsibleId),
+      })
+      responsibleCollaborator = found ?? null
+    }
+
+    return DrizzleConsultationMapper.toDomain({
+      ...record,
+      intake: record.intake
+        ? {
+            ...record.intake,
+            responsible: responsibleCollaborator,
+          }
+        : undefined,
+    } as any)
   }
 
   async findByAppointmentId(appointmentId: string): Promise<Consultation | null> {
@@ -56,51 +84,69 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (!record) return null
 
-    return DrizzleConsultationMapper.toDomain(record as any)
+    let responsibleCollaborator: any = null
+
+    if (record.intake?.responsibleId) {
+      const found = await this.db.query.collaboratorModel.findFirst({
+        where: eq(schema.collaboratorModel.id, record.intake.responsibleId),
+      })
+      responsibleCollaborator = found ?? null
+    }
+
+    return DrizzleConsultationMapper.toDomain({
+      ...record,
+      intake: record.intake
+        ? {
+            ...record.intake,
+            responsible: responsibleCollaborator,
+          }
+        : undefined,
+    } as any)
   }
 
- async updateClientQualification(
-  clientId: string,
-  dto: UpdateClientQualificationDto,
-): Promise<void> {
-  const isLegal = Boolean(dto.legalName || dto.stateRegistration)
+  async updateClientQualification(
+    clientId: string,
+    dto: UpdateClientQualificationDto,
+  ): Promise<void> {
+    const isLegal = Boolean(dto.legalName || dto.stateRegistration)
+    const parsedBirthDate = this.parseNullableDate(dto.birthDate)
+    const parsedConstitutionDate = this.parseNullableDate(dto.constitutionDate)
 
-  await this.db
-    .update(schema.clientModel)
-    .set({
-      type: isLegal ? ('legal' as any) : ('natural' as any),
-      taxIdType: isLegal ? ('cnpj' as any) : ('cpf' as any),
-      taxIdValue: dto.taxIdValue,
-      name: isLegal ? null : dto.name,
-      legalName: isLegal ? dto.legalName : null,
-      tradeName: dto.tradeName,
-      phone: dto.phone,
-      email: dto.email,
-      origin: dto.origin,
-      linkedThirdParty: dto.linkedThirdParty,
-      hmsResponsible: dto.hmsResponsible,
-      rg: dto.rg,
-      birthDate: dto.birthDate,
-      maritalStatus: dto.maritalStatus,
-      nationality: dto.nationality,
-      profession: dto.profession,
-      stateRegistration: dto.stateRegistration,
-      constitutionDate: dto.constitutionDate,
-      legalNature: dto.legalNature,
-      legalRepresentative: dto.legalRepresentative,
-      representativeRole: dto.representativeRole,
-      zipCode: dto.zipCode,
-      street: dto.street,
-      number: dto.number,
-      complement: dto.complement,
-      district: dto.district,
-      city: dto.city,
-      state: dto.state,
-
-      updatedAt: new Date(),
-    })
-    .where(eq(schema.clientModel.id, clientId))
-}
+    await this.db
+      .update(schema.clientModel)
+      .set({
+        type: isLegal ? ('legal' as any) : ('natural' as any),
+        taxIdType: isLegal ? ('cnpj' as any) : ('cpf' as any),
+        taxIdValue: this.parseNullableString(dto.taxIdValue),
+        name: isLegal ? (null as any) : this.parseNullableString(dto.name),
+        legalName: isLegal ? this.parseNullableString(dto.legalName) : (null as any),
+        tradeName: this.parseNullableString(dto.tradeName),
+        phone: this.parseNullableString(dto.phone),
+        email: this.parseNullableString(dto.email),
+        origin: this.parseNullableString(dto.origin),
+        linkedThirdParty: this.parseNullableString(dto.linkedThirdParty),
+        hmsResponsible: this.parseNullableString(dto.hmsResponsible),
+        rg: this.parseNullableString(dto.rg),
+        birthDate: parsedBirthDate ? (parsedBirthDate.toISOString() as any) : null,
+        constitutionDate: parsedConstitutionDate ? (parsedConstitutionDate.toISOString() as any) : null,
+        maritalStatus: this.parseNullableString(dto.maritalStatus),
+        nationality: this.parseNullableString(dto.nationality),
+        profession: this.parseNullableString(dto.profession),
+        stateRegistration: this.parseNullableString(dto.stateRegistration),
+        legalNature: this.parseNullableString(dto.legalNature),
+        legalRepresentative: this.parseNullableString(dto.legalRepresentative),
+        representativeRole: this.parseNullableString(dto.representativeRole),
+        zipCode: this.parseNullableString(dto.zipCode),
+        street: this.parseNullableString(dto.street),
+        number: this.parseNullableString(dto.number),
+        complement: this.parseNullableString(dto.complement),
+        district: this.parseNullableString(dto.district),
+        city: this.parseNullableString(dto.city),
+        state: this.parseNullableString(dto.state),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.clientModel.id, clientId))
+  }
 
   async save(consultation: Consultation): Promise<void> {
     const rawData = DrizzleConsultationMapper.toPersistence(consultation)
@@ -113,6 +159,10 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         set: rawData,
       })
 
+    await this.db
+      .delete(schema.consultationRelevantFactModel)
+      .where(eq(schema.consultationRelevantFactModel.consultationId, consultation.id))
+
     if (consultation.relevantFacts.length > 0) {
       await this.db
         .insert(schema.consultationRelevantFactModel)
@@ -124,8 +174,13 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
             occurredOn: fact.occurredOn ?? null,
           })),
         )
-        .onConflictDoNothing()
     }
+
+    await this.db
+      .delete(schema.consultationPotentialLegalRequestModel)
+      .where(
+        eq(schema.consultationPotentialLegalRequestModel.consultationId, consultation.id),
+      )
 
     if (consultation.potentialLegalRequests.length > 0) {
       await this.db
@@ -135,10 +190,14 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
             id: req.id,
             consultationId: consultation.id,
             description: req.description,
+            summary: req.summary ?? null,
           })),
         )
-        .onConflictDoNothing()
     }
+
+    await this.db
+      .delete(schema.consultationIdentifiedRiskModel)
+      .where(eq(schema.consultationIdentifiedRiskModel.consultationId, consultation.id))
 
     if (consultation.identifiedRisks.length > 0) {
       await this.db
@@ -150,7 +209,6 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
             description: risk.description,
           })),
         )
-        .onConflictDoNothing()
     }
   }
 }

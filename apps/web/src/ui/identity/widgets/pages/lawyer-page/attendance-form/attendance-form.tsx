@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { ArrowLeft, Check, FileClock } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { Button } from '@/ui/shadcn/button'
 
 import { AddFactDialog } from './add-fact'
@@ -20,118 +20,134 @@ import { ClaimsSection, type LegalClaim } from './sections/claim-section'
 import { LawyerNotesSection } from './sections/lawyer-notes-section'
 import { ConclusionSection } from './sections/conclusion-section'
 
+const ORIGIN_MAP: Record<string, string> = {
+  social_media: 'Redes Sociais',
+  website: 'Website / Plataforma',
+  referral: 'Indicação',
+  phone: 'Telefone',
+  active_search: 'Busca Ativa',
+  direct: 'Entrada direta HMS',
+}
+
 export interface AttendanceFormProps {
   consultationId: string
   onBack?: () => void
 }
 
-export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) {
-  const { consultation, isLoading, completeConsultation, updateQualification } =
-    useConsultation(consultationId)
+export function AttendanceForm({
+  consultationId,
+  onBack,
+}: AttendanceFormProps) {
+  const {
+    consultation,
+    isLoading,
+    completeConsultation,
+    updateQualification,
+  } = useConsultation(consultationId)
+
+  const DRAFT_KEY = `consultation_draft_${consultationId}`
+
+  const getDraft = () => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY)
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  }
+
+  const draft = getDraft()
 
   const [isFactModalOpen, setIsFactModalOpen] = useState(false)
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingFact, setEditingFact] = useState<TimelineFact | null>(null)
+
+  const [mainLegalQuestionError, setMainLegalQuestionError] = useState('')
+  const [clientGuidanceError, setClientGuidanceError] = useState('')
 
   const client = consultation?.client
   const intake = consultation?.intake
 
-  const [personType, setPersonType] = useState<'individual' | 'legal'>(() =>
-    client?.type === 'legal' ? 'legal' : 'individual',
+  const rawOrigin =
+    draft?.origin ?? client?.origin ?? intake?.origin ?? 'direct'
+
+  const [personType, setPersonType] = useState<'individual' | 'legal'>(
+    draft?.personType ?? (client?.type === 'legal' ? 'legal' : 'individual'),
   )
 
-  const [fullName, setFullName] = useState(
-    () => client?.name || intake?.clientName || '',
-  )
-  const [cpf, setCpf] = useState(
-    () => client?.taxIdValue || client?.cpf || intake?.cpf || '',
-  )
-  const [phone, setPhone] = useState(
-    () => client?.phone || intake?.phone || '',
-  )
-  const [email, setEmail] = useState(
-    () => client?.email || intake?.email || '',
-  )
-  const [origin, setOrigin] = useState(
-    () => client?.origin || intake?.channel || 'Entrada direta HMS',
+  const [fullName, setFullName] = useState(() => draft?.fullName ?? client?.name ?? '')
+  const [cpf, setCpf] = useState(() => draft?.cpf ?? client?.taxIdValue ?? '')
+  const [phone, setPhone] = useState(() => draft?.phone ?? client?.phone ?? '')
+  const [email, setEmail] = useState(() => draft?.email ?? client?.email ?? '')
+  const [origin] = useState(
+    () => ORIGIN_MAP[rawOrigin] ?? rawOrigin ?? 'Entrada direta HMS',
   )
   const [linkedThirdParty, setLinkedThirdParty] = useState(
-    () => client?.linkedThirdParty || '',
+    () => draft?.linkedThirdParty ?? client?.linkedThirdParty ?? '',
   )
-  const [hmsResponsible, setHmsResponsible] = useState('')
-  const [rg, setRg] = useState(() => client?.rg || '')
-  const [birthDate, setBirthDate] = useState(() => client?.birthDate || '')
+  const [hmsResponsible, setHmsResponsible] = useState(() => draft?.hmsResponsible ?? '')
+  const [rg, setRg] = useState(() => draft?.rg ?? client?.rg ?? '')
+  const [birthDate, setBirthDate] = useState(() => draft?.birthDate ?? client?.birthDate ?? '')
   const [maritalStatus, setMaritalStatus] = useState(
-    () => client?.maritalStatus || '',
+    () => draft?.maritalStatus ?? client?.maritalStatus ?? '',
   )
   const [nationality, setNationality] = useState(
-    () => client?.nationality || '',
+    () => draft?.nationality ?? client?.nationality ?? '',
   )
   const [profession, setProfession] = useState(
-    () => client?.profession || '',
+    () => draft?.profession ?? client?.profession ?? '',
   )
 
   const [companyName, setCompanyName] = useState(
-    () => client?.legalName || intake?.companyName || client?.name || '',
+    () => draft?.companyName ?? client?.legalName ?? client?.name ?? '',
   )
   const [tradeName, setTradeName] = useState(
-    () => client?.tradeName || intake?.tradeName || '',
+    () => draft?.tradeName ?? client?.tradeName ?? '',
   )
   const [stateRegistration, setStateRegistration] = useState(
-    () => client?.stateRegistration || '',
+    () => draft?.stateRegistration ?? client?.stateRegistration ?? '',
   )
   const [constitutionDate, setConstitutionDate] = useState(
-    () => client?.constitutionDate || '',
+    () => draft?.constitutionDate ?? client?.constitutionDate ?? '',
   )
   const [legalNature, setLegalNature] = useState(
-    () => client?.legalNature || '',
+    () => draft?.legalNature ?? client?.legalNature ?? '',
   )
   const [legalRepresentative, setLegalRepresentative] = useState(
-    () =>
-      client?.legalRepresentative ||
-      intake?.representativeName ||
-      '',
+    () => draft?.legalRepresentative ?? client?.legalRepresentative ?? '',
   )
   const [representativeRole, setRepresentativeRole] = useState(
-    () =>
-      client?.representativeRole ||
-      intake?.representativeRole ||
-      '',
+    () => draft?.representativeRole ?? client?.representativeRole ?? '',
   )
 
-  const [cep, setCep] = useState(
-    () => client?.zipCode || intake?.zipCode || '',
-  )
-  const [street, setStreet] = useState(
-    () => client?.street || intake?.street || '',
-  )
-  const [number, setNumber] = useState(
-    () => client?.number || intake?.number || '',
-  )
+  const [cep, setCep] = useState(() => draft?.cep ?? client?.zipCode ?? '')
+  const [street, setStreet] = useState(() => draft?.street ?? client?.street ?? '')
+  const [number, setNumber] = useState(() => draft?.number ?? client?.number ?? '')
   const [complement, setComplement] = useState(
-    () => client?.complement || intake?.complement || '',
+    () => draft?.complement ?? client?.complement ?? '',
   )
   const [neighborhood, setNeighborhood] = useState(
-    () => client?.district || intake?.district || '',
+    () => draft?.neighborhood ?? client?.district ?? '',
   )
   const [city, setCity] = useState(
-    () => client?.city || intake?.city || 'São José dos Campos',
+    () => draft?.city ?? client?.city ?? 'São José dos Campos',
   )
-  const [uf, setUf] = useState(
-    () => client?.state || intake?.state || 'SP',
+  const [uf, setUf] = useState(() => draft?.uf ?? client?.state ?? 'SP')
+
+  const intakeAreaId = intake?.legalAreaId || ''
+  const intakeTopicId = intake?.legalTopicId || ''
+
+  const [legalAreaId, setLegalAreaId] = useState(() => draft?.legalAreaId ?? intakeAreaId)
+  const [legalTopicId, setLegalTopicId] = useState(() => draft?.legalTopicId ?? intakeTopicId)
+
+  const [selectedFormName, setSelectedFormName] = useState(
+    () => draft?.selectedFormName ?? 'Triagem inicial',
   )
-
-  const initialAreaId = intake?.legalAreaId ?? ''
-  const initialTopicId = intake?.legalTopicId ?? ''
-
-  const [legalAreaId, setLegalAreaId] = useState(initialAreaId)
-  const [legalTopicId, setLegalTopicId] = useState(initialTopicId)
-
-  const [selectedFormName, setSelectedFormName] =
-    useState('Triagem inicial')
 
   const [facts, setFacts] = useState<TimelineFact[]>(
     () =>
+      draft?.facts ||
       consultation?.relevantFacts?.map((fact: any) => ({
         id: fact.id || crypto.randomUUID(),
         date: fact.occurredOn
@@ -139,31 +155,120 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
           : 'S/D',
         description: fact.description,
         status: 'Comprovado',
-      })) || [],
+      })) ||
+      [],
   )
 
   const [claims, setClaims] = useState<LegalClaim[]>(
     () =>
+      draft?.claims ||
       consultation?.potentialLegalRequests?.map((req: any) => ({
         id: req.id || crypto.randomUUID(),
-        title: req.description,
-        summary: '',
-      })) || [],
+        title: req.description || req.title,
+        summary: req.summary || '',
+      })) ||
+      [],
   )
 
   const [lawyerNotes, setLawyerNotes] = useState(
-    () => consultation?.notes || '',
+    () => draft?.lawyerNotes ?? consultation?.notes ?? '',
   )
   const [mainLegalQuestion, setMainLegalQuestion] = useState(
-    () => consultation?.primaryLegalQuestion || '',
+    () => draft?.mainLegalQuestion ?? consultation?.primaryLegalQuestion ?? '',
   )
   const [clientGuidance, setClientGuidance] = useState(
-    () => consultation?.guidanceProvided || '',
+    () => draft?.clientGuidance ?? consultation?.guidanceProvided ?? '',
   )
-  const [viability, setViability] = useState('Viável')
+  const [viability, setViability] = useState(() => draft?.viability ?? 'Viável')
   const [decision, setDecision] = useState(
-    'Prosseguir para contratação',
+    () => draft?.decision ?? 'Prosseguir para contratação',
   )
+
+  useEffect(() => {
+    if (!consultationId || isLoading) return
+
+    const dataToSave = {
+      personType,
+      fullName,
+      cpf,
+      phone,
+      email,
+      origin,
+      linkedThirdParty,
+      hmsResponsible,
+      rg,
+      birthDate,
+      maritalStatus,
+      nationality,
+      profession,
+      companyName,
+      tradeName,
+      stateRegistration,
+      constitutionDate,
+      legalNature,
+      legalRepresentative,
+      representativeRole,
+      cep,
+      street,
+      number,
+      complement,
+      neighborhood,
+      city,
+      uf,
+      legalAreaId,
+      legalTopicId,
+      selectedFormName,
+      facts,
+      claims,
+      lawyerNotes,
+      mainLegalQuestion,
+      clientGuidance,
+      viability,
+      decision,
+    }
+
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(dataToSave))
+  }, [
+    consultationId,
+    isLoading,
+    personType,
+    fullName,
+    cpf,
+    phone,
+    email,
+    origin,
+    linkedThirdParty,
+    hmsResponsible,
+    rg,
+    birthDate,
+    maritalStatus,
+    nationality,
+    profession,
+    companyName,
+    tradeName,
+    stateRegistration,
+    constitutionDate,
+    legalNature,
+    legalRepresentative,
+    representativeRole,
+    cep,
+    street,
+    number,
+    complement,
+    neighborhood,
+    city,
+    uf,
+    legalAreaId,
+    legalTopicId,
+    selectedFormName,
+    facts,
+    claims,
+    lawyerNotes,
+    mainLegalQuestion,
+    clientGuidance,
+    viability,
+    decision,
+  ])
 
   const { legalCatalogService } = useRestContext()
 
@@ -172,42 +277,123 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
     queryFn: async () => {
       const response = await legalCatalogService.listLegalAreas()
 
-      if (response.isFailure) return []
+      if (response.isFailure) {
+        return []
+      }
 
       return (response.body as LegalAreaOption[]) ?? []
     },
   })
 
-  const activeAreaIdForQuery = legalAreaId
-
   const { data: topicsData } = useQuery({
-    queryKey: ['legal-topics', activeAreaIdForQuery],
+    queryKey: ['legal-topics', legalAreaId],
     queryFn: async () => {
-      if (!activeAreaIdForQuery) return []
+      if (!legalAreaId) {
+        return []
+      }
 
       const response =
-        await legalCatalogService.listLegalTopics(
-          activeAreaIdForQuery,
-        )
+        await legalCatalogService.listLegalTopics(legalAreaId)
 
-      if (response.isFailure) return []
+      if (response.isFailure) {
+        return []
+      }
 
       return (response.body as LegalTopicOption[]) ?? []
     },
-    enabled: Boolean(activeAreaIdForQuery),
+    enabled: Boolean(legalAreaId),
   })
 
   const areasList = areasData ?? []
   const topicsList = topicsData ?? []
 
   const currentAreaName =
-    areasList.find((area) => area.id === legalAreaId)?.name ?? '—'
+    areasList.find((area) => area.id === legalAreaId)?.name || '—'
 
   const currentTopicName =
-    topicsList.find((topic) => topic.id === legalTopicId)?.name ?? '—'
+    topicsList.find((topic) => topic.id === legalTopicId)?.name || '—'
+
+  const handleSaveFact = (newFact: {
+    id?: string
+    date: string
+    description: string
+    status: string
+  }) => {
+    setFacts((prev) => {
+      if (newFact.id) {
+        return prev.map((f) =>
+          f.id === newFact.id
+            ? {
+                ...f,
+                date: newFact.date,
+                description: newFact.description,
+                status: newFact.status,
+              }
+            : f,
+        )
+      }
+
+      return [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          date: newFact.date,
+          description: newFact.description,
+          status: newFact.status,
+        },
+      ]
+    })
+  }
+
+  const handleSaveClaim = (newClaim: {
+    id?: string
+    title: string
+    summary: string
+  }) => {
+    setClaims((prev) => {
+      if (newClaim.id) {
+        return prev.map((claim) =>
+          claim.id === newClaim.id
+            ? { ...claim, title: newClaim.title, summary: newClaim.summary }
+            : claim,
+        )
+      }
+
+      return [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          title: newClaim.title,
+          summary: newClaim.summary,
+        },
+      ]
+    })
+  }
 
   const handleFinalize = async () => {
-    if (!consultationId) return
+    if (!consultationId) {
+      return
+    }
+
+    let hasError = false
+
+    if (!mainLegalQuestion || !mainLegalQuestion.trim()) {
+      setMainLegalQuestionError('A questão jurídica principal é obrigatória.')
+      hasError = true
+    }
+
+    if (!clientGuidance || !clientGuidance.trim()) {
+      setClientGuidanceError('A orientação prestada ao cliente é obrigatória.')
+      hasError = true
+    }
+
+    if (hasError) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      return
+    }
+
+    setMainLegalQuestionError('')
+    setClientGuidanceError('')
 
     try {
       setIsSubmitting(true)
@@ -240,19 +426,51 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
           district: neighborhood,
           city,
           state: uf,
-        })
+          rg: personType === 'individual' ? rg : undefined,
+          birthDate: personType === 'individual' ? birthDate : undefined,
+          maritalStatus: personType === 'individual' ? maritalStatus : undefined,
+          nationality: personType === 'individual' ? nationality : undefined,
+          profession: personType === 'individual' ? profession : undefined,
+          stateRegistration: personType === 'legal' ? stateRegistration : undefined,
+          constitutionDate: personType === 'legal' ? constitutionDate : undefined,
+          legalNature: personType === 'legal' ? legalNature : undefined,
+          legalRepresentative: personType === 'legal' ? legalRepresentative : undefined,
+          representativeRole: personType === 'legal' ? representativeRole : undefined,
+        } as any)
+        
       }
 
       if (completeConsultation) {
-        await completeConsultation(consultationId)
+        await completeConsultation({
+          consultationId,
+          legalAreaId: legalAreaId || undefined,
+          legalTopicId: legalTopicId || undefined,
+          primaryLegalQuestion: mainLegalQuestion || undefined,
+          guidanceProvided: clientGuidance || undefined,
+          notes: lawyerNotes || undefined,
+          viability: viability || undefined,
+          decision: decision || undefined,
+          relevantFacts: facts.map((fact) => ({
+            id: fact.id,
+            description: fact.description,
+            date: fact.date !== 'S/D' ? fact.date : undefined,
+          })),
+          potentialLegalRequests: claims.map((claim) => ({
+            id: claim.id,
+            title: claim.title,
+            summary: claim.summary,
+          })),
+        } as any)
       }
 
-      if (onBack) onBack()
+      localStorage.removeItem(DRAFT_KEY)
+      localStorage.removeItem(`extra_client_fields_${consultationId}`)
+
+      if (onBack) {
+        onBack()
+      }
     } catch (error) {
-      console.error(
-        'Erro ao finalizar consulta:',
-        error,
-      )
+      console.error('Erro ao finalizar consulta:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -278,6 +496,7 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
       </button>
 
       <QualificationSection
+        consultationId={consultationId}
         personType={personType}
         setPersonType={setPersonType}
         fullName={fullName}
@@ -335,8 +554,8 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
 
       <LegalAreaSection
         legalAreaId={legalAreaId}
-        setLegalAreaId={(newAreaId) => {
-          setLegalAreaId(newAreaId)
+        setLegalAreaId={(id) => {
+          setLegalAreaId(id)
           setLegalTopicId('')
         }}
         legalTopicId={legalTopicId}
@@ -349,9 +568,7 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
         selectedFormName={selectedFormName}
         legalArea={currentAreaName}
         legalTheme={currentTopicName}
-        onOpenSelectModal={() =>
-          setIsFormModalOpen(true)
-        }
+        onOpenSelectModal={() => setIsFormModalOpen(true)}
       />
 
       <TimelineSection
@@ -361,12 +578,23 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
             prev.filter((fact) => fact.id !== id),
           )
         }
-        onOpenAddModal={() =>
+        onEditFact={(fact) => {
+          setEditingFact(fact)
           setIsFactModalOpen(true)
-        }
+        }}
+        onOpenAddModal={() => {
+          setEditingFact(null)
+          setIsFactModalOpen(true)
+        }}
       />
 
-      <ClaimsSection claims={claims} />
+      <ClaimsSection
+        claims={claims}
+        onAddClaim={handleSaveClaim}
+        onRemoveClaim={(id) =>
+          setClaims((prev) => prev.filter((claim) => claim.id !== id))
+        }
+      />
 
       <LawyerNotesSection
         lawyerNotes={lawyerNotes}
@@ -375,21 +603,24 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
 
       <ConclusionSection
         mainLegalQuestion={mainLegalQuestion}
-        setMainLegalQuestion={setMainLegalQuestion}
+        setMainLegalQuestion={(val) => {
+          setMainLegalQuestion(val)
+          if (val.trim()) setMainLegalQuestionError('')
+        }}
         clientGuidance={clientGuidance}
-        setClientGuidance={setClientGuidance}
+        setClientGuidance={(val) => {
+          setClientGuidance(val)
+          if (val.trim()) setClientGuidanceError('')
+        }}
         viability={viability}
         setViability={setViability}
         decision={decision}
         setDecision={setDecision}
+        errorMessage={mainLegalQuestionError}
+        guidanceErrorMessage={clientGuidanceError}
       />
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-        <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-          <FileClock className="w-3.5 h-3.5" />
-          Rascunho salvo
-        </span>
-
+      <div className="flex items-center justify-end pt-4 border-t border-slate-200">
         <Button
           onClick={handleFinalize}
           disabled={isSubmitting}
@@ -404,16 +635,12 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
 
       <AddFactDialog
         isOpen={isFactModalOpen}
-        onClose={() => setIsFactModalOpen(false)}
-        onAdd={(newFact) =>
-          setFacts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              ...newFact,
-            },
-          ])
-        }
+        onClose={() => {
+          setIsFactModalOpen(false)
+          setEditingFact(null)
+        }}
+        factToEdit={editingFact}
+        onAdd={handleSaveFact}
       />
 
       <SelectFormDialog

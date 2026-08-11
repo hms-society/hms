@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { AlertCircle, User, Building2, ChevronUp } from 'lucide-react'
 import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
@@ -57,10 +58,103 @@ interface QualificationSectionProps {
   setCity: (val: string) => void
   uf: string
   setUf: (val: string) => void
+  consultationId?: string
 }
 
+const STORAGE_KEY_PREFIX = 'extra_client_fields_'
+
 export function QualificationSection(props: QualificationSectionProps) {
-  const { personType, setPersonType } = props
+  const {
+    personType,
+    setPersonType,
+    rg,
+    setRg,
+    birthDate,
+    setBirthDate,
+    maritalStatus,
+    setMaritalStatus,
+    nationality,
+    setNationality,
+    profession,
+    setProfession,
+    stateRegistration,
+    setStateRegistration,
+    constitutionDate,
+    setConstitutionDate,
+    legalNature,
+    setLegalNature,
+    legalRepresentative,
+    setLegalRepresentative,
+    representativeRole,
+    setRepresentativeRole,
+    consultationId = 'default',
+  } = props
+
+  const storageKey = `${STORAGE_KEY_PREFIX}${consultationId}`
+
+  const formatRG = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+      .slice(0, 12)
+  }
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey)
+      if (!saved) return
+      const draft = JSON.parse(saved)
+
+      if (draft.rg !== undefined && draft.rg !== '') setRg(draft.rg)
+      if (draft.birthDate !== undefined && draft.birthDate !== '') setBirthDate(draft.birthDate)
+      if (draft.maritalStatus !== undefined && draft.maritalStatus !== '') setMaritalStatus(draft.maritalStatus)
+      if (draft.nationality !== undefined && draft.nationality !== '') setNationality(draft.nationality)
+      if (draft.profession !== undefined && draft.profession !== '') setProfession(draft.profession)
+
+      if (draft.stateRegistration !== undefined && draft.stateRegistration !== '') setStateRegistration(draft.stateRegistration)
+      if (draft.constitutionDate !== undefined && draft.constitutionDate !== '') setConstitutionDate(draft.constitutionDate)
+      if (draft.legalNature !== undefined && draft.legalNature !== '') setLegalNature(draft.legalNature)
+      if (draft.legalRepresentative !== undefined && draft.legalRepresentative !== '') setLegalRepresentative(draft.legalRepresentative)
+      if (draft.representativeRole !== undefined && draft.representativeRole !== '') setRepresentativeRole(draft.representativeRole)
+    } catch (e) {
+      console.error('Erro ao restaurar campos extras:', e)
+    }
+  }, [storageKey])
+
+  useEffect(() => {
+    const dataToSave = {
+      rg,
+      birthDate,
+      maritalStatus,
+      nationality,
+      profession,
+      stateRegistration,
+      constitutionDate,
+      legalNature,
+      legalRepresentative,
+      representativeRole,
+    }
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave))
+    } catch (e) {
+      console.error('Erro ao salvar campos extras:', e)
+    }
+  }, [
+    storageKey,
+    rg,
+    birthDate,
+    maritalStatus,
+    nationality,
+    profession,
+    stateRegistration,
+    constitutionDate,
+    legalNature,
+    legalRepresentative,
+    representativeRole,
+  ])
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
@@ -75,17 +169,18 @@ export function QualificationSection(props: QualificationSectionProps) {
         <AlertCircle className="w-4 h-4 text-emerald-600 shrink-0" />
         Dados iniciais pré-preenchidos a partir do Intake. Complemente conforme a demanda.
       </div>
+
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-700">Tipo de pessoa *</label>
+        <label className="text-xs font-medium text-slate-700">Tipo de pessoa</label>
         <div className="flex items-center gap-2 max-w-xs bg-slate-100/70 p-1 rounded-xl">
           <Button
             type="button"
             variant={personType === 'individual' ? 'default' : 'ghost'}
             onClick={() => setPersonType('individual')}
-            className={`flex-1 rounded-lg h-8 text-xs font-medium gap-1.5 transition-all ${
+            className={`flex-1 rounded-lg h-8 text-xs font-medium gap-1.5 hover:bg-transparent ${
               personType === 'individual'
-                ? 'bg-white text-slate-800 shadow-sm border border-slate-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-white text-slate-800 shadow-sm border border-slate-200 hover:bg-white'
+                : 'text-slate-500'
             }`}
           >
             <User className="w-3.5 h-3.5 text-slate-500" />
@@ -95,10 +190,10 @@ export function QualificationSection(props: QualificationSectionProps) {
             type="button"
             variant={personType === 'legal' ? 'default' : 'ghost'}
             onClick={() => setPersonType('legal')}
-            className={`flex-1 rounded-lg h-8 text-xs font-medium gap-1.5 transition-all ${
+            className={`flex-1 rounded-lg h-8 text-xs font-medium gap-1.5 hover:bg-transparent ${
               personType === 'legal'
-                ? 'bg-white text-slate-800 shadow-sm border border-slate-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-white text-slate-800 shadow-sm border border-slate-200 hover:bg-white'
+                : 'text-slate-500'
             }`}
           >
             <Building2 className="w-3.5 h-3.5 text-slate-500" />
@@ -107,7 +202,6 @@ export function QualificationSection(props: QualificationSectionProps) {
         </div>
       </div>
 
-      {/* PESSOA FÍSICA */}
       {personType === 'individual' && (
         <div className="space-y-6">
           <div className="space-y-4">
@@ -117,7 +211,7 @@ export function QualificationSection(props: QualificationSectionProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-medium text-slate-700">Nome completo *</label>
+                <label className="text-xs font-medium text-slate-700">Nome completo</label>
                 <Input
                   value={props.fullName}
                   onChange={(e) => props.setFullName(e.target.value)}
@@ -125,7 +219,7 @@ export function QualificationSection(props: QualificationSectionProps) {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-700">CPF *</label>
+                <label className="text-xs font-medium text-slate-700">CPF</label>
                 <Input
                   value={props.cpf}
                   onChange={(e) => props.setCpf(e.target.value)}
@@ -133,7 +227,7 @@ export function QualificationSection(props: QualificationSectionProps) {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-700">Telefone principal *</label>
+                <label className="text-xs font-medium text-slate-700">Telefone principal</label>
                 <Input
                   value={props.phone}
                   onChange={(e) => props.setPhone(e.target.value)}
@@ -159,26 +253,26 @@ export function QualificationSection(props: QualificationSectionProps) {
                   className="mt-1 h-9 rounded-xl text-xs bg-slate-50 text-slate-700 cursor-not-allowed"
                 />
               </div>
-              {props.linkedThirdParty && (
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Terceiro vinculado</label>
-                  <Input
-                    value={props.linkedThirdParty}
-                    onChange={(e) => props.setLinkedThirdParty(e.target.value)}
-                    className="mt-1 h-9 rounded-xl text-xs"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="text-xs font-medium text-slate-700">Responsável HMS</label>
+                <Input
+                  value={props.hmsResponsible}
+                  onChange={(e) => props.setHmsResponsible(e.target.value)}
+                  className="mt-1 h-9 rounded-xl text-xs"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-slate-700">Responsável HMS *</label>
-              <Input
-                value={props.hmsResponsible}
-                onChange={(e) => props.setHmsResponsible(e.target.value)}
-                className="mt-1 h-9 rounded-xl text-xs"
-              />
-            </div>
+            {props.linkedThirdParty && (
+              <div className="max-w-xs">
+                <label className="text-xs font-medium text-slate-700">Terceiro vinculado</label>
+                <Input
+                  value={props.linkedThirdParty}
+                  onChange={(e) => props.setLinkedThirdParty(e.target.value)}
+                  className="mt-1 h-9 rounded-xl text-xs"
+                />
+              </div>
+            )}
           </div>
 
           <hr className="border-slate-100" />
@@ -193,58 +287,64 @@ export function QualificationSection(props: QualificationSectionProps) {
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-medium text-slate-700">RG</label>
                 <Input
-                  value={props.rg}
-                  onChange={(e) => props.setRg(e.target.value)}
+                  value={rg}
+                  maxLength={12}
+                  onChange={(e) => setRg(formatRG(e.target.value))}
+                  placeholder="00.000.000-0"
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-700">Data de nascimento</label>
                 <Input
-                  value={props.birthDate}
-                  onChange={(e) => props.setBirthDate(e.target.value)}
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-700">Estado civil</label>
                 <select
-                  value={props.maritalStatus}
-                  onChange={(e) => props.setMaritalStatus(e.target.value)}
-                  className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 text-slate-700"
-                >
-                  <option value="">—</option>
-                  <option value="Solteiro(a)">Solteiro(a)</option>
-                  <option value="Casado(a)">Casado(a)</option>
-                  <option value="Divorciado(a)">Divorciado(a)</option>
-                  <option value="Viúvo(a)">Viúvo(a)</option>
-                </select>
+                    value={maritalStatus}
+                    onChange={(e) => setMaritalStatus(e.target.value)}
+                    className="mt-1 w-full h-9 rounded-xl border border-[#d4ceca] bg-white text-xs px-3 text-slate-900 font-sans focus:outline-none focus:ring-1 focus:ring-slate-400"
+                    >
+                    <option value="">—</option>
+                    <option value="Solteiro(a)">Solteiro(a)</option>
+                    <option value="Casado(a)">Casado(a)</option>
+                    <option value="Divorciado(a)">Divorciado(a)</option>
+                    <option value="Viúvo(a)">Viúvo(a)</option>
+                    </select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-medium text-slate-700">Nacionalidade</label>
                 <Input
-                  value={props.nationality}
-                  onChange={(e) => props.setNationality(e.target.value)}
+                  value={nationality}
+                  onChange={(e) => setNationality(e.target.value)}
+                  className="mt-1 h-9 rounded-xl text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-700">Profissão</label>
+                <Input
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
             </div>
-
-            <div>
-              <label className="text-xs font-medium text-slate-700">Profissão</label>
-              <Input
-                value={props.profession}
-                onChange={(e) => props.setProfession(e.target.value)}
-                className="mt-1 h-9 rounded-xl text-xs"
-              />
-            </div>
           </div>
         </div>
       )}
+
       {personType === 'legal' && (
         <div className="space-y-6">
           <div className="space-y-4">
@@ -259,7 +359,7 @@ export function QualificationSection(props: QualificationSectionProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-medium text-slate-700">Razão social *</label>
+                <label className="text-xs font-medium text-slate-700">Razão social </label>
                 <Input
                   value={props.companyName}
                   onChange={(e) => props.setCompanyName(e.target.value)}
@@ -267,7 +367,7 @@ export function QualificationSection(props: QualificationSectionProps) {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-700">CNPJ *</label>
+                <label className="text-xs font-medium text-slate-700">CNPJ </label>
                 <Input
                   value={props.cpf}
                   onChange={(e) => props.setCpf(e.target.value)}
@@ -288,24 +388,25 @@ export function QualificationSection(props: QualificationSectionProps) {
               <div>
                 <label className="text-xs font-medium text-slate-700">Inscrição estadual</label>
                 <Input
-                  value={props.stateRegistration}
-                  onChange={(e) => props.setStateRegistration(e.target.value)}
+                  value={stateRegistration}
+                  onChange={(e) => setStateRegistration(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-700">Data de constituição</label>
                 <Input
-                  value={props.constitutionDate}
-                  onChange={(e) => props.setConstitutionDate(e.target.value)}
+                  type="date"
+                  value={constitutionDate}
+                  onChange={(e) => setConstitutionDate(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-700">Natureza jurídica</label>
                 <Input
-                  value={props.legalNature}
-                  onChange={(e) => props.setLegalNature(e.target.value)}
+                  value={legalNature}
+                  onChange={(e) => setLegalNature(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
@@ -315,16 +416,16 @@ export function QualificationSection(props: QualificationSectionProps) {
               <div>
                 <label className="text-xs font-medium text-slate-700">Representante legal</label>
                 <Input
-                  value={props.legalRepresentative}
-                  onChange={(e) => props.setLegalRepresentative(e.target.value)}
+                  value={legalRepresentative}
+                  onChange={(e) => setLegalRepresentative(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-700">Cargo do representante</label>
                 <Input
-                  value={props.representativeRole}
-                  onChange={(e) => props.setRepresentativeRole(e.target.value)}
+                  value={representativeRole}
+                  onChange={(e) => setRepresentativeRole(e.target.value)}
                   className="mt-1 h-9 rounded-xl text-xs"
                 />
               </div>
@@ -332,7 +433,7 @@ export function QualificationSection(props: QualificationSectionProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-medium text-slate-700">Telefone principal *</label>
+                <label className="text-xs font-medium text-slate-700">Telefone principal</label>
                 <Input
                   value={props.phone}
                   onChange={(e) => props.setPhone(e.target.value)}
@@ -352,15 +453,13 @@ export function QualificationSection(props: QualificationSectionProps) {
                 <Input
                   value={props.origin}
                   readOnly
-                  className="mt-1 h-9 rounded-xl text-xs bg-slate-50 text-slate-700 cursor-not-allowed"
+                  className="mt-1 h-9 rounded-xl text-xs bg-slate-50 text-slate-700"
                 />
               </div>
             </div>
           </div>
 
           <hr className="border-slate-100" />
-
-          {/* Endereço */}
           <div className="space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Endereço da Empresa
