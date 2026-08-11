@@ -1,0 +1,6 @@
+export * from './create-document-specification.controller'
+export * from './delete-document-specification.controller'
+export * from './get-document-specification.controller'
+export * from './list-document-specifications.controller'
+export * from './update-document-specification-configuration.controller'
+export * from './update-document-specification-template.controller'

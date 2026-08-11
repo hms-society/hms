@@ -27,8 +27,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: 'w-fit rounded-lg bg-muted p-[3px]',
-        line:
-          'w-full flex-row justify-start gap-8 rounded-none border-b border-border bg-transparent p-0',
+        line: 'w-full flex-row justify-start gap-8 rounded-none border-b border-border bg-transparent p-0',
       },
     },
     defaultVariants: {
@@ -64,7 +63,7 @@ function TabsTrigger({
         'after:absolute after:bottom-[-1px] after:left-0 after:h-[3px] after:w-full after:scale-x-0 after:bg-[#134C50] after:transition-transform after:duration-200',
         'data-[state=active]:text-[#134C50]',
         'data-[state=active]:after:scale-x-100',
-        className
+        className,
       )}
       {...props}
     />
@@ -76,7 +75,7 @@ function TabsContent({
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
-      data-slot="tabs-content"
+      data-slot='tabs-content'
       className={cn('flex-1 outline-none', className)}
       {...props}
     />

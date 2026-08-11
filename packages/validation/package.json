@@ -7,7 +7,8 @@
     "./intake": "./src/intake/index.ts",
     "./legal-catalog": "./src/legal-catalog/index.ts",
     "./shared": "./src/shared/index.ts",
-    "./consultation": "./src/consultation/index.ts"
+    "./consultation": "./src/consultation/index.ts",
+    "./document-production": "./src/document-production/index.ts"
   },
   "scripts": {
     "lint": "biome lint src",

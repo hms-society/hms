@@ -17,10 +17,13 @@
     "./document-engine/domain/events": "./src/document-engine/domain/events/index.ts",
     "./document-engine/domain/structures": "./src/document-engine/domain/structures/index.ts",
     "./document-engine/interfaces": "./src/document-engine/interfaces/index.ts",
+    "./document-engine/use-cases": "./src/document-engine/use-cases/index.ts",
     "./document-production/domain/entities": "./src/document-production/domain/entities/index.ts",
     "./document-production/domain/errors": "./src/document-production/domain/errors/index.ts",
     "./document-production/domain/events": "./src/document-production/domain/events/index.ts",
     "./document-production/domain/structures": "./src/document-production/domain/structures/index.ts",
+    "./document-production/interfaces": "./src/document-production/interfaces/index.ts",
+    "./document-production/use-cases": "./src/document-production/use-cases/index.ts",
     "./identity/domain/entities": "./src/identity/domain/entities/index.ts",
     "./identity/domain/entities/fakers": "./src/identity/domain/entities/fakers/index.ts",
     "./identity/domain/errors": "./src/identity/domain/errors/index.ts",
@@ -69,8 +72,10 @@
     "lint": "biome lint src",
     "check-types": "tsc --noEmit"
   },
+  "dependencies": {
+    "@faker-js/faker": "^10.5.0"
+  },
   "devDependencies": {
-    "@faker-js/faker": "^10.5.0",
     "typescript": "5.9.2",
     "vitest": "4.1.9",
     "vitest-mock-extended": "^5.1.0"

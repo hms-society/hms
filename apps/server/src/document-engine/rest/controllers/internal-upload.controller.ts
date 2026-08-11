@@ -1,0 +1,120 @@
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFiles,
+  Inject,
+  UseGuards,
+  HttpStatus,
+  BadRequestException,
+  Body,
+} from '@nestjs/common'
+import { FilesInterceptor } from '@nestjs/platform-express'
+import {
+  ApiResponse,
+  ApiBearerAuth,
+  ApiTags,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
+import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
+import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { AuthGuard } from '@/identity/guards'
+import { CurrentUser } from '@/identity/decorators'
+import type { AuthUser } from '@hms/core/identity/domain/structures'
+
+export interface MulterFile {
+  originalname: string
+  mimetype: string
+  size: number
+  buffer: Buffer
+}
+
+@ApiTags('Document Batches')
+@ApiBearerAuth()
+@Controller('document-batches')
+@UseGuards(AuthGuard)
+export class InternalUploadController {
+  constructor(
+    @Inject(CreateDocumentBatchUseCase)
+    private readonly createDocumentBatchUseCase: CreateDocumentBatchUseCase,
+    @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
+  ) {}
+
+  @Post('internal-upload')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['clientId', 'files'],
+      properties: {
+        clientId: {
+          type: 'string',
+          format: 'uuid',
+          description: 'ID do cliente vinculado ao lote documental',
+        },
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Lote recebido, processado e identificado com sucesso.',
+  })
+  async handle(
+    @UploadedFiles() rawFiles: Array<MulterFile>,
+    @Body('clientId') clientId: string,
+    @CurrentUser() authUser: AuthUser,
+  ) {
+    if (!clientId) {
+      throw new BadRequestException(
+        'O ID do cliente (clientId) é obrigatório para a criação do lote.',
+      )
+    }
+
+    if (!rawFiles || rawFiles.length === 0) {
+      throw new BadRequestException('Nenhum arquivo enviado.')
+    }
+
+    const uploadedFiles = await Promise.all(
+      rawFiles.map(async (file) => {
+        const timestamp = Date.now()
+        const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')
+        const storagePath = `internal/${clientId}/${timestamp}-${safeName}`
+
+        await this.storageProvider.upload(storagePath, file.buffer, file.mimetype)
+
+        return {
+          storagePath,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          sizeBytes: file.size,
+        }
+      }),
+    )
+
+    const batch = await this.createDocumentBatchUseCase.execute({
+      channel: DocumentBatchChannel.InternalUpload,
+      sender: authUser.email || authUser.id,
+      createdBy: authUser.id,
+      clientId: clientId,
+      files: uploadedFiles,
+    })
+
+    return {
+      id: batch.id,
+      readableId: batch.readableId,
+      status: batch.status,
+      inTriageBox: batch.inTriageBox,
+    }
+  }
+}

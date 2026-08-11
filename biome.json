@@ -71,7 +71,7 @@
     "lineWidth": 90
   },
   "files": {
-    "includes": ["**", "!**/routeTree.gen.ts", "!**/dist", "!**/.output"]
+    "includes": ["**", "!**/routeTree.gen.ts", "!**/dist", "!**/.output", "!volumes"]
   },
   "css": {
     "parser": {
@@ -105,6 +105,15 @@
             "useImportType": "off"
           }
         }
+      }
+    },
+    {
+      "includes": ["volumes/**"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
       }
     }
   ]

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common'
-
 import { IntakeModule } from '@/intake/intake.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedModule } from '@/shared/shared.module'
 import { CommunicationModule } from './communication/communication.module'
+import { DocumentsModule } from './document-engine/database/documents.module'
 import { SchedulingModule } from './scheduling/database/drizzle/repositories/scheduling.module'
 import { ConsultationModule } from './consultation/database/drizzle/consultation.module'
+import { DocumentProductionModule } from '@/document-production/document-production.module'
 
 @Module({
   imports: [
@@ -15,8 +16,10 @@ import { ConsultationModule } from './consultation/database/drizzle/consultation
     LegalCatalogModule,
     IntakeModule,
     CommunicationModule,
+    DocumentsModule,
     SchedulingModule,
     ConsultationModule,
+    DocumentProductionModule,
   ],
 })
 export class AppModule {}

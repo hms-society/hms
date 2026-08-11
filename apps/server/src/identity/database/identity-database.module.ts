@@ -16,6 +16,10 @@ import {
   DrizzleCollaboratorsRepository,
   DrizzleIdentityTransaction,
 } from '@/identity/database/drizzle/repositories'
+import {
+  DrizzleIntakeClientsRepository,
+  DrizzleIntakeResponsiblesRepository,
+} from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 
@@ -31,6 +35,8 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleCollaboratorsRepository,
     DrizzleCollaboratorRegistrationAttemptsRepository,
     DrizzleIdentityTransaction,
+    DrizzleIntakeClientsRepository,
+    DrizzleIntakeResponsiblesRepository,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -51,6 +57,14 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       provide: IDENTITY_REPOSITORIES.transaction,
       useExisting: DrizzleIdentityTransaction,
     },
+    {
+      provide: IDENTITY_REPOSITORIES.intakeClients,
+      useExisting: DrizzleIntakeClientsRepository,
+    },
+    {
+      provide: IDENTITY_REPOSITORIES.intakeResponsibles,
+      useExisting: DrizzleIntakeResponsiblesRepository,
+    },
     IdentitySeeder,
   ],
   exports: [
@@ -60,6 +74,8 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     IDENTITY_REPOSITORIES.collaborators,
     IDENTITY_REPOSITORIES.registrationAttempts,
     IDENTITY_REPOSITORIES.transaction,
+    IDENTITY_REPOSITORIES.intakeClients,
+    IDENTITY_REPOSITORIES.intakeResponsibles,
     IdentitySeeder,
   ],
 })

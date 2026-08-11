@@ -1,0 +1,83 @@
+@baseUrl = http://localhost:3333
+@token = replace-with-bearer-token
+@documentSpecificationId = replace-with-document-specification-uuid
+@legalAreaId = replace-with-legal-area-uuid
+@legalTopicId = replace-with-legal-topic-uuid
+
+### List document specifications
+GET {{baseUrl}}/document-specifications?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Filter document specifications
+GET {{baseUrl}}/document-specifications?search=contrato&moment=formalization&status=available
+Authorization: Bearer {{token}}
+
+### Create global document specification
+POST {{baseUrl}}/document-specifications
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Modelo de identificação",
+  "description": "Documento de identificação do cliente.",
+  "application": { "scope": "global", "moment": "consultation" },
+  "isRequired": false
+}
+
+### Create legal-context document specification
+POST {{baseUrl}}/document-specifications
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Modelo jurídico",
+  "description": "Modelo para uma área jurídica.",
+  "application": {
+    "scope": "legal_context",
+    "moment": "legal_production",
+    "legalAreaIds": ["{{legalAreaId}}"],
+    "legalTopicIdsByArea": { "{{legalAreaId}}": ["{{legalTopicId}}"] }
+  },
+  "isRequired": true
+}
+
+### Get document specification
+GET {{baseUrl}}/document-specifications/{{documentSpecificationId}}
+Authorization: Bearer {{token}}
+
+### Update configuration
+PATCH {{baseUrl}}/document-specifications/{{documentSpecificationId}}/configuration
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Modelo atualizado",
+  "description": "Descrição atualizada.",
+  "status": "unavailable",
+  "application": { "scope": "global", "moment": "formalization" },
+  "isRequired": true
+}
+
+### Update template
+PATCH {{baseUrl}}/document-specifications/{{documentSpecificationId}}/template
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": {
+    "type": "doc",
+    "content": [{
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Conteúdo de exemplo" }]
+    }]
+  },
+  "variables": [{
+    "label": "Nome do contrato",
+    "technicalName": "nome_contrato",
+    "description": "Nome usado no contrato"
+  }]
+}
+
+### Reject invalid query
+GET {{baseUrl}}/document-specifications?pageSize=0
+Authorization: Bearer {{token}}

@@ -1,3 +1,3 @@
 export const INTAKE_REPOSITORIES = {
-  intakes: 'intakes',
-}
+  intakes: Symbol('INTAKE_REPOSITORIES.intakes'),
+} as const

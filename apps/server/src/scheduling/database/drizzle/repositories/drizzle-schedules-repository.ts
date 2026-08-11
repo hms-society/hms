@@ -30,7 +30,7 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
     }
 
     if (date instanceof Date) {
-      if (isNaN(date.getTime())) return '' as CalendarDate
+      if (Number.isNaN(date.getTime())) return '' as CalendarDate
       const year = date.getUTCFullYear()
       const month = String(date.getUTCMonth() + 1).padStart(2, '0')
       const day = String(date.getUTCDate()).padStart(2, '0')

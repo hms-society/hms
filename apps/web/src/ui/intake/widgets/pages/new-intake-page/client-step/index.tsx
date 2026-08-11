@@ -6,6 +6,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ClientRegisterDialog } from '@/ui/shared/widgets/components/client-register-dialog'
 
 import { useClientStep } from '@/ui/intake/widgets/pages/new-intake-page/client-step/use-client-step'
+import { useNavigate } from '@tanstack/react-router'
 
 export const ClientStep = () => {
   const {
@@ -20,6 +21,8 @@ export const ClientStep = () => {
     handleClientDialogChange,
     handleClientSelected,
   } = useClientStep()
+
+  const navigate = useNavigate()
 
   return (
     <div className='flex flex-col gap-5'>
@@ -73,6 +76,9 @@ export const ClientStep = () => {
               type='button'
               size='sm'
               className='h-10 min-h-10 flex-1 justify-center rounded-lg shadow-xs sm:w-full'
+              onClick={() => {
+                navigate({ to: '/clientes/$clienteId', params: { clienteId: clientId } })
+              }}
             >
               <Icon name='external-link' />
               Ver cadastro
