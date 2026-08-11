@@ -66,14 +66,6 @@ export const consultationPotentialLegalRequestModel = pgTable('consultation_pote
   summary: text('summary'),
 })
 
-export const consultationIdentifiedRiskModel = pgTable('consultation_identified_risks', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  consultationId: uuid('consultation_id')
-    .notNull()
-    .references(() => consultationModel.id, { onDelete: 'cascade' }),
-  description: text('description').notNull(),
-})
-
 export const consultationSuggestionModel = pgTable('consultation_suggestions', {
   id: uuid('id').defaultRandom().primaryKey(),
   consultationId: uuid('consultation_id')
@@ -111,7 +103,6 @@ export const consultationRelations = relations(consultationModel, ({ one, many }
 
   facts: many(consultationRelevantFactModel),
   potentialRequests: many(consultationPotentialLegalRequestModel),
-  identifiedRisks: many(consultationIdentifiedRiskModel),
   suggestions: many(consultationSuggestionModel),
 }))
 
@@ -135,15 +126,6 @@ export const consultationPotentialLegalRequestRelations = relations(
   }),
 )
 
-export const consultationIdentifiedRiskRelations = relations(
-  consultationIdentifiedRiskModel,
-  ({ one }) => ({
-    consultation: one(consultationModel, {
-      fields: [consultationIdentifiedRiskModel.consultationId],
-      references: [consultationModel.id],
-    }),
-  }),
-)
 
 export const consultationSuggestionRelations = relations(
   consultationSuggestionModel,

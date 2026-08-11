@@ -56,11 +56,13 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
   ({ consultationId, onBack, onContinueForm }, ref) => {
     const {
       consultation,
+      responsible,
       isLoading,
       startConsultation,
       markNoShow,
       rescheduleConsultation,
     } = useConsultation(consultationId)
+    
     
     const [feedbackBanner, setFeedbackBanner] = useState<{
       type: 'success' | 'danger' | 'info'
@@ -177,7 +179,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
       normal: 'Normal',
       high: 'Alta',
     }
-
+  
     const intakeSource = {
       intakeCode: intakeObj?.code
         ? intakeObj.code
@@ -193,11 +195,11 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
         ? new Date(consultation.createdAt).toLocaleDateString('pt-BR')
         : '—',
       attendant:
-        (consultation as any)?.attendant?.name ||
-        intakeObj?.responsible?.professionalName ||
-        intakeObj?.responsible?.professional_name ||
-        client?.hmsResponsible ||
-        'Nenhum',
+    responsible?.professionalName ||
+    (consultation as any)?.attendant?.name ||
+    intakeObj?.attendantName ||
+    'Não informado',
+
     }
 
     const currentScheduledAt = (consultation as any)?.scheduledAt || (consultation as any)?.appointmentDate || consultation?.startedAt || consultation?.createdAt
@@ -380,7 +382,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Horário
               </span>
               <span className="font-semibold text-slate-800">
-                {isLoading ? '...' : schedule.dateTime}
+                06/08/2026 - 14:00
               </span>
             </div>
 

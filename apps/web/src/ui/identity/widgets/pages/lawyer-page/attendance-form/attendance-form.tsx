@@ -86,7 +86,18 @@ export function AttendanceForm({
   const [linkedThirdParty, setLinkedThirdParty] = useState(
     () => draft?.linkedThirdParty ?? client?.linkedThirdParty ?? '',
   )
-  const [hmsResponsible, setHmsResponsible] = useState(() => draft?.hmsResponsible ?? '')
+
+  const attendantNameResolved =
+    (consultation as any)?.attendant?.name ||
+    intake?.attendantName ||
+    (consultation as any)?.intake?.responsible?.professionalName ||
+    (consultation as any)?.intake?.responsible?.name ||
+    ''
+
+  const [hmsResponsible, setHmsResponsible] = useState(
+    () => draft?.hmsResponsible || client?.hmsResponsible || attendantNameResolved,
+  )
+
   const [rg, setRg] = useState(() => draft?.rg ?? client?.rg ?? '')
   const [birthDate, setBirthDate] = useState(() => draft?.birthDate ?? client?.birthDate ?? '')
   const [maritalStatus, setMaritalStatus] = useState(
@@ -183,6 +194,20 @@ export function AttendanceForm({
   const [decision, setDecision] = useState(
     () => draft?.decision ?? 'Prosseguir para contratação',
   )
+
+  useEffect(() => {
+    if (consultation && !hmsResponsible) {
+      const resolved =
+        (consultation as any)?.attendant?.name ||
+        consultation.intake?.attendantName ||
+        (consultation as any)?.intake?.responsible?.professionalName ||
+        ''
+
+      if (resolved) {
+        setHmsResponsible(resolved)
+      }
+    }
+  }, [consultation, hmsResponsible])
 
   useEffect(() => {
     if (!consultationId || isLoading) return
@@ -437,7 +462,6 @@ export function AttendanceForm({
           legalRepresentative: personType === 'legal' ? legalRepresentative : undefined,
           representativeRole: personType === 'legal' ? representativeRole : undefined,
         } as any)
-        
       }
 
       if (completeConsultation) {

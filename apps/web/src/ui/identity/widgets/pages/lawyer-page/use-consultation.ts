@@ -3,7 +3,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { CompleteConsultationRequest } from '@/rest/services/consultation-service'
 
 export function useConsultation(consultationId?: string) {
-  const { consultationService } = useRestContext()
+  const { consultationService, identityService } = useRestContext()
   const queryClient = useQueryClient()
 
   const {
@@ -20,6 +20,18 @@ export function useConsultation(consultationId?: string) {
       return response.body
     },
     enabled: Boolean(consultationId),
+  })
+  const responsibleId = (consultation as any)?.intake?.responsibleId
+
+  const { data: responsible } = useQuery({
+    queryKey: ['collaborator', responsibleId],
+    queryFn: async () => {
+      if (!responsibleId) return null
+      const response = await identityService.getCollaborator(responsibleId)
+      if (response.isFailure) return null
+      return response.body
+    },
+    enabled: !!responsibleId,
   })
 
   const startConsultationMutation = useMutation({
@@ -109,6 +121,7 @@ export function useConsultation(consultationId?: string) {
     isLoading,
     isError,
     error,
+    responsible,
     startConsultation: startConsultationMutation.mutateAsync,
     isStarting: startConsultationMutation.isPending,
     markNoShow: markNoShowMutation.mutateAsync,

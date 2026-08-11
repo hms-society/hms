@@ -107,6 +107,12 @@ type ConsultationRecord = typeof consultationModel.$inferSelect & {
 
 export class DrizzleConsultationMapper {
   static toDomain(record: ConsultationRecord): Consultation {
+    const attendantNameResolved =
+      record.intake?.responsible?.professionalName ??
+      record.intake?.responsible?.name ??
+      record.intake?.attendantName ??
+      'Não informado'
+
     const domainObject = {
       id: record.id,
       appointmentId: record.appointmentId,
@@ -138,14 +144,11 @@ export class DrizzleConsultationMapper {
             email: record.assignedLawyer.email,
           }
         : undefined,
+
       attendant: record.intake?.responsible
         ? {
             id: record.intake.responsible.id,
-            name:
-              record.intake.responsible.professionalName ??
-              record.intake.responsible.professional_name ??
-              record.intake.responsible.name ??
-              'Sistema',
+            name: attendantNameResolved,
             email: record.intake.responsible.email,
           }
         : undefined,
@@ -165,10 +168,7 @@ export class DrizzleConsultationMapper {
             status: record.intake.status,
             responsibleId: record.intake.responsibleId,
             createdBy: record.intake.createdBy,
-            attendantName:
-              record.intake.responsible?.professionalName ??
-              record.intake.responsible?.name ??
-              record.intake.attendantName,
+            attendantName: attendantNameResolved,
           }
         : undefined,
 

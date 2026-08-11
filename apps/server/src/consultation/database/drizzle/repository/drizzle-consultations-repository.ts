@@ -39,7 +39,6 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         legalTopic: true,
         facts: true,
         potentialRequests: true,
-        identifiedRisks: true,
         suggestions: true,
       },
     })
@@ -50,8 +49,12 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (record.intake?.responsibleId) {
       const found = await this.db.query.collaboratorModel.findFirst({
-        where: eq(schema.collaboratorModel.id, record.intake.responsibleId),
+        where: eq(
+          schema.collaboratorModel.userId,
+          record.intake.responsibleId,
+        ),
       })
+
       responsibleCollaborator = found ?? null
     }
 
@@ -77,7 +80,6 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         legalTopic: true,
         facts: true,
         potentialRequests: true,
-        identifiedRisks: true,
         suggestions: true,
       },
     })
@@ -88,8 +90,12 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (record.intake?.responsibleId) {
       const found = await this.db.query.collaboratorModel.findFirst({
-        where: eq(schema.collaboratorModel.id, record.intake.responsibleId),
+        where: eq(
+          schema.collaboratorModel.userId,
+          record.intake.responsibleId,
+        ),
       })
+
       responsibleCollaborator = found ?? null
     }
 
@@ -191,22 +197,6 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
             consultationId: consultation.id,
             description: req.description,
             summary: req.summary ?? null,
-          })),
-        )
-    }
-
-    await this.db
-      .delete(schema.consultationIdentifiedRiskModel)
-      .where(eq(schema.consultationIdentifiedRiskModel.consultationId, consultation.id))
-
-    if (consultation.identifiedRisks.length > 0) {
-      await this.db
-        .insert(schema.consultationIdentifiedRiskModel)
-        .values(
-          consultation.identifiedRisks.map((risk) => ({
-            id: risk.id,
-            consultationId: consultation.id,
-            description: risk.description,
           })),
         )
     }
