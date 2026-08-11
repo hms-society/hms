@@ -17,10 +17,10 @@ export const LawyerCommunicationPage = () => {
   const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [localMessages, setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
+  const [localMessages, _setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
 
   const sendCommunicationMutation = useSendCommunicationMutation()
-  if(sendCommunicationMutation.isSuccess) {
+  if (sendCommunicationMutation.isSuccess) {
     console.log(selectedId)
   }
 

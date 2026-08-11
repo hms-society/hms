@@ -140,6 +140,7 @@ export const BottomDetails = () => {
           <div className='flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-1'>
             {messages.map((msg, idx) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: message index is stable for render
                 key={idx}
                 className='p-4 rounded-lg bg-muted/40 border border-border/40 flex flex-col gap-2'
               >

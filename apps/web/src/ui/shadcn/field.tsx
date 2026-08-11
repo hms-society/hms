@@ -75,6 +75,7 @@ function Field({
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof fieldVariants>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: Field is a layout container, not a fieldset
     <div
       role='group'
       data-slot='field'
