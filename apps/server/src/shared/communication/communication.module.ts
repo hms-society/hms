@@ -6,7 +6,6 @@ import { WhatsappWebhookController } from './whatsapp-webhook.controller'
 import { InngestService } from '../provision/inngest/inngest.service'
 import { InngestController } from '../provision/inngest/inngest.controller'
 
-
 @Module({
   imports: [ProvisionModule, SharedDatabaseModule],
   controllers: [WhatsappWebhookController, InngestController],
