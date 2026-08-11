@@ -2,13 +2,31 @@ import type {
   DocumentBatchDiscardReason,
   DocumentBatchSender,
   DocumentBatchStatus,
+  DocumentBatchChannel,
 } from '../structures'
+
+export type DocumentBatchFile = {
+  id: string
+  batchId: string
+  storagePath: string
+  originalName: string
+  mimeType: string
+  sizeBytes: number
+  createdAt: Date
+}
 
 type DocumentBatchBase = {
   id: string
-  sender: DocumentBatchSender
-  fileIds: string[]
-  receivedAt: Date
+  sender: DocumentBatchSender | string
+  fileIds?: string[]
+  files?: DocumentBatchFile[]
+  readableId?: string
+  channel?: DocumentBatchChannel
+  inTriageBox?: boolean
+  intakeId?: string
+  createdBy?: string
+
+  receivedAt?: Date
   createdAt: Date
   updatedAt: Date
 }
@@ -46,7 +64,21 @@ type DiscardedDocumentBatch = DocumentBatchBase & {
   discardedByCollaboratorId: string
 }
 
+type ModernDocumentBatch = DocumentBatchBase & {
+  status:
+    | typeof DocumentBatchStatus.Received
+    | typeof DocumentBatchStatus.PendingIdentification
+    | typeof DocumentBatchStatus.Identified
+    | typeof DocumentBatchStatus.AutomaticTriageInProgress
+    | typeof DocumentBatchStatus.TriageCompleted
+    | typeof DocumentBatchStatus.PendingHumanReview
+    | typeof DocumentBatchStatus.Processed
+    | typeof DocumentBatchStatus.WithError
+  clientId?: string
+}
+
 export type DocumentBatch =
   | PendingDocumentBatch
   | LinkedDocumentBatch
   | DiscardedDocumentBatch
+  | ModernDocumentBatch

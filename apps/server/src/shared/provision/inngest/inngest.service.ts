@@ -1,36 +1,43 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Inngest, type InngestFunction } from 'inngest'
+import { eq, desc, like } from 'drizzle-orm'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { DrizzleClient } from '../../database/drizzle/drizzle-client'
+import { integracaoEvento } from '../../database/drizzle/schema/integracao-evento'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
-import { clientModel } from '@/identity/database/drizzle/models/client-model'
+import { clientModel } from '@/identity/database/drizzle/models'
 import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
-import { eq, desc } from 'drizzle-orm'
 import { encrypt } from '@/shared/utils/crypto'
 
 @Injectable()
 export class InngestService {
   private readonly logger = new Logger(InngestService.name)
   public readonly client: Inngest
+  private readonly dynamicFunctions: InngestFunction.Like[] = []
 
   constructor(
-    private readonly drizzleClient: DrizzleClient,
     readonly _whatsappProvider: WhatsappProvider,
+    private readonly drizzleClient: DrizzleClient,
   ) {
     this.client = new Inngest({ id: 'hms-server' })
   }
 
+  register(fn: InngestFunction.Like) {
+    this.dynamicFunctions.push(fn)
+  }
+
   getFunctions(): InngestFunction.Like[] {
     return [
+      ...this.dynamicFunctions,
       this.client.createFunction(
         {
-          id: 'whatsapp-event-received',
-          name: 'WhatsApp Event Received',
+          id: 'whatsapp-event-router',
+          name: 'WhatsApp Event Router',
           triggers: [{ event: 'whatsapp/event.received' }],
         },
         async ({ event, step }) => {
-          this.logger.log('Inngest processando evento whatsapp/event.received')
-          const payload = event.data
+          const db = this.drizzleClient.requireDatabase()
+          const payload: any = event.data
 
           await step.run('process-whatsapp-event', async () => {
             const entries = payload?.entry ?? []
@@ -60,14 +67,40 @@ export class InngestService {
                     rawContent = `[Mensagem ${msg.type ?? 'desconhecida'}]`
                   }
 
-                  const db = this.drizzleClient.requireDatabase()
                   const [client] = await db
-                    .select({ id: clientModel.id, phone: clientModel.phone })
+                    .select()
                     .from(clientModel)
-                    .where(eq(clientModel.phone, fromPhone))
+                    .where(like(clientModel.phone, `%${fromPhone.slice(-8)}`))
                     .limit(1)
 
                   if (client) {
+                    // 1. Process WhatsApp Media for Document Production System
+                    if (msg.type === 'document' || msg.type === 'image') {
+                      const media = msg.type === 'document' ? msg.document : msg.image
+
+                      const [evento] = await db
+                        .insert(integracaoEvento)
+                        .values({
+                          provedor: 'whatsapp',
+                          payload: msg,
+                          status: 'recebido',
+                        })
+                        .returning()
+
+                      await step.sendEvent('dispatch-document-batch', {
+                        name: 'documents/whatsapp.batch.received',
+                        data: {
+                          eventoId: evento.id,
+                          sender: fromPhone,
+                          clientId: client.id,
+                          mimeType: media.mime_type,
+                          originalName:
+                            media.filename || `${media.id}.${media.mime_type.split('/')[1]}`,
+                        },
+                      })
+                    }
+
+                    // 2. Save Message to Case Private Message History
                     const [intake] = await db
                       .select({
                         id: intakeModel.id,
@@ -97,6 +130,15 @@ export class InngestService {
                       )
                     }
                   } else {
+                    // If client not found, still record the event as failed if it contains media
+                    if (msg.type === 'document' || msg.type === 'image') {
+                      await db.insert(integracaoEvento).values({
+                        provedor: 'whatsapp',
+                        payload: msg,
+                        status: 'falha_definitiva',
+                        erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
+                      })
+                    }
                     this.logger.warn(
                       `Mensagem recebida de número não cadastrado: ${fromPhone}`,
                     )

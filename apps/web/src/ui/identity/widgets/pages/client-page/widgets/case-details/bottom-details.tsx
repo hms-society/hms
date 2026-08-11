@@ -138,10 +138,9 @@ export const BottomDetails = () => {
             Mensagens do Escritório
           </h2>
           <div className='flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-1'>
-            {messages.map((msg, idx) => (
+            {messages.map((msg) => (
               <div
-                // biome-ignore lint/suspicious/noArrayIndexKey: message index is stable for render
-                key={idx}
+                key={`${msg.sender}-${msg.date}-${msg.content}`}
                 className='p-4 rounded-lg bg-muted/40 border border-border/40 flex flex-col gap-2'
               >
                 <div className='flex justify-between items-start'>
@@ -153,6 +152,7 @@ export const BottomDetails = () => {
                   </div>
                   <span className='text-[10px] text-muted-foreground'>{msg.date}</span>
                 </div>
+
                 <p className='text-xs text-foreground mt-1 leading-relaxed'>
                   {msg.content}
                 </p>
