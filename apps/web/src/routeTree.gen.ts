@@ -31,8 +31,10 @@ import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
 import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
 import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
+import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
+import { Route as ClientesNovoRouteImport } from './routes/clientes/novo'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
@@ -155,6 +157,11 @@ const ModelosDeDocumentosDocumentSpecificationIdRoute =
     path: '/modelos-de-documentos/$documentSpecificationId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
+  id: '/lotes-documentos/$fileId',
+  path: '/lotes-documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakesNovoRoute = IntakesNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
@@ -166,6 +173,11 @@ const ColaboradoresColaboradorIdRoute =
     path: '/colaboradores/$colaboradorId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ClientesNovoRoute = ClientesNovoRouteImport.update({
+  id: '/clientes/novo',
+  path: '/clientes/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
   id: '/clientes/$clienteId',
   path: '/clientes/$clienteId',
@@ -222,8 +234,10 @@ export interface FileRoutesByFullPath {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
@@ -252,8 +266,10 @@ export interface FileRoutesByTo {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda': typeof AgendaIndexRoute
@@ -287,8 +303,10 @@ export interface FileRoutesById {
   '/cliente/mensagens': typeof ClienteMensagensRoute
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
+  '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
+  '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
@@ -323,8 +341,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda/'
@@ -353,8 +373,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda'
@@ -387,8 +409,10 @@ export interface FileRouteTypes {
     | '/cliente/mensagens'
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
+    | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
     | '/intakes/novo'
+    | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda/'
@@ -417,7 +441,9 @@ export interface RootRouteChildren {
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   TriagemRouteRoute: typeof TriagemRouteRouteWithChildren
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
+  ClientesNovoRoute: typeof ClientesNovoRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  LotesDocumentosFileIdRoute: typeof LotesDocumentosFileIdRoute
   ModelosDeDocumentosDocumentSpecificationIdRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   ModelosDeDocumentosNovoRoute: typeof ModelosDeDocumentosNovoRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
@@ -586,6 +612,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lotes-documentos/$fileId': {
+      id: '/lotes-documentos/$fileId'
+      path: '/lotes-documentos/$fileId'
+      fullPath: '/lotes-documentos/$fileId'
+      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intakes/novo': {
       id: '/intakes/novo'
       path: '/novo'
@@ -598,6 +631,13 @@ declare module '@tanstack/react-router' {
       path: '/colaboradores/$colaboradorId'
       fullPath: '/colaboradores/$colaboradorId'
       preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes/novo': {
+      id: '/clientes/novo'
+      path: '/clientes/novo'
+      fullPath: '/clientes/novo'
+      preLoaderRoute: typeof ClientesNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes/$clienteId': {
@@ -762,7 +802,9 @@ const rootRouteChildren: RootRouteChildren = {
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   TriagemRouteRoute: TriagemRouteRouteWithChildren,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
+  ClientesNovoRoute: ClientesNovoRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  LotesDocumentosFileIdRoute: LotesDocumentosFileIdRoute,
   ModelosDeDocumentosDocumentSpecificationIdRoute:
     ModelosDeDocumentosDocumentSpecificationIdRoute,
   ModelosDeDocumentosNovoRoute: ModelosDeDocumentosNovoRoute,

@@ -1,0 +1,32 @@
+import { Controller, Get, Param, Inject, HttpStatus } from '@nestjs/common'
+import { ApiResponse } from '@nestjs/swagger'
+import { GetDocumentFileUseCase } from '@hms/core/document-engine/use-cases'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
+import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
+
+@Controller('documents')
+export class GetDocumentFileController {
+  private readonly useCase: GetDocumentFileUseCase
+
+  constructor(
+    @Inject(DOCUMENT_ENGINE.documentBatches)
+    documentBatchesRepository: DocumentBatchesRepository,
+  ) {
+    this.useCase = new GetDocumentFileUseCase(documentBatchesRepository)
+  }
+
+  @Get('files/:fileId')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'O arquivo foi retornado com sucesso.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Arquivo não encontrado.',
+    type: ErrorResponseDto,
+  })
+  handle(@Param('fileId') fileId: string) {
+    return this.useCase.execute({ fileId })
+  }
+}

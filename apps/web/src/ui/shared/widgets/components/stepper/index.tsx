@@ -31,7 +31,7 @@ export const Stepper = ({
           const isActive = idx === activeStep
 
           return (
-            <div key={idx} className='relative flex flex-col gap-1'>
+            <div key={step.label} className='relative flex flex-col gap-1'>
               {/* Timeline circle dot */}
               <div
                 className={`absolute -left-[31px] top-1 size-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
@@ -92,7 +92,7 @@ export const Stepper = ({
 
         return (
           <div
-            key={idx}
+            key={step.label}
             className='flex flex-col items-center text-center relative z-10 flex-1'
           >
             {/* Step marker circle */}

@@ -77,7 +77,6 @@ export function ClientsListPage() {
   const limit = 20
 
   const { data, isLoading } = useClientsQuery({ page, limit, search })
-  console.log(data)
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
@@ -120,7 +119,12 @@ export function ClientsListPage() {
           <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>
           <p className='text-sm text-muted-foreground'>{total} cadastros</p>
         </div>
-        <Button className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'>
+        <Button
+          className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'
+          onClick={() => {
+            navigate({ to: '/clientes/novo' })
+          }}
+        >
           <Icon name='plus' />
           Novo cliente
         </Button>
