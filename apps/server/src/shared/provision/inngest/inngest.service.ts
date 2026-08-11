@@ -22,6 +22,7 @@ export class InngestService {
     this.client = new Inngest({
       id: 'hms-server',
       eventKey: process.env.INNGEST_EVENT_KEY || 'local',
+      baseUrl: process.env.INNGEST_BASE_URL || 'http://localhost:8288/',
     })
   }
 
