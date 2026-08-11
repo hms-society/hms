@@ -19,7 +19,10 @@ export class InngestService {
     private readonly drizzleClient: DrizzleClient,
     readonly _whatsappProvider: WhatsappProvider,
   ) {
-    this.client = new Inngest({ id: 'hms-server' })
+    this.client = new Inngest({
+      id: 'hms-server',
+      eventKey: process.env.INNGEST_EVENT_KEY || 'local',
+    })
   }
 
   register(fn: InngestFunction.Like) {

@@ -75,17 +75,19 @@ export const LawyerCommunicationPage = () => {
           ? `Intakes: ${activeClientItem.intakeCount}`
           : 'Sem intakes',
         messages: [
-          ...(realMessages?.map((msg: any) => ({
-            id: msg.id,
-            content: msg.content,
-            direction: msg.direction,
-            channel: msg.channel,
-            createdAt: new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            sender: msg.author || 'Cliente',
-          })) || []),
+          ...(realMessages
+            ?.map((msg: any) => ({
+              id: msg.id,
+              content: msg.content,
+              direction: msg.direction,
+              channel: msg.channel,
+              createdAt: new Date(msg.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              sender: msg.author || 'Cliente',
+            }))
+            .reverse() || []),
           ...(localMessages[selectedId] || []),
         ],
       }
