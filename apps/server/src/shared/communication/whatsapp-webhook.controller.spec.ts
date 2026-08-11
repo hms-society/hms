@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { WhatsappWebhookController } from './whatsapp-webhook.controller'
 import { EnvProvider } from '../provision/env/env-provider'
-import { InngestService } from '../provision/inngest/inngest.service'
+import { InngestClient } from '../messaging/inngest/inngest-client'
 import type { Request, Response } from 'express'
 import { ForbiddenException, HttpStatus } from '@nestjs/common'
 import { createHmac } from 'node:crypto'
@@ -9,7 +9,7 @@ import { createHmac } from 'node:crypto'
 describe('WhatsappWebhookController', () => {
   let controller: WhatsappWebhookController
   let mockEnvProvider: EnvProvider
-  let mockInngestService: InngestService
+  let mockInngest: InngestClient
   let mockInngestSend: any
 
   beforeEach(() => {
@@ -22,13 +22,11 @@ describe('WhatsappWebhookController', () => {
     } as unknown as EnvProvider
 
     mockInngestSend = vi.fn().mockResolvedValue(undefined as any)
-    mockInngestService = {
-      client: {
-        send: mockInngestSend,
-      },
-    } as unknown as InngestService
+    mockInngest = {
+      send: mockInngestSend,
+    } as unknown as InngestClient
 
-    controller = new WhatsappWebhookController(mockEnvProvider, mockInngestService)
+    controller = new WhatsappWebhookController(mockEnvProvider, mockInngest)
   })
 
   describe('verifyWebhook (GET)', () => {
