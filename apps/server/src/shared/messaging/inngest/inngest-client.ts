@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { Inngest } from 'inngest'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
