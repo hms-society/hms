@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm'
 import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
-
 import { privateMessageModel } from '../models/private-message-model'
 import { DrizzlePrivateMessageMapper } from '../mappers/drizzle-private-message-mapper'
 import { encrypt } from '@/shared/utils/crypto'

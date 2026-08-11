@@ -16,8 +16,8 @@ export class InngestService {
   private readonly dynamicFunctions: InngestFunction.Like[] = []
 
   constructor(
-    readonly _whatsappProvider: WhatsappProvider,
     private readonly drizzleClient: DrizzleClient,
+    readonly _whatsappProvider: WhatsappProvider,
   ) {
     this.client = new Inngest({ id: 'hms-server' })
   }
@@ -95,7 +95,8 @@ export class InngestService {
                           clientId: client.id,
                           mimeType: media.mime_type,
                           originalName:
-                            media.filename || `${media.id}.${media.mime_type.split('/')[1]}`,
+                            media.filename ||
+                            `${media.id}.${media.mime_type.split('/')[1]}`,
                         },
                       })
                     }
