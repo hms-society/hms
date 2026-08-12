@@ -1,7 +1,13 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  ConsultationChannel,
+  ConsultationModality,
+} from '@hms/core/consultation/domain/structures'
+import { IntakeDecision } from '@hms/core/intake/domain/structures'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useCollaboratorsQuery } from '@/ui/identity/widgets/pages/collaborators-page/use-collaborators-query'
 
 import { useNewIntake } from '../use-new-intake'
 import { useRegisterIntakeAction } from '../use-register-intake-action'
@@ -14,8 +20,13 @@ vi.mock('../use-register-intake-action', () => ({
   useRegisterIntakeAction: vi.fn(),
 }))
 
+vi.mock('@/ui/identity/widgets/pages/collaborators-page/use-collaborators-query', () => ({
+  useCollaboratorsQuery: vi.fn(),
+}))
+
 const useAuthContextMock = vi.mocked(useAuthContext)
 const useRegisterIntakeActionMock = vi.mocked(useRegisterIntakeAction)
+const useCollaboratorsQueryMock = vi.mocked(useCollaboratorsQuery)
 
 describe('useNewIntake', () => {
   const registerIntake = vi.fn()
@@ -28,6 +39,10 @@ describe('useNewIntake', () => {
       error: null,
       isRegisteringIntake: false,
       registerIntake,
+    } as never)
+    useCollaboratorsQueryMock.mockReturnValue({
+      collaboratorsPage: { items: [] },
+      isLoadingCollaborators: false,
     } as never)
   })
 
@@ -43,6 +58,7 @@ describe('useNewIntake', () => {
       result.current.form.setValue('legalAreaId', '47dfd634-75e9-41e4-a47e-05114f923bd0')
       result.current.form.setValue('legalTopicId', '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d')
       result.current.form.setValue('clientId', 'client-id')
+      result.current.form.setValue('lawyer', 'b4a55c12-1fca-4e17-810f-28128f046553')
     })
 
     await act(async () => result.current.handleSubmit())
@@ -58,7 +74,11 @@ describe('useNewIntake', () => {
       legalTopicId: '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d',
       urgency: 'normal',
       demandNotes: '',
-      decision: 'schedule_consultation',
+      decision: IntakeDecision.ScheduleConsultation,
+      assignedLawyerId: 'b4a55c12-1fca-4e17-810f-28128f046553',
+      startsAt: expect.any(Date),
+      modality: ConsultationModality.Virtual,
+      channel: ConsultationChannel.WhatsappVideo,
     })
     expect(result.current.form.getValues('clientId')).toBe('')
   })
@@ -123,7 +143,7 @@ describe('useNewIntake', () => {
 
     expect(registerIntake).toHaveBeenCalledWith(
       expect.objectContaining({
-        decision: 'close_without_contract',
+        decision: IntakeDecision.CloseWithoutContract,
         closureReason: 'client_withdrew',
         closureNotes: 'Client chose not to continue',
       }),

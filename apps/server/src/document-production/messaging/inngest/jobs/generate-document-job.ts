@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DocumentGenerationRequestedEvent } from '@hms/core/document-production/domain/events'
+import {
+  DocumentGenerationCancelledEvent,
+  DocumentGenerationRequestedEvent,
+} from '@hms/core/document-production/domain/events'
 import type { GenerateDocumentWorkflow } from '@hms/core/document-production/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
@@ -23,6 +26,16 @@ const documentGenerationRequestedEvent = eventType(
   },
 )
 
+const documentGenerationCancelledEvent = eventType(
+  DocumentGenerationCancelledEvent._NAME,
+  {
+    schema: z.object({
+      documentGenerationId: z.string().uuid(),
+      occurredAt: z.string().datetime(),
+    }),
+  },
+)
+
 @Injectable()
 export class GenerateDocumentJob extends InngestJob {
   readonly function: InngestFunction.Like
@@ -38,6 +51,12 @@ export class GenerateDocumentJob extends InngestJob {
       {
         id: 'document-production/generate-document',
         name: 'Generate Document',
+        cancelOn: [
+          {
+            event: documentGenerationCancelledEvent,
+            match: 'data.documentGenerationId',
+          },
+        ],
         triggers: [documentGenerationRequestedEvent],
       },
       async ({ event, step }) =>

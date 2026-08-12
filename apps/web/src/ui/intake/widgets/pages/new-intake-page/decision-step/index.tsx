@@ -3,7 +3,6 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { ptBR } from 'date-fns/locale'
 
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
-import { Badge } from '@/ui/shadcn/badge'
 import { Calendar } from '@/ui/shadcn/calendar'
 import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
@@ -40,29 +39,6 @@ const CANAIS_VIRTUAIS = [
   { value: 'other', label: 'Outro', icon: MoreHorizontal },
 ]
 
-const ADVOGADOS_MOCK: Record<
-  string,
-  { nome: string; especialidade: string; iniciais: string; horarios: number }
-> = {
-  epaminondas: {
-    nome: 'Adv. Epaminondas',
-    especialidade: 'Trabalhista',
-    iniciais: 'EP',
-    horarios: 12,
-  },
-  'maria-silva': {
-    nome: 'Adv. Maria Silva',
-    especialidade: 'Cível',
-    iniciais: 'MS',
-    horarios: 8,
-  },
-}
-
-const LAWYERS_OPTIONS = [
-  { value: 'epaminondas', label: 'Adv. Epaminondas — Trabalhista' },
-  { value: 'maria-silva', label: 'Adv. Maria Silva — Cível' },
-]
-
 const HORARIOS = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
 
 const MOTIVOS_ENCERRAMENTO = [
@@ -81,9 +57,11 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
     control,
     decision,
     errors,
+    isLoadingCollaborators,
+    lawyers,
     meetingMode,
     selectedDate,
-    selectedLawyer,
+    selectedLawyerDetails,
     selectedTime,
     virtualChannel,
     handleClosureReasonChange,
@@ -106,8 +84,6 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
       }
     },
   }))
-
-  const advogadoDetalhes = selectedLawyer ? ADVOGADOS_MOCK[selectedLawyer] : null
 
   return (
     <div className='flex flex-col gap-5'>
@@ -255,9 +231,12 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                     <SelectValue placeholder='Selecione um advogado...' />
                   </SelectTrigger>
                   <SelectContent>
-                    {LAWYERS_OPTIONS.map((a) => (
-                      <SelectItem key={a.value} value={a.value}>
-                        {a.label}
+                    {lawyers.map((lawyer) => (
+                      <SelectItem
+                        key={lawyer.collaboratorId}
+                        value={lawyer.collaboratorId}
+                      >
+                        {lawyer.professionalName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -269,28 +248,30 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                 {errors.lawyer.message}
               </span>
             )}
-            {advogadoDetalhes && (
+            {isLoadingCollaborators && (
+              <span className='text-[12px] text-muted-foreground'>
+                Carregando advogados...
+              </span>
+            )}
+            {selectedLawyerDetails && (
               <div className='flex items-center gap-3 bg-muted/40 border border-border rounded-xl p-3'>
                 <Avatar>
                   <AvatarFallback className='bg-primary/15 text-primary text-[12px] font-bold'>
-                    {advogadoDetalhes.iniciais}
+                    {selectedLawyerDetails.professionalName
+                      .split(' ')
+                      .slice(0, 2)
+                      .map((part) => part[0])
+                      .join('')}
                   </AvatarFallback>
                 </Avatar>
                 <div className='flex flex-col'>
                   <span className='text-[13px] text-foreground font-medium'>
-                    {advogadoDetalhes.nome}
+                    {selectedLawyerDetails.professionalName}
                   </span>
                   <span className='text-[11px] text-muted-foreground'>
-                    {advogadoDetalhes.especialidade}
+                    {selectedLawyerDetails.jobTitle ?? 'Advogado'}
                   </span>
                 </div>
-                <Badge
-                  variant='outline'
-                  className='ml-auto text-primary border-primary/20 bg-primary/5 rounded-pill'
-                >
-                  <Clock className='w-3 h-3 mr-1' />
-                  {advogadoDetalhes.horarios} horários nos próximos 7 dias
-                </Badge>
               </div>
             )}
           </div>

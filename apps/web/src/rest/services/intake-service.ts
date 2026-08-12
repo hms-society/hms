@@ -53,6 +53,13 @@ export const IntakeService = (restClient: RestClient): IntakeRestService => {
       return restClient.post<Intake>('/intakes', request)
     },
 
+    retryIntakeConsultationScheduling(intakeId, request) {
+      return restClient.post<Intake>(
+        `/intakes/${intakeId}/consultation-scheduling/retry`,
+        request,
+      )
+    },
+
     transitionIntakeStatus(intakeId, request) {
       return restClient.patch<Intake>(`/intakes/${intakeId}/status`, request)
     },

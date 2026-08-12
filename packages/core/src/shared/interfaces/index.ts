@@ -1,6 +1,7 @@
 export * from './broker'
 export * from './event-outbox'
 export * from './file-storage-provider'
+export * from './id-provider'
 export * from './save-event-to-outbox-params'
 export * from './datetime-provider'
 export * from './use-case'

@@ -1,5 +1,7 @@
-import type { INestApplication, Type } from '@nestjs/common'
+import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import type { Intake, IntakeCreation } from '@hms/core/intake/domain/entities'
+import type { AuthUser } from '@hms/core/identity/domain/structures'
+import type { Broker } from '@hms/core/shared/interfaces'
 import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
 import { IntakeClosureReason, IntakeStatus } from '@hms/core/intake/domain/structures'
 
@@ -10,13 +12,17 @@ import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { IdentityModule } from '@/identity/identity.module'
 import { AuthGuard } from '@/identity/guards'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+import { vi, type Mock } from 'vitest'
 
 export class IntakeModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
     private readonly intakesRepository: DrizzleIntakesRepository,
     private readonly intakeSeeder: IntakeSeeder,
+    readonly broker: Broker & { publish: Mock },
+    readonly authUser: AuthUser,
   ) {}
 
   get app(): INestApplication {
@@ -28,19 +34,39 @@ export class IntakeModuleFixture {
   }
 
   static async register(controller?: Type<unknown>) {
+    const authUser: AuthUser = {
+      id: '91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30',
+      email: 'intake.fixture@hms.test',
+    }
+    const broker: Broker & { publish: Mock } = { publish: vi.fn() }
     const restFixture = await RestFixture.register(
       {
         imports: [IdentityModule, IntakeDatabaseModule],
         controllers: controller ? [controller] : [],
-        providers: [DatetimeProvider],
+        providers: [
+          DatetimeProvider,
+          {
+            provide: InngestBroker,
+            useValue: broker,
+          },
+        ],
       },
-      (builder) => builder.overrideGuard(AuthGuard).useValue({ canActivate: () => true }),
+      (builder) =>
+        builder.overrideGuard(AuthGuard).useValue({
+          canActivate: (context: ExecutionContext) => {
+            const request = context.switchToHttp().getRequest<{ user?: AuthUser }>()
+            request.user = authUser
+            return true
+          },
+        }),
     )
 
     return new IntakeModuleFixture(
       restFixture,
       restFixture.get(DrizzleIntakesRepository),
       restFixture.get(IntakeSeeder),
+      broker,
+      authUser,
     )
   }
 

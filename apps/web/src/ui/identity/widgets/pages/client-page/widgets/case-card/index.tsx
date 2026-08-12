@@ -20,6 +20,8 @@ export const CaseCard = ({ intake }: CaseCardProps) => {
 
   const hasPendency =
     intake.status === IntakeStatus.Registered ||
+    intake.status === IntakeStatus.ConsultationScheduling ||
+    intake.status === IntakeStatus.ConsultationSchedulingFailed ||
     intake.status === IntakeStatus.ViabilityRegistered
 
   return (
@@ -58,6 +60,7 @@ export const CaseCard = ({ intake }: CaseCardProps) => {
       <div className='flex justify-between items-center pt-4 border-t border-border w-full mt-auto'>
         {getStatusBadge(intake.status)}
         <button
+          type='button'
           onClick={handleNavigate}
           className='p-1 rounded-full group-hover:bg-primary/10 transition-colors duration-300 cursor-pointer'
         >

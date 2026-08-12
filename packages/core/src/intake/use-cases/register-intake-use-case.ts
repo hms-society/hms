@@ -1,9 +1,23 @@
 import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
+import type { Broker } from '#shared/interfaces/broker'
 import type { UseCase } from '#shared/interfaces/use-case'
+import type {
+  ConsultationChannel,
+  ConsultationModality,
+} from '#consultation/domain/structures'
 
 import type { Intake, IntakeCreation } from '../domain/entities'
 import { InvalidIntakeClosureError } from '../domain/errors'
-import type { IntakeClosureReason, IntakeStatus } from '../domain/structures'
+import {
+  IntakeConsultationSchedulingRequestedEvent,
+  IntakeCreatedEvent,
+} from '../domain/events'
+import {
+  IntakeStatus,
+  IntakeDecision,
+  type IntakeClosureReason,
+  type IntakeStatus as IntakeStatusValue,
+} from '../domain/structures'
 import type { IntakesRepository } from '../interfaces'
 
 type BaseRequest = Omit<
@@ -12,15 +26,19 @@ type BaseRequest = Omit<
 >
 
 type ScheduledRequest = BaseRequest & {
-  decision: 'schedule_consultation'
+  decision: typeof IntakeDecision.ScheduleConsultation
+  assignedLawyerId: string
+  startsAt: Date
+  modality: ConsultationModality
+  channel?: ConsultationChannel
 }
 
 type RegisteredRequest = BaseRequest & {
-  decision: 'register_intake'
+  decision: typeof IntakeDecision.RegisterIntake
 }
 
 type ClosedRequest = BaseRequest & {
-  decision: 'close_without_contract'
+  decision: typeof IntakeDecision.CloseWithoutContract
   closureNotes?: string
   closureReason: IntakeClosureReason
 }
@@ -31,13 +49,26 @@ export class RegisterIntakeUseCase implements UseCase<Request, Intake> {
   constructor(
     private readonly intakesRepository: IntakesRepository,
     private readonly datetimeProvider: DatetimeProvider,
+    private readonly broker: Broker,
   ) {}
 
   async execute(request: Request): Promise<Intake> {
-    const { decision, ...intakeData } = request
+    const { decision } = request
+    const intakeData: BaseRequest = {
+      clientId: request.clientId,
+      responsibleId: request.responsibleId,
+      createdBy: request.createdBy,
+      updatedBy: request.updatedBy,
+      origin: request.origin,
+      contactChannel: request.contactChannel,
+      legalAreaId: request.legalAreaId,
+      legalTopicId: request.legalTopicId,
+      urgency: request.urgency,
+      demandNotes: request.demandNotes,
+    }
 
     if (
-      decision === 'close_without_contract' &&
+      decision === IntakeDecision.CloseWithoutContract &&
       request.closureReason === 'other' &&
       !request.closureNotes?.trim()
     ) {
@@ -46,17 +77,17 @@ export class RegisterIntakeUseCase implements UseCase<Request, Intake> {
       )
     }
 
-    const status: IntakeStatus =
-      decision === 'schedule_consultation'
-        ? 'consultation_scheduled'
-        : decision === 'register_intake'
-          ? 'registered'
-          : 'closed_without_contract'
+    const status: IntakeStatusValue =
+      decision === IntakeDecision.ScheduleConsultation
+        ? IntakeStatus.ConsultationScheduling
+        : decision === IntakeDecision.RegisterIntake
+          ? IntakeStatus.Registered
+          : IntakeStatus.ClosedWithoutContract
 
     const intake: IntakeCreation = {
       ...intakeData,
       status,
-      ...(decision === 'close_without_contract'
+      ...(decision === IntakeDecision.CloseWithoutContract
         ? {
             closedAt: this.datetimeProvider.now(),
             closureNotes: request.closureNotes?.trim() || undefined,
@@ -65,6 +96,43 @@ export class RegisterIntakeUseCase implements UseCase<Request, Intake> {
         : {}),
     }
 
-    return this.intakesRepository.add(intake)
+    const createdIntake = await this.intakesRepository.add(intake)
+
+    const eventPayload = {
+      intakeId: createdIntake.id,
+      clientId: createdIntake.clientId,
+      responsibleId: createdIntake.responsibleId,
+      legalAreaId: createdIntake.legalAreaId,
+      legalTopicId: createdIntake.legalTopicId,
+      demandNotes: createdIntake.demandNotes,
+      occurredAt: this.datetimeProvider.now(),
+    }
+
+    await this.broker.publish(
+      new IntakeCreatedEvent({
+        ...eventPayload,
+        status: createdIntake.status,
+      }),
+    )
+
+    if (decision === IntakeDecision.ScheduleConsultation) {
+      await this.broker.publish(
+        new IntakeConsultationSchedulingRequestedEvent({
+          intakeId: createdIntake.id,
+          clientId: createdIntake.clientId,
+          assignedLawyerId: request.assignedLawyerId,
+          legalAreaId: createdIntake.legalAreaId,
+          legalTopicId: createdIntake.legalTopicId,
+          demandNotes: createdIntake.demandNotes,
+          startsAt: request.startsAt,
+          modality: request.modality,
+          channel: request.channel,
+          requestedBy: createdIntake.updatedBy,
+          occurredAt: this.datetimeProvider.now(),
+        }),
+      )
+    }
+
+    return createdIntake
   }
 }

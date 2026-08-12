@@ -1,4 +1,5 @@
 export * from './consultation-channel'
+export * from './consultation-document-generation'
 export * from './consultation-modality'
 export * from './consultation-status'
 export * from './consultation-suggestion-status'

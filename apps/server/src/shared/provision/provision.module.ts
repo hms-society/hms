@@ -5,6 +5,7 @@ import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-prov
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
 import { FakeFileStorageProvider } from '@/shared/provision/file-storage/fake-file-storage-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 
 @Module({
   imports: [
@@ -17,12 +18,13 @@ import { FakeFileStorageProvider } from '@/shared/provision/file-storage/fake-fi
   providers: [
     EnvProvider,
     DatetimeProvider,
+    IdProvider,
     FakeFileStorageProvider,
     {
       provide: PROVISION_PROVIDERS.fileStorage,
       useExisting: FakeFileStorageProvider,
     },
   ],
-  exports: [EnvProvider, DatetimeProvider, PROVISION_PROVIDERS.fileStorage],
+  exports: [EnvProvider, DatetimeProvider, IdProvider, PROVISION_PROVIDERS.fileStorage],
 })
 export class ProvisionModule {}

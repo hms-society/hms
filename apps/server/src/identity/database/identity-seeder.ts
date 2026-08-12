@@ -90,14 +90,6 @@ const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   profile: 'paralegal',
 }
 
-const DEFAULT_CLIENT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
-  profile: 'client'
-} = {
-  professionalName: 'Cliente de desenvolvimento',
-  jobTitle: 'Cliente',
-  profile: 'client',
-}
-
 @Injectable()
 export class IdentitySeeder {
   constructor(
@@ -231,17 +223,11 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    const clientCollaborator = await this.collaboratorsRepository.add({
-      userId: clientUser.id,
-      ...DEFAULT_CLIENT,
-    })
-
     if (
       !administratorCreated ||
       !attendantCreated ||
       !lawyerCreated ||
-      !paralegalCreated ||
-      !clientCollaborator
+      !paralegalCreated
     ) {
       throw new AppError('Default seed collaborators were not created')
     }
@@ -266,7 +252,6 @@ export class IdentitySeeder {
         attendantCreated,
         lawyerCreated,
         paralegalCreated,
-        clientCollaborator,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,

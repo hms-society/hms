@@ -1,0 +1,61 @@
+@url = {{BASE_URL}}/consultations
+@consultationId = 00000000-0000-4000-8000-000000000101
+@powerOfAttorneyDocumentId = 00000000-0000-4000-8000-000000000201
+@consultationStatementDocumentId = 00000000-0000-4000-8000-000000000202
+@reviewChallengeDocumentId = 00000000-0000-4000-8000-000000000203
+
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Confirm the authenticated collaborator
+GET {{BASE_URL}}/collaborators/me
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+# Individual path: execute this request and wait for the Inngest run to finish
+# before requesting the same document again.
+
+### Generate the seeded power of attorney
+# @name generatePowerOfAttorney
+POST {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Generate the seeded consultation statement
+# @name generateConsultationStatement
+POST {{url}}/{{consultationId}}/documents/{{consultationStatementDocumentId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Challenge the reviewer with an intentionally inconsistent document
+# @name generateReviewChallengeDocument
+POST {{url}}/{{consultationId}}/documents/{{reviewChallengeDocumentId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+# The seeded template contradicts both itself and the consultation source. A
+# successful review cycle should either require one or more revisions or finish
+# the generation as failed with understandable findings after three attempts.
+
+# Batch path: after a fresh db:seed, execute this request instead of the two
+# individual requests. It requests every eligible document in the package.
+
+### Generate all eligible consultation documents
+# @name generateAllConsultationDocuments
+POST {{url}}/{{consultationId}}/document-generations/batch
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+# Generation is asynchronous. Follow the runs at http://localhost:8288.
+# Until generation read endpoints exist, inspect document_generations and
+# document_versions in PostgreSQL to verify the final status and generated content.
