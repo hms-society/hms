@@ -86,9 +86,11 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     const run = await this.workflow.createRun()
     const result = await run.start({ inputData: input })
 
+    if (result.status === 'failed') throw result.error
+
     if (result.status !== 'success') {
       throw new AppError(
-        'O fluxo de geração documental não foi concluído.',
+        `O fluxo de geração documental terminou com o estado ${result.status}.`,
         'Erro de Geração Documental',
       )
     }
