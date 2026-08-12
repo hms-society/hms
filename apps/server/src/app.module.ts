@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common'
 
 import { CommunicationModule } from '@/communication/communication.module'
+import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
 import { ConsultationModule } from '@/consultation/consultation.module'
 import { CreateConsultationFromAppointmentJob } from '@/consultation/messaging/inngest/jobs'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
+import { ProcessWhatsappBatchJob } from '@/document-engine/messaging/inngest/jobs'
 import { DocumentProductionModule } from '@/document-production/document-production.module'
 import {
   GenerateDocumentJob,
@@ -23,7 +25,6 @@ import { InngestModule } from '@/shared/messaging/inngest/inngest.module'
 import type { InngestOptions } from '@/shared/messaging/inngest/inngest-options'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { SharedModule } from '@/shared/shared.module'
-import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
       imports: [
         SharedMessagingModule,
         CommunicationModule,
+        DocumentsModule,
         ConsultationModule,
         IntakeModule,
         SchedulingModule,
@@ -48,6 +50,7 @@ import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
       inject: [
         InngestClient,
         ProcessWhatsappEventJob,
+        ProcessWhatsappBatchJob,
         ReserveIntakeAppointmentJob,
         CreateConsultationFromAppointmentJob,
         CompleteIntakeConsultationSchedulingJob,
@@ -58,6 +61,7 @@ import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
       useFactory: (
         client: InngestClient,
         processWhatsappEventJob: ProcessWhatsappEventJob,
+        processWhatsappBatchJob: ProcessWhatsappBatchJob,
         reserveIntakeAppointmentJob: ReserveIntakeAppointmentJob,
         createConsultationFromAppointmentJob: CreateConsultationFromAppointmentJob,
         completeIntakeConsultationSchedulingJob: CompleteIntakeConsultationSchedulingJob,
@@ -68,6 +72,7 @@ import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
         client,
         functions: [
           processWhatsappEventJob.function,
+          processWhatsappBatchJob.function,
           reserveIntakeAppointmentJob.function,
           createConsultationFromAppointmentJob.function,
           completeIntakeConsultationSchedulingJob.function,
