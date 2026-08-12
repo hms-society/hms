@@ -94,7 +94,7 @@ export const DocumentInboxPage = () => {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={`h-8 w-64 justify-start rounded-md bg-card px-2.5 text-left font-sans text-xs font-normal ${
+                className={`h-9 w-64 justify-start rounded-md border border-input bg-card px-2.5 text-left font-sans text-sm font-normal ${
                   !dateRange?.from ? "text-muted-foreground" : "text-foreground"
                 }`}
               >

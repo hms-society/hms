@@ -5,8 +5,8 @@ import { Field, FieldLabel, FieldError, FieldGroup } from '@/ui/shadcn/field'
 import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { useDocumentAnalysis } from './use-document-analysis'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
+import { useDocumentAnalysis } from './use-document-analysis'
 
 export type DocumentAnalysisPageProps = {
   fileId: string

@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
-import { documentReview, type DocumentReviewFormData } from './schemas/schema'
+import { documentReview, type DocumentReviewFormData } from '../schemas/schema'
 
 const MOCK_DOCUMENTS = [
   { id: '1', fileName: 'comprovante-residencia.pdf', confidence: 'Alta confiança', type: 'comprovante_residencia' },
