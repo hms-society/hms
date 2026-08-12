@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { isWithinInterval, isSameDay, startOfDay, endOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 
 const MOCK_INBOX_DATA = [
   {
@@ -8,7 +10,8 @@ const MOCK_INBOX_DATA = [
     fileSize: "2.4 MB",
     receivedFromIcon: "circle-help",
     receivedFrom: "Mariana Costa Silva",
-    contactInfo: "Portal do cliente · mariana.silva@email.com",
+    contactInfo:
+      "Portal do cliente · mariana.silva@email.com",
     caseId: "Caso 0089",
     caseDesc: "Comprovante de residência",
     receivedDate: "Hoje",
@@ -182,120 +185,425 @@ const MOCK_INBOX_DATA = [
     badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
     dotClasses: "bg-[#0FA0AA]",
   },
+  {
+    id: "13",
+    fileName: "boletim-ocorrencia.pdf",
+    fileSize: "1.8 MB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Thiago Martins",
+    contactInfo: "Portal do cliente · thiago.martins@email.com",
+    caseId: "Caso 0118",
+    caseDesc: "Boletim de ocorrência",
+    receivedDate: "01/08/2026",
+    receivedTime: "08:45",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "14",
+    fileName: "fatura-cartao.pdf",
+    fileSize: "950 KB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Camila Rocha",
+    contactInfo: "WhatsApp · +55 31 97777-6666",
+    caseId: "Caso 0120",
+    caseDesc: "Comprovante de residência",
+    receivedDate: "01/08/2026",
+    receivedTime: "13:15",
+    status: "Duplicado",
+    badgeClasses: "bg-muted text-muted-foreground",
+    dotClasses: "bg-muted-foreground",
+  },
+  {
+    id: "15",
+    fileName: "contrato-aluguel.pdf",
+    fileSize: "2.1 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Lucas Pereira",
+    contactInfo: "E-mail · lucas.pereira@email.com",
+    caseId: "Caso 0122",
+    caseDesc: "Contrato de locação",
+    receivedDate: "31/07/2026",
+    receivedTime: "17:20",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+
+  // Página 3
+  {
+    id: "16",
+    fileName: "certidao-casamento.pdf",
+    fileSize: "1.4 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Beatriz Martins",
+    contactInfo: "E-mail · beatriz.martins@email.com",
+    caseId: "Caso 0125",
+    caseDesc: "Certidão de casamento",
+    receivedDate: "30/07/2026",
+    receivedTime: "09:42",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "17",
+    fileName: "comprovante-renda.pdf",
+    fileSize: "780 KB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "André Oliveira",
+    contactInfo: "Portal do cliente · andre.oliveira@email.com",
+    caseId: "Caso 0128",
+    caseDesc: "Comprovante de renda",
+    receivedDate: "30/07/2026",
+    receivedTime: "11:18",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+  {
+    id: "18",
+    fileName: "documento-identificacao.pdf",
+    fileSize: "2.8 MB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Diego Santos",
+    contactInfo: "WhatsApp · +55 11 97654-3210",
+    caseId: "Caso 0130",
+    caseDesc: "Documento de identificação",
+    receivedDate: "29/07/2026",
+    receivedTime: "14:05",
+    status: "Incompleto",
+    badgeClasses: "bg-[#FFF3E0] text-[#7C4700]",
+    dotClasses: "bg-[#B36D32]",
+  },
+  {
+    id: "19",
+    fileName: "declaracao-endereco.pdf",
+    fileSize: "560 KB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Juliana Martins",
+    contactInfo: "Portal do cliente · juliana.martins@email.com",
+    caseId: "Caso 0132",
+    caseDesc: "Declaração de endereço",
+    receivedDate: "29/07/2026",
+    receivedTime: "16:37",
+    status: "Ilegível",
+    badgeClasses: "bg-[#FFEBEE] text-[#7B1515]",
+    dotClasses: "bg-[#A02822]",
+  },
+  {
+    id: "20",
+    fileName: "recibo-pagamento.pdf",
+    fileSize: "920 KB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Eduardo Lima",
+    contactInfo: "E-mail · eduardo.lima@email.com",
+    caseId: "Caso 0135",
+    caseDesc: "Recibo de pagamento",
+    receivedDate: "28/07/2026",
+    receivedTime: "10:22",
+    status: "Duplicado",
+    badgeClasses: "bg-muted text-muted-foreground",
+    dotClasses: "bg-muted-foreground",
+  },
+  {
+    id: "21",
+    fileName: "extrato-conta-corrente.pdf",
+    fileSize: "1.7 MB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Priscila Gomes",
+    contactInfo: "WhatsApp · +55 21 96543-2109",
+    caseId: "Caso 0138",
+    caseDesc: "Extrato bancário",
+    receivedDate: "28/07/2026",
+    receivedTime: "15:44",
+    status: "Falha no processamento",
+    badgeClasses: "bg-destructive text-white",
+    dotClasses: "bg-white",
+  },
+
+  // Página 4
+  {
+    id: "22",
+    fileName: "contrato-prestacao-servicos.pdf",
+    fileSize: "2.6 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Renato Carvalho",
+    contactInfo: "E-mail · renato.carvalho@email.com",
+    caseId: "Caso 0141",
+    caseDesc: "Contrato de prestação de serviços",
+    receivedDate: "27/07/2026",
+    receivedTime: "08:55",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+  {
+    id: "23",
+    fileName: "documento-veiculo.pdf",
+    fileSize: "1.3 MB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Marcelo Freitas",
+    contactInfo: "Portal do cliente · marcelo.freitas@email.com",
+    caseId: "Caso 0144",
+    caseDesc: "Documento do veículo",
+    receivedDate: "27/07/2026",
+    receivedTime: "12:10",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "24",
+    fileName: "certidao-negativa.pdf",
+    fileSize: "680 KB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Sabrina Costa",
+    contactInfo: "E-mail · sabrina.costa@email.com",
+    caseId: "Caso 0147",
+    caseDesc: "Certidão negativa",
+    receivedDate: "26/07/2026",
+    receivedTime: "09:30",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+  {
+    id: "25",
+    fileName: "declaracao-imposto-renda.pdf",
+    fileSize: "3.9 MB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Fábio Mendes",
+    contactInfo: "Portal do cliente · fabio.mendes@email.com",
+    caseId: "Caso 0150",
+    caseDesc: "Declaração de imposto de renda",
+    receivedDate: "25/07/2026",
+    receivedTime: "13:47",
+    status: "Incompleto",
+    badgeClasses: "bg-[#FFF3E0] text-[#7C4700]",
+    dotClasses: "bg-[#B36D32]",
+  },
+  {
+    id: "26",
+    fileName: "comprovante-pagamento.jpg",
+    fileSize: "2.2 MB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Larissa Souza",
+    contactInfo: "WhatsApp · +55 31 96666-5544",
+    caseId: "Sem vínculo seguro",
+    caseDesc: "Escolha manual necessária",
+    receivedDate: "25/07/2026",
+    receivedTime: "16:05",
+    status: "Ilegível",
+    badgeClasses: "bg-[#FFEBEE] text-[#7B1515]",
+    dotClasses: "bg-[#A02822]",
+  },
+  {
+    id: "27",
+    fileName: "historico-escolar.pdf",
+    fileSize: "1.9 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Gustavo Ribeiro",
+    contactInfo: "E-mail · gustavo.ribeiro@email.com",
+    caseId: "Caso 0156",
+    caseDesc: "Histórico escolar",
+    receivedDate: "24/07/2026",
+    receivedTime: "11:12",
+    status: "Duplicado",
+    badgeClasses: "bg-muted text-muted-foreground",
+    dotClasses: "bg-muted-foreground",
+  },
+
+  // Página 5
+  {
+    id: "28",
+    fileName: "diploma-graduacao.pdf",
+    fileSize: "2.5 MB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Isabela Rocha",
+    contactInfo: "Portal do cliente · isabela.rocha@email.com",
+    caseId: "Caso 0159",
+    caseDesc: "Diploma de graduação",
+    receivedDate: "23/07/2026",
+    receivedTime: "08:40",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "29",
+    fileName: "certificado-curso.pdf",
+    fileSize: "1.1 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Henrique Alves",
+    contactInfo: "E-mail · henrique.alves@email.com",
+    caseId: "Caso 0162",
+    caseDesc: "Certificado de curso",
+    receivedDate: "22/07/2026",
+    receivedTime: "14:25",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+  {
+    id: "30",
+    fileName: "contrato-financiamento.pdf",
+    fileSize: "4.3 MB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Natália Ferreira",
+    contactInfo: "WhatsApp · +55 11 95555-4433",
+    caseId: "Caso 0165",
+    caseDesc: "Contrato de financiamento",
+    receivedDate: "21/07/2026",
+    receivedTime: "17:03",
+    status: "Incompleto",
+    badgeClasses: "bg-[#FFF3E0] text-[#7C4700]",
+    dotClasses: "bg-[#B36D32]",
+  },
+  {
+    id: "31",
+    fileName: "comprovante-bancario.pdf",
+    fileSize: "730 KB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Paulo Henrique",
+    contactInfo: "Portal do cliente · paulo.henrique@email.com",
+    caseId: "Caso 0168",
+    caseDesc: "Comprovante bancário",
+    receivedDate: "20/07/2026",
+    receivedTime: "10:18",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "32",
+    fileName: "identidade-frente.jpg",
+    fileSize: "3.4 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Aline Martins",
+    contactInfo: "E-mail · aline.martins@email.com",
+    caseId: "Sem vínculo seguro",
+    caseDesc: "Escolha manual necessária",
+    receivedDate: "19/07/2026",
+    receivedTime: "15:36",
+    status: "Ilegível",
+    badgeClasses: "bg-[#FFEBEE] text-[#7B1515]",
+    dotClasses: "bg-[#A02822]",
+  },
+  {
+    id: "33",
+    fileName: "declaracao-renda.pdf",
+    fileSize: "870 KB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Ricardo Nascimento",
+    contactInfo: "Portal do cliente · ricardo.nascimento@email.com",
+    caseId: "Caso 0174",
+    caseDesc: "Declaração de renda",
+    receivedDate: "18/07/2026",
+    receivedTime: "12:42",
+    status: "Falha no processamento",
+    badgeClasses: "bg-destructive text-white",
+    dotClasses: "bg-white",
+  },
+
+  // Página 6
+  {
+    id: "34",
+    fileName: "comprovante-endereco.jpg",
+    fileSize: "1.6 MB",
+    receivedFromIcon: "message-circle",
+    receivedFrom: "Mônica Cardoso",
+    contactInfo: "WhatsApp · +55 21 94444-3322",
+    caseId: "Caso 0177",
+    caseDesc: "Comprovante de endereço",
+    receivedDate: "17/07/2026",
+    receivedTime: "09:05",
+    status: "Aguardando validação",
+    badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
+    dotClasses: "bg-[#0FA0AA]",
+  },
+  {
+    id: "35",
+    fileName: "contrato-trabalho.pdf",
+    fileSize: "2.9 MB",
+    receivedFromIcon: "mail",
+    receivedFrom: "Bruno Castro",
+    contactInfo: "E-mail · bruno.castro@email.com",
+    caseId: "Caso 0180",
+    caseDesc: "Contrato de trabalho",
+    receivedDate: "16/07/2026",
+    receivedTime: "13:20",
+    status: "Validado",
+    badgeClasses: "bg-[#E8F5E9] text-[#1B5E20]",
+    dotClasses: "bg-[#2E7D32]",
+  },
+  {
+    id: "36",
+    fileName: "recibo-aluguel.pdf",
+    fileSize: "640 KB",
+    receivedFromIcon: "circle-help",
+    receivedFrom: "Daniela Moreira",
+    contactInfo: "Portal do cliente · daniela.moreira@email.com",
+    caseId: "Caso 0183",
+    caseDesc: "Recibo de aluguel",
+    receivedDate: "15/07/2026",
+    receivedTime: "16:48",
+    status: "Duplicado",
+    badgeClasses: "bg-muted text-muted-foreground",
+    dotClasses: "bg-muted-foreground",
+  },
 ] as const;
 
-const ITEMS_PER_PAGE = 6;
-
-function parseDocumentDate(receivedDate: string): Date {
+const parseDateString = (dateStr: string) => {
   const today = new Date();
 
-  if (receivedDate === "Hoje") {
-    return new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
-  }
+  if (dateStr === "Hoje") return today;
+  if (dateStr === "Ontem")
+    return new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
-  if (receivedDate === "Ontem") {
-    return new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 1,
-    );
-  }
-
-  const [day, month, year] = receivedDate.split("/").map(Number);
-
-  return new Date(year, month - 1, day);
-}
-
-function normalizeDate(date: Date): Date {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  );
-}
+  const [d, m, y] = dateStr.split("/");
+  return new Date(Number(y), Number(m) - 1, Number(d));
+};
 
 export function useDocumentInbox() {
   const navigate = useNavigate();
-
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [statusFilter, setStatusFilter] = useState("");
-  const [clientFilter, setClientFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [appliedDateRange, setAppliedDateRange] = useState<
+    DateRange | undefined
+  >();
 
-  const [dateStart, setDateStart] = useState("");
-  const [dateEnd, setDateEnd] = useState("");
+  const itemsPerPage = 6;
 
-  const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
-  const [appliedClientFilter, setAppliedClientFilter] = useState("");
-  const [appliedDateStart, setAppliedDateStart] = useState("");
-  const [appliedDateEnd, setAppliedDateEnd] = useState("");
+  const filteredData = useMemo(() => {
+    return MOCK_INBOX_DATA.filter((item) => {
+      if (!appliedDateRange?.from) return true;
 
-  const filteredData = MOCK_INBOX_DATA.filter((doc) => {
-    if (
-      appliedStatusFilter &&
-      doc.status !== appliedStatusFilter
-    ) {
-      return false;
-    }
+      const itemDate = parseDateString(item.receivedDate);
 
-    if (
-      appliedClientFilter &&
-      doc.receivedFrom !== appliedClientFilter
-    ) {
-      return false;
-    }
-
-    if (appliedDateStart) {
-      const documentDate = normalizeDate(
-        parseDocumentDate(doc.receivedDate),
-      );
-
-      const startDate = normalizeDate(
-        new Date(`${appliedDateStart}T00:00:00`),
-      );
-
-      if (documentDate < startDate) {
-        return false;
+      if (appliedDateRange.from && !appliedDateRange.to) {
+        return isSameDay(itemDate, appliedDateRange.from);
       }
 
-      if (appliedDateEnd) {
-        const endDate = normalizeDate(
-          new Date(`${appliedDateEnd}T00:00:00`),
-        );
-
-        if (documentDate > endDate) {
-          return false;
-        }
-      } else {
-        if (documentDate.getTime() !== startDate.getTime()) {
-          return false;
-        }
+      if (appliedDateRange.from && appliedDateRange.to) {
+        return isWithinInterval(itemDate, {
+          start: startOfDay(appliedDateRange.from),
+          end: endOfDay(appliedDateRange.to),
+        });
       }
-    }
 
-    return true;
-  });
+      return true;
+    });
+  }, [appliedDateRange]);
 
   const totalItems = filteredData.length;
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalItems / ITEMS_PER_PAGE),
-  );
-
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
   const paginatedData = filteredData.slice(
-    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
-    safeCurrentPage * ITEMS_PER_PAGE,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
 
   const handlePageChange = (page: number) => {
@@ -305,25 +613,13 @@ export function useDocumentInbox() {
   };
 
   const handleApplyFilters = () => {
-    setAppliedStatusFilter(statusFilter);
-    setAppliedClientFilter(clientFilter);
-    setAppliedDateStart(dateStart);
-    setAppliedDateEnd(dateEnd);
+    setAppliedDateRange(dateRange);
     setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
-    setStatusFilter("");
-    setClientFilter("");
-    setDateFilter("");
-    setDateStart("");
-    setDateEnd("");
-
-    setAppliedStatusFilter("");
-    setAppliedClientFilter("");
-    setAppliedDateStart("");
-    setAppliedDateEnd("");
-
+    setDateRange(undefined);
+    setAppliedDateRange(undefined);
     setCurrentPage(1);
   };
 
@@ -339,26 +635,15 @@ export function useDocumentInbox() {
   };
 
   return {
-    currentPage: safeCurrentPage,
+    currentPage,
     totalPages,
     totalItems,
     paginatedData,
+    dateRange,
+    setDateRange,
     handlePageChange,
     handleAnalyze,
     handleRefresh,
-
-    statusFilter,
-    dateFilter,
-    clientFilter,
-    dateStart,
-    dateEnd,
-
-    setStatusFilter,
-    setDateFilter,
-    setClientFilter,
-    setDateStart,
-    setDateEnd,
-
     handleApplyFilters,
     handleClearFilters,
   };
