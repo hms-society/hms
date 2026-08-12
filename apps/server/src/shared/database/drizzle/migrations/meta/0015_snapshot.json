@@ -1,6 +1,6 @@
 {
-  "id": "6e1a716c-a7a4-4e8c-b3d2-3c38c738f5eb",
-  "prevId": "9de38e26-b1d6-436e-828d-53563d321217",
+  "id": "b5aac93d-fe9a-4e30-9514-8ba37919d77f",
+  "prevId": "6e1a716c-a7a4-4e8c-b3d2-3c38c738f5eb",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -319,8 +319,12 @@
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -633,8 +637,12 @@
           "name": "collaborator_legal_expertises_collaborator_id_collaborators_id_fk",
           "tableFrom": "collaborator_legal_expertises",
           "tableTo": "collaborators",
-          "columnsFrom": ["collaborator_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "collaborator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -697,8 +705,12 @@
           "name": "collaborator_legal_expertise_topics_expertise_id_collaborator_legal_expertises_id_fk",
           "tableFrom": "collaborator_legal_expertise_topics",
           "tableTo": "collaborator_legal_expertises",
-          "columnsFrom": ["expertise_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "expertise_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -797,8 +809,12 @@
           "name": "collaborators_user_id_users_id_fk",
           "tableFrom": "collaborators",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1094,8 +1110,12 @@
           "name": "legal_topics_legal_area_id_legal_areas_id_fk",
           "tableFrom": "legal_topics",
           "tableTo": "legal_areas",
-          "columnsFrom": ["legal_area_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "legal_area_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1163,8 +1183,12 @@
           "name": "communications_client_id_clients_id_fk",
           "tableFrom": "communications",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1172,8 +1196,12 @@
           "name": "communications_author_id_users_id_fk",
           "tableFrom": "communications",
           "tableTo": "users",
-          "columnsFrom": ["author_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1284,8 +1312,12 @@
           "name": "blocked_periods_schedule_id_schedules_id_fk",
           "tableFrom": "blocked_periods",
           "tableTo": "schedules",
-          "columnsFrom": ["schedule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1349,55 +1381,11 @@
         "schedules_collaborator_id_unique": {
           "name": "schedules_collaborator_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["collaborator_id"]
+          "columns": [
+            "collaborator_id"
+          ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.consultation_identified_risks": {
-      "name": "consultation_identified_risks",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "consultation_id": {
-          "name": "consultation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "consultation_identified_risks_consultation_id_consultations_id_fk": {
-          "name": "consultation_identified_risks_consultation_id_consultations_id_fk",
-          "tableFrom": "consultation_identified_risks",
-          "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1828,12 +1816,23 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-      "values": ["whatsapp", "email", "phone", "in_person"]
+      "values": [
+        "whatsapp",
+        "email",
+        "phone",
+        "in_person"
+      ]
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-      "values": ["direct", "referral", "website", "social_media", "other"]
+      "values": [
+        "direct",
+        "referral",
+        "website",
+        "social_media",
+        "other"
+      ]
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -1851,17 +1850,30 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-      "values": ["normal", "high", "urgent"]
+      "values": [
+        "normal",
+        "high",
+        "urgent"
+      ]
     },
     "public.client_type": {
       "name": "client_type",
       "schema": "public",
-      "values": ["natural", "legal"]
+      "values": [
+        "natural",
+        "legal"
+      ]
     },
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
-      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
+      "values": [
+        "admin",
+        "attendant",
+        "lawyer",
+        "paralegal",
+        "supervisor"
+      ]
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -1876,62 +1888,55 @@
     "public.registration_attempt_status": {
       "name": "registration_attempt_status",
       "schema": "public",
-      "values": ["pending_auth", "auth_invited", "completed", "reconciliation_required"]
+      "values": [
+        "pending_auth",
+        "auth_invited",
+        "completed",
+        "reconciliation_required"
+      ]
     },
     "public.tax_id_type": {
       "name": "tax_id_type",
       "schema": "public",
-      "values": ["cpf", "cnpj"]
+      "values": [
+        "cpf",
+        "cnpj"
+      ]
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-      "values": ["invited", "active", "disabled"]
+      "values": [
+        "invited",
+        "active",
+        "disabled"
+      ]
     },
     "public.user_type": {
       "name": "user_type",
       "schema": "public",
-      "values": ["internal", "external_client", "external_third_party", "external_lawyer"]
+      "values": [
+        "internal",
+        "external_client",
+        "external_third_party",
+        "external_lawyer"
+      ]
     },
     "public.communication_channel": {
       "name": "communication_channel",
       "schema": "public",
-      "values": ["whatsapp", "email", "phone"]
+      "values": [
+        "whatsapp",
+        "email",
+        "phone"
+      ]
     },
     "public.communication_direction": {
       "name": "communication_direction",
       "schema": "public",
-      "values": ["inbound", "outbound"]
-    },
-    "public.document_batch_status": {
-      "name": "document_batch_status",
-      "schema": "public",
       "values": [
-        "received",
-        "pending_identification",
-        "identified",
-        "automatic_triage_in_progress",
-        "triage_completed",
-        "pending_human_review",
-        "processed",
-        "with_error"
-      ]
-    },
-    "public.document_channel": {
-      "name": "document_channel",
-      "schema": "public",
-      "values": ["whatsapp", "client_portal", "third_party_portal", "internal_upload"]
-    },
-    "public.document_status": {
-      "name": "document_status",
-      "schema": "public",
-      "values": [
-        "awaiting_validation",
-        "validated",
-        "illegible",
-        "incomplete",
-        "duplicate",
-        "processing_failure"
+        "inbound",
+        "outbound"
       ]
     }
   },
