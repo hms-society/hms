@@ -31,6 +31,9 @@ export const DocumentInboxPage = () => {
     paginatedData,
     dateRange,
     setDateRange,
+    statusFilter,
+    setStatusFilter,
+    uniqueStatuses,
     handlePageChange,
     handleAnalyze,
     handleRefresh,
@@ -49,12 +52,10 @@ export const DocumentInboxPage = () => {
             <h1 className="font-serif text-3xl font-semibold text-brand">
               Caixa de documentos
             </h1>
-
             <p className="mt-1 font-sans text-sm text-muted-foreground">
               Revise os documentos recebidos e encaminhe cada um para validação.
             </p>
           </div>
-
           <Button
             variant="outline"
             className="rounded-pill bg-highlight px-5 font-semibold text-primary shadow-sm hover:bg-highlight-vivid hover:text-white"
@@ -71,23 +72,21 @@ export const DocumentInboxPage = () => {
             Filtros:
           </span>
 
-          <NativeSelect size="sm" className="w-40 bg-card font-sans text-sm">
+          <NativeSelect
+            size="sm"
+            className="w-60 bg-card font-sans text-sm"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <NativeSelectOption value="">Todos os status</NativeSelectOption>
-            <NativeSelectOption value="Aguardando validação">
-              Aguardando validação
-            </NativeSelectOption>
-            <NativeSelectOption value="Validado">Validado</NativeSelectOption>
-            <NativeSelectOption value="Ilegível">Ilegível</NativeSelectOption>
-            <NativeSelectOption value="Incompleto">
-              Incompleto
-            </NativeSelectOption>
-            <NativeSelectOption value="Duplicado">Duplicado</NativeSelectOption>
-            <NativeSelectOption value="Falha no processamento">
-              Falha no processamento
-            </NativeSelectOption>
+            {uniqueStatuses.map((status) => (
+              <NativeSelectOption key={status} value={status}>
+                {status}
+              </NativeSelectOption>
+            ))}
           </NativeSelect>
 
-          <NativeSelect size="sm" className="w-48 bg-card font-sans text-sm">
+          <NativeSelect size="sm" className="w-60 bg-card font-sans text-sm">
             <NativeSelectOption value="">Todos os clientes</NativeSelectOption>
           </NativeSelect>
 
@@ -100,7 +99,6 @@ export const DocumentInboxPage = () => {
                 }`}
               >
                 <Icon name="calendar" className="mr-2 size-3.5 opacity-70" />
-
                 {dateRange?.from ? (
                   dateRange.to ? (
                     <>
@@ -120,9 +118,12 @@ export const DocumentInboxPage = () => {
                 ) : (
                   <span>Data inicial — Data final</span>
                 )}
+                <Icon
+                  name="chevron-down"
+                  className="ml-auto size-4 opacity-60"
+                />
               </Button>
             </PopoverTrigger>
-
             <PopoverContent className="w-[300px] p-0" align="start">
               <Calendar
                 mode="range"
@@ -146,7 +147,6 @@ export const DocumentInboxPage = () => {
             >
               Limpar filtros
             </Button>
-
             <Button
               type="button"
               variant="brand"
@@ -173,29 +173,23 @@ export const DocumentInboxPage = () => {
                 <TableHead className="w-[300px] text-[11px] font-semibold text-muted-foreground">
                   DOCUMENTO
                 </TableHead>
-
                 <TableHead className="text-[11px] font-semibold text-muted-foreground">
                   RECEBIDO DE
                 </TableHead>
-
                 <TableHead className="text-[11px] font-semibold text-muted-foreground">
                   CASO / ITEM SUGERIDO
                 </TableHead>
-
                 <TableHead className="text-[11px] font-semibold text-muted-foreground">
                   RECEBIDO
                 </TableHead>
-
                 <TableHead className="text-[11px] font-semibold text-muted-foreground">
                   STATUS
                 </TableHead>
-
                 <TableHead className="text-right text-[11px] font-semibold text-muted-foreground">
                   AÇÃO
                 </TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {totalItems === 0 ? (
                 <TableRow>
@@ -217,12 +211,10 @@ export const DocumentInboxPage = () => {
                             className="size-4 text-primary"
                           />
                         </div>
-
                         <div className="flex min-w-0 flex-col">
                           <span className="truncate font-sans font-semibold text-foreground">
                             {doc.fileName}
                           </span>
-
                           <span className="font-sans text-xs text-muted-foreground">
                             {doc.fileName.split(".").pop()?.toUpperCase()} •{" "}
                             {doc.fileSize}
@@ -230,7 +222,6 @@ export const DocumentInboxPage = () => {
                         </div>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5">
@@ -238,18 +229,15 @@ export const DocumentInboxPage = () => {
                             name={doc.receivedFromIcon as any}
                             className="size-3.5 text-muted-foreground"
                           />
-
                           <span className="font-sans font-semibold text-foreground">
                             {doc.receivedFrom}
                           </span>
                         </div>
-
                         <span className="font-sans text-xs text-muted-foreground">
                           {doc.contactInfo}
                         </span>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5">
@@ -262,7 +250,6 @@ export const DocumentInboxPage = () => {
                           >
                             {doc.caseId}
                           </span>
-
                           {doc.caseId.includes("Caso") && (
                             <Icon
                               name="external-link"
@@ -270,25 +257,21 @@ export const DocumentInboxPage = () => {
                             />
                           )}
                         </div>
-
                         <span className="font-sans text-xs text-muted-foreground">
                           {doc.caseDesc}
                         </span>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <span className="font-sans font-semibold text-foreground">
                           {doc.receivedDate}
                         </span>
-
                         <span className="font-sans text-xs text-muted-foreground">
                           {doc.receivedTime}
                         </span>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       <Badge
                         className={`gap-1.5 rounded-pill border-0 px-2.5 py-0.5 font-sans text-[11px] font-semibold ${doc.badgeClasses}`}
@@ -296,11 +279,9 @@ export const DocumentInboxPage = () => {
                         <span
                           className={`size-1.5 rounded-full ${doc.dotClasses}`}
                         />
-
                         {doc.status}
                       </Badge>
                     </TableCell>
-
                     <TableCell className="text-right">
                       <Button
                         variant="outline"
@@ -321,7 +302,6 @@ export const DocumentInboxPage = () => {
               <span className="font-sans text-sm text-muted-foreground">
                 Exibindo {startItem}–{endItem} de {totalItems} documentos
               </span>
-
               <Pagination className="!ml-auto !mr-0 !w-auto !justify-end">
                 <PaginationContent>
                   <PaginationItem>
@@ -340,26 +320,73 @@ export const DocumentInboxPage = () => {
                       <Icon name="chevron-left" className="size-4" />
                     </PaginationLink>
                   </PaginationItem>
-                  {Array.from({ length: totalPages }).map((_, i) => {
-                    const page = i + 1;
+                  {totalPages <= 5 ? (
+                    Array.from({ length: totalPages }).map((_, i) => {
+                      const page = i + 1;
 
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === page}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(page);
-                          }}
-                          className="flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] data-[active=true]:bg-[#3D757B] data-[active=true]:text-white"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === page}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(page);
+                            }}
+                            className="flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] data-[active=true]:bg-[#3D757B] data-[active=true]:text-white"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })
+                  ) : (
+                    <>
+                      {currentPage > 3 && (
+                        <PaginationItem>
+                          <span className="flex size-8 items-center justify-center text-[#3D757B]">
+                            ...
+                          </span>
+                        </PaginationItem>
+                      )}
 
+                      {Array.from({ length: 5 }, (_, i) => {
+                        let page: number;
+
+                        if (currentPage <= 3) {
+                          page = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          page = totalPages - 4 + i;
+                        } else {
+                          page = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === page}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(page);
+                              }}
+                              className="flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] data-[active=true]:bg-[#3D757B] data-[active=true]:text-white"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      })}
+
+                      {currentPage < totalPages - 2 && (
+                        <PaginationItem>
+                          <span className="flex size-8 items-center justify-center text-[#3D757B]">
+                            ...
+                          </span>
+                        </PaginationItem>
+                      )}
+                    </>
+                  )}
                   <PaginationItem>
                     <PaginationLink
                       href="#"

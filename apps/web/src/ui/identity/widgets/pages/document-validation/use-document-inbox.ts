@@ -10,8 +10,7 @@ const MOCK_INBOX_DATA = [
     fileSize: "2.4 MB",
     receivedFromIcon: "circle-help",
     receivedFrom: "Mariana Costa Silva",
-    contactInfo:
-      "Portal do cliente · mariana.silva@email.com",
+    contactInfo: "Portal do cliente · mariana.silva@email.com",
     caseId: "Caso 0089",
     caseDesc: "Comprovante de residência",
     receivedDate: "Hoje",
@@ -230,8 +229,6 @@ const MOCK_INBOX_DATA = [
     badgeClasses: "bg-[#E1F5F6] text-[#0F5C61]",
     dotClasses: "bg-[#0FA0AA]",
   },
-
-  // Página 3
   {
     id: "16",
     fileName: "certidao-casamento.pdf",
@@ -322,8 +319,6 @@ const MOCK_INBOX_DATA = [
     badgeClasses: "bg-destructive text-white",
     dotClasses: "bg-white",
   },
-
-  // Página 4
   {
     id: "22",
     fileName: "contrato-prestacao-servicos.pdf",
@@ -414,8 +409,6 @@ const MOCK_INBOX_DATA = [
     badgeClasses: "bg-muted text-muted-foreground",
     dotClasses: "bg-muted-foreground",
   },
-
-  // Página 5
   {
     id: "28",
     fileName: "diploma-graduacao.pdf",
@@ -506,8 +499,6 @@ const MOCK_INBOX_DATA = [
     badgeClasses: "bg-destructive text-white",
     dotClasses: "bg-white",
   },
-
-  // Página 6
   {
     id: "34",
     fileName: "comprovante-endereco.jpg",
@@ -555,13 +546,13 @@ const MOCK_INBOX_DATA = [
   },
 ] as const;
 
+const UNIQUE_STATUSES = Array.from(new Set(MOCK_INBOX_DATA.map((item) => item.status)));
+
 const parseDateString = (dateStr: string) => {
   const today = new Date();
-
   if (dateStr === "Hoje") return today;
   if (dateStr === "Ontem")
     return new Date(today.getTime() - 24 * 60 * 60 * 1000);
-
   const [d, m, y] = dateStr.split("/");
   return new Date(Number(y), Number(m) - 1, Number(d));
 };
@@ -569,16 +560,22 @@ const parseDateString = (dateStr: string) => {
 export function useDocumentInbox() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [appliedDateRange, setAppliedDateRange] = useState<
     DateRange | undefined
   >();
+  
+  const [statusFilter, setStatusFilter] = useState("");
+  const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
 
   const itemsPerPage = 6;
 
   const filteredData = useMemo(() => {
     return MOCK_INBOX_DATA.filter((item) => {
+      if (appliedStatusFilter && item.status !== appliedStatusFilter) {
+        return false;
+      }
+
       if (!appliedDateRange?.from) return true;
 
       const itemDate = parseDateString(item.receivedDate);
@@ -596,7 +593,7 @@ export function useDocumentInbox() {
 
       return true;
     });
-  }, [appliedDateRange]);
+  }, [appliedDateRange, appliedStatusFilter]);
 
   const totalItems = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -614,12 +611,15 @@ export function useDocumentInbox() {
 
   const handleApplyFilters = () => {
     setAppliedDateRange(dateRange);
+    setAppliedStatusFilter(statusFilter);
     setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
     setDateRange(undefined);
     setAppliedDateRange(undefined);
+    setStatusFilter("");
+    setAppliedStatusFilter("");
     setCurrentPage(1);
   };
 
@@ -641,6 +641,9 @@ export function useDocumentInbox() {
     paginatedData,
     dateRange,
     setDateRange,
+    statusFilter,
+    setStatusFilter,
+    uniqueStatuses: UNIQUE_STATUSES,
     handlePageChange,
     handleAnalyze,
     handleRefresh,
