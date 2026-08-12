@@ -10,31 +10,13 @@ export const documentReviewFindingSchema = z.object({
   correction: z.string().trim().min(1),
 })
 
-export const documentReviewSchema = z
-  .object({
-    decision: z.enum(DocumentReviewDecision),
-    findings: z.array(documentReviewFindingSchema),
-  })
-  .superRefine((review, context) => {
-    if (
-      review.decision === DocumentReviewDecision.Approved &&
-      review.findings.length > 0
-    ) {
-      context.addIssue({
-        code: 'custom',
-        message: 'An approved review cannot contain findings.',
-        path: ['findings'],
-      })
-    }
-
-    if (
-      review.decision === DocumentReviewDecision.ChangesRequired &&
-      review.findings.length === 0
-    ) {
-      context.addIssue({
-        code: 'custom',
-        message: 'A review requiring changes must contain at least one finding.',
-        path: ['findings'],
-      })
-    }
-  })
+export const documentReviewSchema = z.discriminatedUnion('decision', [
+  z.object({
+    decision: z.literal(DocumentReviewDecision.Approved),
+    findings: z.array(documentReviewFindingSchema).length(0),
+  }),
+  z.object({
+    decision: z.literal(DocumentReviewDecision.ChangesRequired),
+    findings: z.array(documentReviewFindingSchema).min(1),
+  }),
+])
