@@ -1,12 +1,22 @@
 import { Module } from '@nestjs/common'
-import { IntakeModule } from '@/intake/intake.module'
-import { IdentityModule } from '@/identity/identity.module'
-import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
-import { SharedModule } from '@/shared/shared.module'
-import { CommunicationModule } from './communication/communication.module'
-import { DocumentsModule } from './document-engine/database/documents.module'
-import { SchedulingModule } from './scheduling/database/drizzle/repositories/scheduling.module'
+
+import { CommunicationModule } from '@/communication/communication.module'
+import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
+import { DocumentsModule } from '@/document-engine/database/documents.module'
 import { DocumentProductionModule } from '@/document-production/document-production.module'
+import {
+  GenerateDocumentJob,
+  GenerateDocumentsInBatchJob,
+} from '@/document-production/messaging/inngest/jobs'
+import { IdentityModule } from '@/identity/identity.module'
+import { IntakeModule } from '@/intake/intake.module'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { SchedulingModule } from '@/scheduling/database/drizzle/repositories/scheduling.module'
+import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
+import { InngestModule } from '@/shared/messaging/inngest/inngest.module'
+import type { InngestOptions } from '@/shared/messaging/inngest/inngest-options'
+import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { SharedModule } from '@/shared/shared.module'
 
 @Module({
   imports: [
@@ -18,6 +28,28 @@ import { DocumentProductionModule } from '@/document-production/document-product
     DocumentsModule,
     SchedulingModule,
     DocumentProductionModule,
+    InngestModule.forRootAsync({
+      imports: [SharedMessagingModule, CommunicationModule, DocumentProductionModule],
+      inject: [
+        InngestClient,
+        ProcessWhatsappEventJob,
+        GenerateDocumentJob,
+        GenerateDocumentsInBatchJob,
+      ],
+      useFactory: (
+        client: InngestClient,
+        processWhatsappEventJob: ProcessWhatsappEventJob,
+        generateDocumentJob: GenerateDocumentJob,
+        generateDocumentsInBatchJob: GenerateDocumentsInBatchJob,
+      ): InngestOptions => ({
+        client,
+        functions: [
+          processWhatsappEventJob.function,
+          generateDocumentJob.function,
+          generateDocumentsInBatchJob.function,
+        ],
+      }),
+    }),
   ],
 })
 export class AppModule {}
