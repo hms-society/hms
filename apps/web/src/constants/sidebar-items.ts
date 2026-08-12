@@ -36,11 +36,8 @@ const PARALEGAL_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Meus Casos', route: 'paralegalCases', icon: 'briefcase' },
   { label: 'Documentos', route: 'paralegalDocuments', icon: 'file-text' },
   { label: 'Caixa de Triagem', route: 'paralegalTriage', icon: 'inbox', badgeCount: 14 },
-  {
-    label: 'Central de Comunicação',
-    route: 'paralegalCommunication',
-    icon: 'message-square',
-  },
+  {label: 'Central de Comunicação', route: 'paralegalCommunication', icon: 'message-square'},
+  {label: 'Caixa de Documentos', route: 'documentInbox', icon: 'file-text'}
 ]
 
 const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [

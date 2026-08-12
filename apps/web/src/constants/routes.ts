@@ -28,6 +28,8 @@ export const ROUTES = {
   documentSpecifications: '/modelos-de-documentos',
   newDocumentSpecification: '/modelos-de-documentos/novo',
   documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
+  documentInbox: '/caixa-de-documentos',
+  documentAnalysis: '/caixa-de-documentos/$fileId',
 } as const
 
 export type RouteName = keyof typeof ROUTES
