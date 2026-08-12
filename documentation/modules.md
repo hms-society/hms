@@ -107,23 +107,19 @@ Produz pacotes de documentos reutilizáveis para consultas, formalizações e ca
 Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/x/AQAQ).
 
 - É responsável pelos modelos de origem usados para produzir documentos.
-- Configura pacotes de documentos padrão para uma área jurídica e um ou mais
-  temas jurídicos, incluindo a ordem de cada modelo, o momento da geração e o
-  status de obrigatoriedade.
-- Instancia pacotes a partir da configuração atual, de modo que alterações
-  posteriores na configuração não afetem pacotes já criados.
-- Preserva versões manuais e geradas por IA imutáveis, mantendo uma única versão
-  ativa.
-- Acompanha documentos gerados por IA ou redigidos manualmente durante a revisão
-  e aprovação.
-- Permite que um documento em redação manual retorne à geração por IA sem excluir
-  seu histórico de produção anterior.
-- Mantém imutáveis os documentos aprovados dentro do pacote confirmado.
-- Confirma um pacote somente quando ele contém pelo menos um documento e todos os
-  documentos incluídos foram aprovados.
-- Publica eventos de produção para que a consulta, a formalização ou o caso
-  responsável possa avançar em seu fluxo sem assumir a propriedade do estado dos
-  documentos.
+- Permite selecionar modelos e acrescentar documentos ao conjunto associado a
+  uma consulta, formalização ou caso; modelos criados depois não alteram
+  conjuntos existentes automaticamente.
+- Mantém o pacote como agrupamento opcional, sem estado próprio de confirmação;
+  a consulta, formalização ou caso decide quando sua etapa pode avançar.
+- Preserva versões geradas por IA e versões decorrentes de edição manual como
+  registros imutáveis.
+- Permite várias versões aprovadas, mantendo no máximo uma versão vigente por
+  documento; aprovar ou rejeitar uma versão não apaga as anteriores.
+- Trata geração, revisão, aprovação, rejeição e falha como estados das versões e
+  execuções, não do item que associa o documento ao pacote.
+- Publica eventos de produção para que o módulo responsável acompanhe o resultado
+  sem assumir a propriedade dos documentos e de suas versões.
 
 ---
 
