@@ -1,2 +1,7 @@
 export * from './generate-consultation-document.controller'
 export * from './generate-consultation-documents.controller'
+export * from './get-consultation-document-version.controller'
+export * from './list-consultation-documents.controller'
+export * from './review-consultation-document-version.controller'
+export * from './save-manual-consultation-document-version.controller'
+export * from './select-current-consultation-document-version.controller'

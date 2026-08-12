@@ -5,6 +5,7 @@ import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import type {
   DocumentPackagesRepository,
   DocumentSpecificationsRepository,
+  DocumentVersionsRepository,
   DocumentsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
@@ -25,6 +26,7 @@ import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
+import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { IdentityModule } from '@/identity/identity.module'
 import { AuthGuard } from '@/identity/guards'
@@ -47,6 +49,7 @@ export class ConsultationModuleFixture {
     readonly legalTopicsRepository: LegalTopicsRepository,
     readonly specificationsRepository: DocumentSpecificationsRepository,
     readonly documentsRepository: DocumentsRepository,
+    readonly documentVersionsRepository: DocumentVersionsRepository,
     readonly documentPackagesRepository: DocumentPackagesRepository,
     readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly usersRepository: ReturnType<
@@ -73,6 +76,7 @@ export class ConsultationModuleFixture {
           IntakeDatabaseModule,
           ConsultationDatabaseModule,
           DocumentProductionDatabaseModule,
+          DocumentProductionProvisionModule,
           ProvisionModule,
         ],
         controllers: [controller],
@@ -109,6 +113,7 @@ export class ConsultationModuleFixture {
       restFixture.get(LEGAL_CATALOG_REPOSITORIES.topics),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.specifications),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.documents),
+      restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.versions),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments),
       ConsultationModuleFixture.resolveUsersRepository(restFixture),
@@ -218,6 +223,28 @@ export class ConsultationModuleFixture {
       documentSpecificationId: specification.id,
     })
     return document
+  }
+
+  seedDocumentVersion(
+    documentId: string,
+    createdByCollaboratorId: string,
+    overrides: Partial<Parameters<DocumentVersionsRepository['add']>[0]> = {},
+  ) {
+    return this.documentVersionsRepository.add({
+      documentId,
+      fileId: 'b4577479-b8ed-4b15-a7d7-ea9b99e0ed8f',
+      versionNumber: 1,
+      source: 'ai',
+      content: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Texto' }] }],
+      } as unknown as DocumentTemplateContent,
+      pendingMarkers: [],
+      createdByCollaboratorId,
+      createdAt: new Date('2026-08-12T18:00:00.000Z'),
+      status: 'in_review',
+      ...overrides,
+    })
   }
 
   resetDatabase() {

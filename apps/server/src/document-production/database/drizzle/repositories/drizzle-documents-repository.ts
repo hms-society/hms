@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import type { DocumentCreation } from '@hms/core/document-production/domain/entities'
 import type { DocumentsRepository } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import { DrizzleDocumentMapper } from '@/document-production/database/drizzle/mappers'
 import { documentModel } from '@/document-production/database/drizzle/models'
@@ -51,6 +51,17 @@ export class DrizzleDocumentsRepository
       .limit(1)
 
     return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async findByIds(documentIds: readonly string[]) {
+    if (documentIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(documentModel)
+      .where(inArray(documentModel.id, [...documentIds]))
+
+    return records.map((record) => this.mapper.toDomain(record))
   }
 
   async replace(

@@ -15,9 +15,11 @@ import type {
   DocumentTemplateVariable,
 } from '@hms/core/document-production/domain/structures'
 import type {
+  DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentsRepository,
   DocumentSpecificationsRepository,
+  DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
@@ -100,8 +102,12 @@ const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 @Injectable()
 export class DocumentProductionSeeder {
   constructor(
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
+    private readonly generationsRepository: DocumentGenerationsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
     private readonly specificationsRepository: DocumentSpecificationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
+    private readonly versionsRepository: DocumentVersionsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
     private readonly documentsRepository: DocumentsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
@@ -112,6 +118,8 @@ export class DocumentProductionSeeder {
 
   async clear() {
     await this.packageDocumentsRepository.removeAll()
+    await this.versionsRepository.removeAll()
+    await this.generationsRepository.removeAll()
     await this.documentPackagesRepository.removeAll()
     await this.documentsRepository.removeAll()
     await this.specificationsRepository.removeAll()

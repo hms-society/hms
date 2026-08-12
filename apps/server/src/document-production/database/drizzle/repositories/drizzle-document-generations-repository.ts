@@ -51,6 +51,10 @@ export class DrizzleDocumentGenerationsRepository
     return this.mapper.toDomain(record)
   }
 
+  async removeAll() {
+    await this.database.delete(documentGenerationModel)
+  }
+
   async findById(documentGenerationId: string) {
     const [record] = await this.database
       .select()
