@@ -39,7 +39,8 @@ export const ClientIdentificationStep = ({
             className='h-8 text-xs'
             aria-invalid={Boolean(errors.taxId)}
             aria-describedby={errors.taxId ? 'client-lookup-tax-id-error' : undefined}
-            {...identificationForm.register('taxId', { onChange: handleTaxIdChange })}
+            {...identificationForm.register('taxId')}
+            onChange={handleTaxIdChange}
           />
           <FieldDescription className='text-[11px] text-muted-foreground'>
             Use CPF para pessoa natural ou CNPJ para pessoa jurídica.
@@ -63,7 +64,8 @@ export const ClientIdentificationStep = ({
             className='h-8 text-xs'
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? 'client-lookup-phone-error' : undefined}
-            {...identificationForm.register('phone', { onChange: handlePhoneChange })}
+            {...identificationForm.register('phone')}
+            onChange={handlePhoneChange}
           />
           <FieldDescription className='text-[11px] text-muted-foreground'>
             Use o telefone quando não tiver o documento.

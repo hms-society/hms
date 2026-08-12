@@ -124,7 +124,8 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
             id='client-registration-tax-id'
             className='h-9 text-xs'
             aria-invalid={Boolean(errors.taxId)}
-            {...form.register('taxId', { onChange: handleTaxIdChange })}
+            {...form.register('taxId')}
+            onChange={handleTaxIdChange}
           />
           <FieldError className='text-xs text-destructive'>
             {errors.taxId?.message}
@@ -170,7 +171,8 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
               id='client-registration-phone'
               autoComplete='tel'
               className='h-9 text-xs'
-              {...form.register('phone', { onChange: handlePhoneChange })}
+              {...form.register('phone')}
+              onChange={handlePhoneChange}
             />
           </Field>
         </div>

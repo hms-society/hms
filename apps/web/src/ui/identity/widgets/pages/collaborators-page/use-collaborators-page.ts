@@ -44,7 +44,6 @@ const COLLABORATOR_SEARCH_PARAMS = {
     CollaboratorProfile.Lawyer,
     CollaboratorProfile.Paralegal,
     CollaboratorProfile.Supervisor,
-    CollaboratorProfile.Client,
   ] as const),
   jobTitle: createParser<string>({
     parse: parseTrimmedString,

@@ -13,7 +13,7 @@ function Slider({
   max = 100,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
-  const values = React.useMemo(
+  const _values = React.useMemo(
     () =>
       Array.isArray(value)
         ? value
@@ -45,11 +45,10 @@ function Slider({
           className='absolute bg-primary select-none data-horizontal:h-full data-vertical:w-full'
         />
       </SliderPrimitive.Track>
-
-      {values.map((value) => (
+      {Array.from({ length: _values.length }, (_, index) => (
         <SliderPrimitive.Thumb
           data-slot='slider-thumb'
-          key={value}
+          key={index}
           className='relative block size-3 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50'
         />
       ))}

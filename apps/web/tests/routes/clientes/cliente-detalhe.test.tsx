@@ -40,7 +40,7 @@ test.beforeEach(async ({ page }) => {
         body: JSON.stringify([
           {
             id: 'msg-1',
-            channel: 'email',
+            channel: 'whatsapp',
             direction: 'inbound',
             content: 'Olá, gostaria de saber sobre o meu caso.',
             author: 'Cliente',
@@ -81,12 +81,12 @@ test('filters communications by selected channel', async ({ page }) => {
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
 
   await page.getByRole('combobox').filter({ hasText: 'Todos os canais' }).click()
-  await page.getByRole('option', { name: 'E-mail' }).click()
+  await page.getByRole('option', { name: 'WhatsApp' }).click()
 
   await expect(page.getByText('Olá, gostaria de saber sobre o meu caso.')).toBeVisible()
   await expect(
     page.getByText('Prezada Kristie, enviamos a documentação anexa.'),
-  ).toBeVisible()
+  ).not.toBeVisible()
 })
 
 test('filters communications by selected type', async ({ page }) => {
@@ -127,11 +127,11 @@ test('displays empty state message when no communications match filters', async 
   await page.goto(`/clientes/${CLIENT_ID}`)
   await page.getByText('Comunicações').click()
 
+  await page.getByRole('combobox').filter({ hasText: 'Todos os canais' }).click()
+  await page.getByRole('option', { name: 'WhatsApp' }).click()
+
   await page.getByRole('combobox').filter({ hasText: 'Todos os tipos' }).click()
   await page.getByRole('option', { name: 'Enviadas' }).click()
-
-  await page.getByRole('combobox').filter({ hasText: 'Todo o período' }).click()
-  await page.getByRole('option', { name: 'Últimos 7 dias' }).click()
 
   await expect(
     page.getByText('Olá, gostaria de saber sobre o meu caso.'),

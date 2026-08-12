@@ -58,7 +58,7 @@ const fieldVariants = cva(
       orientation: {
         vertical: 'flex-col *:w-full [&>.sr-only]:w-auto',
         horizontal:
-          'flex-row items-center has-[>[data-slot=field-content]]:items-start *:data-[slot=field-label]:flex-auto *:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
+          'flex-row items-center has-[>[data-slot=field-content]]:items-start *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
         responsive:
           'flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:*:data-[slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
       },
@@ -75,7 +75,6 @@ function Field({
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof fieldVariants>) {
   return (
-    // biome-ignore lint/a11y/useSemanticElements: The group role is intentional for the generic Field container.
     <div
       role='group'
       data-slot='field'
@@ -158,13 +157,14 @@ function FieldSeparator({
       )}
       {...props}
     >
+      <Separator className='absolute inset-0 top-1/2' />
       {children && (
-        <>
-          <Separator className='absolute inset-0 top-1/2' />
-          <span className='relative mx-auto block w-fit bg-background px-2 text-muted-foreground'>
-            {children}
-          </span>
-        </>
+        <span
+          className='relative mx-auto block w-fit bg-background px-2 text-muted-foreground'
+          data-slot='field-separator-content'
+        >
+          {children}
+        </span>
       )}
     </div>
   )
@@ -191,7 +191,7 @@ function FieldError({
       ...new Map(errors.map((error) => [error?.message, error])).values(),
     ]
 
-    if (uniqueErrors.length === 1) {
+    if (uniqueErrors?.length === 1) {
       return uniqueErrors[0]?.message
     }
 

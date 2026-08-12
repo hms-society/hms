@@ -38,10 +38,6 @@ vi.mock('../use-app-layout', () => ({
   useAppLayout: vi.fn(),
 }))
 
-vi.mock('@/ui/shared/hooks/use-clients-query', () => ({
-  useClientsQuery: vi.fn(() => ({ data: { data: [] }, isLoading: false })),
-}))
-
 const useAppLayoutMock = vi.mocked(useAppLayout)
 const useSignOutMock = vi.mocked(useSignOutAction)
 
