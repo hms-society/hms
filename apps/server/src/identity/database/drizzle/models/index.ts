@@ -1,5 +1,6 @@
 export * from '@/identity/database/drizzle/models/client-consent-model'
 export * from '@/identity/database/drizzle/models/client-model'
+export * from '@/identity/database/drizzle/models/client-supporter-model'
 export * from '@/identity/database/drizzle/models/client-type-model'
 export * from '@/identity/database/drizzle/models/collaborator-legal-expertise-model'
 export * from '@/identity/database/drizzle/models/collaborator-legal-expertise-topic-model'

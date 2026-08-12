@@ -12,6 +12,7 @@ export type DocumentBatchFile = {
   originalName: string
   mimeType: string
   sizeBytes: number
+  hashSha256?: string
   createdAt: Date
 }
 

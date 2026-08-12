@@ -138,4 +138,50 @@ export class WhatsappProvider implements IWhatsappProvider {
       externalMessageId,
     }
   }
+
+  async downloadMedia(
+    mediaId: string,
+  ): Promise<{ buffer: Buffer; mimeType: string; size: number }> {
+    const token = this.envProvider.get('WHATSAPP_API_TOKEN')
+    if (!token) throw new Error('WHATSAPP_API_TOKEN not found')
+
+    const metaUrl = `https://graph.facebook.com/v25.0/${mediaId}`
+    const metaRes = await fetch(metaUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!metaRes.ok) {
+      const errorText = await metaRes.text()
+      throw new Error(
+        `Failed to fetch WhatsApp media metadata: ${metaRes.status} - ${errorText}`,
+      )
+    }
+
+    const mediaInfo = (await metaRes.json()) as {
+      url: string
+      mime_type: string
+      file_size: number
+    }
+
+    const downloadRes = await fetch(mediaInfo.url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!downloadRes.ok) {
+      throw new Error(`Failed to download WhatsApp media binary: ${downloadRes.status}`)
+    }
+
+    const arrayBuffer = await downloadRes.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    return {
+      buffer,
+      mimeType: mediaInfo.mime_type,
+      size: mediaInfo.file_size || buffer.length,
+    }
+  }
 }
