@@ -91,10 +91,7 @@ export class ConsultationsController {
   }
 
   @Patch(':id/complete')
-  async complete(
-    @Param('id') id: string,
-    @Body() dto: CompleteConsultationDto,
-  ) {
+  async complete(@Param('id') id: string, @Body() dto: CompleteConsultationDto) {
     try {
       const consultationId = typeof id === 'object' ? (id as any).id : id
 

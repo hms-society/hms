@@ -1386,12 +1386,8 @@
           "name": "consultation_identified_risks_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_identified_risks",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1536,12 +1532,8 @@
           "name": "consultations_intake_id_intakes_id_fk",
           "tableFrom": "consultations",
           "tableTo": "intakes",
-          "columnsFrom": [
-            "intake_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["intake_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1549,12 +1541,8 @@
           "name": "consultations_client_id_clients_id_fk",
           "tableFrom": "consultations",
           "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1562,12 +1550,8 @@
           "name": "consultations_assigned_lawyer_id_collaborators_id_fk",
           "tableFrom": "consultations",
           "tableTo": "collaborators",
-          "columnsFrom": [
-            "assigned_lawyer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_lawyer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1575,12 +1559,8 @@
           "name": "consultations_legal_area_id_legal_areas_id_fk",
           "tableFrom": "consultations",
           "tableTo": "legal_areas",
-          "columnsFrom": [
-            "legal_area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["legal_area_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1588,12 +1568,8 @@
           "name": "consultations_legal_topic_id_legal_topics_id_fk",
           "tableFrom": "consultations",
           "tableTo": "legal_topics",
-          "columnsFrom": [
-            "legal_topic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["legal_topic_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1603,9 +1579,7 @@
         "consultations_appointment_id_unique": {
           "name": "consultations_appointment_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "appointment_id"
-          ]
+          "columns": ["appointment_id"]
         }
       },
       "policies": {},
@@ -1642,12 +1616,8 @@
           "name": "consultation_potential_legal_requests_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_potential_legal_requests",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1694,12 +1664,8 @@
           "name": "consultation_relevant_facts_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_relevant_facts",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1771,12 +1737,8 @@
           "name": "consultation_suggestions_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_suggestions",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1784,12 +1746,8 @@
           "name": "consultation_suggestions_reviewed_by_collaborator_id_collaborators_id_fk",
           "tableFrom": "consultation_suggestions",
           "tableTo": "collaborators",
-          "columnsFrom": [
-            "reviewed_by_collaborator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by_collaborator_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

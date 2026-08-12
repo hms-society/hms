@@ -15,9 +15,7 @@ import { ConsultationsController } from './rest/controllers/consultations-contro
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
-  controllers: [
-    ConsultationsController,
-  ],
+  controllers: [ConsultationsController],
   providers: [
     DrizzleClient,
     DrizzleConsultationsRepository,
