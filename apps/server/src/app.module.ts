@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common'
 import { CommunicationModule } from '@/communication/communication.module'
 import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
+import { ProcessWhatsappBatchJob } from '@/document-engine/messaging/inngest/jobs'
 import { DocumentProductionModule } from '@/document-production/document-production.module'
 import {
   GenerateDocumentJob,
@@ -29,22 +30,30 @@ import { SharedModule } from '@/shared/shared.module'
     SchedulingModule,
     DocumentProductionModule,
     InngestModule.forRootAsync({
-      imports: [SharedMessagingModule, CommunicationModule, DocumentProductionModule],
+      imports: [
+        SharedMessagingModule,
+        CommunicationModule,
+        DocumentsModule,
+        DocumentProductionModule,
+      ],
       inject: [
         InngestClient,
         ProcessWhatsappEventJob,
+        ProcessWhatsappBatchJob,
         GenerateDocumentJob,
         GenerateDocumentsInBatchJob,
       ],
       useFactory: (
         client: InngestClient,
         processWhatsappEventJob: ProcessWhatsappEventJob,
+        processWhatsappBatchJob: ProcessWhatsappBatchJob,
         generateDocumentJob: GenerateDocumentJob,
         generateDocumentsInBatchJob: GenerateDocumentsInBatchJob,
       ): InngestOptions => ({
         client,
         functions: [
           processWhatsappEventJob.function,
+          processWhatsappBatchJob.function,
           generateDocumentJob.function,
           generateDocumentsInBatchJob.function,
         ],
