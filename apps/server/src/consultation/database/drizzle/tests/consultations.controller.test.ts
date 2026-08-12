@@ -129,12 +129,8 @@ describe('ConsultationsController', () => {
     it('throws NotFoundException when consultation does not exist', async () => {
       vi.spyOn(getConsultationByIdUseCase, 'execute').mockResolvedValue(null)
 
-      await expect(
-        controller.findById('invalid-id'),
-      ).rejects.toThrow(NotFoundException)
-      expect(getConsultationByIdUseCase.execute).toHaveBeenCalledWith(
-        'invalid-id',
-      )
+      await expect(controller.findById('invalid-id')).rejects.toThrow(NotFoundException)
+      expect(getConsultationByIdUseCase.execute).toHaveBeenCalledWith('invalid-id')
     })
   })
 
@@ -152,13 +148,12 @@ describe('ConsultationsController', () => {
       consultationsRepositoryMock.findById.mockResolvedValue(mockConsultationDomain)
       consultationsRepositoryMock.updateClientQualification.mockResolvedValue(undefined)
 
-      await expect(
-        controller.updateQualification(clientId, dto),
-      ).resolves.not.toThrow()
+      await expect(controller.updateQualification(clientId, dto)).resolves.not.toThrow()
 
-      expect(
-        consultationsRepositoryMock.updateClientQualification,
-      ).toHaveBeenCalledWith(clientId, dto)
+      expect(consultationsRepositoryMock.updateClientQualification).toHaveBeenCalledWith(
+        clientId,
+        dto,
+      )
     })
   })
 })

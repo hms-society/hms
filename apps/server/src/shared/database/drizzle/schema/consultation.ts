@@ -57,14 +57,17 @@ export const consultationRelevantFactModel = pgTable('consultation_relevant_fact
   occurredOn: timestamp('occurred_on', { withTimezone: true, mode: 'date' }),
 })
 
-export const consultationPotentialLegalRequestModel = pgTable('consultation_potential_legal_requests', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  consultationId: uuid('consultation_id')
-    .notNull()
-    .references(() => consultationModel.id, { onDelete: 'cascade' }),
-  description: text('description').notNull(),
-  summary: text('summary'),
-})
+export const consultationPotentialLegalRequestModel = pgTable(
+  'consultation_potential_legal_requests',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    consultationId: uuid('consultation_id')
+      .notNull()
+      .references(() => consultationModel.id, { onDelete: 'cascade' }),
+    description: text('description').notNull(),
+    summary: text('summary'),
+  },
+)
 
 export const consultationSuggestionModel = pgTable('consultation_suggestions', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -74,9 +77,13 @@ export const consultationSuggestionModel = pgTable('consultation_suggestions', {
   target: text('target').notNull(),
   content: text('content').notNull(),
   status: text('status').notNull(),
-  suggestedAt: timestamp('suggested_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  suggestedAt: timestamp('suggested_at', { withTimezone: true, mode: 'date' })
+    .defaultNow()
+    .notNull(),
   reviewedAt: timestamp('reviewed_at', { withTimezone: true, mode: 'date' }),
-  reviewedByCollaboratorId: uuid('reviewed_by_collaborator_id').references(() => collaboratorModel.id),
+  reviewedByCollaboratorId: uuid('reviewed_by_collaborator_id').references(
+    () => collaboratorModel.id,
+  ),
 })
 
 export const consultationRelations = relations(consultationModel, ({ one, many }) => ({
@@ -125,7 +132,6 @@ export const consultationPotentialLegalRequestRelations = relations(
     }),
   }),
 )
-
 
 export const consultationSuggestionRelations = relations(
   consultationSuggestionModel,

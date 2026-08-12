@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
   "id": "01d4e732-cdf3-480e-8f21-a64386f8fe99",
-=======
-  "id": "d16ba18e-0c37-4111-8055-3a11fab60d5c",
->>>>>>> origin/develop
   "prevId": "76ccc2fb-dacc-4e8b-9848-cce59519aad2",
   "version": "7",
   "dialect": "postgresql",
@@ -323,17 +319,8 @@
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
           "tableTo": "clients",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -568,17 +555,8 @@
           "name": "collaborator_legal_expertises_collaborator_id_collaborators_id_fk",
           "tableFrom": "collaborator_legal_expertises",
           "tableTo": "collaborators",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "collaborator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["collaborator_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -641,17 +619,8 @@
           "name": "collaborator_legal_expertise_topics_expertise_id_collaborator_legal_expertises_id_fk",
           "tableFrom": "collaborator_legal_expertise_topics",
           "tableTo": "collaborator_legal_expertises",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "expertise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["expertise_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -750,17 +719,8 @@
           "name": "collaborators_user_id_users_id_fk",
           "tableFrom": "collaborators",
           "tableTo": "users",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1056,17 +1016,8 @@
           "name": "legal_topics_legal_area_id_legal_areas_id_fk",
           "tableFrom": "legal_topics",
           "tableTo": "legal_areas",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "legal_area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["legal_area_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1077,235 +1028,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-<<<<<<< HEAD
-=======
-    "public.document_specification_legal_areas": {
-      "name": "document_specification_legal_areas",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "document_specification_id": {
-          "name": "document_specification_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "legal_area_id": {
-          "name": "legal_area_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "document_specification_legal_areas_uidx": {
-          "name": "document_specification_legal_areas_uidx",
-          "columns": [
-            {
-              "expression": "document_specification_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "legal_area_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "document_specification_legal_areas_document_specification_id_document_specifications_id_fk": {
-          "name": "document_specification_legal_areas_document_specification_id_document_specifications_id_fk",
-          "tableFrom": "document_specification_legal_areas",
-          "tableTo": "document_specifications",
-          "columnsFrom": ["document_specification_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.document_specification_legal_topics": {
-      "name": "document_specification_legal_topics",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "document_specification_legal_area_id": {
-          "name": "document_specification_legal_area_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "legal_topic_id": {
-          "name": "legal_topic_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "document_specification_legal_topics_uidx": {
-          "name": "document_specification_legal_topics_uidx",
-          "columns": [
-            {
-              "expression": "document_specification_legal_area_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "legal_topic_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "document_specification_legal_topics_document_specification_legal_area_id_document_specification_legal_areas_id_fk": {
-          "name": "document_specification_legal_topics_document_specification_legal_area_id_document_specification_legal_areas_id_fk",
-          "tableFrom": "document_specification_legal_topics",
-          "tableTo": "document_specification_legal_areas",
-          "columnsFrom": ["document_specification_legal_area_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.document_specifications": {
-      "name": "document_specifications",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "variables": {
-          "name": "variables",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'"
-        },
-        "moment": {
-          "name": "moment",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "scope": {
-          "name": "scope",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_required": {
-          "name": "is_required",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'available'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "document_specifications_moment_check": {
-          "name": "document_specifications_moment_check",
-          "value": "\"document_specifications\".\"moment\" in ('consultation', 'formalization', 'legal_production')"
-        },
-        "document_specifications_scope_check": {
-          "name": "document_specifications_scope_check",
-          "value": "\"document_specifications\".\"scope\" in ('global', 'legal_context')"
-        },
-        "document_specifications_status_check": {
-          "name": "document_specifications_status_check",
-          "value": "\"document_specifications\".\"status\" in ('available', 'unavailable')"
-        }
-      },
-      "isRLSEnabled": false
-    },
->>>>>>> origin/develop
     "public.communications": {
       "name": "communications",
       "schema": "",
@@ -1363,17 +1085,8 @@
           "name": "communications_client_id_clients_id_fk",
           "tableFrom": "communications",
           "tableTo": "clients",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1381,17 +1094,8 @@
           "name": "communications_author_id_users_id_fk",
           "tableFrom": "communications",
           "tableTo": "users",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1502,17 +1206,8 @@
           "name": "blocked_periods_schedule_id_schedules_id_fk",
           "tableFrom": "blocked_periods",
           "tableTo": "schedules",
-<<<<<<< HEAD
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-=======
           "columnsFrom": ["schedule_id"],
           "columnsTo": ["id"],
->>>>>>> origin/develop
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1576,19 +1271,12 @@
         "schedules_collaborator_id_unique": {
           "name": "schedules_collaborator_id_unique",
           "nullsNotDistinct": false,
-<<<<<<< HEAD
-          "columns": [
-            "collaborator_id"
-          ]
-=======
           "columns": ["collaborator_id"]
->>>>>>> origin/develop
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-<<<<<<< HEAD
     },
     "public.consultation_identified_risks": {
       "name": "consultation_identified_risks",
@@ -1620,12 +1308,8 @@
           "name": "consultation_identified_risks_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_identified_risks",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1770,12 +1454,8 @@
           "name": "consultations_intake_id_intakes_id_fk",
           "tableFrom": "consultations",
           "tableTo": "intakes",
-          "columnsFrom": [
-            "intake_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["intake_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1783,12 +1463,8 @@
           "name": "consultations_client_id_clients_id_fk",
           "tableFrom": "consultations",
           "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1796,12 +1472,8 @@
           "name": "consultations_assigned_lawyer_id_collaborators_id_fk",
           "tableFrom": "consultations",
           "tableTo": "collaborators",
-          "columnsFrom": [
-            "assigned_lawyer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_lawyer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1809,12 +1481,8 @@
           "name": "consultations_legal_area_id_legal_areas_id_fk",
           "tableFrom": "consultations",
           "tableTo": "legal_areas",
-          "columnsFrom": [
-            "legal_area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["legal_area_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1822,12 +1490,8 @@
           "name": "consultations_legal_topic_id_legal_topics_id_fk",
           "tableFrom": "consultations",
           "tableTo": "legal_topics",
-          "columnsFrom": [
-            "legal_topic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["legal_topic_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1837,9 +1501,7 @@
         "consultations_appointment_id_unique": {
           "name": "consultations_appointment_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "appointment_id"
-          ]
+          "columns": ["appointment_id"]
         }
       },
       "policies": {},
@@ -1876,12 +1538,8 @@
           "name": "consultation_potential_legal_requests_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_potential_legal_requests",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1928,12 +1586,8 @@
           "name": "consultation_relevant_facts_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_relevant_facts",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2005,12 +1659,8 @@
           "name": "consultation_suggestions_consultation_id_consultations_id_fk",
           "tableFrom": "consultation_suggestions",
           "tableTo": "consultations",
-          "columnsFrom": [
-            "consultation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["consultation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2018,12 +1668,8 @@
           "name": "consultation_suggestions_reviewed_by_collaborator_id_collaborators_id_fk",
           "tableFrom": "consultation_suggestions",
           "tableTo": "collaborators",
-          "columnsFrom": [
-            "reviewed_by_collaborator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by_collaborator_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2033,8 +1679,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-=======
->>>>>>> origin/develop
     }
   },
   "enums": {
@@ -2054,31 +1698,12 @@
     "public.intake_contact_channel": {
       "name": "intake_contact_channel",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "whatsapp",
-        "email",
-        "phone",
-        "in_person"
-      ]
-=======
       "values": ["whatsapp", "email", "phone", "in_person"]
->>>>>>> origin/develop
     },
     "public.intake_origin": {
       "name": "intake_origin",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "direct",
-        "referral",
-        "website",
-        "social_media",
-        "other"
-      ]
-=======
       "values": ["direct", "referral", "website", "social_media", "other"]
->>>>>>> origin/develop
     },
     "public.intake_status": {
       "name": "intake_status",
@@ -2096,42 +1721,17 @@
     "public.intake_urgency": {
       "name": "intake_urgency",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "normal",
-        "high",
-        "urgent"
-      ]
-=======
       "values": ["normal", "high", "urgent"]
->>>>>>> origin/develop
     },
     "public.client_type": {
       "name": "client_type",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "natural",
-        "legal"
-      ]
-=======
       "values": ["natural", "legal"]
->>>>>>> origin/develop
     },
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "admin",
-        "attendant",
-        "lawyer",
-        "paralegal",
-        "supervisor"
-      ]
-=======
       "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
->>>>>>> origin/develop
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -2146,80 +1746,32 @@
     "public.registration_attempt_status": {
       "name": "registration_attempt_status",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "pending_auth",
-        "auth_invited",
-        "completed",
-        "reconciliation_required"
-      ]
-=======
       "values": ["pending_auth", "auth_invited", "completed", "reconciliation_required"]
->>>>>>> origin/develop
     },
     "public.tax_id_type": {
       "name": "tax_id_type",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "cpf",
-        "cnpj"
-      ]
-=======
       "values": ["cpf", "cnpj"]
->>>>>>> origin/develop
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "invited",
-        "active",
-        "disabled"
-      ]
-=======
       "values": ["invited", "active", "disabled"]
->>>>>>> origin/develop
     },
     "public.user_type": {
       "name": "user_type",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "internal",
-        "external_client",
-        "external_third_party",
-        "external_lawyer"
-      ]
-=======
       "values": ["internal", "external_client", "external_third_party", "external_lawyer"]
->>>>>>> origin/develop
     },
     "public.communication_channel": {
       "name": "communication_channel",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "whatsapp",
-        "email",
-        "phone"
-      ]
-=======
       "values": ["whatsapp", "email", "phone"]
->>>>>>> origin/develop
     },
     "public.communication_direction": {
       "name": "communication_direction",
       "schema": "public",
-<<<<<<< HEAD
-      "values": [
-        "inbound",
-        "outbound"
-      ]
-=======
       "values": ["inbound", "outbound"]
->>>>>>> origin/develop
     }
   },
   "schemas": {},
@@ -2232,8 +1784,4 @@
     "schemas": {},
     "tables": {}
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/develop

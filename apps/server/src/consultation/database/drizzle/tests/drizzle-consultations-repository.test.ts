@@ -91,7 +91,10 @@ describe('DrizzleConsultationsRepository', () => {
       }
 
       await expect(
-        repository.updateClientQualification('a97f1adf-335c-4ea8-817b-09e7f8446b3d', dto as any),
+        repository.updateClientQualification(
+          'a97f1adf-335c-4ea8-817b-09e7f8446b3d',
+          dto as any,
+        ),
       ).resolves.not.toThrow()
 
       expect(dbMock.update).toHaveBeenCalled()

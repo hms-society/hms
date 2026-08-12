@@ -49,10 +49,7 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (record.intake?.responsibleId) {
       const found = await this.db.query.collaboratorModel.findFirst({
-        where: eq(
-          schema.collaboratorModel.userId,
-          record.intake.responsibleId,
-        ),
+        where: eq(schema.collaboratorModel.userId, record.intake.responsibleId),
       })
 
       responsibleCollaborator = found ?? null
@@ -90,10 +87,7 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
     if (record.intake?.responsibleId) {
       const found = await this.db.query.collaboratorModel.findFirst({
-        where: eq(
-          schema.collaboratorModel.userId,
-          record.intake.responsibleId,
-        ),
+        where: eq(schema.collaboratorModel.userId, record.intake.responsibleId),
       })
 
       responsibleCollaborator = found ?? null
@@ -134,7 +128,9 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         hmsResponsible: this.parseNullableString(dto.hmsResponsible),
         rg: this.parseNullableString(dto.rg),
         birthDate: parsedBirthDate ? (parsedBirthDate.toISOString() as any) : null,
-        constitutionDate: parsedConstitutionDate ? (parsedConstitutionDate.toISOString() as any) : null,
+        constitutionDate: parsedConstitutionDate
+          ? (parsedConstitutionDate.toISOString() as any)
+          : null,
         maritalStatus: this.parseNullableString(dto.maritalStatus),
         nationality: this.parseNullableString(dto.nationality),
         profession: this.parseNullableString(dto.profession),
@@ -157,29 +153,24 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
   async save(consultation: Consultation): Promise<void> {
     const rawData = DrizzleConsultationMapper.toPersistence(consultation)
 
-    await this.db
-      .insert(schema.consultationModel)
-      .values(rawData)
-      .onConflictDoUpdate({
-        target: schema.consultationModel.id,
-        set: rawData,
-      })
+    await this.db.insert(schema.consultationModel).values(rawData).onConflictDoUpdate({
+      target: schema.consultationModel.id,
+      set: rawData,
+    })
 
     await this.db
       .delete(schema.consultationRelevantFactModel)
       .where(eq(schema.consultationRelevantFactModel.consultationId, consultation.id))
 
     if (consultation.relevantFacts.length > 0) {
-      await this.db
-        .insert(schema.consultationRelevantFactModel)
-        .values(
-          consultation.relevantFacts.map((fact) => ({
-            id: fact.id,
-            consultationId: consultation.id,
-            description: fact.description,
-            occurredOn: fact.occurredOn ?? null,
-          })),
-        )
+      await this.db.insert(schema.consultationRelevantFactModel).values(
+        consultation.relevantFacts.map((fact) => ({
+          id: fact.id,
+          consultationId: consultation.id,
+          description: fact.description,
+          occurredOn: fact.occurredOn ?? null,
+        })),
+      )
     }
 
     await this.db
@@ -189,16 +180,14 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
       )
 
     if (consultation.potentialLegalRequests.length > 0) {
-      await this.db
-        .insert(schema.consultationPotentialLegalRequestModel)
-        .values(
-          consultation.potentialLegalRequests.map((req) => ({
-            id: req.id,
-            consultationId: consultation.id,
-            description: req.description,
-            summary: req.summary ?? null,
-          })),
-        )
+      await this.db.insert(schema.consultationPotentialLegalRequestModel).values(
+        consultation.potentialLegalRequests.map((req) => ({
+          id: req.id,
+          consultationId: consultation.id,
+          description: req.description,
+          summary: req.summary ?? null,
+        })),
+      )
     }
   }
 }
