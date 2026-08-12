@@ -23,5 +23,6 @@ export const useClientCommunicationsQuery = (clientId: string) => {
       return communications
     },
     enabled: !!clientId,
+    refetchInterval: 3000,
   })
 }

@@ -31,12 +31,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
 
   useEffect(() => {
     if (clientsData?.data && !isInitialized) {
-      const ids = clientsData.data.map((item: any) => {
-        const c = item.client || item
-        return c.id
-      })
-      // Initially mark the first two clients as having unread messages
-      setUnreadChatIds(ids.slice(0, 2))
+      setUnreadChatIds([])
       setIsInitialized(true)
     }
   }, [clientsData, isInitialized])
@@ -44,7 +39,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   const initializeUnreadChats = useCallback((ids: string[]) => {
     setIsInitialized((prevInitialized) => {
       if (prevInitialized) return prevInitialized
-      setUnreadChatIds(ids.slice(0, 2))
+      setUnreadChatIds(ids)
       return true
     })
   }, [])
