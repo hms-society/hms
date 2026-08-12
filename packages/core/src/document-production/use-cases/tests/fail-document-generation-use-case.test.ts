@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentGeneration } from '../../domain/entities/fakers'
+import { DocumentGenerationFaker } from '../../domain/entities/fakers'
 import { DocumentReviewFindingCategory } from '../../domain/structures'
 import {
   DocumentGenerationConflictError,
@@ -23,14 +23,14 @@ describe('Fail Document Generation Use Case', () => {
 
   it('fails a pending or running generation with understandable findings', async () => {
     const now = new Date('2026-08-11T12:00:00.000Z')
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     const findings = [
       {
         category: DocumentReviewFindingCategory.TemplateCoherence,
         message: 'O conteúdo não corresponde à estrutura esperada pelo modelo.',
       },
     ]
-    const failed = fakeDocumentGeneration({
+    const failed = DocumentGenerationFaker.fake({
       ...generation,
       status: 'failed',
       attemptsCount: 3,
@@ -66,7 +66,7 @@ describe('Fail Document Generation Use Case', () => {
   })
 
   it('rejects a terminal generation', async () => {
-    const generation = fakeDocumentGeneration({ status: 'completed' })
+    const generation = DocumentGenerationFaker.fake({ status: 'completed' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(
@@ -81,7 +81,7 @@ describe('Fail Document Generation Use Case', () => {
   })
 
   it('rejects an invalid failure result', async () => {
-    const generation = fakeDocumentGeneration({ status: 'pending' })
+    const generation = DocumentGenerationFaker.fake({ status: 'pending' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(
@@ -108,7 +108,7 @@ describe('Fail Document Generation Use Case', () => {
       }),
     ).rejects.toBeInstanceOf(DocumentGenerationNotFoundError)
 
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     repository.findById.mockResolvedValueOnce(generation)
     repository.replace.mockResolvedValueOnce(undefined)
     datetimeProvider.now.mockReturnValue(new Date('2026-08-11T12:00:00.000Z'))

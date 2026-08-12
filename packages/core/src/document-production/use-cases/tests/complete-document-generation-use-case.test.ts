@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentGeneration } from '../../domain/entities/fakers'
+import { DocumentGenerationFaker } from '../../domain/entities/fakers'
 import {
   DocumentGenerationConflictError,
   DocumentGenerationNotFoundError,
@@ -22,8 +22,8 @@ describe('Complete Document Generation Use Case', () => {
 
   it('completes a running generation atomically', async () => {
     const now = new Date('2026-08-11T12:00:00.000Z')
-    const generation = fakeDocumentGeneration({ status: 'running' })
-    const completed = fakeDocumentGeneration({
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
+    const completed = DocumentGenerationFaker.fake({
       ...generation,
       status: 'completed',
       attemptsCount: 2,
@@ -57,7 +57,7 @@ describe('Complete Document Generation Use Case', () => {
   })
 
   it('rejects a generation that is not running', async () => {
-    const generation = fakeDocumentGeneration({ status: 'cancelled' })
+    const generation = DocumentGenerationFaker.fake({ status: 'cancelled' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(
@@ -71,7 +71,7 @@ describe('Complete Document Generation Use Case', () => {
   })
 
   it('rejects an invalid result', async () => {
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(
@@ -96,7 +96,7 @@ describe('Complete Document Generation Use Case', () => {
       }),
     ).rejects.toBeInstanceOf(DocumentGenerationNotFoundError)
 
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     repository.findById.mockResolvedValueOnce(generation)
     repository.replace.mockResolvedValueOnce(undefined)
     datetimeProvider.now.mockReturnValue(new Date('2026-08-11T12:00:00.000Z'))

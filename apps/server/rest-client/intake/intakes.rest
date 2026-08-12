@@ -4,6 +4,7 @@
 @userId = 91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30
 @legalAreaId = 2e7a9c41-5d6f-4b82-9a13-8c4e6f7b2d50
 @legalTopicId = b3f1d8a6-7c2e-4f90-8a45-1d6b9e3c5f72
+@lawyerId = 7d7ea9d9-f604-40b1-915b-bb0b528844ee
 
 ### List intakes
 GET {{url}}?search=&status=consultation_scheduled&responsibleId={{userId}}&origin=direct&contactChannel=whatsapp&page=1&pageSize=20
@@ -19,6 +20,10 @@ Content-Type: application/json
 
 {
   "decision": "schedule_consultation",
+  "assignedLawyerId": "{{lawyerId}}",
+  "startsAt": "2026-08-13T13:00:00.000Z",
+  "modality": "virtual",
+  "channel": "google_meet",
   "clientId": "{{clientId}}",
   "responsibleId": "{{userId}}",
   "createdBy": "{{userId}}",
@@ -29,6 +34,18 @@ Content-Type: application/json
   "legalTopicId": "{{legalTopicId}}",
   "urgency": "normal",
   "demandNotes": "Orientação sobre a demanda do cliente"
+}
+
+### Retry consultation scheduling
+POST {{url}}/{{intakeId}}/consultation-scheduling/retry
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "assignedLawyerId": "{{lawyerId}}",
+  "startsAt": "2026-08-13T13:00:00.000Z",
+  "modality": "virtual",
+  "channel": "google_meet"
 }
 
 ### Register intake without scheduling

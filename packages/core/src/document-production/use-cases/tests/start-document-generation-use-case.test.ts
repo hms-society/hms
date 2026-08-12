@@ -2,7 +2,7 @@ import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentGeneration } from '../../domain/entities/fakers'
+import { DocumentGenerationFaker } from '../../domain/entities/fakers'
 import {
   DocumentGenerationConflictError,
   DocumentGenerationNotFoundError,
@@ -22,9 +22,9 @@ describe('Start Document Generation Use Case', () => {
   })
 
   it('transitions a pending generation to running', async () => {
-    const generation = fakeDocumentGeneration({ status: 'pending' })
+    const generation = DocumentGenerationFaker.fake({ status: 'pending' })
     const now = new Date('2026-08-11T15:00:00.000Z')
-    const started = fakeDocumentGeneration({
+    const started = DocumentGenerationFaker.fake({
       ...generation,
       status: 'running',
       startedAt: now,
@@ -59,7 +59,7 @@ describe('Start Document Generation Use Case', () => {
   })
 
   it('returns a generation that is already running', async () => {
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(useCase.execute({ documentGenerationId: generation.id })).resolves.toBe(
@@ -69,7 +69,7 @@ describe('Start Document Generation Use Case', () => {
   })
 
   it('rejects a generation that cannot be started', async () => {
-    const generation = fakeDocumentGeneration({ status: 'completed' })
+    const generation = DocumentGenerationFaker.fake({ status: 'completed' })
     repository.findById.mockResolvedValue(generation)
 
     await expect(
@@ -78,7 +78,7 @@ describe('Start Document Generation Use Case', () => {
   })
 
   it('detects a concurrent status change', async () => {
-    const generation = fakeDocumentGeneration({ status: 'pending' })
+    const generation = DocumentGenerationFaker.fake({ status: 'pending' })
     repository.findById.mockResolvedValue(generation)
     repository.replace.mockResolvedValue(undefined)
     datetimeProvider.now.mockReturnValue(new Date('2026-08-11T15:00:00.000Z'))

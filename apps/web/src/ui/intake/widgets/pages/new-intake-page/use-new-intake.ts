@@ -5,6 +5,12 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { AppError } from '@hms/core/shared/domain/errors'
+import { IntakeDecision } from '@hms/core/intake/domain/structures'
+import {
+  ConsultationChannel,
+  ConsultationModality,
+  type ConsultationChannel as ConsultationChannelValue,
+} from '@hms/core/consultation/domain/structures'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 
@@ -22,7 +28,7 @@ const DEFAULT_VALUES: IntakeFormData = {
   meetingMode: 'virtual',
   virtualChannel: 'whatsapp',
   location: '',
-  lawyer: 'epaminondas',
+  lawyer: '',
   date: new Date(2026, 6, 8),
   time: '10:00',
   closureReason: undefined,
@@ -88,14 +94,36 @@ export function useNewIntake() {
 
     try {
       if (data.decision === 'schedule') {
-        await registerIntake({ ...request, decision: 'schedule_consultation' })
+        if (!data.lawyer || !data.date || !data.time || !data.meetingMode) {
+          throw new AppError('Scheduling data are required')
+        }
+
+        const [hours, minutes] = data.time.split(':').map(Number)
+        const startsAt = new Date(data.date)
+        startsAt.setHours(hours, minutes, 0, 0)
+        const channel =
+          data.meetingMode === 'virtual'
+            ? mapVirtualChannel(data.virtualChannel)
+            : undefined
+
+        await registerIntake({
+          ...request,
+          decision: IntakeDecision.ScheduleConsultation,
+          assignedLawyerId: data.lawyer,
+          startsAt,
+          modality:
+            data.meetingMode === 'virtual'
+              ? ConsultationModality.Virtual
+              : ConsultationModality.InPerson,
+          channel,
+        })
         toast.success('Intake e agendamento salvos com sucesso!')
       } else {
         if (!data.closureReason) throw new AppError('A closure reason is required')
 
         await registerIntake({
           ...request,
-          decision: 'close_without_contract',
+          decision: IntakeDecision.CloseWithoutContract,
           closureReason: data.closureReason,
           closureNotes: data.closureNotes,
         })
@@ -106,6 +134,17 @@ export function useNewIntake() {
     }
     form.reset(DEFAULT_VALUES)
     setCurrentStep(1)
+  }
+
+  function mapVirtualChannel(channel?: string): ConsultationChannelValue {
+    const channels = {
+      whatsapp: ConsultationChannel.WhatsappVideo,
+      'google-meet': ConsultationChannel.GoogleMeet,
+      teams: ConsultationChannel.Teams,
+      other: ConsultationChannel.Other,
+    } as const
+
+    return channels[channel as keyof typeof channels] ?? ConsultationChannel.Other
   }
 
   function handleSubmit(event?: BaseSyntheticEvent) {

@@ -10,6 +10,18 @@ export const getStatusBadge = (status?: IntakeStatus, className?: string) => {
           Em análise de documentos
         </Badge>
       )
+    case IntakeStatus.ConsultationScheduling:
+      return (
+        <Badge variant='info' className={className}>
+          Agendando consulta
+        </Badge>
+      )
+    case IntakeStatus.ConsultationSchedulingFailed:
+      return (
+        <Badge variant='destructive' className={className}>
+          Falha no agendamento
+        </Badge>
+      )
     case IntakeStatus.ConsultationScheduled:
       return (
         <Badge variant='info' className={className}>

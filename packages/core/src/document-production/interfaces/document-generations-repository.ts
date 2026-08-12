@@ -7,6 +7,7 @@ import type {
 export interface DocumentGenerationsRepository {
   add(generation: DocumentGenerationCreation): Promise<DocumentGeneration>
   findById(documentGenerationId: string): Promise<DocumentGeneration | undefined>
+  findLatestByDocumentId(documentId: string): Promise<DocumentGeneration | undefined>
   replace(
     documentGenerationId: string,
     changes: DocumentGenerationUpdate,

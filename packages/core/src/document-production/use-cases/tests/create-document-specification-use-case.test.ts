@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { LegalExpertiseCatalogProvider } from '#legal-catalog/interfaces'
-import { fakeDocumentSpecification } from '../../domain/entities/fakers'
+import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import { InvalidDocumentSpecificationConfigurationError } from '../../domain/errors'
 import type {
   CreateDocumentSpecificationInput,
@@ -18,7 +18,7 @@ describe('Create Document Specification Use Case', () => {
   beforeEach(() => {
     repository = mock<DocumentSpecificationsRepository>()
     catalogProvider = mock<LegalExpertiseCatalogProvider>()
-    repository.add.mockResolvedValue(fakeDocumentSpecification())
+    repository.add.mockResolvedValue(DocumentSpecificationFaker.fake())
     catalogProvider.validateActive.mockResolvedValue(true)
   })
 

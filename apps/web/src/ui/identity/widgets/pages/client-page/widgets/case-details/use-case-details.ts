@@ -26,6 +26,8 @@ export function useCaseDetails() {
     if (!status) return 0
     switch (status) {
       case IntakeStatus.Registered:
+      case IntakeStatus.ConsultationScheduling:
+      case IntakeStatus.ConsultationSchedulingFailed:
         return 0
       case IntakeStatus.ConsultationScheduled:
       case IntakeStatus.ConsultationCompleted:
@@ -87,7 +89,11 @@ export function useCaseDetails() {
       },
     ]
 
-    if (caseDetails?.status !== IntakeStatus.Registered) {
+    if (
+      caseDetails?.status !== IntakeStatus.Registered &&
+      caseDetails?.status !== IntakeStatus.ConsultationScheduling &&
+      caseDetails?.status !== IntakeStatus.ConsultationSchedulingFailed
+    ) {
       timeline.unshift({
         date: '29/07/2026',
         time: '10:00',

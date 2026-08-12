@@ -1,7 +1,4 @@
+import { IntakeDecision } from '@hms/core/intake/domain/structures'
 import { z } from 'zod'
 
-export const intakeDecisionSchema = z.enum([
-  'schedule_consultation',
-  'register_intake',
-  'close_without_contract',
-])
+export const intakeDecisionSchema = z.enum(IntakeDecision)
