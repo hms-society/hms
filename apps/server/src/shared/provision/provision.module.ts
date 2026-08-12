@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
+import { FakeFileStorageProvider } from '@/shared/provision/file-storage/fake-file-storage-provider'
 
 @Module({
   imports: [
@@ -12,7 +14,15 @@ import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
       validate: (config) => envSchema.parse(config),
     }),
   ],
-  providers: [EnvProvider, DatetimeProvider],
-  exports: [EnvProvider, DatetimeProvider],
+  providers: [
+    EnvProvider,
+    DatetimeProvider,
+    FakeFileStorageProvider,
+    {
+      provide: PROVISION_PROVIDERS.fileStorage,
+      useExisting: FakeFileStorageProvider,
+    },
+  ],
+  exports: [EnvProvider, DatetimeProvider, PROVISION_PROVIDERS.fileStorage],
 })
 export class ProvisionModule {}
