@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Orquestrar um Plan de feature com Builders irmãos, sensores e Judges independentes na task atual.
+description: Orquestrar um Plan de feature com Builders irmãos, sensores e um único Judge da implementação inteira na task atual.
 ---
 
 # Implementar Plan
@@ -28,25 +28,29 @@ Para cada fase:
    não execute `build` por fase ou por retry, salvo alteração em bundler,
    exports, ambiente, Docker, workflows ou artefatos gerados;
 8. marque tarefas `verified` somente após os sensores aplicáveis;
-9. crie exatamente um `Judge Implementation` `Phase F<n>` read-only irmão dos
-   Builders, após os sensores;
-10. em `failed`, registre imediatamente o finding no Plan e em `evaluation.md`,
-    crie Builder Fix, reabra tarefas afetadas e repita somente os
-    sensores invalidados; crie novo Judge apenas quando o diff ou a evidência
-    tiver mudado; em `accepted`, aceite a fase e avance.
+9. não crie Judge por fase; após os sensores, registre a fase como `verified` e
+   avance somente quando não houver falha de sensor ou finding bloqueante;
+10. em caso de falha, registre imediatamente o finding no Plan e em
+    `evaluation.md`, crie Builder Fix, reabra as tarefas afetadas e repita
+    somente os sensores invalidados.
 
 Builders não criam subagentes nem editam Plan. Judges não editam arquivos. O
 Orchestrator registra no Plan decisões, evidências resumidas, findings,
 tentativas e próxima ação; registra as avaliações formais e evidências finais em
 `evaluation.md`, mantendo na Spec apenas o resumo e a referência para esse
-arquivo. Cada Judge deve deixar sua evidência e decisão persistidas antes de
-avançar para a próxima fase.
+arquivo. Fases não recebem veredito de Judge.
 
-Após todas as fases aceitas, execute sensores integrados. Quando a integração
-exigir avaliação adicional, faça antes um preflight de banco, Auth, serviços
-locais, credenciais de teste e Playwright. Então crie um único `Judge
-Implementation Final`; o `build` roda somente no Quality Gate final. Depois
-encaminhe para `conclude-spec`.
+Após todas as fases verificadas, execute sensores integrados. Quando a
+integração exigir avaliação adicional, faça antes um preflight de banco, Auth,
+serviços locais, credenciais de teste e Playwright. Então crie exatamente um
+`Judge Implementation Final` read-only para avaliar a implementação inteira; o
+`build` roda somente no Quality Gate final. Depois encaminhe para
+`conclude-spec`.
+
+O Judge final é a única unidade de julgamento da implementação. Se ele retornar
+`failed`, crie Builder Fix, reexecute os sensores invalidados e reutilize o mesmo
+Judge para reavaliar o diff atualizado. Não crie Judge por fase, Judge de retry,
+Judge de conclusão separado ou um segundo Judge para a mesma implementação.
 
 Não crie outro papel de implementação ou Judge de conclusão separado, fork ou
 nova thread.

@@ -231,11 +231,11 @@ Se o Quality Gate falhar, a Spec permanece `in_progress`. O Orchestrator
 aciona `Builder Fix QG-<n>` quando a correção estiver no escopo, reexecuta os
 sensores afetados e aciona novo Judge quando a evidência for invalidada.
 
-Cada fase recebe um único Judge Implementation depois dos sensores. Não repita
-o Judge apenas por decurso de tempo ou por uma nova execução dos mesmos
-comandos; repita-o somente depois de um Builder Fix, mudança de evidência ou
-alteração de escopo que invalide o veredito anterior. Depois de todas as fases
-aceitas, faça uma única avaliação final integrada.
+Cada fase recebe sensores e evidências, mas não recebe Judge. Depois de todas as
+fases verificadas, faça exatamente uma avaliação final integrada por um único
+Judge Implementation da implementação inteira. Se houver finding, corrija com
+Builder Fix, reexecute os sensores invalidados e reutilize o mesmo Judge; não
+crie Judge por fase, Judge de retry ou segundo Judge para a mesma implementação.
 
 Antes de iniciar a fase final, faça um preflight dos pré-requisitos externos:
 serviços locais, banco, Auth/Mailpit, credenciais de teste e Playwright. Se um
