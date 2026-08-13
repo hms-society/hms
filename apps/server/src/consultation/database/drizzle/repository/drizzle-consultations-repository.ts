@@ -103,8 +103,7 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         : undefined,
     } as any)
   }
-
-  async updateClientQualification(
+async updateClientQualification(
     clientId: string,
     dto: UpdateClientQualificationDto,
   ): Promise<void> {
@@ -112,14 +111,26 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
     const parsedBirthDate = this.parseNullableDate(dto.birthDate)
     const parsedConstitutionDate = this.parseNullableDate(dto.constitutionDate)
 
+    const zipCode = this.parseNullableString(dto.zipCode)
+    const street = this.parseNullableString(dto.street)
+    const number = this.parseNullableString(dto.number)
+    const complement = this.parseNullableString(dto.complement)
+    const district = this.parseNullableString(dto.district)
+    const city = this.parseNullableString(dto.city)
+    const state = this.parseNullableString(dto.state)
+
+    const hasCompleteAddress = Boolean(
+      zipCode && street && number && district && city && state,
+    )
+
     await this.db
       .update(schema.clientModel)
       .set({
         type: isLegal ? ('legal' as any) : ('natural' as any),
         taxIdType: isLegal ? ('cnpj' as any) : ('cpf' as any),
         taxIdValue: this.parseNullableString(dto.taxIdValue),
-        name: isLegal ? (null as any) : this.parseNullableString(dto.name),
-        legalName: isLegal ? this.parseNullableString(dto.legalName) : (null as any),
+        name: isLegal ? undefined : this.parseNullableString(dto.name),
+        legalName: isLegal ? this.parseNullableString(dto.legalName) : undefined,
         tradeName: this.parseNullableString(dto.tradeName),
         phone: this.parseNullableString(dto.phone),
         email: this.parseNullableString(dto.email),
@@ -127,10 +138,8 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         linkedThirdParty: this.parseNullableString(dto.linkedThirdParty),
         hmsResponsible: this.parseNullableString(dto.hmsResponsible),
         rg: this.parseNullableString(dto.rg),
-        birthDate: parsedBirthDate ? (parsedBirthDate.toISOString() as any) : null,
-        constitutionDate: parsedConstitutionDate
-          ? (parsedConstitutionDate.toISOString() as any)
-          : null,
+        birthDate: parsedBirthDate ? (parsedBirthDate.toISOString() as any) : undefined,
+        constitutionDate: parsedConstitutionDate ? (parsedConstitutionDate.toISOString() as any) : undefined,
         maritalStatus: this.parseNullableString(dto.maritalStatus),
         nationality: this.parseNullableString(dto.nationality),
         profession: this.parseNullableString(dto.profession),
@@ -138,13 +147,15 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         legalNature: this.parseNullableString(dto.legalNature),
         legalRepresentative: this.parseNullableString(dto.legalRepresentative),
         representativeRole: this.parseNullableString(dto.representativeRole),
-        zipCode: this.parseNullableString(dto.zipCode),
-        street: this.parseNullableString(dto.street),
-        number: this.parseNullableString(dto.number),
-        complement: this.parseNullableString(dto.complement),
-        district: this.parseNullableString(dto.district),
-        city: this.parseNullableString(dto.city),
-        state: this.parseNullableString(dto.state),
+
+        zipCode: hasCompleteAddress ? zipCode : undefined,
+        street: hasCompleteAddress ? street : undefined,
+        number: hasCompleteAddress ? number : undefined,
+        complement: hasCompleteAddress ? complement : undefined,
+        district: hasCompleteAddress ? district : undefined,
+        city: hasCompleteAddress ? city : undefined,
+        state: hasCompleteAddress ? state : undefined,
+
         updatedAt: new Date(),
       })
       .where(eq(schema.clientModel.id, clientId))

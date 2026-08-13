@@ -7,6 +7,7 @@ import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
+import { ConsultationService } from '@/rest/services/consultation-service'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
@@ -38,5 +39,6 @@ export function useRestContextProvider(): RestContextValue {
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
+    consultationService: ConsultationService(restClient)
   }
 }
