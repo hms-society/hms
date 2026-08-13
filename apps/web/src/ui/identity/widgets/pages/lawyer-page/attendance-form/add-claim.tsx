@@ -31,6 +31,7 @@ export function AddClaimDialog({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: summary is needed to resize the textarea when its content changes
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -47,7 +48,7 @@ export function AddClaimDialog({
       setSummary('')
     }
     setError('')
-  }, [claimToEdit, isOpen])
+  }, [claimToEdit])
 
   if (!isOpen) return null
 
@@ -121,7 +122,7 @@ export function AddClaimDialog({
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between'>
-            <label htmlFor='claim-summary'className='text-xs font-medium text-slate-700'>
+            <label htmlFor='claim-summary' className='text-xs font-medium text-slate-700'>
               Resumo/Fundamentação
             </label>
             <span

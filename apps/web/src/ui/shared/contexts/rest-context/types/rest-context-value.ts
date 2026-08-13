@@ -6,7 +6,6 @@ import type { ConsultationService } from '@/rest/services/consultation-service'
 import type { documentService } from '@/rest/services/DocumentEngineService'
 import type { DocumentProductionService } from '@/rest/services/document-production-service'
 
-
 export type RestContextValue = {
   intakeService: ReturnType<typeof IntakeService>
   identityService: ReturnType<typeof IdentityService>

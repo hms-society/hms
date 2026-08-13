@@ -41,7 +41,7 @@ export function LegalAreaSection({
     effectiveAreas.unshift({ id: legalAreaId, name: fallbackAreaName })
   }
 
-  let effectiveTopics = legalAreaId
+  const effectiveTopics = legalAreaId
     ? topicsList.filter((t) => !t.legalAreaId || t.legalAreaId === legalAreaId)
     : [...topicsList]
 

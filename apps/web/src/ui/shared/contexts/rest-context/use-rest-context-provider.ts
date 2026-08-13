@@ -43,6 +43,6 @@ export function useRestContextProvider(): RestContextValue {
     communicationService: CommunicationService(restClient),
     consultationService: ConsultationService(restClient),
     documentProductionService: DocumentProductionService(restClient),
-    documentService: documentService(restClient)
+    documentService: documentService(restClient),
   }
 }

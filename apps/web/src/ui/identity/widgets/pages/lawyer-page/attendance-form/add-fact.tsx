@@ -42,13 +42,6 @@ export function AddFactDialog({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
-    }
-  }, [description])
-
-  useEffect(() => {
     if (factToEdit) {
       setDescription(factToEdit.description || '')
       setProbationaryStatus(factToEdit.status || 'A comprovar')
@@ -78,7 +71,7 @@ export function AddFactDialog({
       setProbationaryStatus('A comprovar')
     }
     setError('')
-  }, [factToEdit, isOpen])
+  }, [factToEdit])
 
   if (!isOpen) return null
 
@@ -217,7 +210,10 @@ export function AddFactDialog({
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between'>
-            <label htmlFor='fact-description' className='text-xs font-medium text-slate-700'>
+            <label
+              htmlFor='fact-description'
+              className='text-xs font-medium text-slate-700'
+            >
               Descrição do fato <span className='text-rose-500'>*</span>
             </label>
             <span
@@ -251,9 +247,7 @@ export function AddFactDialog({
         </div>
 
         <div className='space-y-2'>
-          <p className='text-xs font-medium text-slate-700'>
-            Situação probatória
-          </p>
+          <p className='text-xs font-medium text-slate-700'>Situação probatória</p>
           <div className='flex items-center gap-2'>
             {['Comprovado', 'A comprovar', 'Controvertido'].map((status) => (
               <button

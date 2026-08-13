@@ -246,6 +246,7 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
       clientGuidance,
       viability,
       decision,
+      DRAFT_KEY,
     }
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(dataToSave))
@@ -392,12 +393,12 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
 
     let hasError = false
 
-    if (!mainLegalQuestion || !mainLegalQuestion.trim()) {
+    if (!mainLegalQuestion?.trim()) {
       setMainLegalQuestionError('A questão jurídica principal é obrigatória.')
       hasError = true
     }
 
-    if (!clientGuidance || !clientGuidance.trim()) {
+    if (!clientGuidance?.trim()) {
       setClientGuidanceError('A orientação prestada ao cliente é obrigatória.')
       hasError = true
     }
