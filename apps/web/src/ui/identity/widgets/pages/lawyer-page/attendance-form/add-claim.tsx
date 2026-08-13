@@ -101,10 +101,11 @@ export function AddClaimDialog({
         </div>
 
         <div className='space-y-1'>
-          <label className='text-xs font-medium text-slate-700'>
+          <label htmlFor='claim-title' className='text-xs font-medium text-slate-700'>
             Título do pedido <span className='text-rose-500'>*</span>
           </label>
           <Input
+            id='claim-title'
             value={title}
             onChange={(e) => {
               setTitle(e.target.value)
@@ -120,7 +121,7 @@ export function AddClaimDialog({
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between'>
-            <label className='text-xs font-medium text-slate-700'>
+            <label htmlFor='claim-summary'className='text-xs font-medium text-slate-700'>
               Resumo/Fundamentação
             </label>
             <span
@@ -134,6 +135,7 @@ export function AddClaimDialog({
             </span>
           </div>
           <textarea
+            id='claim-summary'
             ref={textareaRef}
             value={summary}
             maxLength={MAX_SUMMARY_LENGTH}

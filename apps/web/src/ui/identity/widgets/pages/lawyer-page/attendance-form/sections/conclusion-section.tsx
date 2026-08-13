@@ -59,10 +59,11 @@ export function ConclusionSection(props: ConclusionSectionProps) {
       </h2>
 
       <div className='space-y-1'>
-        <label className='text-xs font-medium text-slate-700'>
+        <label htmlFor='main-legal-question' className='text-xs font-medium text-slate-700'>
           Questão jurídica principal <span className='text-rose-500'>*</span>
         </label>
         <Input
+          id='main-legal-question'
           value={props.mainLegalQuestion}
           onBlur={() => setQuestionTouched(true)}
           onChange={(e) => {
@@ -81,7 +82,7 @@ export function ConclusionSection(props: ConclusionSectionProps) {
 
       <div className='space-y-1'>
         <div className='flex items-center justify-between'>
-          <label className='text-xs font-medium text-slate-700'>
+          <label htmlFor='client-guidance' className='text-xs font-medium text-slate-700'>
             Orientação prestada ao cliente <span className='text-rose-500'>*</span>
           </label>
           <span
@@ -95,6 +96,7 @@ export function ConclusionSection(props: ConclusionSectionProps) {
           </span>
         </div>
         <textarea
+          id='client-guidance'
           ref={textareaRef}
           value={props.clientGuidance}
           maxLength={MAX_GUIDANCE_LENGTH}
@@ -117,9 +119,9 @@ export function ConclusionSection(props: ConclusionSectionProps) {
 
       <div className='space-y-4 pt-2 border-t border-slate-100'>
         <div className='space-y-2'>
-          <label className='text-xs font-medium text-slate-700'>
+          <p className='text-xs font-medium text-slate-700'>
             Viabilidade Jurídica
-          </label>
+          </p>
           <div className='flex flex-wrap gap-2'>
             {VIABILITY_OPTIONS.map((v) => (
               <button
@@ -139,9 +141,9 @@ export function ConclusionSection(props: ConclusionSectionProps) {
         </div>
 
         <div className='space-y-2'>
-          <label className='text-xs font-medium text-slate-700'>
+          <p className='text-xs font-medium text-slate-700'>
             Decisão de Encaminhamento
-          </label>
+          </p>
           <div className='flex flex-wrap gap-2'>
             {DECISION_OPTIONS.map((d) => (
               <button

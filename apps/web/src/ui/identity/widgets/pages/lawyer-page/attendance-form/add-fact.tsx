@@ -150,7 +150,7 @@ export function AddFactDialog({
         </div>
 
         <div className='space-y-2'>
-          <label className='text-xs font-medium text-slate-700'>Data ou período</label>
+          <p className='text-xs font-medium text-slate-700'>Data ou período</p>
           <div className='grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs'>
             <button
               type='button'
@@ -217,7 +217,7 @@ export function AddFactDialog({
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between'>
-            <label className='text-xs font-medium text-slate-700'>
+            <label htmlFor='fact-description' className='text-xs font-medium text-slate-700'>
               Descrição do fato <span className='text-rose-500'>*</span>
             </label>
             <span
@@ -231,6 +231,7 @@ export function AddFactDialog({
             </span>
           </div>
           <textarea
+            id='fact-description'
             ref={textareaRef}
             value={description}
             maxLength={MAX_DESCRIPTION_LENGTH}
@@ -250,9 +251,9 @@ export function AddFactDialog({
         </div>
 
         <div className='space-y-2'>
-          <label className='text-xs font-medium text-slate-700'>
+          <p className='text-xs font-medium text-slate-700'>
             Situação probatória
-          </label>
+          </p>
           <div className='flex items-center gap-2'>
             {['Comprovado', 'A comprovar', 'Controvertido'].map((status) => (
               <button
