@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-
 import { CommunicationModule } from '@/communication/communication.module'
 import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
+import { ConsultationModule } from '@/consultation/database/drizzle/consultation.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
 import { ProcessWhatsappBatchJob } from '@/document-engine/messaging/inngest/jobs'
 import { DocumentProductionModule } from '@/document-production/document-production.module'
@@ -28,6 +28,7 @@ import { SharedModule } from '@/shared/shared.module'
     CommunicationModule,
     DocumentsModule,
     SchedulingModule,
+    ConsultationModule,
     DocumentProductionModule,
     InngestModule.forRootAsync({
       imports: [

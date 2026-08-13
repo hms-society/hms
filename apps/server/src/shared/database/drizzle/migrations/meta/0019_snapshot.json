@@ -1,6 +1,6 @@
 {
-  "id": "a18371f0-374b-4a6e-bd5e-fe5f32de2319",
-  "prevId": "28c837ef-b3a9-4f36-90ae-529d7fd1ad85",
+  "id": "b5aac93d-fe9a-4e30-9514-8ba37919d77f",
+  "prevId": "6e1a716c-a7a4-4e8c-b3d2-3c38c738f5eb",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1356,48 +1356,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.consultation_identified_risks": {
-      "name": "consultation_identified_risks",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "consultation_id": {
-          "name": "consultation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "consultation_identified_risks_consultation_id_consultations_id_fk": {
-          "name": "consultation_identified_risks_consultation_id_consultations_id_fk",
-          "tableFrom": "consultation_identified_risks",
-          "tableTo": "consultations",
-          "columnsFrom": ["consultation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.consultations": {
       "name": "consultations",
       "schema": "",
@@ -1413,7 +1371,7 @@
           "name": "appointment_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "intake_id": {
           "name": "intake_id",
@@ -1587,13 +1545,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "consultations_appointment_id_unique": {
-          "name": "consultations_appointment_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["appointment_id"]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
