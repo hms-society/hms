@@ -79,6 +79,15 @@ import {
   ZoomIn,
   ZoomOut,
   Download,
+  Scan,
+  CheckCircle2,
+  FileMinus,
+  Lock,
+  CreditCard,
+  Map,
+  AlertTriangle,
+  AlertCircle,
+  HelpCircle
 } from 'lucide-react'
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
 import type { IconName } from '../types'
@@ -164,4 +173,13 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   download: Download,
   underline: Underline,
   undo: Undo2,
+  scan: Scan,
+  'check-circle-2': CheckCircle2,
+  'file-minus': FileMinus,
+  'lock': Lock,
+  'credit-card': CreditCard,
+  'map': Map,
+  'alert-triangle': AlertTriangle,
+  'alert-circle': AlertCircle,
+  'help-circle': HelpCircle
 }
