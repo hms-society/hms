@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Scale } from 'lucide-react'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Input } from '@/ui/shadcn/input'
 
 interface ConclusionSectionProps {
@@ -49,17 +49,18 @@ export function ConclusionSection(props: ConclusionSectionProps) {
   const showQuestionError = props.errorMessage || (questionTouched && isQuestionEmpty)
 
   const isGuidanceEmpty = !props.clientGuidance || !props.clientGuidance.trim()
-  const showGuidanceError = props.guidanceErrorMessage || (guidanceTouched && isGuidanceEmpty)
+  const showGuidanceError =
+    props.guidanceErrorMessage || (guidanceTouched && isGuidanceEmpty)
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-5">
-      <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 font-serif">
-        <Scale className="w-4 h-4 text-teal-800" /> Conclusão da consulta
+    <div className='bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-5'>
+      <h2 className='text-base font-bold text-slate-800 flex items-center gap-2 font-serif'>
+        <Icon name='scale' className='w-4 h-4 text-teal-800' /> Conclusão da consulta
       </h2>
 
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-700">
-          Questão jurídica principal <span className="text-rose-500">*</span>
+      <div className='space-y-1'>
+        <label className='text-xs font-medium text-slate-700'>
+          Questão jurídica principal <span className='text-rose-500'>*</span>
         </label>
         <Input
           value={props.mainLegalQuestion}
@@ -68,20 +69,20 @@ export function ConclusionSection(props: ConclusionSectionProps) {
             props.setMainLegalQuestion(e.target.value)
             if (!questionTouched) setQuestionTouched(true)
           }}
-          placeholder="Descreva a principal dúvida ou demanda jurídica"
-          className="h-9 rounded-xl text-xs border-[#d4ceca]"
+          placeholder='Descreva a principal dúvida ou demanda jurídica'
+          className='h-9 rounded-xl text-xs border-[#d4ceca]'
         />
         {showQuestionError && (
-          <p className="text-[11px] text-rose-500 font-medium pt-0.5">
+          <p className='text-[11px] text-rose-500 font-medium pt-0.5'>
             {props.errorMessage || 'A questão jurídica principal é obrigatória.'}
           </p>
         )}
       </div>
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-slate-700">
-            Orientação prestada ao cliente <span className="text-rose-500">*</span>
+      <div className='space-y-1'>
+        <div className='flex items-center justify-between'>
+          <label className='text-xs font-medium text-slate-700'>
+            Orientação prestada ao cliente <span className='text-rose-500'>*</span>
           </label>
           <span
             className={`text-[10px] font-medium ${
@@ -102,28 +103,33 @@ export function ConclusionSection(props: ConclusionSectionProps) {
             props.setClientGuidance(e.target.value)
             if (!guidanceTouched) setGuidanceTouched(true)
           }}
-          placeholder="Registre o que foi orientado..."
+          placeholder='Registre o que foi orientado...'
           rows={3}
-          className="w-full min-h-[70px] p-2.5 rounded-xl text-xs border border-[#d4ceca] overflow-hidden transition-all focus:outline-none focus:ring-2 focus:border-slate-400 focus:ring-slate-400 bg-slate-50/50 resize-none"
+          className='w-full min-h-[70px] p-2.5 rounded-xl text-xs border border-[#d4ceca] overflow-hidden transition-all focus:outline-none focus:ring-2 focus:border-slate-400 focus:ring-slate-400 bg-slate-50/50 resize-none'
         />
         {showGuidanceError && (
-          <p className="text-[11px] text-rose-500 font-medium pt-0.5">
-            {props.guidanceErrorMessage || 'A orientação prestada ao cliente é obrigatória.'}
+          <p className='text-[11px] text-rose-500 font-medium pt-0.5'>
+            {props.guidanceErrorMessage ||
+              'A orientação prestada ao cliente é obrigatória.'}
           </p>
         )}
       </div>
 
-      <div className="space-y-4 pt-2 border-t border-slate-100">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-slate-700">Viabilidade Jurídica</label>
-          <div className="flex flex-wrap gap-2">
+      <div className='space-y-4 pt-2 border-t border-slate-100'>
+        <div className='space-y-2'>
+          <label className='text-xs font-medium text-slate-700'>
+            Viabilidade Jurídica
+          </label>
+          <div className='flex flex-wrap gap-2'>
             {VIABILITY_OPTIONS.map((v) => (
               <button
                 key={v}
-                type="button"
+                type='button'
                 onClick={() => props.setViability(v)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  props.viability === v ? 'bg-teal-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600'
+                  props.viability === v
+                    ? 'bg-teal-800 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 {v}
@@ -132,16 +138,20 @@ export function ConclusionSection(props: ConclusionSectionProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-slate-700">Decisão de Encaminhamento</label>
-          <div className="flex flex-wrap gap-2">
+        <div className='space-y-2'>
+          <label className='text-xs font-medium text-slate-700'>
+            Decisão de Encaminhamento
+          </label>
+          <div className='flex flex-wrap gap-2'>
             {DECISION_OPTIONS.map((d) => (
               <button
                 key={d}
-                type="button"
+                type='button'
                 onClick={() => props.setDecision(d)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  props.decision === d ? 'bg-teal-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600'
+                  props.decision === d
+                    ? 'bg-teal-800 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 {d}

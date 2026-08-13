@@ -82,7 +82,9 @@ export function useConsultation(consultationId?: string) {
   })
 
   const completeConsultationMutation = useMutation({
-    mutationFn: async (data: CompleteConsultationRequest & { consultationId?: string }) => {
+    mutationFn: async (
+      data: CompleteConsultationRequest & { consultationId?: string },
+    ) => {
       const id = data.consultationId || consultationId
       if (!id) throw new Error('ID da consulta não fornecido.')
 

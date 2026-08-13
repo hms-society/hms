@@ -1,4 +1,4 @@
-import { Tag } from 'lucide-react'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 
 export interface LegalAreaOption {
   id: string
@@ -33,7 +33,11 @@ export function LegalAreaSection({
   fallbackTopicName,
 }: LegalAreaSectionProps) {
   const effectiveAreas = [...areasList]
-  if (legalAreaId && fallbackAreaName && !effectiveAreas.some((a) => a.id === legalAreaId)) {
+  if (
+    legalAreaId &&
+    fallbackAreaName &&
+    !effectiveAreas.some((a) => a.id === legalAreaId)
+  ) {
     effectiveAreas.unshift({ id: legalAreaId, name: fallbackAreaName })
   }
 
@@ -41,7 +45,11 @@ export function LegalAreaSection({
     ? topicsList.filter((t) => !t.legalAreaId || t.legalAreaId === legalAreaId)
     : [...topicsList]
 
-  if (legalTopicId && fallbackTopicName && !effectiveTopics.some((t) => t.id === legalTopicId)) {
+  if (
+    legalTopicId &&
+    fallbackTopicName &&
+    !effectiveTopics.some((t) => t.id === legalTopicId)
+  ) {
     effectiveTopics.unshift({
       id: legalTopicId,
       legalAreaId,
@@ -50,13 +58,13 @@ export function LegalAreaSection({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
-      <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 font-serif">
-        <Tag className="w-4 h-4 text-teal-800" /> Área e Tema
+    <div className='bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4'>
+      <h2 className='text-base font-bold text-slate-800 flex items-center gap-2 font-serif'>
+        <Icon name='tag' className='w-4 h-4 text-teal-800' /> Área e Tema
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div>
-          <label className="text-xs font-medium text-slate-700">Área jurídica</label>
+          <label className='text-xs font-medium text-slate-700'>Área jurídica</label>
           <select
             value={legalAreaId}
             onChange={(e) => {
@@ -64,9 +72,9 @@ export function LegalAreaSection({
               setLegalAreaId(newAreaId)
               setLegalTopicId('')
             }}
-            className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-700 cursor-pointer"
+            className='mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-700 cursor-pointer'
           >
-            <option value="">Selecione uma área...</option>
+            <option value=''>Selecione uma área...</option>
             {effectiveAreas.map((area) => (
               <option key={area.id} value={area.id}>
                 {area.name}
@@ -75,13 +83,13 @@ export function LegalAreaSection({
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-slate-700">Tema jurídico</label>
+          <label className='text-xs font-medium text-slate-700'>Tema jurídico</label>
           <select
             value={legalTopicId}
             onChange={(e) => setLegalTopicId(e.target.value)}
-            className="mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-700 cursor-pointer"
+            className='mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-700 cursor-pointer'
           >
-            <option value="">Selecione um tema...</option>
+            <option value=''>Selecione um tema...</option>
             {effectiveTopics.map((topic) => (
               <option key={topic.id} value={topic.id}>
                 {topic.name}

@@ -82,7 +82,7 @@ function renderConsultationDetailsPage() {
   return render(
     <QueryClientProvider client={queryClient}>
       <ConsultationDetails
-        consultationId="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
         onBack={handleBack}
         onContinueForm={handleContinueForm}
       />
@@ -134,7 +134,9 @@ describe('ConsultationDetails', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Iniciar consulta/i }))
 
-    expect(handleStartConsultation).toHaveBeenCalledWith('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
+    expect(handleStartConsultation).toHaveBeenCalledWith(
+      'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+    )
   })
 
   it('delegates mark no-show action', () => {

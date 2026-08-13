@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { ArrowLeft, Check } from 'lucide-react'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Button } from '@/ui/shadcn/button'
 
 import { AddFactDialog } from './add-fact'
@@ -34,16 +34,9 @@ export interface AttendanceFormProps {
   onBack?: () => void
 }
 
-export function AttendanceForm({
-  consultationId,
-  onBack,
-}: AttendanceFormProps) {
-  const {
-    consultation,
-    isLoading,
-    completeConsultation,
-    updateQualification,
-  } = useConsultation(consultationId)
+export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) {
+  const { consultation, isLoading, completeConsultation, updateQualification } =
+    useConsultation(consultationId)
 
   const DRAFT_KEY = `consultation_draft_${consultationId}`
 
@@ -69,8 +62,7 @@ export function AttendanceForm({
   const client = consultation?.client
   const intake = consultation?.intake
 
-  const rawOrigin =
-    draft?.origin ?? client?.origin ?? intake?.origin ?? 'direct'
+  const rawOrigin = draft?.origin ?? client?.origin ?? intake?.origin ?? 'direct'
 
   const [personType, setPersonType] = useState<'individual' | 'legal'>(
     draft?.personType ?? (client?.type === 'legal' ? 'legal' : 'individual'),
@@ -99,7 +91,9 @@ export function AttendanceForm({
   )
 
   const [rg, setRg] = useState(() => draft?.rg ?? client?.rg ?? '')
-  const [birthDate, setBirthDate] = useState(() => draft?.birthDate ?? client?.birthDate ?? '')
+  const [birthDate, setBirthDate] = useState(
+    () => draft?.birthDate ?? client?.birthDate ?? '',
+  )
   const [maritalStatus, setMaritalStatus] = useState(
     () => draft?.maritalStatus ?? client?.maritalStatus ?? '',
   )
@@ -150,7 +144,9 @@ export function AttendanceForm({
   const intakeTopicId = intake?.legalTopicId || ''
 
   const [legalAreaId, setLegalAreaId] = useState(() => draft?.legalAreaId ?? intakeAreaId)
-  const [legalTopicId, setLegalTopicId] = useState(() => draft?.legalTopicId ?? intakeTopicId)
+  const [legalTopicId, setLegalTopicId] = useState(
+    () => draft?.legalTopicId ?? intakeTopicId,
+  )
 
   const [selectedFormName, setSelectedFormName] = useState(
     () => draft?.selectedFormName ?? 'Triagem inicial',
@@ -317,8 +313,7 @@ export function AttendanceForm({
         return []
       }
 
-      const response =
-        await legalCatalogService.listLegalTopics(legalAreaId)
+      const response = await legalCatalogService.listLegalTopics(legalAreaId)
 
       if (response.isFailure) {
         return []
@@ -332,8 +327,7 @@ export function AttendanceForm({
   const areasList = areasData ?? []
   const topicsList = topicsData ?? []
 
-  const currentAreaName =
-    areasList.find((area) => area.id === legalAreaId)?.name || '—'
+  const currentAreaName = areasList.find((area) => area.id === legalAreaId)?.name || '—'
 
   const currentTopicName =
     topicsList.find((topic) => topic.id === legalTopicId)?.name || '—'
@@ -370,11 +364,7 @@ export function AttendanceForm({
     })
   }
 
-  const handleSaveClaim = (newClaim: {
-    id?: string
-    title: string
-    summary: string
-  }) => {
+  const handleSaveClaim = (newClaim: { id?: string; title: string; summary: string }) => {
     setClaims((prev) => {
       if (newClaim.id) {
         return prev.map((claim) =>
@@ -425,24 +415,14 @@ export function AttendanceForm({
 
       if (updateQualification) {
         await updateQualification({
-          name:
-            personType === 'individual'
-              ? fullName
-              : undefined,
-          legalName:
-            personType === 'legal'
-              ? companyName || fullName
-              : undefined,
-          tradeName:
-            personType === 'legal'
-              ? tradeName
-              : undefined,
+          name: personType === 'individual' ? fullName : undefined,
+          legalName: personType === 'legal' ? companyName || fullName : undefined,
+          tradeName: personType === 'legal' ? tradeName : undefined,
           taxIdValue: cpf,
           phone,
           email,
           origin,
-          linkedThirdParty:
-            linkedThirdParty || undefined,
+          linkedThirdParty: linkedThirdParty || undefined,
           hmsResponsible,
           zipCode: cep,
           street,
@@ -502,20 +482,20 @@ export function AttendanceForm({
 
   if (isLoading) {
     return (
-      <div className="p-12 text-center text-xs text-slate-500">
+      <div className='p-12 text-center text-xs text-slate-500'>
         Carregando dados da ficha...
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 pb-12 font-sans">
+    <div className='space-y-6 pb-12 font-sans'>
       <button
-        type="button"
+        type='button'
         onClick={onBack}
-        className="flex items-center gap-1.5 text-xs text-teal-800 hover:text-teal-900 font-medium cursor-pointer"
+        className='flex items-center gap-1.5 text-xs text-teal-800 hover:text-teal-900 font-medium cursor-pointer'
       >
-        <ArrowLeft className="w-3.5 h-3.5" />
+        <Icon name='arrow-left' className='w-3.5 h-3.5' />
         Voltar
       </button>
 
@@ -597,11 +577,7 @@ export function AttendanceForm({
 
       <TimelineSection
         facts={facts}
-        onRemoveFact={(id) =>
-          setFacts((prev) =>
-            prev.filter((fact) => fact.id !== id),
-          )
-        }
+        onRemoveFact={(id) => setFacts((prev) => prev.filter((fact) => fact.id !== id))}
         onEditFact={(fact) => {
           setEditingFact(fact)
           setIsFactModalOpen(true)
@@ -620,10 +596,7 @@ export function AttendanceForm({
         }
       />
 
-      <LawyerNotesSection
-        lawyerNotes={lawyerNotes}
-        setLawyerNotes={setLawyerNotes}
-      />
+      <LawyerNotesSection lawyerNotes={lawyerNotes} setLawyerNotes={setLawyerNotes} />
 
       <ConclusionSection
         mainLegalQuestion={mainLegalQuestion}
@@ -644,16 +617,14 @@ export function AttendanceForm({
         guidanceErrorMessage={clientGuidanceError}
       />
 
-      <div className="flex items-center justify-end pt-4 border-t border-slate-200">
+      <div className='flex items-center justify-end pt-4 border-t border-slate-200'>
         <Button
           onClick={handleFinalize}
           disabled={isSubmitting}
-          className="bg-teal-800 hover:bg-teal-900 text-white rounded-full px-8 h-11 text-xs font-bold gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+          className='bg-teal-800 hover:bg-teal-900 text-white rounded-full px-8 h-11 text-xs font-bold gap-2 shadow-sm cursor-pointer disabled:opacity-50'
         >
-          <Check className="w-4 h-4" />
-          {isSubmitting
-            ? 'Finalizando...'
-            : 'Finalizar consulta'}
+          <Icon name='check' className='w-4 h-4' />
+          {isSubmitting ? 'Finalizando...' : 'Finalizar consulta'}
         </Button>
       </div>
 

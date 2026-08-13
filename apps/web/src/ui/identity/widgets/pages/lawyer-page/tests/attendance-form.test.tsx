@@ -86,7 +86,7 @@ function renderAttendanceFormPage() {
   return render(
     <QueryClientProvider client={queryClient}>
       <AttendanceForm
-        consultationId="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
         onBack={handleBack}
       />
     </QueryClientProvider>,
@@ -135,7 +135,9 @@ describe('AttendanceForm', () => {
 
     renderAttendanceFormPage()
 
-    const submitButton = await screen.findByRole('button', { name: /Finalizar consulta/i })
+    const submitButton = await screen.findByRole('button', {
+      name: /Finalizar consulta/i,
+    })
     fireEvent.click(submitButton)
 
     expect(
@@ -150,7 +152,9 @@ describe('AttendanceForm', () => {
   it('submits qualification and completes consultation when form is valid', async () => {
     renderAttendanceFormPage()
 
-    const submitButton = await screen.findByRole('button', { name: /Finalizar consulta/i })
+    const submitButton = await screen.findByRole('button', {
+      name: /Finalizar consulta/i,
+    })
     fireEvent.click(submitButton)
 
     await waitFor(() => {

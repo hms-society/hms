@@ -1,19 +1,16 @@
-import { ClipboardList, FileText, Lock, Package } from 'lucide-react'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 
 interface ConsultationTabsProps {
   activeTab: 'details' | 'form' | 'package'
   onTabChange: (tab: 'details' | 'form' | 'package') => void
 }
 
-export function ConsultationTabs({
-  activeTab,
-  onTabChange,
-}: ConsultationTabsProps) {
+export function ConsultationTabs({ activeTab, onTabChange }: ConsultationTabsProps) {
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex min-w-max items-center gap-2 sm:gap-6 border-b border-slate-200 text-sm font-medium text-slate-500">
+    <div className='w-full overflow-x-auto'>
+      <div className='flex min-w-max items-center gap-2 sm:gap-6 border-b border-slate-200 text-sm font-medium text-slate-500'>
         <button
-          type="button"
+          type='button'
           onClick={() => onTabChange('details')}
           className={`flex items-center gap-2 whitespace-nowrap pb-3 transition-colors ${
             activeTab === 'details'
@@ -21,12 +18,12 @@ export function ConsultationTabs({
               : 'hover:text-slate-800'
           }`}
         >
-          <ClipboardList className="h-4 w-4 shrink-0" />
+          <Icon name='clipboard-list' className='h-4 w-4 shrink-0' />
           <span>Detalhes</span>
         </button>
 
         <button
-          type="button"
+          type='button'
           onClick={() => onTabChange('form')}
           className={`flex items-center gap-2 whitespace-nowrap pb-3 transition-colors ${
             activeTab === 'form'
@@ -34,18 +31,18 @@ export function ConsultationTabs({
               : 'hover:text-slate-800'
           }`}
         >
-          <FileText className="h-4 w-4 shrink-0" />
+          <Icon name='file-text' className='h-4 w-4 shrink-0' />
           <span>Ficha de Atendimento</span>
         </button>
 
         <button
-          type="button"
+          type='button'
           disabled
-          className="flex items-center gap-2 whitespace-nowrap pb-3 text-slate-400 opacity-70 cursor-not-allowed"
+          className='flex items-center gap-2 whitespace-nowrap pb-3 text-slate-400 opacity-70 cursor-not-allowed'
         >
-          <Package className="h-4 w-4 shrink-0" />
+          <Icon name='package' className='h-4 w-4 shrink-0' />
           <span>Pacote de documentos da consulta</span>
-          <Lock className="h-3 w-3 shrink-0" />
+          <Icon name='lock' className='h-3 w-3 shrink-0' />
         </button>
       </div>
     </div>

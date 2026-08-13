@@ -66,8 +66,14 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       return restClient.get<any>(`/consultations/${consultationId}`)
     },
 
-    async listConsultations(params?: { lawyerId?: string; clientId?: string; status?: string }) {
-      const searchParams = new URLSearchParams(params as Record<string, string>).toString()
+    async listConsultations(params?: {
+      lawyerId?: string
+      clientId?: string
+      status?: string
+    }) {
+      const searchParams = new URLSearchParams(
+        params as Record<string, string>,
+      ).toString()
       const url = searchParams ? `/consultations?${searchParams}` : '/consultations'
       return restClient.get<any>(url)
     },
@@ -106,10 +112,7 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       consultationId: string,
       request: CompleteConsultationRequest,
     ) {
-      return restClient.patch<any>(
-        `/consultations/${consultationId}/complete`,
-        request,
-      )
+      return restClient.patch<any>(`/consultations/${consultationId}/complete`, request)
     },
 
     async cancelConsultation(consultationId: string, reason?: string) {

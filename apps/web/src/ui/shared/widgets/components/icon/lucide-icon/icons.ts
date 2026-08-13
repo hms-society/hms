@@ -72,6 +72,17 @@ import {
   ZoomOut,
   ChevronUp,
   ChevronDown,
+  Timer,
+  Loader2,
+  Lock,
+  Package,
+  Sparkles,
+  AlertCircle,
+  Building2,
+  FileEdit,
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react'
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
 import type { IconName } from '../types'
@@ -150,4 +161,15 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   'zoom-out': ZoomOut,
   'chevron-up': ChevronUp,
   'chevron-down': ChevronDown,
+  timer: Timer,
+  'loader-2': Loader2,
+  lock: Lock,
+  package: Package,
+  sparkles: Sparkles,
+  'alert-circle': AlertCircle,
+  'building-2': Building2,
+  'file-edit': FileEdit,
+  'rotate-ccw': RotateCcw,
+  'check-circle-2': CheckCircle2,
+  'x-circle': XCircle,
 }
