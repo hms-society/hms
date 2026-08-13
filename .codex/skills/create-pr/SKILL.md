@@ -19,6 +19,41 @@ milestones.
 - link do PRD no Confluence, quando houver;
 - todas as chaves/URLs de `jira_tickets`, quando houver.
 
+## Regra de integração e topologia de branches
+
+Antes de criar ou atualizar um PR, descubra a topologia real da entrega. Não
+assuma que branches com nomes semelhantes contêm conjuntos cumulativos de
+alterações.
+
+1. Atualize as referências remotas sem alterar a worktree do usuário:
+
+   ```bash
+   git fetch origin develop --prune
+   gh pr list --state all --search "<termos da Spec>"
+   ```
+
+2. Para cada PR ou branch relacionado, registre base, head, SHA, estado e
+   merge. Verifique a ancestralidade com `git merge-base --is-ancestor`; o nome
+   da branch ou a ordem visual dos PRs não prova que uma alteração foi
+   incorporada.
+3. O padrão é uma branch de entrega baseada em `origin/develop`. Não crie
+   branches intermediárias apenas para repartir linhas, nem crie uma cadeia de
+   worktrees em que um PR dependa acidentalmente de outro PR ainda não aceito.
+4. Se a entrega precisar de vários PRs por fronteira semântica ou dependência
+   real, cada PR deve declarar sua base e dependências. Depois que os PRs forem
+   aceitos, crie ou atualize uma branch de integração baseada no `develop` atual
+   e incorpore explicitamente todos os heads aceitos, na ordem de dependência.
+   O PR final deve ser comparado com `origin/develop` e conter o conjunto
+   completo aceito — nunca apenas o último branch intermediário.
+5. Se já existir um PR de entrega, atualize o head desse PR em vez de abrir
+   outro PR para a mesma Spec. Antes do push, confirme que a branch contém os
+   commits e arquivos de todos os PRs aceitos.
+
+Use uma worktree temporária limpa para a integração quando a worktree principal
+estiver suja. Preserve as alterações do usuário e copie somente arquivos de
+ambiente ignorados e locais; não copie `.env.example` ou qualquer arquivo
+`tracked`. Não use `reset --hard`, `checkout --` ou rebase para apagar trabalho.
+
 ## Leitura e preflight
 
 Antes de criar commits ou abrir o PR, leia:
@@ -43,6 +78,37 @@ pnpm build
 
 Use filtros de workspace quando forem suficientes e registre comandos
 omitidos, falhas pré-existentes e validações adicionais de integração/e2e.
+
+Para uma entrega composta, valide o estado integrado, não cada branch isolada.
+Calcule e registre o diff real contra a base do PR:
+
+```bash
+git diff --stat origin/develop...HEAD
+git diff --name-status origin/develop...HEAD
+```
+
+Não aplique um limite artificial de 5.000 linhas e não divida um PR apenas para
+contornar o workflow `check-pr-size`. Se o usuário autorizar uma entrega maior,
+publique um único PR coerente, informe a quantidade real de linhas e registre o
+`check-size` como uma pendência de política. Não declare o Quality Gate
+completamente verde enquanto esse check estiver vermelho; se a proteção da
+branch impedir o merge, reporte o bloqueio ao usuário em vez de alterar ou
+burlar o workflow sem autorização.
+
+### Migrações e arquivos gerados
+
+Antes de publicar uma integração que toca o banco:
+
+- compare os números das migrações e o `meta/_journal.json` entre `develop` e
+  cada branch aceita;
+- resolva colisões de numeração explicitamente, renumerando a migração nova e
+  atualizando snapshot, journal, testes e referências correspondentes;
+- nunca aceite cegamente `ours`/`theirs` para uma migração ou seu metadata;
+- execute a geração/verificação de migration e os testes específicos disponíveis;
+- confirme que cada teste lê o nome final do arquivo de migration.
+
+Se o teste local exigir Docker/Testcontainers indisponível, registre isso como
+limitação; não transforme uma falha de ambiente em aprovação da implementação.
 
 ## Título
 
@@ -136,11 +202,15 @@ Solicite a revisão automatizada apenas depois de o PR estar publicado:
 gh pr comment <numero-do-pr> --body "@codex review"
 ```
 
+Execute o mesmo comentário depois de cada push que altere o PR, sempre usando o
+número real do PR.
+
 ## Loop pós-publicação do PR
 
 Depois de solicitar a revisão, aguarde e acompanhe o Quality Gate do `HEAD`
-atual. O ciclo só termina quando todos os checks obrigatórios estiverem verdes,
-o PR estiver mergeable e não houver conversa bloqueante pendente.
+atual. O ciclo só termina quando todos os checks funcionais obrigatórios
+estiverem verdes, as exceções de política autorizadas estiverem documentadas, o
+PR estiver mergeable e não houver conversa bloqueante pendente.
 
 1. Consulte os checks e o SHA do `HEAD` do PR:
 
@@ -154,13 +224,17 @@ o PR estiver mergeable e não houver conversa bloqueante pendente.
 2. Aguarde os workflows oficiais do commit publicado. Use `gh run watch
    <run-id> --exit-status` ou equivalente e registre o resultado de cada
    workflow.
-3. Se um check falhar, leia os logs, corrija somente problemas dentro do
-   escopo, execute os sensores locais aplicáveis, crie um novo commit e faça
+3. Se um check funcional falhar, leia os logs, corrija somente problemas dentro
+   do escopo, execute os sensores locais aplicáveis, crie um novo commit e faça
    push. Depois reinicie o loop a partir do novo SHA; checks de um HEAD anterior
    não validam o commit corrigido.
-4. Após cada novo push, aguarde novamente Core, Server, Web e quaisquer outros
+4. Se o único check vermelho for `check-size` e a entrega acima de 5.000 linhas
+   tiver sido autorizada, não crie branches artificiais nem faça alterações
+   cosméticas para reduzir a contagem. Registre o valor e a consequência para
+   merge.
+5. Após cada novo push, aguarde novamente Core, Server, Web e quaisquer outros
    checks obrigatórios antes de concluir.
-5. Confirme que o PR continua mergeable e que reviews/conversas bloqueantes
+6. Confirme que o PR continua mergeable e que reviews/conversas bloqueantes
    foram resolvidas. Registre checks ignorados ou não aplicáveis como
    limitações explícitas.
 

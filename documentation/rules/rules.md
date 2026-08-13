@@ -48,6 +48,9 @@ and surface the discrepancy before silently copying the implementation.
 | [`controllers-testing-rules.md`](controllers-testing-rules.md) | Creating or changing server controller tests, REST fixtures, HTTP assertions, or test application wiring for database-backed routes. | `apps/server/src/**/rest/controllers/tests/**`, `apps/server/src/**/fixtures/**`, `apps/server/src/shared/rest/tests/**` |
 | [`database-layer-rules.md`](database-layer-rules.md) | Changing Drizzle models, persistence types, mappers, repositories, repository tokens, database modules, migrations, or seeders. Also read it when a controller or use case change requires persistence work. | `apps/server/src/**/database/**`, `apps/server/src/shared/database/**`, `apps/server/drizzle.config.ts` |
 | [`provision-layer-rules.md`](provision-layer-rules.md) | Creating or changing server providers, web provision adapters, provider contracts, environment access, time access, provider registration, or provider mocks in use-case tests. | `apps/server/src/shared/provision/**`, `apps/web/src/provision/**`, shared provider interfaces in `packages/core`, tests mocking those providers |
+| [`server-app-layer-rules.md`](server-app-layer-rules.md) | Creating or changing feature-owned server provision, messaging, or AI directories, Nest layer modules, feature providers, jobs, or their registration in a feature root module. | `apps/server/src/<module>/provision/**`, `apps/server/src/<module>/messaging/**`, `apps/server/src/<module>/ai/**`, `apps/server/src/<module>/<module>.module.ts` |
+| [`messaging-layer-rules.md`](messaging-layer-rules.md) | Creating or changing domain events, brokers, Inngest jobs, fan-out, event schemas, the shared Inngest endpoint, or job registration. | `packages/core/src/**/domain/events/**`, `packages/core/src/shared/interfaces/broker.ts`, `apps/server/src/shared/messaging/**`, `apps/server/src/**/messaging/**`, `apps/server/src/app.module.ts` |
+| [`ai-layer-rules.md`](ai-layer-rules.md) | Creating or changing AI modules, Mastra agents, tools, schemas, workflows, model selection, prompts, or exported workflow contracts. | `apps/server/src/shared/ai/**`, `apps/server/src/**/ai/**`, workflow interfaces and structures in `packages/core` |
 | [`commit-rules.md`](commit-rules.md) | Writing, validating, or creating a commit; changing commitlint or commit hooks; or preparing a commit message for the user. | `.husky/**`, `commitlint.config.mjs`, commit operations or commit-message requests |
 
 ## Common multi-rule combinations
@@ -65,6 +68,9 @@ actual scope:
 | Add a complete REST operation | Core Package + REST Layer; add Database Layer when persistence changes; add Controller Testing and Use Case Testing for their respective tests |
 | Change a use case only | Core Package + Use Case Testing |
 | Add or change a shared provider | Provision Layer + Core Package; add Use Case Testing when use-case tests consume it |
+| Add a feature provider | Server App Layer; add Provision Layer when the change also affects a shared provider or core provider contract |
+| Add or change an event-driven job | Messaging Layer + Server App Layer; add Core Package when its domain event or interface changes |
+| Add or change an AI workflow | AI Layer + Server App Layer + Core Package; add Provision Layer when model environment resolution changes |
 | Change a database-backed controller test | REST Layer + Controller Testing + Database Layer |
 | Create a commit | Commit Rules, plus the implementation rules already selected for validating the changed scope |
 
