@@ -2,16 +2,18 @@ import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from '@/app.module'
+import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
+import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
+import { RealDocumentsSeeder } from '@/document-engine/database/real-documents-seeder'
+import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
-import { CommunicationSeeder } from '@/communication/database/communication-seeder'
+import { SchedulingSeeder } from '@/scheduling/database/scheduling-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
-import { SchedulingSeeder } from '@/scheduling/database/scheduling-seeder'
 
 const LOGGER = new Logger('DatabaseSeed')
 
@@ -37,8 +39,10 @@ async function bootstrap() {
     await app.get(ConsultationSeeder).clear()
     await app.get(SchedulingSeeder).clear()
     await app.get(IntakeSeeder).clear()
-    const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
+    await app.get(RealDocumentsSeeder).clear()
+    await app.get(DocumentsSeeder).clear()
 
+    const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(LegalCatalogSeeder).clear()
 
@@ -52,14 +56,13 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
-    const identitySeed = await app.get(IdentitySeeder).run(
-      authAdministrationProvider,
-      {
-        legalAreaId: legalArea.id,
-        legalTopicIds: [legalTopic.id],
-      },
-      seedPassword,
-    )
+    const identitySeed = await app
+      .get(IdentitySeeder)
+      .run(
+        authAdministrationProvider,
+        { legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] },
+        seedPassword,
+      )
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
     const attendant = identitySeed.collaborators.find(
@@ -94,6 +97,7 @@ async function bootstrap() {
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
     })
+
     if (!consultationSeed.consultation) {
       throw new AppError('The document-production Consultation could not be seeded')
     }
@@ -104,6 +108,8 @@ async function bootstrap() {
       consultationId: consultationSeed.consultation.id,
     })
     await app.get(CommunicationSeeder).run()
+    await app.get(RealDocumentsSeeder).run()
+    await app.get(DocumentsSeeder).run()
 
     LOGGER.log(
       JSON.stringify({

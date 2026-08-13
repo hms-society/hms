@@ -9,3 +9,5 @@ export * from '@/scheduling/database/drizzle/models'
 export * from '@/shared/database/drizzle/schema/integracao-evento'
 
 export * from '@/shared/database/drizzle/schema/scheduling'
+export * from '@/document-engine/database/drizzle/models/index'
+export * from '@/document-engine/database/drizzle/models/document-status-model'

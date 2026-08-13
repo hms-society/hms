@@ -1,5 +1,5 @@
 {
-  "id": "6b13247b-9b8f-447e-8ace-da5404d505c8",
+  "id": "82aef77a-892f-4f28-a772-b0267aa56f85",
   "prevId": "30b8c5e0-737e-483c-a3ad-a5a55743b2bf",
   "version": "7",
   "dialect": "postgresql",
@@ -1171,7 +1171,7 @@
         },
         "content": {
           "name": "content",
-          "type": "jsonb",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1290,10 +1290,6 @@
         "document_specifications_variables_check": {
           "name": "document_specifications_variables_check",
           "value": "jsonb_typeof(\"document_specifications\".\"variables\") = 'array'"
-        },
-        "document_specifications_content_check": {
-          "name": "document_specifications_content_check",
-          "value": "jsonb_typeof(\"document_specifications\".\"content\") = 'object' AND \"document_specifications\".\"content\"->>'type' = 'doc' AND (\"document_specifications\".\"content\"->'content' IS NULL OR jsonb_typeof(\"document_specifications\".\"content\"->'content') = 'array')"
         }
       },
       "isRLSEnabled": false
@@ -1628,6 +1624,389 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.daily_counters": {
+      "name": "daily_counters",
+      "schema": "",
+      "columns": {
+        "context": {
+          "name": "context",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "daily_counters_context_date_pk": {
+          "name": "daily_counters_context_date_pk",
+          "columns": ["context", "date"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_batches": {
+      "name": "document_batches",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "readable_id": {
+          "name": "readable_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "document_batch_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'received'"
+        },
+        "channel": {
+          "name": "channel",
+          "type": "document_channel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sender": {
+          "name": "sender",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "in_triage_box": {
+          "name": "in_triage_box",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intake_id": {
+          "name": "intake_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "document_batches_readable_id_uidx": {
+          "name": "document_batches_readable_id_uidx",
+          "columns": [
+            {
+              "expression": "readable_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "document_batches_status_idx": {
+          "name": "document_batches_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "document_batches_client_id_idx": {
+          "name": "document_batches_client_id_idx",
+          "columns": [
+            {
+              "expression": "client_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "document_batches_in_triage_box_idx": {
+          "name": "document_batches_in_triage_box_idx",
+          "columns": [
+            {
+              "expression": "in_triage_box",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "document_batches_client_id_clients_id_fk": {
+          "name": "document_batches_client_id_clients_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "document_batches_intake_id_intakes_id_fk": {
+          "name": "document_batches_intake_id_intakes_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "intakes",
+          "columnsFrom": ["intake_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "document_batches_created_by_users_id_fk": {
+          "name": "document_batches_created_by_users_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "document_batches_readable_id_unique": {
+          "name": "document_batches_readable_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["readable_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_batch_files": {
+      "name": "document_batch_files",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storage_path": {
+          "name": "storage_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "original_name": {
+          "name": "original_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "size_bytes": {
+          "name": "size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hash_sha256": {
+          "name": "hash_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "document_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_item_id": {
+          "name": "checklist_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_confidence": {
+          "name": "ai_confidence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extracted_fields": {
+          "name": "extracted_fields",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "missing_fields": {
+          "name": "missing_fields",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_duplicate": {
+          "name": "is_duplicate",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "original_document_id": {
+          "name": "original_document_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_suggestion": {
+          "name": "ai_suggestion",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "human_correction": {
+          "name": "human_correction",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_by": {
+          "name": "reviewed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "document_batch_files_batch_id_document_batches_id_fk": {
+          "name": "document_batch_files_batch_id_document_batches_id_fk",
+          "tableFrom": "document_batch_files",
+          "tableTo": "document_batches",
+          "columnsFrom": ["batch_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "document_batch_files_original_document_id_document_batch_files_id_fk": {
+          "name": "document_batch_files_original_document_id_document_batch_files_id_fk",
+          "tableFrom": "document_batch_files",
+          "tableTo": "document_batch_files",
+          "columnsFrom": ["original_document_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "document_batch_files_reviewed_by_users_id_fk": {
+          "name": "document_batch_files_reviewed_by_users_id_fk",
+          "tableFrom": "document_batch_files",
+          "tableTo": "users",
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -1721,6 +2100,37 @@
       "name": "communication_direction",
       "schema": "public",
       "values": ["inbound", "outbound"]
+    },
+    "public.document_batch_status": {
+      "name": "document_batch_status",
+      "schema": "public",
+      "values": [
+        "received",
+        "pending_identification",
+        "identified",
+        "automatic_triage_in_progress",
+        "triage_completed",
+        "pending_human_review",
+        "processed",
+        "with_error"
+      ]
+    },
+    "public.document_channel": {
+      "name": "document_channel",
+      "schema": "public",
+      "values": ["whatsapp", "client_portal", "third_party_portal", "internal_upload"]
+    },
+    "public.document_status": {
+      "name": "document_status",
+      "schema": "public",
+      "values": [
+        "awaiting_validation",
+        "validated",
+        "illegible",
+        "incomplete",
+        "duplicate",
+        "processing_failure"
+      ]
     }
   },
   "schemas": {},
