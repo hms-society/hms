@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -196,7 +197,7 @@ export const Schedule = () => {
   if (isLoading) {
     return (
       <div className='flex h-64 w-full items-center justify-center'>
-        <Loader2 className='size-6 animate-spin text-primary' />
+        <Icon name='loader-2' className='size-6 animate-spin text-primary' />
       </div>
     )
   }
@@ -214,7 +215,7 @@ export const Schedule = () => {
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
         <div className='flex items-center gap-3'>
-          <Timer className='w-5 h-5 text-primary shrink-0' />
+          <Icon name='timer' className='w-5 h-5 text-primary shrink-0' />
           <div className='flex flex-col'>
             <span className='text-[14px] font-semibold text-foreground'>
               Duração padrão da consulta
@@ -258,7 +259,7 @@ export const Schedule = () => {
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>
-          <CalendarDays className='w-5 h-5 text-primary shrink-0' />
+          <Icon name='calendar-days' className='w-5 h-5 text-primary shrink-0' />
           <span className='text-[15px] font-semibold text-foreground'>
             Disponibilidade semanal
           </span>
@@ -307,7 +308,7 @@ export const Schedule = () => {
                             onClick={() => handleRemoveSlot(day.id, idx)}
                             className='ml-1 text-muted-foreground hover:text-destructive opacity-70 group-hover:opacity-100 transition-opacity'
                           >
-                            <X className='size-3.5' />
+                            <Icon name='x' className='size-3.5' />
                           </button>
                         </div>
                       ))}
@@ -319,7 +320,7 @@ export const Schedule = () => {
                         className='size-7 rounded-lg text-primary shrink-0'
                         onClick={() => handleOpenAddModal(day.id)}
                       >
-                        <Plus className='size-4' />
+                        <Icon name='plus' className='size-4' />
                       </Button>
                     </div>
                   ) : (
@@ -337,7 +338,7 @@ export const Schedule = () => {
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border'>
           <div className='flex items-center gap-2'>
-            <CalendarDays className='w-5 h-5 text-primary shrink-0' />
+            <Icon name='calendar-days' className='w-5 h-5 text-primary shrink-0' />
             <span className='text-[15px] font-semibold text-foreground'>
               Bloqueios de agenda
             </span>
@@ -347,7 +348,7 @@ export const Schedule = () => {
             onClick={handleOpenAddBlockModal}
             className='rounded-full px-4 gap-1.5 w-full sm:w-auto justify-center'
           >
-            <Plus className='size-4' />
+            <Icon name='plus' className='size-4' />
             Adicionar bloqueio
           </Button>
         </div>
@@ -383,7 +384,7 @@ export const Schedule = () => {
                     className='size-8 text-muted-foreground hover:text-destructive shrink-0'
                     onClick={() => handleRemoveBlock(block.id)}
                   >
-                    <Trash2 className='size-4' />
+                    <Icon name='trash-2' className='size-4' />
                   </Button>
                 </div>
               )
@@ -442,7 +443,7 @@ export const Schedule = () => {
             >
               {isUpdatingAvailability ? (
                 <>
-                  <Loader2 className='size-4 animate-spin' />
+                  <Icon name='loader-2' className='size-4 animate-spin' />
                   Salvando...
                 </>
               ) : (
@@ -514,7 +515,7 @@ export const Schedule = () => {
             >
               {isAddingBlock ? (
                 <>
-                  <Loader2 className='size-4 animate-spin' />
+                  <Icon name='loader-2' className='size-4 animate-spin' />
                   Salvando...
                 </>
               ) : (
