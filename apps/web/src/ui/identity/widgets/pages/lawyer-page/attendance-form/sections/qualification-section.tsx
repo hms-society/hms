@@ -175,7 +175,7 @@ export function QualificationSection(props: QualificationSectionProps) {
       </div>
 
       <div className='bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-800 flex items-center gap-2'>
-        <Icon name='alert-circle' className='w-4 h-4 text-emerald-600 shrink-0' />
+        <Icon name='triangle-alert' className='w-4 h-4 text-emerald-600 shrink-0' />
         Dados iniciais pré-preenchidos a partir do Intake. Complemente conforme a demanda.
       </div>
 
@@ -205,7 +205,7 @@ export function QualificationSection(props: QualificationSectionProps) {
                 : 'text-slate-500'
             }`}
           >
-            <Icon name='building-2' className='w-3.5 h-3.5 text-slate-500' />
+            <Icon name='building' className='w-3.5 h-3.5 text-slate-500' />
             Pessoa Jurídica
           </Button>
         </div>

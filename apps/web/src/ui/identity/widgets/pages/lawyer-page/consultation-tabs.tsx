@@ -40,9 +40,9 @@ export function ConsultationTabs({ activeTab, onTabChange }: ConsultationTabsPro
           disabled
           className='flex items-center gap-2 whitespace-nowrap pb-3 text-slate-400 opacity-70 cursor-not-allowed'
         >
-          <Icon name='package' className='h-4 w-4 shrink-0' />
+          <Icon name='briefcase' className='h-4 w-4 shrink-0' />
           <span>Pacote de documentos da consulta</span>
-          <Icon name='lock' className='h-3 w-3 shrink-0' />
+          <Icon name='shield-check' className='h-3 w-3 shrink-0' />
         </button>
       </div>
     </div>

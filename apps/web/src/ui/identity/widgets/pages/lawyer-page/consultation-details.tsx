@@ -242,13 +242,13 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             <div className='flex items-center gap-2'>
               {feedbackBanner.type === 'success' ? (
                 <Icon
-                  name='check-circle-2'
+                  name='check'
                   className='w-4 h-4 text-emerald-600 shrink-0'
                 />
               ) : feedbackBanner.type === 'danger' ? (
-                <Icon name='x-circle' className='w-4 h-4 text-red-600 shrink-0' />
+                <Icon name='x' className='w-4 h-4 text-red-600 shrink-0' />
               ) : (
-                <Icon name='rotate-ccw' className='w-4 h-4 text-teal-600 shrink-0' />
+                <Icon name='refresh-cw' className='w-4 h-4 text-teal-600 shrink-0' />
               )}
               <span className='break-words'>{feedbackBanner.message}</span>
             </div>
@@ -421,7 +421,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 disabled={isCompleted}
                 className='rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800 hover:bg-teal-50 cursor-pointer w-full sm:w-auto justify-center'
               >
-                <Icon name='rotate-ccw' className='w-3.5 h-3.5 shrink-0' /> Remarcar
+                <Icon name='refresh-cw' className='w-3.5 h-3.5 shrink-0' /> Remarcar
               </Button>
 
               <Button
@@ -461,7 +461,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
         <div className='bg-white rounded-2xl border border-teal-600/60 p-4 sm:p-6 lg:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
           <div className='flex items-center gap-3.5'>
             <div className='w-10 h-10 rounded-xl bg-teal-50 text-teal-800 flex items-center justify-center shrink-0 border border-teal-100'>
-              <Icon name='file-edit' className='w-5 h-5' />
+              <Icon name='pencil' className='w-5 h-5' />
             </div>
             <p className='text-xs sm:text-sm font-semibold text-slate-800 font-sans'>
               Continue o preenchimento da ficha
@@ -483,7 +483,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
               <div className='flex items-start sm:items-center justify-between border-b border-slate-100 pb-3.5'>
                 <div className='flex items-center gap-2.5'>
                   <div className='w-8 h-8 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center shrink-0'>
-                    <Icon name='rotate-ccw' className='w-4 h-4' />
+                    <Icon name='refresh-cw' className='w-4 h-4' />
                   </div>
                   <div>
                     <h3 className='text-sm sm:text-base font-bold text-slate-800 font-serif'>

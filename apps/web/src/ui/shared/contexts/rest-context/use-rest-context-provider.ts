@@ -8,6 +8,8 @@ import { CommunicationService } from '@/rest/services/communication-service'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { ConsultationService } from '@/rest/services/consultation-service'
+import { DocumentProductionService } from '@/rest/services/document-production-service'
+import { documentService } from '@/rest/services/DocumentEngineService'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
@@ -40,5 +42,7 @@ export function useRestContextProvider(): RestContextValue {
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
     consultationService: ConsultationService(restClient),
+    documentProductionService: DocumentProductionService(restClient),
+    documentService: documentService(restClient)
   }
 }

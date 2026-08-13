@@ -197,7 +197,7 @@ export const Schedule = () => {
   if (isLoading) {
     return (
       <div className='flex h-64 w-full items-center justify-center'>
-        <Icon name='loader-2' className='size-6 animate-spin text-primary' />
+        <Icon name='refresh-cw' className='size-6 animate-spin text-primary' />
       </div>
     )
   }
@@ -215,7 +215,7 @@ export const Schedule = () => {
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
         <div className='flex items-center gap-3'>
-          <Icon name='timer' className='w-5 h-5 text-primary shrink-0' />
+          <Icon name='clock' className='w-5 h-5 text-primary shrink-0' />
           <div className='flex flex-col'>
             <span className='text-[14px] font-semibold text-foreground'>
               Duração padrão da consulta
@@ -443,7 +443,7 @@ export const Schedule = () => {
             >
               {isUpdatingAvailability ? (
                 <>
-                  <Icon name='loader-2' className='size-4 animate-spin' />
+                  <Icon name='refresh-cw' className='size-4 animate-spin' />
                   Salvando...
                 </>
               ) : (
@@ -515,7 +515,7 @@ export const Schedule = () => {
             >
               {isAddingBlock ? (
                 <>
-                  <Icon name='loader-2' className='size-4 animate-spin' />
+                  <Icon name='refresh-cw' className='size-4 animate-spin' />
                   Salvando...
                 </>
               ) : (

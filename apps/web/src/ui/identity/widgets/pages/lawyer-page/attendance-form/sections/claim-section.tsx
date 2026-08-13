@@ -62,7 +62,7 @@ export function ClaimsSection({ claims, onAddClaim, onRemoveClaim }: ClaimsSecti
                   </span>
                   {claim.isSuggested && (
                     <Badge className='bg-purple-100 text-purple-800 text-[10px] border-none font-medium px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0'>
-                      <Icon name='sparkles' className='w-3 h-3' /> Sugerido
+                      <Icon name='plus' className='w-3 h-3' /> Sugerido
                     </Badge>
                   )}
                 </div>
