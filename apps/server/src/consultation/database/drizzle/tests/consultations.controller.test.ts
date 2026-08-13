@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { NotFoundException } from '@nestjs/common'
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
-import { GetConsultationByIdController, UpdateClientQualificationController } from '../rest/controllers'
+import {
+  GetConsultationByIdController,
+  UpdateClientQualificationController,
+} from '../rest/controllers'
 import { GetConsultationByIdUseCase } from '@hms/core/consultation/use-cases'
 import { DrizzleConsultationsRepository } from '../repository/drizzle-consultations-repository'
 import { AuthGuard } from '@/identity/guards'
@@ -68,7 +71,9 @@ describe('Consultation Controllers', () => {
         mockConsultationDomain as any,
       )
 
-      const result = await getByIdController.handle('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
+      const result = await getByIdController.handle(
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+      )
 
       expect(result).toBeDefined()
     })
@@ -78,7 +83,9 @@ describe('Consultation Controllers', () => {
         new Error('Consulta não encontrada.'),
       )
 
-      await expect(getByIdController.handle('invalid-id')).rejects.toThrow(NotFoundException)
+      await expect(getByIdController.handle('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      )
     })
   })
 
