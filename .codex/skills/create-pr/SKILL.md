@@ -54,7 +54,21 @@ estiver suja. Preserve as alterações do usuário e copie somente arquivos de
 ambiente ignorados e locais; não copie `.env.example` ou qualquer arquivo
 `tracked`. Não use `reset --hard`, `checkout --` ou rebase para apagar trabalho.
 
-## Leitura e preflight
+---
+
+## Execution Guidelines
+
+### 1. Context Analysis
+
+- Review the implemented Spec and the changelog of the changes made.
+- Identify:
+  - Technical impact (which of `web` / `server` / `core` is affected)
+  - Design decisions taken
+  - Risks and side effects
+  - **Exact modified paths:** Retrieve the complete, lowest-level file paths of all files created or altered (using `git status` or `git diff`).
+  - **Dynamic Codeowners:** For any modified files, run a command like `git log -n 1 --pretty=format:"%ae" -- <file>` or check git history to identify the last author/owner of the modified files, so they can be listed under the alignment section.
+
+---
 
 Antes de criar commits ou abrir o PR, leia:
 
@@ -110,6 +124,12 @@ Antes de publicar uma integração que toca o banco:
 Se o teste local exigir Docker/Testcontainers indisponível, registre isso como
 limitação; não transforme uma falha de ambiente em aprovação da implementação.
 
+The PR body must follow the structure defined in `.github/pull_request_template.md`.
+
+**Formatting rules:**
+- Use Markdown
+- List the exact, full paths of the modified files (at the lowest level possible) under the respective module sections.
+- Identify and list the original authors/codeowners of each modified file using `git log` or `git blame` history, under the alignment section.
 ## Título
 
 Use um título curto, em PT-BR, como frase nominal, sem prefixo Conventional
@@ -142,6 +162,45 @@ Use Markdown sem título principal (`#`) e inclua:
 
 Explique o propósito central da alteração.
 
+## 📝 Descrição das Alterações (obrigatório)
+Explique por que este PR foi criado, qual é seu propósito principal e quais problemas ele resolve.
+
+## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
+Enumere os módulos afetados e liste os caminhos de todos os arquivos ou pastas específicas criados/modificados:
+- [ ] `apps/web` (Frontend / Interface)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `apps/server` (Backend / API)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `packages/core` (Regras de Domínio)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+- [ ] `supabase` (Banco de dados / Migrations / Seeders)
+  *Arquivos alterados:* 
+  - (Caminho completo de cada arquivo...)
+
+## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
+Identifique e liste os autores originais de cada arquivo que você alterou (consulte o histórico do Git):
+- [ ] Identifiquei os autores originais dos arquivos alterados:
+  * `caminho/do/arquivo` -> Autor/Codeowner
+- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
+  - *Detalhes do alinhamento:* ...
+
+
+
+---
+
+## Como testar (obrigatório)
+
+Passo a passo claro para o revisor validar as mudanças. Referencie os comandos
+relevantes, ex.:
+
+```
+pnpm install
+pnpm --filter web dev        # frontend em http://localhost:3000
+pnpm --filter server start:dev
+pnpm --filter <pkg> check-types
 ### Tickets Jira relacionados
 
 Liste todas as chaves ou URLs, sem usar palavras-chave de fechamento do GitHub:
@@ -202,45 +261,14 @@ Solicite a revisão automatizada apenas depois de o PR estar publicado:
 gh pr comment <numero-do-pr> --body "@codex review"
 ```
 
-Execute o mesmo comentário depois de cada push que altere o PR, sempre usando o
-número real do PR.
+Após qualquer push que altere o PR, consulte novamente o SHA do `HEAD`, aguarde
+os checks desse SHA e repita o comentário `@codex review`. Checks de um commit
+anterior não validam o estado novo.
 
-## Loop pós-publicação do PR
-
-Depois de solicitar a revisão, aguarde e acompanhe o Quality Gate do `HEAD`
-atual. O ciclo só termina quando todos os checks funcionais obrigatórios
-estiverem verdes, as exceções de política autorizadas estiverem documentadas, o
-PR estiver mergeable e não houver conversa bloqueante pendente.
-
-1. Consulte os checks e o SHA do `HEAD` do PR:
-
-   ```bash
-   gh pr view <numero-do-pr> --json commits,mergeable,statusCheckRollup,reviews,comments
-   ```
-
-   Use the last commit SHA from `.commits[-1].oid` as the `HEAD` being
-   validated.
-
-2. Aguarde os workflows oficiais do commit publicado. Use `gh run watch
-   <run-id> --exit-status` ou equivalente e registre o resultado de cada
-   workflow.
-3. Se um check funcional falhar, leia os logs, corrija somente problemas dentro
-   do escopo, execute os sensores locais aplicáveis, crie um novo commit e faça
-   push. Depois reinicie o loop a partir do novo SHA; checks de um HEAD anterior
-   não validam o commit corrigido.
-4. Se o único check vermelho for `check-size` e a entrega acima de 5.000 linhas
-   tiver sido autorizada, não crie branches artificiais nem faça alterações
-   cosméticas para reduzir a contagem. Registre o valor e a consequência para
-   merge.
-5. Após cada novo push, aguarde novamente Core, Server, Web e quaisquer outros
-   checks obrigatórios antes de concluir.
-6. Confirme que o PR continua mergeable e que reviews/conversas bloqueantes
-   foram resolvidas. Registre checks ignorados ou não aplicáveis como
-   limitações explícitas.
-
-Este prompt publica, valida e acompanha o PR, mas nunca executa merge, fecha o
-PR ou altera a branch de destino automaticamente. A decisão de merge permanece
-com o usuário/revisor autorizado.
+Se o único check vermelho for `check-size` por uma entrega acima de 5.000 linhas
+explicitamente autorizada, registre a exceção e sua consequência para merge.
+Não crie branches artificiais nem altere a contagem apenas para contornar o
+workflow.
 
 Informe título, URL, número, branch, commits, validações, referências Jira e
 Confluence, resultado da revisão e quaisquer pendências preservadas.
