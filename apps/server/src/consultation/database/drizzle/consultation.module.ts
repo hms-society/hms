@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleConsultationsRepository } from './repository/drizzle-consultations-repository'
 import {
@@ -9,13 +8,26 @@ import {
   CompleteConsultationUseCase,
   GetConsultationByIdUseCase,
 } from '@hms/core/consultation/use-cases'
-
-import { ConsultationsController } from './rest/controllers/consultations-controller'
+import {
+  CreateConsultationController,
+  StartConsultationController,
+  CompleteConsultationController,
+  RegisterNoShowController,
+  GetConsultationByIdController,
+  UpdateClientQualificationController,
+} from './rest/controllers'
 
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
-  controllers: [ConsultationsController],
+  controllers: [
+    CreateConsultationController,
+    StartConsultationController,
+    CompleteConsultationController,
+    RegisterNoShowController,
+    GetConsultationByIdController,
+    UpdateClientQualificationController,
+  ],
   providers: [
     DrizzleClient,
     DrizzleConsultationsRepository,
