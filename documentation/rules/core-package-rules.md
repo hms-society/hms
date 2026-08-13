@@ -65,6 +65,20 @@ Use cases may coordinate entities, structures, interfaces, errors, and events wh
 enforcing the rules required by one application action. Keep one exported use case
 class per file and use a verb-led name that describes the action.
 
+## Enum-like domain structures are canonical
+
+When a closed set of domain values is represented by an `as const` structure, that
+structure and its derived type are the canonical definitions for the whole system.
+Consumers must import them from the owning core module instead of repeating string
+literal unions or arrays whenever that import is possible.
+
+This applies to use-case requests, entities, events, validation schemas, jobs, REST
+adapters, UI mappings, and tests. Zod schemas must build enums directly from the
+domain structure, for example `z.enum(ConsultationModality)`, rather than copying its
+values into a new array. Infrastructure declarations that cannot consume runtime
+domain structures, such as literal SQL check constraints, may repeat the persisted
+values but must remain synchronized with the canonical structure.
+
 ## Contracts belong to interfaces directories
 
 Every contract exposed by `packages/core` must live in an `interfaces` directory
