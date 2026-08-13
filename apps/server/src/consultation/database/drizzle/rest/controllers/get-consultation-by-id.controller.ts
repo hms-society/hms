@@ -1,4 +1,13 @@
-import { Controller, Get, HttpStatus, Inject, NotFoundException, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Inject,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { GetConsultationByIdUseCase } from '@hms/core/consultation/use-cases'

@@ -17,14 +17,16 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
 
   private parseNullableDate(dateStr?: string | Date | null): Date | undefined {
     if (!dateStr) return undefined
-    if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? undefined : dateStr
+    if (dateStr instanceof Date) {
+      return Number.isNaN(dateStr.getTime()) ? undefined : dateStr
+    }
     if (typeof dateStr === 'string' && !dateStr.trim()) return undefined
     const parsed = new Date(dateStr)
-    return isNaN(parsed.getTime()) ? undefined : parsed
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed
   }
 
   private parseNullableString(str?: string | null): string | undefined {
-    if (!str || !str.trim()) return undefined
+    if (!str?.trim()) return undefined
     return str.trim()
   }
 
@@ -103,7 +105,7 @@ export class DrizzleConsultationsRepository implements ConsultationsRepository {
         : undefined,
     } as any)
   }
-async updateClientQualification(
+  async updateClientQualification(
     clientId: string,
     dto: UpdateClientQualificationDto,
   ): Promise<void> {
@@ -139,7 +141,9 @@ async updateClientQualification(
         hmsResponsible: this.parseNullableString(dto.hmsResponsible),
         rg: this.parseNullableString(dto.rg),
         birthDate: parsedBirthDate ? (parsedBirthDate.toISOString() as any) : undefined,
-        constitutionDate: parsedConstitutionDate ? (parsedConstitutionDate.toISOString() as any) : undefined,
+        constitutionDate: parsedConstitutionDate
+          ? (parsedConstitutionDate.toISOString() as any)
+          : undefined,
         maritalStatus: this.parseNullableString(dto.maritalStatus),
         nationality: this.parseNullableString(dto.nationality),
         profession: this.parseNullableString(dto.profession),
