@@ -241,10 +241,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           >
             <div className='flex items-center gap-2'>
               {feedbackBanner.type === 'success' ? (
-                <Icon
-                  name='check'
-                  className='w-4 h-4 text-emerald-600 shrink-0'
-                />
+                <Icon name='check' className='w-4 h-4 text-emerald-600 shrink-0' />
               ) : feedbackBanner.type === 'danger' ? (
                 <Icon name='x' className='w-4 h-4 text-red-600 shrink-0' />
               ) : (
@@ -503,40 +500,43 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 </button>
               </div>
 
-              <div className='space-y-4 font-sans'>
-                <div>
-                  <label className='block text-xs font-semibold text-slate-700 mb-1.5'>
-                    Selecione a data
-                  </label>
-                  <input
-                    type='date'
-                    min={todayString}
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className='w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 text-slate-800'
-                  />
-                </div>
+              <div>
+                <label
+                  htmlFor='reschedule-date'
+                  className='block text-xs font-semibold text-slate-700 mb-1.5'
+                >
+                  Selecione a data
+                </label>
+                <input
+                  id='reschedule-date'
+                  type='date'
+                  min={todayString}
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className='w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 text-slate-800'
+                />
+              </div>
 
-                <div>
-                  <label className='block text-xs font-semibold text-slate-700 mb-2'>
-                    Horários disponíveis
-                  </label>
-                  <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
-                    {AVAILABLE_SLOTS.map((slot) => (
-                      <button
-                        key={slot}
-                        type='button'
-                        onClick={() => setSelectedTime(slot)}
-                        className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer ${
-                          selectedTime === slot
-                            ? 'bg-teal-800 text-white border-teal-800 shadow-sm'
-                            : 'border-slate-200 text-slate-700 hover:border-teal-600 hover:bg-teal-50/50'
-                        }`}
-                      >
-                        {slot}
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <p className='block text-xs font-semibold text-slate-700 mb-2'>
+                  Horários disponíveis
+                </p>
+
+                <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
+                  {AVAILABLE_SLOTS.map((slot) => (
+                    <button
+                      key={slot}
+                      type='button'
+                      onClick={() => setSelectedTime(slot)}
+                      className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer ${
+                        selectedTime === slot
+                          ? 'bg-teal-800 text-white border-teal-800 shadow-sm'
+                          : 'border-slate-200 text-slate-700 hover:border-teal-600 hover:bg-teal-50/50'
+                      }`}
+                    >
+                      {slot}
+                    </button>
+                  ))}
                 </div>
               </div>
 

@@ -139,7 +139,19 @@ export function QualificationSection(props: QualificationSectionProps) {
     } catch (e) {
       console.error('Erro ao restaurar campos extras:', e)
     }
-  }, [storageKey])
+  }, [
+    storageKey,
+    setRg,
+    setBirthDate,
+    setMaritalStatus,
+    setNationality,
+    setProfession,
+    setStateRegistration,
+    setConstitutionDate,
+    setLegalNature,
+    setLegalRepresentative,
+    setRepresentativeRole,
+  ])
 
   useEffect(() => {
     const dataToSave = {
