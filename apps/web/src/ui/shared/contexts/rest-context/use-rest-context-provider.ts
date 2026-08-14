@@ -10,6 +10,7 @@ import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
 import { documentService } from '@/rest/services/DocumentEngineService'
+import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
@@ -44,5 +45,6 @@ export function useRestContextProvider(): RestContextValue {
     consultationService: ConsultationService(restClient),
     documentProductionService: DocumentProductionService(restClient),
     documentService: documentService(restClient),
+    aiSuggestionsService: AiSuggestionsService(restClient),
   }
 }

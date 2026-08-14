@@ -74,3 +74,8 @@ export type IconName =
   | 'chevron-down'
   | 'download'
   | 'underline'
+  | 'sparkles'
+  | 'check-circle-2'
+  | 'edit-3'
+  | 'x-circle'
+  | 'shield-alert'

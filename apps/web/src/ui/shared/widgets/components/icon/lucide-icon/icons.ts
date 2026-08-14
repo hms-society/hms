@@ -74,6 +74,11 @@ import {
   ZoomOut,
   Underline,
   Info,
+  Sparkles,
+  CheckCircle2,
+  Edit3,
+  XCircle,
+  ShieldAlert,
 } from 'lucide-react'
 
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
@@ -178,4 +183,9 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
 
   download: Download,
   underline: Underline,
+  sparkles: Sparkles,
+  'check-circle-2': CheckCircle2,
+  'edit-3': Edit3,
+  'x-circle': XCircle,
+  'shield-alert': ShieldAlert,
 }
