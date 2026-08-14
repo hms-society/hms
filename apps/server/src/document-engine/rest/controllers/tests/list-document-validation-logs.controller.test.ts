@@ -3,15 +3,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
-import { RecordDocumentValidationDecisionController } from '@/document-engine/rest/controllers/record-document-validation-decision.controller'
+import { ListDocumentValidationLogsController } from '@/document-engine/rest/controllers/list-document-validation-logs.controller'
 import {
   DocumentBatchChannel,
-  DocumentValidationDecision,
   DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '@hms/core/document-engine/domain/structures'
 
-describe('Record Document Validation Decision Controller [PATCH /document-validation/documents/:documentFileId/decision]', () => {
+describe('List Document Validation Logs Controller [GET /document-validation/documents/:documentFileId/logs]', () => {
   let fixture: DocumentEngineModuleFixture
   let userId: string
   let clientId: string
@@ -19,7 +18,7 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
   beforeAll(async () => {
     userId = randomUUID()
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
-      RecordDocumentValidationDecisionController,
+      ListDocumentValidationLogsController,
       userId,
     )
   })
@@ -34,7 +33,7 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
     await fixture.close()
   })
 
-  it('records a validation decision without writing mock labels into uuid columns', async () => {
+  it('returns the validation history for a document file', async () => {
     const batch = await fixture.documentBatchesRepository.add({
       readableId: `LOTE-${randomUUID()}`,
       channel: DocumentBatchChannel.InternalUpload,
@@ -56,42 +55,27 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
     const file = batch.files?.[0]
     expect(file).toBeDefined()
 
+    await fixture.documentValidationLogsRepository.add({
+      documentFileId: file?.id ?? '',
+      actorId: userId,
+      action: DocumentValidationLogAction.ResendRequested,
+      status: DocumentValidationStatus.ResendRequested,
+      reason: 'Documento incompleto.',
+      message: 'Envie novamente o arquivo completo.',
+    })
+
     const response = await request(fixture.app.getHttpServer())
-      .patch(`/document-validation/documents/${file?.id}/decision`)
-      .send({
-        decision: DocumentValidationDecision.Validate,
-        documentTypeId: 'case-0089',
-        checklistRequirementId: 'residence-proof',
-      })
+      .get(`/document-validation/documents/${file?.id}/logs`)
       .expect(200)
 
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        id: file?.id,
-        status: DocumentValidationStatus.Valid,
-        reviewedBy: userId,
-      }),
-    )
-    expect(response.body.checklistLink.caseId).toBeUndefined()
-    expect(response.body.checklistLink.checklistItemId).toBeUndefined()
-    expect(response.body.humanCorrection).toEqual(
-      expect.objectContaining({
-        decision: DocumentValidationDecision.Validate,
-        documentTypeId: 'case-0089',
-        checklistRequirementId: 'residence-proof',
-      }),
-    )
-
-    const logs =
-      await fixture.documentValidationLogsRepository.listByDocumentFileId(file?.id ?? '')
-
-    expect(logs).toEqual([
+    expect(response.body).toEqual([
       expect.objectContaining({
         documentFileId: file?.id,
         actorId: userId,
-        action: DocumentValidationLogAction.DecisionRecorded,
-        status: DocumentValidationStatus.Valid,
-        decision: DocumentValidationDecision.Validate,
+        action: DocumentValidationLogAction.ResendRequested,
+        status: DocumentValidationStatus.ResendRequested,
+        reason: 'Documento incompleto.',
+        message: 'Envie novamente o arquivo completo.',
       }),
     ])
   })

@@ -4,26 +4,31 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import type { DocumentValidationDocument } from '../../domain/entities'
 import {
   DocumentBatchChannel,
+  DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../../domain/structures'
 import { DocumentFileNotFoundError } from '../../domain/errors'
 import type {
   DocumentValidationAnalyzerProvider,
+  DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '../../interfaces'
 import { AnalyzeDocumentValidationUseCase } from '../analyze-document-validation-use-case'
 
 describe('Analyze Document Validation Use Case', () => {
   let documentValidationsRepository: MockProxy<DocumentValidationsRepository>
+  let documentValidationLogsRepository: MockProxy<DocumentValidationLogsRepository>
   let documentValidationAnalyzerProvider: MockProxy<DocumentValidationAnalyzerProvider>
   let useCase: AnalyzeDocumentValidationUseCase
 
   beforeEach(() => {
     documentValidationsRepository = mock<DocumentValidationsRepository>()
+    documentValidationLogsRepository = mock<DocumentValidationLogsRepository>()
     documentValidationAnalyzerProvider = mock<DocumentValidationAnalyzerProvider>()
     useCase = new AnalyzeDocumentValidationUseCase(
       documentValidationsRepository,
       documentValidationAnalyzerProvider,
+      documentValidationLogsRepository,
     )
   })
 
@@ -44,7 +49,10 @@ describe('Analyze Document Validation Use Case', () => {
     })
     documentValidationsRepository.recordAnalysis.mockResolvedValue(analyzedDocument)
 
-    const result = await useCase.execute({ documentFileId: document.id })
+    const result = await useCase.execute({
+      documentFileId: document.id,
+      requestedBy: 'reviewer-id',
+    })
 
     expect(result).toEqual(analyzedDocument)
     expect(documentValidationAnalyzerProvider.analyze).toHaveBeenCalledWith(document)
@@ -55,6 +63,17 @@ describe('Analyze Document Validation Use Case', () => {
       extractedFields: [{ label: 'Titular', value: 'Mariana Costa Silva' }],
       missingFields: [],
       aiSuggestion: { caseLabel: 'Caso 0089' },
+    })
+    expect(documentValidationLogsRepository.add).toHaveBeenCalledWith({
+      documentFileId: document.id,
+      actorId: 'reviewer-id',
+      action: DocumentValidationLogAction.AnalysisRecorded,
+      status: DocumentValidationStatus.Valid,
+      metadata: {
+        aiConfidence: 96,
+        aiSuggestion: { caseLabel: 'Caso 0089' },
+        missingFields: [],
+      },
     })
   })
 

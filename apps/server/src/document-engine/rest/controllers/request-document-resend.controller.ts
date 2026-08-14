@@ -1,5 +1,8 @@
 import { Body, Inject, Param, Post } from '@nestjs/common'
-import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
+import type {
+  DocumentValidationLogsRepository,
+  DocumentValidationsRepository,
+} from '@hms/core/document-engine/interfaces'
 import { RequestDocumentResendUseCase } from '@hms/core/document-engine/use-cases'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 
@@ -19,8 +22,13 @@ export class RequestDocumentResendController {
   constructor(
     @Inject(DOCUMENT_ENGINE.documentValidations)
     documentValidationsRepository: DocumentValidationsRepository,
+    @Inject(DOCUMENT_ENGINE.documentValidationLogs)
+    documentValidationLogsRepository: DocumentValidationLogsRepository,
   ) {
-    this.useCase = new RequestDocumentResendUseCase(documentValidationsRepository)
+    this.useCase = new RequestDocumentResendUseCase(
+      documentValidationsRepository,
+      documentValidationLogsRepository,
+    )
   }
 
   @Post('documents/:documentFileId/resend-request')

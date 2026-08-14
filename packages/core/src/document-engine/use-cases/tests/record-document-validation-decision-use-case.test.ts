@@ -5,19 +5,26 @@ import type { DocumentValidationDocument } from '../../domain/entities'
 import {
   DocumentBatchChannel,
   DocumentValidationDecision,
+  DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../../domain/structures'
-import type { DocumentValidationsRepository } from '../../interfaces'
+import type {
+  DocumentValidationLogsRepository,
+  DocumentValidationsRepository,
+} from '../../interfaces'
 import { RecordDocumentValidationDecisionUseCase } from '../record-document-validation-decision-use-case'
 
 describe('Record Document Validation Decision Use Case', () => {
   let documentValidationsRepository: MockProxy<DocumentValidationsRepository>
+  let documentValidationLogsRepository: MockProxy<DocumentValidationLogsRepository>
   let useCase: RecordDocumentValidationDecisionUseCase
 
   beforeEach(() => {
     documentValidationsRepository = mock<DocumentValidationsRepository>()
+    documentValidationLogsRepository = mock<DocumentValidationLogsRepository>()
     useCase = new RecordDocumentValidationDecisionUseCase(
       documentValidationsRepository,
+      documentValidationLogsRepository,
     )
   })
 
@@ -44,6 +51,17 @@ describe('Record Document Validation Decision Use Case', () => {
       checklistRequirementId: 'residence-proof',
       status: DocumentValidationStatus.Valid,
     })
+    expect(documentValidationLogsRepository.add).toHaveBeenCalledWith({
+      documentFileId: document.id,
+      actorId: 'reviewer-id',
+      action: DocumentValidationLogAction.DecisionRecorded,
+      status: DocumentValidationStatus.Valid,
+      decision: DocumentValidationDecision.Validate,
+      metadata: {
+        documentTypeId: 'comprovante_residencia',
+        checklistRequirementId: 'residence-proof',
+      },
+    })
   })
 
   it('maps mismatch decision to not corresponding status', async () => {
@@ -65,6 +83,15 @@ describe('Record Document Validation Decision Use Case', () => {
       decision: DocumentValidationDecision.Mismatch,
       reason: 'Documento enviado não corresponde ao checklist.',
       status: DocumentValidationStatus.NotCorresponding,
+    })
+    expect(documentValidationLogsRepository.add).toHaveBeenCalledWith({
+      documentFileId: document.id,
+      actorId: 'reviewer-id',
+      action: DocumentValidationLogAction.DecisionRecorded,
+      status: DocumentValidationStatus.NotCorresponding,
+      decision: DocumentValidationDecision.Mismatch,
+      reason: 'Documento enviado não corresponde ao checklist.',
+      metadata: {},
     })
   })
 })

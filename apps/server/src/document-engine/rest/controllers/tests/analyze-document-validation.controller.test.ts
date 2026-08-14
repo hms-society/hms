@@ -6,6 +6,7 @@ import { AnalyzeDocumentValidationController } from '@/document-engine/rest/cont
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
 import {
   DocumentBatchChannel,
+  DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '@hms/core/document-engine/domain/structures'
 
@@ -81,5 +82,17 @@ describe('Analyze Document Validation Controller [POST /document-validation/docu
         aiConfidence: 96,
       }),
     )
+
+    const logs =
+      await fixture.documentValidationLogsRepository.listByDocumentFileId(file?.id ?? '')
+
+    expect(logs).toEqual([
+      expect.objectContaining({
+        documentFileId: file?.id,
+        actorId: userId,
+        action: DocumentValidationLogAction.AnalysisRecorded,
+        status: DocumentValidationStatus.Valid,
+      }),
+    ])
   })
 })

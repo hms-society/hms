@@ -34,6 +34,8 @@ export const DocumentInboxPage = () => {
     statusFilter,
     setStatusFilter,
     uniqueStatuses,
+    error,
+    isFetching,
     handlePageChange,
     handleAnalyze,
     handleRefresh,
@@ -60,8 +62,9 @@ export const DocumentInboxPage = () => {
             variant='outline'
             className='rounded-pill bg-highlight px-5 font-semibold text-primary shadow-sm hover:bg-highlight-vivid hover:text-white'
             onClick={handleRefresh}
+            disabled={isFetching}
           >
-            Atualizar
+            {isFetching ? 'Atualizando...' : 'Atualizar'}
           </Button>
         </div>
       </header>
@@ -162,6 +165,17 @@ export const DocumentInboxPage = () => {
           <Icon name='inbox' className='size-4 text-brand' />
           Documentos recebidos
         </div>
+
+        {error && (
+          <div
+            className='flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/10 p-4 font-sans text-sm text-destructive'
+            role='alert'
+          >
+            <Icon name='alert-circle' className='mt-0.5 size-4' />
+            Não foi possível carregar os documentos. Confira o backend e tente
+            atualizar novamente.
+          </div>
+        )}
 
         <TableSurface className='shadow-card'>
           <Table>

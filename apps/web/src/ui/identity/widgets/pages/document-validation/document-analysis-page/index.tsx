@@ -30,7 +30,15 @@ const getStatusStyles = (status: string) => {
   }
 }
 
-const ProcessingFailurePanel = ({ onRequestResend }: { onRequestResend: () => void }) => (
+const ProcessingFailurePanel = ({
+  failureInstruction,
+  failureReason,
+  onRequestResend,
+}: {
+  failureInstruction?: string
+  failureReason?: string
+  onRequestResend: () => void
+}) => (
   <aside className='flex flex-col bg-card'>
     <div className='flex flex-1 flex-col gap-6 p-6'>
       <div className='flex flex-col gap-3'>
@@ -43,7 +51,7 @@ const ProcessingFailurePanel = ({ onRequestResend }: { onRequestResend: () => vo
           </div>
           <div className='flex flex-col'>
             <span className='font-sans text-sm font-semibold text-foreground'>
-              Arquivo protegido por senha
+              {failureReason ?? 'Arquivo protegido por senha'}
             </span>
             <span className='mt-0.5 font-sans text-xs text-muted-foreground'>
               Não foi possível analisar o documento porque ele exige uma senha para
@@ -59,7 +67,8 @@ const ProcessingFailurePanel = ({ onRequestResend }: { onRequestResend: () => vo
           <div className='flex items-center gap-3 rounded-lg border border-border/50 bg-muted/40 p-4'>
             <Icon name='send' className='size-4 text-muted-foreground' />
             <span className='font-sans text-sm text-foreground'>
-              Solicite ao remetente uma nova cópia do arquivo sem proteção por senha.
+              {failureInstruction ??
+                'Solicite ao remetente uma nova cópia do arquivo sem proteção por senha.'}
             </span>
           </div>
           <div className='flex items-center gap-2 px-1'>
@@ -209,6 +218,8 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
     form,
     currentDecision,
     isSubmitting,
+    isLoading,
+    error,
     isResendModalOpen,
     onSubmit,
     handleRequestResend,
@@ -220,6 +231,40 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
   const documentStatus = mockDocument.status
   const isProcessingFailure = documentStatus === 'Falha no processamento'
   const isResendRequested = documentStatus === 'Reenvio solicitado'
+
+  if (isLoading) {
+    return (
+      <div className='flex min-h-[480px] w-full items-center justify-center rounded-xl border border-border bg-card shadow-card'>
+        <div className='flex items-center gap-3 font-sans text-sm text-muted-foreground'>
+          <Icon name='refresh-cw' className='size-4 animate-spin' />
+          Carregando documento para validação...
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex min-h-[480px] w-full flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card p-8 text-center shadow-card'>
+        <Icon name='alert-circle' className='size-8 text-destructive' />
+        <div className='flex flex-col gap-1'>
+          <h1 className='font-serif text-2xl font-semibold text-brand'>
+            Não foi possível carregar o documento
+          </h1>
+          <p className='font-sans text-sm text-muted-foreground'>
+            Verifique se o documento ainda existe e tente voltar para a caixa.
+          </p>
+        </div>
+        <Anchor
+          route='documentInbox'
+          className='inline-flex h-10 items-center gap-2 rounded-pill border border-border bg-transparent px-4 font-sans text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted'
+        >
+          <Icon name='arrow-left' className='size-4' />
+          Voltar aos documentos
+        </Anchor>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -289,7 +334,11 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
             />
 
             {isProcessingFailure ? (
-              <ProcessingFailurePanel onRequestResend={handleRequestResend} />
+              <ProcessingFailurePanel
+                failureInstruction={mockDocument.failureInstruction}
+                failureReason={mockDocument.failureReason}
+                onRequestResend={handleRequestResend}
+              />
             ) : isResendRequested ? (
               <ReadOnlyIncompletePanel />
             ) : (

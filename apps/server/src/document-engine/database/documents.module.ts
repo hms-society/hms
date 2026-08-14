@@ -13,6 +13,7 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
 import { AnalyzeDocumentValidationController } from '../rest/controllers/analyze-document-validation.controller'
 import { GetDocumentValidationController } from '../rest/controllers/get-document-validation.controller'
 import { ListDocumentValidationsController } from '../rest/controllers/list-document-validations.controller'
+import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
 import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
@@ -32,6 +33,7 @@ import { DocumentEngineProvisionModule } from '../provision/document-engine-prov
     AnalyzeDocumentValidationController,
     GetDocumentValidationController,
     ListDocumentValidationsController,
+    ListDocumentValidationLogsController,
     RecordDocumentValidationDecisionController,
     RequestDocumentResendController,
   ],

@@ -2,6 +2,7 @@ import type { INestApplication, Type } from '@nestjs/common'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleDocumentBatchesRepository } from '@/document-engine/database/drizzle/repositories/document-batches-repository'
+import { DrizzleDocumentValidationLogsRepository } from '@/document-engine/database/drizzle/repositories/drizzle-document-validation-logs-repository'
 import { DrizzleDocumentValidationsRepository } from '@/document-engine/database/drizzle/repositories/drizzle-document-validations-repository'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
@@ -16,6 +17,7 @@ export class DocumentEngineModuleFixture {
     private readonly drizzleClient: DrizzleClient,
     readonly documentBatchesRepository: DrizzleDocumentBatchesRepository,
     readonly documentValidationsRepository: DrizzleDocumentValidationsRepository,
+    readonly documentValidationLogsRepository: DrizzleDocumentValidationLogsRepository,
   ) {}
 
   get app(): INestApplication {
@@ -33,6 +35,7 @@ export class DocumentEngineModuleFixture {
       restFixture.get(DrizzleClient),
       restFixture.get(DrizzleDocumentBatchesRepository),
       restFixture.get(DrizzleDocumentValidationsRepository),
+      restFixture.get(DrizzleDocumentValidationLogsRepository),
     )
   }
 
@@ -68,6 +71,7 @@ export class DocumentEngineModuleFixture {
       restFixture.get(DrizzleClient),
       restFixture.get(DrizzleDocumentBatchesRepository),
       restFixture.get(DrizzleDocumentValidationsRepository),
+      restFixture.get(DrizzleDocumentValidationLogsRepository),
     )
   }
 

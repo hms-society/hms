@@ -1,6 +1,9 @@
 import { Body, Inject, Param, Patch } from '@nestjs/common'
 import type { DocumentValidationDecision } from '@hms/core/document-engine/domain/structures'
-import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
+import type {
+  DocumentValidationLogsRepository,
+  DocumentValidationsRepository,
+} from '@hms/core/document-engine/interfaces'
 import { RecordDocumentValidationDecisionUseCase } from '@hms/core/document-engine/use-cases'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 
@@ -23,9 +26,12 @@ export class RecordDocumentValidationDecisionController {
   constructor(
     @Inject(DOCUMENT_ENGINE.documentValidations)
     documentValidationsRepository: DocumentValidationsRepository,
+    @Inject(DOCUMENT_ENGINE.documentValidationLogs)
+    documentValidationLogsRepository: DocumentValidationLogsRepository,
   ) {
     this.useCase = new RecordDocumentValidationDecisionUseCase(
       documentValidationsRepository,
+      documentValidationLogsRepository,
     )
   }
 

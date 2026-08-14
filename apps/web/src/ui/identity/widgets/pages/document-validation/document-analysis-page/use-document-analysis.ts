@@ -1,158 +1,89 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { toast } from 'sonner'
+import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
+
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { documentReview, type DocumentReviewFormData } from '../schemas/schema'
 
-const MOCK_DOCUMENTS = [
-  {
-    id: '1',
-    fileName: 'comprovante-residencia.pdf',
-    confidence: 'Sugerido pela IA',
-    type: 'comprovante_residencia',
-    fileSize: '2.4 MB',
-    receivedFrom: 'Mariana Costa Silva',
-    contactInfo: 'E-mail - mariana.silva@email.com',
-    receivedDate: 'Hoje',
-    receivedTime: '14:32',
-    integrity: 'Confirmada',
-    duplicity: 'Nenhuma correspondência',
-    status: 'Não vinculado',
-  },
-  {
-    id: '2',
-    fileName: 'extrato-bancario.pdf',
-    confidence: 'Sugerido pela IA - Confiança alta',
-    type: 'extrato_bancario',
-    fileSize: '1.1 MB',
-    receivedFrom: 'João Paulo Mendes',
-    contactInfo: 'WhatsApp - +55 21 99876-5432',
-    receivedDate: 'Hoje',
-    receivedTime: '13:08',
-    integrity: 'Confirmada',
-    duplicity: 'Nenhuma correspondência',
-    status: 'Válido',
-  },
-  {
-    id: '3',
-    fileName: 'rg-frente-verso.jpg',
-    confidence: 'Baixa confiança',
-    type: 'rg',
-    fileSize: '3.8 MB',
-    receivedFrom: 'Ana Beatriz Lima',
-    contactInfo: 'E-mail - ana.lima@email.com',
-    receivedDate: 'Ontem',
-    receivedTime: '17:45',
-    integrity: 'Falha',
-    duplicity: 'Possível duplicidade',
-    status: 'Ilegível',
-  },
-  {
-    id: '4',
-    fileName: 'contrato-social.pdf',
-    confidence: 'Média confiança',
-    type: 'contrato_social',
-    fileSize: '890 KB',
-    receivedFrom: 'Alvorada Serviços Ltda.',
-    contactInfo: 'Portal do cliente - documentos@alvorada.com.br',
-    receivedDate: 'Ontem',
-    receivedTime: '16:20',
-    integrity: 'Confirmada',
-    duplicity: 'Nenhuma correspondência',
-    status: 'Incompleto',
-  },
-  {
-    id: '5',
-    fileName: 'declaracao-hipossuficiencia.pdf',
-    confidence: 'Alta confiança',
-    type: 'declaracao_hipossuficiencia',
-    fileSize: '620 KB',
-    receivedFrom: 'Rafael Nunes',
-    contactInfo: 'Portal do cliente - rafael.nunes@email.com',
-    receivedDate: 'Ontem',
-    receivedTime: '15:02',
-    integrity: 'Confirmada',
-    duplicity: 'Duplicado',
-    status: 'Duplicado',
-  },
-  {
-    id: '6',
-    fileName: 'procuracao-assinada.pdf',
-    confidence: 'Média confiança',
-    type: 'procuracao',
-    fileSize: '740 KB',
-    receivedFrom: 'Cláudia Ferreira',
-    contactInfo: 'WhatsApp - +55 11 98765-1098',
-    receivedDate: '05/08/2026',
-    receivedTime: '11:26',
-    integrity: 'Confirmada',
-    duplicity: 'Nenhuma correspondência',
-    status: 'Falha no processamento',
-  },
-  {
-    id: '7',
-    fileName: 'comprovante-residencia.pdf',
-    confidence: 'Decisão registrada',
-    type: 'comprovante_residencia',
-    fileSize: '2.4 MB',
-    receivedFrom: 'Mariana Costa Silva',
-    contactInfo: 'E-mail - mariana.silva@email.com',
-    receivedDate: 'Hoje',
-    receivedTime: '14:32',
-    integrity: 'Confirmada',
-    duplicity: 'Nenhuma correspondência',
-    status: 'Reenvio solicitado',
-  },
-]
+type AnalysisDocumentView = {
+  id: string
+  fileName: string
+  confidence: string
+  type: string
+  fileSize: string
+  receivedFrom: string
+  contactInfo: string
+  receivedDate: string
+  receivedTime: string
+  integrity: string
+  duplicity: string
+  status: string
+  failureReason?: string
+  failureInstruction?: string
+}
 
-const mapStatusToDecision = (status: string): DocumentReviewFormData['decision'] => {
-  switch (status) {
-    case 'Não vinculado':
-      return 'not_linked'
-    case 'Ilegível':
-      return 'illegible'
-    case 'Incompleto':
-      return 'incomplete'
-    case 'Duplicado':
-      return 'duplicate'
-    default:
-      return 'validate'
-  }
+const FALLBACK_DOCUMENT: AnalysisDocumentView = {
+  id: '',
+  fileName: 'Carregando documento...',
+  confidence: 'Aguardando IA',
+  type: '',
+  fileSize: '0 KB',
+  receivedFrom: 'Carregando',
+  contactInfo: 'Carregando',
+  receivedDate: 'Hoje',
+  receivedTime: '--:--',
+  integrity: 'Pendente',
+  duplicity: 'Pendente',
+  status: 'Aguardando validação',
 }
 
 export const useDocumentAnalysis = ({ fileId }: { fileId: string }) => {
+  const { documentValidationService } = useRestContext()
+  const queryClient = useQueryClient()
   const { navigateTo } = useNavigation()
   const [isResendModalOpen, setIsResendModalOpen] = useState(false)
 
-  const mockDocument = MOCK_DOCUMENTS.find((doc) => doc.id === fileId) || {
-    id: fileId,
-    fileName: 'documento-desconhecido.pdf',
-    confidence: 'Sugerido pela IA',
-    type: '',
-    fileSize: '0 KB',
-    receivedFrom: 'Desconhecido',
-    contactInfo: 'N/A',
-    receivedDate: 'N/A',
-    receivedTime: 'N/A',
-    integrity: 'Pendente',
-    duplicity: 'Pendente',
-    status: 'Aguardando validação',
-  }
+  const {
+    data: document,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['document-validation', 'documents', fileId],
+    queryFn: async () => {
+      const response = await documentValidationService.getDocument(fileId)
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+  })
+
+  const viewDocument = useMemo(
+    () => (document ? toAnalysisDocumentView(document) : FALLBACK_DOCUMENT),
+    [document],
+  )
 
   const form = useForm<DocumentReviewFormData>({
     resolver: zodResolver(documentReview),
     mode: 'onTouched',
-    defaultValues: {
-      decision: mapStatusToDecision(mockDocument.status),
-      documentTypeId: mockDocument.type,
-      checklistRequirementId: '',
-      reason: '',
+    values: {
+      decision: mapStatusToDecision(viewDocument.status),
+      documentTypeId:
+        getStringSuggestion(document, 'documentTypeId') || viewDocument.type || '',
+      checklistRequirementId:
+        document?.checklistLink?.checklistItemId ??
+        getStringSuggestion(document, 'checklistItemId') ??
+        '',
+      reason: document?.humanCorrection?.reason ?? '',
       originalDocumentId:
-        mapStatusToDecision(mockDocument.status) === 'duplicate'
-          ? 'doc-0089-residencia'
-          : '',
+        document?.duplicateMatch?.documentFileId ??
+        document?.humanCorrection?.originalDocumentId ??
+        '',
     },
   })
 
@@ -160,15 +91,44 @@ export const useDocumentAnalysis = ({ fileId }: { fileId: string }) => {
 
   const { mutateAsync: submitReview, isPending: isSubmitting } = useMutation({
     mutationFn: async (data: DocumentReviewFormData) => {
-      await new Promise((resolve) => setTimeout(resolve, 600))
-      return { fileId, ...data }
+      const response = await documentValidationService.recordDecision(fileId, data)
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['document-validation', 'documents'],
+      })
       toast.success('Documento revisado com sucesso.')
-      navigateTo('documentInbox')
+      await navigateTo('documentInbox')
     },
     onError: () => {
       toast.error('Ocorreu um erro ao processar a validação do documento.')
+    },
+  })
+
+  const { mutateAsync: requestResend, isPending: isRequestingResend } = useMutation({
+    mutationFn: async (message: string) => {
+      const response = await documentValidationService.requestResend(fileId, {
+        reason: form.getValues('reason') || 'Documento incompleto',
+        message,
+      })
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['document-validation', 'documents'],
+      })
+      setIsResendModalOpen(false)
+      toast.success('Solicitação de reenvio encaminhada com sucesso.')
+    },
+    onError: () => {
+      toast.error('Ocorreu um erro ao solicitar o reenvio do documento.')
     },
   })
 
@@ -176,23 +136,139 @@ export const useDocumentAnalysis = ({ fileId }: { fileId: string }) => {
     await submitReview(data)
   })
 
-  const handleRequestResend = () => setIsResendModalOpen(true)
-  const handleCloseResendModal = () => setIsResendModalOpen(false)
+  function handleRequestResend() {
+    setIsResendModalOpen(true)
+  }
 
-  const handleConfirmResend = (_message: string) => {
+  function handleCloseResendModal() {
     setIsResendModalOpen(false)
-    toast.success('Solicitação de reenvio encaminhada com sucesso.')
+  }
+
+  async function handleConfirmResend(message: string) {
+    await requestResend(message)
   }
 
   return {
     form,
     currentDecision,
-    isSubmitting,
+    isLoading,
+    error,
+    isSubmitting: isSubmitting || isRequestingResend,
     isResendModalOpen,
     onSubmit,
     handleRequestResend,
     handleCloseResendModal,
     handleConfirmResend,
-    mockDocument,
+    mockDocument: viewDocument,
   }
+}
+
+function toAnalysisDocumentView(
+  document: DocumentValidationDocument,
+): AnalysisDocumentView {
+  const receivedAt = new Date(document.receivedAt)
+
+  return {
+    id: document.id,
+    fileName: document.fileName,
+    confidence: getConfidenceLabel(document),
+    type: getStringSuggestion(document, 'documentTypeId') ?? '',
+    fileSize: formatFileSize(document.sizeBytes),
+    receivedFrom: getSenderName(document),
+    contactInfo: `${document.channel} - ${document.sender}`,
+    receivedDate: formatReceivedDate(receivedAt),
+    receivedTime: format(receivedAt, 'HH:mm'),
+    integrity: 'Confirmada',
+    duplicity: document.duplicateMatch ? 'Duplicado' : 'Nenhuma correspondência',
+    status: getStatusLabel(document.status),
+    failureReason: document.failure?.reason,
+    failureInstruction: document.failure?.instruction,
+  }
+}
+
+function mapStatusToDecision(status: string): DocumentReviewFormData['decision'] {
+  switch (status) {
+    case 'Não vinculado':
+      return 'not_linked'
+    case 'Ilegível':
+      return 'illegible'
+    case 'Incompleto':
+    case 'Reenvio solicitado':
+      return 'incomplete'
+    case 'Duplicado':
+      return 'duplicate'
+    case 'Não correspondente':
+      return 'mismatch'
+    default:
+      return 'validate'
+  }
+}
+
+function getStatusLabel(status: DocumentValidationDocument['status']) {
+  const labels: Record<DocumentValidationDocument['status'], string> = {
+    awaiting_validation: 'Aguardando validação',
+    validated: 'Válido',
+    not_linked: 'Não vinculado',
+    illegible: 'Ilegível',
+    incomplete: 'Incompleto',
+    duplicate: 'Duplicado',
+    not_corresponding: 'Não correspondente',
+    processing_failure: 'Falha no processamento',
+    resend_requested: 'Reenvio solicitado',
+  }
+
+  return labels[status]
+}
+
+function getConfidenceLabel(document: DocumentValidationDocument) {
+  const label = getStringSuggestion(document, 'confidenceLabel')
+
+  if (label) return label
+
+  if (document.aiConfidence === undefined) return 'Aguardando IA'
+  if (document.aiConfidence >= 90) return 'Sugerido pela IA - Confiança alta'
+  if (document.aiConfidence >= 60) return 'Sugerido pela IA'
+
+  return 'Baixa confiança'
+}
+
+function getStringSuggestion(
+  document: DocumentValidationDocument | undefined,
+  key: string,
+) {
+  const value = document?.aiSuggestion?.[key]
+
+  return typeof value === 'string' ? value : undefined
+}
+
+function getSenderName(document: DocumentValidationDocument) {
+  const titular = document.extractedFields.find((field) => field.label === 'Titular')
+
+  return titular?.value ?? document.sender
+}
+
+function formatReceivedDate(date: Date) {
+  const today = new Date()
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+
+  if (isSameDay(date, today)) return 'Hoje'
+  if (isSameDay(date, yesterday)) return 'Ontem'
+
+  return format(date, 'dd/MM/yyyy')
+}
+
+function isSameDay(left: Date, right: Date) {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  )
+}
+
+function formatFileSize(sizeBytes: number) {
+  if (sizeBytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(sizeBytes / 1024))} KB`
+  }
+
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
 }
