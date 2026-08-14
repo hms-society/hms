@@ -1,4 +1,5 @@
 @url = {{BASE_URL}}/health
 
-GET {{url}}
-Content-Type: application/json
+### Check server health
+GET {{BASE_URL}}/health
+Accept: application/json
