@@ -20,9 +20,9 @@ export const useClientCommunicationsQuery = (clientId: string) => {
         response.throwError()
       }
 
-      // Filter out whatsapp communication channel
-      return communications.filter((item: any) => item.channel !== 'whatsapp')
+      return communications
     },
     enabled: !!clientId,
+    refetchInterval: 3000,
   })
 }

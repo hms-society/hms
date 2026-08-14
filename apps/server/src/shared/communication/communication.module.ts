@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { ProvisionModule } from '../provision/provision.module'
 import { WhatsappProvider } from './whatsapp.provider'

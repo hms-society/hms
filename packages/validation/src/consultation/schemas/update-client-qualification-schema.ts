@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const updateClientQualificationSchema = z.object({
- name: z.string().optional(),
+  name: z.string().optional(),
   legalName: z.string().optional(),
   tradeName: z.string().optional(),
   taxIdValue: z.string().optional(),
@@ -29,4 +29,6 @@ export const updateClientQualificationSchema = z.object({
   state: z.string().optional(),
 })
 
-export type UpdateClientQualificationInput = z.infer<typeof updateClientQualificationSchema>
+export type UpdateClientQualificationInput = z.infer<
+  typeof updateClientQualificationSchema
+>

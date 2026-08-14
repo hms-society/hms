@@ -81,4 +81,58 @@ describe('WhatsappProvider', () => {
       }),
     ).rejects.toThrow('Failed to send WhatsApp message: 400 - Bad Request')
   })
+
+  describe('sendTextMessage', () => {
+    it('should successfully send a WhatsApp free-form text message', async () => {
+      const mockResponse = {
+        messages: [{ id: 'wamid.freeform123' }],
+      }
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(mockResponse),
+      })
+
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await provider.sendTextMessage('5519971659516', 'Olá, tudo bem?')
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://graph.facebook.com/v25.0/fake-phone-id/messages',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer fake-token',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: '5519971659516',
+            type: 'text',
+            text: {
+              body: 'Olá, tudo bem?',
+            },
+          }),
+        }),
+      )
+
+      expect(result).toEqual({ externalMessageId: 'wamid.freeform123' })
+    })
+
+    it('should throw an error when fetch fails for text message', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: vi.fn().mockResolvedValue('Internal Server Error'),
+      })
+
+      vi.stubGlobal('fetch', fetchMock)
+
+      await expect(
+        provider.sendTextMessage('5519971659516', 'Olá, tudo bem?'),
+      ).rejects.toThrow(
+        'Failed to send WhatsApp text message: 500 - Internal Server Error',
+      )
+    })
+  })
 })
