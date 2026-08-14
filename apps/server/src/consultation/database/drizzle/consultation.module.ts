@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common'
+
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { IdentityModule } from '@/identity/identity.module'
 import { DrizzleConsultationsRepository } from './repository/drizzle-consultations-repository'
+
 import {
   CreateConsultationUseCase,
   RegisterNoShowUseCase,
@@ -8,25 +11,25 @@ import {
   CompleteConsultationUseCase,
   GetConsultationByIdUseCase,
 } from '@hms/core/consultation/use-cases'
-import {
-  CreateConsultationController,
-  StartConsultationController,
-  CompleteConsultationController,
-  RegisterNoShowController,
-  GetConsultationByIdController,
-  UpdateClientQualificationController,
-} from './rest/controllers'
+
+import { CreateConsultationController } from './rest/controllers/create-consultation.controller'
+import { StartConsultationController } from './rest/controllers/start-consultation.controller'
+import { CompleteConsultationController } from './rest/controllers/complete-consultation.controller'
+import { RegisterNoShowController } from './rest/controllers/register-no-show.controller'
+import { GetConsultationByIdController } from './rest/controllers/get-consultation-by-id.controller'
 
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
+  imports: [
+    IdentityModule,
+  ],
   controllers: [
     CreateConsultationController,
     StartConsultationController,
     CompleteConsultationController,
     RegisterNoShowController,
     GetConsultationByIdController,
-    UpdateClientQualificationController,
   ],
   providers: [
     DrizzleClient,
@@ -67,6 +70,7 @@ export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
     },
   ],
   exports: [
+    CONSULTATIONS_REPOSITORY,
     CreateConsultationUseCase,
     RegisterNoShowUseCase,
     StartConsultationUseCase,

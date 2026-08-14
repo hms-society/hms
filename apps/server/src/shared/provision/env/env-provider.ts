@@ -7,8 +7,6 @@ export const envSchema = z.object({
   HMS_SERVER_APP_PORT: z.coerce.number().default(3333),
   HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'stg']),
   HMS_WEB_APP_URL: z.string(),
-  OLLAMA_AI_MODEL: z.string().min(1).default('qwen3.5:2b'),
-  OPENROUTER_API_KEY: z.string().min(1).optional(),
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   HMS_USER_SEED_PASSWORD: z.string().min(6).optional(),

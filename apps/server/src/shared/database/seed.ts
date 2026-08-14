@@ -11,6 +11,7 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
 import { RealDocumentsSeeder } from '@/document-engine/database/real-documents-seeder'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
+import { DrizzleConsultationsRepository } from '@/consultation/database/drizzle/repository/drizzle-consultations-repository'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule)

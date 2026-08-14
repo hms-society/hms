@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpStatus,
-  Inject,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, HttpStatus, Inject, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { CompleteConsultationUseCase } from '@hms/core/consultation/use-cases'
