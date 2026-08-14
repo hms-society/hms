@@ -12,7 +12,9 @@ export type RegisterAiFeedbackRequest = {
   collaboratorId: string
 }
 
-export class RegisterAiFeedbackUseCase implements UseCase<RegisterAiFeedbackRequest, AiSuggestion> {
+export class RegisterAiFeedbackUseCase
+  implements UseCase<RegisterAiFeedbackRequest, AiSuggestion>
+{
   constructor(
     private readonly aiSuggestionsRepository: AiSuggestionsRepository,
     private readonly datetimeProvider: DatetimeProvider,

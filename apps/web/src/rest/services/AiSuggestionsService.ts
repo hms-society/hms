@@ -13,7 +13,10 @@ export const AiSuggestionsService = (client: RestClient) => {
       return client.get<AiSuggestion[]>(`/ai-suggestions?entityId=${entityId}`)
     },
     sendFeedback: async (suggestionId: string, payload: RegisterFeedbackPayload) => {
-      return client.post<AiSuggestion>(`/ai-suggestions/${suggestionId}/feedback`, payload)
+      return client.post<AiSuggestion>(
+        `/ai-suggestions/${suggestionId}/feedback`,
+        payload,
+      )
     },
   }
 }

@@ -17,10 +17,6 @@ export class DrizzleAiSuggestionsRepository
   extends DrizzleRepository
   implements AiSuggestionsRepository
 {
-  constructor(drizzle: DrizzleClient) {
-    super(drizzle)
-  }
-
   async findByEntityId(entityId: string): Promise<AiSuggestion[]> {
     const rows = await this.database
       .select()

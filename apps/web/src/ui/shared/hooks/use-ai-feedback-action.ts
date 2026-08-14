@@ -20,7 +20,9 @@ export const useAiFeedbackAction = () => {
     },
     onSuccess: (_, variables) => {
       if (variables.entityId) {
-        queryClient.invalidateQueries({ queryKey: ['ai-suggestions', variables.entityId] })
+        queryClient.invalidateQueries({
+          queryKey: ['ai-suggestions', variables.entityId],
+        })
       } else {
         queryClient.invalidateQueries({ queryKey: ['ai-suggestions'] })
       }

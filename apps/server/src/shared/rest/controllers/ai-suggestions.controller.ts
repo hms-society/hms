@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Query, Param, Body, Inject, HttpStatus } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  Param,
+  Body,
+  Inject,
+  HttpStatus,
+} from '@nestjs/common'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
   GetAiSuggestionsUseCase,
@@ -51,10 +60,7 @@ export class AiSuggestionsController {
     status: HttpStatus.OK,
     description: 'Feedback registrado com sucesso.',
   })
-  async registerFeedback(
-    @Param('id') id: string,
-    @Body() dto: RegisterAiFeedbackDto,
-  ) {
+  async registerFeedback(@Param('id') id: string, @Body() dto: RegisterAiFeedbackDto) {
     return this.feedbackUseCase.execute({
       suggestionId: id,
       action: dto.action,

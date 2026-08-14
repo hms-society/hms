@@ -6,7 +6,9 @@ type GetAiSuggestionsRequest = {
   entityId: string
 }
 
-export class GetAiSuggestionsUseCase implements UseCase<GetAiSuggestionsRequest, AiSuggestion[]> {
+export class GetAiSuggestionsUseCase
+  implements UseCase<GetAiSuggestionsRequest, AiSuggestion[]>
+{
   constructor(private readonly aiSuggestionsRepository: AiSuggestionsRepository) {}
 
   async execute({ entityId }: GetAiSuggestionsRequest): Promise<AiSuggestion[]> {

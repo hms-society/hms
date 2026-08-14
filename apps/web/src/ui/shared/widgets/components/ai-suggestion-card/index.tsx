@@ -4,10 +4,7 @@ import { Card, CardContent } from '@/ui/shadcn/card'
 import { Input } from '@/ui/shadcn/input'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import {
-  useAiSuggestionCard,
-  type AiSuggestionCardProps,
-} from './use-ai-suggestion-card'
+import { useAiSuggestionCard, type AiSuggestionCardProps } from './use-ai-suggestion-card'
 
 export type { AiSuggestionCardProps }
 
