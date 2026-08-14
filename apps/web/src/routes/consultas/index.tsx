@@ -5,4 +5,3 @@ import { Consultation } from '@/ui/identity/widgets/pages/lawyer-page/consultati
 export const Route = createFileRoute('/consultas/')({
   component: Consultation,
 })
-
