@@ -1,5 +1,7 @@
 export const IntakeStatus = {
   Registered: 'registered',
+  ConsultationScheduling: 'consultation_scheduling',
+  ConsultationSchedulingFailed: 'consultation_scheduling_failed',
   ConsultationScheduled: 'consultation_scheduled',
   ConsultationCompleted: 'consultation_completed',
   ViabilityRegistered: 'viability_registered',

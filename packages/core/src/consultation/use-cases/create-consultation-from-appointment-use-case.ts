@@ -1,53 +1,74 @@
-import { ConsultationStatus, ConsultationModality } from '../domain/structures'
-import type { Consultation } from '../domain/entities'
-import type { ConsultationsRepository } from '../interfaces/consultations-repository'
+import type { DatetimeProvider, IdProvider, UseCase } from '#shared/interfaces'
 
-export class CreateConsultationDto {
-  id!: string
-  appointmentId!: string
-  clientId!: string
-  assignedLawyerId!: string
-  legalAreaId!: string
-  legalTopicId!: string
-  modality!: ConsultationModality
-  channel?: string
+import type { Consultation } from '../domain/entities'
+import { ConsultationModality, type ConsultationChannel } from '../domain/structures'
+import type { ConsultationsRepository } from '../interfaces'
+
+type BaseRequest = {
+  intakeId: string
+  appointmentId: string
+  clientId: string
+  assignedLawyerId: string
+  legalAreaId: string
+  legalTopicId: string
+  demandNotes?: string
 }
 
-export class CreateConsultationUseCase {
-  constructor(private readonly consultationsRepository: ConsultationsRepository) {}
+type Request =
+  | (BaseRequest & {
+      modality: typeof ConsultationModality.InPerson
+      channel?: never
+    })
+  | (BaseRequest & {
+      modality: typeof ConsultationModality.Virtual
+      channel: ConsultationChannel
+    })
 
-  async execute(input: CreateConsultationDto): Promise<Consultation> {
-    const existing = await this.consultationsRepository.findByAppointmentId(
-      input.appointmentId,
+type Response = Consultation | undefined
+
+export class CreateConsultationFromAppointmentUseCase
+  implements UseCase<Request, Response>
+{
+  constructor(
+    private readonly consultationsRepository: ConsultationsRepository,
+    private readonly idProvider: IdProvider,
+    private readonly datetimeProvider: DatetimeProvider,
+  ) {}
+
+  async execute(request: Request): Promise<Response> {
+    const existingConsultation = await this.consultationsRepository.findByIntakeId(
+      request.intakeId,
     )
 
-    if (existing) {
-      return existing
-    }
+    if (existingConsultation) return existingConsultation
 
-    const now = new Date()
-
-    const consultation: Consultation = {
-      id: input.id,
-      appointmentId: input.appointmentId,
-      clientId: input.clientId,
-      assignedLawyerId: input.assignedLawyerId,
-      legalAreaId: input.legalAreaId,
-      legalTopicId: input.legalTopicId,
-      status: ConsultationStatus.Pending,
-      modality: input.modality,
-      ...(input.modality === ConsultationModality.Virtual && input.channel
-        ? { channel: input.channel as any }
-        : {}),
+    const now = this.datetimeProvider.now()
+    const consultationBase = {
+      id: this.idProvider.generate(),
+      intakeId: request.intakeId,
+      appointmentId: request.appointmentId,
+      clientId: request.clientId,
+      assignedLawyerId: request.assignedLawyerId,
+      legalAreaId: request.legalAreaId,
+      legalTopicId: request.legalTopicId,
+      notes: request.demandNotes,
       relevantFacts: [],
       potentialLegalRequests: [],
       identifiedRisks: [],
       suggestions: [],
+      status: 'pending' as const,
       createdAt: now,
       updatedAt: now,
-    } as Consultation
+    }
+    const consultation: Consultation =
+      request.modality === ConsultationModality.Virtual
+        ? {
+            ...consultationBase,
+            modality: ConsultationModality.Virtual,
+            channel: request.channel,
+          }
+        : { ...consultationBase, modality: ConsultationModality.InPerson }
 
-    await this.consultationsRepository.save(consultation)
-    return consultation
+    return this.consultationsRepository.add(consultation)
   }
 }

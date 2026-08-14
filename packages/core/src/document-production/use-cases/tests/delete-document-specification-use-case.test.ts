@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentSpecification } from '../../domain/entities/fakers'
+import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import { DocumentSpecificationNotFoundError } from '../../domain/errors'
 import type { DocumentSpecificationsRepository } from '../../interfaces'
 import { DeleteDocumentSpecificationUseCase } from '../delete-document-specification-use-case'
@@ -14,7 +14,7 @@ describe('Delete Document Specification Use Case', () => {
   })
 
   it('removes the specification found by id', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.remove.mockResolvedValue(true)
 
     await expect(

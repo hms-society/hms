@@ -10,6 +10,7 @@ import type { ConsultationSuggestion } from './consultation-suggestion'
 
 type ConsultationBase = {
   id: string
+  intakeId: string
   appointmentId: string
   clientId: string
   assignedLawyerId: string
@@ -18,8 +19,6 @@ type ConsultationBase = {
   primaryLegalQuestion?: string
   guidanceProvided?: string
   notes?: string
-  viability?: string
-  decision?: string
   relevantFacts: RelevantFact[]
   potentialLegalRequests: PotentialLegalRequest[]
   identifiedRisks: IdentifiedRisk[]
