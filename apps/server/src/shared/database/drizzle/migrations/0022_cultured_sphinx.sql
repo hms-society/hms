@@ -1,0 +1,2 @@
+ALTER TYPE "public"."intake_status" ADD VALUE 'consultation_scheduling' BEFORE 'consultation_scheduled';--> statement-breakpoint
+ALTER TYPE "public"."intake_status" ADD VALUE 'consultation_scheduling_failed' BEFORE 'consultation_scheduled';

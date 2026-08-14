@@ -89,6 +89,7 @@ export class ReviewDocumentCycleTool {
       task: input.draft ? 'correct_document_draft' : 'write_document_draft',
       template: input.template,
       source: input.source,
+      ...(input.instructions ? { instructions: input.instructions } : {}),
       ...(input.draft ? { currentDraft: input.draft } : {}),
       ...(input.review ? { reviewFindings: input.review.findings } : {}),
     })
@@ -103,6 +104,7 @@ export class ReviewDocumentCycleTool {
       task: 'review_document_draft',
       template: input.template,
       source: input.source,
+      ...(input.instructions ? { instructions: input.instructions } : {}),
       draft,
       pendingMarkers,
     })

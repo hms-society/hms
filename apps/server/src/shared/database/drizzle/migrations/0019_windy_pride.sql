@@ -1,0 +1,30 @@
+CREATE TABLE "consultations" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"intake_id" uuid NOT NULL,
+	"appointment_id" uuid NOT NULL,
+	"client_id" uuid NOT NULL,
+	"assigned_lawyer_id" uuid NOT NULL,
+	"legal_area_id" uuid NOT NULL,
+	"legal_topic_id" uuid NOT NULL,
+	"primary_legal_question" text,
+	"guidance_provided" text,
+	"notes" text,
+	"relevant_facts" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"potential_legal_requests" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"identified_risks" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"suggestions" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"modality" text NOT NULL,
+	"channel" text,
+	"status" text NOT NULL,
+	"started_at" timestamp with time zone,
+	"completed_at" timestamp with time zone,
+	"no_show_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "consultations_modality_check" CHECK ("consultations"."modality" in ('in_person', 'virtual')),
+	CONSTRAINT "consultations_channel_check" CHECK ("consultations"."channel" is null or "consultations"."channel" in ('whatsapp_video', 'google_meet', 'teams', 'other')),
+	CONSTRAINT "consultations_status_check" CHECK ("consultations"."status" in ('pending', 'in_progress', 'completed', 'no_show')),
+	CONSTRAINT "consultations_modality_channel_check" CHECK (("consultations"."modality" = 'in_person' and "consultations"."channel" is null) or ("consultations"."modality" = 'virtual' and "consultations"."channel" is not null))
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX "consultations_appointment_id_uq" ON "consultations" USING btree ("appointment_id");
