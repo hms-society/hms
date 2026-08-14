@@ -2,12 +2,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import type { DocumentSpecificationsRepository } from '@hms/core/document-production/interfaces'
-import type {
-  DocumentPackagesRepository,
-  DocumentsRepository,
-  PackageDocumentsRepository,
-} from '@hms/core/document-production/interfaces'
-import { AppError } from '@hms/core/shared/domain/errors'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 
@@ -22,6 +16,18 @@ type DocumentTemplateSeed = {
   readonly moment: DocumentSpecificationCreation['application']['moment']
   readonly isRequired: boolean
   readonly scope: 'global' | 'legal_context'
+}
+
+function createTemplateContent(name: string): DocumentTemplateContent {
+  return {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: `Conteúdo inicial de ${name}` }],
+      },
+    ],
+  } as unknown as DocumentTemplateContent
 }
 
 const DOCUMENT_TEMPLATES = [
@@ -53,19 +59,10 @@ export class DocumentProductionSeeder {
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
     private readonly specificationsRepository: DocumentSpecificationsRepository,
-    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
-    private readonly documentsRepository: DocumentsRepository,
-    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
-    private readonly documentPackagesRepository: DocumentPackagesRepository,
-    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
-    private readonly packageDocumentsRepository: PackageDocumentsRepository,
   ) {}
 
-  async clear() {
-    await this.packageDocumentsRepository.removeAll()
-    await this.documentPackagesRepository.removeAll()
-    await this.documentsRepository.removeAll()
-    await this.specificationsRepository.removeAll()
+  clear() {
+    return this.specificationsRepository.removeAll()
   }
 
   seed(specifications: readonly DocumentSpecificationCreation[]) {
@@ -78,15 +75,12 @@ export class DocumentProductionSeeder {
       ({ legalAreaId, name }) => legalAreaId === area?.id && name === 'Contratos',
     )
     if (!area || !topic)
-      throw new AppError(
-        'As referências da produção documental são obrigatórias para o seed.',
-        'Erro de Seed',
-      )
+      throw new Error('Document production seed references are required')
 
     const specifications: DocumentSpecificationCreation[] = DOCUMENT_TEMPLATES.map(
       (template) => ({
         ...template,
-        content: this.createTemplateContent(template.name),
+        content: createTemplateContent(template.name),
         variables: [],
         application:
           template.scope === 'global'
@@ -105,17 +99,5 @@ export class DocumentProductionSeeder {
     )
 
     return this.seed(specifications)
-  }
-
-  private createTemplateContent(name: string): DocumentTemplateContent {
-    return {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: `Conteúdo inicial de ${name}` }],
-        },
-      ],
-    } as unknown as DocumentTemplateContent
   }
 }

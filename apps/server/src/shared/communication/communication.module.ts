@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
-import { ProvisionModule } from '@/shared/provision/provision.module'
-import { WhatsappWebhookController } from '@/shared/communication/whatsapp-webhook.controller'
-import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
+import { ProvisionModule } from '../provision/provision.module'
+import { WhatsappProvider } from './whatsapp.provider'
+import { WhatsappWebhookController } from './whatsapp-webhook.controller'
+import { InngestService } from '../provision/inngest/inngest.service'
+import { InngestController } from '../provision/inngest/inngest.controller'
+import { SharedDatabaseModule } from '../database/drizzle/database.module'
 
 @Module({
-  imports: [ProvisionModule, SharedMessagingModule],
-  controllers: [WhatsappWebhookController],
-  providers: [WhatsappProvider],
-  exports: [WhatsappProvider],
+  imports: [ProvisionModule, SharedDatabaseModule, SharedMessagingModule],
+  controllers: [WhatsappWebhookController, InngestController],
+  providers: [WhatsappProvider, InngestService],
+  exports: [WhatsappProvider, InngestService],
 })
 export class CommunicationModule {}

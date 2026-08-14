@@ -3,6 +3,7 @@ import { Inngest, type InngestFunction } from 'inngest'
 import { eq, desc, like } from 'drizzle-orm'
 import { WhatsappProvider } from '../../communication/whatsapp.provider'
 import { DrizzleClient } from '../../database/drizzle/drizzle-client'
+import { integracaoEvento } from '../../database/drizzle/schema/integracao-evento'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models'
 import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
@@ -18,7 +19,11 @@ export class InngestService {
     private readonly drizzleClient: DrizzleClient,
     readonly _whatsappProvider: WhatsappProvider,
   ) {
-    this.client = new Inngest({ id: 'hms-server' })
+    this.client = new Inngest({
+      id: 'hms-server',
+      eventKey: process.env.INNGEST_EVENT_KEY || 'local',
+      baseUrl: process.env.INNGEST_BASE_URL || 'http://localhost:8288/',
+    })
   }
 
   register(fn: InngestFunction.Like) {
@@ -72,25 +77,34 @@ export class InngestService {
                     .where(like(clientModel.phone, `%${fromPhone.slice(-8)}`))
                     .limit(1)
 
-                  // 1. Process WhatsApp Media for Document Production System
-                  if (msg.type === 'document' || msg.type === 'image') {
-                    const media = msg.type === 'document' ? msg.document : msg.image
-
-                    await step.sendEvent('dispatch-document-batch', {
-                      name: 'documents/whatsapp.batch.received',
-                      data: {
-                        sender: fromPhone,
-                        clientId: client?.id,
-                        mediaId: media.id,
-                        mimeType: media.mime_type,
-                        originalName:
-                          media.filename ||
-                          `${media.id}.${media.mime_type.split('/')[1]}`,
-                      },
-                    })
-                  }
-
                   if (client) {
+                    // 1. Process WhatsApp Media for Document Production System
+                    if (msg.type === 'document' || msg.type === 'image') {
+                      const media = msg.type === 'document' ? msg.document : msg.image
+
+                      const [evento] = await db
+                        .insert(integracaoEvento)
+                        .values({
+                          provedor: 'whatsapp',
+                          payload: msg,
+                          status: 'recebido',
+                        })
+                        .returning()
+
+                      await step.sendEvent('dispatch-document-batch', {
+                        name: 'documents/whatsapp.batch.received',
+                        data: {
+                          eventoId: evento.id,
+                          sender: fromPhone,
+                          clientId: client.id,
+                          mimeType: media.mime_type,
+                          originalName:
+                            media.filename ||
+                            `${media.id}.${media.mime_type.split('/')[1]}`,
+                        },
+                      })
+                    }
+
                     // 2. Save Message to Case Private Message History
                     const [intake] = await db
                       .select({
@@ -121,8 +135,17 @@ export class InngestService {
                       )
                     }
                   } else {
+                    // If client not found, still record the event as failed if it contains media
+                    if (msg.type === 'document' || msg.type === 'image') {
+                      await db.insert(integracaoEvento).values({
+                        provedor: 'whatsapp',
+                        payload: msg,
+                        status: 'falha_definitiva',
+                        erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
+                      })
+                    }
                     this.logger.warn(
-                      `Mensagem recebida de número não cadastrado diretamente como cliente: ${fromPhone}`,
+                      `Mensagem recebida de número não cadastrado: ${fromPhone}`,
                     )
                   }
                 }

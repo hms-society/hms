@@ -5,8 +5,7 @@ import { CommunicationModule } from '@/shared/communication/communication.module
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
-import { ProcessWhatsappBatchJob } from '../messaging/inngest/jobs'
-import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
 import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
@@ -18,7 +17,6 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
-    SharedMessagingModule,
   ],
   controllers: [
     InternalUploadController,
@@ -26,7 +24,7 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     GetDocumentFileController,
   ],
   providers: [
-    ProcessWhatsappBatchJob,
+    ProcessWhatsappBatchWorker,
     {
       provide: ListClientDocumentBatchUseCase,
       useFactory: (repository: DocumentBatchesRepository) => {
@@ -37,7 +35,7 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
   ],
   exports: [
     ListClientDocumentBatchUseCase,
-    ProcessWhatsappBatchJob,
+    ProcessWhatsappBatchWorker,
     DocumentsDatabaseModule,
   ],
 })

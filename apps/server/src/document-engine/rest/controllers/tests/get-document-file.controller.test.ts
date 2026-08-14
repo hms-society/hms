@@ -59,17 +59,17 @@ describe('Get Document File Controller [GET /documents/files/:fileId]', () => {
       ],
     })
 
-    const file = batch.files[0]
+    const file = batch?.files?.[0]
     expect(file).toBeDefined()
 
     const response = await request(fixture.app.getHttpServer())
-      .get(`/documents/files/${file.id}`)
+      .get(`/documents/files/${file?.id}`)
       .expect(200)
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        id: file.id,
-        batchId: batch.id,
+        id: file?.id,
+        batchId: batch?.id,
         storagePath: 'client/file-123.pdf',
         originalName: 'test.pdf',
         mimeType: 'application/pdf',

@@ -2,7 +2,6 @@ import { intakeFormSchema, type IntakeFormData } from '@hms/validation/intake'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type BaseSyntheticEvent } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 
 import { AppError } from '@hms/core/shared/domain/errors'
 
@@ -89,7 +88,6 @@ export function useNewIntake() {
     try {
       if (data.decision === 'schedule') {
         await registerIntake({ ...request, decision: 'schedule_consultation' })
-        toast.success('Intake e agendamento salvos com sucesso!')
       } else {
         if (!data.closureReason) throw new AppError('A closure reason is required')
 
@@ -99,7 +97,6 @@ export function useNewIntake() {
           closureReason: data.closureReason,
           closureNotes: data.closureNotes,
         })
-        toast.info('Intake encerrado com sucesso.')
       }
     } catch {
       return

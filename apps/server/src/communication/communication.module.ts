@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { ListClientCommunicationsController } from '@/communication/rest/controllers/list-client-communications.controller'
@@ -14,17 +13,12 @@ import { CommunicationModule as SharedCommunicationModule } from '@/shared/commu
   controllers: [ListClientCommunicationsController, SendCommunicationController],
   providers: [
     CommunicationSeeder,
-    ProcessWhatsappEventJob,
     DrizzlePrivateMessagesRepository,
     {
       provide: COMMUNICATION_REPOSITORIES.privateMessages,
       useExisting: DrizzlePrivateMessagesRepository,
     },
   ],
-  exports: [
-    CommunicationSeeder,
-    ProcessWhatsappEventJob,
-    COMMUNICATION_REPOSITORIES.privateMessages,
-  ],
+  exports: [CommunicationSeeder, COMMUNICATION_REPOSITORIES.privateMessages],
 })
 export class CommunicationModule {}

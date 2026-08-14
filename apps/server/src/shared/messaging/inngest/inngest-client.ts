@@ -5,7 +5,10 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 @Injectable()
 export class InngestClient extends Inngest {
-  constructor(@Inject(EnvProvider) envProvider: EnvProvider) {
+  constructor(
+    @Inject(EnvProvider)
+    envProvider: EnvProvider,
+  ) {
     super({
       id: 'hms-server',
       isDev: envProvider.get('INNGEST_DEV') === '1',

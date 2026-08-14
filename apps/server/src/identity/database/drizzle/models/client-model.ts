@@ -7,6 +7,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  date,
 } from 'drizzle-orm/pg-core'
 
 import { clientTypeModel } from '@/identity/database/drizzle/models/client-type-model'
@@ -24,6 +25,19 @@ export const clientModel = pgTable(
     taxIdValue: text('tax_id_value').notNull(),
     phone: text('phone'),
     email: text('email'),
+    rg: text('rg'),
+    birthDate: date('birth_date', { mode: 'string' }),
+    maritalStatus: text('marital_status'),
+    nationality: text('nationality'),
+    profession: text('profession'),
+    stateRegistration: text('state_registration'),
+    constitutionDate: date('constitution_date', { mode: 'string' }),
+    legalNature: text('legal_nature'),
+    legalRepresentative: text('legal_representative'),
+    representativeRole: text('representative_role'),
+    origin: text('origin'),
+    linkedThirdParty: text('linked_third_party'),
+    hmsResponsible: text('hms_responsible'),
     street: text('street'),
     number: text('number'),
     complement: text('complement'),
@@ -31,6 +45,7 @@ export const clientModel = pgTable(
     city: text('city'),
     state: text('state'),
     zipCode: text('zip_code'),
+
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
