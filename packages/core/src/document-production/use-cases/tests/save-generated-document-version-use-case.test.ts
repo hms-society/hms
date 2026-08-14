@@ -3,7 +3,10 @@ import type { DatetimeProvider, FileStorageProvider } from '#shared/interfaces'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { DocumentGenerationFaker, DocumentVersionFaker } from '../../domain/entities/fakers'
+import {
+  DocumentGenerationFaker,
+  DocumentVersionFaker,
+} from '../../domain/entities/fakers'
 import {
   DocumentGenerationConflictError,
   DocumentGenerationNotFoundError,
@@ -76,6 +79,7 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
+      status: 'in_review',
     })
     generationsRepository.findById.mockResolvedValue(generation)
     versionsRepository.findByDocumentGenerationId.mockResolvedValue(undefined)
@@ -119,6 +123,7 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
+      status: 'in_review',
     })
   })
 

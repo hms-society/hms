@@ -8,6 +8,7 @@ export class DocumentVersionFaker {
       id: faker.string.uuid(),
       documentId: faker.string.uuid(),
       documentGenerationId: faker.string.uuid(),
+      sourceDocumentVersionId: undefined,
       fileId: faker.string.uuid(),
       versionNumber: 1,
       source: 'ai',
@@ -15,6 +16,7 @@ export class DocumentVersionFaker {
       pendingMarkers: [],
       createdByCollaboratorId: faker.string.uuid(),
       createdAt: faker.date.past(),
+      status: 'in_review',
       ...overrides,
     }
   }

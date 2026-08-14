@@ -1,7 +1,7 @@
 import type { DocumentVersionCreation } from '@hms/core/document-production/domain/entities'
 import type { DocumentVersionsRepository } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { Injectable } from '@nestjs/common'
 
 import { DrizzleDocumentVersionMapper } from '@/document-production/database/drizzle/mappers'
@@ -37,6 +37,10 @@ export class DrizzleDocumentVersionsRepository
     return this.mapper.toDomain(record)
   }
 
+  async removeAll() {
+    await this.database.delete(documentVersionModel)
+  }
+
   async findLatestByDocumentId(documentId: string) {
     const [record] = await this.database
       .select()
@@ -55,6 +59,55 @@ export class DrizzleDocumentVersionsRepository
       .where(eq(documentVersionModel.documentGenerationId, documentGenerationId))
       .limit(1)
 
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async findById(documentVersionId: string) {
+    const [record] = await this.database
+      .select()
+      .from(documentVersionModel)
+      .where(eq(documentVersionModel.id, documentVersionId))
+      .limit(1)
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async findByDocumentIds(documentIds: readonly string[]) {
+    if (documentIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(documentVersionModel)
+      .where(inArray(documentVersionModel.documentId, [...documentIds]))
+      .orderBy(
+        asc(documentVersionModel.documentId),
+        desc(documentVersionModel.versionNumber),
+      )
+
+    return records.map((record) => this.mapper.toDomain(record))
+  }
+
+  async review(
+    documentVersionId: string,
+    status: 'approved' | 'rejected',
+    reviewedByCollaboratorId: string,
+    reviewedAt: Date,
+    rejectionReason?: string,
+  ) {
+    const [record] = await this.database
+      .update(documentVersionModel)
+      .set({
+        status,
+        reviewedByCollaboratorId,
+        reviewedAt,
+        rejectionReason: rejectionReason ?? null,
+      })
+      .where(
+        and(
+          eq(documentVersionModel.id, documentVersionId),
+          eq(documentVersionModel.status, 'in_review'),
+        ),
+      )
+      .returning()
     return record ? this.mapper.toDomain(record) : undefined
   }
 }

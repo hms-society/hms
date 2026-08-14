@@ -57,5 +57,76 @@ Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
 # Generation is asynchronous. Follow the runs at http://localhost:8288.
-# Until generation read endpoints exist, inspect document_generations and
-# document_versions in PostgreSQL to verify the final status and generated content.
+# Wait for the generation to complete before listing its immutable version.
+
+### List consultation documents and version history
+# @name listConsultationDocuments
+GET {{url}}/{{consultationId}}/documents
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Get a generated document version including its Tiptap content
+# @prompt documentVersionId Copy a version ID from listConsultationDocuments
+GET {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/versions/{{documentVersionId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Save edited Tiptap content as a new immutable manual version
+# @name saveManualDocumentVersion
+# @prompt sourceDocumentVersionId Copy the edited source version ID
+POST {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/versions/{{sourceDocumentVersionId}}/manual
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": { "level": 1, "textAlign": "center" },
+        "content": [{ "type": "text", "text": "Procuração revisada" }]
+      },
+      {
+        "type": "paragraph",
+        "attrs": { "textAlign": "left" },
+        "content": [
+          {
+            "type": "text",
+            "text": "O cliente outorga poderes limitados à negociação da locação residencial."
+          }
+        ]
+      }
+    ]
+  }
+}
+
+### Approve a generated document version
+# @prompt documentVersionId Copy an in-review version ID
+PATCH {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/versions/{{documentVersionId}}/review
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "decision": "approved"
+}
+
+### Reject a generated document version
+# @prompt documentVersionId Copy an in-review version ID
+PATCH {{url}}/{{consultationId}}/documents/{{reviewChallengeDocumentId}}/versions/{{documentVersionId}}/review
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "decision": "rejected",
+  "rejectionReason": "A cláusula precisa ser revisada."
+}
+
+### Select an approved version as current
+# @prompt documentVersionId Copy an approved version ID
+PATCH {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/versions/{{documentVersionId}}/current
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
