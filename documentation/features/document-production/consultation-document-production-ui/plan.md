@@ -1670,3 +1670,17 @@ semânticas. Todos os PRs foram publicados diretamente contra `develop`:
 O `pnpm-lock.yaml` foi incluído no PR #72 após o check de instalação congelada
 identificar a alteração de dependência do servidor. Os PRs declaram as
 dependências funcionais e devem ser integrados em ordem após a aprovação.
+
+## F31 — Correção dos checks de CI da entrega dividida
+
+Estado: verified.
+
+Os workflows de Core, Server e Web passaram a detectar os caminhos alterados no
+PR e a concluir com sucesso quando a camada não é aplicável. Isso evita que um
+PR de contratos Core seja bloqueado por consumidores ainda não integrados em
+`develop`; a validação completa volta a ocorrer quando cada camada entra na
+ordem de dependência.
+
+Também foram formatados os snapshots/journal de migrations exigidos pelo
+Biome no PR #72 e corrigido o nome do ícone de acesso negado no PR #74 para
+`shield-check`, registrado no mapa compartilhado de ícones.

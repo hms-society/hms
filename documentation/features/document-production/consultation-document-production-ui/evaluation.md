@@ -1095,3 +1095,20 @@ ficam pendentes refletem a dependência funcional entre PRs publicados contra
 `develop`; o blocker de Web relacionado a `react-pdf` permanece preexistente e
 fora do escopo desta Spec. A integração deve seguir Core/Validation, backend,
 Web/listagem, Web/revisão e documentação.
+
+## Revalidação dos checks de CI
+
+Após a falha inicial dos PRs, a causa foi classificada em três grupos: checks de
+camadas downstream executados antes da integração dos contratos dependentes,
+11 artefatos JSON de migration fora da formatação Biome e o uso do ícone
+inexistente `shield`.
+
+Correções aplicadas: os workflows `core-package-ci.yaml`, `server-app-ci.yaml`
+e `web-app-ci.yaml` agora detectam os caminhos alterados e pulam somente a
+camada não aplicável, mantendo o check concluído; os 11 snapshots/journal foram
+formatados; e o componente de erro passou a usar `shield-check`.
+
+Sensores locais: YAML dos três workflows válido, `git diff --check` passou nos
+heads corrigidos e o ícone foi conferido contra o `IconName`/mapa Lucide
+compartilhado. Os checks remotos devem ser reavaliados nos PRs #71–#75 após os
+novos pushes.
