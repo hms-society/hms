@@ -31,7 +31,12 @@ describe('Record Document Validation Decision Use Case', () => {
   it('maps validate decision to validated status', async () => {
     const document = fakeDocumentValidationDocument({
       status: DocumentValidationStatus.Valid,
+      aiSuggestion: {
+        documentTypeId: 'comprovante_residencia',
+        checklistItemId: 'residence-proof',
+      },
     })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
     documentValidationsRepository.recordDecision.mockResolvedValue(document)
 
     const result = await useCase.execute({
@@ -68,6 +73,7 @@ describe('Record Document Validation Decision Use Case', () => {
     const document = fakeDocumentValidationDocument({
       status: DocumentValidationStatus.NotCorresponding,
     })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
     documentValidationsRepository.recordDecision.mockResolvedValue(document)
 
     await useCase.execute({
@@ -92,6 +98,71 @@ describe('Record Document Validation Decision Use Case', () => {
       decision: DocumentValidationDecision.Mismatch,
       reason: 'Documento enviado não corresponde ao checklist.',
       metadata: {},
+    })
+  })
+
+  it('requires a reason when rejecting an incomplete document', async () => {
+    const document = fakeDocumentValidationDocument()
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+
+    await expect(
+      useCase.execute({
+        documentFileId: document.id,
+        reviewedBy: 'reviewer-id',
+        decision: DocumentValidationDecision.Incomplete,
+      }),
+    ).rejects.toThrow('O motivo é obrigatório')
+
+    expect(documentValidationsRepository.recordDecision).not.toHaveBeenCalled()
+    expect(documentValidationLogsRepository.add).not.toHaveBeenCalled()
+  })
+
+  it('records an AI correction log when the human decision changes the suggested status', async () => {
+    const currentDocument = fakeDocumentValidationDocument({
+      status: DocumentValidationStatus.Valid,
+      aiSuggestion: {
+        documentTypeId: 'comprovante_residencia',
+        checklistItemId: 'residence-proof',
+        checklistItemLabel: 'Comprovante de residência',
+      },
+    })
+    const updatedDocument = fakeDocumentValidationDocument({
+      status: DocumentValidationStatus.Incomplete,
+    })
+    documentValidationsRepository.findByFileId.mockResolvedValue(currentDocument)
+    documentValidationsRepository.recordDecision.mockResolvedValue(updatedDocument)
+
+    await useCase.execute({
+      documentFileId: currentDocument.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Incomplete,
+      reason: 'Faltando verso do documento.',
+    })
+
+    expect(documentValidationLogsRepository.add).toHaveBeenNthCalledWith(2, {
+      documentFileId: currentDocument.id,
+      actorId: 'reviewer-id',
+      action: DocumentValidationLogAction.AiCorrectionRecorded,
+      status: DocumentValidationStatus.Incomplete,
+      decision: DocumentValidationDecision.Incomplete,
+      reason: 'Faltando verso do documento.',
+      metadata: {
+        errorType: 'status_correction',
+        suggested: {
+          status: DocumentValidationStatus.Valid,
+          documentTypeId: 'comprovante_residencia',
+          checklistItemId: 'residence-proof',
+          checklistItemLabel: 'Comprovante de residência',
+        },
+        correction: {
+          status: DocumentValidationStatus.Incomplete,
+          decision: DocumentValidationDecision.Incomplete,
+          documentTypeId: undefined,
+          checklistRequirementId: undefined,
+          originalDocumentId: undefined,
+          reason: 'Faltando verso do documento.',
+        },
+      },
     })
   })
 })

@@ -1,4 +1,5 @@
 import type { INestApplication, Type } from '@nestjs/common'
+import type { TestingModuleBuilder } from '@nestjs/testing'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleDocumentBatchesRepository } from '@/document-engine/database/drizzle/repositories/document-batches-repository'
@@ -9,7 +10,6 @@ import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { SharedModule } from '@/shared/shared.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
 import { AuthGuard } from '@/identity/guards'
-import { DocumentEngineProvisionModule } from '@/document-engine/provision/document-engine-provision.module'
 
 export class DocumentEngineModuleFixture {
   private constructor(
@@ -39,14 +39,18 @@ export class DocumentEngineModuleFixture {
     )
   }
 
-  static async registerAuthenticated(controller?: Type<unknown>, userId = 'user-id') {
+  static async registerAuthenticated(
+    controller?: Type<unknown>,
+    userId = 'user-id',
+    configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+  ) {
     const restFixture = await RestFixture.register(
       {
-        imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
+        imports: [SharedModule, DocumentsModule],
         controllers: controller ? [controller] : [],
       },
-      (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
+      (builder) => {
+        const authenticatedBuilder = builder.overrideGuard(AuthGuard).useValue({
           canActivate(context: {
             switchToHttp(): {
               getRequest(): {
@@ -63,7 +67,10 @@ export class DocumentEngineModuleFixture {
             }
             return true
           },
-        }),
+        })
+
+        return configure?.(authenticatedBuilder) ?? authenticatedBuilder
+      },
     )
 
     return new DocumentEngineModuleFixture(

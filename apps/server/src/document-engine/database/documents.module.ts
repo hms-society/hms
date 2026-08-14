@@ -6,6 +6,7 @@ import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
 import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
+import { AnalyzeDocumentValidationWorker } from '../provision/inngest/analyze-document-validation-worker'
 import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
@@ -16,7 +17,9 @@ import { ListDocumentValidationsController } from '../rest/controllers/list-docu
 import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
-import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
+import { DocumentValidationAiModule } from '../ai/document-validation-ai.module'
+import { GetDocumentValidationAiResultController } from '../rest/controllers/get-document-validation-ai-result.controller'
+import { GetDocumentValidationAiInputController } from '../rest/controllers/get-document-validation-ai-input.controller'
 
 @Module({
   imports: [
@@ -24,7 +27,7 @@ import { DocumentEngineProvisionModule } from '../provision/document-engine-prov
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
-    DocumentEngineProvisionModule,
+    DocumentValidationAiModule,
   ],
   controllers: [
     InternalUploadController,
@@ -32,12 +35,15 @@ import { DocumentEngineProvisionModule } from '../provision/document-engine-prov
     GetDocumentFileController,
     AnalyzeDocumentValidationController,
     GetDocumentValidationController,
+    GetDocumentValidationAiInputController,
+    GetDocumentValidationAiResultController,
     ListDocumentValidationsController,
     ListDocumentValidationLogsController,
     RecordDocumentValidationDecisionController,
     RequestDocumentResendController,
   ],
   providers: [
+    AnalyzeDocumentValidationWorker,
     ProcessWhatsappBatchWorker,
     {
       provide: ListClientDocumentBatchUseCase,
@@ -49,8 +55,10 @@ import { DocumentEngineProvisionModule } from '../provision/document-engine-prov
   ],
   exports: [
     ListClientDocumentBatchUseCase,
+    AnalyzeDocumentValidationWorker,
     ProcessWhatsappBatchWorker,
     DocumentsDatabaseModule,
+    DocumentValidationAiModule,
   ],
 })
 export class DocumentsModule {}

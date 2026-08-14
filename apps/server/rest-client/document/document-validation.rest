@@ -1,0 +1,82 @@
+@baseUrl = http://localhost:3333
+@inngestRunsUrl = http://localhost:8288/runs
+
+# Use um id existente em document_batch_files após rodar o seed.
+@documentFileId = afcf8a0b-8954-47b6-81f7-2b5616506dbe
+
+# Lê HMS_USER_SEED_PASSWORD de apps/server/.env quando o REST Client suporta {{$dotenv ...}}.
+@seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
+
+### 00. Sign in
+# @name signIn
+# O que essa requisição faz?
+# Autentica o usuário seedado e disponibiliza o accessToken para as próximas requisições.
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### 01. Ver documento atual
+# O que essa requisição faz?
+# Mostra o documento antes/depois da análise: status, storagePath, campos extraídos, sugestão da IA e vínculo.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 02. Ver input enviado para a IA
+# O que essa requisição faz?
+# Mostra o payload/prompt que o backend monta para a IA analisar esse documento.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}/ai-input
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 03. Enfileirar análise documental no Inngest
+# O que essa requisição faz?
+# Publica o evento document-engine/document-validation.analysis-requested e retorna 202.
+# O processamento acontece em segundo plano e pode ser acompanhado em {{inngestRunsUrl}}.
+POST {{baseUrl}}/document-validation/documents/{{documentFileId}}/analyze
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 04. Ver documento após o Inngest processar
+# O que essa requisição faz?
+# Confere se o job do Inngest persistiu status, aiConfidence, extractedFields, missingFields e checklistLink.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 05. Ver logs da validação
+# O que essa requisição faz?
+# Lista a auditoria do documento, incluindo análise registrada, usuário, status, metadados da IA, decisões e reenvios.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}/logs
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 06. Solicitar reenvio
+# O que essa requisição faz?
+# Salva uma solicitação de reenvio para o documento e registra o evento no log de validação.
+POST {{baseUrl}}/document-validation/documents/{{documentFileId}}/resend-request
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "Documento incompleto.",
+  "message": "Olá, envie novamente o arquivo completo para continuarmos a validação."
+}
+
+### 07. Registrar decisão humana
+# O que essa requisição faz?
+# Registra a decisão final do usuário sobre a validação e grava a auditoria correspondente.
+PATCH {{baseUrl}}/document-validation/documents/{{documentFileId}}/decision
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "validate",
+  "documentTypeId": "comprovante_residencia",
+  "checklistRequirementId": "residence-proof",
+  "reason": "Documento validado manualmente após conferência."
+}

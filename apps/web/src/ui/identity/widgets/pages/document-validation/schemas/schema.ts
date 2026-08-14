@@ -17,7 +17,10 @@ export const documentReview = z
     originalDocumentId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (['incomplete', 'mismatch', 'escalate'].includes(data.decision) && !data.reason) {
+    if (
+      ['illegible', 'incomplete', 'mismatch', 'escalate'].includes(data.decision) &&
+      !data.reason
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'O motivo é obrigatório para justificar esta decisão.',
