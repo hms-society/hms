@@ -9,12 +9,23 @@ import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
+
+import {
+  createPendingMarkerExtension,
+  normalizePendingMarkerTerms,
+  pendingMarkerPluginKey,
+} from './pending-marker-extension'
 
 export type DocumentEditorProps = {
   content: DocumentTemplateContent
   onChange: (content: DocumentTemplateContent) => void
   onEditorReady?: (insert: (name: string) => void) => void
   onFocus?: () => void
+  ariaLabel?: string
+  editable?: boolean
+  emptyState?: ReactNode
+  highlightedTerms?: readonly string[]
 }
 
 export const DOCUMENT_TEMPLATE_LINK_OPTIONS = {
@@ -41,16 +52,35 @@ const ContractLink = Link.extend({
   },
 })
 
+function findFirstTextRange(
+  editor: NonNullable<ReturnType<typeof useEditor>>,
+  term: string,
+) {
+  let range: { from: number; to: number } | undefined
+
+  editor.state.doc.descendants((node, position) => {
+    if (range || !node.isText || !node.text) return
+    const index = node.text.indexOf(term)
+    if (index >= 0) range = { from: position + index, to: position + index + term.length }
+  })
+
+  return range
+}
+
 export function useDocumentEditor({
   content,
   onChange,
   onEditorReady,
   onFocus,
+  ariaLabel = 'Conteúdo do template',
+  editable = true,
+  highlightedTerms = [],
 }: DocumentEditorProps) {
   const lastEmittedContent = useRef<string | null>(null)
   const editor = useEditor({
     immediatelyRender: false,
     content: content as never,
+    editable,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2] },
@@ -69,8 +99,14 @@ export function useDocumentEditor({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right'],
       }),
+      createPendingMarkerExtension(highlightedTerms),
     ],
     editorProps: {
+      attributes: {
+        'aria-label': ariaLabel,
+        'aria-readonly': String(!editable),
+        role: 'textbox',
+      },
       handleDOMEvents: {
         dragover: (_view, event) => {
           const dragEvent = event as DragEvent
@@ -124,8 +160,31 @@ export function useDocumentEditor({
     [content, editor],
   )
 
+  useEffect(
+    function syncEditorEditableState() {
+      editor?.setEditable(editable)
+    },
+    [editable, editor],
+  )
+
+  useEffect(
+    function syncHighlightedTerms() {
+      if (!editor) return
+      const terms = normalizePendingMarkerTerms(highlightedTerms)
+      editor.view.dispatch(editor.state.tr.setMeta(pendingMarkerPluginKey, terms))
+      const firstTerm = terms[0]
+      if (!firstTerm) return
+      const range = findFirstTextRange(editor, firstTerm)
+      if (range) {
+        editor.commands.setTextSelection(range)
+        editor.commands.focus()
+      }
+    },
+    [editor, highlightedTerms],
+  )
+
   function applyLink() {
-    if (!editor) return
+    if (!editor || !editable) return
     const href = window.prompt('Informe a URL HTTP(S) do link:', 'https://')?.trim()
     if (!href) return
     try {
@@ -196,10 +255,11 @@ export function useDocumentEditor({
     function exposeVariableInsertion() {
       if (editor && onEditorReady)
         onEditorReady(function insertVariable(name: string) {
+          if (!editable) return
           editor.chain().focus().insertContent(`{{${name}}}`).run()
         })
     },
-    [editor, onEditorReady],
+    [editable, editor, onEditorReady],
   )
 
   return {

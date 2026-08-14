@@ -15,7 +15,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { PageTitle } from '@/ui/shared/widgets/components/page-title'
 
-import { DocumentEditor } from './document-editor'
+import { DocumentEditor } from '@/ui/document-production/widgets/components/document-editor'
 import { RemoveDocumentSpecificationSection } from './remove-document-specification-section'
 import { SwitchField } from './switch-field'
 import { VariablePicker } from './variable-picker'
