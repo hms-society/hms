@@ -290,6 +290,7 @@ export function AttendanceForm({ consultationId, onBack }: AttendanceFormProps) 
     clientGuidance,
     viability,
     decision,
+    DRAFT_KEY,
   ])
 
   const { legalCatalogService } = useRestContext()
