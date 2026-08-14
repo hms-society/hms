@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { Inngest } from 'inngest'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 @Injectable()
 export class InngestClient extends Inngest {
-  constructor(envProvider: EnvProvider) {
+  constructor(
+    @Inject(EnvProvider)
+    envProvider: EnvProvider,
+  ) {
     super({
       id: 'hms-server',
       isDev: envProvider.get('INNGEST_DEV') === '1',

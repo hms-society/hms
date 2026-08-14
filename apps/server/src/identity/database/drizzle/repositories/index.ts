@@ -7,3 +7,4 @@ export * from '@/identity/database/drizzle/repositories/drizzle-identity-transac
 export * from '@/identity/database/drizzle/repositories/drizzle-users-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-intake-clients-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-intake-responsibles-repository'
+export * from '@/identity/database/drizzle/repositories/drizzle-supporters-repository'

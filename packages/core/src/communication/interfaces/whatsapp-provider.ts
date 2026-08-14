@@ -5,4 +5,6 @@ export interface WhatsappProvider {
   sendAutomaticMessage(
     params: SendWhatsappMessageParams,
   ): Promise<SendWhatsappMessageResult>
+
+  sendTextMessage(phone: string, text: string): Promise<SendWhatsappMessageResult>
 }

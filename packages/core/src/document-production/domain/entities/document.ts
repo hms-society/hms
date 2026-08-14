@@ -1,7 +1,7 @@
 export type Document = {
-  id: string
-  title: string
-  currentVersionId?: string
-  createdAt: Date
-  updatedAt: Date
+  readonly id: string
+  readonly title: string
+  readonly currentVersionId?: string
+  readonly createdAt: Date
+  readonly updatedAt: Date
 }

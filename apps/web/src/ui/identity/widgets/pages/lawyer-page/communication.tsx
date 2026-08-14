@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
+import { useSendCommunicationMutation } from '@/ui/shared/hooks/use-send-communication-mutation'
+import { toast } from 'sonner'
 
 import {
   ChatListPanel,
@@ -15,7 +17,12 @@ export const LawyerCommunicationPage = () => {
   const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [localMessages, setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
+  const [localMessages, _setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
+
+  const sendCommunicationMutation = useSendCommunicationMutation()
+  if (sendCommunicationMutation.isSuccess) {
+    console.log(selectedId)
+  }
 
   // Fetch clients from the database
   const { data: clientsData, isLoading: isLoadingClients } = useClientsQuery({
@@ -68,17 +75,19 @@ export const LawyerCommunicationPage = () => {
           ? `Intakes: ${activeClientItem.intakeCount}`
           : 'Sem intakes',
         messages: [
-          ...(realMessages?.map((msg: any) => ({
-            id: msg.id,
-            content: msg.content,
-            direction: msg.direction,
-            channel: msg.channel,
-            createdAt: new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            sender: msg.author || 'Cliente',
-          })) || []),
+          ...(realMessages
+            ? [...realMessages].reverse().map((msg: any) => ({
+                id: msg.id,
+                content: msg.content,
+                direction: msg.direction,
+                channel: msg.channel,
+                createdAt: new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                sender: msg.author || 'Cliente',
+              }))
+            : []),
           ...(localMessages[selectedId] || []),
         ],
       }
@@ -86,26 +95,24 @@ export const LawyerCommunicationPage = () => {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!messageText.trim() || !selectedId) return
+    if (!messageText.trim() || !selectedId || sendCommunicationMutation.isPending) return
 
-    const newMessage: ChatMessage = {
-      id: `new-${Date.now()}`,
-      content: messageText,
-      direction: 'outbound',
-      channel: 'whatsapp',
-      createdAt: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      sender: 'Advogado de desenvolvimento',
-    }
-
-    setLocalMessages((prev) => ({
-      ...prev,
-      [selectedId]: [...(prev[selectedId] || []), newMessage],
-    }))
-
+    const textToSend = messageText
     setMessageText('')
+
+    sendCommunicationMutation.mutate(
+      {
+        clientId: selectedId,
+        content: textToSend,
+        channel: 'whatsapp',
+      },
+      {
+        onError: (error: any) => {
+          setMessageText(textToSend)
+          toast.error(error?.message || 'Falha ao entregar a mensagem.')
+        },
+      },
+    )
   }
 
   // Construct conversations list for ChatListPanel

@@ -1,11 +1,18 @@
-import type { DocumentVersionSource } from '../structures'
+import type {
+  DocumentPendingMarker,
+  DocumentTemplateContent,
+  DocumentVersionSource,
+} from '../structures'
 
 export type DocumentVersion = {
-  id: string
-  documentId: string
-  fileId: string
-  versionNumber: number
-  source: DocumentVersionSource
-  createdByCollaboratorId: string
-  createdAt: Date
+  readonly id: string
+  readonly documentId: string
+  readonly documentGenerationId?: string
+  readonly fileId: string
+  readonly versionNumber: number
+  readonly source: DocumentVersionSource
+  readonly content: DocumentTemplateContent
+  readonly pendingMarkers: readonly DocumentPendingMarker[]
+  readonly createdByCollaboratorId: string
+  readonly createdAt: Date
 }

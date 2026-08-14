@@ -15,7 +15,7 @@ services:
       - hms
 
   supabase-db:
-    container_name: supabase-db
+    container_name: hms-supabase-db
     image: supabase/postgres:17.6.1.136
     restart: unless-stopped
     ports:
@@ -37,7 +37,7 @@ services:
       retries: 10
 
   supabase-auth:
-    container_name: supabase-auth
+    container_name: hms-supabase-auth
     image: supabase/gotrue:v2.189.0
     restart: unless-stopped
     depends_on:
@@ -97,7 +97,7 @@ services:
       retries: 10
 
   supabase-rest:
-    container_name: supabase-rest
+    container_name: hms-supabase-rest
     image: postgrest/postgrest:v14.12
     restart: unless-stopped
     depends_on:
@@ -113,7 +113,7 @@ services:
       PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXP:-3600}
 
   supabase-storage:
-    container_name: supabase-storage
+    container_name: hms-supabase-storage
     image: supabase/storage-api:v1.60.4
     restart: unless-stopped
     depends_on:
@@ -152,7 +152,7 @@ services:
       retries: 10
 
   supabase-meta:
-    container_name: supabase-meta
+    container_name: hms-supabase-meta
     image: supabase/postgres-meta:v0.96.6
     restart: unless-stopped
     depends_on:
@@ -168,7 +168,7 @@ services:
       CRYPTO_KEY: ${PG_META_CRYPTO_KEY:-local-pg-meta-crypto-key-change-me}
 
   supabase-studio:
-    container_name: supabase-studio
+    container_name: hms-supabase-studio
     image: supabase/studio:2026.07.07-sha-a6a04f2
     restart: unless-stopped
     ports:
@@ -202,7 +202,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://localhost:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})\"",
+          'node -e "fetch(''http://localhost:3000/api/platform/profile'').then((r) => {if (r.status !== 200) throw new Error(r.status)})"',
         ]
       interval: 5s
       timeout: 10s
@@ -210,7 +210,7 @@ services:
       start_period: 20s
 
   supabase-kong:
-    container_name: supabase-kong
+    container_name: hms-supabase-kong
     image: kong/kong:3.9.1
     restart: unless-stopped
     depends_on:
@@ -233,7 +233,7 @@ services:
       - ./volumes/kong/kong.yml:/home/kong/kong.yml:ro
 
   mailpit:
-    container_name: mailpit
+    container_name: hms-mailpit
     image: axllent/mailpit:v1.21
     restart: unless-stopped
     ports:
@@ -244,7 +244,7 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: "true"
 
   templates-server:
-    container_name: templates-server
+    container_name: hms-templates-server
     image: nginx:1.27-alpine
     restart: unless-stopped
     volumes:

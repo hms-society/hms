@@ -100,7 +100,7 @@ Meta Cloud API webhook
 * **API compatibility:** Supports OpenAI ChatCompletions and Anthropic API formats, directly integrable with Mastra AI.
 * **MIT License:** Open-source weights, with possible future self-hosting if volume justifies it.
 * **Controlled tools:** The AI does not access the database, storage, or service role directly; it uses specific tools exposed by the back-end.
-* **NestJS AiService:** Intermediate layer between the product and Mastra.
+* **NestJS feature AI modules:** Intermediate layers expose Core workflow interfaces through injection tokens while keeping concrete Mastra agents, tools, and workflows internal.
 
 ### WhatsApp
 

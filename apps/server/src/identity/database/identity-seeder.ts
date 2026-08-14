@@ -25,7 +25,7 @@ type UserSeed = {
 }
 
 const DEFAULT_CLIENTS: ClientCreation[] = [
-  ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+  ClientFaker.fake({ email: 'client@hms.br', name: 'Kauan', phone: '+5519971659516' }),
   ...ClientFaker.fakeMany(9),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
@@ -248,7 +248,11 @@ export class IdentitySeeder {
 
     const clientsToSeed = [
       {
-        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+        ...ClientFaker.fake({
+          email: 'client@hms.br',
+          name: 'Kauan',
+          phone: '+5519971659516',
+        }),
         id: clientUser?.id,
       },
       ...ClientFaker.fakeMany(9),
