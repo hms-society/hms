@@ -1,4 +1,14 @@
-import { Body, Controller, HttpStatus, Inject, NotFoundException, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Inject,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { updateClientQualificationSchema } from '@hms/validation/consultation'
 import { ZodValidationPipe } from 'nestjs-zod'
@@ -42,7 +52,7 @@ export class UpdateClientQualificationController {
   ) {
     const consultation = await this.consultationsRepository.findById(consultationId)
 
-    if (!consultation || !consultation.clientId) {
+    if (!consultation?.clientId) {
       throw new NotFoundException('Consulta ou cliente vinculado não encontrado.')
     }
 

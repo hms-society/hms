@@ -66,12 +66,12 @@ describe('GetConsultationByIdController (consultations.controller.test.ts)', () 
           provide: GetConsultationByIdUseCase,
           useValue: { execute: vi.fn() },
         },
-        
+
         {
           provide: 'ConsultationsRepository',
           useValue: consultationsRepositoryMock,
         },
-       
+
         {
           provide: 'identity:auth-provider',
           useValue: { verifyToken: vi.fn() },
@@ -104,9 +104,10 @@ describe('GetConsultationByIdController (consultations.controller.test.ts)', () 
         mockConsultationDomain as any,
       )
 
-      const result = typeof (controller as any).handle === 'function'
-        ? await (controller as any).handle('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
-        : await (controller as any).findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
+      const result =
+        typeof (controller as any).handle === 'function'
+          ? await (controller as any).handle('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
+          : await (controller as any).findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')
 
       expect(result).toBeDefined()
     })

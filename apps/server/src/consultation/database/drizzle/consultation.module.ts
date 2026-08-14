@@ -21,9 +21,7 @@ import { GetConsultationByIdController } from './rest/controllers/get-consultati
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
-  imports: [
-    IdentityModule,
-  ],
+  imports: [IdentityModule],
   controllers: [
     CreateConsultationController,
     StartConsultationController,
