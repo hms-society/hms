@@ -1,36 +1,44 @@
-import type { IntakeService as IntakeRestService } from '@hms/core/intake/interfaces'
+import type {
+  IntakeListResponse,
+  IntakeService as IntakeRestService,
+} from '@hms/core/intake/interfaces'
 import type { Intake } from '@hms/core/intake/domain/entities'
 import type { IntakeListQuery } from '@hms/core/intake/domain/structures'
+import type { IntakeListItem } from '@hms/core/intake/domain/structures'
+import type { ResponsibleListProjection } from '@hms/core/identity/domain/structures'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
-const buildIntakeListQuery = (query?: IntakeListQuery): string => {
-  if (!query) return ''
+function createIntakesPath(query: IntakeListQuery = {}) {
+  const searchParams = new URLSearchParams()
+  const queryEntries: Array<[string, string | number | null | undefined]> = [
+    ['search', query.search],
+    ['status', query.status],
+    ['responsibleId', query.responsibleId],
+    ['origin', query.origin],
+    ['contactChannel', query.contactChannel],
+    ['registeredFrom', query.registeredFrom],
+    ['registeredTo', query.registeredTo],
+    ['page', query.page],
+    ['pageSize', query.pageSize],
+  ]
 
-  const params = new URLSearchParams()
-
-  for (const [key, value] of Object.entries(query)) {
-    if (value === undefined || value === null || value === '') continue
-
-    if (Array.isArray(value)) {
-      for (const item of value) params.append(key, String(item))
-      continue
-    }
-
-    params.append(key, String(value))
+  for (const [key, value] of queryEntries) {
+    if (value != null) searchParams.set(key, String(value))
   }
 
-  const search = params.toString()
-  return search ? `?${search}` : ''
+  const queryString = searchParams.toString()
+
+  return queryString ? `/intakes?${queryString}` : '/intakes'
 }
 
 export const IntakeService = (restClient: RestClient): IntakeRestService => {
   return {
     listIntakes(query) {
-      return restClient.get(`/intakes${buildIntakeListQuery(query)}`)
+      return restClient.get<IntakeListResponse<IntakeListItem>>(createIntakesPath(query))
     },
 
     listIntakeResponsibles() {
-      return restClient.get('/intakes/responsibles')
+      return restClient.get<readonly ResponsibleListProjection[]>('/intakes/responsibles')
     },
 
     listClientIntake(clientId) {
@@ -43,6 +51,13 @@ export const IntakeService = (restClient: RestClient): IntakeRestService => {
 
     registerIntake(request) {
       return restClient.post<Intake>('/intakes', request)
+    },
+
+    retryIntakeConsultationScheduling(intakeId, request) {
+      return restClient.post<Intake>(
+        `/intakes/${intakeId}/consultation-scheduling/retry`,
+        request,
+      )
     },
 
     transitionIntakeStatus(intakeId, request) {
