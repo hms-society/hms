@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AttendanceForm } from '../attendance-form/attendance-form'
-import { useConsultation } from '../use-consultation'
+import type { useConsultation } from '../use-consultation'
 
 const handleCompleteConsultation = vi.fn().mockResolvedValue(undefined)
 const handleUpdateQualification = vi.fn().mockResolvedValue(undefined)

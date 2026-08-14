@@ -1,16 +1,14 @@
 import {
   Controller,
   HttpStatus,
-  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
-import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { StartConsultationUseCase } from '@hms/core/consultation/use-cases'
-import { CONSULTATIONS_REPOSITORY } from '../../consultation.module'
+
 import { AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
@@ -19,14 +17,7 @@ import { ErrorResponseDto } from '@/shared/rest/dtos'
 @Controller('consultations')
 @UseGuards(AuthGuard)
 export class StartConsultationController {
-  private readonly useCase: StartConsultationUseCase
-
-  constructor(
-    @Inject(CONSULTATIONS_REPOSITORY)
-    consultationsRepository: ConsultationsRepository,
-  ) {
-    this.useCase = new StartConsultationUseCase(consultationsRepository)
-  }
+  constructor(private readonly useCase: StartConsultationUseCase) {}
 
   @Patch(':consultationId/start')
   @ApiResponse({
