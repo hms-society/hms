@@ -1675,7 +1675,7 @@ dependências funcionais e devem ser integrados em ordem após a aprovação.
 
 Estado: verified.
 
-Os workflows de Core, Server e Web passaram a detectar os caminhos alterados no
+O PR #76 atualiza os workflows de Core, Server e Web para detectar os caminhos alterados no
 PR e a concluir com sucesso quando a camada não é aplicável. Isso evita que um
 PR de contratos Core seja bloqueado por consumidores ainda não integrados em
 `develop`; a validação completa volta a ocorrer quando cada camada entra na

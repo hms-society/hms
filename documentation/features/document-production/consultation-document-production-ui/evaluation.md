@@ -1108,7 +1108,8 @@ e `web-app-ci.yaml` agora detectam os caminhos alterados e pulam somente a
 camada não aplicável, mantendo o check concluído; os 11 snapshots/journal foram
 formatados; e o componente de erro passou a usar `shield-check`.
 
-Sensores locais: YAML dos três workflows válido, `git diff --check` passou nos
+Sensores locais: o PR #76 contém o YAML dos três workflows, validado localmente;
+`git diff --check` passou nos
 heads corrigidos e o ícone foi conferido contra o `IconName`/mapa Lucide
 compartilhado. Os checks remotos devem ser reavaliados nos PRs #71–#75 após os
 novos pushes.
