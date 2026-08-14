@@ -1652,3 +1652,21 @@ implementação da Spec está coerente entre contratos Core, REST, UI e testes; 
 há finding novo bloqueando a entrega. O único blocker permanece o `react-pdf`
 ausente no `document-viewer` preexistente. O veredito detalhado e as evidências
 estão em [`evaluation.md`](./evaluation.md).
+
+## F30 — Entrega dividida em PRs contra `develop`
+
+Estado: verified.
+
+Como o delta excedia o limite de 5.000 linhas relevantes do
+`.github/workflows/check-pr-size.yml`, a entrega foi dividida por fronteiras
+semânticas. Todos os PRs foram publicados diretamente contra `develop`:
+
+- #71 — contratos Core/Validation: 4.433 linhas relevantes;
+- #72 — backend/API, migrations, seed e Inngest: 4.739 linhas relevantes;
+- #73 — Web/listagem e seleção: 3.778 linhas relevantes;
+- #74 — Web/revisão e editor: 3.680 linhas relevantes;
+- #75 — documentação, Plan, evaluation e evidência visual: 0 linhas relevantes.
+
+O `pnpm-lock.yaml` foi incluído no PR #72 após o check de instalação congelada
+identificar a alteração de dependência do servidor. Os PRs declaram as
+dependências funcionais e devem ser integrados em ordem após a aprovação.

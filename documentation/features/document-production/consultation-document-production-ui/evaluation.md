@@ -1083,5 +1083,15 @@ integrados passam e a validação visual confirmou a composição final. O únic
 finding ativo é a dependência/import `react-pdf` ausente no `document-viewer`,
 fora do escopo da feature e já registrado nas avaliações anteriores.
 
-Status final: Spec e Plan concluídos. Nenhum commit ou PR foi criado neste
-encerramento; a avaliação considera o working tree sobre `HEAD 1c557ed6`.
+Status final: Spec e Plan concluídos. A entrega foi publicada em cinco PRs,
+todos contra `develop`, com o limite do workflow respeitado: #71 Core/Validation
+(4.433 linhas relevantes), #72 backend (4.739), #73 Web/listagem (3.778), #74
+Web/revisão (3.680) e #75 documentação (0). O PR #72 recebeu ainda o
+`pnpm-lock.yaml` para manter o frozen install do CI alinhado ao
+`apps/server/package.json`.
+
+Os checks `check-size` passaram nos cinco PRs. Os checks de app que falham ou
+ficam pendentes refletem a dependência funcional entre PRs publicados contra
+`develop`; o blocker de Web relacionado a `react-pdf` permanece preexistente e
+fora do escopo desta Spec. A integração deve seguir Core/Validation, backend,
+Web/listagem, Web/revisão e documentação.
