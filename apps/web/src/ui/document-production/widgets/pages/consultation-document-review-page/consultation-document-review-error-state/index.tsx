@@ -16,7 +16,7 @@ export const ConsultationDocumentReviewErrorState = ({
 }: ConsultationDocumentReviewErrorStateProps) => (
   <main className='mx-auto flex w-full max-w-3xl flex-col items-center gap-4 py-16 text-center'>
     <span className='flex size-12 items-center justify-center rounded-xl bg-muted text-primary'>
-      <Icon name={forbidden ? 'shield' : 'file-text'} />
+      <Icon name={forbidden ? 'shield-check' : 'file-text'} />
     </span>
     <h1 className='font-serif text-2xl font-semibold'>
       {forbidden
