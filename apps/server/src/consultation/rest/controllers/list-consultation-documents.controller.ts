@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { ListConsultationDocumentsUseCase } from '@hms/core/consultation/use-cases'
 import type {
+  DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentsRepository,
   DocumentVersionsRepository,
@@ -35,6 +36,8 @@ export class ListConsultationDocumentsController {
     documentsRepository: DocumentsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
     versionsRepository: DocumentVersionsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
+    generationsRepository: DocumentGenerationsRepository,
   ) {
     this.useCase = new ListConsultationDocumentsUseCase(
       consultationsRepository,
@@ -42,6 +45,7 @@ export class ListConsultationDocumentsController {
       packageDocumentsRepository,
       documentsRepository,
       versionsRepository,
+      generationsRepository,
     )
   }
 
@@ -60,6 +64,7 @@ export class ListConsultationDocumentsController {
     const documents = await this.useCase.execute({
       consultationId,
       collaboratorId: collaborator.collaboratorId,
+      collaboratorProfile: collaborator.profile,
     })
     return documents.map(ListConsultationDocumentsResponseDto.fromDomain)
   }

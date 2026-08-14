@@ -38,7 +38,7 @@ describe('Select Current Consultation Document Version Use Case', () => {
     )
   })
 
-  it('selects an approved version as current', async () => {
+  it('allows an administrator to select a current version in any consultation', async () => {
     const consultation = ConsultationFaker.fake()
     const version = DocumentVersionFaker.fake({ status: 'approved' })
     const document = DocumentFaker.fake({
@@ -71,7 +71,8 @@ describe('Select Current Consultation Document Version Use Case', () => {
         consultationId: consultation.id,
         documentId: document.id,
         documentVersionId: version.id,
-        selectedByCollaboratorId: consultation.assignedLawyerId,
+        selectedByCollaboratorId: 'admin-collaborator-id',
+        selectedByCollaboratorProfile: 'admin',
       }),
     ).resolves.toEqual(document)
     expect(documentsRepository.replace).toHaveBeenCalledWith(document.id, {

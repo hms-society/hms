@@ -118,22 +118,12 @@ export class IdentitySeeder {
       throw new AppError('AuthAdministrationProvider is required to clear users')
     }
 
-    const authCleanupResults = await Promise.allSettled(
-      DEFAULT_USERS.map(async ({ email }) => {
-        const authUser = await authAdministrationProvider.findUserByEmail(email)
-        if (authUser) await authAdministrationProvider.removeUser(authUser.authUserId)
-      }),
-    )
+    await authAdministrationProvider.removeAllUsers()
 
     await this.clientsRepository.removeAll()
     await this.registrationAttemptsRepository.removeAll()
     await this.collaboratorsRepository.removeAll()
     await this.usersRepository.removeAll()
-
-    const authCleanupFailure = authCleanupResults.find(
-      (result): result is PromiseRejectedResult => result.status === 'rejected',
-    )
-    if (authCleanupFailure) throw authCleanupFailure.reason
   }
 
   async seedUsers(

@@ -2,6 +2,10 @@ import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 import type { DocumentVersion } from '../../document-production/domain/entities'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 import { DocumentVersionConflictError } from '../../document-production/domain/errors'
 import type {
   DocumentPackagesRepository,
@@ -24,6 +28,7 @@ type Request = {
   readonly documentId: string
   readonly documentVersionId: string
   readonly reviewedByCollaboratorId: string
+  readonly reviewedByCollaboratorProfile: CollaboratorProfileValue
   readonly decision: Extract<DocumentVersionStatusType, 'approved' | 'rejected'>
   readonly rejectionReason?: string
 }
@@ -44,7 +49,10 @@ export class ReviewConsultationDocumentVersionUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.reviewedByCollaboratorId) {
+    if (
+      request.reviewedByCollaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.reviewedByCollaboratorId
+    ) {
       throw new ConsultationDocumentAccessDeniedError()
     }
 

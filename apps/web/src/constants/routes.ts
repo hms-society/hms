@@ -28,7 +28,25 @@ export const ROUTES = {
   documentSpecifications: '/modelos-de-documentos',
   newDocumentSpecification: '/modelos-de-documentos/novo',
   documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
+  consultationDocuments: '/consultas/$consultationId/documentos',
+  consultationDocumentVersion:
+    '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId',
 } as const
 
 export type RouteName = keyof typeof ROUTES
 export type RoutePath = (typeof ROUTES)[RouteName]
+
+export function buildConsultationDocumentsPath(consultationId: string): string {
+  return ROUTES.consultationDocuments.replace('$consultationId', consultationId)
+}
+
+export function buildConsultationDocumentVersionPath(params: {
+  consultationId: string
+  documentId: string
+  documentVersionId: string
+}): string {
+  return ROUTES.consultationDocumentVersion
+    .replace('$consultationId', params.consultationId)
+    .replace('$documentId', params.documentId)
+    .replace('$documentVersionId', params.documentVersionId)
+}

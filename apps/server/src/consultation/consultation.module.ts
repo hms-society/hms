@@ -4,12 +4,15 @@ import { ConsultationDatabaseModule } from '@/consultation/database/consultation
 import { ConsultationMessagingModule } from '@/consultation/messaging/consultation-messaging.module'
 import {
   GenerateConsultationDocumentController,
+  CancelConsultationDocumentGenerationController,
   GenerateConsultationDocumentsController,
+  GetConsultationDocumentSelectionController,
   GetConsultationDocumentVersionController,
   ListConsultationDocumentsController,
   ReviewConsultationDocumentVersionController,
   SaveManualConsultationDocumentVersionController,
   SelectCurrentConsultationDocumentVersionController,
+  ReplaceConsultationDocumentSelectionController,
 } from '@/consultation/rest/controllers'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
@@ -32,13 +35,16 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     ProvisionModule,
   ],
   controllers: [
+    CancelConsultationDocumentGenerationController,
     GenerateConsultationDocumentController,
     GenerateConsultationDocumentsController,
+    GetConsultationDocumentSelectionController,
     GetConsultationDocumentVersionController,
     ListConsultationDocumentsController,
     ReviewConsultationDocumentVersionController,
     SaveManualConsultationDocumentVersionController,
     SelectCurrentConsultationDocumentVersionController,
+    ReplaceConsultationDocumentSelectionController,
   ],
   exports: [ConsultationDatabaseModule, ConsultationMessagingModule],
 })

@@ -76,6 +76,25 @@ export class DrizzleDocumentGenerationsRepository
     return record ? this.mapper.toDomain(record) : undefined
   }
 
+  async findLatestByDocumentIds(documentIds: readonly string[]) {
+    if (documentIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(documentGenerationModel)
+      .where(inArray(documentGenerationModel.documentId, [...documentIds]))
+      .orderBy(desc(documentGenerationModel.createdAt))
+
+    const latestByDocumentId = new Map<string, (typeof records)[number]>()
+    for (const record of records) {
+      if (!latestByDocumentId.has(record.documentId)) {
+        latestByDocumentId.set(record.documentId, record)
+      }
+    }
+
+    return [...latestByDocumentId.values()].map((record) => this.mapper.toDomain(record))
+  }
+
   async replace(
     documentGenerationId: string,
     changes: DocumentGenerationUpdate,

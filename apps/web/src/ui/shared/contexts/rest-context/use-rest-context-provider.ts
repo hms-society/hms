@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react'
 
 import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
+import { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
 import { IntakeService } from '@/rest/services/intake-service'
 import { IdentityService } from '@/rest/services/identity-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
@@ -41,6 +42,8 @@ export function useRestContextProvider(): RestContextValue {
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
+    consultationDocumentProductionService:
+      ConsultationDocumentProductionService(restClient),
     documentService: documentService(restClient),
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),

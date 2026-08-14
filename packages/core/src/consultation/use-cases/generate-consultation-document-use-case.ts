@@ -4,6 +4,10 @@ import type { Intake } from '../../intake/domain/entities'
 import type { IntakesRepository } from '../../intake/interfaces'
 import type { Client } from '../../identity/domain/entities'
 import type { ClientsRepository } from '../../identity/interfaces'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 import type {
   LegalExpertiseCatalogProvider,
   LegalExpertiseCatalogResolution,
@@ -24,6 +28,7 @@ import type { Consultation } from '../domain/entities'
 import {
   ConsultationDocumentAccessDeniedError,
   ConsultationDocumentNotFoundError,
+  InvalidConsultationDocumentGenerationInstructionsError,
   ConsultationNotFoundError,
 } from '../domain/errors'
 import type { ConsultationDocumentGeneration } from '../domain/structures'
@@ -32,7 +37,9 @@ import type { ConsultationsRepository } from '../interfaces'
 type Request = {
   readonly consultationId: string
   readonly documentId: string
+  readonly instructions?: string
   readonly requestedByCollaboratorId: string
+  readonly requestedByCollaboratorProfile: CollaboratorProfileValue
 }
 
 export class GenerateConsultationDocumentUseCase
@@ -52,6 +59,10 @@ export class GenerateConsultationDocumentUseCase
   ) {}
 
   async execute(request: Request): Promise<ConsultationDocumentGeneration> {
+    const instructions = request.instructions?.trim()
+    if (request.instructions !== undefined && !instructions) {
+      throw new InvalidConsultationDocumentGenerationInstructionsError()
+    }
     const { consultation, intake, client, legalContext } = await this.loadContext(request)
     const packageDocument = await this.findPackageDocument(
       consultation.id,
@@ -76,6 +87,7 @@ export class GenerateConsultationDocumentUseCase
       documentId: request.documentId,
       documentSpecificationVersionId: packageDocument.documentSpecificationId,
       requestedByCollaboratorId: request.requestedByCollaboratorId,
+      ...(instructions ? { instructions } : {}),
       source: this.buildGenerationSource(consultation, intake, client, legalContext),
       occurredAt: this.datetimeProvider.now(),
     })
@@ -95,7 +107,10 @@ export class GenerateConsultationDocumentUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.requestedByCollaboratorId) {
+    if (
+      request.requestedByCollaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.requestedByCollaboratorId
+    ) {
       throw new ConsultationDocumentAccessDeniedError()
     }
 

@@ -1,3 +1,6 @@
 export * from './consultation-document-access-denied-error'
 export * from './consultation-document-not-found-error'
+export * from './consultation-document-selection-removal-error'
+export * from './invalid-consultation-document-selection-error'
 export * from './consultation-not-found-error'
+export * from './invalid-consultation-document-generation-instructions-error'

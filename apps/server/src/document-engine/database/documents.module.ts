@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { CommunicationModule } from '@/shared/communication/communication.module'
+import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
-import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
 import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
@@ -17,6 +17,7 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
+    DocumentEngineMessagingModule,
   ],
   controllers: [
     InternalUploadController,
@@ -24,7 +25,6 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     GetDocumentFileController,
   ],
   providers: [
-    ProcessWhatsappBatchWorker,
     {
       provide: ListClientDocumentBatchUseCase,
       useFactory: (repository: DocumentBatchesRepository) => {
@@ -33,6 +33,6 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
   ],
-  exports: [ListClientDocumentBatchUseCase],
+  exports: [ListClientDocumentBatchUseCase, DocumentEngineMessagingModule],
 })
 export class DocumentsModule {}

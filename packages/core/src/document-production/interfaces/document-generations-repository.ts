@@ -9,6 +9,9 @@ export interface DocumentGenerationsRepository {
   removeAll(): Promise<void>
   findById(documentGenerationId: string): Promise<DocumentGeneration | undefined>
   findLatestByDocumentId(documentId: string): Promise<DocumentGeneration | undefined>
+  findLatestByDocumentIds(
+    documentIds: readonly string[],
+  ): Promise<readonly DocumentGeneration[]>
   replace(
     documentGenerationId: string,
     changes: DocumentGenerationUpdate,

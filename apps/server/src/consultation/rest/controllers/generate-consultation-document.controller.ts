@@ -1,5 +1,6 @@
 import {
   HttpCode,
+  Body,
   HttpStatus,
   Inject,
   Param,
@@ -19,6 +20,8 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type { LegalExpertiseCatalogProvider } from '@hms/core/legal-catalog/interfaces'
+import { generateConsultationDocumentSchema } from '@hms/validation/document-production'
+import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
 import { ConsultationsController } from '@/consultation/decorators'
@@ -33,6 +36,8 @@ import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+
+type RequestBody = Parameters<GenerateConsultationDocumentUseCase['execute']>[0]
 
 @ConsultationsController()
 @ApiBearerAuth()
@@ -81,16 +86,27 @@ export class GenerateConsultationDocumentController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: ErrorResponseDto })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, type: ErrorResponseDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, type: ErrorResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: ErrorResponseDto })
   @ApiResponse({ status: HttpStatus.CONFLICT, type: ErrorResponseDto })
   handle(
     @Param('consultationId', new ParseUUIDPipe()) consultationId: string,
     @Param('documentId', new ParseUUIDPipe()) documentId: string,
+    @Body(new ZodValidationPipe(generateConsultationDocumentSchema))
+    body: Omit<
+      RequestBody,
+      | 'consultationId'
+      | 'documentId'
+      | 'requestedByCollaboratorId'
+      | 'requestedByCollaboratorProfile'
+    >,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<ConsultationDocumentGenerationResponseDto> {
     return this.useCase.execute({
       consultationId,
       documentId,
+      instructions: body.instructions,
       requestedByCollaboratorId: collaborator.collaboratorId,
+      requestedByCollaboratorProfile: collaborator.profile,
     })
   }
 }

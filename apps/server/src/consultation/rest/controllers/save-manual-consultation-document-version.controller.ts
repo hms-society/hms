@@ -99,6 +99,7 @@ export class SaveManualConsultationDocumentVersionController {
         documentId,
         sourceDocumentVersionId,
         createdByCollaboratorId: collaborator.collaboratorId,
+        createdByCollaboratorProfile: collaborator.profile,
         content: body.content,
       })
       .then(ConsultationDocumentVersionResponseDto.fromDomain)

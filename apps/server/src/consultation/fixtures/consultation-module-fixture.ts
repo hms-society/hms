@@ -2,14 +2,17 @@ import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import { UnauthorizedException } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
+import type { DocumentGenerationCreation } from '@hms/core/document-production/domain/entities'
+import { DocumentGenerationFaker } from '@hms/core/document-production/domain/entities/fakers'
+import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import type {
+  DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentSpecificationsRepository,
   DocumentVersionsRepository,
   DocumentsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
-import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import type { User, UserCreation } from '@hms/core/identity/domain/entities'
 import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
@@ -52,6 +55,7 @@ export class ConsultationModuleFixture {
     readonly documentVersionsRepository: DocumentVersionsRepository,
     readonly documentPackagesRepository: DocumentPackagesRepository,
     readonly packageDocumentsRepository: PackageDocumentsRepository,
+    readonly documentGenerationsRepository: DocumentGenerationsRepository,
     private readonly usersRepository: ReturnType<
       typeof ConsultationModuleFixture.resolveUsersRepository
     >,
@@ -116,6 +120,7 @@ export class ConsultationModuleFixture {
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.versions),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages),
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments),
+      restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.generations),
       ConsultationModuleFixture.resolveUsersRepository(restFixture),
       ConsultationModuleFixture.resolveCollaboratorsRepository(restFixture),
       authentication,
@@ -244,6 +249,31 @@ export class ConsultationModuleFixture {
       createdAt: new Date('2026-08-12T18:00:00.000Z'),
       status: 'in_review',
       ...overrides,
+    })
+  }
+
+  seedDocumentGeneration(
+    documentId: string,
+    requestedByCollaboratorId: string,
+    overrides: Partial<DocumentGenerationCreation> = {},
+  ) {
+    const generation = DocumentGenerationFaker.fake({
+      documentId,
+      requestedByCollaboratorId,
+      status: 'running',
+      ...overrides,
+    })
+
+    return this.documentGenerationsRepository.add({
+      id: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: generation.documentSpecificationVersionId,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source: generation.source,
+      template: generation.template,
+      status: generation.status,
+      attemptsCount: generation.attemptsCount,
+      findings: generation.findings,
     })
   }
 

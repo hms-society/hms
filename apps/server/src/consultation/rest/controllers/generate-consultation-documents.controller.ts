@@ -92,6 +92,7 @@ export class GenerateConsultationDocumentsController {
     return this.useCase.execute({
       consultationId,
       requestedByCollaboratorId: collaborator.collaboratorId,
+      requestedByCollaboratorProfile: collaborator.profile,
     })
   }
 }

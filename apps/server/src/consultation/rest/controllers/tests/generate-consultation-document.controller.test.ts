@@ -34,6 +34,7 @@ describe('Generate Consultation Document Controller [POST /consultations/:consul
     const response = await request(fixture.app.getHttpServer())
       .post(`/consultations/${consultation.id}/documents/${document.id}/generations`)
       .set('Authorization', fixture.authenticateAs(user))
+      .send({ instructions: 'Atualizar a qualificação das partes.' })
       .expect(202)
 
     expect(response.body).toMatchObject({ documentId: document.id })
@@ -63,6 +64,30 @@ describe('Generate Consultation Document Controller [POST /consultations/:consul
               },
             }),
           }),
+          instructions: 'Atualizar a qualificação das partes.',
+        }),
+      }),
+    )
+  })
+
+  it('requests generation without a body for the initial document production', async () => {
+    const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const consultation = await fixture.seedConsultation(
+      ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
+    )
+    const document = await fixture.seedDocument(consultation.id)
+
+    const response = await request(fixture.app.getHttpServer())
+      .post(`/consultations/${consultation.id}/documents/${document.id}/generations`)
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(202)
+
+    expect(response.body).toMatchObject({ documentId: document.id })
+    expect(fixture.broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'document-production/document.generation-requested',
+        payload: expect.objectContaining({
+          documentId: document.id,
         }),
       }),
     )

@@ -57,7 +57,7 @@ describe('Save Manual Consultation Document Version Use Case', () => {
     )
   })
 
-  it('exports and saves an edited immutable version with pending markers', async () => {
+  it('allows an administrator to save a manual version in any consultation', async () => {
     const consultation = ConsultationFaker.fake()
     const document = DocumentFaker.fake()
     const sourceVersion = DocumentVersionFaker.fake({ documentId: document.id })
@@ -125,7 +125,8 @@ describe('Save Manual Consultation Document Version Use Case', () => {
         consultationId: consultation.id,
         documentId: document.id,
         sourceDocumentVersionId: sourceVersion.id,
-        createdByCollaboratorId: consultation.assignedLawyerId,
+        createdByCollaboratorId: 'admin-collaborator-id',
+        createdByCollaboratorProfile: 'admin',
         content,
       }),
     ).resolves.toEqual(saved)

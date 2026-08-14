@@ -52,6 +52,26 @@ export class DrizzlePackageDocumentsRepository
     return records.map((record) => this.mapper.toDomain(record))
   }
 
+  async replaceForDocumentPackage(
+    documentPackageId: string,
+    packageDocuments: readonly PackageDocumentCreation[],
+  ) {
+    return this.database.transaction(async (transaction) => {
+      await transaction
+        .delete(packageDocumentModel)
+        .where(eq(packageDocumentModel.documentPackageId, documentPackageId))
+
+      if (packageDocuments.length === 0) return []
+
+      const records = await transaction
+        .insert(packageDocumentModel)
+        .values(packageDocuments.map((packageDocument) => ({ ...packageDocument })))
+        .returning()
+
+      return records.map((record) => this.mapper.toDomain(record))
+    })
+  }
+
   async removeAll() {
     await this.database.delete(packageDocumentModel)
   }

@@ -31,7 +31,7 @@ describe('Get Consultation Document Version Use Case', () => {
     )
   })
 
-  it('returns a version belonging to the consultation document', async () => {
+  it('allows an administrator to read any consultation document version', async () => {
     const consultation = ConsultationFaker.fake()
     const version = DocumentVersionFaker.fake()
     consultationsRepository.findById.mockResolvedValue(consultation)
@@ -59,7 +59,8 @@ describe('Get Consultation Document Version Use Case', () => {
         consultationId: consultation.id,
         documentId: version.documentId,
         documentVersionId: version.id,
-        collaboratorId: consultation.assignedLawyerId,
+        collaboratorId: 'admin-collaborator-id',
+        collaboratorProfile: 'admin',
       }),
     ).resolves.toEqual(version)
   })

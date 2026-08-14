@@ -1,6 +1,10 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 
 import type { Document } from '../../document-production/domain/entities'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 import { DocumentVersionNotApprovedError } from '../../document-production/domain/errors'
 import { DocumentVersionStatus } from '../../document-production/domain/structures'
 import type {
@@ -21,6 +25,7 @@ type Request = {
   readonly documentId: string
   readonly documentVersionId: string
   readonly selectedByCollaboratorId: string
+  readonly selectedByCollaboratorProfile: CollaboratorProfileValue
 }
 
 export class SelectCurrentConsultationDocumentVersionUseCase
@@ -55,7 +60,10 @@ export class SelectCurrentConsultationDocumentVersionUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.selectedByCollaboratorId) {
+    if (
+      request.selectedByCollaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.selectedByCollaboratorId
+    ) {
       throw new ConsultationDocumentAccessDeniedError()
     }
     const documentPackage = await this.documentPackagesRepository.findByContext({

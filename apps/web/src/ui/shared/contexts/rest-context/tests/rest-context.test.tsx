@@ -6,14 +6,34 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import { RestContext, RestContextProvider } from '../index'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-const services = {
-  intakeService: {},
-  identityService: {},
-  legalCatalogService: {},
-}
+const { getSessionMock, navigateToMock, restClient, signOutMock } = vi.hoisted(() => {
+  const client = {
+    get: vi.fn(),
+    patch: vi.fn(),
+    post: vi.fn(),
+  }
 
-vi.mock('../use-rest-context-provider', () => ({
-  useRestContextProvider: () => services,
+  return {
+    getSessionMock: vi.fn(),
+    navigateToMock: vi.fn(),
+    restClient: client,
+    signOutMock: vi.fn(),
+  }
+})
+
+vi.mock('@/rest/axios/axios-rest-client', () => ({
+  AxiosRestClient: vi.fn(() => restClient),
+}))
+
+vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
+  useAuthContext: () => ({
+    getSession: getSessionMock,
+    signOut: signOutMock,
+  }),
+}))
+
+vi.mock('@/ui/shared/hooks/use-navigation', () => ({
+  useNavigation: () => ({ navigateTo: navigateToMock }),
 }))
 
 describe('RestContext', () => {
@@ -27,11 +47,19 @@ describe('RestContext', () => {
     ).toThrow(AppError)
   })
 
-  it('exposes Identity and preserves Intake inside the provider', () => {
+  it('registers the consultation document service with the shared authenticated client', async () => {
     const { result } = renderHook(() => useRestContext(), {
       wrapper: ({ children }) => <RestContextProvider>{children}</RestContextProvider>,
     })
 
-    expect(result.current).toEqual(services)
+    restClient.get.mockResolvedValue({})
+
+    await result.current.consultationDocumentProductionService.listDocuments(
+      'consultation-id',
+    )
+
+    expect(restClient.get).toHaveBeenCalledWith(
+      '/consultations/consultation-id/documents',
+    )
   })
 })

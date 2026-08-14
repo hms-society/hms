@@ -176,6 +176,20 @@
       "when": 1786568713782,
       "tag": "0024_strong_quasar",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1786733880174,
+      "tag": "0025_repair_document_batch_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1786734142854,
+      "tag": "0026_create_documents_storage_bucket",
+      "breakpoints": true
     }
   ]
 }

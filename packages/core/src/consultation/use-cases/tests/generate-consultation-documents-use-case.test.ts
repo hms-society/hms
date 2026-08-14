@@ -57,7 +57,7 @@ describe('Generate Consultation Documents Use Case', () => {
     )
   })
 
-  it('publishes only documents that have never been generated', async () => {
+  it('allows an administrator to batch-generate documents in any consultation', async () => {
     const consultation = ConsultationFaker.fake()
     const intake = {
       id: consultation.intakeId,
@@ -120,7 +120,8 @@ describe('Generate Consultation Documents Use Case', () => {
     await expect(
       useCase.execute({
         consultationId: consultation.id,
-        requestedByCollaboratorId: consultation.assignedLawyerId,
+        requestedByCollaboratorId: 'admin-collaborator-id',
+        requestedByCollaboratorProfile: 'admin',
       }),
     ).resolves.toEqual([
       {
@@ -190,6 +191,7 @@ describe('Generate Consultation Documents Use Case', () => {
       useCase.execute({
         consultationId: consultation.id,
         requestedByCollaboratorId: consultation.assignedLawyerId,
+        requestedByCollaboratorProfile: 'lawyer',
       }),
     ).resolves.toEqual([])
     expect(broker.publish).not.toHaveBeenCalled()

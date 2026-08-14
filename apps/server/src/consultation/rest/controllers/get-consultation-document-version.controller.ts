@@ -58,6 +58,7 @@ export class GetConsultationDocumentVersionController {
         documentId,
         documentVersionId,
         collaboratorId: collaborator.collaboratorId,
+        collaboratorProfile: collaborator.profile,
       })
       .then(ConsultationDocumentVersionResponseDto.fromDomain)
   }

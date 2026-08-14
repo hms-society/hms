@@ -3,6 +3,10 @@ import type { Intake } from '../../intake/domain/entities'
 import type { IntakesRepository } from '../../intake/interfaces'
 import type { Client } from '../../identity/domain/entities'
 import type { ClientsRepository } from '../../identity/interfaces'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 import type {
   LegalExpertiseCatalogProvider,
   LegalExpertiseCatalogResolution,
@@ -27,6 +31,7 @@ import type { ConsultationsRepository } from '../interfaces'
 type Request = {
   readonly consultationId: string
   readonly requestedByCollaboratorId: string
+  readonly requestedByCollaboratorProfile: CollaboratorProfileValue
 }
 
 export class GenerateConsultationDocumentsUseCase
@@ -100,7 +105,10 @@ export class GenerateConsultationDocumentsUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.requestedByCollaboratorId) {
+    if (
+      request.requestedByCollaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.requestedByCollaboratorId
+    ) {
       throw new ConsultationDocumentAccessDeniedError()
     }
 

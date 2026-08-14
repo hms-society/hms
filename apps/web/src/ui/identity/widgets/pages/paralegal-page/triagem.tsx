@@ -384,7 +384,7 @@ export function Triagem() {
         </div>
       )}
       <Dialog open={!!selectedBatch} onOpenChange={(open) => !open && handleCloseModal()}>
-        <DialogContent className='w-[92vw] sm:max-w-md max-h-[90vh] p-4 sm:p-6 rounded-3xl bg-white border-none shadow-xl flex flex-col gap-0 [&>button]:hidden font-sans'>
+        <DialogContent className='w-[92vw] sm:max-w-lg max-h-[90vh] p-4 sm:p-6 rounded-3xl bg-white border-none shadow-xl flex flex-col gap-0 [&>button]:hidden font-sans'>
           <DialogHeader className='p-0 space-y-0 hidden'>
             <DialogTitle className='font-serif'>Confirmar Vínculo</DialogTitle>
           </DialogHeader>
@@ -547,7 +547,7 @@ export function Triagem() {
         open={!!rejectingBatch}
         onOpenChange={(open) => !open && handleCloseRejectModal()}
       >
-        <DialogContent className='w-[92vw] sm:max-w-md p-4 sm:p-6 rounded-3xl bg-white border-none shadow-xl flex flex-col items-center text-center gap-4 sm:gap-5 [&>button]:hidden font-sans'>
+        <DialogContent className='w-[92vw] sm:max-w-lg p-4 sm:p-6 rounded-3xl bg-white border-none shadow-xl flex flex-col items-center text-center gap-4 sm:gap-5 [&>button]:hidden font-sans'>
           <DialogHeader className='p-0 space-y-0 hidden'>
             <DialogTitle className='font-serif'>Rejeitar Lote</DialogTitle>
           </DialogHeader>

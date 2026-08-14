@@ -35,7 +35,7 @@ describe('Review Consultation Document Version Use Case', () => {
     )
   })
 
-  it('records the assigned lawyer decision and review time', async () => {
+  it('allows an administrator to review any consultation document version', async () => {
     const consultation = ConsultationFaker.fake()
     const version = DocumentVersionFaker.fake()
     const reviewedAt = new Date('2026-08-12T19:00:00.000Z')
@@ -67,14 +67,15 @@ describe('Review Consultation Document Version Use Case', () => {
         consultationId: consultation.id,
         documentId: version.documentId,
         documentVersionId: version.id,
-        reviewedByCollaboratorId: consultation.assignedLawyerId,
+        reviewedByCollaboratorId: 'admin-collaborator-id',
+        reviewedByCollaboratorProfile: 'admin',
         decision: 'approved',
       }),
     ).resolves.toEqual(approved)
     expect(versionsRepository.review).toHaveBeenCalledWith(
       version.id,
       'approved',
-      consultation.assignedLawyerId,
+      'admin-collaborator-id',
       reviewedAt,
       undefined,
     )

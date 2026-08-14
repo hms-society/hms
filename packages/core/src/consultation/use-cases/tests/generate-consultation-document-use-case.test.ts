@@ -54,7 +54,7 @@ describe('Generate Consultation Document Use Case', () => {
     )
   })
 
-  it('publishes a generation request with consultation and intake data', async () => {
+  it('allows an administrator to generate a document in any consultation', async () => {
     const consultation = ConsultationFaker.fake()
     const intake = {
       id: consultation.intakeId,
@@ -109,7 +109,9 @@ describe('Generate Consultation Document Use Case', () => {
       useCase.execute({
         consultationId: consultation.id,
         documentId,
-        requestedByCollaboratorId: consultation.assignedLawyerId,
+        instructions: '  Atualizar a qualificação das partes.  ',
+        requestedByCollaboratorId: 'admin-collaborator-id',
+        requestedByCollaboratorProfile: 'admin',
       }),
     ).resolves.toEqual({ documentGenerationId: generationId, documentId })
     expect(broker.publish).toHaveBeenCalledWith(
@@ -119,6 +121,7 @@ describe('Generate Consultation Document Use Case', () => {
           documentGenerationId: generationId,
           documentId,
           documentSpecificationVersionId: documentSpecificationId,
+          instructions: 'Atualizar a qualificação das partes.',
           source: {
             type: 'consultation',
             id: consultation.id,
@@ -161,6 +164,7 @@ describe('Generate Consultation Document Use Case', () => {
         consultationId: consultation.id,
         documentId: 'a7b4f7c1-98e8-4f20-a5a6-30d35ee694d2',
         requestedByCollaboratorId: '2f952206-5e7d-4930-bd46-e55cded671fc',
+        requestedByCollaboratorProfile: 'lawyer',
       }),
     ).rejects.toBeInstanceOf(ConsultationDocumentAccessDeniedError)
     expect(broker.publish).not.toHaveBeenCalled()

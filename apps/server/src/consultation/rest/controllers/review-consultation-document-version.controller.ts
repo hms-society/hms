@@ -81,6 +81,7 @@ export class ReviewConsultationDocumentVersionController {
         documentId,
         documentVersionId,
         reviewedByCollaboratorId: collaborator.collaboratorId,
+        reviewedByCollaboratorProfile: collaborator.profile,
         decision: body.decision,
         rejectionReason: 'rejectionReason' in body ? body.rejectionReason : undefined,
       })

@@ -73,6 +73,7 @@ export class SelectCurrentConsultationDocumentVersionController {
         documentId,
         documentVersionId,
         selectedByCollaboratorId: collaborator.collaboratorId,
+        selectedByCollaboratorProfile: collaborator.profile,
       })
       .then(SelectCurrentConsultationDocumentVersionResponseDto.fromDomain)
   }

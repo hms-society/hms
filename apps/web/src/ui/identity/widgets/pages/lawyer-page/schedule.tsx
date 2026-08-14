@@ -397,7 +397,7 @@ export const Schedule = () => {
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
+        <DialogContent className='sm:max-w-xl rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
             <DialogTitle className='font-serif text-[18px] text-foreground'>
               Adicionar intervalo
@@ -454,7 +454,7 @@ export const Schedule = () => {
       </Dialog>
 
       <Dialog open={modalBlockOpen} onOpenChange={setModalBlockOpen}>
-        <DialogContent className='sm:max-w-[420px] rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
+        <DialogContent className='sm:max-w-xl rounded-2xl p-4 sm:p-6 w-[92vw] sm:w-full'>
           <DialogHeader className='pb-4 border-b border-border'>
             <DialogTitle className='font-serif text-[18px] text-foreground'>
               Adicionar bloqueio

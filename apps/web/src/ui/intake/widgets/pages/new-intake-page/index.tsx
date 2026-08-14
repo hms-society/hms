@@ -199,7 +199,7 @@ export const NewIntakePage = () => {
       </form>
 
       <AlertDialog open={isClosureDialogOpen} onOpenChange={handleClosureDialogChange}>
-        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-[480px]'>
+        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-lg'>
           <AlertDialogHeader className='relative place-items-start gap-1 p-5 pr-14 text-left'>
             <AlertDialogTitle className='font-serif text-xl font-semibold'>
               Encerrar sem contratação?

@@ -18,6 +18,7 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 
 const inputSchema = z.object({
   documentGenerationId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
 })
 
@@ -26,6 +27,7 @@ const outputSchema = z.object({
   documentId: z.string().uuid(),
   documentSpecificationVersionId: z.string().uuid(),
   requestedByCollaboratorId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
   template: z.object({
     name: z.string(),
@@ -76,7 +78,11 @@ export class LoadDocumentGenerationTool {
           documentGenerationId: input.documentGenerationId,
         })
 
-        return this.serializeDocumentGeneration(generation, input.source)
+        return this.serializeDocumentGeneration(
+          generation,
+          input.source,
+          input.instructions,
+        )
       },
     })
   }
@@ -84,12 +90,14 @@ export class LoadDocumentGenerationTool {
   private serializeDocumentGeneration(
     generation: DocumentGeneration,
     source: Output['source'],
+    instructions: Output['instructions'],
   ): Output {
     return {
       id: generation.id,
       documentId: generation.documentId,
       documentSpecificationVersionId: generation.documentSpecificationVersionId,
       requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      instructions,
       source,
       template: {
         name: generation.template.name,
