@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   HttpStatus,
-  Inject,
   NotFoundException,
   Param,
   ParseUUIDPipe,
@@ -12,7 +11,6 @@ import {
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { updateClientQualificationSchema } from '@hms/validation/consultation'
 import { ZodValidationPipe } from 'nestjs-zod'
-import { CONSULTATIONS_REPOSITORY } from '../../consultation.module'
 import { DrizzleConsultationsRepository } from '../../repository/drizzle-consultations-repository'
 import { UpdateClientQualificationDto } from './dto/update-client-qualification.dto'
 import { AuthGuard } from '@/identity/guards'
@@ -23,12 +21,9 @@ import { ErrorResponseDto } from '@/shared/rest/dtos'
 @Controller('consultations')
 @UseGuards(AuthGuard)
 export class UpdateClientQualificationController {
-  constructor(
-    @Inject(CONSULTATIONS_REPOSITORY)
-    private readonly consultationsRepository: DrizzleConsultationsRepository,
-  ) {}
+  constructor(private readonly consultationsRepository: DrizzleConsultationsRepository) {}
 
-  @Patch(':consultationId/qualification')
+  @Patch(':id/qualification')
   @ApiBody({ type: UpdateClientQualificationDto })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -45,7 +40,7 @@ export class UpdateClientQualificationController {
     type: ErrorResponseDto,
   })
   async handle(
-    @Param('consultationId', new ParseUUIDPipe())
+    @Param('id', new ParseUUIDPipe())
     consultationId: string,
     @Body(new ZodValidationPipe(updateClientQualificationSchema))
     body: UpdateClientQualificationDto,

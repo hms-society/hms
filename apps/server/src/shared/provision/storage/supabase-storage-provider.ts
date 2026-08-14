@@ -17,8 +17,17 @@ export class SupabaseStorageProvider implements StorageProvider {
   }
 
   async upload(path: string, file: Uint8Array, mimeType: string): Promise<string> {
+    // Ensure the bucket exists
+    if (this.bucketName) {
+      await this.supabase.storage
+        .createBucket(this.bucketName, {
+          public: true,
+        })
+        .catch(() => {})
+    }
+
     const { error } = await this.supabase.storage
-      .from(this.bucketName)
+      .from(this.bucketName || 'documents')
       .upload(path, file, {
         contentType: mimeType,
         upsert: true,

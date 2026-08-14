@@ -2,16 +2,13 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Inject,
   NotFoundException,
   Param,
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
-import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { GetConsultationByIdUseCase } from '@hms/core/consultation/use-cases'
-import { CONSULTATIONS_REPOSITORY } from '../../consultation.module'
 import { AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
@@ -20,14 +17,7 @@ import { ErrorResponseDto } from '@/shared/rest/dtos'
 @Controller('consultations')
 @UseGuards(AuthGuard)
 export class GetConsultationByIdController {
-  private readonly useCase: GetConsultationByIdUseCase
-
-  constructor(
-    @Inject(CONSULTATIONS_REPOSITORY)
-    consultationsRepository: ConsultationsRepository,
-  ) {
-    this.useCase = new GetConsultationByIdUseCase(consultationsRepository)
-  }
+  constructor(private readonly useCase: GetConsultationByIdUseCase) {}
 
   @Get(':consultationId')
   @ApiResponse({
@@ -49,11 +39,22 @@ export class GetConsultationByIdController {
     consultationId: string,
   ) {
     try {
-      return await this.useCase.execute(consultationId)
+      const consultation = await this.useCase.execute(consultationId)
+
+      if (!consultation) {
+        throw new NotFoundException('A consulta não foi encontrada.')
+      }
+
+      return consultation
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error
+      }
+
       if (error instanceof Error && error.message === 'Consulta não encontrada.') {
         throw new NotFoundException(error.message)
       }
+
       throw error
     }
   }

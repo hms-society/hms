@@ -1,86 +1,117 @@
-# Fluxo de Integração do WhatsApp
+# Fluxo Completo de Integração do WhatsApp (Inbound & Outbound)
 
-Este diagrama ilustra a interação entre o `WhatsappWebhookController` (fluxo de entrada / inbound) e o `WhatsappProvider` (fluxo de saída / outbound).
+Este documento descreve a arquitetura de integração do WhatsApp no HMS, detalhando os papéis da tabela `private_messages` (mensagens diretas entre Advogado/Colaborador e Cliente) e da tabela `communications` (notificações oficiais do sistema/e-mail).
+
+---
+
+## 🎨 Diagrama Unificado da Arquitetura WhatsApp (Inbound & Outbound)
 
 ```mermaid
 graph TD
-    %% Estilos Gerais
-    classDef hms fill:#2563eb,stroke:#1d4ed8,color:#ffffff,stroke-width:2px;
+    %% Estilos de nós
+    classDef client fill:#10b981,stroke:#047857,color:#ffffff,stroke-width:2px;
     classDef meta fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
-    classDef user fill:#10b981,stroke:#047857,color:#ffffff,stroke-width:2px;
-    classDef database fill:#f59e0b,stroke:#d97706,color:#ffffff,stroke-width:2px;
+    classDef server fill:#2563eb,stroke:#1d4ed8,color:#ffffff,stroke-width:2px;
+    classDef web fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+    classDef db fill:#f59e0b,stroke:#d97706,color:#ffffff,stroke-width:2px;
 
-    %% Elementos
-    User(["👤 Usuário no WhatsApp"]):::user
-    Meta["🌐 Meta (WhatsApp Cloud API)"]:::meta
-    
-    subgraph HMS_App ["HMS (apps/server)"]
-        Controller["🔌 WhatsappWebhookController<br/>(GET/POST /integrations/whatsapp/webhook)"]:::hms
-        Provider["📤 WhatsappProvider<br/>(sendAutomaticMessage)"]:::hms
-        Inngest["⚡ Inngest (Background Jobs)"]:::hms
+    %% Atores e Plataformas Externas
+    Cliente(["👤 Cliente no WhatsApp"]):::client
+    MetaAPI["🌐 Meta (WhatsApp Cloud API)"]:::meta
+
+    %% Frontend (Web App)
+    subgraph Web_App ["Frontend (apps/web)"]
+        ChatUI["💻 Central de Comunicação (React UI)"]:::web
+        ReactQuery["🔄 useSendCommunicationMutation & Services"]:::web
     end
 
-    DB[("🗄️ Tabela IntegracaoEvento<br/>(Supabase/Drizzle)")]:::database
+    %% Backend (Server App)
+    subgraph HMS_Server ["Backend (apps/server)"]
+        WebhookCtrl["🔌 WhatsappWebhookController<br/>(GET/POST /integrations/whatsapp/webhook)"]:::server
+        SendCtrl["🔌 SendCommunicationController<br/>(POST /communications/send)"]:::server
+        InngestJob["⚡ Inngest (whatsapp/event.received)"]:::server
+        WhatsappProv["📤 WhatsappProvider<br/>(sendTextMessage & sendAutomaticMessage)"]:::server
+    end
 
-    %% Fluxo de Entrada (Inbound)
-    User -->|"1. Envia Mensagem"| Meta
-    Meta -->|"2. Dispara Webhook (POST)"| Controller
-    Controller -->|"3. Valida Assinatura & Salva"| DB
-    Controller -->|"4. Dispara Evento Assíncrono"| Inngest
-    Controller -.->|"5. Retorna 200 OK em < 3s"| Meta
+    %% Banco de Dados
+    subgraph Database ["Persistência (Drizzle ORM)"]
+        DBPrivateMsgs[("🗄️ Tabela private_messages<br/>(Advogado ↔ Cliente / WhatsApp)")]:::db
+        DBClients[("🗄️ Tabela clients<br/>(busca por telefone)")]:::db
+    end
 
-    %% Fluxo de Saída (Outbound)
-    Inngest -->|"Ex: Job de Agendamento"| Provider
-    Provider -->|"6. POST /messages (Template)"| Meta
-    Meta -->|"7. Entrega Mensagem"| User
+    %% FLUXO INBOUND (Entrada no Chat WhatsApp)
+    Cliente -->|"1. Envia mensagem via WhatsApp"| MetaAPI
+    MetaAPI -->|"2. Dispara Webhook HTTP POST"| WebhookCtrl
+    WebhookCtrl -->|"3. Valida HMAC-SHA256 & despacha"| InngestJob
+    WebhookCtrl -.->|"4. Responde 200 OK (< 3s)"| MetaAPI
+    InngestJob -->|"5. Busca cliente por telefone"| DBClients
+    InngestJob -->|"6. Registra em private_messages (direction: inbound)"| DBPrivateMsgs
+
+    %% FLUXO OUTBOUND (Saída pelo Advogado na UI)
+    ChatUI -->|"7. Advogado digita e envia mensagem"| ReactQuery
+    ReactQuery -->|"8. Requisição HTTP POST /communications/send"| SendCtrl
+    SendCtrl -->|"9. Valida cliente & autorização do advogado"| DBClients
+    SendCtrl -->|"10. Dispara envio de mensagem de texto"| WhatsappProv
+    SendCtrl -->|"11. Registra mensagem criptografada em private_messages"| DBPrivateMsgs
+    WhatsappProv -->|"12. POST /v25.0/{phone_number_id}/messages"| MetaAPI
+    MetaAPI -->|"13. Entrega no celular do cliente"| Cliente
+
+    %% ATUALIZAÇÃO REATIVA DA UI
+    DBPrivateMsgs -.->|"14. Invalidação de Cache & Atualização da UI"| ChatUI
 ```
 
-## Diagrama de Sequência de Comunicação (WhatsApp)
+---
 
-O diagrama a seguir detalha o fluxo cronológico das interações para recepção (inbound) e envio (outbound) de mensagens:
+## ⏱️ Diagrama de Sequência Cronológico (End-to-End)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as 👤 Usuário (WhatsApp)
+    actor Cliente as 👤 Cliente (WhatsApp)
+    actor Advogado as ⚖️ Advogado (Colaborador HMS)
     participant Meta as 🌐 Meta Cloud API
-    participant Controller as 🔌 WhatsappWebhookController
-    participant Env as ⚙️ EnvProvider
-    participant Inngest as ⚡ Inngest (Background Jobs)
-    participant Core as 🧠 Use Case / Service
+    participant WebhookCtrl as 🔌 WhatsappWebhookController
+    participant Inngest as ⚡ Inngest (whatsapp/event.received)
+    participant SendCtrl as 🔌 SendCommunicationController
     participant Provider as 📤 WhatsappProvider
+    participant DB as 🗄️ Banco de Dados (Drizzle)
 
-    Note over Meta, Controller: Fluxo de Entrada (Inbound Webhook)
-    Usuario->>Meta: Envia mensagem de texto
-    Meta->>Controller: POST /integrations/whatsapp/webhook (x-hub-signature-256)
-    activate Controller
-    Controller->>Env: get('WHATSAPP_APP_SECRET')
-    Env-->>Controller: Segredo da aplicação (App Secret)
-    Note over Controller: Valida assinatura SHA256 com o payload bruto
-    alt Assinatura Inválida
-        Controller-->>Meta: Retorna 403 Forbidden
-    else Assinatura Válida
-        Controller->>Inngest: send('whatsapp/event.received', payload)
-        activate Inngest
-        Note over Inngest: Enfileira processamento assíncrono do evento
-        Inngest-->>Controller: Evento despachado
-        deactivate Inngest
-        Controller-->>Meta: Retorna 200 OK (status: success)
+    Note over Cliente, Inngest: 📥 FLUXO INBOUND (Mensagem Recebida do Cliente)
+    Cliente->>Meta: Envia mensagem de texto no WhatsApp
+    Meta->>WebhookCtrl: POST /integrations/whatsapp/webhook (x-hub-signature-256)
+    activate WebhookCtrl
+    WebhookCtrl->>Inngest: despacha evento 'whatsapp/event.received'
+    WebhookCtrl-->>Meta: 200 OK (resposta em < 3s)
+    deactivate WebhookCtrl
+
+    activate Inngest
+    Inngest->>DB: Busca clientModel onde client.phone == msg.from
+    alt Cliente Encontrado
+        Inngest->>DB: Insere em private_messages (direction: 'inbound', client_id, content)
+    else Cliente Não Encontrado
+        Note over Inngest: Emite aviso log (Warning)
     end
-    deactivate Controller
+    deactivate Inngest
 
-    Note over Core, Meta: Fluxo de Saída (Outbound Messages)
-    Core->>Provider: sendAutomaticMessage(params: { phone, kind, ... })
+    Note over Advogado, Cliente: 📤 FLUXO OUTBOUND (Advogado responde na Central)
+    Advogado->>SendCtrl: POST /communications/send { clientId, content, channel: 'whatsapp' }
+    activate SendCtrl
+    SendCtrl->>DB: Busca cliente e valida telefone
+    SendCtrl->>Provider: sendTextMessage(phone, content)
     activate Provider
-    Provider->>Env: get('WHATSAPP_API_TOKEN' & 'WHATSAPP_PHONE_NUMBER_ID')
-    Env-->>Provider: Credenciais da API
-    Note over Provider: Constrói template com base em params.kind & HMS_SERVER_APP_MODE
-    Provider->>Meta: POST /v25.0/{phone_number_id}/messages (Bearer Token & Body JSON)
-    activate Meta
-    Meta-->>Provider: Retorna 200 OK (com message_id gerado)
-    deactivate Meta
-    Note over Provider: Valida e extrai externalMessageId
-    Provider-->>Core: Retorna { externalMessageId }
+    Provider->>Meta: POST /v25.0/{phone_number_id}/messages
+    Meta-->>Provider: 200 OK { messages: [{ id: externalId }] }
     deactivate Provider
-    Meta->>Usuario: Entrega mensagem estruturada no dispositivo do usuário
+    SendCtrl->>DB: Insere em private_messages (collaborator_id, client_id, direction: 'outbound')
+    SendCtrl-->>Advogado: 201 Created { id, content, createdAt, externalId }
+    deactivate SendCtrl
+    Meta->>Cliente: Entrega mensagem no celular do cliente
 ```
+
+---
+
+## 🔍 Separação de Responsabilidades entre Tabelas
+
+| Tabela | Finalidade | Principais Atributos | Atores Envolvidos |
+| :--- | :--- | :--- | :--- |
+| **`private_messages`** | **Chat e Operações CRUD da Central de Comunicação**. Mensagens diretas de conversa entre o advogado e o cliente (WhatsApp / demandas de atendimento). | `client_id`, `collaborator_id`, `intake_id`, `content` (criptografado), `file_ids`, `direction` | Advogado (Colaborador) ↔ Cliente |

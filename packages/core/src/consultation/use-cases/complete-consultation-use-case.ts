@@ -36,18 +36,18 @@ export class CompleteConsultationUseCase {
         const month = parseInt(parts[1], 10) - 1
         const year = parseInt(parts[2], 10)
         const parsed = new Date(year, month, day)
-        return isNaN(parsed.getTime()) ? null : parsed
+        return Number.isNaN(parsed.getTime()) ? null : parsed
       }
     }
 
     const parsed = new Date(dateStr)
-    return isNaN(parsed.getTime()) ? null : parsed
+    return Number.isNaN(parsed.getTime()) ? null : parsed
   }
 
   async execute(input: CompleteConsultationInput): Promise<Consultation> {
     const rawId = input.consultationId as any
     const consultationId =
-      typeof rawId === 'object' ? (rawId.id || rawId.consultationId) : String(rawId)
+      typeof rawId === 'object' ? rawId.id || rawId.consultationId : String(rawId)
 
     const consultation = await this.consultationsRepository.findById(consultationId)
 
@@ -62,15 +62,20 @@ export class CompleteConsultationUseCase {
       throw new Error('Apenas consultas em andamento ou pendentes podem ser concluídas.')
     }
 
-    const primaryLegalQuestion = input.primaryLegalQuestion ?? consultation.primaryLegalQuestion
+    const primaryLegalQuestion =
+      input.primaryLegalQuestion ?? consultation.primaryLegalQuestion
     const guidanceProvided = input.guidanceProvided ?? consultation.guidanceProvided
 
     if (!primaryLegalQuestion?.trim()) {
-      throw new Error('A questão jurídica principal é obrigatória para concluir a consulta.')
+      throw new Error(
+        'A questão jurídica principal é obrigatória para concluir a consulta.',
+      )
     }
 
     if (!guidanceProvided?.trim()) {
-      throw new Error('A orientação prestada ao cliente é obrigatória para concluir a consulta.')
+      throw new Error(
+        'A orientação prestada ao cliente é obrigatória para concluir a consulta.',
+      )
     }
 
     const hasPendingSuggestions = consultation.suggestions.some(

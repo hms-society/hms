@@ -42,7 +42,6 @@ import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens
 import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
-import { Route as AdvogadoConsultasRouteImport } from './routes/advogado/consultas'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
@@ -216,11 +215,6 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
-const AdvogadoConsultasRoute = AdvogadoConsultasRouteImport.update({
-  id: '/consultas',
-  path: '/consultas',
-  getParentRoute: () => AdvogadoRouteRoute,
-} as any)
 const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
   id: '/comunicacao',
   path: '/comunicacao',
@@ -247,7 +241,6 @@ export interface FileRoutesByFullPath {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -282,7 +275,6 @@ export interface FileRoutesByTo {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -322,7 +314,6 @@ export interface FileRoutesById {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/consultas': typeof AdvogadoConsultasRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -363,7 +354,6 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/triagem'
     | '/advogado/comunicacao'
-    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -398,7 +388,6 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/cliente'
     | '/advogado/comunicacao'
-    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -437,7 +426,6 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/triagem'
     | '/advogado/comunicacao'
-    | '/advogado/consultas'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -727,13 +715,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
-    '/advogado/consultas': {
-      id: '/advogado/consultas'
-      path: '/consultas'
-      fullPath: '/advogado/consultas'
-      preLoaderRoute: typeof AdvogadoConsultasRouteImport
-      parentRoute: typeof AdvogadoRouteRoute
-    }
     '/advogado/comunicacao': {
       id: '/advogado/comunicacao'
       path: '/comunicacao'
@@ -760,12 +741,10 @@ declare module '@tanstack/react-router' {
 
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
-  AdvogadoConsultasRoute: typeof AdvogadoConsultasRoute
 }
 
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
-  AdvogadoConsultasRoute: AdvogadoConsultasRoute,
 }
 
 const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(

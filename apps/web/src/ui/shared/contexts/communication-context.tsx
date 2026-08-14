@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+  useCallback,
+} from 'react'
 import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
 
 type CommunicationContextType = {
@@ -24,25 +31,25 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
 
   useEffect(() => {
     if (clientsData?.data && !isInitialized) {
-      const ids = clientsData.data.map((item: any) => {
-        const c = item.client || item
-        return c.id
-      })
-      // Initially mark the first two clients as having unread messages
-      setUnreadChatIds(ids.slice(0, 2))
+      setUnreadChatIds([])
       setIsInitialized(true)
     }
   }, [clientsData, isInitialized])
 
-  const initializeUnreadChats = (ids: string[]) => {
-    if (isInitialized) return
-    setUnreadChatIds(ids.slice(0, 2))
-    setIsInitialized(true)
-  }
+  const initializeUnreadChats = useCallback((ids: string[]) => {
+    setIsInitialized((prevInitialized) => {
+      if (prevInitialized) return prevInitialized
+      setUnreadChatIds(ids)
+      return true
+    })
+  }, [])
 
-  const markAsRead = (clientId: string) => {
-    setUnreadChatIds((prev) => prev.filter((id) => id !== clientId))
-  }
+  const markAsRead = useCallback((clientId: string) => {
+    setUnreadChatIds((prev) => {
+      if (!prev.includes(clientId)) return prev
+      return prev.filter((id) => id !== clientId)
+    })
+  }, [])
 
   const hasUnread = unreadChatIds.length > 0
 

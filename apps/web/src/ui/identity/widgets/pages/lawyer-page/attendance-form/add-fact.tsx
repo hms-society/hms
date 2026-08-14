@@ -191,12 +191,6 @@ export function AddFactDialog({
 
           {dateType !== 'undefined' && (
             <div className='relative mt-2'>
-              {dateType === 'period' && (
-                <Icon
-                  name='calendar'
-                  className='w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10'
-                />
-              )}
               <Input
                 type={dateType === 'specific' ? 'date' : 'text'}
                 value={dateValue}

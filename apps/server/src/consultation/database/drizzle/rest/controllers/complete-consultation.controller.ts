@@ -2,35 +2,27 @@ import {
   Body,
   Controller,
   HttpStatus,
-  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger'
-import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { CompleteConsultationUseCase } from '@hms/core/consultation/use-cases'
 import { completeConsultationSchema } from '@hms/validation/consultation'
 import { ZodValidationPipe } from 'nestjs-zod'
-import { CONSULTATIONS_REPOSITORY } from '../../consultation.module'
-import { CompleteConsultationDto } from './dto/complete-consultation-dto'
+
 import { AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+
+import { CompleteConsultationDto } from './dto/complete-consultation-dto'
 
 @ApiTags('consultations')
 @ApiBearerAuth()
 @Controller('consultations')
 @UseGuards(AuthGuard)
 export class CompleteConsultationController {
-  private readonly useCase: CompleteConsultationUseCase
-
-  constructor(
-    @Inject(CONSULTATIONS_REPOSITORY)
-    consultationsRepository: ConsultationsRepository,
-  ) {
-    this.useCase = new CompleteConsultationUseCase(consultationsRepository)
-  }
+  constructor(private readonly useCase: CompleteConsultationUseCase) {}
 
   @Patch(':consultationId/complete')
   @ApiBody({ type: CompleteConsultationDto })
