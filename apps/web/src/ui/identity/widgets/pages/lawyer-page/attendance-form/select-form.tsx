@@ -120,7 +120,9 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
         </div>
 
         <div className='space-y-1'>
-          <label className='text-xs font-medium text-slate-700'>Buscar ficha</label>
+          <label htmlFor='search-form' className='text-xs font-medium text-slate-700'>
+            Buscar ficha
+          </label>
 
           <div className='relative'>
             <Icon
@@ -129,6 +131,7 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
             />
 
             <Input
+              id='search-form'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder='Digite o nome da ficha'
@@ -139,9 +142,12 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
 
         <div className='grid grid-cols-2 gap-3'>
           <div>
-            <label className='text-xs font-medium text-slate-700'>Área jurídica</label>
+            <label htmlFor='select-area' className='text-xs font-medium text-slate-700'>
+              Área jurídica
+            </label>
 
             <select
+              id='select-area'
               value={selectedArea}
               onChange={(e) => handleAreaChange(e.target.value)}
               className='mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700'
@@ -157,9 +163,12 @@ export function SelectFormDialog({ isOpen, onClose, onSelect }: SelectFormDialog
           </div>
 
           <div>
-            <label className='text-xs font-medium text-slate-700'>Tema jurídico</label>
+            <label htmlFor='select-theme' className='text-xs font-medium text-slate-700'>
+              Tema jurídico
+            </label>
 
             <select
+              id='select-theme'
               value={selectedTheme}
               onChange={(e) => setSelectedTheme(e.target.value)}
               disabled={!selectedArea}

@@ -62,10 +62,14 @@ export function LegalAreaSection({
       <h2 className='text-base font-bold text-slate-800 flex items-center gap-2 font-serif'>
         <Icon name='tag' className='w-4 h-4 text-teal-800' /> Área e Tema
       </h2>
+
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div>
-          <label className='text-xs font-medium text-slate-700'>Área jurídica</label>
+          <label htmlFor='legal-area' className='text-xs font-medium text-slate-700'>
+            Área jurídica
+          </label>
           <select
+            id='legal-area'
             value={legalAreaId}
             onChange={(e) => {
               const newAreaId = e.target.value
@@ -82,9 +86,13 @@ export function LegalAreaSection({
             ))}
           </select>
         </div>
+
         <div>
-          <label className='text-xs font-medium text-slate-700'>Tema jurídico</label>
+          <label htmlFor='legal-topic' className='text-xs font-medium text-slate-700'>
+            Tema jurídico
+          </label>
           <select
+            id='legal-topic'
             value={legalTopicId}
             onChange={(e) => setLegalTopicId(e.target.value)}
             className='mt-1 w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-700 cursor-pointer'

@@ -102,7 +102,10 @@ export function AddClaimDialog({
         </div>
 
         <div className='space-y-1'>
-          <label htmlFor='claim-title' className='text-xs font-medium text-slate-700'>
+          <label 
+            htmlFor='claim-title' 
+            className='text-xs font-medium text-slate-700'
+            >
             Título do pedido <span className='text-rose-500'>*</span>
           </label>
           <Input
