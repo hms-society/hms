@@ -9,6 +9,15 @@ Leia Plan, Spec, Architecture, Rules e `documentation/tooling.md`. Use
 `documentation/rules/rules.md` para descobrir as regras das camadas tocadas. O
 Orchestrator mantém o Plan e todo o fluxo ocorre na task atual.
 
+Após **cada mudança de implementação**, o Orchestrator deve atualizar
+imediatamente o Plan e `evaluation.md` antes de iniciar a próxima ação. Isso
+inclui alterações feitas por Builders e Builder Fixes, correções de retry,
+mudanças em seed ou ambiente, artefatos gerados, arquivos de configuração,
+testes adicionados ou alterados e qualquer reversão parcial. Nunca acumule
+mudanças para registrá-las somente no final. Cada checkpoint deve registrar
+resumo da mudança, paths afetados, fase/tarefa, impacto sobre as evidências e
+os sensores que precisam ser reexecutados.
+
 Preserve no Plan o link do PRD no Confluence e todas as chaves de
 `jira_tickets` da Spec. Consulte esses registros quando a integração estiver
 disponível, mas não altere status, comentários ou critérios de aceite no Jira
@@ -33,6 +42,12 @@ Para cada fase:
 10. em caso de falha, registre imediatamente o finding no Plan e em
     `evaluation.md`, crie Builder Fix, reabra as tarefas afetadas e repita
     somente os sensores invalidados.
+
+O registro pós-mudança é obrigatório mesmo quando a mudança não altera código
+de produção: seed, variáveis de ambiente, configuração de execução, artefato
+gerado e teste são mudanças de implementação para esta finalidade. Atualize o
+Plan com o estado operacional e `evaluation.md` com a evidência/limitação
+correspondente no mesmo checkpoint.
 
 Builders não criam subagentes nem editam Plan. Judges não editam arquivos. O
 Orchestrator registra no Plan decisões, evidências resumidas, findings,
