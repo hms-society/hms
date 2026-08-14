@@ -35,7 +35,8 @@ Inclua:
 - campo `parallelizable` e motivo quando aplicável;
 - sensores e evidências esperados por fase;
 - riscos, findings ativos, tentativas, estado e próxima ação;
-- vereditos do Judge Implementation por fase.
+- sensores e evidências por fase; o veredito do único Judge Implementation fica
+  reservado para a implementação inteira.
 
 Estados de tarefa: `pending`, `implementing`, `validating`, `verified`.
 Estados de fase: `pending`, `in_progress`, `awaiting_judgment`, `failed`,

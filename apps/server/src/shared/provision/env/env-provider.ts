@@ -19,6 +19,8 @@ export const envSchema = z.object({
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().default(''),
   WHATSAPP_APP_SECRET: z.string().default(''),
   SUPABASE_STORAGE_BUCKET: z.string().default(''),
+  OLLAMA_AI_MODEL: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
 })
 
 type Env = z.infer<typeof envSchema>

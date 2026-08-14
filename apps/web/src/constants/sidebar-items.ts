@@ -42,10 +42,9 @@ const PARALEGAL_SIDEBAR_ITEMS: SidebarItem[] = [
 
 const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Meus Casos', route: 'clientMyCases', icon: 'file-text' },
-  { label: 'Mensagens', route: 'clientMessages', icon: 'message-circle' },
-  { label: 'Privacidade & LGPD', route: 'clientPrivacy', icon: 'shield' },
+  { label: 'Mensagens', route: 'clientMessages', icon: 'message-square' },
+  { label: 'Privacidade & LGPD', route: 'clientPrivacy', icon: 'shield-check' },
 ]
-
 export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Admin]: [
     { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },

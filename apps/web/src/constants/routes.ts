@@ -7,29 +7,36 @@ export const ROUTES = {
   requestPasswordReset: '/pedir-redefinir-senha',
   resetPassword: '/redefinir-senha',
   invite: '/convite',
+
   attendant: '/atendimento',
   attendantConsultations: '/atendimento/consultas',
-  lawyerSchedule: '/agenda',
+
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
   lawyerCommunication: '/advogado/comunicacao',
+  lawyerSchedule: '/agenda',
+
   clients: '/clientes',
   collaborators: '/colaboradores',
+
+  documentSpecifications: '/modelos-de-documentos',
+  newDocumentSpecification: '/modelos-de-documentos/novo',
+  documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
+
   documentBatch: '/lotes-documentos',
+  documentInbox: '/caixa-de-documentos',
+  documentAnalysis: '/caixa-de-documentos/$fileId',
+
   paralegalCases: '/casos',
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',
   paralegalCommunication: '/comunicacao',
+
   client: '/cliente',
   clientMyCases: '/cliente/meus-casos',
   clientMyCaseDetails: '/cliente/meus-casos/$caseId',
   clientMessages: '/cliente/mensagens',
   clientPrivacy: '/cliente/privacidade',
-  documentSpecifications: '/modelos-de-documentos',
-  newDocumentSpecification: '/modelos-de-documentos/novo',
-  documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
-  documentInbox: '/caixa-de-documentos',
-  documentAnalysis: '/caixa-de-documentos/$fileId',
 } as const
 
 export type RouteName = keyof typeof ROUTES

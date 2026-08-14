@@ -1,0 +1,2 @@
+ALTER TABLE "document_generations" ADD COLUMN "template" jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "document_generations" ADD CONSTRAINT "document_generations_template_check" CHECK (jsonb_typeof("document_generations"."template") = 'object');

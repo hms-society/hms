@@ -32,8 +32,6 @@ async function bootstrap() {
     await app.get(IntakeSeeder).clear()
     await app.get(DocumentProductionSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
-    await app.get(IntakeSeeder).clear()
-    await app.get(LegalCatalogSeeder).clear()
     await app.get(RealDocumentsSeeder).clear()
     await app.get(DocumentsSeeder).clear()
 
