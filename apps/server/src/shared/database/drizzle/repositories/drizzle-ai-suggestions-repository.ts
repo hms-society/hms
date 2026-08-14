@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import type {
   AiSuggestionsRepository,
   UpdateAiFeedbackParams,
