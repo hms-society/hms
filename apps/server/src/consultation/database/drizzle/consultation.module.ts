@@ -1,65 +1,75 @@
 import { Module } from '@nestjs/common'
 
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { IdentityModule } from '@/identity/identity.module'
-import { DrizzleConsultationsRepository } from './repository/drizzle-consultations-repository'
-
 import {
+  CompleteConsultationUseCase,
   CreateConsultationUseCase,
+  GetConsultationByIdUseCase,
   RegisterNoShowUseCase,
   StartConsultationUseCase,
-  CompleteConsultationUseCase,
-  GetConsultationByIdUseCase,
 } from '@hms/core/consultation/use-cases'
 
-import { CreateConsultationController } from './rest/controllers/create-consultation.controller'
-import { StartConsultationController } from './rest/controllers/start-consultation.controller'
+import { IdentityModule } from '@/identity/identity.module'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+
+import { DrizzleConsultationsRepository } from './repository/drizzle-consultations-repository'
 import { CompleteConsultationController } from './rest/controllers/complete-consultation.controller'
-import { RegisterNoShowController } from './rest/controllers/register-no-show.controller'
+import { CreateConsultationController } from './rest/controllers/create-consultation.controller'
 import { GetConsultationByIdController } from './rest/controllers/get-consultation-by-id.controller'
+import { RegisterNoShowController } from './rest/controllers/register-no-show.controller'
+import { StartConsultationController } from './rest/controllers/start-consultation.controller'
+import { UpdateClientQualificationController } from './rest/controllers/update-client-qualification.controller'
 
 export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
 
 @Module({
   imports: [IdentityModule],
+
   controllers: [
     CreateConsultationController,
     StartConsultationController,
     CompleteConsultationController,
     RegisterNoShowController,
     GetConsultationByIdController,
+    UpdateClientQualificationController,
   ],
+
   providers: [
     DrizzleClient,
     DrizzleConsultationsRepository,
+
     {
       provide: CONSULTATIONS_REPOSITORY,
       useClass: DrizzleConsultationsRepository,
     },
+
     {
       provide: CreateConsultationUseCase,
       useFactory: (repo: DrizzleConsultationsRepository) =>
         new CreateConsultationUseCase(repo),
       inject: [CONSULTATIONS_REPOSITORY],
     },
+
     {
       provide: RegisterNoShowUseCase,
       useFactory: (repo: DrizzleConsultationsRepository) =>
         new RegisterNoShowUseCase(repo),
       inject: [CONSULTATIONS_REPOSITORY],
     },
+
     {
       provide: StartConsultationUseCase,
       useFactory: (repo: DrizzleConsultationsRepository) =>
         new StartConsultationUseCase(repo),
       inject: [CONSULTATIONS_REPOSITORY],
     },
+
     {
       provide: CompleteConsultationUseCase,
       useFactory: (repo: DrizzleConsultationsRepository) =>
         new CompleteConsultationUseCase(repo),
       inject: [CONSULTATIONS_REPOSITORY],
     },
+
     {
       provide: GetConsultationByIdUseCase,
       useFactory: (repo: DrizzleConsultationsRepository) =>
@@ -67,6 +77,7 @@ export const CONSULTATIONS_REPOSITORY = 'ConsultationsRepository'
       inject: [CONSULTATIONS_REPOSITORY],
     },
   ],
+
   exports: [
     CONSULTATIONS_REPOSITORY,
     CreateConsultationUseCase,
