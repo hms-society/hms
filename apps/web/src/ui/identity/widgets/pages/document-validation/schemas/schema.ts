@@ -4,6 +4,7 @@ export const documentReview = z
   .object({
     decision: z.enum([
       'validate',
+      'not_linked',
       'illegible',
       'incomplete',
       'duplicate',
