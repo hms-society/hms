@@ -1684,3 +1684,12 @@ ordem de dependência.
 Também foram formatados os snapshots/journal de migrations exigidos pelo
 Biome no PR #72 e corrigido o nome do ícone de acesso negado no PR #74 para
 `shield-check`, registrado no mapa compartilhado de ícones.
+
+## F32 — Compatibilidade do contexto REST da listagem
+
+Estado: verified.
+
+O PR #73 preserva o `ConsultationService` e o campo `consultationService` no
+`RestContext`, além de adicionar o novo serviço de produção documental. Assim,
+consumidores existentes da página do advogado continuam compilando enquanto o
+novo fluxo documental é introduzido.

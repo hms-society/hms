@@ -1113,3 +1113,7 @@ Sensores locais: o PR #76 contém o YAML dos três workflows, validado localment
 heads corrigidos e o ícone foi conferido contra o `IconName`/mapa Lucide
 compartilhado. Os checks remotos devem ser reavaliados nos PRs #71–#75 após os
 novos pushes.
+
+O PR #73 também foi corrigido para preservar o serviço REST de consultas e sua
+injeção no `RestContext`; a alteração evita quebrar o consumidor existente da
+página do advogado enquanto o serviço de produção documental é adicionado.
