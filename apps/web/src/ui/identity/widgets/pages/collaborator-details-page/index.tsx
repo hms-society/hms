@@ -246,7 +246,7 @@ export const CollaboratorDetailsPage = ({
         open={isDeactivateDialogOpen}
         onOpenChange={handleDeactivateDialogOpenChange}
       >
-        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-[480px]'>
+        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-lg'>
           <AlertDialogHeader className='place-items-start gap-2 p-6 text-left sm:grid-cols-[auto_1fr]'>
             <AlertDialogMedia className='bg-destructive/10 text-destructive'>
               <Icon name='user-x' />
@@ -284,7 +284,7 @@ export const CollaboratorDetailsPage = ({
         open={isReactivateDialogOpen}
         onOpenChange={handleReactivateDialogOpenChange}
       >
-        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-[480px]'>
+        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-lg'>
           <AlertDialogHeader className='place-items-start gap-2 p-6 text-left sm:grid-cols-[auto_1fr]'>
             <AlertDialogMedia className='bg-primary/10 text-primary'>
               <Icon name='refresh-cw' />

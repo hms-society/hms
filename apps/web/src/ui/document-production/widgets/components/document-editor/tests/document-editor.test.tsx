@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ComponentProps } from 'react'
 
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 
-import { DocumentEditor } from '..'
+import { DocumentEditor, parseDocumentTemplateContent } from '..'
 
 const EMPTY_CONTENT = {
   type: 'doc',
@@ -12,14 +13,19 @@ const EMPTY_CONTENT = {
 
 function renderDocumentEditor(
   content: DocumentTemplateContent = EMPTY_CONTENT,
-  onChange = vi.fn(),
-  onEditorReady = vi.fn(),
+  props: Omit<
+    Partial<ComponentProps<typeof DocumentEditor>>,
+    'onChange' | 'onEditorReady'
+  > = {},
 ) {
+  const onChange = vi.fn()
+  const onEditorReady = vi.fn()
   render(
     <DocumentEditor
       content={content}
       onChange={onChange}
       onEditorReady={onEditorReady}
+      {...props}
     />,
   )
   return { onChange, onEditorReady }
@@ -86,5 +92,45 @@ describe('DocumentEditor', () => {
 
     await waitFor(() => expect(onChange).toHaveBeenCalled())
     expect(JSON.stringify(onChange.mock.lastCall?.[0])).toContain('{{cliente_nome}}')
+  })
+
+  it('keeps read-only content inaccessible to editing controls', async () => {
+    renderDocumentEditor(
+      {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Texto' }] }],
+      } as unknown as DocumentTemplateContent,
+      { editable: false, ariaLabel: 'Visualização do documento' },
+    )
+
+    await waitFor(() => expect(screen.getByRole('textbox')).not.toBeNull())
+    expect(screen.queryByRole('toolbar')).toBeNull()
+    expect(screen.getByRole('textbox').getAttribute('aria-label')).toBe(
+      'Visualização do documento',
+    )
+    expect(screen.getByRole('textbox').getAttribute('contenteditable')).toBe('false')
+  })
+
+  it('highlights and focuses the first matching pending marker without changing JSON', async () => {
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { textAlign: null },
+          content: [{ type: 'text', text: 'Preencha {{cliente_nome}}.' }],
+        },
+      ],
+    } as unknown as DocumentTemplateContent
+    const { onChange } = renderDocumentEditor(content, {
+      highlightedTerms: ['{{cliente_nome}}'],
+    })
+    const editor = await waitForEditor()
+
+    await waitFor(() =>
+      expect(editor.querySelector('[data-pending-marker="true"]')).not.toBeNull(),
+    )
+    expect(parseDocumentTemplateContent(content).success).toBe(true)
+    expect(onChange.mock.lastCall?.[0]).toEqual(content)
   })
 })
