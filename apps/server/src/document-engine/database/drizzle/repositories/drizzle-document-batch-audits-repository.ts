@@ -3,7 +3,6 @@ import type {
   DocumentBatchAuditLogEntry,
   DocumentBatchAuditsRepository,
 } from '@hms/core/document-engine/interfaces'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { documentBatchAuditModel } from '../models/document-batch-audit-model'
 
@@ -12,10 +11,6 @@ export class DrizzleDocumentBatchAuditsRepository
   extends DrizzleRepository
   implements DocumentBatchAuditsRepository
 {
-  constructor(drizzle: DrizzleClient) {
-    super(drizzle)
-  }
-
   async add(entry: DocumentBatchAuditLogEntry): Promise<DocumentBatchAuditLogEntry> {
     const [inserted] = await this.database
       .insert(documentBatchAuditModel)

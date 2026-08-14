@@ -35,6 +35,10 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
   ],
-  exports: [ListClientDocumentBatchUseCase, ProcessWhatsappBatchJob],
+  exports: [
+    ListClientDocumentBatchUseCase,
+    ProcessWhatsappBatchJob,
+    DocumentsDatabaseModule,
+  ],
 })
 export class DocumentsModule {}

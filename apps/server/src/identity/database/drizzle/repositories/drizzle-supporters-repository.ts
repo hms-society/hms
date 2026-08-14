@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import type { ClientSupporter, SupportersRepository } from '@hms/core/identity/interfaces'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientSupporterModel } from '@/identity/database/drizzle/models/client-supporter-model'
 import { eq } from 'drizzle-orm'
@@ -10,10 +9,6 @@ export class DrizzleSupportersRepository
   extends DrizzleRepository
   implements SupportersRepository
 {
-  constructor(drizzle: DrizzleClient) {
-    super(drizzle)
-  }
-
   async findByPhone(phone: string): Promise<ClientSupporter[]> {
     const records = await this.database
       .select()
