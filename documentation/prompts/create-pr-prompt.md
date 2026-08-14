@@ -99,13 +99,26 @@ git diff --stat origin/develop...HEAD
 git diff --name-status origin/develop...HEAD
 ```
 
-Não aplique um limite artificial de 5.000 linhas e não divida um PR apenas para
-contornar o workflow `check-pr-size`. Se o usuário autorizar uma entrega maior,
-publique um único PR coerente, informe a quantidade real de linhas e registre o
-`check-size` como uma pendência de política. Não declare o Quality Gate
-completamente verde enquanto esse check estiver vermelho; se a proteção da
-branch impedir o merge, reporte o bloqueio ao usuário em vez de alterar ou
-burlar o workflow sem autorização.
+### Regra obrigatória de tamanho do PR
+
+Leia `.github/workflows/check-pr-size.yml` antes de decidir a topologia. Replique
+exatamente o escopo configurado pelo workflow: conte as linhas adicionadas em
+arquivos com extensões `.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cts`, `.mjs`,
+`.cjs`, `.css`, `.scss` e `.sql`; ignore documentação, configurações, assets e
+lockfiles.
+
+Se a soma ultrapassar 5.000 linhas, a entrega deve ser dividida em PRs menores
+antes de qualquer publicação. A divisão deve seguir fronteiras semânticas e
+dependências reais — por exemplo, Core/contratos, backend/persistência,
+mensageria/jobs e Web/rotas — e cada PR deve declarar base, head, dependências,
+escopo e seu próprio resultado do `check-pr-size`. Não divida por arquivo,
+quantidade artificial de linhas ou apenas para esconder uma dependência.
+
+Depois que os PRs forem aceitos, crie uma branch de integração baseada no
+`develop` atualizado e incorpore explicitamente todos os heads na ordem de
+dependência. O PR final deve conter o conjunto completo aceito. Não publique um
+PR monolítico acima do limite, não autorize exceção implicitamente e não declare
+o Quality Gate verde enquanto `check-size` estiver vermelho.
 
 ### Migrações e arquivos gerados
 
