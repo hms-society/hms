@@ -18,6 +18,8 @@ type ConsultationBase = {
   primaryLegalQuestion?: string
   guidanceProvided?: string
   notes?: string
+  viability?: string
+  decision?: string
   relevantFacts: RelevantFact[]
   potentialLegalRequests: PotentialLegalRequest[]
   identifiedRisks: IdentifiedRisk[]
