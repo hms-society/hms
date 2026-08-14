@@ -9,6 +9,20 @@ import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
 import { getMimeTypeFromExtension } from '../utils/mime-type.map'
 import { extname } from 'node:path'
+import { eq } from 'drizzle-orm'
+import { documentBatchFileModel } from './drizzle/models'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
+
+const VALIDATION_STATUS_CYCLE = [
+  DocumentValidationStatus.NotLinked,
+  DocumentValidationStatus.Valid,
+  DocumentValidationStatus.Illegible,
+  DocumentValidationStatus.Incomplete,
+  DocumentValidationStatus.Duplicate,
+  DocumentValidationStatus.ProcessingFailure,
+  DocumentValidationStatus.ResendRequested,
+] as const
+
 @Injectable()
 export class DocumentsSeeder {
   constructor(
@@ -89,9 +103,88 @@ export class DocumentsSeeder {
         })
 
         batches.push(batch)
+
+        await Promise.all(
+          (batch.files ?? []).map((file, fileIndex) => {
+            const status =
+              VALIDATION_STATUS_CYCLE[
+                (index + batchIndex + fileIndex) % VALIDATION_STATUS_CYCLE.length
+              ]
+
+            return db
+              .update(documentBatchFileModel)
+              .set({
+                status,
+                aiConfidence: status === DocumentValidationStatus.ProcessingFailure ? 0 : 88,
+                extractedFields: this.createExtractedFields(status),
+                missingFields:
+                  status === DocumentValidationStatus.Incomplete
+                    ? ['Data de emissão']
+                    : [],
+                caseId: undefined,
+                checklistItemId: undefined,
+                isDuplicate: status === DocumentValidationStatus.Duplicate,
+                originalDocumentId:
+                  status === DocumentValidationStatus.Duplicate ? file.id : undefined,
+                aiSuggestion: this.createAiSuggestion(status),
+              })
+              .where(eq(documentBatchFileModel.id, file.id))
+          }),
+        )
       }
     }
 
     return batches
+  }
+
+  private createExtractedFields(status: DocumentValidationStatus) {
+    if (
+      status === DocumentValidationStatus.Illegible ||
+      status === DocumentValidationStatus.ProcessingFailure
+    ) {
+      return []
+    }
+
+    const fields = [
+      { label: 'Titular', value: 'Mariana Costa Silva', confidence: 94 },
+      { label: 'CPF', value: '284.***.***-19', confidence: 91 },
+      { label: 'Endereço', value: 'Rua das Palmeiras, 147', confidence: 89 },
+      { label: 'CEP', value: '01452-001', confidence: 88 },
+      { label: 'Data de emissão', value: '04/08/2026', confidence: 83 },
+    ]
+
+    if (status === DocumentValidationStatus.Incomplete) {
+      return fields.slice(0, 4)
+    }
+
+    return fields
+  }
+
+  private createAiSuggestion(status: DocumentValidationStatus) {
+    if (status === DocumentValidationStatus.ProcessingFailure) {
+      return {
+        confidenceLabel: 'Falha no processamento',
+        failureReason: 'Arquivo protegido por senha',
+        failureInstruction:
+          'Solicite ao remetente uma nova cópia do arquivo sem proteção por senha.',
+      }
+    }
+
+    return {
+      confidenceLabel:
+        status === DocumentValidationStatus.Valid
+          ? 'Sugerido pela IA - Confiança alta'
+          : 'Sugerido pela IA',
+      documentTypeId: 'comprovante_residencia',
+      caseLabel: status === DocumentValidationStatus.NotLinked ? undefined : 'Caso 0089',
+      checklistItemLabel:
+        status === DocumentValidationStatus.NotLinked
+          ? undefined
+          : 'Comprovante de residência',
+      originalDocumentFileName:
+        status === DocumentValidationStatus.Duplicate
+          ? 'comprovante-residencia.pdf'
+          : undefined,
+    }
   }
 }

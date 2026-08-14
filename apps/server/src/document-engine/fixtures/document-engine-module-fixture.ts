@@ -2,16 +2,20 @@ import type { INestApplication, Type } from '@nestjs/common'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleDocumentBatchesRepository } from '@/document-engine/database/drizzle/repositories/document-batches-repository'
+import { DrizzleDocumentValidationsRepository } from '@/document-engine/database/drizzle/repositories/drizzle-document-validations-repository'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { SharedModule } from '@/shared/shared.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
+import { AuthGuard } from '@/identity/guards'
+import { DocumentEngineProvisionModule } from '@/document-engine/provision/document-engine-provision.module'
 
 export class DocumentEngineModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
     private readonly drizzleClient: DrizzleClient,
     readonly documentBatchesRepository: DrizzleDocumentBatchesRepository,
+    readonly documentValidationsRepository: DrizzleDocumentValidationsRepository,
   ) {}
 
   get app(): INestApplication {
@@ -28,6 +32,42 @@ export class DocumentEngineModuleFixture {
       restFixture,
       restFixture.get(DrizzleClient),
       restFixture.get(DrizzleDocumentBatchesRepository),
+      restFixture.get(DrizzleDocumentValidationsRepository),
+    )
+  }
+
+  static async registerAuthenticated(controller?: Type<unknown>, userId = 'user-id') {
+    const restFixture = await RestFixture.register(
+      {
+        imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
+        controllers: controller ? [controller] : [],
+      },
+      (builder) =>
+        builder.overrideGuard(AuthGuard).useValue({
+          canActivate(context: {
+            switchToHttp(): {
+              getRequest(): {
+                user?: { id: string; email: string }
+                auth?: { accessToken: string; user: { id: string; email: string } }
+              }
+            }
+          }) {
+            const request = context.switchToHttp().getRequest()
+            request.user = { id: userId, email: 'lawyer@hms.com' }
+            request.auth = {
+              accessToken: 'test-token',
+              user: { id: userId, email: 'lawyer@hms.com' },
+            }
+            return true
+          },
+        }),
+    )
+
+    return new DocumentEngineModuleFixture(
+      restFixture,
+      restFixture.get(DrizzleClient),
+      restFixture.get(DrizzleDocumentBatchesRepository),
+      restFixture.get(DrizzleDocumentValidationsRepository),
     )
   }
 

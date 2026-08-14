@@ -10,6 +10,12 @@ import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-ca
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { GetDocumentFileController } from '../rest/controllers/get-document-file.controller'
+import { AnalyzeDocumentValidationController } from '../rest/controllers/analyze-document-validation.controller'
+import { GetDocumentValidationController } from '../rest/controllers/get-document-validation.controller'
+import { ListDocumentValidationsController } from '../rest/controllers/list-document-validations.controller'
+import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
+import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
+import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
 
 @Module({
   imports: [
@@ -17,11 +23,17 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
+    DocumentEngineProvisionModule,
   ],
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
     GetDocumentFileController,
+    AnalyzeDocumentValidationController,
+    GetDocumentValidationController,
+    ListDocumentValidationsController,
+    RecordDocumentValidationDecisionController,
+    RequestDocumentResendController,
   ],
   providers: [
     ProcessWhatsappBatchWorker,
