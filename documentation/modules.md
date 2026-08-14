@@ -17,6 +17,11 @@ Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassia
   o cliente relacionado.
 - Mantém o estado, a linha do tempo e o histórico de cada Intake.
 - Coordena a abertura do Intake com a reserva de uma consulta no Agendamento.
+- Mantém o agendamento como pendente enquanto compromisso e consulta são criados
+  assincronamente, registra a falha definitiva quando o processamento não termina e
+  só considera a consulta agendada depois que o módulo Consulta confirma sua criação.
+- Permite solicitar novamente um agendamento que terminou com falha, usando os
+  dados confirmados na nova tentativa e preservando qualquer compromisso já reservado.
 - Reflete a realização da consulta e registra a decisão de viabilidade.
 - Controla a passagem para formalização e reflete a contratação como desfecho
   terminal.

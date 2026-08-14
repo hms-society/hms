@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentSpecification } from '../../domain/entities/fakers'
+import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import {
   DocumentSpecificationNotFoundError,
   InvalidDocumentTemplateError,
@@ -18,7 +18,7 @@ describe('Update Document Specification Template Use Case', () => {
   })
 
   it('validates tokens, trims variables and updates only the template boundary', async () => {
-    const specification = fakeDocumentSpecification({ name: 'Configuração preservada' })
+    const specification = DocumentSpecificationFaker.fake({ name: 'Configuração preservada' })
     repository.findById.mockResolvedValue(specification)
     repository.replaceTemplate.mockResolvedValue(specification)
 
@@ -66,7 +66,7 @@ describe('Update Document Specification Template Use Case', () => {
   })
 
   it('rejects unknown or malformed tokens before persistence', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
 
     await expect(
@@ -115,7 +115,7 @@ describe('Update Document Specification Template Use Case', () => {
   })
 
   it('accepts variable names with repeated and trailing underscores', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
     repository.replaceTemplate.mockResolvedValue(specification)
 
@@ -142,7 +142,7 @@ describe('Update Document Specification Template Use Case', () => {
   })
 
   it('accepts ordered lists and preserves their list attributes', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
     repository.replaceTemplate.mockResolvedValue(specification)
     const content = {

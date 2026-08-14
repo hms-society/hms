@@ -3,6 +3,7 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { IntakeFaker } from '../../domain/entities/fakers'
 import { InvalidIntakeTransitionError } from '../../domain/errors'
+import { IntakeStatus } from '../../domain/structures'
 import type { IntakesRepository } from '../../interfaces'
 import { TransitionIntakeStatusUseCase } from '../transition-intake-status-use-case'
 
@@ -14,10 +15,12 @@ describe('Transition Intake Status Use Case', () => {
   })
 
   it('allows only the next lifecycle transition', async () => {
-    const currentIntake = IntakeFaker.fake({ status: 'consultation_scheduled' })
+    const currentIntake = IntakeFaker.fake({
+      status: IntakeStatus.ConsultationScheduled,
+    })
     const updatedIntake = IntakeFaker.fake({
       id: currentIntake.id,
-      status: 'consultation_completed',
+      status: IntakeStatus.ConsultationCompleted,
       version: currentIntake.version + 1,
     })
     repository.findById.mockResolvedValue(currentIntake)
@@ -28,7 +31,7 @@ describe('Transition Intake Status Use Case', () => {
       useCase.execute({
         intakeId: currentIntake.id,
         expectedVersion: currentIntake.version,
-        status: 'consultation_completed',
+        status: IntakeStatus.ConsultationCompleted,
         updatedBy: updatedIntake.updatedBy,
       }),
     ).resolves.toBe(updatedIntake)
@@ -37,7 +40,7 @@ describe('Transition Intake Status Use Case', () => {
       intakeId: currentIntake.id,
       expectedVersion: currentIntake.version,
       changes: {
-        status: 'consultation_completed',
+        status: IntakeStatus.ConsultationCompleted,
         updatedBy: updatedIntake.updatedBy,
       },
     })
@@ -46,7 +49,7 @@ describe('Transition Intake Status Use Case', () => {
       useCase.execute({
         intakeId: currentIntake.id,
         expectedVersion: currentIntake.version,
-        status: 'in_formalization',
+        status: IntakeStatus.InFormalization,
         updatedBy: updatedIntake.updatedBy,
       }),
     ).rejects.toBeInstanceOf(InvalidIntakeTransitionError)

@@ -6,7 +6,7 @@ import type {
   DocumentGenerationStatus,
   DocumentGenerationUpdate,
 } from '@hms/core/document-production/domain/structures'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 
 import { DrizzleDocumentGenerationMapper } from '@/document-production/database/drizzle/mappers'
 import { documentGenerationModel } from '@/document-production/database/drizzle/models'
@@ -51,11 +51,26 @@ export class DrizzleDocumentGenerationsRepository
     return this.mapper.toDomain(record)
   }
 
+  async removeAll() {
+    await this.database.delete(documentGenerationModel)
+  }
+
   async findById(documentGenerationId: string) {
     const [record] = await this.database
       .select()
       .from(documentGenerationModel)
       .where(eq(documentGenerationModel.id, documentGenerationId))
+      .limit(1)
+
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async findLatestByDocumentId(documentId: string) {
+    const [record] = await this.database
+      .select()
+      .from(documentGenerationModel)
+      .where(eq(documentGenerationModel.documentId, documentId))
+      .orderBy(desc(documentGenerationModel.createdAt))
       .limit(1)
 
     return record ? this.mapper.toDomain(record) : undefined

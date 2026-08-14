@@ -46,6 +46,8 @@ describe('List Intakes Use Case', () => {
       statusCounts: {
         all: 1,
         byStatus: {
+          [IntakeListStatus.ConsultationScheduling]: 0,
+          [IntakeListStatus.ConsultationSchedulingFailed]: 0,
           [IntakeListStatus.ConsultationScheduled]: 0,
           [IntakeListStatus.ConsultationCompleted]: 0,
           [IntakeListStatus.ViabilityRegistered]: 0,
@@ -138,6 +140,8 @@ describe('List Intakes Use Case', () => {
       statusCounts: {
         all: 1,
         byStatus: {
+          [IntakeListStatus.ConsultationScheduling]: 0,
+          [IntakeListStatus.ConsultationSchedulingFailed]: 0,
           [IntakeListStatus.ConsultationScheduled]: 0,
           [IntakeListStatus.ConsultationCompleted]: 0,
           [IntakeListStatus.ViabilityRegistered]: 0,

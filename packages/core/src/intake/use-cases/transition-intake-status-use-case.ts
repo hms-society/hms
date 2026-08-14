@@ -20,7 +20,6 @@ type Request = {
 }
 
 const transitions: Partial<Record<IntakeStatusValue, IntakeStatusValue>> = {
-  [IntakeStatus.Registered]: IntakeStatus.ConsultationScheduled,
   [IntakeStatus.ConsultationScheduled]: IntakeStatus.ConsultationCompleted,
   [IntakeStatus.ConsultationCompleted]: IntakeStatus.ViabilityRegistered,
   [IntakeStatus.ViabilityRegistered]: IntakeStatus.InFormalization,

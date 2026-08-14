@@ -1,0 +1,2 @@
+ALTER TABLE "document_versions" ADD COLUMN "source_document_version_id" uuid;--> statement-breakpoint
+CREATE INDEX "document_versions_source_version_id_idx" ON "document_versions" USING btree ("source_document_version_id");

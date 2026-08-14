@@ -20,6 +20,8 @@ export const CaseCard = ({ intake }: CaseCardProps) => {
 
   const hasPendency =
     intake.status === IntakeStatus.Registered ||
+    intake.status === IntakeStatus.ConsultationScheduling ||
+    intake.status === IntakeStatus.ConsultationSchedulingFailed ||
     intake.status === IntakeStatus.ViabilityRegistered
 
   return (

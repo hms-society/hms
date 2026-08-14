@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import {
-  fakeDocumentGeneration,
-  fakeDocumentSpecification,
+  DocumentGenerationFaker,
+  DocumentSpecificationFaker,
 } from '../../domain/entities/fakers'
 import { DocumentSpecificationNotFoundError } from '../../domain/errors'
 import type {
@@ -22,8 +22,8 @@ describe('Prepare Document Generation Use Case', () => {
   })
 
   it('creates a pending generation with source and template snapshots', async () => {
-    const specification = fakeDocumentSpecification({ name: 'Procuração' })
-    const generation = fakeDocumentGeneration()
+    const specification = DocumentSpecificationFaker.fake({ name: 'Procuração' })
+    const generation = DocumentGenerationFaker.fake()
     const source = {
       type: 'consultation' as const,
       id: '7c470059-82f8-4616-ac79-70934f758f37',
