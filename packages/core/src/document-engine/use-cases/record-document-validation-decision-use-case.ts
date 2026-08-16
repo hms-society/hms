@@ -130,10 +130,7 @@ export class RecordDocumentValidationDecisionUseCase {
       return true
     }
 
-    const suggestedDocumentType = this.getStringSuggestion(
-      document,
-      'documentTypeId',
-    )
+    const suggestedDocumentType = this.getStringSuggestion(document, 'documentTypeId')
     if (
       request.documentTypeId &&
       suggestedDocumentType &&
@@ -142,10 +139,7 @@ export class RecordDocumentValidationDecisionUseCase {
       return true
     }
 
-    const suggestedChecklistItem = this.getStringSuggestion(
-      document,
-      'checklistItemId',
-    )
+    const suggestedChecklistItem = this.getStringSuggestion(document, 'checklistItemId')
     return Boolean(
       request.checklistRequirementId &&
         suggestedChecklistItem &&
@@ -154,9 +148,7 @@ export class RecordDocumentValidationDecisionUseCase {
   }
 
   private hasAiSuggestionMetadata(document: DocumentValidationDocument) {
-    return Boolean(
-      document.aiSuggestion && Object.keys(document.aiSuggestion).length > 0,
-    )
+    return Boolean(document.aiSuggestion && Object.keys(document.aiSuggestion).length > 0)
   }
 
   private buildAiCorrectionMetadata(

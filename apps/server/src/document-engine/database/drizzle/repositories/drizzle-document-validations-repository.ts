@@ -55,9 +55,7 @@ export class DrizzleDocumentValidationsRepository
 
     const records = await query.orderBy(desc(documentBatchFileModel.createdAt))
 
-    return records.map((record) =>
-      this.toDomain({ ...record.file, batch: record.batch }),
-    )
+    return records.map((record) => this.toDomain({ ...record.file, batch: record.batch }))
   }
 
   async findByFileId(

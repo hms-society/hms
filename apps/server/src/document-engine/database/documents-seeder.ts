@@ -115,7 +115,8 @@ export class DocumentsSeeder {
               .update(documentBatchFileModel)
               .set({
                 status,
-                aiConfidence: status === DocumentValidationStatus.ProcessingFailure ? 0 : 88,
+                aiConfidence:
+                  status === DocumentValidationStatus.ProcessingFailure ? 0 : 88,
                 extractedFields: this.createExtractedFields(status),
                 missingFields:
                   status === DocumentValidationStatus.Incomplete

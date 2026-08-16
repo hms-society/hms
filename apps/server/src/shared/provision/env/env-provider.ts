@@ -21,9 +21,6 @@ export const envSchema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().default(''),
   OLLAMA_AI_MODEL: z.string().optional(),
   OPENROUTER_API_KEY: z.string().optional(),
-  DOCUMENT_VALIDATION_AI_MODE: z
-    .enum(['deterministic', 'live'])
-    .default('deterministic'),
 })
 
 type Env = z.infer<typeof envSchema>

@@ -82,8 +82,9 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
       }),
     )
 
-    const logs =
-      await fixture.documentValidationLogsRepository.listByDocumentFileId(file?.id ?? '')
+    const logs = await fixture.documentValidationLogsRepository.listByDocumentFileId(
+      file?.id ?? '',
+    )
 
     expect(logs).toEqual([
       expect.objectContaining({

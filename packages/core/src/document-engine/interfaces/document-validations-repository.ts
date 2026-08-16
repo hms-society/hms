@@ -39,12 +39,8 @@ export type RecordDocumentResendRequestInput = {
 }
 
 export interface DocumentValidationsRepository {
-  list(
-    filters?: ListDocumentValidationsFilters,
-  ): Promise<DocumentValidationDocument[]>
-  findByFileId(
-    documentFileId: string,
-  ): Promise<DocumentValidationDocument | undefined>
+  list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationDocument[]>
+  findByFileId(documentFileId: string): Promise<DocumentValidationDocument | undefined>
   recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
   ): Promise<DocumentValidationDocument>

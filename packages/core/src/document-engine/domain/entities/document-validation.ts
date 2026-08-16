@@ -1,7 +1,4 @@
-import type {
-  DocumentBatchChannel,
-  DocumentValidationStatus,
-} from '../structures'
+import type { DocumentBatchChannel, DocumentValidationStatus } from '../structures'
 
 export type DocumentValidationExtractedField = {
   label: string

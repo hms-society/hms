@@ -2,10 +2,7 @@ import type {
   DocumentValidationDocument,
   DocumentValidationLog,
 } from '@hms/core/document-engine/domain/entities'
-import type {
-  DocumentValidationAnalysisQueue,
-  DocumentValidationService as IDocumentValidationService,
-} from '@hms/core/document-engine/interfaces'
+import type { DocumentValidationService as IDocumentValidationService } from '@hms/core/document-engine/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
 export const DocumentValidationService = (
@@ -36,12 +33,6 @@ export const DocumentValidationService = (
     listLogs(documentFileId) {
       return restClient.get<DocumentValidationLog[]>(
         `/document-validation/documents/${documentFileId}/logs`,
-      )
-    },
-
-    analyzeDocument(documentFileId) {
-      return restClient.post<DocumentValidationAnalysisQueue>(
-        `/document-validation/documents/${documentFileId}/analyze`,
       )
     },
 

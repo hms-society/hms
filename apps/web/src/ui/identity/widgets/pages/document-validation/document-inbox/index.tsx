@@ -172,8 +172,8 @@ export const DocumentInboxPage = () => {
             role='alert'
           >
             <Icon name='alert-circle' className='mt-0.5 size-4' />
-            Não foi possível carregar os documentos. Confira o backend e tente
-            atualizar novamente.
+            Não foi possível carregar os documentos. Confira o backend e tente atualizar
+            novamente.
           </div>
         )}
 

@@ -21,8 +21,7 @@ export class RequestDocumentResendUseCase {
   ) {}
 
   async execute(request: RequestDocumentResendRequest) {
-    const document =
-      await this.documentValidationsRepository.recordResendRequest(request)
+    const document = await this.documentValidationsRepository.recordResendRequest(request)
 
     await this.documentValidationLogsRepository.add({
       documentFileId: request.documentFileId,

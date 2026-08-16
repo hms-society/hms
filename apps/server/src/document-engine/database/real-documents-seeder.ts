@@ -143,9 +143,7 @@ export class RealDocumentsSeeder {
                       { label: 'CEP', value: '01452-001' },
                     ],
               missingFields:
-                status === DocumentValidationStatus.Incomplete
-                  ? ['Data de emissão']
-                  : [],
+                status === DocumentValidationStatus.Incomplete ? ['Data de emissão'] : [],
               caseId: undefined,
               checklistItemId: undefined,
               isDuplicate: status === DocumentValidationStatus.Duplicate,

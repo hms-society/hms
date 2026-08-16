@@ -79,10 +79,10 @@ import {
   FileMinus,
   Lock,
   CreditCard,
-  Map,
+  Map as MapIcon,
   AlertTriangle,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-react'
 
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
@@ -190,10 +190,10 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   scan: Scan,
   'check-circle-2': CheckCircle2,
   'file-minus': FileMinus,
-  'lock': Lock,
+  lock: Lock,
   'credit-card': CreditCard,
-  'map': Map,
+  map: MapIcon,
   'alert-triangle': AlertTriangle,
   'alert-circle': AlertCircle,
-  'help-circle': HelpCircle
+  'help-circle': HelpCircle,
 }

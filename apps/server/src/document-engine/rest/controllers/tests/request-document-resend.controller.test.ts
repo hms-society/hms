@@ -77,8 +77,9 @@ describe('Request Document Resend Controller [POST /document-validation/document
       }),
     )
 
-    const logs =
-      await fixture.documentValidationLogsRepository.listByDocumentFileId(file?.id ?? '')
+    const logs = await fixture.documentValidationLogsRepository.listByDocumentFileId(
+      file?.id ?? '',
+    )
 
     expect(logs).toEqual([
       expect.objectContaining({

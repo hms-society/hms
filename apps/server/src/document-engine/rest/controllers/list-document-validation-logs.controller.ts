@@ -13,9 +13,7 @@ export class ListDocumentValidationLogsController {
     @Inject(DOCUMENT_ENGINE.documentValidationLogs)
     documentValidationLogsRepository: DocumentValidationLogsRepository,
   ) {
-    this.useCase = new ListDocumentValidationLogsUseCase(
-      documentValidationLogsRepository,
-    )
+    this.useCase = new ListDocumentValidationLogsUseCase(documentValidationLogsRepository)
   }
 
   @Get('documents/:documentFileId/logs')

@@ -30,7 +30,7 @@ type AnalysisDocumentView = {
 const FALLBACK_DOCUMENT: AnalysisDocumentView = {
   id: '',
   fileName: 'Carregando documento...',
-  confidence: 'Aguardando IA',
+  confidence: 'Sem sugestão disponível',
   type: '',
   fileSize: '0 KB',
   receivedFrom: 'Carregando',
@@ -225,7 +225,7 @@ function getConfidenceLabel(document: DocumentValidationDocument) {
 
   if (label) return label
 
-  if (document.aiConfidence === undefined) return 'Aguardando IA'
+  if (document.aiConfidence === undefined) return 'Sem sugestão disponível'
   if (document.aiConfidence >= 90) return 'Sugerido pela IA - Confiança alta'
   if (document.aiConfidence >= 60) return 'Sugerido pela IA'
 

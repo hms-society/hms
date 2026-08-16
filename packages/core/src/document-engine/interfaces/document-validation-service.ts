@@ -7,7 +7,6 @@ import type {
   DocumentValidationStatus,
 } from '../domain/structures'
 import type { RestResponse } from '../../shared/responses/rest-response'
-import type { DocumentValidationAnalysisQueue } from './document-validation-analysis-queue'
 
 export type ListDocumentValidationsQuery = {
   status?: DocumentValidationStatus
@@ -30,13 +29,8 @@ export interface DocumentValidationService {
   listDocuments(
     query?: ListDocumentValidationsQuery,
   ): Promise<RestResponse<DocumentValidationDocument[]>>
-  getDocument(
-    documentFileId: string,
-  ): Promise<RestResponse<DocumentValidationDocument>>
+  getDocument(documentFileId: string): Promise<RestResponse<DocumentValidationDocument>>
   listLogs(documentFileId: string): Promise<RestResponse<DocumentValidationLog[]>>
-  analyzeDocument(
-    documentFileId: string,
-  ): Promise<RestResponse<DocumentValidationAnalysisQueue>>
   recordDecision(
     documentFileId: string,
     request: RecordDocumentValidationDecisionRequest,
