@@ -3,6 +3,7 @@ import type { AuthAdministrationUser, AuthUser } from '../domain/structures'
 export interface AuthAdministrationProvider {
   createUser(email: string, password: string): Promise<AuthUser>
   removeUser(userId: string): Promise<void>
+  removeAllUsers(): Promise<void>
   inviteUserByEmail(email: string, redirectTo: string): Promise<AuthUser>
   resendInvitation(email: string, redirectTo: string): Promise<AuthUser>
   findUserByEmail(email: string): Promise<AuthAdministrationUser | undefined>

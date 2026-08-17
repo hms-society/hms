@@ -12,6 +12,7 @@ import {
   type DocumentPendingMarker,
   type DocumentTemplateContent,
   DocumentVersionSource,
+  DocumentVersionStatus,
 } from '../domain/structures'
 import type {
   DocumentFileExporter,
@@ -80,6 +81,7 @@ export class SaveGeneratedDocumentVersionUseCase
       pendingMarkers: request.pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: this.datetimeProvider.now(),
+      status: DocumentVersionStatus.InReview,
     })
   }
 
