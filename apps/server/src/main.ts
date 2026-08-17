@@ -4,6 +4,7 @@ import { apiReference } from '@scalar/nestjs-api-reference'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from '@/app.module'
+import { seedDatabase } from '@/shared/database/seed'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
 
@@ -31,6 +32,10 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalErrorHandler(app.get(HttpAdapterHost)))
 
   const envProvider = app.get(EnvProvider)
+
+  if (envProvider.get('HMS_SERVER_APP_MODE') === 'stg') {
+    await seedDatabase(app)
+  }
 
   app.enableCors({
     origin: envProvider.get('HMS_WEB_APP_URL'),
