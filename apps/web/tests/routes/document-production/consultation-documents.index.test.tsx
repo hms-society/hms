@@ -39,8 +39,7 @@ test('lists consultation documents and navigates to the review route', async ({
 
 })
 
-test('keeps batch generation stateful and exercises narrow keyboard layout', async ({
-  documentProduction,
+test('opens document selection and exercises narrow keyboard layout', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
