@@ -120,6 +120,20 @@
       "when": 1786571723706,
       "tag": "0016_shallow_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1786723200000,
+      "tag": "0021_document_validation_statuses",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1786725600000,
+      "tag": "0022_document_validation_logs",
+      "breakpoints": true
     }
   ]
 }
