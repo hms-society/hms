@@ -43,6 +43,11 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
   ],
-  exports: [ListClientDocumentBatchUseCase, DocumentEngineMessagingModule],
+  exports: [
+    ListClientDocumentBatchUseCase,
+    DocumentEngineMessagingModule,
+    DOCUMENT_ENGINE.documentValidations,
+    DOCUMENT_ENGINE.documentValidationLogs,
+  ],
 })
 export class DocumentsModule {}
