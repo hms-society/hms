@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { IntakeListResponse } from '@hms/core/intake/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
+import { ConsultationModality } from '@hms/core/consultation/domain/structures'
 
 import { IntakeService } from '../intake-service'
 
@@ -15,6 +16,8 @@ const intakePage = {
   statusCounts: {
     all: 0,
     byStatus: {
+      consultation_scheduling: 0,
+      consultation_scheduling_failed: 0,
       consultation_scheduled: 0,
       consultation_completed: 0,
       viability_registered: 0,
@@ -69,5 +72,27 @@ describe('IntakeService', () => {
     await service.listIntakes()
 
     expect(get).toHaveBeenCalledWith('/intakes')
+  })
+
+  it('requests consultation scheduling again', async () => {
+    const response = new RestResponse({ body: {} as never })
+    const post = vi.fn<RestClient['post']>().mockResolvedValue(response)
+    const service = IntakeService({ post } as unknown as RestClient)
+
+    const result = await service.retryIntakeConsultationScheduling('intake-id', {
+      assignedLawyerId: 'b4a55c12-1fca-4e17-810f-28128f046553',
+      startsAt: new Date('2026-08-13T13:00:00.000Z'),
+      modality: ConsultationModality.InPerson,
+    })
+
+    expect(post).toHaveBeenCalledWith(
+      '/intakes/intake-id/consultation-scheduling/retry',
+      {
+        assignedLawyerId: 'b4a55c12-1fca-4e17-810f-28128f046553',
+        startsAt: new Date('2026-08-13T13:00:00.000Z'),
+        modality: ConsultationModality.InPerson,
+      },
+    )
+    expect(result).toBe(response)
   })
 })

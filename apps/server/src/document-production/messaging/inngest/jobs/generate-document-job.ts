@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DocumentGenerationRequestedEvent } from '@hms/core/document-production/domain/events'
+import {
+  DocumentGenerationCancelledEvent,
+  DocumentGenerationRequestedEvent,
+} from '@hms/core/document-production/domain/events'
 import type { GenerateDocumentWorkflow } from '@hms/core/document-production/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
@@ -17,7 +20,18 @@ const documentGenerationRequestedEvent = eventType(
       documentId: z.string().uuid(),
       documentSpecificationVersionId: z.string().uuid(),
       requestedByCollaboratorId: z.string().uuid(),
+      instructions: z.string().trim().min(1).max(4000).optional(),
       source: documentGenerationSourceSchema,
+      occurredAt: z.string().datetime(),
+    }),
+  },
+)
+
+const documentGenerationCancelledEvent = eventType(
+  DocumentGenerationCancelledEvent._NAME,
+  {
+    schema: z.object({
+      documentGenerationId: z.string().uuid(),
       occurredAt: z.string().datetime(),
     }),
   },
@@ -38,6 +52,12 @@ export class GenerateDocumentJob extends InngestJob {
       {
         id: 'document-production/generate-document',
         name: 'Generate Document',
+        cancelOn: [
+          {
+            event: documentGenerationCancelledEvent,
+            match: 'data.documentGenerationId',
+          },
+        ],
         triggers: [documentGenerationRequestedEvent],
       },
       async ({ event, step }) =>
@@ -47,6 +67,7 @@ export class GenerateDocumentJob extends InngestJob {
             documentId: event.data.documentId,
             documentSpecificationVersionId: event.data.documentSpecificationVersionId,
             requestedByCollaboratorId: event.data.requestedByCollaboratorId,
+            instructions: event.data.instructions,
             source: event.data.source,
           }),
         ),

@@ -1,1 +1,0 @@
-DROP TABLE "consultation_identified_risks" CASCADE;

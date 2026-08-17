@@ -4,6 +4,7 @@ export interface DocumentsRepository {
   add(document: DocumentCreation): Promise<Document>
   addMany(documents: readonly DocumentCreation[]): Promise<readonly Document[]>
   findById(documentId: string): Promise<Document | undefined>
+  findByIds(documentIds: readonly string[]): Promise<readonly Document[]>
   replace(
     documentId: string,
     changes: Partial<Pick<Document, 'title' | 'currentVersionId'>>,

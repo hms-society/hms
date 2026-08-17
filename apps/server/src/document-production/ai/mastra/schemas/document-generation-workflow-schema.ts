@@ -22,6 +22,7 @@ export const documentGenerationWorkflowInputSchema = z.object({
   documentId: z.string().uuid(),
   documentSpecificationVersionId: z.string().uuid(),
   requestedByCollaboratorId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
 })
 
@@ -31,6 +32,7 @@ export const documentPendingMarkerSchema = z.object({
 
 export const documentReviewCycleInputSchema = z.object({
   documentGenerationId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
   template: z.object({
     name: z.string(),

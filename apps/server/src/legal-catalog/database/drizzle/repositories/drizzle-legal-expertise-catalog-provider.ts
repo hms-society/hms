@@ -4,6 +4,7 @@ import type {
   LegalExpertiseCatalogResolution,
   LegalExpertiseSelection,
 } from '@hms/core/legal-catalog/interfaces'
+import { AppError } from '@hms/core/shared/domain/errors'
 
 import { DrizzleLegalAreasRepository } from '@/legal-catalog/database/drizzle/repositories/drizzle-legal-areas-repository'
 import { DrizzleLegalTopicsRepository } from '@/legal-catalog/database/drizzle/repositories/drizzle-legal-topics-repository'
@@ -47,14 +48,20 @@ export class DrizzleLegalExpertiseCatalogProvider
       const area = areasById.get(expertise.legalAreaId)
 
       if (!area) {
-        throw new Error('Legal area reference could not be resolved')
+        throw new AppError(
+          'A área jurídica informada não pôde ser resolvida.',
+          'Contexto Jurídico Não Encontrado',
+        )
       }
 
       const legalTopics = expertise.legalTopicIds.map((legalTopicId) => {
         const topic = topicsById.get(legalTopicId)
 
         if (!topic) {
-          throw new Error('Legal topic reference could not be resolved')
+          throw new AppError(
+            'O tema jurídico informado não pôde ser resolvido.',
+            'Contexto Jurídico Não Encontrado',
+          )
         }
 
         return {

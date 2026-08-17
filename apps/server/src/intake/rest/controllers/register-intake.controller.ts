@@ -11,6 +11,7 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakesController } from '@/intake/decorators'
 import { AuthGuard } from '@/identity/guards'
 import { IntakeResponseDto } from '@/intake/rest/dtos/intake-response.dto'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 type RequestBody = Parameters<RegisterIntakeUseCase['execute']>[0]
@@ -25,8 +26,9 @@ export class RegisterIntakesController {
   constructor(
     @Inject(INTAKE_REPOSITORIES.intakes) intakesRepository: IntakesRepository,
     datetimeProvider: DatetimeProvider,
+    broker: InngestBroker,
   ) {
-    this.useCase = new RegisterIntakeUseCase(intakesRepository, datetimeProvider)
+    this.useCase = new RegisterIntakeUseCase(intakesRepository, datetimeProvider, broker)
   }
 
   @Post()
@@ -45,7 +47,7 @@ export class RegisterIntakesController {
     description: 'The intake cannot be closed with the supplied data.',
     type: ErrorResponseDto,
   })
-  @UsePipes(ZodValidationPipe)
+  @UsePipes(new ZodValidationPipe(registerIntakeSchema))
   handle(@Body() body: RegisterIntakeControllerRequestBody & RequestBody) {
     return this.useCase.execute(body)
   }

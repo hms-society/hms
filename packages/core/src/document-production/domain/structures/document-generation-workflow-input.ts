@@ -5,5 +5,6 @@ export type DocumentGenerationWorkflowInput = {
   readonly documentId: string
   readonly documentSpecificationVersionId: string
   readonly requestedByCollaboratorId: string
+  readonly instructions?: string
   readonly source: DocumentGenerationSource
 }

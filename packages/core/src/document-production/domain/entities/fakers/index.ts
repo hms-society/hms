@@ -1,3 +1,6 @@
 export * from './document-specification-faker'
 export * from './document-generation-faker'
 export * from './document-version-faker'
+export * from './document-faker'
+export * from './document-package-faker'
+export * from './package-document-faker'

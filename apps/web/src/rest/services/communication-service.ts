@@ -10,12 +10,6 @@ export type CommunicationRecord = {
   author: string
 }
 
-export type SendCommunicationPayload = {
-  clientId: string
-  content: string
-  channel: 'whatsapp' | 'email' | 'phone'
-}
-
 export function CommunicationService(client: RestClient) {
   return {
     listClientCommunications: async (clientId: string) => {
@@ -27,16 +21,6 @@ export function CommunicationService(client: RestClient) {
       }
 
       // Se for uma resposta bruta do Axios (com .data)
-      return new RestResponse(response)
-    },
-
-    sendCommunication: async (payload: SendCommunicationPayload) => {
-      const response: any = await client.post('/communications/send', payload)
-
-      if (response && response.isFailure !== undefined) {
-        return response
-      }
-
       return new RestResponse(response)
     },
   }
