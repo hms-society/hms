@@ -71,7 +71,15 @@
     "lineWidth": 90
   },
   "files": {
-    "includes": ["**", "!**/routeTree.gen.ts", "!**/dist", "!**/.output", "!volumes"]
+    "includes": [
+      "**",
+      "!**/routeTree.gen.ts",
+      "!**/dist",
+      "!**/.output",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!volumes"
+    ]
   },
   "css": {
     "parser": {

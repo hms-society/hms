@@ -3,14 +3,14 @@ import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent, CardHeader } from '@/ui/shadcn/card'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import type { ClientRegisterDialogController } from '../use-client-register-dialog'
+import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
 import { useClientReviewStep } from './use-client-review-step'
 
 export type ClientReviewStepProps = {
-  controller: ClientRegisterDialogController
+  dialog: ClientRegisterDialogValues
 }
 
-export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
+export const ClientReviewStep = ({ dialog }: ClientReviewStepProps) => {
   const {
     primaryRows,
     contactRows,
@@ -19,10 +19,10 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
     consentRows,
     pending,
     canRetry,
-  } = useClientReviewStep(controller)
+  } = useClientReviewStep(dialog)
 
   return (
-    <form onSubmit={controller.handleSubmitRegistration} className='flex flex-col gap-6'>
+    <form onSubmit={dialog.handleSubmitRegistration} className='flex flex-col gap-6'>
       <div>
         <h2 className='font-serif text-xl font-semibold text-foreground sm:text-2xl'>
           Revisão do cliente
@@ -44,7 +44,7 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             variant='ghost'
             size='sm'
             className='h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground'
-            onClick={controller.handleBackToIdentification}
+            onClick={dialog.handleBackToIdentification}
           >
             <Icon name='pencil' className='size-3.5' />
             Editar
@@ -82,7 +82,7 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             variant='ghost'
             size='sm'
             className='h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground'
-            onClick={controller.handleBackToRegistration}
+            onClick={dialog.handleBackToRegistration}
           >
             <Icon name='pencil' className='size-3.5' />
             Editar
@@ -130,7 +130,7 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
             variant='ghost'
             size='sm'
             className='h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground'
-            onClick={controller.handleBackToPrivacy}
+            onClick={dialog.handleBackToPrivacy}
           >
             <Icon name='pencil' className='size-3.5' />
             Editar
@@ -150,7 +150,7 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
         </CardContent>
       </Card>
 
-      {controller.createdClientDetails && pending.length > 0 && (
+      {dialog.createdClientDetails && pending.length > 0 && (
         <div
           role='status'
           className='rounded-xl border border-brand-accent/40 bg-accent/50 p-4 text-xs sm:text-sm'
@@ -170,7 +170,7 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
               type='button'
               className='mt-3 rounded-pill text-xs h-8 px-4'
               variant='outline'
-              onClick={controller.handleRetryPendingConsents}
+              onClick={dialog.handleRetryPendingConsents}
             >
               Tentar consentimentos pendentes
             </Button>
@@ -178,12 +178,12 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
         </div>
       )}
 
-      {controller.asyncError && (
+      {dialog.asyncError && (
         <p
           role='alert'
           className='rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive'
         >
-          {controller.asyncError}
+          {dialog.asyncError}
         </p>
       )}
 
@@ -196,8 +196,8 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
           type='button'
           variant='outline'
           className='rounded-pill text-sm font-medium h-9 px-6'
-          onClick={controller.handleBackToPrivacy}
-          disabled={controller.isBusy}
+          onClick={dialog.handleBackToPrivacy}
+          disabled={dialog.isBusy}
         >
           Voltar
         </Button>
@@ -205,18 +205,16 @@ export const ClientReviewStep = ({ controller }: ClientReviewStepProps) => {
           type='button'
           className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
           disabled={
-            controller.isBusy ||
-            Boolean(controller.createdClientDetails && pending.length === 0)
+            dialog.isBusy || Boolean(dialog.createdClientDetails && pending.length === 0)
           }
-          onClick={controller.handleSubmitRegistration}
+          onClick={dialog.handleSubmitRegistration}
         >
-          {controller.requestLock === 'registration' ||
-          controller.requestLock === 'consents'
+          {dialog.requestLock === 'registration' || dialog.requestLock === 'consents'
             ? 'Salvando…'
-            : controller.createdClientDetails
+            : dialog.createdClientDetails
               ? 'Concluir consentimentos'
               : 'Concluir cadastro'}
-          {!controller.isBusy && <Icon name='check' className='size-3.5' />}
+          {!dialog.isBusy && <Icon name='check' className='size-3.5' />}
         </Button>
       </div>
     </form>

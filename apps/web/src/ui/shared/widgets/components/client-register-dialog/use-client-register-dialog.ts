@@ -441,5 +441,5 @@ export function useClientRegisterDialog({
   }
 }
 
-export type ClientRegisterDialogController = ReturnType<typeof useClientRegisterDialog>
+export type ClientRegisterDialogValues = ReturnType<typeof useClientRegisterDialog>
 export type ClientRegisterDialogForm = UseFormReturn<RegistrationForm>
