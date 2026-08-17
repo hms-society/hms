@@ -83,9 +83,7 @@ describe('GetConsultationByIdController (consultations.controller.test.ts)', () 
       ],
     })
 
-    if (AuthGuard) {
-      moduleBuilder.overrideGuard(AuthGuard).useValue({ canActivate: () => true })
-    }
+    moduleBuilder.overrideGuard(AuthGuard).useValue({ canActivate: () => true })
 
     const module: TestingModule = await moduleBuilder.compile()
 

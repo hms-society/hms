@@ -59,7 +59,7 @@ non-React hooks, types, constants, and utilities remain in `.ts` files.
 
 Apply [`code-conventions-rules.md`](code-conventions-rules.md) for function
 declarations, naming, handler prefixes, and the order of values and functions in
-hook/controller destructuring. The UI-specific rules below refine those shared
+hook destructuring. The UI-specific rules below refine those shared
 conventions where necessary.
 
 ### Action hooks
@@ -133,7 +133,14 @@ must be declared as an exported `const` using the widget-specific props type:
 export const CollaboratorRegisterDialog = (
   props: CollaboratorRegisterDialogProps,
 ) => {
-  const controller = useCollaboratorRegisterDialog(props)
+  const {
+    form,
+    handleClose,
+    handleOpenChange,
+    isRegisteringCollaborator,
+    open,
+    profile,
+  } = useCollaboratorRegisterDialog(props)
 
   return <DialogContent>{/* markup and hook wiring */}</DialogContent>
 }
@@ -165,7 +172,7 @@ export function useCollaboratorRegisterDialog(props: CollaboratorRegisterDialogP
 ```
 
 Do not declare widget-hook behavior as arrow-function variables. This rule
-applies to widget and page controller hooks; the exported-arrow convention for
+applies to widget and page hooks; the exported-arrow convention for
 `use<Name>Action` hooks remains the explicit exception described above.
 
 All UI logic belongs in the owning widget's hook. This includes local state,
@@ -175,8 +182,10 @@ point is responsible for rendering markup, passing props, and wiring DOM events
 to handlers exposed by the hook; it must not contain the logic behind those
 handlers.
 
-Prefer a widget controller returned by the hook when a widget has multiple
-states or interactions:
+Destructure the values and handlers returned by the hook at the component boundary.
+Do not assign the hook result to a generic `controller` variable or access its
+members through `controller.*`; the destructured names make the rendered contract
+explicit and keep the markup readable:
 
 ```ts
 export function useClientCard(client: Client) {
@@ -185,6 +194,12 @@ export function useClientCard(client: Client) {
   }
 
   return { handleOpen }
+}
+
+export const ClientCard = ({ client }: ClientCardProps) => {
+  const { handleOpen } = useClientCard(client)
+
+  return <button onClick={handleOpen}>Abrir</button>
 }
 ```
 
@@ -607,6 +622,14 @@ Before changing UI or styling, follow `documentation/design.md`. Use the existin
 CSS variables and Tailwind theme tokens for colors, typography, radii, spacing,
 shadows, focus states, and light/dark behavior. Do not hardcode a design value when
 an appropriate token exists.
+
+The radius token mapping is normative: design `pill` maps to Tailwind
+`rounded-full`. Buttons, badges, and tags specified as pill in Pencil or the
+design documentation must use `rounded-full` directly or a shared component
+variant that resolves to it. Before completing a UI change, inspect the rendered
+class contract or a focused component test to verify that the selected radius
+matches the referenced design token; do not infer compliance from visual
+similarity alone.
 
 Headings use the documented serif family; body copy, controls, and navigation use
 the documented sans family. Preserve accessible names, visible keyboard focus,
