@@ -5,16 +5,15 @@ import { Checkbox } from '@/ui/shadcn/checkbox'
 import { Field, FieldDescription, FieldLabel } from '@/ui/shadcn/field'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import type { ClientRegisterDialogController } from '../use-client-register-dialog'
+import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
 import { useClientPrivacyStep } from './use-client-privacy-step'
 
 export type ClientPrivacyStepProps = {
-  controller: ClientRegisterDialogController
+  dialog: ClientRegisterDialogValues
 }
 
-export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
-  const { form, consentFields, getConsentChangeHandler } =
-    useClientPrivacyStep(controller)
+export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
+  const { form, consentFields, getConsentChangeHandler } = useClientPrivacyStep(dialog)
 
   return (
     <div className='flex flex-col gap-6'>
@@ -80,9 +79,9 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
         })}
       </fieldset>
 
-      {controller.asyncError && (
+      {dialog.asyncError && (
         <p role='alert' className='text-xs font-medium text-destructive'>
-          {controller.asyncError}
+          {dialog.asyncError}
         </p>
       )}
 
@@ -92,14 +91,14 @@ export const ClientPrivacyStep = ({ controller }: ClientPrivacyStepProps) => {
           type='button'
           variant='outline'
           className='rounded-pill text-sm font-medium h-9 px-6'
-          onClick={controller.handleBackToRegistration}
+          onClick={dialog.handleBackToRegistration}
         >
           Voltar
         </Button>
         <Button
           type='button'
           className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
-          onClick={controller.handleContinueToReview}
+          onClick={dialog.handleContinueToReview}
         >
           Revisar cadastro
           <Icon name='arrow-right' className='size-3.5' />

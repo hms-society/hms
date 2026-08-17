@@ -3,19 +3,19 @@ import { Card, CardContent } from '@/ui/shadcn/card'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import type {
-  ClientRegisterDialogController,
+  ClientRegisterDialogValues,
   ClientRegisterDialogSearchResult,
 } from '../use-client-register-dialog'
 import { ClientSummary } from './client-summary'
 import { useClientSearchResultStep } from './use-client-search-result-step'
 
 export type ClientSearchResultStepProps = {
-  controller: ClientRegisterDialogController
+  dialog: ClientRegisterDialogValues
   result: ClientRegisterDialogSearchResult
 }
 
 export const ClientSearchResultStep = ({
-  controller,
+  dialog,
   result,
 }: ClientSearchResultStepProps) => {
   const { maskedTaxId, maskedPhone } = useClientSearchResultStep(result)
@@ -34,9 +34,9 @@ export const ClientSearchResultStep = ({
 
         <ClientSummary details={result.details} />
 
-        {controller.asyncError && (
+        {dialog.asyncError && (
           <p role='alert' className='text-xs font-medium text-destructive'>
-            {controller.asyncError}
+            {dialog.asyncError}
           </p>
         )}
         <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
@@ -44,14 +44,14 @@ export const ClientSearchResultStep = ({
             type='button'
             variant='outline'
             className='rounded-pill text-xs font-medium'
-            onClick={controller.handleSearchAnotherClient}
+            onClick={dialog.handleSearchAnotherClient}
           >
             Buscar outro cliente
           </Button>
           <Button
             type='button'
             className='rounded-pill text-xs font-medium gap-1.5'
-            onClick={controller.handleSelectExistingClient}
+            onClick={dialog.handleSelectExistingClient}
           >
             <Icon name='check' className='size-3.5' />
             Abrir cadastro
@@ -89,9 +89,9 @@ export const ClientSearchResultStep = ({
         </CardContent>
       </Card>
 
-      {controller.asyncError && (
+      {dialog.asyncError && (
         <p role='alert' className='text-xs font-medium text-destructive'>
-          {controller.asyncError}
+          {dialog.asyncError}
         </p>
       )}
       <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
@@ -99,14 +99,14 @@ export const ClientSearchResultStep = ({
           type='button'
           variant='outline'
           className='rounded-pill text-xs font-medium'
-          onClick={controller.handleBackToIdentification}
+          onClick={dialog.handleBackToIdentification}
         >
           Voltar
         </Button>
         <Button
           type='button'
           className='rounded-pill text-xs font-medium gap-1.5'
-          onClick={controller.handleContinueToRegistration}
+          onClick={dialog.handleContinueToRegistration}
         >
           Continuar cadastro
           <Icon name='arrow-right' className='size-3.5' />

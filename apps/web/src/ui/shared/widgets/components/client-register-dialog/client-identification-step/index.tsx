@@ -3,21 +3,19 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/ui/shadcn/fie
 import { Input } from '@/ui/shadcn/input'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import type { ClientRegisterDialogController } from '../use-client-register-dialog'
+import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
 import { useClientIdentificationStep } from './use-client-identification-step'
 
 export type ClientIdentificationStepProps = {
-  controller: ClientRegisterDialogController
+  dialog: ClientRegisterDialogValues
 }
 
-export const ClientIdentificationStep = ({
-  controller,
-}: ClientIdentificationStepProps) => {
+export const ClientIdentificationStep = ({ dialog }: ClientIdentificationStepProps) => {
   const { identificationForm, errors, busy, handleTaxIdChange, handlePhoneChange } =
-    useClientIdentificationStep(controller)
+    useClientIdentificationStep(dialog)
 
   return (
-    <form onSubmit={controller.handleLookup} className='flex flex-col gap-6'>
+    <form onSubmit={dialog.handleLookup} className='flex flex-col gap-6'>
       <div>
         <h2 className='font-serif text-xl font-semibold text-foreground sm:text-2xl'>
           Consulte o cadastro
@@ -74,12 +72,12 @@ export const ClientIdentificationStep = ({
         </Field>
       </div>
 
-      {controller.asyncError && (
+      {dialog.asyncError && (
         <p
           role='alert'
           className='rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive'
         >
-          {controller.asyncError}
+          {dialog.asyncError}
         </p>
       )}
       <span aria-live='polite' className='sr-only'>
@@ -90,7 +88,7 @@ export const ClientIdentificationStep = ({
           type='button'
           variant='outline'
           className='rounded-pill text-sm font-medium h-9 px-6'
-          onClick={controller.handleClearIdentification}
+          onClick={dialog.handleClearIdentification}
           disabled={busy}
         >
           Limpar
@@ -98,7 +96,7 @@ export const ClientIdentificationStep = ({
         <Button
           type='submit'
           className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
-          disabled={controller.isBusy}
+          disabled={dialog.isBusy}
         >
           <Icon name='search' className='size-3.5' />
           {busy ? 'Buscando…' : 'Buscar cliente'}
