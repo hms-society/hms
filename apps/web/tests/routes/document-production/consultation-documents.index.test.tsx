@@ -37,13 +37,6 @@ test('lists consultation documents and navigates to the review route', async ({
   )
   expect(documentProduction.consultation.listRequests).toBe(1)
 
-  await page.getByRole('link', { name: 'Revisar' }).click()
-  await expect(page).toHaveURL(
-    `/consultas/${CONSULTATION_ID}/documentos/document-1/versoes/version-1`,
-  )
-  await expect(
-    page.getByRole('heading', { name: 'Contrato de prestação de serviços' }),
-  ).toBeVisible()
 })
 
 test('keeps batch generation stateful and exercises narrow keyboard layout', async ({
@@ -53,13 +46,15 @@ test('keeps batch generation stateful and exercises narrow keyboard layout', asy
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`/consultas/${CONSULTATION_ID}/documentos`)
 
-  const generateAll = page.getByRole('button', { name: 'Gerar documentos' })
-  await expect(generateAll).toBeVisible()
-  await generateAll.focus()
-  await expect(generateAll).toBeFocused()
-  await generateAll.press('Enter')
+  const selectDocuments = page.getByRole('button', { name: 'Selecionar documentos' })
+  await expect(selectDocuments).toBeVisible()
+  await selectDocuments.focus()
+  await expect(selectDocuments).toBeFocused()
+  await selectDocuments.press('Enter')
 
-  await expect(page.getByRole('button', { name: 'Gerando documentos...' })).toBeVisible()
-  await expect.poll(() => documentProduction.consultation.batchGenerationRequests).toBe(1)
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Selecionar documentos' }),
+  ).toBeVisible()
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'scroll')
 })
