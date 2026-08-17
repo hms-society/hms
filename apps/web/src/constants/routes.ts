@@ -23,6 +23,10 @@ export const ROUTES = {
   newDocumentSpecification: '/modelos-de-documentos/novo',
   documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
 
+  documentBatch: '/lotes-documentos',
+  documentInbox: '/caixa-de-documentos',
+  documentAnalysis: '/caixa-de-documentos/$fileId',
+
   paralegalCases: '/casos',
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',

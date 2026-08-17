@@ -8,6 +8,7 @@ import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import {
   DocumentBatchChannel,
   DocumentBatchStatus,
+  DocumentValidationStatus,
 } from '@hms/core/document-engine/domain/structures'
 
 import type { StorageProvider } from '@hms/core/shared/interfaces'
@@ -16,6 +17,15 @@ import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { getMimeTypeFromExtension } from '../utils/mime-type.map'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { eq } from 'drizzle-orm'
+import { documentBatchFileModel } from './drizzle/models'
+
+const REAL_VALIDATION_STATUS_CYCLE = [
+  DocumentValidationStatus.Valid,
+  DocumentValidationStatus.Incomplete,
+  DocumentValidationStatus.Duplicate,
+  DocumentValidationStatus.Illegible,
+] as const
 
 @Injectable()
 export class RealDocumentsSeeder {
@@ -110,6 +120,45 @@ export class RealDocumentsSeeder {
       `)
 
       batches.push(batch)
+
+      await Promise.all(
+        (batch.files ?? []).map((file, fileIndex) => {
+          const status =
+            REAL_VALIDATION_STATUS_CYCLE[
+              (index + fileIndex) % REAL_VALIDATION_STATUS_CYCLE.length
+            ]
+
+          return db
+            .update(documentBatchFileModel)
+            .set({
+              status,
+              aiConfidence: status === DocumentValidationStatus.Illegible ? 34 : 90,
+              extractedFields:
+                status === DocumentValidationStatus.Illegible
+                  ? []
+                  : [
+                      { label: 'Titular', value: 'Mariana Costa Silva' },
+                      { label: 'CPF', value: '284.***.***-19' },
+                      { label: 'Endereço', value: 'Rua das Palmeiras, 147' },
+                      { label: 'CEP', value: '01452-001' },
+                    ],
+              missingFields:
+                status === DocumentValidationStatus.Incomplete ? ['Data de emissão'] : [],
+              caseId: undefined,
+              checklistItemId: undefined,
+              isDuplicate: status === DocumentValidationStatus.Duplicate,
+              originalDocumentId:
+                status === DocumentValidationStatus.Duplicate ? file.id : undefined,
+              aiSuggestion: {
+                confidenceLabel: 'Sugerido pela IA',
+                documentTypeId: 'comprovante_residencia',
+                caseLabel: 'Caso 0089',
+                checklistItemLabel: 'Comprovante de residência',
+              },
+            })
+            .where(eq(documentBatchFileModel.id, file.id))
+        }),
+      )
     }
 
     return batches

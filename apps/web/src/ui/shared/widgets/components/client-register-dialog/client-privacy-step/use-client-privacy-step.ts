@@ -1,6 +1,6 @@
 import {
   CONSENT_TYPES,
-  type ClientRegisterDialogController,
+  type ClientRegisterDialogValues,
 } from '../use-client-register-dialog'
 
 export const CONSENT_COPY = {
@@ -22,8 +22,8 @@ export const CONSENT_COPY = {
   },
 } as const
 
-export function useClientPrivacyStep(controller: ClientRegisterDialogController) {
-  const form = controller.registrationForm
+export function useClientPrivacyStep(dialog: ClientRegisterDialogValues) {
+  const { registrationForm: form } = dialog
   const consentFields = CONSENT_TYPES.map(function getConsentField(type) {
     return {
       type,

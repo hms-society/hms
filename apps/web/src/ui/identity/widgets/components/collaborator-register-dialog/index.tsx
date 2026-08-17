@@ -39,7 +39,6 @@ import {
 export type { CollaboratorRegisterDialogProps } from './use-collaborator-register-dialog'
 
 export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProps) => {
-  const controller = useCollaboratorRegisterDialog(props)
   const {
     fields,
     form,
@@ -50,16 +49,25 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
     legalAreasError,
     legalAreasUnavailable,
     legalTopicsUnavailable,
-    onSubmit,
     pendingProfile,
     profile,
     registerCollaboratorError,
     requestErrorRef,
     selectedExpertises,
-  } = controller
-
+    onSubmit,
+    handleAddExpertise,
+    handleAreaChange,
+    handleClose,
+    handleConfirmProfileChange,
+    handleOpenChange,
+    handlePendingProfileChange,
+    handleProfileChange,
+    handleRemoveExpertise,
+    handleTopicAvailabilityChange,
+    handleTopicsChange,
+  } = useCollaboratorRegisterDialog(props)
   return (
-    <Dialog open={props.open} onOpenChange={controller.handleOpenChange}>
+    <Dialog open={props.open} onOpenChange={handleOpenChange}>
       <DialogContent className='flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-[14px] p-0 sm:max-w-[760px] [&>[data-slot=dialog-close]]:top-4 [&>[data-slot=dialog-close]]:right-4 [&>[data-slot=dialog-close]]:size-8'>
         <DialogHeader className='shrink-0 border-b border-border px-6 py-5 pr-16'>
           <DialogTitle className='font-serif text-xl font-semibold text-foreground'>
@@ -106,7 +114,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
               </h3>
               <div className='grid gap-3 sm:grid-cols-2'>
                 <Field label='Perfil' error={form.formState.errors.profile?.message}>
-                  <Select value={profile} onValueChange={controller.handleProfileChange}>
+                  <Select value={profile} onValueChange={handleProfileChange}>
                     <SelectTrigger
                       className='w-full rounded-md text-[13px]'
                       aria-label='Perfil'
@@ -166,11 +174,9 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
                       )}
                       disabled={legalAreasUnavailable}
                       canRemove={fields.length > 1}
-                      onRemove={() => controller.handleRemoveExpertise(index)}
-                      onAreaChange={(value) => controller.handleAreaChange(index, value)}
-                      onTopicsChange={(topicIds) =>
-                        controller.handleTopicsChange(index, topicIds)
-                      }
+                      onRemove={() => handleRemoveExpertise(index)}
+                      onAreaChange={(value) => handleAreaChange(index, value)}
+                      onTopicsChange={(topicIds) => handleTopicsChange(index, topicIds)}
                       areaError={
                         form.formState.errors.legalExpertises?.[index]?.legalAreaId
                           ?.message
@@ -179,7 +185,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
                         form.formState.errors.legalExpertises?.[index]?.legalTopicIds
                           ?.message
                       }
-                      onAvailabilityChange={controller.handleTopicAvailabilityChange}
+                      onAvailabilityChange={handleTopicAvailabilityChange}
                     />
                   ))}
                 </fieldset>
@@ -188,7 +194,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
                   variant='outline'
                   size='sm'
                   className='rounded-full px-3 text-xs text-primary'
-                  onClick={controller.handleAddExpertise}
+                  onClick={handleAddExpertise}
                   disabled={legalAreasUnavailable || fields.length >= legalAreas.length}
                 >
                   <Icon name='plus' />
@@ -208,12 +214,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
             )}
           </div>
           <DialogFooter className='mx-0 mb-0 shrink-0 rounded-none border-border bg-transparent px-6 py-4'>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={controller.handleClose}
-            >
+            <Button type='button' variant='outline' size='sm' onClick={handleClose}>
               Cancelar
             </Button>
             <Button
@@ -233,7 +234,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
       </DialogContent>
       <AlertDialog
         open={Boolean(pendingProfile)}
-        onOpenChange={controller.handlePendingProfileChange}
+        onOpenChange={handlePendingProfileChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -245,7 +246,7 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Manter especialidades</AlertDialogCancel>
-            <AlertDialogAction onClick={controller.handleConfirmProfileChange}>
+            <AlertDialogAction onClick={handleConfirmProfileChange}>
               Descartar e trocar
             </AlertDialogAction>
           </AlertDialogFooter>

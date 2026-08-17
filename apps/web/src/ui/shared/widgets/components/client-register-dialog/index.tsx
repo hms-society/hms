@@ -23,12 +23,60 @@ import {
 export type { ClientRegisterDialogProps } from './use-client-register-dialog'
 
 export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
-  const controller = useClientRegisterDialog(props)
+  const {
+    asyncError,
+    createdClientDetails,
+    dialogContentRef,
+    handleBackToIdentification,
+    handleBackToPrivacy,
+    handleBackToRegistration,
+    handleClearIdentification,
+    handleClientTypeChange,
+    handleContinueToPrivacy,
+    handleContinueToRegistration,
+    handleContinueToReview,
+    handleLookup,
+    handleRetryPendingConsents,
+    handleSearchAnotherClient,
+    handleSelectExistingClient,
+    handleSubmitRegistration,
+    identificationForm,
+    isBusy,
+    registrationForm,
+    requestLock,
+    searchResult,
+    state,
+  } = useClientRegisterDialog(props)
+
+  const clientRegisterDialog = {
+    asyncError,
+    createdClientDetails,
+    dialogContentRef,
+    handleBackToIdentification,
+    handleBackToPrivacy,
+    handleBackToRegistration,
+    handleClearIdentification,
+    handleClientTypeChange,
+    handleContinueToPrivacy,
+    handleContinueToRegistration,
+    handleContinueToReview,
+    handleLookup,
+    handleRetryPendingConsents,
+    handleSearchAnotherClient,
+    handleSelectExistingClient,
+    handleSubmitRegistration,
+    identificationForm,
+    isBusy,
+    registrationForm,
+    requestLock,
+    searchResult,
+    state,
+  }
 
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent
-        ref={controller.dialogContentRef}
+        ref={dialogContentRef}
         showCloseButton={false}
         className='flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-lg sm:max-h-[min(90dvh,48rem)] sm:max-w-3xl'
         aria-describedby='client-register-dialog-description'
@@ -57,27 +105,21 @@ export const ClientRegisterDialog = (props: ClientRegisterDialogProps) => {
           </DialogDescription>
 
           <div className='pt-2'>
-            <ClientRegisterDialogStepper state={controller.state} />
+            <ClientRegisterDialogStepper state={state} />
           </div>
         </DialogHeader>
         <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-7'>
-          {controller.state === 'identification' && (
-            <ClientIdentificationStep controller={controller} />
+          {state === 'identification' && (
+            <ClientIdentificationStep dialog={clientRegisterDialog} />
           )}
-          {(controller.state === 'existing-client' || controller.state === 'not-found') &&
-            controller.searchResult && (
-              <ClientSearchResultStep
-                controller={controller}
-                result={controller.searchResult}
-              />
-            )}
-          {controller.state === 'registration' && (
-            <ClientRegistrationStep controller={controller} />
+          {(state === 'existing-client' || state === 'not-found') && searchResult && (
+            <ClientSearchResultStep dialog={clientRegisterDialog} result={searchResult} />
           )}
-          {controller.state === 'privacy' && (
-            <ClientPrivacyStep controller={controller} />
+          {state === 'registration' && (
+            <ClientRegistrationStep dialog={clientRegisterDialog} />
           )}
-          {controller.state === 'review' && <ClientReviewStep controller={controller} />}
+          {state === 'privacy' && <ClientPrivacyStep dialog={clientRegisterDialog} />}
+          {state === 'review' && <ClientReviewStep dialog={clientRegisterDialog} />}
         </div>
       </DialogContent>
     </Dialog>
