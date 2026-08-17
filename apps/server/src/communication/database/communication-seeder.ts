@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common'
-import { faker } from '@faker-js/faker'
 import { eq } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -22,6 +21,7 @@ export class CommunicationSeeder {
   }
 
   async run() {
+    const { faker } = await import('@faker-js/faker')
     const db = this.drizzleClient.requireDatabase()
 
     const clients = await db.select().from(clientModel)

@@ -29,6 +29,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@faker-js/faker':
+        specifier: ^10.5.0
+        version: 10.5.0
       '@hms/core':
         specifier: workspace:^
         version: link:../../packages/core
@@ -84,9 +87,6 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@faker-js/faker':
-        specifier: ^10.5.0
-        version: 10.5.0
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.23(@swc/core@1.15.43)(@types/node@22.15.3)(esbuild@0.28.1)(prettier@3.7.4)
