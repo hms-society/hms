@@ -46,8 +46,7 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
   exports: [
     ListClientDocumentBatchUseCase,
     DocumentEngineMessagingModule,
-    DOCUMENT_ENGINE.documentValidations,
-    DOCUMENT_ENGINE.documentValidationLogs,
+    DocumentsDatabaseModule,
   ],
 })
 export class DocumentsModule {}
