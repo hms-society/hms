@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentGeneration } from '../../domain/entities/fakers'
+import { DocumentGenerationFaker } from '../../domain/entities/fakers'
 import { DocumentGenerationNotFoundError } from '../../domain/errors'
 import type { DocumentGenerationsRepository } from '../../interfaces'
 import { LoadDocumentGenerationUseCase } from '../load-document-generation-use-case'
@@ -14,7 +14,7 @@ describe('Load Document Generation Use Case', () => {
   })
 
   it('returns the generation found by id', async () => {
-    const generation = fakeDocumentGeneration()
+    const generation = DocumentGenerationFaker.fake()
     repository.findById.mockResolvedValue(generation)
 
     await expect(

@@ -2,12 +2,14 @@ import type {
   DocumentPendingMarker,
   DocumentTemplateContent,
   DocumentVersionSource,
+  DocumentVersionStatus,
 } from '../structures'
 
 export type DocumentVersion = {
   readonly id: string
   readonly documentId: string
   readonly documentGenerationId?: string
+  readonly sourceDocumentVersionId?: string
   readonly fileId: string
   readonly versionNumber: number
   readonly source: DocumentVersionSource
@@ -15,4 +17,8 @@ export type DocumentVersion = {
   readonly pendingMarkers: readonly DocumentPendingMarker[]
   readonly createdByCollaboratorId: string
   readonly createdAt: Date
+  readonly status: DocumentVersionStatus
+  readonly reviewedByCollaboratorId?: string
+  readonly reviewedAt?: Date
+  readonly rejectionReason?: string
 }

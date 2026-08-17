@@ -41,6 +41,7 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 const authAdministrationFixture: AuthAdministrationProvider = {
   createUser: async (email) => ({ id: randomUUID(), email }),
   removeUser: async () => undefined,
+  removeAllUsers: async () => undefined,
   inviteUserByEmail: async (email) => ({ id: randomUUID(), email }),
   resendInvitation: async (email) => ({ id: randomUUID(), email }),
   findUserByEmail: async () => undefined,

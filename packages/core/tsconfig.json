@@ -15,6 +15,7 @@
       "#document-engine/*": ["./src/document-engine/*"],
       "#document-production/*": ["./src/document-production/*"],
       "#identity/*": ["./src/identity/*"],
+      "#intake/*": ["./src/intake/*"],
       "#legal-catalog/*": ["./src/legal-catalog/*"],
       "#scheduling/*": ["./src/scheduling/*"],
       "#shared/*": ["./src/shared/*"]

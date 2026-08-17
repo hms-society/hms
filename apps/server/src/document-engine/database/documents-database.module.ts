@@ -10,7 +10,6 @@ import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
-import { DrizzleDocumentBatchAuditsRepository } from './drizzle/repositories/drizzle-document-batch-audits-repository'
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
@@ -19,7 +18,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DrizzleDocumentBatchMapper,
     DrizzleDailyCountersRepository,
     DrizzleDocumentBatchesRepository,
-    DrizzleDocumentBatchAuditsRepository,
     {
       provide: DOCUMENT_ENGINE.dailyCounters,
       useExisting: DrizzleDailyCountersRepository,
@@ -27,10 +25,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     {
       provide: DOCUMENT_ENGINE.documentBatches,
       useExisting: DrizzleDocumentBatchesRepository,
-    },
-    {
-      provide: DOCUMENT_ENGINE.documentBatchAudits,
-      useExisting: DrizzleDocumentBatchAuditsRepository,
     },
     {
       provide: CreateDocumentBatchUseCase,
@@ -60,7 +54,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
   exports: [
     DOCUMENT_ENGINE.dailyCounters,
     DOCUMENT_ENGINE.documentBatches,
-    DOCUMENT_ENGINE.documentBatchAudits,
     CreateDocumentBatchUseCase,
     DocumentsSeeder,
     RealDocumentsSeeder,

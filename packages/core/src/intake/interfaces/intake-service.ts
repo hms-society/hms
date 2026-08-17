@@ -7,6 +7,7 @@ import type { ResponsibleListProjection } from '../../identity/domain/structures
 import type {
   CloseIntakeWithoutContractUseCase,
   RegisterIntakeUseCase,
+  RetryIntakeConsultationSchedulingUseCase,
   TransitionIntakeStatusUseCase,
 } from '../use-cases'
 
@@ -15,6 +16,11 @@ type RegisterIntakeRequest = Parameters<RegisterIntakeUseCase['execute']>[0]
 type TransitionIntakeStatusRequest = Omit<
   Parameters<TransitionIntakeStatusUseCase['execute']>[0],
   'intakeId'
+>
+
+type RetryIntakeConsultationSchedulingRequest = Omit<
+  Parameters<RetryIntakeConsultationSchedulingUseCase['execute']>[0],
+  'intakeId' | 'requestedBy'
 >
 
 type CloseIntakeWithoutContractRequest = Omit<
@@ -30,6 +36,10 @@ export interface IntakeService {
   listClientIntake(clientId: string): Promise<RestResponse<Intake[]>>
   getIntake(intakeId: string): Promise<RestResponse<Intake>>
   registerIntake(request: RegisterIntakeRequest): Promise<RestResponse<Intake>>
+  retryIntakeConsultationScheduling(
+    intakeId: string,
+    request: RetryIntakeConsultationSchedulingRequest,
+  ): Promise<RestResponse<Intake>>
   transitionIntakeStatus(
     intakeId: string,
     request: TransitionIntakeStatusRequest,

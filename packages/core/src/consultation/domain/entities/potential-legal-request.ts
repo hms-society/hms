@@ -1,5 +1,4 @@
-export interface PotentialLegalRequest {
+export type PotentialLegalRequest = {
   id: string
   description: string
-  summary?: string | null
 }

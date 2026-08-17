@@ -21,6 +21,33 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
     private readonly db: DrizzleDB,
   ) {}
 
+  async addMany(schedulesToAdd: readonly Schedule[]) {
+    if (schedulesToAdd.length === 0) return []
+
+    const records = await this.db
+      .insert(schedules)
+      .values(
+        schedulesToAdd.map((schedule) => ({
+          id: schedule.id,
+          collaboratorId: schedule.collaboratorId,
+          defaultDurationMinutes: schedule.appointmentDurationInMinutes,
+          weeklyAvailability: schedule.weeklyAvailability,
+          createdAt: schedule.createdAt,
+          updatedAt: schedule.updatedAt,
+        })),
+      )
+      .returning()
+
+    return records.map((record) =>
+      this.mapToScheduleDomain({ ...record, blockedPeriods: [] }),
+    )
+  }
+
+  async removeAll() {
+    await this.db.delete(blockedPeriods)
+    await this.db.delete(schedules)
+  }
+
   private toCalendarDate(date: Date | string | null | undefined): CalendarDate {
     if (!date) return '' as CalendarDate
 
@@ -134,6 +161,8 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
       .returning()
 
     return updated
+      ? this.mapToScheduleDomain({ ...updated, blockedPeriods: [] })
+      : undefined
   }
 
   async updateDefaultDuration(scheduleId: string, defaultDurationMinutes: number) {
@@ -147,6 +176,8 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
       .returning()
 
     return updated
+      ? this.mapToScheduleDomain({ ...updated, blockedPeriods: [] })
+      : undefined
   }
 
   async createBlockedPeriod(data: CreateBlockedPeriodInput): Promise<BlockedPeriod> {

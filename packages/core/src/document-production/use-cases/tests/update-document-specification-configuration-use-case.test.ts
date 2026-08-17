@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { LegalExpertiseCatalogProvider } from '#legal-catalog/interfaces'
-import { fakeDocumentSpecification } from '../../domain/entities/fakers'
+import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import {
   DocumentSpecificationNotFoundError,
   InvalidDocumentSpecificationConfigurationError,
@@ -23,7 +23,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('updates only configuration and keeps an available template valid', async () => {
-    const specification = fakeDocumentSpecification({
+    const specification = DocumentSpecificationFaker.fake({
       content: {
         type: 'doc',
         content: [
@@ -66,7 +66,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('validates legal application and rejects unavailable content', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
     const application = {
       scope: 'legal_context' as const,
@@ -95,7 +95,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('persists configuration and template changes through the same save action', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     const content = {
       type: 'doc' as const,
       content: [
@@ -143,7 +143,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('preserves the system source when a variable receives an edited technical name', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     const content = {
       type: 'doc' as const,
       content: [
@@ -186,7 +186,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('allows an empty description', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
     repository.replaceConfiguration.mockResolvedValue({
       ...specification,
@@ -214,7 +214,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('allows an unavailable specification to keep an empty template', async () => {
-    const specification = fakeDocumentSpecification({
+    const specification = DocumentSpecificationFaker.fake({
       status: 'available',
       content: {
         type: 'doc',
@@ -250,7 +250,7 @@ describe('Update Document Specification Configuration Use Case', () => {
   })
 
   it('rejects inactive catalog selections and preserves the repository', async () => {
-    const specification = fakeDocumentSpecification({
+    const specification = DocumentSpecificationFaker.fake({
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Texto' }] }],

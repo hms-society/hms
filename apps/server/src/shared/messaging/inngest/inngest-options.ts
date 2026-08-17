@@ -1,7 +1,8 @@
 import type { FactoryProvider, ModuleMetadata } from '@nestjs/common'
-import type { ServeHandlerOptions } from 'inngest'
+import type { InngestFunction, ServeHandlerOptions } from 'inngest'
 
 export type InngestOptions = Pick<ServeHandlerOptions, 'client' | 'functions'>
+export type InngestFunctionGroup = InngestFunction.Like[]
 
 export type InngestAsyncOptions = Pick<ModuleMetadata, 'imports'> &
   Pick<FactoryProvider<InngestOptions>, 'inject' | 'useFactory'>
