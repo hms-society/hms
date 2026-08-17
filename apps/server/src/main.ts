@@ -4,6 +4,7 @@ import { apiReference } from '@scalar/nestjs-api-reference'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from '@/app.module'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { seedDatabase } from '@/shared/database/seed'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
@@ -34,6 +35,7 @@ async function bootstrap() {
   const envProvider = app.get(EnvProvider)
 
   if (envProvider.get('HMS_SERVER_APP_MODE') === 'stg') {
+    await app.get(DrizzleClient).runMigrations()
     await seedDatabase(app)
   }
 

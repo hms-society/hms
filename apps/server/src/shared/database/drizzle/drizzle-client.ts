@@ -1,6 +1,8 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres, { type Sql } from 'postgres'
+import { resolve } from 'node:path'
 import * as schema from '@/shared/database/drizzle/schema'
 
 export type Database = PostgresJsDatabase<typeof schema>
@@ -31,6 +33,12 @@ export class DrizzleClient implements OnModuleDestroy {
       throw new Error('Database connection is not configured')
     }
     return this.database
+  }
+
+  async runMigrations() {
+    await migrate(this.requireDatabase(), {
+      migrationsFolder: resolve(process.cwd(), 'src/shared/database/drizzle/migrations'),
+    })
   }
 
   async isHealthy() {
