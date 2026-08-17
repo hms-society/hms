@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:3333
+
+# Use um id existente em document_batch_files após rodar o seed.
+@documentFileId = afcf8a0b-8954-47b6-81f7-2b5616506dbe
+@seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
+
+### 00. Sign in
+# @name signIn
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### 01. Ver documento atual
+# Mostra status, storagePath, campos extraídos, sugestão já registrada e vínculo.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 02. Ver logs da validação
+# Lista a auditoria do documento, incluindo usuário, status, metadados da sugestão, decisões e reenvios.
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}/logs
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+### 03. Solicitar reenvio
+# Salva uma solicitação de reenvio para o documento e registra o evento no log de validação.
+POST {{baseUrl}}/document-validation/documents/{{documentFileId}}/resend-request
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "Documento incompleto.",
+  "message": "Olá, envie novamente o arquivo completo para continuarmos a validação."
+}
+
+### 04. Registrar decisão humana
+# Registra a decisão final do usuário sobre a validação e grava a auditoria correspondente.
+PATCH {{baseUrl}}/document-validation/documents/{{documentFileId}}/decision
+Authorization: Bearer {{signIn.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "validate",
+  "documentTypeId": "comprovante_residencia",
+  "checklistRequirementId": "residence-proof",
+  "reason": "Documento validado manualmente após conferência."
+}

@@ -10,6 +10,11 @@ import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-ca
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { GetDocumentFileController } from '../rest/controllers/get-document-file.controller'
+import { GetDocumentValidationController } from '../rest/controllers/get-document-validation.controller'
+import { ListDocumentValidationsController } from '../rest/controllers/list-document-validations.controller'
+import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
+import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
+import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
 
 @Module({
   imports: [
@@ -23,6 +28,11 @@ import { GetDocumentFileController } from '../rest/controllers/get-document-file
     InternalUploadController,
     ListClientDocumentController,
     GetDocumentFileController,
+    GetDocumentValidationController,
+    ListDocumentValidationsController,
+    ListDocumentValidationLogsController,
+    RecordDocumentValidationDecisionController,
+    RequestDocumentResendController,
   ],
   providers: [
     {

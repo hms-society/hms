@@ -1,14 +1,14 @@
 import type { ChangeEvent } from 'react'
 
 import type {
-  ClientRegisterDialogController,
+  ClientRegisterDialogValues,
   RegistrationForm,
 } from '../use-client-register-dialog'
 import { useMaskPhone } from '../../../../hooks/use-mask-phone'
 import { useMaskTaxId } from '../../../../hooks/use-mask-tax-id'
 
-export function useClientRegistrationStep(controller: ClientRegisterDialogController) {
-  const form = controller.registrationForm
+export function useClientRegistrationStep(dialog: ClientRegisterDialogValues) {
+  const { registrationForm: form, handleClientTypeChange } = dialog
   const { errors } = form.formState
   const type = form.watch('type')
   const addressErrors = errors.address
@@ -16,7 +16,7 @@ export function useClientRegistrationStep(controller: ClientRegisterDialogContro
   const maskPhone = useMaskPhone()
 
   function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {
-    controller.handleClientTypeChange(event.target.value as RegistrationForm['type'])
+    handleClientTypeChange(event.target.value as RegistrationForm['type'])
   }
 
   function handleTaxIdChange(event: ChangeEvent<HTMLInputElement>) {

@@ -2,7 +2,7 @@ import { useWatch } from 'react-hook-form'
 
 import {
   CONSENT_TYPES,
-  type ClientRegisterDialogController,
+  type ClientRegisterDialogValues,
   type RegistrationForm,
 } from '../use-client-register-dialog'
 
@@ -20,9 +20,10 @@ type ReviewRow = {
   value: string
 }
 
-export function useClientReviewStep(controller: ClientRegisterDialogController) {
+export function useClientReviewStep(dialog: ClientRegisterDialogValues) {
+  const { registrationForm, createdClientDetails, isBusy } = dialog
   const draft = useWatch({
-    control: controller.registrationForm.control,
+    control: registrationForm.control,
   }) as RegistrationForm
 
   const clientName = draft.type === 'natural' ? draft.name : draft.legalName
@@ -67,7 +68,7 @@ export function useClientReviewStep(controller: ClientRegisterDialogController) 
   ]
   const complementaryFieldsFilled = complementaryValues.filter(Boolean).length
   const granted = new Set(
-    controller.createdClientDetails?.consents.map(function getConsentType(consent) {
+    createdClientDetails?.consents.map(function getConsentType(consent) {
       return consent.type
     }),
   )
@@ -77,9 +78,7 @@ export function useClientReviewStep(controller: ClientRegisterDialogController) 
   const pending = selected.filter(function isPendingConsent(type) {
     return !granted.has(type)
   })
-  const canRetry = Boolean(
-    controller.createdClientDetails && pending.length > 0 && !controller.isBusy,
-  )
+  const canRetry = Boolean(createdClientDetails && pending.length > 0 && !isBusy)
   const consentRows = CONSENT_TYPES.map(function getConsentRow(type) {
     return {
       type,

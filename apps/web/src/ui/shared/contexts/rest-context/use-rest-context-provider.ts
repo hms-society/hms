@@ -11,6 +11,7 @@ import { DocumentProductionService } from '@/rest/services/document-production-s
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { SchedulingService } from '@/rest/services/scheduling-service'
+import { DocumentValidationService } from '@/rest/services/document-validation-service'
 
 import type { RestContextValue } from './types/rest-context-value'
 import { BROWSER_ENV } from '@/constants'
@@ -49,5 +50,6 @@ export function useRestContextProvider(): RestContextValue {
     documentService: documentService(restClient),
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),
+    documentValidationService: DocumentValidationService(restClient),
   }
 }
