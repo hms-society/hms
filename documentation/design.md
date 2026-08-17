@@ -409,6 +409,11 @@ Base radius de `0.75rem` com escala derivada:
 - `2xl` a `4xl`: multiplicacao para cards grandes, modais, containers
 - `pill` (9999px): botoes pill, badges, tags
 
+Implementacao Tailwind obrigatoria: o token `pill` deve ser escrito como
+`rounded-full`. Ao implementar botoes, badges ou tags definidos como pill, o
+agente deve aplicar essa classe ou uma variante compartilhada equivalente; nao
+deve substituir o token por `rounded-lg`, `rounded-md` ou um valor arbitrario.
+
 ## 5. Stack Tecnico (Frontend)
 
 - **Tailwind CSS v4** com `@theme inline` (CSS-first config, sem tailwind.config.js)

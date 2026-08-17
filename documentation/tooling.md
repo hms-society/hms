@@ -164,7 +164,12 @@ The `production` and `staging` GitHub environments must provide these secrets:
   pnpm --filter server db:migration:apply     # apply migrations
   pnpm --filter server db:schema:push        # push schema directly (dev)
   pnpm --filter server db:studio     # open Drizzle Studio
+  pnpm --filter server db:seed       # reset and seed dev/staging through Nest
   ```
+
+The seed entrypoint must run through the Nest compiler so emitted decorator
+metadata remains available to the application context. Do not execute it directly
+with `tsx`.
 
 ## Local infrastructure — Docker Compose
 

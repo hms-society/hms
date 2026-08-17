@@ -1,102 +1,296 @@
 ---
 name: create-spec
-description: Criar e julgar uma Spec de feature, compacta ou completa, a partir de PRD do Confluence, ticket Jira, report ou demanda direta.
+description: Create, refine, and judge an implementation-ready feature Spec from a PRD, Jira ticket, report, existing reference, or direct request, grounded in repository rules and real code paths.
 ---
 
-# Criar Spec
+# Create a Spec
 
-O Orchestrator conduz a autoria na task atual. Não crie nova thread. Use Spec
-somente para uma entrega relacionada a uma feature. Para manutenção transversal
-sem Contract de feature, use fluxo direto.
+Author the Spec in the current task. Do not create another user-owned thread. Use this
+workflow for feature delivery or a feature-scoped change; use a direct workflow for
+maintenance without a feature Contract.
 
-## Classificação
+## Repository authority
 
-Identifique a origem: `prd`, `jira-ticket`, `report` ou `direct-request`. O PRD
-é uma página do Confluence e toda demanda rastreável deve usar um ticket Jira;
-não use GitHub Issue ou milestone como fonte de produto. Defina `scope` com
-workspaces, diretórios ou arquivos. Use modo compacto para uma
-mudança pequena e coesa; use modo completo quando houver múltiplos fluxos,
-risco, integrações ou fases.
+Read the root and applicable nested `AGENTS.md` files before research. Repository
+instructions override generic workflow assumptions, especially traceability, source
+systems, tests, architecture, design tools, commands, and terminology.
 
-## Fontes
+Do not assume Jira, Confluence, a specific migration path, framework, test taxonomy, or
+folder convention. Discover them from repository instructions, documentation, tooling,
+configuration, and source. Never invent an external ticket or migrate traceability to a
+system the repository does not use.
 
-Leia a origem da demanda no Confluence/Jira, `documentation/architecture.md`,
-Rules aplicáveis, `documentation/sdd.md` e os paths reais da codebase. Use os
-MCPs disponíveis quando aplicáveis. Se o Confluence ou Jira não estiver
-acessível, registre a limitação e não invente requisitos ou critérios.
+## Classify the delivery
 
-Resolva ambiguidades materiais antes da solução técnica. Registre premissas e
-questões pendentes; antes de `open`, questões pendentes devem estar resolvidas
-e premissas críticas confirmadas ou explicitamente aceitas com risco.
+Identify the actual source as one of:
 
-## Arquivo e Contract
+- `prd`: a product requirements document at the repository-approved URL or path;
+- `jira-ticket`: a repository-approved Jira ticket URL or key;
+- `report`: a bug or security report that is safe to reference;
+- `direct-request`: the current task or another explicit user request.
 
-Crie `documentation/features/<domínio>/<feature>/spec.md`. O `plan.md` é
-opcional e só deve ser criado quando o tamanho, risco ou dependências exigirem
-fases e ledger; `evaluation.md` é obrigatório após a implementação/julgamento,
-mesmo sem Plan. A única exceção é uma Spec abandonada antes da implementação.
-Para qualquer
-alteração em feature já implementada, use
-`documentation/features/<domínio>/<feature>/changes/<nome-da-mudanca>/`. Use um
-nome curto em kebab-case; o ticket permanece no frontmatter. Em bugs ou
-security, não copie o relatório privado para o repositório; em evolução de
-produto, registre a demanda do ticket como origem da mudança.
+Use compact mode for a small cohesive change. Use complete mode when the delivery crosses
+workspaces/layers, adds persistence or external integration, includes multiple user states,
+or has meaningful security, concurrency, migration, or UI risk.
+
+Define `scope` with the workspaces, directories, configuration, generated outputs, and
+documentation expected to change. Revisit it when research expands the delivery.
+
+## Research before writing
+
+Read in this order:
+
+1. the request source and referenced implementation/design files;
+2. the repository rule router and every selected rule;
+3. Architecture, module ownership, affected PRD, design, and tooling documents required
+   by repository instructions;
+4. the actual code paths, package versions, configuration, exports, fixtures, and similar
+   implementations for every affected layer;
+5. current library documentation through the repository-approved documentation MCP when
+   an evolving framework or SDK decision matters.
+
+Inspect the worktree and preserve unrelated changes. Treat documentation as intent when it
+conflicts with code and surface the discrepancy.
+
+For each affected layer, record:
+
+- real existing paths and their relevant declarations;
+- reference implementations to follow, including external/local references explicitly
+  supplied by the user;
+- current data/control flow and where it changes;
+- contracts crossing layers or applications;
+- generated files and their canonical commands;
+- risks, gaps, concurrency, security, tenancy, SSR/hydration, and external-provider
+  limitations where applicable.
+
+When a supplied reference and the repository differ, preserve the requested pattern only
+where it fits the target repository. State intentional deviations instead of copying
+obsolete frameworks, migrations, test conventions, secrets, or out-of-scope operations.
+
+Resolve material choices before finalizing. Ask only when local evidence and repository
+rules cannot produce a safe answer. Record accepted assumptions and explicitly deferred
+product requirements.
+
+## File and frontmatter
+
+Create `documentation/features/<domain>/<feature>/spec.md`. For a change to an already
+implemented feature, use
+`documentation/features/<domain>/<feature>/changes/<change-name>/spec.md`. Use short
+kebab-case names.
+
+Use only metadata supported by the repository. A typical frontmatter is:
 
 ```yaml
 ---
-title: <título>
+title: <title>
 status: draft
 revision: 1
 source:
   type: <prd|jira-ticket|report|direct-request>
-  ref: <confluence-url|jira-url|report-url|path|codex-task>
-prd: <confluence-url, opcional>
+  ref: <actual-url|path|codex-task>
 jira_tickets:
   - <PROJ-123>
+prd: <actual-prd-url-or-path, optional>
 scope:
-  - <workspace|diretório|arquivo>
+  - <workspace|directory|file>
 last_updated_at: YYYY-MM-DD
 ---
 ```
 
-O corpo deve conter contexto, escopo, Contract, estado atual, solução técnica,
-plano de validação, referência para `evaluation.md`, alinhamento documental e
-amendments. As avaliações e evidências finais não são duplicadas na Spec: são
-registradas em `evaluation.md` após a implementação ou julgamento.
+Do not add empty metadata. Preserve existing traceability across revisions. Keep Jira
+ticket references in `jira_tickets` whenever they apply, and do not change ticket status
+automatically.
 
-Use somente `RF-*` e `CA-*` como IDs obrigatórios:
+`plan.md` is optional and recommended when phases, risk, or dependencies need a ledger.
+`evaluation.md` is required after implementation/final judgment unless the Spec is
+abandoned before implementation. The Spec defines intent; final logs and implementation
+evidence belong in `evaluation.md`.
+
+## Required document structure
+
+Write these sections:
+
+1. **Context** — objective, source, why the chosen Spec mode applies, and documentation
+   limitations.
+2. **Scope** — explicit in-scope and out-of-scope behavior.
+3. **Product alignment** — delivered PRD requirements, partial slices, and deferred
+   outcomes without weakening the PRD.
+4. **Contract** — functional requirements and acceptance criteria.
+5. **Current state** — concise evidence from the repository.
+6. **Technical solution** — end-to-end responsibilities and flow per affected layer.
+7. **Implementation blueprint** — exact declarations, file inventory, decisions, runtime
+   flows, removals, and open technical questions.
+8. **Validation plan** — commands and real/manual validation proportional to risk.
+9. **Evaluation** — link to `evaluation.md`.
+10. **Documentation alignment** — PRD/Architecture/module documents changed or confirmed.
+11. **Premises and resolved questions**.
+12. **Amendments** — one dated entry per revision explaining material changes.
+
+Omit only a section that is genuinely inapplicable, and say why when its absence could be
+ambiguous.
+
+## Contract rules
+
+Use only `RF-*` and `CA-*` as required IDs. Keep acceptance criteria in list format, not a
+table:
 
 ```md
-| CA | RF | Dado | Quando | Então | Evidência esperada |
-|---|---|---|---|---|---|
-| CA-01 | RF-01 | pré-condição | ação | resultado | teste/browser/sensor |
+- **CA-01 — RF-01**
+  - **Given:** precondition.
+  - **When:** action.
+  - **Then:** observable result.
+  - **Expected evidence:** exact test, browser, sensor, or inspection boundary.
 ```
 
-Segurança, performance e arquitetura entram como critérios de aceitação ou
-restrições técnicas. Não use `RN-*`, `RNF-*`, `RA-*`, comentários
-`harness:evidence`, gates próprios ou baselines.
+Every RF must have acceptance evidence. Cover success, rejection, authorization, tenant
+isolation, concurrency, provider failure, hydration/session restoration, accessibility,
+and secret boundaries when relevant. Evidence names must follow the repository's test
+taxonomy; do not invent test categories.
 
-Quando `source.type` for `report`, prefira a URL direta do ticket Jira. Para
-Security Reports, só use a URL se o repositório tiver controle de acesso
-compatível; nunca copie o conteúdo sensível do ticket.
+Security, performance, architecture, and provider limitations may be acceptance criteria
+or technical restrictions. Do not add alternate ID systems, evidence comments, custom
+gates, or baselines unless repository instructions require them.
 
-Declare as validações aplicáveis conforme `documentation/tooling.md`: `pnpm format`,
-lint, typecheck, testes e, quando houver UI ou REST, integração/e2e e validação
-no navegador. Build é validação final do CI.
+## Implementation-ready technical detail
 
-## Rastreabilidade
+The Spec must be implementable without rediscovering architecture. Include exact paths,
+TypeScript signatures, dependencies, input/output types, algorithms, status/error mapping,
+transaction semantics, state ownership, and generated commands where applicable. Do not
+write full implementation bodies.
 
-Relacione cada requisito ao PRD do Confluence e aos tickets Jira aplicáveis.
-Preserve todas as chaves em `jira_tickets` na Spec e não altere o status dos
-tickets automaticamente.
+### Existing references
+
+List the real paths and declarations used as patterns. Explain what each reference governs.
+When the user names a specific reference, inspect it and identify which aspects are adopted
+and which are intentionally not adopted.
+
+### Core/domain
+
+- Place concepts with identity in `domain/entities`; value/state/provider projections
+  without local identity belong in `domain/structures`, subject to repository rules.
+- Define domain entities, structures, repository/provider/service contracts, use cases, and
+  domain errors in their owning module.
+- Give exact signatures and use-case algorithms, including neutral not-found/auth behavior.
+- Keep business rules in use cases and infrastructure/framework types out of Core.
+- Prefer named domain error subclasses when failures participate in control flow or REST
+  mapping. Keep provider availability errors in infrastructure and HTTP parsing/validation
+  errors at the transport boundary.
+- Derive Zod enum values from runtime Core domain objects; do not duplicate string arrays.
+  Apply the same rule to persistence enums when repository conventions support it.
+- Add required entity/structure fakers and barrels when tests consume new domain types.
+
+### Transactions and side effects
+
+Preserve the repository's database abstraction. Do not introduce a second transaction method
+when one repository-approved transaction API can express the requirement. Specify isolation,
+locking, retry, conflict translation, and concurrency evidence in the adapter.
+
+For retryable transactions:
+
+- capture deterministic inputs such as business time once before entering the callback;
+- restrict the replayable callback to repository work through its database scope;
+- never call providers or emit external side effects inside the callback;
+- publish messages, remote mutations, or other side effects only after a successful commit,
+  unless an established outbox pattern says otherwise.
+
+### Application/server boundaries
+
+Specify provider tokens/registration, environment variables, guards/middleware, request
+context, decorators, schemas, DTOs, controllers/jobs, repositories, mappers, models,
+migrations, modules, seeders, fixtures, and error translation that actually apply.
+
+Derive server-controlled values from authenticated context, route params, or server state;
+exclude them from request schemas. State exact public HTTP behavior without leaking local
+account status or provider payloads. Keep service-role credentials and signing secrets out
+of browser/runtime boundaries that do not need them.
+
+### Web/UI boundaries
+
+Specify provider factories, service adapters, context/state ownership, route protection,
+SSR/client behavior, token refresh, async race protection, return-URL sanitization,
+loading/error/empty/success states, widget tree, responsive behavior, accessibility, and
+browser evidence.
+
+Every widget that is a layout must use the `Layout` suffix consistently across its full
+public contract:
+
+- the React component name ends in `Layout`, for example `AuthVisualLayout`;
+- the widget-specific props type ends in `LayoutProps`, for example
+  `AuthVisualLayoutProps`;
+- related public types retain the layout identity, for example
+  `AuthVisualLayoutVariant` instead of `AuthVisualVariant`;
+- the kebab-case widget directory ends in `-layout`, for example
+  `widgets/layouts/auth-visual-layout/`.
+
+When an existing layout violates this invariant, the Spec must classify the change as a
+coherent rename/move: list the new path under **Files to create**, the old path under
+**Files to remove**, every importing consumer under **Files to modify**, and rename the
+component, props and related public types together. Do not leave compatibility aliases with
+names that omit `Layout` unless repository evidence requires a staged migration.
+
+Use one clear source of truth for state. Do not introduce a store, context, middleware, or
+parallel provider merely because it is common; follow the repository and explicit user
+direction. Describe cancellation/generation handling when stale async auth/data work could
+overwrite logout, navigation, or newer state.
+
+### File inventory
+
+Separate paths under clear headings such as **Files to create**, **Files to modify**,
+**Files to generate**, and **Files to remove**. Do not use parenthetical `new file`
+annotations. Ensure every nonexistent path is under creation/generation and every path under
+modification exists.
+
+Use visually clear Markdown:
+
+- one top-level list item per file or coherent file group;
+- a blank line before nested responsibilities or code blocks;
+- bold labels such as **Dependencies**, **Request**, **Response**, **Algorithm**,
+  **Route**, **Input**, **Output**, **Errors**, and **Metadata**;
+- balanced fenced blocks nested under their owning item;
+- no orphan punctuation, duplicate continuation text, or mixed create/modify lists.
+
+## Pencil-backed UI
+
+When UI is tied to Pencil, use the Pencil skill and MCP. Treat `.pen` files as encrypted and
+never inspect them with filesystem tools.
+
+1. Inspect editor state/schema, supplied Node IDs, reusable components, variables, exact
+   viewport, and node names.
+2. Add a mapping table: Pencil file, Node ID, frame/state, feature surface, and required UI
+   validation.
+3. Mark design-only references that must not expand functional scope.
+4. Require mapping to existing code tokens/components rather than hardcoded Pencil values.
+5. Require a Pencil screenshot and layout-problem inspection for every mapped node.
+6. Require manual browser validation through the repository-approved interactive workflow at
+   the design viewport, plus accessibility tree/DOM, URL, network, console, keyboard, and
+   narrow-viewport checks.
+7. Record route, Node ID, viewport, comparison, screenshot/layout result, and remaining
+   findings in `evaluation.md`.
+
+Desktop-only frames do not waive responsive validation and must not be treated as mobile
+specifications.
+
+## Validation plan
+
+Use commands from repository tooling. Include only applicable generation, format, code-check,
+typecheck, unit, controller/job integration, automated browser, manual browser, and build
+commands. State the distinction between mocked browser coverage and a real
+authenticated/server-backed flow.
+
+For real UI validation, name required services, health checks, target routes/states,
+viewport, keyboard path, accessibility checks, console/network inspection, persisted effect,
+design Node IDs, and process cleanup.
 
 ## Judge Spec
 
-Acione `judge-spec-agent` como subagente read-only `Judge Spec` na task atual.
-Envie a origem, Spec, pesquisa, Architecture e Rules, sem narrativa persuasiva.
+Trigger `judge-spec-agent` as a read-only `Judge Spec` subagent in the current task. Send the
+source, current Spec, research, Architecture, applicable Rules, reference implementations,
+and explicit repository/user constraints without persuasive framing.
 
-- `failed`: encaminhe findings ao Orchestrator, corrija e avalie novamente;
-- `accepted`: altere a Spec para `status: open` e roteie para `implement-spec`
-  ou `create-plan`.
+- On `failed`, correct every concrete blocker and submit the current file again.
+- On `accepted`, set `status: open` and recommend `implement-spec` or `create-plan` based on
+  size/risk.
 
-Não crie nova thread para pesquisa ou julgamento.
+After every user-requested amendment, increment `revision`, update documentation alignment
+and amendment history, rerun Markdown integrity checks, and repeat Judge Spec. Do not call an
+earlier accepted revision current after the Contract or blueprint changes.
