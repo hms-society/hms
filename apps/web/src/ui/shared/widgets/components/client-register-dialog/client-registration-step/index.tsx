@@ -10,14 +10,14 @@ import { Input } from '@/ui/shadcn/input'
 import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import type { ClientRegisterDialogController } from '../use-client-register-dialog'
+import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
 import { useClientRegistrationStep } from './use-client-registration-step'
 
 export type ClientRegistrationStepProps = {
-  controller: ClientRegisterDialogController
+  dialog: ClientRegisterDialogValues
 }
 
-export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepProps) => {
+export const ClientRegistrationStep = ({ dialog }: ClientRegistrationStepProps) => {
   const {
     form,
     errors,
@@ -26,7 +26,7 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
     handleTypeChange,
     handleTaxIdChange,
     handlePhoneChange,
-  } = useClientRegistrationStep(controller)
+  } = useClientRegistrationStep(dialog)
 
   return (
     <div className='flex flex-col gap-6'>
@@ -309,9 +309,9 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
         </div>
       </div>
 
-      {controller.asyncError && (
+      {dialog.asyncError && (
         <p role='alert' className='text-xs font-medium text-destructive'>
-          {controller.asyncError}
+          {dialog.asyncError}
         </p>
       )}
 
@@ -320,14 +320,14 @@ export const ClientRegistrationStep = ({ controller }: ClientRegistrationStepPro
           type='button'
           variant='outline'
           className='rounded-pill text-sm font-medium h-9 px-6'
-          onClick={controller.handleBackToIdentification}
+          onClick={dialog.handleBackToIdentification}
         >
           Voltar
         </Button>
         <Button
           type='button'
           className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
-          onClick={controller.handleContinueToPrivacy}
+          onClick={dialog.handleContinueToPrivacy}
         >
           Continuar
           <Icon name='arrow-right' className='size-3.5' />

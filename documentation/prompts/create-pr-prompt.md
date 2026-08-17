@@ -135,6 +135,26 @@ Antes de publicar uma integração que toca o banco:
 Se o teste local exigir Docker/Testcontainers indisponível, registre isso como
 limitação; não transforme uma falha de ambiente em aprovação da implementação.
 
+### Regra obrigatória: aguardar o CI remoto
+
+Depois de publicar ou atualizar o PR, não encerre a execução nem declare a
+entrega pronta enquanto qualquer workflow obrigatório estiver `queued`,
+`in_progress` ou `pending`. Consulte `gh pr checks <numero>` e, quando
+necessário, acompanhe os runs com `gh run watch <run-id> --exit-status` até
+todos os checks chegarem a um estado terminal.
+
+O encerramento só é permitido quando:
+
+- todos os checks obrigatórios estiverem `pass`/`success`;
+- checks `skipped` estiverem explicados como não aplicáveis;
+- qualquer check `fail`/`failure` tiver sido diagnosticado, corrigido e
+  revalidado, ou estiver explicitamente reportado como bloqueio.
+
+Se um push alterar o PR, repita o comentário `@codex review` e reinicie a
+espera pelo SHA novo. Nunca use checks de um commit anterior para declarar o
+PR verde e nunca finalize apenas informando que Server/Web/Core ainda estão
+pendentes.
+
 The PR body must follow the structure defined in `.github/pull_request_template.md`.
 
 **Formatting rules:**

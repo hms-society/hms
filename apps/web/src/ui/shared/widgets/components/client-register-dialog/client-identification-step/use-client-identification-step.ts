@@ -1,13 +1,13 @@
 import type { ChangeEvent } from 'react'
 
-import type { ClientRegisterDialogController } from '../use-client-register-dialog'
+import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
 import { useMaskPhone } from '../../../../hooks/use-mask-phone'
 import { useMaskTaxId } from '../../../../hooks/use-mask-tax-id'
 
-export function useClientIdentificationStep(controller: ClientRegisterDialogController) {
-  const identificationForm = controller.identificationForm
+export function useClientIdentificationStep(dialog: ClientRegisterDialogValues) {
+  const { identificationForm, requestLock } = dialog
   const { errors } = identificationForm.formState
-  const busy = controller.requestLock === 'lookup'
+  const busy = requestLock === 'lookup'
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
