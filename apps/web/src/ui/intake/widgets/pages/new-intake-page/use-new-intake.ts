@@ -3,6 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type BaseSyntheticEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
+import {
+  ConsultationChannel,
+  ConsultationModality,
+} from '@hms/core/consultation/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
@@ -87,7 +91,34 @@ export function useNewIntake() {
 
     try {
       if (data.decision === 'schedule') {
-        await registerIntake({ ...request, decision: 'schedule_consultation' })
+        if (!data.lawyer || !data.date || !data.time || !data.meetingMode) {
+          throw new AppError('Scheduling details are required')
+        }
+
+        const [hours, minutes] = data.time.split(':').map(Number)
+        const startsAt = new Date(data.date)
+        startsAt.setHours(hours, minutes, 0, 0)
+
+        const channel =
+          data.virtualChannel === 'whatsapp'
+            ? ConsultationChannel.WhatsappVideo
+            : data.virtualChannel === 'google-meet'
+              ? ConsultationChannel.GoogleMeet
+              : data.virtualChannel === 'teams'
+                ? ConsultationChannel.Teams
+                : ConsultationChannel.Other
+
+        await registerIntake({
+          ...request,
+          decision: 'schedule_consultation',
+          assignedLawyerId: data.lawyer,
+          startsAt,
+          modality:
+            data.meetingMode === 'in-person'
+              ? ConsultationModality.InPerson
+              : ConsultationModality.Virtual,
+          channel,
+        })
       } else {
         if (!data.closureReason) throw new AppError('A closure reason is required')
 
