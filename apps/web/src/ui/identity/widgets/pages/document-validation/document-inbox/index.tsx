@@ -178,25 +178,25 @@ export const DocumentInboxPage = () => {
         )}
 
         <TableSurface className='shadow-card'>
-          <Table>
+          <Table className='table-fixed'>
             <TableHeader className='bg-muted/30'>
               <TableRow className='hover:bg-transparent'>
-                <TableHead className='w-[300px] text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[24%] text-center text-[11px] font-semibold text-muted-foreground'>
                   DOCUMENTO
                 </TableHead>
-                <TableHead className='text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[22%] text-center text-[11px] font-semibold text-muted-foreground'>
                   RECEBIDO DE
                 </TableHead>
-                <TableHead className='text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[20%] text-center text-[11px] font-semibold text-muted-foreground'>
                   CASO / ITEM SUGERIDO
                 </TableHead>
-                <TableHead className='text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[10%] text-center text-[11px] font-semibold text-muted-foreground'>
                   RECEBIDO
                 </TableHead>
-                <TableHead className='text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[14%] text-center text-[11px] font-semibold text-muted-foreground'>
                   STATUS
                 </TableHead>
-                <TableHead className='text-right text-[11px] font-semibold text-muted-foreground'>
+                <TableHead className='w-[10%] text-center text-[11px] font-semibold text-muted-foreground'>
                   AÇÃO
                 </TableHead>
               </TableRow>
@@ -214,8 +214,8 @@ export const DocumentInboxPage = () => {
               ) : (
                 paginatedData.map((doc) => (
                   <TableRow key={doc.id}>
-                    <TableCell>
-                      <div className='flex items-start gap-3'>
+                    <TableCell className='w-[24%]'>
+                      <div className='mx-auto flex max-w-[260px] items-start gap-3'>
                         <div className='flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/50'>
                           <Icon name='file-text' className='size-4 text-primary' />
                         </div>
@@ -230,9 +230,9 @@ export const DocumentInboxPage = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className='flex flex-col gap-0.5'>
-                        <div className='flex items-center gap-1.5'>
+                    <TableCell className='w-[22%]'>
+                      <div className='mx-auto flex max-w-[260px] flex-col items-center gap-0.5 text-center'>
+                        <div className='flex items-center justify-center gap-1.5'>
                           <Icon
                             name={doc.receivedFromIcon}
                             className='size-3.5 text-muted-foreground'
@@ -246,9 +246,9 @@ export const DocumentInboxPage = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className='flex flex-col gap-0.5'>
-                        <div className='flex items-center gap-1.5'>
+                    <TableCell className='w-[20%]'>
+                      <div className='mx-auto flex max-w-[230px] flex-col items-center gap-0.5 text-center'>
+                        <div className='flex items-center justify-center gap-1.5'>
                           <span
                             className={`font-sans font-semibold ${
                               doc.caseId.includes('Caso')
@@ -270,8 +270,8 @@ export const DocumentInboxPage = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className='flex flex-col gap-0.5'>
+                    <TableCell className='w-[10%] text-center'>
+                      <div className='flex flex-col items-center gap-0.5'>
                         <span className='font-sans font-semibold text-foreground'>
                           {doc.receivedDate}
                         </span>
@@ -280,18 +280,18 @@ export const DocumentInboxPage = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='w-[14%] text-center'>
                       <Badge
-                        className={`gap-1.5 rounded-pill border-0 px-2.5 py-0.5 font-sans text-[11px] font-semibold ${doc.badgeClasses}`}
+                        className={`mx-auto gap-1.5 rounded-pill border-0 px-2.5 py-0.5 font-sans text-[11px] font-semibold ${doc.badgeClasses}`}
                       >
                         <span className={`size-1.5 rounded-full ${doc.dotClasses}`} />
                         {doc.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className='text-right'>
+                    <TableCell className='w-[10%] text-center'>
                       <Button
                         variant='outline'
-                        className='flex items-center justify-center rounded-full border-2 border-primary bg-transparent px-3 text-[14px] font-semibold text-primary hover:bg-[#3D757B] hover:text-white'
+                        className='mx-auto flex items-center justify-center rounded-full border-2 border-primary bg-transparent px-3 text-[14px] font-semibold text-primary hover:bg-[#3D757B] hover:text-white'
                         onClick={() => handleAnalyze(doc.id)}
                       >
                         Analisar
