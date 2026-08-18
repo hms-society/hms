@@ -6,6 +6,7 @@ export class DocumentGenerationRequestedEvent extends Event<{
   documentId: string
   documentSpecificationVersionId: string
   requestedByCollaboratorId: string
+  instructions?: string
   source: DocumentGenerationSource
   occurredAt: Date
 }> {

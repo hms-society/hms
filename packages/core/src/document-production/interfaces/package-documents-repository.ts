@@ -5,6 +5,10 @@ export interface PackageDocumentsRepository {
   addMany(
     packageDocuments: readonly PackageDocumentCreation[],
   ): Promise<readonly PackageDocument[]>
+  replaceForDocumentPackage(
+    documentPackageId: string,
+    packageDocuments: readonly PackageDocumentCreation[],
+  ): Promise<readonly PackageDocument[]>
   findByDocumentPackageId(documentPackageId: string): Promise<readonly PackageDocument[]>
   removeAll(): Promise<void>
 }

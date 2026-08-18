@@ -2,9 +2,19 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
+import type { Broker } from '#shared/interfaces/broker'
+import {
+  ConsultationChannel,
+  ConsultationModality,
+} from '#consultation/domain/structures'
 
 import { IntakeFaker } from '../../domain/entities/fakers'
 import { InvalidIntakeClosureError } from '../../domain/errors'
+import {
+  IntakeConsultationSchedulingRequestedEvent,
+  IntakeCreatedEvent,
+} from '../../domain/events'
+import { IntakeDecision, IntakeStatus } from '../../domain/structures'
 import type { IntakesRepository } from '../../interfaces'
 import { RegisterIntakeUseCase } from '../register-intake-use-case'
 
@@ -13,20 +23,28 @@ const currentDate = new Date('2026-07-24T12:00:00.000Z')
 describe('Register Intake Use Case', () => {
   let repository: MockProxy<IntakesRepository>
   let datetimeProvider: MockProxy<DatetimeProvider>
+  let broker: MockProxy<Broker>
 
   beforeEach(() => {
     repository = mock<IntakesRepository>()
     datetimeProvider = mock<DatetimeProvider>()
+    broker = mock<Broker>()
     datetimeProvider.now.mockReturnValue(currentDate)
   })
 
-  it('registers an Intake with the scheduled status', async () => {
-    const registeredIntake = IntakeFaker.fake({ status: 'consultation_scheduled' })
+  it('registers an Intake while consultation scheduling is pending', async () => {
+    const registeredIntake = IntakeFaker.fake({
+      status: IntakeStatus.ConsultationScheduling,
+    })
     repository.add.mockResolvedValue(registeredIntake)
-    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider)
+    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider, broker)
 
     const result = await useCase.execute({
-      decision: 'schedule_consultation',
+      decision: IntakeDecision.ScheduleConsultation,
+      assignedLawyerId: registeredIntake.responsibleId,
+      startsAt: currentDate,
+      modality: ConsultationModality.Virtual,
+      channel: ConsultationChannel.WhatsappVideo,
       clientId: registeredIntake.clientId,
       responsibleId: registeredIntake.responsibleId,
       createdBy: registeredIntake.createdBy,
@@ -41,16 +59,36 @@ describe('Register Intake Use Case', () => {
 
     expect(result).toBe(registeredIntake)
     expect(repository.add).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'consultation_scheduled' }),
+      expect.objectContaining({ status: IntakeStatus.ConsultationScheduling }),
+    )
+    expect(broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: IntakeCreatedEvent._NAME,
+        payload: expect.objectContaining({
+          intakeId: registeredIntake.id,
+          status: IntakeStatus.ConsultationScheduling,
+          occurredAt: currentDate,
+        }),
+      }),
+    )
+    expect(broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: IntakeConsultationSchedulingRequestedEvent._NAME,
+        payload: expect.objectContaining({
+          intakeId: registeredIntake.id,
+          requestedBy: registeredIntake.updatedBy,
+          occurredAt: currentDate,
+        }),
+      }),
     )
   })
 
   it('registers an Intake without scheduling', async () => {
     const registeredIntake = IntakeFaker.fake({ status: 'registered' })
     repository.add.mockResolvedValue(registeredIntake)
-    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider)
+    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider, broker)
     const request = {
-      decision: 'register_intake' as const,
+      decision: IntakeDecision.RegisterIntake,
       clientId: registeredIntake.clientId,
       responsibleId: registeredIntake.responsibleId,
       createdBy: registeredIntake.createdBy,
@@ -70,6 +108,9 @@ describe('Register Intake Use Case', () => {
         status: 'registered',
       }),
     )
+    expect(broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({ name: IntakeCreatedEvent._NAME }),
+    )
   })
 
   it('registers an Intake already closed using the datetime provider', async () => {
@@ -79,10 +120,10 @@ describe('Register Intake Use Case', () => {
       closedAt: currentDate,
     })
     repository.add.mockResolvedValue(registeredIntake)
-    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider)
+    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider, broker)
 
     await useCase.execute({
-      decision: 'close_without_contract',
+      decision: IntakeDecision.CloseWithoutContract,
       closureReason: 'client_withdrew',
       clientId: registeredIntake.clientId,
       responsibleId: registeredIntake.responsibleId,
@@ -103,15 +144,18 @@ describe('Register Intake Use Case', () => {
         closedAt: currentDate,
       }),
     )
+    expect(broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({ name: IntakeCreatedEvent._NAME }),
+    )
   })
 
   it('rejects the other closure reason without notes', async () => {
     const intake = IntakeFaker.fake()
-    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider)
+    const useCase = new RegisterIntakeUseCase(repository, datetimeProvider, broker)
 
     await expect(
       useCase.execute({
-        decision: 'close_without_contract',
+        decision: IntakeDecision.CloseWithoutContract,
         closureReason: 'other',
         clientId: intake.clientId,
         responsibleId: intake.responsibleId,

@@ -1,7 +1,9 @@
-import type { Consultation } from '../domain/entities/consultation'
+import type { Consultation } from '../domain/entities'
 
 export interface ConsultationsRepository {
-  findById(id: string): Promise<Consultation | null>
-  findByAppointmentId(appointmentId: string): Promise<Consultation | null>
-  save(consultation: Consultation): Promise<void>
+  add(consultation: Consultation): Promise<Consultation>
+  addMany(consultations: readonly Consultation[]): Promise<readonly Consultation[]>
+  findById(consultationId: string): Promise<Consultation | undefined>
+  findByIntakeId(intakeId: string): Promise<Consultation | undefined>
+  removeAll(): Promise<void>
 }

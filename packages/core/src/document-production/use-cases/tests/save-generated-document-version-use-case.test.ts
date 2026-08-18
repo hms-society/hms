@@ -3,7 +3,10 @@ import type { DatetimeProvider, FileStorageProvider } from '#shared/interfaces'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { fakeDocumentGeneration, fakeDocumentVersion } from '../../domain/entities/fakers'
+import {
+  DocumentGenerationFaker,
+  DocumentVersionFaker,
+} from '../../domain/entities/fakers'
 import {
   DocumentGenerationConflictError,
   DocumentGenerationNotFoundError,
@@ -40,7 +43,7 @@ describe('Save Generated Document Version Use Case', () => {
   })
 
   it('exports, stores, and persists the next generated document version', async () => {
-    const generation = fakeDocumentGeneration({
+    const generation = DocumentGenerationFaker.fake({
       status: 'running',
       template: {
         name: 'Procuração Jurídica',
@@ -48,7 +51,7 @@ describe('Save Generated Document Version Use Case', () => {
         variables: [],
       },
     })
-    const latestVersion = fakeDocumentVersion({
+    const latestVersion = DocumentVersionFaker.fake({
       documentId: generation.documentId,
       versionNumber: 2,
     })
@@ -68,7 +71,7 @@ describe('Save Generated Document Version Use Case', () => {
       createdAt: new Date('2026-08-11T12:00:00.000Z'),
     }
     const now = new Date('2026-08-11T13:00:00.000Z')
-    const savedVersion = fakeDocumentVersion({
+    const savedVersion = DocumentVersionFaker.fake({
       documentId: generation.documentId,
       fileId: storedFile.id,
       versionNumber: 3,
@@ -76,6 +79,7 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
+      status: 'in_review',
     })
     generationsRepository.findById.mockResolvedValue(generation)
     versionsRepository.findByDocumentGenerationId.mockResolvedValue(undefined)
@@ -119,13 +123,14 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
+      status: 'in_review',
     })
   })
 
   it('starts numbering at one when the document has no previous version', async () => {
-    const generation = fakeDocumentGeneration({ status: 'running' })
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
     const bytes = new Uint8Array([1])
-    const savedVersion = fakeDocumentVersion({
+    const savedVersion = DocumentVersionFaker.fake({
       documentId: generation.documentId,
       versionNumber: 1,
     })
@@ -173,8 +178,8 @@ describe('Save Generated Document Version Use Case', () => {
   })
 
   it('reuses the version already created by the same generation', async () => {
-    const generation = fakeDocumentGeneration({ status: 'running' })
-    const existingVersion = fakeDocumentVersion({
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
+    const existingVersion = DocumentVersionFaker.fake({
       documentId: generation.documentId,
       documentGenerationId: generation.id,
     })
@@ -194,7 +199,7 @@ describe('Save Generated Document Version Use Case', () => {
   })
 
   it('rejects a generation that is not running', async () => {
-    const generation = fakeDocumentGeneration({ status: 'completed' })
+    const generation = DocumentGenerationFaker.fake({ status: 'completed' })
     generationsRepository.findById.mockResolvedValue(generation)
 
     await expect(

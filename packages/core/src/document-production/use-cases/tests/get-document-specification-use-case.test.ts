@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { DocumentSpecification } from '../../domain/entities'
-import { fakeDocumentSpecification } from '../../domain/entities/fakers'
+import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import { DocumentSpecificationNotFoundError } from '../../domain/errors'
 import type { DocumentSpecificationsRepository } from '../../interfaces'
 import { GetDocumentSpecificationUseCase } from '../get-document-specification-use-case'
@@ -15,7 +15,7 @@ describe('Get Document Specification Use Case', () => {
   })
 
   it('returns the specification found by id', async () => {
-    const specification = fakeDocumentSpecification()
+    const specification = DocumentSpecificationFaker.fake()
     repository.findById.mockResolvedValue(specification)
 
     await expect(

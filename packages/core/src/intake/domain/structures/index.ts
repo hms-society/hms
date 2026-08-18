@@ -1,5 +1,7 @@
 export * from './contact-channel'
 export * from './intake-closure-reason'
+export * from './intake-consultation-scheduling-outcome'
+export * from './intake-decision'
 export * from './intake-demand-draft'
 export * from './intake-list-item'
 export * from './intake-list-query'
