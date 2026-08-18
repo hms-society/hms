@@ -61,6 +61,10 @@ jobs:
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm install --frozen-lockfile
 
+      - name: Generate routes
+        if: steps.scope.outputs.relevant == 'true'
+        run: pnpm --filter web generate-routes
+
       - name: Code checks
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter web check:code

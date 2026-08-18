@@ -59,6 +59,10 @@ describe('useNewIntake', () => {
       urgency: 'normal',
       demandNotes: '',
       decision: 'schedule_consultation',
+      assignedLawyerId: 'epaminondas',
+      startsAt: expect.any(Date),
+      modality: 'virtual',
+      channel: 'whatsapp_video',
     })
     expect(result.current.form.getValues('clientId')).toBe('')
   })
