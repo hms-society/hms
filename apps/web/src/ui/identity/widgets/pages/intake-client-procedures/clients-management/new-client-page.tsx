@@ -12,7 +12,30 @@ import type { ClientDetails } from '@hms/core/identity/domain/entities'
 export const NewClientPage = () => {
   const navigate = useNavigate()
 
-  const controller = useClientRegisterDialog({
+  const {
+    asyncError,
+    createdClientDetails,
+    dialogContentRef,
+    handleBackToIdentification,
+    handleBackToPrivacy,
+    handleBackToRegistration,
+    handleClearIdentification,
+    handleClientTypeChange,
+    handleContinueToPrivacy,
+    handleContinueToRegistration,
+    handleContinueToReview,
+    handleLookup,
+    handleRetryPendingConsents,
+    handleSearchAnotherClient,
+    handleSelectExistingClient,
+    handleSubmitRegistration,
+    identificationForm,
+    isBusy,
+    registrationForm,
+    requestLock,
+    searchResult,
+    state,
+  } = useClientRegisterDialog({
     open: true,
     onOpenChange: (open) => {
       if (!open) {
@@ -26,6 +49,31 @@ export const NewClientPage = () => {
       })
     },
   })
+
+  const clientRegisterDialog = {
+    asyncError,
+    createdClientDetails,
+    dialogContentRef,
+    handleBackToIdentification,
+    handleBackToPrivacy,
+    handleBackToRegistration,
+    handleClearIdentification,
+    handleClientTypeChange,
+    handleContinueToPrivacy,
+    handleContinueToRegistration,
+    handleContinueToReview,
+    handleLookup,
+    handleRetryPendingConsents,
+    handleSearchAnotherClient,
+    handleSelectExistingClient,
+    handleSubmitRegistration,
+    identificationForm,
+    isBusy,
+    registrationForm,
+    requestLock,
+    searchResult,
+    state,
+  }
 
   return (
     <div className='mx-auto flex w-full max-w-3xl flex-col gap-6 pt-10 pb-12 px-4 sm:px-6'>
@@ -48,28 +96,24 @@ export const NewClientPage = () => {
       </div>
 
       <div className='mt-2'>
-        <ClientRegisterDialogStepper state={controller.state} />
+        <ClientRegisterDialogStepper state={state} />
       </div>
 
       <div
-        ref={controller.dialogContentRef}
+        ref={dialogContentRef}
         className='mt-4 overflow-hidden rounded-2xl border border-border bg-card px-6 py-6 shadow-sm sm:px-8 sm:py-7'
       >
-        {controller.state === 'identification' && (
-          <ClientIdentificationStep controller={controller} />
+        {state === 'identification' && (
+          <ClientIdentificationStep dialog={clientRegisterDialog} />
         )}
-        {(controller.state === 'existing-client' || controller.state === 'not-found') &&
-          controller.searchResult && (
-            <ClientSearchResultStep
-              controller={controller}
-              result={controller.searchResult}
-            />
-          )}
-        {controller.state === 'registration' && (
-          <ClientRegistrationStep controller={controller} />
+        {(state === 'existing-client' || state === 'not-found') && searchResult && (
+          <ClientSearchResultStep dialog={clientRegisterDialog} result={searchResult} />
         )}
-        {controller.state === 'privacy' && <ClientPrivacyStep controller={controller} />}
-        {controller.state === 'review' && <ClientReviewStep controller={controller} />}
+        {state === 'registration' && (
+          <ClientRegistrationStep dialog={clientRegisterDialog} />
+        )}
+        {state === 'privacy' && <ClientPrivacyStep dialog={clientRegisterDialog} />}
+        {state === 'review' && <ClientReviewStep dialog={clientRegisterDialog} />}
       </div>
     </div>
   )

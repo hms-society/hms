@@ -11,6 +11,8 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 import { DrizzleDocumentBatchAuditsRepository } from './drizzle/repositories/drizzle-document-batch-audits-repository'
+import { DrizzleDocumentValidationLogsRepository } from './drizzle/repositories/drizzle-document-validation-logs-repository'
+import { DrizzleDocumentValidationsRepository } from './drizzle/repositories/drizzle-document-validations-repository'
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
@@ -19,6 +21,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DrizzleDocumentBatchMapper,
     DrizzleDailyCountersRepository,
     DrizzleDocumentBatchesRepository,
+    DrizzleDocumentValidationsRepository,
+    DrizzleDocumentValidationLogsRepository,
     DrizzleDocumentBatchAuditsRepository,
     {
       provide: DOCUMENT_ENGINE.dailyCounters,
@@ -27,6 +31,14 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     {
       provide: DOCUMENT_ENGINE.documentBatches,
       useExisting: DrizzleDocumentBatchesRepository,
+    },
+    {
+      provide: DOCUMENT_ENGINE.documentValidations,
+      useExisting: DrizzleDocumentValidationsRepository,
+    },
+    {
+      provide: DOCUMENT_ENGINE.documentValidationLogs,
+      useExisting: DrizzleDocumentValidationLogsRepository,
     },
     {
       provide: DOCUMENT_ENGINE.documentBatchAudits,
@@ -60,6 +72,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
   exports: [
     DOCUMENT_ENGINE.dailyCounters,
     DOCUMENT_ENGINE.documentBatches,
+    DOCUMENT_ENGINE.documentValidations,
+    DOCUMENT_ENGINE.documentValidationLogs,
     DOCUMENT_ENGINE.documentBatchAudits,
     CreateDocumentBatchUseCase,
     DocumentsSeeder,
