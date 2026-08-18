@@ -45,6 +45,7 @@ import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/c
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
+import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
 
 const TriagemRouteRoute = TriagemRouteRouteImport.update({
   id: '/triagem',
@@ -230,6 +231,12 @@ const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
   path: '/meus-casos/$caseId',
   getParentRoute: () => ClienteRouteRoute,
 } as any)
+const ConsultasConsultationIdDocumentosIndexRoute =
+  ConsultasConsultationIdDocumentosIndexRouteImport.update({
+    id: '/$consultationId/documentos/',
+    path: '/$consultationId/documentos/',
+    getParentRoute: () => ConsultasRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/triagem/': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -302,6 +310,7 @@ export interface FileRoutesByTo {
   '/triagem': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   '/triagem/': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/triagem/'
     | '/cliente/meus-casos/$caseId'
     | '/cliente/meus-casos/'
+    | '/consultas/$consultationId/documentos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/triagem'
     | '/cliente/meus-casos/$caseId'
     | '/cliente/meus-casos'
+    | '/consultas/$consultationId/documentos'
   id:
     | '__root__'
     | '/'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/triagem/'
     | '/cliente/meus-casos/$caseId'
     | '/cliente/meus-casos/'
+    | '/consultas/$consultationId/documentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -736,6 +749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteMeusCasosCaseIdRouteImport
       parentRoute: typeof ClienteRouteRoute
     }
+    '/consultas/$consultationId/documentos/': {
+      id: '/consultas/$consultationId/documentos/'
+      path: '/$consultationId/documentos'
+      fullPath: '/consultas/$consultationId/documentos/'
+      preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
+      parentRoute: typeof ConsultasRouteRoute
+    }
   }
 }
 
@@ -796,10 +816,13 @@ const ClienteRouteRouteWithChildren = ClienteRouteRoute._addFileChildren(
 
 interface ConsultasRouteRouteChildren {
   ConsultasIndexRoute: typeof ConsultasIndexRoute
+  ConsultasConsultationIdDocumentosIndexRoute: typeof ConsultasConsultationIdDocumentosIndexRoute
 }
 
 const ConsultasRouteRouteChildren: ConsultasRouteRouteChildren = {
   ConsultasIndexRoute: ConsultasIndexRoute,
+  ConsultasConsultationIdDocumentosIndexRoute:
+    ConsultasConsultationIdDocumentosIndexRoute,
 }
 
 const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(
