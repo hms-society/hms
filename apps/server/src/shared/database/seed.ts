@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from '@/app.module'
+import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { CollaboratorProfile } from '@hms/core/identity/domain/structures'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
 import { RealDocumentsSeeder } from '@/document-engine/database/real-documents-seeder'
@@ -29,6 +32,7 @@ async function bootstrap() {
       throw new AppError('HMS_USER_SEED_PASSWORD is required when seeding dev or staging')
     }
 
+    await app.get(CaseManagementSeeder).clear()
     await app.get(IntakeSeeder).clear()
     await app.get(DocumentProductionSeeder).clear()
     await app.get(LegalCatalogSeeder).clear()
@@ -62,12 +66,31 @@ async function bootstrap() {
       },
       seedPassword,
     )
-    await app.get(IntakeSeeder).run({
+    const attendantIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === CollaboratorProfile.Attendant)
+      .map(({ id }) => id)
+    const lawyerIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === CollaboratorProfile.Lawyer)
+      .map(({ id }) => id)
+    const paralegalIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === CollaboratorProfile.Paralegal)
+      .map(({ id }) => id)
+
+    const intakes = await app.get(IntakeSeeder).run({
       clientIds: identitySeed.clients.map(({ id }) => id),
-      responsibleIds: identitySeed.collaborators.map(({ id }) => id),
+      responsibleIds: attendantIds,
       actorIds: identitySeed.users.map(({ id }) => id),
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
+    })
+
+    await app.get(CaseManagementSeeder).run({
+      contractedIntakes: intakes.filter(
+        ({ status }) => status === IntakeStatus.Contracted,
+      ),
+      lawyerIds,
+      paralegalIds,
+      actorId: identitySeed.users[0]?.id ?? lawyerIds[0] ?? paralegalIds[0],
     })
     await app.get(CommunicationSeeder).run()
     await app.get(RealDocumentsSeeder).run()

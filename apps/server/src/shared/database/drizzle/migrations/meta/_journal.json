@@ -134,6 +134,13 @@
       "when": 1786725600000,
       "tag": "0022_document_validation_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1787094311363,
+      "tag": "0023_case_management",
+      "breakpoints": true
     }
   ]
 }

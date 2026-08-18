@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DRIZZLE, type DrizzleDB } from '@/shared/database/drizzle/database.provider'
-import { clientModel } from '@/identity/database/drizzle/models'
-import { userModel } from '@/identity/database/drizzle/models/user-model'
-import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import type { IntakeCreation } from '@hms/core/intake/domain/entities'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
+import { AppError } from '@hms/core/shared/domain/errors'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 
@@ -20,7 +17,6 @@ export type IntakeSeedReferences = {
 @Injectable()
 export class IntakeSeeder {
   constructor(
-    @Inject(DRIZZLE) private readonly database: DrizzleDB,
     @Inject(INTAKE_REPOSITORIES.intakes)
     private readonly intakesRepository: IntakesRepository,
   ) {}
@@ -33,100 +29,141 @@ export class IntakeSeeder {
     return this.intakesRepository.removeAll()
   }
 
-  async run(references?: IntakeSeedReferences) {
-    const clients = await this.database.select().from(clientModel)
-    const users = await this.database.select().from(userModel)
-
-    const attendant = users.find((u) => u.email === 'attendant@hmsadvogados.com.br')
-    const responsibleId = attendant?.id || references?.responsibleIds[0] || clients[0]?.id
-
-    if (!responsibleId || clients.length === 0) {
-      throw new Error('Intake seed requirements are not met')
+  run(references?: IntakeSeedReferences) {
+    if (!references) {
+      throw new AppError('Intake seed references are required')
     }
 
-    const areas = await this.database.select().from(legalAreaModel)
-    const topics = await this.database.select().from(legalTopicModel)
+    const [responsibleId] = references.responsibleIds
+    const actorId = references.actorIds[0] ?? responsibleId
 
-    if (areas.length === 0 || topics.length === 0) {
-      throw new Error('Legal areas and topics are required')
+    if (!responsibleId || !actorId || references.clientIds.length === 0) {
+      throw new AppError('Intake seed requirements are not met')
     }
 
-    const testClient = clients.find((c) => c.email === 'client@hms.br')
-    const intakesToSeed: IntakeCreation[] = []
-
-    if (testClient) {
-      // 1. Consultation Scheduled
-      const civArea = areas.find((a) => a.name === 'Cível') || areas[0]
-      const civTopic = topics.find((t) => t.legalAreaId === civArea.id) || topics[0]
-      intakesToSeed.push({
-        clientId: testClient.id,
-        responsibleId,
-        createdBy: responsibleId,
-        updatedBy: responsibleId,
-        origin: 'direct' as const,
-        contactChannel: 'whatsapp' as const,
-        legalAreaId: civArea.id,
-        legalTopicId: civTopic.id,
-        urgency: 'normal' as const,
-        demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
-        status: IntakeStatus.ConsultationScheduled,
-      })
-
-      // 2. Registered (Pending docs)
-      const trabArea = areas.find((a) => a.name === 'Trabalhista') || areas[0]
-      const trabTopic = topics.find((t) => t.legalAreaId === trabArea.id) || topics[0]
-      intakesToSeed.push({
-        clientId: testClient.id,
-        responsibleId,
-        createdBy: responsibleId,
-        updatedBy: responsibleId,
-        origin: 'direct' as const,
-        contactChannel: 'whatsapp' as const,
-        legalAreaId: trabArea.id,
-        legalTopicId: trabTopic.id,
-        urgency: 'high' as const,
-        demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
-        status: IntakeStatus.Registered,
-      })
-
-      // 3. Contracted
-      const famArea = areas.find((a) => a.name === 'Família') || areas[0]
-      const famTopic = topics.find((t) => t.legalAreaId === famArea.id) || topics[0]
-      intakesToSeed.push({
-        clientId: testClient.id,
-        responsibleId,
-        createdBy: responsibleId,
-        updatedBy: responsibleId,
-        origin: 'direct' as const,
-        contactChannel: 'email' as const,
-        legalAreaId: famArea.id,
-        legalTopicId: famTopic.id,
-        urgency: 'normal' as const,
-        demandNotes: 'Divórcio consensual e partilha de bens.',
-        status: IntakeStatus.Contracted,
-      })
-    }
-
-    // Seed 1 simple intake for the other seeded clients
-    for (const client of clients) {
-      if (client.email === 'client@hms.br') continue
-      const area = areas[Math.floor(Math.random() * areas.length)]
-      const topic = topics.find((t) => t.legalAreaId === area.id) || topics[0]
-      intakesToSeed.push({
-        clientId: client.id,
-        responsibleId,
-        createdBy: responsibleId,
-        updatedBy: responsibleId,
-        origin: 'direct' as const,
-        contactChannel: 'phone' as const,
-        legalAreaId: area.id,
-        legalTopicId: topic.id,
-        urgency: 'normal' as const,
-        demandNotes: 'Consulta inicial sobre direito contratual.',
-        status: IntakeStatus.Registered,
-      })
-    }
+    const intakesToSeed = this.createClientCaseSeeds({
+      actorId,
+      references,
+      responsibleId,
+    })
 
     return this.seed(intakesToSeed)
+  }
+
+  private createClientCaseSeeds({
+    actorId,
+    references,
+    responsibleId,
+  }: {
+    actorId: string
+    references: IntakeSeedReferences
+    responsibleId: string
+  }): IntakeCreation[] {
+    return references.clientIds.flatMap((clientId, index) => {
+      if (index === 0) {
+        return [
+          this.createCaseSeed({
+            actorId,
+            clientId,
+            contactChannel: 'whatsapp',
+            demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
+            references,
+            responsibleId,
+            status: IntakeStatus.Contracted,
+            urgency: 'normal',
+          }),
+          this.createCaseSeed({
+            actorId,
+            clientId,
+            contactChannel: 'whatsapp',
+            demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
+            references,
+            responsibleId,
+            status: IntakeStatus.Registered,
+            urgency: 'high',
+          }),
+          this.createCaseSeed({
+            actorId,
+            clientId,
+            contactChannel: 'email',
+            demandNotes: 'Divórcio consensual e partilha de bens.',
+            references,
+            responsibleId,
+            status: IntakeStatus.InFormalization,
+            urgency: 'normal',
+          }),
+        ]
+      }
+
+      return [
+        this.createCaseSeed({
+          actorId,
+          clientId,
+          contactChannel: this.getContactChannelByIndex(index),
+          demandNotes: this.getDemandNotesByIndex(index),
+          references,
+          responsibleId,
+          status: IntakeStatus.Contracted,
+          urgency: this.getUrgencyByIndex(index),
+        }),
+      ]
+    })
+  }
+
+  private createCaseSeed({
+    actorId,
+    clientId,
+    contactChannel,
+    demandNotes,
+    references,
+    responsibleId,
+    status,
+    urgency,
+  }: {
+    actorId: string
+    clientId: string
+    contactChannel: IntakeCreation['contactChannel']
+    demandNotes: string
+    references: IntakeSeedReferences
+    responsibleId: string
+    status: IntakeCreation['status']
+    urgency: IntakeCreation['urgency']
+  }): IntakeCreation {
+    return {
+      clientId,
+      responsibleId,
+      createdBy: actorId,
+      updatedBy: actorId,
+      origin: 'direct',
+      contactChannel,
+      legalAreaId: references.legalAreaId,
+      legalTopicId: references.legalTopicId,
+      urgency,
+      demandNotes,
+      status,
+    }
+  }
+
+  private getContactChannelByIndex(index: number): IntakeCreation['contactChannel'] {
+    const contactChannels = ['phone', 'whatsapp', 'email', 'in_person'] as const
+
+    return contactChannels[index % contactChannels.length]
+  }
+
+  private getDemandNotesByIndex(index: number): string {
+    const demandNotes = [
+      'Consulta inicial sobre revisão contratual e obrigações pendentes.',
+      'Cliente relata conflito familiar e necessidade de orientação preventiva.',
+      'Análise preliminar sobre cobrança indevida e documentação disponível.',
+      'Pedido de orientação sobre direitos trabalhistas e próximos passos.',
+    ]
+
+    return demandNotes[index % demandNotes.length] ?? demandNotes[0]
+  }
+
+  private getUrgencyByIndex(index: number): IntakeCreation['urgency'] {
+    const urgencies = ['normal', 'high', 'urgent'] as const
+
+    return urgencies[index % urgencies.length] ?? 'normal'
   }
 }

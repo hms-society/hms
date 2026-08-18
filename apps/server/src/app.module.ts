@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { CaseManagementModule } from '@/case-management/case-management.module'
 import { IntakeModule } from '@/intake/intake.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
@@ -15,6 +16,7 @@ import { DocumentProductionModule } from '@/document-production/document-product
     IdentityModule,
     LegalCatalogModule,
     IntakeModule,
+    CaseManagementModule,
     CommunicationModule,
     DocumentsModule,
     SchedulingModule,
