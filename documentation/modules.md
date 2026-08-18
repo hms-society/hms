@@ -4,6 +4,10 @@ Cada módulo é responsável por um conjunto claro de atribuições. Nenhum mód
 invade o escopo de outro. Eles se comunicam por meio de eventos e referências
 compartilhadas.
 
+Os PRDs canônicos vinculados neste documento são a fonte normativa das regras de
+produto. Este resumo deve acompanhá-los e não introduzir fluxos, estados ou
+responsabilidades que não estejam definidos neles.
+
 ---
 
 ## Intake
@@ -17,11 +21,12 @@ Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassia
   o cliente relacionado.
 - Mantém o estado, a linha do tempo e o histórico de cada Intake.
 - Coordena a abertura do Intake com a reserva de uma consulta no Agendamento.
-- Mantém o agendamento como pendente enquanto compromisso e consulta são criados
-  assincronamente, registra a falha definitiva quando o processamento não termina e
-  só considera a consulta agendada depois que o módulo Consulta confirma sua criação.
-- Permite solicitar novamente um agendamento que terminou com falha, usando os
-  dados confirmados na nova tentativa e preservando qualquer compromisso já reservado.
+- Cria o Intake no status `Consulta agendada` somente depois que o módulo de
+  Agendamento confirma a reserva, armazenando apenas a referência do agendamento.
+- Não cria um Intake quando a reserva falha e preserva os dados temporários do
+  fluxo para que outro horário possa ser escolhido.
+- Garante que a finalização seja idempotente, sem criar mais de uma reserva ou
+  mais de um Intake em cliques repetidos, retentativas ou respostas tardias.
 - Reflete a realização da consulta e registra a decisão de viabilidade.
 - Controla a passagem para formalização e reflete a contratação como desfecho
   terminal.
@@ -130,32 +135,43 @@ Requisito de produto: [PRD — Módulo de Produção Documental](https://platafo
 
 ## Comunicação
 
-Governa todas as interações registradas com pessoas e as notificações internas.
+Centraliza os atendimentos realizados por WhatsApp e e-mail e as notificações
+internas relacionadas ao módulo.
 
-- Registra toda comunicação (recebida e enviada) em um log central vinculado a
-  uma pessoa, triagem ou caso.
-- Envia mensagens automáticas pelo WhatsApp após eventos autorizados, sem manter
-  atendimento humano integrado ao canal.
-- Recebe documentos enviados pelo WhatsApp e publica eventos para o Motor
-  Documental.
-- Mantém o atendimento humano centralizado no e-mail.
-- Envia notificações internas aos membros da equipe (novo documento recebido,
-  prazo se aproximando, tarefa atribuída).
-- Impõe as regras de consentimento: nenhuma mensagem é enviada sem o consentimento
-  ativo da pessoa para aquele canal.
+Requisito de produto: [PRD — Módulo de Comunicação](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588694).
+
+- Registra atendimentos, conversas e mensagens recebidas e enviadas por WhatsApp
+  e e-mail, inclusive quando o remetente ainda não está vinculado a um cliente.
+- Mantém no máximo um atendimento ativo por cliente, no qual conversas dos dois
+  canais podem coexistir.
+- Permite respostas humanas livres por WhatsApp e por e-mail somente ao atendente
+  que assumiu explicitamente o atendimento.
+- Notifica um atendente elegível sem atribuir ou reservar automaticamente o
+  atendimento.
+- Envia mensagens automáticas fixas de marcação e reagendamento após eventos
+  confirmados do Agendamento.
+- Encaminha ocorrências com arquivos recebidos por WhatsApp ou e-mail ao Motor
+  Documental sem exibir ou realizar a triagem na conversa.
+- Permite iniciar um novo Intake em outra guia sem vincular diretamente a
+  mensagem ao Intake, à Consulta ou ao Caso.
+- Bloqueia mensagens manuais e automáticas sem consentimento ativo para o canal,
+  sem usar outro canal como fallback.
+- Preserva mensagens, estados de entrega, atribuições e encerramentos com
+  processamento idempotente e atualização em tempo real.
 
 ---
 
 ## Identidade
 
-Sabe quem são todas as pessoas, como elas acessam o sistema e quais autorizações
-possuem globalmente.
+Controla as contas de acesso, os colaboradores, os clientes e as autorizações
+globais, preservando esses conceitos como cadastros distintos.
 
 Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232).
 
-- Mantém um cadastro único de pessoas, com detecção de duplicatas por identificador
-  fiscal.
-- Vincula pessoas a usuários do sistema por meio do Supabase Auth.
+- Mantém contas de acesso por e-mail separadas dos cadastros de colaboradores e
+  clientes; clientes não recebem acesso no MVP.
+- Impede clientes duplicados por CPF ou CNPJ, desconsiderando máscara e pontuação.
+- Vincula cada colaborador a exatamente uma conta de acesso.
 - Atribui um dos cinco perfis fixos que determinam a autorização em todo o sistema:
   Administrador, Atendente, Advogado, Paralegal ou Supervisor.
 - Associa cada colaborador jurídico a uma ou mais áreas jurídicas, com um ou mais
@@ -169,12 +185,12 @@ Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atla
 
 ## Agendamento
 
-É responsável pela disponibilidade dos colaboradores e pelas reservas de
+É responsável pela disponibilidade dos advogados e pelas reservas de
 compromissos.
 
 Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/x/AYAT).
 
-- Configura a duração padrão dos compromissos na agenda de cada colaborador.
+- Configura a duração padrão das consultas na agenda de cada advogado.
 - Registra a disponibilidade semanal como intervalos de horário local agrupados
   por dia da semana.
 - Registra períodos bloqueados inclusivos, com datas sem horário, para férias,
@@ -196,7 +212,12 @@ Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlass
 
 - Cria uma consulta para um cliente e um advogado designado a partir da referência
   de um compromisso do módulo de Agendamento.
-- Registra modalidade, canal, ocorrência, ausência, resumo e documentos solicitados.
+- Registra modalidade, canal, ocorrência, ausência, classificação jurídica,
+  questão principal, fatos, possíveis pedidos, riscos, orientação e observações.
+- Exige decisão humana antes de incorporar sugestões ao conteúdo jurídico.
+- Permite selecionar e acompanhar documentos produzidos pela Produção Documental
+  sem exigir um estado ou uma confirmação próprios para o agrupamento; a Consulta
+  controla sua conclusão e pode ser concluída sem documentos selecionados.
 - Não calcula disponibilidade nem reserva horário na agenda de um colaborador.
 
 ---
