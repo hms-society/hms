@@ -83242,7 +83242,7 @@
                           "id": "U1Sd9",
                           "name": "L",
                           "fill": "$foreground",
-                          "content": "Contexto",
+                          "content": "Cliente",
                           "fontFamily": "$font-sans",
                           "fontSize": 12,
                           "fontWeight": "600"
@@ -83569,6 +83569,144 @@
                               "fontFamily": "$font-sans",
                               "fontSize": 12,
                               "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YuR40",
+                  "name": "Footer Bar",
+                  "width": "fill_container",
+                  "height": 70,
+                  "fill": "$card",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeLinejoin": "round",
+                  "gap": 24,
+                  "padding": [
+                    16,
+                    28
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "S2FIxf",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "k6Y0z",
+                          "name": "I",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "hourglass",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "imdrq",
+                          "name": "L",
+                          "fill": "$muted-foreground",
+                          "content": "Aguardando 2 assinaturas · 3 dias desde o envio · expira em 12 dias",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SrD7l",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tZOFr",
+                          "name": "Voltar",
+                          "fill": "$accent",
+                          "cornerRadius": 999,
+                          "stroke": "$ghost-stroke",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "gap": 6,
+                          "padding": [
+                            9,
+                            16
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "tmwYS",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Icon",
+                              "enabled": false,
+                              "width": 14,
+                              "height": 14,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "GYzVX",
+                              "name": "Label",
+                              "fill": "$foreground",
+                              "content": "Voltar",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "N3aGva",
+                          "name": "Reenviar link",
+                          "cornerRadius": 999,
+                          "stroke": "$primary",
+                          "strokeWidth": 1.5,
+                          "strokeAlignment": "inner",
+                          "gap": 6,
+                          "padding": [
+                            9,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "DZMMX",
+                              "name": "Icon",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "send",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "a3v73E",
+                              "name": "Label",
+                              "fill": "$primary",
+                              "content": "Reenviar link para cliente",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "600"
                             }
                           ]
                         }
@@ -84132,120 +84270,6 @@
                           ]
                         }
                       ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "w7gut",
-              "name": "Footer Bar",
-              "width": "fill_container",
-              "height": 70,
-              "fill": "$card",
-              "stroke": "$border",
-              "strokeWidth": {
-                "top": 1
-              },
-              "strokeLinejoin": "round",
-              "gap": 24,
-              "padding": [
-                16,
-                28
-              ],
-              "justifyContent": "space_between",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "nHMp0",
-                  "gap": 8,
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "lv5ch",
-                      "name": "I",
-                      "width": 14,
-                      "height": 14,
-                      "icon": "hourglass",
-                      "library": "lucide",
-                      "fill": "$muted-foreground"
-                    },
-                    {
-                      "type": "text",
-                      "id": "i2qjo",
-                      "name": "L",
-                      "fill": "$muted-foreground",
-                      "content": "Aguardando 2 assinaturas · 3 dias desde o envio · expira em 12 dias",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "nGeNI",
-                  "gap": 10,
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "id": "Kdotp",
-                      "type": "ref",
-                      "ref": "JoVda",
-                      "name": "Cancelar pacote",
-                      "padding": [
-                        9,
-                        16
-                      ],
-                      "descendants": {
-                        "vRHPQ": {
-                          "enabled": true,
-                          "icon": "x-circle"
-                        },
-                        "mbbDv": {
-                          "content": "Cancelar pacote",
-                          "fontSize": 13
-                        }
-                      }
-                    },
-                    {
-                      "id": "YGUdd",
-                      "type": "ref",
-                      "ref": "srlJ1",
-                      "name": "Voltar",
-                      "padding": [
-                        9,
-                        16
-                      ],
-                      "descendants": {
-                        "axQtR": {
-                          "content": "Voltar",
-                          "fontSize": 13
-                        }
-                      }
-                    },
-                    {
-                      "id": "LLlL2",
-                      "type": "ref",
-                      "ref": "yR4IE",
-                      "name": "Reenviar link",
-                      "padding": [
-                        9,
-                        18
-                      ],
-                      "descendants": {
-                        "CfQKb": {
-                          "enabled": true,
-                          "icon": "send"
-                        },
-                        "BCKt5": {
-                          "content": "Reenviar link para cliente",
-                          "fontSize": 13
-                        }
-                      }
                     }
                   ]
                 }
