@@ -8,9 +8,8 @@ import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useNavigation } from '@/ui/shared/hooks/use-navigation'
-import { SchedulingService } from '@/rest/services/scheduling-service'
+import { documentService } from '@/rest/services/DocumentEngineService'
+import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 import { DocumentValidationService } from '@/rest/services/document-validation-service'
 
 import type { RestContextValue } from './types/rest-context-value'
@@ -50,6 +49,8 @@ export function useRestContextProvider(): RestContextValue {
     documentService: documentService(restClient),
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),
+    documentService: documentService(restClient),
+    aiSuggestionsService: AiSuggestionsService(restClient),
     documentValidationService: DocumentValidationService(restClient),
   }
 }
