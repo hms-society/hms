@@ -83,3 +83,8 @@ export type IconName =
   | 'alert-circle'
   | 'help-circle'
   | 'underline'
+  | 'sparkles'
+  | 'check-circle-2'
+  | 'edit-3'
+  | 'x-circle'
+  | 'shield-alert'
