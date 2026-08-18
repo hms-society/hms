@@ -14,6 +14,7 @@ export const ROUTES = {
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
   lawyerCommunication: '/advogado/comunicacao',
+  lawyerCases: '/advogado/meus-casos',
   lawyerSchedule: '/agenda',
 
   clients: '/clientes',

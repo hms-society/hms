@@ -16,12 +16,9 @@ export type SidebarItems = {
 const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },
   { label: 'Meus intakes', route: 'intakes', icon: 'file-text' },
+  { label: 'Meus Casos', route: 'lawyerCases', icon: 'briefcase-business'},
   { label: 'Consultas', route: 'lawyerConsultations', icon: 'monitor' },
-  {
-    label: 'Central de Comunicação',
-    route: 'lawyerCommunication',
-    icon: 'message-square',
-  },
+  {label: 'Central de Comunicação',route: 'lawyerCommunication',icon: 'message-square',},
   { label: 'Minha Agenda', route: 'lawyerSchedule', icon: 'calendar' },
   { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
