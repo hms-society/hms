@@ -14,6 +14,7 @@ import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
 import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
+import { Route as AssinaturasRouteRouteImport } from './routes/assinaturas/route'
 import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
 import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -42,6 +43,7 @@ import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens
 import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AssinaturasIntakeIdRouteImport } from './routes/assinaturas/$intakeId'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
@@ -69,6 +71,11 @@ const ClienteRouteRoute = ClienteRouteRouteImport.update({
 const AtendimentoRouteRoute = AtendimentoRouteRouteImport.update({
   id: '/atendimento',
   path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssinaturasRouteRoute = AssinaturasRouteRouteImport.update({
+  id: '/assinaturas',
+  path: '/assinaturas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgendaRouteRoute = AgendaRouteRouteImport.update({
@@ -215,6 +222,11 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
+const AssinaturasIntakeIdRoute = AssinaturasIntakeIdRouteImport.update({
+  id: '/$intakeId',
+  path: '/$intakeId',
+  getParentRoute: () => AssinaturasRouteRoute,
+} as any)
 const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
   id: '/comunicacao',
   path: '/comunicacao',
@@ -235,12 +247,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
+  '/assinaturas': typeof AssinaturasRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/assinaturas/$intakeId': typeof AssinaturasIntakeIdRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -272,9 +286,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/advogado': typeof AdvogadoRouteRouteWithChildren
+  '/assinaturas': typeof AssinaturasRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/assinaturas/$intakeId': typeof AssinaturasIntakeIdRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -308,12 +324,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/agenda': typeof AgendaRouteRouteWithChildren
+  '/assinaturas': typeof AssinaturasRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/assinaturas/$intakeId': typeof AssinaturasIntakeIdRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -348,12 +366,14 @@ export interface FileRouteTypes {
     | '/'
     | '/advogado'
     | '/agenda'
+    | '/assinaturas'
     | '/atendimento'
     | '/cliente'
     | '/consultas'
     | '/intakes'
     | '/triagem'
     | '/advogado/comunicacao'
+    | '/assinaturas/$intakeId'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -385,9 +405,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/advogado'
+    | '/assinaturas'
     | '/atendimento'
     | '/cliente'
     | '/advogado/comunicacao'
+    | '/assinaturas/$intakeId'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -420,12 +442,14 @@ export interface FileRouteTypes {
     | '/'
     | '/advogado'
     | '/agenda'
+    | '/assinaturas'
     | '/atendimento'
     | '/cliente'
     | '/consultas'
     | '/intakes'
     | '/triagem'
     | '/advogado/comunicacao'
+    | '/assinaturas/$intakeId'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -459,6 +483,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdvogadoRouteRoute: typeof AdvogadoRouteRouteWithChildren
   AgendaRouteRoute: typeof AgendaRouteRouteWithChildren
+  AssinaturasRouteRoute: typeof AssinaturasRouteRouteWithChildren
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   ClienteRouteRoute: typeof ClienteRouteRouteWithChildren
   ConsultasRouteRoute: typeof ConsultasRouteRouteWithChildren
@@ -517,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/atendimento'
       fullPath: '/atendimento'
       preLoaderRoute: typeof AtendimentoRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assinaturas': {
+      id: '/assinaturas'
+      path: '/assinaturas'
+      fullPath: '/assinaturas'
+      preLoaderRoute: typeof AssinaturasRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agenda': {
@@ -715,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
+    '/assinaturas/$intakeId': {
+      id: '/assinaturas/$intakeId'
+      path: '/$intakeId'
+      fullPath: '/assinaturas/$intakeId'
+      preLoaderRoute: typeof AssinaturasIntakeIdRouteImport
+      parentRoute: typeof AssinaturasRouteRoute
+    }
     '/advogado/comunicacao': {
       id: '/advogado/comunicacao'
       path: '/comunicacao'
@@ -762,6 +801,17 @@ const AgendaRouteRouteChildren: AgendaRouteRouteChildren = {
 const AgendaRouteRouteWithChildren = AgendaRouteRoute._addFileChildren(
   AgendaRouteRouteChildren,
 )
+
+interface AssinaturasRouteRouteChildren {
+  AssinaturasIntakeIdRoute: typeof AssinaturasIntakeIdRoute
+}
+
+const AssinaturasRouteRouteChildren: AssinaturasRouteRouteChildren = {
+  AssinaturasIntakeIdRoute: AssinaturasIntakeIdRoute,
+}
+
+const AssinaturasRouteRouteWithChildren =
+  AssinaturasRouteRoute._addFileChildren(AssinaturasRouteRouteChildren)
 
 interface AtendimentoRouteRouteChildren {
   AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
@@ -836,6 +886,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdvogadoRouteRoute: AdvogadoRouteRouteWithChildren,
   AgendaRouteRoute: AgendaRouteRouteWithChildren,
+  AssinaturasRouteRoute: AssinaturasRouteRouteWithChildren,
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   ClienteRouteRoute: ClienteRouteRouteWithChildren,
   ConsultasRouteRoute: ConsultasRouteRouteWithChildren,

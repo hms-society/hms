@@ -5,7 +5,7 @@ import { AttendanceForm } from './attendance-form/attendance-form'
 
 export function ConsultationPage() {
   const [activeTab, setActiveTab] = useState<'details' | 'form' | 'package'>('details')
-  const testConsultationId = 'deafdf3a-aa14-4723-a5f6-3f018120046e'
+  const testConsultationId = '15f64f1e-f5c8-44d5-b1a0-1f2b9ae8502e'
 
   return (
     <div className='w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-8 font-sans'>

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import type { DocumentPackageCreation } from '@hms/core/document-production/domain/entities'
-import type { DocumentPackagesRepository } from '@hms/core/document-production/interfaces'
+import type {DocumentPackagesRepository} from '@hms/core/document-production/interfaces'
+import type {SignatureDispatchInfo} from '@hms/core/document-production/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 import {
   DrizzleDocumentPackageMapper,
@@ -105,5 +106,64 @@ export class DrizzleDocumentPackagesRepository
       record,
       documents.map((document) => this.packageDocumentMapper.toDomain(document)),
     )
+  }
+
+  public async findDispatchInfoByIntakeId(
+    intakeId: string,
+  ): Promise<SignatureDispatchInfo | null> {
+    const [pkg] = await this.database
+      .select({
+        id: documentPackageModel.id,
+        createdAt: documentPackageModel.createdAt,
+      })
+      .from(documentPackageModel)
+      .where(
+        and(
+          eq(documentPackageModel.contextType, 'formalization'),
+          eq(documentPackageModel.contextId, intakeId),
+        ),
+      )
+      .orderBy(desc(documentPackageModel.createdAt))
+      .limit(1)
+
+    if (!pkg) {
+      return null
+    }
+
+    const dispatchDate = new Date(pkg.createdAt)
+
+    const daysSinceSent = Math.max(
+      0,
+      Math.floor((Date.now() - dispatchDate.getTime()) / (1000 * 60 * 60 * 24)),
+    )
+    const expirationDays = 15
+    const expiresInDays = Math.max(0, expirationDays - daysSinceSent)
+
+    const expirationDate = new Date(dispatchDate)
+    expirationDate.setDate(expirationDate.getDate() + expirationDays)
+    const expirationDayMonth = expirationDate.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+    })
+
+    const sentAtFormatted = dispatchDate.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    const sentAtTime = dispatchDate.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    return {
+      sentAt: `${sentAtFormatted} às ${sentAtTime}`,
+      sentBy: 'Dr. Hudson M. Silva',
+      channel: 'WhatsApp',
+      signatoriesCount: '2 pessoas',
+      deadline: `15 dias (expira ${expirationDayMonth})`,
+      expiresInDays,
+      daysSinceSent,
+    }
   }
 }

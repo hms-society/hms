@@ -42,6 +42,7 @@ const PARALEGAL_SIDEBAR_ITEMS: SidebarItem[] = [
     icon: 'message-square',
   },
   { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
+  { label: 'Assinaturas Contratuais', route: 'paralegalSign', icon: 'pencil' },
 ]
 
 const CLIENT_SIDEBAR_ITEMS: SidebarItem[] = [

@@ -31,6 +31,7 @@ export const ROUTES = {
   paralegalDocuments: '/documentos',
   paralegalTriage: '/triagem',
   paralegalCommunication: '/comunicacao',
+  paralegalSign: '/assinaturas',
 
   client: '/cliente',
   clientMyCases: '/cliente/meus-casos',
