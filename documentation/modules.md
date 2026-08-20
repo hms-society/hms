@@ -16,12 +16,10 @@ Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassia
 - Registra a demanda, o canal de contato, a origem, o responsável operacional e
   o cliente relacionado.
 - Mantém o estado, a linha do tempo e o histórico de cada Intake.
-- Coordena a abertura do Intake com a reserva de uma consulta no Agendamento.
-- Mantém o agendamento como pendente enquanto compromisso e consulta são criados
-  assincronamente, registra a falha definitiva quando o processamento não termina e
-  só considera a consulta agendada depois que o módulo Consulta confirma sua criação.
-- Permite solicitar novamente um agendamento que terminou com falha, usando os
-  dados confirmados na nova tentativa e preservando qualquer compromisso já reservado.
+- Solicita a reserva de uma consulta ao Agendamento e só cria efetivamente o
+  Intake depois que a reserva é confirmada.
+- Não cria Intake, identificador ou histórico quando a reserva falha; mantém os
+  dados apenas no fluxo temporário de criação para correção e nova tentativa.
 - Reflete a realização da consulta e registra a decisão de viabilidade.
 - Controla a passagem para formalização e reflete a contratação como desfecho
   terminal.
@@ -132,13 +130,14 @@ Requisito de produto: [PRD — Módulo de Produção Documental](https://platafo
 
 Governa todas as interações registradas com pessoas e as notificações internas.
 
-- Registra toda comunicação (recebida e enviada) em um log central vinculado a
-  uma pessoa, triagem ou caso.
-- Envia mensagens automáticas pelo WhatsApp após eventos autorizados, sem manter
-  atendimento humano integrado ao canal.
-- Recebe documentos enviados pelo WhatsApp e publica eventos para o Motor
-  Documental.
-- Mantém o atendimento humano centralizado no e-mail.
+- Centraliza atendimentos humanos por WhatsApp e e-mail, agrupando as conversas
+  dos dois canais em um único atendimento ativo por cliente.
+- Registra mensagens recebidas, manuais e automáticas, seus anexos, autoria e
+  estados de entrega.
+- Envia mensagens automáticas após eventos autorizados e permite respostas
+  humanas pelo canal da conversa.
+- Recebe documentos enviados pelo WhatsApp ou e-mail e publica eventos para o
+  Motor Documental.
 - Envia notificações internas aos membros da equipe (novo documento recebido,
   prazo se aproximando, tarefa atribuída).
 - Impõe as regras de consentimento: nenhuma mensagem é enviada sem o consentimento
@@ -198,6 +197,51 @@ Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlass
   de um compromisso do módulo de Agendamento.
 - Registra modalidade, canal, ocorrência, ausência, resumo e documentos solicitados.
 - Não calcula disponibilidade nem reserva horário na agenda de um colaborador.
+
+---
+
+## Formalização
+
+Coordena os documentos contratuais, os signatários, as solicitações de assinatura
+e a transição entre o Intake viável e a abertura do Caso.
+
+Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.atlassian.net/wiki/x/AQBvAQ).
+
+- Mantém uma única Formalização por Intake e exatamente um cliente no MVP.
+- Controla os estados agregados `Em andamento`, `Concluída` e `Cancelada`; os
+  estados terminais permanecem somente leitura.
+- Referencia as versões vigentes e aprovadas mantidas pela Produção Documental e
+  confirma o conjunto de documentos antes da etapa de assinatura.
+- Mantém o cliente como primeiro signatário e adiciona o advogado responsável por
+  padrão, sem selecionar documentos automaticamente para qualquer signatário.
+- Permite adicionar e remover signatários colaboradores ativos com perfil
+  Advogado, Paralegal ou Supervisor, usando nome, CPF e contatos de Identidade.
+- Exige CPF e pelo menos um canal disponível entre e-mail e WhatsApp, sem exigir
+  ambos e sem manter papel na assinatura ou comprovação de representação.
+- Relaciona signatários aos documentos e mantém a posição dos campos de assinatura
+  em um modelo interno independente do provedor.
+- Congela o conteúdo-fonte no envio, gera e preserva o PDF original e solicita a
+  assinatura eletrônica por uma porta substituível, inicialmente integrada ao
+  Documenso e sem ICP-Brasil no MVP.
+- Solicita à Comunicação o envio dos links por e-mail ou WhatsApp, respeitando o
+  consentimento específico de cada canal e sem fallback automático.
+- Acompanha o progresso por documento; um documento só é considerado assinado
+  quando todos os seus signatários concluíram.
+- Permite reenvio individual a signatários pendentes e cancelamento de todas as
+  solicitações abertas antes de liberar novamente a edição dos documentos.
+- Preserva PDFs assinados, evidências e registros de envio, reenvio e cancelamento
+  sem depender do armazenamento permanente do provedor.
+- Habilita a confirmação da contratação somente depois que todos os documentos
+  estão assinados e solicita a abertura idempotente do Caso.
+- Muda para `Concluída` e sinaliza o Intake como `Contratado` somente depois da
+  abertura bem-sucedida do Caso; em caso de falha, permanece `Em andamento` e
+  permite nova tentativa sem duplicar o Caso.
+- Muda para `Cancelada` quando o Intake é encerrado sem contratação, cancela as
+  solicitações ainda abertas e preserva todo o histórico produzido.
+
+A Formalização não edita o conteúdo dos documentos, não mantém o cadastro oficial
+de pessoas ou consentimentos, não envia mensagens diretamente pelos canais, não
+define a equipe do Caso e não administra o andamento jurídico após a contratação.
 
 ---
 

@@ -39,7 +39,7 @@ estável, paginação, sincronização com a URL, estados de carregamento/vazio/
 e item **Documentos** na sidebar administrativa existente.
 
 O resultado observável é uma listagem server-side que mostra **Modelo**,
-**Aplicação**, **Obrigatoriedade** e **Estado**, resolve nomes jurídicos pelo
+**Aplicação** e **Estado**, resolve nomes jurídicos pelo
 contrato público do Catálogo Jurídico e não oferece qualquer mutação.
 
 ## Escopo
@@ -101,7 +101,7 @@ Decisões visuais para a implementação:
   final;
 - aplicar os tokens semânticos de `documentation/design.md`/`global.css`, com
   `Fraunces` para headings e `Plus Jakarta Sans` para corpo/controles;
-- usar texto e ícone para obrigatoriedade/estado, com foco visível e sem
+- usar texto e ícone para o estado, com foco visível e sem
   depender somente de cor;
 - remover visualmente o botão **Novo modelo**, ações por linha e a coluna
   **Ação**, conforme a exceção explícita da Spec;
@@ -115,7 +115,7 @@ Decisões visuais para a implementação:
 ### Estado atual e findings
 
 - `packages/core/src/document-production` possui entidades/estruturas iniciais,
-  mas `DocumentSpecification` ainda não tem `isRequired`, nem há ports, caso de
+  mas ainda não há ports, caso de
   uso ou contrato REST.
 - Não há módulo, models, migration, seeder, controller ou fixture de Produção
   Documental no servidor.
@@ -145,8 +145,8 @@ F1 Core + validation
               └── F4 Integrated sensors + browser + Quality Gate
 ```
 
-Produção Documental é dona do modelo, momento, obrigatoriedade, abrangência,
-status e associações. O Catálogo Jurídico é dono de nomes, atividade e
+Produção Documental é dona do modelo, momento, abrangência, status e associações.
+O Catálogo Jurídico é dono de nomes, atividade e
 compatibilidade de áreas/temas. As associações armazenam somente referências
 lógicas; apenas as FKs entre tabelas próprias de Produção Documental são
 permitidas.
@@ -171,7 +171,7 @@ persistência e serviço sem expor conteúdo/variáveis.
 
 | Tarefa | Estado | Paths principais | Resultado observável | Traceabilidade | Parallelizable |
 |---|---|---|---|---|---|
-| F1-T1 — Atualizar domínio e exports | `verified` | `packages/core/src/document-production/domain/entities/document-specification.ts`; `domain/entities/index.ts`; `domain/structures/*`; `interfaces/document-specifications-repository.ts`; `interfaces/document-production-service.ts`; `interfaces/index.ts`; `use-cases/index.ts`; `packages/core/package.json` | `DocumentSpecification` possui `isRequired`; query, item, record, creation, repository e service têm contratos exportados nos subpaths corretos | SR-002, SR-008; CA-03, CA-04, CA-18 | não; todos os consumers dependem deste contrato |
+| F1-T1 — Atualizar domínio e exports | `verified` | `packages/core/src/document-production/domain/entities/document-specification.ts`; `domain/entities/index.ts`; `domain/structures/*`; `interfaces/document-specifications-repository.ts`; `interfaces/document-production-service.ts`; `interfaces/index.ts`; `use-cases/index.ts`; `packages/core/package.json` | `DocumentSpecification` possui os dados de configuração sem classificação de obrigatoriedade; query, item, record, creation, repository e service têm contratos exportados nos subpaths corretos | SR-002, SR-008; CA-03, CA-04, CA-18 | não; todos os consumers dependem deste contrato |
 | F1-T2 — Implementar caso de uso | `verified` | `packages/core/src/document-production/use-cases/list-document-specifications-use-case.ts`; `use-cases/index.ts` | normaliza busca/paginação, delega filtros/ordenação ao repository e resolve somente aplicações restritas pelo provider público | SR-003–SR-005, SR-008; CA-05, CA-06, CA-10–CA-12, CA-18 | não; depende de F1-T1 |
 | F1-T3 — Criar schema e testes de domínio | `verified` | `packages/validation/src/document-production/schemas/document-specification-list-query-schema.ts`; exports do package; `packages/core/src/document-production/use-cases/tests`; testes de schema | enums, IDs, inteiros, defaults e limites são validados/coagidos na borda; use case cobre busca, filtros, resolução, paginação, estabilidade e página além do total | SR-003–SR-005, SR-008; CA-05, CA-06, CA-09–CA-12, CA-18 | sim após F1-T1; não compartilha paths de produção com F1-T2 |
 
@@ -185,7 +185,7 @@ Sensores oficiais da fase, sem build:
 - `pnpm --filter @hms/validation test`.
 
 Evidências registradas: F1 alterou somente `packages/core` e `packages/validation`;
-`DocumentSpecification` ganhou `isRequired`, a projeção não expõe
+`DocumentSpecification` não expõe classificação de obrigatoriedade, a projeção não expõe
 `content`/`variables` e a resolução usa somente o contrato público
 `LegalExpertiseCatalogProvider`. Sensores executados no workspace principal em
 05/08/2026: core lint/check-types/test — 390 arquivos verificados, 21 arquivos
@@ -248,7 +248,7 @@ Decisões de UI para F3-T3:
   renderizados; a coluna `Ação` contém os controles visuais `Editar` e
   `Duplicar`, sem handlers de mutação nesta entrega;
 - a aplicação restrita exibirá nomes acessíveis completos e resumo visual para
-  conjuntos longos; estado/obrigatoriedade terão texto e ícone;
+  conjuntos longos; o estado terá texto e ícone;
 - usar tokens de `documentation/design.md` e preservar light/dark, foco e
   reflow; nenhuma cor, fonte, raio ou sombra nova hardcoded.
 
