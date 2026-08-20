@@ -18,7 +18,9 @@ describe('Update Document Specification Template Use Case', () => {
   })
 
   it('validates tokens, trims variables and updates only the template boundary', async () => {
-    const specification = DocumentSpecificationFaker.fake({ name: 'Configuração preservada' })
+    const specification = DocumentSpecificationFaker.fake({
+      name: 'Configuração preservada',
+    })
     repository.findById.mockResolvedValue(specification)
     repository.replaceTemplate.mockResolvedValue(specification)
 
