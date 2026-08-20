@@ -236,7 +236,6 @@ export class IdentitySeeder {
       ...client,
       id,
     })) satisfies ClientCreation[]
-
     const clients = await this.seed(clientsToSeed)
 
     return {
