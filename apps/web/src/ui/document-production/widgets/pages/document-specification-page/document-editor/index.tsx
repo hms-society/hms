@@ -16,10 +16,17 @@ export type { DocumentEditorProps } from './use-document-editor'
 export const DocumentEditor = ({
   content,
   onChange,
+  editable = true,
   onEditorReady,
   onFocus,
 }: DocumentEditorProps) => {
-  const documentEditor = useDocumentEditor({ content, onChange, onEditorReady, onFocus })
+  const documentEditor = useDocumentEditor({
+    content,
+    onChange,
+    editable,
+    onEditorReady,
+    onFocus,
+  })
   const { editor } = documentEditor
   if (!editor)
     return (
@@ -28,6 +35,7 @@ export const DocumentEditor = ({
   return (
     <div className='relative overflow-hidden bg-card'>
       <div
+        hidden={!editable}
         className='flex min-h-12 flex-wrap items-center gap-0.5 border-b bg-secondary/35 px-3 py-1.5'
         role='toolbar'
         aria-label='Formatação do template'

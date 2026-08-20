@@ -31,7 +31,6 @@ export const DocumentSpecificationsTable = ({
         <TableRow>
           <TableHead className='w-[18rem]'>Modelo</TableHead>
           <TableHead>Aplicação</TableHead>
-          <TableHead className='w-[8.75rem]'>Obrigatoriedade</TableHead>
           <TableHead className='w-[7rem]'>Estado</TableHead>
           <TableHead className='w-[11rem] text-right'>Ação</TableHead>
         </TableRow>
@@ -50,15 +49,6 @@ export const DocumentSpecificationsTable = ({
             </TableCell>
             <TableCell>
               <DocumentSpecificationsApplication item={item} />
-            </TableCell>
-            <TableCell>
-              <span className='inline-flex items-center gap-1.5 text-xs font-semibold'>
-                <Icon
-                  name={item.isRequired ? 'shield-check' : 'circle'}
-                  className='size-3.5'
-                />
-                {item.isRequired ? 'Obrigatório' : 'Opcional'}
-              </span>
             </TableCell>
             <TableCell>
               <Badge variant={item.status === 'available' ? 'secondary' : 'outline'}>

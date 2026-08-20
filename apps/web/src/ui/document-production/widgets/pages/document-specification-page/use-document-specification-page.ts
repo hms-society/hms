@@ -29,7 +29,6 @@ type ConfigurationForm = {
   name: string
   description: string
   status: DocumentSpecificationStatus
-  isRequired: boolean
   application: DocumentSpecificationApplication
 }
 
@@ -37,7 +36,6 @@ const DEFAULT_CONFIGURATION: ConfigurationForm = {
   name: '',
   description: '',
   status: 'available',
-  isRequired: false,
   application: { scope: 'global', moment: 'consultation' },
 }
 
@@ -242,7 +240,6 @@ export function useDocumentSpecificationPage({
         name: value.name,
         description: value.description,
         status: value.status,
-        isRequired: value.isRequired,
         application: value.application,
       }
       form.reset(configuration, { keepDirty: false, keepTouched: false })
@@ -462,7 +459,6 @@ export function useDocumentSpecificationPage({
         name: watchedConfiguration.name,
         description: watchedConfiguration.description,
         status: watchedConfiguration.status,
-        isRequired: watchedConfiguration.isRequired,
         application: watchedConfiguration.application,
         content,
         variables,
@@ -535,7 +531,6 @@ export function useDocumentSpecificationPage({
   const wordCount = templateText ? templateText.split(/\s+/).length : 0
   const modelName = watchedConfiguration.name
   const status = watchedConfiguration.status
-  const isRequired = watchedConfiguration.isRequired
   return {
     activeTab,
     actions,
@@ -568,7 +563,6 @@ export function useDocumentSpecificationPage({
     isLoading,
     insertVariable,
     isNotFound,
-    isRequired,
     isCatalogError,
     isTemplateDirty,
     isTemplateEmpty,
@@ -579,10 +573,6 @@ export function useDocumentSpecificationPage({
     setInsertVariable,
     topics,
     variables: variablesWithSystem,
-    toggleRequired: () =>
-      form.setValue('isRequired', !watchedConfiguration.isRequired, {
-        shouldDirty: true,
-      }),
     toggleAvailability: () =>
       form.setValue(
         'status',

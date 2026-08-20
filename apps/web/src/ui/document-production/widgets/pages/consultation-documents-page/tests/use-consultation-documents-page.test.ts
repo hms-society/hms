@@ -8,7 +8,14 @@ import { useConsultationDocumentSelectionQuery } from '../../../../hooks/use-con
 import { useGenerateConsultationDocumentAction } from '../../../../hooks/use-generate-consultation-document-action'
 import { useGenerateConsultationDocumentsAction } from '../../../../hooks/use-generate-consultation-documents-action'
 import { useReplaceConsultationDocumentSelectionAction } from '../../../../hooks/use-replace-consultation-document-selection-action'
+import { useConfirmConsultationDocumentPackageAction } from '../../../../hooks/use-confirm-consultation-document-package-action'
 import { useConsultationDocumentsPage } from '../use-consultation-documents-page'
+
+const useConsultationMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/ui/consultation/hooks/use-consultation', () => ({
+  useConsultation: () => useConsultationMock(),
+}))
 
 vi.mock('../../../../hooks/use-consultation-documents-query', () => ({
   useConsultationDocumentsQuery: vi.fn(),
@@ -28,6 +35,9 @@ vi.mock('../../../../hooks/use-consultation-document-selection-query', () => ({
 vi.mock('../../../../hooks/use-replace-consultation-document-selection-action', () => ({
   useReplaceConsultationDocumentSelectionAction: vi.fn(),
 }))
+vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', () => ({
+  useConfirmConsultationDocumentPackageAction: vi.fn(),
+}))
 
 const useConsultationDocumentsQueryMock = vi.mocked(useConsultationDocumentsQuery)
 const useCancelConsultationDocumentGenerationActionMock = vi.mocked(
@@ -44,6 +54,9 @@ const useGenerateConsultationDocumentsActionMock = vi.mocked(
 )
 const useReplaceConsultationDocumentSelectionActionMock = vi.mocked(
   useReplaceConsultationDocumentSelectionAction,
+)
+const useConfirmConsultationDocumentPackageActionMock = vi.mocked(
+  useConfirmConsultationDocumentPackageAction,
 )
 
 function createVersion(
@@ -111,6 +124,12 @@ function createCancellationAction(overrides: Record<string, unknown> = {}) {
 describe('useConsultationDocumentsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useConsultationMock.mockReturnValue({
+      consultation: {
+        status: 'pending',
+        attendanceFinalizedAt: new Date('2026-08-19T12:00:00.000Z'),
+      },
+    })
     useConsultationDocumentsQueryMock.mockReturnValue(createQueryResult() as never)
     useCancelConsultationDocumentGenerationActionMock.mockReturnValue(
       createCancellationAction() as never,
@@ -129,6 +148,11 @@ describe('useConsultationDocumentsPage', () => {
     useGenerateConsultationDocumentsActionMock.mockReturnValue(
       createBatchAction() as never,
     )
+    useConfirmConsultationDocumentPackageActionMock.mockReturnValue({
+      confirmDocumentPackage: vi.fn().mockResolvedValue(undefined),
+      error: null,
+      isConfirming: false,
+    } as never)
   })
 
   it('derives the status from the highest version number without mutating history', () => {
@@ -227,6 +251,32 @@ describe('useConsultationDocumentsPage', () => {
       status: 'generating',
       statusLabel: 'Gerando',
       isGenerating: true,
+    })
+  })
+
+  it('stops showing loading when a persisted generation has failed', () => {
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createQueryResult([
+        {
+          id: 'document-1',
+          title: 'Procuração',
+          generationStatus: DocumentGenerationStatus.Failed,
+          versions: [],
+        },
+      ]) as never,
+    )
+    useGenerateConsultationDocumentActionMock.mockReturnValue(
+      createIndividualAction({ pendingDocumentIds: ['document-1'] }) as never,
+    )
+
+    const { result } = renderHook(() =>
+      useConsultationDocumentsPage({ consultationId: 'consultation-1' }),
+    )
+
+    expect(result.current.documents[0]).toMatchObject({
+      status: 'failed',
+      statusLabel: 'Falha na geração',
+      isGenerating: false,
     })
   })
 

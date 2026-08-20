@@ -30,6 +30,9 @@ export type SelectConsultationDocumentsDialogProps = {
   selectedDocumentSpecificationIds: readonly string[]
   isLoading?: boolean
   isSaving?: boolean
+  isReadOnly?: boolean
+  initialAreaId?: string
+  initialTopicId?: string
   onOpenChange: (open: boolean) => void
   onSave: (documentSpecificationIds: readonly string[]) => void
 }
@@ -40,6 +43,9 @@ export function SelectConsultationDocumentsDialog({
   selectedDocumentSpecificationIds,
   isLoading = false,
   isSaving = false,
+  isReadOnly = false,
+  initialAreaId,
+  initialTopicId,
   onOpenChange,
   onSave,
 }: SelectConsultationDocumentsDialogProps) {
@@ -68,9 +74,9 @@ export function SelectConsultationDocumentsDialog({
     if (!open) return
     setDraftSelection(new Set(selectedDocumentSpecificationIds))
     setSearch('')
-    setAreaId('all')
-    setTopicId('all')
-  }, [open, selectedDocumentSpecificationIds])
+    setAreaId(initialAreaId ?? 'all')
+    setTopicId(initialTopicId ?? 'all')
+  }, [initialAreaId, initialTopicId, open, selectedDocumentSpecificationIds])
 
   const newDocumentSpecificationCount = useMemo(
     () =>
@@ -138,7 +144,7 @@ export function SelectConsultationDocumentsDialog({
           <div className='relative'>
             <Icon
               name='search'
-              className='pointer-events-none absolute top-2.5 left-3 size-4 text-muted-foreground'
+              className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground'
             />
             <Input
               aria-label='Buscar documentos'
@@ -146,6 +152,7 @@ export function SelectConsultationDocumentsDialog({
               onChange={(event) => setSearch(event.target.value)}
               placeholder='Buscar documento pelo nome'
               className='h-11 pl-10'
+              readOnly={isReadOnly}
             />
           </div>
 
@@ -160,6 +167,7 @@ export function SelectConsultationDocumentsDialog({
                   setAreaId(value)
                   setTopicId('all')
                 }}
+                disabled={isReadOnly}
               >
                 <SelectTrigger
                   id='consultation-area-filter'
@@ -191,7 +199,7 @@ export function SelectConsultationDocumentsDialog({
               <Select
                 value={topicId}
                 onValueChange={setTopicId}
-                disabled={areaId === 'all'}
+                disabled={isReadOnly || areaId === 'all'}
               >
                 <SelectTrigger
                   id='consultation-topic-filter'
@@ -253,7 +261,7 @@ export function SelectConsultationDocumentsDialog({
                     <Checkbox
                       id={`consultation-document-${option.documentSpecificationId}`}
                       checked={isSelected}
-                      disabled={isLocked}
+                      disabled={isReadOnly || isLocked}
                       onCheckedChange={(checked) =>
                         toggleSelection(option.documentSpecificationId, checked)
                       }
@@ -316,7 +324,7 @@ export function SelectConsultationDocumentsDialog({
               size='sm'
               className='rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90'
               onClick={() => onSave([...draftSelection])}
-              disabled={isSaving || !hasSelectionChanges}
+              disabled={isReadOnly || isSaving || !hasSelectionChanges}
               aria-busy={isSaving}
             >
               <Icon name='plus' />

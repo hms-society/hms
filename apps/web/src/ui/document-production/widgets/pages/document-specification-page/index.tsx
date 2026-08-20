@@ -226,16 +226,6 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
                     </SelectContent>
                   </Select>
                 </div>
-                <div className='space-y-1.5'>
-                  <Label>Obrigatoriedade</Label>
-                  <SwitchField
-                    checked={documentSpecificationPage.isRequired}
-                    label='Documento obrigatório'
-                    offLabel='Opcional'
-                    onLabel='Obrigatório'
-                    onToggle={documentSpecificationPage.toggleRequired}
-                  />
-                </div>
               </div>
               {application.scope === 'legal_context' && (
                 <div className='space-y-4 border-t px-4 py-4'>

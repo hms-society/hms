@@ -30,6 +30,14 @@ function hasNewerVersion(
   )
 }
 
+function hasFinishedGeneration(document: ConsultationDocumentListItem | undefined) {
+  return (
+    document?.generationStatus === 'completed' ||
+    document?.generationStatus === 'failed' ||
+    document?.generationStatus === 'cancelled'
+  )
+}
+
 type GenerationContext = {
   readonly attemptId: string
   readonly documentIds: readonly string[]
@@ -153,12 +161,10 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
       queryClient.getQueryData<readonly ConsultationDocumentListItem[]>(listKey)
     const completed = context.documentIds.filter((documentId) => {
       const current = pendingRef.current[documentId]
+      const document = documents?.find((item) => item.id === documentId)
       return (
         current?.attemptId === context.attemptId &&
-        hasNewerVersion(
-          documents?.find((item) => item.id === documentId),
-          current,
-        )
+        (hasFinishedGeneration(document) || hasNewerVersion(document, current))
       )
     })
     const remaining = context.documentIds.filter((id) => !completed.includes(id))

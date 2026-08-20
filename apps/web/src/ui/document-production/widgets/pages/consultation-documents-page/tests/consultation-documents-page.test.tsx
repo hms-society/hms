@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { DocumentGenerationStatus } from '@hms/core/document-production/domain/structures'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildConsultationDocumentVersionPath, ROUTES } from '@/constants/routes'
@@ -10,6 +11,13 @@ import { useConsultationDocumentSelectionQuery } from '../../../../hooks/use-con
 import { useReplaceConsultationDocumentSelectionAction } from '../../../../hooks/use-replace-consultation-document-selection-action'
 import { useGenerateConsultationDocumentAction } from '../../../../hooks/use-generate-consultation-document-action'
 import { useGenerateConsultationDocumentsAction } from '../../../../hooks/use-generate-consultation-documents-action'
+import { useConfirmConsultationDocumentPackageAction } from '../../../../hooks/use-confirm-consultation-document-package-action'
+
+const useConsultationMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/ui/consultation/hooks/use-consultation', () => ({
+  useConsultation: () => useConsultationMock(),
+}))
 
 vi.mock('../../../../hooks/use-consultation-document-selection-query', () => ({
   useConsultationDocumentSelectionQuery: vi.fn(),
@@ -35,6 +43,9 @@ vi.mock('../../../../hooks/use-generate-consultation-document-action', () => ({
 }))
 vi.mock('../../../../hooks/use-generate-consultation-documents-action', () => ({
   useGenerateConsultationDocumentsAction: vi.fn(),
+}))
+vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', () => ({
+  useConfirmConsultationDocumentPackageAction: vi.fn(),
 }))
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   Anchor: ({ children, route, params, ...props }: AnchorProps) => {
@@ -70,6 +81,9 @@ const useGenerateConsultationDocumentActionMock = vi.mocked(
 )
 const useGenerateConsultationDocumentsActionMock = vi.mocked(
   useGenerateConsultationDocumentsAction,
+)
+const useConfirmConsultationDocumentPackageActionMock = vi.mocked(
+  useConfirmConsultationDocumentPackageAction,
 )
 
 function createVersion(
@@ -157,6 +171,12 @@ describe('ConsultationDocumentsPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    useConsultationMock.mockReturnValue({
+      consultation: {
+        status: 'pending',
+        attendanceFinalizedAt: new Date('2026-08-19T12:00:00.000Z'),
+      },
+    })
     useConsultationDocumentsQueryMock.mockReturnValue(
       createQueryResult({
         data: [
@@ -183,6 +203,12 @@ describe('ConsultationDocumentsPage', () => {
               }),
             ],
           },
+          {
+            id: 'document-5',
+            title: 'Documento com falha',
+            generationStatus: DocumentGenerationStatus.Failed,
+            versions: [],
+          },
         ],
       }) as never,
     )
@@ -203,6 +229,11 @@ describe('ConsultationDocumentsPage', () => {
     useGenerateConsultationDocumentsActionMock.mockReturnValue(
       createBatchAction() as never,
     )
+    useConfirmConsultationDocumentPackageActionMock.mockReturnValue({
+      confirmDocumentPackage: vi.fn().mockResolvedValue(undefined),
+      error: null,
+      isConfirming: false,
+    } as never)
   })
 
   it('renders the real list composition with status matrix, current chip and actions', () => {
@@ -224,6 +255,8 @@ describe('ConsultationDocumentsPage', () => {
     expect(screen.getAllByText('Rejeitado')).not.toHaveLength(0)
     expect(screen.getAllByText('Vigente')).not.toHaveLength(0)
     expect(screen.getByRole('button', { name: 'Gerar documento' })).toBeDefined()
+    expect(screen.getByText('Falha na geração')).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeDefined()
     expect(screen.getByRole('link', { name: 'Revisar' }).getAttribute('href')).toBe(
       '/consultas/consultation-1/documentos/document-3/versoes/version-3',
     )
@@ -243,7 +276,6 @@ describe('ConsultationDocumentsPage', () => {
       documentId: 'document-1',
     })
     expect(screen.queryByRole('button', { name: 'Gerar documentos' })).toBeNull()
-    expect(screen.queryByText(/bloqueia|obrigatório|confirmar pacote/i)).toBeNull()
   })
 
   it('keeps document selection available without a batch generation CTA', () => {
@@ -251,6 +283,26 @@ describe('ConsultationDocumentsPage', () => {
 
     expect(screen.queryByRole('button', { name: 'Gerar documentos' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Selecionar documentos' })).toBeDefined()
+  })
+
+  it('keeps the document package read-only when the consultation is not pending', () => {
+    useConsultationMock.mockReturnValue({
+      consultation: {
+        status: 'completed',
+        attendanceFinalizedAt: new Date('2026-08-19T12:00:00.000Z'),
+      },
+    })
+
+    renderPage()
+
+    expect(screen.getByRole('button', { name: 'Selecionar documentos' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByRole('button', { name: 'Gerar documento' })).toHaveProperty(
+      'disabled',
+      true,
+    )
   })
 
   it('locks only versioned package documents and submits additions', () => {
@@ -265,7 +317,6 @@ describe('ConsultationDocumentsPage', () => {
               name: 'Procuração',
               description: 'Representação contratual.',
               application: { scope: 'global', moment: 'consultation' },
-              isRequired: false,
               status: 'available',
               selected: true,
               hasVersion: true,
@@ -275,7 +326,6 @@ describe('ConsultationDocumentsPage', () => {
               name: 'Termo de ciência',
               description: 'Consentimento para tratamento de dados.',
               application: { scope: 'global', moment: 'consultation' },
-              isRequired: false,
               status: 'available',
               selected: true,
               hasVersion: false,
@@ -285,7 +335,6 @@ describe('ConsultationDocumentsPage', () => {
               name: 'Declaração de pobreza',
               description: 'Pedido de gratuidade da justiça.',
               application: { scope: 'global', moment: 'consultation' },
-              isRequired: false,
               status: 'available',
               selected: false,
             },
@@ -347,7 +396,6 @@ describe('ConsultationDocumentsPage', () => {
               name: 'Procuração',
               description: 'Representação contratual.',
               application: { scope: 'global', moment: 'consultation' },
-              isRequired: false,
               status: 'available',
               selected: true,
               hasVersion: false,

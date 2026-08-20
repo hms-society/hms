@@ -4,12 +4,14 @@ import type {
 } from '@hms/core/consultation/domain/structures'
 import { DocumentGenerationStatus } from '@hms/core/document-production/domain/structures'
 import { useMemo, useState } from 'react'
+import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
 import { useConsultationDocumentsQuery } from '../../../hooks/use-consultation-documents-query'
 import { useCancelConsultationDocumentGenerationAction } from '../../../hooks/use-cancel-consultation-document-generation-action'
 import { useGenerateConsultationDocumentAction } from '../../../hooks/use-generate-consultation-document-action'
 import { useGenerateConsultationDocumentsAction } from '../../../hooks/use-generate-consultation-documents-action'
 import { useConsultationDocumentSelectionQuery } from '../../../hooks/use-consultation-document-selection-query'
 import { useReplaceConsultationDocumentSelectionAction } from '../../../hooks/use-replace-consultation-document-selection-action'
+import { useConfirmConsultationDocumentPackageAction } from '../../../hooks/use-confirm-consultation-document-package-action'
 
 export type ConsultationDocumentsPageProps = {
   consultationId: string
@@ -20,6 +22,7 @@ export type ConsultationDocumentStatus =
   | 'in_review'
   | 'rejected'
   | 'approved'
+  | 'failed'
   | 'generating'
 
 export type ConsultationDocumentViewModel = {
@@ -64,6 +67,13 @@ function getDocumentStatus(
   generationStatus: ConsultationDocumentViewModel['document']['generationStatus'],
   isOptimisticallyGenerating: boolean,
 ): Pick<ConsultationDocumentViewModel, 'status' | 'statusLabel'> {
+  if (generationStatus === DocumentGenerationStatus.Failed) {
+    return {
+      status: 'failed',
+      statusLabel: 'Falha na geração',
+    }
+  }
+
   const isGenerating =
     isOptimisticallyGenerating ||
     generationStatus === DocumentGenerationStatus.Pending ||
@@ -94,12 +104,22 @@ function getDocumentStatus(
 export function useConsultationDocumentsPage({
   consultationId,
 }: ConsultationDocumentsPageProps) {
-  const documentsQuery = useConsultationDocumentsQuery(consultationId)
-  const selectionQuery = useConsultationDocumentSelectionQuery(consultationId)
+  const { consultation } = useConsultation(consultationId)
+  const isConsultationPending = consultation?.status === 'pending'
+  const isReadOnly = !isConsultationPending
+  const isAttendanceFinalized = Boolean(consultation?.attendanceFinalizedAt)
+  const documentsQuery = useConsultationDocumentsQuery(consultationId, {
+    enabled: isAttendanceFinalized,
+  })
+  const selectionQuery = useConsultationDocumentSelectionQuery(consultationId, {
+    enabled: isAttendanceFinalized,
+  })
   const selectionAction = useReplaceConsultationDocumentSelectionAction(consultationId)
   const cancellationAction = useCancelConsultationDocumentGenerationAction(consultationId)
   const individualGeneration = useGenerateConsultationDocumentAction(consultationId)
   const batchGeneration = useGenerateConsultationDocumentsAction(consultationId)
+  const packageConfirmationAction =
+    useConfirmConsultationDocumentPackageAction(consultationId)
   const [isSelectionOpen, setIsSelectionOpen] = useState(false)
   const [cancelledDocumentIds, setCancelledDocumentIds] = useState<ReadonlySet<string>>(
     new Set(),
@@ -152,6 +172,8 @@ export function useConsultationDocumentsPage({
           isTimedOut:
             timedOutDocumentIds.has(document.id) &&
             status.status !== 'generating' &&
+            document.generationStatus !== DocumentGenerationStatus.Failed &&
+            document.generationStatus !== DocumentGenerationStatus.Cancelled &&
             !cancelledDocumentIds.has(document.id),
         }
       }),
@@ -165,6 +187,8 @@ export function useConsultationDocumentsPage({
   )
 
   function handleGenerateDocument(documentId: string) {
+    if (isReadOnly) return Promise.resolve()
+
     setCancelledDocumentIds((ids) => {
       if (!ids.has(documentId)) return ids
       const next = new Set(ids)
@@ -175,11 +199,15 @@ export function useConsultationDocumentsPage({
   }
 
   function handleGenerateDocuments() {
+    if (isReadOnly) return Promise.resolve()
+
     setCancelledDocumentIds(new Set())
     return batchGeneration.generateDocuments()
   }
 
   async function handleCancelDocumentGeneration(documentId: string) {
+    if (isReadOnly) return
+
     await cancellationAction.cancelDocumentGeneration(documentId)
     setCancelledDocumentIds((ids) => new Set(ids).add(documentId))
   }
@@ -193,19 +221,34 @@ export function useConsultationDocumentsPage({
   }
 
   async function handleSaveSelection(documentSpecificationIds: readonly string[]) {
+    if (isReadOnly) return
+
     await selectionAction.replaceSelection(documentSpecificationIds)
     setIsSelectionOpen(false)
   }
 
+  async function handleConfirmPackage() {
+    if (isReadOnly) return
+
+    await packageConfirmationAction.confirmDocumentPackage()
+  }
+
   return {
+    consultation,
     documents,
     selection: selectionQuery.data,
+    isReadOnly,
+    isConsultationPending,
     isSelectionLoading: selectionQuery.isLoading,
     isSelectionOpen,
     setIsSelectionOpen,
     isSelectionSaving: selectionAction.isReplacing,
     selectionError: selectionQuery.error ?? selectionAction.error,
     isLoading: documentsQuery.isLoading,
+    isAttendanceFinalized,
+    isPackageConfirmed: Boolean(selectionQuery.data?.confirmedAt),
+    isPackageConfirming: packageConfirmationAction.isConfirming,
+    packageConfirmationError: packageConfirmationAction.error,
     isError: documentsQuery.isError,
     isBatchGenerating:
       batchGeneration.isGeneratingDocuments ||
@@ -218,6 +261,7 @@ export function useConsultationDocumentsPage({
     handleRetry,
     handleRefresh,
     handleSaveSelection,
+    handleConfirmPackage,
   }
 }
 

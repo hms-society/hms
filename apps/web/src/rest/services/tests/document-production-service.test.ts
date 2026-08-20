@@ -36,7 +36,6 @@ describe('DocumentProductionService', () => {
       name: 'Procuração',
       description: 'Representação',
       application: { scope: 'global' as const, moment: 'consultation' as const },
-      isRequired: true,
     }
 
     await expect(service.createDocumentSpecification(request)).resolves.toBe(response)
@@ -57,7 +56,6 @@ describe('DocumentProductionService', () => {
       description: 'Representação atualizada',
       status: 'unavailable' as const,
       application: { scope: 'global' as const, moment: 'consultation' as const },
-      isRequired: false,
     }
     const template = {
       content: { type: 'doc' as const, content: [{ type: 'paragraph' as const }] },

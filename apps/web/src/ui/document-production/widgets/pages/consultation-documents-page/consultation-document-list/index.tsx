@@ -8,6 +8,7 @@ export type ConsultationDocumentListProps = {
   onCancelDocumentGeneration: (documentId: string) => Promise<unknown>
   isCancellingDocument: boolean
   onRefreshDocument: () => Promise<unknown>
+  isReadOnly: boolean
 }
 
 export const ConsultationDocumentList = ({
@@ -16,6 +17,7 @@ export const ConsultationDocumentList = ({
   onCancelDocumentGeneration,
   isCancellingDocument,
   onRefreshDocument,
+  isReadOnly,
 }: ConsultationDocumentListProps) => (
   <TableSurface ariaLabel='Documentos da consulta' className='border-0 p-0 shadow-none'>
     <ul className='divide-y divide-border'>
@@ -27,6 +29,7 @@ export const ConsultationDocumentList = ({
           onCancelDocumentGeneration={onCancelDocumentGeneration}
           isCancellingDocument={isCancellingDocument}
           onRefreshDocument={onRefreshDocument}
+          isReadOnly={isReadOnly}
         />
       ))}
     </ul>

@@ -15,7 +15,12 @@ export const ConsultationDocumentsPage = ({
   consultationId,
 }: ConsultationDocumentsPageProps) => {
   const {
+    consultation,
     documents,
+    isAttendanceFinalized,
+    isReadOnly,
+    isPackageConfirmed,
+    isPackageConfirming,
     selection,
     isSelectionLoading,
     isSelectionOpen,
@@ -29,7 +34,25 @@ export const ConsultationDocumentsPage = ({
     handleRetry,
     handleRefresh,
     handleSaveSelection,
+    handleConfirmPackage,
   } = useConsultationDocumentsPage({ consultationId })
+
+  if (!isAttendanceFinalized) {
+    return (
+      <main className='mx-auto flex w-full flex-col'>
+        <section className='rounded-xl border border-border bg-card px-4 py-8 text-center shadow-sm sm:px-5'>
+          <Icon name='lock' className='mx-auto h-5 w-5 text-muted-foreground' />
+          <h1 className='mt-3 font-serif text-lg text-foreground'>
+            Documentos bloqueados
+          </h1>
+          <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
+            Finalize a ficha de atendimento para liberar o pacote de documentos da
+            consulta.
+          </p>
+        </section>
+      </main>
+    )
+  }
 
   return (
     <main className='mx-auto flex w-full flex-col'>
@@ -43,15 +66,47 @@ export const ConsultationDocumentsPage = ({
               Acompanhe a produção, a revisão e o histórico dos documentos vinculados.
             </p>
           </div>
-          <div className='flex flex-wrap justify-end'>
+          <div className='flex flex-wrap justify-end gap-3'>
             <Button
               type='button'
               variant='outline'
               size='sm'
               onClick={() => setIsSelectionOpen(true)}
+              disabled={isReadOnly}
+              title={
+                isReadOnly
+                  ? 'Consulta encerrada; pacote em modo somente leitura.'
+                  : undefined
+              }
             >
               <Icon name='list-plus' />
               Selecionar documentos
+            </Button>
+            <Button
+              type='button'
+              size='sm'
+              disabled={
+                isReadOnly ||
+                isPackageConfirmed ||
+                isPackageConfirming ||
+                documents.length === 0 ||
+                documents.some((item) => item.status !== 'approved')
+              }
+              onClick={() => void handleConfirmPackage()}
+              title={
+                isReadOnly
+                  ? 'Consulta encerrada; pacote em modo somente leitura.'
+                  : isPackageConfirmed
+                    ? 'Pacote já confirmado.'
+                    : 'Aprove todos os documentos para confirmar o pacote.'
+              }
+            >
+              <Icon name='check' />
+              {isPackageConfirmed
+                ? 'Pacote confirmado'
+                : isPackageConfirming
+                  ? 'Confirmando...'
+                  : 'Confirmar pacote'}
             </Button>
           </div>
         </header>
@@ -81,6 +136,7 @@ export const ConsultationDocumentsPage = ({
               onCancelDocumentGeneration={handleCancelDocumentGeneration}
               isCancellingDocument={isCancellingDocument}
               onRefreshDocument={handleRefresh}
+              isReadOnly={isReadOnly}
             />
           )}
         </div>
@@ -93,6 +149,9 @@ export const ConsultationDocumentsPage = ({
         }
         isLoading={isSelectionLoading}
         isSaving={isSelectionSaving}
+        isReadOnly={isReadOnly}
+        initialAreaId={consultation?.legalAreaId}
+        initialTopicId={consultation?.legalTopicId}
         onOpenChange={setIsSelectionOpen}
         onSave={(ids) => void handleSaveSelection(ids)}
       />

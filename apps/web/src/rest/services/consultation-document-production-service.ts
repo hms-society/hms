@@ -62,6 +62,14 @@ export const ConsultationDocumentProductionService = (
       )
     },
 
+    confirmDocumentPackage(consultationId) {
+      return restClient.patch<{
+        readonly id: string
+        readonly confirmedAt: Date
+        readonly confirmedByCollaboratorId: string
+      }>(`/consultations/${consultationId}/documents/package/confirm`)
+    },
+
     generateDocument(consultationId, documentId, request) {
       return restClient.post<ConsultationDocumentGeneration>(
         `/consultations/${consultationId}/documents/${documentId}/generations`,

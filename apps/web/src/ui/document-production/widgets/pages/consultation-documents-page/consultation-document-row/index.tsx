@@ -10,6 +10,7 @@ export type ConsultationDocumentRowProps = {
   onCancelDocumentGeneration: (documentId: string) => Promise<unknown>
   isCancellingDocument: boolean
   onRefreshDocument: () => Promise<unknown>
+  isReadOnly: boolean
 }
 
 export const ConsultationDocumentRow = ({
@@ -18,6 +19,7 @@ export const ConsultationDocumentRow = ({
   onCancelDocumentGeneration,
   isCancellingDocument,
   onRefreshDocument,
+  isReadOnly,
 }: ConsultationDocumentRowProps) => (
   <li className='flex flex-col gap-2 border-b border-border/80 px-1 py-3 last:border-b-0 sm:px-2'>
     <div className='flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between'>
@@ -47,7 +49,7 @@ export const ConsultationDocumentRow = ({
               type='button'
               variant='outline'
               size='sm'
-              disabled={isCancellingDocument}
+              disabled={isReadOnly || isCancellingDocument}
               aria-busy={isCancellingDocument}
               onClick={() => void onCancelDocumentGeneration(item.document.id)}
             >
@@ -55,20 +57,20 @@ export const ConsultationDocumentRow = ({
               Cancelar geração
             </Button>
           </>
-        ) : item.status === 'not_generated' ? (
+        ) : item.status === 'not_generated' || item.status === 'failed' ? (
           <Button
             type='button'
             variant='brand'
             size='sm'
-            disabled={item.isGenerating}
+            disabled={isReadOnly || item.isGenerating}
             onClick={() => void onGenerateDocument(item.document.id)}
           >
-            <Icon name='list-plus' />
-            Gerar documento
+            <Icon name={item.status === 'failed' ? 'refresh-cw' : 'list-plus'} />
+            {item.status === 'failed' ? 'Tentar novamente' : 'Gerar documento'}
           </Button>
         ) : item.latestVersion ? (
           <>
-            {item.status === 'in_review' && (
+            {item.status === 'in_review' && !isReadOnly && (
               <Button asChild variant='brand' size='sm'>
                 <Anchor
                   route='consultationDocumentVersion'
@@ -108,6 +110,7 @@ export const ConsultationDocumentRow = ({
           type='button'
           variant='outline'
           size='xs'
+          disabled={isReadOnly}
           onClick={() => void onRefreshDocument()}
         >
           <Icon name='refresh-cw' />

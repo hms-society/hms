@@ -13,6 +13,7 @@ import { useEffect, useRef } from 'react'
 export type DocumentEditorProps = {
   content: DocumentTemplateContent
   onChange: (content: DocumentTemplateContent) => void
+  editable?: boolean
   onEditorReady?: (insert: (name: string) => void) => void
   onFocus?: () => void
 }
@@ -44,12 +45,14 @@ const ContractLink = Link.extend({
 export function useDocumentEditor({
   content,
   onChange,
+  editable = true,
   onEditorReady,
   onFocus,
 }: DocumentEditorProps) {
   const lastEmittedContent = useRef<string | null>(null)
   const editor = useEditor({
     immediatelyRender: false,
+    editable,
     content: content as never,
     extensions: [
       StarterKit.configure({
@@ -122,6 +125,13 @@ export function useDocumentEditor({
         editor.commands.setContent(content as never, { emitUpdate: false })
     },
     [content, editor],
+  )
+
+  useEffect(
+    function syncEditorEditableState() {
+      editor?.setEditable(editable)
+    },
+    [editable, editor],
   )
 
   function applyLink() {
