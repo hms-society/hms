@@ -39,6 +39,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Reset staging database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STG }}
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DROP SCHEMA IF EXISTS public CASCADE;
+          CREATE SCHEMA public;
+          GRANT ALL ON SCHEMA public TO postgres, service_role;
+          GRANT USAGE ON SCHEMA public TO anon, authenticated;
+          SQL
+
       - name: Apply staging database migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STG }}
