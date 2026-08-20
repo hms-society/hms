@@ -19,7 +19,7 @@ export const collaboratorListQuerySchema = z
     jobTitle: optionalNormalizedTextSchema,
     status: userStatusSchema.optional(),
     page: pageSchema,
-    limit: pageSizeSchema.optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
     pageSize: pageSizeSchema,
   })
   .strict()

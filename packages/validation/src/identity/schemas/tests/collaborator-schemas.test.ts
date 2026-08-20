@@ -14,7 +14,6 @@ describe('Collaborator schemas', () => {
       jobTitle: 'Advogada',
       page: 1,
       pageSize: 20,
-      limit: 20,
     })
 
     expect(
