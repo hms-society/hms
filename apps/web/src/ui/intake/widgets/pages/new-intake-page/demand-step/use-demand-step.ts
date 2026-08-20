@@ -4,6 +4,8 @@ import { useFormContext } from 'react-hook-form'
 import { useLegalAreasQuery } from './use-legal-areas-query'
 import { useLegalTopicsQuery } from './use-legal-topics-query'
 
+export const NO_LEGAL_AREA_VALUE = '__no_legal_area__'
+
 export function useDemandStep() {
   const form = useFormContext<IntakeFormData>()
   const selectedLegalAreaId = form.watch('legalAreaId')
@@ -13,7 +15,10 @@ export function useDemandStep() {
     useLegalTopicsQuery(selectedLegalAreaId)
 
   function handleLegalAreaChange(value: string) {
-    form.setValue('legalAreaId', value, { shouldDirty: true, shouldValidate: true })
+    form.setValue('legalAreaId', value === NO_LEGAL_AREA_VALUE ? '' : value, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
     form.setValue('legalTopicId', '', { shouldDirty: true })
   }
 

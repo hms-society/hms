@@ -67,5 +67,9 @@ export const IntakeService = (restClient: RestClient): IntakeRestService => {
     closeIntakeWithoutContract(intakeId, request) {
       return restClient.post<Intake>(`/intakes/${intakeId}/close`, request)
     },
+
+    updateIntake(intakeId, request) {
+      return restClient.patch<Intake>(`/intakes/${intakeId}`, request)
+    },
   }
 }

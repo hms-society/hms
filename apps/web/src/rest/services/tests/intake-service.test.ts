@@ -95,4 +95,35 @@ describe('IntakeService', () => {
     )
     expect(result).toBe(response)
   })
+
+  it('updates editable intake fields', async () => {
+    const response = new RestResponse({ body: {} as never })
+    const patch = vi.fn<RestClient['patch']>().mockResolvedValue(response)
+    const service = IntakeService({ patch } as unknown as RestClient)
+
+    const result = await service.updateIntake('intake-id', {
+      expectedVersion: 2,
+      updatedBy: 'user-id',
+      responsibleId: 'responsible-id',
+      origin: 'referral',
+      contactChannel: 'email',
+      legalAreaId: 'area-id',
+      legalTopicId: 'topic-id',
+      urgency: 'urgent',
+      demandNotes: 'Demanda revisada',
+    })
+
+    expect(patch).toHaveBeenCalledWith('/intakes/intake-id', {
+      expectedVersion: 2,
+      updatedBy: 'user-id',
+      responsibleId: 'responsible-id',
+      origin: 'referral',
+      contactChannel: 'email',
+      legalAreaId: 'area-id',
+      legalTopicId: 'topic-id',
+      urgency: 'urgent',
+      demandNotes: 'Demanda revisada',
+    })
+    expect(result).toBe(response)
+  })
 })

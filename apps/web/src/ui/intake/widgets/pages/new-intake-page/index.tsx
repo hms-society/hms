@@ -52,7 +52,7 @@ export const NewIntakePage = () => {
   return (
     <FormProvider {...form}>
       <form
-        className='mx-auto flex w-full max-w-5xl flex-col gap-5 pt-20 pb-12 px-4 sm:px-6'
+        className='flex w-full flex-col gap-5 pt-20 pb-12 px-4 sm:px-6'
         onSubmit={handleSubmit}
         noValidate
       >
@@ -87,12 +87,7 @@ export const NewIntakePage = () => {
               <Icon name='door-open' />
               Encerrar atendimento
             </Button>
-          ) : (
-            <span className='inline-flex w-fit items-center gap-1.5 rounded-pill bg-secondary px-2.5 py-1.5 text-[11px] font-semibold text-secondary-foreground'>
-              <Icon name='list-checks' className='size-3.5 text-primary' />
-              Etapa {currentStep} de 3
-            </span>
-          )}
+          ) : null}
         </header>
 
         <ol

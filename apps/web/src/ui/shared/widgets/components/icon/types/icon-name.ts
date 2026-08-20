@@ -82,6 +82,7 @@ export type IconName =
   | 'alert-triangle'
   | 'alert-circle'
   | 'help-circle'
+  | 'sliders-horizontal'
   | 'underline'
   | 'sparkles'
   | 'check-circle-2'

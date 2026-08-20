@@ -10,6 +10,7 @@ import {
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useRegisterIntakeAction } from './use-register-intake-action'
 
@@ -25,20 +26,14 @@ const DEFAULT_VALUES: IntakeFormData = {
   meetingMode: 'virtual',
   virtualChannel: 'whatsapp',
   location: '',
-  lawyer: 'epaminondas',
+  lawyer: undefined,
   date: new Date(2026, 6, 8),
   time: '10:00',
   closureReason: undefined,
   closureNotes: '',
 }
 
-const DEMAND_FIELDS = [
-  'origin',
-  'contactChannel',
-  'legalAreaId',
-  'legalTopicId',
-  'urgency',
-] as const
+const DEMAND_FIELDS = ['origin', 'contactChannel', 'urgency'] as const
 
 const STEP_CONTENT = {
   1: {
@@ -57,6 +52,7 @@ const STEP_CONTENT = {
 
 export function useNewIntake() {
   const { user } = useAuthContext()
+  const { navigateTo } = useNavigation()
   const { error, isRegisteringIntake, registerIntake } = useRegisterIntakeAction()
   const [currentStep, setCurrentStep] = useState(1)
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false)
@@ -79,12 +75,10 @@ export function useNewIntake() {
     const request = {
       clientId: data.clientId,
       responsibleId: user.id,
-      createdBy: user.id,
-      updatedBy: user.id,
       origin: data.origin,
       contactChannel: data.contactChannel,
-      legalAreaId: data.legalAreaId,
-      legalTopicId: data.legalTopicId,
+      ...(data.legalAreaId ? { legalAreaId: data.legalAreaId } : {}),
+      ...(data.legalTopicId ? { legalTopicId: data.legalTopicId } : {}),
       urgency: data.urgency,
       demandNotes: data.notes,
     }
@@ -134,6 +128,7 @@ export function useNewIntake() {
     }
     form.reset(DEFAULT_VALUES)
     setCurrentStep(1)
+    await navigateTo('intakes')
   }
 
   function handleSubmit(event?: BaseSyntheticEvent) {
