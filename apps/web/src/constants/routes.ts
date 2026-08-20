@@ -3,6 +3,7 @@ export const ROUTES = {
   login: '/login',
   home: '/home',
   intakes: '/intakes',
+  intakeDetails: '/intakes/$intakeId',
   newIntake: '/intakes/novo',
   requestPasswordReset: '/pedir-redefinir-senha',
   resetPassword: '/redefinir-senha',
@@ -12,6 +13,7 @@ export const ROUTES = {
   lawyerSchedule: '/agenda',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
+  consultation: '/consultas/$consultationId',
   lawyerCommunication: '/advogado/comunicacao',
   clients: '/clientes',
   collaborators: '/colaboradores',
@@ -31,6 +33,7 @@ export const ROUTES = {
   newDocumentSpecification: '/modelos-de-documentos/novo',
   documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
   consultationDocuments: '/consultas/$consultationId/documentos',
+  consultationAttendanceForm: '/consultas/$consultationId/ficha-atendimento',
   consultationDocumentVersion:
     '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId',
 } as const
@@ -40,6 +43,10 @@ export type RoutePath = (typeof ROUTES)[RouteName]
 
 export function buildConsultationDocumentsPath(consultationId: string): string {
   return ROUTES.consultationDocuments.replace('$consultationId', consultationId)
+}
+
+export function buildConsultationPath(consultationId: string): string {
+  return ROUTES.consultation.replace('$consultationId', consultationId)
 }
 
 export function buildConsultationDocumentVersionPath(params: {

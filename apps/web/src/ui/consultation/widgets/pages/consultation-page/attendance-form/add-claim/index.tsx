@@ -4,13 +4,13 @@ import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 import { legalClaimSchema } from '@hms/validation/consultation'
 
-export interface ClaimToEdit {
+export type ClaimToEdit = {
   id: string
   title: string
   summary: string
 }
 
-interface AddClaimDialogProps {
+export type AddClaimDialogProps = {
   isOpen: boolean
   onClose: () => void
   onAdd: (claim: { id?: string; title: string; summary: string }) => void
@@ -19,12 +19,12 @@ interface AddClaimDialogProps {
 
 const MAX_SUMMARY_LENGTH = 1000
 
-export function AddClaimDialog({
+export const AddClaimDialog = ({
   isOpen,
   onClose,
   onAdd,
   claimToEdit,
-}: AddClaimDialogProps) {
+}: AddClaimDialogProps) => {
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [error, setError] = useState('')
@@ -114,7 +114,9 @@ export function AddClaimDialog({
             }}
             placeholder='Ex: Rescisão indireta do contrato de trabalho'
             className={`h-9 rounded-xl text-xs ${
-              error ? 'border-rose-500 focus-visible:ring-rose-500' : 'border-[#d4ceca]'
+              error
+                ? 'border-rose-500 focus-visible:border-rose-500 focus-visible:ring-rose-500/20'
+                : 'border-[#d4ceca]'
             }`}
           />
           {error && <p className='text-[11px] text-rose-500 font-medium'>{error}</p>}
@@ -143,7 +145,7 @@ export function AddClaimDialog({
             onChange={(e) => setSummary(e.target.value)}
             placeholder='Breve justificativa do pedido'
             rows={1}
-            className='w-full min-h-[38px] p-2.5 rounded-xl text-xs border border-[#d4ceca] overflow-hidden transition-all focus:outline-none focus:ring-2 focus:border-slate-400 focus:ring-slate-400 bg-white resize-none'
+            className='w-full min-h-[38px] p-2.5 rounded-xl text-xs border border-[#d4ceca] overflow-hidden transition-all focus:outline-none focus:ring-2 focus:border-ring focus:ring-ring/20 bg-white resize-none'
           />
         </div>
 

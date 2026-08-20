@@ -3,18 +3,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ConsultationDetails } from '../consultation-details'
-import { useConsultation } from '../use-consultation'
+import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
 
-vi.mock('../use-consultation', () => ({
+vi.mock('@/ui/consultation/hooks/use-consultation', () => ({
   useConsultation: vi.fn(),
 }))
 
 const useConsultationMock = vi.mocked(useConsultation)
 
-const handleStartConsultation = vi.fn().mockResolvedValue(undefined)
 const handleMarkNoShow = vi.fn().mockResolvedValue(undefined)
 const handleRescheduleConsultation = vi.fn().mockResolvedValue(undefined)
-const handleBack = vi.fn()
 const handleContinueForm = vi.fn()
 
 type ControllerOverrides = Partial<ReturnType<typeof useConsultation>>
@@ -60,16 +58,17 @@ function useConsultationTestController(): ReturnType<typeof useConsultation> {
     isLoading: false,
     isError: false,
     error: null,
-    isStarting: false,
     isMarkingNoShow: false,
     isRescheduling: false,
     isCompleting: false,
-    isUpdatingQualification: false,
-    startConsultation: handleStartConsultation,
     markNoShow: handleMarkNoShow,
     rescheduleConsultation: handleRescheduleConsultation,
-    updateQualification: vi.fn(),
     completeConsultation: vi.fn(),
+    finalizeAttendance: vi.fn(),
+    isFinalizingAttendance: false,
+    editAttendance: vi.fn(),
+    isEditingAttendance: false,
+    editAttendanceError: null,
     ...controllerOverrides,
   }
 }
@@ -83,7 +82,6 @@ function renderConsultationDetailsPage() {
     <QueryClientProvider client={queryClient}>
       <ConsultationDetails
         consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
-        onBack={handleBack}
         onContinueForm={handleContinueForm}
       />
     </QueryClientProvider>,
@@ -119,24 +117,11 @@ describe('ConsultationDetails', () => {
     expect(screen.getByText('Não informado')).toBeTruthy()
   })
 
-  it('delegates backward and continue form navigation actions', () => {
+  it('delegates continue form navigation action', () => {
     renderConsultationDetailsPage()
-
-    fireEvent.click(screen.getByRole('button', { name: /Voltar/i }))
-    expect(handleBack).toHaveBeenCalledOnce()
 
     fireEvent.click(screen.getByRole('button', { name: /Continuar ficha/i }))
     expect(handleContinueForm).toHaveBeenCalledOnce()
-  })
-
-  it('delegates consultation start action', () => {
-    renderConsultationDetailsPage()
-
-    fireEvent.click(screen.getByRole('button', { name: /Iniciar consulta/i }))
-
-    expect(handleStartConsultation).toHaveBeenCalledWith(
-      'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-    )
   })
 
   it('delegates mark no-show action', () => {

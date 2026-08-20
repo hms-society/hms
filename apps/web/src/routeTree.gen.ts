@@ -34,6 +34,7 @@ import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de
 import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
 import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
 import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
 import { Route as ClientesNovoRouteImport } from './routes/clientes/novo'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
@@ -43,9 +44,13 @@ import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-d
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
+import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
+import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
+import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
+import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
 
 const TriagemRouteRoute = TriagemRouteRouteImport.update({
   id: '/triagem',
@@ -175,6 +180,11 @@ const IntakesNovoRoute = IntakesNovoRouteImport.update({
   path: '/novo',
   getParentRoute: () => IntakesRouteRoute,
 } as any)
+const IntakesIntakeIdRoute = IntakesIntakeIdRouteImport.update({
+  id: '/$intakeId',
+  path: '/$intakeId',
+  getParentRoute: () => IntakesRouteRoute,
+} as any)
 const ColaboradoresColaboradorIdRoute =
   ColaboradoresColaboradorIdRouteImport.update({
     id: '/colaboradores/$colaboradorId',
@@ -221,11 +231,29 @@ const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
   path: '/comunicacao',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
+const ConsultasConsultationIdRouteRoute =
+  ConsultasConsultationIdRouteRouteImport.update({
+    id: '/$consultationId',
+    path: '/$consultationId',
+    getParentRoute: () => ConsultasRouteRoute,
+  } as any)
+const ConsultasConsultationIdIndexRoute =
+  ConsultasConsultationIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ConsultasConsultationIdRouteRoute,
+  } as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
   getParentRoute: () => ClienteRouteRoute,
 } as any)
+const ConsultasConsultationIdFichaAtendimentoRoute =
+  ConsultasConsultationIdFichaAtendimentoRouteImport.update({
+    id: '/ficha-atendimento',
+    path: '/ficha-atendimento',
+    getParentRoute: () => ConsultasConsultationIdRouteRoute,
+  } as any)
 const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
   id: '/meus-casos/$caseId',
   path: '/meus-casos/$caseId',
@@ -233,10 +261,18 @@ const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
 } as any)
 const ConsultasConsultationIdDocumentosIndexRoute =
   ConsultasConsultationIdDocumentosIndexRouteImport.update({
-    id: '/$consultationId/documentos/',
-    path: '/$consultationId/documentos/',
-    getParentRoute: () => ConsultasRouteRoute,
+    id: '/documentos/',
+    path: '/documentos/',
+    getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
+const ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute =
+  ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport.update(
+    {
+      id: '/documentos/$documentId/_versoes/$documentVersionId',
+      path: '/documentos/$documentId/$documentVersionId',
+      getParentRoute: () => ConsultasConsultationIdRouteRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -247,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -256,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
@@ -274,8 +312,11 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/triagem/': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/consultas/$consultationId/documentos/$documentId/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -291,6 +332,7 @@ export interface FileRoutesByTo {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
@@ -309,8 +351,11 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
   '/triagem': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/consultas/$consultationId/documentos/$documentId/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -322,6 +367,7 @@ export interface FileRoutesById {
   '/consultas': typeof ConsultasRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/triagem': typeof TriagemRouteRouteWithChildren
+  '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -331,6 +377,7 @@ export interface FileRoutesById {
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/clientes/novo': typeof ClientesNovoRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
@@ -349,8 +396,11 @@ export interface FileRoutesById {
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/triagem/': typeof TriagemIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
+  '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
+  '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -363,6 +413,7 @@ export interface FileRouteTypes {
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/consultas/$consultationId'
     | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -372,6 +423,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
@@ -390,8 +442,11 @@ export interface FileRouteTypes {
     | '/redefinir-senha/'
     | '/triagem/'
     | '/cliente/meus-casos/$caseId'
+    | '/consultas/$consultationId/ficha-atendimento'
     | '/cliente/meus-casos/'
+    | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -407,6 +462,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
@@ -425,8 +481,11 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/triagem'
     | '/cliente/meus-casos/$caseId'
+    | '/consultas/$consultationId/ficha-atendimento'
     | '/cliente/meus-casos'
+    | '/consultas/$consultationId'
     | '/consultas/$consultationId/documentos'
+    | '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
   id:
     | '__root__'
     | '/'
@@ -437,6 +496,7 @@ export interface FileRouteTypes {
     | '/consultas'
     | '/intakes'
     | '/triagem'
+    | '/consultas/$consultationId'
     | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -446,6 +506,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/clientes/novo'
     | '/colaboradores/$colaboradorId'
+    | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
     | '/modelos-de-documentos/$documentSpecificationId'
@@ -464,8 +525,11 @@ export interface FileRouteTypes {
     | '/redefinir-senha/'
     | '/triagem/'
     | '/cliente/meus-casos/$caseId'
+    | '/consultas/$consultationId/ficha-atendimento'
     | '/cliente/meus-casos/'
+    | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -672,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakesNovoRouteImport
       parentRoute: typeof IntakesRouteRoute
     }
+    '/intakes/$intakeId': {
+      id: '/intakes/$intakeId'
+      path: '/$intakeId'
+      fullPath: '/intakes/$intakeId'
+      preLoaderRoute: typeof IntakesIntakeIdRouteImport
+      parentRoute: typeof IntakesRouteRoute
+    }
     '/colaboradores/$colaboradorId': {
       id: '/colaboradores/$colaboradorId'
       path: '/colaboradores/$colaboradorId'
@@ -735,12 +806,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
       parentRoute: typeof AdvogadoRouteRoute
     }
+    '/consultas/$consultationId': {
+      id: '/consultas/$consultationId'
+      path: '/$consultationId'
+      fullPath: '/consultas/$consultationId'
+      preLoaderRoute: typeof ConsultasConsultationIdRouteRouteImport
+      parentRoute: typeof ConsultasRouteRoute
+    }
+    '/consultas/$consultationId/': {
+      id: '/consultas/$consultationId/'
+      path: '/'
+      fullPath: '/consultas/$consultationId/'
+      preLoaderRoute: typeof ConsultasConsultationIdIndexRouteImport
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
+    }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
       path: '/meus-casos'
       fullPath: '/cliente/meus-casos/'
       preLoaderRoute: typeof ClienteMeusCasosIndexRouteImport
       parentRoute: typeof ClienteRouteRoute
+    }
+    '/consultas/$consultationId/ficha-atendimento': {
+      id: '/consultas/$consultationId/ficha-atendimento'
+      path: '/ficha-atendimento'
+      fullPath: '/consultas/$consultationId/ficha-atendimento'
+      preLoaderRoute: typeof ConsultasConsultationIdFichaAtendimentoRouteImport
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
     '/cliente/meus-casos/$caseId': {
       id: '/cliente/meus-casos/$caseId'
@@ -751,10 +843,17 @@ declare module '@tanstack/react-router' {
     }
     '/consultas/$consultationId/documentos/': {
       id: '/consultas/$consultationId/documentos/'
-      path: '/$consultationId/documentos'
+      path: '/documentos'
       fullPath: '/consultas/$consultationId/documentos/'
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
-      parentRoute: typeof ConsultasRouteRoute
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
+    }
+    '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId': {
+      id: '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
+      path: '/documentos/$documentId/$documentVersionId'
+      fullPath: '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
+      preLoaderRoute: typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
   }
 }
@@ -814,15 +913,38 @@ const ClienteRouteRouteWithChildren = ClienteRouteRoute._addFileChildren(
   ClienteRouteRouteChildren,
 )
 
-interface ConsultasRouteRouteChildren {
-  ConsultasIndexRoute: typeof ConsultasIndexRoute
+interface ConsultasConsultationIdRouteRouteChildren {
+  ConsultasConsultationIdFichaAtendimentoRoute: typeof ConsultasConsultationIdFichaAtendimentoRoute
+  ConsultasConsultationIdIndexRoute: typeof ConsultasConsultationIdIndexRoute
   ConsultasConsultationIdDocumentosIndexRoute: typeof ConsultasConsultationIdDocumentosIndexRoute
+  ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute: typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+}
+
+const ConsultasConsultationIdRouteRouteChildren: ConsultasConsultationIdRouteRouteChildren =
+  {
+    ConsultasConsultationIdFichaAtendimentoRoute:
+      ConsultasConsultationIdFichaAtendimentoRoute,
+    ConsultasConsultationIdIndexRoute: ConsultasConsultationIdIndexRoute,
+    ConsultasConsultationIdDocumentosIndexRoute:
+      ConsultasConsultationIdDocumentosIndexRoute,
+    ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute:
+      ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute,
+  }
+
+const ConsultasConsultationIdRouteRouteWithChildren =
+  ConsultasConsultationIdRouteRoute._addFileChildren(
+    ConsultasConsultationIdRouteRouteChildren,
+  )
+
+interface ConsultasRouteRouteChildren {
+  ConsultasConsultationIdRouteRoute: typeof ConsultasConsultationIdRouteRouteWithChildren
+  ConsultasIndexRoute: typeof ConsultasIndexRoute
 }
 
 const ConsultasRouteRouteChildren: ConsultasRouteRouteChildren = {
+  ConsultasConsultationIdRouteRoute:
+    ConsultasConsultationIdRouteRouteWithChildren,
   ConsultasIndexRoute: ConsultasIndexRoute,
-  ConsultasConsultationIdDocumentosIndexRoute:
-    ConsultasConsultationIdDocumentosIndexRoute,
 }
 
 const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(
@@ -830,11 +952,13 @@ const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(
 )
 
 interface IntakesRouteRouteChildren {
+  IntakesIntakeIdRoute: typeof IntakesIntakeIdRoute
   IntakesNovoRoute: typeof IntakesNovoRoute
   IntakesIndexRoute: typeof IntakesIndexRoute
 }
 
 const IntakesRouteRouteChildren: IntakesRouteRouteChildren = {
+  IntakesIntakeIdRoute: IntakesIntakeIdRoute,
   IntakesNovoRoute: IntakesNovoRoute,
   IntakesIndexRoute: IntakesIndexRoute,
 }

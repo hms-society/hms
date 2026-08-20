@@ -2,22 +2,29 @@ import { useState } from 'react'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Button } from '@/ui/shadcn/button'
 import { Badge } from '@/ui/shadcn/badge'
-import { AddClaimDialog } from '../add-claim'
+import { CollapsibleCard } from '@/ui/shared/widgets/components/collapsible-card'
+import { AddClaimDialog } from '../../add-claim'
 
-export interface LegalClaim {
+export type LegalClaim = {
   id: string
   title: string
   summary: string
   isSuggested?: boolean
 }
 
-interface ClaimsSectionProps {
+export type ClaimsSectionProps = {
   claims: LegalClaim[]
   onAddClaim?: (claim: { id?: string; title: string; summary: string }) => void
   onRemoveClaim?: (id: string) => void
+  isReadOnly?: boolean
 }
 
-export function ClaimsSection({ claims, onAddClaim, onRemoveClaim }: ClaimsSectionProps) {
+export const ClaimsSection = ({
+  claims,
+  onAddClaim,
+  onRemoveClaim,
+  isReadOnly = false,
+}: ClaimsSectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClaim, setEditingClaim] = useState<LegalClaim | null>(null)
 
@@ -37,15 +44,15 @@ export function ClaimsSection({ claims, onAddClaim, onRemoveClaim }: ClaimsSecti
   }
 
   return (
-    <div className='bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4'>
-      <div className='flex items-center justify-between'>
+    <CollapsibleCard
+      isOptional
+      title={
         <h2 className='text-base font-bold text-slate-800 flex items-center gap-2 font-serif'>
           <Icon name='scale' className='w-4 h-4 text-teal-800' /> Possíveis pedidos
           jurídicos
         </h2>
-        <Icon name='chevron-up' className='w-4 h-4 text-slate-400 cursor-pointer' />
-      </div>
-
+      }
+    >
       {claims.length === 0 ? (
         <p className='text-xs text-slate-400 py-2'>Nenhum pedido registrado ainda.</p>
       ) : (
@@ -73,45 +80,51 @@ export function ClaimsSection({ claims, onAddClaim, onRemoveClaim }: ClaimsSecti
                 )}
               </div>
 
-              <div className='flex items-center gap-2 shrink-0 pt-0.5'>
-                <button
-                  type='button'
-                  onClick={() => handleOpenEdit(claim)}
-                  className='text-slate-400 hover:text-slate-600 transition-colors cursor-pointer'
-                  title='Editar pedido'
-                >
-                  <Icon name='pencil' className='w-4 h-4' />
-                </button>
+              {!isReadOnly && (
+                <div className='flex items-center gap-2 shrink-0 pt-0.5'>
+                  <button
+                    type='button'
+                    onClick={() => handleOpenEdit(claim)}
+                    className='text-slate-400 hover:text-slate-600 transition-colors cursor-pointer'
+                    title='Editar pedido'
+                  >
+                    <Icon name='pencil' className='w-4 h-4' />
+                  </button>
 
-                <button
-                  type='button'
-                  onClick={() => onRemoveClaim?.(claim.id)}
-                  className='text-slate-400 hover:text-rose-600 transition-colors cursor-pointer'
-                  title='Excluir pedido'
-                >
-                  <Icon name='trash-2' className='w-4 h-4' />
-                </button>
-              </div>
+                  <button
+                    type='button'
+                    onClick={() => onRemoveClaim?.(claim.id)}
+                    className='text-slate-400 hover:text-rose-600 transition-colors cursor-pointer'
+                    title='Excluir pedido'
+                  >
+                    <Icon name='trash-2' className='w-4 h-4' />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      <Button
-        type='button'
-        variant='ghost'
-        onClick={handleOpenAdd}
-        className='text-xs font-semibold text-teal-800 p-0 h-auto gap-1.5 cursor-pointer hover:bg-transparent'
-      >
-        <Icon name='plus' className='w-4 h-4' /> Adicionar pedido manualmente
-      </Button>
+      {!isReadOnly && (
+        <Button
+          type='button'
+          variant='ghost'
+          onClick={handleOpenAdd}
+          className='text-xs font-semibold text-teal-800 p-0 h-auto gap-1.5 cursor-pointer hover:bg-transparent'
+        >
+          <Icon name='plus' className='w-4 h-4' /> Adicionar pedido manualmente
+        </Button>
+      )}
 
-      <AddClaimDialog
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        claimToEdit={editingClaim}
-        onAdd={(claim) => onAddClaim?.(claim)}
-      />
-    </div>
+      {!isReadOnly && (
+        <AddClaimDialog
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          claimToEdit={editingClaim}
+          onAdd={(claim) => onAddClaim?.(claim)}
+        />
+      )}
+    </CollapsibleCard>
   )
 }

@@ -4,14 +4,14 @@ import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 import { relevantFactSchema } from '@hms/validation/consultation'
 
-export interface FactToEdit {
+export type FactToEdit = {
   id: string
   date: string
   description: string
   status: string
 }
 
-interface AddFactDialogProps {
+export type AddFactDialogProps = {
   isOpen: boolean
   onClose: () => void
   onAdd: (fact: {
@@ -25,12 +25,12 @@ interface AddFactDialogProps {
 
 const MAX_DESCRIPTION_LENGTH = 1000
 
-export function AddFactDialog({
+export const AddFactDialog = ({
   isOpen,
   onClose,
   onAdd,
   factToEdit,
-}: AddFactDialogProps) {
+}: AddFactDialogProps) => {
   const [dateType, setDateType] = useState<'specific' | 'period' | 'undefined'>(
     'specific',
   )
@@ -233,8 +233,8 @@ export function AddFactDialog({
             rows={1}
             className={`w-full min-h-[38px] p-2.5 rounded-xl text-xs border overflow-hidden transition-all focus:outline-none focus:ring-2 ${
               error
-                ? 'border-rose-500 focus:ring-rose-500'
-                : 'border-[#d4ceca] focus:border-slate-400 focus:ring-slate-400'
+                ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20'
+                : 'border-[#d4ceca] focus:border-ring focus:ring-ring/20'
             }`}
           />
           {error && <p className='text-[11px] text-rose-500 font-medium'>{error}</p>}

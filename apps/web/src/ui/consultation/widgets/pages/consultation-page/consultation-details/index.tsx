@@ -1,234 +1,75 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef } from 'react'
+
+import { Badge } from '@/ui/shadcn/badge'
+import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import { Button } from '@/ui/shadcn/button'
-import { Badge } from '@/ui/shadcn/badge'
-import { useConsultation } from './use-consultation'
+import {
+  useConsultationDetails,
+  type ConsultationDetailsProps,
+} from './use-consultation-details'
 
-export interface ConsultationDetailsProps {
-  consultationId: string
-  onBack?: () => void
-  onContinueForm?: () => void
-}
-
-const originMap: Record<string, string> = {
-  social_media: 'Redes Sociais',
-  website: 'Website / Plataforma',
-  referral: 'Indicação',
-  phone: 'Telefone',
-  active_search: 'Busca Ativa',
-  direct: 'Entrada direta HMS',
-}
-
-const channelMap: Record<string, string> = {
-  whatsapp: 'WhatsApp',
-  phone: 'Ligação Telefônica',
-  email: 'E-mail',
-  in_person: 'Presencial',
-  video_call: 'Videochamada',
-}
-
-const AVAILABLE_SLOTS = [
-  '08:00',
-  '09:00',
-  '10:00',
-  '11:00',
-  '13:30',
-  '14:30',
-  '15:30',
-  '16:30',
-  '17:30',
-]
+export type { ConsultationDetailsProps } from './use-consultation-details'
 
 export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetailsProps>(
-  ({ consultationId, onBack, onContinueForm }, ref) => {
+  ({ consultationId, onContinueForm }, ref) => {
     const {
       consultation,
-      responsible,
       isLoading,
-      startConsultation,
-      markNoShow,
-      rescheduleConsultation,
-    } = useConsultation(consultationId)
+      isError,
+      error,
+      feedbackBanner,
+      isRescheduleModalOpen,
+      selectedDate,
+      selectedTime,
+      isSubmittingReschedule,
+      statusLower,
+      isCompleted,
+      canMarkNoShow,
+      clientData,
+      demandContext,
+      intakeSource,
+      schedule,
+      todayString,
+      availableSlots,
+      handleMarkNoShow,
+      handleOpenReschedule,
+      handleCloseReschedule,
+      handleDismissFeedback,
+      handleDateChange,
+      handleTimeChange,
+      handleConfirmReschedule,
+    } = useConsultationDetails({ consultationId, onContinueForm })
 
-    const [feedbackBanner, setFeedbackBanner] = useState<{
-      type: 'success' | 'danger' | 'info'
-      message: string
-    } | null>(null)
-
-    const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false)
-    const [selectedDate, setSelectedDate] = useState<string>('')
-    const [selectedTime, setSelectedTime] = useState<string>('')
-    const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false)
-
-    const statusLower = consultation?.status?.toLowerCase()
-    const isPending = statusLower === 'pending'
-    const isCompleted = statusLower === 'completed'
-
-    const canBeStarted = isPending
-    const canMarkNoShow = isPending
-
-    const handleStatusAction = async (action: 'toggle_start' | 'toggle_absent') => {
-      if (!consultationId) return
-
-      try {
-        if (action === 'toggle_start') {
-          await startConsultation(consultationId)
-
-          setFeedbackBanner({
-            type: 'success',
-            message: 'Consulta iniciada com sucesso!',
-          })
-        } else {
-          await markNoShow(consultationId)
-
-          setFeedbackBanner({
-            type: 'danger',
-            message: 'Ausência registrada com sucesso.',
-          })
-        }
-      } catch {
-        setFeedbackBanner({
-          type: 'danger',
-          message: 'Ocorreu um erro ao atualizar o status.',
-        })
-      }
+    if (isError) {
+      return (
+        <div className='rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+          <h2 className='font-serif text-xl text-foreground'>
+            Não foi possível carregar a consulta
+          </h2>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            {error instanceof Error ? error.message : 'Verifique o ID e tente novamente.'}
+          </p>
+        </div>
+      )
     }
 
-    const handleConfirmReschedule = async () => {
-      if (!selectedDate || !selectedTime || !consultationId) return
-
-      try {
-        setIsSubmittingReschedule(true)
-        const combinedIsoDate = new Date(
-          `${selectedDate}T${selectedTime}:00`,
-        ).toISOString()
-
-        await rescheduleConsultation(consultationId)
-
-        if (consultation) {
-          consultation.status = 'pending' as any
-          ;(consultation as any).scheduledAt = combinedIsoDate
-        }
-
-        setIsRescheduleModalOpen(false)
-        setSelectedDate('')
-        setSelectedTime('')
-
-        setFeedbackBanner({
-          type: 'info',
-          message: `Consulta remarcada para ${new Date(combinedIsoDate).toLocaleDateString('pt-BR')} às ${selectedTime}.`,
-        })
-      } catch {
-        setFeedbackBanner({
-          type: 'danger',
-          message: 'Ocorreu um erro ao remarcar a consulta. Tente novamente.',
-        })
-      } finally {
-        setIsSubmittingReschedule(false)
-      }
+    if (!isLoading && !consultation) {
+      return (
+        <div className='mx-auto max-w-3xl rounded-2xl border border-border bg-card p-8 text-center'>
+          <h2 className='font-serif text-xl text-foreground'>Consulta não encontrada</h2>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            A consulta informada não está disponível.
+          </p>
+        </div>
+      )
     }
-
-    const intakeObj = consultation?.intake as any
-    const demandContext = intakeObj?.demandNotes || consultation?.primaryLegalQuestion
-
-    const client = consultation?.client
-    const displayName =
-      client?.name || client?.legalName || client?.tradeName || 'Cliente sem nome'
-
-    const clientData = {
-      name: displayName,
-      initials:
-        displayName !== 'Cliente sem nome'
-          ? displayName
-              .split(' ')
-              .filter(Boolean)
-              .map((n: string) => n[0])
-              .slice(0, 2)
-              .join('')
-              .toUpperCase()
-          : 'CL',
-      badge: client?.type === 'legal' ? 'Pessoa Jurídica' : 'Pessoa Física',
-      taxIdLabel: client?.taxIdType ? String(client.taxIdType).toUpperCase() : 'CPF/CNPJ',
-      taxIdValue: client?.taxIdValue || '—',
-      phone: client?.phone || '—',
-      email: client?.email || '—',
-      location: client?.city && client?.state ? `${client.city} - ${client.state}` : '—',
-    }
-
-    const rawOrigin = intakeObj?.origin || client?.origin || consultation?.channel
-    const rawChannel =
-      intakeObj?.contactChannel ||
-      (consultation?.modality === 'PRESENTIAL' ? 'in_person' : 'video_call')
-    const rawUrgency = intakeObj?.urgency || 'normal'
-
-    const urgencyMap: Record<string, string> = {
-      urgent: 'Urgente',
-      normal: 'Normal',
-      high: 'Alta',
-    }
-
-    const intakeSource = {
-      intakeCode: intakeObj?.code
-        ? intakeObj.code
-        : intakeObj?.sequenceNumber
-          ? `INT-${String(intakeObj.sequenceNumber).padStart(4, '0')}`
-          : consultation?.intakeId
-            ? `INT-${consultation.intakeId.slice(0, 4).toUpperCase()}`
-            : '—',
-      source: rawOrigin ? originMap[rawOrigin] || rawOrigin : '—',
-      channel: rawChannel ? channelMap[rawChannel] || rawChannel : '—',
-      urgency: urgencyMap[rawUrgency] || 'Normal',
-      openedAt: consultation?.createdAt
-        ? new Date(consultation.createdAt).toLocaleDateString('pt-BR')
-        : '—',
-      attendant:
-        responsible?.professionalName ||
-        (consultation as any)?.attendant?.name ||
-        intakeObj?.attendantName ||
-        'Não informado',
-    }
-
-    const currentScheduledAt =
-      (consultation as any)?.scheduledAt ||
-      (consultation as any)?.appointmentDate ||
-      consultation?.startedAt ||
-      consultation?.createdAt
-
-    const schedule = {
-      dateTime: currentScheduledAt
-        ? new Date(currentScheduledAt).toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '—',
-      format: consultation?.modality === 'PRESENTIAL' ? 'Presencial' : 'Virtual',
-      lawyer:
-        consultation?.assignedLawyer?.name ||
-        consultation?.assignedLawyer?.professionalName ||
-        'Não atribuído',
-    }
-
-    const todayString = new Date().toISOString().split('T')[0]
 
     return (
       <div
         ref={ref}
-        className='space-y-4 sm:space-y-6 pb-8 sm:pb-12 font-sans px-3 sm:px-0 max-w-7xl mx-auto'
+        className='space-y-4 sm:space-y-6 pb-8 sm:pb-12 font-sans px-3 sm:px-0'
       >
-        <div>
-          <button
-            type='button'
-            onClick={onBack}
-            className='flex items-center gap-1.5 text-xs text-teal-800 font-medium cursor-pointer hover:underline'
-          >
-            <Icon name='arrow-left' className='w-3.5 h-3.5' /> Voltar
-          </button>
-        </div>
-
         {feedbackBanner && (
           <div
             className={`p-3.5 sm:p-4 rounded-xl text-xs font-medium flex items-start sm:items-center justify-between gap-3 shadow-sm transition-all animate-in fade-in slide-in-from-top-2 ${
@@ -251,7 +92,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             </div>
             <button
               type='button'
-              onClick={() => setFeedbackBanner(null)}
+              onClick={handleDismissFeedback}
               className='text-slate-400 hover:text-slate-600 text-xs font-bold px-1 shrink-0'
             >
               ✕
@@ -310,35 +151,30 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 {isLoading ? '...' : intakeSource.intakeCode}
               </span>
             </div>
-
             <div>
               <span className='text-slate-400 block mb-0.5'>Origem</span>
               <span className='font-semibold text-slate-800 block truncate'>
                 {isLoading ? '...' : intakeSource.source}
               </span>
             </div>
-
             <div>
               <span className='text-slate-400 block mb-0.5'>Canal</span>
               <span className='font-semibold text-slate-800 block truncate'>
                 {isLoading ? '...' : intakeSource.channel}
               </span>
             </div>
-
             <div>
-              <span className='text-slate-400 block mb-0.5'>Urgência</span>
-              <Badge className='bg-teal-100/80 text-teal-800 border-none text-[10px] font-medium px-2 py-0 inline-block'>
+              <span className='text-slate-400 block mb-1'>Urgência</span>
+              <Badge className='h-5 rounded-full bg-teal-100/80 px-2 py-0 text-[10px] font-medium text-teal-800 border-none'>
                 {intakeSource.urgency}
               </Badge>
             </div>
-
             <div>
               <span className='text-slate-400 block mb-0.5'>Aberto em</span>
               <span className='font-semibold text-slate-800 block truncate'>
                 {isLoading ? '...' : intakeSource.openedAt}
               </span>
             </div>
-
             <div>
               <span className='text-slate-400 block mb-0.5'>Atendente</span>
               <span className='font-semibold text-slate-800 block truncate'>
@@ -380,9 +216,10 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 <Icon name='clock' className='w-3.5 h-3.5 text-slate-400 shrink-0' />{' '}
                 Horário
               </span>
-              <span className='font-semibold text-slate-800'>06/08/2026 - 14:00</span>
+              <span className='font-semibold text-slate-800'>
+                {isLoading ? '...' : schedule.dateTime}
+              </span>
             </div>
-
             <div className='flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2.5 gap-1 sm:gap-0'>
               <span className='text-slate-500 flex items-center gap-2'>
                 <Icon name='video' className='w-3.5 h-3.5 text-slate-400 shrink-0' />{' '}
@@ -392,7 +229,6 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 {isLoading ? '...' : schedule.format}
               </span>
             </div>
-
             <div className='flex flex-col sm:flex-row sm:items-center justify-between pb-1 gap-1 sm:gap-0'>
               <span className='text-slate-500 flex items-center gap-2'>
                 <Icon name='user' className='w-3.5 h-3.5 text-slate-400 shrink-0' />{' '}
@@ -408,39 +244,22 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
             <span className='text-xs text-slate-500 font-medium'>
               Atualizar presença / status:
             </span>
-
             <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto'>
               <Button
                 type='button'
                 variant='outline'
                 size='sm'
-                onClick={() => setIsRescheduleModalOpen(true)}
+                onClick={handleOpenReschedule}
                 disabled={isCompleted}
                 className='rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 border-teal-700/40 text-teal-800 hover:bg-teal-50 cursor-pointer w-full sm:w-auto justify-center'
               >
                 <Icon name='refresh-cw' className='w-3.5 h-3.5 shrink-0' /> Remarcar
               </Button>
-
-              <Button
-                type='button'
-                size='sm'
-                onClick={() => handleStatusAction('toggle_start')}
-                disabled={!canBeStarted}
-                className={`rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 transition-all w-full sm:w-auto justify-center ${
-                  canBeStarted
-                    ? 'bg-teal-800 hover:bg-teal-900 text-white cursor-pointer'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                <Icon name='check' className='w-3.5 h-3.5 shrink-0' />
-                Iniciar consulta
-              </Button>
-
               <Button
                 type='button'
                 variant='destructive'
                 size='sm'
-                onClick={() => handleStatusAction('toggle_absent')}
+                onClick={handleMarkNoShow}
                 disabled={!canMarkNoShow}
                 className={`rounded-full h-9 sm:h-8 text-xs font-medium gap-1.5 px-4 transition-all w-full sm:w-auto justify-center ${
                   canMarkNoShow
@@ -448,8 +267,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                <Icon name='user-x' className='w-3.5 h-3.5 shrink-0' />
-                Marcar ausência
+                <Icon name='user-x' className='w-3.5 h-3.5 shrink-0' /> Marcar ausência
               </Button>
             </div>
           </div>
@@ -461,16 +279,15 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
               <Icon name='pencil' className='w-5 h-5' />
             </div>
             <p className='text-xs sm:text-sm font-semibold text-slate-800 font-sans'>
-              Continue o preenchimento da ficha
+              Continue o preenchimento da ficha dinâmica
             </p>
           </div>
-
           <Button
             type='button'
             onClick={onContinueForm}
             className='bg-teal-800 hover:bg-teal-900 text-white text-xs font-semibold rounded-full px-5 h-10 gap-2 w-full sm:w-auto justify-center shrink-0 shadow-sm cursor-pointer'
           >
-            Continuar ficha <Icon name='arrow-right' className='w-4 h-4' />
+            Continuar ficha dinâmica <Icon name='arrow-right' className='w-4 h-4' />
           </Button>
         </div>
 
@@ -493,7 +310,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 </div>
                 <button
                   type='button'
-                  onClick={() => setIsRescheduleModalOpen(false)}
+                  onClick={handleCloseReschedule}
                   className='p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0'
                 >
                   <Icon name='x' className='w-5 h-5' />
@@ -512,8 +329,8 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                   type='date'
                   min={todayString}
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className='w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 text-slate-800'
+                  onChange={(event) => handleDateChange(event.target.value)}
+                  className='w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring text-slate-800'
                 />
               </div>
 
@@ -521,13 +338,12 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                 <p className='block text-xs font-semibold text-slate-700 mb-2'>
                   Horários disponíveis
                 </p>
-
                 <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
-                  {AVAILABLE_SLOTS.map((slot) => (
+                  {availableSlots.map((slot) => (
                     <button
                       key={slot}
                       type='button'
-                      onClick={() => setSelectedTime(slot)}
+                      onClick={() => handleTimeChange(slot)}
                       className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer ${
                         selectedTime === slot
                           ? 'bg-teal-800 text-white border-teal-800 shadow-sm'
@@ -545,7 +361,7 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
                   type='button'
                   variant='outline'
                   size='sm'
-                  onClick={() => setIsRescheduleModalOpen(false)}
+                  onClick={handleCloseReschedule}
                   className='rounded-full text-xs font-medium h-9 px-4 cursor-pointer w-full sm:w-auto'
                 >
                   Cancelar
