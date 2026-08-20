@@ -120,6 +120,7 @@ async function bootstrap() {
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
     })
+
     await app.get(CommunicationSeeder).run()
     await app.get(RealDocumentsSeeder).run()
     await app.get(DocumentsSeeder).run()
