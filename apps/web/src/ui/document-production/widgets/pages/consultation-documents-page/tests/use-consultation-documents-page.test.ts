@@ -280,6 +280,32 @@ describe('useConsultationDocumentsPage', () => {
     })
   })
 
+  it('stops showing loading when polling times out while the persisted generation is still running', () => {
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createQueryResult([
+        {
+          id: 'document-1',
+          title: 'Procuração',
+          generationStatus: DocumentGenerationStatus.Running,
+          versions: [],
+        },
+      ]) as never,
+    )
+    useGenerateConsultationDocumentActionMock.mockReturnValue(
+      createIndividualAction({ timedOutDocumentIds: ['document-1'] }) as never,
+    )
+
+    const { result } = renderHook(() =>
+      useConsultationDocumentsPage({ consultationId: 'consultation-1' }),
+    )
+
+    expect(result.current.documents[0]).toMatchObject({
+      status: 'not_generated',
+      isGenerating: false,
+      isTimedOut: true,
+    })
+  })
+
   it('keeps timeout recoverable without deriving a persisted failure state', () => {
     useConsultationDocumentsQueryMock.mockReturnValue(
       createQueryResult([{ id: 'document-1', title: 'Contrato', versions: [] }]) as never,
@@ -352,7 +378,12 @@ describe('useConsultationDocumentsPage', () => {
     )
     useConsultationDocumentsQueryMock.mockReturnValue(
       createQueryResult([
-        { id: 'document-1', title: 'Procuração', versions: [] },
+        {
+          id: 'document-1',
+          title: 'Procuração',
+          generationStatus: DocumentGenerationStatus.Running,
+          versions: [],
+        },
       ]) as never,
     )
     useGenerateConsultationDocumentActionMock.mockReturnValue(

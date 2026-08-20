@@ -67,6 +67,7 @@ function getDocumentStatus(
   latestVersion: ConsultationDocumentVersionSummary | undefined,
   generationStatus: ConsultationDocumentViewModel['document']['generationStatus'],
   isOptimisticallyGenerating: boolean,
+  isGenerationStopped: boolean,
 ): Pick<ConsultationDocumentViewModel, 'status' | 'statusLabel'> {
   if (generationStatus === DocumentGenerationStatus.Failed) {
     return {
@@ -76,9 +77,10 @@ function getDocumentStatus(
   }
 
   const isGenerating =
-    isOptimisticallyGenerating ||
-    generationStatus === DocumentGenerationStatus.Pending ||
-    generationStatus === DocumentGenerationStatus.Running
+    !isGenerationStopped &&
+    (isOptimisticallyGenerating ||
+      generationStatus === DocumentGenerationStatus.Pending ||
+      generationStatus === DocumentGenerationStatus.Running)
 
   if (isGenerating) {
     return {
@@ -153,10 +155,13 @@ export function useConsultationDocumentsPage({
         const latestVersion = getLatestVersion(document.versions)
         const isOptimisticallyGenerating =
           pendingDocumentIds.has(document.id) && !cancelledDocumentIds.has(document.id)
+        const isGenerationStopped =
+          cancelledDocumentIds.has(document.id) || timedOutDocumentIds.has(document.id)
         const status = getDocumentStatus(
           latestVersion,
           document.generationStatus,
           isOptimisticallyGenerating,
+          isGenerationStopped,
         )
 
         return {

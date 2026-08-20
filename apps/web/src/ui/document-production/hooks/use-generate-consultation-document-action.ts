@@ -94,9 +94,6 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
       return response
     },
     onMutate: async ({ documentId }): Promise<GenerationContext> => {
-      await queryClient.cancelQueries({
-        queryKey: consultationDocumentQueryKeys.list(consultationId ?? ''),
-      })
       const documents = queryClient.getQueryData<readonly ConsultationDocumentListItem[]>(
         consultationDocumentQueryKeys.list(consultationId ?? ''),
       )
@@ -115,6 +112,11 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
           startedAt: Date.now(),
         },
       }))
+
+      void queryClient.cancelQueries({
+        queryKey: consultationDocumentQueryKeys.list(consultationId ?? ''),
+      })
+
       return { attemptId, documentIds: [documentId], consultationId }
     },
     onError: (_error, _variables, context) => {
