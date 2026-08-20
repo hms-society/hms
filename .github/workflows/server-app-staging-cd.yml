@@ -45,8 +45,11 @@ jobs:
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           DROP SCHEMA IF EXISTS public CASCADE;
+          DROP SCHEMA IF EXISTS drizzle CASCADE;
           CREATE SCHEMA public;
+          CREATE SCHEMA drizzle;
           GRANT ALL ON SCHEMA public TO postgres, service_role;
+          GRANT ALL ON SCHEMA drizzle TO postgres, service_role;
           GRANT USAGE ON SCHEMA public TO anon, authenticated;
           SQL
 
