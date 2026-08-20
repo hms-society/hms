@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Intake } from '@hms/core/intake/domain/entities'
 import { updateIntakeSchema, type UpdateIntakeFormData } from '@hms/validation/intake'
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useIntakeResponsiblesQuery } from '@/ui/intake/hooks/use-intake-responsibles-query'
@@ -27,14 +27,18 @@ export function useIntakeEditDialog({
   const { intakeService } = useRestContext()
   const { user } = useAuthContext()
   const queryClient = useQueryClient()
-  const form = useForm<UpdateIntakeFormData>({
-    resolver: zodResolver(updateIntakeSchema),
+  const form = useForm<UpdateIntakeFormData, unknown, UpdateIntakeFormData>({
+    resolver: zodResolver(updateIntakeSchema) as Resolver<
+      UpdateIntakeFormData,
+      unknown,
+      UpdateIntakeFormData
+    >,
     mode: 'onChange',
     defaultValues: createDefaultValues(intake, user?.id ?? ''),
   })
   const selectedLegalAreaId = form.watch('legalAreaId')
   const legalAreasQuery = useLegalAreasQuery()
-  const legalTopicsQuery = useLegalTopicsQuery(selectedLegalAreaId)
+  const legalTopicsQuery = useLegalTopicsQuery(selectedLegalAreaId ?? '')
   const responsiblesQuery = useIntakeResponsiblesQuery()
 
   const updateMutation = useMutation({
@@ -97,8 +101,8 @@ function createDefaultValues(intake: Intake, userId: string): UpdateIntakeFormDa
     responsibleId: intake.responsibleId,
     origin: intake.origin,
     contactChannel: intake.contactChannel,
-    legalAreaId: intake.legalAreaId,
-    legalTopicId: intake.legalTopicId,
+    legalAreaId: intake.legalAreaId ?? '',
+    legalTopicId: intake.legalTopicId ?? '',
     urgency: intake.urgency,
     demandNotes: intake.demandNotes ?? '',
   }

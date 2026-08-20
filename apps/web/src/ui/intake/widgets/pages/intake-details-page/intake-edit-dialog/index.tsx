@@ -153,7 +153,10 @@ export const IntakeEditDialog = (props: IntakeEditDialogProps) => {
               render={({ field, fieldState }) => (
                 <div className='space-y-2'>
                   <Label htmlFor='intake-edit-legal-area'>Área jurídica</Label>
-                  <Select onValueChange={handleLegalAreaChange} value={field.value}>
+                  <Select
+                    onValueChange={handleLegalAreaChange}
+                    value={field.value ?? ''}
+                  >
                     <SelectTrigger
                       id='intake-edit-legal-area'
                       className='w-full'
@@ -184,7 +187,7 @@ export const IntakeEditDialog = (props: IntakeEditDialogProps) => {
                   <Label htmlFor='intake-edit-legal-topic'>Assunto jurídico</Label>
                   <Select
                     onValueChange={field.onChange}
-                    value={field.value}
+                    value={field.value ?? ''}
                     disabled={isLoadingOptions || !form.getValues('legalAreaId')}
                   >
                     <SelectTrigger
@@ -262,7 +265,7 @@ function EditSelectField({
       render={({ field, fieldState }) => (
         <div className='space-y-2'>
           <Label htmlFor={`intake-edit-${name}`}>{label}</Label>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select onValueChange={field.onChange} value={field.value ?? ''}>
             <SelectTrigger
               id={`intake-edit-${name}`}
               className='w-full'
