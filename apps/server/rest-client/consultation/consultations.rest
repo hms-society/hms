@@ -1,5 +1,13 @@
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, and replace the
+# legal/dynamic-form/document-specification placeholders with IDs returned by
+# the requests in this directory and apps/server/rest-client/shared/.
+
 @url = {{BASE_URL}}/consultations
 @consultationId = 00000000-0000-4000-8000-000000000101
+@legalAreaId = replace-with-legal-area-uuid
+@legalTopicId = replace-with-legal-topic-uuid
+@dynamicFormId = replace-with-dynamic-form-uuid
 @powerOfAttorneyDocumentId = 00000000-0000-4000-8000-000000000201
 @consultationStatementDocumentId = 00000000-0000-4000-8000-000000000202
 @reviewChallengeDocumentId = 00000000-0000-4000-8000-000000000203
@@ -22,8 +30,78 @@ GET {{BASE_URL}}/collaborators/me
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### Get consultation details
+# @name getConsultation
+GET {{url}}/{{consultationId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Get consultation by intake
+# @prompt intakeId Copy the intake ID from the consultation details response
+# @name getConsultationByIntake
+GET {{url}}/by-intake/{{intakeId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
 ### Reopen the attendance form for editing
 PATCH {{url}}/{{consultationId}}/attendance/edit
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### List available dynamic forms for the consultation context
+# @name listDynamicFormsForConsultation
+GET {{BASE_URL}}/dynamic-forms?legalAreaId={{legalAreaId}}&legalTopicId={{legalTopicId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Finalize the attendance form
+# Expected: 200. The viability and decision values are intentionally coupled by backend validation.
+# @name finalizeConsultationAttendance
+PATCH {{url}}/{{consultationId}}/attendance/finalize
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "modality": "virtual",
+  "channel": "google_meet",
+  "primaryLegalQuestion": "Quais poderes são necessários para representar o cliente?",
+  "guidanceProvided": "Orientação jurídica prestada durante a consulta.",
+  "viability": "Viável",
+  "decision": "Prosseguir para contratação",
+  "dynamicFormId": "{{dynamicFormId}}",
+  "answers": [],
+  "notes": "Observações complementares da consulta.",
+  "relevantFacts": [],
+  "potentialLegalRequests": []
+}
+
+### List the consultation document selection
+# @name listConsultationDocumentSelection
+GET {{url}}/{{consultationId}}/documents/selection
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Replace the consultation document selection
+# Copy document specification IDs from the selection response before sending.
+# @name replaceConsultationDocumentSelection
+PUT {{url}}/{{consultationId}}/documents/selection
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "documentSpecificationIds": [
+    "replace-with-document-specification-uuid"
+  ]
+}
+
+### Confirm the consultation document package
+# Expected: 200 after every selected document has an approved version.
+# @name confirmConsultationDocumentPackage
+PATCH {{url}}/{{consultationId}}/documents/package/confirm
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
@@ -39,6 +117,13 @@ Accept: application/json
 ### Generate the seeded consultation statement
 # @name generateConsultationStatement
 POST {{url}}/{{consultationId}}/documents/{{consultationStatementDocumentId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Cancel an active document generation
+# Expected: 204. Follow with the list request to confirm the UI can leave the loading state.
+# @name cancelConsultationDocumentGeneration
+POST {{url}}/{{consultationId}}/documents/{{consultationStatementDocumentId}}/generations/cancel
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
@@ -133,5 +218,17 @@ Accept: application/json
 ### Select an approved version as current
 # @prompt documentVersionId Copy an approved version ID
 PATCH {{url}}/{{consultationId}}/documents/{{powerOfAttorneyDocumentId}}/versions/{{documentVersionId}}/current
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Complete the consultation
+# Expected: 200 only after the attendance and document package gates are complete.
+# @name completeConsultation
+PATCH {{url}}/{{consultationId}}/complete
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Verify the consultation is readonly after completion
+GET {{url}}/{{consultationId}}
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json

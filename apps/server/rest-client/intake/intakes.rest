@@ -1,23 +1,44 @@
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, and replace the
+# UUID placeholders using the identity and legal-catalog REST clients.
+
 @url = {{BASE_URL}}/intakes
-@intakeId = 7d2f5e6a-8d4c-4b3a-9e1f-2c6a7b8d9e01
-@clientId = 4a8f3c21-6b7d-4e90-8f12-3d5c7a9b1e24
-@userId = 91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30
-@legalAreaId = 2e7a9c41-5d6f-4b82-9a13-8c4e6f7b2d50
-@legalTopicId = b3f1d8a6-7c2e-4f90-8a45-1d6b9e3c5f72
-@lawyerId = 7d7ea9d9-f604-40b1-915b-bb0b528844ee
+@intakeId = replace-with-intake-uuid
+@clientId = replace-with-client-uuid
+@userId = replace-with-collaborator-uuid
+@legalAreaId = replace-with-legal-area-uuid
+@legalTopicId = replace-with-legal-topic-uuid
+@lawyerId = replace-with-lawyer-uuid
+
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Confirm the authenticated administrator
+GET {{BASE_URL}}/collaborators/me
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
 
 ### List intakes
 GET {{url}}?search=&status=consultation_scheduled&responsibleId={{userId}}&origin=direct&contactChannel=whatsapp&page=1&pageSize=20
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### List intake responsible options
 GET {{url}}/responsibles
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Register intake
 POST {{url}}
 Content-Type: application/json
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "decision": "schedule_consultation",
@@ -37,7 +58,7 @@ Authorization: Bearer {{accessToken}}
 
 ### Retry consultation scheduling
 POST {{url}}/{{intakeId}}/consultation-scheduling/retry
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -50,7 +71,7 @@ Content-Type: application/json
 ### Register intake without scheduling
 POST {{url}}
 Content-Type: application/json
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "decision": "register_intake",
@@ -67,15 +88,17 @@ Authorization: Bearer {{accessToken}}
 ### Get intake
 GET {{url}}/{{intakeId}}
 Content-Type: application/json
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### List client intakes
 GET {{url}}/clients/{{clientId}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Transition intake status
 PATCH {{url}}/{{intakeId}}/status
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "expectedVersion": 1,
@@ -86,6 +109,7 @@ Content-Type: application/json
 ### Update intake editable fields
 PATCH {{url}}/{{intakeId}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "expectedVersion": 1,
@@ -102,6 +126,7 @@ Content-Type: application/json
 ### Close intake without contract
 POST {{url}}/{{intakeId}}/close
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "expectedVersion": 1,
