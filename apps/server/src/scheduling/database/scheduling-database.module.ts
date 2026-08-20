@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { DRIZZLE } from '@/shared/database/drizzle/database.provider'
+import { databaseProviders, DRIZZLE } from '@/shared/database/drizzle/database.provider'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleSchedulesRepository } from './drizzle/repositories/drizzle-schedules-repository'
 
