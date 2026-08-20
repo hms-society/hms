@@ -153,10 +153,7 @@ export const IntakeEditDialog = (props: IntakeEditDialogProps) => {
               render={({ field, fieldState }) => (
                 <div className='space-y-2'>
                   <Label htmlFor='intake-edit-legal-area'>Área jurídica</Label>
-                  <Select
-                    onValueChange={handleLegalAreaChange}
-                    value={field.value ?? ''}
-                  >
+                  <Select onValueChange={handleLegalAreaChange} value={field.value ?? ''}>
                     <SelectTrigger
                       id='intake-edit-legal-area'
                       className='w-full'
