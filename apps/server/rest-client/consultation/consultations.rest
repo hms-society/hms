@@ -72,7 +72,16 @@ Accept: application/json
   "viability": "Viável",
   "decision": "Prosseguir para contratação",
   "dynamicFormId": "{{dynamicFormId}}",
-  "answers": [],
+  "answers": [
+    {
+      "fieldId": "civil-relationship",
+      "value": ["contracts"]
+    },
+    {
+      "fieldId": "civil-facts",
+      "value": "O cliente precisa negociar um contrato de locação residencial."
+    }
+  ],
   "notes": "Observações complementares da consulta.",
   "relevantFacts": [],
   "potentialLegalRequests": []

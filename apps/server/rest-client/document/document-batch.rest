@@ -1,5 +1,12 @@
-@baseUrl = http://localhost:3333
-@clientId = adc35945-a999-4399-9149-01286f4c2df9
+@baseUrl = {{BASE_URL}}
+@clientId = replace-with-client-uuid
 
+### List document batches for a client
 GET {{baseUrl}}/document-batches/clients/{{clientId}}
-Content-Type: application/json
+Accept: application/json
+
+### Get a document file
+# Copy fileId from the document batch response.
+# @prompt fileId Copy the document file ID
+GET {{baseUrl}}/documents/files/{{fileId}}
+Accept: application/json

@@ -1,5 +1,4 @@
 @url = {{BASE_URL}}/document-specifications
-@documentSpecificationId = replace-with-document-specification-uuid
 @legalAreaId = replace-with-legal-area-uuid
 @legalTopicId = replace-with-legal-topic-uuid
 
@@ -28,6 +27,7 @@ GET {{url}}?search=contrato&moment=formalization&status=available
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Create global document specification
+# @name createGlobalDocumentSpecification
 POST {{url}}
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
@@ -35,7 +35,15 @@ Content-Type: application/json
 {
   "name": "Modelo de identificação",
   "description": "Documento de identificação do cliente.",
-  "application": { "scope": "global", "moment": "consultation" }
+  "application": { "scope": "global", "moment": "consultation" },
+  "content": {
+    "type": "doc",
+    "content": [{
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Identificação do cliente." }]
+    }]
+  },
+  "variables": []
 }
 
 ### Create legal-context document specification
@@ -51,15 +59,23 @@ Content-Type: application/json
     "moment": "legal_production",
     "legalAreaIds": ["{{legalAreaId}}"],
     "legalTopicIdsByArea": { "{{legalAreaId}}": ["{{legalTopicId}}"] }
-  }
+  },
+  "content": {
+    "type": "doc",
+    "content": [{
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Modelo jurídico de exemplo." }]
+    }]
+  },
+  "variables": []
 }
 
 ### Get document specification
-GET {{url}}/{{documentSpecificationId}}
+GET {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Update configuration
-PATCH {{url}}/{{documentSpecificationId}}/configuration
+PATCH {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}/configuration
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
@@ -71,7 +87,7 @@ Content-Type: application/json
 }
 
 ### Update template
-PATCH {{url}}/{{documentSpecificationId}}/template
+PATCH {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}/template
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
@@ -92,4 +108,8 @@ Content-Type: application/json
 
 ### Reject invalid query
 GET {{url}}?pageSize=0
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+
+### Delete the created document specification
+DELETE {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

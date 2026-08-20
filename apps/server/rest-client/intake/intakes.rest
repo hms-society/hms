@@ -3,7 +3,6 @@
 # UUID placeholders using the identity and legal-catalog REST clients.
 
 @url = {{BASE_URL}}/intakes
-@intakeId = replace-with-intake-uuid
 @clientId = replace-with-client-uuid
 @userId = replace-with-collaborator-uuid
 @legalAreaId = replace-with-legal-area-uuid
@@ -36,6 +35,7 @@ GET {{url}}/responsibles
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Register intake
+# @name registerScheduledIntake
 POST {{url}}
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
@@ -57,7 +57,8 @@ Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 }
 
 ### Retry consultation scheduling
-POST {{url}}/{{intakeId}}/consultation-scheduling/retry
+# Expected: 409 while the intake is not in consultation_scheduling_failed.
+POST {{url}}/{{registerScheduledIntake.response.body.$.id}}/consultation-scheduling/retry
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
@@ -69,6 +70,7 @@ Content-Type: application/json
 }
 
 ### Register intake without scheduling
+# @name registerRegisteredIntake
 POST {{url}}
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
@@ -86,7 +88,7 @@ Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 }
 
 ### Get intake
-GET {{url}}/{{intakeId}}
+GET {{url}}/{{registerRegisteredIntake.response.body.$.id}}
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
@@ -96,23 +98,28 @@ Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Transition intake status
-PATCH {{url}}/{{intakeId}}/status
+# Use an intake currently in consultation_scheduled. Copy its current ID and
+# version from the GET response after scheduling has been resolved.
+# @prompt scheduledIntakeId Copy the scheduled intake ID
+# @prompt scheduledIntakeVersion Copy the current intake version
+PATCH {{url}}/{{scheduledIntakeId}}/status
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
-  "expectedVersion": 1,
+  "expectedVersion": {{scheduledIntakeVersion}},
   "status": "consultation_completed",
   "updatedBy": "{{userId}}"
 }
 
 ### Update intake editable fields
-PATCH {{url}}/{{intakeId}}
+# @name updateRegisteredIntake
+PATCH {{url}}/{{registerRegisteredIntake.response.body.$.id}}
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
-  "expectedVersion": 1,
+  "expectedVersion": {{registerRegisteredIntake.response.body.$.version}},
   "updatedBy": "{{userId}}",
   "responsibleId": "{{userId}}",
   "origin": "direct",
@@ -124,12 +131,13 @@ Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 }
 
 ### Close intake without contract
-POST {{url}}/{{intakeId}}/close
+# @name closeRegisteredIntake
+POST {{url}}/{{registerRegisteredIntake.response.body.$.id}}/close
 Content-Type: application/json
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
-  "expectedVersion": 1,
+  "expectedVersion": {{updateRegisteredIntake.response.body.$.version}},
   "closureReason": "out_of_scope",
   "updatedBy": "{{userId}}"
 }

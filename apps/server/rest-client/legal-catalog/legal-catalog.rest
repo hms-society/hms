@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/legal-catalog
-@legalAreaId = 276ab847-912b-4601-b6c4-e915ad93b7f6
+@legalAreaId = replace-with-legal-area-uuid
 
 ### List active legal areas
 GET {{url}}/areas

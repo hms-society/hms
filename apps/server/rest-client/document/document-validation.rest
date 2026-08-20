@@ -1,11 +1,11 @@
-@baseUrl = http://localhost:3333
+@baseUrl = {{BASE_URL}}
 
 # Use um id existente em document_batch_files após rodar o seed.
-@documentFileId = afcf8a0b-8954-47b6-81f7-2b5616506dbe
+@documentFileId = replace-with-document-file-uuid
 @seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
 
 ### 00. Sign in
-# @name signIn
+# @name signInAsSeededAdmin
 POST {{baseUrl}}/auth/sign-in
 Content-Type: application/json
 
@@ -14,22 +14,27 @@ Content-Type: application/json
   "password": "{{seedPassword}}"
 }
 
+### 00.1 Listar documentos para obter um documentFileId
+GET {{baseUrl}}/document-validation/documents
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
 ### 01. Ver documento atual
 # Mostra status, storagePath, campos extraídos, sugestão já registrada e vínculo.
 GET {{baseUrl}}/document-validation/documents/{{documentFileId}}
-Authorization: Bearer {{signIn.response.body.accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 ### 02. Ver logs da validação
 # Lista a auditoria do documento, incluindo usuário, status, metadados da sugestão, decisões e reenvios.
 GET {{baseUrl}}/document-validation/documents/{{documentFileId}}/logs
-Authorization: Bearer {{signIn.response.body.accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 ### 03. Solicitar reenvio
 # Salva uma solicitação de reenvio para o documento e registra o evento no log de validação.
 POST {{baseUrl}}/document-validation/documents/{{documentFileId}}/resend-request
-Authorization: Bearer {{signIn.response.body.accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -40,7 +45,7 @@ Content-Type: application/json
 ### 04. Registrar decisão humana
 # Registra a decisão final do usuário sobre a validação e grava a auditoria correspondente.
 PATCH {{baseUrl}}/document-validation/documents/{{documentFileId}}/decision
-Authorization: Bearer {{signIn.response.body.accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
