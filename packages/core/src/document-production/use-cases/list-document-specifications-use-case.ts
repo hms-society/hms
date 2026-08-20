@@ -93,7 +93,6 @@ export class ListDocumentSpecificationsUseCase
       name: record.name,
       description: record.description,
       application,
-      isRequired: record.isRequired,
       status: record.status,
     }
   }

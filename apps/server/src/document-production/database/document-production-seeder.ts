@@ -149,7 +149,6 @@ export class DocumentProductionSeeder {
           legalAreaIds: [area.id],
           legalTopicIdsByArea: { [area.id]: [topic.id] },
         },
-        isRequired: false,
         status: 'available',
       }))
     const specifications =

@@ -198,7 +198,6 @@ function createSpecification(
       scope: 'global',
       moment: 'consultation',
     },
-    isRequired: false,
     status: 'available',
     ...overrides,
   }

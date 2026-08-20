@@ -10,7 +10,6 @@ export type DocumentSpecification = {
   name: string
   description: string
   application: DocumentSpecificationApplication
-  isRequired: boolean
   content: DocumentTemplateContent
   variables: readonly DocumentTemplateVariable[]
   status: DocumentSpecificationStatus

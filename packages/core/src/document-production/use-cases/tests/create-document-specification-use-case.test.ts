@@ -30,7 +30,6 @@ describe('Create Document Specification Use Case', () => {
         scope: 'global',
         moment: 'formalization',
       },
-      isRequired: true,
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -49,7 +48,6 @@ describe('Create Document Specification Use Case', () => {
         scope: 'global',
         moment: 'formalization',
       },
-      isRequired: true,
       status: 'available',
       content: {
         type: 'doc',
@@ -65,7 +63,6 @@ describe('Create Document Specification Use Case', () => {
       name: 'Modelo indisponível',
       description: '',
       application: { scope: 'global', moment: 'consultation' },
-      isRequired: false,
       status: 'unavailable',
       content: { type: 'doc', content: [{ type: 'paragraph' }] },
       variables: [],
@@ -88,7 +85,6 @@ describe('Create Document Specification Use Case', () => {
       name: 'Modelo',
       description: 'Descrição',
       application,
-      isRequired: false,
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -115,7 +111,6 @@ describe('Create Document Specification Use Case', () => {
         scope: 'global',
         moment: 'consultation',
       },
-      isRequired: false,
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -140,7 +135,6 @@ describe('Create Document Specification Use Case', () => {
           scope: 'global',
           moment: 'consultation',
         },
-        isRequired: false,
       }),
     ).rejects.toBeInstanceOf(InvalidDocumentSpecificationConfigurationError)
     expect(repository.add).not.toHaveBeenCalled()

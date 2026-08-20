@@ -5,6 +5,8 @@ export type DocumentPackage = {
   readonly id: string
   readonly context: DocumentPackageContext
   readonly documents: readonly PackageDocument[]
+  readonly confirmedAt?: Date
+  readonly confirmedByCollaboratorId?: string
   readonly createdAt: Date
   readonly updatedAt: Date
 }

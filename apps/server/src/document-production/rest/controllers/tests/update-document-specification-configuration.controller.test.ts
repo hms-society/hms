@@ -26,7 +26,6 @@ function createSpec(
     content: templateContent,
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
-    isRequired: false,
     status: 'unavailable',
     ...overrides,
   }
@@ -59,7 +58,6 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         description: specification.description,
         status: 'available',
         application: specification.application,
-        isRequired: specification.isRequired,
       })
       .expect(400)
   })
@@ -77,14 +75,12 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         description: 'Descrição atualizada',
         status: 'unavailable',
         application: { scope: 'global', moment: 'formalization' },
-        isRequired: true,
       })
       .expect(200)
 
     expect(response.body).toMatchObject({
       name: 'Modelo atualizado',
       application: { scope: 'global', moment: 'formalization' },
-      isRequired: true,
       content: templateContent,
     })
   })
@@ -102,7 +98,6 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         description: 'Descrição',
         status: 'unavailable',
         application: { scope: 'global', moment: 'consultation' },
-        isRequired: false,
       })
       .expect(403)
   })

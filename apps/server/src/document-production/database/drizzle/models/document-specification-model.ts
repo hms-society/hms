@@ -1,15 +1,6 @@
 import { sql } from 'drizzle-orm'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
-import {
-  boolean,
-  check,
-  index,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core'
+import { check, index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const documentSpecificationModel = pgTable(
   'document_specifications',
@@ -21,7 +12,6 @@ export const documentSpecificationModel = pgTable(
     variables: jsonb('variables').$type<unknown[]>().notNull().default([]),
     moment: text('moment').notNull(),
     scope: text('scope').notNull(),
-    isRequired: boolean('is_required').notNull().default(false),
     status: text('status').notNull().default('available'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()

@@ -72,7 +72,6 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       description,
       status: changes.status,
       application,
-      isRequired: changes.isRequired,
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),
     }

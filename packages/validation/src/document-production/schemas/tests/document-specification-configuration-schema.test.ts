@@ -27,7 +27,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: '  Procuração  ',
         description: '  Descrição  ',
         application: globalApplication,
-        isRequired: true,
         content,
         variables: [],
       }),
@@ -41,7 +40,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: 'Modelo',
         description: 'Descrição',
         application: legalApplication,
-        isRequired: false,
         status: 'unavailable',
       }),
     ).toBeTruthy()
@@ -50,7 +48,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: 'Modelo sem descrição',
         description: '',
         application: globalApplication,
-        isRequired: false,
         content,
         variables: [],
       }),
@@ -63,7 +60,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: 'Modelo',
         description: 'Descrição',
         application: { ...globalApplication, legalAreaIds: [] },
-        isRequired: false,
       }).success,
     ).toBe(false)
     expect(
@@ -71,7 +67,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: 'Modelo',
         description: 'Descrição',
         application: { ...legalApplication, legalTopicIdsByArea: {} },
-        isRequired: false,
         status: 'available',
       }).success,
     ).toBe(false)
@@ -80,7 +75,6 @@ describe('Document Specification Configuration Schemas', () => {
         name: 'Modelo',
         description: 'Descrição',
         application: globalApplication,
-        isRequired: false,
         status: 'draft',
       }).success,
     ).toBe(false)

@@ -39,6 +39,7 @@ import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-cata
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
 export class ConsultationModuleFixture {
@@ -78,6 +79,7 @@ export class ConsultationModuleFixture {
           IdentityModule,
           LegalCatalogModule,
           IntakeDatabaseModule,
+          SchedulingDatabaseModule,
           ConsultationDatabaseModule,
           DocumentProductionDatabaseModule,
           DocumentProductionProvisionModule,
@@ -203,7 +205,6 @@ export class ConsultationModuleFixture {
         name: 'Procuração',
         description: '',
         application: { scope: 'global', moment: 'consultation' },
-        isRequired: false,
         content: {
           type: 'doc',
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Texto' }] }],

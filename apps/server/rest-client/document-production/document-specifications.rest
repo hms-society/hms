@@ -20,8 +20,7 @@ Content-Type: application/json
 {
   "name": "Modelo de identificação",
   "description": "Documento de identificação do cliente.",
-  "application": { "scope": "global", "moment": "consultation" },
-  "isRequired": false
+  "application": { "scope": "global", "moment": "consultation" }
 }
 
 ### Create legal-context document specification
@@ -38,7 +37,6 @@ Content-Type: application/json
     "legalAreaIds": ["{{legalAreaId}}"],
     "legalTopicIdsByArea": { "{{legalAreaId}}": ["{{legalTopicId}}"] }
   },
-  "isRequired": true
 }
 
 ### Get document specification
@@ -54,8 +52,7 @@ Content-Type: application/json
   "name": "Modelo atualizado",
   "description": "Descrição atualizada.",
   "status": "unavailable",
-  "application": { "scope": "global", "moment": "formalization" },
-  "isRequired": true
+  "application": { "scope": "global", "moment": "formalization" }
 }
 
 ### Update template

@@ -5,6 +5,5 @@ export type DocumentSpecificationListRecord = {
   readonly name: string
   readonly description: string
   readonly application: DocumentSpecificationApplication
-  readonly isRequired: boolean
   readonly status: DocumentSpecificationStatus
 }

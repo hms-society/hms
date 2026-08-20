@@ -25,7 +25,6 @@ function createSpecification(
     content: templateContent,
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
-    isRequired: false,
     status: 'unavailable',
     ...overrides,
   }

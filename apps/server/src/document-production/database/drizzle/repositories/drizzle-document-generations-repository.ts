@@ -28,17 +28,7 @@ export class DrizzleDocumentGenerationsRepository
   async add(generation: DocumentGenerationCreation) {
     const [record] = await this.database
       .insert(documentGenerationModel)
-      .values({
-        id: generation.id,
-        documentId: generation.documentId,
-        documentSpecificationVersionId: generation.documentSpecificationVersionId,
-        requestedByCollaboratorId: generation.requestedByCollaboratorId,
-        source: generation.source,
-        template: generation.template,
-        status: generation.status,
-        attemptsCount: generation.attemptsCount,
-        findings: generation.findings,
-      })
+      .values(this.toInsertValues(generation))
       .returning()
 
     if (!record) {
@@ -49,6 +39,24 @@ export class DrizzleDocumentGenerationsRepository
     }
 
     return this.mapper.toDomain(record)
+  }
+
+  async addOrGet(generation: DocumentGenerationCreation) {
+    const [record] = await this.database
+      .insert(documentGenerationModel)
+      .values(this.toInsertValues(generation))
+      .onConflictDoNothing({ target: documentGenerationModel.id })
+      .returning()
+
+    if (record) return this.mapper.toDomain(record)
+
+    const existingGeneration = await this.findById(generation.id)
+    if (existingGeneration) return existingGeneration
+
+    throw new AppError(
+      'Não foi possível localizar a geração documental idempotente.',
+      'Erro de Persistência',
+    )
   }
 
   async removeAll() {
@@ -114,5 +122,19 @@ export class DrizzleDocumentGenerationsRepository
       .returning()
 
     return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  private toInsertValues(generation: DocumentGenerationCreation) {
+    return {
+      id: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: generation.documentSpecificationVersionId,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source: generation.source,
+      template: generation.template,
+      status: generation.status,
+      attemptsCount: generation.attemptsCount,
+      findings: generation.findings,
+    }
   }
 }

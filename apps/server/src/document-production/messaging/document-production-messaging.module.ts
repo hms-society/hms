@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common'
 
 import { DocumentProductionAiModule } from '@/document-production/ai/document-production-ai.module'
+import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import {
   GenerateDocumentJob,
   GenerateDocumentsInBatchJob,
 } from '@/document-production/messaging/inngest/jobs'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-options'
 
 export const DOCUMENT_PRODUCTION_INNGEST_FUNCTIONS = Symbol(
@@ -13,7 +15,12 @@ export const DOCUMENT_PRODUCTION_INNGEST_FUNCTIONS = Symbol(
 )
 
 @Module({
-  imports: [DocumentProductionAiModule, SharedMessagingModule],
+  imports: [
+    DocumentProductionAiModule,
+    DocumentProductionDatabaseModule,
+    SharedMessagingModule,
+    ProvisionModule,
+  ],
   providers: [
     GenerateDocumentJob,
     GenerateDocumentsInBatchJob,

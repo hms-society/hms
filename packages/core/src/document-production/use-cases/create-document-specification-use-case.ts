@@ -56,7 +56,6 @@ export class CreateDocumentSpecificationUseCase
       name,
       description,
       application,
-      isRequired: request.isRequired,
       content,
       variables,
       status,
