@@ -305,6 +305,26 @@ describe('ConsultationDocumentsPage', () => {
     )
   })
 
+  it('blocks the document package when the intake was closed without contract', () => {
+    useConsultationMock.mockReturnValue({
+      consultation: {
+        status: 'pending',
+        attendanceFinalizedAt: new Date('2026-08-19T12:00:00.000Z'),
+        intake: { status: 'closed_without_contract' },
+      },
+    })
+
+    renderPage()
+
+    expect(screen.getByRole('heading', { name: 'Documentos bloqueados' })).toBeDefined()
+    expect(
+      screen.getByText(
+        'Documentos não disponíveis para consultas encerradas sem contratação.',
+      ),
+    ).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'Selecionar documentos' })).toBeNull()
+  })
+
   it('locks only versioned package documents and submits additions', () => {
     const replaceSelection = vi.fn().mockResolvedValue(undefined)
     useConsultationDocumentSelectionQueryMock.mockReturnValue(

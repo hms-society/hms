@@ -27,7 +27,12 @@ const ORIGIN_MAP: Record<string, string> = {
 export type AttendanceFormProps = {
   consultationId: string
   onBack?: () => void
-  onFinalized?: () => void | Promise<void>
+  onFinalized?: (result: AttendanceFinalizationResult) => void | Promise<void>
+}
+
+export type AttendanceFinalizationResult = {
+  closedWithoutContract: boolean
+  intakeId: string
 }
 
 type NewFact = {
@@ -607,7 +612,10 @@ export function useAttendanceForm({
       localStorage.removeItem(`extra_client_fields_${consultationId}`)
       if (shouldNavigate) {
         if (onFinalized) {
-          await onFinalized()
+          await onFinalized({
+            closedWithoutContract: false,
+            intakeId: consultation?.intakeId ?? '',
+          })
         } else {
           onBack?.()
         }
@@ -668,7 +676,10 @@ export function useAttendanceForm({
       setClosureNotes('')
       setIsClosureConfirmationOpen(false)
       if (onFinalized) {
-        await onFinalized()
+        await onFinalized({
+          closedWithoutContract: true,
+          intakeId: consultation.intakeId,
+        })
       } else {
         onBack?.()
       }

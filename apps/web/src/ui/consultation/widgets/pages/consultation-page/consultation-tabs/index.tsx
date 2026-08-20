@@ -5,12 +5,14 @@ export type ConsultationTabsProps = {
   consultationId: string
   activeTab: 'details' | 'form' | 'package'
   isDocumentsEnabled: boolean
+  isDocumentsClosedWithoutContract?: boolean
 }
 
 export const ConsultationTabs = ({
   consultationId,
   activeTab,
   isDocumentsEnabled,
+  isDocumentsClosedWithoutContract = false,
 }: ConsultationTabsProps) => {
   return (
     <div className='w-full overflow-x-auto'>
@@ -60,7 +62,11 @@ export const ConsultationTabs = ({
         ) : (
           <span
             aria-disabled='true'
-            title='Finalize a ficha de atendimento para liberar os documentos.'
+            title={
+              isDocumentsClosedWithoutContract
+                ? 'Documentos não disponíveis para consultas encerradas sem contratação.'
+                : 'Finalize a ficha de atendimento para liberar os documentos.'
+            }
             className='flex cursor-not-allowed items-center gap-2 whitespace-nowrap pb-3 text-slate-300'
           >
             <Icon name='briefcase' className='h-4 w-4 shrink-0' />

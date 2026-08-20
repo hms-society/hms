@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
+
 import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
 import { useConsultationDocumentSelectionQuery } from '@/ui/document-production/hooks/use-consultation-document-selection-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -32,6 +34,8 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
   completeConsultationRef.current = completeConsultation
   navigateToRef.current = navigateTo
   const isAttendanceFinalized = Boolean(consultation?.attendanceFinalizedAt)
+  const isIntakeClosedWithoutContract =
+    consultation?.intake?.status === IntakeStatus.ClosedWithoutContract
   const isPackageConfirmed = Boolean(documentSelection?.confirmedAt)
   const canCompleteConsultation = isAttendanceFinalized && isPackageConfirmed
   const isConsultationPending = consultation?.status === 'pending'
@@ -90,7 +94,8 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
       <ConsultationTabs
         consultationId={consultationId}
         activeTab={activeTab}
-        isDocumentsEnabled={isAttendanceFinalized}
+        isDocumentsEnabled={isAttendanceFinalized && !isIntakeClosedWithoutContract}
+        isDocumentsClosedWithoutContract={isIntakeClosedWithoutContract}
       />
       {children}
     </div>

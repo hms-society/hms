@@ -54,19 +54,22 @@ export const ConfirmConsultationClosureDialog = ({
   onConfirm,
 }: ConfirmConsultationClosureDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className='max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-[696px] [&_[data-slot=dialog-close]]:top-6 [&_[data-slot=dialog-close]]:right-6 [&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-highlight/70 [&_[data-slot=dialog-close]]:text-foreground [&_[data-slot=dialog-close]]:hover:bg-highlight'>
-      <DialogHeader className='border-b border-border px-7 py-6 pr-20'>
+    <DialogContent className='max-h-[calc(100vh-3rem)] gap-0 overflow-y-auto rounded-xl p-0 sm:max-w-[696px] [&_[data-slot=dialog-close]]:top-4 [&_[data-slot=dialog-close]]:right-5 [&_[data-slot=dialog-close]]:size-11 [&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-highlight/70 [&_[data-slot=dialog-close]]:text-foreground [&_[data-slot=dialog-close]]:hover:bg-highlight'>
+      <DialogHeader className='border-b border-border px-6 py-6 pr-20'>
         <DialogTitle className='font-serif text-2xl font-semibold leading-tight text-brand'>
           Encerrar sem contratação?
         </DialogTitle>
-        <DialogDescription className='text-sm leading-6 text-muted-foreground'>
+        <DialogDescription className='text-base leading-6 text-muted-foreground'>
           Informe o motivo e confirme o encerramento definitivo deste intake.
         </DialogDescription>
       </DialogHeader>
 
-      <div className='space-y-6 px-7 py-6'>
+      <div className='space-y-5 px-6 py-5'>
         <div className='space-y-2'>
-          <Label htmlFor='consultation-closure-reason' className='text-sm font-semibold'>
+          <Label
+            htmlFor='consultation-closure-reason'
+            className='text-base font-semibold'
+          >
             Motivo do encerramento <span className='text-destructive'>*</span>
           </Label>
           <Select
@@ -78,8 +81,10 @@ export const ConfirmConsultationClosureDialog = ({
               aria-required='true'
               className='h-12 w-full rounded-lg px-4 text-base'
             >
-              <Icon name='tag' className='size-4 text-destructive' />
-              <SelectValue placeholder='Selecione um motivo' />
+              <span className='flex min-w-0 items-center gap-3'>
+                <Icon name='tag' className='size-5 shrink-0 text-destructive' />
+                <SelectValue placeholder='Selecione um motivo' />
+              </span>
             </SelectTrigger>
             <SelectContent>
               {Object.entries(CLOSURE_REASON_LABELS).map(([value, label]) => (
@@ -92,7 +97,7 @@ export const ConfirmConsultationClosureDialog = ({
         </div>
 
         <div className='space-y-2'>
-          <Label htmlFor='consultation-closure-notes' className='text-sm font-semibold'>
+          <Label htmlFor='consultation-closure-notes' className='text-base font-semibold'>
             Observações{' '}
             <span className='font-normal text-muted-foreground'>(opcional)</span>
           </Label>
@@ -102,12 +107,12 @@ export const ConfirmConsultationClosureDialog = ({
             onChange={(event) => onClosureNotesChange(event.target.value)}
             placeholder='Adicione informações complementares sobre o encerramento.'
             rows={4}
-            className='min-h-32 resize-none px-4 py-3 text-base'
+            className='min-h-32 resize-none rounded-lg px-4 py-3 text-base leading-6'
           />
         </div>
 
-        <div className='flex items-center gap-3 rounded-lg bg-highlight px-4 py-3 text-sm font-medium text-highlight-foreground'>
-          <Icon name='info' className='size-4 shrink-0' />
+        <div className='flex items-center gap-3 rounded-lg bg-highlight px-4 py-3 text-base font-medium text-highlight-foreground'>
+          <Icon name='info' className='size-5 shrink-0' />
           <span>O cliente e o histórico permanecerão disponíveis.</span>
         </div>
 
@@ -118,14 +123,14 @@ export const ConfirmConsultationClosureDialog = ({
         )}
       </div>
 
-      <DialogFooter className='border-t border-border bg-card px-7 py-5 sm:justify-end'>
+      <DialogFooter className='mx-0 mb-0 gap-3 rounded-b-xl border-t border-border bg-card px-6 py-5 sm:flex-row sm:justify-end'>
         <Button
           type='button'
-          variant='brand'
+          variant='outline'
           size='lg'
           onClick={() => onOpenChange(false)}
           disabled={isPending}
-          className='rounded-full px-8'
+          className='h-12 w-full rounded-full border-2 border-primary px-7 text-base text-primary hover:bg-highlight sm:min-w-36 sm:w-auto'
         >
           Cancelar
         </Button>
@@ -135,9 +140,9 @@ export const ConfirmConsultationClosureDialog = ({
           size='lg'
           onClick={onConfirm}
           disabled={isPending || !closureReason}
-          className='rounded-full bg-destructive px-8 text-destructive-foreground hover:bg-destructive/90'
+          className='h-12 w-full rounded-full bg-destructive px-7 text-base text-destructive-foreground hover:bg-destructive/90 sm:min-w-[300px] sm:w-auto'
         >
-          <Icon name='door-open' className='size-4' />
+          <Icon name='door-open' className='size-5' />
           {isPending ? 'Encerrando...' : 'Encerrar sem contratação'}
         </Button>
       </DialogFooter>

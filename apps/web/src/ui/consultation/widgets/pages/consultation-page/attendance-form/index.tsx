@@ -13,7 +13,10 @@ import { SelectFormDialog } from '@/ui/shared/widgets/dynamic-form/select-form'
 import { SelectedFormSection } from '@/ui/shared/widgets/dynamic-form/selected-form-section'
 import { ConfirmConsultationClosureDialog } from '@/ui/intake/widgets/components/confirm-consultation-closure-dialog'
 
-export type { AttendanceFormProps } from './use-attendance-form'
+export type {
+  AttendanceFinalizationResult,
+  AttendanceFormProps,
+} from './use-attendance-form'
 
 export const AttendanceForm = ({
   consultationId,

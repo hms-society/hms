@@ -3,6 +3,7 @@ import type {
   ConsultationDocumentVersionSummary,
 } from '@hms/core/consultation/domain/structures'
 import { DocumentGenerationStatus } from '@hms/core/document-production/domain/structures'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { useMemo, useState } from 'react'
 import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
 import { useConsultationDocumentsQuery } from '../../../hooks/use-consultation-documents-query'
@@ -106,13 +107,17 @@ export function useConsultationDocumentsPage({
 }: ConsultationDocumentsPageProps) {
   const { consultation } = useConsultation(consultationId)
   const isConsultationPending = consultation?.status === 'pending'
-  const isReadOnly = !isConsultationPending
   const isAttendanceFinalized = Boolean(consultation?.attendanceFinalizedAt)
+  const isIntakeClosedWithoutContract =
+    consultation?.intake?.status === IntakeStatus.ClosedWithoutContract
+  const isDocumentsBlockedByClosure = isIntakeClosedWithoutContract
+  const isReadOnly = !isConsultationPending || isDocumentsBlockedByClosure
+  const isDocumentsAvailable = isAttendanceFinalized && !isDocumentsBlockedByClosure
   const documentsQuery = useConsultationDocumentsQuery(consultationId, {
-    enabled: isAttendanceFinalized,
+    enabled: isDocumentsAvailable,
   })
   const selectionQuery = useConsultationDocumentSelectionQuery(consultationId, {
-    enabled: isAttendanceFinalized,
+    enabled: isDocumentsAvailable,
   })
   const selectionAction = useReplaceConsultationDocumentSelectionAction(consultationId)
   const cancellationAction = useCancelConsultationDocumentGenerationAction(consultationId)
@@ -250,6 +255,7 @@ export function useConsultationDocumentsPage({
     isPackageConfirming: packageConfirmationAction.isConfirming,
     packageConfirmationError: packageConfirmationAction.error,
     isError: documentsQuery.isError,
+    isDocumentsBlockedByClosure,
     isBatchGenerating:
       batchGeneration.isGeneratingDocuments ||
       batchGeneration.pendingDocumentIds.length > 0,

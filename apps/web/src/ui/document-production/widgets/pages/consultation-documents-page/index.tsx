@@ -27,6 +27,7 @@ export const ConsultationDocumentsPage = ({
     setIsSelectionOpen,
     isSelectionSaving,
     isLoading,
+    isDocumentsBlockedByClosure,
     isError,
     isCancellingDocument,
     handleGenerateDocument,
@@ -37,7 +38,7 @@ export const ConsultationDocumentsPage = ({
     handleConfirmPackage,
   } = useConsultationDocumentsPage({ consultationId })
 
-  if (!isAttendanceFinalized) {
+  if (!isAttendanceFinalized || isDocumentsBlockedByClosure) {
     return (
       <main className='mx-auto flex w-full flex-col'>
         <section className='rounded-xl border border-border bg-card px-4 py-8 text-center shadow-sm sm:px-5'>
@@ -46,8 +47,9 @@ export const ConsultationDocumentsPage = ({
             Documentos bloqueados
           </h1>
           <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
-            Finalize a ficha de atendimento para liberar o pacote de documentos da
-            consulta.
+            {isDocumentsBlockedByClosure
+              ? 'Documentos não disponíveis para consultas encerradas sem contratação.'
+              : 'Finalize a ficha de atendimento para liberar o pacote de documentos da consulta.'}
           </p>
         </section>
       </main>
