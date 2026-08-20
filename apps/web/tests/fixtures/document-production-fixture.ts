@@ -299,6 +299,25 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       }
 
       if (
+        url.pathname === `/consultations/${CONSULTATION_ID}` &&
+        request.method() === 'GET'
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: CONSULTATION_ID,
+            status: 'pending',
+            attendanceFinalizedAt: '2026-01-02T00:00:00.000Z',
+            legalAreaId: 'area-1',
+            legalTopicId: 'topic-1',
+            intake: { status: 'consultation_scheduled' },
+          }),
+        })
+        return
+      }
+
+      if (
         url.pathname === `/consultations/${CONSULTATION_ID}/documents` &&
         request.method() === 'GET'
       ) {
@@ -309,6 +328,22 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify(consultation.documents),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/consultations/${CONSULTATION_ID}/documents/selection` &&
+        request.method() === 'GET'
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            selectedDocumentSpecificationIds: ['spec-1'],
+            options: [],
+            confirmedAt: undefined,
+          }),
         })
         return
       }

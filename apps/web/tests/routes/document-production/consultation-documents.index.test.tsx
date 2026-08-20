@@ -36,10 +36,10 @@ test('lists consultation documents and navigates to the review route', async ({
     `${DOCUMENT_PRODUCTION_BACKEND}/consultations/${CONSULTATION_ID}/documents`,
   )
   expect(documentProduction.consultation.listRequests).toBe(1)
-
 })
 
 test('opens document selection and exercises narrow keyboard layout', async ({
+  documentProduction: _,
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
@@ -52,8 +52,6 @@ test('opens document selection and exercises narrow keyboard layout', async ({
   await selectDocuments.press('Enter')
 
   await expect(page.getByRole('dialog')).toBeVisible()
-  await expect(
-    page.getByRole('heading', { name: 'Selecionar documentos' }),
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Selecionar documentos' })).toBeVisible()
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'scroll')
 })

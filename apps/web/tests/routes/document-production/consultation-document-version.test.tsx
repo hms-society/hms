@@ -24,7 +24,9 @@ test('opens a version, preserves JSON editor content, and approves it with the r
     body: { decision: 'approved' },
   })
   await expect(
-    page.getByText('Esta versão foi aprovada e pode se tornar vigente.'),
+    page.getByText(
+      'A aprovação é definitiva. Selecione esta versão para torná-la vigente.',
+    ),
   ).toBeVisible()
 })
 
@@ -39,5 +41,7 @@ test('shows a conflict without claiming the review succeeded', async ({
   await page.getByRole('button', { name: 'Aprovar versão' }).last().click()
 
   await expect(page.getByRole('alert')).toContainText('Conflito')
-  await expect(page.getByText('Esta versão aguarda uma decisão final.')).toBeVisible()
+  await expect(
+    page.getByText('Revise o conteúdo antes de aprovar ou rejeitar esta versão.'),
+  ).toBeVisible()
 })
