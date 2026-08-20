@@ -25,7 +25,11 @@ type UserSeed = {
 }
 
 const DEFAULT_CLIENTS: ClientCreation[] = [
-  ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
+  ClientFaker.fake({
+    email: 'client@hms.br',
+    name: 'Cliente HMS Teste',
+    phone: '5511999999999',
+  }),
   ...ClientFaker.fakeMany(9),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
