@@ -4,8 +4,7 @@ import type { ClientRegisterDialogSearchResult } from '../use-client-register-di
 import { useMaskPhone } from '../../../../hooks/use-mask-phone'
 import { useMaskTaxId } from '../../../../hooks/use-mask-tax-id'
 
-export const CONSENT_LABELS: Record<ConsentType, string> = {
-  data_processing: 'Tratamento de dados',
+export const CONSENT_LABELS: Record<Exclude<ConsentType, 'data_processing'>, string> = {
   whatsapp_communication: 'WhatsApp',
   email_communication: 'E-mail',
   third_party_sharing: 'Terceiros',

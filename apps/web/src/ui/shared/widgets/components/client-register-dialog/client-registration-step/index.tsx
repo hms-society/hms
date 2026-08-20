@@ -49,7 +49,7 @@ export const ClientRegistrationStep = ({ dialog }: ClientRegistrationStepProps) 
             aria-invalid={Boolean(errors.type)}
             className='text-xs h-9'
           >
-            <NativeSelectOption value='natural'>Pessoa natural</NativeSelectOption>
+            <NativeSelectOption value='natural'>Pessoa física</NativeSelectOption>
             <NativeSelectOption value='legal'>Pessoa jurídica</NativeSelectOption>
           </NativeSelect>
           <FieldError className='text-xs text-destructive'>
@@ -136,7 +136,7 @@ export const ClientRegistrationStep = ({ dialog }: ClientRegistrationStepProps) 
         <h3 className='font-serif text-sm font-semibold text-foreground'>
           Contato{' '}
           <span className='font-sans font-normal text-xs text-muted-foreground'>
-            (opcional)
+            (e-mail ou WhatsApp obrigatório)
           </span>
         </h3>
         <div className='grid gap-4 sm:grid-cols-2'>
@@ -159,19 +159,24 @@ export const ClientRegistrationStep = ({ dialog }: ClientRegistrationStepProps) 
               {errors.email?.message}
             </FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={Boolean(errors.phone)}>
             <FieldLabel
               htmlFor='client-registration-phone'
               className='text-xs font-medium'
             >
-              Telefone
+              WhatsApp
             </FieldLabel>
             <Input
               id='client-registration-phone'
               autoComplete='tel'
+              placeholder='+55 (11) 99999-9999'
               className='h-9 text-xs'
+              aria-invalid={Boolean(errors.phone)}
               {...form.register('phone', { onChange: handlePhoneChange })}
             />
+            <FieldError className='text-xs text-destructive'>
+              {errors.phone?.message}
+            </FieldError>
           </Field>
         </div>
       </div>
@@ -315,18 +320,20 @@ export const ClientRegistrationStep = ({ dialog }: ClientRegistrationStepProps) 
         </p>
       )}
 
-      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'
-          className='rounded-pill text-sm font-medium h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill border-border bg-card px-5 text-sm font-medium'
           onClick={dialog.handleBackToIdentification}
         >
           Voltar
         </Button>
         <Button
           type='button'
-          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill px-5 text-sm font-medium shadow-xs'
           onClick={dialog.handleContinueToPrivacy}
         >
           Continuar

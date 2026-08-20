@@ -31,7 +31,7 @@ import {
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
-import { ActiveAdminGuard, AuthGuard } from '@/identity/guards'
+import { ActiveAdminGuard, ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
@@ -91,7 +91,7 @@ export class IdentityModuleFixture {
           ProvisionModule,
         ],
         controllers: controller ? [controller] : [],
-        providers: [DatetimeProvider, ActiveAdminGuard],
+        providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
       },
       (builder) =>
         builder

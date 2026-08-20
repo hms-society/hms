@@ -8,6 +8,10 @@
 GET {{url}}?page=1&pageSize=20&profile=lawyer&status=active&search={{COLLABORATOR_SEARCH}}
 Authorization: Bearer {{accessToken}}
 
+### List active lawyers for intake scheduling
+GET {{url}}/lawyers?page=1&limit=10&search={{COLLABORATOR_SEARCH}}
+Authorization: Bearer {{accessToken}}
+
 ### Get current collaborator
 GET {{url}}/me
 Authorization: Bearer {{accessToken}}

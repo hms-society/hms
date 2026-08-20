@@ -8,5 +8,6 @@ export type CollaboratorListQuery = {
   readonly status?: UserStatus
   readonly excludeUserId?: string
   readonly page?: number
+  readonly limit?: number
   readonly pageSize?: number
 }

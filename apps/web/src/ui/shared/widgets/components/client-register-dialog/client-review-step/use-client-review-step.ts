@@ -3,11 +3,11 @@ import { useWatch } from 'react-hook-form'
 import {
   CONSENT_TYPES,
   type ClientRegisterDialogValues,
+  type RegistrationConsentType,
   type RegistrationForm,
 } from '../use-client-register-dialog'
 
-export const CONSENT_LABELS: Record<(typeof CONSENT_TYPES)[number], string> = {
-  data_processing: 'Tratamento de dados',
+export const CONSENT_LABELS: Record<RegistrationConsentType, string> = {
   whatsapp_communication: 'WhatsApp',
   email_communication: 'E-mail',
   third_party_sharing: 'Terceiros',
@@ -44,7 +44,7 @@ export function useClientReviewStep(dialog: ClientRegisterDialogValues) {
     },
     {
       label: 'Tipo',
-      value: draft.type === 'natural' ? 'Pessoa natural' : 'Pessoa jurídica',
+      value: draft.type === 'natural' ? 'Pessoa física' : 'Pessoa jurídica',
     },
     {
       label: draft.type === 'natural' ? 'CPF' : 'CNPJ',
@@ -52,7 +52,7 @@ export function useClientReviewStep(dialog: ClientRegisterDialogValues) {
     },
   ]
   const contactRows: ReviewRow[] = [
-    { label: 'Telefone principal', value: draft.phone || MISSING_VALUE },
+    { label: 'WhatsApp principal', value: draft.phone || MISSING_VALUE },
     { label: 'E-mail', value: draft.email || MISSING_VALUE },
   ]
   const complementaryValues = [

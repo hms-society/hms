@@ -68,12 +68,48 @@ describe('useClientRegisterDialog', () => {
     expect(result.current.identificationForm.getValues('taxId')).toBe('')
   })
 
-  it('creates a client without sending consent data and completes without grants', async () => {
+  it('reopens the registration form with the saved draft when editing the review', () => {
+    const { result } = renderHook(() =>
+      useClientRegisterDialog({ open: true, onOpenChange, onClientSelected }),
+    )
+
+    act(() => {
+      result.current.registrationForm.setValue('type', 'legal')
+      result.current.registrationForm.setValue('legalName', 'Empresa HMS')
+      result.current.registrationForm.setValue('tradeName', 'HMS')
+      result.current.registrationForm.setValue('taxId', '11.222.333/0001-81')
+      result.current.registrationForm.setValue('email', 'contato@hms.com')
+      result.current.registrationForm.setValue('consents.email_communication', true)
+      result.current.handleEditRegistration()
+    })
+
+    expect(result.current.state).toBe('registration')
+    expect(result.current.registrationForm.getValues()).toMatchObject({
+      type: 'legal',
+      legalName: 'Empresa HMS',
+      tradeName: 'HMS',
+      taxId: '11.222.333/0001-81',
+      email: 'contato@hms.com',
+      consents: { email_communication: true },
+    })
+  })
+
+  it('creates a client and grants the selected communication consent', async () => {
     identityService.lookupClient.mockResolvedValue(
       new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
     )
     identityService.registerClient.mockResolvedValue(
       new RestResponse({ body: clientDetails }),
+    )
+    identityService.grantClientConsent.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'consent-id',
+          clientId: 'client-id',
+          type: 'whatsapp_communication',
+          grantedAt: new Date('2026-01-01'),
+        },
+      }),
     )
     const { result } = renderHook(() =>
       useClientRegisterDialog({ open: true, onOpenChange, onClientSelected }),
@@ -82,7 +118,11 @@ describe('useClientRegisterDialog', () => {
     act(() => result.current.identificationForm.setValue('taxId', '529.982.247-25'))
     await act(async () => result.current.handleLookup())
     act(() => result.current.handleContinueToRegistration())
-    act(() => result.current.registrationForm.setValue('name', 'Maria Aparecida'))
+    act(() => {
+      result.current.registrationForm.setValue('name', 'Maria Aparecida')
+      result.current.registrationForm.setValue('phone', '+55 (11) 99999-9999')
+      result.current.registrationForm.setValue('consents.whatsapp_communication', true)
+    })
     await act(async () => result.current.handleContinueToPrivacy())
     await act(async () => result.current.handleContinueToReview())
     await act(async () => result.current.handleSubmitRegistration())
@@ -93,8 +133,15 @@ describe('useClientRegisterDialog', () => {
     expect(identityService.registerClient.mock.calls[0]?.[0]).not.toHaveProperty(
       'consents',
     )
-    expect(identityService.grantClientConsent).not.toHaveBeenCalled()
-    expect(onClientSelected).toHaveBeenCalledWith(clientDetails)
+    expect(identityService.grantClientConsent).toHaveBeenCalledWith(
+      'client-id',
+      'whatsapp_communication',
+    )
+    expect(onClientSelected).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consents: [expect.objectContaining({ type: 'whatsapp_communication' })],
+      }),
+    )
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
   })
 
@@ -114,7 +161,7 @@ describe('useClientRegisterDialog', () => {
           body: {
             id: 'consent-id',
             clientId: 'client-id',
-            type: 'data_processing',
+            type: 'whatsapp_communication',
             grantedAt: new Date('2026-01-01'),
           },
         }),
@@ -128,7 +175,8 @@ describe('useClientRegisterDialog', () => {
     act(() => result.current.handleContinueToRegistration())
     act(() => {
       result.current.registrationForm.setValue('name', 'Maria Aparecida')
-      result.current.registrationForm.setValue('consents.data_processing', true)
+      result.current.registrationForm.setValue('phone', '+55 (11) 99999-9999')
+      result.current.registrationForm.setValue('consents.whatsapp_communication', true)
     })
     await act(async () => result.current.handleContinueToPrivacy())
     await act(async () => result.current.handleContinueToReview())

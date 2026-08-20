@@ -5,8 +5,7 @@ import { grantClientConsentSchema, lookupClientSchema, registerClientSchema } fr
 const cpf = '52998224725'
 const cnpj = '11222333000181'
 const consents = {
-  data_processing: false,
-  whatsapp_communication: false,
+  whatsapp_communication: true,
   email_communication: false,
   third_party_sharing: false,
 }
@@ -29,6 +28,7 @@ describe('Identity schemas', () => {
         type: 'natural',
         name: 'Maria Aparecida',
         taxId: '529.982.247-25',
+        phone: '+55 (11) 99999-9999',
         consents,
       }),
     ).toMatchObject({ type: 'natural', name: 'Maria Aparecida', taxId: cpf })
@@ -38,12 +38,54 @@ describe('Identity schemas', () => {
         type: 'legal',
         legalName: 'Empresa SJC',
         taxId: '11.222.333/0001-81',
+        email: 'contato@empresa.com',
         consents,
       }),
     ).toMatchObject({ type: 'legal', legalName: 'Empresa SJC', taxId: cnpj })
+
+    expect(
+      registerClientSchema.parse({
+        type: 'natural',
+        name: 'Maria Aparecida',
+        taxId: '529.982.247-25',
+        phone: '11999999999',
+        consents,
+      }).phone,
+    ).toBe('5511999999999')
   })
 
   it('rejects incompatible fields, invalid contact data, and partial addresses', () => {
+    expect(
+      registerClientSchema.safeParse({
+        type: 'natural',
+        name: 'Maria',
+        taxId: cpf,
+        consents,
+      }).success,
+    ).toBe(false)
+    expect(
+      registerClientSchema.safeParse({
+        type: 'natural',
+        name: 'Maria',
+        taxId: cpf,
+        phone: '+55 (11) 99999-9999',
+        consents: {
+          whatsapp_communication: false,
+          email_communication: false,
+          third_party_sharing: true,
+        },
+      }),
+    ).toMatchObject({
+      success: false,
+      error: {
+        issues: [
+          expect.objectContaining({
+            path: ['consents'],
+            message: 'Selecione pelo menos uma forma de comunicação: WhatsApp ou e-mail.',
+          }),
+        ],
+      },
+    })
     expect(
       registerClientSchema.safeParse({
         type: 'natural',
@@ -76,7 +118,7 @@ describe('Identity schemas', () => {
         type: 'natural',
         name: 'Maria',
         taxId: cpf,
-        consents: ['data_processing'],
+        consents: ['whatsapp_communication'],
       }).success,
     ).toBe(false)
   })
@@ -87,6 +129,7 @@ describe('Identity schemas', () => {
         type: 'natural',
         name: 'Maria',
         taxId: cpf,
+        email: 'maria@example.com',
         address: {
           street: 'Rua A',
           number: '10',

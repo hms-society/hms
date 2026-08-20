@@ -63,6 +63,18 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
       )
     },
 
+    listLawyers(query) {
+      const searchParams = new URLSearchParams()
+      searchParams.set('page', String(query.page ?? 1))
+      searchParams.set('limit', String(query.limit ?? 10))
+
+      if (query.search) searchParams.set('search', query.search)
+
+      return restClient.get<PaginationResponse<CollaboratorSummary>>(
+        `/collaborators/lawyers?${searchParams.toString()}`,
+      )
+    },
+
     getCollaborator(collaboratorId) {
       return restClient.get<CollaboratorSummary>(`/collaborators/${collaboratorId}`)
     },

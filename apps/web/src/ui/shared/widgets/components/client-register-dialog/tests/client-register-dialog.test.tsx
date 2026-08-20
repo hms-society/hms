@@ -125,4 +125,56 @@ describe('ClientRegisterDialog', () => {
     await waitFor(() => expect(screen.getByText('Dados do cliente')).toBeTruthy())
     expect(screen.getByDisplayValue('529.982.247-25')).toBeTruthy()
   })
+
+  it('validates WhatsApp on blur and enables only the matching communication consent', async () => {
+    identityService.lookupClient.mockResolvedValue(
+      new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
+    )
+    render(
+      <ClientRegisterDialog
+        open
+        onOpenChange={onOpenChange}
+        onClientSelected={onClientSelected}
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('CPF ou CNPJ'), {
+      target: { value: '529.982.247-25' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar cliente' }))
+    expect(await screen.findByText('Cliente não encontrado')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar cadastro' }))
+    await waitFor(() => expect(screen.getByText('Dados do cliente')).toBeTruthy())
+
+    const whatsapp = screen.getByLabelText('WhatsApp')
+    fireEvent.change(whatsapp, { target: { value: '55' } })
+    expect(screen.queryByText(/Informe um WhatsApp válido/)).toBeNull()
+    fireEvent.blur(whatsapp)
+    expect(await screen.findByText(/Informe um WhatsApp válido/)).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('Nome completo'), {
+      target: { value: 'Maria Aparecida' },
+    })
+    fireEvent.change(whatsapp, { target: { value: '+55 (11) 99999-9999' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+
+    await waitFor(() =>
+      expect(screen.getByText('Privacidade e consentimentos')).toBeTruthy(),
+    )
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Comunicação por WhatsApp',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(false)
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Comunicação por e-mail',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true)
+  })
 })

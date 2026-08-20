@@ -22,14 +22,12 @@ export function useClientRegistrationStep(dialog: ClientRegisterDialogValues) {
   function handleTaxIdChange(event: ChangeEvent<HTMLInputElement>) {
     form.setValue('taxId', maskTaxId(event.target.value), {
       shouldDirty: true,
-      shouldTouch: true,
     })
   }
 
   function handlePhoneChange(event: ChangeEvent<HTMLInputElement>) {
     form.setValue('phone', maskPhone(event.target.value), {
       shouldDirty: true,
-      shouldTouch: true,
     })
   }
 

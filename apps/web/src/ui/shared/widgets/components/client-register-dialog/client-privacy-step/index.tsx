@@ -2,7 +2,7 @@ import { Controller } from 'react-hook-form'
 
 import { Button } from '@/ui/shadcn/button'
 import { Checkbox } from '@/ui/shadcn/checkbox'
-import { Field, FieldDescription, FieldLabel } from '@/ui/shadcn/field'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/ui/shadcn/field'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import type { ClientRegisterDialogValues } from '../use-client-register-dialog'
@@ -22,7 +22,7 @@ export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
           Privacidade e consentimentos
         </h2>
         <p className='mt-1 text-xs text-muted-foreground leading-relaxed sm:text-sm'>
-          Estas escolhas são independentes e nenhuma delas impede a criação do cliente.
+          Selecione pelo menos uma forma de comunicação para continuar.
         </p>
       </div>
       <div className='rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs sm:text-sm'>
@@ -37,7 +37,12 @@ export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
       {/* Lista de Consentimentos */}
       <fieldset className='grid gap-3'>
         <legend className='sr-only'>Consentimentos disponíveis</legend>
-        {consentFields.map(function renderConsentField({ type, copy, fieldName }) {
+        {consentFields.map(function renderConsentField({
+          type,
+          copy,
+          fieldName,
+          disabled,
+        }) {
           return (
             <Controller
               key={type}
@@ -47,11 +52,13 @@ export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
                 return (
                   <Field
                     orientation='horizontal'
-                    className='flex items-start gap-3.5 rounded-xl border border-border bg-card/60 p-4 transition-colors hover:bg-card'
+                    data-disabled={disabled || undefined}
+                    className={`flex items-start gap-3.5 rounded-xl border border-border bg-card/60 p-4 transition-colors ${disabled ? 'opacity-50' : 'hover:bg-card'}`}
                   >
                     <Checkbox
                       id={`client-consent-${type}`}
                       checked={field.value ?? false}
+                      disabled={disabled}
                       onCheckedChange={getConsentChangeHandler(field.onChange)}
                       onBlur={field.onBlur}
                       className='mt-0.5'
@@ -79,6 +86,8 @@ export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
         })}
       </fieldset>
 
+      <FieldError>{form.formState.errors.consents?.message}</FieldError>
+
       {dialog.asyncError && (
         <p role='alert' className='text-xs font-medium text-destructive'>
           {dialog.asyncError}
@@ -86,18 +95,20 @@ export const ClientPrivacyStep = ({ dialog }: ClientPrivacyStepProps) => {
       )}
 
       {/* Footer de Ações Unificado */}
-      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'
-          className='rounded-pill text-sm font-medium h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill border-border bg-card px-5 text-sm font-medium'
           onClick={dialog.handleBackToRegistration}
         >
           Voltar
         </Button>
         <Button
           type='button'
-          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill px-5 text-sm font-medium shadow-xs'
           onClick={dialog.handleContinueToReview}
         >
           Revisar cadastro

@@ -68,6 +68,23 @@ describe('IdentityService', () => {
     expect(result).toBe(response)
   })
 
+  it('lists active lawyers with page and limit parameters', async () => {
+    const response = new RestResponse({ body: collaboratorsPage })
+    const get = vi.fn<RestClient['get']>().mockResolvedValue(response)
+    const service = IdentityService({ get } as unknown as RestClient)
+
+    const result = await service.listLawyers({
+      page: 2,
+      limit: 10,
+      search: 'Ana Ribeiro',
+    })
+
+    expect(get).toHaveBeenCalledWith(
+      '/collaborators/lawyers?page=2&limit=10&search=Ana+Ribeiro',
+    )
+    expect(result).toBe(response)
+  })
+
   it('gets collaborator details by collaboratorId', async () => {
     const response = new RestResponse({ body: collaboratorSummary })
     const get = vi.fn<RestClient['get']>().mockResolvedValue(response)
