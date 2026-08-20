@@ -24,9 +24,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         <main className='relative flex min-h-screen min-w-0 flex-1 flex-col'>
           <Navbar />
 
-          <div className='flex-1 flex flex-col px-4 pt-[116px] pb-8 sm:px-8'>
-            {children}
-          </div>
+          <div className='flex-1 flex flex-col px-6 pt-28 pb-8 sm:px-12'>{children}</div>
         </main>
       </div>
     </CommunicationProvider>
