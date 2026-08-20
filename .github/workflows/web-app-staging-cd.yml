@@ -1,9 +1,9 @@
 name: Web App Staging CD
 
 on:
-  pull_request:
+  push:
     branches:
-      - develop
+      - feat/scrum-138-document-production-server-develop
   workflow_dispatch:
 
 permissions: {}
