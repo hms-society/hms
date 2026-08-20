@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { AppError } from '@hms/core/shared/domain/errors'
 import { EnvProvider } from '../env/env-provider'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 
@@ -18,23 +19,21 @@ export class SupabaseStorageProvider implements StorageProvider {
 
   async upload(path: string, file: Uint8Array, mimeType: string): Promise<string> {
     // Ensure the bucket exists
-    if (this.bucketName) {
-      await this.supabase.storage
-        .createBucket(this.bucketName, {
-          public: true,
-        })
-        .catch(() => {})
-    }
+    await this.supabase.storage
+      .createBucket(this.bucketName, {
+        public: false,
+      })
+      .catch(() => {})
 
     const { error } = await this.supabase.storage
-      .from(this.bucketName || 'documents')
+      .from(this.bucketName)
       .upload(path, file, {
         contentType: mimeType,
         upsert: true,
       })
 
     if (error) {
-      throw new Error(error.message)
+      throw new AppError(error.message, 'Erro no Armazenamento de Documentos')
     }
 
     return path
