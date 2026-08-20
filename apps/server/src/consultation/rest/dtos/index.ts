@@ -1,4 +1,7 @@
 export * from './consultation-document-generation-response.dto'
+export * from './consultation-response.dto'
+export * from './finalize-consultation-attendance-request.dto'
+export * from './consultation-document-package-confirmation-response.dto'
 export * from './consultation-document-selection-response.dto'
 export * from './consultation-document-version-response.dto'
 export * from './list-consultation-documents-response.dto'

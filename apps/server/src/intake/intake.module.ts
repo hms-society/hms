@@ -14,6 +14,7 @@ import {
   RegisterIntakesController,
   RetryIntakeConsultationSchedulingController,
   TransitionIntakeStatusController,
+  UpdateIntakeController,
 } from '@/intake/rest/controllers'
 
 @Module({
@@ -32,6 +33,7 @@ import {
     GetIntakesController,
     ListClientIntakesController,
     TransitionIntakeStatusController,
+    UpdateIntakeController,
     CloseIntakeWithoutContractController,
   ],
   exports: [IntakeMessagingModule],

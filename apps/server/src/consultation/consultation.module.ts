@@ -5,7 +5,13 @@ import { ConsultationMessagingModule } from '@/consultation/messaging/consultati
 import {
   GenerateConsultationDocumentController,
   CancelConsultationDocumentGenerationController,
+  CompleteConsultationController,
+  ConfirmConsultationDocumentPackageController,
+  EditConsultationAttendanceController,
+  FinalizeConsultationAttendanceController,
   GenerateConsultationDocumentsController,
+  GetConsultationController,
+  GetConsultationByIntakeController,
   GetConsultationDocumentSelectionController,
   GetConsultationDocumentVersionController,
   ListConsultationDocumentsController,
@@ -20,24 +26,34 @@ import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 
 @Module({
   imports: [
     IdentityModule,
     LegalCatalogModule,
     IntakeDatabaseModule,
+    SchedulingDatabaseModule,
     ConsultationDatabaseModule,
     ConsultationMessagingModule,
     DocumentProductionDatabaseModule,
     DocumentProductionProvisionModule,
     SharedMessagingModule,
     ProvisionModule,
+    SharedDatabaseModule,
   ],
   controllers: [
     CancelConsultationDocumentGenerationController,
+    CompleteConsultationController,
+    ConfirmConsultationDocumentPackageController,
+    EditConsultationAttendanceController,
+    FinalizeConsultationAttendanceController,
     GenerateConsultationDocumentController,
     GenerateConsultationDocumentsController,
+    GetConsultationController,
+    GetConsultationByIntakeController,
     GetConsultationDocumentSelectionController,
     GetConsultationDocumentVersionController,
     ListConsultationDocumentsController,

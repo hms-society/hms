@@ -7,6 +7,7 @@ import type { IdentifiedRisk } from './identified-risk'
 import type { PotentialLegalRequest } from './potential-legal-request'
 import type { RelevantFact } from './relevant-fact'
 import type { ConsultationSuggestion } from './consultation-suggestion'
+import type { DynamicFormAnswer, DynamicFormSnapshot } from '../../../shared/domain'
 
 type ConsultationBase = {
   id: string
@@ -14,8 +15,8 @@ type ConsultationBase = {
   appointmentId: string
   clientId: string
   assignedLawyerId: string
-  legalAreaId: string
-  legalTopicId: string
+  legalAreaId?: string
+  legalTopicId?: string
   primaryLegalQuestion?: string
   guidanceProvided?: string
   notes?: string
@@ -23,6 +24,13 @@ type ConsultationBase = {
   potentialLegalRequests: PotentialLegalRequest[]
   identifiedRisks: IdentifiedRisk[]
   suggestions: ConsultationSuggestion[]
+  viability?: string
+  decision?: string
+  dynamicFormId?: string
+  dynamicFormAnswers?: readonly DynamicFormAnswer[]
+  dynamicFormSnapshot?: DynamicFormSnapshot
+  attendanceFinalizedAt?: Date
+  attendanceFinalizedByCollaboratorId?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -44,18 +52,11 @@ type PendingConsultation = {
   noShowAt?: never
 }
 
-type ConsultationInProgress = {
-  status: typeof ConsultationStatus.InProgress
-  startedAt: Date
-  completedAt?: never
-  noShowAt?: never
-}
-
 type CompletedConsultation = {
   status: typeof ConsultationStatus.Completed
   primaryLegalQuestion: string
   guidanceProvided: string
-  startedAt: Date
+  startedAt?: Date
   completedAt: Date
   noShowAt?: never
 }
@@ -71,7 +72,6 @@ type ConsultationAttendance = InPersonConsultation | VirtualConsultation
 
 type ConsultationLifecycle =
   | PendingConsultation
-  | ConsultationInProgress
   | CompletedConsultation
   | NoShowConsultation
 

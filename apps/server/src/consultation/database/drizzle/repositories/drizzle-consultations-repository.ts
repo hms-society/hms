@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
-import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
+import type {
+  ConsultationUpdate,
+  ConsultationsRepository,
+} from '@hms/core/consultation/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { eq } from 'drizzle-orm'
 
@@ -69,6 +72,16 @@ export class DrizzleConsultationsRepository
       .from(consultationModel)
       .where(eq(consultationModel.intakeId, intakeId))
       .limit(1)
+
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async replace(consultationId: string, changes: ConsultationUpdate) {
+    const [record] = await this.database
+      .update(consultationModel)
+      .set({ ...changes, updatedAt: new Date() })
+      .where(eq(consultationModel.id, consultationId))
+      .returning()
 
     return record ? this.mapper.toDomain(record) : undefined
   }

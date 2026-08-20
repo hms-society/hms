@@ -9,6 +9,8 @@ export class DrizzleConsultationMapper {
     return {
       ...record,
       appointmentId: record.appointmentId ?? undefined,
+      legalAreaId: record.legalAreaId ?? undefined,
+      legalTopicId: record.legalTopicId ?? undefined,
       primaryLegalQuestion: record.primaryLegalQuestion ?? undefined,
       guidanceProvided: record.guidanceProvided ?? undefined,
       notes: record.notes ?? undefined,
@@ -17,6 +19,14 @@ export class DrizzleConsultationMapper {
       startedAt: record.startedAt ?? undefined,
       completedAt: record.completedAt ?? undefined,
       noShowAt: record.noShowAt ?? undefined,
+      dynamicFormId: record.dynamicFormId ?? undefined,
+      dynamicFormAnswers: record.dynamicFormAnswers ?? [],
+      dynamicFormSnapshot: record.dynamicFormSnapshot ?? undefined,
+      viability: record.viability ?? undefined,
+      decision: record.decision ?? undefined,
+      attendanceFinalizedAt: record.attendanceFinalizedAt ?? undefined,
+      attendanceFinalizedByCollaboratorId:
+        record.attendanceFinalizedByCollaboratorId ?? undefined,
     } as Consultation
   }
 }

@@ -27,8 +27,8 @@ export const intakeModel = pgTable(
     updatedBy: uuid('updated_by').notNull(),
     origin: intakeOriginModel('origin').notNull(),
     contactChannel: intakeContactChannelModel('contact_channel').notNull(),
-    legalAreaId: uuid('legal_area_id').notNull(),
-    legalTopicId: uuid('legal_topic_id').notNull(),
+    legalAreaId: uuid('legal_area_id'),
+    legalTopicId: uuid('legal_topic_id'),
     urgency: intakeUrgencyModel('urgency').default('normal').notNull(),
     demandNotes: text('demand_notes'),
     status: intakeStatusModel('status').notNull(),
@@ -69,14 +69,6 @@ export const intakeModel = pgTable(
           AND ${table.closedAt} IS NULL
         )
       )`,
-    ),
-    check(
-      'intakes_other_closure_notes_check',
-      sql`${table.closureReason} <> 'other'
-        OR (
-          ${table.closureNotes} IS NOT NULL
-          AND char_length(btrim(${table.closureNotes})) > 0
-        )`,
     ),
   ],
 )

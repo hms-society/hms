@@ -1,4 +1,5 @@
 export * from './consultation'
+export * from './consultation-details'
 export * from './consultation-suggestion'
 export * from './identified-risk'
 export * from './potential-legal-request'

@@ -97,7 +97,7 @@ describe('List Intakes Controller [GET /intakes]', () => {
       total: 2,
       totalPages: 2,
       statusCounts: {
-        all: 3,
+        all: 2,
         byStatus: {
           [IntakeListStatus.Contracted]: 1,
           [IntakeListStatus.ConsultationScheduled]: 1,

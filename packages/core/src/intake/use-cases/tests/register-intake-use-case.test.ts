@@ -9,7 +9,6 @@ import {
 } from '#consultation/domain/structures'
 
 import { IntakeFaker } from '../../domain/entities/fakers'
-import { InvalidIntakeClosureError } from '../../domain/errors'
 import {
   IntakeConsultationSchedulingRequestedEvent,
   IntakeCreatedEvent,
@@ -76,11 +75,13 @@ describe('Register Intake Use Case', () => {
         name: IntakeConsultationSchedulingRequestedEvent._NAME,
         payload: expect.objectContaining({
           intakeId: registeredIntake.id,
+          assignedLawyerId: registeredIntake.responsibleId,
           requestedBy: registeredIntake.updatedBy,
           occurredAt: currentDate,
         }),
       }),
     )
+    expect(repository.add.mock.calls[0]?.[0]).not.toHaveProperty('assignedLawyerId')
   })
 
   it('registers an Intake without scheduling', async () => {
@@ -95,8 +96,6 @@ describe('Register Intake Use Case', () => {
       updatedBy: registeredIntake.updatedBy,
       origin: registeredIntake.origin,
       contactChannel: registeredIntake.contactChannel,
-      legalAreaId: registeredIntake.legalAreaId,
-      legalTopicId: registeredIntake.legalTopicId,
       urgency: registeredIntake.urgency,
       demandNotes: registeredIntake.demandNotes,
     }
@@ -108,6 +107,8 @@ describe('Register Intake Use Case', () => {
         status: 'registered',
       }),
     )
+    expect(repository.add.mock.calls[0]?.[0]).not.toHaveProperty('legalAreaId')
+    expect(repository.add.mock.calls[0]?.[0]).not.toHaveProperty('legalTopicId')
     expect(broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({ name: IntakeCreatedEvent._NAME }),
     )
@@ -149,8 +150,9 @@ describe('Register Intake Use Case', () => {
     )
   })
 
-  it('rejects the other closure reason without notes', async () => {
-    const intake = IntakeFaker.fake()
+  it('registers a closed Intake without an observation', async () => {
+    const intake = IntakeFaker.fake({ status: 'closed_without_contract' })
+    repository.add.mockResolvedValue(intake)
     const useCase = new RegisterIntakeUseCase(repository, datetimeProvider, broker)
 
     await expect(
@@ -168,6 +170,14 @@ describe('Register Intake Use Case', () => {
         urgency: intake.urgency,
         demandNotes: intake.demandNotes,
       }),
-    ).rejects.toBeInstanceOf(InvalidIntakeClosureError)
+    ).resolves.toBe(intake)
+
+    expect(repository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'closed_without_contract',
+        closureReason: 'other',
+        closureNotes: undefined,
+      }),
+    )
   })
 })

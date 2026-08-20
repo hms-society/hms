@@ -17,6 +17,7 @@ Authorization: Bearer {{accessToken}}
 ### Register intake
 POST {{url}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "decision": "schedule_consultation",
@@ -26,8 +27,6 @@ Content-Type: application/json
   "channel": "google_meet",
   "clientId": "{{clientId}}",
   "responsibleId": "{{userId}}",
-  "createdBy": "{{userId}}",
-  "updatedBy": "{{userId}}",
   "origin": "direct",
   "contactChannel": "whatsapp",
   "legalAreaId": "{{legalAreaId}}",
@@ -51,13 +50,12 @@ Content-Type: application/json
 ### Register intake without scheduling
 POST {{url}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "decision": "register_intake",
   "clientId": "{{clientId}}",
   "responsibleId": "{{userId}}",
-  "createdBy": "{{userId}}",
-  "updatedBy": "{{userId}}",
   "origin": "direct",
   "contactChannel": "whatsapp",
   "legalAreaId": "{{legalAreaId}}",
@@ -83,6 +81,22 @@ Content-Type: application/json
   "expectedVersion": 1,
   "status": "consultation_completed",
   "updatedBy": "{{userId}}"
+}
+
+### Update intake editable fields
+PATCH {{url}}/{{intakeId}}
+Content-Type: application/json
+
+{
+  "expectedVersion": 1,
+  "updatedBy": "{{userId}}",
+  "responsibleId": "{{userId}}",
+  "origin": "direct",
+  "contactChannel": "whatsapp",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "urgency": "normal",
+  "demandNotes": "Orientação atualizada sobre a demanda do cliente."
 }
 
 ### Close intake without contract

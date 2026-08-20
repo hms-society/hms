@@ -8,8 +8,8 @@ export class IntakeConsultationSchedulingRequestedEvent extends Event<{
   intakeId: string
   clientId: string
   assignedLawyerId: string
-  legalAreaId: string
-  legalTopicId: string
+  legalAreaId?: string
+  legalTopicId?: string
   demandNotes?: string
   startsAt: Date
   modality: ConsultationModality

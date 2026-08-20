@@ -99,7 +99,7 @@ export class GenerateConsultationDocumentsUseCase
     consultation: Consultation
     intake: Intake
     client: Client
-    legalContext: LegalExpertiseCatalogResolution
+    legalContext?: LegalExpertiseCatalogResolution
   }> {
     const consultation = await this.consultationsRepository.findById(
       request.consultationId,
@@ -115,17 +115,18 @@ export class GenerateConsultationDocumentsUseCase
     const [intake, client, legalContexts] = await Promise.all([
       this.intakesRepository.findById(consultation.intakeId),
       this.clientsRepository.findById(consultation.clientId),
-      this.legalExpertiseCatalogProvider.resolve([
-        {
-          legalAreaId: consultation.legalAreaId,
-          legalTopicIds: [consultation.legalTopicId],
-        },
-      ]),
+      consultation.legalAreaId && consultation.legalTopicId
+        ? this.legalExpertiseCatalogProvider.resolve([
+            {
+              legalAreaId: consultation.legalAreaId,
+              legalTopicIds: [consultation.legalTopicId],
+            },
+          ])
+        : Promise.resolve([]),
     ])
     if (!intake) throw new ConsultationNotFoundError()
     if (!client) throw new ConsultationNotFoundError()
     const legalContext = legalContexts[0]
-    if (!legalContext) throw new ConsultationNotFoundError()
 
     return { consultation, intake, client, legalContext }
   }
@@ -134,10 +135,9 @@ export class GenerateConsultationDocumentsUseCase
     consultation: Consultation,
     intake: Intake,
     client: Client,
-    legalContext: LegalExpertiseCatalogResolution,
+    legalContext?: LegalExpertiseCatalogResolution,
   ): DocumentGenerationSource {
-    const legalTopic = legalContext.legalTopics[0]
-    if (!legalTopic) throw new ConsultationNotFoundError()
+    const legalTopic = legalContext?.legalTopics[0]
 
     return {
       type: 'consultation',
@@ -154,10 +154,14 @@ export class GenerateConsultationDocumentsUseCase
           phone: client.phone,
           address: client.address,
         },
-        legalContext: {
-          area: legalContext.legalArea,
-          topic: legalTopic,
-        },
+        ...(legalContext && legalTopic
+          ? {
+              legalContext: {
+                area: legalContext.legalArea,
+                topic: legalTopic,
+              },
+            }
+          : {}),
       },
     }
   }

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
 import { ConsultationFaker } from '@hms/core/consultation/domain/entities/fakers'
+import type { DynamicForm } from '@hms/core/shared/domain'
 import {
   ConsultationChannel,
   ConsultationModality,
@@ -19,6 +20,7 @@ export type ConsultationSeedReferences = {
   readonly assignedLawyerId: string
   readonly legalAreaId: string
   readonly legalTopicId: string
+  readonly dynamicForm?: DynamicForm
 }
 
 @Injectable()
@@ -37,7 +39,6 @@ export class ConsultationSeeder {
   }
 
   async run(references: ConsultationSeedReferences) {
-    const startedAt = new Date('2030-01-14T13:00:00.000Z')
     const consultation = ConsultationFaker.fake({
       id: DOCUMENT_PRODUCTION_CONSULTATION_ID,
       intakeId: references.intakeId,
@@ -48,15 +49,22 @@ export class ConsultationSeeder {
       legalTopicId: references.legalTopicId,
       modality: ConsultationModality.Virtual,
       channel: ConsultationChannel.GoogleMeet,
-      status: ConsultationStatus.Completed,
+      status: ConsultationStatus.Pending,
       primaryLegalQuestion:
         'Which powers are required to represent the client in the lease negotiation?',
       guidanceProvided:
         'Prepare a limited power of attorney for negotiation and document review.',
       notes:
         'The client wants representation restricted to the residential lease negotiation.',
-      startedAt,
-      completedAt: new Date('2030-01-14T13:45:00.000Z'),
+      dynamicFormId: references.dynamicForm?.id,
+      dynamicFormSnapshot: references.dynamicForm
+        ? {
+            dynamicFormId: references.dynamicForm.id,
+            name: references.dynamicForm.name,
+            description: references.dynamicForm.description,
+            fields: references.dynamicForm.fields,
+          }
+        : undefined,
     })
     const [createdConsultation] = await this.seed([consultation])
 

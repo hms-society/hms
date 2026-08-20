@@ -20,6 +20,13 @@ export interface ConsultationDocumentProductionService {
     consultationId: string,
     documentSpecificationIds: readonly string[],
   ): Promise<RestResponse<ConsultationDocumentSelection>>
+  confirmDocumentPackage(
+    consultationId: string,
+  ): Promise<RestResponse<{
+    readonly id: string
+    readonly confirmedAt: Date
+    readonly confirmedByCollaboratorId: string
+  }>>
   generateDocument(
     consultationId: string,
     documentId: string,

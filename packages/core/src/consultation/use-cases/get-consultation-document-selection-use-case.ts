@@ -1,6 +1,5 @@
 import type { UseCase } from '#shared/interfaces'
 import type { ConsultationDocumentSelection } from '../domain/structures'
-import type { DocumentSpecificationListRecord } from '../../document-production/domain/structures'
 import {
   CollaboratorProfile,
   type CollaboratorProfile as CollaboratorProfileValue,
@@ -21,18 +20,6 @@ type Request = {
   readonly consultationId: string
   readonly collaboratorId: string
   readonly collaboratorProfile: CollaboratorProfileValue
-}
-
-function isApplicableToConsultation(
-  application: DocumentSpecificationListRecord['application'],
-  legalAreaId: string,
-  legalTopicId: string,
-) {
-  if (application.scope === 'global') return true
-  return (
-    application.legalAreaIds.includes(legalAreaId) &&
-    application.legalTopicIdsByArea[legalAreaId]?.includes(legalTopicId) === true
-  )
 }
 
 export class GetConsultationDocumentSelectionUseCase
@@ -80,24 +67,18 @@ export class GetConsultationDocumentSelectionUseCase
     )
 
     return {
-      options: specificationsPage.items
-        .filter((specification) =>
-          isApplicableToConsultation(
-            specification.application,
-            consultation.legalAreaId,
-            consultation.legalTopicId,
-          ),
-        )
-        .map((specification) => ({
-          ...specification,
-          selected: selectedIds.has(specification.documentSpecificationId),
-          hasVersion: documentIdsWithVersions.has(
-            documentIdsBySpecification.get(specification.documentSpecificationId) ?? '',
-          ),
-        })),
+      options: specificationsPage.items.map((specification) => ({
+        ...specification,
+        selected: selectedIds.has(specification.documentSpecificationId),
+        hasVersion: documentIdsWithVersions.has(
+          documentIdsBySpecification.get(specification.documentSpecificationId) ?? '',
+        ),
+      })),
       selectedDocumentSpecificationIds: packageDocuments.map(
         ({ documentSpecificationId }) => documentSpecificationId,
       ),
+      confirmedAt: documentPackage?.confirmedAt,
+      confirmedByCollaboratorId: documentPackage?.confirmedByCollaboratorId,
     }
   }
 

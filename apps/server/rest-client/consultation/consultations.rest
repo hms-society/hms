@@ -22,6 +22,11 @@ GET {{BASE_URL}}/collaborators/me
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### Reopen the attendance form for editing
+PATCH {{url}}/{{consultationId}}/attendance/edit
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
 # Individual path: execute this request and wait for the Inngest run to finish
 # before requesting the same document again.
 

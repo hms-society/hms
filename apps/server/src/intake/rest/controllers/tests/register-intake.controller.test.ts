@@ -47,6 +47,8 @@ describe('Register Intakes Controller [POST /intakes]', () => {
     expect(response.body.id).toEqual(expect.any(String))
     expect(response.body.sequenceNumber).toBe(1)
     expect(response.body.status).toBe(IntakeStatus.ConsultationScheduling)
+    expect(response.body.createdBy).toBe(fixture.authUser.id)
+    expect(response.body.updatedBy).toBe(fixture.authUser.id)
   })
 
   it('registers an intake without scheduling', async () => {
@@ -57,18 +59,16 @@ describe('Register Intakes Controller [POST /intakes]', () => {
         decision: IntakeDecision.RegisterIntake,
         clientId: draft.clientId,
         responsibleId: draft.responsibleId,
-        createdBy: draft.createdBy,
-        updatedBy: draft.updatedBy,
         origin: draft.origin,
         contactChannel: draft.contactChannel,
-        legalAreaId: draft.legalAreaId,
-        legalTopicId: draft.legalTopicId,
         urgency: draft.urgency,
         demandNotes: draft.demandNotes,
       })
       .expect(201)
 
     expect(response.body.status).toBe('registered')
+    expect(response.body.legalAreaId).toBeUndefined()
+    expect(response.body.legalTopicId).toBeUndefined()
   })
 
   it('rejects consultation scheduling without an assigned lawyer', async () => {
@@ -83,8 +83,29 @@ describe('Register Intakes Controller [POST /intakes]', () => {
         channel: ConsultationChannel.WhatsappVideo,
         clientId: draft.clientId,
         responsibleId: draft.responsibleId,
-        createdBy: draft.createdBy,
-        updatedBy: draft.updatedBy,
+        origin: draft.origin,
+        contactChannel: draft.contactChannel,
+        legalAreaId: draft.legalAreaId,
+        legalTopicId: draft.legalTopicId,
+        urgency: draft.urgency,
+        demandNotes: draft.demandNotes,
+      })
+      .expect(400)
+
+    const intakes = await fixture.intakeListRepository.list({})
+
+    expect(intakes.total).toBe(0)
+  })
+
+  it('requires a closure reason when closing an intake without a contract', async () => {
+    const draft = IntakeFaker.fake()
+
+    await request(fixture.app.getHttpServer())
+      .post('/intakes')
+      .send({
+        decision: IntakeDecision.CloseWithoutContract,
+        clientId: draft.clientId,
+        responsibleId: draft.responsibleId,
         origin: draft.origin,
         contactChannel: draft.contactChannel,
         legalAreaId: draft.legalAreaId,

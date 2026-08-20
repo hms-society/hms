@@ -11,15 +11,18 @@ import { intakeDecisionSchema } from './intake-decision-schema'
 import { intakeOriginSchema } from './intake-origin-schema'
 import { intakeUrgencySchema } from './intake-urgency-schema'
 
+const optionalCatalogReferenceSchema = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().optional(),
+)
+
 export const registerIntakeBaseSchema = z.object({
   clientId: z.string(),
   responsibleId: z.string(),
-  createdBy: z.string(),
-  updatedBy: z.string(),
   origin: intakeOriginSchema,
   contactChannel: intakeContactChannelSchema,
-  legalAreaId: z.string(),
-  legalTopicId: z.string(),
+  legalAreaId: optionalCatalogReferenceSchema,
+  legalTopicId: optionalCatalogReferenceSchema,
   urgency: intakeUrgencySchema,
   demandNotes: z.string().optional(),
 })
@@ -35,12 +38,21 @@ export const registerIntakeSchema = registerIntakeBaseSchema
     closureReason: intakeClosureReasonSchema.optional(),
   })
   .superRefine((data, context) => {
+    if (data.decision === 'close_without_contract' && !data.closureReason) {
+      context.addIssue({
+        code: 'custom',
+        message:
+          'O motivo do encerramento é obrigatório para encerrar o intake sem contratação.',
+        path: ['closureReason'],
+      })
+    }
+
     if (data.decision !== 'schedule_consultation') return
 
     if (!data.assignedLawyerId) {
       context.addIssue({
         code: 'custom',
-        message: 'An assigned lawyer is required to schedule a consultation.',
+        message: 'O advogado responsável é obrigatório para agendar uma consulta.',
         path: ['assignedLawyerId'],
       })
     }
@@ -48,7 +60,7 @@ export const registerIntakeSchema = registerIntakeBaseSchema
     if (!data.startsAt) {
       context.addIssue({
         code: 'custom',
-        message: 'A start date is required to schedule a consultation.',
+        message: 'A data de início é obrigatória para agendar uma consulta.',
         path: ['startsAt'],
       })
     }
@@ -56,7 +68,7 @@ export const registerIntakeSchema = registerIntakeBaseSchema
     if (!data.modality) {
       context.addIssue({
         code: 'custom',
-        message: 'A modality is required to schedule a consultation.',
+        message: 'A modalidade é obrigatória para agendar uma consulta.',
         path: ['modality'],
       })
     }

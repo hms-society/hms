@@ -14,6 +14,7 @@ import type {
   PotentialLegalRequest,
   RelevantFact,
 } from '@hms/core/consultation/domain/entities'
+import type { DynamicFormAnswer, DynamicFormSnapshot } from '@hms/core/shared/domain'
 
 export const consultationModel = pgTable(
   'consultations',
@@ -23,8 +24,8 @@ export const consultationModel = pgTable(
     appointmentId: uuid('appointment_id').notNull(),
     clientId: uuid('client_id').notNull(),
     assignedLawyerId: uuid('assigned_lawyer_id').notNull(),
-    legalAreaId: uuid('legal_area_id').notNull(),
-    legalTopicId: uuid('legal_topic_id').notNull(),
+    legalAreaId: uuid('legal_area_id'),
+    legalTopicId: uuid('legal_topic_id'),
     primaryLegalQuestion: text('primary_legal_question'),
     guidanceProvided: text('guidance_provided'),
     notes: text('notes'),
@@ -41,6 +42,19 @@ export const consultationModel = pgTable(
       .$type<ConsultationSuggestion[]>()
       .default([])
       .notNull(),
+    viability: text('viability'),
+    decision: text('decision'),
+    dynamicFormId: uuid('dynamic_form_id'),
+    dynamicFormAnswers: jsonb('dynamic_form_answers')
+      .$type<readonly DynamicFormAnswer[]>()
+      .default([])
+      .notNull(),
+    dynamicFormSnapshot: jsonb('dynamic_form_snapshot').$type<DynamicFormSnapshot>(),
+    attendanceFinalizedAt: timestamp('attendance_finalized_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    attendanceFinalizedByCollaboratorId: uuid('attendance_finalized_by_collaborator_id'),
     modality: text('modality').notNull(),
     channel: text('channel'),
     status: text('status').notNull(),
@@ -67,7 +81,7 @@ export const consultationModel = pgTable(
     ),
     check(
       'consultations_status_check',
-      sql`${table.status} in ('pending', 'in_progress', 'completed', 'no_show')`,
+      sql`${table.status} in ('pending', 'completed', 'no_show')`,
     ),
     check(
       'consultations_modality_channel_check',

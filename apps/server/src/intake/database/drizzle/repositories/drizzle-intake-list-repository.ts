@@ -159,7 +159,6 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
 
     for (const groupedCount of groupedCounts) {
       const amount = groupedCount.count
-      all += amount
 
       if (groupedCount.status === 'registered') {
         registered = amount
@@ -167,6 +166,7 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
       }
 
       if (groupedCount.status in byStatus) {
+        all += amount
         byStatus[groupedCount.status as IntakeListStatus] = amount
       }
     }
