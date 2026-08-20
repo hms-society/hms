@@ -1,20 +1,23 @@
 import { useCallback, useMemo, useRef } from 'react'
 
+import { BROWSER_ENV } from '@/constants'
 import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
 import { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
-import { IntakeService } from '@/rest/services/intake-service'
-import { IdentityService } from '@/rest/services/identity-service'
-import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
+import { documentService } from '@/rest/services/DocumentEngineService'
+import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
-import { documentService } from '@/rest/services/DocumentEngineService'
-import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 import { DocumentValidationService } from '@/rest/services/document-validation-service'
+import { DynamicFormService } from '@/rest/services/dynamic-form-service'
+import { IdentityService } from '@/rest/services/identity-service'
+import { IntakeService } from '@/rest/services/intake-service'
+import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
+import { SchedulingService } from '@/rest/services/scheduling-service'
 
+import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import type { RestContextValue } from './types/rest-context-value'
-import { BROWSER_ENV } from '@/constants'
-import { documentService } from '@/rest/services/DocumentEngineService'
 
 export function useRestContextProvider(): RestContextValue {
   const { getSession, signOut } = useAuthContext()
@@ -49,8 +52,8 @@ export function useRestContextProvider(): RestContextValue {
     documentService: documentService(restClient),
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),
-    documentService: documentService(restClient),
     aiSuggestionsService: AiSuggestionsService(restClient),
     documentValidationService: DocumentValidationService(restClient),
+    dynamicFormService: DynamicFormService(restClient),
   }
 }

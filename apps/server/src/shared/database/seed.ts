@@ -12,6 +12,8 @@ import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { SchedulingSeeder } from '@/scheduling/database/scheduling-seeder'
+import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
+import { createDynamicFormSeeds } from '@/shared/database/dynamic-forms-seed-data'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
 
@@ -41,12 +43,15 @@ async function bootstrap() {
     await app.get(IntakeSeeder).clear()
     await app.get(RealDocumentsSeeder).clear()
     await app.get(DocumentsSeeder).clear()
+    await app.get(DynamicFormsSeeder).clear()
 
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(LegalCatalogSeeder).clear()
 
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
+    const dynamicFormSeeds = createDynamicFormSeeds(legalCatalog)
+    const dynamicForms = await app.get(DynamicFormsSeeder).run(dynamicFormSeeds)
     const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
     const legalTopic = legalCatalog.topics.find(
       (topic) => topic.legalAreaId === legalArea?.id && topic.name === 'Contratos',
@@ -54,6 +59,13 @@ async function bootstrap() {
 
     if (!legalArea || !legalTopic) {
       throw new AppError('Default lawyer legal expertise could not be seeded')
+    }
+
+    const consultationDynamicForm = dynamicForms.find(
+      ({ name }) => name === 'Triagem Cível',
+    )
+    if (!consultationDynamicForm) {
+      throw new AppError('Default consultation dynamic form could not be seeded')
     }
 
     const identitySeed = await app
@@ -96,6 +108,7 @@ async function bootstrap() {
       assignedLawyerId: lawyer.id,
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
+      dynamicForm: consultationDynamicForm,
     })
 
     if (!consultationSeed.consultation) {

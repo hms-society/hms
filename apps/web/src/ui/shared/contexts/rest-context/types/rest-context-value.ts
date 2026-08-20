@@ -8,6 +8,8 @@ import type { ConsultationDocumentProductionService } from '@/rest/services/cons
 import type { DocumentProductionService } from '@/rest/services/document-production-service'
 import type { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 import type { DocumentValidationService } from '@/rest/services/document-validation-service'
+import type { SchedulingService } from '@/rest/services/scheduling-service'
+import type { DynamicFormService } from '@/rest/services/dynamic-form-service'
 
 export type RestContextValue = {
   intakeService: ReturnType<typeof IntakeService>
@@ -19,9 +21,9 @@ export type RestContextValue = {
     typeof ConsultationDocumentProductionService
   >
   documentProductionService: ReturnType<typeof DocumentProductionService>
-  schedulingService?: any
+  schedulingService: ReturnType<typeof SchedulingService>
   documentService: ReturnType<typeof documentService>
   documentValidationService: ReturnType<typeof DocumentValidationService>
-  documentProductionService: ReturnType<typeof DocumentProductionService>
   aiSuggestionsService: ReturnType<typeof AiSuggestionsService>
+  dynamicFormService: ReturnType<typeof DynamicFormService>
 }
