@@ -109,16 +109,26 @@ Meta Cloud API webhook
 
 #### Local Testing & Tunneling (Webhooks)
 
-To receive webhooks on your local NestJS instance during development, configure a secure public HTTPS endpoint using a tunnel (e.g. `ngrok`):
+To avoid changing Meta Cloud API access tokens or Webhook Callback URLs on every local run, follow this shared environment workflow:
 
-1. **Environment Variables:** Set the following keys in your backend `.env` (`apps/server/.env`):
-   - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`: A custom string of your choice (e.g., `vibecoding`).
-   - `WHATSAPP_APP_SECRET`: The App Secret obtained from the Meta App Dashboard (used to verify event signatures).
-2. **Expose Server:** Start ngrok forwarding to the NestJS port (`3333`):
-   ```bash
-   ngrok http --url=your-subdomain.ngrok-free.dev 3333
-   ```
-3. **Configure Meta Dashboard:** In the Meta App Dashboard under **WhatsApp > Configuration**, set the Callback URL to `https://your-subdomain.ngrok-free.dev/integrations/whatsapp/webhook` and enter your verify token. Then, subscribe to the `messages` event field under **Webhook fields**.
+1. **Meta System User Token (Permanent Credential):**
+   - In Meta Business Manager, create a **System User** with Admin/Developer permissions.
+   - Assign the System User to your WhatsApp Business App and generate a permanent **System User Access Token** with permissions `whatsapp_business_messaging` and `whatsapp_business_management`.
+   - Set `WHATSAPP_API_TOKEN` and `WHATSAPP_PHONE_NUMBER_ID` in `.env`.
+
+2. **Static Ngrok Domain Setup:**
+   - Reserve a free static domain on your [Ngrok Dashboard](https://dashboard.ngrok.com/cloud-edge/domains) (e.g. `buckle-stinger-swoop.ngrok-free.dev`).
+   - Add `NGROK_DOMAIN=buckle-stinger-swoop.ngrok-free.dev` to your backend `.env` (`apps/server/.env`).
+
+3. **One-Time Meta Webhook Configuration:**
+   - In the Meta App Dashboard under **WhatsApp > Configuration**, set the Callback URL once to:
+     `https://buckle-stinger-swoop.ngrok-free.dev/integrations/whatsapp/webhook`
+   - Enter `WHATSAPP_WEBHOOK_VERIFY_TOKEN` (default: `vibecoding`).
+   - Subscribe to the `messages` event field under **Webhook fields**.
+
+4. **Start Tunnel:**
+   - Run `pnpm ngrok` in the root workspace to automatically open the static HTTPS tunnel forwarding to local NestJS port (`3333`).
+
 
 #### Webhook Lifecycle Flow
 
