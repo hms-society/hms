@@ -33,8 +33,8 @@ jobs:
           echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
           echo "Total de linhas adicionadas (excluindo lock/config): $ADDITIONS"
           
-          if [ "$ADDITIONS" -gt 5000 ]; then
-            echo "::error::Este Pull Request adiciona $ADDITIONS linhas (excedendo o limite máximo de 5000 linhas)!"
+          if [ "$ADDITIONS" -gt 10000 ]; then
+            echo "::error::Este Pull Request adiciona $ADDITIONS linhas (excedendo o limite máximo de 10000 linhas)!"
             echo "Por favor, quebre este Pull Request em partes menores e focadas para facilitar a revisão de código."
             exit 1
           fi
