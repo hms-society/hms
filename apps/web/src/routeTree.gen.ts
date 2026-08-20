@@ -50,7 +50,7 @@ import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
-import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
+import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
 const TriagemRouteRoute = TriagemRouteRouteImport.update({
   id: '/triagem',
@@ -268,8 +268,8 @@ const ConsultasConsultationIdDocumentosIndexRoute =
 const ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute =
   ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport.update(
     {
-      id: '/documentos/$documentId/_versoes/$documentVersionId',
-      path: '/documentos/$documentId/$documentVersionId',
+      id: '/documentos/$documentId/versoes/$documentVersionId',
+      path: '/documentos/$documentId/versoes/$documentVersionId',
       getParentRoute: () => ConsultasConsultationIdRouteRoute,
     } as any,
   )
@@ -316,7 +316,7 @@ export interface FileRoutesByFullPath {
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/consultas/$consultationId/documentos/$documentId/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -355,7 +355,7 @@ export interface FileRoutesByTo {
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/consultas/$consultationId/documentos/$documentId/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -400,7 +400,7 @@ export interface FileRoutesById {
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -446,7 +446,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
-    | '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
+    | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -485,7 +485,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos'
     | '/consultas/$consultationId'
     | '/consultas/$consultationId/documentos'
-    | '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
+    | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   id:
     | '__root__'
     | '/'
@@ -529,7 +529,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
-    | '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
+    | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -848,10 +848,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
-    '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId': {
-      id: '/consultas/$consultationId/documentos/$documentId/_versoes/$documentVersionId'
-      path: '/documentos/$documentId/$documentVersionId'
-      fullPath: '/consultas/$consultationId/documentos/$documentId/$documentVersionId'
+    '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': {
+      id: '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
+      path: '/documentos/$documentId/versoes/$documentVersionId'
+      fullPath: '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }

@@ -11,7 +11,7 @@ import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { PageTitle } from '@/ui/shared/widgets/components/page-title'
-import { DocumentEditor } from '@/ui/document-production/widgets/pages/document-specification-page/document-editor'
+import { DocumentEditor } from '@/ui/document-production/widgets/components/document-editor'
 import {
   type ConsultationDocumentVersionPageProps,
   useConsultationDocumentVersionPage,
