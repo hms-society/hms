@@ -158,7 +158,21 @@ describe('CollaboratorInvitePage', () => {
     expect(screen.queryByRole('button', { name: 'Criar minha senha' })).toBeNull()
   })
 
-  it('shows an unavailable state when the URL has no invite token', async () => {
+  it('renders the password form when the invite token was consumed into a session', () => {
+    render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+
+    expect(screen.getByRole('button', { name: 'Criar minha senha' })).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('shows an unavailable state when the URL has no invite token or session', async () => {
+    useAuthContextMock.mockReturnValue({
+      getSession: vi.fn().mockResolvedValue(null),
+      isLoading: false,
+      session: null,
+      updatePassword,
+    } as never)
+
     render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
 
     expect((await screen.findByRole('alert')).textContent).toContain(
