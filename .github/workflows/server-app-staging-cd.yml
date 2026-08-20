@@ -61,7 +61,6 @@ jobs:
           HMS_SERVER_APP_MODE: stg
           HMS_USER_SEED_PASSWORD: ${{ secrets.HMS_USER_SEED_PASSWORD_STG }}
           HMS_WEB_APP_URL: ${{ secrets.HMS_WEB_APP_URL_STG }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY_STG }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL_STG }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_STG }}
         run: pnpm --filter server db:seed

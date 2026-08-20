@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
-import { AppModule } from '@/app.module'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
@@ -14,13 +13,14 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
 import { SchedulingSeeder } from '@/scheduling/database/scheduling-seeder'
 import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
 import { createDynamicFormSeeds } from '@/shared/database/dynamic-forms-seed-data'
+import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 const LOGGER = new Logger('DatabaseSeed')
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule)
+  const app = await NestFactory.createApplicationContext(SeedModule)
 
   try {
     const envProvider = app.get(EnvProvider)
