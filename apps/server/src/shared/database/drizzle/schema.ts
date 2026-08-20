@@ -7,6 +7,7 @@ export * from '@/communication/database/drizzle/models/private-message-model'
 export * from '@/consultation/database/drizzle/models'
 export * from '@/scheduling/database/drizzle/models'
 export * from '@/shared/database/drizzle/schema/integracao-evento'
+export * from '@/shared/database/drizzle/models/dynamic-form-model'
 
 export * from '@/shared/database/drizzle/schema/scheduling'
 export * from '@/document-engine/database/drizzle/models/index'
