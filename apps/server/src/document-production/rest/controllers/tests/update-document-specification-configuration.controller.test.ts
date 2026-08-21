@@ -43,14 +43,14 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture.close())
 
-  it('rejects enabling an empty template', async () => {
+  it('allows enabling a specification before template content is added', async () => {
     const [specification] = await fixture.specificationsRepository.addMany([
       createSpec({ content: { type: 'doc', content: [] }, status: 'unavailable' }),
     ])
     const admin = await fixture.registerAdmin()
     if (!specification) throw new Error('Specification was not created')
 
-    await request(fixture.app.getHttpServer())
+    const response = await request(fixture.app.getHttpServer())
       .patch(`/document-specifications/${specification.id}/configuration`)
       .set('Authorization', fixture.authenticateAs(admin))
       .send({
@@ -59,7 +59,12 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         status: 'available',
         application: specification.application,
       })
-      .expect(400)
+      .expect(200)
+
+    expect(response.body).toMatchObject({
+      status: 'available',
+      content: { type: 'doc', content: [] },
+    })
   })
 
   it('updates configuration without changing template', async () => {

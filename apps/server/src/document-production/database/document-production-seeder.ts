@@ -36,7 +36,7 @@ export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
-  readonly requestedByCollaboratorId: string
+  readonly requestedByCollaboratorId?: string
 }
 
 type DocumentTemplateSeed = {
@@ -238,12 +238,14 @@ export class DocumentProductionSeeder {
       packageDocumentCreations,
     )
 
-    const generatedDocuments = await this.seedApprovedDocumentVersions({
-      documents,
-      specifications,
-      consultationId: references.consultationId,
-      requestedByCollaboratorId: references.requestedByCollaboratorId,
-    })
+    const generatedDocuments = references.requestedByCollaboratorId
+      ? await this.seedApprovedDocumentVersions({
+          documents,
+          specifications,
+          consultationId: references.consultationId,
+          requestedByCollaboratorId: references.requestedByCollaboratorId,
+        })
+      : { generations: [], versions: [] }
 
     return {
       specifications,
