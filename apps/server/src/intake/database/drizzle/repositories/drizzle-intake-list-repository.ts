@@ -8,7 +8,19 @@ import type {
 import { IntakeListStatus as IntakeListStatusValues } from '@hms/core/intake/domain/structures'
 import type { IntakeListResponse } from '@hms/core/intake/interfaces'
 import { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
-import { and, count, desc, eq, gte, inArray, lte, or, sql, type SQL } from 'drizzle-orm'
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -76,18 +88,23 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
     const clientIds = query.clientIds
 
     if (search) {
+      const searchConditions: SQL[] = []
       const sequenceNumber = this.parseSequenceNumber(search)
-      const protocolCondition = sequenceNumber
-        ? eq(intakeModel.sequenceNumber, sequenceNumber)
-        : undefined
-      const clientCondition = clientIds?.length
-        ? inArray(intakeModel.clientId, clientIds)
-        : clientIds
-          ? sql`false`
-          : undefined
-      const searchCondition = this.combineOr(protocolCondition, clientCondition)
+      const searchPattern = `%${this.escapeLikePattern(search)}%`
 
-      conditions.push(searchCondition ?? sql`false`)
+      if (sequenceNumber) {
+        searchConditions.push(eq(intakeModel.sequenceNumber, sequenceNumber))
+      }
+
+      searchConditions.push(ilike(intakeModel.demandNotes, searchPattern))
+
+      if (clientIds) {
+        searchConditions.push(
+          clientIds.length ? inArray(intakeModel.clientId, clientIds) : sql`false`,
+        )
+      }
+
+      conditions.push(or(...searchConditions) ?? sql`false`)
     } else if (clientIds) {
       conditions.push(
         clientIds.length ? inArray(intakeModel.clientId, clientIds) : sql`false`,
@@ -195,9 +212,8 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
     }
   }
 
-  private combineOr(first: SQL | undefined, second: SQL | undefined): SQL | undefined {
-    if (first && second) return or(first, second)
-    return first ?? second
+  private escapeLikePattern(value: string): string {
+    return value.replace(/[\\%_]/g, '\\$&')
   }
 
   private parseSequenceNumber(search: string): number | undefined {

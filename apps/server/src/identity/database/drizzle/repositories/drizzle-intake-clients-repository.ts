@@ -1,7 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import type { ClientListProjection } from '@hms/core/identity/domain/structures'
 import type { IntakeClientsRepository } from '@hms/core/identity/interfaces'
-import { asc, ilike, inArray } from 'drizzle-orm'
+import { asc, ilike, inArray, or } from 'drizzle-orm'
 
 import { clientModel } from '@/identity/database/drizzle/models'
 import {
@@ -32,7 +32,13 @@ export class DrizzleIntakeClientsRepository
     const clients = await this.database
       .select({ clientId: clientModel.id })
       .from(clientModel)
-      .where(ilike(clientModel.name, namePattern))
+      .where(
+        or(
+          ilike(clientModel.name, namePattern),
+          ilike(clientModel.legalName, namePattern),
+          ilike(clientModel.tradeName, namePattern),
+        ),
+      )
       .orderBy(asc(clientModel.id))
 
     return clients.map(({ clientId }) => clientId)
