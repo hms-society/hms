@@ -10,6 +10,7 @@ export type DocumentSpecification = {
   name: string
   description: string
   application: DocumentSpecificationApplication
+  accessClassification: string
   content: DocumentTemplateContent
   variables: readonly DocumentTemplateVariable[]
   status: DocumentSpecificationStatus

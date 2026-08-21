@@ -56,6 +56,7 @@ export class CreateDocumentSpecificationUseCase
       name,
       description,
       application,
+      accessClassification: request.accessClassification,
       content,
       variables,
       status,

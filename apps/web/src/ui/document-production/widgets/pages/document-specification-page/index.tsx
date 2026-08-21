@@ -24,9 +24,16 @@ import {
   useDocumentSpecificationPage,
 } from './use-document-specification-page'
 
+// 1. IMPORTAÇÕES ADICIONADAS
+import { Controller } from 'react-hook-form'
+import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+
 export type { DocumentSpecificationPageProps }
 
 export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps) => {
+  const { session } = useAuthContext()
+  const isAdmin = session?.user?.email === 'admin@hmsadvogados.com.br'
+
   const documentSpecificationPage = useDocumentSpecificationPage(props)
   const { form, application } = documentSpecificationPage
 
@@ -166,6 +173,42 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
                     onToggle={documentSpecificationPage.toggleAvailability}
                   />
                 </div>
+
+                {/* 3. NOVO CAMPO: CLASSIFICAÇÃO DE ACESSO */}
+                <div className='space-y-1.5 md:col-span-2'>
+                  <Label>Classificação de Acesso *</Label>
+                  <Controller
+                    control={form.control}
+                    name="accessClassification"
+                    render={({ field }) => (
+                      <div className="flex flex-col gap-1.5">
+                        <Select
+                          disabled={!isAdmin} // Bloqueia para não-admins
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a classificação" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Interno">Interno</SelectItem>
+                            <SelectItem value="Cliente">Cliente</SelectItem>
+                            <SelectItem value="Restrito">Restrito</SelectItem>
+                            <SelectItem value="Confidencial">Confidencial</SelectItem>
+                            <SelectItem value="Parceiro liberado">Parceiro liberado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {!isAdmin && (
+                          <span className="text-xs text-muted-foreground">
+                            Apenas administradores podem alterar a classificação (Padrão: Interno).
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
                 <div className='space-y-1.5 md:col-span-2'>
                   <Label htmlFor='document-description'>
                     Descrição interna (opcional)

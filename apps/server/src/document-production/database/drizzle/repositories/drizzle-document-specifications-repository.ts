@@ -121,6 +121,7 @@ export class DrizzleDocumentSpecificationsRepository
           legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
         },
         status: domain.status,
+        accessClassification: domain.accessClassification, 
       }
     })
 
@@ -148,6 +149,7 @@ export class DrizzleDocumentSpecificationsRepository
             moment: specification.application.moment,
             scope: specification.application.scope,
             status: specification.status,
+            accessClassification: specification.accessClassification,
           })),
         )
         .returning()
@@ -190,6 +192,7 @@ export class DrizzleDocumentSpecificationsRepository
           moment: specification.application.moment,
           scope: specification.application.scope,
           status: specification.status,
+          accessClassification: specification.accessClassification,
         })
         .returning()
 
@@ -224,6 +227,7 @@ export class DrizzleDocumentSpecificationsRepository
           moment: changes.application.moment,
           scope: changes.application.scope,
           status: changes.status,
+          accessClassification: changes.accessClassification,
           ...(changes.content !== undefined ? { content: changes.content } : {}),
           ...(changes.variables !== undefined
             ? { variables: [...changes.variables] }

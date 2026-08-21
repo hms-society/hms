@@ -6,4 +6,5 @@ export type DocumentSpecificationListRecord = {
   readonly description: string
   readonly application: DocumentSpecificationApplication
   readonly status: DocumentSpecificationStatus
+  readonly accessClassification: string
 }

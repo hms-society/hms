@@ -253,6 +253,13 @@
       "when": 1787172937448,
       "tag": "0035_outstanding_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1787325061721,
+      "tag": "0036_mighty_matthew_murdock",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,8 @@ export const documentSpecificationModel = pgTable(
     moment: text('moment').notNull(),
     scope: text('scope').notNull(),
     status: text('status').notNull().default('available'),
+    accessClassification: text('access_classification').notNull().default('Interno'),
+
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
@@ -33,6 +35,13 @@ export const documentSpecificationModel = pgTable(
       'document_specifications_status_check',
       sql`${table.status} in ('available', 'unavailable')`,
     ),
+    
+    // 2. NOVO: Trava de segurança no banco para os valores exatos
+    check(
+      'document_specifications_access_classification_check',
+      sql`${table.accessClassification} in ('Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado')`,
+    ),
+
     check(
       'document_specifications_variables_check',
       sql`jsonb_typeof(${table.variables}) = 'array'`,

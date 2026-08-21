@@ -71,6 +71,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       name,
       description,
       status: changes.status,
+      accessClassification: changes.accessClassification,
       application,
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),

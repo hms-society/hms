@@ -30,6 +30,7 @@ type ConfigurationForm = {
   description: string
   status: DocumentSpecificationStatus
   application: DocumentSpecificationApplication
+  accessClassification: string
 }
 
 const DEFAULT_CONFIGURATION: ConfigurationForm = {
@@ -37,6 +38,7 @@ const DEFAULT_CONFIGURATION: ConfigurationForm = {
   description: '',
   status: 'available',
   application: { scope: 'global', moment: 'consultation' },
+  accessClassification: 'Interno',
 }
 
 type DocumentSpecificationQueryError = Error & { statusCode?: number }
@@ -241,6 +243,7 @@ export function useDocumentSpecificationPage({
         description: value.description,
         status: value.status,
         application: value.application,
+        accessClassification: value.accessClassification ?? 'Interno',
       }
       form.reset(configuration, { keepDirty: false, keepTouched: false })
       setSavedConfiguration(configuration)
@@ -460,6 +463,7 @@ export function useDocumentSpecificationPage({
         description: watchedConfiguration.description,
         status: watchedConfiguration.status,
         application: watchedConfiguration.application,
+        accessClassification: watchedConfiguration.accessClassification,
         content,
         variables,
       })
