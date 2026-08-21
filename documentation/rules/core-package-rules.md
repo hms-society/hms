@@ -110,17 +110,50 @@ Consumers must import auth data structures from the structures barrel and the
 provider contract from the interfaces barrel. Do not place provider-specific
 types or Supabase imports in `packages/core`.
 
-## Only entities have identity
+## Entity identity and composition
 
-Only declarations inside an `entities` directory may own a local domain identity
-field named `id`. A structure represents a value, state, configuration, or
-relationship without an identity of its own and therefore normally must not
-declare an `id` property.
+Only domain entity declarations may own a local identity. An entity is represented
+as a type alias composed with the shared `Entity` type:
 
-If a domain concept needs an `id` so it can be referenced, edited, removed, or tracked
-independently, model it as an entity instead of a structure. Do not remove a necessary
-identity merely to keep the declaration in `structures`.
+```ts
+import type { Entity } from '#shared/domain/entities/entity'
 
+export type Intake = Entity & {
+  clientId: string
+  status: IntakeStatus
+  createdAt: Date
+}
+```
+
+`Entity` is a type, not an interface or class, and is the only owner of the
+identity property:
+
+```ts
+export type Entity = {
+  readonly id: string
+}
+```
+
+Entity files must therefore:
+
+- use `export type`, not `export interface`;
+- compose `Entity` with `Entity & {...}` or through a private base type that
+  already composes it;
+- never redeclare `id` locally;
+- keep their own fields mutable, without `readonly`. The identity remains
+  readonly because it is defined that way by `Entity`;
+- preserve this composition in discriminated unions by putting `Entity` on the
+  shared base type.
+
+A structure represents a value, state, configuration, or relationship without an
+identity of its own and normally must not declare a local `id`. If a domain concept
+needs an `id` so it can be referenced, edited, removed, or tracked independently,
+model it as an entity instead of a structure. Do not remove a necessary identity
+merely to keep the declaration in `structures`.
+
+Creation, update, summary, and projection types are separate contracts. They do
+not compose `Entity` merely because they are stored in an `entities` directory;
+use `Omit`, `Pick`, or a dedicated type for their input or read-model shape.
 Structures may contain explicitly named references to entities, such as
 `consultationId` or `legalAreaId`. External identity projections are the narrow
 exception: `AuthUser` may expose the provider's subject `id` because it represents

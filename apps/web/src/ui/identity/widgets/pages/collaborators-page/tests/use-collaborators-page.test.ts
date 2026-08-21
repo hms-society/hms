@@ -5,21 +5,42 @@ import { toast } from 'sonner'
 
 import { UserStatus } from '@hms/core/identity/domain/structures'
 
-import { useCollaboratorActions } from '../../../../hooks/use-collaborator-actions'
-import {
-  useCollaboratorJobTitlesQuery,
-  useCollaboratorsQuery,
-} from '../use-collaborators-query'
+import { useCancelCollaboratorInvitationAction } from '@/ui/identity/hooks/use-cancel-collaborator-invitation-action'
+import { useDeactivateCollaboratorAction } from '@/ui/identity/hooks/use-deactivate-collaborator-action'
+import { useCollaboratorJobTitlesQuery } from '@/ui/identity/hooks/use-collaborator-job-titles-query'
+import { useCollaboratorsQuery } from '@/ui/identity/hooks/use-collaborators-query'
+import { useReactivateCollaboratorAction } from '@/ui/identity/hooks/use-reactivate-collaborator-action'
+import { useRemoveCollaboratorAction } from '@/ui/identity/hooks/use-remove-collaborator-action'
+import { useResendCollaboratorInvitationAction } from '@/ui/identity/hooks/use-resend-collaborator-invitation-action'
 import type { CollaboratorAction } from '../use-collaborators-page'
 import { useCollaboratorsPage } from '../use-collaborators-page'
 
-vi.mock('../use-collaborators-query', () => ({
+vi.mock('@/ui/identity/hooks/use-collaborator-job-titles-query', () => ({
   useCollaboratorJobTitlesQuery: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-collaborators-query', () => ({
   useCollaboratorsQuery: vi.fn(),
 }))
 
-vi.mock('../../../../hooks/use-collaborator-actions', () => ({
-  useCollaboratorActions: vi.fn(),
+vi.mock('@/ui/identity/hooks/use-cancel-collaborator-invitation-action', () => ({
+  useCancelCollaboratorInvitationAction: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-deactivate-collaborator-action', () => ({
+  useDeactivateCollaboratorAction: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-reactivate-collaborator-action', () => ({
+  useReactivateCollaboratorAction: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-remove-collaborator-action', () => ({
+  useRemoveCollaboratorAction: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-resend-collaborator-invitation-action', () => ({
+  useResendCollaboratorInvitationAction: vi.fn(),
 }))
 
 vi.mock('sonner', () => ({
@@ -28,11 +49,23 @@ vi.mock('sonner', () => ({
   },
 }))
 
-const useCollaboratorActionsMock = vi.mocked(useCollaboratorActions)
+const useCancelCollaboratorInvitationActionMock = vi.mocked(
+  useCancelCollaboratorInvitationAction,
+)
+const useDeactivateCollaboratorActionMock = vi.mocked(useDeactivateCollaboratorAction)
 const useCollaboratorJobTitlesQueryMock = vi.mocked(useCollaboratorJobTitlesQuery)
 const useCollaboratorsQueryMock = vi.mocked(useCollaboratorsQuery)
+const useReactivateCollaboratorActionMock = vi.mocked(useReactivateCollaboratorAction)
+const useRemoveCollaboratorActionMock = vi.mocked(useRemoveCollaboratorAction)
+const useResendCollaboratorInvitationActionMock = vi.mocked(
+  useResendCollaboratorInvitationAction,
+)
 
-type CollaboratorActions = ReturnType<typeof useCollaboratorActions>
+type CollaboratorActions = ReturnType<typeof useCancelCollaboratorInvitationAction> &
+  ReturnType<typeof useDeactivateCollaboratorAction> &
+  ReturnType<typeof useReactivateCollaboratorAction> &
+  ReturnType<typeof useRemoveCollaboratorAction> &
+  ReturnType<typeof useResendCollaboratorInvitationAction>
 
 function createCollaboratorActions(
   overrides: Partial<CollaboratorActions> = {},
@@ -62,6 +95,39 @@ function createCollaboratorActions(
   }
 }
 
+function mockCollaboratorActions(actions: CollaboratorActions) {
+  useCancelCollaboratorInvitationActionMock.mockReturnValue({
+    cancelCollaboratorInvitation: actions.cancelCollaboratorInvitation,
+    cancelCollaboratorInvitationError: actions.cancelCollaboratorInvitationError,
+    isCancellingCollaboratorInvitation: actions.isCancellingCollaboratorInvitation,
+    resetCancelCollaboratorInvitation: actions.resetCancelCollaboratorInvitation,
+  })
+  useDeactivateCollaboratorActionMock.mockReturnValue({
+    deactivateCollaborator: actions.deactivateCollaborator,
+    deactivateCollaboratorError: actions.deactivateCollaboratorError,
+    isDeactivatingCollaborator: actions.isDeactivatingCollaborator,
+    resetDeactivateCollaborator: actions.resetDeactivateCollaborator,
+  })
+  useReactivateCollaboratorActionMock.mockReturnValue({
+    reactivateCollaborator: actions.reactivateCollaborator,
+    reactivateCollaboratorError: actions.reactivateCollaboratorError,
+    isReactivatingCollaborator: actions.isReactivatingCollaborator,
+    resetReactivateCollaborator: actions.resetReactivateCollaborator,
+  })
+  useRemoveCollaboratorActionMock.mockReturnValue({
+    removeCollaborator: actions.removeCollaborator,
+    removeCollaboratorError: actions.removeCollaboratorError,
+    isRemovingCollaborator: actions.isRemovingCollaborator,
+    resetRemoveCollaborator: actions.resetRemoveCollaborator,
+  })
+  useResendCollaboratorInvitationActionMock.mockReturnValue({
+    resendInvitation: actions.resendInvitation,
+    resendInvitationError: actions.resendInvitationError,
+    isResendingInvitation: actions.isResendingInvitation,
+    resetResendInvitation: actions.resetResendInvitation,
+  })
+}
+
 const collaborator = {
   collaboratorId: 'collaborator-id',
   professionalName: 'Ana Ribeiro',
@@ -75,7 +141,7 @@ const collaborator = {
 describe('useCollaboratorsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useCollaboratorActionsMock.mockReturnValue(createCollaboratorActions())
+    mockCollaboratorActions(createCollaboratorActions())
     useCollaboratorJobTitlesQueryMock.mockReturnValue({
       jobTitles: ['Advogada'],
       jobTitlesError: null,
@@ -228,7 +294,7 @@ describe('useCollaboratorsPage', () => {
   it('confirms a selected action through the matching mutation', async () => {
     const resendInvitation = vi.fn().mockResolvedValue(undefined)
     const resetResendInvitation = vi.fn()
-    useCollaboratorActionsMock.mockReturnValue(
+    mockCollaboratorActions(
       createCollaboratorActions({ resendInvitation, resetResendInvitation }),
     )
     const { result } = renderHook(() => useCollaboratorsPage(), {
@@ -264,9 +330,7 @@ describe('useCollaboratorsPage', () => {
 
   it('shows a success toast after deactivating a collaborator', async () => {
     const deactivateCollaborator = vi.fn().mockResolvedValue(undefined)
-    useCollaboratorActionsMock.mockReturnValue(
-      createCollaboratorActions({ deactivateCollaborator }),
-    )
+    mockCollaboratorActions(createCollaboratorActions({ deactivateCollaborator }))
     const { result } = renderHook(() => useCollaboratorsPage(), {
       wrapper: withNuqsTestingAdapter(),
     })
@@ -304,7 +368,7 @@ describe('useCollaboratorsPage', () => {
     const reset = vi.fn()
     const actions = createCollaboratorActions()
     Object.assign(actions, { [testCase.mutation]: mutation, [testCase.reset]: reset })
-    useCollaboratorActionsMock.mockReturnValue(actions)
+    mockCollaboratorActions(actions)
     const selectedCollaborator =
       testCase.kind === 'remove'
         ? { ...collaborator, status: 'disabled' as const, lastAccessAt: undefined }
@@ -326,7 +390,7 @@ describe('useCollaboratorsPage', () => {
 
   it('does not confirm an action while another action is pending', async () => {
     const deactivateCollaborator = vi.fn().mockResolvedValue(undefined)
-    useCollaboratorActionsMock.mockReturnValue(
+    mockCollaboratorActions(
       createCollaboratorActions({
         deactivateCollaborator,
         isDeactivatingCollaborator: true,

@@ -3,9 +3,9 @@ import type {
   DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type DocumentValidationLog = {
-  id: string
+export type DocumentValidationLog = Entity & {
   documentFileId: string
   actorId?: string
   action: DocumentValidationLogAction

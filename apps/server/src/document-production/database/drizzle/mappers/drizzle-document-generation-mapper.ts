@@ -13,7 +13,7 @@ export class DrizzleDocumentGenerationMapper {
       template: record.template,
       status: record.status as DocumentGeneration['status'],
       attemptsCount: record.attemptsCount,
-      findings: record.findings,
+      findings: [...record.findings],
       documentVersionId: record.documentVersionId ?? undefined,
       failureMessage: record.failureMessage ?? undefined,
       startedAt: record.startedAt ?? undefined,

@@ -1,7 +1,7 @@
 import type { Entity } from '#shared/domain/entities/entity'
 import type { CaseMemberRole } from '../structures'
 
-export interface CaseMember extends Entity {
+export type CaseMember = Entity & {
   caseId: string
   collaboratorId: string
   role: CaseMemberRole

@@ -2,9 +2,9 @@ import type {
   ConsultationSuggestionStatus,
   ConsultationSuggestionTarget,
 } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-type ConsultationSuggestionBase = {
-  id: string
+type ConsultationSuggestionBase = Entity & {
   consultationId: string
   target: ConsultationSuggestionTarget
   content: string

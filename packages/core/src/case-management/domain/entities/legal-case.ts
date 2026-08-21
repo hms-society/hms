@@ -1,7 +1,7 @@
 import type { Entity } from '#shared/domain/entities/entity'
 import type { LegalCaseStatus } from '../structures'
 
-export interface LegalCase extends Entity {
+export type LegalCase = Entity & {
   publicCode: string
   clientId: string
   intakeId: string

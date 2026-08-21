@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 
 import { useCollaboratorLegalAreasQuery } from '@/ui/identity/hooks/use-collaborator-legal-areas-query'
-import { useUpdateCollaboratorAction } from '@/ui/identity/widgets/components/collaborator-edit-dialog/use-update-collaborator-action'
+import { useUpdateCollaboratorAction } from '@/ui/identity/hooks/use-update-collaborator-action'
 import type { CollaboratorFormValues } from '@/ui/identity/widgets/components/collaborator-expertise-group'
 
 export type CollaboratorEditDialogProps = {

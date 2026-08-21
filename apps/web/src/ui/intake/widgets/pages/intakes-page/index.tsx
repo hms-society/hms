@@ -194,10 +194,10 @@ export const IntakesPage = () => {
             />
             <Input
               id='intake-search'
-              aria-label='Buscar por protocolo, pessoa, documento ou demanda'
+              aria-label='Buscar por ID, cliente ou demanda'
               value={searchParams.search}
               onChange={(event) => update({ search: event.target.value })}
-              placeholder='Buscar por protocolo, pessoa, documento ou demanda'
+              placeholder='Buscar por ID, cliente ou demanda'
               className='h-11 rounded-full border-input bg-card pl-11 text-sm shadow-none placeholder:text-muted-foreground/90'
             />
           </div>

@@ -4,21 +4,21 @@ import type {
   DocumentVersionSource,
   DocumentVersionStatus,
 } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type DocumentVersion = {
-  readonly id: string
-  readonly documentId: string
-  readonly documentGenerationId?: string
-  readonly sourceDocumentVersionId?: string
-  readonly fileId: string
-  readonly versionNumber: number
-  readonly source: DocumentVersionSource
-  readonly content: DocumentTemplateContent
-  readonly pendingMarkers: readonly DocumentPendingMarker[]
-  readonly createdByCollaboratorId: string
-  readonly createdAt: Date
-  readonly status: DocumentVersionStatus
-  readonly reviewedByCollaboratorId?: string
-  readonly reviewedAt?: Date
-  readonly rejectionReason?: string
+export type DocumentVersion = Entity & {
+  documentId: string
+  documentGenerationId?: string
+  sourceDocumentVersionId?: string
+  fileId: string
+  versionNumber: number
+  source: DocumentVersionSource
+  content: DocumentTemplateContent
+  pendingMarkers: DocumentPendingMarker[]
+  createdByCollaboratorId: string
+  createdAt: Date
+  status: DocumentVersionStatus
+  reviewedByCollaboratorId?: string
+  reviewedAt?: Date
+  rejectionReason?: string
 }

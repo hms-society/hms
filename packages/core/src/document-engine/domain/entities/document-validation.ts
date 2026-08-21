@@ -1,4 +1,5 @@
 import type { DocumentBatchChannel, DocumentValidationStatus } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
 export type DocumentValidationExtractedField = {
   label: string
@@ -38,8 +39,7 @@ export type DocumentValidationHumanCorrection = {
   message?: string
 }
 
-export type DocumentValidationDocument = {
-  id: string
+export type DocumentValidationDocument = Entity & {
   batchId: string
   fileName: string
   mimeType: string

@@ -1,7 +1,8 @@
-export type Document = {
-  readonly id: string
-  readonly title: string
-  readonly currentVersionId?: string
-  readonly createdAt: Date
-  readonly updatedAt: Date
+import type { Entity } from '../../../shared/domain/entities/entity'
+
+export type Document = Entity & {
+  title: string
+  currentVersionId?: string
+  createdAt: Date
+  updatedAt: Date
 }

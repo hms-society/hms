@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useCollaboratorLegalAreasQuery } from '@/ui/identity/hooks/use-collaborator-legal-areas-query'
-import { useRegisterCollaboratorAction } from '../use-register-collaborator-action'
+import { useRegisterCollaboratorAction } from '@/ui/identity/hooks/use-register-collaborator-action'
 
 import {
   useCollaboratorRegisterDialog,
@@ -13,7 +13,7 @@ vi.mock('@/ui/identity/hooks/use-collaborator-legal-areas-query', () => ({
   useCollaboratorLegalAreasQuery: vi.fn(),
 }))
 
-vi.mock('../use-register-collaborator-action', () => ({
+vi.mock('@/ui/identity/hooks/use-register-collaborator-action', () => ({
   useRegisterCollaboratorAction: vi.fn(),
 }))
 

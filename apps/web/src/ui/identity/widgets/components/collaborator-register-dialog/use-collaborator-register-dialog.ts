@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 
 import { useCollaboratorLegalAreasQuery } from '@/ui/identity/hooks/use-collaborator-legal-areas-query'
-import { useRegisterCollaboratorAction } from './use-register-collaborator-action'
+import { useRegisterCollaboratorAction } from '@/ui/identity/hooks/use-register-collaborator-action'
 
 import type { CollaboratorFormValues } from '../collaborator-expertise-group'
 

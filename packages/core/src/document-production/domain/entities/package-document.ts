@@ -1,8 +1,9 @@
-export type PackageDocument = {
-  readonly id: string
-  readonly documentPackageId: string
-  readonly documentId: string
-  readonly documentSpecificationId: string
-  readonly createdAt: Date
-  readonly updatedAt: Date
+import type { Entity } from '../../../shared/domain/entities/entity'
+
+export type PackageDocument = Entity & {
+  documentPackageId: string
+  documentId: string
+  documentSpecificationId: string
+  createdAt: Date
+  updatedAt: Date
 }

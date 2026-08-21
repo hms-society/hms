@@ -273,7 +273,7 @@ export function createDynamicFormSeeds({
           },
         },
       ],
-      fields: definition.fields,
+      fields: [...definition.fields],
     }
   })
 }
