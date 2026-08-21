@@ -6,7 +6,5 @@ export const Route = createFileRoute('/advogado/meus-casos')({
 })
 
 function RouteComponent() {
-  return (
-        <CasoDetalheChecklistPage/>
-  )
+  return <CasoDetalheChecklistPage />
 }
