@@ -186,6 +186,7 @@ export function useConsultationDetails({ consultationId }: ConsultationDetailsPr
     high: 'Alta',
   }
   const intakeSource = {
+    intakeId: consultation?.intakeId ?? intakeObj?.id,
     intakeCode: intakeObj?.code
       ? intakeObj.code
       : intakeObj?.sequenceNumber

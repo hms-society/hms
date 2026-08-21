@@ -25,5 +25,6 @@ export const useConsultationCompletionAction = (consultationId?: string) => {
   return {
     completeConsultation: mutation.mutateAsync,
     isCompleting: mutation.isPending,
+    completeConsultationError: mutation.error,
   }
 }

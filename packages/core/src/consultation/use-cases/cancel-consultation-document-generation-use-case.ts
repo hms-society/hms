@@ -15,6 +15,7 @@ import {
   ConsultationDocumentAccessDeniedError,
   ConsultationDocumentNotFoundError,
   ConsultationNotFoundError,
+  ConsultationPackageConfirmationError,
 } from '../domain/errors'
 import type { Consultation } from '../domain/entities'
 import type { ConsultationsRepository } from '../interfaces'
@@ -85,6 +86,11 @@ export class CancelConsultationDocumentGenerationUseCase
       consultationId,
     })
     if (!documentPackage) throw new ConsultationDocumentNotFoundError()
+    if (documentPackage.confirmedAt) {
+      throw new ConsultationPackageConfirmationError(
+        'O pacote de documentos já foi confirmado e precisa ser reaberto antes de alterar uma geração.',
+      )
+    }
 
     const packageDocuments =
       await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)

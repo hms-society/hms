@@ -12,6 +12,7 @@ import { useReplaceConsultationDocumentSelectionAction } from '../../../../hooks
 import { useGenerateConsultationDocumentAction } from '../../../../hooks/use-generate-consultation-document-action'
 import { useGenerateConsultationDocumentsAction } from '../../../../hooks/use-generate-consultation-documents-action'
 import { useConfirmConsultationDocumentPackageAction } from '../../../../hooks/use-confirm-consultation-document-package-action'
+import { useReopenConsultationDocumentPackageAction } from '../../../../hooks/use-reopen-consultation-document-package-action'
 
 const useConsultationMock = vi.hoisted(() => vi.fn())
 
@@ -46,6 +47,9 @@ vi.mock('../../../../hooks/use-generate-consultation-documents-action', () => ({
 }))
 vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', () => ({
   useConfirmConsultationDocumentPackageAction: vi.fn(),
+}))
+vi.mock('../../../../hooks/use-reopen-consultation-document-package-action', () => ({
+  useReopenConsultationDocumentPackageAction: vi.fn(),
 }))
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   Anchor: ({ children, route, params, ...props }: AnchorProps) => {
@@ -84,6 +88,9 @@ const useGenerateConsultationDocumentsActionMock = vi.mocked(
 )
 const useConfirmConsultationDocumentPackageActionMock = vi.mocked(
   useConfirmConsultationDocumentPackageAction,
+)
+const useReopenConsultationDocumentPackageActionMock = vi.mocked(
+  useReopenConsultationDocumentPackageAction,
 )
 
 function createVersion(
@@ -234,6 +241,11 @@ describe('ConsultationDocumentsPage', () => {
       error: null,
       isConfirming: false,
     } as never)
+    useReopenConsultationDocumentPackageActionMock.mockReturnValue({
+      reopenDocumentPackage: vi.fn().mockResolvedValue(undefined),
+      error: null,
+      isReopening: false,
+    } as never)
   })
 
   it('renders the real list composition with status matrix, current chip and actions', () => {
@@ -285,6 +297,31 @@ describe('ConsultationDocumentsPage', () => {
     expect(screen.getByRole('button', { name: 'Selecionar documentos' })).toBeDefined()
   })
 
+  it('submits the package confirmation from the header action', () => {
+    const confirmDocumentPackage = vi.fn().mockResolvedValue(undefined)
+    useConfirmConsultationDocumentPackageActionMock.mockReturnValue({
+      confirmDocumentPackage,
+      error: null,
+      isConfirming: false,
+    } as never)
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createQueryResult({
+        data: [
+          {
+            id: 'document-1',
+            title: 'Procuração',
+            versions: [createVersion({ status: 'approved' })],
+          },
+        ],
+      }) as never,
+    )
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar pacote' }))
+
+    expect(confirmDocumentPackage).toHaveBeenCalledOnce()
+  })
+
   it('keeps the document package read-only when the consultation is not pending', () => {
     useConsultationMock.mockReturnValue({
       consultation: {
@@ -303,6 +340,46 @@ describe('ConsultationDocumentsPage', () => {
       'disabled',
       true,
     )
+  })
+
+  it('shows the package edit action after confirmation and reopens it on click', () => {
+    const reopenDocumentPackage = vi.fn().mockResolvedValue(undefined)
+    useReopenConsultationDocumentPackageActionMock.mockReturnValue({
+      reopenDocumentPackage,
+      error: null,
+      isReopening: false,
+    } as never)
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createQueryResult({
+        data: [
+          {
+            id: 'document-1',
+            title: 'Procuração',
+            versions: [createVersion({ status: 'approved' })],
+          },
+        ],
+      }) as never,
+    )
+    useConsultationDocumentSelectionQueryMock.mockReturnValue(
+      createSelectionQuery({
+        data: {
+          options: [],
+          selectedDocumentSpecificationIds: ['spec-1'],
+          confirmedAt: new Date('2026-08-21T12:00:00.000Z'),
+        },
+      }) as never,
+    )
+
+    renderPage()
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Selecionar documentos' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Editar pacote' }))
+
+    expect(reopenDocumentPackage).toHaveBeenCalledOnce()
   })
 
   it('blocks the document package when the intake was closed without contract', () => {

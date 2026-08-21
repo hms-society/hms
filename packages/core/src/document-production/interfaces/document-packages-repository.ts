@@ -13,5 +13,9 @@ export interface DocumentPackagesRepository {
     confirmedByCollaboratorId: string,
     confirmedAt: Date,
   ): Promise<DocumentPackage | undefined>
+  reopen(
+    documentPackageId: string,
+    reopenedAt: Date,
+  ): Promise<DocumentPackage | undefined>
   removeAll(): Promise<void>
 }

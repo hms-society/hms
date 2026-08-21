@@ -139,6 +139,7 @@ async function bootstrap() {
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
+      requestedByCollaboratorId: lawyer.id,
     })
 
     await app.get(CommunicationSeeder).run()

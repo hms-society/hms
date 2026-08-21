@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import {
@@ -146,10 +147,21 @@ export const ConsultationDetails = forwardRef<HTMLDivElement, ConsultationDetail
           <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-y-3 gap-x-4 sm:gap-x-8 text-xs font-sans w-full lg:w-auto lg:min-w-[280px]'>
             <div>
               <span className='text-slate-400 block mb-0.5'>Intake</span>
-              <span className='font-semibold text-teal-700 cursor-pointer flex items-center gap-1 truncate'>
-                <Icon name='link' className='w-3 h-3 shrink-0' />{' '}
-                {isLoading ? '...' : intakeSource.intakeCode}
-              </span>
+              {isLoading || !intakeSource.intakeId ? (
+                <span className='font-semibold text-teal-700 flex items-center gap-1 truncate'>
+                  <Icon name='link' className='w-3 h-3 shrink-0' />{' '}
+                  {isLoading ? '...' : intakeSource.intakeCode}
+                </span>
+              ) : (
+                <Anchor
+                  route='intakeDetails'
+                  params={{ intakeId: intakeSource.intakeId }}
+                  className='flex items-center gap-1 truncate font-semibold text-teal-700 underline-offset-2 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+                >
+                  <Icon name='link' className='w-3 h-3 shrink-0' />
+                  {intakeSource.intakeCode}
+                </Anchor>
+              )}
             </div>
             <div>
               <span className='text-slate-400 block mb-0.5'>Origem</span>

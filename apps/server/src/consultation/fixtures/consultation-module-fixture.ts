@@ -263,6 +263,7 @@ export class ConsultationModuleFixture {
       requestedByCollaboratorId,
       status: 'running',
       ...overrides,
+      findings: overrides.findings ? [...overrides.findings] : [],
     })
 
     return this.documentGenerationsRepository.add({

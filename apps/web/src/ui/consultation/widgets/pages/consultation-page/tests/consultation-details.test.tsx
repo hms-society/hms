@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ConsultationDetails } from '../consultation-details'
@@ -7,6 +8,21 @@ import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
 
 vi.mock('@/ui/consultation/hooks/use-consultation', () => ({
   useConsultation: vi.fn(),
+}))
+
+vi.mock('@/ui/shared/widgets/components/anchor', () => ({
+  Anchor: ({
+    children,
+    params,
+    ...props
+  }: {
+    children: ReactNode
+    params?: { intakeId?: string }
+  }) => (
+    <a href={`/intakes/${params?.intakeId ?? ''}`} {...props}>
+      {children}
+    </a>
+  ),
 }))
 
 const useConsultationMock = vi.mocked(useConsultation)
@@ -70,6 +86,7 @@ function useConsultationTestController(): ReturnType<typeof useConsultation> {
     isEditingAttendance: false,
     editAttendanceError: null,
     ...controllerOverrides,
+    completeConsultationError: controllerOverrides.completeConsultationError ?? null,
   }
 }
 
@@ -102,7 +119,9 @@ describe('ConsultationDetails', () => {
 
     expect(screen.getByRole('heading', { name: 'Morris Lemke' })).toBeTruthy()
     expect(screen.getByText('03737829420')).toBeTruthy()
-    expect(screen.getByText('INT-0014')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'INT-0014' }).getAttribute('href')).toBe(
+      '/intakes/5eb2b8d8-cc84-42b3-bc64-ff40d7e9debd',
+    )
     expect(screen.getByText('Maria Atendente')).toBeTruthy()
     expect(screen.getByText('Advogado de desenvolvimento')).toBeTruthy()
   })

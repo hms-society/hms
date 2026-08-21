@@ -65,7 +65,11 @@ export class ConfirmConsultationDocumentPackageController {
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
     return this.useCase
-      .execute({ consultationId, collaboratorId: collaborator.collaboratorId })
+      .execute({
+        consultationId,
+        collaboratorId: collaborator.collaboratorId,
+        collaboratorProfile: collaborator.profile,
+      })
       .then(ConsultationDocumentPackageConfirmationResponseDto.fromDomain)
   }
 }

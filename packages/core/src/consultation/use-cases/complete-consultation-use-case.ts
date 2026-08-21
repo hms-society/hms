@@ -1,5 +1,9 @@
 import type { DocumentPackagesRepository } from '../../document-production/interfaces'
 import type { Broker, DatetimeProvider, UseCase } from '#shared/interfaces'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 
 import {
   ConsultationCompletionBlockedError,
@@ -13,6 +17,7 @@ import type { ConsultationsRepository } from '../interfaces'
 type Request = {
   readonly consultationId: string
   readonly collaboratorId: string
+  readonly collaboratorProfile: CollaboratorProfileValue
 }
 
 export class CompleteConsultationUseCase implements UseCase<Request, Consultation> {
@@ -28,7 +33,10 @@ export class CompleteConsultationUseCase implements UseCase<Request, Consultatio
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.collaboratorId) {
+    if (
+      request.collaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.collaboratorId
+    ) {
       throw new ConsultationCompletionBlockedError(
         'Somente o advogado associado pode concluir a consulta.',
       )

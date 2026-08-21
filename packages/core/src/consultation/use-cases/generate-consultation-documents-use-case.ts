@@ -24,6 +24,7 @@ import type { Consultation } from '../domain/entities'
 import {
   ConsultationDocumentAccessDeniedError,
   ConsultationNotFoundError,
+  ConsultationPackageConfirmationError,
 } from '../domain/errors'
 import type { ConsultationDocumentGeneration } from '../domain/structures'
 import type { ConsultationsRepository } from '../interfaces'
@@ -58,6 +59,11 @@ export class GenerateConsultationDocumentsUseCase
       consultationId: consultation.id,
     })
     if (!documentPackage) return []
+    if (documentPackage.confirmedAt) {
+      throw new ConsultationPackageConfirmationError(
+        'O pacote de documentos já foi confirmado e precisa ser reaberto antes de gerar novas versões.',
+      )
+    }
 
     const packageDocuments =
       await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)

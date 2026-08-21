@@ -18,7 +18,7 @@ export type ConsultationPageProps = {
 
 export const ConsultationPage = ({ consultationId, children }: ConsultationPageProps) => {
   const { activeTab } = useConsultationPage()
-  const { consultation, completeConsultation, isCompleting } =
+  const { consultation, completeConsultation, isCompleting, completeConsultationError } =
     useConsultation(consultationId)
   const { data: documentSelection } = useConsultationDocumentSelectionQuery(
     consultationId,
@@ -39,6 +39,7 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
   const isPackageConfirmed = Boolean(documentSelection?.confirmedAt)
   const canCompleteConsultation = isAttendanceFinalized && isPackageConfirmed
   const isConsultationPending = consultation?.status === 'pending'
+  const isConsultationCompleted = consultation?.status === 'completed'
   const hasConsultation = Boolean(consultation)
   const handleOpenCompletionDialog = useCallback(() => {
     setIsCompletionDialogOpen(true)
@@ -46,8 +47,12 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
 
   const handleCompleteConsultation = useCallback(async () => {
     await completeConsultationRef.current()
-    await navigateToRef.current('consultation', { params: { consultationId } })
-  }, [consultationId])
+    if (consultation?.intakeId) {
+      await navigateToRef.current('intakeDetails', {
+        params: { intakeId: consultation.intakeId },
+      })
+    }
+  }, [consultation?.intakeId])
 
   useEffect(
     function registerCompleteConsultationAction() {
@@ -59,12 +64,16 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
       registerPrimaryAction({
         onClick: handleOpenCompletionDialog,
         isPending: isCompleting,
-        isDisabled: !isConsultationPending || !canCompleteConsultation,
-        disabledReason: !isConsultationPending
-          ? 'A consulta não está pendente.'
-          : !isAttendanceFinalized
-            ? 'Finalize a ficha de atendimento primeiro.'
-            : 'Confirme o pacote de documentos primeiro.',
+        label: isConsultationCompleted ? 'Consulta finalizada' : undefined,
+        isDisabled:
+          isConsultationCompleted || !isConsultationPending || !canCompleteConsultation,
+        disabledReason: isConsultationCompleted
+          ? 'A consulta já foi finalizada.'
+          : !isConsultationPending
+            ? 'A consulta não está pendente.'
+            : !isAttendanceFinalized
+              ? 'Finalize a ficha de atendimento primeiro.'
+              : 'Confirme o pacote de documentos primeiro.',
       })
 
       return function unregisterCompleteConsultationAction() {
@@ -76,6 +85,7 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
       hasConsultation,
       handleOpenCompletionDialog,
       isAttendanceFinalized,
+      isConsultationCompleted,
       isCompleting,
       isConsultationPending,
       registerPrimaryAction,
@@ -88,6 +98,7 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
       <ConfirmConsultationCompletionDialog
         open={isCompletionDialogOpen}
         isConfirming={isCompleting}
+        error={completeConsultationError}
         onOpenChange={setIsCompletionDialogOpen}
         onConfirm={handleCompleteConsultation}
       />
