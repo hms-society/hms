@@ -47,7 +47,7 @@ export const DocumentSpecificationsTable = ({
         <TableRow>
           <TableHead className='w-[18rem]'>Modelo</TableHead>
           <TableHead>Aplicação</TableHead>
-          <TableHead className='w-[11rem]'>Classificação</TableHead> {/* NOVA COLUNA */}
+          <TableHead className='w-[11rem]'>Classificação</TableHead>
           <TableHead className='w-[7rem]'>Estado</TableHead>
           <TableHead className='w-[11rem] text-right'>Ação</TableHead>
         </TableRow>
@@ -71,6 +71,7 @@ export const DocumentSpecificationsTable = ({
               <TableCell>
                 <DocumentSpecificationsApplication item={item} />
               </TableCell>
+              
               <TableCell>
                 <Badge variant="outline" className={`gap-1 whitespace-nowrap ${badgeStyle.className}`}>
                   <Icon name={badgeStyle.icon as any} className="h-3 w-3" />

@@ -20,6 +20,7 @@ import type { DocumentSpecificationsRepository } from '../interfaces'
 type Request = {
   readonly documentSpecificationId: string
   readonly changes: DocumentSpecificationConfigurationUpdate
+  readonly userId: string
 }
 
 const TECHNICAL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/
@@ -36,6 +37,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
   async execute({
     documentSpecificationId,
     changes,
+    userId,
   }: Request): Promise<DocumentSpecification> {
     const current = await this.specificationsRepository.findById(documentSpecificationId)
     if (!current) throw new DocumentSpecificationNotFoundError(documentSpecificationId)
@@ -45,6 +47,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     const description = changes.description.trim()
     const content = changes.content ?? current.content
     const variables = changes.variables ?? current.variables
+    
     if (!name) {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O nome do modelo é obrigatório.',
@@ -60,8 +63,9 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       changes.status === 'available' ||
       (this.hasText(content) &&
         (changes.content !== undefined || changes.variables !== undefined))
-    )
+    ) {
       this.assertValidTemplate(content, variables)
+    }
 
     if (application.scope === 'legal_context') {
       await this.validateCatalog(application)
@@ -76,12 +80,27 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),
     }
+    
     const updated = await this.specificationsRepository.replaceConfiguration(
       documentSpecificationId,
       normalizedChanges,
     )
 
     if (!updated) throw new DocumentSpecificationNotFoundError(documentSpecificationId)
+
+    const oldClassification = (current as any).accessClassification ?? 'Interno'
+    const newClassification = normalizedChanges.accessClassification
+
+    if (newClassification && newClassification !== oldClassification) {
+      await this.specificationsRepository.registerAuditLog({
+        documentSpecificationId,
+        userId,
+        action: 'CLASSIFICATION_CHANGED',
+        previousValue: oldClassification,
+        newValue: newClassification,
+      })
+    }
+
     return updated
   }
 

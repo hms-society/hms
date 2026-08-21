@@ -29,4 +29,11 @@ export interface DocumentSpecificationsRepository {
     specifications: readonly DocumentSpecificationCreation[],
   ): Promise<readonly DocumentSpecification[]>
   removeAll(): Promise<void>
+  registerAuditLog(data: {
+    documentSpecificationId: string
+    userId: string
+    action: string
+    previousValue: string
+    newValue: string
+  }): Promise<void>
 }

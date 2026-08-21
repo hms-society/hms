@@ -25,6 +25,7 @@ import {
   documentSpecificationLegalAreaModel,
   documentSpecificationLegalTopicModel,
   documentSpecificationModel,
+  documentSpecificationAuditLogModel,
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -121,7 +122,7 @@ export class DrizzleDocumentSpecificationsRepository
           legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
         },
         status: domain.status,
-        accessClassification: domain.accessClassification, 
+        accessClassification: domain.accessClassification,
       }
     })
 
@@ -275,6 +276,22 @@ export class DrizzleDocumentSpecificationsRepository
 
   async removeAll() {
     await this.database.delete(documentSpecificationModel)
+  }
+
+  async registerAuditLog(data: {
+    documentSpecificationId: string
+    userId: string
+    action: string
+    previousValue: string
+    newValue: string
+  }): Promise<void> {
+    await this.database.insert(documentSpecificationAuditLogModel).values({
+      documentSpecificationId: data.documentSpecificationId,
+      userId: data.userId,
+      action: data.action,
+      previousValue: data.previousValue,
+      newValue: data.newValue,
+    })
   }
 
   private async toDomain(
