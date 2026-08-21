@@ -16,8 +16,6 @@ export function useMeusCasos() {
     isLoadingClientIntakes,
   } = useClientIntakesQuery(clientId)
 
-  console.log({ clientIntakes })
-  console.log({ clientDetails, clientDetailsError })
   const clientName = clientDetails?.client
     ? clientDetails.client.type === 'natural'
       ? clientDetails.client.name
