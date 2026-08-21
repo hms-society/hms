@@ -192,7 +192,9 @@ export function IntakeDetailsContent({
         <ConsultationCard intake={intake} consultationId={data.consultationId} />
       )}
 
-      {intake.status === 'consultation_completed' && <AttendanceCard />}
+      {intake.status === 'consultation_completed' && (
+        <AttendanceCard consultationId={data.consultationId} />
+      )}
 
       {intake.status === 'viability_registered' && (
         <ViabilityCard
@@ -386,7 +388,7 @@ function ConsultationCard({
   )
 }
 
-function AttendanceCard() {
+function AttendanceCard({ consultationId }: { consultationId?: string }) {
   return (
     <Card className='border border-border shadow-sm'>
       <CardContent className='p-5 sm:p-6'>
@@ -395,21 +397,28 @@ function AttendanceCard() {
             <p className='text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground'>
               Ficha de atendimento
             </p>
-            <h2 className='mt-1 text-lg font-semibold text-foreground'>Em avaliação</h2>
+            <h2 className='mt-1 text-lg font-semibold text-foreground'>
+              Ficha concluída
+            </h2>
             <p className='mt-1 max-w-3xl text-sm leading-6 text-muted-foreground'>
-              A ficha de atendimento registra o conteúdo da Consulta e permanece sob
-              responsabilidade do módulo de Consulta.
+              A ficha de atendimento foi finalizada e permanece disponível no módulo de
+              Consulta.
             </p>
           </div>
-          <Badge variant='attention'>Em avaliação</Badge>
         </div>
         <div className='mt-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3'>
           <span className='text-sm text-muted-foreground'>Consulta concluída</span>
-          <Button asChild type='button' variant='outline' size='sm'>
-            <Anchor route='attendantConsultations'>
+          {consultationId ? (
+            <Button asChild type='button' variant='outline' size='sm'>
+              <Anchor route='consultationAttendanceForm' params={{ consultationId }}>
+                Abrir ficha <Icon name='external-link' />
+              </Anchor>
+            </Button>
+          ) : (
+            <Button type='button' variant='outline' size='sm' disabled>
               Abrir ficha <Icon name='external-link' />
-            </Anchor>
-          </Button>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
