@@ -267,6 +267,13 @@
       "when": 1787352000000,
       "tag": "0024_documents_storage_bucket",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1787352000001,
+      "tag": "0038_case_management_repair",
+      "breakpoints": true
     }
   ]
 }
