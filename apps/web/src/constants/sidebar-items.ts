@@ -55,6 +55,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
+    { label: 'Clientes', route: 'clients', icon: 'users' },
     { label: 'Documentos', route: 'documentSpecifications', icon: 'file-text' },
     { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
   ],
