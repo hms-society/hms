@@ -7,6 +7,12 @@
       "skillPath": "skills/caveman-commit/SKILL.md",
       "computedHash": "790a4eeace0be35c6691faf923518ba5bd50f1f1305d1101d09dd4971be94e00"
     },
+    "excalidraw-diagram-generator": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/excalidraw-diagram-generator/SKILL.md",
+      "computedHash": "68af7d099a9e6fd2a94b4e1219b8b7820e09ebe4a8c2a636358d3f5188219e51"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
