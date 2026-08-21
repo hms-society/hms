@@ -158,7 +158,7 @@ describe('useDocumentSpecificationPage', () => {
     useDocumentSpecificationActionsMock.mockReturnValue(createActions())
   })
 
-  it('starts a new specification with available status and a disabled save action', () => {
+  it('starts a new specification with available status and no save action until it has a name', () => {
     const { result } = renderDocumentSpecificationPage({ mode: 'create' })
 
     expect(result.current.activeTab).toBe('configuration')
@@ -167,6 +167,18 @@ describe('useDocumentSpecificationPage', () => {
     expect(result.current.canSaveModel).toBe(false)
     expect(result.current.isDirty).toBe(false)
     expect(result.current.isDeleteDialogOpen).toBe(false)
+  })
+
+  it('allows an available model to be saved before its template is filled', () => {
+    const { result } = renderDocumentSpecificationPage({ mode: 'create' })
+
+    act(() => {
+      result.current.form.setValue('name', 'Modelo disponível', { shouldDirty: true })
+    })
+
+    expect(result.current.isTemplateEmpty).toBe(true)
+    expect(result.current.form.getValues('status')).toBe('available')
+    expect(result.current.canSaveModel).toBe(true)
   })
 
   it('allows an incomplete model to be saved as unavailable', () => {
@@ -194,7 +206,10 @@ describe('useDocumentSpecificationPage', () => {
     )
     await waitFor(() => expect(result.current.isDirty).toBe(true))
 
-    act(() => result.current.handleTabChange('template'))
+    act(() => {
+      result.current.handleTabChange('template')
+      result.current.handleTabChange('template')
+    })
 
     expect(confirmMock).toHaveBeenCalledOnce()
     expect(result.current.activeTab).toBe('configuration')

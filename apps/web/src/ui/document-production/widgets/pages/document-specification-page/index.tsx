@@ -135,7 +135,7 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
         </TabsList>
         <TabsContent value='configuration' className='pt-3'>
           <div className='flex flex-col gap-4'>
-            <section className='overflow-hidden rounded-xl border bg-card'>
+            <section className='overflow-hidden rounded-xl border bg-card p-3'>
               <header className='border-b px-4 py-3'>
                 <h2 className='text-base font-semibold'>Informações gerais</h2>
                 <p className='text-xs text-muted-foreground'>
@@ -185,14 +185,14 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
               </div>
             </section>
 
-            <section className='overflow-hidden rounded-xl border bg-card'>
+            <section className='overflow-hidden rounded-xl border bg-card p-3'>
               <header className='border-b px-4 py-3'>
                 <h2 className='text-base font-semibold'>Aplicação</h2>
                 <p className='text-xs text-muted-foreground'>
                   Escolha o momento e aplique globalmente ou por áreas e temas.
                 </p>
               </header>
-              <div className='grid gap-4 p-4 md:grid-cols-[15rem_minmax(0,1fr)_15rem]'>
+              <div className='grid gap-4 p-4 md:grid-cols-2'>
                 <div className='space-y-1.5'>
                   <Label htmlFor='document-moment'>Momento</Label>
                   <Select
@@ -215,7 +215,7 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
                     value={application.scope}
                     onValueChange={documentSpecificationPage.handleApplicationScope}
                   >
-                    <SelectTrigger id='document-scope' className='w-full' size='sm'>
+                    <SelectTrigger id='document-scope' size='sm' className='w-full'>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -351,7 +351,7 @@ export const DocumentSpecificationPage = (props: DocumentSpecificationPageProps)
                 <p className='text-xs text-muted-foreground'>
                   {documentSpecificationPage.isTemplateEmpty &&
                   !documentSpecificationPage.isConfigurationDirty
-                    ? 'Começar a escrever para habilitar o salvamento.'
+                    ? 'O template ainda está vazio. Você pode preenchê-lo agora ou depois.'
                     : documentSpecificationPage.isTemplateDirty ||
                         documentSpecificationPage.isConfigurationDirty
                       ? 'Alterações não salvas.'

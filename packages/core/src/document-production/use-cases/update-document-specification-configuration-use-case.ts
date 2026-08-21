@@ -56,12 +56,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       )
     }
 
-    if (
-      changes.status === 'available' ||
-      (this.hasText(content) &&
-        (changes.content !== undefined || changes.variables !== undefined))
-    )
-      this.assertValidTemplate(content, variables)
+    if (this.hasText(content)) this.assertValidTemplate(content, variables)
 
     if (application.scope === 'legal_context') {
       await this.validateCatalog(application)

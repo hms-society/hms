@@ -17,16 +17,14 @@ import { DocumentSpecificationsApplication } from '../document-specifications-ap
 export type DocumentSpecificationsTableProps = {
   items: readonly DocumentSpecificationListItem[]
   onEdit?: (item: DocumentSpecificationListItem) => void
-  onDuplicate?: (item: DocumentSpecificationListItem) => void
 }
 
 export const DocumentSpecificationsTable = ({
   items,
   onEdit,
-  onDuplicate,
 }: DocumentSpecificationsTableProps) => (
   <TableSurface ariaLabel='Lista de modelos de documentos'>
-    <Table className='w-full min-w-[64rem]'>
+    <Table className='w-full min-w-[64rem] table-fixed'>
       <TableHeader>
         <TableRow>
           <TableHead className='w-[18rem]'>Modelo</TableHead>
@@ -38,8 +36,10 @@ export const DocumentSpecificationsTable = ({
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.documentSpecificationId} tabIndex={0}>
-            <TableCell className='max-w-[18rem]'>
-              <div className='text-sm font-semibold leading-5'>{item.name}</div>
+            <TableCell className='w-[18rem] max-w-[18rem]'>
+              <div className='truncate text-sm font-semibold leading-5' title={item.name}>
+                {item.name}
+              </div>
               <div
                 className='mt-0.5 truncate text-xs leading-5 text-muted-foreground'
                 title={item.description}
@@ -73,16 +73,6 @@ export const DocumentSpecificationsTable = ({
                     <Icon name='pencil' />
                     Editar
                   </Anchor>
-                </Button>
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='icon-xs'
-                  aria-label={`Duplicar ${item.name}`}
-                  onClick={() => onDuplicate?.(item)}
-                  className='text-muted-foreground hover:text-foreground'
-                >
-                  <Icon name='copy' />
                 </Button>
               </div>
             </TableCell>

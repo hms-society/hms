@@ -271,18 +271,6 @@ export const DocumentEditor = ({
             >
               <Icon name='redo' className='size-4' />
             </ToolbarButton>
-            <span aria-hidden='true' className='mx-1 h-5 w-px bg-border' />
-            <ToolbarButton
-              type='button'
-              size='icon-xs'
-              variant='ghost'
-              className='ml-auto text-muted-foreground'
-              tooltip='Inserir link'
-              aria-label='Inserir link'
-              onClick={documentEditor.applyLink}
-            >
-              <Icon name='link' className='size-4' />
-            </ToolbarButton>
           </TooltipProvider>
         </div>
       )}

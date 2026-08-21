@@ -183,18 +183,6 @@ export function useDocumentEditor({
     [editor, highlightedTerms],
   )
 
-  function applyLink() {
-    if (!editor || !editable) return
-    const href = window.prompt('Informe a URL HTTP(S) do link:', 'https://')?.trim()
-    if (!href) return
-    try {
-      if (!isAllowedDocumentTemplateHref(href)) return
-    } catch {
-      return
-    }
-    editor.chain().focus().setLink({ href }).run()
-  }
-
   function setParagraph() {
     editor?.chain().focus().setParagraph().run()
   }
@@ -277,7 +265,6 @@ export function useDocumentEditor({
       alignCenter: editor?.isActive({ textAlign: 'center' }) ?? false,
       alignRight: editor?.isActive({ textAlign: 'right' }) ?? false,
     },
-    applyLink,
     canRedo: editor?.can().redo() ?? false,
     canUndo: editor?.can().undo() ?? false,
     clearFormatting,

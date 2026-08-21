@@ -56,6 +56,7 @@ describe('DocumentEditor', () => {
     renderDocumentEditor()
     const editor = await waitForEditor()
 
+    expect(screen.queryByRole('button', { name: 'Inserir link' })).toBeNull()
     expect(screen.getByText('Ainda não há conteúdo no template')).not.toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Começar a escrever' }))
 
