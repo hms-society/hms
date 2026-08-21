@@ -55,21 +55,76 @@ export class IntakeSeeder {
     })
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
-      .map((clientId) =>
-        this.createIntake({
-          clientId,
-          responsibleId: references.responsibleId,
-          createdBy: references.actorId,
-          updatedBy: references.actorId,
-          origin: 'direct',
-          contactChannel: 'phone',
-          legalAreaId: references.legalAreaId,
-          legalTopicId: references.legalTopicId,
-          urgency: 'normal',
-          demandNotes: 'Initial consultation about a contractual matter.',
-          status: IntakeStatus.Registered,
-        }),
-      )
+      .flatMap((clientId, index) => {
+        if (index === 0) {
+          return [
+            this.createIntake({
+              clientId,
+              responsibleId: references.responsibleId,
+              createdBy: references.actorId,
+              updatedBy: references.actorId,
+              origin: 'direct',
+              contactChannel: 'whatsapp',
+              legalAreaId: references.legalAreaId,
+              legalTopicId: references.legalTopicId,
+              urgency: 'normal',
+              demandNotes: 'Cliente solicita análise de contrato de aluguel residencial.',
+              status: IntakeStatus.Contracted,
+            }),
+            this.createIntake({
+              clientId,
+              responsibleId: references.responsibleId,
+              createdBy: references.actorId,
+              updatedBy: references.actorId,
+              origin: 'direct',
+              contactChannel: 'whatsapp',
+              legalAreaId: references.legalAreaId,
+              legalTopicId: references.legalTopicId,
+              urgency: 'high',
+              demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
+              status: IntakeStatus.Registered,
+            }),
+            this.createIntake({
+              clientId,
+              responsibleId: references.responsibleId,
+              createdBy: references.actorId,
+              updatedBy: references.actorId,
+              origin: 'direct',
+              contactChannel: 'email',
+              legalAreaId: references.legalAreaId,
+              legalTopicId: references.legalTopicId,
+              urgency: 'normal',
+              demandNotes: 'Divórcio consensual e partilha de bens.',
+              status: IntakeStatus.InFormalization,
+            }),
+          ]
+        }
+
+        const contactChannels = ['phone', 'whatsapp', 'email', 'in_person'] as const
+        const demandNotes = [
+          'Consulta inicial sobre revisão contratual e obrigações pendentes.',
+          'Cliente relata conflito familiar e necessidade de orientação preventiva.',
+          'Análise preliminar sobre cobrança indevida e documentação disponível.',
+          'Pedido de orientação sobre direitos trabalhistas e próximos passos.',
+        ]
+        const urgencies = ['normal', 'high', 'urgent'] as const
+
+        return [
+          this.createIntake({
+            clientId,
+            responsibleId: references.responsibleId,
+            createdBy: references.actorId,
+            updatedBy: references.actorId,
+            origin: 'direct',
+            contactChannel: contactChannels[index % contactChannels.length],
+            legalAreaId: references.legalAreaId,
+            legalTopicId: references.legalTopicId,
+            urgency: urgencies[index % urgencies.length],
+            demandNotes: demandNotes[index % demandNotes.length],
+            status: IntakeStatus.Contracted,
+          }),
+        ]
+      })
 
     const intakes = await this.seed([documentProductionIntake, ...additionalIntakes])
     const createdDocumentProductionIntake = intakes.find(

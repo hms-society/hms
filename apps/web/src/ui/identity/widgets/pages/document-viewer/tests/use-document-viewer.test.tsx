@@ -26,8 +26,8 @@ vi.mock('@/ui/shared/hooks/use-document-file-query', () => ({
   }),
 }))
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: () => ({
+vi.mock('@/provision/auth/supabase/supabase-client', () => ({
+  supabaseClient: {
     storage: {
       from: () => ({
         download: vi.fn().mockResolvedValue({
@@ -36,7 +36,7 @@ vi.mock('@supabase/supabase-js', () => ({
         }),
       }),
     },
-  }),
+  },
 }))
 
 const createWrapper = () => {

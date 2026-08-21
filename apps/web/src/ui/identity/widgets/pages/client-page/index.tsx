@@ -77,7 +77,6 @@ export function ClientsListPage() {
   const limit = 20
 
   const { data, isLoading } = useClientsQuery({ page, limit, search })
-  console.log(data)
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
 
@@ -114,7 +113,7 @@ export function ClientsListPage() {
   }
 
   return (
-    <div className='mx-auto flex w-full max-w-6xl flex-col gap-6 mt-25'>
+    <div className='mx-auto flex w-full max-w-6xl flex-col gap-6 mt-12'>
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div>
           <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>

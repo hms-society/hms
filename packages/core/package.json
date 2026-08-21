@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
+    "./case-management/domain/entities": "./src/case-management/domain/entities/index.ts",
+    "./case-management/domain/structures": "./src/case-management/domain/structures/index.ts",
+    "./case-management/interfaces": "./src/case-management/interfaces/index.ts",
     "./communication/domain/entities": "./src/communication/domain/entities/index.ts",
     "./communication/domain/errors": "./src/communication/domain/errors/index.ts",
     "./communication/domain/events": "./src/communication/domain/events/index.ts",
@@ -65,6 +68,7 @@
     "./shared/constants": "./src/shared/constants/index.ts"
   },
   "imports": {
+    "#case-management/*": "./src/case-management/*",
     "#communication/*": "./src/communication/*",
     "#consultation/*": "./src/consultation/*",
     "#document-engine/*": "./src/document-engine/*",

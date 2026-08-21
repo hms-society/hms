@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@supabase/supabase-js'
+import { BROWSER_ENV } from '@/constants'
+import { supabaseClient } from '@/provision/auth/supabase/supabase-client'
 import { useDocumentFileQuery } from '@/ui/shared/hooks/use-document-file-query'
 
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 2
 const ZOOM_STEP = 0.25
 const BASE_PAGE_WIDTH = 900
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY,
-)
 
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return '0 Bytes'
@@ -55,8 +51,8 @@ export const useDocumentViewer = () => {
     queryFn: async () => {
       if (!file?.storagePath) return null
 
-      const { data, error } = await supabase.storage
-        .from(import.meta.env.VITE_SUPABASE_STORAGE_BUCKET)
+      const { data, error } = await supabaseClient.storage
+        .from(BROWSER_ENV.supabaseStorageBucket)
         .download(file.storagePath)
 
       if (error) {

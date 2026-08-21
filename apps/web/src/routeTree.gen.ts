@@ -43,6 +43,7 @@ import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens
 import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AdvogadoMeusCasosRouteImport } from './routes/advogado/meus-casos'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
 import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
@@ -226,6 +227,11 @@ const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
   path: '/consultas',
   getParentRoute: () => AtendimentoRouteRoute,
 } as any)
+const AdvogadoMeusCasosRoute = AdvogadoMeusCasosRouteImport.update({
+  id: '/meus-casos',
+  path: '/meus-casos',
+  getParentRoute: () => AdvogadoRouteRoute,
+} as any)
 const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
   id: '/comunicacao',
   path: '/comunicacao',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/triagem': typeof TriagemRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
+  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/triagem'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
+    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -454,6 +464,7 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/cliente'
     | '/advogado/comunicacao'
+    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/triagem'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
+    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -799,6 +811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtendimentoConsultasRouteImport
       parentRoute: typeof AtendimentoRouteRoute
     }
+    '/advogado/meus-casos': {
+      id: '/advogado/meus-casos'
+      path: '/meus-casos'
+      fullPath: '/advogado/meus-casos'
+      preLoaderRoute: typeof AdvogadoMeusCasosRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
+    }
     '/advogado/comunicacao': {
       id: '/advogado/comunicacao'
       path: '/comunicacao'
@@ -860,10 +879,12 @@ declare module '@tanstack/react-router' {
 
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
+  AdvogadoMeusCasosRoute: typeof AdvogadoMeusCasosRoute
 }
 
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
+  AdvogadoMeusCasosRoute: AdvogadoMeusCasosRoute,
 }
 
 const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
