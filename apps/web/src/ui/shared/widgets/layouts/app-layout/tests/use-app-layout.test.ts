@@ -84,6 +84,9 @@ describe('useAppLayout', () => {
     expect(result.current.sidebarItems).toContainEqual(
       expect.objectContaining({ route: 'documentSpecifications', label: 'Documentos' }),
     )
+    expect(result.current.sidebarItems).toContainEqual(
+      expect.objectContaining({ route: 'documentInbox', label: 'Caixa de Documentos' }),
+    )
   })
 
   it('toggles the collapsed sidebar state', () => {
