@@ -29,7 +29,6 @@ type ConfigurationForm = {
   name: string
   description: string
   status: DocumentSpecificationStatus
-  isRequired: boolean
   application: DocumentSpecificationApplication
 }
 
@@ -37,7 +36,6 @@ const DEFAULT_CONFIGURATION: ConfigurationForm = {
   name: '',
   description: '',
   status: 'available',
-  isRequired: false,
   application: { scope: 'global', moment: 'consultation' },
 }
 
@@ -187,6 +185,7 @@ export function useDocumentSpecificationPage({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
   const isNavigatingAfterSave = useRef(false)
+  const tabChangePromptRef = useRef<string | null>(null)
   const {
     createDocumentSpecification,
     deleteDocumentSpecification,
@@ -242,7 +241,6 @@ export function useDocumentSpecificationPage({
         name: value.name,
         description: value.description,
         status: value.status,
-        isRequired: value.isRequired,
         application: value.application,
       }
       form.reset(configuration, { keepDirty: false, keepTouched: false })
@@ -462,10 +460,9 @@ export function useDocumentSpecificationPage({
         name: watchedConfiguration.name,
         description: watchedConfiguration.description,
         status: watchedConfiguration.status,
-        isRequired: watchedConfiguration.isRequired,
         application: watchedConfiguration.application,
         content,
-        variables,
+        variables: [...variables],
       })
       if (response.isFailure) {
         toast.error(response.errorMessage)
@@ -485,7 +482,7 @@ export function useDocumentSpecificationPage({
       request: {
         ...watchedConfiguration,
         content,
-        variables,
+        variables: [...variables],
       },
     })
     if (response.isFailure) {
@@ -500,13 +497,23 @@ export function useDocumentSpecificationPage({
   }
 
   function handleTabChange(tab: string) {
-    if (
-      tab !== activeTab &&
-      mode === 'edit' &&
-      isDirty &&
-      !window.confirm('Existem alterações não salvas. Deseja trocar de aba mesmo assim?')
-    )
-      return
+    const shouldConfirmTabChange = tab !== activeTab && mode === 'edit' && isDirty
+
+    if (shouldConfirmTabChange) {
+      if (tabChangePromptRef.current === tab) return
+      tabChangePromptRef.current = tab
+      window.setTimeout(() => {
+        if (tabChangePromptRef.current === tab) tabChangePromptRef.current = null
+      }, 0)
+
+      if (
+        !window.confirm(
+          'Existem alterações não salvas. Deseja trocar de aba mesmo assim?',
+        )
+      )
+        return
+    }
+
     setActiveTab(tab as 'configuration' | 'template')
   }
 
@@ -528,14 +535,10 @@ export function useDocumentSpecificationPage({
       ))
   const isConfigurationReady =
     watchedConfiguration.name.trim().length > 0 && isApplicationReady
-  const canSaveModel =
-    isConfigurationReady &&
-    !isCatalogError &&
-    (watchedConfiguration.status === 'unavailable' || !isTemplateEmpty)
+  const canSaveModel = isConfigurationReady && !isCatalogError
   const wordCount = templateText ? templateText.split(/\s+/).length : 0
   const modelName = watchedConfiguration.name
   const status = watchedConfiguration.status
-  const isRequired = watchedConfiguration.isRequired
   return {
     activeTab,
     actions,
@@ -568,7 +571,6 @@ export function useDocumentSpecificationPage({
     isLoading,
     insertVariable,
     isNotFound,
-    isRequired,
     isCatalogError,
     isTemplateDirty,
     isTemplateEmpty,
@@ -579,10 +581,6 @@ export function useDocumentSpecificationPage({
     setInsertVariable,
     topics,
     variables: variablesWithSystem,
-    toggleRequired: () =>
-      form.setValue('isRequired', !watchedConfiguration.isRequired, {
-        shouldDirty: true,
-      }),
     toggleAvailability: () =>
       form.setValue(
         'status',

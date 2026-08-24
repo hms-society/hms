@@ -5,6 +5,8 @@ export class DrizzleIntakeMapper {
   toDomain(drizzleIntake: DrizzleIntake): Intake {
     return {
       ...drizzleIntake,
+      legalAreaId: drizzleIntake.legalAreaId ?? undefined,
+      legalTopicId: drizzleIntake.legalTopicId ?? undefined,
       demandNotes: drizzleIntake.demandNotes ?? undefined,
       closureReason: drizzleIntake.closureReason ?? undefined,
       closureNotes: drizzleIntake.closureNotes ?? undefined,

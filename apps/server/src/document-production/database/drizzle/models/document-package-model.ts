@@ -7,6 +7,8 @@ export const documentPackageModel = pgTable(
     id: uuid('id').primaryKey(),
     contextType: text('context_type').notNull(),
     contextId: uuid('context_id').notNull(),
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true, mode: 'date' }),
+    confirmedByCollaboratorId: uuid('confirmed_by_collaborator_id'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),

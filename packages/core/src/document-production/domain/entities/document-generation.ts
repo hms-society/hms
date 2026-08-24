@@ -4,23 +4,23 @@ import type {
   DocumentGenerationStatus,
   DocumentGenerationTemplate,
 } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type DocumentGeneration = {
-  readonly id: string
-  readonly documentId: string
-  readonly documentSpecificationVersionId: string
-  readonly requestedByCollaboratorId: string
-  readonly source: DocumentGenerationSource
-  readonly template: DocumentGenerationTemplate
-  readonly status: DocumentGenerationStatus
-  readonly attemptsCount: number
-  readonly findings: readonly DocumentGenerationFinding[]
-  readonly documentVersionId?: string
-  readonly failureMessage?: string
-  readonly startedAt?: Date
-  readonly completedAt?: Date
-  readonly failedAt?: Date
-  readonly cancelledAt?: Date
-  readonly createdAt: Date
-  readonly updatedAt: Date
+export type DocumentGeneration = Entity & {
+  documentId: string
+  documentSpecificationVersionId: string
+  requestedByCollaboratorId: string
+  source: DocumentGenerationSource
+  template: DocumentGenerationTemplate
+  status: DocumentGenerationStatus
+  attemptsCount: number
+  findings: DocumentGenerationFinding[]
+  documentVersionId?: string
+  failureMessage?: string
+  startedAt?: Date
+  completedAt?: Date
+  failedAt?: Date
+  cancelledAt?: Date
+  createdAt: Date
+  updatedAt: Date
 }

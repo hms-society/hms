@@ -1,3 +1,4 @@
+import type { FinalizeConsultationAttendanceDto } from '@hms/validation/consultation'
 import type { AxiosRestClient } from '@/rest/axios/axios-rest-client'
 
 export type CreateConsultationRequest = {
@@ -31,39 +32,14 @@ export type CompleteConsultationRequest = {
   }>
 }
 
-export type UpdateClientQualificationRequest = {
-  name?: string
-  legalName?: string
-  tradeName?: string
-  taxIdValue?: string
-  phone?: string
-  email?: string
-  origin?: string
-  linkedThirdParty?: string
-  hmsResponsible?: string
-  rg?: string
-  birthDate?: string
-  maritalStatus?: string
-  nationality?: string
-  profession?: string
-  stateRegistration?: string
-  constitutionDate?: string
-  legalNature?: string
-  legalRepresentative?: string
-  representativeRole?: string
-  zipCode?: string
-  street?: string
-  number?: string
-  complement?: string
-  district?: string
-  city?: string
-  state?: string
-}
-
 export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClient>) => {
   return {
     async getConsultationById(consultationId: string) {
       return restClient.get<any>(`/consultations/${consultationId}`)
+    },
+
+    async getConsultationByIntakeId(intakeId: string) {
+      return restClient.get<any>(`/consultations/by-intake/${intakeId}`)
     },
 
     async listConsultations(params?: {
@@ -86,10 +62,6 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       return restClient.put<any>(`/consultations/${consultationId}`, request)
     },
 
-    async startConsultation(consultationId: string) {
-      return restClient.patch<any>(`/consultations/${consultationId}/start`)
-    },
-
     async markNoShow(consultationId: string) {
       return restClient.patch<any>(`/consultations/${consultationId}/no-show`)
     },
@@ -98,21 +70,22 @@ export const ConsultationService = (restClient: ReturnType<typeof AxiosRestClien
       return restClient.patch<any>(`/consultations/${consultationId}/reschedule`)
     },
 
-    async updateQualification(
+    async completeConsultation(consultationId: string) {
+      return restClient.patch<any>(`/consultations/${consultationId}/complete`)
+    },
+
+    async finalizeAttendance(
       consultationId: string,
-      request: UpdateClientQualificationRequest,
+      request: FinalizeConsultationAttendanceDto,
     ) {
       return restClient.patch<any>(
-        `/consultations/${consultationId}/qualification`,
+        `/consultations/${consultationId}/attendance/finalize`,
         request,
       )
     },
 
-    async completeConsultation(
-      consultationId: string,
-      request: CompleteConsultationRequest,
-    ) {
-      return restClient.patch<any>(`/consultations/${consultationId}/complete`, request)
+    async editAttendance(consultationId: string) {
+      return restClient.patch<any>(`/consultations/${consultationId}/attendance/edit`)
     },
 
     async cancelConsultation(consultationId: string, reason?: string) {

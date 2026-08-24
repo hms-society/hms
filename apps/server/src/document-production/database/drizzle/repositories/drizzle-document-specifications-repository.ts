@@ -120,7 +120,6 @@ export class DrizzleDocumentSpecificationsRepository
           legalAreaIds,
           legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
         },
-        isRequired: domain.isRequired,
         status: domain.status,
       }
     })
@@ -148,7 +147,6 @@ export class DrizzleDocumentSpecificationsRepository
             variables: [...specification.variables],
             moment: specification.application.moment,
             scope: specification.application.scope,
-            isRequired: specification.isRequired,
             status: specification.status,
           })),
         )
@@ -191,7 +189,6 @@ export class DrizzleDocumentSpecificationsRepository
           variables: [...specification.variables],
           moment: specification.application.moment,
           scope: specification.application.scope,
-          isRequired: specification.isRequired,
           status: specification.status,
         })
         .returning()
@@ -226,7 +223,6 @@ export class DrizzleDocumentSpecificationsRepository
           description: changes.description,
           moment: changes.application.moment,
           scope: changes.application.scope,
-          isRequired: changes.isRequired,
           status: changes.status,
           ...(changes.content !== undefined ? { content: changes.content } : {}),
           ...(changes.variables !== undefined

@@ -1,18 +1,18 @@
 @url = {{BASE_URL}}/auth
 
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+
 ### Sign in
+# @name signIn
 POST {{url}}/sign-in
 Content-Type: application/json
 
 {
-  "identifier": "atendente@hmsadvogados.com.br",
-  "password": "123456"
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
 }
 
-### Forgot password
-POST {{url}}/forgot-password
-Content-Type: application/json
-
-{
-  "email": "user@example.com"
-}
+### Complete collaborator sign-in
+# Use the access token returned by Sign in.
+POST {{url}}/complete-sign-in
+Authorization: Bearer {{signIn.response.body.$.accessToken}}

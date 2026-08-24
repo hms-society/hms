@@ -26,7 +26,7 @@ describe('RegisterClientUseCase', () => {
         type: 'natural',
         name: '  Ricardo Alves de Souza  ',
         taxId: '529.982.247-25',
-        phone: '(12) 99876-3322',
+        phone: '+55 (12) 99876-3322',
         email: ' ricardo@example.com ',
       }),
     ).resolves.toEqual({ client, consents: [] })
@@ -35,7 +35,7 @@ describe('RegisterClientUseCase', () => {
       type: 'natural',
       name: 'Ricardo Alves de Souza',
       taxId: { type: 'cpf', value: cpf },
-      phone: '12998763322',
+      phone: '5512998763322',
       email: 'ricardo@example.com',
       address: undefined,
     })

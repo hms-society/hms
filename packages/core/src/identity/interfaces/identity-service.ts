@@ -32,6 +32,9 @@ export interface IdentityService {
   listCollaborators(
     query: CollaboratorListQuery,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
+  listLawyers(
+    query: Pick<CollaboratorListQuery, 'page' | 'limit' | 'search'>,
+  ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   getCollaborator(collaboratorId: string): Promise<RestResponse<CollaboratorSummary>>
   listCollaboratorJobTitles(): Promise<RestResponse<readonly string[]>>
   getCurrentCollaborator(): Promise<RestResponse<CollaboratorSummary>>

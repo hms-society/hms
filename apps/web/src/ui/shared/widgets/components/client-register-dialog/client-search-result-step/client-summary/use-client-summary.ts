@@ -8,9 +8,20 @@ function getClientName(details: ClientDetails) {
     : details.client.legalName
 }
 
+function getClientInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
 export function useClientSummary(details: ClientDetails) {
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
+  const clientName = getClientName(details)
   const activeTypes = new Set(
     details.consents.map(function getConsentType(consent) {
       return consent.type
@@ -19,7 +30,9 @@ export function useClientSummary(details: ClientDetails) {
 
   return {
     activeTypes,
-    clientName: getClientName(details),
+    clientName,
+    clientInitials: getClientInitials(clientName),
+    clientType: details.client.type === 'natural' ? 'Pessoa física' : 'Pessoa jurídica',
     taxId: maskTaxId(details.client.taxId.value),
     phone: maskPhone(details.client.phone) || 'Não informado',
   }

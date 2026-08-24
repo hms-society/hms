@@ -27,7 +27,6 @@ describe('Create Document Specification Controller [POST /document-specification
         name: 'Modelo',
         description: 'Descrição',
         application: { scope: 'global', moment: 'consultation' },
-        isRequired: false,
       })
       .expect(401)
   })
@@ -42,7 +41,6 @@ describe('Create Document Specification Controller [POST /document-specification
         name: ' Novo modelo ',
         description: ' Descrição objetiva ',
         application: { scope: 'global', moment: 'consultation' },
-        isRequired: false,
         content,
         variables: [],
       })
@@ -68,7 +66,6 @@ describe('Create Document Specification Controller [POST /document-specification
         name: '',
         description: 'Descrição',
         application: { scope: 'global', moment: 'consultation' },
-        isRequired: false,
         status: 'available',
       })
       .expect(400)
@@ -93,7 +90,6 @@ describe('Create Document Specification Controller [POST /document-specification
           legalAreaIds: [area.id],
           legalTopicIdsByArea: { [area.id]: [topic.id] },
         },
-        isRequired: true,
         content,
         variables: [],
       })

@@ -1,14 +1,11 @@
-export type CollaboratorRegistrationAttempt = {
-  readonly id: string
-  readonly normalizedEmail: string
-  readonly payloadHash: string
-  readonly authUserId?: string
-  readonly status:
-    | 'pending_auth'
-    | 'auth_invited'
-    | 'completed'
-    | 'reconciliation_required'
-  readonly lastError?: string
-  readonly createdAt: Date
-  readonly updatedAt: Date
+import type { Entity } from '../../../shared/domain/entities/entity'
+
+export type CollaboratorRegistrationAttempt = Entity & {
+  normalizedEmail: string
+  payloadHash: string
+  authUserId?: string
+  status: 'pending_auth' | 'auth_invited' | 'completed' | 'reconciliation_required'
+  lastError?: string
+  createdAt: Date
+  updatedAt: Date
 }

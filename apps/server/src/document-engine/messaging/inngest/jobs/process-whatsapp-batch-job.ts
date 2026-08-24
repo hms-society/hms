@@ -5,10 +5,9 @@ import { z } from 'zod'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const whatsappDocumentBatchReceivedEvent = eventType(
-  'documents/whatsapp.batch.received',
-  { schema: z.record(z.string(), z.unknown()) },
-)
+const whatsappDocumentBatchReceived = eventType('documents/whatsapp.batch.received', {
+  schema: z.record(z.string(), z.unknown()),
+})
 
 @Injectable()
 export class ProcessWhatsappBatchJob extends InngestJob {
@@ -22,16 +21,15 @@ export class ProcessWhatsappBatchJob extends InngestJob {
       {
         id: 'document-engine/process-whatsapp-batch',
         name: 'Process WhatsApp Document Batch',
-        triggers: [whatsappDocumentBatchReceivedEvent],
+        triggers: [whatsappDocumentBatchReceived],
       },
-      async ({ event, step }) => {
-        return step.run('process-batch-metadata', async () => {
+      async ({ event, step }) =>
+        step.run('process-batch-metadata', async () => {
           ProcessWhatsappBatchJob.logger.log(
             `Processing WhatsApp document batch ${JSON.stringify(event.data)}`,
           )
           return { status: 'received' }
-        })
-      },
+        }),
     )
   }
 }

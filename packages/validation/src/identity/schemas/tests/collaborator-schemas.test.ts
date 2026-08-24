@@ -9,7 +9,12 @@ describe('Collaborator schemas', () => {
         search: '  maria  ',
         jobTitle: '  Advogada  ',
       }),
-    ).toEqual({ search: 'maria', jobTitle: 'Advogada', page: 1, pageSize: 20 })
+    ).toEqual({
+      search: 'maria',
+      jobTitle: 'Advogada',
+      page: 1,
+      pageSize: 20,
+    })
 
     expect(
       collaboratorListQuerySchema.parse({ page: '2', pageSize: '100' }),

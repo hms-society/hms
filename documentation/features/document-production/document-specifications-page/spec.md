@@ -66,7 +66,7 @@ handlers próprios e não devem ser inventados nesta entrega.
 ## Objetivo
 
 Permitir que um administrador ativo encontre modelos de documentos e compreenda
-sua aplicação, obrigatoriedade e disponibilidade, sem criar ou alterar dados.
+sua aplicação e disponibilidade, sem criar ou alterar dados.
 
 # Escopo
 
@@ -137,11 +137,10 @@ Cada item deve apresentar:
 - nome e descrição;
 - momento da aplicação: `Consulta`, `Formalização` ou `Produção jurídica`;
 - abrangência `Global` ou os nomes das áreas e temas jurídicos associados;
-- obrigatoriedade por texto: `Obrigatório` ou `Opcional`;
 - estado por texto: `Disponível` ou `Indisponível`.
 
-A tabela possui as colunas **Modelo**, **Aplicação**, **Obrigatoriedade**,
-**Estado** e **Ação**. A coluna **Ação** contém os controles **Editar** e
+A tabela possui as colunas **Modelo**, **Aplicação**, **Estado** e **Ação**. A
+coluna **Ação** contém os controles **Editar** e
 **Duplicar** por linha. A coluna **Atualizado** não é renderizada. Nome e
 descrição permanecem juntos em **Modelo**. A aplicação global é identificada por
 `Global`; a aplicação restrita apresenta os nomes disponíveis e resume
@@ -206,15 +205,14 @@ Falhas de listagem exibem mensagem orientada à recuperação e **Tentar novamen
 
 ### SR-008 — Manter limites entre módulos
 
-Produção Documental é proprietária dos modelos, da obrigatoriedade, do momento,
-da abrangência e da disponibilidade. Associações armazenam apenas referências de
+Produção Documental é proprietária dos modelos, do momento, da abrangência e da
+disponibilidade. Associações armazenam apenas referências de
 área e tema. Nomes, atividade e compatibilidade pertencem ao Catálogo Jurídico e
 são resolvidos pelo seu provider público; Produção Documental não importa models,
 repositories ou tabelas do catálogo.
 
-O tipo `DocumentSpecification` passa a representar explicitamente a
-obrigatoriedade. Conteúdo e variáveis existentes no agregado não são retornados
-pela projeção da listagem.
+Conteúdo e variáveis existentes no agregado não são retornados pela projeção da
+listagem.
 
 ### SR-009 — Seguir fielmente a experiência visual e acessível do HMS
 
@@ -225,7 +223,7 @@ serifado e controles em sans. Não adiciona cores, raios ou sombras hardcoded
 quando há token semântico equivalente.
 
 Busca, selects e paginação funcionam por teclado, mantêm foco visível e possuem
-nomes acessíveis. Estado e obrigatoriedade usam texto e ícone, nunca somente cor.
+nomes acessíveis. O estado usa texto e ícone, nunca somente cor.
 A página preserva leitura e operação em viewport estreito, zoom/reflow, tema
 escuro e WCAG 2.2 nível AA.
 
@@ -244,7 +242,7 @@ sidebar além de registrar o novo item.
 |---|---|---|---|---|---|
 | CA-01 | SR-001 | administrador ativo autenticado | acessa a rota ou consulta a API | a página e os dados são disponibilizados | integração REST + integração de rota + navegador real |
 | CA-02 | SR-001 | sessão ausente, conta inativa, sem vínculo ou perfil não administrador | tenta ler modelos | recebe `401` ou `403` sem dados | integração REST + integração de rota |
-| CA-03 | SR-002 | modelos globais e restritos, obrigatórios e opcionais | a listagem conclui | cada linha apresenta modelo, aplicação, obrigatoriedade e estado | teste de use case + integração REST + widget + navegador |
+| CA-03 | SR-002 | modelos globais e restritos | a listagem conclui | cada linha apresenta modelo, aplicação e estado | teste de use case + integração REST + widget + navegador |
 | CA-04 | SR-002 | tabela renderizada | inspeciona o cabeçalho e as linhas | **Atualizado** não existe; **Ação** contém **Editar** e **Duplicar** com nomes acessíveis por modelo | widget + navegador |
 | CA-05 | SR-003 | modelos correspondentes somente por nome ou descrição, com caixa diferente | pesquisa | ambos são retornados e os demais são excluídos | teste de use case + integração REST |
 | CA-06 | SR-004 | busca, área, tema, momento e estado válidos | aplica todos os critérios | o servidor combina todos por `AND` e retorna somente compatíveis | teste de use case + integração REST + integração de rota |
@@ -286,8 +284,7 @@ sidebar além de registrar o novo item.
 - `packages/core/src/document-production` contém entidades, estados e eventos
   iniciais, mas não contém repository, contrato de serviço ou caso de uso de
   listagem;
-- `DocumentSpecification` ainda não representa a obrigatoriedade exigida pelo
-  PRD e pelo frame;
+- `DocumentSpecification` ainda não possui a projeção administrativa completa;
 - `apps/server` não possui módulo, persistência, seeder, controller ou rota de
   Produção Documental;
 - `apps/web` não possui serviço, contexto, rota, navegação ou UI do módulo;
@@ -300,7 +297,7 @@ sidebar além de registrar o novo item.
 
 | Path | Estado | Evidência e responsabilidade |
 |---|---|---|
-| `packages/core/src/document-production/domain/entities/document-specification.ts` | existente | agregado possui aplicação, conteúdo, variáveis e estado; precisa de `isRequired` |
+| `packages/core/src/document-production/domain/entities/document-specification.ts` | existente | agregado possui aplicação, conteúdo, variáveis e estado |
 | `packages/core/src/legal-catalog/interfaces/legal-expertise-catalog-provider.ts` | existente | `resolve()` é o contrato público para nomes de áreas e temas |
 | `packages/core/src/document-production/domain/structures/document-specification-list-query.ts` | novo arquivo | query normalizada da listagem |
 | `packages/core/src/document-production/domain/structures/document-specification-list-item.ts` | novo arquivo | projeção pública sem conteúdo ou variáveis |
@@ -343,9 +340,8 @@ repository do catálogo atravessa a fronteira.
 
 ## Core e validação
 
-- modificar o arquivo existente `domain/entities/document-specification.ts` para
-  adicionar `isRequired: boolean`, sem alterar o ownership de conteúdo e
-  variáveis;
+- manter o agregado `DocumentSpecification` responsável pelo nome, aplicação,
+  conteúdo, variáveis e estado, sem adicionar classificação de obrigatoriedade;
 - criar `DocumentSpecificationListQuery` com `search?: string`,
   `legalAreaId?: string`, `legalTopicId?: string`,
   `moment?: DocumentGenerationMoment`, `status?: DocumentSpecificationStatus`,
@@ -377,7 +373,6 @@ export type DocumentSpecificationListRecord = {
   name: string
   description: string
   application: DocumentSpecificationApplication
-  isRequired: boolean
   status: DocumentSpecificationStatus
 }
 
@@ -404,7 +399,6 @@ export type DocumentSpecificationListItem = {
   name: string
   description: string
   application: GlobalApplication | LegalContextApplication
-  isRequired: boolean
   status: DocumentSpecificationStatus
 }
 ```
@@ -519,8 +513,8 @@ export declare class DocumentProductionSeeder {
 - criar `DocumentSpecificationListItemResponseDto` e
   `DocumentSpecificationsPageResponseDto` em
   `apps/server/src/document-production/rest/dtos`; o item expõe
-  `documentSpecificationId`, nome, descrição, aplicação discriminada,
-  `isRequired` e `status`, e a página expõe `items`, `page`, `pageSize`, `total`
+  `documentSpecificationId`, nome, descrição, aplicação discriminada e
+  `status`, e a página expõe `items`, `page`, `pageSize`, `total`
   e `totalPages` com `@ApiProperty`;
 - criar o controller com a assinatura declarativa:
 
@@ -642,8 +636,8 @@ avaliado é `1e5cb6a`.
 - O Contract segue `SCRUM-134`, o PRD canônico `2588673`, especialmente
   REQ-005 e seção 11.4, `documentation/modules.md`, arquitetura, design,
   tooling, SDD e as Rules roteadas.
-- A obrigatoriedade já decidida no PRD será adicionada ao domínio; isso alinha a
-  implementação e não cria regra de produto.
+- A classificação de obrigatoriedade foi removida do modelo, da API, da
+  persistência e da experiência administrativa.
 - A entrega mantém os fluxos de mutação fora do escopo, mas renderiza os controles
   de ação previstos no frame para preservar a fidelidade visual.
 - Nenhuma fronteira modular, dependência ou Rule global precisa mudar.
@@ -677,3 +671,4 @@ revisão e novo Judge Spec.
 | 5 | 2026-08-05 | Detalha evidências, design, fluxo, paths, assinaturas, persistência e decisões técnicas | reaplicação do prompt `create-spec` ampliado, sem expansão do escopo funcional |
 | 6 | 2026-08-05 | Esclarece que a sidebar existente deve ser reutilizada e receber o item administrativo **Documentos** | correção direta do usuário sobre o significado de ignorar a sidebar do frame |
 | 7 | 2026-08-05 | Torna a fidelidade visual ao Node `K2Fvp` normativa e inclui a coluna **Ação** com **Editar** e **Duplicar** | amendment `changes/visual-fidelity-and-row-actions` e correção direta do usuário |
+| 8 | 2026-08-19 | Remove a classificação de obrigatoriedade da UI, API, domínio e persistência | decisão de produto para simplificar o modelo de documentos |

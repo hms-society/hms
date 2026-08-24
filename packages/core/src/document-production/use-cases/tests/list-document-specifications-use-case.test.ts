@@ -30,7 +30,6 @@ describe('List Document Specifications Use Case', () => {
         legalAreaIds: ['area-1'],
         legalTopicIdsByArea: { 'area-1': ['topic-1'] },
       },
-      isRequired: true,
       status: 'available',
     }
     const page: PaginationResponse<DocumentSpecificationListRecord> = {
@@ -81,7 +80,6 @@ describe('List Document Specifications Use Case', () => {
               },
             ],
           },
-          isRequired: true,
           status: 'available',
         },
       ],
@@ -110,7 +108,6 @@ describe('List Document Specifications Use Case', () => {
             scope: 'global',
             moment: 'formalization',
           },
-          isRequired: false,
           status: 'unavailable',
         },
       ],
@@ -134,7 +131,6 @@ describe('List Document Specifications Use Case', () => {
           name: 'Contrato',
           description: 'Modelo global',
           application: { scope: 'global', moment: 'formalization' },
-          isRequired: false,
           status: 'unavailable',
         },
       ] satisfies readonly DocumentSpecificationListItem[],

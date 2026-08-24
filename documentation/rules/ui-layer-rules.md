@@ -175,6 +175,16 @@ Do not declare widget-hook behavior as arrow-function variables. This rule
 applies to widget and page hooks; the exported-arrow convention for
 `use<Name>Action` hooks remains the explicit exception described above.
 
+### Keep widget-owned presentation helpers in the widget hook
+
+Helpers that derive presentation values or interaction state for a single widget
+must remain private functions inside that widget's colocated hook. This includes
+helpers such as initials, status labels, display variants, filtered collections,
+and other values that exist only to render or operate that widget. Do not leave
+these helpers as module-level functions in a `.tsx` file or move them to a
+generic utility merely to remove them from the component. Only behavior genuinely
+shared by multiple widgets may live in a feature-level utility or shared hook.
+
 All UI logic belongs in the owning widget's hook. This includes local state,
 effects, subscriptions, form state and validation, request orchestration,
 derived state, transitions, and user-interaction handlers. The component entry

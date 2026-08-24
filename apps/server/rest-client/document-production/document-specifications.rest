@@ -1,32 +1,54 @@
-@baseUrl = http://localhost:3333
-@token = replace-with-bearer-token
-@documentSpecificationId = replace-with-document-specification-uuid
+@url = {{BASE_URL}}/document-specifications
 @legalAreaId = replace-with-legal-area-uuid
 @legalTopicId = replace-with-legal-topic-uuid
 
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, and execute the
+# login request before sending the document specification requests.
+
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
 ### List document specifications
-GET {{baseUrl}}/document-specifications?page=1&pageSize=20
-Authorization: Bearer {{token}}
+GET {{url}}?page=1&pageSize=20
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Filter document specifications
-GET {{baseUrl}}/document-specifications?search=contrato&moment=formalization&status=available
-Authorization: Bearer {{token}}
+GET {{url}}?search=contrato&moment=formalization&status=available
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Create global document specification
-POST {{baseUrl}}/document-specifications
-Authorization: Bearer {{token}}
+# @name createGlobalDocumentSpecification
+POST {{url}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
   "name": "Modelo de identificação",
   "description": "Documento de identificação do cliente.",
   "application": { "scope": "global", "moment": "consultation" },
-  "isRequired": false
+  "content": {
+    "type": "doc",
+    "content": [{
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Identificação do cliente." }]
+    }]
+  },
+  "variables": []
 }
 
 ### Create legal-context document specification
-POST {{baseUrl}}/document-specifications
-Authorization: Bearer {{token}}
+POST {{url}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -38,29 +60,35 @@ Content-Type: application/json
     "legalAreaIds": ["{{legalAreaId}}"],
     "legalTopicIdsByArea": { "{{legalAreaId}}": ["{{legalTopicId}}"] }
   },
-  "isRequired": true
+  "content": {
+    "type": "doc",
+    "content": [{
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "Modelo jurídico de exemplo." }]
+    }]
+  },
+  "variables": []
 }
 
 ### Get document specification
-GET {{baseUrl}}/document-specifications/{{documentSpecificationId}}
-Authorization: Bearer {{token}}
+GET {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Update configuration
-PATCH {{baseUrl}}/document-specifications/{{documentSpecificationId}}/configuration
-Authorization: Bearer {{token}}
+PATCH {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}/configuration
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
   "name": "Modelo atualizado",
   "description": "Descrição atualizada.",
   "status": "unavailable",
-  "application": { "scope": "global", "moment": "formalization" },
-  "isRequired": true
+  "application": { "scope": "global", "moment": "formalization" }
 }
 
 ### Update template
-PATCH {{baseUrl}}/document-specifications/{{documentSpecificationId}}/template
-Authorization: Bearer {{token}}
+PATCH {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}/template
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -79,5 +107,9 @@ Content-Type: application/json
 }
 
 ### Reject invalid query
-GET {{baseUrl}}/document-specifications?pageSize=0
-Authorization: Bearer {{token}}
+GET {{url}}?pageSize=0
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+
+### Delete the created document specification
+DELETE {{url}}/{{createGlobalDocumentSpecification.response.body.$.documentSpecificationId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

@@ -6,7 +6,7 @@ import {
   type ReactNode,
   useCallback,
 } from 'react'
-import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
+import { useClientsQuery } from '@/ui/identity/hooks/use-clients-query'
 
 type CommunicationContextType = {
   unreadChatIds: string[]
@@ -24,17 +24,17 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Automatically fetch first page of clients to set initial unread badge state
-  const { data: clientsData } = useClientsQuery({
+  const { clientsPage } = useClientsQuery({
     page: 1,
     limit: 50,
   })
 
   useEffect(() => {
-    if (clientsData?.data && !isInitialized) {
+    if (clientsPage?.data && !isInitialized) {
       setUnreadChatIds([])
       setIsInitialized(true)
     }
-  }, [clientsData, isInitialized])
+  }, [clientsPage, isInitialized])
 
   const initializeUnreadChats = useCallback((ids: string[]) => {
     setIsInitialized((prevInitialized) => {

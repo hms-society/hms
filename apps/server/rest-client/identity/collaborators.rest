@@ -4,8 +4,18 @@
 @legalAreaId = {{LEGAL_AREA_ID}}
 @legalTopicId = {{LEGAL_TOPIC_ID}}
 
+# Use ACCESS_TOKEN from a seeded administrator session for this file.
+
 ### List collaborators
 GET {{url}}?page=1&pageSize=20&profile=lawyer&status=active&search={{COLLABORATOR_SEARCH}}
+Authorization: Bearer {{accessToken}}
+
+### List active lawyers for intake scheduling
+GET {{url}}/lawyers?page=1&limit=10&search={{COLLABORATOR_SEARCH}}
+Authorization: Bearer {{accessToken}}
+
+### List collaborator job titles
+GET {{url}}/job-titles
 Authorization: Bearer {{accessToken}}
 
 ### Get current collaborator

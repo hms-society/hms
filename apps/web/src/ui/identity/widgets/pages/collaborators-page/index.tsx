@@ -409,7 +409,7 @@ export function CollaboratorsPage({
           handleActionDialogOpenChange(open)
         }}
       >
-        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-[480px]'>
+        <AlertDialogContent className='max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-lg'>
           <AlertDialogHeader className='place-items-start gap-2 p-6 text-left'>
             <AlertDialogMedia
               className={

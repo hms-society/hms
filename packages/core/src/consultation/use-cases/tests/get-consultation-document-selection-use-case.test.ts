@@ -102,7 +102,6 @@ function createSpecification(
     name,
     description: `${name} description`,
     application: { scope: 'global', moment: 'consultation' },
-    isRequired: false,
     status: 'available',
   }
 }

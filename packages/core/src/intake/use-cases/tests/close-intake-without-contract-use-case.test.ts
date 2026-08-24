@@ -4,7 +4,6 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
 
 import { IntakeFaker } from '../../domain/entities/fakers'
-import { InvalidIntakeClosureError } from '../../domain/errors'
 import type { IntakesRepository } from '../../interfaces'
 import { CloseIntakeWithoutContractUseCase } from '../close-intake-without-contract-use-case'
 
@@ -56,9 +55,17 @@ describe('Close Intake Without Contract Use Case', () => {
     })
   })
 
-  it('rejects the other closure reason without notes', async () => {
+  it('allows the closure observation to be omitted', async () => {
     const currentIntake = IntakeFaker.fake({ status: 'viability_registered' })
+    const closedIntake = IntakeFaker.fake({
+      id: currentIntake.id,
+      status: 'closed_without_contract',
+      closureReason: 'other',
+      closureNotes: undefined,
+      closedAt: currentDate,
+    })
     repository.findById.mockResolvedValue(currentIntake)
+    repository.replace.mockResolvedValue(closedIntake)
     const useCase = new CloseIntakeWithoutContractUseCase(repository, datetimeProvider)
 
     await expect(
@@ -68,6 +75,6 @@ describe('Close Intake Without Contract Use Case', () => {
         closureReason: 'other',
         updatedBy: currentIntake.updatedBy,
       }),
-    ).rejects.toBeInstanceOf(InvalidIntakeClosureError)
+    ).resolves.toBe(closedIntake)
   })
 })

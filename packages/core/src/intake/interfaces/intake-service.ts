@@ -9,9 +9,16 @@ import type {
   RegisterIntakeUseCase,
   RetryIntakeConsultationSchedulingUseCase,
   TransitionIntakeStatusUseCase,
+  UpdateIntakeUseCase,
 } from '../use-cases'
 
-type RegisterIntakeRequest = Parameters<RegisterIntakeUseCase['execute']>[0]
+type WithoutAuditFields<Request> = Request extends unknown
+  ? Omit<Request, 'createdBy' | 'updatedBy'>
+  : never
+
+type RegisterIntakeRequest = WithoutAuditFields<
+  Parameters<RegisterIntakeUseCase['execute']>[0]
+>
 
 type TransitionIntakeStatusRequest = Omit<
   Parameters<TransitionIntakeStatusUseCase['execute']>[0],
@@ -27,6 +34,8 @@ type CloseIntakeWithoutContractRequest = Omit<
   Parameters<CloseIntakeWithoutContractUseCase['execute']>[0],
   'intakeId'
 >
+
+type UpdateIntakeRequest = Omit<Parameters<UpdateIntakeUseCase['execute']>[0], 'intakeId'>
 
 export interface IntakeService {
   listIntakes(
@@ -47,5 +56,9 @@ export interface IntakeService {
   closeIntakeWithoutContract(
     intakeId: string,
     request: CloseIntakeWithoutContractRequest,
+  ): Promise<RestResponse<Intake>>
+  updateIntake(
+    intakeId: string,
+    request: UpdateIntakeRequest,
   ): Promise<RestResponse<Intake>>
 }

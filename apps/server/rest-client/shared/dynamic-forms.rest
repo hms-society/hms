@@ -1,0 +1,32 @@
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, and use the legal
+# catalog REST client to obtain the area/topic IDs for the context filter.
+
+@url = {{BASE_URL}}/dynamic-forms
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### List all available dynamic forms
+GET {{url}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Search dynamic forms by name
+GET {{url}}?search=triagem
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Filter dynamic forms by legal context
+GET {{url}}?legalAreaId=replace-with-legal-area-uuid&legalTopicId=replace-with-legal-topic-uuid
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json

@@ -48,9 +48,6 @@ export class DocumentSpecificationResponseDto {
   @ApiProperty({ type: () => DocumentSpecificationApplicationResponseDto })
   application!: DocumentSpecification['application']
 
-  @ApiProperty()
-  isRequired!: boolean
-
   @ApiProperty({ type: 'object', additionalProperties: true })
   content!: DocumentSpecification['content']
 
@@ -70,7 +67,6 @@ export class DocumentSpecificationResponseDto {
       name: entity.name,
       description: entity.description,
       application: entity.application,
-      isRequired: entity.isRequired,
       content: entity.content,
       variables: entity.variables,
       status: entity.status,

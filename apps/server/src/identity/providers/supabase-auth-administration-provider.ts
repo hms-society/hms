@@ -77,6 +77,31 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     if (error) this.throwAuthError(error, 'Não foi possível remover o usuário do Auth.')
   }
 
+  async removeAllUsers(): Promise<void> {
+    const authUserIds: string[] = []
+    let page = 1
+
+    while (true) {
+      const { data, error } = await this.supabase.auth.admin.listUsers({
+        page,
+        perPage: USERS_PAGE_SIZE,
+      })
+
+      if (error) {
+        this.throwAuthError(error, 'Não foi possível consultar os usuários do Auth.')
+      }
+
+      authUserIds.push(...data.users.map((user) => user.id))
+
+      if (typeof data.nextPage !== 'number') break
+      page = data.nextPage
+    }
+
+    for (const authUserId of authUserIds) {
+      await this.removeUser(authUserId)
+    }
+  }
+
   async findUserByEmail(email: string): Promise<AuthAdministrationUser | undefined> {
     const normalizedEmail = this.normalizeEmail(email)
     let page = 1

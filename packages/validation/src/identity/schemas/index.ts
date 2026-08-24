@@ -1,3 +1,5 @@
+import '../../configure-zod'
+
 export * from './address-schema'
 export * from './client-type-schema'
 export * from './client-details-schema'

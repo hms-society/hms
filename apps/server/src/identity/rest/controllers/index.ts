@@ -4,6 +4,7 @@ export { CompleteSignInController } from '@/identity/rest/controllers/complete-s
 export { GetCurrentCollaboratorController } from '@/identity/rest/controllers/get-current-collaborator.controller'
 export { GetCollaboratorController } from '@/identity/rest/controllers/get-collaborator.controller'
 export { ListCollaboratorsController } from '@/identity/rest/controllers/list-collaborators.controller'
+export { ListLawyersController } from '@/identity/rest/controllers/list-lawyers.controller'
 export { ListCollaboratorJobTitlesController } from '@/identity/rest/controllers/list-collaborator-job-titles.controller'
 export { LookupClientController } from '@/identity/rest/controllers/lookup-client.controller'
 export { RegisterCollaboratorController } from '@/identity/rest/controllers/register-collaborator.controller'

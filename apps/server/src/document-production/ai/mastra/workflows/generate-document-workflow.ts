@@ -56,6 +56,7 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
       .then(loadGenerationStep)
       .map(async ({ inputData }) => ({
         documentGenerationId: inputData.id,
+        instructions: inputData.instructions,
         source: inputData.source,
         template: inputData.template,
         attemptsCount: 0,

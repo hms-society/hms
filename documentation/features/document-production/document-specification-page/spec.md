@@ -92,7 +92,7 @@ transporte.
 - criar sua identidade e configuração inicial como **Disponível**, sem estado
   Rascunho, e redirecionar ao detalhe criado;
 - abrir o detalhe de um modelo pela ação **Editar** da listagem;
-- carregar nome, descrição, disponibilidade, aplicação, obrigatoriedade,
+- carregar nome, descrição, disponibilidade e aplicação,
   conteúdo rico e variáveis personalizadas;
 - salvar nome, descrição, estado e uma única aplicação, global ou restrita a
   múltiplas áreas com temas compatíveis;
@@ -173,7 +173,7 @@ A ação **Novo modelo** de `K2Fvp` abre
 `/modelos-de-documentos/novo`, protegida pelo mesmo middleware administrativo. A
 página reutiliza a composição visual da aba Configuração de `vBrek`, em modo de
 criação, com nome e descrição vazios, aplicação inicial
-`{ moment: 'consultation', scope: 'global' }` editável e `isRequired: false`. A
+`{ moment: 'consultation', scope: 'global' }` editável. A
 aba Template permanece acessível e nenhuma entidade é criada ao abrir ou
 abandonar a rota.
 
@@ -213,9 +213,6 @@ Cada modelo possui exatamente uma aplicação com:
 
 - `moment`: `consultation`, `formalization` ou `legal_production`;
 - `scope`: `global` ou `legal_context`.
-
-`isRequired: boolean` é propriedade do modelo, ao lado de `application`, e não
-integra a união discriminada. Esse shape é único em Core, banco, REST e UI.
 
 Em abrangência global não há áreas ou temas persistidos. Em abrangência jurídica
 deve existir ao menos uma área ativa e, para cada área, ao menos um tema ativo e
@@ -404,7 +401,7 @@ recria primitivas shadcn nem hardcodeia cores, raios ou sombras disponíveis no
 tema.
 
 Abas, toolbar, selects, temas removíveis, modal, busca e salvamento funcionam por
-teclado, têm foco visível e nomes acessíveis. Estado, obrigatoriedade, validação e
+teclado, têm foco visível e nomes acessíveis. Estado, validação e
 feedback não dependem somente de cor. O editor expõe nome/descrição acessível e
 os botões de formatação comunicam estado pressionado. A página preserva operação
 sem overflow em viewport estreito, zoom/reflow, tema escuro e WCAG 2.2 AA.
@@ -525,15 +522,15 @@ Criar, cada `export type` em arquivo próprio sob
   nós/marcas de RF-004; tipos auxiliares permanecem não exportados no mesmo
   arquivo;
 - `DocumentSpecificationConfigurationUpdate = Pick<DocumentSpecification,
-  'name' | 'description' | 'status' | 'application' | 'isRequired'>`;
+  'name' | 'description' | 'status' | 'application'>`;
 - `DocumentSpecificationTemplateUpdate = Pick<DocumentSpecification,
   'content' | 'variables'>`.
 - `CreateDocumentSpecificationInput` contém nome, descrição, aplicação,
-  obrigatoriedade, conteúdo e variáveis; não contém identidade, datas ou um
+  conteúdo e variáveis; não contém identidade, datas ou um
   estado controlado pelo client. O caso de uso define o estado inicial como
   `available`.
 - `DocumentSpecificationDetails`, projeção do contrato REST com
-  `documentSpecificationId`, `name`, `description`, `application`, `isRequired`,
+  `documentSpecificationId`, `name`, `description`, `application`,
   `content`, `variables`, `status` e `updatedAt: string` ISO. A projeção omite
   `createdAt`, que não é consumido pela tela, e não expõe `Date` no transporte.
 
@@ -683,7 +680,7 @@ updateDocumentSpecificationTemplate(
 Criar e exportar em `packages/validation/src/document-production/schemas`:
 
 - `createDocumentSpecificationSchema`, derivado dos campos compartilhados de
-  configuração, aceitando `name`, `description`, `application`, `isRequired`,
+  configuração, aceitando `name`, `description`, `application`,
   `content` e `variables`; propriedades `status`, identidade e datas são
   estritamente rejeitadas;
 - `documentTemplateContentSchema`, união recursiva estrita dos nós/marcas
@@ -759,7 +756,7 @@ payloads são documentados com `@ApiResponse` e `ErrorResponseDto`.
 
 `DocumentSpecificationResponseDto` expõe exatamente
 `documentSpecificationId`, `name`, `description`, `application` discriminada com
-IDs jurídicos, `isRequired`, `content`, `variables`, `status` e `updatedAt`; a
+IDs jurídicos, `content`, `variables`, `status` e `updatedAt`; a
 data é string ISO no JSON. `static fromDomain(entity)` produz a projeção
 `DocumentSpecificationDetails`, mapeia `entity.id` para
 `documentSpecificationId` e chama `entity.updatedAt.toISOString()`. Nenhum nome
@@ -806,9 +803,9 @@ class UpdateDocumentSpecificationTemplateController {
 
 `CreateDocumentSpecificationRequestDto` corresponde exatamente a
 `CreateDocumentSpecificationInput`: `name`, `description`, `application`,
-`isRequired`, `content` e `variables`. `UpdateDocumentSpecificationConfigurationRequestDto` corresponde exatamente a
+`content` e `variables`. `UpdateDocumentSpecificationConfigurationRequestDto` corresponde exatamente a
 `DocumentSpecificationConfigurationUpdate`: `name`, `description`, `status`,
-`isRequired` e `application`. `UpdateDocumentSpecificationTemplateRequestDto`
+`application`. `UpdateDocumentSpecificationTemplateRequestDto`
 corresponde a `DocumentSpecificationTemplateUpdate`: `content` e `variables`.
 Os três requests são derivados dos schemas compartilhados; nenhum DTO redefine
 regra.

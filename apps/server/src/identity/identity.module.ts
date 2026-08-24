@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { AuthModule } from '@/identity/auth.module'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
-import { ActiveAdminGuard } from '@/identity/guards'
+import { ActiveAdminGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import {
   GetClientController,
   GrantClientConsentController,
@@ -10,6 +10,7 @@ import {
   GetCurrentCollaboratorController,
   LookupClientController,
   ListCollaboratorsController,
+  ListLawyersController,
   ListCollaboratorJobTitlesController,
   GetCollaboratorController,
   RegisterCollaboratorController,
@@ -28,7 +29,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 
 @Module({
   imports: [AuthModule, IdentityDatabaseModule, LegalCatalogModule, ProvisionModule],
-  providers: [ActiveAdminGuard],
+  providers: [ActiveAdminGuard, ActiveCollaboratorGuard],
   controllers: [
     GetClientController,
     LookupClientController,
@@ -40,6 +41,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     CompleteSignInController,
     GetCurrentCollaboratorController,
     ListCollaboratorsController,
+    ListLawyersController,
     ListCollaboratorJobTitlesController,
     GetCollaboratorController,
     ResendCollaboratorInvitationController,
@@ -49,6 +51,11 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RemoveCancelledCollaboratorController,
     UpdateCollaboratorController,
   ],
-  exports: [AuthModule, IdentityDatabaseModule, ActiveAdminGuard],
+  exports: [
+    AuthModule,
+    IdentityDatabaseModule,
+    ActiveAdminGuard,
+    ActiveCollaboratorGuard,
+  ],
 })
 export class IdentityModule {}

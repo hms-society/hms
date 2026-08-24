@@ -41,7 +41,6 @@ export const createDocumentSpecificationSchema = z
     name: textSchema,
     description: optionalTextSchema,
     application: applicationSchema,
-    isRequired: z.boolean(),
     status: z
       .enum(DocumentSpecificationStatus)
       .default(DocumentSpecificationStatus.Available),

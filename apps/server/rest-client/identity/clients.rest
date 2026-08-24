@@ -1,5 +1,9 @@
 @url = {{BASE_URL}}/clients
-@clientId = 5f2a1c9e-7b4d-4e83-9a16-2d6c8f1b3e70
+@clientId = replace-with-client-uuid
+@accessToken = {{ACCESS_TOKEN}}
+
+# List and consent routes require a valid seeded session. Public lookup and
+# registration requests below do not require the token.
 
 ### Lookup client
 POST {{url}}/lookup
@@ -13,6 +17,11 @@ Content-Type: application/json
 ### Get client
 GET {{url}}/{{clientId}}
 Content-Type: application/json
+
+### List clients
+GET {{url}}?page=1&pageSize=20
+Authorization: Bearer {{accessToken}}
+Accept: application/json
 
 ### Register natural client
 POST {{url}}

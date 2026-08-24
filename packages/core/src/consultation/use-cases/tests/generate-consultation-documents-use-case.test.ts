@@ -65,13 +65,13 @@ describe('Generate Consultation Documents Use Case', () => {
     const client = ClientFaker.fake({ id: consultation.clientId })
     const legalContext = {
       legalArea: {
-        id: consultation.legalAreaId,
+        id: consultation.legalAreaId!,
         name: 'Direito Civil',
         active: true,
       },
       legalTopics: [
         {
-          id: consultation.legalTopicId,
+          id: consultation.legalTopicId!,
           name: 'Locação residencial',
           active: true,
         },
@@ -172,13 +172,13 @@ describe('Generate Consultation Documents Use Case', () => {
     legalExpertiseCatalogProvider.resolve.mockResolvedValue([
       {
         legalArea: {
-          id: consultation.legalAreaId,
+          id: consultation.legalAreaId!,
           name: 'Direito Civil',
           active: true,
         },
         legalTopics: [
           {
-            id: consultation.legalTopicId,
+            id: consultation.legalTopicId!,
             name: 'Locação residencial',
             active: true,
           },

@@ -666,7 +666,7 @@ fixes:
     - troca de aplicação jurídica para Global confirma antes de limpar áreas e
       temas; cancelamento real preservou `Áreas e temas selecionados`
   JI-12:
-    - `status`, `isRequired`, `modelName`, toggles e valores derivados foram
+    - `status`, `modelName`, toggles e valores derivados foram
       movidos para `use-document-specification-page.ts`; o entrypoint não chama
       mais `form.watch`/`form.setValue`
   JI-13:

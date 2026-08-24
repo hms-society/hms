@@ -8,5 +8,14 @@ export interface DocumentPackagesRepository {
   ): Promise<readonly DocumentPackage[]>
   findById(documentPackageId: string): Promise<DocumentPackage | undefined>
   findByContext(context: DocumentPackageContext): Promise<DocumentPackage | undefined>
+  confirm(
+    documentPackageId: string,
+    confirmedByCollaboratorId: string,
+    confirmedAt: Date,
+  ): Promise<DocumentPackage | undefined>
+  reopen(
+    documentPackageId: string,
+    reopenedAt: Date,
+  ): Promise<DocumentPackage | undefined>
   removeAll(): Promise<void>
 }

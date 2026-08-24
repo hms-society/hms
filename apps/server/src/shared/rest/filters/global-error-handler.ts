@@ -10,6 +10,7 @@ import {
   AppError,
   BadRequestError,
   ConflictError,
+  ForbiddenError,
   NotFoundError,
 } from '@hms/core/shared/domain/errors'
 
@@ -61,6 +62,10 @@ export class GlobalErrorHandler implements ExceptionFilter {
 
     if (exception instanceof ConflictError) {
       return this.createSharedErrorResponse(exception, HttpStatus.CONFLICT, path)
+    }
+
+    if (exception instanceof ForbiddenError) {
+      return this.createSharedErrorResponse(exception, HttpStatus.FORBIDDEN, path)
     }
 
     if (this.isAppError(exception)) {

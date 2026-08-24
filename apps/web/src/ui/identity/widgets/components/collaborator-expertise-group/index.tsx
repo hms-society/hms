@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useWatch, type Control } from 'react-hook-form'
 
-import { useCollaboratorLegalTopicsQuery } from './use-collaborator-legal-topics-query'
+import { useCollaboratorLegalTopicsQuery } from '@/ui/identity/hooks/use-collaborator-legal-topics-query'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'

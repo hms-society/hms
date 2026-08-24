@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useClientsQuery } from '@/ui/shared/hooks/use-clients-query'
-import { useClientCommunicationsQuery } from '@/ui/shared/hooks/use-client-communications-query'
-import { useSendCommunicationMutation } from '@/ui/shared/hooks/use-send-communication-mutation'
+import { useClientsQuery } from '@/ui/identity/hooks/use-clients-query'
+import { useClientCommunicationsQuery } from '@/ui/identity/hooks/use-client-communications-query'
+import { useSendCommunicationMutation } from '@/ui/identity/hooks/use-send-communication-mutation'
 import { toast } from 'sonner'
 
 import {
@@ -25,13 +25,13 @@ export const LawyerCommunicationPage = () => {
   }
 
   // Fetch clients from the database
-  const { data: clientsData, isLoading: isLoadingClients } = useClientsQuery({
+  const { clientsPage, isLoadingClients } = useClientsQuery({
     page: 1,
     limit: 50,
     search: searchQuery,
   })
 
-  const clients = (clientsData?.data ?? []) as any[]
+  const clients = (clientsPage?.data ?? []) as any[]
 
   // Automatically select the first client if none is selected
   useEffect(() => {

@@ -4,9 +4,9 @@ import type {
   MessageDirection,
   MessageOrigin,
 } from '../structures'
+import type { Entity } from '#shared/domain/entities/entity'
 
-type MessageBase = {
-  id: string
+type MessageBase = Entity & {
   direction: MessageDirection
   origin: MessageOrigin
   text?: string

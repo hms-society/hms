@@ -1,3 +1,5 @@
+import '../../configure-zod'
+
 export * from './close-intake-without-contract-schema'
 export * from './intake-closure-reason-schema'
 export * from './intake-contact-channel-schema'
@@ -8,4 +10,6 @@ export * from './intake-schema'
 export * from './intake-status-schema'
 export * from './intake-urgency-schema'
 export * from './register-intake-schema'
+export * from './retry-intake-consultation-scheduling-schema'
 export * from './transition-intake-status-schema'
+export * from './update-intake-schema'

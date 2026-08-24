@@ -8,6 +8,7 @@ const BACKEND_URL = 'http://hms-api.test'
 const LEGAL_AREA_ID = '47dfd634-75e9-41e4-a47e-05114f923bd0'
 const LEGAL_TOPIC_ID = '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d'
 const CLIENT_ID = '09ee728b-80f6-4234-899c-ca40c75c841f'
+const LAWYER_ID = 'lawyer-1'
 
 async function openNewIntake(page: Page) {
   await page.goto(ROUTES.newIntake)
@@ -36,6 +37,15 @@ async function linkExistingClient(page: Page) {
   await expect(page.getByText('Vinculado')).toBeVisible()
   await page.getByRole('button', { name: 'Próximo' }).click()
   await expect(page.getByRole('heading', { name: 'Definir próximo passo' })).toBeVisible()
+}
+
+async function selectLawyer(page: Page) {
+  await page.getByRole('button', { name: 'Advogado *' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByRole('button', { name: 'Advogado de teste' })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Advogado de teste' }).click()
+  await dialog.getByRole('button', { name: 'Selecionar advogado' }).click()
+  await expect(dialog).toBeHidden()
 }
 
 async function mockNextResponse(
@@ -77,6 +87,36 @@ test.beforeEach(async ({ page }) => {
     },
   )
 
+  await page.route(`${BACKEND_URL}/collaborators/lawyers**`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          {
+            collaboratorId: LAWYER_ID,
+            professionalName: 'Advogado de teste',
+            email: 'lawyer@hms.test',
+            profile: 'lawyer',
+            status: 'active',
+            legalExpertises: [
+              {
+                legalArea: { id: LEGAL_AREA_ID, name: 'Trabalhista', active: true },
+                legalTopics: [
+                  { id: LEGAL_TOPIC_ID, name: 'Verbas rescisórias', active: true },
+                ],
+              },
+            ],
+          },
+        ],
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        totalPages: 1,
+      }),
+    })
+  })
+
   await page.route('**/clients/lookup', async (route) => {
     await route.fulfill({
       status: 200,
@@ -113,6 +153,7 @@ test('registers a scheduled intake through the protected route', async ({
   await openNewIntake(page)
   await goToClientStep(page)
   await linkExistingClient(page)
+  await selectLawyer(page)
 
   const registerRequestPromise = page.waitForRequest(
     (request) =>
@@ -124,8 +165,6 @@ test('registers a scheduled intake through the protected route', async ({
   expect(registerRequest.postDataJSON()).toMatchObject({
     clientId: CLIENT_ID,
     responsibleId: auth.id,
-    createdBy: auth.id,
-    updatedBy: auth.id,
     origin: 'direct',
     contactChannel: 'whatsapp',
     urgency: 'normal',
@@ -140,14 +179,12 @@ playwrightTest('redirects unauthenticated users to login', async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`${ROUTES.login}$`))
 })
 
-test('keeps the demand step open when required fields are missing', async ({ page }) => {
+test('allows progressing when optional legal context is absent', async ({ page }) => {
   await openNewIntake(page)
 
   await page.getByRole('button', { name: 'Próximo' }).click()
 
-  await expect(page.getByText('Selecione a área jurídica')).toBeVisible()
-  await expect(page.getByText('Selecione o tema jurídico')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Registrar demanda' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Vincular cliente' })).toBeVisible()
 })
 
 test('keeps the client step open when no client is linked', async ({ page }) => {
@@ -201,6 +238,7 @@ test('shows an error and keeps the form when intake registration fails', async (
   await openNewIntake(page)
   await goToClientStep(page)
   await linkExistingClient(page)
+  await selectLawyer(page)
   await mockNextResponse(page, `${BACKEND_URL}/intakes`, 500, {
     message: 'temporary failure',
   })

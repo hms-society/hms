@@ -3,9 +3,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type BaseSyntheticEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
+import {
+  ConsultationChannel,
+  ConsultationModality,
+} from '@hms/core/consultation/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useRegisterIntakeAction } from './use-register-intake-action'
 
@@ -21,20 +26,14 @@ const DEFAULT_VALUES: IntakeFormData = {
   meetingMode: 'virtual',
   virtualChannel: 'whatsapp',
   location: '',
-  lawyer: 'epaminondas',
+  lawyer: undefined,
   date: new Date(2026, 6, 8),
   time: '10:00',
   closureReason: undefined,
   closureNotes: '',
 }
 
-const DEMAND_FIELDS = [
-  'origin',
-  'contactChannel',
-  'legalAreaId',
-  'legalTopicId',
-  'urgency',
-] as const
+const DEMAND_FIELDS = ['origin', 'contactChannel', 'urgency'] as const
 
 const STEP_CONTENT = {
   1: {
@@ -53,6 +52,7 @@ const STEP_CONTENT = {
 
 export function useNewIntake() {
   const { user } = useAuthContext()
+  const { navigateTo } = useNavigation()
   const { error, isRegisteringIntake, registerIntake } = useRegisterIntakeAction()
   const [currentStep, setCurrentStep] = useState(1)
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false)
@@ -75,19 +75,44 @@ export function useNewIntake() {
     const request = {
       clientId: data.clientId,
       responsibleId: user.id,
-      createdBy: user.id,
-      updatedBy: user.id,
       origin: data.origin,
       contactChannel: data.contactChannel,
-      legalAreaId: data.legalAreaId,
-      legalTopicId: data.legalTopicId,
+      ...(data.legalAreaId ? { legalAreaId: data.legalAreaId } : {}),
+      ...(data.legalTopicId ? { legalTopicId: data.legalTopicId } : {}),
       urgency: data.urgency,
       demandNotes: data.notes,
     }
 
     try {
       if (data.decision === 'schedule') {
-        await registerIntake({ ...request, decision: 'schedule_consultation' })
+        if (!data.lawyer || !data.date || !data.time || !data.meetingMode) {
+          throw new AppError('Scheduling details are required')
+        }
+
+        const [hours, minutes] = data.time.split(':').map(Number)
+        const startsAt = new Date(data.date)
+        startsAt.setHours(hours, minutes, 0, 0)
+
+        const channel =
+          data.virtualChannel === 'whatsapp'
+            ? ConsultationChannel.WhatsappVideo
+            : data.virtualChannel === 'google-meet'
+              ? ConsultationChannel.GoogleMeet
+              : data.virtualChannel === 'teams'
+                ? ConsultationChannel.Teams
+                : ConsultationChannel.Other
+
+        await registerIntake({
+          ...request,
+          decision: 'schedule_consultation',
+          assignedLawyerId: data.lawyer,
+          startsAt,
+          modality:
+            data.meetingMode === 'in-person'
+              ? ConsultationModality.InPerson
+              : ConsultationModality.Virtual,
+          channel,
+        })
       } else {
         if (!data.closureReason) throw new AppError('A closure reason is required')
 
@@ -103,6 +128,7 @@ export function useNewIntake() {
     }
     form.reset(DEFAULT_VALUES)
     setCurrentStep(1)
+    await navigateTo('intakes')
   }
 
   function handleSubmit(event?: BaseSyntheticEvent) {

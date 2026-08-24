@@ -243,6 +243,14 @@ describe('useCollaboratorInvitePage', () => {
     expect(completeSignIn).not.toHaveBeenCalled()
   })
 
+  it('keeps the invitation available when Supabase consumed the URL token', () => {
+    const { result } = renderHook(() => useCollaboratorInvitePage(), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.isInviteUnavailable).toBe(false)
+  })
+
   it('reports the pending state while the invitation request is running', async () => {
     let resolveCompletion: (response: RestResponse) => void = () => undefined
     completeSignIn.mockImplementation(

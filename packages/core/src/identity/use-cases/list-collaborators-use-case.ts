@@ -34,7 +34,7 @@ export class ListCollaboratorsUseCase
   ): CollaboratorListQuery {
     const normalizedQuery: CollaboratorListQuery = {
       page: this.normalizePage(query.page),
-      pageSize: this.normalizePageSize(query.pageSize),
+      pageSize: this.normalizePageSize(query.limit ?? query.pageSize),
       ...(excludeUserId ? { excludeUserId } : {}),
       ...(this.normalizeText(query.search)
         ? { search: this.normalizeText(query.search) }

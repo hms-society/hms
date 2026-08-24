@@ -87,6 +87,7 @@ import {
   AlertTriangle,
   AlertCircle,
   HelpCircle,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
@@ -204,4 +205,5 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   'alert-triangle': AlertTriangle,
   'alert-circle': AlertCircle,
   'help-circle': HelpCircle,
+  'sliders-horizontal': SlidersHorizontal,
 }

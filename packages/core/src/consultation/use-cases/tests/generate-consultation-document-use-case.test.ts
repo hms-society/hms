@@ -63,13 +63,13 @@ describe('Generate Consultation Document Use Case', () => {
     const client = ClientFaker.fake({ id: consultation.clientId })
     const legalContext = {
       legalArea: {
-        id: consultation.legalAreaId,
+        id: consultation.legalAreaId!,
         name: 'Direito Civil',
         active: true,
       },
       legalTopics: [
         {
-          id: consultation.legalTopicId,
+          id: consultation.legalTopicId!,
           name: 'Locação residencial',
           active: true,
         },

@@ -12,16 +12,18 @@ import { useEffect, useState, type MouseEvent } from 'react'
 
 import type { IconName } from '@/ui/shared/widgets/components/icon'
 
-import { useCollaboratorActions } from '../../../hooks/use-collaborator-actions'
+import { useCancelCollaboratorInvitationAction } from '@/ui/identity/hooks/use-cancel-collaborator-invitation-action'
+import { useDeactivateCollaboratorAction } from '@/ui/identity/hooks/use-deactivate-collaborator-action'
+import { useCollaboratorJobTitlesQuery } from '@/ui/identity/hooks/use-collaborator-job-titles-query'
+import { useCollaboratorsQuery } from '@/ui/identity/hooks/use-collaborators-query'
+import { useReactivateCollaboratorAction } from '@/ui/identity/hooks/use-reactivate-collaborator-action'
+import { useRemoveCollaboratorAction } from '@/ui/identity/hooks/use-remove-collaborator-action'
+import { useResendCollaboratorInvitationAction } from '@/ui/identity/hooks/use-resend-collaborator-invitation-action'
 import {
   COLLABORATOR_PROFILE_LABELS,
   COLLABORATOR_STATUS_LABELS,
   formatCollaboratorLastAccess,
 } from './collaborators-page-constants'
-import {
-  useCollaboratorJobTitlesQuery,
-  useCollaboratorsQuery,
-} from './use-collaborators-query'
 
 export type CollaboratorAction = {
   kind: 'resend' | 'deactivate' | 'reactivate' | 'cancel-invitation' | 'remove'
@@ -106,23 +108,31 @@ export function useCollaboratorsPage({ successMessage }: CollaboratorsPageOption
     isResendingInvitation,
     resendInvitationError,
     resetResendInvitation,
+  } = useResendCollaboratorInvitationAction()
+  const {
     deactivateCollaborator,
     isDeactivatingCollaborator,
     deactivateCollaboratorError,
     resetDeactivateCollaborator,
+  } = useDeactivateCollaboratorAction()
+  const {
     reactivateCollaborator,
     isReactivatingCollaborator,
     reactivateCollaboratorError,
     resetReactivateCollaborator,
+  } = useReactivateCollaboratorAction()
+  const {
     cancelCollaboratorInvitation,
     isCancellingCollaboratorInvitation,
     cancelCollaboratorInvitationError,
     resetCancelCollaboratorInvitation,
+  } = useCancelCollaboratorInvitationAction()
+  const {
     removeCollaborator,
     isRemovingCollaborator,
     removeCollaboratorError,
     resetRemoveCollaborator,
-  } = useCollaboratorActions()
+  } = useRemoveCollaboratorAction()
   const isActionPending =
     isResendingInvitation ||
     isDeactivatingCollaborator ||

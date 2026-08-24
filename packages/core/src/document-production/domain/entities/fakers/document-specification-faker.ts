@@ -14,7 +14,6 @@ export class DocumentSpecificationFaker {
         scope: 'global',
         moment: 'consultation',
       },
-      isRequired: false,
       content: { type: 'doc', content: [{ type: 'paragraph' }] },
       variables: [],
       status: 'unavailable',

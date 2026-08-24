@@ -3,7 +3,6 @@ import type {
   DocumentPackageCreation,
   PackageDocumentCreation,
 } from '../../document-production/domain/entities'
-import type { DocumentSpecificationListRecord } from '../../document-production/domain/structures'
 import {
   CollaboratorProfile,
   type CollaboratorProfile as CollaboratorProfileValue,
@@ -18,6 +17,7 @@ import type {
 import {
   ConsultationDocumentAccessDeniedError,
   ConsultationNotFoundError,
+  ConsultationPackageConfirmationError,
   ConsultationDocumentSelectionRemovalError,
   InvalidConsultationDocumentSelectionError,
 } from '../domain/errors'
@@ -58,13 +58,12 @@ export class ReplaceConsultationDocumentSelectionUseCase
         consultationId: consultation.id,
       }),
     ])
-    const availableSpecifications = specificationsPage.items.filter((specification) =>
-      isApplicableToConsultation(
-        specification.application,
-        consultation.legalAreaId,
-        consultation.legalTopicId,
-      ),
-    )
+    const availableSpecifications = specificationsPage.items
+    if (existingPackage?.confirmedAt) {
+      throw new ConsultationPackageConfirmationError(
+        'O pacote de documentos já foi confirmado e não pode mais ser alterado.',
+      )
+    }
     const selectedIds = [...new Set(request.documentSpecificationIds)]
     const specificationsById = new Map(
       availableSpecifications.map((specification) => [
@@ -141,6 +140,8 @@ export class ReplaceConsultationDocumentSelectionUseCase
         ),
       })),
       selectedDocumentSpecificationIds: selectedIds,
+      confirmedAt: documentPackage.confirmedAt,
+      confirmedByCollaboratorId: documentPackage.confirmedByCollaboratorId,
     }
   }
 
@@ -166,16 +167,4 @@ export class ReplaceConsultationDocumentSelectionUseCase
     }
     return consultation
   }
-}
-
-function isApplicableToConsultation(
-  application: DocumentSpecificationListRecord['application'],
-  legalAreaId: string,
-  legalTopicId: string,
-) {
-  if (application.scope === 'global') return true
-  return (
-    application.legalAreaIds.includes(legalAreaId) &&
-    application.legalTopicIdsByArea[legalAreaId]?.includes(legalTopicId) === true
-  )
 }

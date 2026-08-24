@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 
-import { useResetPasswordAction } from './use-reset-password-action'
+import { useResetPasswordAction } from '@/ui/identity/hooks/use-reset-password-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 type ResetPasswordStatus = 'idle' | 'loading' | 'success' | 'error'

@@ -31,6 +31,7 @@ describe('RegisterClientController [POST /clients]', () => {
 
     expect(response.body.client.id).toEqual(expect.any(String))
     expect(response.body.client.taxId).toEqual({ type: 'cpf', value: '52998224725' })
+    expect(response.body.client.phone).toBe('5512998763322')
     expect(response.body.consents).toEqual([])
   })
 
@@ -68,7 +69,12 @@ describe('RegisterClientController [POST /clients]', () => {
 
     await request(fixture.app.getHttpServer())
       .post('/clients')
-      .send({ type: 'natural', name: 'Outro Cliente', taxId: cpf })
+      .send({
+        type: 'natural',
+        name: 'Outro Cliente',
+        taxId: cpf,
+        phone: '+55 (12) 98888-1111',
+      })
       .expect(409)
       .expect(({ body }) => {
         expect(body).toMatchObject({
@@ -85,7 +91,12 @@ describe('RegisterClientController [POST /clients]', () => {
       [1, 2].map((suffix) =>
         request(fixture.app.getHttpServer())
           .post('/clients')
-          .send({ type: 'natural', name: `Cliente ${suffix}`, taxId: cpf }),
+          .send({
+            type: 'natural',
+            name: `Cliente ${suffix}`,
+            taxId: cpf,
+            phone: `+55 (12) 98888-111${suffix}`,
+          }),
       ),
     )
 

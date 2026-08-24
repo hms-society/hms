@@ -1,10 +1,9 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
-import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
+import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { eq, desc } from 'drizzle-orm'
 import { AuthGuard } from '@/identity/guards'
-import { decrypt } from '@/shared/utils/crypto'
 
 @Controller('communications')
 @UseGuards(AuthGuard)
@@ -17,28 +16,25 @@ export class ListClientCommunicationsController {
 
     const records = await db
       .select({
-        id: privateMessageModel.id,
-        direction: privateMessageModel.direction,
-        content: privateMessageModel.content,
-        createdAt: privateMessageModel.createdAt,
-        authorName: collaboratorModel.professionalName,
+        id: communicationModel.id,
+        channel: communicationModel.channel,
+        direction: communicationModel.direction,
+        content: communicationModel.content,
+        createdAt: communicationModel.createdAt,
+        authorName: userModel.email,
       })
-      .from(privateMessageModel)
-      .leftJoin(
-        collaboratorModel,
-        eq(privateMessageModel.collaboratorId, collaboratorModel.id),
-      )
-      .where(eq(privateMessageModel.clientId, clientId))
-      .orderBy(desc(privateMessageModel.createdAt))
+      .from(communicationModel)
+      .leftJoin(userModel, eq(communicationModel.authorId, userModel.id))
+      .where(eq(communicationModel.clientId, clientId))
+      .orderBy(desc(communicationModel.createdAt))
 
     return records.map((record) => ({
       id: record.id,
-      channel: 'whatsapp',
+      channel: record.channel,
       direction: record.direction,
-      content: record.content ? decrypt(record.content) : '',
+      content: record.content,
       createdAt: record.createdAt.toISOString(),
-      author:
-        record.direction === 'outbound' ? record.authorName || 'Advogado' : 'Cliente',
+      author: record.authorName || 'Cliente',
     }))
   }
 }

@@ -1,13 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DocumentGenerationRequestedEvent } from '@hms/core/document-production/domain/events'
+import {
+  DocumentGenerationCancelledEvent,
+  DocumentGenerationRequestedEvent,
+} from '@hms/core/document-production/domain/events'
+import { DocumentGenerationConflictError } from '@hms/core/document-production/domain/errors'
 import type { GenerateDocumentWorkflow } from '@hms/core/document-production/interfaces'
+import type { DocumentGenerationsRepository } from '@hms/core/document-production/interfaces'
+import { FailDocumentGenerationUseCase } from '@hms/core/document-production/use-cases'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
 
 import { documentGenerationSourceSchema } from '@/document-production/ai/mastra/schemas'
+import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { DOCUMENT_PRODUCTION_WORKFLOWS } from '@/document-production/constants/document-production-workflows'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 const documentGenerationRequestedEvent = eventType(
   DocumentGenerationRequestedEvent._NAME,
@@ -17,7 +25,18 @@ const documentGenerationRequestedEvent = eventType(
       documentId: z.string().uuid(),
       documentSpecificationVersionId: z.string().uuid(),
       requestedByCollaboratorId: z.string().uuid(),
+      instructions: z.string().trim().min(1).max(4000).optional(),
       source: documentGenerationSourceSchema,
+      occurredAt: z.string().datetime(),
+    }),
+  },
+)
+
+const documentGenerationCancelledEvent = eventType(
+  DocumentGenerationCancelledEvent._NAME,
+  {
+    schema: z.object({
+      documentGenerationId: z.string().uuid(),
       occurredAt: z.string().datetime(),
     }),
   },
@@ -31,14 +50,49 @@ export class GenerateDocumentJob extends InngestJob {
     inngest: InngestClient,
     @Inject(DOCUMENT_PRODUCTION_WORKFLOWS.generateDocument)
     workflow: GenerateDocumentWorkflow,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
+    generationsRepository: DocumentGenerationsRepository,
+    datetimeProvider: DatetimeProvider,
   ) {
     super(inngest)
+
+    const failGeneration = new FailDocumentGenerationUseCase(
+      generationsRepository,
+      datetimeProvider,
+    )
 
     this.function = this.inngest.createFunction(
       {
         id: 'document-production/generate-document',
         name: 'Generate Document',
+        cancelOn: [
+          {
+            event: documentGenerationCancelledEvent,
+            match: 'data.documentGenerationId',
+          },
+        ],
         triggers: [documentGenerationRequestedEvent],
+        onFailure: async ({ event, error }) => {
+          const originalEvent = event.data.event
+          const generation = await generationsRepository.findById(
+            originalEvent.data.documentGenerationId,
+          )
+
+          if (!generation) return
+
+          try {
+            await failGeneration.execute({
+              documentGenerationId: generation.id,
+              attemptsCount: generation.attemptsCount,
+              failureMessage:
+                error.message || 'A geração documental falhou inesperadamente.',
+              findings: [],
+            })
+          } catch (failureError) {
+            if (failureError instanceof DocumentGenerationConflictError) return
+            throw failureError
+          }
+        },
       },
       async ({ event, step }) =>
         step.run('generate-document', () =>
@@ -47,6 +101,7 @@ export class GenerateDocumentJob extends InngestJob {
             documentId: event.data.documentId,
             documentSpecificationVersionId: event.data.documentSpecificationVersionId,
             requestedByCollaboratorId: event.data.requestedByCollaboratorId,
+            instructions: event.data.instructions,
             source: event.data.source,
           }),
         ),

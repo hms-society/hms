@@ -1,28 +1,53 @@
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, and replace the
+# UUID placeholders using the identity and legal-catalog REST clients.
+
 @url = {{BASE_URL}}/intakes
-@intakeId = 7d2f5e6a-8d4c-4b3a-9e1f-2c6a7b8d9e01
-@clientId = 4a8f3c21-6b7d-4e90-8f12-3d5c7a9b1e24
-@userId = 91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30
-@legalAreaId = 2e7a9c41-5d6f-4b82-9a13-8c4e6f7b2d50
-@legalTopicId = b3f1d8a6-7c2e-4f90-8a45-1d6b9e3c5f72
+@clientId = replace-with-client-uuid
+@userId = replace-with-collaborator-uuid
+@legalAreaId = replace-with-legal-area-uuid
+@legalTopicId = replace-with-legal-topic-uuid
+@lawyerId = replace-with-lawyer-uuid
+
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Confirm the authenticated administrator
+GET {{BASE_URL}}/collaborators/me
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
 
 ### List intakes
 GET {{url}}?search=&status=consultation_scheduled&responsibleId={{userId}}&origin=direct&contactChannel=whatsapp&page=1&pageSize=20
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### List intake responsible options
 GET {{url}}/responsibles
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Register intake
+# @name registerScheduledIntake
 POST {{url}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "decision": "schedule_consultation",
+  "assignedLawyerId": "{{lawyerId}}",
+  "startsAt": "2026-08-13T13:00:00.000Z",
+  "modality": "virtual",
+  "channel": "google_meet",
   "clientId": "{{clientId}}",
   "responsibleId": "{{userId}}",
-  "createdBy": "{{userId}}",
-  "updatedBy": "{{userId}}",
   "origin": "direct",
   "contactChannel": "whatsapp",
   "legalAreaId": "{{legalAreaId}}",
@@ -31,16 +56,29 @@ Content-Type: application/json
   "demandNotes": "Orientação sobre a demanda do cliente"
 }
 
+### Retry consultation scheduling
+# Expected: 409 while the intake is not in consultation_scheduling_failed.
+POST {{url}}/{{registerScheduledIntake.response.body.$.id}}/consultation-scheduling/retry
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "assignedLawyerId": "{{lawyerId}}",
+  "startsAt": "2026-08-13T13:00:00.000Z",
+  "modality": "virtual",
+  "channel": "google_meet"
+}
+
 ### Register intake without scheduling
+# @name registerRegisteredIntake
 POST {{url}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
   "decision": "register_intake",
   "clientId": "{{clientId}}",
   "responsibleId": "{{userId}}",
-  "createdBy": "{{userId}}",
-  "updatedBy": "{{userId}}",
   "origin": "direct",
   "contactChannel": "whatsapp",
   "legalAreaId": "{{legalAreaId}}",
@@ -50,30 +88,56 @@ Content-Type: application/json
 }
 
 ### Get intake
-GET {{url}}/{{intakeId}}
+GET {{url}}/{{registerRegisteredIntake.response.body.$.id}}
 Content-Type: application/json
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### List client intakes
 GET {{url}}/clients/{{clientId}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### Transition intake status
-PATCH {{url}}/{{intakeId}}/status
+# Use an intake currently in consultation_scheduled. Copy its current ID and
+# version from the GET response after scheduling has been resolved.
+# @prompt scheduledIntakeId Copy the scheduled intake ID
+# @prompt scheduledIntakeVersion Copy the current intake version
+PATCH {{url}}/{{scheduledIntakeId}}/status
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
-  "expectedVersion": 1,
+  "expectedVersion": {{scheduledIntakeVersion}},
   "status": "consultation_completed",
   "updatedBy": "{{userId}}"
 }
 
-### Close intake without contract
-POST {{url}}/{{intakeId}}/close
+### Update intake editable fields
+# @name updateRegisteredIntake
+PATCH {{url}}/{{registerRegisteredIntake.response.body.$.id}}
 Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 {
-  "expectedVersion": 1,
+  "expectedVersion": {{registerRegisteredIntake.response.body.$.version}},
+  "updatedBy": "{{userId}}",
+  "responsibleId": "{{userId}}",
+  "origin": "direct",
+  "contactChannel": "whatsapp",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "urgency": "normal",
+  "demandNotes": "Orientação atualizada sobre a demanda do cliente."
+}
+
+### Close intake without contract
+# @name closeRegisteredIntake
+POST {{url}}/{{registerRegisteredIntake.response.body.$.id}}/close
+Content-Type: application/json
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+
+{
+  "expectedVersion": {{updateRegisteredIntake.response.body.$.version}},
   "closureReason": "out_of_scope",
   "updatedBy": "{{userId}}"
 }
