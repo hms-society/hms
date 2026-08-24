@@ -81,4 +81,40 @@ describe('WhatsappProvider', () => {
       }),
     ).rejects.toThrow('Failed to send WhatsApp message: 400 - Bad Request')
   })
+
+  it('should successfully send a WhatsApp text message', async () => {
+    const mockResponse = {
+      messages: [{ id: 'wamid.67890' }],
+    }
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(mockResponse),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await provider.sendTextMessage('5519971659516', 'Olá via texto')
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://graph.facebook.com/v25.0/fake-phone-id/messages',
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer fake-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: '5519971659516',
+          type: 'text',
+          text: {
+            body: 'Olá via texto',
+          },
+        }),
+      }),
+    )
+
+    expect(result).toEqual({ externalMessageId: 'wamid.67890' })
+  })
 })
