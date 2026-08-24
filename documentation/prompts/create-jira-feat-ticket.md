@@ -1,16 +1,16 @@
 ---
-name: create-jira-task-ticket
-description: Create a scoped Jira task ticket from a product requirement or feature request, grounded in repository rules, PRD traceability, and the current implementation.
+name: create-jira-feat-ticket
+description: Create a scoped Jira feature ticket from a Confluence PRD or feature request, grounded in repository rules, product traceability, and the current implementation.
 ---
 
-# Prompt: Create Jira Task Ticket
+# Prompt: Create Jira Feature Ticket
 
 ## Objective
 
 Transform a product requirement or feature request into one clear, actionable Jira
-task ticket for the current repository.
+feature ticket for the current repository.
 
-The result of this task is one Jira task ticket. Do not implement code, create a
+The result of this task is one Jira feature ticket. Do not implement code, create a
 branch, or open a pull request.
 
 ## Input
@@ -43,7 +43,7 @@ Before writing the ticket:
 Create the ticket with the repository- and project-approved values:
 
 - **Project:** `<PROJECT_KEY>`
-- **Type:** `Task`
+- **Type:** the repository-approved feature delivery type, normally `Task`
 - **Summary:** `<short, outcome-oriented title>`
 - **Sprint:** `<name or number, when applicable>`
 - **Assignee:** `<Jira user, when applicable>`
@@ -136,7 +136,7 @@ sensitive report contents or credentials into the ticket.
 
 ## Scope rules
 
-- Create exactly one Jira task ticket for the request unless the user explicitly
+- Create exactly one Jira feature ticket for the request unless the user explicitly
   asks for decomposition.
 - Keep the ticket small enough to implement and review as one coherent change.
 - Preserve the owning module's boundaries from `documentation/modules.md`.
