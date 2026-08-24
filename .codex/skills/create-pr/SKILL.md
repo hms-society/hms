@@ -33,6 +33,18 @@ Create PRs with `draft: false` (or the equivalent `gh` behavior), and if an exis
 PR is draft, run `gh pr ready <number>` before returning its publication metadata. Do not leave
 a delivery PR in draft status unless the user explicitly changes this repository policy.
 
+## Pull request language policy
+
+Every pull request opened or updated by this workflow must be written in Brazilian Portuguese
+(pt-BR). This applies to the title, section headings, objective, traceability, implementation
+summary, business-rule explanation, manual and automated validation, limitations, and every
+other prose field authored by the workflow. Keep file paths, commands, code identifiers, Jira
+keys, URLs, product names, and other technical literals unchanged when translating them.
+
+Before publishing or returning an existing pull request, inspect its complete title and body
+and translate any workflow-authored English prose into pt-BR. Do not treat an already-open PR
+as compliant merely because its latest comment is in pt-BR.
+
 ## Mandatory workflow invocation
 
 This prompt is a publication workflow, not a replacement for the commit or conclusion
@@ -163,31 +175,31 @@ the user whether an in-Contract discrepancy should be fixed.
 
 Include these sections in this order:
 
-- **Objective** — problem, expected outcome, scope and explicit exclusions;
-- **Related Jira tickets** — real Jira keys/URLs and their relationship, or `None`;
-- **PRD and Spec traceability** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
+- **Objetivo** — problem, expected outcome, scope and explicit exclusions;
+- **Tickets Jira relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
+- **Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
   exact revision, delivery boundary, and covered `RF-*`/`CA-*` criteria. This workflow does
   not change Jira or Confluence;
-- **Implementation** — coherent frontend, backend, domain, persistence and test slices with
+- **Implementação** — coherent frontend, backend, domain, persistence and test slices with
   the most relevant changed paths. Describe each affected layer concretely: name the
   contracts/use cases, schemas, migrations/models, routes/controllers, UI routes/widgets,
   generated artifacts and test/evidence surfaces that materially changed. Do not use a
   generic one-line inventory when the delivery crosses multiple layers;
-- **Business-rule changes** — only when behavior, validation, authorization or workflow
+- **Alterações em regras de negócio** — only when behavior, validation, authorization or workflow
   changed; state the previous behavior, new behavior, reason and evidence. Cover ownership,
   authorization/tenant scope, validation and invariants, persistence/side-effect boundaries,
   conflict or concurrency behavior, and explicit exclusions. If no business behavior
-  changed, write `None — no behavior, validation, authorization or workflow change`;
-- **Manual testing** — prerequisites, reproducible steps, expected result and error/recovery
+  changed, write `Nenhuma — não há alteração de comportamento, validação, autorização ou workflow`;
+- **Testes manuais** — prerequisites, reproducible steps, expected result and error/recovery
   flows. Include environment/services and fixture prerequisites, then numbered user-visible
   scenarios covering the primary lifecycle, success persistence, authorization or tenant
   isolation, validation/conflict recovery, keyboard/accessibility and responsive behavior
   when applicable. Name the route or entry point, action, expected result and relevant retry,
   cancellation or failure outcome. Point to `evaluation.md` for exact commands and artifact
   identifiers;
-- **Automated validation** — exact commands and observed results, including failures,
+- **Validação automatizada** — exact commands and observed results, including failures,
   limitations and omitted checks;
-- **Known limitations** — explicit non-blocking gaps, or `None`.
+- **Limitações conhecidas** — explicit non-blocking gaps, or `Nenhuma`.
 
 When UI changes, summarize the visual validation result and link the detailed state/viewport
 comparisons in `evaluation.md`; do not create a separate `Visual evidence` PR section.
@@ -199,7 +211,7 @@ reproducible manual coverage; if any is only a generic summary, expand it before
 the PR metadata. Keep the body concise enough to review; it is a traceability and validation
 summary, not a copy of the full diff.
 
-Use a short noun-phrase title without a Conventional Commit prefix or fabricated issue key.
+Use a short pt-BR noun-phrase title without a Conventional Commit prefix or fabricated issue key.
 For a bug fix, include the evidence-based cause and correction.
 
 ## Publish and return
