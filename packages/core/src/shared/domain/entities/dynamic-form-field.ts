@@ -1,8 +1,8 @@
 import type { DynamicFormFieldOption } from '../structures/dynamic-form-field-option'
 import type { DynamicFormFieldType } from '../structures/dynamic-form-field-type'
+import type { Entity } from './entity'
 
-export type DynamicFormField = {
-  id: string
+export type DynamicFormField = Entity & {
   key: string
   label: string
   type: DynamicFormFieldType
@@ -10,5 +10,5 @@ export type DynamicFormField = {
   required: boolean
   description?: string
   placeholder?: string
-  options?: readonly DynamicFormFieldOption[]
+  options?: DynamicFormFieldOption[]
 }

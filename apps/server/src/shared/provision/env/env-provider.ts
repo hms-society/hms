@@ -21,7 +21,10 @@ export const envSchema = z.object({
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().default(''),
   WHATSAPP_APP_SECRET: z.string().default(''),
   NGROK_DOMAIN: z.string().optional(),
-  SUPABASE_STORAGE_BUCKET: z.string().min(1).default('documents'),
+  SUPABASE_STORAGE_BUCKET: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().default('documents'),
+  ),
 })
 
 type Env = z.infer<typeof envSchema>

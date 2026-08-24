@@ -1,12 +1,12 @@
 import type { DocumentPackageContext } from '../structures'
 import type { PackageDocument } from './package-document'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type DocumentPackage = {
-  readonly id: string
-  readonly context: DocumentPackageContext
-  readonly documents: readonly PackageDocument[]
-  readonly confirmedAt?: Date
-  readonly confirmedByCollaboratorId?: string
-  readonly createdAt: Date
-  readonly updatedAt: Date
+export type DocumentPackage = Entity & {
+  context: DocumentPackageContext
+  documents: PackageDocument[]
+  confirmedAt?: Date
+  confirmedByCollaboratorId?: string
+  createdAt: Date
+  updatedAt: Date
 }

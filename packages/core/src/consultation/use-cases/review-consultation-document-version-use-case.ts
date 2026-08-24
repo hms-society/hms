@@ -20,6 +20,7 @@ import {
   ConsultationDocumentAccessDeniedError,
   ConsultationDocumentNotFoundError,
   ConsultationNotFoundError,
+  ConsultationPackageConfirmationError,
 } from '../domain/errors'
 import type { ConsultationsRepository } from '../interfaces'
 
@@ -61,6 +62,11 @@ export class ReviewConsultationDocumentVersionUseCase
       consultationId: consultation.id,
     })
     if (!documentPackage) throw new ConsultationDocumentNotFoundError()
+    if (documentPackage.confirmedAt) {
+      throw new ConsultationPackageConfirmationError(
+        'O pacote de documentos já foi confirmado e precisa ser reaberto antes de revisar uma versão.',
+      )
+    }
     const packageDocuments =
       await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
     if (!packageDocuments.some((item) => item.documentId === request.documentId)) {

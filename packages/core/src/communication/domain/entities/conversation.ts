@@ -1,7 +1,7 @@
+import type { Entity } from '#shared/domain/entities/entity'
 import type { CommunicationChannel } from '../structures'
 
-type ConversationBase = {
-  id: string
+type ConversationBase = Entity & {
   attendanceId: string
   createdAt: Date
   updatedAt: Date

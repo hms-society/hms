@@ -58,13 +58,14 @@ export class UpdateDocumentSpecificationConfigurationUseCase
         'O status do modelo de documento é inválido.',
       )
     }
-
+    const isFirstTimeEnabling =
+      current.status !== 'available' && changes.status === 'available'
     if (
       changes.status === 'available' ||
       (this.hasText(content) &&
         (changes.content !== undefined || changes.variables !== undefined))
     ) {
-      this.assertValidTemplate(content, variables)
+      this.assertValidTemplate(content, variables, { requireText: !isFirstTimeEnabling })
     }
 
     if (application.scope === 'legal_context') {
@@ -204,11 +205,12 @@ export class UpdateDocumentSpecificationConfigurationUseCase
   private assertValidTemplate(
     content: DocumentTemplateContent,
     variables: readonly DocumentTemplateVariable[],
+    options: { requireText: boolean } = { requireText: true },
   ): void {
     this.assertValidContent(content)
     this.assertValidVariables(variables)
     this.assertValidTokens(content, variables)
-    if (!this.hasText(content)) {
+    if (options.requireText && !this.hasText(content)) {
       throw new InvalidDocumentTemplateError('O modelo precisa possuir conteúdo textual.')
     }
   }

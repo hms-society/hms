@@ -1,9 +1,10 @@
-export type AiBlock = {
-  readonly id: string
-  readonly suggestionId: string
-  readonly entityId: string
-  readonly suggestionType: string
-  readonly blockedAt: Date
-  readonly blockedByCollaboratorId: string
-  readonly isUnblocked: boolean
+import type { Entity } from './entity'
+
+export type AiBlock = Entity & {
+  suggestionId: string
+  entityId: string
+  suggestionType: string
+  blockedAt: Date
+  blockedByCollaboratorId: string
+  isUnblocked: boolean
 }

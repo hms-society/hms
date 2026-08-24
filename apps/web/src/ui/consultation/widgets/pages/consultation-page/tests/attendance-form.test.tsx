@@ -81,6 +81,7 @@ function useConsultationTestController(): ReturnType<typeof useConsultation> {
     isEditingAttendance: false,
     editAttendanceError: null,
     ...controllerOverrides,
+    completeConsultationError: controllerOverrides.completeConsultationError ?? null,
   }
 }
 

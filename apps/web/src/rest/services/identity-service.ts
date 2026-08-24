@@ -10,19 +10,19 @@ import type { CollaboratorUpdate } from '@hms/core/identity/domain/entities'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import type { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
 
-function createCollaboratorsPath(query: CollaboratorListQuery) {
-  const searchParams = new URLSearchParams()
+export const IdentityService = (restClient: RestClient): IdentityRestService => {
+  function createCollaboratorsPath(query: CollaboratorListQuery) {
+    const searchParams = new URLSearchParams()
 
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) searchParams.set(key, String(value))
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined) searchParams.set(key, String(value))
+    }
+
+    const queryString = searchParams.toString()
+
+    return queryString ? `/collaborators?${queryString}` : '/collaborators'
   }
 
-  const queryString = searchParams.toString()
-
-  return queryString ? `/collaborators?${queryString}` : '/collaborators'
-}
-
-export const IdentityService = (restClient: RestClient): IdentityRestService => {
   return {
     getClient(clientId) {
       return restClient.get<ClientDetails>(`/clients/${clientId}`)

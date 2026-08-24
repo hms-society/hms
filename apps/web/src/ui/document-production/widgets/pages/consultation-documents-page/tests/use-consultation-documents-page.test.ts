@@ -9,6 +9,7 @@ import { useGenerateConsultationDocumentAction } from '../../../../hooks/use-gen
 import { useGenerateConsultationDocumentsAction } from '../../../../hooks/use-generate-consultation-documents-action'
 import { useReplaceConsultationDocumentSelectionAction } from '../../../../hooks/use-replace-consultation-document-selection-action'
 import { useConfirmConsultationDocumentPackageAction } from '../../../../hooks/use-confirm-consultation-document-package-action'
+import { useReopenConsultationDocumentPackageAction } from '../../../../hooks/use-reopen-consultation-document-package-action'
 import { useConsultationDocumentsPage } from '../use-consultation-documents-page'
 
 const useConsultationMock = vi.hoisted(() => vi.fn())
@@ -38,6 +39,9 @@ vi.mock('../../../../hooks/use-replace-consultation-document-selection-action', 
 vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', () => ({
   useConfirmConsultationDocumentPackageAction: vi.fn(),
 }))
+vi.mock('../../../../hooks/use-reopen-consultation-document-package-action', () => ({
+  useReopenConsultationDocumentPackageAction: vi.fn(),
+}))
 
 const useConsultationDocumentsQueryMock = vi.mocked(useConsultationDocumentsQuery)
 const useCancelConsultationDocumentGenerationActionMock = vi.mocked(
@@ -57,6 +61,9 @@ const useReplaceConsultationDocumentSelectionActionMock = vi.mocked(
 )
 const useConfirmConsultationDocumentPackageActionMock = vi.mocked(
   useConfirmConsultationDocumentPackageAction,
+)
+const useReopenConsultationDocumentPackageActionMock = vi.mocked(
+  useReopenConsultationDocumentPackageAction,
 )
 
 function createVersion(
@@ -152,6 +159,11 @@ describe('useConsultationDocumentsPage', () => {
       confirmDocumentPackage: vi.fn().mockResolvedValue(undefined),
       error: null,
       isConfirming: false,
+    } as never)
+    useReopenConsultationDocumentPackageActionMock.mockReturnValue({
+      reopenDocumentPackage: vi.fn().mockResolvedValue(undefined),
+      error: null,
+      isReopening: false,
     } as never)
   })
 

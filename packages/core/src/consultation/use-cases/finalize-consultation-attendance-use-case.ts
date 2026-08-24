@@ -102,7 +102,7 @@ export class FinalizeConsultationAttendanceUseCase
           .join(' — '),
       })),
       dynamicFormId: request.dynamicFormId ?? undefined,
-      dynamicFormAnswers: request.answers ?? [],
+      dynamicFormAnswers: [...(request.answers ?? [])],
       dynamicFormSnapshot: dynamicForm
         ? {
             dynamicFormId: dynamicForm.id,

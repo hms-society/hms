@@ -1,3 +1,3 @@
-export interface Entity {
+export type Entity = {
   readonly id: string
 }

@@ -7,7 +7,7 @@ import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
 
 import { UpdateDocumentSpecificationConfigurationController } from '@/document-production/rest/controllers'
 
-const templateContent: DocumentTemplateContent = {
+const templateContent = {
   type: 'doc',
   content: [
     {
@@ -15,7 +15,7 @@ const templateContent: DocumentTemplateContent = {
       content: [{ type: 'text', text: 'Conteúdo de teste' }],
     },
   ],
-}
+} as unknown as DocumentTemplateContent
 
 function createSpec(
   overrides: Partial<DocumentSpecificationCreation> = {},
@@ -27,10 +27,10 @@ function createSpec(
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
     status: 'unavailable',
+    accessClassification: 'Interno',
     ...overrides,
   }
 }
-
 describe('Update Document Specification Configuration Controller [PATCH .../configuration]', () => {
   let fixture: DocumentProductionModuleFixture
 
@@ -43,23 +43,29 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture.close())
 
-  it('rejects enabling an empty template', async () => {
+  it('allows enabling a specification before template content is added', async () => {
     const [specification] = await fixture.specificationsRepository.addMany([
       createSpec({ content: { type: 'doc', content: [] }, status: 'unavailable' }),
     ])
     const admin = await fixture.registerAdmin()
     if (!specification) throw new Error('Specification was not created')
 
-    await request(fixture.app.getHttpServer())
+    const response = await request(fixture.app.getHttpServer())
       .patch(`/document-specifications/${specification.id}/configuration`)
       .set('Authorization', fixture.authenticateAs(admin))
       .send({
         name: specification.name,
         description: specification.description,
         status: 'available',
+        accessClassification: 'Interno',
         application: specification.application,
       })
-      .expect(400)
+      .expect(200)
+
+    expect(response.body).toMatchObject({
+      status: 'available',
+      content: { type: 'doc', content: [] },
+    })
   })
 
   it('updates configuration without changing template', async () => {
@@ -74,9 +80,9 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         name: 'Modelo atualizado',
         description: 'Descrição atualizada',
         status: 'unavailable',
+        accessClassification: 'Interno',
         application: { scope: 'global', moment: 'formalization' },
       })
-      .expect(200)
 
     expect(response.body).toMatchObject({
       name: 'Modelo atualizado',
@@ -97,6 +103,7 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         name: 'Modelo',
         description: 'Descrição',
         status: 'unavailable',
+        accessClassification: 'Interno',
         application: { scope: 'global', moment: 'consultation' },
       })
       .expect(403)

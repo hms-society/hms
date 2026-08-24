@@ -128,7 +128,7 @@ describe('DocumentSpecificationsPage', () => {
     expect(screen.getByRole('link', { name: 'Novo modelo' }).getAttribute('href')).toBe(
       '/modelos-de-documentos/novo',
     )
-    expect(screen.getByRole('button', { name: 'Duplicar Procuração' })).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'Duplicar Procuração' })).toBeNull()
     expect(screen.queryByRole('columnheader', { name: 'Atualizado' })).toBeNull()
   })
 

@@ -3,13 +3,14 @@ import { UserStatus } from '@hms/core/identity/domain/structures'
 import { useState, type MouseEvent } from 'react'
 import { toast } from 'sonner'
 
-import { useCollaboratorActions } from '../../../hooks/use-collaborator-actions'
+import { useDeactivateCollaboratorAction } from '@/ui/identity/hooks/use-deactivate-collaborator-action'
+import { useReactivateCollaboratorAction } from '@/ui/identity/hooks/use-reactivate-collaborator-action'
 import {
   COLLABORATOR_PROFILE_LABELS,
   COLLABORATOR_STATUS_LABELS,
   formatCollaboratorLastAccess,
 } from '../collaborators-page/collaborators-page-constants'
-import { useCollaboratorDetailsQuery } from './use-collaborator-details-query'
+import { useCollaboratorDetailsQuery } from '@/ui/identity/hooks/use-collaborator-details-query'
 
 export function useCollaboratorDetailsPage(collaboratorId: string) {
   const { collaborator, collaboratorError, isLoadingCollaborator, refetch } =
@@ -21,12 +22,14 @@ export function useCollaboratorDetailsPage(collaboratorId: string) {
     deactivateCollaborator,
     deactivateCollaboratorError,
     isDeactivatingCollaborator,
+    resetDeactivateCollaborator,
+  } = useDeactivateCollaboratorAction()
+  const {
     isReactivatingCollaborator,
     reactivateCollaborator,
     reactivateCollaboratorError,
-    resetDeactivateCollaborator,
     resetReactivateCollaborator,
-  } = useCollaboratorActions()
+  } = useReactivateCollaboratorAction()
 
   function getLegalExpertises(collaboratorValue: CollaboratorSummary) {
     if (!collaboratorValue.legalExpertises) return []

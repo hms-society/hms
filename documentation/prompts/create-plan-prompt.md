@@ -1,105 +1,239 @@
 ---
 name: create-plan
-description: Criar um Plan SDD como ledger de fases, progresso, evidências e handoff para uma Spec de feature.
+description: Create a concise SDD execution Plan for an open feature Spec that needs dependent phases, parallel Builder ownership, risk control or a durable implementation ledger.
 ---
 
-# Criar Plan
+# Create a Plan
 
-Crie Plan somente quando a Spec `open` possuir fases dependentes, múltiplos
-workspaces, migration relevante, risco elevado ou necessidade real de ledger.
-Para Spec pequena, use `implement-spec` diretamente.
+Create `plan.md` only when an `open` Spec recommends Plan-backed execution because it has
+dependent phases, multiple applications or ownership boundaries, migration/integration
+risk, meaningful parallelism, complex manual validation or a real need for recovery state.
+After planning, `implement-spec` automatically selects this Plan. Use its direct strategy for
+a small cohesive Spec.
 
-## Descoberta e propagação de Rules
+The Orchestrator creates and owns the Plan in the current task. Builders never edit it.
 
-Antes de escrever o Plan, leia integralmente `AGENTS.md`, `AGENTS.local.md`, o
-router de Rules do repositório e cada Rule aplicável aos paths e comportamentos
-previstos pela Spec. Registre no Plan uma seção **Rules aplicáveis** com o path
-exato de cada Rule, as fases/tarefas que ela governa e as restrições relevantes.
+The Plan is an execution ledger, not a second implementation contract. It must preserve the
+Spec's exact revision and route every implementation change through `implement-spec`; never
+create or reference a parallel implementation workflow.
 
-Cada handoff para Builder e para o único Judge Implementation deve repetir as
-Rules aplicáveis. Cada agente deve lê-las integralmente e informar quais carregou.
-Repita a descoberta dinâmica quando um finding ou mudança de escopo alcançar
-novo path, camada ou comportamento.
+## Preconditions and authority
 
-## Pencil e referências visuais
+Read `AGENTS.md`, `AGENTS.local.md`, `documentation/rules/sdd-rules.md`, the
+current Spec, its Rule Pack, Architecture, Modules, and Tooling. Confirm:
 
-Quando a Spec possuir fonte Pencil, referência `design/*.pen`, node ID ou critério
-visual, declare no Plan o uso obrigatório do Pencil MCP, os nodes, viewport e
-evidências esperadas. Use o skill `pencil-design` antes do fluxo Pencil e chame
-`mcp__pencil__get_editor_state` com `include_schema: true` antes de qualquer outra
-operação quando o schema não for conhecido.
+- the Spec is `open` and its revision is current;
+- the Technical and Validation Contracts contain enough detail to schedule work;
+- every required design manifest/reference exists;
+- every supplied design screenshot has a completed visual inventory, and all required
+  supplemental-screenshot suggestions are captured or explicitly accepted as documented
+  assumptions;
+- Plan-backed execution remains appropriate;
+- no material product or technical ambiguity remains.
 
-O Pencil é um hard gate. Antes de qualquer Builder iniciar implementação, confirme
-que o editor está ativo, respondendo e com o arquivo exato referenciado pela Spec
-aberto — neste caso, `design/hms.pen`. Confirme também o schema e os node IDs
-necessários. Se o Pencil estiver inativo, falhar, estiver em outro arquivo ou não
-permitir confirmar schema/nodes, bloqueie a implementação: não inicie Builders,
-não marque fase como `in_progress` e não substitua a evidência por memória,
-screenshot antigo, arquivo local ou inferência. Registre a causa e a próxima ação;
-somente um novo preflight bem-sucedido libera o trabalho.
+Planning must not redefine product behavior or technical contracts. If planning exposes a
+material ambiguity or requires a different contract, stop, return the Spec to the
+`create-spec` amendment workflow and resume only after the revised Spec is `open`.
 
-Inspecione os nodes citados, registre-os em `evaluation.md` e compare screenshots
-com a implementação. Nunca leia, busque ou edite `.pen` por filesystem; não copie
-hex, radius, shadow ou font fora dos tokens do repositório. Nodes design-only não
-ampliam o escopo nem autorizam simular comportamento sem contrato.
+Use the Spec's real source and Jira ticket traceability. Do not invent or migrate external
+records.
 
-## Browser Use e validação interativa
+## Location and metadata
 
-Quando a entrega envolver UI, rotas, autenticação, REST, responsividade ou
-interação, declare o uso do skill `browser-use` com CDP junto ao Playwright MCP.
-Exija accessibility tree, `wait_for_load()` após navegação, verificação após cada
-ação, screenshots quando layout importar, viewport estreito, teclado, console e
-network. Não trate apenas `curl` ou navegação bem-sucedida como evidência de UI.
-
-O Orchestrator cria o Plan na task atual e mantém a relação com a revisão da
-Spec:
+Create `plan.md` beside the governing `spec.md`, including inside a concluded feature's
+`changes/<change-name>/` directory.
 
 ```yaml
-spec: ../spec.md
-evaluation: ../evaluation.md
-spec_revision: 1
+---
+title: <feature> — implementation plan
 status: pending
-prd: <confluence-url, opcional>
+spec: ./spec.md
+spec_revision: 1
+evaluation: ./evaluation.md
 jira_tickets:
-  - <PROJ-123>
+  - <PROJ-123> # omit when none
+prd: <actual-confluence-url, optional>
+updated_at: YYYY-MM-DD
+---
 ```
 
-O PRD deve ser referenciado pela página do Confluence, nunca por milestone ou
-arquivo local criado como fonte de verdade. Preserve todas as chaves Jira da
-Spec e mantenha a rastreabilidade entre ticket, requisito, critério de aceite
-e tarefa do Plan.
+`evaluation.md` is an expected colocated path. It is created by `implement-spec` at
+implementation kickoff, not by `create-plan`.
 
-Inclua:
+## Required Plan structure
 
-- objetivo, escopo e fora de escopo;
-- Rules aplicáveis por fase/tarefa, com paths e restrições relevantes;
-- fases ordenadas e dependências;
-- tarefas com paths, resultado observável e IDs `RF-*`/`CA-*`;
-- campo `parallelizable` e motivo quando aplicável;
-- sensores e evidências esperados por fase;
-- riscos, findings ativos, tentativas, estado e próxima ação;
-- sensores e evidências por fase; o veredito do único Judge Implementation fica
-  reservado para a implementação inteira.
+Write three required sections and one conditional section:
 
-## Formato linear obrigatório
+1. **Execution status**
+2. **Execution ledger**
+3. **Validation and handoff**
+4. **Execution log** — add only after a risk, finding, failed attempt or material execution
+   event exists.
 
-Escreva fases e tarefas em formato linear, legível em viewport estreito e sem
-tabelas largas. Para cada fase, use o título, dependências e estado. Para cada
-tarefa, registre em blocos separados: ID/estado, dependências, paths, resultado
-observável, RF/CA e `parallelizable` com o motivo.
+Do not repeat the Spec's objective, scope, requirements, algorithms, declarations, schemas,
+technical decisions or full Rule Pack. Reference the authoritative Contract instead.
 
-Não use tabelas para decompor tarefas, fases, endpoints, riscos ou handoffs.
-Use listas ou blocos lineares. Tabelas só são permitidas para matrizes compactas
-quando forem materialmente mais claras e não exigirem colunas extensas ou quebra
-excessiva de paths e resultados.
+### 1. Execution status
 
-Cada handoff deve repetir linearmente tarefa, paths, Rules, dependências, sensores
-e evidências esperadas; não remeta o agente a uma linha de tabela como único
-contexto operacional.
+Keep one compact operational snapshot:
 
-Estados de tarefa: `pending`, `implementing`, `validating`, `verified`.
-Estados de fase: `pending`, `in_progress`, `awaiting_judgment`, `failed`,
-`accepted`.
+- Spec path, revision and `open` status;
+- one-sentence rationale for Plan-backed execution;
+- current phase;
+- next action;
+- active blockers;
+- active Builders and the next dependency-ready Builder;
+- only shared/generated-file, package/lockfile or other ownership coordination that cannot
+  be represented by a single task.
 
-Somente o Orchestrator atualiza o Plan. Builders implementam; Judges avaliam
-read-only. Todos são subagentes da task atual. Não use nova thread.
+Update this snapshot throughout implementation. If the Spec revision changes, record the
+revision mismatch as a blocker, stop dependent execution and reconcile every affected phase,
+task, path, criterion, design reference and validation target before resuming.
+
+### 2. Execution ledger
+
+Use one phase/parallelism table with exactly these columns:
+
+| Wave | Builder | Phase | Name | Depends on | Parallel with | Status | Exit condition |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `builder_<boundary>` | F1 | `<outcome>` | — | — | `pending` | `<sensor-backed exit>` |
+
+Derive the dependency graph and Builder ownership from the Spec's Technical Contract and affected
+ownership boundaries. Use the exact subagent names `builder_core`, `builder_validation`,
+`builder_server`, and `builder_web` for their corresponding affected boundaries; reserve
+`reviewer` for the single integrated read-only review and `builder_fix_<boundary>` for an
+independent correction when the owning Builder cannot be resumed. Do not create a Builder merely
+because a package exists. Group small or tightly
+coupled packages into one cohesive ownership assignment, and give a package its own Builder only
+when its work is substantial and independently executable. Future applications and packages
+follow the same evidence-based grouping instead of increasing the Builder count linearly.
+
+Do not translate product-document ordering into phases or waves. Plan sequencing comes only
+from the Spec's technical contracts, path ownership, and executable dependencies.
+
+A Builder may own multiple sequential phases inside its ownership boundary. Phases control
+sequencing and exits; they do not trigger fresh agents. Reuse the same Builder across related
+phases and corrections to preserve context. Default to at most three concurrent implementation
+Builders. Exceed that only when the Plan records a concrete parallelism benefit, stable contracts
+and non-overlapping paths that justify the additional context and integration cost. The
+Orchestrator owns root configuration, package installation, lockfiles, shared/generated-file
+coordination and final integration.
+
+Below the table, group concise task cards by phase:
+
+```md
+### F1 — <phase name>
+
+#### F1-T1 — <task outcome>
+
+- **Status/owner:** `pending` — `builder_<boundary>`
+- **Depends/parallel:** <dependencies and safe parallel work>
+- **Paths:** <exact owned paths or coherent path groups>
+- **Contract:** <RF-* and CA-*>
+- **Outcome:** <observable result>
+- **Rules:** <exact applicable Rule paths and relevant `Antipatterns to Avoid` subsections, when present>
+- **Exit:** <focused commands/sensors and required evidence>
+```
+
+Every task has exactly these seven concerns: status/owner, dependency/parallelism, owned
+paths, RF/CA coverage, observable outcome, applicable Rules (including relevant
+`Antipatterns to Avoid` subsections) and validation/exit. Reference the Spec for technical
+detail. Assign every task to its stable ownership Builder; do not create one Builder per task.
+Paths may not overlap between active Builders.
+
+For every task that changes UI or browser behavior, its exit must also require: the exact Spec
+widget tree comparison, applicable keyboard/narrow-viewport states, console and failed-request
+inspection, and a fresh Playwright MCP screenshot for each affected design state. For every task
+that changes server-backed behavior, its exit must require the real request/response and
+persistence or authorization result; mocked transport is not sufficient evidence.
+
+A Builder may not start until the Orchestrator records the exact Spec revision, assigned phases
+and task paths, criteria, Rules, design references and exits. A task may not be marked complete
+from a Builder report alone. On any error or discrepancy, keep it `in_progress`, record the
+finding, invalidate affected evidence, resume the responsible Builder through `implement-spec`,
+and rerun the exit without asking the user for permission to make an in-Contract correction.
+Activate `builder_fix_<boundary>` only when the responsible Builder cannot be resumed or the
+correction is genuinely independent.
+
+Status vocabulary:
+
+- **Plan:** `pending`, `in_progress`, `completed`, `superseded`;
+- **Phase, task and coverage row:** `pending`, `in_progress`, `completed`.
+
+Keep a failed or blocked item `in_progress` and record its finding/blocker and next action;
+do not create failure statuses. Keep the final integrated phase `in_progress` while integrated
+validation is active. Use `superseded` only when a revised Spec replaces
+the Plan or switches to direct implementation.
+
+### 3. Validation and handoff
+
+Use one coverage table to schedule evidence without repeating the Spec's scenario steps:
+
+| Type | Scenario/surface | Criteria | Reference | Evidence target | Status |
+| --- | --- | --- | --- | --- | --- |
+| Manual | MV-01 | CA-01 | Spec MV-01 | `./evaluation.md` | `pending` |
+| Visual (optional) | `<state>` | CA-02 | `./design/<reference>.png` | `Playwright screenshot path or CI artifact identifier` | `pending` |
+| Runtime | `<integration>` | CA-03 | Integration Contract | `./evaluation.md` | `pending` |
+
+Include only applicable rows. For design-backed UI, schedule every supplied screenshot and every
+required supplemental state at its exact viewport and record an independent comparison row for
+each. Do not create a dedicated visual-reference test or use one generic capture as evidence for
+multiple states/viewports. Recommended supplemental screenshots may be deferred only when the
+manifest records the decision and no acceptance gap remains. Builders use saved references;
+the Orchestrator reopens Pencil through MCP when the Design Contract changes, a reference must
+be refreshed, or the final comparison requires confirmation against the canonical node.
+
+Schedule exactly one read-only subagent named `reviewer` using the
+[`Integrated Reviewer`](../agents/reviewer-agent.md) contract after Builder
+diffs are integrated and before readiness. Do not create Reviewers per Builder, phase, application
+or package. The Reviewer checks
+the complete candidate, cross-Builder contracts and all affected surfaces; when UI is affected,
+it also inspects every required final visual comparison and independently replays high-risk
+Playwright MCP interactions. Its report is not evidence: the Orchestrator verifies each finding,
+records accepted findings in Evaluation and resumes the responsible Builder for correction. After
+any correction, resume the same `reviewer` subagent to recheck the affected candidate; never
+activate a replacement Reviewer merely because the implementation changed.
+
+Define the final handoff condition: all tasks and phases completed, Spec validation
+commands current on the integrated commit, generated artifacts/migrations reviewed,
+services/accounts/fixtures ready, every `MV-*` executable, transient validation-artifact
+identifiers recorded, the final Spec tree/conformance comparison passed, all additional-screenshot
+decisions resolved, `reviewer` completed, every verified review finding resolved and
+no blocking finding active. Then
+route directly to `conclude-spec`.
+
+### 4. Execution log — conditional
+
+After implementation starts, record only material operational entries:
+
+```md
+- **YYYY-MM-DD — <phase/task event>**
+  - **Finding/result:** <evaluation finding ID or concise result>
+  - **Next action:** <action>
+```
+
+The Plan owns status, attempts and next action. Full command evidence, screenshots, finding
+details and verdicts belong in `evaluation.md`.
+
+## Plan integrity and author summary
+
+Before saving, verify the Spec revision, acyclic dependencies, complete RF/CA scheduling,
+non-overlapping active paths, valid Rule paths, executable exits, complete `MV-*`/design
+coverage, stable Builder ownership, justified concurrency, final conformance checkpoints and
+valid colocated links.
+
+After creating or materially revising `plan.md`, return a concise summary with:
+
+- clickable Plan path, status and Spec revision;
+- reason for Plan-backed execution;
+- number of waves, phases and tasks;
+- active Builders, reused phase assignments, parallel waves, critical dependencies and
+  shared ownership;
+- the scheduled `reviewer` subagent and its affected surfaces;
+- planned manual/runtime/visual coverage;
+- active risks or blockers;
+- initial phase and next action.
+
+Do not claim unexecuted phases, sensors or validation passed. If the Spec is not `open`, the
+revision is stale or a prerequisite is missing, report the blocker instead of presenting the
+Plan as implementation-ready.

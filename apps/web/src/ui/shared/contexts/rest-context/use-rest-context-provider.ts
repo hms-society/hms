@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef } from 'react'
 import { BROWSER_ENV } from '@/constants'
 import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
 import { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
-import { documentService } from '@/rest/services/DocumentEngineService'
+import { DocumentEngineService } from '@/rest/services/document-engine-service'
 import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { ConsultationService } from '@/rest/services/consultation-service'
@@ -49,7 +49,7 @@ export function useRestContextProvider(): RestContextValue {
     consultationService: ConsultationService(restClient),
     consultationDocumentProductionService:
       ConsultationDocumentProductionService(restClient),
-    documentService: documentService(restClient),
+    documentService: DocumentEngineService(restClient),
     schedulingService: SchedulingService(restClient),
     documentProductionService: DocumentProductionService(restClient),
     aiSuggestionsService: AiSuggestionsService(restClient),

@@ -51,11 +51,11 @@ export class ConsultationSeeder {
       channel: ConsultationChannel.GoogleMeet,
       status: ConsultationStatus.Pending,
       primaryLegalQuestion:
-        'Which powers are required to represent the client in the lease negotiation?',
+        'Quais poderes são necessários para representar o cliente na negociação do contrato de locação?',
       guidanceProvided:
-        'Prepare a limited power of attorney for negotiation and document review.',
+        'Preparar uma procuração com poderes limitados para a negociação e a análise do contrato.',
       notes:
-        'The client wants representation restricted to the residential lease negotiation.',
+        'O cliente deseja que a representação seja limitada à negociação do contrato de locação residencial.',
       dynamicFormId: references.dynamicForm?.id,
       dynamicFormSnapshot: references.dynamicForm
         ? {
@@ -65,6 +65,8 @@ export class ConsultationSeeder {
             fields: references.dynamicForm.fields,
           }
         : undefined,
+      attendanceFinalizedAt: new Date('2026-08-20T15:00:00.000Z'),
+      attendanceFinalizedByCollaboratorId: references.assignedLawyerId,
     })
     const [createdConsultation] = await this.seed([consultation])
 

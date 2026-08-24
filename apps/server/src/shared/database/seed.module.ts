@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
@@ -14,6 +15,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 
 @Module({
   imports: [
+    CaseManagementDatabaseModule,
     AuthModule,
     ConsultationDatabaseModule,
     DocumentsDatabaseModule,

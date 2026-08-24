@@ -1,6 +1,7 @@
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { PageTitle } from '@/ui/shared/widgets/components/page-title'
+import { DocumentVersionStatus } from '@hms/core/document-production/domain/structures'
 import { ConsultationDocumentEmptyState } from './consultation-documents-empty-state'
 import { ConsultationDocumentErrorState } from './consultation-documents-error-state'
 import { ConsultationDocumentList } from './consultation-document-list'
@@ -21,6 +22,9 @@ export const ConsultationDocumentsPage = ({
     isReadOnly,
     isPackageConfirmed,
     isPackageConfirming,
+    packageConfirmationError,
+    packageReopeningError,
+    isPackageReopening,
     selection,
     isSelectionLoading,
     isSelectionOpen,
@@ -36,6 +40,7 @@ export const ConsultationDocumentsPage = ({
     handleRefresh,
     handleSaveSelection,
     handleConfirmPackage,
+    handleReopenPackage,
   } = useConsultationDocumentsPage({ consultationId })
 
   if (!isAttendanceFinalized || isDocumentsBlockedByClosure) {
@@ -84,34 +89,55 @@ export const ConsultationDocumentsPage = ({
               <Icon name='list-plus' />
               Selecionar documentos
             </Button>
-            <Button
-              type='button'
-              size='sm'
-              disabled={
-                isReadOnly ||
-                isPackageConfirmed ||
-                isPackageConfirming ||
-                documents.length === 0 ||
-                documents.some((item) => item.status !== 'approved')
-              }
-              onClick={() => void handleConfirmPackage()}
-              title={
-                isReadOnly
-                  ? 'Consulta encerrada; pacote em modo somente leitura.'
-                  : isPackageConfirmed
-                    ? 'Pacote já confirmado.'
-                    : 'Aprove todos os documentos para confirmar o pacote.'
-              }
-            >
-              <Icon name='check' />
-              {isPackageConfirmed
-                ? 'Pacote confirmado'
-                : isPackageConfirming
-                  ? 'Confirmando...'
-                  : 'Confirmar pacote'}
-            </Button>
+            {isPackageConfirmed ? (
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                disabled={isPackageReopening}
+                onClick={() => void handleReopenPackage()}
+                title='Reabra o pacote para alterar documentos ou gerar novas versões.'
+              >
+                <Icon name='pencil' />
+                {isPackageReopening ? 'Reabrindo...' : 'Editar pacote'}
+              </Button>
+            ) : (
+              <Button
+                type='button'
+                size='sm'
+                disabled={
+                  isReadOnly ||
+                  isPackageConfirming ||
+                  documents.length === 0 ||
+                  documents.some(
+                    (item) =>
+                      item.status !== DocumentVersionStatus.Approved &&
+                      item.status !== DocumentVersionStatus.Rejected,
+                  )
+                }
+                onClick={() => void handleConfirmPackage()}
+                title={
+                  isReadOnly
+                    ? 'Consulta encerrada; pacote em modo somente leitura.'
+                    : 'Gere e revise todos os documentos para confirmar o pacote.'
+                }
+              >
+                <Icon name='check' />
+                {isPackageConfirming ? 'Confirmando...' : 'Confirmar pacote'}
+              </Button>
+            )}
           </div>
         </header>
+
+        {packageConfirmationError || packageReopeningError ? (
+          <p
+            className='mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive'
+            role='alert'
+          >
+            {(packageConfirmationError ?? packageReopeningError)?.message ??
+              'Não foi possível atualizar o pacote de documentos.'}
+          </p>
+        ) : null}
 
         <div className='mt-4 flex items-center justify-between border-b border-border pb-2 text-[0.6875rem] text-muted-foreground'>
           <span>

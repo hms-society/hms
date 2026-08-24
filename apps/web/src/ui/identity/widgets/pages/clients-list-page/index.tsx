@@ -1,0 +1,258 @@
+import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
+import { Badge } from '@/ui/shadcn/badge'
+import { Button } from '@/ui/shadcn/button'
+import { Input } from '@/ui/shadcn/input'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/ui/shadcn/pagination'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/shadcn/table'
+import { ClientRegisterDialog } from '@/ui/shared/widgets/components/client-register-dialog'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useClientsListPage } from './use-clients-list-page'
+
+export const ClientsListPage = () => {
+  const {
+    clients,
+    handleClientRegisterDialogOpenChange,
+    handleClientSelect,
+    handleClientSelected,
+    handleNextPage,
+    handleOriginChange,
+    handlePreviousPage,
+    handleResponsibleChange,
+    handleSearchChange,
+    handleStatusChange,
+    handleOpenClientRegisterDialog,
+    isClientRegisterDialogOpen,
+    isLoading,
+    limit,
+    maskPhone,
+    maskTaxId,
+    origin,
+    page,
+    responsavel,
+    search,
+    status,
+    total,
+    totalPages,
+  } = useClientsListPage()
+
+  return (
+    <div className='flex w-full flex-col gap-6 mt-12'>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+        <div>
+          <h1 className='text-2xl font-serif font-semibold text-foreground'>Clientes</h1>
+          <p className='text-sm text-muted-foreground'>{total} cadastros</p>
+        </div>
+        <Button
+          className='bg-[#387F75] text-white hover:bg-[#387F75]/90 rounded-full px-6'
+          onClick={handleOpenClientRegisterDialog}
+        >
+          <Icon name='plus' />
+          Novo cliente
+        </Button>
+      </div>
+
+      {isClientRegisterDialogOpen && (
+        <ClientRegisterDialog
+          open={isClientRegisterDialogOpen}
+          onOpenChange={handleClientRegisterDialogOpenChange}
+          onClientSelected={handleClientSelected}
+        />
+      )}
+
+      <div className='relative'>
+        <Icon
+          name='search'
+          className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground'
+        />
+        <Input
+          value={search}
+          onChange={(event) => handleSearchChange(event.target.value)}
+          placeholder='Buscar por nome, CPF, CNPJ ou telefone...'
+          className='pl-9 bg-card border-border/60 shadow-sm'
+        />
+      </div>
+
+      <div className='flex items-center gap-3'>
+        <span className='text-sm text-muted-foreground mr-1'>Filtros</span>
+        <Select value={status} onValueChange={handleStatusChange}>
+          <SelectTrigger className='w-[160px] bg-card h-9 border-border/60 shadow-sm'>
+            <SelectValue placeholder='Status relacional' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='status'>Status relacional</SelectItem>
+            <SelectItem value='cliente'>Cliente</SelectItem>
+            <SelectItem value='interessado'>Interessado</SelectItem>
+            <SelectItem value='potencial'>Potencial</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={responsavel} onValueChange={handleResponsibleChange}>
+          <SelectTrigger className='w-[160px] bg-card h-9 border-border/60 shadow-sm'>
+            <SelectValue placeholder='Responsável HMS' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='responsavel'>Responsável HMS</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={origin} onValueChange={handleOriginChange}>
+          <SelectTrigger className='w-[120px] bg-card h-9 border-border/60 shadow-sm'>
+            <SelectValue placeholder='Origem' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='origem'>Origem</SelectItem>
+            <SelectItem value='direct'>Direta HMS</SelectItem>
+            <SelectItem value='referral'>Indicação</SelectItem>
+            <SelectItem value='website'>Site</SelectItem>
+            <SelectItem value='social_media'>Redes sociais</SelectItem>
+            <SelectItem value='other'>Outro</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className='rounded-xl border border-border/60 bg-card overflow-hidden shadow-sm'>
+        <Table>
+          <TableHeader>
+            <TableRow className='hover:bg-transparent'>
+              <TableHead className='w-[300px] font-medium text-muted-foreground'>
+                Nome
+              </TableHead>
+              <TableHead className='font-medium text-muted-foreground'>
+                CPF / CNPJ
+              </TableHead>
+              <TableHead className='font-medium text-muted-foreground'>
+                Telefone
+              </TableHead>
+              <TableHead className='font-medium text-muted-foreground'>Status</TableHead>
+              <TableHead className='font-medium text-muted-foreground'>Intakes</TableHead>
+              <TableHead className='font-medium text-muted-foreground'>Origem</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  Carregando clientes...
+                </TableCell>
+              </TableRow>
+            ) : clients.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  Nenhum cliente encontrado.
+                </TableCell>
+              </TableRow>
+            ) : (
+              clients.map(
+                ({
+                  client,
+                  clientStatus,
+                  displayName,
+                  displayOrigin,
+                  initials,
+                  intakesCount,
+                  statusStyle,
+                }) => {
+                  return (
+                    <TableRow
+                      key={client.id}
+                      className='cursor-pointer'
+                      onClick={() => handleClientSelect(client.id)}
+                    >
+                      <TableCell className='font-medium'>
+                        <div className='flex items-center gap-3'>
+                          <Avatar className={`size-8 ${statusStyle.avatar}`}>
+                            <AvatarFallback className='bg-transparent font-medium text-xs'>
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className='text-foreground font-semibold'>
+                            {displayName}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className='text-muted-foreground'>
+                        {client.taxId?.value ? maskTaxId(client.taxId.value) : '-'}
+                      </TableCell>
+                      <TableCell className='text-muted-foreground'>
+                        {client.phone ? maskPhone(client.phone) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant='secondary'
+                          className={`border-transparent shadow-none font-medium ${statusStyle.badge}`}
+                        >
+                          {clientStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className='text-muted-foreground'>
+                        {intakesCount}
+                      </TableCell>
+                      <TableCell className='text-muted-foreground'>
+                        {displayOrigin}
+                      </TableCell>
+                    </TableRow>
+                  )
+                },
+              )
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className='flex items-center justify-between pt-2'>
+        <p className='text-sm text-muted-foreground'>
+          Exibindo {clients.length > 0 ? (page - 1) * limit + 1 : 0}-
+          {(page - 1) * limit + clients.length} de {total}
+        </p>
+        <Pagination className='w-auto mx-0'>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href='#'
+                onClick={handlePreviousPage}
+                text=''
+                className={`size-9 p-0 border border-border/60 bg-card text-muted-foreground hover:bg-muted ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink
+                href='#'
+                isActive
+                className='size-9 border border-[#387F75] bg-[#387F75]/10 text-[#387F75] hover:bg-[#387F75]/20'
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href='#'
+                onClick={handleNextPage}
+                text=''
+                className={`size-9 p-0 border border-border/60 bg-card text-muted-foreground hover:bg-muted ${page === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
+  )
+}

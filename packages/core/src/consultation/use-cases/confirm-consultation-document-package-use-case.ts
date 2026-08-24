@@ -7,6 +7,11 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
+import { DocumentVersionStatus } from '../../document-production/domain/structures'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 import type { DatetimeProvider, UseCase } from '#shared/interfaces'
 
 import {
@@ -19,6 +24,7 @@ import type { ConsultationsRepository } from '../interfaces'
 type Request = {
   readonly consultationId: string
   readonly collaboratorId: string
+  readonly collaboratorProfile: CollaboratorProfileValue
 }
 
 export class ConfirmConsultationDocumentPackageUseCase
@@ -37,7 +43,10 @@ export class ConfirmConsultationDocumentPackageUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (consultation.assignedLawyerId !== request.collaboratorId) {
+    if (
+      request.collaboratorProfile !== CollaboratorProfile.Admin &&
+      consultation.assignedLawyerId !== request.collaboratorId
+    ) {
       throw new ConsultationDocumentAccessDeniedError()
     }
     if (!consultation.attendanceFinalizedAt) {
@@ -73,12 +82,17 @@ export class ConfirmConsultationDocumentPackageUseCase
       packageDocuments.map((document) => document.documentId),
     )
     const latestVersions = latestVersionsByDocumentId(versions)
-    const hasUnapprovedDocument = packageDocuments.some((document) => {
-      return latestVersions.get(document.documentId)?.status !== 'approved'
+    const hasUnfinishedDocument = packageDocuments.some((document) => {
+      const latestVersion = latestVersions.get(document.documentId)
+      return (
+        !latestVersion ||
+        (latestVersion.status !== DocumentVersionStatus.Approved &&
+          latestVersion.status !== DocumentVersionStatus.Rejected)
+      )
     })
-    if (hasUnapprovedDocument) {
+    if (hasUnfinishedDocument) {
       throw new ConsultationPackageConfirmationError(
-        'Aprove todos os documentos para confirmar o pacote.',
+        'Gere e revise todos os documentos antes de confirmar o pacote.',
       )
     }
 

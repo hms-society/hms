@@ -191,9 +191,13 @@ Bring it up with `docker compose up`.
   (`frontend-design`, `caveman-commit`) via `npx skills add`.
 - `generate-supabase-keys.sh` — generates local `ANON_KEY` and
   `SUPABASE_SERVICE_ROLE_KEY` values signed with the `JWT_SECRET` from `.env`.
-- `sync-commands.sh` — turns the prompts in `documentation/prompts/*.md` into
-  slash-command files for editors/agents (`.cursor/commands`, `.claude/commands`,
-  `.opencode/commands`), symlinking when possible and copying as a fallback.
+- `sync-commands.sh` — turns canonical prompts in `documentation/prompts/*.md`
+  into slash-command files (`.cursor/commands`, `.claude/commands`,
+  `.opencode/commands`) and generated Codex skills under `.codex/skills`, removing
+  stale managed artifacts when a workflow is retired.
+- `sync-agents.sh` — generates Codex, Claude, and OpenCode role configuration from
+  `documentation/agents/*-agent.md`; Searcher and Integrated Reviewer roles are
+  read-only, while Builders receive workspace-write access without subagent creation.
 
 ## Editor configuration
 

@@ -1,4 +1,5 @@
-export type PotentialLegalRequest = {
-  id: string
+import type { Entity } from '../../../shared/domain/entities/entity'
+
+export type PotentialLegalRequest = Entity & {
   description: string
 }

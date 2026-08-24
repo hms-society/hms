@@ -1,22 +1,22 @@
 import type { LegalExpertise } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-type CollaboratorBase = {
-  readonly id: string
-  readonly userId: string
-  readonly professionalName: string
-  readonly jobTitle?: string
-  readonly createdAt: Date
-  readonly updatedAt: Date
+type CollaboratorBase = Entity & {
+  userId: string
+  professionalName: string
+  jobTitle?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 type AdministrativeCollaborator = CollaboratorBase & {
-  readonly profile: 'admin' | 'attendant' | 'client'
-  readonly legalExpertises?: never
+  profile: 'admin' | 'attendant' | 'client'
+  legalExpertises?: never
 }
 
 type LegalCollaborator = CollaboratorBase & {
-  readonly profile: 'lawyer' | 'paralegal' | 'supervisor'
-  readonly legalExpertises: readonly [LegalExpertise, ...LegalExpertise[]]
+  profile: 'lawyer' | 'paralegal' | 'supervisor'
+  legalExpertises: [LegalExpertise, ...LegalExpertise[]]
 }
 
 export type Collaborator = AdministrativeCollaborator | LegalCollaborator

@@ -76,6 +76,21 @@ describe('Create Document Specification Use Case', () => {
     )
   })
 
+  it('creates an available specification without template text', async () => {
+    await new CreateDocumentSpecificationUseCase(repository, catalogProvider).execute({
+      name: 'Modelo disponível',
+      description: '',
+      application: { scope: 'global', moment: 'consultation' },
+      accessClassification: 'Interno',
+      content: { type: 'doc', content: [{ type: 'paragraph' }] },
+      variables: [],
+    })
+
+    expect(repository.add).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Modelo disponível', status: 'available' }),
+    )
+  })
+
   it('validates and forwards legal context through the public catalog provider', async () => {
     const application = {
       scope: 'legal_context' as const,

@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import type { DocumentValidationDocument } from '../../domain/entities'
+import { DocumentValidationDocumentFaker } from '../../domain/entities/fakers'
 import {
-  DocumentBatchChannel,
   DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../../domain/structures'
@@ -28,7 +27,7 @@ describe('Request Document Resend Use Case', () => {
   })
 
   it('records the resend request message in the validation log', async () => {
-    const document = fakeDocumentValidationDocument({
+    const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.ResendRequested,
     })
     documentValidationsRepository.recordResendRequest.mockResolvedValue(document)
@@ -51,24 +50,3 @@ describe('Request Document Resend Use Case', () => {
     })
   })
 })
-
-function fakeDocumentValidationDocument(
-  overrides: Partial<DocumentValidationDocument> = {},
-): DocumentValidationDocument {
-  return {
-    id: 'document-file-id',
-    batchId: 'document-batch-id',
-    fileName: 'comprovante-residencia.pdf',
-    mimeType: 'application/pdf',
-    sizeBytes: 1024,
-    storagePath: 'seed/document.pdf',
-    status: DocumentValidationStatus.AwaitingValidation,
-    channel: DocumentBatchChannel.InternalUpload,
-    sender: 'lawyer@hms.com',
-    receivedAt: new Date('2026-08-14T12:00:00.000Z'),
-    createdAt: new Date('2026-08-14T12:00:00.000Z'),
-    extractedFields: [],
-    missingFields: [],
-    ...overrides,
-  }
-}

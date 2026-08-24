@@ -47,6 +47,7 @@ export class ListIntakesUseCase {
   async execute(
     query: ListIntakesUseCaseRequest = {},
   ): Promise<IntakeListResponse<IntakeListItem>> {
+    console.log(2 + 2)
     const normalizedQuery = await this.normalizeQuery(query)
     const result = await this.intakeListRepository.list(normalizedQuery)
     const clientIds = this.unique(result.items.map((item) => item.clientId))

@@ -1,14 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type {
+  DocumentGenerationCreation,
+  DocumentGeneration,
   DocumentCreation,
   DocumentPackageCreation,
   DocumentSpecificationCreation,
+  DocumentVersion,
+  DocumentVersionCreation,
   PackageDocumentCreation,
 } from '@hms/core/document-production/domain/entities'
 import {
+  DocumentGenerationFaker,
   DocumentFaker,
   DocumentPackageFaker,
   PackageDocumentFaker,
+  DocumentVersionFaker,
 } from '@hms/core/document-production/domain/entities/fakers'
 import type {
   DocumentTemplateContent,
@@ -30,6 +36,7 @@ export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
+  readonly requestedByCollaboratorId?: string
 }
 
 type DocumentTemplateSeed = {
@@ -99,6 +106,24 @@ const DOCUMENT_TEMPLATES = [
 
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 
+const SEEDED_GENERATION_IDS = [
+  '00000000-0000-4000-8000-000000000401',
+  '00000000-0000-4000-8000-000000000402',
+  '00000000-0000-4000-8000-000000000403',
+] as const
+
+const SEEDED_VERSION_IDS = [
+  '00000000-0000-4000-8000-000000000501',
+  '00000000-0000-4000-8000-000000000502',
+  '00000000-0000-4000-8000-000000000503',
+] as const
+
+const SEEDED_FILE_IDS = [
+  '00000000-0000-4000-8000-000000000601',
+  '00000000-0000-4000-8000-000000000602',
+  '00000000-0000-4000-8000-000000000603',
+] as const
+
 @Injectable()
 export class DocumentProductionSeeder {
   constructor(
@@ -143,7 +168,7 @@ export class DocumentProductionSeeder {
         description: template.description,
         accessClassification: 'Interno',
         content: this.createTemplateContent(template.name, template.paragraphs),
-        variables: template.variables,
+        variables: [...template.variables],
         application: {
           scope: 'legal_context',
           moment: 'consultation',
@@ -214,7 +239,174 @@ export class DocumentProductionSeeder {
       packageDocumentCreations,
     )
 
-    return { specifications, documents, documentPackage, packageDocuments }
+    const generatedDocuments = references.requestedByCollaboratorId
+      ? await this.seedApprovedDocumentVersions({
+          documents,
+          specifications,
+          consultationId: references.consultationId,
+          requestedByCollaboratorId: references.requestedByCollaboratorId,
+        })
+      : { generations: [], versions: [] }
+
+    return {
+      specifications,
+      documents,
+      documentPackage,
+      packageDocuments,
+      ...generatedDocuments,
+    }
+  }
+
+  private async seedApprovedDocumentVersions({
+    documents,
+    specifications,
+    consultationId,
+    requestedByCollaboratorId,
+  }: {
+    readonly documents: readonly { id: string; title: string }[]
+    readonly specifications: readonly {
+      id: string
+      name: string
+      content: DocumentTemplateContent
+      variables: readonly DocumentTemplateVariable[]
+    }[]
+    readonly consultationId: string
+    readonly requestedByCollaboratorId: string
+  }) {
+    const startedAt = new Date('2026-08-20T15:05:00.000Z')
+    const reviewedAt = new Date('2026-08-20T15:10:00.000Z')
+    const generations: DocumentGeneration[] = []
+    const versions: DocumentVersion[] = []
+
+    for (const [index, document] of documents.entries()) {
+      const specification = specifications[index]
+      const generationId = SEEDED_GENERATION_IDS[index]
+      const versionId = SEEDED_VERSION_IDS[index]
+      const fileId = SEEDED_FILE_IDS[index]
+
+      if (!specification || !generationId || !versionId || !fileId) {
+        throw new AppError(
+          'The generated document seed references could not be resolved.',
+          'Seed Error',
+        )
+      }
+
+      const generated = DocumentGenerationFaker.fake({
+        id: generationId,
+        documentId: document.id,
+        documentSpecificationVersionId: specification.id,
+        requestedByCollaboratorId,
+        source: {
+          type: 'consultation',
+          id: consultationId,
+          data: { documentTitle: document.title },
+        },
+        template: {
+          name: specification.name,
+          content: specification.content,
+          variables: specification.variables,
+        },
+        status: 'pending',
+        attemptsCount: 0,
+        findings: [],
+      })
+      const generationCreation: DocumentGenerationCreation = {
+        id: generated.id,
+        documentId: generated.documentId,
+        documentSpecificationVersionId: generated.documentSpecificationVersionId,
+        requestedByCollaboratorId: generated.requestedByCollaboratorId,
+        source: generated.source,
+        template: generated.template,
+        status: generated.status,
+        attemptsCount: generated.attemptsCount,
+        findings: generated.findings,
+      }
+      const createdGeneration = await this.generationsRepository.add(generationCreation)
+      const runningGeneration = await this.generationsRepository.replace(
+        createdGeneration.id,
+        {
+          status: 'running',
+          attemptsCount: 1,
+          findings: [],
+          startedAt,
+          updatedAt: startedAt,
+        },
+        ['pending'],
+      )
+
+      if (!runningGeneration) {
+        throw new AppError(
+          'The seeded document generation could not be started.',
+          'Seed Error',
+        )
+      }
+
+      const version = DocumentVersionFaker.fake({
+        id: versionId,
+        documentId: document.id,
+        documentGenerationId: createdGeneration.id,
+        fileId,
+        versionNumber: 1,
+        source: 'ai',
+        content: specification.content,
+        pendingMarkers: [],
+        createdByCollaboratorId: requestedByCollaboratorId,
+        createdAt: startedAt,
+        status: 'in_review',
+      })
+      const versionCreation: DocumentVersionCreation = {
+        id: version.id,
+        documentId: version.documentId,
+        documentGenerationId: version.documentGenerationId,
+        fileId: version.fileId,
+        versionNumber: version.versionNumber,
+        source: version.source,
+        content: version.content,
+        pendingMarkers: version.pendingMarkers,
+        createdByCollaboratorId: version.createdByCollaboratorId,
+        createdAt: version.createdAt,
+        status: version.status,
+      }
+      const createdVersion = await this.versionsRepository.add(versionCreation)
+      const approvedVersion = await this.versionsRepository.review(
+        createdVersion.id,
+        'approved',
+        requestedByCollaboratorId,
+        reviewedAt,
+      )
+
+      if (!approvedVersion) {
+        throw new AppError(
+          'The seeded document version could not be approved.',
+          'Seed Error',
+        )
+      }
+
+      const completedGeneration = await this.generationsRepository.replace(
+        createdGeneration.id,
+        {
+          status: 'completed',
+          attemptsCount: 1,
+          findings: [],
+          documentVersionId: approvedVersion.id,
+          completedAt: reviewedAt,
+          updatedAt: reviewedAt,
+        },
+        ['running'],
+      )
+
+      if (!completedGeneration) {
+        throw new AppError(
+          'The seeded document generation could not be completed.',
+          'Seed Error',
+        )
+      }
+
+      generations.push(completedGeneration)
+      versions.push(approvedVersion)
+    }
+
+    return { generations, versions }
   }
 
   private createTemplateContent(

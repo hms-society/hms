@@ -3,10 +3,10 @@ import type { FormEvent } from 'react'
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useSignInAction } from '../use-sign-in-action'
+import { useSignInAction } from '@/ui/identity/hooks/use-sign-in-action'
 import { useSignInPage } from '../use-sign-in-page'
 
-vi.mock('../use-sign-in-action', () => ({
+vi.mock('@/ui/identity/hooks/use-sign-in-action', () => ({
   useSignInAction: vi.fn(),
 }))
 

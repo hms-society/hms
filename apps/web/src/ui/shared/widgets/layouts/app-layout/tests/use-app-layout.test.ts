@@ -82,7 +82,13 @@ describe('useAppLayout', () => {
       expect.objectContaining({ route: 'collaborators', label: 'Colaboradores' }),
     )
     expect(result.current.sidebarItems).toContainEqual(
+      expect.objectContaining({ route: 'clients', label: 'Clientes' }),
+    )
+    expect(result.current.sidebarItems).toContainEqual(
       expect.objectContaining({ route: 'documentSpecifications', label: 'Documentos' }),
+    )
+    expect(result.current.sidebarItems).toContainEqual(
+      expect.objectContaining({ route: 'documentInbox', label: 'Caixa de Documentos' }),
     )
   })
 

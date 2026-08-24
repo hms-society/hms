@@ -16,6 +16,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 export type ConfirmConsultationCompletionDialogProps = {
   open: boolean
   isConfirming?: boolean
+  error?: Error | null
   onOpenChange: (open: boolean) => void
   onConfirm: () => void | Promise<void>
 }
@@ -23,6 +24,7 @@ export type ConfirmConsultationCompletionDialogProps = {
 export const ConfirmConsultationCompletionDialog = ({
   open,
   isConfirming = false,
+  error,
   onOpenChange,
   onConfirm,
 }: ConfirmConsultationCompletionDialogProps) => {
@@ -33,7 +35,7 @@ export const ConfirmConsultationCompletionDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className='gap-0 overflow-hidden p-0 sm:max-w-lg'>
+      <AlertDialogContent className='gap-0 overflow-hidden rounded-xl p-0 sm:max-w-[514px]'>
         <AlertDialogHeader className='border-b border-border px-6 py-6 sm:px-7'>
           <AlertDialogMedia className='bg-highlight text-highlight-foreground'>
             <Icon name='check-circle-2' className='size-5' />
@@ -47,14 +49,20 @@ export const ConfirmConsultationCompletionDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter className='border-t-0 bg-background px-6 py-4 sm:px-7'>
-          <AlertDialogCancel disabled={isConfirming} className='rounded-full px-5'>
+        {error ? (
+          <p className='px-6 py-3 text-sm text-destructive sm:px-7' role='alert'>
+            {error.message}
+          </p>
+        ) : null}
+
+        <AlertDialogFooter className='mb-0 border-t border-border bg-muted/50 px-6 py-4 pb-4 sm:px-7'>
+          <AlertDialogCancel disabled={isConfirming} className='h-11 rounded-lg px-5'>
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isConfirming}
-            className='rounded-full px-5'
+            className='h-11 rounded-lg px-5'
           >
             {isConfirming ? 'Finalizando...' : 'Finalizar consulta'}
           </AlertDialogAction>

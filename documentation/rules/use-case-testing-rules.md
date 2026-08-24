@@ -146,6 +146,12 @@ export function fakeIntake(overrides: Partial<Intake> = {}): Intake {
 Add a `fakeMany` helper only when tests need collections repeatedly. Export fakers
 through the local `fakers/index.ts` barrel.
 
+Use the owning core faker from tests instead of defining local entity fixtures such
+as `fakeDocument`, `createDocument`, or `fake<DomainEntity>`. A test may override
+the fields that make its scenario meaningful, but it must keep the valid defaults
+provided by the faker. If an entity has no faker yet and more than one test needs
+it, add the faker under the owning module before duplicating fixture builders.
+
 Do not create fakers for providers or repository implementations. Providers use
 typed mocks; fakers are only for domain entities and structures.
 

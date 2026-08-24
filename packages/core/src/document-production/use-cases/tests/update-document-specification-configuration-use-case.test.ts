@@ -66,9 +66,10 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceTemplate).not.toHaveBeenCalled()
   })
 
-  it('validates legal application and rejects unavailable content', async () => {
-    const specification = DocumentSpecificationFaker.fake()
+  it('validates legal application while allowing an empty available template', async () => {
+    const specification = DocumentSpecificationFaker.fake({ status: 'available' })
     repository.findById.mockResolvedValue(specification)
+    repository.replaceConfiguration.mockResolvedValue(specification)
     const application = {
       scope: 'legal_context' as const,
       moment: 'legal_production' as const,

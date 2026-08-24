@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common'
 
+import { CaseManagementModule } from '@/case-management/case-management.module'
+
 import { CommunicationModule } from '@/communication/communication.module'
 import { COMMUNICATION_INNGEST_FUNCTIONS } from '@/communication/messaging/communication-messaging.module'
 import { ConsultationModule } from '@/consultation/consultation.module'
@@ -29,6 +31,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
     IdentityModule,
     LegalCatalogModule,
     IntakeModule,
+    CaseManagementModule,
     CommunicationModule,
     ConsultationModule,
     DocumentsModule,
@@ -37,6 +40,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
     InngestModule.forRootAsync({
       imports: [
         SharedMessagingModule,
+        CaseManagementModule,
         CommunicationModule,
         DocumentsModule,
         IntakeModule,

@@ -108,9 +108,17 @@ Accept: application/json
 }
 
 ### Confirm the consultation document package
-# Expected: 200 after every selected document has an approved version.
+# Expected: 200 after every selected document has an approved or rejected version.
 # @name confirmConsultationDocumentPackage
 PATCH {{url}}/{{consultationId}}/documents/package/confirm
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Reopen the consultation document package for editing
+# Expected: 204. This clears the current package confirmation and unlocks selection,
+# generation, review and version changes until the package is confirmed again.
+# @name reopenConsultationDocumentPackage
+PATCH {{url}}/{{consultationId}}/documents/package/reopen
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 

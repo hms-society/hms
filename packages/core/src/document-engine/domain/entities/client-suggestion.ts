@@ -1,7 +1,7 @@
 import type { ClientSuggestionEvidence, ClientSuggestionStatus } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-type ClientSuggestionBase = {
-  id: string
+type ClientSuggestionBase = Entity & {
   documentBatchId: string
   clientId: string
   score: number

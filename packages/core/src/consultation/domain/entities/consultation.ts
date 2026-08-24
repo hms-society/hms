@@ -8,9 +8,9 @@ import type { PotentialLegalRequest } from './potential-legal-request'
 import type { RelevantFact } from './relevant-fact'
 import type { ConsultationSuggestion } from './consultation-suggestion'
 import type { DynamicFormAnswer, DynamicFormSnapshot } from '../../../shared/domain'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-type ConsultationBase = {
-  id: string
+type ConsultationBase = Entity & {
   intakeId: string
   appointmentId: string
   clientId: string
@@ -27,7 +27,7 @@ type ConsultationBase = {
   viability?: string
   decision?: string
   dynamicFormId?: string
-  dynamicFormAnswers?: readonly DynamicFormAnswer[]
+  dynamicFormAnswers?: DynamicFormAnswer[]
   dynamicFormSnapshot?: DynamicFormSnapshot
   attendanceFinalizedAt?: Date
   attendanceFinalizedByCollaboratorId?: string

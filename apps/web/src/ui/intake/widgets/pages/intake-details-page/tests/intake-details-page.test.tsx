@@ -24,7 +24,9 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
             ? '/consultas'
             : route === 'consultation'
               ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}`
-              : '/intakes'
+              : route === 'consultationAttendanceForm'
+                ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}/ficha-atendimento`
+                : '/intakes'
       }
       {...props}
     >
@@ -167,6 +169,17 @@ describe('IntakeDetailsPage', () => {
 
     expect(screen.getAllByText('Formalização iniciada').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: 'Confirmar contratação' })).toBeDefined()
+  })
+
+  it('opens the completed attendance form in the consultation ficha tab', () => {
+    useIntakeDetailsQueryMock.mockReturnValue(
+      createQueryResult(createDetails('consultation_completed')),
+    )
+    renderPage(createDetails('consultation_completed'))
+
+    expect(screen.getByRole('link', { name: /Abrir ficha/ }).getAttribute('href')).toBe(
+      '/consultas/consultation-1/ficha-atendimento',
+    )
   })
 
   it('renders closure information and removes active actions in a terminal state', () => {

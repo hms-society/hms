@@ -13,6 +13,7 @@ import { useGenerateConsultationDocumentsAction } from '../../../hooks/use-gener
 import { useConsultationDocumentSelectionQuery } from '../../../hooks/use-consultation-document-selection-query'
 import { useReplaceConsultationDocumentSelectionAction } from '../../../hooks/use-replace-consultation-document-selection-action'
 import { useConfirmConsultationDocumentPackageAction } from '../../../hooks/use-confirm-consultation-document-package-action'
+import { useReopenConsultationDocumentPackageAction } from '../../../hooks/use-reopen-consultation-document-package-action'
 
 export type ConsultationDocumentsPageProps = {
   consultationId: string
@@ -113,7 +114,6 @@ export function useConsultationDocumentsPage({
   const isIntakeClosedWithoutContract =
     consultation?.intake?.status === IntakeStatus.ClosedWithoutContract
   const isDocumentsBlockedByClosure = isIntakeClosedWithoutContract
-  const isReadOnly = !isConsultationPending || isDocumentsBlockedByClosure
   const isDocumentsAvailable = isAttendanceFinalized && !isDocumentsBlockedByClosure
   const documentsQuery = useConsultationDocumentsQuery(consultationId, {
     enabled: isDocumentsAvailable,
@@ -121,12 +121,17 @@ export function useConsultationDocumentsPage({
   const selectionQuery = useConsultationDocumentSelectionQuery(consultationId, {
     enabled: isDocumentsAvailable,
   })
+  const isPackageConfirmed = Boolean(selectionQuery.data?.confirmedAt)
+  const isReadOnly =
+    !isConsultationPending || isDocumentsBlockedByClosure || isPackageConfirmed
   const selectionAction = useReplaceConsultationDocumentSelectionAction(consultationId)
   const cancellationAction = useCancelConsultationDocumentGenerationAction(consultationId)
   const individualGeneration = useGenerateConsultationDocumentAction(consultationId)
   const batchGeneration = useGenerateConsultationDocumentsAction(consultationId)
   const packageConfirmationAction =
     useConfirmConsultationDocumentPackageAction(consultationId)
+  const packageReopeningAction =
+    useReopenConsultationDocumentPackageAction(consultationId)
   const [isSelectionOpen, setIsSelectionOpen] = useState(false)
   const [cancelledDocumentIds, setCancelledDocumentIds] = useState<ReadonlySet<string>>(
     new Set(),
@@ -243,6 +248,14 @@ export function useConsultationDocumentsPage({
     await packageConfirmationAction.confirmDocumentPackage()
   }
 
+  async function handleReopenPackage() {
+    if (!isPackageConfirmed || !isConsultationPending || isDocumentsBlockedByClosure) {
+      return
+    }
+
+    await packageReopeningAction.reopenDocumentPackage()
+  }
+
   return {
     consultation,
     documents,
@@ -256,9 +269,11 @@ export function useConsultationDocumentsPage({
     selectionError: selectionQuery.error ?? selectionAction.error,
     isLoading: documentsQuery.isLoading,
     isAttendanceFinalized,
-    isPackageConfirmed: Boolean(selectionQuery.data?.confirmedAt),
+    isPackageConfirmed,
     isPackageConfirming: packageConfirmationAction.isConfirming,
     packageConfirmationError: packageConfirmationAction.error,
+    isPackageReopening: packageReopeningAction.isReopening,
+    packageReopeningError: packageReopeningAction.error,
     isError: documentsQuery.isError,
     isDocumentsBlockedByClosure,
     isBatchGenerating:
@@ -273,6 +288,7 @@ export function useConsultationDocumentsPage({
     handleRefresh,
     handleSaveSelection,
     handleConfirmPackage,
+    handleReopenPackage,
   }
 }
 

@@ -70,6 +70,12 @@ export const ConsultationDocumentProductionService = (
       }>(`/consultations/${consultationId}/documents/package/confirm`)
     },
 
+    reopenDocumentPackage(consultationId) {
+      return restClient.patch<void>(
+        `/consultations/${consultationId}/documents/package/reopen`,
+      )
+    },
+
     generateDocument(consultationId, documentId, request) {
       return restClient.post<ConsultationDocumentGeneration>(
         `/consultations/${consultationId}/documents/${documentId}/generations`,

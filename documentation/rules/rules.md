@@ -8,6 +8,11 @@ This document is the entry point for the rules under `documentation/rules`. Read
 it before starting repository work, then load only the rule documents that match
 the task's paths and architectural impact.
 
+For feature SDD, also read [`sdd-rules.md`](sdd-rules.md). It defines the
+canonical authority preflight, artifact ownership, statuses, workflow transitions,
+agent roles, living-evidence contract, and publication/closure lifecycle. This
+router still owns selection of the task-specific Rule Pack.
+
 ## Use dynamic context discovery
 
 Rule selection follows **dynamic context discovery**. Do not load every rule for

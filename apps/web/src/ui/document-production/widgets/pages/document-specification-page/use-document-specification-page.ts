@@ -187,6 +187,7 @@ export function useDocumentSpecificationPage({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
   const isNavigatingAfterSave = useRef(false)
+  const tabChangePromptRef = useRef<string | null>(null)
   const {
     createDocumentSpecification,
     deleteDocumentSpecification,
@@ -465,7 +466,7 @@ export function useDocumentSpecificationPage({
         application: watchedConfiguration.application,
         accessClassification: watchedConfiguration.accessClassification,
         content,
-        variables,
+        variables: [...variables],
       })
       if (response.isFailure) {
         toast.error(response.errorMessage)
@@ -485,7 +486,7 @@ export function useDocumentSpecificationPage({
       request: {
         ...watchedConfiguration,
         content,
-        variables,
+        variables: [...variables],
       },
     })
     if (response.isFailure) {
@@ -500,13 +501,23 @@ export function useDocumentSpecificationPage({
   }
 
   function handleTabChange(tab: string) {
-    if (
-      tab !== activeTab &&
-      mode === 'edit' &&
-      isDirty &&
-      !window.confirm('Existem alterações não salvas. Deseja trocar de aba mesmo assim?')
-    )
-      return
+    const shouldConfirmTabChange = tab !== activeTab && mode === 'edit' && isDirty
+
+    if (shouldConfirmTabChange) {
+      if (tabChangePromptRef.current === tab) return
+      tabChangePromptRef.current = tab
+      window.setTimeout(() => {
+        if (tabChangePromptRef.current === tab) tabChangePromptRef.current = null
+      }, 0)
+
+      if (
+        !window.confirm(
+          'Existem alterações não salvas. Deseja trocar de aba mesmo assim?',
+        )
+      )
+        return
+    }
+
     setActiveTab(tab as 'configuration' | 'template')
   }
 
@@ -528,10 +539,7 @@ export function useDocumentSpecificationPage({
       ))
   const isConfigurationReady =
     watchedConfiguration.name.trim().length > 0 && isApplicationReady
-  const canSaveModel =
-    isConfigurationReady &&
-    !isCatalogError &&
-    (watchedConfiguration.status === 'unavailable' || !isTemplateEmpty)
+  const canSaveModel = isConfigurationReady && !isCatalogError
   const wordCount = templateText ? templateText.split(/\s+/).length : 0
   const modelName = watchedConfiguration.name
   const status = watchedConfiguration.status

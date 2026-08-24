@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
+import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
@@ -15,6 +16,7 @@ import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
 import { createDynamicFormSeeds } from '@/shared/database/dynamic-forms-seed-data'
 import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 const LOGGER = new Logger('DatabaseSeed')
@@ -37,6 +39,7 @@ async function bootstrap() {
     }
 
     await app.get(CommunicationSeeder).clear()
+    await app.get(CaseManagementSeeder).clear()
     await app.get(DocumentProductionSeeder).clear()
     await app.get(ConsultationSeeder).clear()
     await app.get(SchedulingSeeder).clear()
@@ -96,6 +99,23 @@ async function bootstrap() {
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
     })
+
+    const lawyerIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === 'lawyer')
+      .map(({ id }) => id)
+    const paralegalIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === 'paralegal')
+      .map(({ id }) => id)
+
+    await app.get(CaseManagementSeeder).run({
+      contractedIntakes: intakeSeed.intakes.filter(
+        ({ status }) => status === IntakeStatus.Contracted,
+      ),
+      lawyerIds,
+      paralegalIds,
+      actorId: actor.id,
+    })
+
     const schedulingSeed = await app.get(SchedulingSeeder).run({
       intakeId: intakeSeed.documentProductionIntake.id,
       clientId: client.id,
@@ -119,6 +139,7 @@ async function bootstrap() {
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
+      requestedByCollaboratorId: lawyer.id,
     })
 
     await app.get(CommunicationSeeder).run()

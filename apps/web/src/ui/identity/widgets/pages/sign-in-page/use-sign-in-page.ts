@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useSignInAction } from './use-sign-in-action'
+import { useSignInAction } from '@/ui/identity/hooks/use-sign-in-action'
 
 type SignInFormValues = {
   email: string

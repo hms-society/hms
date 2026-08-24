@@ -1,10 +1,10 @@
 import type { UserStatus } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type User = {
-  readonly id: string
-  readonly email: string
-  readonly status: UserStatus
-  readonly lastAccessAt?: Date
-  readonly createdAt: Date
-  readonly updatedAt: Date
+export type User = Entity & {
+  email: string
+  status: UserStatus
+  lastAccessAt?: Date
+  createdAt: Date
+  updatedAt: Date
 }
