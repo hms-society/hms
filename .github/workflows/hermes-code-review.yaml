@@ -1,7 +1,7 @@
 name: Hermes code review
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - develop
     types:
@@ -28,12 +28,14 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout pull request without credentials
+      - name: Checkout trusted base without PR code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 0
-          persist-credentials: false
+          # The workflow token is restricted to contents: read and is needed to
+          # fetch the same-repository PR ref for diff inspection.
+          persist-credentials: true
 
       - name: Wait for HMS CI
         shell: bash
@@ -101,8 +103,15 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
+          # Fetch the PR commit as data only. Never check out or execute PR code
+          # in this secret-bearing workflow.
+          git fetch --no-tags origin "refs/pull/${PR_NUMBER}/head"
+          fetched_head="$(git rev-parse FETCH_HEAD)"
+          test "$fetched_head" = "$HEAD_SHA"
 
           git diff --find-renames --unified=40 "$BASE_SHA...$HEAD_SHA" > scoped.diff
           git diff --name-only "$BASE_SHA...$HEAD_SHA" > scoped-files.txt
