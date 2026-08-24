@@ -48,7 +48,9 @@ export class DocumentSpecificationResponseDto {
   @ApiProperty({ type: () => DocumentSpecificationApplicationResponseDto })
   application!: DocumentSpecification['application']
 
-  @ApiProperty({ enum: ['Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado'] })
+  @ApiProperty({
+    enum: ['Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado'],
+  })
   accessClassification!: string
 
   @ApiProperty({ type: 'object', additionalProperties: true })

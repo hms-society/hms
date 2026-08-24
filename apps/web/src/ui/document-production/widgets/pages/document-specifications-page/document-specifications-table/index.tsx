@@ -56,112 +56,97 @@ export const DocumentSpecificationsTable = ({
   items,
   onEdit,
 }: DocumentSpecificationsTableProps) => (
-  <TableSurface ariaLabel='Lista de modelos de documentos'>
-       {' '}
-    <Table className='w-full min-w-[64rem] table-fixed'>
-           {' '}
+  <TableSurface ariaLabel="Lista de modelos de documentos">
+    <Table className="w-full min-w-[64rem] table-fixed">
       <TableHeader>
-               {' '}
         <TableRow>
-                    <TableHead className='w-[18rem]'>Modelo</TableHead>         {' '}
-          <TableHead>Aplicação</TableHead>         {' '}
-          <TableHead className='w-[11rem]'>Classificação</TableHead>         {' '}
-          <TableHead className='w-[7rem]'>Estado</TableHead>         {' '}
-          <TableHead className='w-[11rem] text-center'>Ação</TableHead>       {' '}
+          <TableHead className="w-[18rem]">Modelo</TableHead>
+          <TableHead>Aplicação</TableHead>
+          <TableHead className="w-[11rem]">Classificação</TableHead>
+          <TableHead className="w-[7rem]">Estado</TableHead>
+          <TableHead className="w-[11rem] text-center">Ação</TableHead>
         </TableRow>
-             {' '}
       </TableHeader>
-           {' '}
+
       <TableBody>
-               {' '}
         {items.map((item) => {
           const badgeStyle = getClassificationStyle(item.accessClassification)
 
           return (
             <TableRow key={item.documentSpecificationId} tabIndex={0}>
-                           {' '}
-              <TableCell className='w-[18rem] max-w-[18rem]'>
-                               {' '}
+              <TableCell className="w-[18rem] max-w-[18rem]">
                 <div
-                  className='truncate text-sm font-semibold leading-5'
+                  className="truncate text-sm font-semibold leading-5"
                   title={item.name}
                 >
-                                    {item.name}               {' '}
+                  {item.name}
                 </div>
-                               {' '}
+
                 <div
-                  className='mt-0.5 truncate text-xs leading-5 text-muted-foreground'
+                  className="mt-0.5 truncate text-xs leading-5 text-muted-foreground"
                   title={item.description}
                 >
-                                    {item.description}               {' '}
+                  {item.description}
                 </div>
-                             {' '}
               </TableCell>
-                           {' '}
+
               <TableCell>
-                                <DocumentSpecificationsApplication item={item} />         
-                   {' '}
+                <DocumentSpecificationsApplication item={item} />
               </TableCell>
-                           {' '}
+
               <TableCell>
-                               {' '}
                 <Badge
-                  variant='outline'
+                  variant="outline"
                   className={`gap-1 whitespace-nowrap ${badgeStyle.className}`}
                 >
-                                   {' '}
-                  <Icon name={badgeStyle.icon as any} className='h-3 w-3' />             
-                      {item.accessClassification ?? 'Interno'}               {' '}
+                  <Icon
+                    name={badgeStyle.icon as any}
+                    className="h-3 w-3"
+                  />
+                  {item.accessClassification ?? 'Interno'}
                 </Badge>
-                             {' '}
               </TableCell>
-                           {' '}
+
               <TableCell>
-                               {' '}
-                <Badge variant={item.status === 'available' ? 'secondary' : 'outline'}>
-                                   {' '}
-                  <Icon name={item.status === 'available' ? 'check' : 'clock'} />         
-                          {item.status === 'available' ? 'Disponível' : 'Indisponível'}   
-                             {' '}
+                <Badge
+                  variant={item.status === 'available' ? 'secondary' : 'outline'}
+                >
+                  <Icon
+                    name={item.status === 'available' ? 'check' : 'clock'}
+                  />
+                  {item.status === 'available'
+                    ? 'Disponível'
+                    : 'Indisponível'}
                 </Badge>
-                             {' '}
               </TableCell>
-                           {' '}
-              <TableCell className='text-center'>
-                <div className='flex items-center justify-center gap-2'>
-                                   {' '}
+
+              <TableCell className="text-center">
+                <div className="flex items-center justify-center gap-2">
                   <Button
                     asChild
-                    variant='brand'
-                    size='sm'
-                    className='h-9 rounded-full px-3 text-xs'
+                    variant="brand"
+                    size="sm"
+                    className="h-9 rounded-full px-3 text-xs"
                     aria-label={`Editar ${item.name}`}
                   >
-                                       {' '}
                     <Anchor
-                      route='documentSpecification'
+                      route="documentSpecification"
                       params={{
-                        documentSpecificationId: item.documentSpecificationId,
+                        documentSpecificationId:
+                          item.documentSpecificationId,
                       }}
                       onClick={() => onEdit?.(item)}
                     >
-                                            <Icon name='pencil' />                     
-                      Editar                    {' '}
+                      <Icon name="pencil" />
+                      Editar
                     </Anchor>
-                                     {' '}
                   </Button>
-                                 {' '}
                 </div>
-                             {' '}
               </TableCell>
-                         {' '}
             </TableRow>
           )
         })}
-             {' '}
       </TableBody>
-         {' '}
     </Table>
-     {' '}
   </TableSurface>
 )
