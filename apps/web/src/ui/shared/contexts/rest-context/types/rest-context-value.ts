@@ -3,6 +3,7 @@ import type { IdentityService } from '@/rest/services/identity-service'
 import type { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import type { CommunicationService } from '@/rest/services/communication-service'
 import type { ConsultationService } from '@/rest/services/consultation-service'
+import type { CaseManagementService } from '@/rest/services/case-management-service'
 import type { DocumentEngineService } from '@/rest/services/document-engine-service'
 import type { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
 import type { DocumentProductionService } from '@/rest/services/document-production-service'
@@ -16,6 +17,7 @@ export type RestContextValue = {
   identityService: ReturnType<typeof IdentityService>
   legalCatalogService: ReturnType<typeof LegalCatalogService>
   communicationService: ReturnType<typeof CommunicationService>
+  caseManagementService: ReturnType<typeof CaseManagementService>
   consultationService: ReturnType<typeof ConsultationService>
   consultationDocumentProductionService: ReturnType<
     typeof ConsultationDocumentProductionService

@@ -1,3 +1,4 @@
+export * from './case-checklist-gate-decision-model'
 export * from './case-member-model'
 export * from './case-member-role-model'
 export * from './legal-case-model'

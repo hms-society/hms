@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import { and, eq, sql } from 'drizzle-orm'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import { legalCaseModel } from '@/case-management/database/drizzle/models'
@@ -34,5 +35,42 @@ export class DrizzleLegalCasesRepository
 
   async removeAll(): Promise<void> {
     await this.database.delete(legalCaseModel)
+  }
+
+  async findById(caseId: string): ReturnType<LegalCasesRepository['findById']> {
+    const [legalCase] = await this.database
+      .select()
+      .from(legalCaseModel)
+      .where(eq(legalCaseModel.id, caseId))
+      .limit(1)
+
+    return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
+  }
+
+  async reviewChecklistGate({
+    caseId,
+    checklistGate,
+    expectedVersion,
+    status,
+  }: Parameters<LegalCasesRepository['reviewChecklistGate']>[0]): ReturnType<
+    LegalCasesRepository['reviewChecklistGate']
+  > {
+    const [updatedCase] = await this.database
+      .update(legalCaseModel)
+      .set({
+        checklistGateDecision: checklistGate.decision,
+        checklistGateDecidedAt: new Date(),
+        checklistGateDecidedBy: checklistGate.decidedBy,
+        checklistGateRemarks: checklistGate.remarks,
+        status,
+        updatedAt: new Date(),
+        version: sql`${legalCaseModel.version} + 1`,
+      })
+      .where(
+        and(eq(legalCaseModel.id, caseId), eq(legalCaseModel.version, expectedVersion)),
+      )
+      .returning()
+
+    return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
   }
 }

@@ -1,5 +1,6 @@
 export const LegalCaseStatus = {
   Documentation: 'documentation',
+  ReadyForLegalProduction: 'ready_for_legal_production',
   LegalProduction: 'legal_production',
   ProtocolDelivery: 'protocol_delivery',
   Execution: 'execution',

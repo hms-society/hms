@@ -25,7 +25,14 @@ import {
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
 
-export const CasoDetalheChecklistPage = () => {
+export type CasoDetalheChecklistPageProps = {
+  caseId?: string
+}
+
+export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
+  const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
+  const displayCaseId = 'CASO-20260703-0089'
+
   return (
     <div className='flex w-full flex-col gap-4 pb-10 font-sans'>
       <Breadcrumb className='text-[11px]'>
@@ -38,12 +45,12 @@ export const CasoDetalheChecklistPage = () => {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Anchor route='home'>Meus casos</Anchor>
+              <Anchor route='lawyerCases'>Meus casos</Anchor>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>CASO-20260703-0089</BreadcrumbPage>
+            <BreadcrumbPage>{displayCaseId}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -64,7 +71,7 @@ export const CasoDetalheChecklistPage = () => {
             <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground'>
               <span className='flex items-center gap-1'>
                 <Icon name='tag' className='size-3' />
-                CASO-20260703-0089
+                {displayCaseId}
               </span>
               <span className='flex items-center gap-1'>
                 <Icon name='scale' className='size-3' />
@@ -187,7 +194,12 @@ export const CasoDetalheChecklistPage = () => {
         </TabsContent>
 
         <TabsContent value='checklist' className='mt-3 flex flex-col gap-4'>
-          <ChecklistDossierTab activities={MOCK_ACTIVITIES} checklist={MOCK_CHECKLIST} />
+          <ChecklistDossierTab
+            activities={MOCK_ACTIVITIES}
+            caseId={caseUuid}
+            checklist={MOCK_CHECKLIST}
+            expectedVersion={1}
+          />
         </TabsContent>
       </Tabs>
     </div>

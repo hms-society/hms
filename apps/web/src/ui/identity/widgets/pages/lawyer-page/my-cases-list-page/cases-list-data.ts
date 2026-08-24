@@ -1,0 +1,107 @@
+import type { LawyerCaseListItem } from './types'
+
+export const LAWYER_CASES: LawyerCaseListItem[] = [
+  {
+    id: '00000000-0000-4000-8000-000000000089',
+    title: 'Aposentadoria por Tempo de Contribuição',
+    clientName: 'Antônio Carvalho',
+    publicCode: 'CASO-20260703-0089',
+    legalArea: 'Direito Previdenciário',
+    status: 'Em formação',
+    priority: 'Normal',
+    nextAction: 'Aprovar solicitação assistida de documentos',
+    updatedAt: 'Hoje, 09:42',
+    team: [
+      {
+        collaboratorId: 'collab-ricardo-mendes',
+        initials: 'RM',
+        name: 'Dr. Ricardo Mendes',
+        role: 'Advogado principal',
+        className: 'bg-primary text-primary-foreground',
+      },
+      {
+        collaboratorId: 'collab-mariana-costa',
+        initials: 'MC',
+        name: 'Mariana Costa',
+        role: 'Advogada auxiliar',
+        className: 'bg-amber-500 text-white',
+      },
+      {
+        collaboratorId: 'collab-joao-pedro',
+        initials: 'JP',
+        name: 'João Pedro Silva',
+        role: 'Paralegal',
+        className: 'bg-emerald-600 text-white',
+      },
+    ],
+    progress: {
+      completedCount: 1,
+      totalCount: 7,
+      icon: 'list-checks',
+    },
+  },
+  {
+    id: '00000000-0000-4000-8000-000000000090',
+    title: 'Revisão de Benefício Previdenciário',
+    clientName: 'Helena Duarte',
+    publicCode: 'CASO-20260704-0090',
+    legalArea: 'Direito Previdenciário',
+    status: 'Aguardando cliente',
+    priority: 'Alta',
+    nextAction: 'Aguardar comprovantes complementares',
+    updatedAt: 'Ontem, 17:15',
+    team: [
+      {
+        collaboratorId: 'collab-mariana-costa',
+        initials: 'MC',
+        name: 'Mariana Costa',
+        role: 'Advogada principal',
+        className: 'bg-primary text-primary-foreground',
+      },
+      {
+        collaboratorId: 'collab-beatriz-oliveira',
+        initials: 'BO',
+        name: 'Beatriz Oliveira',
+        role: 'Supervisão',
+        className: 'bg-zinc-500 text-white',
+      },
+    ],
+    progress: {
+      completedCount: 3,
+      totalCount: 8,
+      icon: 'file-text',
+    },
+  },
+  {
+    id: '00000000-0000-4000-8000-000000000091',
+    title: 'Defesa em Execução Fiscal',
+    clientName: 'Mendes & Prado Ltda.',
+    publicCode: 'CASO-20260705-0091',
+    legalArea: 'Direito Tributário',
+    status: 'Em andamento',
+    priority: 'Normal',
+    nextAction: 'Revisar minuta de exceção de pré-executividade',
+    updatedAt: '19/08, 11:30',
+    team: [
+      {
+        collaboratorId: 'collab-ricardo-mendes',
+        initials: 'RM',
+        name: 'Dr. Ricardo Mendes',
+        role: 'Advogado principal',
+        className: 'bg-primary text-primary-foreground',
+      },
+      {
+        collaboratorId: 'collab-joao-pedro',
+        initials: 'JP',
+        name: 'João Pedro Silva',
+        role: 'Paralegal',
+        className: 'bg-emerald-600 text-white',
+      },
+    ],
+    progress: {
+      completedCount: 5,
+      totalCount: 9,
+      icon: 'scale',
+    },
+  },
+]

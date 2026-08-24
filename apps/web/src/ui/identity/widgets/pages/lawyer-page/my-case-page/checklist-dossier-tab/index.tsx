@@ -10,19 +10,58 @@ import {
   getChecklistRowClasses,
 } from '../checklist-style'
 import type { ActivityItem, ChecklistItem } from '../types'
+import { DecisionReasonDialog } from './decision-reason-dialog'
+import { useChecklistDossierTab } from './use-checklist-dossier-tab'
 
 export type ChecklistDossierTabProps = {
   activities: ActivityItem[]
+  caseId: string
   checklist: ChecklistItem[]
+  expectedVersion: number
 }
 
 export const ChecklistDossierTab = ({
   activities,
+  caseId,
   checklist,
+  expectedVersion,
 }: ChecklistDossierTabProps) => {
+  const {
+    canStartLegalWriting,
+    checklistGateLabel,
+    checklistGateRemarks,
+    decisionReasonDialog,
+    dossierGateLabel,
+    error,
+    handleApproveChecklist,
+    handleApproveWithException,
+    handleBlockChecklist,
+    handleCancelDecisionReason,
+    handleConfirmDecisionReason,
+    handleDecisionReasonDialogOpenChange,
+    handleRejectOnMerit,
+    handleRemarksChange,
+    isDecisionReasonDialogOpen,
+    isChecklistComplete,
+    isReviewingChecklistGate,
+    mandatoryItemsCount,
+    pendingItemsCount,
+    reasonError,
+    remarks,
+    validatedItemsCount,
+  } = useChecklistDossierTab({
+    caseId,
+    checklist,
+    initialExpectedVersion: expectedVersion,
+  })
+  const progressPercentage =
+    mandatoryItemsCount > 0
+      ? Math.round((validatedItemsCount / mandatoryItemsCount) * 100)
+      : 0
+
   return (
     <>
-      <div className='flex items-center justify-between gap-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5'>
+      <div className='flex flex-col justify-between gap-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 lg:flex-row lg:items-start'>
         <div className='flex items-start gap-3'>
           <div className='flex size-7 shrink-0 items-center justify-center rounded-full bg-card text-amber-700'>
             <Icon name='lock' className='size-3.5' />
@@ -32,22 +71,92 @@ export const ChecklistDossierTab = ({
               Gate de produção jurídica
             </h2>
             <p className='text-[11px] text-amber-800/80'>
-              O caso só avança para Produção Jurídica com o checklist em &quot;Aprovado
-              para produção&quot; ou &quot;Aprovado com exceção&quot;. Faltam 6 itens
-              obrigatórios.
+              Checklist e Dossiê Documental são gates sequenciais. O checklist pode
+              avançar com aprovação humana, mas a escrita jurídica segue bloqueada até
+              homologação do dossiê.
             </p>
+            <div className='mt-1 flex flex-wrap gap-1.5'>
+              <Badge variant='attention' className='h-5 rounded-full px-2 text-[10px]'>
+                {checklistGateLabel}
+              </Badge>
+              <Badge variant='secondary' className='h-5 rounded-full px-2 text-[10px]'>
+                {dossierGateLabel}
+              </Badge>
+              {!canStartLegalWriting && (
+                <Badge variant='outline' className='h-5 rounded-full px-2 text-[10px]'>
+                  Escrita bloqueada
+                </Badge>
+              )}
+            </div>
+            {checklistGateRemarks && (
+              <p className='mt-1 text-[11px] font-medium text-amber-900'>
+                Ressalvas: {checklistGateRemarks}
+              </p>
+            )}
+            {error && (
+              <p className='mt-1 text-[11px] font-medium text-destructive'>
+                {error.message}
+              </p>
+            )}
           </div>
         </div>
-        <Button
-          variant='outline'
-          size='xs'
-          className='rounded-full border-amber-500/20 bg-card text-amber-800 hover:bg-amber-500/20'
-          disabled
-        >
-          <Icon name='check' className='size-3' />
-          Aprovar checklist final
-        </Button>
+        <div className='flex flex-wrap justify-end gap-2 lg:max-w-sm'>
+          <Button
+            variant='outline'
+            size='xs'
+            className='rounded-full border-amber-500/20 bg-card text-amber-800 hover:bg-amber-500/20'
+            disabled={!isChecklistComplete || isReviewingChecklistGate}
+            onClick={handleApproveChecklist}
+          >
+            <Icon name='check' className='size-3' />
+            Aprovar checklist
+          </Button>
+          <Button
+            variant='outline'
+            size='xs'
+            className='rounded-full border-amber-500/20 bg-card text-amber-800 hover:bg-amber-500/20'
+            disabled={isReviewingChecklistGate}
+            onClick={handleApproveWithException}
+          >
+            <Icon name='shield-check' className='size-3' />
+            Aprovar com exceção
+          </Button>
+          <Button
+            variant='outline'
+            size='xs'
+            className='rounded-full border-destructive/20 bg-card text-destructive hover:bg-destructive/10'
+            disabled={isReviewingChecklistGate}
+            onClick={handleBlockChecklist}
+          >
+            <Icon name='lock' className='size-3' />
+            Bloqueado/insuficiente
+          </Button>
+          <Button
+            variant='outline'
+            size='xs'
+            className='rounded-full border-destructive/20 bg-card text-destructive hover:bg-destructive/10'
+            disabled={isReviewingChecklistGate}
+            onClick={handleRejectOnMerit}
+          >
+            <Icon name='shield-alert' className='size-3' />
+            Reprovar mérito
+          </Button>
+        </div>
       </div>
+
+      <DecisionReasonDialog
+        confirmLabel={decisionReasonDialog.confirmLabel}
+        description={decisionReasonDialog.description}
+        error={reasonError}
+        isConfirming={isReviewingChecklistGate}
+        open={isDecisionReasonDialogOpen}
+        reason={remarks}
+        title={decisionReasonDialog.title}
+        onCancel={handleCancelDecisionReason}
+        onConfirm={handleConfirmDecisionReason}
+        onOpenChange={handleDecisionReasonDialogOpenChange}
+        onReasonChange={handleRemarksChange}
+      />
 
       <section className='flex flex-col gap-4 rounded-lg border border-border bg-card p-5 shadow-xs'>
         <div className='flex flex-col gap-4 md:flex-row md:items-start md:justify-between'>
@@ -67,10 +176,14 @@ export const ChecklistDossierTab = ({
 
           <div className='flex w-full max-w-56 flex-col items-end gap-1.5'>
             <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
-              <div className='h-full w-[14%] rounded-full bg-primary' />
+              <div
+                className='h-full rounded-full bg-primary'
+                style={{ width: `${progressPercentage}%` }}
+              />
             </div>
             <span className='text-[11px] font-semibold text-foreground'>
-              1 de 7 obrigatórios - 14%
+              {validatedItemsCount} de {mandatoryItemsCount} obrigatórios -{' '}
+              {progressPercentage}%
             </span>
           </div>
         </div>
@@ -240,6 +353,12 @@ export const ChecklistDossierTab = ({
             </div>
           ))}
         </div>
+        {pendingItemsCount > 0 && (
+          <p className='text-[11px] text-muted-foreground'>
+            {pendingItemsCount} itens ainda exigem validação ou exceção autorizada antes
+            do avanço de fase.
+          </p>
+        )}
       </section>
 
       <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-5 shadow-xs'>

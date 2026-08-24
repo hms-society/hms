@@ -1,0 +1,11 @@
+### Review case checklist gate
+PATCH {{baseUrl}}/cases/00000000-0000-4000-8000-000000000089/checklist-gate
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "approved_with_exception",
+  "decidedBy": "00000000-0000-4000-8000-000000000001",
+  "expectedVersion": 1,
+  "remarks": "Exceção documental previamente autorizada."
+}

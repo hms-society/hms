@@ -1,0 +1,147 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { mock, type MockProxy } from 'vitest-mock-extended'
+
+import { LegalCaseFaker } from '../../domain/entities/fakers'
+import { CaseChecklistGateDecision, LegalCaseStatus } from '../../domain/structures'
+import type { LegalCasesRepository } from '../../interfaces'
+import { ReviewCaseChecklistGateUseCase } from '../review-case-checklist-gate-use-case'
+
+describe('Review Case Checklist Gate Use Case', () => {
+  let repository: MockProxy<LegalCasesRepository>
+  let useCase: ReviewCaseChecklistGateUseCase
+
+  beforeEach(() => {
+    repository = mock<LegalCasesRepository>()
+    useCase = new ReviewCaseChecklistGateUseCase(repository)
+  })
+
+  it('approves a complete checklist as the first gate without releasing legal writing', async () => {
+    const decidedBy = '00000000-0000-4000-8000-000000000101'
+    const legalCase = LegalCaseFaker.fake()
+    const reviewedCase = LegalCaseFaker.fake({
+      id: legalCase.id,
+      version: legalCase.version + 1,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.Approved,
+        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
+        decidedBy,
+        remarks: undefined,
+      },
+      dossierGate: {
+        homologatedAt: undefined,
+        homologatedBy: undefined,
+      },
+    })
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        expectedVersion: legalCase.version,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy,
+      }),
+    ).resolves.toBe(reviewedCase)
+
+    expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
+      caseId: legalCase.id,
+      expectedVersion: legalCase.version,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy,
+        remarks: undefined,
+      },
+      status: LegalCaseStatus.ReadyForLegalProduction,
+    })
+  })
+
+  it('records approval with exception only when remarks explain the exception', async () => {
+    const decidedBy = '00000000-0000-4000-8000-000000000102'
+    const remarks = 'CNIS será complementado por ofício já autorizado.'
+    const legalCase = LegalCaseFaker.fake()
+    const reviewedCase = LegalCaseFaker.fake({
+      id: legalCase.id,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
+        decidedBy,
+        remarks,
+      },
+    })
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        expectedVersion: legalCase.version,
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        decidedBy,
+        remarks,
+      }),
+    ).resolves.toBe(reviewedCase)
+
+    expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
+      caseId: legalCase.id,
+      expectedVersion: legalCase.version,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        decidedBy,
+        remarks,
+      },
+      status: LegalCaseStatus.ReadyForLegalProduction,
+    })
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        expectedVersion: legalCase.version,
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        decidedBy,
+        remarks: ' ',
+      }),
+    ).rejects.toThrow('ressalvas')
+  })
+
+  it('blocks production when the checklist is insufficient or legally rejected', async () => {
+    const decidedBy = '00000000-0000-4000-8000-000000000103'
+    const remarks = 'Documento crítico ilegível.'
+    const legalCase = LegalCaseFaker.fake()
+    const reviewedCase = LegalCaseFaker.fake({
+      id: legalCase.id,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.BlockedInsufficient,
+        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
+        decidedBy,
+        remarks,
+      },
+    })
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        expectedVersion: legalCase.version,
+        decision: CaseChecklistGateDecision.BlockedInsufficient,
+        decidedBy,
+        remarks,
+      }),
+    ).resolves.toBe(reviewedCase)
+
+    expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
+      caseId: legalCase.id,
+      expectedVersion: legalCase.version,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.BlockedInsufficient,
+        decidedBy,
+        remarks,
+      },
+      status: LegalCaseStatus.Documentation,
+    })
+  })
+})
