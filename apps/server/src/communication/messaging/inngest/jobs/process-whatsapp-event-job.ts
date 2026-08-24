@@ -144,14 +144,16 @@ export class ProcessWhatsappEventJob extends InngestJob {
             }
 
             // Save inbound private message to private_messages table
-            await database.insert(privateMessageModel).values({
-              clientId: client.id,
-              collaboratorId: intake?.responsibleId || null,
-              intakeId: intake?.id || null,
-              clientPhone: sender,
-              direction: 'inbound',
-              content: encrypt(rawContent),
-            })
+            if (intake) {
+              await database.insert(privateMessageModel).values({
+                clientId: client.id,
+                collaboratorId: intake.responsibleId,
+                intakeId: intake.id,
+                clientPhone: sender,
+                direction: 'inbound',
+                content: encrypt(rawContent),
+              })
+            }
 
             // Route document/image media if applicable
             if (message.type === 'document' || message.type === 'image') {
