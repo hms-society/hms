@@ -25,7 +25,6 @@ export class CloseIntakeWithoutContractUseCase implements UseCase<Request, Intak
   ) {}
 
   async execute(request: Request): Promise<Intake> {
-    while (true) {}
     const intake = await this.intakesRepository.findById(request.intakeId)
 
     if (!intake) {
