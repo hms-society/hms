@@ -1,5 +1,8 @@
 import type { IntakeFormData } from '@hms/validation/intake'
 import { useFormContext } from 'react-hook-form'
+import { useEffect, useState } from 'react'
+
+import type { LawyerOption } from './use-lawyer-selector-dialog'
 
 export type IntakeDecision = IntakeFormData['decision']
 export type MeetingMode = NonNullable<IntakeFormData['meetingMode']>
@@ -12,6 +15,14 @@ export function useDecisionStep() {
   const selectedLawyer = form.watch('lawyer')
   const selectedDate = form.watch('date')
   const selectedTime = form.watch('time')
+  const [selectedLawyerDetails, setSelectedLawyerDetails] = useState<LawyerOption>()
+
+  useEffect(
+    function clearSelectedLawyerDetailsWhenFormResets() {
+      if (!selectedLawyer) setSelectedLawyerDetails(undefined)
+    },
+    [selectedLawyer],
+  )
 
   function handleDecisionChange(value: IntakeDecision) {
     form.setValue('decision', value, { shouldDirty: true, shouldValidate: true })
@@ -22,6 +33,14 @@ export function useDecisionStep() {
       shouldDirty: true,
       shouldValidate: true,
     })
+  }
+
+  function handleLawyerChange(lawyer: LawyerOption) {
+    form.setValue('lawyer', lawyer.value, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+    setSelectedLawyerDetails(lawyer)
   }
 
   function handleVirtualChannelChange(value: string) {
@@ -39,15 +58,6 @@ export function useDecisionStep() {
     form.setValue('time', value, { shouldDirty: true, shouldValidate: true })
   }
 
-  function handleClosureReasonChange(
-    value: NonNullable<IntakeFormData['closureReason']>,
-  ) {
-    form.setValue('closureReason', value, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-  }
-
   return {
     control: form.control,
     decision,
@@ -55,12 +65,13 @@ export function useDecisionStep() {
     meetingMode,
     selectedDate,
     selectedLawyer,
+    selectedLawyerDetails,
     selectedTime,
     virtualChannel,
-    handleClosureReasonChange,
     handleDateChange,
     handleDecisionChange,
     handleMeetingModeChange,
+    handleLawyerChange,
     handleTimeChange,
     handleVirtualChannelChange,
   }

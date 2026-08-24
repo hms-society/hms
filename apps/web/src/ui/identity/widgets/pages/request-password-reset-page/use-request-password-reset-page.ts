@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 
-import { useForgotPasswordAction } from './use-request-password-reset-action'
+import { useForgotPasswordAction } from '@/ui/identity/hooks/use-request-password-reset-action'
 
 const RESEND_COOLDOWN_SECONDS = 15
 

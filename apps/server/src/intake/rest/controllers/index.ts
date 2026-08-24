@@ -4,4 +4,6 @@ export { ListIntakeResponsiblesController } from '@/intake/rest/controllers/list
 export { ListClientIntakesController } from '@/intake/rest/controllers/list-client-intakes.controller'
 export { ListIntakesController } from '@/intake/rest/controllers/list-intakes.controller'
 export { RegisterIntakesController } from '@/intake/rest/controllers/register-intake.controller'
+export { RetryIntakeConsultationSchedulingController } from '@/intake/rest/controllers/retry-intake-consultation-scheduling.controller'
 export { TransitionIntakeStatusController } from '@/intake/rest/controllers/transition-intake-status.controller'
+export { UpdateIntakeController } from '@/intake/rest/controllers/update-intake.controller'

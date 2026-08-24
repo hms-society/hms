@@ -3,7 +3,7 @@ name: Server App Staging CD
 on:
   push:
     branches:
-      - develop
+      - feat/scrum-138-document-production-server-develop
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy-staging:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
@@ -38,6 +38,20 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Reset staging database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STG }}
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DROP SCHEMA IF EXISTS public CASCADE;
+          DROP SCHEMA IF EXISTS drizzle CASCADE;
+          CREATE SCHEMA public;
+          CREATE SCHEMA drizzle;
+          GRANT ALL ON SCHEMA public TO postgres, service_role;
+          GRANT ALL ON SCHEMA drizzle TO postgres, service_role;
+          GRANT USAGE ON SCHEMA public TO anon, authenticated;
+          SQL
 
       - name: Apply staging database migrations
         env:

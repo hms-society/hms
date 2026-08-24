@@ -36,7 +36,7 @@ export class PrepareDocumentGenerationUseCase
       throw new DocumentSpecificationNotFoundError(request.documentSpecificationVersionId)
     }
 
-    return this.generationsRepository.add({
+    return this.generationsRepository.addOrGet({
       id: request.documentGenerationId,
       documentId: request.documentId,
       documentSpecificationVersionId: request.documentSpecificationVersionId,

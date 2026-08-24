@@ -44,7 +44,7 @@ export const ClientReviewStep = ({ dialog }: ClientReviewStepProps) => {
             variant='ghost'
             size='sm'
             className='h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground'
-            onClick={dialog.handleBackToIdentification}
+            onClick={dialog.handleEditRegistration}
           >
             <Icon name='pencil' className='size-3.5' />
             Editar
@@ -82,7 +82,7 @@ export const ClientReviewStep = ({ dialog }: ClientReviewStepProps) => {
             variant='ghost'
             size='sm'
             className='h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground'
-            onClick={dialog.handleBackToRegistration}
+            onClick={dialog.handleEditRegistration}
           >
             <Icon name='pencil' className='size-3.5' />
             Editar
@@ -191,11 +191,12 @@ export const ClientReviewStep = ({ dialog }: ClientReviewStepProps) => {
         <Icon name='info' className='mt-0.5 size-3.5 shrink-0 text-primary' />
         <p>Ao concluir, apenas o cliente será criado.</p>
       </div>
-      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:items-center sm:justify-between sm:px-8'>
+      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:items-center sm:justify-between sm:px-8'>
         <Button
           type='button'
           variant='outline'
-          className='rounded-pill text-sm font-medium h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill border-border bg-card px-5 text-sm font-medium'
           onClick={dialog.handleBackToPrivacy}
           disabled={dialog.isBusy}
         >
@@ -203,7 +204,8 @@ export const ClientReviewStep = ({ dialog }: ClientReviewStepProps) => {
         </Button>
         <Button
           type='button'
-          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill px-5 text-sm font-medium shadow-xs'
           disabled={
             dialog.isBusy || Boolean(dialog.createdClientDetails && pending.length === 0)
           }

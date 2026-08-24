@@ -31,7 +31,7 @@ import {
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
-import { ActiveAdminGuard, AuthGuard } from '@/identity/guards'
+import { ActiveAdminGuard, ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
@@ -41,6 +41,7 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 const authAdministrationFixture: AuthAdministrationProvider = {
   createUser: async (email) => ({ id: randomUUID(), email }),
   removeUser: async () => undefined,
+  removeAllUsers: async () => undefined,
   inviteUserByEmail: async (email) => ({ id: randomUUID(), email }),
   resendInvitation: async (email) => ({ id: randomUUID(), email }),
   findUserByEmail: async () => undefined,
@@ -90,7 +91,7 @@ export class IdentityModuleFixture {
           ProvisionModule,
         ],
         controllers: controller ? [controller] : [],
-        providers: [DatetimeProvider, ActiveAdminGuard],
+        providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
       },
       (builder) =>
         builder

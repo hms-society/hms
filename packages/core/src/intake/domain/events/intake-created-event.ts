@@ -6,8 +6,8 @@ export class IntakeCreatedEvent extends Event<{
   intakeId: string
   clientId: string
   responsibleId: string
-  legalAreaId: string
-  legalTopicId: string
+  legalAreaId?: string
+  legalTopicId?: string
   demandNotes?: string
   status: IntakeStatus
   occurredAt: Date

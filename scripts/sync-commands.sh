@@ -24,6 +24,41 @@ done
 
 mkdir -p "$SKILLS_DIR"
 
+cleanup_stale_generated_artifacts() {
+  local dir dest source skill_file skill_dir
+
+  for dir in "${OUT_DIRS[@]}"; do
+    for dest in "$dir"/*.md; do
+      if [[ -L "$dest" ]]; then
+        source="$(readlink "$dest")"
+        if [[ "$source" == ../../documentation/prompts/*.md && ! -e "$dest" ]]; then
+          rm -f "$dest"
+          echo "removed: $dest (missing source)"
+        fi
+        continue
+      fi
+
+      source="$(sed -n 's/^<!-- Auto-generated from \(documentation\/prompts\/[^ ]*\).* -->$/\1/p' "$dest" | head -n 1)"
+      if [[ -n "$source" && ! -f "$source" ]]; then
+        rm -f "$dest"
+        echo "removed: $dest (missing source)"
+      fi
+    done
+  done
+
+  for skill_file in "$SKILLS_DIR"/*/SKILL.md; do
+    source="$(sed -n 's/^<!-- Auto-generated from \(documentation\/prompts\/[^ ]*\).* -->$/\1/p' "$skill_file" | head -n 1)"
+    if [[ -n "$source" && ! -f "$source" ]]; then
+      skill_dir="$(dirname "$skill_file")"
+      rm -f "$skill_file"
+      rmdir "$skill_dir" 2>/dev/null || true
+      echo "removed: $skill_dir (missing source)"
+    fi
+  done
+}
+
+cleanup_stale_generated_artifacts
+
 # Função: tenta criar symlink; se não der, copia
 link_or_copy() {
   local src="$1"
@@ -87,6 +122,8 @@ write_skill() {
       echo "  $description"
     fi
     echo "---"
+    echo
+    echo "<!-- Auto-generated from $src -->"
     echo
     awk '
       NR == 1 && $0 == "---" {

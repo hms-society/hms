@@ -34,7 +34,7 @@ há nova thread.
 ## Objetivo
 
 Permitir que um administrador ativo crie ou abra um modelo de documento,
-configure nome, descrição, disponibilidade, obrigatoriedade e uma única
+configure nome, descrição, disponibilidade e uma única
 aplicação, e edite seu template rico com variáveis de sistema e personalizadas.
 
 O resultado observável é um fluxo local de criação: **Novo modelo** não cria
@@ -127,7 +127,7 @@ F1 Core + validation
 ```
 
 Produção Documental é dona de modelo, aplicação, template, variáveis,
-obrigatoriedade, estado e associações internas. Catálogo Jurídico é dono de
+estado e associações internas. Catálogo Jurídico é dono de
 nomes, atividade e compatibilidade; a feature só usa
 `LegalExpertiseCatalogProvider` e seus serviços públicos. Não criar FKs, joins,
 imports de tabelas ou repositories do Catálogo em Produção Documental.
@@ -213,7 +213,7 @@ com uma borda consistente de erros.
 |---|---|---|---|---|---|
 | F3-T1 — Controllers, DTOs, decorator e composição | `verified` | `apps/server/src/document-production/rest/{controllers,dtos}/**`; `decorators/**`; `document-production.module.ts`; `apps/server/src/app.module.ts` | `POST /document-specifications`, `GET /document-specifications/:documentSpecificationId`, `PATCH .../configuration`, `PATCH .../template` e `DELETE .../:documentSpecificationId` usam `@DocumentProductionController`, `AuthGuard`, `ActiveAdminGuard`, use case único no construtor e DTOs derivados dos schemas; sucesso POST `201`, GET/PATCH/DELETE `200` | RF-001–RF-009, RF-011–RF-012; CA-01–CA-09, CA-12, CA-15, CA-18–CA-22, CA-26–CA-32 | não; depende de F2-T2 |
 | F3-T2 — Testes HTTP por controller e exemplos REST | `awaiting_judgment` | `apps/server/src/document-production/rest/controllers/tests/{create,get,update-document-specification-configuration,update-document-specification-template}.controller.test.ts`; `apps/server/rest-client/document-production/document-specifications.rest` | quatro testes exercem Supertest, module fixture, use case, token, repository Drizzle, mapper e banco real; cobrem `401/403/404/400`, rollback, projeção ISO, domínio inválido e sucesso; `.rest` documenta Bearer e payloads representativos | RF-001–RF-009, RF-011; CA-01–CA-09, CA-12, CA-15, CA-18–CA-22, CA-26–CA-30 | não; segue a composição de F3-T1 |
-| F3-T3 — Sensor REST e revisão de contratos | `awaiting_judgment` | `apps/server/src/document-production/rest/dtos/index.ts`; `controllers/index.ts`; `document-production.module.ts`; `document-specifications.rest` | integração reproduzível confirma que response expõe exatamente ID, nome, descrição, aplicação/IDs, obrigatoriedade, content, variables, status e `updatedAt`, sem perfil/user ID ou nomes duplicados do Catálogo | RF-001, RF-008, RF-009; CA-01–CA-02, CA-18, CA-21–CA-22, CA-26–CA-28 | não; depende dos testes e composição |
+| F3-T3 — Sensor REST e revisão de contratos | `awaiting_judgment` | `apps/server/src/document-production/rest/dtos/index.ts`; `controllers/index.ts`; `document-production.module.ts`; `document-specifications.rest` | integração reproduzível confirma que response expõe exatamente ID, nome, descrição, aplicação/IDs, content, variables, status e `updatedAt`, sem perfil/user ID ou nomes duplicados do Catálogo | RF-001, RF-008, RF-009; CA-01–CA-02, CA-18, CA-21–CA-22, CA-26–CA-28 | não; depende dos testes e composição |
 
 Regras de teste F3: não chamar `controller.handle()` diretamente; cada
 controller possui arquivo próprio; usar `RestFixture`/`DatabaseFixture`,
@@ -242,7 +242,7 @@ Decisões de UI F4:
 - usar tokens de `documentation/design.md`, Fraunces em headings, Plus Jakarta
   Sans no corpo, wrappers HMS `Icon`/`Anchor` e primitives existentes;
 - usar texto, foco, `aria-*` e estados pressionados para comunicar estado,
-  obrigatoriedade, validação e erro, sem depender somente de cor;
+  validação e erro, sem depender somente de cor;
 - modo create mantém `status`, `content` e `variables` no rascunho local; Template
   permanece acessível e status começa Disponível;
 - catálogo com falha mantém rascunho, informa a indisponibilidade e não permite

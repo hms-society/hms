@@ -135,7 +135,7 @@ export const StepDecision = forwardRef<StepRef, StepDecisionProps>(
         <Separator />
 
         {tipoCard === 'agendar' && (
-          <div className='flex flex-col gap-5'>
+          <div className='flex flex-col gap-5 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6'>
             <div className='flex items-center gap-2'>
               <CalendarDays className='w-4 h-4 text-primary' />
               <span className='text-[14px] font-serif text-foreground'>

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { CommunicationModule } from '@/shared/communication/communication.module'
+import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
-import { ProcessWhatsappBatchWorker } from '../provision/inngest/process-whatsapp-batch-worker'
 import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
@@ -22,6 +22,7 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
+    DocumentEngineMessagingModule,
   ],
   controllers: [
     InternalUploadController,
@@ -34,7 +35,6 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
     RequestDocumentResendController,
   ],
   providers: [
-    ProcessWhatsappBatchWorker,
     {
       provide: ListClientDocumentBatchUseCase,
       useFactory: (repository: DocumentBatchesRepository) => {
@@ -45,7 +45,7 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
   ],
   exports: [
     ListClientDocumentBatchUseCase,
-    ProcessWhatsappBatchWorker,
+    DocumentEngineMessagingModule,
     DocumentsDatabaseModule,
   ],
 })

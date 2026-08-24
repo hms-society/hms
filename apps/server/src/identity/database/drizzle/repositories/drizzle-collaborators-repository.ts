@@ -155,7 +155,7 @@ export class DrizzleCollaboratorsRepository
     query: CollaboratorListQuery,
   ): Promise<PaginationResponse<CollaboratorSummary>> {
     const page = query.page ?? 1
-    const pageSize = query.pageSize ?? 20
+    const pageSize = query.limit ?? query.pageSize ?? 20
     const where = this.buildWhere(query)
 
     const [{ total }] = await this.database

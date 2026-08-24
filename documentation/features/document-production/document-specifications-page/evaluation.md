@@ -20,7 +20,7 @@ feature.
 | Requisitos / critérios | Evidência | Veredito |
 |---|---|---|
 | SR-001 / CA-01–02 | Controller REST com `AuthGuard` + `ActiveAdminGuard`; teste REST dedicado 7/7; login real do administrador e rota protegida | aceito |
-| SR-002 / CA-03–04 | Projeção core, DTO, componente de tabela e teste web; resposta real contém `isRequired`/`status`; DOM real contém `Obrigatório`/`Opcional` e `Disponível`; headers são `Modelo`, `Aplicação`, `Obrigatoriedade`, `Estado`, `Ação`, sem `Atualizado` | aceito |
+| SR-002 / CA-03–04 | Projeção core, DTO, componente de tabela e teste web; resposta real contém `status`; DOM real contém `Disponível`; headers são `Modelo`, `Aplicação`, `Estado`, `Ação`, sem `Atualizado` | aceito |
 | SR-003 / CA-05 | Caso de uso, repository com busca por nome/descrição e fluxo real `Contrato` com request 200 | aceito |
 | SR-004 / CA-06–09 | Schema Zod, filtros REST combinados, correlação área/tema no teste 7/7 e filtro real por área; tema dependente é habilitado após selecionar área | aceito |
 | SR-005 / CA-10–12 | Repository com contagem separada, ordenação estável e paginação; teste REST cobre filtros/paginação/ordenação | aceito |

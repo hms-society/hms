@@ -119,7 +119,7 @@ describe('List Intakes Use Case', () => {
     })
   })
 
-  it('omits rows when identity projections cannot be resolved', async () => {
+  it('keeps rows when identity projections cannot be resolved', async () => {
     const page = {
       items: [
         {
@@ -162,6 +162,21 @@ describe('List Intakes Use Case', () => {
       intakeResponsiblesRepository,
     )
 
-    await expect(useCase.execute()).resolves.toEqual({ ...page, items: [] })
+    await expect(useCase.execute()).resolves.toEqual({
+      ...page,
+      items: [
+        expect.objectContaining({
+          client: {
+            clientId: 'missing-client',
+            name: 'Cliente não encontrado',
+            maskedTaxId: '—',
+          },
+          responsible: {
+            responsibleId: 'missing-responsible',
+            professionalName: 'Atendente não encontrado',
+          },
+        }),
+      ],
+    })
   })
 })

@@ -132,7 +132,9 @@ export class RegisterClientUseCase
   }
 
   private normalizePhone(value?: string) {
-    const normalizedValue = value?.replace(/\D/g, '')
+    const digits = value?.replace(/\D/g, '') || ''
+    const normalizedValue =
+      digits.length === 11 && !digits.startsWith('55') ? `55${digits}` : digits
     return normalizedValue || undefined
   }
 }

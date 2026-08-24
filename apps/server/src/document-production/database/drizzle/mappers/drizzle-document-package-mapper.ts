@@ -20,7 +20,9 @@ export class DrizzleDocumentPackageMapper {
     return {
       id: record.id,
       context,
-      documents,
+      documents: [...documents],
+      confirmedAt: record.confirmedAt ?? undefined,
+      confirmedByCollaboratorId: record.confirmedByCollaboratorId ?? undefined,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     }

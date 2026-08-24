@@ -6,6 +6,8 @@ import type { DocumentTemplateContent } from '@hms/core/document-production/doma
 import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
 import { ListDocumentSpecificationsController } from '@/document-production/rest/controllers'
 
+const consultationId = '00000000-0000-4000-8000-000000000001'
+
 describe('List Document Specifications Controller [GET /document-specifications]', () => {
   let fixture: DocumentProductionModuleFixture
 
@@ -21,18 +23,22 @@ describe('List Document Specifications Controller [GET /document-specifications]
 
   it('lists seeded specifications with resolved legal names for an active administrator', async () => {
     const { areas, topics } = await fixture.seedCatalog()
-    await fixture.specificationsSeeder.run({ legalAreas: areas, legalTopics: topics })
+    await fixture.specificationsSeeder.run({
+      legalAreas: areas,
+      legalTopics: topics,
+      consultationId,
+    })
     await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())
       .get('/document-specifications')
       .set('Authorization', 'Bearer fixture-access-token')
-      .query({ search: 'contrato', page: 1, pageSize: 1 })
+      .query({ search: 'negociação contratual', page: 1, pageSize: 1 })
       .expect(200)
 
     expect(response.body).toMatchObject({ page: 1, pageSize: 1, total: 1, totalPages: 1 })
     expect(response.body.items[0]).toMatchObject({
-      name: 'Contrato de prestação de serviços',
+      name: 'Procuração',
       application: {
         scope: 'legal_context',
         legalExpertises: [
@@ -44,7 +50,11 @@ describe('List Document Specifications Controller [GET /document-specifications]
 
   it('applies legal filters and stable pagination through the real repository', async () => {
     const { areas, topics } = await fixture.seedCatalog()
-    await fixture.specificationsSeeder.run({ legalAreas: areas, legalTopics: topics })
+    await fixture.specificationsSeeder.run({
+      legalAreas: areas,
+      legalTopics: topics,
+      consultationId,
+    })
     const legalArea = areas[1]
     const legalTopic = topics.find(({ legalAreaId }) => legalAreaId === legalArea?.id)
     if (!legalArea || !legalTopic)
@@ -188,7 +198,6 @@ function createSpecification(
       scope: 'global',
       moment: 'consultation',
     },
-    isRequired: false,
     status: 'available',
     ...overrides,
   }

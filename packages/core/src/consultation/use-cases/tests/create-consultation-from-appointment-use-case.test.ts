@@ -87,4 +87,33 @@ describe('Create Consultation From Appointment Use Case', () => {
     ).resolves.toBe(consultation)
     expect(consultationsRepository.add).not.toHaveBeenCalled()
   })
+
+  it('creates a pending Consultation without legal classification', async () => {
+    const consultation = ConsultationFaker.fake({
+      id: consultationId,
+      legalAreaId: undefined,
+      legalTopicId: undefined,
+    })
+    consultationsRepository.add.mockResolvedValue(consultation)
+    const useCase = new CreateConsultationFromAppointmentUseCase(
+      consultationsRepository,
+      idProvider,
+      datetimeProvider,
+    )
+
+    await useCase.execute({
+      intakeId: consultation.intakeId,
+      appointmentId: consultation.appointmentId,
+      clientId: consultation.clientId,
+      assignedLawyerId: consultation.assignedLawyerId,
+      modality: ConsultationModality.InPerson,
+    })
+
+    expect(consultationsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        legalAreaId: undefined,
+        legalTopicId: undefined,
+      }),
+    )
+  })
 })

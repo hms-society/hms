@@ -9,8 +9,8 @@ export const intakeFormSchema = z
   .object({
     origin: intakeOriginSchema,
     contactChannel: intakeContactChannelSchema,
-    legalAreaId: z.string().min(1, 'Selecione a área jurídica'),
-    legalTopicId: z.string().min(1, 'Selecione o tema jurídico'),
+    legalAreaId: z.string(),
+    legalTopicId: z.string(),
     urgency: intakeUrgencySchema,
     notes: z.string().trim().max(2000, 'Use no máximo 2.000 caracteres').optional(),
     clientId: z.string().min(1, 'Vincule ou cadastre uma pessoa antes de continuar'),

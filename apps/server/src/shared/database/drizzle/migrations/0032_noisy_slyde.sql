@@ -1,0 +1,1 @@
+ALTER TABLE "intakes" DROP CONSTRAINT "intakes_other_closure_notes_check";

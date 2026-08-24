@@ -1,25 +1,25 @@
 import type { Address, TaxId } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-type ClientBase = {
-  readonly id: string
-  readonly email?: string
-  readonly phone?: string
-  readonly address?: Address
-  readonly createdAt: Date
-  readonly updatedAt: Date
+type ClientBase = Entity & {
+  email?: string
+  phone?: string
+  address?: Address
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type NaturalClient = ClientBase & {
-  readonly type: 'natural'
-  readonly name: string
-  readonly taxId: TaxId<'cpf'>
+  type: 'natural'
+  name: string
+  taxId: TaxId<'cpf'>
 }
 
 export type LegalClient = ClientBase & {
-  readonly type: 'legal'
-  readonly legalName: string
-  readonly tradeName?: string
-  readonly taxId: TaxId<'cnpj'>
+  type: 'legal'
+  legalName: string
+  tradeName?: string
+  taxId: TaxId<'cnpj'>
 }
 
 export type Client = NaturalClient | LegalClient

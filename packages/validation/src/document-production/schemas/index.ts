@@ -1,3 +1,5 @@
+import '../../configure-zod'
+
 export * from './create-document-specification-schema'
 export * from './document-specification-list-query-schema'
 export * from './document-specification-configuration-schema'

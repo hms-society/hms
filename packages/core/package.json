@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
+    "./case-management/domain/entities": "./src/case-management/domain/entities/index.ts",
+    "./case-management/domain/structures": "./src/case-management/domain/structures/index.ts",
+    "./case-management/interfaces": "./src/case-management/interfaces/index.ts",
     "./communication/domain/entities": "./src/communication/domain/entities/index.ts",
     "./communication/domain/errors": "./src/communication/domain/errors/index.ts",
     "./communication/domain/events": "./src/communication/domain/events/index.ts",
@@ -16,6 +19,7 @@
     "./consultation/interfaces": "./src/consultation/interfaces/index.ts",
     "./consultation/use-cases": "./src/consultation/use-cases/index.ts",
     "./document-engine/domain/entities": "./src/document-engine/domain/entities/index.ts",
+    "./document-engine/domain/entities/fakers": "./src/document-engine/domain/entities/fakers/index.ts",
     "./document-engine/domain/errors": "./src/document-engine/domain/errors/index.ts",
     "./document-engine/domain/events": "./src/document-engine/domain/events/index.ts",
     "./document-engine/domain/structures": "./src/document-engine/domain/structures/index.ts",
@@ -54,9 +58,11 @@
     "./scheduling/domain/structures": "./src/scheduling/domain/structures/index.ts",
     "./scheduling/interfaces": "./src/scheduling/interfaces/index.ts",
     "./shared/domain/entities": "./src/shared/domain/entities/index.ts",
+    "./domain/errors": "./src/shared/domain/errors/index.ts",
     "./shared/domain/errors": "./src/shared/domain/errors/index.ts",
     "./shared/domain/events": "./src/shared/domain/events/index.ts",
     "./shared/domain/structures": "./src/shared/domain/structures/index.ts",
+    "./shared/domain": "./src/shared/domain/index.ts",
     "./shared/interfaces": "./src/shared/interfaces/index.ts",
     "./shared/use-cases": "./src/shared/use-cases/index.ts",
     "./shared/responses/rest-response": "./src/shared/responses/rest-response.ts",
@@ -64,6 +70,7 @@
     "./shared/constants": "./src/shared/constants/index.ts"
   },
   "imports": {
+    "#case-management/*": "./src/case-management/*",
     "#communication/*": "./src/communication/*",
     "#consultation/*": "./src/consultation/*",
     "#document-engine/*": "./src/document-engine/*",

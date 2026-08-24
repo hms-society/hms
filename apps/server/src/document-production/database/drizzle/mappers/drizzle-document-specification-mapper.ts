@@ -26,7 +26,6 @@ export class DrizzleDocumentSpecificationMapper {
       content: record.content,
       variables,
       application,
-      isRequired: record.isRequired,
       status: record.status as DocumentSpecification['status'],
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,

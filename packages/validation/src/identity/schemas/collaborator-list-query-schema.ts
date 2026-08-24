@@ -19,6 +19,13 @@ export const collaboratorListQuerySchema = z
     jobTitle: optionalNormalizedTextSchema,
     status: userStatusSchema.optional(),
     page: pageSchema,
+    limit: z.coerce.number().int().min(1).max(100).optional(),
     pageSize: pageSizeSchema,
   })
   .strict()
+
+export const lawyerListQuerySchema = collaboratorListQuerySchema.pick({
+  search: true,
+  page: true,
+  limit: true,
+})

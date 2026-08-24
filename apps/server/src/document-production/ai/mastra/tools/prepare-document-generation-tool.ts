@@ -15,6 +15,7 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 
 const outputSchema = z.object({
   documentGenerationId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
 })
 
@@ -51,6 +52,7 @@ export class PrepareDocumentGenerationTool {
 
         return {
           documentGenerationId: generation.id,
+          instructions: input.instructions,
           source: input.source,
         }
       },

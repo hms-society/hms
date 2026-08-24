@@ -25,7 +25,11 @@ type UserSeed = {
 }
 
 const DEFAULT_CLIENTS: ClientCreation[] = [
-  ClientFaker.fake({ email: 'client@hms.br', name: 'Kauan', phone: '+5519971659516' }),
+  ClientFaker.fake({
+    email: 'client@hms.br',
+    name: 'Cliente HMS Teste',
+    phone: '5511999999999',
+  }),
   ...ClientFaker.fakeMany(9),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
@@ -90,14 +94,6 @@ const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   profile: 'paralegal',
 }
 
-const DEFAULT_CLIENT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
-  profile: 'client'
-} = {
-  professionalName: 'Cliente de desenvolvimento',
-  jobTitle: 'Cliente',
-  profile: 'client',
-}
-
 @Injectable()
 export class IdentitySeeder {
   constructor(
@@ -126,22 +122,12 @@ export class IdentitySeeder {
       throw new AppError('AuthAdministrationProvider is required to clear users')
     }
 
-    const authCleanupResults = await Promise.allSettled(
-      DEFAULT_USERS.map(async ({ email }) => {
-        const authUser = await authAdministrationProvider.findUserByEmail(email)
-        if (authUser) await authAdministrationProvider.removeUser(authUser.authUserId)
-      }),
-    )
+    await authAdministrationProvider.removeAllUsers()
 
     await this.clientsRepository.removeAll()
     await this.registrationAttemptsRepository.removeAll()
     await this.collaboratorsRepository.removeAll()
     await this.usersRepository.removeAll()
-
-    const authCleanupFailure = authCleanupResults.find(
-      (result): result is PromiseRejectedResult => result.status === 'rejected',
-    )
-    if (authCleanupFailure) throw authCleanupFailure.reason
   }
 
   async seedUsers(
@@ -231,28 +217,18 @@ export class IdentitySeeder {
       legalExpertises: [lawyerLegalExpertise],
     })
 
-    const clientCollaborator = await this.collaboratorsRepository.add({
-      userId: clientUser.id,
-      ...DEFAULT_CLIENT,
-    })
-
     if (
       !administratorCreated ||
       !attendantCreated ||
       !lawyerCreated ||
-      !paralegalCreated ||
-      !clientCollaborator
+      !paralegalCreated
     ) {
       throw new AppError('Default seed collaborators were not created')
     }
 
     const clientsToSeed = [
       {
-        ...ClientFaker.fake({
-          email: 'client@hms.br',
-          name: 'Kauan',
-          phone: '+5519971659516',
-        }),
+        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
         id: clientUser?.id,
       },
       ...ClientFaker.fakeMany(9),
@@ -260,7 +236,6 @@ export class IdentitySeeder {
       ...client,
       id,
     })) satisfies ClientCreation[]
-
     const clients = await this.seed(clientsToSeed)
 
     return {
@@ -270,7 +245,6 @@ export class IdentitySeeder {
         attendantCreated,
         lawyerCreated,
         paralegalCreated,
-        clientCollaborator,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,

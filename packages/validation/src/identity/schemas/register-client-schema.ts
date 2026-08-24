@@ -8,6 +8,25 @@ const optionalText = z
   .optional()
   .transform((value) => value?.trim() || undefined)
 
+const optionalWhatsappSchema = z
+  .string()
+  .optional()
+  .transform((value) => {
+    const digits = value?.replace(/\D/g, '') || ''
+    if (digits.length === 11 && !digits.startsWith('55')) return `55${digits}`
+    return digits || undefined
+  })
+  .superRefine((value, context) => {
+    if (!value) return
+
+    if (!/^55\d{2}9\d{8}$/.test(value)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Informe um WhatsApp válido no formato +55 (11) 99999-9999.',
+      })
+    }
+  })
+
 const optionalAddressSchema = addressSchema
   .partial()
   .superRefine((address, context) => {
@@ -41,12 +60,13 @@ const optionalAddressSchema = addressSchema
     }
   })
 
-const consentDraftSchema = z.object({
-  data_processing: z.boolean().default(false),
-  whatsapp_communication: z.boolean().default(false),
-  email_communication: z.boolean().default(false),
-  third_party_sharing: z.boolean().default(false),
-})
+const consentDraftSchema = z
+  .object({
+    whatsapp_communication: z.boolean().default(false),
+    email_communication: z.boolean().default(false),
+    third_party_sharing: z.boolean().default(false),
+  })
+  .strict()
 
 const registrationFields = {
   type: clientTypeSchema,
@@ -54,7 +74,7 @@ const registrationFields = {
   legalName: optionalText,
   tradeName: optionalText,
   taxId: z.string().transform((value) => value.replace(/\D/g, '')),
-  phone: optionalText,
+  phone: optionalWhatsappSchema,
   email: z
     .union([z.email(), z.literal('')])
     .optional()
@@ -68,7 +88,6 @@ type RegistrationBase = z.output<typeof registrationBaseSchema>
 export const registerClientSchema = registrationBaseSchema
   .extend({
     consents: consentDraftSchema.default({
-      data_processing: false,
       whatsapp_communication: false,
       email_communication: false,
       third_party_sharing: false,
@@ -76,6 +95,7 @@ export const registerClientSchema = registrationBaseSchema
   })
   .strict()
   .superRefine(validateRegistration)
+  .superRefine(validateCommunicationConsents)
 
 export const registerClientRequestSchema = registrationBaseSchema
   .strict()
@@ -124,9 +144,32 @@ function validateRegistration(value: RegistrationBase, context: RefinementCtx) {
     context.addIssue({
       code: 'custom',
       path: ['name'],
-      message: 'Remova o nome de pessoa natural.',
+      message: 'Remova o nome de pessoa física.',
     })
   }
+
+  if (!value.email && !value.phone) {
+    context.addIssue({
+      code: 'custom',
+      path: ['phone'],
+      message: 'Informe um e-mail ou WhatsApp.',
+    })
+  }
+}
+
+function validateCommunicationConsents(
+  value: RegistrationBase & { consents: z.output<typeof consentDraftSchema> },
+  context: RefinementCtx,
+) {
+  if (value.consents.whatsapp_communication || value.consents.email_communication) {
+    return
+  }
+
+  context.addIssue({
+    code: 'custom',
+    path: ['consents'],
+    message: 'Selecione pelo menos uma forma de comunicação: WhatsApp ou e-mail.',
+  })
 }
 
 function isValidCheckDigits(value: string) {

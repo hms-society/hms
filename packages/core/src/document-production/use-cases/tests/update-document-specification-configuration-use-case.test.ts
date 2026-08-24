@@ -6,7 +6,6 @@ import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import {
   DocumentSpecificationNotFoundError,
   InvalidDocumentSpecificationConfigurationError,
-  InvalidDocumentTemplateError,
 } from '../../domain/errors'
 import type { DocumentTemplateContent } from '../../domain/structures'
 import type { DocumentSpecificationsRepository } from '../../interfaces'
@@ -51,7 +50,6 @@ describe('Update Document Specification Configuration Use Case', () => {
         description: ' Nova descrição ',
         status: 'available',
         application: specification.application,
-        isRequired: true,
       },
     })
 
@@ -60,14 +58,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       description: 'Nova descrição',
       status: 'available',
       application: specification.application,
-      isRequired: true,
     })
     expect(repository.replaceTemplate).not.toHaveBeenCalled()
   })
 
-  it('validates legal application and rejects unavailable content', async () => {
-    const specification = DocumentSpecificationFaker.fake()
+  it('validates legal application while allowing an empty available template', async () => {
+    const specification = DocumentSpecificationFaker.fake({ status: 'available' })
     repository.findById.mockResolvedValue(specification)
+    repository.replaceConfiguration.mockResolvedValue(specification)
     const application = {
       scope: 'legal_context' as const,
       moment: 'legal_production' as const,
@@ -75,23 +73,23 @@ describe('Update Document Specification Configuration Use Case', () => {
       legalTopicIdsByArea: { 'area-1': ['topic-1'] },
     }
 
-    await expect(
-      new UpdateDocumentSpecificationConfigurationUseCase(
-        repository,
-        catalogProvider,
-      ).execute({
-        documentSpecificationId: specification.id,
-        changes: {
-          name: 'Nome',
-          description: 'Descrição',
-          status: 'available',
-          application,
-          isRequired: false,
-        },
-      }),
-    ).rejects.toBeInstanceOf(InvalidDocumentTemplateError)
-    expect(catalogProvider.validateActive).not.toHaveBeenCalled()
-    expect(repository.replaceConfiguration).not.toHaveBeenCalled()
+    await new UpdateDocumentSpecificationConfigurationUseCase(
+      repository,
+      catalogProvider,
+    ).execute({
+      documentSpecificationId: specification.id,
+      changes: {
+        name: 'Nome',
+        description: 'Descrição',
+        status: 'available',
+        application,
+      },
+    })
+
+    expect(catalogProvider.validateActive).toHaveBeenCalledWith([
+      { legalAreaId: 'area-1', legalTopicIds: ['topic-1'] },
+    ])
+    expect(repository.replaceConfiguration).toHaveBeenCalled()
   })
 
   it('persists configuration and template changes through the same save action', async () => {
@@ -125,7 +123,6 @@ describe('Update Document Specification Configuration Use Case', () => {
         description: '',
         status: 'available',
         application: specification.application,
-        isRequired: false,
         content,
         variables,
       },
@@ -136,7 +133,6 @@ describe('Update Document Specification Configuration Use Case', () => {
       description: '',
       status: 'available',
       application: specification.application,
-      isRequired: false,
       content,
       variables,
     })
@@ -173,7 +169,6 @@ describe('Update Document Specification Configuration Use Case', () => {
         description: '',
         status: 'available',
         application: specification.application,
-        isRequired: false,
         content,
         variables,
       },
@@ -203,7 +198,6 @@ describe('Update Document Specification Configuration Use Case', () => {
         description: '',
         status: 'unavailable',
         application: specification.application,
-        isRequired: false,
       },
     })
 
@@ -237,7 +231,6 @@ describe('Update Document Specification Configuration Use Case', () => {
         description: '',
         status: 'unavailable',
         application: specification.application,
-        isRequired: false,
         content: specification.content,
         variables: specification.variables,
       },
@@ -275,7 +268,6 @@ describe('Update Document Specification Configuration Use Case', () => {
             legalAreaIds: ['area-1'],
             legalTopicIdsByArea: { 'area-1': ['topic-1'] },
           },
-          isRequired: false,
         },
       }),
     ).rejects.toBeInstanceOf(InvalidDocumentSpecificationConfigurationError)
@@ -298,7 +290,6 @@ describe('Update Document Specification Configuration Use Case', () => {
             scope: 'global',
             moment: 'consultation',
           },
-          isRequired: false,
         },
       }),
     ).rejects.toBeInstanceOf(DocumentSpecificationNotFoundError)

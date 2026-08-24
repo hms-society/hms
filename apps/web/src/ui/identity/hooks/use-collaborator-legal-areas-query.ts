@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-import { collaboratorQueryKeys } from './collaborator-query-keys'
+const COLLABORATOR_LEGAL_AREAS_QUERY_KEY = ['identity', 'legal-catalog', 'areas'] as const
 
 export function useCollaboratorLegalAreasQuery() {
   const { legalCatalogService } = useRestContext()
@@ -20,7 +20,7 @@ export function useCollaboratorLegalAreasQuery() {
     error: legalAreasError,
     isLoading: isLoadingLegalAreas,
   } = useQuery({
-    queryKey: collaboratorQueryKeys.legalAreas,
+    queryKey: COLLABORATOR_LEGAL_AREAS_QUERY_KEY,
     queryFn: fetchLegalAreas,
   })
 

@@ -5,7 +5,7 @@ import {
   DOCUMENT_TEMPLATE_LINK_OPTIONS,
   isAllowedDocumentTemplateHref,
   parseDocumentTemplateContent,
-} from '../document-editor'
+} from '@/ui/document-production/widgets/components/document-editor'
 import {
   isDocumentSpecificationNotFoundError,
   shouldBlockLegalConfigurationSubmit,

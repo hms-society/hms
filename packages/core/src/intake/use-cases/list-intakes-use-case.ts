@@ -102,10 +102,19 @@ export class ListIntakesUseCase {
     )
 
     return rows.flatMap((row) => {
-      const client = clientsById.get(row.clientId)
-      const responsible = responsiblesById.get(row.responsibleId)
-
-      if (!client || !responsible) return []
+      const client =
+        clientsById.get(row.clientId) ??
+        ({
+          clientId: row.clientId,
+          name: 'Cliente não encontrado',
+          maskedTaxId: '—',
+        } satisfies ClientListProjection)
+      const responsible =
+        responsiblesById.get(row.responsibleId) ??
+        ({
+          responsibleId: row.responsibleId,
+          professionalName: 'Atendente não encontrado',
+        } satisfies ResponsibleListProjection)
 
       return [
         {

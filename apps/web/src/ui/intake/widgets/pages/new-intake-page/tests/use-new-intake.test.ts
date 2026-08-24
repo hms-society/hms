@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useNewIntake } from '../use-new-intake'
 import { useRegisterIntakeAction } from '../use-register-intake-action'
@@ -10,19 +11,29 @@ vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
   useAuthContext: vi.fn(),
 }))
 
+vi.mock('@/ui/shared/hooks/use-navigation', () => ({
+  useNavigation: vi.fn(),
+}))
+
 vi.mock('../use-register-intake-action', () => ({
   useRegisterIntakeAction: vi.fn(),
 }))
 
 const useAuthContextMock = vi.mocked(useAuthContext)
+const useNavigationMock = vi.mocked(useNavigation)
 const useRegisterIntakeActionMock = vi.mocked(useRegisterIntakeAction)
 
 describe('useNewIntake', () => {
   const registerIntake = vi.fn()
+  const navigateTo = vi.fn().mockResolvedValue(undefined)
 
   beforeEach(() => {
     vi.clearAllMocks()
     registerIntake.mockResolvedValue({})
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn(),
+    })
     useAuthContextMock.mockReturnValue({ user: { id: 'user-id' } } as never)
     useRegisterIntakeActionMock.mockReturnValue({
       error: null,
@@ -43,6 +54,7 @@ describe('useNewIntake', () => {
       result.current.form.setValue('legalAreaId', '47dfd634-75e9-41e4-a47e-05114f923bd0')
       result.current.form.setValue('legalTopicId', '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d')
       result.current.form.setValue('clientId', 'client-id')
+      result.current.form.setValue('lawyer', 'lawyer-id')
     })
 
     await act(async () => result.current.handleSubmit())
@@ -50,8 +62,6 @@ describe('useNewIntake', () => {
     expect(registerIntake).toHaveBeenCalledWith({
       clientId: 'client-id',
       responsibleId: 'user-id',
-      createdBy: 'user-id',
-      updatedBy: 'user-id',
       origin: 'direct',
       contactChannel: 'whatsapp',
       legalAreaId: '47dfd634-75e9-41e4-a47e-05114f923bd0',
@@ -59,8 +69,31 @@ describe('useNewIntake', () => {
       urgency: 'normal',
       demandNotes: '',
       decision: 'schedule_consultation',
+      assignedLawyerId: 'lawyer-id',
+      startsAt: expect.any(Date),
+      modality: 'virtual',
+      channel: 'whatsapp_video',
     })
     expect(result.current.form.getValues('clientId')).toBe('')
+    expect(navigateTo).toHaveBeenCalledWith('intakes')
+  })
+
+  it('registers an intake without legal classification', async () => {
+    const { result } = renderHook(() => useNewIntake())
+
+    act(() => {
+      result.current.form.setValue('clientId', 'client-id')
+      result.current.form.setValue('lawyer', 'lawyer-id')
+    })
+
+    await act(async () => result.current.handleSubmit())
+
+    expect(registerIntake).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        legalAreaId: expect.anything(),
+        legalTopicId: expect.anything(),
+      }),
+    )
   })
 
   it('exposes the registering state as form submission state', () => {

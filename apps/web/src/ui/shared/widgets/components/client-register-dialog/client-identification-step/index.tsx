@@ -34,13 +34,13 @@ export const ClientIdentificationStep = ({ dialog }: ClientIdentificationStepPro
             id='client-lookup-tax-id'
             placeholder='000.000.000-00'
             autoComplete='off'
-            className='h-8 text-xs'
+            className='h-9 text-xs'
             aria-invalid={Boolean(errors.taxId)}
             aria-describedby={errors.taxId ? 'client-lookup-tax-id-error' : undefined}
             {...identificationForm.register('taxId', { onChange: handleTaxIdChange })}
           />
           <FieldDescription className='text-[11px] text-muted-foreground'>
-            Use CPF para pessoa natural ou CNPJ para pessoa jurídica.
+            Use CPF para pessoa física ou CNPJ para pessoa jurídica.
           </FieldDescription>
           <FieldError
             id='client-lookup-tax-id-error'
@@ -52,19 +52,19 @@ export const ClientIdentificationStep = ({ dialog }: ClientIdentificationStepPro
 
         <Field data-invalid={Boolean(errors.phone)}>
           <FieldLabel htmlFor='client-lookup-phone' className='text-xs font-medium'>
-            Telefone
+            WhatsApp
           </FieldLabel>
           <Input
             id='client-lookup-phone'
-            placeholder='(00) 00000-0000'
+            placeholder='+55 (11) 99999-9999'
             autoComplete='off'
-            className='h-8 text-xs'
+            className='h-9 text-xs'
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? 'client-lookup-phone-error' : undefined}
             {...identificationForm.register('phone', { onChange: handlePhoneChange })}
           />
           <FieldDescription className='text-[11px] text-muted-foreground'>
-            Use o telefone quando não tiver o documento.
+            Use o WhatsApp quando não tiver o documento.
           </FieldDescription>
           <FieldError id='client-lookup-phone-error' className='text-xs text-destructive'>
             {errors.phone?.message}
@@ -83,11 +83,12 @@ export const ClientIdentificationStep = ({ dialog }: ClientIdentificationStepPro
       <span aria-live='polite' className='sr-only'>
         {busy ? 'Buscando cadastro…' : ''}
       </span>
-      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'
-          className='rounded-pill text-sm font-medium h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill border-border bg-card px-5 text-sm font-medium'
           onClick={dialog.handleClearIdentification}
           disabled={busy}
         >
@@ -95,7 +96,8 @@ export const ClientIdentificationStep = ({ dialog }: ClientIdentificationStepPro
         </Button>
         <Button
           type='submit'
-          className='rounded-pill text-sm font-medium gap-1.5 h-9 px-6'
+          size='sm'
+          className='h-11 rounded-pill px-5 text-sm font-medium shadow-xs'
           disabled={dialog.isBusy}
         >
           <Icon name='search' className='size-3.5' />

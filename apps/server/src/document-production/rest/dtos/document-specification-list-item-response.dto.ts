@@ -30,7 +30,6 @@ export class DocumentSpecificationListItemResponseDto {
   @ApiProperty() description!: string
   @ApiProperty({ type: () => DocumentSpecificationApplicationResponseDto })
   application!: DocumentSpecificationApplicationResponseDto
-  @ApiProperty() isRequired!: boolean
   @ApiProperty({ enum: ['available', 'unavailable'] })
   status!: DocumentSpecificationStatus
 }

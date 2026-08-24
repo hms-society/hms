@@ -8,8 +8,8 @@ export const createConsultationSchema = z.object({
   clientId: z.string().uuid(),
   assignedLawyerId: z.string().uuid(),
   responsibleId: z.string().uuid().optional(),
-  legalAreaId: z.string().uuid(),
-  legalTopicId: z.string().uuid(),
+  legalAreaId: z.string().uuid().optional(),
+  legalTopicId: z.string().uuid().optional(),
   modality: z.nativeEnum(ConsultationModality),
   channel: z.string().optional(),
 })

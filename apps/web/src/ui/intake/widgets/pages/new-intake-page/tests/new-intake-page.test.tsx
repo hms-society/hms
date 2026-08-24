@@ -109,7 +109,7 @@ describe('NewIntakePage', () => {
     renderNewIntakePage()
 
     expect(screen.getByRole('heading', { name: 'Registrar demanda' })).toBeTruthy()
-    expect(screen.getByText('Etapa 1 de 3')).toBeTruthy()
+    expect(screen.getByRole('list', { name: 'Etapas do novo intake' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Intakes' }).getAttribute('href')).toBe(
       ROUTES.intakes,
     )

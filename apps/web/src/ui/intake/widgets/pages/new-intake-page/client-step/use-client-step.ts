@@ -42,11 +42,6 @@ export function useClientStep() {
   }
 
   function handleChangeClient() {
-    setClientDetails(undefined)
-    form.setValue('clientId', '', {
-      shouldDirty: true,
-      shouldValidate: false,
-    })
     form.clearErrors('clientId')
     setIsClientDialogOpen(true)
   }

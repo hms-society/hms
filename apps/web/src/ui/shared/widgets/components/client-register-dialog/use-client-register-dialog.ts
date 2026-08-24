@@ -32,12 +32,13 @@ export type LookupClientForm = z.input<typeof lookupClientSchema>
 export type RegistrationForm = z.input<typeof registerClientSchema>
 export type RegistrationValues = z.output<typeof registerClientSchema>
 
-export const CONSENT_TYPES: readonly ConsentType[] = [
-  'data_processing',
+export const CONSENT_TYPES = [
   'whatsapp_communication',
   'email_communication',
   'third_party_sharing',
-]
+] as const satisfies readonly ConsentType[]
+
+export type RegistrationConsentType = (typeof CONSENT_TYPES)[number]
 
 const EMPTY_REGISTRATION: RegistrationForm = {
   type: 'natural',
@@ -57,15 +58,13 @@ const EMPTY_REGISTRATION: RegistrationForm = {
     zipCode: '',
   },
   consents: {
-    data_processing: false,
     whatsapp_communication: false,
     email_communication: false,
     third_party_sharing: false,
   },
 }
 
-const CONSENT_LABELS: Record<ConsentType, string> = {
-  data_processing: 'tratamento de dados',
+const CONSENT_LABELS: Record<RegistrationConsentType, string> = {
   whatsapp_communication: 'comunicação por WhatsApp',
   email_communication: 'comunicação por e-mail',
   third_party_sharing: 'compartilhamento com terceiros',
@@ -79,7 +78,14 @@ function formatTaxId(value: string) {
 
 function formatPhone(value?: string) {
   if (!value) return ''
-  return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+  const digits = value.replace(/\D/g, '')
+  if (digits.length === 13) {
+    return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+  }
+  if (digits.length === 11) {
+    return `+55 (${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  }
+  return value
 }
 
 export function useClientRegisterDialog({
@@ -102,7 +108,8 @@ export function useClientRegisterDialog({
   const registrationForm = useForm<RegistrationForm, unknown, RegistrationValues>({
     resolver: zodResolver(registerClientSchema),
     defaultValues: EMPTY_REGISTRATION,
-    mode: 'onTouched',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
   })
 
   const resetFlow = useCallback(
@@ -193,6 +200,12 @@ export function useClientRegisterDialog({
     setState('identification')
   }
 
+  function handleEditRegistration() {
+    registrationForm.reset(registrationForm.getValues())
+    setAsyncError(undefined)
+    setState('registration')
+  }
+
   function handleBackToRegistration() {
     setState('registration')
   }
@@ -251,7 +264,7 @@ export function useClientRegisterDialog({
   }
 
   function getSelectedConsentTypes(values: {
-    consents?: Partial<Record<ConsentType, boolean>>
+    consents?: Partial<Record<RegistrationConsentType, boolean>>
   }) {
     return CONSENT_TYPES.filter(function isSelectedConsent(type) {
       return values.consents?.[type] === true
@@ -261,7 +274,7 @@ export function useClientRegisterDialog({
   const completeCreatedClient = useCallback(
     async function completeCreatedClient(
       clientDetails: ClientDetails,
-      types: readonly ConsentType[],
+      types: readonly RegistrationConsentType[],
     ) {
       if (types.length === 0) {
         onClientSelected(clientDetails)
@@ -272,7 +285,7 @@ export function useClientRegisterDialog({
       setRequestLock('consents')
       setAsyncError(undefined)
       let currentDetails = clientDetails
-      const pending: ConsentType[] = []
+      const pending: RegistrationConsentType[] = []
 
       for (const type of types) {
         const response = await identityService.grantClientConsent(
@@ -431,6 +444,7 @@ export function useClientRegisterDialog({
     handleSelectExistingClient,
     handleContinueToRegistration,
     handleBackToIdentification,
+    handleEditRegistration,
     handleBackToRegistration,
     handleBackToPrivacy,
     handleClientTypeChange,

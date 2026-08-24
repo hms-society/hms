@@ -7,7 +7,6 @@ import type {
 } from '#consultation/domain/structures'
 
 import type { Intake, IntakeCreation } from '../domain/entities'
-import { InvalidIntakeClosureError } from '../domain/errors'
 import {
   IntakeConsultationSchedulingRequestedEvent,
   IntakeCreatedEvent,
@@ -61,20 +60,10 @@ export class RegisterIntakeUseCase implements UseCase<Request, Intake> {
       updatedBy: request.updatedBy,
       origin: request.origin,
       contactChannel: request.contactChannel,
-      legalAreaId: request.legalAreaId,
-      legalTopicId: request.legalTopicId,
+      ...(request.legalAreaId ? { legalAreaId: request.legalAreaId } : {}),
+      ...(request.legalTopicId ? { legalTopicId: request.legalTopicId } : {}),
       urgency: request.urgency,
       demandNotes: request.demandNotes,
-    }
-
-    if (
-      decision === IntakeDecision.CloseWithoutContract &&
-      request.closureReason === 'other' &&
-      !request.closureNotes?.trim()
-    ) {
-      throw new InvalidIntakeClosureError(
-        'Uma observação é obrigatória quando o motivo for outro.',
-      )
     }
 
     const status: IntakeStatusValue =

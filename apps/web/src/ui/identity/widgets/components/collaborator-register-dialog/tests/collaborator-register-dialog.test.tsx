@@ -2,8 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useCollaboratorLegalAreasQuery } from '@/ui/identity/hooks/use-collaborator-legal-areas-query'
-import { useCollaboratorLegalTopicsQuery } from '@/ui/identity/widgets/components/collaborator-expertise-group/use-collaborator-legal-topics-query'
-import { useRegisterCollaboratorAction } from '../use-register-collaborator-action'
+import { useCollaboratorLegalTopicsQuery } from '@/ui/identity/hooks/use-collaborator-legal-topics-query'
+import { useRegisterCollaboratorAction } from '@/ui/identity/hooks/use-register-collaborator-action'
 
 import { CollaboratorRegisterDialog } from '../index'
 
@@ -11,14 +11,11 @@ vi.mock('@/ui/identity/hooks/use-collaborator-legal-areas-query', () => ({
   useCollaboratorLegalAreasQuery: vi.fn(),
 }))
 
-vi.mock(
-  '@/ui/identity/widgets/components/collaborator-expertise-group/use-collaborator-legal-topics-query',
-  () => ({
-    useCollaboratorLegalTopicsQuery: vi.fn(),
-  }),
-)
+vi.mock('@/ui/identity/hooks/use-collaborator-legal-topics-query', () => ({
+  useCollaboratorLegalTopicsQuery: vi.fn(),
+}))
 
-vi.mock('../use-register-collaborator-action', () => ({
+vi.mock('@/ui/identity/hooks/use-register-collaborator-action', () => ({
   useRegisterCollaboratorAction: vi.fn(),
 }))
 

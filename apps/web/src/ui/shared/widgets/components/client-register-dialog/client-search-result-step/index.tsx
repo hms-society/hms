@@ -22,7 +22,7 @@ export const ClientSearchResultStep = ({
 
   if (result.kind === 'existing') {
     return (
-      <div className='flex flex-col gap-6'>
+      <div className='flex min-h-full flex-col gap-6'>
         <div>
           <h2 className='font-serif text-xl font-semibold text-foreground sm:text-2xl'>
             Cliente já cadastrado
@@ -39,18 +39,20 @@ export const ClientSearchResultStep = ({
             {dialog.asyncError}
           </p>
         )}
-        <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+        <div className='-mx-6 -mb-6 mt-auto flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
           <Button
             type='button'
             variant='outline'
-            className='rounded-pill text-xs font-medium'
+            size='sm'
+            className='h-11 rounded-pill border-border bg-card px-5 text-xs font-medium sm:text-sm'
             onClick={dialog.handleSearchAnotherClient}
           >
             Buscar outro cliente
           </Button>
           <Button
             type='button'
-            className='rounded-pill text-xs font-medium gap-1.5'
+            size='sm'
+            className='h-11 rounded-pill px-5 text-xs font-medium shadow-xs sm:text-sm'
             onClick={dialog.handleSelectExistingClient}
           >
             <Icon name='check' className='size-3.5' />
@@ -62,7 +64,7 @@ export const ClientSearchResultStep = ({
   }
 
   return (
-    <div className='flex flex-col gap-6'>
+    <div className='flex min-h-full flex-col gap-6'>
       <div>
         <h2 className='font-serif text-xl font-semibold text-foreground sm:text-2xl'>
           Cliente não encontrado
@@ -81,7 +83,7 @@ export const ClientSearchResultStep = ({
             </p>
           </div>
           <div className='flex flex-col gap-1'>
-            <span className='text-xs font-medium text-muted-foreground'>Telefone</span>
+            <span className='text-xs font-medium text-muted-foreground'>WhatsApp</span>
             <p className='font-semibold text-foreground'>
               {maskedPhone || 'Não informado'}
             </p>
@@ -94,18 +96,20 @@ export const ClientSearchResultStep = ({
           {dialog.asyncError}
         </p>
       )}
-      <div className='-mx-6 -mb-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/30 px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
+      <div className='-mx-6 -mb-6 mt-auto flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:-mx-8 sm:-mb-7 sm:flex-row sm:justify-end sm:px-8'>
         <Button
           type='button'
           variant='outline'
-          className='rounded-pill text-xs font-medium'
+          size='sm'
+          className='h-11 rounded-pill border-border bg-card px-5 text-xs font-medium sm:text-sm'
           onClick={dialog.handleBackToIdentification}
         >
           Voltar
         </Button>
         <Button
           type='button'
-          className='rounded-pill text-xs font-medium gap-1.5'
+          size='sm'
+          className='h-11 rounded-pill px-5 text-xs font-medium shadow-xs sm:text-sm'
           onClick={dialog.handleContinueToRegistration}
         >
           Continuar cadastro

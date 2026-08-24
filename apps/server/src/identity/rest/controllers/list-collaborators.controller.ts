@@ -50,6 +50,7 @@ export class ListCollaboratorsController {
   @ApiQuery({ name: 'jobTitle', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 20 })
   @ApiResponse({
     status: HttpStatus.OK,

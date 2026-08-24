@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-import { collaboratorQueryKeys } from './collaborator-query-keys'
+const CURRENT_COLLABORATOR_QUERY_KEY = ['identity', 'collaborator', 'current'] as const
 
 export function useCurrentCollaboratorQuery() {
   const { identityService } = useRestContext()
@@ -20,7 +20,7 @@ export function useCurrentCollaboratorQuery() {
     error: currentCollaboratorError,
     isLoading: isLoadingCurrentCollaborator,
   } = useQuery({
-    queryKey: collaboratorQueryKeys.current,
+    queryKey: CURRENT_COLLABORATOR_QUERY_KEY,
     queryFn: fetchCurrentCollaborator,
   })
 

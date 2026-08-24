@@ -1,7 +1,7 @@
+import type { Entity } from '#shared/domain/entities/entity'
 import type { AttendanceStatus } from '../structures'
 
-type AttendanceBase = {
-  id: string
+type AttendanceBase = Entity & {
   clientId?: string
   startedAt: Date
   createdAt: Date

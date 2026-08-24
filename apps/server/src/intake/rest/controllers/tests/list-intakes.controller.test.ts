@@ -72,7 +72,7 @@ describe('List Intakes Controller [GET /intakes]', () => {
         clientId: client.id,
         responsibleId: responsible.id,
         status: IntakeListStatus.Contracted,
-        demandNotes: 'Demanda que não participa da busca',
+        demandNotes: 'Contrato residencial para análise',
       },
       {
         clientId: client.id,
@@ -97,7 +97,7 @@ describe('List Intakes Controller [GET /intakes]', () => {
       total: 2,
       totalPages: 2,
       statusCounts: {
-        all: 3,
+        all: 2,
         byStatus: {
           [IntakeListStatus.Contracted]: 1,
           [IntakeListStatus.ConsultationScheduled]: 1,
@@ -118,6 +118,19 @@ describe('List Intakes Controller [GET /intakes]', () => {
       },
     })
     expect(response.body.items[0].client.maskedTaxId).not.toContain('52998224725')
+
+    const demandResponse = await request(fixture.app.getHttpServer())
+      .get('/intakes')
+      .query({ search: 'contrato residencial' })
+      .expect(200)
+
+    expect(demandResponse.body).toMatchObject({
+      total: 1,
+      totalPages: 1,
+    })
+    expect(demandResponse.body.items[0]).toMatchObject({
+      demandNotes: 'Contrato residencial para análise',
+    })
   })
 
   it('normalizes an invalid status and caps the requested page size', async () => {

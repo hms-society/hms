@@ -4,9 +4,9 @@ import type {
   DocumentBatchStatus,
   DocumentBatchChannel,
 } from '../structures'
+import type { Entity } from '../../../shared/domain/entities/entity'
 
-export type DocumentBatchFile = {
-  id: string
+export type DocumentBatchFile = Entity & {
   batchId: string
   storagePath: string
   originalName: string
@@ -15,8 +15,7 @@ export type DocumentBatchFile = {
   createdAt: Date
 }
 
-type DocumentBatchBase = {
-  id: string
+type DocumentBatchBase = Entity & {
   sender: DocumentBatchSender | string
   fileIds?: string[]
   files?: DocumentBatchFile[]

@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common'
+import { Controller, Get, Post, Put, Delete, Body, Param, Inject } from '@nestjs/common'
 import { AddBlockedPeriodUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type { CalendarDate } from '@hms/core/scheduling/domain/structures'
-import { DrizzleSchedulesRepository } from '../../drizzle-schedules-repository'
+import type { SchedulesRepository } from '@hms/core/scheduling/interfaces'
+
+import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
 @Controller('schedules')
 export class SchedulesController {
   constructor(
-    private readonly schedulesRepository: DrizzleSchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    private readonly schedulesRepository: SchedulesRepository,
     private readonly addBlockedPeriodUseCase: AddBlockedPeriodUseCase,
   ) {}
 

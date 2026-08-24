@@ -8,7 +8,6 @@ export type ConsultationDocumentSelectionOption = {
   readonly name: string
   readonly description: string
   readonly application: DocumentSpecificationApplication
-  readonly isRequired: boolean
   readonly status: DocumentSpecificationStatus
   readonly selected: boolean
   readonly hasVersion: boolean
@@ -17,4 +16,6 @@ export type ConsultationDocumentSelectionOption = {
 export type ConsultationDocumentSelection = {
   readonly options: readonly ConsultationDocumentSelectionOption[]
   readonly selectedDocumentSpecificationIds: readonly string[]
+  readonly confirmedAt?: Date
+  readonly confirmedByCollaboratorId?: string
 }

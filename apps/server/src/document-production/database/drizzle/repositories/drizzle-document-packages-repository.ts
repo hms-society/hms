@@ -81,6 +81,34 @@ export class DrizzleDocumentPackagesRepository
     return record ? this.mapWithDocuments(record) : undefined
   }
 
+  async confirm(
+    documentPackageId: string,
+    confirmedByCollaboratorId: string,
+    confirmedAt: Date,
+  ) {
+    const [record] = await this.database
+      .update(documentPackageModel)
+      .set({ confirmedAt, confirmedByCollaboratorId, updatedAt: confirmedAt })
+      .where(eq(documentPackageModel.id, documentPackageId))
+      .returning()
+
+    return record ? this.mapWithDocuments(record) : undefined
+  }
+
+  async reopen(documentPackageId: string, reopenedAt: Date) {
+    const [record] = await this.database
+      .update(documentPackageModel)
+      .set({
+        confirmedAt: null,
+        confirmedByCollaboratorId: null,
+        updatedAt: reopenedAt,
+      })
+      .where(eq(documentPackageModel.id, documentPackageId))
+      .returning()
+
+    return record ? this.mapWithDocuments(record) : undefined
+  }
+
   async removeAll() {
     await this.database.delete(documentPackageModel)
   }

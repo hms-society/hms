@@ -141,6 +141,33 @@ describe('SupabaseAuthAdministrationProvider', () => {
     expect(adminDeleteUser).toHaveBeenCalledWith('seeded-user')
   })
 
+  it('removes every user across all Auth pages', async () => {
+    listUsers
+      .mockResolvedValueOnce({
+        data: {
+          users: [createUser({ id: 'first-page-user' })],
+          nextPage: 2,
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: {
+          users: [createUser({ id: 'second-page-user' })],
+          nextPage: null,
+        },
+        error: null,
+      })
+    adminDeleteUser.mockResolvedValue({ error: null })
+    const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
+
+    await provider.removeAllUsers()
+
+    expect(listUsers).toHaveBeenNthCalledWith(1, { page: 1, perPage: 1000 })
+    expect(listUsers).toHaveBeenNthCalledWith(2, { page: 2, perPage: 1000 })
+    expect(adminDeleteUser).toHaveBeenNthCalledWith(1, 'first-page-user')
+    expect(adminDeleteUser).toHaveBeenNthCalledWith(2, 'second-page-user')
+  })
+
   it('resends an invitation through the Supabase invite e-mail operation', async () => {
     const user = createUser({ id: 'resent-invited-user' })
     inviteUserByEmail.mockResolvedValue({ data: { user }, error: null })

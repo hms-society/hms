@@ -1,10 +1,11 @@
-export type AiError = {
-  readonly id: string
-  readonly suggestionId: string
-  readonly entityId: string
-  readonly suggestionType: string
-  readonly suggestedContent: string
-  readonly rejectionReason: string
-  readonly createdAt: Date
-  readonly createdByCollaboratorId: string
+import type { Entity } from './entity'
+
+export type AiError = Entity & {
+  suggestionId: string
+  entityId: string
+  suggestionType: string
+  suggestedContent: string
+  rejectionReason: string
+  createdAt: Date
+  createdByCollaboratorId: string
 }

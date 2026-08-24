@@ -1,0 +1,1 @@
+ALTER TABLE "document_specifications" DROP COLUMN "is_required";

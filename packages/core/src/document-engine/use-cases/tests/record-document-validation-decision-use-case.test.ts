@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import type { DocumentValidationDocument } from '../../domain/entities'
+import { DocumentValidationDocumentFaker } from '../../domain/entities/fakers'
 import {
-  DocumentBatchChannel,
   DocumentValidationDecision,
   DocumentValidationLogAction,
   DocumentValidationStatus,
@@ -29,7 +28,7 @@ describe('Record Document Validation Decision Use Case', () => {
   })
 
   it('maps validate decision to validated status', async () => {
-    const document = fakeDocumentValidationDocument({
+    const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,
       aiSuggestion: {
         documentTypeId: 'comprovante_residencia',
@@ -70,7 +69,7 @@ describe('Record Document Validation Decision Use Case', () => {
   })
 
   it('maps mismatch decision to not corresponding status', async () => {
-    const document = fakeDocumentValidationDocument({
+    const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.NotCorresponding,
     })
     documentValidationsRepository.findByFileId.mockResolvedValue(document)
@@ -102,7 +101,7 @@ describe('Record Document Validation Decision Use Case', () => {
   })
 
   it('requires a reason when rejecting an incomplete document', async () => {
-    const document = fakeDocumentValidationDocument()
+    const document = DocumentValidationDocumentFaker.fake()
     documentValidationsRepository.findByFileId.mockResolvedValue(document)
 
     await expect(
@@ -118,7 +117,7 @@ describe('Record Document Validation Decision Use Case', () => {
   })
 
   it('records an AI correction log when the human decision changes the suggested status', async () => {
-    const currentDocument = fakeDocumentValidationDocument({
+    const currentDocument = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,
       aiSuggestion: {
         documentTypeId: 'comprovante_residencia',
@@ -126,7 +125,7 @@ describe('Record Document Validation Decision Use Case', () => {
         checklistItemLabel: 'Comprovante de residência',
       },
     })
-    const updatedDocument = fakeDocumentValidationDocument({
+    const updatedDocument = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Incomplete,
     })
     documentValidationsRepository.findByFileId.mockResolvedValue(currentDocument)
@@ -166,24 +165,3 @@ describe('Record Document Validation Decision Use Case', () => {
     })
   })
 })
-
-function fakeDocumentValidationDocument(
-  overrides: Partial<DocumentValidationDocument> = {},
-): DocumentValidationDocument {
-  return {
-    id: 'document-file-id',
-    batchId: 'document-batch-id',
-    fileName: 'comprovante-residencia.pdf',
-    mimeType: 'application/pdf',
-    sizeBytes: 1024,
-    storagePath: 'seed/document.pdf',
-    status: DocumentValidationStatus.AwaitingValidation,
-    channel: DocumentBatchChannel.InternalUpload,
-    sender: 'lawyer@hms.com',
-    receivedAt: new Date('2026-08-14T12:00:00.000Z'),
-    createdAt: new Date('2026-08-14T12:00:00.000Z'),
-    extractedFields: [],
-    missingFields: [],
-    ...overrides,
-  }
-}

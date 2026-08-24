@@ -30,7 +30,7 @@ describe('Prepare Document Generation Use Case', () => {
       data: { clientName: 'Maria da Silva' },
     }
     specificationsRepository.findById.mockResolvedValue(specification)
-    generationsRepository.add.mockResolvedValue(generation)
+    generationsRepository.addOrGet.mockResolvedValue(generation)
 
     const result = await new PrepareDocumentGenerationUseCase(
       generationsRepository,
@@ -44,7 +44,7 @@ describe('Prepare Document Generation Use Case', () => {
     })
 
     expect(result).toBe(generation)
-    expect(generationsRepository.add).toHaveBeenCalledWith({
+    expect(generationsRepository.addOrGet).toHaveBeenCalledWith({
       id: generation.id,
       documentId: generation.documentId,
       documentSpecificationVersionId: specification.id,
@@ -59,6 +59,34 @@ describe('Prepare Document Generation Use Case', () => {
       attemptsCount: 0,
       findings: [],
     })
+  })
+
+  it('returns the existing generation when the event is replayed', async () => {
+    const specification = DocumentSpecificationFaker.fake({ name: 'Procuração' })
+    const generation = DocumentGenerationFaker.fake({
+      documentSpecificationVersionId: specification.id,
+    })
+    const source = {
+      type: 'consultation' as const,
+      id: '7c470059-82f8-4616-ac79-70934f758f37',
+      data: { clientName: 'Maria da Silva' },
+    }
+    specificationsRepository.findById.mockResolvedValue(specification)
+    generationsRepository.addOrGet.mockResolvedValue(generation)
+
+    const result = await new PrepareDocumentGenerationUseCase(
+      generationsRepository,
+      specificationsRepository,
+    ).execute({
+      documentGenerationId: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: specification.id,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source,
+    })
+
+    expect(result).toBe(generation)
+    expect(generationsRepository.addOrGet).toHaveBeenCalledTimes(1)
   })
 
   it('rejects a request whose document specification does not exist', async () => {
@@ -80,6 +108,6 @@ describe('Prepare Document Generation Use Case', () => {
         },
       }),
     ).rejects.toBeInstanceOf(DocumentSpecificationNotFoundError)
-    expect(generationsRepository.add).not.toHaveBeenCalled()
+    expect(generationsRepository.addOrGet).not.toHaveBeenCalled()
   })
 })

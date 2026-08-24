@@ -7,7 +7,7 @@ import type {
   IntakeUrgency,
 } from '../structures'
 
-export interface Intake extends Entity {
+export type Intake = Entity & {
   sequenceNumber: number
   clientId: string
   responsibleId: string
@@ -15,8 +15,8 @@ export interface Intake extends Entity {
   updatedBy: string
   origin: IntakeOrigin
   contactChannel: ContactChannel
-  legalAreaId: string
-  legalTopicId: string
+  legalAreaId?: string
+  legalTopicId?: string
   urgency: IntakeUrgency
   demandNotes?: string
   status: IntakeStatus
@@ -34,20 +34,27 @@ export type IntakeCreation = Omit<
 >
 
 export type IntakeUpdate = Partial<
-  Pick<
-    Intake,
-    | 'clientId'
-    | 'closureNotes'
-    | 'closureReason'
-    | 'closedAt'
-    | 'contactChannel'
-    | 'demandNotes'
-    | 'legalAreaId'
-    | 'legalTopicId'
-    | 'origin'
-    | 'responsibleId'
-    | 'status'
-    | 'updatedBy'
-    | 'urgency'
+  Omit<
+    Pick<
+      Intake,
+      | 'clientId'
+      | 'closureNotes'
+      | 'closureReason'
+      | 'closedAt'
+      | 'contactChannel'
+      | 'demandNotes'
+      | 'legalAreaId'
+      | 'legalTopicId'
+      | 'origin'
+      | 'responsibleId'
+      | 'status'
+      | 'updatedBy'
+      | 'urgency'
+    >,
+    'demandNotes' | 'legalAreaId' | 'legalTopicId'
   >
->
+> & {
+  legalAreaId?: string | null
+  legalTopicId?: string | null
+  demandNotes?: string | null
+}

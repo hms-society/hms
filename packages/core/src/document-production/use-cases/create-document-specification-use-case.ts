@@ -49,14 +49,12 @@ export class CreateDocumentSpecificationUseCase
       )
     }
 
-    if (status === DocumentSpecificationStatus.Available || this.getText(content).trim())
-      this.assertValidTemplate(content, variables)
+    if (this.getText(content).trim()) this.assertValidTemplate(content, variables)
 
     const creation: DocumentSpecificationCreation = {
       name,
       description,
       application,
-      isRequired: request.isRequired,
       content,
       variables,
       status,

@@ -1,9 +1,8 @@
 import type { CalendarDate } from '../structures'
+import type { Entity } from '#shared/domain/entities/entity'
 
-export type BlockedPeriod = {
-  id: string
+export type BlockedPeriod = Entity & {
   startsOn: CalendarDate
-  /** Inclusive final calendar date. */
   endsOn: CalendarDate
   reason?: string
   createdAt: Date

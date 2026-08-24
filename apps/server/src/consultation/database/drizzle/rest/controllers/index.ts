@@ -1,7 +1,0 @@
-export * from './create-consultation.controller'
-export * from './start-consultation.controller'
-export * from './complete-consultation.controller'
-export * from './register-no-show.controller'
-export * from './get-consultation-by-id.controller'
-export * from './update-client-qualification.controller'
-export * from './dto'

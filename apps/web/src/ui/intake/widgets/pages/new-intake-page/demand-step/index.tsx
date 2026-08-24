@@ -11,7 +11,10 @@ import {
 import { Separator } from '@/ui/shadcn/separator'
 import { Textarea } from '@/ui/shadcn/textarea'
 
-import { useDemandStep } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-demand-step'
+import {
+  NO_LEGAL_AREA_VALUE,
+  useDemandStep,
+} from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-demand-step'
 
 export interface StepRef {
   validate: () => Promise<boolean>
@@ -33,13 +36,7 @@ export const StepDemand = forwardRef<StepRef>((_, ref) => {
 
   useImperativeHandle(ref, () => ({
     validate: async () => {
-      return await trigger([
-        'origin',
-        'contactChannel',
-        'legalAreaId',
-        'legalTopicId',
-        'urgency',
-      ])
+      return await trigger(['origin', 'contactChannel', 'urgency'])
     },
   }))
 
@@ -108,7 +105,8 @@ export const StepDemand = forwardRef<StepRef>((_, ref) => {
       <div className='grid grid-cols-3 gap-4'>
         <div className='flex flex-col gap-1.5'>
           <Label htmlFor='legalAreaId'>
-            Área jurídica <span className='text-destructive'>*</span>
+            Área jurídica{' '}
+            <span className='font-normal text-muted-foreground'>(opcional)</span>
           </Label>
           <Controller
             name='legalAreaId'
@@ -129,6 +127,7 @@ export const StepDemand = forwardRef<StepRef>((_, ref) => {
                   />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={NO_LEGAL_AREA_VALUE}>Nenhuma área</SelectItem>
                   {legalAreas.map((area) => (
                     <SelectItem key={area.id} value={area.id}>
                       {area.name}
@@ -146,7 +145,8 @@ export const StepDemand = forwardRef<StepRef>((_, ref) => {
         </div>
         <div className='flex flex-col gap-1.5'>
           <Label htmlFor='legalTopicId'>
-            Tema jurídico <span className='text-destructive'>*</span>
+            Tema jurídico{' '}
+            <span className='font-normal text-muted-foreground'>(opcional)</span>
           </Label>
           <Controller
             name='legalTopicId'
