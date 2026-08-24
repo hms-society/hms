@@ -265,11 +265,10 @@ With explicit authorization to commit, push, and publish, conclusion:
 2. verifies generated artifacts, migrations, design evidence, and documentation;
 3. invokes `commit-code` for intentional scoped commits;
 4. invokes `create-pr` whenever the current delivery PR is absent or stale;
-5. requests the repository-required `@codex review` after publication;
-6. waits for every applicable GitHub Actions check on the current PR head SHA;
-7. routes failures immediately through implementation or amendment and repeats publication/CI;
-8. records workflow, result, URL, and tested SHA in Evaluation;
-9. sets Spec, Plan, and Evaluation to `completed` only after current-head CI passes and blocking
+5. waits for every applicable GitHub Actions check on the current PR head SHA;
+6. routes failures immediately through implementation or amendment and repeats publication/CI;
+7. records workflow, result, URL, and tested SHA in Evaluation;
+8. sets Spec, Plan, and Evaluation to `completed` only after current-head CI passes and blocking
    review conversations are resolved.
 
 Do not alter Jira status or Confluence content automatically. Apply authorized factual updates

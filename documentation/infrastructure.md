@@ -102,6 +102,21 @@ Meta Cloud API webhook
 * **Controlled tools:** The AI does not access the database, storage, or service role directly; it uses specific tools exposed by the back-end.
 * **NestJS feature AI modules:** Intermediate layers expose Core workflow interfaces through injection tokens while keeping concrete Mastra agents, tools, and workflows internal.
 
+### Hermes AI Agents and Composio
+
+* **Hermes:** AI agent service deployed on Coolify as a Docker Compose service for
+  HMS project assistance and automated pull-request code review.
+* **`code-reviewer` profile:** Technical reviewer for HMS pull requests. It reviews
+  changed application and package code, reports actionable defects, and publishes
+  inline GitHub comments through Composio.
+* **`vera` profile:** HMS project assistant with verified context from the monorepo,
+  GitHub, Jira, and Confluence. It supports architecture, requirements,
+  implementation, testing, and delivery traceability.
+* **Composio integrations:** The profiles use Composio for the HMS-connected
+  applications: GitHub, Supabase, Google Drive, Jira, and Confluence.
+* **Deployment boundary:** Hermes is an operational assistant and review service;
+  it does not replace the NestJS application, domain packages, or repository CI.
+
 ### WhatsApp
 
 * **Meta Cloud API:** Official WhatsApp integration used only for automatic messages and receiving documents.
@@ -231,7 +246,7 @@ docker-compose.yml
 ### Staging and Production
 
 * **Managed Supabase in São Paulo:** Auth, PostgreSQL, and Storage.
-* **Coolify:** Deploys the server and web app. WhatsApp is consumed as a managed Meta Cloud API.
+* **Coolify:** Deploys the server and web app. WhatsApp is consumed as a managed Meta Cloud API. Hermes is also deployed on Coolify through a Docker Compose service, with the `code-reviewer` and `vera` profiles connected to the HMS applications through Composio.
 * **Hostinger VPS:** Main server for Coolify.
 * **Cloudflare:** DNS, proxy, TLS, basic WAF, and domain protection.
 * **Coolify integrated Traefik:** Internal reverse proxy for containers.
