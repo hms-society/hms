@@ -47,7 +47,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     const description = changes.description.trim()
     const content = changes.content ?? current.content
     const variables = changes.variables ?? current.variables
-    
+
     if (!name) {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O nome do modelo é obrigatório.',
@@ -80,7 +80,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),
     }
-    
+
     const updated = await this.specificationsRepository.replaceConfiguration(
       documentSpecificationId,
       normalizedChanges,

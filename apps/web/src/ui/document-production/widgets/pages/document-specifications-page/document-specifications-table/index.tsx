@@ -29,7 +29,10 @@ const getClassificationStyle = (classification?: string) => {
     case 'Cliente':
       return { className: 'border-blue-500 bg-blue-50 text-blue-700', icon: 'user' }
     case 'Parceiro liberado':
-      return { className: 'border-purple-500 bg-purple-50 text-purple-700', icon: 'users' }
+      return {
+        className: 'border-purple-500 bg-purple-50 text-purple-700',
+        icon: 'users',
+      }
     case 'Interno':
     default:
       return { className: 'border-gray-300 bg-gray-50 text-gray-700', icon: 'building' }
@@ -67,14 +70,17 @@ export const DocumentSpecificationsTable = ({
                   {item.description}
                 </div>
               </TableCell>
-              
+
               <TableCell>
                 <DocumentSpecificationsApplication item={item} />
               </TableCell>
-              
+
               <TableCell>
-                <Badge variant="outline" className={`gap-1 whitespace-nowrap ${badgeStyle.className}`}>
-                  <Icon name={badgeStyle.icon as any} className="h-3 w-3" />
+                <Badge
+                  variant='outline'
+                  className={`gap-1 whitespace-nowrap ${badgeStyle.className}`}
+                >
+                  <Icon name={badgeStyle.icon as any} className='h-3 w-3' />
                   {item.accessClassification ?? 'Interno'}
                 </Badge>
               </TableCell>
@@ -85,7 +91,7 @@ export const DocumentSpecificationsTable = ({
                   {item.status === 'available' ? 'Disponível' : 'Indisponível'}
                 </Badge>
               </TableCell>
-              
+
               <TableCell className='text-right'>
                 <div className='flex items-center justify-end gap-2'>
                   <Button

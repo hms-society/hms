@@ -45,12 +45,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: '  Novo nome ',
         description: ' Nova descrição ',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
       },
     })
 
@@ -59,6 +61,7 @@ describe('Update Document Specification Configuration Use Case', () => {
       description: 'Nova descrição',
       status: 'available',
       application: specification.application,
+      accessClassification: 'Interno',
     })
     expect(repository.replaceTemplate).not.toHaveBeenCalled()
   })
@@ -78,12 +81,14 @@ describe('Update Document Specification Configuration Use Case', () => {
         repository,
         catalogProvider,
       ).execute({
+        userId: 'user-123',
         documentSpecificationId: specification.id,
         changes: {
           name: 'Nome',
           description: 'Descrição',
           status: 'available',
           application,
+          accessClassification: 'Interno',
         },
       }),
     ).rejects.toBeInstanceOf(InvalidDocumentTemplateError)
@@ -116,12 +121,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
         content,
         variables,
       },
@@ -132,6 +139,7 @@ describe('Update Document Specification Configuration Use Case', () => {
       description: '',
       status: 'available',
       application: specification.application,
+      accessClassification: 'Interno',
       content,
       variables,
     })
@@ -162,12 +170,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
         content,
         variables,
       },
@@ -191,12 +201,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'unavailable',
         application: specification.application,
+        accessClassification: 'Interno',
       },
     })
 
@@ -224,12 +236,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'unavailable',
         application: specification.application,
+        accessClassification: 'Interno',
         content: specification.content,
         variables: specification.variables,
       },
@@ -256,11 +270,13 @@ describe('Update Document Specification Configuration Use Case', () => {
         repository,
         catalogProvider,
       ).execute({
+        userId: 'user-123',
         documentSpecificationId: specification.id,
         changes: {
           name: 'Nome',
           description: 'Descrição',
           status: 'unavailable',
+          accessClassification: 'Interno',
           application: {
             scope: 'legal_context',
             moment: 'consultation',
@@ -280,11 +296,13 @@ describe('Update Document Specification Configuration Use Case', () => {
         repository,
         catalogProvider,
       ).execute({
+        userId: 'user-123',
         documentSpecificationId: 'missing',
         changes: {
           name: 'Nome',
           description: 'Descrição',
           status: 'unavailable',
+          accessClassification: 'Interno',
           application: {
             scope: 'global',
             moment: 'consultation',

@@ -22,7 +22,7 @@ export const documentSpecificationModel = pgTable(
       .defaultNow()
       .notNull(),
   },
-  
+
   (table) => [
     check(
       'document_specifications_moment_check',
@@ -36,7 +36,7 @@ export const documentSpecificationModel = pgTable(
       'document_specifications_status_check',
       sql`${table.status} in ('available', 'unavailable')`,
     ),
-    
+
     check(
       'document_specifications_access_classification_check',
       sql`${table.accessClassification} in ('Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado')`,
@@ -64,30 +64,14 @@ export const documentSpecificationAuditLogModel = pgTable(
     documentSpecificationId: uuid('document_specification_id')
       .notNull()
       .references(() => documentSpecificationModel.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').notNull(), 
-    action: text('action').notNull(), 
-    previousValue: text('previous_value'), 
-    newValue: text('new_value'), 
-    receptor: text('receptor'), 
-    
+    userId: uuid('user_id').notNull(),
+    action: text('action').notNull(),
+    previousValue: text('previous_value'),
+    newValue: text('new_value'),
+    receptor: text('receptor'),
+
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
-  }
-)
-
-export const externalAccessLogModel = pgTable(
-  'external_access_logs',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    documentSpecificationId: uuid('document_specification_id')
-      .notNull()
-      .references(() => documentSpecificationModel.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').notNull(),
-    denialReason: text('denial_reason').notNull(), 
-    
-    attemptedAt: timestamp('attempted_at', { withTimezone: true, mode: 'date' })
-      .defaultNow()
-      .notNull(),
-  }
+  },
 )

@@ -83,10 +83,10 @@ export class UpdateDocumentSpecificationConfigurationController {
     @Req() req: { user: { id: string } },
   ): Promise<DocumentSpecificationResponseDto> {
     return this.useCase
-      .execute({ 
-        documentSpecificationId, 
-        changes: body, 
-        userId: req.user.id 
+      .execute({
+        documentSpecificationId,
+        changes: body,
+        userId: req.user.id,
       })
       .then(DocumentSpecificationResponseDto.fromDomain)
   }
