@@ -79,6 +79,7 @@ async function bootstrap() {
         seedPassword,
       )
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+    const kauanClient = identitySeed.clients.find(({ email }) => email === 'kauan@hms.br')
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
     const attendant = identitySeed.collaborators.find(
       ({ profile }) => profile === 'attendant',
@@ -94,6 +95,8 @@ async function bootstrap() {
     const intakeSeed = await app.get(IntakeSeeder).run({
       clientIds: identitySeed.clients.map(({ id }) => id),
       documentProductionClientId: client.id,
+      kauanClientId: kauanClient?.id,
+      lawyerId: lawyer.id,
       responsibleId: attendant.id,
       actorId: actor.id,
       legalAreaId: legalArea.id,

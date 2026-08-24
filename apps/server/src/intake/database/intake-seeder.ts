@@ -10,6 +10,8 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 export type IntakeSeedReferences = {
   readonly clientIds: readonly string[]
   readonly documentProductionClientId: string
+  readonly kauanClientId?: string
+  readonly lawyerId?: string
   readonly responsibleId: string
   readonly actorId: string
   readonly legalAreaId: string
@@ -53,8 +55,29 @@ export class IntakeSeeder {
         'The client needs representation to review and negotiate a residential lease agreement.',
       status: IntakeStatus.ConsultationScheduled,
     })
+
+    const kauanIntake = references.kauanClientId
+      ? this.createIntake({
+          clientId: references.kauanClientId,
+          responsibleId: references.lawyerId ?? references.responsibleId,
+          createdBy: references.actorId,
+          updatedBy: references.actorId,
+          origin: 'direct',
+          contactChannel: 'whatsapp',
+          legalAreaId: references.legalAreaId,
+          legalTopicId: references.legalTopicId,
+          urgency: 'high',
+          demandNotes: 'Atendimento via WhatsApp - Cliente Kauan.',
+          status: IntakeStatus.ConsultationScheduled,
+        })
+      : null
+
     const additionalIntakes = references.clientIds
-      .filter((clientId) => clientId !== references.documentProductionClientId)
+      .filter(
+        (clientId) =>
+          clientId !== references.documentProductionClientId &&
+          clientId !== references.kauanClientId,
+      )
       .flatMap((clientId, index) => {
         if (index === 0) {
           return [
@@ -126,7 +149,11 @@ export class IntakeSeeder {
         ]
       })
 
-    const intakes = await this.seed([documentProductionIntake, ...additionalIntakes])
+    const intakesToSeed = [documentProductionIntake, ...additionalIntakes]
+    if (kauanIntake) {
+      intakesToSeed.push(kauanIntake)
+    }
+    const intakes = await this.seed(intakesToSeed)
     const createdDocumentProductionIntake = intakes.find(
       ({ clientId, status }) =>
         clientId === references.documentProductionClientId &&
