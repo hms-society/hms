@@ -98,9 +98,7 @@ conclusion automatically after it returns evaluation to `ready`.
    proceed to the final CI gate before it returns the current PR metadata.
 8. Invoke `create-pr` for the final publication whenever the branch was newly committed or
    the PR needs any update; reuse the existing delivery PR and never create a duplicate.
-9. After publication, run `gh pr comment <number> --body "@codex review"` using the actual PR
-   number, then record the request in Evaluation.
-10. Record the branch and PR URL in the delivery record; update
+9. Record the branch and PR URL in the delivery record; update
    `evaluation.md` only when the operational ledger needs the reference.
 
 ## Final PR CI Quality Gate

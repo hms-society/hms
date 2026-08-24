@@ -216,9 +216,7 @@ For a bug fix, include the evidence-based cause and correction.
 
 ## Publish and return
 
-Push the prepared branch, create or update the PR, and add the exact comment
-`@codex review` when it has not already been requested for the current delivery state.
-Then obtain the actual delivery metadata:
+Push the prepared branch and create or update the PR. Then obtain the actual delivery metadata:
 
 ```bash
 gh pr view <number> --json number,url,headRefName,baseRefName,commits,statusCheckRollup
