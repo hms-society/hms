@@ -46,9 +46,7 @@ if (
     `[ngrok] Starting tunnel with static domain: ${ngrokDomain.trim()} on port ${port}...`,
   )
 } else {
-  console.log(
-    `[ngrok] Starting standard tunnel on port ${port}...`,
-  )
+  console.log(`[ngrok] Starting standard tunnel on port ${port}...`)
 }
 
 args.push(port)
