@@ -192,6 +192,7 @@ jobs:
                 "Before reporting a finding, list existing review comments for this pull request through Composio and deduplicate already-reported issues. " +
                 "Every finding must point to an added RIGHT-side line listed in CHANGED_RIGHT_SIDE_LINES. " +
                 "For each surviving finding, publish an inline GitHub review comment through Composio using the exact path, RIGHT-side line, HEAD SHA, severity, title, and body. " +
+                "Start every published inline comment with its rounded severity badge followed by the bold title: P1 uses `![P1](https://img.shields.io/badge/prioridade-P1-d73a4a?style=flat) **<title>**`, P2 uses `![P2](https://img.shields.io/badge/prioridade-P2-f57c00?style=flat) **<title>**`, and P3 uses `![P3](https://img.shields.io/badge/prioridade-P3-d4a72c?style=flat) **<title>**`; put the body after a blank line and never use a plain `[P1]`, `[P2]`, or `[P3]` prefix. " +
                 "Only return a finding after its Composio publication succeeds. " +
                 "Return exactly one JSON object with no Markdown fences using this schema: " +
                 "{\"scope\":\"repository\",\"head_sha\":string,\"summary\":string,\"findings\":[{\"path\":string,\"line\":positive_integer,\"severity\":\"P1\"|\"P2\"|\"P3\",\"title\":string,\"body\":string}]}. " +
