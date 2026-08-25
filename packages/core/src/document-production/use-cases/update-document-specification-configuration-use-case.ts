@@ -47,21 +47,24 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     const description = changes.description.trim()
     const content = changes.content ?? current.content
     const variables = changes.variables ?? current.variables
+    const status = changes.status ?? current.status
 
     if (!name) {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O nome do modelo é obrigatório.',
       )
     }
-    if (changes.status !== 'available' && changes.status !== 'unavailable') {
+
+    if (status !== 'available' && status !== 'unavailable') {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O status do modelo de documento é inválido.',
       )
     }
-    const isFirstTimeEnabling =
-      current.status !== 'available' && changes.status === 'available'
+
+    const isFirstTimeEnabling = current.status !== 'available' && status === 'available'
+
     if (
-      changes.status === 'available' ||
+      status === 'available' ||
       (this.hasText(content) &&
         (changes.content !== undefined || changes.variables !== undefined))
     ) {
@@ -77,8 +80,7 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     const normalizedChanges: DocumentSpecificationConfigurationUpdate = {
       name,
       description,
-      status: changes.status,
-      // Preserva a classificação atual se não for enviada na requisição PATCH
+      status,
       accessClassification: changes.accessClassification ?? oldClassification,
       application,
       ...(changes.content !== undefined ? { content } : {}),
