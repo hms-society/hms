@@ -22,6 +22,9 @@ import {
 import { PgTransaction } from 'drizzle-orm/pg-core'
 
 import {
+  documentGenerationModel,
+  documentModel,
+  documentPackageModel,
   documentSpecificationLegalAreaModel,
   documentSpecificationLegalTopicModel,
   documentSpecificationModel,
@@ -275,6 +278,13 @@ export class DrizzleDocumentSpecificationsRepository
   }
 
   async removeAll() {
+    await this.database.delete(packageDocumentModel)
+    await this.database.delete(documentPackageModel)
+    await this.database.delete(documentVersionModel)
+    await this.database.delete(documentModel)
+    await this.database.delete(documentGenerationModel)
+    await this.database.delete(documentSpecificationLegalTopicModel)
+    await this.database.delete(documentSpecificationLegalAreaModel)
     await this.database.delete(documentSpecificationModel)
   }
 
