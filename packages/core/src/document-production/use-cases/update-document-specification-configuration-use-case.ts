@@ -72,35 +72,38 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       await this.validateCatalog(application)
     }
 
+    const oldClassification = (current as any).accessClassification ?? 'Interno'
+
     const normalizedChanges: DocumentSpecificationConfigurationUpdate = {
       name,
       description,
       status: changes.status,
-      accessClassification: changes.accessClassification,
+      // Preserva a classificação atual se não for enviada na requisição PATCH
+      accessClassification: changes.accessClassification ?? oldClassification,
       application,
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),
     }
 
+    const newClassification = normalizedChanges.accessClassification
+
+    const auditLogData =
+      newClassification && newClassification !== oldClassification
+        ? {
+            userId,
+            action: 'CLASSIFICATION_CHANGED',
+            previousValue: oldClassification,
+            newValue: newClassification,
+          }
+        : undefined
+
     const updated = await this.specificationsRepository.replaceConfiguration(
       documentSpecificationId,
       normalizedChanges,
+      auditLogData,
     )
 
     if (!updated) throw new DocumentSpecificationNotFoundError(documentSpecificationId)
-
-    const oldClassification = (current as any).accessClassification ?? 'Interno'
-    const newClassification = normalizedChanges.accessClassification
-
-    if (newClassification && newClassification !== oldClassification) {
-      await this.specificationsRepository.registerAuditLog({
-        documentSpecificationId,
-        userId,
-        action: 'CLASSIFICATION_CHANGED',
-        previousValue: oldClassification,
-        newValue: newClassification,
-      })
-    }
 
     return updated
   }

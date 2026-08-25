@@ -219,10 +219,15 @@ export class DrizzleDocumentSpecificationsRepository
 
     return record ? this.toDomain(this.database, record) : undefined
   }
-
   async replaceConfiguration(
     documentSpecificationId: string,
     changes: DocumentSpecificationConfigurationUpdate,
+    auditLog?: {
+      userId: string
+      action: string
+      previousValue: string
+      newValue: string
+    },
   ) {
     return this.database.transaction(async (transaction) => {
       const [record] = await transaction
@@ -246,6 +251,15 @@ export class DrizzleDocumentSpecificationsRepository
       if (!record) return undefined
 
       await this.replaceAssociations(transaction, record.id, changes.application)
+      if (auditLog) {
+        await transaction.insert(documentSpecificationAuditLogModel).values({
+          documentSpecificationId: record.id,
+          userId: auditLog.userId,
+          action: auditLog.action,
+          previousValue: auditLog.previousValue,
+          newValue: auditLog.newValue,
+        })
+      }
 
       return this.toDomain(transaction, record)
     })

@@ -19,6 +19,12 @@ export interface DocumentSpecificationsRepository {
   replaceConfiguration(
     documentSpecificationId: string,
     changes: DocumentSpecificationConfigurationUpdate,
+    auditLog?: {
+      userId: string
+      action: string
+      previousValue: string
+      newValue: string
+    },
   ): Promise<DocumentSpecification | undefined>
   replaceTemplate(
     documentSpecificationId: string,
