@@ -29,6 +29,8 @@ import {
   documentSpecificationLegalTopicModel,
   documentSpecificationModel,
   documentSpecificationAuditLogModel,
+  packageDocumentModel,
+  documentVersionModel,
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
