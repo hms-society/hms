@@ -56,13 +56,17 @@ describe('Update Document Specification Configuration Use Case', () => {
       },
     })
 
-    expect(repository.replaceConfiguration).toHaveBeenCalledWith(specification.id, {
-      name: 'Novo nome',
-      description: 'Nova descrição',
-      status: 'available',
-      application: specification.application,
-      accessClassification: 'Interno',
-    })
+    expect(repository.replaceConfiguration).toHaveBeenCalledWith(
+      specification.id,
+      {
+        name: 'Novo nome',
+        description: 'Nova descrição',
+        status: 'available',
+        application: specification.application,
+        accessClassification: 'Interno',
+      },
+      undefined,
+    )
     expect(repository.replaceTemplate).not.toHaveBeenCalled()
   })
 
@@ -135,15 +139,19 @@ describe('Update Document Specification Configuration Use Case', () => {
       },
     })
 
-    expect(repository.replaceConfiguration).toHaveBeenCalledWith(specification.id, {
-      name: 'Nome',
-      description: '',
-      status: 'available',
-      application: specification.application,
-      accessClassification: 'Interno',
-      content,
-      variables,
-    })
+    expect(repository.replaceConfiguration).toHaveBeenCalledWith(
+      specification.id,
+      {
+        name: 'Nome',
+        description: '',
+        status: 'available',
+        application: specification.application,
+        accessClassification: 'Interno',
+        content,
+        variables,
+      },
+      undefined,
+    )
   })
 
   it('preserves the system source when a variable receives an edited technical name', async () => {
@@ -187,6 +195,7 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ content, variables }),
+      undefined,
     )
   })
 
@@ -216,6 +225,7 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ description: '' }),
+      undefined,
     )
   })
 
@@ -253,6 +263,7 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ status: 'unavailable', content: specification.content }),
+      undefined,
     )
   })
 
