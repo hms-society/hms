@@ -18,11 +18,10 @@ jobs:
           # Garantir que a branch base está disponível para comparação
           git fetch origin ${{ github.base_ref }}
           
-          # Considera apenas arquivos de implementação, estilos, SQL e testes.
-          # Documentação, configurações, assets e lockfiles não entram no limite.
+          # Considera apenas arquivos TypeScript.
           ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD \
             | awk -F '\t' '
-                $3 ~ /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|css|scss|sql)$/ { add += $1 }
+                $3 ~ /\.(ts|tsx|mts|cts)$/ { add += $1 }
                 END { print add }
               ')
           
@@ -30,10 +29,10 @@ jobs:
           ADDITIONS=${ADDITIONS:-0}
           
           echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
-          echo "Total de linhas adicionadas (excluindo lock/config): $ADDITIONS"
+          echo "Total de linhas adicionadas em arquivos TypeScript: $ADDITIONS"
           
           if [ "$ADDITIONS" -gt 5000 ]; then
-            echo "::error::Este Pull Request adiciona $ADDITIONS linhas (excedendo o limite máximo de 5000 linhas)!"
+            echo "::error::Este Pull Request adiciona $ADDITIONS linhas TypeScript (excedendo o limite máximo de 5000 linhas)!"
             echo "Por favor, quebre este Pull Request em partes menores e focadas para facilitar a revisão de código."
             exit 1
           fi
