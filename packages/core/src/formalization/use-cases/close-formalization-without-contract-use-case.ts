@@ -3,7 +3,6 @@ import type { Formalization } from '../domain/entities'
 import {
   FormalizationNotFoundError,
   FormalizationStateConflictError,
-  FormalizationVersionConflictError,
 } from '../domain/errors'
 import { FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
@@ -32,30 +31,25 @@ export class CloseFormalizationWithoutContractUseCase
     const formalization = await this.formalizationsRepository.findById(request.formalizationId)
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    if (request.intakeId !== formalization.intakeId) {
+      throw new FormalizationStateConflictError(
+        'O Intake informado não pertence à formalização autorizada.',
+      )
+    }
     if (formalization.status === FormalizationStatus.Cancelled) return formalization
     if (formalization.status !== FormalizationStatus.InProgress) {
       throw new FormalizationStateConflictError()
     }
 
-    const intakeRequest: CloseFormalizationIntakeRequest = {
-      intakeId: request.intakeId,
+    return this.intakeClosureService.closeWithoutContract({
+      formalizationId: formalization.id,
+      intakeId: formalization.intakeId,
       actorId: request.actorId,
       reason: request.reason,
       notes: request.notes,
-      expectedVersion: request.expectedVersion,
-    }
-    await this.intakeClosureService.closeWithoutContract(intakeRequest)
-    const now = this.datetimeProvider.now()
-    const cancelled = await this.formalizationsRepository.replace({
-      formalizationId: formalization.id,
-      expectedVersion: request.expectedFormalizationVersion,
-      changes: {
-        status: FormalizationStatus.Cancelled,
-        cancelledAt: now,
-        cancelledByCollaboratorId: request.actorId,
-      },
+      expectedIntakeVersion: request.expectedVersion,
+      expectedFormalizationVersion: request.expectedFormalizationVersion,
+      cancelledAt: this.datetimeProvider.now(),
     })
-    if (!cancelled) throw new FormalizationVersionConflictError()
-    return cancelled
   }
 }
