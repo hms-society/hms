@@ -76,6 +76,8 @@
       "!**/routeTree.gen.ts",
       "!**/dist",
       "!**/.output",
+      "!documentation/.obsidian",
+      "!documentation/HMS Memory",
       "!**/playwright-report",
       "!**/test-results",
       "!volumes"
