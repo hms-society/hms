@@ -1,6 +1,6 @@
 import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
 import { ValidateDynamicFormAnswersUseCase } from '../../shared/use-cases'
-import type { DynamicFormAnswer } from '../../shared/domain/structures'
+import type { DynamicFormAnswer, DynamicFormAnswerValue } from '../../shared/domain/structures'
 import type { Formalization } from '../domain/entities'
 import {
   FormalizationContractFormValidationError,
@@ -49,7 +49,10 @@ export class CloseFormalizationContractFormUseCase
       throw new FormalizationContractFormValidationError(validation.issues)
     }
 
-    const hasChanged = JSON.stringify(formalization.contractFormAnswers) !== JSON.stringify(validation.answers)
+    const hasChanged = !this.answersEqual(
+      formalization.contractFormAnswers,
+      validation.answers,
+    )
     const contractFormRevision = formalization.contractFormRevision === 0
       ? 1
       : hasChanged
@@ -76,5 +79,39 @@ export class CloseFormalizationContractFormUseCase
     })
     if (!updated) throw new FormalizationVersionConflictError()
     return updated
+  }
+
+  private answersEqual(
+    first: readonly DynamicFormAnswer[],
+    second: readonly DynamicFormAnswer[],
+  ): boolean {
+    if (first.length !== second.length) return false
+
+    const firstByFieldId = new Map(first.map((answer) => [answer.fieldId, answer.value]))
+    const secondByFieldId = new Map(second.map((answer) => [answer.fieldId, answer.value]))
+    if (firstByFieldId.size !== first.length || secondByFieldId.size !== second.length) {
+      return false
+    }
+
+    return [...firstByFieldId.keys()].sort().every((fieldId) => {
+      const firstValue = firstByFieldId.get(fieldId)
+      const secondValue = secondByFieldId.get(fieldId)
+      return secondByFieldId.has(fieldId) && this.valuesEqual(firstValue, secondValue)
+    })
+  }
+
+  private valuesEqual(
+    first: DynamicFormAnswerValue | undefined,
+    second: DynamicFormAnswerValue | undefined,
+  ): boolean {
+    if (Array.isArray(first) || Array.isArray(second)) {
+      if (!Array.isArray(first) || !Array.isArray(second) || first.length !== second.length) {
+        return false
+      }
+      const firstValues = [...first].sort()
+      const secondValues = [...second].sort()
+      return firstValues.every((value, index) => value === secondValues[index])
+    }
+    return first === second
   }
 }

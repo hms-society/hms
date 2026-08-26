@@ -22,7 +22,7 @@ describe('Close Formalization Without Contract Use Case', () => {
     const cancelled = fakeFormalization({ ...formalization, status: 'cancelled' })
     const now = new Date('2026-08-24T14:00:00.000Z')
     repository.findById.mockResolvedValue(formalization)
-    repository.replace.mockResolvedValue(cancelled)
+    closureService.closeWithoutContract.mockResolvedValue(cancelled)
     datetimeProvider.now.mockReturnValue(now)
 
     await expect(
@@ -36,13 +36,51 @@ describe('Close Formalization Without Contract Use Case', () => {
       }),
     ).resolves.toBe(cancelled)
     expect(closureService.closeWithoutContract).toHaveBeenCalledWith(expect.objectContaining({
+      formalizationId: formalization.id,
       intakeId: formalization.intakeId,
-      expectedVersion: 3,
+      actorId: formalization.assignedLawyerId,
+      expectedIntakeVersion: 3,
+      expectedFormalizationVersion: formalization.version,
+      cancelledAt: now,
     }))
-    expect(repository.replace).toHaveBeenCalledWith(expect.objectContaining({
-      expectedVersion: formalization.version,
-      changes: expect.objectContaining({ status: 'cancelled', cancelledAt: now }),
-    }))
+    expect(repository.replace).not.toHaveBeenCalled()
+  })
+
+  it('rejects an Intake mismatch before invoking the closure boundary', async () => {
+    const formalization = fakeFormalization()
+    repository.findById.mockResolvedValue(formalization)
+
+    await expect(
+      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+        formalizationId: formalization.id,
+        intakeId: 'another-intake',
+        actorId: formalization.assignedLawyerId,
+        reason: 'client_withdrew',
+        expectedVersion: 3,
+        expectedFormalizationVersion: formalization.version,
+      }),
+    ).rejects.toThrow('não pertence à formalização autorizada')
+    expect(closureService.closeWithoutContract).not.toHaveBeenCalled()
+    expect(repository.replace).not.toHaveBeenCalled()
+  })
+
+  it('does not perform a second persistence step when the atomic closure fails', async () => {
+    const formalization = fakeFormalization()
+    const conflict = new Error('closure CAS conflict')
+    repository.findById.mockResolvedValue(formalization)
+    closureService.closeWithoutContract.mockRejectedValue(conflict)
+
+    await expect(
+      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+        formalizationId: formalization.id,
+        intakeId: formalization.intakeId,
+        actorId: formalization.assignedLawyerId,
+        reason: 'client_withdrew',
+        expectedVersion: 3,
+        expectedFormalizationVersion: formalization.version,
+      }),
+    ).rejects.toBe(conflict)
+    expect(repository.replace).not.toHaveBeenCalled()
   })
 
   it('allows an admin to operate closure and records the admin actor', async () => {
@@ -51,7 +89,7 @@ describe('Close Formalization Without Contract Use Case', () => {
     const cancelled = fakeFormalization({ ...formalization, status: 'cancelled' })
     const now = new Date('2026-08-24T14:00:00.000Z')
     repository.findById.mockResolvedValue(formalization)
-    repository.replace.mockResolvedValue(cancelled)
+    closureService.closeWithoutContract.mockResolvedValue(cancelled)
     datetimeProvider.now.mockReturnValue(now)
 
     await expect(
@@ -68,10 +106,6 @@ describe('Close Formalization Without Contract Use Case', () => {
     expect(closureService.closeWithoutContract).toHaveBeenCalledWith(
       expect.objectContaining({ actorId: adminId }),
     )
-    expect(repository.replace).toHaveBeenCalledWith(
-      expect.objectContaining({
-        changes: expect.objectContaining({ cancelledByCollaboratorId: adminId }),
-      }),
-    )
+    expect(repository.replace).not.toHaveBeenCalled()
   })
 })
