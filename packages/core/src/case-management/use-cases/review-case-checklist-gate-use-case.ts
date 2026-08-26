@@ -37,6 +37,8 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
       throw new LegalCaseNotFoundError()
     }
 
+    this.ensureCaseCanBeReviewed(legalCase)
+
     const remarks = request.remarks?.trim() || undefined
     this.ensureRemarksWhenRequired(request.decision, remarks)
     const status = this.getStatusAfterDecision(request.decision)
@@ -48,14 +50,29 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
         decidedBy: request.decidedBy,
         remarks,
       },
+      expectedStatus: LegalCaseStatus.Documentation,
       status,
     })
 
     if (!reviewedCase) {
-      throw new LegalCaseNotFoundError()
+      throw new CaseChecklistGateReviewError(
+        'O checklist deste caso não pode mais ser revisado.',
+      )
     }
 
     return reviewedCase
+  }
+
+  private ensureCaseCanBeReviewed(legalCase: LegalCase) {
+    if (legalCase.status !== LegalCaseStatus.Documentation) {
+      throw new CaseChecklistGateReviewError(
+        'Revise o checklist apenas enquanto o caso estiver em documentação.',
+      )
+    }
+
+    if (legalCase.checklistGate.decision) {
+      throw new CaseChecklistGateReviewError('O checklist deste caso já foi revisado.')
+    }
   }
 
   private ensureRemarksWhenRequired(
@@ -65,6 +82,18 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     if (decision === CaseChecklistGateDecision.ApprovedWithException && !remarks) {
       throw new CaseChecklistGateReviewError(
         'Informe as ressalvas para aprovar o checklist com exceção.',
+      )
+    }
+
+    if (decision === CaseChecklistGateDecision.BlockedInsufficient && !remarks) {
+      throw new CaseChecklistGateReviewError(
+        'Informe o motivo para bloquear o checklist.',
+      )
+    }
+
+    if (decision === CaseChecklistGateDecision.RejectedOnMerit && !remarks) {
+      throw new CaseChecklistGateReviewError(
+        'Informe o motivo para reprovar o checklist.',
       )
     }
   }

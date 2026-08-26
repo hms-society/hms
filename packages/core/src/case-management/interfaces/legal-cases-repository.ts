@@ -4,6 +4,7 @@ import type { CaseChecklistGate, LegalCaseStatus } from '../domain/structures'
 export type ReviewChecklistGateRepositoryParams = {
   caseId: string
   checklistGate: Pick<CaseChecklistGate, 'decision' | 'decidedBy' | 'remarks'>
+  expectedStatus: LegalCaseStatus
   status: LegalCaseStatus
 }
 

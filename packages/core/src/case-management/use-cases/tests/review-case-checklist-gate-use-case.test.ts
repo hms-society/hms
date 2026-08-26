@@ -54,6 +54,7 @@ describe('Review Case Checklist Gate Use Case', () => {
         decidedBy,
         remarks: undefined,
       },
+      expectedStatus: LegalCaseStatus.Documentation,
       status: LegalCaseStatus.ReadyForLegalProduction,
     })
   })
@@ -94,6 +95,7 @@ describe('Review Case Checklist Gate Use Case', () => {
         decidedBy,
         remarks,
       },
+      expectedStatus: LegalCaseStatus.Documentation,
       status: LegalCaseStatus.ReadyForLegalProduction,
     })
 
@@ -143,8 +145,103 @@ describe('Review Case Checklist Gate Use Case', () => {
         decidedBy,
         remarks,
       },
+      expectedStatus: LegalCaseStatus.Documentation,
       status: LegalCaseStatus.Documentation,
     })
+  })
+
+  it('requires remarks when the checklist is blocked or rejected on merit', async () => {
+    const decidedBy = '00000000-0000-4000-8000-000000000105'
+    const legalCase = LegalCaseFaker.fake()
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.BlockedInsufficient,
+        decidedBy,
+        remarks: ' ',
+      }),
+    ).rejects.toThrow('bloquear')
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.RejectedOnMerit,
+        decidedBy,
+      }),
+    ).rejects.toThrow('reprovar')
+
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('rejects checklist review outside the documentation stage', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      status: LegalCaseStatus.LegalProduction,
+    })
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: '00000000-0000-4000-8000-000000000106',
+      }),
+    ).rejects.toThrow('documentação')
+
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('rejects checklist review when the gate was already decided', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      checklistGate: {
+        decision: CaseChecklistGateDecision.Approved,
+        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
+        decidedBy: '00000000-0000-4000-8000-000000000107',
+        remarks: undefined,
+      },
+    })
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: '00000000-0000-4000-8000-000000000108',
+      }),
+    ).rejects.toThrow('já foi revisado')
+
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('rejects checklist review when the conditional update loses the race', async () => {
+    const legalCase = LegalCaseFaker.fake()
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+    repository.reviewChecklistGate.mockResolvedValue(undefined)
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: '00000000-0000-4000-8000-000000000109',
+      }),
+    ).rejects.toThrow('não pode mais ser revisado')
   })
 
   it('rejects a checklist review for cases outside the collaborator team', async () => {

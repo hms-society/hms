@@ -60,8 +60,8 @@ export const legalCaseModel = pgTable(
     ),
     check('cases_title_not_blank_check', sql`char_length(btrim(${table.title})) > 0`),
     check(
-      'cases_checklist_exception_remarks_check',
-      sql`${table.checklistGateDecision} <> 'approved_with_exception' OR char_length(btrim(${table.checklistGateRemarks})) > 0`,
+      'cases_checklist_reason_remarks_check',
+      sql`${table.checklistGateDecision} NOT IN ('approved_with_exception', 'blocked_insufficient', 'rejected_on_merit') OR (${table.checklistGateRemarks} IS NOT NULL AND char_length(btrim(${table.checklistGateRemarks})) > 0)`,
     ),
     check(
       'cases_updated_after_created_check',

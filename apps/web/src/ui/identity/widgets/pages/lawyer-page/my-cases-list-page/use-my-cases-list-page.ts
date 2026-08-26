@@ -37,6 +37,7 @@ export function useMyCasesListPage() {
     queryKey: ['case-management', 'my-cases'],
     queryFn: async () => {
       const response = await caseManagementService.listMyCases()
+      if (response.isFailure) response.throwError()
       return response.body
     },
   })

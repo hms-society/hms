@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
+import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useMyCasesListPage } from '../use-my-cases-list-page'
@@ -114,6 +115,20 @@ describe('useMyCasesListPage', () => {
     expect(result.current.total).toBe(1)
     expect(result.current.cases[0].clientName).toBe('Cliente HMS Teste')
     expect(result.current.cases[0].displayTeam).toContain('Advogado de desenvolvimento')
+  })
+
+  it('surfaces API failures instead of treating them as an empty list', async () => {
+    caseManagementService.listMyCases.mockResolvedValue(
+      new RestResponse({ statusCode: 500, errorMessage: 'temporary failure' }),
+    )
+
+    const { result } = renderHook(() => useMyCasesListPage(), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => expect(result.current.isCasesError).toBe(true))
+
+    expect(result.current.total).toBe(0)
   })
 })
 

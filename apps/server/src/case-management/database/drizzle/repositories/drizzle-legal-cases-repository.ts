@@ -4,7 +4,7 @@ import type {
   LegalCaseTeamMemberSummary,
 } from '@hms/core/case-management/domain/entities'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import { desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import {
@@ -144,6 +144,7 @@ export class DrizzleLegalCasesRepository
   async reviewChecklistGate({
     caseId,
     checklistGate,
+    expectedStatus,
     status,
   }: Parameters<LegalCasesRepository['reviewChecklistGate']>[0]): ReturnType<
     LegalCasesRepository['reviewChecklistGate']
@@ -158,7 +159,13 @@ export class DrizzleLegalCasesRepository
         status,
         updatedAt: new Date(),
       })
-      .where(eq(legalCaseModel.id, caseId))
+      .where(
+        and(
+          eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.status, expectedStatus),
+          isNull(legalCaseModel.checklistGateDecision),
+        ),
+      )
       .returning()
 
     return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
