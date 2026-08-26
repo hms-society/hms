@@ -160,3 +160,41 @@ exception: `AuthUser` may expose the provider's subject `id` because it represen
 an external authentication identity, not a core aggregate entity. No other
 structure should add a bare `id` field without documenting the same external
 identity rationale.
+
+## Structure mutability is semantic
+
+Structures do not receive `readonly` mechanically. Each structure must express the
+mutability of the value it represents:
+
+- use mutable fields when callers are allowed to assemble, normalize, or update that
+  value in memory;
+- use `readonly` fields when mutation would violate the contract, such as an immutable
+  snapshot, historical record, published event payload, or fixed configuration;
+- use `readonly T[]`, `ReadonlyArray<T>`, tuples with `readonly`, or nested
+  `Readonly<T>` only when nested collection/object mutation must also be prohibited;
+- do not infer deep immutability from a top-level `readonly` property, because
+  TypeScript's `readonly` modifier is shallow;
+- do not add `readonly` merely because a declaration is stored under `structures` or
+  is passed as a use-case request, response, projection, filter, or update shape.
+
+The declaration must make the semantic choice visible. If a structure is intentionally
+immutable, apply `readonly` consistently to every field and nested value covered by
+that guarantee. If it is intentionally mutable, omit `readonly`; do not mix modifiers
+without a field-specific reason.
+
+## Antipatterns to Avoid
+
+### Adding `readonly` to every Structure field
+
+**Prohibited:** treating `readonly` as a directory convention and adding it to every
+field of every type under `domain/structures`.
+
+**Required alternative:** decide mutability from the structure's domain role. Reserve
+`readonly` for contracts that must be immutable and model the required depth explicitly;
+leave ordinary mutable request, update, filter, response, projection, and working-value
+fields without it.
+
+**Validation:** inspect the resulting declaration against its consumers and immutable
+boundary, then run `pnpm --filter @hms/core check-types`. Type checking proves that the
+chosen modifiers are compatible with consumers; the contract review proves that the
+choice matches the domain semantics.

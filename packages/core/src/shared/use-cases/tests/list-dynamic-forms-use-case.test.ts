@@ -57,6 +57,21 @@ describe('ListDynamicFormsUseCase', () => {
 
     expect(forms.map(({ id }) => id)).toEqual(['form-two'])
   })
+
+  it('lists forms from the requested context type', async () => {
+    repository.list.mockResolvedValue([
+      makeForm({ id: 'form-legal', name: 'Ficha jurídica' }),
+      makeForm({
+        id: 'form-formalization',
+        name: 'Ficha de contratação',
+        contextType: 'formalization',
+      }),
+    ])
+
+    const forms = await useCase.execute({ query: { contextType: 'formalization' } })
+
+    expect(forms.map(({ id }) => id)).toEqual(['form-formalization'])
+  })
 })
 
 function makeForm(overrides: {
@@ -65,6 +80,7 @@ function makeForm(overrides: {
   status?: 'available' | 'unavailable'
   legalAreaId?: string
   legalTopicIds?: string[]
+  contextType?: string
 }): DynamicForm {
   return {
     id: overrides.id,
@@ -72,7 +88,7 @@ function makeForm(overrides: {
     status: overrides.status ?? 'available',
     contexts: [
       {
-        type: 'legal',
+        type: overrides.contextType ?? 'legal',
         data: {
           legalAreaId: overrides.legalAreaId ?? 'area-civil',
           legalTopicIds: overrides.legalTopicIds ?? ['topic-contracts'],

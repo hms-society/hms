@@ -134,8 +134,8 @@ flowchart TD
     H -->|No| I["Responsible Builder correction and refreshed evidence"]
     I --> C
     H -->|Yes| J["conclude-spec"]
-    J --> K["commit-code and create-pr"]
-    K --> L["PR CI Quality Gate on current head"]
+    J --> K["commit-code and create-pr for PR set"]
+    K --> L["PR CI Quality Gate on every current PR head"]
     L -->|Failure| M["Implementation correction or Spec amendment"]
     M --> J
     L -->|Pass| N["Spec, Plan, and Evaluation completed"]
@@ -264,10 +264,12 @@ With explicit authorization to commit, push, and publish, conclusion:
 1. runs local closure preflight and final Spec-to-diff conformance;
 2. verifies generated artifacts, migrations, design evidence, and documentation;
 3. invokes `commit-code` for intentional scoped commits;
-4. invokes `create-pr` whenever the current delivery PR is absent or stale;
-5. waits for every applicable GitHub Actions check on the current PR head SHA;
+4. invokes `create-pr` whenever the current delivery PR set is absent or stale; `create-pr`
+   applies the repository's 5,000-added-TypeScript-line limit and splits oversized deliveries
+   only across semantic or explicitly dependent PR slices;
+5. waits for every applicable GitHub Actions check on every current delivery PR head SHA;
 6. routes failures immediately through implementation or amendment and repeats publication/CI;
-7. records workflow, result, URL, and tested SHA in Evaluation;
+7. records each workflow result, URL, PR head SHA and delivery-PR dependency in Evaluation;
 8. sets Spec, Plan, and Evaluation to `completed` only after current-head CI passes and blocking
    review conversations are resolved.
 
