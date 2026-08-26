@@ -388,7 +388,8 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
     { auto: true, scope: 'test' },
   ],
   documentProduction: async ({ page }, use) => {
-    const state: DocumentProductionState = {
+    const formalization = createFormalizationState()
+    const state: DocumentProductionState & { formalization: FormalizationState } = {
       details: structuredClone(documentSpecificationDetails),
       listRequests: 0,
       getRequests: 0,
@@ -396,8 +397,8 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       templatePatchRequests: 0,
       createRequests: 0,
       consultation: createConsultationState(),
+      formalization,
     }
-    const formalization = createFormalizationState()
 
     await page.route(`${DOCUMENT_PRODUCTION_BACKEND}/**`, async (route) => {
       const request = route.request()
@@ -445,7 +446,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       }
 
       if (
-        url.pathname === `/formalizations/by-intake/intake-1/start` &&
+        url.pathname === '/formalizations/by-intake/intake-1/start' &&
         request.method() === 'POST'
       ) {
         formalization.startRequests += 1
@@ -1018,6 +1019,6 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       await route.continue()
     })
 
-    await use({ ...state, formalization })
+    await use(state)
   },
 })
