@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 
+import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProcessWhatsappBatchJob } from '@/document-engine/messaging/inngest/jobs'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-options'
@@ -9,7 +10,7 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
 )
 
 @Module({
-  imports: [SharedMessagingModule],
+  imports: [SharedMessagingModule, DocumentsDatabaseModule],
   providers: [
     ProcessWhatsappBatchJob,
     {
