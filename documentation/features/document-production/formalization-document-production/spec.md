@@ -1,6 +1,6 @@
 ---
 title: Fundação da página de Formalização
-status: completed
+status: open
 revision: 8
 source:
   type: jira-ticket
@@ -16,15 +16,15 @@ scope:
   - apps/web/src
   - apps/web/tests
   - documentation/features/document-production/formalization-document-production
-last_updated_at: 2026-08-25
+last_updated_at: 2026-08-26
 ---
 
 # 1. Context and scope
 
 ## Delivery outcome
 
-Spec revision 8 was implemented across Core, Validation, Server and Web. The
-delivery is published as the dependent PR chain [#89](https://github.com/hms-society/hms/pull/89),
+Spec revision 8 was implemented across Core, Validation, Server and Web and is
+under review-correction verification. The delivery is published as the dependent PR chain [#89](https://github.com/hms-society/hms/pull/89),
 [#90](https://github.com/hms-society/hms/pull/90),
 [#91](https://github.com/hms-society/hms/pull/91) and
 [#92](https://github.com/hms-society/hms/pull/92); all applicable PR CI checks
@@ -87,8 +87,9 @@ moment, but every browser-facing document operation is coupled to Consultation.
   selected documents stale until each has a new version derived from that revision;
   old versions stay in history.
 - `Encerrar sem contratação` is functional, requires the existing Intake closure
-  reason and optional notes, cancels the Formalization and closes the Intake without
-  a contract. It is terminal and retry-safe.
+  reason and optional notes, and atomically cancels the Formalization and closes the
+  linked Intake without a contract. Both transitions use optimistic versions inside
+  one server transaction; it is terminal and retry-safe.
 - Package confirmation requires at least one selected document and, for every
   selected document, a latest version derived from the current form revision whose
   status is `approved` or `rejected`. Historical versions do not independently block.
@@ -199,7 +200,7 @@ and are normative.
 | Purpose/applicability | A definition used here has `formalization_contract` purpose context plus legal area/topic context. Purpose prevents selecting a Consultation form. Options remain definition data, not Core enums. |
 | Fresh document proof | A version is fresh when it or its `sourceDocumentVersionId` ancestry resolves to a generation whose `source.type`/`id` match the Formalization and whose source data has the current `contractFormRevision`. No historical row is mutated to simulate freshness. |
 | Module reads | Intake, Consultation and Identity expose narrow owner-implemented read/command ports. Formalization never imports sibling Drizzle tables/repositories; Document Production consumes only the published source. |
-| Closure convergence | The Formalization use case calls the Intake-owned idempotent close command, then conditionally cancels Formalization. A retry treats an already closed Intake as success and completes the Formalization transition; no external event is emitted before both states converge. |
+| Closure convergence | The Formalization use case calls an Intake-owned closure boundary carrying both aggregate versions. The Server executes the Intake and Formalization CAS updates in one transaction, rolls back both on conflict, and treats an already converged cancellation as idempotent; no external event is emitted before both states converge. |
 | REST errors | Authentication is 401, ownership is 403, absence is 404, optimistic/state conflict is 409 and syntactic/field validation is 400 with stable `issues[{path,message}]`. |
 | UI reuse | Extract a source-neutral Web view model/component/actions. Consultation remains an adapter and keeps its existing behavior; Formalization injects its stricter lock/freshness/confirmation capabilities. |
 | Structure mutability | `Formalization` remains a mutable Entity apart from its inherited identity. `DynamicFormFieldValidation` is readonly because it is fixed definition metadata. `FormalizationDocumentSourceData` is recursively readonly and converts dates to ISO strings because it crosses persistence/messaging as an immutable historical snapshot. No other Structure receives `readonly` by convention. |
@@ -510,7 +511,7 @@ export type FormalizationDocumentSourceData =
 | `packages/core/src/formalization/use-cases/tests` | Create | One focused unit test per named use case plus concurrency/retry, unauthorized admin/lawyer, revision freshness and exact source preservation. |
 | `packages/core/src/formalization/interfaces/formalizations-repository.ts` | Create | `findById`, `findByIntakeId`, atomic `addOrGet`, conditional `replace`, `removeAll`; `addOrGet` returns the winner of unique-Intake races. |
 | `packages/core/src/formalization/interfaces/formalization-source-reader.ts` | Create | Narrow server-side owner projection reads for Intake, completed Consultation, Client, assigned lawyer and applicable purpose/legal form; no persistence types. |
-| `packages/core/src/formalization/interfaces/formalization-intake-closure-service.ts` | Create | Idempotent Intake-owned `closeWithoutContract` command using the existing reason/notes/version contract. |
+| `packages/core/src/formalization/interfaces/formalization-intake-closure-service.ts` | Create | Idempotent Intake-owned `closeWithoutContract` boundary carrying the linked Formalization, closure reason/notes and both expected aggregate versions. |
 | `packages/core/src/formalization/interfaces/formalization-service.ts` | Create | Browser-facing start/get/draft/close/reopen/close-without-contract/confirm and individual document methods matching REST operations below. |
 | `packages/core/src/formalization/interfaces/index.ts` | Create | Export Formalization ports. |
 | `packages/core/src/formalization/domain/entities/index.ts` | Create | Export `Formalization`. |
@@ -638,7 +639,7 @@ migration transaction.
 | `apps/server/src/formalization/rest/dtos` | Create | Response/error DTO directory | Formalization details, document projections and stable field issues; serialize dates without leaking PII |
 | `apps/server/src/formalization/rest/index.ts` | Create | REST barrel | Export controllers/DTOs | Feature composition |
 | `apps/server/src/formalization/provision/formalization-source-reader.ts` | Create | `ServerFormalizationSourceReader` | Implements narrow owner ports through owner-exposed services; no sibling Drizzle model import |
-| `apps/server/src/formalization/provision/formalization-intake-closure-service.ts` | Create | `ServerFormalizationIntakeClosureService` | Delegates to existing Intake close use case; preserves idempotency/version errors |
+| `apps/server/src/formalization/provision/formalization-intake-closure-service.ts` | Create | `ServerFormalizationIntakeClosureService` | Delegates to the transaction-owned closure boundary; preserves idempotency, rollback and version errors |
 | `apps/server/src/formalization/fixtures/formalization-module-fixture.ts` | Create | `FormalizationModuleFixture` | Real DB, auth overrides, broker mock and owner source fixtures |
 | `apps/server/src/formalization/formalization.module.ts` | Create | `FormalizationModule` | Registers database, owner adapters, controllers and existing Document Production dependencies |
 | `apps/server/src/formalization/index.ts` | Create | Module barrel | Exports module only |
@@ -814,3 +815,4 @@ provider is introduced.
 | 6 | 2026-08-25 | in_progress | Added the explicit product decision that administrators may read and operate any Formalization while preserving assigned-lawyer ownership and authenticated audit actors. |
 | 7 | 2026-08-25 | completed | Added persisted replacement of the open Formalization contract-form snapshot, answer clearing, revision reset and two temporary matching seed definitions. |
 | 8 | 2026-08-25 | completed | Made Intake legal-area/topic inheritance explicit for form discovery and closed the delivery after final runtime, visual, reviewer and PR CI evidence. |
+| 8 (reopened) | 2026-08-26 | open | Reopened the unchanged revision 8 implementation for three PR #89 corrections: bind closure to the authorized Intake, make Intake/Formalization closure atomic with retry-safe CAS, and compare normalized answers by deterministic `fieldId` identity. |
