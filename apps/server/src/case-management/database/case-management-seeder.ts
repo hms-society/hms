@@ -49,7 +49,7 @@ export class CaseManagementSeeder {
     }
 
     const legalCases = await this.legalCasesRepository.addMany(
-      this.createLegalCaseSeeds(references.contractedIntakes),
+      this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
     )
 
     const caseMembers = await this.caseMembersRepository.addMany(
@@ -108,14 +108,27 @@ export class CaseManagementSeeder {
     }
 
     return legalCases.flatMap((legalCase, caseIndex) => {
-      const caseLawyerIds = this.pickCollaboratorIds(lawyerIds, caseIndex, 2)
+      const leadLawyerId = lawyerIds[0]
+      const supportingLawyerIds = this.pickCollaboratorIds(
+        lawyerIds.filter((lawyerId) => lawyerId !== leadLawyerId),
+        caseIndex,
+        1,
+      )
 
       const teamMembers = [
-        ...caseLawyerIds.map((collaboratorId, lawyerIndex) => ({
+        {
+          caseId: legalCase.id,
+          collaboratorId: leadLawyerId,
+          role: CaseMemberRole.LeadLawyer,
+          isPrimary: true,
+          assignedAt: legalCase.openedAt,
+          assignedBy: actorId,
+        },
+        ...supportingLawyerIds.map((collaboratorId) => ({
           caseId: legalCase.id,
           collaboratorId,
-          role: lawyerIndex === 0 ? CaseMemberRole.LeadLawyer : CaseMemberRole.Lawyer,
-          isPrimary: lawyerIndex === 0,
+          role: CaseMemberRole.Lawyer,
+          isPrimary: false,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
         })),

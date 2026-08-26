@@ -40,4 +40,40 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     )
     expect(response.body.dossierGate.homologatedAt).toBeUndefined()
   })
+
+  it('rejects approval with exception without remarks', async () => {
+    const legalCase = await fixture.registerLegalCase()
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/checklist-gate`)
+      .send({
+        expectedVersion: legalCase.version,
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        decidedBy: fixture.authUser.id,
+      })
+      .expect(409)
+
+    expect(response.body.message).toBe(
+      'Informe as ressalvas para aprovar o checklist com exceção.',
+    )
+    expect(response.body.statusCode).toBe(409)
+  })
+
+  it('rejects stale checklist gate reviews', async () => {
+    const legalCase = await fixture.registerLegalCase()
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/checklist-gate`)
+      .send({
+        expectedVersion: legalCase.version + 1,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: fixture.authUser.id,
+      })
+      .expect(409)
+
+    expect(response.body.message).toBe(
+      'O caso foi alterado por outro usuário. Atualize a página e tente novamente.',
+    )
+    expect(response.body.statusCode).toBe(409)
+  })
 })

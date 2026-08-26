@@ -28,6 +28,8 @@ export const LawyerCasesListPage = () => {
     handleAreaChange,
     handleSearchChange,
     handleStatusChange,
+    isCasesError,
+    isLoadingCases,
     search,
     status,
     total,
@@ -103,7 +105,19 @@ export const LawyerCasesListPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cases.length === 0 ? (
+            {isLoadingCases ? (
+              <TableRow>
+                <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  Carregando casos...
+                </TableCell>
+              </TableRow>
+            ) : isCasesError ? (
+              <TableRow>
+                <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  Não foi possível carregar os casos.
+                </TableCell>
+              </TableRow>
+            ) : cases.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
                   Nenhum caso encontrado.
