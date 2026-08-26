@@ -1,0 +1,74 @@
+@baseUrl = http://localhost:3333
+@formalizationId = 00000000-0000-4000-8000-000000000701
+@intakeId = 00000000-0000-4000-8000-000000000101
+@documentId = 00000000-0000-4000-8000-000000000201
+@versionId = 00000000-0000-4000-8000-000000000501
+
+### Start or retrieve the assigned-lawyer Formalization
+POST {{baseUrl}}/formalizations/by-intake/{{intakeId}}/start
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Read the Formalization
+GET {{baseUrl}}/formalizations/{{formalizationId}}
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Save a draft
+PATCH {{baseUrl}}/formalizations/{{formalizationId}}/contract-form/draft
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedVersion": 1,
+  "answers": []
+}
+
+### Close the commercial conditions form
+PATCH {{baseUrl}}/formalizations/{{formalizationId}}/contract-form/close
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedVersion": 2,
+  "answers": []
+}
+
+### List available document specifications
+GET {{baseUrl}}/formalizations/{{formalizationId}}/documents/selection
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Request one individual generation
+POST {{baseUrl}}/formalizations/{{formalizationId}}/documents/{{documentId}}/generations
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{}
+
+### Review a document version
+PATCH {{baseUrl}}/formalizations/{{formalizationId}}/document-versions/{{versionId}}/review
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### Confirm the current document set
+PATCH {{baseUrl}}/formalizations/{{formalizationId}}/documents/confirm
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedVersion": 3
+}
+
+### Close without contract
+PATCH {{baseUrl}}/formalizations/{{formalizationId}}/close-without-contract
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedVersion": 3,
+  "expectedIntakeVersion": 2,
+  "reason": "client_withdrew",
+  "notes": ""
+}

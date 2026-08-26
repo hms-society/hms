@@ -11,6 +11,7 @@ import { DOCUMENT_PRODUCTION_INNGEST_FUNCTIONS } from '@/document-production/mes
 import { DocumentsModule } from '@/document-engine/database/documents.module'
 import { DOCUMENT_ENGINE_INNGEST_FUNCTIONS } from '@/document-engine/messaging/document-engine-messaging.module'
 import { IntakeModule } from '@/intake/intake.module'
+import { FormalizationModule } from '@/formalization/formalization.module'
 import { INTAKE_INNGEST_FUNCTIONS } from '@/intake/messaging/intake-messaging.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
@@ -31,6 +32,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
     IdentityModule,
     LegalCatalogModule,
     IntakeModule,
+    FormalizationModule,
     CaseManagementModule,
     CommunicationModule,
     ConsultationModule,
