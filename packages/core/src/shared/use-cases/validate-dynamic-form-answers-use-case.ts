@@ -197,9 +197,7 @@ export class ValidateDynamicFormAnswersUseCase
       return typeof value === 'string' ? value.trim() : value
     }
     if (field.type === 'multiple_selection') {
-      return Array.isArray(value)
-        ? [...new Set(value.filter((item): item is string => typeof item === 'string'))]
-        : value
+      return Array.isArray(value) ? [...new Set(value)] : value
     }
     return value
   }

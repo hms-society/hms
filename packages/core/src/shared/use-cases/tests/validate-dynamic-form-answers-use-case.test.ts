@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { DynamicFormAnswer } from '../../domain'
 import { DynamicFormAnswerValidationMode } from '../../domain/structures'
 import { InvalidDynamicFormDefinitionError } from '../../domain/errors'
 import { fakeDynamicFormSnapshot } from '../../domain/structures/fakers'
@@ -142,6 +143,37 @@ describe('Validate Dynamic Form Answers Use Case', () => {
         { path: 'field:required', message: 'Este campo é obrigatório.' },
       ]),
     )
+  })
+
+  it.each([
+    ['mixed', ['a', 42]],
+    ['only invalid', [42, false]],
+  ])('preserves %s multiple-selection items for validation', async (_caseName, value) => {
+    const snapshot = fakeDynamicFormSnapshot({
+      fields: [
+        {
+          id: 'multi',
+          key: 'multi',
+          label: 'Múltipla',
+          type: 'multiple_selection',
+          position: 0,
+          required: false,
+          options: [{ value: 'a', label: 'A', position: 0 }],
+        },
+      ],
+    })
+    const invalidValue = value as unknown as DynamicFormAnswer['value']
+
+    const result = await new ValidateDynamicFormAnswersUseCase().execute({
+      snapshot,
+      mode: DynamicFormAnswerValidationMode.Draft,
+      answers: [{ fieldId: 'multi', value: invalidValue }],
+    })
+
+    expect(result).toEqual({
+      answers: [{ fieldId: 'multi', value }],
+      issues: [{ path: 'field:multi', message: 'Informe uma lista de opções válida.' }],
+    })
   })
 
   it('rejects malformed definitions before inspecting answers', async () => {
