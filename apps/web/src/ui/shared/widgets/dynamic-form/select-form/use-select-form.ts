@@ -31,6 +31,7 @@ export type UseSelectFormOptions = {
   initialLegalAreaId?: string
   initialLegalTopicId?: string
   initialSelectedFormId?: string
+  contextType?: string
 }
 
 export function useSelectForm({
@@ -38,6 +39,7 @@ export function useSelectForm({
   initialLegalAreaId,
   initialLegalTopicId,
   initialSelectedFormId,
+  contextType,
 }: UseSelectFormOptions) {
   const { dynamicFormService, legalCatalogService } = useRestContext()
   const [search, setSearch] = useState('')
@@ -88,12 +90,13 @@ export function useSelectForm({
     isLoading: isFormsLoading,
     isError: isFormsError,
   } = useQuery({
-    queryKey: ['dynamic-forms', search, selectedArea, selectedTheme],
+    queryKey: ['dynamic-forms', contextType, search, selectedArea, selectedTheme],
     queryFn: async () => {
       const response = await dynamicFormService.listDynamicForms({
         search,
         legalAreaId: selectedArea,
         legalTopicId: selectedTheme,
+        contextType,
       })
 
       if (response.isFailure)
@@ -106,7 +109,9 @@ export function useSelectForm({
 
   const areas = areasData ?? []
   const topics = topicsData ?? []
-  const forms = (formsData ?? []).map((form) => toFormOption(form, areas, topics))
+  const forms = (formsData ?? []).map((form) =>
+    toFormOption(form, areas, topics, contextType),
+  )
 
   useEffect(
     function preserveSelectedFormForContext() {
@@ -169,8 +174,11 @@ function toFormOption(
   form: DynamicForm,
   areas: readonly LegalAreaOption[],
   topics: readonly LegalTopicOption[],
+  contextType?: string,
 ): FormOption {
-  const legalContext = form.contexts.find((context) => context.type === 'legal')
+  const legalContext = form.contexts.find(
+    (context) => context.type === (contextType ?? 'legal'),
+  )
   const legalAreaId = getStringValue(legalContext?.data.legalAreaId)
   const legalTopicIds = getStringArrayValue(legalContext?.data.legalTopicIds)
   const area = areas.find((item) => item.id === legalAreaId)?.name

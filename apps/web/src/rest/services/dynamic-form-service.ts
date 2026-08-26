@@ -5,6 +5,7 @@ export type ListDynamicFormsParams = {
   search?: string
   legalAreaId?: string
   legalTopicId?: string
+  contextType?: string
 }
 
 export const DynamicFormService = (restClient: RestClient) => {
