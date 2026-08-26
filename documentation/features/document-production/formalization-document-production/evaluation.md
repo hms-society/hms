@@ -4,7 +4,7 @@ spec: ./spec.md
 plan: ./plan.md
 spec_revision: 8
 status: completed
-prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 jira_tickets:
   - SCRUM-139
 updated_at: 2026-08-26

@@ -5,7 +5,7 @@ revision: 8
 source:
   type: jira-ticket
   ref: https://plataformahms.atlassian.net/browse/SCRUM-139
-prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 jira_tickets:
   - SCRUM-139
 scope:
@@ -771,8 +771,8 @@ omitted.
 | Authority | Reference | Alignment |
 | --- | --- | --- |
 | Jira | [SCRUM-139](https://plataformahms.atlassian.net/browse/SCRUM-139) | Primary delivery source; batch generation removed and form lifecycle clarified by direct decisions. |
-| Formalization PRD | [PRD Módulo de Formalização](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o) | Version 4 aligns aggregate/lifecycle/access/confirmation ownership and permits fresh latest versions with decision Aprovada or Rejeitada. |
-| Document Production PRD | [PRD Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673/PRD+M+dulo+de+Produ+o+Documental) | Document/version/source ownership and no package-owned confirmation for new Formalization behavior. |
+| Formalization PRD | [PRD Módulo de Formalização](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713) | Version 4 aligns aggregate/lifecycle/access/confirmation ownership and permits fresh latest versions with decision Aprovada or Rejeitada. |
+| Document Production PRD | [PRD Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673) | Document/version/source ownership and no package-owned confirmation for new Formalization behavior. |
 | Repository architecture/modules | `documentation/architecture.md`; `documentation/modules.md` | Formalization owns lifecycle/confirmation; source modules keep their records; Document Production consumes snapshots. Architecture’s DocuSeal reference is stale against the current PRD’s Documenso choice, but signing is outside this Spec. |
 | Design | `documentation/design.md`; [design manifest](design/manifest.md) | Token use, Pencil frames and accepted deviations. |
 

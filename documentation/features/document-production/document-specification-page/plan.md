@@ -3,7 +3,7 @@ spec: ./spec.md
 evaluation: ./evaluation.md
 spec_revision: 3
 status: completed
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 jira_tickets:
   - SCRUM-136
 ---
@@ -72,7 +72,7 @@ Fora de escopo:
 ## Fontes e evidências de descoberta
 
 - Spec canônica: [`spec.md`](./spec.md), revisão 3, `status: open`.
-- PRD canônico: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673), página `2588673`, versão 7, atualizada em 09/08/2026. A seção 11.8 registra o Contract revisado sobre criação, disponibilidade, descrição, salvamento, variáveis, remoção e gates visuais.
+- PRD canônico: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673), página `2588673`, versão 7, atualizada em 09/08/2026. A seção 11.8 registra o Contract revisado sobre criação, disponibilidade, descrição, salvamento, variáveis, remoção e gates visuais.
 - Ticket: [SCRUM-136](https://plataformahms.atlassian.net/browse/SCRUM-136).
 - Design declarado pela Spec: `design/hms.pen#K2Fvp`, `#vBrek`, `#V7lxA`, `#FQtUK` e `#fRdNH`.
 - Tiptap: documentação atual consultada via Context7 em `/ueberdosis/tiptap-docs`, confirmando React `useEditor`/`EditorContent`, `immediatelyRender: false`, JSON e `setContent` com `emitUpdate: false` para sincronização externa.

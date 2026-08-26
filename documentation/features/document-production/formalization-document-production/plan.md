@@ -6,7 +6,7 @@ spec_revision: 8
 evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-139
-prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 updated_at: 2026-08-26
 ---
 
