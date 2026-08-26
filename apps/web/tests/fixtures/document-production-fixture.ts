@@ -446,7 +446,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       }
 
       if (
-        url.pathname === `/formalizations/by-intake/intake-1/start` &&
+        url.pathname === '/formalizations/by-intake/intake-1/start' &&
         request.method() === 'POST'
       ) {
         formalization.startRequests += 1
