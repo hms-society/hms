@@ -14,7 +14,7 @@ const templateContent: DocumentTemplateContent = {
       content: [{ type: 'text', text: 'Conteúdo de teste' }],
     },
   ],
-}
+} as unknown as DocumentTemplateContent
 
 function createSpecification(
   overrides: Partial<DocumentSpecificationCreation> = {},
@@ -26,6 +26,7 @@ function createSpecification(
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
     status: 'unavailable',
+    accessClassification: 'Interno',
     ...overrides,
   }
 }
