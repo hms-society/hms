@@ -44,6 +44,9 @@ export const createDocumentSpecificationSchema = z
     status: z
       .enum(DocumentSpecificationStatus)
       .default(DocumentSpecificationStatus.Available),
+    accessClassification: z
+      .enum(['Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado'])
+      .default('Interno'),
     content: documentTemplateContentSchema,
     variables: z.array(documentTemplateVariableSchema),
   })

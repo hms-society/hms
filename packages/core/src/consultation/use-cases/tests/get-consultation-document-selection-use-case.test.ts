@@ -103,6 +103,7 @@ function createSpecification(
     description: `${name} description`,
     application: { scope: 'global', moment: 'consultation' },
     status: 'available',
+    accessClassification: 'Interno',
   }
 }
 

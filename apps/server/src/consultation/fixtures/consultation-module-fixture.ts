@@ -204,6 +204,7 @@ export class ConsultationModuleFixture {
       {
         name: 'Procuração',
         description: '',
+        accessClassification: 'Interno',
         application: { scope: 'global', moment: 'consultation' },
         content: {
           type: 'doc',

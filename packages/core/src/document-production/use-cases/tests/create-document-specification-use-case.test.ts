@@ -30,6 +30,7 @@ describe('Create Document Specification Use Case', () => {
         scope: 'global',
         moment: 'formalization',
       },
+      accessClassification: 'Interno',
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -49,6 +50,7 @@ describe('Create Document Specification Use Case', () => {
         moment: 'formalization',
       },
       status: 'available',
+      accessClassification: 'Interno',
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -64,6 +66,7 @@ describe('Create Document Specification Use Case', () => {
       description: '',
       application: { scope: 'global', moment: 'consultation' },
       status: 'unavailable',
+      accessClassification: 'Interno',
       content: { type: 'doc', content: [{ type: 'paragraph' }] },
       variables: [],
     })
@@ -78,6 +81,7 @@ describe('Create Document Specification Use Case', () => {
       name: 'Modelo disponível',
       description: '',
       application: { scope: 'global', moment: 'consultation' },
+      accessClassification: 'Interno',
       content: { type: 'doc', content: [{ type: 'paragraph' }] },
       variables: [],
     })
@@ -99,6 +103,7 @@ describe('Create Document Specification Use Case', () => {
       name: 'Modelo',
       description: 'Descrição',
       application,
+      accessClassification: 'Interno',
       content: {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
@@ -120,6 +125,7 @@ describe('Create Document Specification Use Case', () => {
   it('allows an empty description', async () => {
     await new CreateDocumentSpecificationUseCase(repository, catalogProvider).execute({
       name: 'Modelo sem descrição',
+      accessClassification: 'Interno',
       description: '',
       application: {
         scope: 'global',
@@ -144,6 +150,7 @@ describe('Create Document Specification Use Case', () => {
     await expect(
       new CreateDocumentSpecificationUseCase(repository, catalogProvider).execute({
         name: '   ',
+        accessClassification: 'Interno',
         description: 'Descrição',
         application: {
           scope: 'global',

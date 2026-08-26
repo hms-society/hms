@@ -8,8 +8,13 @@ import { DeleteDocumentSpecificationController } from '@/document-production/res
 
 const templateContent: DocumentTemplateContent = {
   type: 'doc',
-  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
-}
+  content: [
+    {
+      type: 'paragraph',
+      content: [{ type: 'text', text: 'Conteúdo de teste' }],
+    },
+  ],
+} as unknown as DocumentTemplateContent
 
 function createSpecification(): DocumentSpecificationCreation {
   return {
@@ -19,6 +24,7 @@ function createSpecification(): DocumentSpecificationCreation {
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
     status: 'available',
+    accessClassification: 'Interno',
   }
 }
 

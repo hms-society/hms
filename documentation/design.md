@@ -22,6 +22,23 @@ colors:
   destructive: "oklch(0.439 0.176 26)"
   destructive-foreground: "oklch(1 0 0)"
 
+  # Badges semânticos
+  badge-destructive: "oklch(0.940 0.035 26)"
+  badge-destructive-foreground: "oklch(0.360 0.145 26)"
+  badge-destructive-border: "oklch(0.820 0.075 26)"
+  badge-success: "oklch(0.930 0.045 155)"
+  badge-success-foreground: "oklch(0.340 0.095 155)"
+  badge-success-border: "oklch(0.810 0.075 155)"
+  badge-waiting: "oklch(0.940 0.035 15)"
+  badge-waiting-foreground: "oklch(0.370 0.120 15)"
+  badge-waiting-border: "oklch(0.820 0.070 15)"
+  badge-attention: "oklch(0.940 0.055 75)"
+  badge-attention-foreground: "oklch(0.380 0.090 60)"
+  badge-attention-border: "oklch(0.810 0.085 75)"
+  badge-info: "oklch(0.930 0.040 245)"
+  badge-info-foreground: "oklch(0.350 0.095 245)"
+  badge-info-border: "oklch(0.810 0.070 245)"
+
   # Estrutura
   border: "oklch(0.886 0.013 85)"
   input: "oklch(0.768 0.022 85)"
@@ -366,6 +383,15 @@ Todas as cores sao definidas em OKLCH para uniformidade perceptual. O tema e imp
 - **Brand-accent** (dourado/ambar, hue ~54): acento quente para destaque visual, badges, indicadores
 - **Brand-highlight** (teal vibrante, hue ~200): estados ativos, elementos ao vivo
 - **Destructive** (vermelho, hue ~26): acoes destrutivas, erros
+
+### Badges semanticos
+
+Badges genericos usam pares explicitos de superficie, texto e borda em vez de
+cores transparentes sobre o fundo da pagina. `success`, `waiting`, `attention`,
+`info` e `destructive` preservam respectivamente as familias verde, rosa,
+ambar, azul e vermelha, com valores proprios para light e dark mode definidos
+em `global.css`. A borda deve permanecer visivel para que o estado nao dependa
+somente da diferenca sutil entre a superficie do badge e a pagina.
 
 ### Superficies
 Light mode usa um canvas off-white quente (`oklch(0.962 0.007 80.8)` ou `#F5F2ED`) — nao branco puro, para reduzir fadiga visual. Cards e popovers sao brancos puros para criar hierarquia sutil via elevacao.

@@ -85,6 +85,17 @@ stop before editing feature source and report the exact blocker:
   freshness and applicable lesson/disposition. Invalidate affected prior evidence immediately. Do not report
   completion, readiness or a passing validation result while the current change is absent from
   Evaluation.
+- This applies equally to small maintenance and UI-only changes. Any class, CSS or layout
+  adjustment—including margin, padding, width, max-width, gap, alignment, container,
+  responsive or spacing changes—must add or update the relevant `EV-*`, `VIS-*` and `FND-*`
+  records in `evaluation.md` during the same task. Mark affected screenshots or comparisons
+  `stale` until they are recaptured and inspected; do not treat a passing test or an old visual
+  capture as current evidence.
+- In `apps/web`, page surfaces must not set horizontal outer margins or page-level maximum-width
+  containers. The app layout owns that geometry. Reject page-root utilities such as `mx-auto`,
+  horizontal `m*` spacing, and `max-w-6xl` (or equivalent `max-w-*`) unless the governing design
+  or repository rule explicitly assigns that geometry to the page. Component-local width and
+  margin constraints remain valid when they do not recreate a page container.
 
 ## Builder activation gate
 
