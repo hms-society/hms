@@ -27,14 +27,18 @@ export class SaveFormalizationContractFormDraftUseCase
   constructor(private readonly formalizationsRepository: FormalizationsRepository) {}
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (
       formalization.status !== FormalizationStatus.InProgress ||
       formalization.contractFormState !== FormalizationContractFormState.Open
     ) {
-      throw new FormalizationStateConflictError('O formulário não está aberto para rascunho.')
+      throw new FormalizationStateConflictError(
+        'O formulário não está aberto para rascunho.',
+      )
     }
 
     const validation = await this.validateAnswersUseCase.execute({

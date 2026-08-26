@@ -93,7 +93,8 @@ describe('Formalization schemas', () => {
 
     expect(updateFormalizationContractFormSchema.parse(request)).toEqual(request)
     expect(
-      updateFormalizationContractFormSchema.safeParse({ expectedVersion: 0, answers }).success,
+      updateFormalizationContractFormSchema.safeParse({ expectedVersion: 0, answers })
+        .success,
     ).toBe(false)
     expect(
       updateFormalizationContractFormSchema.safeParse({
@@ -115,7 +116,9 @@ describe('Formalization schemas', () => {
     ).toEqual({ documentSpecificationIds: [intakeId] })
     expect(generateFormalizationDocumentSchema.parse({})).toEqual({})
     expect(
-      generateFormalizationDocumentSchema.parse({ instructions: 'Use the current facts.' }),
+      generateFormalizationDocumentSchema.parse({
+        instructions: 'Use the current facts.',
+      }),
     ).toEqual({ instructions: 'Use the current facts.' })
     expect(
       reviewFormalizationDocumentVersionSchema.parse({
@@ -150,7 +153,10 @@ describe('Formalization schemas', () => {
   })
 
   it('publishes stable issue and action response shapes', () => {
-    const issue = { path: `field:${fieldIds.numeric}`, message: 'Informe um número válido.' }
+    const issue = {
+      path: `field:${fieldIds.numeric}`,
+      message: 'Informe um número válido.',
+    }
     expect(formalizationIssueSchema.parse(issue)).toEqual(issue)
     expect(
       formalizationErrorResponseSchema.parse({
@@ -168,34 +174,67 @@ describe('Formalization schemas', () => {
         documentId: formalizationId,
       }),
     ).toEqual({ documentGenerationId: intakeId, documentId: formalizationId })
-    expect(formalizationIssueSchema.safeParse({ path: '', message: 'Erro' }).success).toBe(false)
+    expect(
+      formalizationIssueSchema.safeParse({ path: '', message: 'Erro' }).success,
+    ).toBe(false)
   })
 
   it('keeps inferred payloads assignable to the Core request contracts', () => {
     expectTypeOf<
       import('../formalization-contract-form-answers-schema').FormalizationContractFormAnswerInput
     >().toMatchTypeOf<DynamicFormAnswer>()
-    expectTypeOf<import('../update-formalization-contract-form-schema').UpdateFormalizationContractFormInput>().toMatchTypeOf<
-      SaveFormalizationContractFormRequest
-    >()
-    expectTypeOf<import('../close-formalization-without-contract-schema').CloseFormalizationWithoutContractInput>().toMatchTypeOf<
-      CloseFormalizationWithoutContractRequest
-    >()
-    expectTypeOf<import('../generate-formalization-document-schema').GenerateFormalizationDocumentInput>().toMatchTypeOf<
-      GenerateFormalizationDocumentRequest
-    >()
-    expectTypeOf<import('../review-formalization-document-version-schema').ReviewFormalizationDocumentVersionInput>().toMatchTypeOf<
-      ReviewFormalizationDocumentVersionRequest
-    >()
+    expectTypeOf<
+      import('../update-formalization-contract-form-schema').UpdateFormalizationContractFormInput
+    >().toMatchTypeOf<SaveFormalizationContractFormRequest>()
+    expectTypeOf<
+      import('../close-formalization-without-contract-schema').CloseFormalizationWithoutContractInput
+    >().toMatchTypeOf<CloseFormalizationWithoutContractRequest>()
+    expectTypeOf<
+      import('../generate-formalization-document-schema').GenerateFormalizationDocumentInput
+    >().toMatchTypeOf<GenerateFormalizationDocumentRequest>()
+    expectTypeOf<
+      import('../review-formalization-document-version-schema').ReviewFormalizationDocumentVersionInput
+    >().toMatchTypeOf<ReviewFormalizationDocumentVersionRequest>()
   })
 
   it('rejects malformed identifiers, numeric versions, answers and action data', () => {
-    expect(formalizationContractFormAnswerSchema.safeParse({ fieldId: 'not-uuid', value: true }).success).toBe(false)
-    expect(updateFormalizationContractFormSchema.safeParse({ expectedVersion: 1.5, answers: [] }).success).toBe(false)
-    expect(confirmFormalizationDocumentsSchema.safeParse({ expectedVersion: Number.POSITIVE_INFINITY }).success).toBe(false)
-    expect(replaceFormalizationDocumentSelectionSchema.safeParse({ documentSpecificationIds: ['not-uuid'] }).success).toBe(false)
-    expect(generateFormalizationDocumentSchema.safeParse({ instructions: '   ' }).success).toBe(false)
-    expect(saveFormalizationDocumentVersionSchema.safeParse({ sourceDocumentVersionId: 'not-uuid', content: { type: 'doc' } }).success).toBe(false)
-    expect(closeFormalizationWithoutContractSchema.safeParse({ expectedVersion: 1, expectedIntakeVersion: 1, reason: 'unknown' }).success).toBe(false)
+    expect(
+      formalizationContractFormAnswerSchema.safeParse({
+        fieldId: 'not-uuid',
+        value: true,
+      }).success,
+    ).toBe(false)
+    expect(
+      updateFormalizationContractFormSchema.safeParse({
+        expectedVersion: 1.5,
+        answers: [],
+      }).success,
+    ).toBe(false)
+    expect(
+      confirmFormalizationDocumentsSchema.safeParse({
+        expectedVersion: Number.POSITIVE_INFINITY,
+      }).success,
+    ).toBe(false)
+    expect(
+      replaceFormalizationDocumentSelectionSchema.safeParse({
+        documentSpecificationIds: ['not-uuid'],
+      }).success,
+    ).toBe(false)
+    expect(
+      generateFormalizationDocumentSchema.safeParse({ instructions: '   ' }).success,
+    ).toBe(false)
+    expect(
+      saveFormalizationDocumentVersionSchema.safeParse({
+        sourceDocumentVersionId: 'not-uuid',
+        content: { type: 'doc' },
+      }).success,
+    ).toBe(false)
+    expect(
+      closeFormalizationWithoutContractSchema.safeParse({
+        expectedVersion: 1,
+        expectedIntakeVersion: 1,
+        reason: 'unknown',
+      }).success,
+    ).toBe(false)
   })
 })
