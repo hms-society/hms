@@ -19,12 +19,6 @@ export interface DocumentSpecificationsRepository {
   replaceConfiguration(
     documentSpecificationId: string,
     changes: DocumentSpecificationConfigurationUpdate,
-    auditLog?: {
-      userId: string
-      action: string
-      previousValue: string
-      newValue: string
-    },
   ): Promise<DocumentSpecification | undefined>
   replaceTemplate(
     documentSpecificationId: string,
@@ -35,11 +29,4 @@ export interface DocumentSpecificationsRepository {
     specifications: readonly DocumentSpecificationCreation[],
   ): Promise<readonly DocumentSpecification[]>
   removeAll(): Promise<void>
-  registerAuditLog(data: {
-    documentSpecificationId: string
-    userId: string
-    action: string
-    previousValue: string
-    newValue: string
-  }): Promise<void>
 }

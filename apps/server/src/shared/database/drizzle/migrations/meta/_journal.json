@@ -267,20 +267,6 @@
       "when": 1787352000000,
       "tag": "0024_documents_storage_bucket",
       "breakpoints": true
-    },
-    {
-      "idx": 38,
-      "version": "7",
-      "when": 1787325061721,
-      "tag": "0036_mighty_matthew_murdock",
-      "breakpoints": true
-    },
-    {
-      "idx": 39,
-      "version": "7",
-      "when": 1787685853377,
-      "tag": "0039_many_sumo",
-      "breakpoints": true
     }
   ]
 }

@@ -10,7 +10,6 @@ export type DocumentSpecification = Entity & {
   name: string
   description: string
   application: DocumentSpecificationApplication
-  accessClassification: string
   content: DocumentTemplateContent
   variables: DocumentTemplateVariable[]
   status: DocumentSpecificationStatus
