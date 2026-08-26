@@ -60,7 +60,6 @@ const item = {
   name: 'Procuração',
   description: 'Documento de representação',
   application: { scope: 'global' as const, moment: 'consultation' as const },
-  accessClassification: 'Interno',
   status: 'available' as const,
 }
 

@@ -27,7 +27,6 @@ export class DrizzleDocumentSpecificationMapper {
       variables,
       application,
       status: record.status as DocumentSpecification['status'],
-      accessClassification: record.accessClassification,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     }

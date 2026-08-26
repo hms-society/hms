@@ -1,2 +1,0 @@
-ALTER TABLE "document_specifications" ADD COLUMN "access_classification" text DEFAULT 'Interno' NOT NULL;--> statement-breakpoint
-ALTER TABLE "document_specifications" ADD CONSTRAINT "document_specifications_access_classification_check" CHECK ("access_classification" in ('Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado'));

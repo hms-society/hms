@@ -20,7 +20,6 @@ import type { DocumentSpecificationsRepository } from '../interfaces'
 type Request = {
   readonly documentSpecificationId: string
   readonly changes: DocumentSpecificationConfigurationUpdate
-  readonly userId: string
 }
 
 const TECHNICAL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/
@@ -37,7 +36,6 @@ export class UpdateDocumentSpecificationConfigurationUseCase
   async execute({
     documentSpecificationId,
     changes,
-    userId,
   }: Request): Promise<DocumentSpecification> {
     const current = await this.specificationsRepository.findById(documentSpecificationId)
     if (!current) throw new DocumentSpecificationNotFoundError(documentSpecificationId)
@@ -47,66 +45,37 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     const description = changes.description.trim()
     const content = changes.content ?? current.content
     const variables = changes.variables ?? current.variables
-    const status = changes.status ?? current.status
-
     if (!name) {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O nome do modelo é obrigatório.',
       )
     }
-
-    if (status !== 'available' && status !== 'unavailable') {
+    if (changes.status !== 'available' && changes.status !== 'unavailable') {
       throw new InvalidDocumentSpecificationConfigurationError(
         'O status do modelo de documento é inválido.',
       )
     }
 
-    const isFirstTimeEnabling = current.status !== 'available' && status === 'available'
-
-    if (
-      status === 'available' ||
-      (this.hasText(content) &&
-        (changes.content !== undefined || changes.variables !== undefined))
-    ) {
-      this.assertValidTemplate(content, variables, { requireText: !isFirstTimeEnabling })
-    }
+    if (this.hasText(content)) this.assertValidTemplate(content, variables)
 
     if (application.scope === 'legal_context') {
       await this.validateCatalog(application)
     }
 
-    const oldClassification = (current as any).accessClassification ?? 'Interno'
-
     const normalizedChanges: DocumentSpecificationConfigurationUpdate = {
       name,
       description,
-      status,
-      accessClassification: changes.accessClassification ?? oldClassification,
+      status: changes.status,
       application,
       ...(changes.content !== undefined ? { content } : {}),
       ...(changes.variables !== undefined ? { variables } : {}),
     }
-
-    const newClassification = normalizedChanges.accessClassification
-
-    const auditLogData =
-      newClassification && newClassification !== oldClassification
-        ? {
-            userId,
-            action: 'CLASSIFICATION_CHANGED',
-            previousValue: oldClassification,
-            newValue: newClassification,
-          }
-        : undefined
-
     const updated = await this.specificationsRepository.replaceConfiguration(
       documentSpecificationId,
       normalizedChanges,
-      auditLogData,
     )
 
     if (!updated) throw new DocumentSpecificationNotFoundError(documentSpecificationId)
-
     return updated
   }
 
@@ -210,12 +179,11 @@ export class UpdateDocumentSpecificationConfigurationUseCase
   private assertValidTemplate(
     content: DocumentTemplateContent,
     variables: readonly DocumentTemplateVariable[],
-    options: { requireText: boolean } = { requireText: true },
   ): void {
     this.assertValidContent(content)
     this.assertValidVariables(variables)
     this.assertValidTokens(content, variables)
-    if (options.requireText && !this.hasText(content)) {
+    if (!this.hasText(content)) {
       throw new InvalidDocumentTemplateError('O modelo precisa possuir conteúdo textual.')
     }
   }

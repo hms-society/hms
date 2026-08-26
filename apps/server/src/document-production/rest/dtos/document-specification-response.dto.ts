@@ -48,11 +48,6 @@ export class DocumentSpecificationResponseDto {
   @ApiProperty({ type: () => DocumentSpecificationApplicationResponseDto })
   application!: DocumentSpecification['application']
 
-  @ApiProperty({
-    enum: ['Interno', 'Cliente', 'Restrito', 'Confidencial', 'Parceiro liberado'],
-  })
-  accessClassification!: string
-
   @ApiProperty({ type: 'object', additionalProperties: true })
   content!: DocumentSpecification['content']
 
@@ -72,7 +67,6 @@ export class DocumentSpecificationResponseDto {
       name: entity.name,
       description: entity.description,
       application: entity.application,
-      accessClassification: entity.accessClassification, // NOVO: Mapeamento do domínio para a resposta
       content: entity.content,
       variables: entity.variables,
       status: entity.status,
