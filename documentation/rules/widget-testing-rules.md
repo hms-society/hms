@@ -27,6 +27,14 @@ test must not render the component as a substitute for the component test. The
 widget test is intentionally isolated from query, mutation, router, context, and
 other hook implementation details.
 
+This isolated component test is structural boundary coverage: it proves that
+hook state maps to markup and that interactions delegate to the exposed
+handlers. It does not prove the hook, query, URL state, dialog orchestration, or
+REST mutation is wired correctly. The real owning-hook test and applicable route
+integration test provide that behavioral evidence. A green suite made only of
+mocked hook snapshots or callback assertions must not be reported as complete
+behavior coverage.
+
 Tests exercise the smallest public widget or layout that owns a user-visible
 behavior. Assert what the user can render, identify, click, and observe rather
 than internal JSX structure or implementation details.
@@ -64,6 +72,12 @@ impossible for the widget, and state the reason in the test or evaluation.
 - filter, sort, pagination, and URL synchronization when present;
 - dialog/drawer open, cancel/close, confirm, and validation behavior when present;
 - protected access and redirect behavior at the route integration boundary.
+
+Also review required and malformed values, minimum and maximum boundaries,
+conflicting fields, disabled controls, duplicate submissions, expected 4xx
+failures, unexpected failures, retry, and recovery whenever the widget exposes
+those states. Pair each request or callback assertion with the resulting visible
+state when the outcome is user-observable.
 
 For tables, test the action availability matrix explicitly. For example, an
 invited record may expose resend/cancel, an active record may expose deactivate,

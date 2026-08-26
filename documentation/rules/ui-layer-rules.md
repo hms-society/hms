@@ -7,6 +7,11 @@ description: Architecture and implementation rules for the web UI, shared widget
 These rules apply to `apps/web/src` and define how application UI, shared widgets,
 hooks, routes, environment configuration, and REST adapters are organized.
 
+Read and apply [`documentation/design.md`](../design.md) before UI implementation
+or review. It is the authority for tokens, typography, hierarchy, responsive
+behavior, focus treatment, and accessibility. This rule defines the source and
+composition boundaries that implement that design contract.
+
 ## UI code follows feature and shared boundaries
 
 Feature-owned UI belongs under:
@@ -54,6 +59,19 @@ File and directory names use kebab-case. React components remain in `.tsx` files
 non-React hooks, types, constants, and utilities remain in `.ts` files.
 
 ## UI implementation conventions
+
+### Prefer shared shadcn primitives
+
+When a matching primitive exists under `apps/web/src/ui/shadcn`, use it instead
+of rebuilding the equivalent interactive or form element in feature code. This
+includes buttons, inputs, selects, textareas, labels, badges, dialogs, and tables.
+Compose the shared primitive through its public props, variants, and `className`.
+
+If no suitable primitive exists, add or extend the shared primitive before
+introducing a feature-local equivalent. Native elements remain appropriate for
+document structure, text, layout, external links, and cases where native
+semantics are required. Preserve accessible naming and keyboard behavior in
+either case.
 
 ### Shared code conventions
 
@@ -184,6 +202,14 @@ and other values that exist only to render or operate that widget. Do not leave
 these helpers as module-level functions in a `.tsx` file or move them to a
 generic utility merely to remove them from the component. Only behavior genuinely
 shared by multiple widgets may live in a feature-level utility or shared hook.
+
+Reusable presentation formatting is an application concern rather than a
+widget-local detail. Currency, decimals, quantities, percentages, dates, and
+times used by more than one widget belong in focused shared hooks under
+`apps/web/src/ui/shared/hooks`. Keep one hook in each kebab-case file, such as
+`use-format-date.ts`; consumers import the hook directly rather than through a
+generic formatter module. Widget-local formatters are allowed only for genuinely
+private presentation rules that do not duplicate a shared contract.
 
 All UI logic belongs in the owning widget's hook. This includes local state,
 effects, subscriptions, form state and validation, request orchestration,

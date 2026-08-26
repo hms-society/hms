@@ -271,6 +271,12 @@ With explicit authorization to commit, push, and publish, conclusion:
 8. sets Spec, Plan, and Evaluation to `completed` only after current-head CI passes and blocking
    review conversations are resolved.
 
+Before staging a delivery commit, audit the complete candidate diff against the
+Spec scope. Pre-existing SDD, Rule, prompt, or other governance changes outside
+that scope are inherited changes: exclude them unless the user explicitly
+authorizes their inclusion, and record the disposition in Evaluation. A green
+sensor does not authorize unrelated files to ship.
+
 Do not alter Jira status or Confluence content automatically. Apply authorized factual updates
 and record traceability; product or normative changes still require explicit user approval. Do
 not merge or deploy unless the user explicitly asks.
