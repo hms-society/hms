@@ -5,6 +5,7 @@ import {
   FORMALIZATION_REPOSITORIES,
 } from '@/formalization/constants/formalization-repositories'
 import { FormalizationSeeder } from '@/formalization/database/formalization-seeder'
+import { DrizzleFormalizationCloseTransaction } from '@/formalization/database/formalization-close-transaction'
 import { DrizzleFormalizationStartTransaction } from '@/formalization/database/formalization-start-transaction'
 import { DrizzleFormalizationMapper } from '@/formalization/database/drizzle/mappers'
 import { DrizzleFormalizationsRepository } from '@/formalization/database/drizzle/repositories'
@@ -17,6 +18,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     DrizzleFormalizationMapper,
     DrizzleFormalizationsRepository,
     DrizzleFormalizationStartTransaction,
+    DrizzleFormalizationCloseTransaction,
     FormalizationSeeder,
     {
       provide: FORMALIZATION_REPOSITORIES.formalizations,
@@ -26,10 +28,15 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       provide: FORMALIZATION_DATABASE_OPERATIONS.startTransaction,
       useExisting: DrizzleFormalizationStartTransaction,
     },
+    {
+      provide: FORMALIZATION_DATABASE_OPERATIONS.closeTransaction,
+      useExisting: DrizzleFormalizationCloseTransaction,
+    },
   ],
   exports: [
     FORMALIZATION_REPOSITORIES.formalizations,
     FORMALIZATION_DATABASE_OPERATIONS.startTransaction,
+    FORMALIZATION_DATABASE_OPERATIONS.closeTransaction,
     FormalizationSeeder,
   ],
 })

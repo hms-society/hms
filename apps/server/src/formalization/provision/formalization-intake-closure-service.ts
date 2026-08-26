@@ -1,37 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { CloseIntakeWithoutContractUseCase } from '@hms/core/intake/use-cases'
-import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type {
-  CloseFormalizationIntakeRequest,
+  CloseFormalizationRequest,
   FormalizationIntakeClosureService,
 } from '@hms/core/formalization'
 
-import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
-import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
+import type { FormalizationCloseTransaction } from '@/formalization/database/formalization-close-transaction'
 
 @Injectable()
 export class ServerFormalizationIntakeClosureService
   implements FormalizationIntakeClosureService
 {
-  private readonly useCase: CloseIntakeWithoutContractUseCase
-
   constructor(
-    @Inject(INTAKE_REPOSITORIES.intakes) intakesRepository: IntakesRepository,
-    datetimeProvider: DatetimeProvider,
-  ) {
-    this.useCase = new CloseIntakeWithoutContractUseCase(
-      intakesRepository,
-      datetimeProvider,
-    )
-  }
+    @Inject(FORMALIZATION_DATABASE_OPERATIONS.closeTransaction)
+    private readonly closeTransaction: FormalizationCloseTransaction,
+  ) {}
 
-  closeWithoutContract(request: CloseFormalizationIntakeRequest) {
-    return this.useCase.execute({
-      intakeId: request.intakeId,
-      expectedVersion: request.expectedVersion,
-      closureReason: request.reason,
-      closureNotes: request.notes,
-      updatedBy: request.actorId,
-    })
+  closeWithoutContract(request: CloseFormalizationRequest) {
+    return this.closeTransaction.closeWithoutContract(request)
   }
 }
