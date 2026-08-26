@@ -41,6 +41,7 @@ export const ConsultationDocumentsPage = ({
     handleSaveSelection,
     handleConfirmPackage,
     handleReopenPackage,
+    handleUpdateAccess,
   } = useConsultationDocumentsPage({ consultationId })
 
   if (!isAttendanceFinalized || isDocumentsBlockedByClosure) {
@@ -165,6 +166,7 @@ export const ConsultationDocumentsPage = ({
               isCancellingDocument={isCancellingDocument}
               onRefreshDocument={handleRefresh}
               isReadOnly={isReadOnly}
+              onUpdateAccess={handleUpdateAccess}
             />
           )}
         </div>

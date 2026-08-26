@@ -1,4 +1,12 @@
-import type { Document, DocumentCreation } from '../domain/entities'
+import type { Document, DocumentCreation, ClassificacaoAcesso } from '../domain/entities'
+
+export interface UpdateClassificationWithAuditParams {
+  documentId: string
+  userId: string
+  valorAnterior: ClassificacaoAcesso
+  valorNovo: ClassificacaoAcesso
+  destinatarioIdentificador?: string
+}
 
 export interface DocumentsRepository {
   add(document: DocumentCreation): Promise<Document>
@@ -10,4 +18,8 @@ export interface DocumentsRepository {
     changes: Partial<Pick<Document, 'title' | 'currentVersionId'>>,
   ): Promise<Document | undefined>
   removeAll(): Promise<void>
+
+  updateClassificationWithAudit(
+    params: UpdateClassificationWithAuditParams,
+  ): Promise<void>
 }

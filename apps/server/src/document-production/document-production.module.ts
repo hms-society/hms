@@ -12,6 +12,7 @@ import {
   ListDocumentSpecificationsController,
   UpdateDocumentSpecificationConfigurationController,
   UpdateDocumentSpecificationTemplateController,
+  UpdateDocumentAccessClassificationController,
 } from '@/document-production/rest/controllers'
 
 @Module({
@@ -28,6 +29,7 @@ import {
     ListDocumentSpecificationsController,
     UpdateDocumentSpecificationConfigurationController,
     UpdateDocumentSpecificationTemplateController,
+    UpdateDocumentAccessClassificationController,
   ],
   providers: [DocumentProductionSeeder],
   exports: [DocumentProductionSeeder, DocumentProductionMessagingModule],

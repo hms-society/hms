@@ -32,7 +32,13 @@ function createPath(query: DocumentSpecificationListQuery = {}) {
 
 export const DocumentProductionService = (
   restClient: RestClient,
-): DocumentProductionRestService => {
+): DocumentProductionRestService & {
+  updateDocumentAccess: (request: {
+    documentId: string
+    classificacaoAcesso: string
+    partnerId?: string
+  }) => Promise<any>
+} => {
   return {
     listDocumentSpecifications(query = {}) {
       return restClient.get<PaginationResponse<DocumentSpecificationListItem>>(
@@ -76,6 +82,16 @@ export const DocumentProductionService = (
     deleteDocumentSpecification(documentSpecificationId: string) {
       return restClient.delete<void>(
         `/document-specifications/${documentSpecificationId}`,
+      )
+    },
+
+    updateDocumentAccess(request) {
+      return restClient.patch<any>(
+        `/documents/${request.documentId}/access-classification`,
+        {
+          classification: request.classificacaoAcesso,
+          destinatarioIdentificador: request.partnerId,
+        },
       )
     },
   }

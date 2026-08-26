@@ -14,6 +14,7 @@ import { useConsultationDocumentSelectionQuery } from '../../../hooks/use-consul
 import { useReplaceConsultationDocumentSelectionAction } from '../../../hooks/use-replace-consultation-document-selection-action'
 import { useConfirmConsultationDocumentPackageAction } from '../../../hooks/use-confirm-consultation-document-package-action'
 import { useReopenConsultationDocumentPackageAction } from '../../../hooks/use-reopen-consultation-document-package-action'
+import { useUpdateDocumentAccessAction } from '../../../hooks/use-update-document-access-action'
 
 export type ConsultationDocumentsPageProps = {
   consultationId: string
@@ -28,7 +29,14 @@ export type ConsultationDocumentStatus =
   | 'generating'
 
 export type ConsultationDocumentViewModel = {
-  document: ConsultationDocumentListItem
+  document: ConsultationDocumentListItem & {
+    classificacaoAcesso?:
+      | 'INTERNO'
+      | 'CLIENTE'
+      | 'RESTRITO'
+      | 'CONFIDENCIAL'
+      | 'PARCEIRO_LIBERADO'
+  }
   latestVersion?: ConsultationDocumentVersionSummary
   latestVersionRouteParams?: {
     consultationId: string
@@ -132,6 +140,8 @@ export function useConsultationDocumentsPage({
     useConfirmConsultationDocumentPackageAction(consultationId)
   const packageReopeningAction =
     useReopenConsultationDocumentPackageAction(consultationId)
+  const updateAccessAction = useUpdateDocumentAccessAction()
+
   const [isSelectionOpen, setIsSelectionOpen] = useState(false)
   const [cancelledDocumentIds, setCancelledDocumentIds] = useState<ReadonlySet<string>>(
     new Set(),
@@ -256,6 +266,21 @@ export function useConsultationDocumentsPage({
     await packageReopeningAction.reopenDocumentPackage()
   }
 
+  async function handleUpdateAccess(
+    documentId: string,
+    classification: string,
+    partnerId?: string,
+  ) {
+    if (isReadOnly) return
+
+    await updateAccessAction.updateDocumentAccess({
+      documentId,
+      classificacaoAcesso: classification,
+      partnerId,
+    })
+    handleRefresh()
+  }
+
   return {
     consultation,
     documents,
@@ -289,6 +314,7 @@ export function useConsultationDocumentsPage({
     handleSaveSelection,
     handleConfirmPackage,
     handleReopenPackage,
+    handleUpdateAccess,
   }
 }
 
