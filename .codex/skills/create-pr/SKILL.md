@@ -7,10 +7,11 @@ description: >
 <!-- Auto-generated from documentation/prompts/create-pr-prompt.md -->
 
 
-# Create or Update a Pull Request
+# Create or Update Pull Requests
 
-Publish one coherent HMS delivery through GitHub. Use `gh`, preserve the user's worktree
-and update an existing delivery PR instead of creating a duplicate.
+Publish an HMS delivery through one or more coherent, size-compliant GitHub pull requests.
+Use `gh`, preserve the user's worktree and update existing delivery PRs instead of creating
+duplicates.
 
 ## Inputs and authority
 
@@ -32,6 +33,34 @@ Every pull request opened or updated by this workflow must be ready for review, 
 Create PRs with `draft: false` (or the equivalent `gh` behavior), and if an existing delivery
 PR is draft, run `gh pr ready <number>` before returning its publication metadata. Do not leave
 a delivery PR in draft status unless the user explicitly changes this repository policy.
+
+## Pull request size and splitting policy
+
+`.github/workflows/check-pr-size.yml` is the authoritative size gate for delivery PRs. Match
+its calculation exactly: compare `origin/<base>...HEAD`, count only added lines in `.ts`,
+`.tsx`, `.mts` and `.cts` files, and keep every PR at or below 5,000 added lines. Recalculate
+the count after any branch merge or correction before publishing or updating a PR.
+
+Coherence is mandatory whenever a delivery is split: the split must follow real product,
+technical or dependency boundaries, and every resulting PR must be a reviewable, traceable
+slice with a clear outcome. The line limit determines when splitting is required; it never
+determines where to cut the work.
+
+- If the complete delivery is at or below 5,000 added TypeScript lines, publish one coherent
+  PR.
+- If it exceeds 5,000 lines, split it before publication into slices that each remain at or
+  below 5,000 lines. Every slice must remain coherent; never cut files or behavior into
+  arbitrary line-count fragments.
+- The first or independent slice uses `develop` as its base. A dependent slice may use the
+  immediately preceding slice branch as its base, forming an explicit PR dependency chain.
+  Record each slice's scope, base PR, dependency order and covered `RF-*`/`CA-*` criteria in
+  the delivery artifacts and PR body.
+- If no coherent partition satisfies the limit, stop publication and route the delivery back
+  through `create-plan` or `create-spec` rather than publishing an oversized or arbitrary PR.
+
+When splitting is required, publish or update every slice in the same task and return metadata
+for every delivery PR. Every slice remains ready for review and must satisfy the same traceability,
+validation and CI requirements as a single-PR delivery.
 
 ## Pull request language policy
 
@@ -55,7 +84,8 @@ and traceability are refreshed through this workflow. Do not create commits or e
 metadata ad hoc while claiming that `commit-code` or `create-pr` was invoked.
 
 When `conclude-spec` calls this prompt, return the exact PR number, URL, base, head SHA and
-check URLs to `conclude-spec`; do not return while publication is only partially complete.
+check URLs for every delivery PR to `conclude-spec`; do not return while publication is only
+partially complete.
 
 ## Delivery inspection
 
@@ -88,13 +118,14 @@ including the file speculatively.
    ```
 
 3. Verify base, head, SHA and ancestry; branch names do not prove incorporation.
-4. Use `develop`/`origin/develop` as the integration base unless the repository state or user says
-   otherwise.
-5. Before calculating the publication diff or creating/updating the PR, merge the fetched
-   `origin/develop` into the delivery branch. The delivery branch must contain the current
-   `develop` history; do not submit a PR while it is behind `develop`. Treat this merge as part of
-   the publication and require the same explicit commit authority before creating its merge
-   commit.
+4. Use `develop`/`origin/develop` as the integration base for the first or an independent slice.
+   For a dependent slice, use the immediately preceding slice branch as the PR base and record
+   that dependency explicitly.
+5. Before calculating the publication diff or creating/updating a PR, update the first or
+   independent delivery branch with the fetched `origin/develop`. For dependent slices, first
+   update the predecessor slice, then propagate the current predecessor branch as the base of
+   the dependent slice. Every branch must contain the history required by its declared base;
+   require the same explicit commit authority for any merge commit.
 6. If the merge has only minor, unambiguous textual conflicts in delivery-owned files, resolve
    them automatically by preserving the intended delivery change and the current `main`
    behavior, then stage the resolutions, complete the merge, and review the resulting diff.
@@ -104,13 +135,14 @@ including the file speculatively.
    Report each conflicted path, the competing changes, and the decision needed; do not abort or
    complete the merge, push, or create/update the PR until the user directs the resolution.
 8. After the merge is complete, calculate and review the complete diff against the PR base.
-9. If a delivery PR exists, update its head and body. Otherwise create one PR for the
-   coherent delivery.
+9. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
+   size-compliant PR set required by the splitting policy.
 
 Do not use destructive Git operations, bypass hooks, create accidental dependent branches
 or mix unrelated work. For composed deliveries, document every base and dependency and
-validate the integrated diff. Do not create an intermediate branch merely to divide a diff;
-separate PRs require real semantic boundaries and explicit dependency ordering.
+validate each slice and the integrated result. Do not split arbitrarily to satisfy a line
+count; every separate PR must represent a coherent product/technical slice with a real
+semantic boundary or an explicit dependency required by the size policy.
 
 ## Validation evidence
 
@@ -222,8 +254,8 @@ Push the prepared branch and create or update the PR. Then obtain the actual del
 gh pr view <number> --json number,url,headRefName,baseRefName,commits,statusCheckRollup
 ```
 
-Return the PR URL, number, base, head, head SHA, changed-path summary and current check/review
-state. Do not merge or deploy.
+Return one record per PR containing its URL, number, base, head, head SHA, dependency order,
+changed-path summary and current check/review state. Do not merge or deploy.
 
 Reviewer comments may arrive later. They are handled by `resolve-pr-pendencies`, not by this
 workflow.

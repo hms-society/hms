@@ -9,7 +9,8 @@
     "./shared": "./src/shared/index.ts",
     "./consultation": "./src/consultation/index.ts",
     "./document-production": "./src/document-production/index.ts",
-    "./document-engine": "./src/document-engine/index.ts"
+    "./document-engine": "./src/document-engine/index.ts",
+    "./formalization": "./src/formalization/index.ts"
   },
   "scripts": {
     "lint": "biome lint src",

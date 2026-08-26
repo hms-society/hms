@@ -28,10 +28,19 @@ export class ListDynamicFormsUseCase
       return false
     }
 
+    if (
+      query.contextType &&
+      !form.contexts.some((context) => context.type === query.contextType)
+    ) {
+      return false
+    }
+
     if (!query.legalAreaId && !query.legalTopicId) return true
 
+    const contextType = query.contextType ?? 'legal'
+
     return form.contexts.some((context) => {
-      if (context.type !== 'legal') return false
+      if (context.type !== contextType) return false
 
       const legalAreaId = context.data.legalAreaId
       const legalTopicIds = context.data.legalTopicIds
@@ -49,11 +58,13 @@ export class ListDynamicFormsUseCase
     const search = query.search?.trim().toLocaleLowerCase('pt-BR')
     const legalAreaId = query.legalAreaId?.trim()
     const legalTopicId = query.legalTopicId?.trim()
+    const contextType = query.contextType?.trim()
 
     return {
       ...(search ? { search } : {}),
       ...(legalAreaId ? { legalAreaId } : {}),
       ...(legalTopicId ? { legalTopicId } : {}),
+      ...(contextType ? { contextType } : {}),
     }
   }
 }
