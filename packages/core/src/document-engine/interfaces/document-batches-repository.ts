@@ -22,5 +22,6 @@ export type CreateDocumentBatchRecord = {
 export interface DocumentBatchesRepository {
   add(batch: CreateDocumentBatchRecord): Promise<DocumentBatch>
   findById(clientId: string): Promise<DocumentBatch[]>
+  findTriageBatches(): Promise<DocumentBatch[]>
   findFileById(fileId: string): Promise<DocumentBatchFile | undefined>
 }

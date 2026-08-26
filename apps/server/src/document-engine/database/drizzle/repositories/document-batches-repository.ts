@@ -90,6 +90,29 @@ export class DrizzleDocumentBatchesRepository
     return records.map((record) => this.mapper.toDomain(record as any))
   }
 
+  async findTriageBatches(): Promise<DocumentBatch[]> {
+    const batches = await this.database
+      .select()
+      .from(documentBatchModel)
+      .where(eq(documentBatchModel.inTriageBox, true))
+      .orderBy(desc(documentBatchModel.createdAt))
+
+    if (batches.length === 0) return []
+
+    const batchIds = batches.map((b) => b.id)
+    const files = await this.database
+      .select()
+      .from(documentBatchFileModel)
+      .where(inArray(documentBatchFileModel.batchId, batchIds))
+
+    const records = batches.map((batch) => ({
+      ...batch,
+      files: files.filter((f) => f.batchId === batch.id),
+    }))
+
+    return records.map((record) => this.mapper.toDomain(record as any))
+  }
+
   async findFileById(fileId: string): Promise<DocumentBatchFile | undefined> {
     const [record] = await this.database
       .select()

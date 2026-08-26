@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { isSameDay, isWithinInterval, startOfDay, endOfDay, format } from 'date-fns'
 import type { DateRange } from 'react-day-picker'
-import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
+import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 
+import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
 import { useDocumentValidationDocumentsQuery } from '@/ui/document-engine/hooks/use-document-validation-documents-query'
 import type { IconName } from '@/ui/shared/widgets/components/icon'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -28,12 +29,15 @@ const ITEMS_PER_PAGE = 6
 
 export function useDocumentInbox() {
   const { navigateTo } = useNavigation()
+  const { batches, batchesError, isFetchingBatches, refetchBatches } =
+    useDocumentBatchesTriageQuery()
   const {
-    documents: rawDocuments,
-    documentsError,
-    isFetchingDocuments,
-    refetchDocuments,
+    documents: rawValidationDocuments,
+    documentsError: validationError,
+    isFetchingDocuments: isFetchingValidation,
+    refetchDocuments: refetchValidation,
   } = useDocumentValidationDocumentsQuery()
+
   const [currentPage, setCurrentPage] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [appliedDateRange, setAppliedDateRange] = useState<DateRange | undefined>()
@@ -169,7 +173,60 @@ export function useDocumentInbox() {
     }
   }
 
-  const documents = rawDocuments.map(toInboxDocument)
+  function batchToInboxDocuments(batch: DocumentBatch): InboxDocument[] {
+    const receivedAt = new Date(batch.createdAt)
+    const statusLabel =
+      batch.status === 'pending_identification' || batch.status === 'received'
+        ? 'Aguardando validação'
+        : 'Pendente'
+    const statusStyle = getStatusStyle(statusLabel)
+    const channel = batch.channel ?? DocumentBatchChannel.WhatsApp
+
+    if (batch.files && batch.files.length > 0) {
+      return batch.files.map((file) => ({
+        id: file.id,
+        fileName: file.originalName,
+        fileSize: formatFileSize(file.sizeBytes),
+        receivedFromIcon: getChannelIcon(channel),
+        receivedFrom: batch.sender,
+        contactInfo: `${getChannelLabel(channel)} · ${batch.sender}`,
+        caseId: batch.readableId ?? 'Sem vínculo seguro',
+        caseDesc: batch.clientId
+          ? 'Titular pré-identificado'
+          : 'Escolha manual necessária',
+        receivedDate: formatReceivedDate(receivedAt),
+        receivedTime: format(receivedAt, 'HH:mm'),
+        status: statusLabel,
+        badgeClasses: statusStyle.badgeClasses,
+        dotClasses: statusStyle.dotClasses,
+      }))
+    }
+
+    return [
+      {
+        id: batch.id,
+        fileName: batch.readableId ?? 'Lote sem arquivos',
+        fileSize: '0 KB',
+        receivedFromIcon: getChannelIcon(channel),
+        receivedFrom: batch.sender,
+        contactInfo: `${getChannelLabel(channel)} · ${batch.sender}`,
+        caseId: batch.readableId ?? 'Sem vínculo seguro',
+        caseDesc: batch.clientId
+          ? 'Titular pré-identificado'
+          : 'Escolha manual necessária',
+        receivedDate: formatReceivedDate(receivedAt),
+        receivedTime: format(receivedAt, 'HH:mm'),
+        status: statusLabel,
+        badgeClasses: statusStyle.badgeClasses,
+        dotClasses: statusStyle.dotClasses,
+      },
+    ]
+  }
+
+  const documents =
+    batches.length > 0
+      ? batches.flatMap(batchToInboxDocuments)
+      : rawValidationDocuments.map(toInboxDocument)
 
   const uniqueStatuses = useMemo(
     () => Array.from(new Set(documents.map((item) => item.status))),
@@ -242,7 +299,7 @@ export function useDocumentInbox() {
   }
 
   async function handleRefresh() {
-    await refetchDocuments()
+    await Promise.all([refetchBatches(), refetchValidation()])
   }
 
   return {
@@ -258,8 +315,8 @@ export function useDocumentInbox() {
     setClientFilter,
     uniqueStatuses,
     uniqueClients,
-    error: documentsError,
-    isFetching: isFetchingDocuments,
+    error: batchesError || validationError,
+    isFetching: isFetchingBatches || isFetchingValidation,
     handlePageChange,
     handleAnalyze,
     handleRefresh,

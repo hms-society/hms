@@ -9,6 +9,9 @@ export const DocumentEngineService = (client: RestClient) => {
     listClientDocument: async (clientId: string) => {
       return client.get<DocumentBatch[]>(`/document-batches/clients/${clientId}`)
     },
+    listTriageBatches: async () => {
+      return client.get<DocumentBatch[]>('/document-batches/triage')
+    },
     getDocumentFile: async (fileId: string) => {
       return client.get<DocumentBatchFile>(`/documents/files/${fileId}`)
     },

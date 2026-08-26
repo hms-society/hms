@@ -84,7 +84,9 @@ describe('ProcessWhatsappEventJob', () => {
   })
 
   it('2. Processa imagens enviadas por cliente cadastrado (.jpg, .png, .jpeg, .webp)', async () => {
-    const { mockDrizzleClient, insertValuesMock } = createMockDrizzle({ id: 'client-active-1' })
+    const { mockDrizzleClient, insertValuesMock } = createMockDrizzle({
+      id: 'client-active-1',
+    })
     const mockInngest = createMockInngest()
     const job = new ProcessWhatsappEventJob(mockInngest, mockDrizzleClient)
 
