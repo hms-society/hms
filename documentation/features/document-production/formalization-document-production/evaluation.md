@@ -3,7 +3,7 @@ feature: "document-production/formalization-document-production"
 spec: ./spec.md
 plan: ./plan.md
 spec_revision: 8
-status: ready
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o
 jira_tickets:
   - SCRUM-139
@@ -14,7 +14,7 @@ updated_at: 2026-08-25
 
 Evaluation of Spec revision `8` against the current implementation.
 
-Current result: Revision 8 makes Intake legal area/topic inheritance explicit on the Formalization projection and uses it for contract-form discovery. Revision 7 replacement behavior remains implemented, including answer clearing and two temporary seeded forms. The four reviewer evidence findings are now corrected: the rollback path runs through the real transaction after insertion, the seed was executed twice, all required PNGs are retained with dimensions, and the post-seed admin/paralegal/dark-mode browser matrix is green. The same Reviewer completed the final read-only recheck with no blockers. The local generation worker limitation remains accepted as `FND-011`, and the contracted Pencil `WNe1f` state remains a deferred supplemental state because no approved read-by-Intake API exists. Final status awaits the PR CI quality gate.
+Current result: Revision 8 makes Intake legal area/topic inheritance explicit on the Formalization projection and uses it for contract-form discovery. Revision 7 replacement behavior remains implemented, including answer clearing and two temporary seeded forms. The reviewer evidence findings and the final Web CI fixture regression are resolved: rollback runs through the real transaction after insertion, the seed was executed twice, all required PNGs are retained with dimensions, the post-seed admin/paralegal/dark-mode browser matrix is green, and the shared fixture preserves the mutable state observed by its route handlers. The same Reviewer completed the final read-only recheck with no blockers, and every applicable Core, Server and Web PR CI check passed for the four ready-for-review delivery PRs. The local generation worker limitation remains accepted as `FND-011`, and the contracted Pencil `WNe1f` state remains a deferred supplemental state because no approved read-by-Intake API exists.
 
 ## Execution assignments
 
@@ -122,6 +122,7 @@ Revision 8 evidence-refresh activation: `builder_server` (`01a038fe-e3ae-70d1-9c
 | `EV-50` | Database/Server | `pnpm --filter server db:seed` twice; PostgreSQL uniqueness, projection and dynamic-form queries after each run | Two complete authorized clear/run executions passed. The final PostgreSQL observation reports exactly one `in_formalization` Intake, one Formalization, one unique Formalization/Intake relation, three `formalization`-context definitions and two temporary replacement definitions. The final lifecycle state is a single open Formalization with six persisted answers, one package and one package document; repeated browser close/reopen increments are expected state transitions, not duplicate seed rows. | passed |
 | `EV-51` | Cross-layer real browser | Final temporary repository Playwright CLI matrix against the repeated clean seed: admin access, paralegal denial, dark mode, assigned-lawyer Intake/Formalization, close/reopen, `390 × 844` dialog captures and request diagnostics | Final `pnpm exec playwright test --config playwright.closure.config.ts --workers=1` passed 4/4 in 1m. Admin access passed; paralegal received the expected Formalization 403; dark mode passed; assigned-lawyer close/reopen passed with the optional collaborator 403 classified by `FND-027`. No request failed or page error occurred. Final PNGs were inspected and retained under `apps/web/test-results/final-visual/`; temporary config/test sources are removed after capture. | passed |
 | `EV-52` | Cross-layer closure | Corrected real transaction regression, repeated clean seed, final browser matrix and final saved visual artifacts | All four reviewer blockers are resolved without a Contract change: rollback is exercised after the real insert, seed repeatability has two runs, all required current PNGs exist with recorded dimensions, and post-reseed role/theme/browser evidence is green. | passed |
+| `EV-53` | Pull-request CI | Final checks attached to PRs #89–#92 at their current head SHAs; Web CI rerun after the shared fixture correction | Core, Server and Web checks passed for every applicable PR. The initial #91/#92 Web failures were the same fixture state-identity regression and passed after the correction; the optional Supabase Preview remained skipped by workflow path filters. The Hermes review check on PR #89 also passed. | passed |
 
 ## Manual evidence
 
@@ -199,6 +200,7 @@ Revision 8 evidence-refresh activation: `builder_server` (`01a038fe-e3ae-70d1-9c
 | `FND-030` | evidence artifact | Reviewer inspection of saved visual evidence paths | `EV-47`, `EV-49`, `VIS-01`–`VIS-08`, `CA-12` | resolved | Fresh captures were retained under `apps/web/test-results/final-visual/`, including independent `zetNe.png`, `Z3Ll2j.png`, `ZLBTF.png` and `USNIG.png` outputs with exact dimensions; all current references point to existing artifacts. |
 | `FND-031` | evidence freshness | Reviewer inspection of post-reseed role/theme browser coverage | `EV-51`, `MV-01`, `MV-02`, `CA-03`, `CA-12` | resolved | The final CLI matrix passed 4/4 after the repeated seed: administrator access, paralegal 403, dark mode and assigned-lawyer close/reopen. Console, page-error and failed-request diagnostics were clean; the optional collaborator 403 remains the accepted `FND-027` policy observation. |
 | `FND-032` | implementation/routing | Final focused browser replay exposed the Formalization document-review route as a sibling without a dynamic Formalization layout | `EV-51`, `CA-12`, `F5-T3` | resolved | Added the dynamic Formalization route layout with an `Outlet`, regenerated `routeTree.gen.ts`, and reran the official 4-test Formalization route suite plus the final browser matrix. Direct review navigation now renders the review page instead of an empty shell; no REST contract changed. |
+| `FND-033` | test/fixture | Web CI #91 and #92: five Document Specifications tests observed zero request counters although the mocked requests completed | `EV-53`, `CA-07`, `CA-09` | resolved | The shared fixture had returned a spread copy of its state while route handlers incremented the original object. The fixture now exposes the same typed state object, preserving mutable request counters; the focused suite passed 9/9 and both affected Web CI runs passed. |
 
 ## Lessons learned
 
@@ -219,6 +221,7 @@ Revision 8 evidence-refresh activation: `builder_server` (`01a038fe-e3ae-70d1-9c
 | A regression test must exercise the failure after the transaction boundary it claims to protect; mocking the entry use case before persistence can only prove error mapping. | `FND-028` | no authority change; the Server transaction rule already requires rollback/atomicity coverage, so this is a feature-local test correction. |
 | Clean-seed evidence for idempotency requires two complete clear/run observations, not one successful invocation. | `FND-029` | no authority change; the database-layer rule already requires deterministic, repeatable seed behavior. |
 | A dynamic route with a shared `$id` segment must have an explicit layout route when sibling detail/review surfaces depend on the same parameter; regenerate and exercise both direct and in-app navigation after adding it. | `FND-032` | no authority change; this is a feature-local TanStack route composition correction. |
+| Shared browser fixtures must expose the same mutable state object used by their route handlers; spreading state with primitive counters creates false-negative request assertions. | `FND-033` | no authority change; the correction is feature-local and the existing widget/route test rules already require assertions against observable transport behavior. |
 
 ## PR CI quality gate
 
@@ -227,7 +230,22 @@ is not SDD current-implementation metadata. Retain failed and superseded-head ru
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | applicable PR workflow | — | pending | — |
+| `CI-01` | Core package checks — PR #89 | `ffe2d55c659fba5bbfaf82c784406d89451cfeb` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923961380/job/98042957294) |
+| `CI-02` | Server app checks — PR #89 | `ffe2d55c659fba5bbfaf82c784406d89451cfeb` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923961370/job/98042957312) |
+| `CI-03` | Web app checks — PR #89 | `ffe2d55c659fba5bbfaf82c784406d89451cfeb` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923961424/job/98042957477) |
+| `CI-04` | Review pull request — PR #89 | `ffe2d55c659fba5bbfaf82c784406d89451cfeb` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923961435/job/98042957571) |
+| `CI-05` | Core package checks — PR #90 | `16ab18e9d6909fd56e2728ee3ddeef47d3e17359` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923980578/job/98043014003) |
+| `CI-06` | Server app checks — PR #90 | `16ab18e9d6909fd56e2728ee3ddeef47d3e17359` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923980571/job/98043014115) |
+| `CI-07` | Web app checks — PR #90 | `16ab18e9d6909fd56e2728ee3ddeef47d3e17359` | passed | [run](https://github.com/hms-society/hms/actions/runs/32923980595/job/98043014216) |
+| `CI-08` | Core package checks — PR #91 | `a170af0eff579a3cba3e4390809824f85f060877` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925039346/job/98046131719) |
+| `CI-09` | Server app checks — PR #91 | `a170af0eff579a3cba3e4390809824f85f060877` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925039249/job/98046135529) |
+| `CI-10` | Web app checks — PR #91 | `a170af0eff579a3cba3e4390809824f85f060877` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925039247/job/98046138368) |
+| `CI-11` | Core package checks — PR #92 | `ac1be964e1e76d01e2744c8ab3ad66941c9517fd` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925397989/job/98047170160) |
+| `CI-12` | Server app checks — PR #92 | `ac1be964e1e76d01e2744c8ab3ad66941c9517fd` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925397996/job/98047170433) |
+| `CI-13` | Web app checks — PR #92 | `ac1be964e1e76d01e2744c8ab3ad66941c9517fd` | passed | [run](https://github.com/hms-society/hms/actions/runs/32925397987/job/98047170569) |
+
+Supabase Preview foi `skipped` em todos os PRs pelos filtros de caminho do
+workflow; não é um check aplicável a esta entrega.
 
 ## History
 
@@ -247,3 +265,4 @@ is not SDD current-implementation metadata. Retain failed and superseded-head ru
 | `2026-08-25` | Closure evidence correction completed: the authorized seed ran twice, the real post-insert rollback regression passed, the final admin/paralegal/dark-mode browser matrix passed 4/4, and `F2GBfU`, `zetNe`, `Z3Ll2j`, `b2f2jS`, `nFKJE`, `ZLBTF` and `USNIG` are retained under `apps/web/test-results/final-visual/` with recorded dimensions. The dynamic Formalization route layout was added and the official Formalization route suite passed 4/4; the same-reviewer recheck followed as the final gate. |
 | `2026-08-25` | Closure evidence correction completed: the authorized seed ran twice, the real post-insert rollback regression passed, the final admin/paralegal/dark-mode browser matrix passed 4/4, and `F2GBfU`, `zetNe`, `Z3Ll2j`, `b2f2jS`, `nFKJE`, `ZLBTF` and `USNIG` are retained under `apps/web/test-results/final-visual/` with recorded dimensions. The dynamic Formalization route layout was added and the official Formalization route suite passed 4/4. |
 | `2026-08-25` | Same Reviewer final read-only recheck completed with no blocking findings. Plan F7 and its Review handoff row were closed; PR CI remains the only final quality-gate step. |
+| `2026-08-25` | The four ready-for-review PRs were published in dependency order; final Core/Server/Web CI passed at the recorded head SHAs. The shared Web fixture counter regression was corrected and both affected Web CI reruns passed. Evaluation and Spec revision 8 are complete; no external Jira/Confluence state was mutated. |

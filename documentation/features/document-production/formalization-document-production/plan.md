@@ -12,7 +12,7 @@ updated_at: 2026-08-25
 
 # Execution status
 
-- **Spec:** [`spec.md`](./spec.md), revisão 8, pending final PR CI quality gate.
+- **Spec:** [`spec.md`](./spec.md), revisão 8, completed.
 - **Revision 7 amendment:** replace the persisted contract-form snapshot only while
   open, clear answers on replacement, expose the shared selector through the
   Formalization context, and seed two temporary matching definitions.
@@ -20,13 +20,24 @@ updated_at: 2026-08-25
   the Formalization projection and use that inherited context for form discovery.
 - **Authorization correction:** administrators may operate any Formalization; the assigned lawyer remains the owner and authenticated actors remain the audit subjects.
 - **Rationale:** Plan-backed execution é necessário porque a entrega cruza Core, Validation, Server/REST/persistência/seed, reutilização de UI entre Formalização e Consulta e validação autenticada com migração, concorrência e estados visuais.
-- **Current phase:** F7 — final same-reviewer read-only recheck completed; PR publication and CI quality gate remain.
-- **Next action:** publish the PR and run the applicable CI quality gate; the contracted Pencil state remains outside this delivery until an owner-approved read contract exists.
-- **Active blockers:** none in the implementation or current evidence. The final Reviewer gate and PR CI are pending. `WNe1f` is a deferred supplemental state, not a contract requirement for this revision.
+- **Current phase:** Delivery published; final same-reviewer recheck and every applicable PR CI quality gate passed.
+- **Next action:** await review and an explicitly authorized merge; the contracted Pencil state remains outside this delivery until an owner-approved read contract exists.
+- **Active blockers:** none. `WNe1f` is a deferred supplemental state, not a contract requirement for this revision.
 - **Builders:** nenhum ativo antes do kickoff; próximo Builder pronto: `builder_core`. Reutilizar `builder_validation` em F2, `builder_server` em F4 e `builder_web` em F3/F5; executar no máximo dois Builders em paralelo por onda.
 - **Shared ownership:** o Orchestrator coordena `evaluation.md`, lockfile/dependências caso surjam, geração das migrations/meta do Drizzle, `routeTree.gen.ts`, integração final e evidência oficial. Builders não editam este Plan, a Spec ou a Evaluation.
 
 # Execution ledger
+
+## Published delivery
+
+The implementation is published as a ready-for-review dependent chain:
+
+| Order | PR | Base | Head | Head SHA |
+| --- | --- | --- | --- | --- |
+| 1 | [#89](https://github.com/hms-society/hms/pull/89) | `develop` | `codex/formalization-core-validation` | `ffe2d55c659fba5bbfaf82c784406d89451cfeb` |
+| 2 | [#90](https://github.com/hms-society/hms/pull/90) | `codex/formalization-core-validation` | `codex/formalization-server` | `16ab18e9d6909fd56e2728ee3ddeef47d3e17359` |
+| 3 | [#91](https://github.com/hms-society/hms/pull/91) | `codex/formalization-server` | `codex/formalization-web-shared` | `a170af0eff579a3cba3e4390809824f85f060877` |
+| 4 | [#92](https://github.com/hms-society/hms/pull/92) | `codex/formalization-web-shared` | `codex/formalization-web` | `ac1be964e1e76d01e2744c8ab3ad66941c9517fd` |
 
 | Wave | Builder | Phase | Name | Depends on | Parallel with | Status | Exit condition |
 | --- | --- | --- | --- | --- | --- | --- | --- |

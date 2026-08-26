@@ -1,6 +1,6 @@
 ---
 title: Fundação da página de Formalização
-status: in_progress
+status: completed
 revision: 8
 source:
   type: jira-ticket
@@ -20,6 +20,16 @@ last_updated_at: 2026-08-25
 ---
 
 # 1. Context and scope
+
+## Delivery outcome
+
+Spec revision 8 was implemented across Core, Validation, Server and Web. The
+delivery is published as the dependent PR chain [#89](https://github.com/hms-society/hms/pull/89),
+[#90](https://github.com/hms-society/hms/pull/90),
+[#91](https://github.com/hms-society/hms/pull/91) and
+[#92](https://github.com/hms-society/hms/pull/92); all applicable PR CI checks
+passed. Detailed acceptance, runtime, visual and CI evidence is maintained in
+[`evaluation.md`](./evaluation.md).
 
 ## Objective and source
 
@@ -802,3 +812,5 @@ provider is introduced.
 | 4 | 2026-08-24 | open | Codified semantic Structure mutability in `core-package-rules.md`; retained deep `readonly` only for the immutable Formalization generation snapshot and fixed validation configuration. |
 | 5 | 2026-08-24 | open | Audited the Contract against the new mutability rule: restored mutable Entity answer state, made fixed validation metadata explicitly readonly and replaced shallow wrappers with a recursive JSON-safe immutable generation snapshot. |
 | 6 | 2026-08-25 | in_progress | Added the explicit product decision that administrators may read and operate any Formalization while preserving assigned-lawyer ownership and authenticated audit actors. |
+| 7 | 2026-08-25 | completed | Added persisted replacement of the open Formalization contract-form snapshot, answer clearing, revision reset and two temporary matching seed definitions. |
+| 8 | 2026-08-25 | completed | Made Intake legal-area/topic inheritance explicit for form discovery and closed the delivery after final runtime, visual, reviewer and PR CI evidence. |
