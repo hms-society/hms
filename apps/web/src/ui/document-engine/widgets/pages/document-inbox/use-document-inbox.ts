@@ -5,7 +5,6 @@ import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 
 import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
-import { useDocumentValidationDocumentsQuery } from '@/ui/document-engine/hooks/use-document-validation-documents-query'
 import type { IconName } from '@/ui/shared/widgets/components/icon'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
@@ -31,12 +30,6 @@ export function useDocumentInbox() {
   const { navigateTo } = useNavigation()
   const { batches, batchesError, isFetchingBatches, refetchBatches } =
     useDocumentBatchesTriageQuery()
-  const {
-    documents: rawValidationDocuments,
-    documentsError: validationError,
-    isFetchingDocuments: isFetchingValidation,
-    refetchDocuments: refetchValidation,
-  } = useDocumentValidationDocumentsQuery()
 
   const [currentPage, setCurrentPage] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
@@ -70,22 +63,6 @@ export function useDocumentInbox() {
     }
 
     return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-
-  function getStatusLabel(status: DocumentValidationDocument['status']) {
-    const labels: Record<DocumentValidationDocument['status'], string> = {
-      awaiting_validation: 'Aguardando validação',
-      validated: 'Validado',
-      not_linked: 'Não vinculado',
-      illegible: 'Ilegível',
-      incomplete: 'Incompleto',
-      duplicate: 'Duplicado',
-      not_corresponding: 'Não correspondente',
-      processing_failure: 'Falha no processamento',
-      resend_requested: 'Reenvio solicitado',
-    }
-
-    return labels[status]
   }
 
   function getStatusStyle(status: string) {
@@ -130,47 +107,18 @@ export function useDocumentInbox() {
     }
   }
 
-  function getChannelIcon(channel: DocumentValidationDocument['channel']): IconName {
+  function getChannelIcon(channel?: string): IconName {
     if (channel === DocumentBatchChannel.WhatsApp) return 'message-square'
     if (channel === DocumentBatchChannel.Email) return 'mail'
 
     return 'help-circle'
   }
 
-  function getChannelLabel(channel: DocumentValidationDocument['channel']) {
+  function getChannelLabel(channel?: string) {
     if (channel === DocumentBatchChannel.WhatsApp) return 'WhatsApp'
     if (channel === DocumentBatchChannel.Email) return 'E-mail'
 
     return 'Portal do cliente'
-  }
-
-  function getSenderName(document: DocumentValidationDocument) {
-    const titular = document.extractedFields.find((field) => field.label === 'Titular')
-
-    return titular?.value ?? document.sender
-  }
-
-  function toInboxDocument(document: DocumentValidationDocument): InboxDocument {
-    const status = getStatusLabel(document.status)
-    const statusStyle = getStatusStyle(status)
-    const checklistLink = document.checklistLink
-    const receivedAt = new Date(document.receivedAt)
-
-    return {
-      id: document.id,
-      fileName: document.fileName,
-      fileSize: formatFileSize(document.sizeBytes),
-      receivedFromIcon: getChannelIcon(document.channel),
-      receivedFrom: getSenderName(document),
-      contactInfo: `${getChannelLabel(document.channel)} · ${document.sender}`,
-      caseId: checklistLink?.caseLabel ?? 'Sem vínculo seguro',
-      caseDesc: checklistLink?.checklistItemLabel ?? 'Escolha manual necessária',
-      receivedDate: formatReceivedDate(receivedAt),
-      receivedTime: format(receivedAt, 'HH:mm'),
-      status,
-      badgeClasses: statusStyle.badgeClasses,
-      dotClasses: statusStyle.dotClasses,
-    }
   }
 
   function batchToInboxDocuments(batch: DocumentBatch): InboxDocument[] {
@@ -223,10 +171,7 @@ export function useDocumentInbox() {
     ]
   }
 
-  const documents =
-    batches.length > 0
-      ? batches.flatMap(batchToInboxDocuments)
-      : rawValidationDocuments.map(toInboxDocument)
+  const documents = batches.flatMap(batchToInboxDocuments)
 
   const uniqueStatuses = useMemo(
     () => Array.from(new Set(documents.map((item) => item.status))),
@@ -299,7 +244,7 @@ export function useDocumentInbox() {
   }
 
   async function handleRefresh() {
-    await Promise.all([refetchBatches(), refetchValidation()])
+    await refetchBatches()
   }
 
   return {
@@ -315,8 +260,8 @@ export function useDocumentInbox() {
     setClientFilter,
     uniqueStatuses,
     uniqueClients,
-    error: batchesError || validationError,
-    isFetching: isFetchingBatches || isFetchingValidation,
+    error: batchesError,
+    isFetching: isFetchingBatches,
     handlePageChange,
     handleAnalyze,
     handleRefresh,
