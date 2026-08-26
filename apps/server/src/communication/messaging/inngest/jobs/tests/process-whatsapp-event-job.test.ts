@@ -131,16 +131,18 @@ describe('ProcessWhatsappEventJob', () => {
       }),
     )
 
-    expect(sendEventMock).toHaveBeenCalledWith('dispatch-document-batch', {
-      name: 'documents/whatsapp.batch.received',
-      data: {
-        eventoId: 'evt-100',
-        sender: '5511999991111',
-        clientId: 'client-active-1',
-        mimeType: 'image/jpeg',
-        originalName: 'img-1.jpeg',
+    expect(sendEventMock).toHaveBeenCalledWith('dispatch-document-batches', [
+      {
+        name: 'documents/whatsapp.batch.received',
+        data: {
+          eventoId: 'evt-100',
+          sender: '5511999991111',
+          clientId: 'client-active-1',
+          mimeType: 'image/jpeg',
+          originalName: 'img-1.jpeg',
+        },
       },
-    })
+    ])
   })
 
   it('3. Processa envio por terceiro cadastrado repassando o cliente correspondente', async () => {
@@ -183,16 +185,18 @@ describe('ProcessWhatsappEventJob', () => {
     const handler = job.function as any
     await handler({ event, step: mockStep })
 
-    expect(sendEventMock).toHaveBeenCalledWith('dispatch-document-batch', {
-      name: 'documents/whatsapp.batch.received',
-      data: {
-        eventoId: 'evt-100',
-        sender: '5511977776666',
-        clientId: 'client-third-party-99',
-        mimeType: 'application/pdf',
-        originalName: 'procuracao_familiar.pdf',
+    expect(sendEventMock).toHaveBeenCalledWith('dispatch-document-batches', [
+      {
+        name: 'documents/whatsapp.batch.received',
+        data: {
+          eventoId: 'evt-100',
+          sender: '5511977776666',
+          clientId: 'client-third-party-99',
+          mimeType: 'application/pdf',
+          originalName: 'procuracao_familiar.pdf',
+        },
       },
-    })
+    ])
   })
 
   it('4. Processa múltiplos documentos e mídias de diferentes tipos em um único payload', async () => {
@@ -251,36 +255,38 @@ describe('ProcessWhatsappEventJob', () => {
     const handler = job.function as any
     await handler({ event, step: mockStep })
 
-    expect(sendEventMock).toHaveBeenCalledTimes(3)
-    expect(sendEventMock).toHaveBeenNthCalledWith(1, 'dispatch-document-batch', {
-      name: 'documents/whatsapp.batch.received',
-      data: {
-        eventoId: 'evt-100',
-        sender: '5511955554444',
-        clientId: 'client-multi-doc',
-        mimeType: 'application/pdf',
-        originalName: 'rg.pdf',
+    expect(sendEventMock).toHaveBeenCalledTimes(1)
+    expect(sendEventMock).toHaveBeenCalledWith('dispatch-document-batches', [
+      {
+        name: 'documents/whatsapp.batch.received',
+        data: {
+          eventoId: 'evt-100',
+          sender: '5511955554444',
+          clientId: 'client-multi-doc',
+          mimeType: 'application/pdf',
+          originalName: 'rg.pdf',
+        },
       },
-    })
-    expect(sendEventMock).toHaveBeenNthCalledWith(2, 'dispatch-document-batch', {
-      name: 'documents/whatsapp.batch.received',
-      data: {
-        eventoId: 'evt-100',
-        sender: '5511955554444',
-        clientId: 'client-multi-doc',
-        mimeType: 'image/png',
-        originalName: 'img-2.png',
+      {
+        name: 'documents/whatsapp.batch.received',
+        data: {
+          eventoId: 'evt-100',
+          sender: '5511955554444',
+          clientId: 'client-multi-doc',
+          mimeType: 'image/png',
+          originalName: 'img-2.png',
+        },
       },
-    })
-    expect(sendEventMock).toHaveBeenNthCalledWith(3, 'dispatch-document-batch', {
-      name: 'documents/whatsapp.batch.received',
-      data: {
-        eventoId: 'evt-100',
-        sender: '5511955554444',
-        clientId: 'client-multi-doc',
-        mimeType: 'image/webp',
-        originalName: 'img-3.webp',
+      {
+        name: 'documents/whatsapp.batch.received',
+        data: {
+          eventoId: 'evt-100',
+          sender: '5511955554444',
+          clientId: 'client-multi-doc',
+          mimeType: 'image/webp',
+          originalName: 'img-3.webp',
+        },
       },
-    })
+    ])
   })
 })

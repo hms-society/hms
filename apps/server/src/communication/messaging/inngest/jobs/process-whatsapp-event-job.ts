@@ -61,8 +61,12 @@ export class ProcessWhatsappEventJob extends InngestJob {
           return
         }
 
-        await step.run('route-whatsapp-media', async () => {
+        const eventsToDispatch = await step.run('route-whatsapp-media', async () => {
           const database = this.drizzleClient.requireDatabase()
+          const events: Array<{
+            name: 'documents/whatsapp.batch.received'
+            data: Record<string, unknown>
+          }> = []
 
           for (const message of messages) {
             if (message.type !== 'document' && message.type !== 'image') {
@@ -105,7 +109,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
               })
               .returning()
 
-            await step.sendEvent('dispatch-document-batch', {
+            events.push({
               name: 'documents/whatsapp.batch.received',
               data: {
                 eventoId: evento.id,
@@ -119,7 +123,13 @@ export class ProcessWhatsappEventJob extends InngestJob {
               },
             })
           }
+
+          return events
         })
+
+        if (eventsToDispatch && eventsToDispatch.length > 0) {
+          await step.sendEvent('dispatch-document-batches', eventsToDispatch)
+        }
       },
     )
   }
