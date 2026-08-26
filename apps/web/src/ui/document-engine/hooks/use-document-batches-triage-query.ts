@@ -5,7 +5,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 const DOCUMENT_BATCHES_TRIAGE_QUERY_KEY = ['document-batches', 'triage'] as const
 
 export function useDocumentBatchesTriageQuery() {
-  const { documentEngineService } = useRestContext()
+  const { documentService } = useRestContext()
   const {
     data: batches = [],
     error: batchesError,
@@ -14,7 +14,7 @@ export function useDocumentBatchesTriageQuery() {
   } = useQuery({
     queryKey: DOCUMENT_BATCHES_TRIAGE_QUERY_KEY,
     queryFn: async () => {
-      const response = await documentEngineService.listTriageBatches()
+      const response = await documentService.listTriageBatches()
 
       if (response.isFailure) response.throwError()
 
