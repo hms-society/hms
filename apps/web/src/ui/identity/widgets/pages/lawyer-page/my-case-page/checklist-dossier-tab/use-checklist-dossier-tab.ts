@@ -15,7 +15,6 @@ import type { ChecklistItem } from '../types'
 export type UseChecklistDossierTabParams = {
   caseId: string
   checklist: ChecklistItem[]
-  initialExpectedVersion: number
 }
 
 const CHECKLIST_GATE_LABELS: Record<CaseChecklistGateDecisionValue, string> = {
@@ -64,7 +63,6 @@ const DECISION_DIALOG_COPY: Record<
 export function useChecklistDossierTab({
   caseId,
   checklist,
-  initialExpectedVersion,
 }: UseChecklistDossierTabParams) {
   const { caseManagementService } = useRestContext()
   const { currentCollaborator } = useCurrentCollaboratorQuery()
@@ -73,7 +71,6 @@ export function useChecklistDossierTab({
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)
   const [reviewedCase, setReviewedCase] = useState<LegalCase | null>(null)
-  const expectedVersion = reviewedCase?.version ?? initialExpectedVersion
   const validatedItemsCount = checklist.filter(
     (item) => item.status === 'validado',
   ).length
@@ -107,7 +104,6 @@ export function useChecklistDossierTab({
       const response = await caseManagementService.reviewChecklistGate(caseId, {
         decision,
         decidedBy: currentCollaborator.collaboratorId,
-        expectedVersion,
         remarks: remarks.trim() || undefined,
       })
 

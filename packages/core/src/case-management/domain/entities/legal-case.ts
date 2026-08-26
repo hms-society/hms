@@ -12,12 +12,11 @@ export type LegalCase = Entity & {
   checklistGate: CaseChecklistGate
   dossierGate: CaseDossierGate
   openedAt: Date
-  version: number
   createdAt: Date
   updatedAt: Date
 }
 
 export type LegalCaseCreation = Omit<
   LegalCase,
-  'checklistGate' | 'createdAt' | 'dossierGate' | 'id' | 'updatedAt' | 'version'
+  'checklistGate' | 'createdAt' | 'dossierGate' | 'id' | 'updatedAt'
 >

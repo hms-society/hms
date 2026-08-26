@@ -18,7 +18,6 @@ export type LegalCaseSummary = Pick<Entity, 'id'> & {
   legalTopic: string
   openedAt: Date
   updatedAt: Date
-  version: number
   checklistGate: CaseChecklistGate
   dossierGate: CaseDossierGate
   team: LegalCaseTeamMemberSummary[]

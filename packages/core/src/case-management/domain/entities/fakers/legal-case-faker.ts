@@ -27,7 +27,6 @@ export class LegalCaseFaker {
         homologatedBy: undefined,
       },
       openedAt: createdAt,
-      version: faker.number.int({ min: 1, max: 10 }),
       createdAt,
       updatedAt: createdAt,
       ...overrides,

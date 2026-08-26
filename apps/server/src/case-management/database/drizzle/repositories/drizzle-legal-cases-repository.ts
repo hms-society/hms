@@ -4,7 +4,7 @@ import type {
   LegalCaseTeamMemberSummary,
 } from '@hms/core/case-management/domain/entities'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import { and, desc, eq, inArray, sql } from 'drizzle-orm'
+import { desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import {
@@ -70,7 +70,6 @@ export class DrizzleLegalCasesRepository
         legalTopic: legalTopicModel.name,
         openedAt: legalCaseModel.openedAt,
         updatedAt: legalCaseModel.updatedAt,
-        version: legalCaseModel.version,
         checklistGateDecision: legalCaseModel.checklistGateDecision,
         checklistGateDecidedAt: legalCaseModel.checklistGateDecidedAt,
         checklistGateDecidedBy: legalCaseModel.checklistGateDecidedBy,
@@ -127,7 +126,6 @@ export class DrizzleLegalCasesRepository
         legalTopic: legalCase.legalTopic,
         openedAt: legalCase.openedAt,
         updatedAt: legalCase.updatedAt,
-        version: legalCase.version,
         checklistGate: {
           decision: legalCase.checklistGateDecision ?? undefined,
           decidedAt: legalCase.checklistGateDecidedAt ?? undefined,
@@ -146,7 +144,6 @@ export class DrizzleLegalCasesRepository
   async reviewChecklistGate({
     caseId,
     checklistGate,
-    expectedVersion,
     status,
   }: Parameters<LegalCasesRepository['reviewChecklistGate']>[0]): ReturnType<
     LegalCasesRepository['reviewChecklistGate']
@@ -157,14 +154,11 @@ export class DrizzleLegalCasesRepository
         checklistGateDecision: checklistGate.decision,
         checklistGateDecidedAt: new Date(),
         checklistGateDecidedBy: checklistGate.decidedBy,
-        checklistGateRemarks: checklistGate.remarks,
+        checklistGateRemarks: checklistGate.remarks ?? null,
         status,
         updatedAt: new Date(),
-        version: sql`${legalCaseModel.version} + 1`,
       })
-      .where(
-        and(eq(legalCaseModel.id, caseId), eq(legalCaseModel.version, expectedVersion)),
-      )
+      .where(eq(legalCaseModel.id, caseId))
       .returning()
 
     return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined

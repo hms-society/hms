@@ -25,7 +25,6 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     const response = await request(fixture.app.getHttpServer())
       .patch(`/cases/${legalCase.id}/checklist-gate`)
       .send({
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy: fixture.authUser.id,
         remarks: 'CNIS será complementado por ofício já autorizado.',
@@ -33,7 +32,6 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
       .expect(200)
 
     expect(response.body.status).toBe('ready_for_legal_production')
-    expect(response.body.version).toBe(legalCase.version + 1)
     expect(response.body.checklistGate.decision).toBe('approved_with_exception')
     expect(response.body.checklistGate.remarks).toBe(
       'CNIS será complementado por ofício já autorizado.',
@@ -47,7 +45,6 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     const response = await request(fixture.app.getHttpServer())
       .patch(`/cases/${legalCase.id}/checklist-gate`)
       .send({
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy: fixture.authUser.id,
       })
@@ -55,24 +52,6 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
 
     expect(response.body.message).toBe(
       'Informe as ressalvas para aprovar o checklist com exceção.',
-    )
-    expect(response.body.statusCode).toBe(409)
-  })
-
-  it('rejects stale checklist gate reviews', async () => {
-    const legalCase = await fixture.registerLegalCase()
-
-    const response = await request(fixture.app.getHttpServer())
-      .patch(`/cases/${legalCase.id}/checklist-gate`)
-      .send({
-        expectedVersion: legalCase.version + 1,
-        decision: CaseChecklistGateDecision.Approved,
-        decidedBy: fixture.authUser.id,
-      })
-      .expect(409)
-
-    expect(response.body.message).toBe(
-      'O caso foi alterado por outro usuário. Atualize a página e tente novamente.',
     )
     expect(response.body.statusCode).toBe(409)
   })

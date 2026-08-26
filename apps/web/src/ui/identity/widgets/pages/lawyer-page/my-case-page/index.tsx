@@ -198,7 +198,6 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
             checklist={MOCK_CHECKLIST}
-            expectedVersion={1}
           />
         </TabsContent>
       </Tabs>

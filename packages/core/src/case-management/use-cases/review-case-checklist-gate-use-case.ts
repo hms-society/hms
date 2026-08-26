@@ -1,11 +1,7 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 
 import type { LegalCase } from '../domain/entities'
-import {
-  CaseChecklistGateReviewError,
-  LegalCaseNotFoundError,
-  LegalCaseVersionConflictError,
-} from '../domain/errors'
+import { CaseChecklistGateReviewError, LegalCaseNotFoundError } from '../domain/errors'
 import {
   CaseChecklistGateDecision,
   LegalCaseStatus,
@@ -15,7 +11,6 @@ import type { LegalCasesRepository } from '../interfaces'
 
 type Request = {
   caseId: string
-  expectedVersion: number
   decision: CaseChecklistGateDecisionValue
   decidedBy: string
   remarks?: string
@@ -37,7 +32,6 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
 
     const reviewedCase = await this.legalCasesRepository.reviewChecklistGate({
       caseId: request.caseId,
-      expectedVersion: request.expectedVersion,
       checklistGate: {
         decision: request.decision,
         decidedBy: request.decidedBy,
@@ -47,7 +41,7 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     })
 
     if (!reviewedCase) {
-      throw new LegalCaseVersionConflictError()
+      throw new LegalCaseNotFoundError()
     }
 
     return reviewedCase

@@ -26,7 +26,6 @@ export class DrizzleLegalCaseMapper {
         homologatedBy: record.dossierGateHomologatedBy ?? undefined,
       },
       openedAt: record.openedAt,
-      version: record.version,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     }

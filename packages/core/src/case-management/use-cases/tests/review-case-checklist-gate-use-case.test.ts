@@ -20,7 +20,6 @@ describe('Review Case Checklist Gate Use Case', () => {
     const legalCase = LegalCaseFaker.fake()
     const reviewedCase = LegalCaseFaker.fake({
       id: legalCase.id,
-      version: legalCase.version + 1,
       checklistGate: {
         decision: CaseChecklistGateDecision.Approved,
         decidedAt: new Date('2026-08-24T12:00:00.000Z'),
@@ -39,7 +38,6 @@ describe('Review Case Checklist Gate Use Case', () => {
     await expect(
       useCase.execute({
         caseId: legalCase.id,
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.Approved,
         decidedBy,
       }),
@@ -47,7 +45,6 @@ describe('Review Case Checklist Gate Use Case', () => {
 
     expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
       caseId: legalCase.id,
-      expectedVersion: legalCase.version,
       checklistGate: {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy,
@@ -77,7 +74,6 @@ describe('Review Case Checklist Gate Use Case', () => {
     await expect(
       useCase.execute({
         caseId: legalCase.id,
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy,
         remarks,
@@ -86,7 +82,6 @@ describe('Review Case Checklist Gate Use Case', () => {
 
     expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
       caseId: legalCase.id,
-      expectedVersion: legalCase.version,
       checklistGate: {
         decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy,
@@ -98,7 +93,6 @@ describe('Review Case Checklist Gate Use Case', () => {
     await expect(
       useCase.execute({
         caseId: legalCase.id,
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy,
         remarks: ' ',
@@ -126,7 +120,6 @@ describe('Review Case Checklist Gate Use Case', () => {
     await expect(
       useCase.execute({
         caseId: legalCase.id,
-        expectedVersion: legalCase.version,
         decision: CaseChecklistGateDecision.BlockedInsufficient,
         decidedBy,
         remarks,
@@ -135,7 +128,6 @@ describe('Review Case Checklist Gate Use Case', () => {
 
     expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
       caseId: legalCase.id,
-      expectedVersion: legalCase.version,
       checklistGate: {
         decision: CaseChecklistGateDecision.BlockedInsufficient,
         decidedBy,

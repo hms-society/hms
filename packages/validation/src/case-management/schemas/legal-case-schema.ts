@@ -23,7 +23,6 @@ export const legalCaseSchema = z.object({
     homologatedBy: z.string().optional(),
   }),
   openedAt: z.iso.datetime(),
-  version: z.number().int(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 })

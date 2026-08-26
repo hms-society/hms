@@ -25,7 +25,6 @@ describe('List My Legal Cases Use Case', () => {
         legalTopic: 'Contratos',
         openedAt: new Date('2026-08-25T12:00:00.000Z'),
         updatedAt: new Date('2026-08-25T12:30:00.000Z'),
-        version: 1,
         checklistGate: {},
         dossierGate: {},
         team: [

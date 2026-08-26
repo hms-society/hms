@@ -2,7 +2,6 @@ import { sql } from 'drizzle-orm'
 import {
   check,
   index,
-  integer,
   pgTable,
   text,
   timestamp,
@@ -39,7 +38,6 @@ export const legalCaseModel = pgTable(
     openedAt: timestamp('opened_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
-    version: integer('version').default(1).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
@@ -52,7 +50,6 @@ export const legalCaseModel = pgTable(
     uniqueIndex('cases_intake_id_uidx').on(table.intakeId),
     index('cases_client_status_idx').on(table.clientId, table.status),
     index('cases_opened_at_idx').on(table.openedAt),
-    check('cases_version_positive_check', sql`${table.version} > 0`),
     check(
       'cases_public_code_format_check',
       sql`${table.publicCode} ~ '^CASO-[0-9]{8}-[0-9]{4}$'`,

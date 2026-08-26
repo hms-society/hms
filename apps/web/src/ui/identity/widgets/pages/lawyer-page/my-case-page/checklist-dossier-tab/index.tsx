@@ -17,14 +17,12 @@ export type ChecklistDossierTabProps = {
   activities: ActivityItem[]
   caseId: string
   checklist: ChecklistItem[]
-  expectedVersion: number
 }
 
 export const ChecklistDossierTab = ({
   activities,
   caseId,
   checklist,
-  expectedVersion,
 }: ChecklistDossierTabProps) => {
   const {
     canStartLegalWriting,
@@ -52,7 +50,6 @@ export const ChecklistDossierTab = ({
   } = useChecklistDossierTab({
     caseId,
     checklist,
-    initialExpectedVersion: expectedVersion,
   })
   const progressPercentage =
     mandatoryItemsCount > 0

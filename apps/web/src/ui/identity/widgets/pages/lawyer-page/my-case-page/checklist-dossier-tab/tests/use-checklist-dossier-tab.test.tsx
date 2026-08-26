@@ -52,7 +52,6 @@ describe('useChecklistDossierTab', () => {
       new RestResponse({
         body: {
           id: 'case-1',
-          version: 2,
           status: 'ready_for_legal_production',
           checklistGate: {
             decision: CaseChecklistGateDecision.ApprovedWithException,
@@ -74,7 +73,6 @@ describe('useChecklistDossierTab', () => {
             { id: '1', title: 'Procuração', status: 'validado' },
             { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
           ],
-          initialExpectedVersion: 1,
         }),
       { wrapper },
     )
@@ -95,7 +93,6 @@ describe('useChecklistDossierTab', () => {
     expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
       decision: CaseChecklistGateDecision.ApprovedWithException,
       decidedBy: 'collaborator-1',
-      expectedVersion: 1,
       remarks: 'CNIS será complementado por ofício já autorizado.',
     })
     await waitFor(() =>
@@ -122,7 +119,6 @@ describe('useChecklistDossierTab', () => {
         useChecklistDossierTab({
           caseId: 'case-1',
           checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
-          initialExpectedVersion: 1,
         }),
       { wrapper },
     )

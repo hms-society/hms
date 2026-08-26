@@ -62,7 +62,6 @@ describe('ChecklistDossierTab', () => {
           { id: '1', title: 'Procuração', status: 'validado' },
           { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
         ]}
-        expectedVersion={1}
       />,
     )
 
@@ -80,7 +79,6 @@ describe('ChecklistDossierTab', () => {
         { id: '1', title: 'Procuração', status: 'validado' },
         { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
       ],
-      initialExpectedVersion: 1,
     })
   })
 
@@ -105,7 +103,6 @@ describe('ChecklistDossierTab', () => {
         activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
-        expectedVersion={1}
       />,
     )
 

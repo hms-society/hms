@@ -3,7 +3,6 @@ import type { CaseChecklistGateDecision } from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
 
 export type ReviewCaseChecklistGateRequest = {
-  expectedVersion: number
   decision: CaseChecklistGateDecision
   decidedBy: string
   remarks?: string

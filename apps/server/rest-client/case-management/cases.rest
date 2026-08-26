@@ -3,7 +3,7 @@
 
 # Preconditions
 # Run `pnpm seed`, start the API on http://localhost:3333, execute the login
-# request, then provide a seeded case ID and its current version when prompted.
+# request, then provide a seeded case ID when prompted.
 
 ### Sign in as the seeded lawyer
 # @name signInAsSeededLawyer
@@ -31,20 +31,17 @@ Accept: application/json
 
 ### Review case checklist gate - approve
 # @prompt caseId Enter the case ID to review
-# @prompt expectedVersion Enter the current case version
 PATCH {{url}}/{{caseId}}/checklist-gate
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
   "decision": "approved",
-  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
-  "expectedVersion": {{expectedVersion}}
+  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}"
 }
 
 ### Review case checklist gate - approve with exception
 # @prompt caseId Enter the case ID to review
-# @prompt expectedVersion Enter the current case version
 PATCH {{url}}/{{caseId}}/checklist-gate
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Content-Type: application/json
@@ -52,13 +49,11 @@ Content-Type: application/json
 {
   "decision": "approved_with_exception",
   "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
-  "expectedVersion": {{expectedVersion}},
   "remarks": "Exceção documental previamente autorizada."
 }
 
 ### Review case checklist gate - reject on merit
 # @prompt caseId Enter the case ID to review
-# @prompt expectedVersion Enter the current case version
 PATCH {{url}}/{{caseId}}/checklist-gate
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Content-Type: application/json
@@ -66,13 +61,11 @@ Content-Type: application/json
 {
   "decision": "rejected_on_merit",
   "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
-  "expectedVersion": {{expectedVersion}},
   "remarks": "Documentação formal completa, mas insuficiente para sustentar a tese jurídica."
 }
 
 ### Review case checklist gate - block for insufficient documentation
 # @prompt caseId Enter the case ID to review
-# @prompt expectedVersion Enter the current case version
 PATCH {{url}}/{{caseId}}/checklist-gate
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Content-Type: application/json
@@ -80,6 +73,5 @@ Content-Type: application/json
 {
   "decision": "blocked_insufficient",
   "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
-  "expectedVersion": {{expectedVersion}},
   "remarks": "Pendências documentais impedem o avanço para produção jurídica."
 }

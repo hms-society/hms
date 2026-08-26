@@ -53,7 +53,7 @@ export class ReviewCaseChecklistGateController {
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'The checklist gate review is invalid or the case version is outdated.',
+    description: 'The checklist gate review is invalid.',
     type: ErrorResponseDto,
   })
   @UsePipes(ZodValidationPipe)

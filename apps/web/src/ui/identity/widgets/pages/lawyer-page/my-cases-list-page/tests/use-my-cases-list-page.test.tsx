@@ -33,7 +33,6 @@ describe('useMyCasesListPage', () => {
           legalTopic: 'Contratos',
           openedAt: '2026-08-25T12:00:00.000Z',
           updatedAt: '2026-08-25T12:30:00.000Z',
-          version: 1,
           checklistGate: {},
           dossierGate: {},
           team: [
@@ -55,7 +54,6 @@ describe('useMyCasesListPage', () => {
           legalTopic: 'Execução fiscal',
           openedAt: '2026-08-25T12:00:00.000Z',
           updatedAt: '2026-08-25T13:30:00.000Z',
-          version: 2,
           checklistGate: { decision: 'approved' },
           dossierGate: {},
           team: [
