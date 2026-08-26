@@ -1,9 +1,12 @@
 import { DocumentEditor } from '../../components/document-editor'
+import {
+  DocumentReviewDecisionBar,
+  DocumentReviewHeader,
+} from '../../components/document-review'
 import { Button } from '@/ui/shadcn/button'
 import { ConsultationDocumentReviewErrorState } from './consultation-document-review-error-state'
 import { ConsultationDocumentReviewLoading } from './consultation-document-review-loading'
 import { CancelManualEditDialog } from './cancel-manual-edit-dialog'
-import { DocumentVersionDecisionBar } from './document-version-decision-bar'
 import { DocumentVersionHistoryDialog } from './document-version-history-dialog'
 import { PendingMarkerNotFoundDialog } from './pending-marker-not-found-dialog'
 import { PendingMarkersDialog } from './pending-markers-dialog'
@@ -11,7 +14,6 @@ import { RegenerateDocumentVersionDialog } from './regenerate-document-version-d
 import { RejectDocumentVersionDialog } from './reject-document-version-dialog'
 import { SaveManualVersionDialog } from './save-manual-version-dialog'
 import { ViewRejectionReasonDialog } from './view-rejection-reason-dialog'
-import { ConsultationDocumentReviewHeader } from './consultation-document-review-header'
 import {
   type ConsultationDocumentReviewPageProps,
   useConsultationDocumentReviewPage,
@@ -120,7 +122,7 @@ export const ConsultationDocumentReviewPage = (
 
   return (
     <main className='mx-auto flex w-full flex-col gap-5'>
-      <ConsultationDocumentReviewHeader
+      <DocumentReviewHeader
         viewModel={viewModel}
         pendingMarkersCount={pendingMarkers.length}
         onBack={() => void handleBack()}
@@ -135,7 +137,7 @@ export const ConsultationDocumentReviewPage = (
           {actionError}
         </p>
       )}
-      <DocumentVersionDecisionBar
+      <DocumentReviewDecisionBar
         viewModel={viewModel}
         isEditing={isEditing}
         isSaving={isSaving}

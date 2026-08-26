@@ -1,10 +1,9 @@
+import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { PageTitle } from '@/ui/shared/widgets/components/page-title'
-import { DocumentVersionStatus } from '@hms/core/document-production/domain/structures'
+import { DocumentPackage } from '../../components/document-package'
 import { ConsultationDocumentEmptyState } from './consultation-documents-empty-state'
 import { ConsultationDocumentErrorState } from './consultation-documents-error-state'
-import { ConsultationDocumentList } from './consultation-document-list'
 import { ConsultationDocumentsLoading } from './consultation-documents-loading'
 import { SelectConsultationDocumentsDialog } from './select-consultation-documents-dialog'
 import {
@@ -63,112 +62,58 @@ export const ConsultationDocumentsPage = ({
 
   return (
     <main className='mx-auto flex w-full flex-col'>
-      <section className='rounded-xl border border-border bg-card px-4 py-4 shadow-sm sm:px-5'>
-        <header className='flex flex-wrap items-start justify-between gap-4'>
-          <div className='min-w-0 space-y-1'>
-            <PageTitle className='text-base font-semibold'>
-              Documentos da consulta
-            </PageTitle>
-            <p className='max-w-2xl text-xs leading-5 text-muted-foreground'>
-              Acompanhe a produção, a revisão e o histórico dos documentos vinculados.
-            </p>
-          </div>
-          <div className='flex flex-wrap justify-end gap-3'>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={() => setIsSelectionOpen(true)}
-              disabled={isReadOnly}
-              title={
-                isReadOnly
-                  ? 'Consulta encerrada; pacote em modo somente leitura.'
-                  : undefined
-              }
-            >
-              <Icon name='list-plus' />
-              Selecionar documentos
+      <DocumentPackage
+        title='Documentos da consulta'
+        description='Acompanhe a produção, a revisão e o histórico dos documentos vinculados.'
+        summary={
+          selection
+            ? `${selection.selectedDocumentSpecificationIds.length} documentos selecionados`
+            : documents.length === 1
+              ? '1 documento vinculado'
+              : `${documents.length} documentos vinculados`
+        }
+        items={documents}
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={
+          (packageConfirmationError ?? packageReopeningError)?.message ?? undefined
+        }
+        loadingState={<ConsultationDocumentsLoading />}
+        errorState={<ConsultationDocumentErrorState onRetry={handleRetry} />}
+        emptyState={<ConsultationDocumentEmptyState />}
+        isReadOnly={isReadOnly}
+        isConfirmed={isPackageConfirmed}
+        isConfirming={isPackageConfirming}
+        isReopening={isPackageReopening}
+        isConfirmationEligible={documents.every(
+          (item) => item.status === 'approved' || item.status === 'rejected',
+        )}
+        onSelect={() => setIsSelectionOpen(true)}
+        onConfirm={handleConfirmPackage}
+        onReopen={handleReopenPackage}
+        onGenerateDocument={handleGenerateDocument}
+        onCancelDocumentGeneration={handleCancelDocumentGeneration}
+        isCancellingDocument={isCancellingDocument}
+        onRefreshDocument={handleRefresh}
+        renderAction={(action, item) => {
+          if (!item.latestVersion) return null
+          return (
+            <Button asChild variant={action === 'review' ? 'brand' : 'ghost'} size='sm'>
+              <Anchor
+                route='consultationDocumentVersion'
+                params={{
+                  consultationId,
+                  documentId: item.id,
+                  documentVersionId: item.latestVersion.id,
+                }}
+              >
+                <Icon name={action === 'review' ? 'pencil' : 'eye'} />
+                {action === 'review' ? 'Revisar' : 'Visualizar'}
+              </Anchor>
             </Button>
-            {isPackageConfirmed ? (
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                disabled={isPackageReopening}
-                onClick={() => void handleReopenPackage()}
-                title='Reabra o pacote para alterar documentos ou gerar novas versões.'
-              >
-                <Icon name='pencil' />
-                {isPackageReopening ? 'Reabrindo...' : 'Editar pacote'}
-              </Button>
-            ) : (
-              <Button
-                type='button'
-                size='sm'
-                disabled={
-                  isReadOnly ||
-                  isPackageConfirming ||
-                  documents.length === 0 ||
-                  documents.some(
-                    (item) =>
-                      item.status !== DocumentVersionStatus.Approved &&
-                      item.status !== DocumentVersionStatus.Rejected,
-                  )
-                }
-                onClick={() => void handleConfirmPackage()}
-                title={
-                  isReadOnly
-                    ? 'Consulta encerrada; pacote em modo somente leitura.'
-                    : 'Gere e revise todos os documentos para confirmar o pacote.'
-                }
-              >
-                <Icon name='check' />
-                {isPackageConfirming ? 'Confirmando...' : 'Confirmar pacote'}
-              </Button>
-            )}
-          </div>
-        </header>
-
-        {packageConfirmationError || packageReopeningError ? (
-          <p
-            className='mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive'
-            role='alert'
-          >
-            {(packageConfirmationError ?? packageReopeningError)?.message ??
-              'Não foi possível atualizar o pacote de documentos.'}
-          </p>
-        ) : null}
-
-        <div className='mt-4 flex items-center justify-between border-b border-border pb-2 text-[0.6875rem] text-muted-foreground'>
-          <span>
-            {selection
-              ? `${selection.selectedDocumentSpecificationIds.length} documentos selecionados`
-              : documents.length === 1
-                ? '1 documento vinculado'
-                : `${documents.length} documentos vinculados`}
-          </span>
-          <span>Produção documental</span>
-        </div>
-
-        <div className='pt-1'>
-          {isLoading ? (
-            <ConsultationDocumentsLoading />
-          ) : isError ? (
-            <ConsultationDocumentErrorState onRetry={handleRetry} />
-          ) : documents.length === 0 ? (
-            <ConsultationDocumentEmptyState />
-          ) : (
-            <ConsultationDocumentList
-              items={documents}
-              onGenerateDocument={handleGenerateDocument}
-              onCancelDocumentGeneration={handleCancelDocumentGeneration}
-              isCancellingDocument={isCancellingDocument}
-              onRefreshDocument={handleRefresh}
-              isReadOnly={isReadOnly}
-            />
-          )}
-        </div>
-      </section>
+          )
+        }}
+      />
       <SelectConsultationDocumentsDialog
         open={isSelectionOpen}
         options={selection?.options ?? []}
