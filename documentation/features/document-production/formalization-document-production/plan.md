@@ -1,6 +1,6 @@
 ---
 title: Fundação da página de Formalização — implementation plan
-status: in_progress
+status: completed
 spec: ./spec.md
 spec_revision: 8
 evaluation: ./evaluation.md
@@ -12,7 +12,7 @@ updated_at: 2026-08-26
 
 # Execution status
 
-- **Spec:** [`spec.md`](./spec.md), revisão 8, open for implementation correction verification.
+- **Spec:** [`spec.md`](./spec.md), revisão 8, completed.
 - **Revision 7 amendment:** replace the persisted contract-form snapshot only while
   open, clear answers on replacement, expose the shared selector through the
   Formalization context, and seed two temporary matching definitions.
@@ -20,8 +20,8 @@ updated_at: 2026-08-26
   the Formalization projection and use that inherited context for form discovery.
 - **Authorization correction:** administrators may operate any Formalization; the assigned lawyer remains the owner and authenticated actors remain the audit subjects.
 - **Rationale:** Plan-backed execution é necessário porque a entrega cruza Core, Validation, Server/REST/persistência/seed, reutilização de UI entre Formalização e Consulta e validação autenticada com migração, concorrência e estados visuais.
-- **Current phase:** Review correction implementation, integrated runtime evidence and the same-Reviewer recheck are complete for F1-T2/F4-T3/F7-T1; only the final CI/review result recording remains before the delivery gate.
-- **Next action:** complete the current PR CI/review cycle, record its results and route the unchanged revision 8 Spec to `conclude-spec`.
+- **Current phase:** Review correction implementation, integrated runtime evidence, same-Reviewer recheck and final PR CI gate are complete for F1-T2/F4-T3/F7-T1.
+- **Next action:** none; revision 8 delivery is concluded.
 - **Active blockers:** none for the corrected contract. `WNe1f` remains a deferred supplemental state, not a contract requirement for this revision.
 - **Builders:** `builder_core` and `builder_server` completed the correction without editing SDD artifacts; reuse the same Reviewer for F7 recheck and keep the Orchestrator responsible for integration/evidence.
 - **Shared ownership:** o Orchestrator coordena `evaluation.md`, lockfile/dependências caso surjam, geração das migrations/meta do Drizzle, `routeTree.gen.ts`, integração final e evidência oficial. Builders não editam este Plan, a Spec ou a Evaluation.
@@ -46,7 +46,7 @@ The implementation is published as a ready-for-review dependent chain:
 | 2 | `builder_web` | F3 | Extração source-neutral de Document Production | F1 | F2 | `completed` | Neutral package/review surfaces compile and Consultation regression coverage passes |
 | 3 | `builder_server` | F4 | Persistência, seed, REST e composição do Server | F2 | F5 | `completed` | Real transaction rollback regression and server fixture prove persistence, authorization, source/event and convergence contracts after the closure correction |
 | 3 | `builder_web` | F5 | Página, rotas e jornada Web da Formalização | F2, F3; REST Contract da Spec congelado | F4 | `completed` | Web unit/route coverage and generated/static checks pass with all required UI evidence |
-| 4 | `orchestrator` | F6 | Integração, artefatos gerados e validação executável | F4, F5 | — | `in_progress` | Integrated candidate reflects the corrected closure behavior and current runtime/visual evidence |
+| 4 | `orchestrator` | F6 | Integração, artefatos gerados e validação executável | F4, F5 | — | `completed` | Integrated candidate reflects the corrected closure behavior and current runtime/visual evidence |
 | 5 | `reviewer` | F7 | Revisão integrada read-only | F6 | — | `completed` | Same Reviewer rechecks the corrected candidate; no blocking findings remain |
 
 #### Revision 7 amendment — persisted contract-form replacement
@@ -179,7 +179,7 @@ The implementation is published as a ready-for-review dependent chain:
 
 #### F6-T1 — Gerar artefatos e executar o Quality Gate integrado
 
-- **Status/owner:** `in_progress` — `orchestrator`, correction integrated and propagated; final CI/review results remain to be recorded before closure.
+- **Status/owner:** `completed` — `orchestrator`; correction integrated and propagated, with current CI/review results recorded in Evaluation.
 - **Depends/parallel:** F4 e F5 integrados; sem Builder concorrente.
 - **Paths:** `apps/server/src/shared/database/drizzle/migrations/**` e `meta/**` gerados pelo Drizzle; `apps/web/src/routeTree.gen.ts` gerado pelo TanStack Router; `evaluation.md` criado pelo kickoff de `implement-spec`; nenhum lockfile/dependência nova sem decisão explícita.
 - **Contract:** todos os `RF-*`/`CA-*`; especialmente `CA-01`, `CA-06`, `CA-12`, `CA-13` e o Quality Gate da Spec.

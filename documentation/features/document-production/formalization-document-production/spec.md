@@ -1,6 +1,6 @@
 ---
 title: Fundação da página de Formalização
-status: open
+status: completed
 revision: 8
 source:
   type: jira-ticket
@@ -24,7 +24,7 @@ last_updated_at: 2026-08-26
 ## Delivery outcome
 
 Spec revision 8 was implemented across Core, Validation, Server and Web and is
-under review-correction verification. The delivery is published as the dependent PR chain [#89](https://github.com/hms-society/hms/pull/89),
+delivered through the dependent PR chain [#89](https://github.com/hms-society/hms/pull/89),
 [#90](https://github.com/hms-society/hms/pull/90),
 [#91](https://github.com/hms-society/hms/pull/91) and
 [#92](https://github.com/hms-society/hms/pull/92); all applicable PR CI checks
@@ -816,3 +816,4 @@ provider is introduced.
 | 7 | 2026-08-25 | completed | Added persisted replacement of the open Formalization contract-form snapshot, answer clearing, revision reset and two temporary matching seed definitions. |
 | 8 | 2026-08-25 | completed | Made Intake legal-area/topic inheritance explicit for form discovery and closed the delivery after final runtime, visual, reviewer and PR CI evidence. |
 | 8 (reopened) | 2026-08-26 | open | Reopened the unchanged revision 8 implementation for three PR #89 corrections: bind closure to the authorized Intake, make Intake/Formalization closure atomic with retry-safe CAS, and compare normalized answers by deterministic `fieldId` identity. |
+| 8 (closed) | 2026-08-26 | completed | Added the fourth review correction for preserving invalid answer item types, propagated all four corrections through PRs #89–#92, passed Docker/Testcontainers runtime validation, completed the same-Reviewer recheck and passed the final dependent-PR CI gate. |
