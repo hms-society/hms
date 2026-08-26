@@ -1,26 +1,37 @@
 Guidance for AI coding agents working in this repository (HMS).
 
-HMS is a pnpm + Turborepo monorepo:
-
-- `apps/web` — TanStack Start + React frontend (Tailwind v4, shadcn/ui)
-- `apps/server` — NestJS backend
-- `packages/core` — shared domain (entities, errors, events, constants) consumed by both apps
-
 ## MCP availability and usage
 
 The development environment provides the following MCP servers. Use them when
 the task matches their purpose; do not invoke them for repository work that can
 be completed reliably from the local source and tooling alone.
 
-### Playwright (`mcp__playwright__*`)
+### Playwright CLI
 
-Use Playwright to validate browser behavior in `apps/web`, especially after UI,
-route, authentication, form, or REST integration changes. It can navigate the
-running application, inspect the accessibility snapshot, interact with fields
-and controls, capture console messages, and inspect network requests and
-responses. Prefer snapshots, console output, and network inspection for
-diagnosis; use screenshots when visual confirmation is needed. Start the web
-application and any required backend services before using it.
+Use the repository's Playwright CLI/test runner to validate browser behavior in
+`apps/web`, especially after UI, route, authentication, form, or REST
+integration changes. Do not use a Playwright MCP server for this repository.
+
+Prefer the configured integration command:
+
+```bash
+pnpm --filter web test:integration
+```
+
+For a focused run or debugging, use the local CLI through the workspace:
+
+```bash
+pnpm --filter web exec playwright test tests/routes/identity/login.index.test.tsx
+pnpm --filter web exec playwright test --headed
+pnpm --filter web exec playwright test --debug
+```
+
+The integration config starts the web app on `127.0.0.1:3100` and uses the
+fixtures under `apps/web/tests`. Existing route tests may use `page.route` for
+isolated widget/route behavior; label those as mocked coverage and do not treat
+them as evidence of real REST or Auth integration. For real server-backed flows,
+start the required services separately and point the test or CLI flow at the
+local application configuration.
 
 #### Required authenticated-browser workflow
 
@@ -41,24 +52,23 @@ transport as sufficient evidence. Use this sequence:
    For the current seed, the administrator is
    `admin@hmsadvogados.com.br`; never assume a credential without checking the
    source and `HMS_USER_SEED_PASSWORD` first.
-4. Navigate to `/login`, capture a fresh accessibility snapshot, fill the
-   visible email and password fields, submit, and wait for the authenticated
-   destination. Verify both the URL and authenticated content before testing a
-   protected route.
+4. Run the CLI test or flow against `/login`, locate fields by accessible role or
+   label, submit, and wait for the authenticated destination. Verify both the URL
+   and authenticated content before testing a protected route.
 5. Navigate to the protected route and validate real server-backed behavior.
    For Identity, verify `/colaboradores`, filters/search URL state, row actions,
    details, and the relevant form/dialog. Use the real REST/Auth services for
    this pass; `page.route` mocks belong only to isolated route/widget tests and
    must be labeled as such in the evidence.
-6. After each navigation or state-changing interaction, take a new
-   `browser_snapshot`. Accessibility refs are ephemeral: never reuse a ref from
-   an older snapshot after navigation or re-render. Prefer role/name or the
-   current snapshot ref over CSS selectors.
-7. Inspect `browser_console_messages` at the end of each flow and inspect
-   `browser_network_requests` for failed API calls. Any console error, 4xx/5xx
-   response, hydration warning, or auth refresh failure must be recorded and
-   classified as fixed, pre-existing, or blocking; do not call a flow green
-   solely because the test reached the expected URL.
+6. After each navigation or state-changing interaction, resolve fresh locators;
+   do not retain element handles across navigations or rerenders. Prefer
+   accessible role/name locators over brittle CSS selectors.
+7. Capture Playwright trace, screenshot, console, and failed-request evidence as
+   appropriate (`--trace`, `page.on('console')`, `page.on('requestfailed')`, or
+   response assertions). Any console error, 4xx/5xx response, hydration warning,
+   or auth refresh failure must be recorded and classified as fixed,
+   pre-existing, or blocking; do not call a flow green solely because the test
+   reached the expected URL.
 8. Exercise at least one narrow viewport and keyboard path for UI changes. If
    the Contract includes responsive, theme, focus, or accessibility behavior,
    validate each explicitly rather than inferring it from a desktop snapshot.

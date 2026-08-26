@@ -1,12 +1,12 @@
 ---
 name: conclude-spec
-description: Publish a validated Spec implementation through its pull request, run the final PR CI Quality Gate, close the SDD artifacts, and report the delivery state.
+description: Publish a validated Spec implementation through its pull request set, run the final PR CI Quality Gate, close the SDD artifacts, and report the delivery state.
 ---
 
 # Conclude a Spec
 
 Close a validation-ready implementation in the current task. `conclude-spec` owns publication,
-the final pull-request CI gate, evidence closure and artifact completion. It does not
+the final pull-request CI gate for the delivery PR set, evidence closure and artifact completion. It does not
 implement changes or process later reviewer feedback.
 
 ## Workflow continuity
@@ -47,11 +47,11 @@ and Jira statement through the Spec's `RF-*` and `CA-*` criteria to current Eval
 then classify the delivery as full, partial, or deferred without changing Jira or Confluence.
 
 Conclusion requires authorization to create commits, push the delivery branch and create or
-update its pull request. If that authority is not explicit or already in scope, ask once and
+update its pull requests. If that authority is not explicit or already in scope, ask once and
 keep the Spec `in_progress`. Do not silently publish, merge or deploy.
 
 All pull requests opened or updated by this workflow must be ready for review, never draft.
-The mandatory `create-pr` publication step must create or convert the delivery PR with
+The mandatory `create-pr` publication step must create or convert every delivery PR with
 `draft: false`; verify `isDraft: false` before the conclusion summary.
 
 ## Authority and late-change routing
@@ -91,32 +91,32 @@ conclusion automatically after it returns evaluation to `ready`.
 5. Reconcile the Confluence PRD/Jira/RF/CA evidence map without mutating external state. If
    traceability is incomplete, route the discrepancy through the authority rules.
 6. Invoke `commit-code` to create intentional scoped commits.
-7. Inspect the existing delivery PR, if any, and compare its base, head SHA, title and body
+7. Inspect the existing delivery PR set, if any, and compare each base, head SHA, title and body
    with the current candidate. If no matching PR exists, the PR points at an earlier SHA, or
    its publication details are stale or incomplete, **invoke `create-pr` immediately and
    mandatorily** to create or update it. Do not bypass `create-pr` with an ad hoc PR edit or
-   proceed to the final CI gate before it returns the current PR metadata.
+   proceed to the final CI gate before it returns the complete PR metadata.
 8. Invoke `create-pr` for the final publication whenever the branch was newly committed or
-   the PR needs any update; reuse the existing delivery PR and never create a duplicate.
-9. Record the branch and PR URL in the delivery record; update
+   any PR needs an update; reuse existing delivery PRs and never create duplicates.
+9. Record every branch and PR URL in the delivery record; update
    `evaluation.md` only when the operational ledger needs the reference.
 
 ## Final PR CI Quality Gate
 
 The PR CI gate is a blocking loop. After publication, poll every applicable check attached
-to the current PR head SHA until each reaches a terminal result. A pending or in-progress
+to every current delivery PR head SHA until each reaches a terminal result. A pending or in-progress
 check is not a pass, and this workflow must not return a final delivery summary while any
 required check is pending. Use the actual PR check/run URLs and record each workflow's head
 SHA and result in `evaluation.md`.
 
-Use the checks attached to the current pull request and select the applicable checked-in
+Use the checks attached to each current pull request and select the applicable checked-in
 GitHub Actions workflows by their real path filters:
 
 - **Core CI** for affected Core/package inputs;
 - **Server CI** for affected Server or Core inputs;
 - **Web CI** for affected Web or Core inputs.
 
-Wait for every applicable PR check on the current PR head SHA. A branch-push run, local build,
+Wait for every applicable PR check on every current PR head SHA. A branch-push run, local build,
 earlier SHA, cancelled run or missing expected workflow does not satisfy this gate. Record
 the check/workflow name, result, run URL, PR head SHA and relevant test/build summary in
 `evaluation.md`. Record why a workflow is inapplicable when its path filters exclude it.
@@ -126,8 +126,9 @@ If CI fails:
 - record the failure in `evaluation.md` and keep the Spec `in_progress`;
 - immediately invoke the applicable implementation or amendment workflow through the
   authority and late-change routing above;
-- after that workflow returns evaluation to `ready`, invoke `commit-code`, update the existing
-  PR through the mandatory `create-pr` workflow, and run this gate again on its new head SHA;
+- after that workflow returns evaluation to `ready`, invoke `commit-code`, update the affected
+  delivery PRs through the mandatory `create-pr` workflow, and run this gate again on every
+  affected current head SHA;
 - rerun the same SHA only for a documented transient CI/infrastructure failure;
 - repeat this correction, publication and CI loop until the gate passes or a permitted pause
   condition from Workflow continuity occurs.
@@ -253,7 +254,7 @@ Return:
 - delivery references, when present;
 - validation result and CA/manual/visual coverage;
 - fully delivered, partially delivered, and deferred Confluence PRD/Jira source statements;
-- applicable PR CI workflows and results;
+- applicable PR CI workflows and results for every delivery PR;
 - documentation alignment and remaining non-blocking limitations;
 - finding-derived PRD, Architecture, Design, Tooling and Rule Pack improvements, including
   justified no-change dispositions;

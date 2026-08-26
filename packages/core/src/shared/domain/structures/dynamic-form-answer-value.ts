@@ -1,1 +1,1 @@
-export type DynamicFormAnswerValue = string | boolean | readonly string[] | null
+export type DynamicFormAnswerValue = string | number | boolean | readonly string[] | null

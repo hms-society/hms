@@ -31,6 +31,7 @@ describe('List Document Specifications Use Case', () => {
         legalTopicIdsByArea: { 'area-1': ['topic-1'] },
       },
       status: 'available',
+      accessClassification: 'Interno',
     }
     const page: PaginationResponse<DocumentSpecificationListRecord> = {
       items: [record],
@@ -81,6 +82,7 @@ describe('List Document Specifications Use Case', () => {
             ],
           },
           status: 'available',
+          accessClassification: 'Interno',
         },
       ],
     })
@@ -109,6 +111,7 @@ describe('List Document Specifications Use Case', () => {
             moment: 'formalization',
           },
           status: 'unavailable',
+          accessClassification: 'Interno',
         },
       ],
       page: 8,
@@ -132,6 +135,7 @@ describe('List Document Specifications Use Case', () => {
           description: 'Modelo global',
           application: { scope: 'global', moment: 'formalization' },
           status: 'unavailable',
+          accessClassification: 'Interno',
         },
       ] satisfies readonly DocumentSpecificationListItem[],
     })

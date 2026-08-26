@@ -6,6 +6,7 @@ import { DocumentSpecificationFaker } from '../../domain/entities/fakers'
 import {
   DocumentSpecificationNotFoundError,
   InvalidDocumentSpecificationConfigurationError,
+  InvalidDocumentTemplateError,
 } from '../../domain/errors'
 import type { DocumentTemplateContent } from '../../domain/structures'
 import type { DocumentSpecificationsRepository } from '../../interfaces'
@@ -44,21 +45,28 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: '  Novo nome ',
         description: ' Nova descrição ',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
       },
     })
 
-    expect(repository.replaceConfiguration).toHaveBeenCalledWith(specification.id, {
-      name: 'Novo nome',
-      description: 'Nova descrição',
-      status: 'available',
-      application: specification.application,
-    })
+    expect(repository.replaceConfiguration).toHaveBeenCalledWith(
+      specification.id,
+      {
+        name: 'Novo nome',
+        description: 'Nova descrição',
+        status: 'available',
+        application: specification.application,
+        accessClassification: 'Interno',
+      },
+      undefined,
+    )
     expect(repository.replaceTemplate).not.toHaveBeenCalled()
   })
 
@@ -73,23 +81,24 @@ describe('Update Document Specification Configuration Use Case', () => {
       legalTopicIdsByArea: { 'area-1': ['topic-1'] },
     }
 
-    await new UpdateDocumentSpecificationConfigurationUseCase(
-      repository,
-      catalogProvider,
-    ).execute({
-      documentSpecificationId: specification.id,
-      changes: {
-        name: 'Nome',
-        description: 'Descrição',
-        status: 'available',
-        application,
-      },
-    })
-
-    expect(catalogProvider.validateActive).toHaveBeenCalledWith([
-      { legalAreaId: 'area-1', legalTopicIds: ['topic-1'] },
-    ])
-    expect(repository.replaceConfiguration).toHaveBeenCalled()
+    await expect(
+      new UpdateDocumentSpecificationConfigurationUseCase(
+        repository,
+        catalogProvider,
+      ).execute({
+        userId: 'user-123',
+        documentSpecificationId: specification.id,
+        changes: {
+          name: 'Nome',
+          description: 'Descrição',
+          status: 'available',
+          application,
+          accessClassification: 'Interno',
+        },
+      }),
+    ).rejects.toBeInstanceOf(InvalidDocumentTemplateError)
+    expect(catalogProvider.validateActive).not.toHaveBeenCalled()
+    expect(repository.replaceConfiguration).not.toHaveBeenCalled()
   })
 
   it('persists configuration and template changes through the same save action', async () => {
@@ -117,25 +126,32 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
         content,
         variables,
       },
     })
 
-    expect(repository.replaceConfiguration).toHaveBeenCalledWith(specification.id, {
-      name: 'Nome',
-      description: '',
-      status: 'available',
-      application: specification.application,
-      content,
-      variables,
-    })
+    expect(repository.replaceConfiguration).toHaveBeenCalledWith(
+      specification.id,
+      {
+        name: 'Nome',
+        description: '',
+        status: 'available',
+        application: specification.application,
+        accessClassification: 'Interno',
+        content,
+        variables,
+      },
+      undefined,
+    )
   })
 
   it('preserves the system source when a variable receives an edited technical name', async () => {
@@ -163,12 +179,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'available',
         application: specification.application,
+        accessClassification: 'Interno',
         content,
         variables,
       },
@@ -177,6 +195,7 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ content, variables }),
+      undefined,
     )
   })
 
@@ -192,18 +211,21 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'unavailable',
         application: specification.application,
+        accessClassification: 'Interno',
       },
     })
 
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ description: '' }),
+      undefined,
     )
   })
 
@@ -225,12 +247,14 @@ describe('Update Document Specification Configuration Use Case', () => {
       repository,
       catalogProvider,
     ).execute({
+      userId: 'user-123',
       documentSpecificationId: specification.id,
       changes: {
         name: 'Nome',
         description: '',
         status: 'unavailable',
         application: specification.application,
+        accessClassification: 'Interno',
         content: specification.content,
         variables: specification.variables,
       },
@@ -239,6 +263,7 @@ describe('Update Document Specification Configuration Use Case', () => {
     expect(repository.replaceConfiguration).toHaveBeenCalledWith(
       specification.id,
       expect.objectContaining({ status: 'unavailable', content: specification.content }),
+      undefined,
     )
   })
 
@@ -257,11 +282,13 @@ describe('Update Document Specification Configuration Use Case', () => {
         repository,
         catalogProvider,
       ).execute({
+        userId: 'user-123',
         documentSpecificationId: specification.id,
         changes: {
           name: 'Nome',
           description: 'Descrição',
           status: 'unavailable',
+          accessClassification: 'Interno',
           application: {
             scope: 'legal_context',
             moment: 'consultation',
@@ -281,11 +308,13 @@ describe('Update Document Specification Configuration Use Case', () => {
         repository,
         catalogProvider,
       ).execute({
+        userId: 'user-123',
         documentSpecificationId: 'missing',
         changes: {
           name: 'Nome',
           description: 'Descrição',
           status: 'unavailable',
+          accessClassification: 'Interno',
           application: {
             scope: 'global',
             moment: 'consultation',
