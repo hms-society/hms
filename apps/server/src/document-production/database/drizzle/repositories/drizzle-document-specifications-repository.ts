@@ -28,9 +28,8 @@ import {
   documentSpecificationLegalAreaModel,
   documentSpecificationLegalTopicModel,
   documentSpecificationModel,
-  documentSpecificationAuditLogModel,
-  packageDocumentModel,
   documentVersionModel,
+  packageDocumentModel,
 } from '@/document-production/database/drizzle/models'
 import { DrizzleDocumentSpecificationMapper } from '@/document-production/database/drizzle/mappers'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -127,7 +126,6 @@ export class DrizzleDocumentSpecificationsRepository
           legalTopicIdsByArea: topicsBySpecification.get(specification.id) ?? {},
         },
         status: domain.status,
-        accessClassification: domain.accessClassification,
       }
     })
 
@@ -155,7 +153,6 @@ export class DrizzleDocumentSpecificationsRepository
             moment: specification.application.moment,
             scope: specification.application.scope,
             status: specification.status,
-            accessClassification: specification.accessClassification,
           })),
         )
         .returning()
@@ -198,7 +195,6 @@ export class DrizzleDocumentSpecificationsRepository
           moment: specification.application.moment,
           scope: specification.application.scope,
           status: specification.status,
-          accessClassification: specification.accessClassification,
         })
         .returning()
 
@@ -219,15 +215,10 @@ export class DrizzleDocumentSpecificationsRepository
 
     return record ? this.toDomain(this.database, record) : undefined
   }
+
   async replaceConfiguration(
     documentSpecificationId: string,
     changes: DocumentSpecificationConfigurationUpdate,
-    auditLog?: {
-      userId: string
-      action: string
-      previousValue: string
-      newValue: string
-    },
   ) {
     return this.database.transaction(async (transaction) => {
       const [record] = await transaction
@@ -238,7 +229,6 @@ export class DrizzleDocumentSpecificationsRepository
           moment: changes.application.moment,
           scope: changes.application.scope,
           status: changes.status,
-          accessClassification: changes.accessClassification,
           ...(changes.content !== undefined ? { content: changes.content } : {}),
           ...(changes.variables !== undefined
             ? { variables: [...changes.variables] }
@@ -251,15 +241,6 @@ export class DrizzleDocumentSpecificationsRepository
       if (!record) return undefined
 
       await this.replaceAssociations(transaction, record.id, changes.application)
-      if (auditLog) {
-        await transaction.insert(documentSpecificationAuditLogModel).values({
-          documentSpecificationId: record.id,
-          userId: auditLog.userId,
-          action: auditLog.action,
-          previousValue: auditLog.previousValue,
-          newValue: auditLog.newValue,
-        })
-      }
 
       return this.toDomain(transaction, record)
     })
@@ -302,22 +283,6 @@ export class DrizzleDocumentSpecificationsRepository
     await this.database.delete(documentSpecificationLegalTopicModel)
     await this.database.delete(documentSpecificationLegalAreaModel)
     await this.database.delete(documentSpecificationModel)
-  }
-
-  async registerAuditLog(data: {
-    documentSpecificationId: string
-    userId: string
-    action: string
-    previousValue: string
-    newValue: string
-  }): Promise<void> {
-    await this.database.insert(documentSpecificationAuditLogModel).values({
-      documentSpecificationId: data.documentSpecificationId,
-      userId: data.userId,
-      action: data.action,
-      previousValue: data.previousValue,
-      newValue: data.newValue,
-    })
   }
 
   private async toDomain(

@@ -25,5 +25,4 @@ export type DocumentSpecificationListItem = {
   readonly description: string
   readonly application: GlobalApplication | LegalContextApplication
   readonly status: DocumentSpecificationStatus
-  readonly accessClassification: string
 }

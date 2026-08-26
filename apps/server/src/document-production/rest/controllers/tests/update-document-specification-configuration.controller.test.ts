@@ -7,7 +7,7 @@ import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
 
 import { UpdateDocumentSpecificationConfigurationController } from '@/document-production/rest/controllers'
 
-const templateContent = {
+const templateContent: DocumentTemplateContent = {
   type: 'doc',
   content: [
     {
@@ -15,7 +15,7 @@ const templateContent = {
       content: [{ type: 'text', text: 'Conteúdo de teste' }],
     },
   ],
-} as unknown as DocumentTemplateContent
+}
 
 function createSpec(
   overrides: Partial<DocumentSpecificationCreation> = {},
@@ -27,10 +27,10 @@ function createSpec(
     variables: [],
     application: { scope: 'global', moment: 'consultation' },
     status: 'unavailable',
-    accessClassification: 'Interno',
     ...overrides,
   }
 }
+
 describe('Update Document Specification Configuration Controller [PATCH .../configuration]', () => {
   let fixture: DocumentProductionModuleFixture
 
@@ -57,7 +57,6 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         name: specification.name,
         description: specification.description,
         status: 'available',
-        accessClassification: 'Interno',
         application: specification.application,
       })
       .expect(200)
@@ -80,9 +79,9 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         name: 'Modelo atualizado',
         description: 'Descrição atualizada',
         status: 'unavailable',
-        accessClassification: 'Interno',
         application: { scope: 'global', moment: 'formalization' },
       })
+      .expect(200)
 
     expect(response.body).toMatchObject({
       name: 'Modelo atualizado',
@@ -103,7 +102,6 @@ describe('Update Document Specification Configuration Controller [PATCH .../conf
         name: 'Modelo',
         description: 'Descrição',
         status: 'unavailable',
-        accessClassification: 'Interno',
         application: { scope: 'global', moment: 'consultation' },
       })
       .expect(403)

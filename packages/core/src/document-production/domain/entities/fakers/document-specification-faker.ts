@@ -10,7 +10,6 @@ export class DocumentSpecificationFaker {
       id: faker.string.uuid(),
       name: 'Modelo de contrato',
       description: 'Descrição do modelo',
-      accessClassification: 'Interno',
       application: {
         scope: 'global',
         moment: 'consultation',

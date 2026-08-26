@@ -92,7 +92,6 @@ export class ListDocumentSpecificationsUseCase
       documentSpecificationId: record.documentSpecificationId,
       name: record.name,
       description: record.description,
-      accessClassification: record.accessClassification,
       application,
       status: record.status,
     }

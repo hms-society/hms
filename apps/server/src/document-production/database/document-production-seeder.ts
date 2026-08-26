@@ -166,7 +166,6 @@ export class DocumentProductionSeeder {
       DOCUMENT_TEMPLATES.map((template) => ({
         name: template.name,
         description: template.description,
-        accessClassification: 'Interno',
         content: this.createTemplateContent(template.name, template.paragraphs),
         variables: [...template.variables],
         application: {

@@ -5,7 +5,6 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
-  Req,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger'
@@ -80,14 +79,9 @@ export class UpdateDocumentSpecificationConfigurationController {
     documentSpecificationId: string,
     @Body(new ZodValidationPipe(documentSpecificationConfigurationUpdateSchema))
     body: RequestBody,
-    @Req() req: { user: { id: string } },
   ): Promise<DocumentSpecificationResponseDto> {
     return this.useCase
-      .execute({
-        documentSpecificationId,
-        changes: body,
-        userId: req.user.id,
-      })
+      .execute({ documentSpecificationId, changes: body })
       .then(DocumentSpecificationResponseDto.fromDomain)
   }
 }

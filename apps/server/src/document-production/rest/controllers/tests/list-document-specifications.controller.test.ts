@@ -200,6 +200,5 @@ function createSpecification(
     },
     status: 'available',
     ...overrides,
-    accessClassification: 'Interno',
   }
 }

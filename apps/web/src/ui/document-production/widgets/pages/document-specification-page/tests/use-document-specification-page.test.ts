@@ -74,7 +74,6 @@ const DETAIL: DocumentSpecificationDetails = {
   name: 'Procuração',
   description: 'Documento de representação',
   application: { scope: 'global', moment: 'consultation' },
-  accessClassification: 'Interno',
   status: 'available',
   content: TEMPLATE_CONTENT,
   variables: [],
