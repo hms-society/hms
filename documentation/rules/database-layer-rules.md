@@ -244,8 +244,10 @@ Seeders must also follow these rules:
   other values required to make a development account usable may remain
   explicit;
 - keep cleanup ownership inside module seeders. The central orchestrator must
-  finish every module `clear()` before any module `run()` begins, using
-  dependency order for both phases when cross-module foreign keys require it;
+  finish every module `clear()` before any module `run()` begins. When
+  cross-module foreign keys require ordering, call `clear()` in reverse
+  dependency order so dependents are removed first, then call `run()` in normal
+  dependency order so referenced records exist before dependents;
 - centralize execution in `apps/server/src/shared/database/seed.ts`. It must
   verify `HMS_SERVER_APP_MODE` is `dev` or `stg` before any cleanup or insertion,
   abort in every other mode, require `HMS_USER_SEED_PASSWORD` in `dev` and `stg`, and
