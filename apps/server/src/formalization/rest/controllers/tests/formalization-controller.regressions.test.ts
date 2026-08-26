@@ -177,6 +177,156 @@ describe('Formalization controllers', () => {
     })
   })
 
+  it('closes the Intake and Formalization through one HTTP action', async () => {
+    const intake = IntakeFaker.fake({
+      id: '00000000-0000-4000-8000-000000000912',
+      status: IntakeStatus.InFormalization,
+      version: 1,
+      closureReason: undefined,
+      closureNotes: undefined,
+      closedAt: undefined,
+    })
+    const formalization = fakeFormalization({
+      id: '00000000-0000-4000-8000-000000000913',
+      intakeId: intake.id,
+      assignedLawyerId: fixture.collaboratorId,
+      version: 1,
+    })
+    await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
+    await fixture.formalizationsRepository.addOrGet(formalization)
+    vi.spyOn(
+      fixture.app.get(ServerFormalizationSourceReader),
+      'findContext',
+    ).mockResolvedValue({
+      intake,
+      consultation: consultationFor(formalization),
+      client: ClientFaker.fake({ id: formalization.clientId }),
+      assignedLawyer: CollaboratorFaker.legal({ id: fixture.collaboratorId }),
+    })
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/formalizations/${formalization.id}/close-without-contract`)
+      .send({
+        expectedVersion: 1,
+        expectedIntakeVersion: 1,
+        reason: 'client_withdrew',
+        notes: 'Cliente desistiu após a consulta.',
+      })
+
+    expect(response.status).toBe(200)
+    expect(response.body).toMatchObject({
+      id: formalization.id,
+      status: FormalizationStatus.Cancelled,
+      cancelledByCollaboratorId: fixture.collaboratorId,
+      version: 2,
+    })
+    await expect(
+      fixture.formalizationsRepository.findById(formalization.id),
+    ).resolves.toMatchObject({
+      status: FormalizationStatus.Cancelled,
+      version: 2,
+    })
+    await expect(
+      fixture.app.get(INTAKE_REPOSITORIES.intakes).findById(intake.id),
+    ).resolves.toMatchObject({
+      status: IntakeStatus.ClosedWithoutContract,
+      closureReason: 'client_withdrew',
+      closureNotes: 'Cliente desistiu após a consulta.',
+      version: 2,
+    })
+  })
+
+  it('rolls back both aggregates when the Formalization CAS fails', async () => {
+    const intake = IntakeFaker.fake({
+      id: '00000000-0000-4000-8000-000000000914',
+      status: IntakeStatus.InFormalization,
+      version: 1,
+      closureReason: undefined,
+      closureNotes: undefined,
+      closedAt: undefined,
+    })
+    const formalization = fakeFormalization({
+      id: '00000000-0000-4000-8000-000000000915',
+      intakeId: intake.id,
+      assignedLawyerId: fixture.collaboratorId,
+      version: 1,
+    })
+    await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
+    await fixture.formalizationsRepository.addOrGet(formalization)
+    vi.spyOn(
+      fixture.app.get(ServerFormalizationSourceReader),
+      'findContext',
+    ).mockResolvedValue({
+      intake,
+      consultation: consultationFor(formalization),
+      client: ClientFaker.fake({ id: formalization.clientId }),
+      assignedLawyer: CollaboratorFaker.legal({ id: fixture.collaboratorId }),
+    })
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/formalizations/${formalization.id}/close-without-contract`)
+      .send({
+        expectedVersion: 2,
+        expectedIntakeVersion: 1,
+        reason: 'client_withdrew',
+      })
+
+    expect(response.status).toBe(409)
+    await expect(
+      fixture.formalizationsRepository.findById(formalization.id),
+    ).resolves.toMatchObject({ status: FormalizationStatus.InProgress, version: 1 })
+    await expect(
+      fixture.app.get(INTAKE_REPOSITORIES.intakes).findById(intake.id),
+    ).resolves.toMatchObject({ status: IntakeStatus.InFormalization, version: 1 })
+  })
+
+  it('keeps an already cancelled Formalization idempotent without closing its Intake', async () => {
+    const intake = IntakeFaker.fake({
+      id: '00000000-0000-4000-8000-000000000916',
+      status: IntakeStatus.InFormalization,
+      version: 1,
+      closureReason: undefined,
+      closureNotes: undefined,
+      closedAt: undefined,
+    })
+    const formalization = fakeFormalization({
+      id: '00000000-0000-4000-8000-000000000917',
+      intakeId: intake.id,
+      assignedLawyerId: fixture.collaboratorId,
+      status: FormalizationStatus.Cancelled,
+      cancelledAt: new Date('2026-08-24T12:00:00.000Z'),
+      cancelledByCollaboratorId: fixture.collaboratorId,
+    })
+    await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
+    await fixture.formalizationsRepository.addOrGet(formalization)
+    vi.spyOn(
+      fixture.app.get(ServerFormalizationSourceReader),
+      'findContext',
+    ).mockResolvedValue({
+      intake,
+      consultation: consultationFor(formalization),
+      client: ClientFaker.fake({ id: formalization.clientId }),
+      assignedLawyer: CollaboratorFaker.legal({ id: fixture.collaboratorId }),
+    })
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/formalizations/${formalization.id}/close-without-contract`)
+      .send({
+        expectedVersion: 999,
+        expectedIntakeVersion: 999,
+        reason: 'client_withdrew',
+      })
+
+    expect(response.status).toBe(200)
+    expect(response.body).toMatchObject({
+      id: formalization.id,
+      status: FormalizationStatus.Cancelled,
+    })
+    await expect(
+      fixture.app.get(INTAKE_REPOSITORIES.intakes).findById(intake.id),
+    ).resolves.toMatchObject({ status: IntakeStatus.InFormalization, version: 1 })
+  })
+
   it('converges confirmation into the selection projection without rewriting history', async () => {
     const formalization = fakeFormalization({
       id: '00000000-0000-4000-8000-000000000905',
