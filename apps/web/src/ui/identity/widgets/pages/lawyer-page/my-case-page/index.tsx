@@ -198,6 +198,8 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
             checklist={MOCK_CHECKLIST}
+            isReviewDisabled
+            reviewDisabledReason='A revisão do gate será habilitada quando o detalhe carregar o checklist real deste caso.'
           />
         </TabsContent>
       </Tabs>

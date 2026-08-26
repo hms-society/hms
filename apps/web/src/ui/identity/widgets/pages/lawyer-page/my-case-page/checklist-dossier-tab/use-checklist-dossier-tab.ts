@@ -8,13 +8,13 @@ import {
   LegalCaseStatus,
 } from '@hms/core/case-management/domain/structures'
 
-import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
   caseId: string
   checklist: ChecklistItem[]
+  isReviewDisabled?: boolean
 }
 
 const CHECKLIST_GATE_LABELS: Record<CaseChecklistGateDecisionValue, string> = {
@@ -63,9 +63,9 @@ const DECISION_DIALOG_COPY: Record<
 export function useChecklistDossierTab({
   caseId,
   checklist,
+  isReviewDisabled = false,
 }: UseChecklistDossierTabParams) {
   const { caseManagementService } = useRestContext()
-  const { currentCollaborator } = useCurrentCollaboratorQuery()
   const [remarks, setRemarks] = useState('')
   const [pendingDecision, setPendingDecision] =
     useState<CaseChecklistGateDecisionValue | null>(null)
@@ -97,13 +97,12 @@ export function useChecklistDossierTab({
 
   const mutation = useMutation({
     mutationFn: async (decision: CaseChecklistGateDecisionValue) => {
-      if (!currentCollaborator?.collaboratorId) {
-        throw new Error('Colaborador atual não identificado.')
+      if (isReviewDisabled) {
+        throw new Error('A revisão deste checklist ainda não está disponível.')
       }
 
       const response = await caseManagementService.reviewChecklistGate(caseId, {
         decision,
-        decidedBy: currentCollaborator.collaboratorId,
         remarks: remarks.trim() || undefined,
       })
 
@@ -192,6 +191,7 @@ export function useChecklistDossierTab({
     handleRemarksChange,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
+    isReviewDisabled,
     isReviewingChecklistGate: mutation.isPending,
     mandatoryItemsCount,
     pendingItemsCount,

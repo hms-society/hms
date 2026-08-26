@@ -26,6 +26,17 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
       throw new LegalCaseNotFoundError()
     }
 
+    const assignedCases = await this.legalCasesRepository.listByTeamMember(
+      request.decidedBy,
+    )
+    const canReviewCase = assignedCases.some(
+      (assignedCase) => assignedCase.id === request.caseId,
+    )
+
+    if (!canReviewCase) {
+      throw new LegalCaseNotFoundError()
+    }
+
     const remarks = request.remarks?.trim() || undefined
     this.ensureRemarksWhenRequired(request.decision, remarks)
     const status = this.getStatusAfterDecision(request.decision)

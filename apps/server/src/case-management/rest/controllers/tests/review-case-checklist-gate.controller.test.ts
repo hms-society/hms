@@ -1,7 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 
-import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/structures'
+import {
+  CaseChecklistGateDecision,
+  CaseMemberRole,
+} from '@hms/core/case-management/domain/structures'
 
 import { CaseManagementModuleFixture } from '@/case-management/fixtures/case-management-module-fixture'
 import { ReviewCaseChecklistGateController } from '@/case-management/rest/controllers/review-case-checklist-gate.controller'
@@ -20,13 +23,25 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
   afterAll(async () => fixture.close())
 
   it('reviews a case checklist gate', async () => {
-    const legalCase = await fixture.registerLegalCase()
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.LeadLawyer,
+        isPrimary: true,
+      },
+    ])
 
     const response = await request(fixture.app.getHttpServer())
       .patch(`/cases/${legalCase.id}/checklist-gate`)
       .send({
         decision: CaseChecklistGateDecision.ApprovedWithException,
-        decidedBy: fixture.authUser.id,
         remarks: 'CNIS será complementado por ofício já autorizado.',
       })
       .expect(200)
@@ -36,17 +51,30 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     expect(response.body.checklistGate.remarks).toBe(
       'CNIS será complementado por ofício já autorizado.',
     )
+    expect(response.body.checklistGate.decidedBy).toBe(collaborator.collaboratorId)
     expect(response.body.dossierGate.homologatedAt).toBeUndefined()
   })
 
   it('rejects approval with exception without remarks', async () => {
-    const legalCase = await fixture.registerLegalCase()
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.LeadLawyer,
+        isPrimary: true,
+      },
+    ])
 
     const response = await request(fixture.app.getHttpServer())
       .patch(`/cases/${legalCase.id}/checklist-gate`)
       .send({
         decision: CaseChecklistGateDecision.ApprovedWithException,
-        decidedBy: fixture.authUser.id,
       })
       .expect(409)
 

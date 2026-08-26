@@ -17,12 +17,16 @@ export type ChecklistDossierTabProps = {
   activities: ActivityItem[]
   caseId: string
   checklist: ChecklistItem[]
+  isReviewDisabled?: boolean
+  reviewDisabledReason?: string
 }
 
 export const ChecklistDossierTab = ({
   activities,
   caseId,
   checklist,
+  isReviewDisabled = false,
+  reviewDisabledReason,
 }: ChecklistDossierTabProps) => {
   const {
     canStartLegalWriting,
@@ -41,6 +45,7 @@ export const ChecklistDossierTab = ({
     handleRemarksChange,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
+    isReviewDisabled: isChecklistReviewDisabled,
     isReviewingChecklistGate,
     mandatoryItemsCount,
     pendingItemsCount,
@@ -50,6 +55,7 @@ export const ChecklistDossierTab = ({
   } = useChecklistDossierTab({
     caseId,
     checklist,
+    isReviewDisabled,
   })
   const progressPercentage =
     mandatoryItemsCount > 0
@@ -95,6 +101,11 @@ export const ChecklistDossierTab = ({
                 {error.message}
               </p>
             )}
+            {isChecklistReviewDisabled && reviewDisabledReason && (
+              <p className='mt-1 text-[11px] font-medium text-amber-900'>
+                {reviewDisabledReason}
+              </p>
+            )}
           </div>
         </div>
         <div className='flex flex-wrap justify-end gap-2 lg:max-w-sm'>
@@ -102,7 +113,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-amber-500/20 bg-card text-amber-800 hover:bg-amber-500/20'
-            disabled={!isChecklistComplete || isReviewingChecklistGate}
+            disabled={
+              !isChecklistComplete ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleApproveChecklist}
           >
             <Icon name='check' className='size-3' />
@@ -112,7 +127,7 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-amber-500/20 bg-card text-amber-800 hover:bg-amber-500/20'
-            disabled={isReviewingChecklistGate}
+            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
             onClick={handleApproveWithException}
           >
             <Icon name='shield-check' className='size-3' />
@@ -122,7 +137,7 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-card text-destructive hover:bg-destructive/10'
-            disabled={isReviewingChecklistGate}
+            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
             onClick={handleBlockChecklist}
           >
             <Icon name='lock' className='size-3' />
@@ -132,7 +147,7 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-card text-destructive hover:bg-destructive/10'
-            disabled={isReviewingChecklistGate}
+            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
             onClick={handleRejectOnMerit}
           >
             <Icon name='shield-alert' className='size-3' />

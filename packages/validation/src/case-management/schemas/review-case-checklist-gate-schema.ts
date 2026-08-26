@@ -4,6 +4,5 @@ import { caseChecklistGateDecisionSchema } from './case-checklist-gate-decision-
 
 export const reviewCaseChecklistGateSchema = z.object({
   decision: caseChecklistGateDecisionSchema,
-  decidedBy: z.string(),
   remarks: z.string().optional(),
 })

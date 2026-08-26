@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
+import type { LegalCaseSummary } from '../../domain/entities'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import { CaseChecklistGateDecision, LegalCaseStatus } from '../../domain/structures'
 import type { LegalCasesRepository } from '../../interfaces'
@@ -33,6 +34,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
@@ -69,6 +73,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
@@ -115,6 +122,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
@@ -136,4 +146,43 @@ describe('Review Case Checklist Gate Use Case', () => {
       status: LegalCaseStatus.Documentation,
     })
   })
+
+  it('rejects a checklist review for cases outside the collaborator team', async () => {
+    const legalCase = LegalCaseFaker.fake()
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: '00000000-0000-4000-8000-000000000104',
+      }),
+    ).rejects.toThrow('O caso não foi encontrado.')
+
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
 })
+
+function fakeLegalCaseSummary(
+  overrides: Partial<LegalCaseSummary> = {},
+): LegalCaseSummary {
+  const legalCase = LegalCaseFaker.fake(overrides)
+
+  return {
+    id: legalCase.id,
+    publicCode: legalCase.publicCode,
+    title: legalCase.title,
+    status: legalCase.status,
+    clientName: 'Cliente HMS',
+    legalArea: 'Cível',
+    legalTopic: 'Contratos',
+    openedAt: legalCase.openedAt,
+    updatedAt: legalCase.updatedAt,
+    checklistGate: legalCase.checklistGate,
+    dossierGate: legalCase.dossierGate,
+    team: [],
+    ...overrides,
+  }
+}

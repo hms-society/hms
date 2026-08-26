@@ -34,6 +34,7 @@ function createController(
     handleRemarksChange: vi.fn(),
     isDecisionReasonDialogOpen: false,
     isChecklistComplete: false,
+    isReviewDisabled: false,
     isReviewingChecklistGate: false,
     mandatoryItemsCount: 2,
     pendingItemsCount: 1,
@@ -79,6 +80,36 @@ describe('ChecklistDossierTab', () => {
         { id: '1', title: 'Procuração', status: 'validado' },
         { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
       ],
+      isReviewDisabled: false,
+    })
+  })
+
+  it('keeps checklist review actions disabled while case data is mocked', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        isChecklistComplete: true,
+        isReviewDisabled: true,
+      }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
+        isReviewDisabled
+        reviewDisabledReason='A revisão depende do detalhe real do caso.'
+      />,
+    )
+
+    expect(screen.getByText('A revisão depende do detalhe real do caso.')).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: /aprovar checklist/i }).hasAttribute('disabled'),
+    ).toBe(true)
+    expect(useChecklistDossierTabMock).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
+      isReviewDisabled: true,
     })
   })
 

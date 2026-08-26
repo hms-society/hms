@@ -4,7 +4,6 @@ import type { RestResponse } from '#shared/responses/rest-response'
 
 export type ReviewCaseChecklistGateRequest = {
   decision: CaseChecklistGateDecision
-  decidedBy: string
   remarks?: string
 }
 

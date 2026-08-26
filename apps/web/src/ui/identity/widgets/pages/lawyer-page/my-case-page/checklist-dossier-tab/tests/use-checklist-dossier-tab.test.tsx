@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
-import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useChecklistDossierTab } from '../use-checklist-dossier-tab'
 
@@ -14,12 +13,7 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: vi.fn(),
 }))
 
-vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
-  useCurrentCollaboratorQuery: vi.fn(),
-}))
-
 const useRestContextMock = vi.mocked(useRestContext)
-const useCurrentCollaboratorQueryMock = vi.mocked(useCurrentCollaboratorQuery)
 
 describe('useChecklistDossierTab', () => {
   const caseManagementService = {
@@ -30,11 +24,6 @@ describe('useChecklistDossierTab', () => {
     vi.clearAllMocks()
     useRestContextMock.mockReturnValue({
       caseManagementService,
-    } as never)
-    useCurrentCollaboratorQueryMock.mockReturnValue({
-      currentCollaborator: { collaboratorId: 'collaborator-1' },
-      currentCollaboratorError: null,
-      isLoadingCurrentCollaborator: false,
     } as never)
   })
 
@@ -92,7 +81,6 @@ describe('useChecklistDossierTab', () => {
 
     expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
       decision: CaseChecklistGateDecision.ApprovedWithException,
-      decidedBy: 'collaborator-1',
       remarks: 'CNIS será complementado por ofício já autorizado.',
     })
     await waitFor(() =>
@@ -130,6 +118,35 @@ describe('useChecklistDossierTab', () => {
     })
 
     expect(result.current.reasonError).toBe('Informe o motivo da decisão.')
+    expect(caseManagementService.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('does not submit checklist reviews while the case detail uses mock data', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
+          isReviewDisabled: true,
+        }),
+      { wrapper },
+    )
+
+    expect(result.current.isReviewDisabled).toBe(true)
+
+    await expect(result.current.handleApproveChecklist()).rejects.toThrow(
+      'A revisão deste checklist ainda não está disponível.',
+    )
     expect(caseManagementService.reviewChecklistGate).not.toHaveBeenCalled()
   })
 })
