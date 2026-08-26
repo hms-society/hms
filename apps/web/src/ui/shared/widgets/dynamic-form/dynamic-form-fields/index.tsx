@@ -2,6 +2,13 @@ import type { DynamicFormAnswerValue, DynamicFormField } from '@hms/core/shared/
 
 import { Checkbox } from '@/ui/shadcn/checkbox'
 import { Input } from '@/ui/shadcn/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
 import { Textarea } from '@/ui/shadcn/textarea'
 
 export type DynamicFormFieldsSectionProps = {
@@ -27,6 +34,8 @@ export const DynamicFormFieldsSection = ({
         const error = errors[`field:${field.id}`]
         const value = answers[field.id]
         const fieldId = `dynamic-field-${field.id}`
+        const errorId = `${fieldId}-error`
+        const required = isRequired(field, fields, answers)
 
         return (
           <div key={field.id} className='space-y-2'>
@@ -41,16 +50,17 @@ export const DynamicFormFieldsSection = ({
                   onCheckedChange={(checked) => onChange(field.id, checked === true)}
                   disabled={isReadOnly}
                   aria-invalid={Boolean(error)}
+                  aria-describedby={error ? errorId : undefined}
                 />
                 <span>
                   {field.label}
-                  {field.required && <span className='ml-1 text-destructive'>*</span>}
+                  {required && <span className='ml-1 text-destructive'>*</span>}
                 </span>
               </label>
             ) : (
               <label htmlFor={fieldId} className='text-sm font-medium text-foreground'>
                 {field.label}
-                {field.required && <span className='ml-1 text-destructive'>*</span>}
+                {required && <span className='ml-1 text-destructive'>*</span>}
               </label>
             )}
 
@@ -64,6 +74,7 @@ export const DynamicFormFieldsSection = ({
                 value={typeof value === 'string' ? value : ''}
                 placeholder={field.placeholder}
                 aria-invalid={Boolean(error)}
+                aria-describedby={error ? errorId : undefined}
                 readOnly={isReadOnly}
                 onChange={(event) => onChange(field.id, event.target.value)}
                 className='h-11 rounded-xl text-sm'
@@ -76,6 +87,7 @@ export const DynamicFormFieldsSection = ({
                 value={typeof value === 'string' ? value : ''}
                 placeholder={field.placeholder}
                 aria-invalid={Boolean(error)}
+                aria-describedby={error ? errorId : undefined}
                 readOnly={isReadOnly}
                 onChange={(event) => onChange(field.id, event.target.value)}
                 className='min-h-24 rounded-xl text-sm'
@@ -88,14 +100,65 @@ export const DynamicFormFieldsSection = ({
                 type='date'
                 value={typeof value === 'string' ? value : ''}
                 aria-invalid={Boolean(error)}
+                aria-describedby={error ? errorId : undefined}
                 readOnly={isReadOnly}
                 onChange={(event) => onChange(field.id, event.target.value)}
                 className='h-11 rounded-xl text-sm'
               />
             )}
 
+            {(field.type === 'integer' ||
+              field.type === 'currency' ||
+              field.type === 'percentage') && (
+              <Input
+                id={fieldId}
+                type='number'
+                inputMode='decimal'
+                min={field.validation?.min}
+                max={field.validation?.max}
+                step={field.type === 'integer' ? 1 : 'any'}
+                value={typeof value === 'number' ? String(value) : ''}
+                placeholder={field.placeholder}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? errorId : undefined}
+                readOnly={isReadOnly}
+                onChange={(event) => {
+                  const next = event.target.value
+                  onChange(field.id, next === '' ? null : Number(next))
+                }}
+                className='h-11 rounded-xl text-sm'
+              />
+            )}
+
+            {field.type === 'single_selection' && (
+              <Select
+                value={typeof value === 'string' ? value : ''}
+                onValueChange={(next) => onChange(field.id, next)}
+                disabled={isReadOnly}
+              >
+                <SelectTrigger
+                  id={fieldId}
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? errorId : undefined}
+                  className='w-full rounded-xl'
+                >
+                  <SelectValue placeholder={field.placeholder ?? 'Selecione uma opção'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options?.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             {field.type === 'multiple_selection' && (
-              <div className='space-y-1.5 rounded-xl border border-input bg-transparent p-2.5'>
+              <div
+                className='space-y-1.5 rounded-xl border border-input bg-transparent p-2.5'
+                aria-describedby={error ? errorId : undefined}
+              >
                 {field.options?.map((option) => {
                   const selectedValues = Array.isArray(value) ? value : []
                   const isSelected = selectedValues.includes(option.value)
@@ -131,10 +194,29 @@ export const DynamicFormFieldsSection = ({
               </div>
             )}
 
-            {error && <p className='text-xs font-medium text-destructive'>{error}</p>}
+            {error && (
+              <p
+                id={errorId}
+                role='alert'
+                className='text-xs font-medium text-destructive'
+              >
+                {error}
+              </p>
+            )}
           </div>
         )
       })}
     </div>
   )
+}
+
+function isRequired(
+  field: DynamicFormField,
+  fields: readonly DynamicFormField[],
+  answers: Readonly<Record<string, DynamicFormAnswerValue>>,
+) {
+  const condition = field.validation?.requiredWhen
+  if (!condition) return field.required
+  const dependency = fields.find((candidate) => candidate.key === condition.fieldKey)
+  return dependency ? answers[dependency.id] === condition.equals : false
 }

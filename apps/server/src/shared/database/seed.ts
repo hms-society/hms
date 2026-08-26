@@ -10,6 +10,7 @@ import { DocumentProductionSeeder } from '@/document-production/database/documen
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
+import { FormalizationSeeder } from '@/formalization/database/formalization-seeder'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { SchedulingSeeder } from '@/scheduling/database/scheduling-seeder'
 import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
@@ -41,6 +42,7 @@ async function bootstrap() {
     await app.get(CommunicationSeeder).clear()
     await app.get(CaseManagementSeeder).clear()
     await app.get(DocumentProductionSeeder).clear()
+    await app.get(FormalizationSeeder).clear()
     await app.get(ConsultationSeeder).clear()
     await app.get(SchedulingSeeder).clear()
     await app.get(IntakeSeeder).clear()
@@ -135,10 +137,26 @@ async function bootstrap() {
       throw new AppError('The document-production Consultation could not be seeded')
     }
 
+    const formalizationForm = dynamicForms.find(
+      ({ name }) => name === 'Condições comerciais da formalização',
+    )
+    if (!formalizationForm || !consultationSeed.consultation) {
+      throw new AppError('The Formalization seed dependencies could not be resolved')
+    }
+
+    const formalization = await app.get(FormalizationSeeder).run({
+      intake: intakeSeed.documentProductionIntake,
+      consultation: consultationSeed.consultation,
+      client,
+      assignedLawyer: lawyer,
+      contractForm: formalizationForm,
+    })
+
     const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
+      formalizationId: formalization.id,
       requestedByCollaboratorId: lawyer.id,
     })
 

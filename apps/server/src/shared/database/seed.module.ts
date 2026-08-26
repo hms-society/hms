@@ -8,6 +8,7 @@ import { DocumentProductionDatabaseModule } from '@/document-production/database
 import { AuthModule } from '@/identity/auth.module'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { FormalizationDatabaseModule } from '@/formalization/database/formalization-database.module'
 import { LegalCatalogDatabaseModule } from '@/legal-catalog/database/legal-catalog-database.module'
 import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -22,6 +23,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DocumentProductionDatabaseModule,
     IdentityDatabaseModule,
     IntakeDatabaseModule,
+    FormalizationDatabaseModule,
     LegalCatalogDatabaseModule,
     ProvisionModule,
     SchedulingDatabaseModule,

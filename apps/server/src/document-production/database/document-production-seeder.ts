@@ -36,6 +36,7 @@ export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
+  readonly formalizationId?: string
   readonly requestedByCollaboratorId?: string
 }
 
@@ -105,6 +106,24 @@ const DOCUMENT_TEMPLATES = [
 ] as const satisfies readonly DocumentTemplateSeed[]
 
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
+const FORMALIZATION_DOCUMENT_PACKAGE_ID = '00000000-0000-4000-8000-000000000302'
+const FORMALIZATION_DOCUMENT_ID = '00000000-0000-4000-8000-000000000204'
+const FORMALIZATION_PACKAGE_DOCUMENT_ID = '00000000-0000-4000-8000-000000000604'
+
+const FORMALIZATION_DOCUMENT_TEMPLATE = {
+  name: 'Contrato de formalização',
+  description: 'Documento de apoio para a formalização das condições comerciais.',
+  paragraphs: [
+    'As condições comerciais foram registradas a partir da formalização do atendimento.',
+    'Cliente: {cliente_nome}.',
+    'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
+  ],
+  variables: [
+    { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+    { label: 'Área jurídica', technicalName: 'area_juridica' },
+    { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+  ],
+} as const satisfies Omit<DocumentTemplateSeed, 'documentId'>
 
 const SEEDED_GENERATION_IDS = [
   '00000000-0000-4000-8000-000000000401',
@@ -238,6 +257,14 @@ export class DocumentProductionSeeder {
       packageDocumentCreations,
     )
 
+    const formalizationFixture = references.formalizationId
+      ? await this.seedFormalizationFixture({
+          areaId: area.id,
+          topicId: topic.id,
+          formalizationId: references.formalizationId,
+        })
+      : undefined
+
     const generatedDocuments = references.requestedByCollaboratorId
       ? await this.seedApprovedDocumentVersions({
           documents,
@@ -252,7 +279,87 @@ export class DocumentProductionSeeder {
       documents,
       documentPackage,
       packageDocuments,
+      ...(formalizationFixture ?? {}),
       ...generatedDocuments,
+    }
+  }
+
+  private async seedFormalizationFixture({
+    areaId,
+    topicId,
+    formalizationId,
+  }: {
+    readonly areaId: string
+    readonly topicId: string
+    readonly formalizationId: string
+  }) {
+    const [specification] = await this.specificationsRepository.addMany([
+      {
+        name: FORMALIZATION_DOCUMENT_TEMPLATE.name,
+        description: FORMALIZATION_DOCUMENT_TEMPLATE.description,
+        content: this.createTemplateContent(
+          FORMALIZATION_DOCUMENT_TEMPLATE.name,
+          FORMALIZATION_DOCUMENT_TEMPLATE.paragraphs,
+        ),
+        variables: [...FORMALIZATION_DOCUMENT_TEMPLATE.variables],
+        application: {
+          scope: 'legal_context',
+          moment: 'formalization',
+          legalAreaIds: [areaId],
+          legalTopicIdsByArea: { [areaId]: [topicId] },
+        },
+        status: 'available',
+      },
+    ])
+
+    if (!specification) {
+      throw new AppError(
+        'The Formalization document specification could not be seeded.',
+        'Seed Error',
+      )
+    }
+
+    const {
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      ...document
+    } = DocumentFaker.fake({
+      id: FORMALIZATION_DOCUMENT_ID,
+      title: FORMALIZATION_DOCUMENT_TEMPLATE.name,
+    })
+    const [formalizationDocument] = await this.documentsRepository.addMany([document])
+
+    if (!formalizationDocument) {
+      throw new AppError('The Formalization document could not be seeded.', 'Seed Error')
+    }
+
+    const seededPackage = DocumentPackageFaker.fake({
+      id: FORMALIZATION_DOCUMENT_PACKAGE_ID,
+      context: { type: 'formalization', formalizationId },
+    })
+    const formalizationPackage = await this.documentPackagesRepository.add({
+      id: seededPackage.id,
+      context: seededPackage.context,
+    })
+    const {
+      createdAt: _packageDocumentCreatedAt,
+      updatedAt: _packageDocumentUpdatedAt,
+      ...packageDocument
+    } = PackageDocumentFaker.fake({
+      id: FORMALIZATION_PACKAGE_DOCUMENT_ID,
+      documentPackageId: formalizationPackage.id,
+      documentId: formalizationDocument.id,
+      documentSpecificationId: specification.id,
+    })
+    const formalizationPackageDocuments = await this.packageDocumentsRepository.addMany([
+      packageDocument,
+    ])
+
+    return {
+      formalizationSpecifications: [specification],
+      formalizationDocuments: [formalizationDocument],
+      formalizationPackage,
+      formalizationPackageDocuments,
     }
   }
 

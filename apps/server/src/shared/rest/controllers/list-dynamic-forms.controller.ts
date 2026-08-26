@@ -25,6 +25,7 @@ export class ListDynamicFormsController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'legalAreaId', required: false, type: String, format: 'uuid' })
   @ApiQuery({ name: 'legalTopicId', required: false, type: String, format: 'uuid' })
+  @ApiQuery({ name: 'contextType', required: false, type: String })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Available dynamic forms were returned successfully.',
