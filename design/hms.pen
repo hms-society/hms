@@ -207013,6 +207013,667 @@
           ]
         }
       ]
+    },
+    {
+      "id": "b2f2jS",
+      "type": "ref",
+      "reusable": true,
+      "ref": "iCoRX",
+      "name": "Modal/Formalização/Fechar formulário",
+      "x": 14821,
+      "y": 10218,
+      "width": 600,
+      "descendants": {
+        "z2VpiW": {
+          "content": "Fechar formulário de contratação?"
+        },
+        "GLZKh": {
+          "content": "Revise o efeito antes de liberar a Produção Documental.",
+          "fontSize": 12
+        },
+        "c7bL9O": {
+          "type": "frame",
+          "id": "g6HWmY",
+          "name": "Conteúdo - Fechar formulário",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "lLwz5",
+              "name": "Consequência do fechamento",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mEwPM",
+                  "name": "Ícone formulário fechado",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "$highlight",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "l7Ji7",
+                      "name": "Ícone cadeado",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "lock-keyhole",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kxkFw",
+                  "name": "Texto do fechamento",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KnWS8",
+                      "name": "Título da consequência",
+                      "fill": "$foreground",
+                      "content": "As condições ficarão fechadas para edição",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ueGzr",
+                      "name": "Descrição da consequência",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "As respostas serão validadas e salvas. Para alterar qualquer condição depois, será necessário reabrir o formulário.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W169KV",
+              "name": "Liberação documental",
+              "width": "fill_container",
+              "fill": "$secondary",
+              "cornerRadius": 8,
+              "gap": 9,
+              "padding": [
+                12,
+                14
+              ],
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "fCAse",
+                  "name": "Ícone documentos",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "files",
+                  "library": "lucide",
+                  "fill": "$highlight-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "v8na0E",
+                  "name": "Texto liberação documental",
+                  "fill": "$secondary-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Ao fechar, a Produção Documental será liberada para seleção, geração e revisão de documentos.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        "I5hgeU": {
+          "id": "h8oau",
+          "type": "ref",
+          "ref": "SQoVa",
+          "name": "Fechar formulário",
+          "descendants": {
+            "gfybN": {
+              "icon": "lock-keyhole",
+              "enabled": true
+            },
+            "hKQ6y": {
+              "content": "Fechar formulário"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "nFKJE",
+      "type": "ref",
+      "reusable": true,
+      "ref": "iCoRX",
+      "name": "Modal/Formalização/Reabrir formulário",
+      "x": 15481,
+      "y": 10218,
+      "width": 600,
+      "descendants": {
+        "z2VpiW": {
+          "content": "Reabrir condições comerciais?"
+        },
+        "GLZKh": {
+          "content": "A Produção Documental ficará bloqueada até um novo fechamento.",
+          "fontSize": 12
+        },
+        "c7bL9O": {
+          "type": "frame",
+          "id": "GJCoi",
+          "name": "Conteúdo - Reabrir formulário",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "E5XCK",
+              "name": "Aviso de bloqueio",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TOIVD",
+                  "name": "Ícone reabrir",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "$accent",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "IuGxW",
+                      "name": "Ícone desfazer",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "rotate-ccw",
+                      "library": "lucide",
+                      "fill": "$accent-foreground"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AbhSY",
+                  "name": "Texto do bloqueio",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eUorA",
+                      "name": "Título do bloqueio",
+                      "fill": "$foreground",
+                      "content": "Os documentos ficarão temporariamente bloqueados",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Tzc7F",
+                      "name": "Descrição do bloqueio",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Nenhuma seleção, geração, revisão ou confirmação poderá ser feita enquanto o formulário estiver aberto.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AZUIw",
+              "name": "Efeito das alterações",
+              "width": "fill_container",
+              "fill": "$secondary",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                12,
+                14
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DMInh",
+                  "name": "Título efeito das alterações",
+                  "fill": "$secondary-foreground",
+                  "content": "Quando fechar novamente",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "gDb7m",
+                  "name": "Texto efeito das alterações",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Sem alterações, documentos e confirmação serão preservados. Com alterações, a confirmação será invalidada e todos os documentos exigirão novas versões; o histórico continuará disponível.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        "I5hgeU": {
+          "id": "cbneC",
+          "type": "ref",
+          "ref": "SQoVa",
+          "name": "Reabrir formulário",
+          "descendants": {
+            "gfybN": {
+              "icon": "rotate-ccw",
+              "enabled": true
+            },
+            "hKQ6y": {
+              "content": "Reabrir formulário"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "ZLBTF",
+      "type": "ref",
+      "reusable": true,
+      "ref": "iCoRX",
+      "name": "Modal/Formalização/Confirmar pacote",
+      "x": 14821,
+      "y": 10878,
+      "width": 600,
+      "descendants": {
+        "z2VpiW": {
+          "content": "Confirmar pacote de documentos?"
+        },
+        "GLZKh": {
+          "content": "Revise o conjunto que seguirá para a configuração de assinatura.",
+          "fontSize": 12
+        },
+        "c7bL9O": {
+          "type": "frame",
+          "id": "ob1Ng",
+          "name": "Conteúdo - Confirmar pacote",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "KSMqK",
+              "name": "Resumo do pacote",
+              "width": "fill_container",
+              "fill": "$highlight",
+              "cornerRadius": 10,
+              "gap": 14,
+              "padding": [
+                14,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PA3Wb",
+                  "name": "Ícone pacote pronto",
+                  "width": 40,
+                  "height": 40,
+                  "fill": "$card",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nob70",
+                      "name": "Ícone confirmação",
+                      "width": 19,
+                      "height": 19,
+                      "icon": "badge-check",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "crpqt",
+                  "name": "Texto resumo pacote",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "g5jMv3",
+                      "name": "Quantidade de documentos",
+                      "fill": "$foreground",
+                      "content": "4 documentos prontos",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ni9Pf",
+                      "name": "Estados dos documentos",
+                      "fill": "$highlight-foreground",
+                      "content": "3 aprovados · 1 rejeitado",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pLX3w",
+              "name": "Critério atendido",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "fakLI",
+                  "name": "Ícone versões",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "list-checks",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "DzRu2",
+                  "name": "Texto critério",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Cada documento possui uma versão vigente, originada da revisão atual do formulário, com decisão Aprovada ou Rejeitada.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iJDxD",
+              "name": "Nota sem envio",
+              "width": "fill_container",
+              "fill": "$secondary",
+              "cornerRadius": 8,
+              "gap": 9,
+              "padding": [
+                12,
+                14
+              ],
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "A8pte",
+                  "name": "Ícone informação",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "info",
+                  "library": "lucide",
+                  "fill": "$highlight-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "H5rV6",
+                  "name": "Texto sem envio",
+                  "fill": "$secondary-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Confirmar o pacote não cria solicitações de assinatura nem envia mensagens. A próxima etapa continuará bloqueada nesta entrega.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        "I5hgeU": {
+          "id": "Kcf9S",
+          "type": "ref",
+          "ref": "SQoVa",
+          "name": "Confirmar pacote",
+          "descendants": {
+            "gfybN": {
+              "icon": "badge-check",
+              "enabled": true
+            },
+            "hKQ6y": {
+              "content": "Confirmar pacote"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "USNIG",
+      "type": "ref",
+      "reusable": true,
+      "ref": "iCoRX",
+      "name": "Modal/Formalização/Encerrar sem contratação",
+      "x": 15481,
+      "y": 10878,
+      "width": 600,
+      "descendants": {
+        "z2VpiW": {
+          "content": "Encerrar sem contratação?"
+        },
+        "GLZKh": {
+          "content": "Esta ação encerra definitivamente o Intake e a Formalização.",
+          "fontSize": 12
+        },
+        "c7bL9O": {
+          "type": "frame",
+          "id": "iLmIT",
+          "name": "Conteúdo - Encerrar sem contratação",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "kecHL",
+              "name": "Campo motivo",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "LzH4I",
+                  "name": "Rótulo motivo",
+                  "fill": "$foreground",
+                  "content": "Motivo do encerramento *",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "id": "nBlTi",
+                  "type": "ref",
+                  "ref": "Y83nV1",
+                  "name": "Selecionar motivo",
+                  "width": "fill_container",
+                  "descendants": {
+                    "jh0J4": {
+                      "icon": "circle-x",
+                      "fill": "$destructive-muted"
+                    },
+                    "wO6E2": {
+                      "content": "Desistência do cliente"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EaDzk",
+              "name": "Campo observações",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ngI6X",
+                  "name": "Rótulo observações",
+                  "fill": "$foreground",
+                  "content": "Observações (opcional)",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "eXrIe",
+                  "name": "Área de observações",
+                  "width": "fill_container",
+                  "height": 76,
+                  "cornerRadius": 6,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "padding": [
+                    10,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XXv5b",
+                      "name": "Placeholder observações",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Adicione informações que ajudem a compreender o encerramento.",
+                      "lineHeight": 1.45,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "t6vqn",
+              "name": "Aviso de encerramento definitivo",
+              "width": "fill_container",
+              "fill": "$accent",
+              "cornerRadius": 8,
+              "gap": 9,
+              "padding": [
+                12,
+                14
+              ],
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Li2qb",
+                  "name": "Ícone alerta",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "triangle-alert",
+                  "library": "lucide",
+                  "fill": "$destructive"
+                },
+                {
+                  "type": "text",
+                  "id": "dh4p9",
+                  "name": "Texto encerramento definitivo",
+                  "fill": "$accent-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "A Formalização ficará Cancelada e o Intake, Encerrado sem contratação. Documentos e histórico permanecerão disponíveis somente para leitura.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        "I5hgeU": {
+          "id": "iPb31",
+          "type": "ref",
+          "ref": "JoVda",
+          "name": "Encerrar sem contratação",
+          "descendants": {
+            "vRHPQ": {
+              "icon": "circle-x",
+              "enabled": true
+            },
+            "mbbDv": {
+              "content": "Encerrar sem contratação"
+            }
+          }
+        }
+      }
     }
   ],
   "variables": {
