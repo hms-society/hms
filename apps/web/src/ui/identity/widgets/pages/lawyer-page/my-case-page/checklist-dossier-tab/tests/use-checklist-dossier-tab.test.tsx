@@ -23,6 +23,7 @@ const useRestContextMock = vi.mocked(useRestContext)
 
 describe('useChecklistDossierTab', () => {
   const caseManagementService = {
+    completeChecklist: vi.fn(),
     reviewChecklistGate: vi.fn(),
   }
 
@@ -54,6 +55,19 @@ describe('useChecklistDossierTab', () => {
     })
     const wrapper = ({ children }: PropsWithChildren) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.completeChecklist.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'case-1',
+          status: 'documentation',
+          checklistCompletedAt: '2026-08-27T12:12:00.000Z',
+          checklistCompletedBy: 'collaborator-1',
+          checklistGate: {},
+          dossierGate: {},
+        },
+        statusCode: 200,
+      }),
     )
     caseManagementService.reviewChecklistGate.mockResolvedValue(
       new RestResponse({
@@ -237,6 +251,7 @@ describe('useChecklistDossierTab', () => {
 
     await result.current.handleApproveChecklist()
 
+    expect(caseManagementService.completeChecklist).toHaveBeenCalledWith('case-1')
     expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
       decision: CaseChecklistGateDecision.Approved,
       remarks: undefined,

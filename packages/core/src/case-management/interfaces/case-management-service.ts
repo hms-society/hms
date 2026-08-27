@@ -8,6 +8,7 @@ export type ReviewCaseChecklistGateRequest = {
 }
 
 export interface CaseManagementService {
+  completeChecklist(caseId: string): Promise<RestResponse<LegalCase>>
   listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
   reviewChecklistGate(
     caseId: string,

@@ -115,6 +115,12 @@ export function useChecklistDossierTab({
         throw new Error('A revisão deste checklist ainda não está disponível.')
       }
 
+      if (decision === CaseChecklistGateDecision.Approved) {
+        const completionResponse = await caseManagementService.completeChecklist(caseId)
+
+        if (completionResponse.isFailure) completionResponse.throwError()
+      }
+
       const response = await caseManagementService.reviewChecklistGate(caseId, {
         decision,
         remarks: remarks.trim() || undefined,

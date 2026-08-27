@@ -9,6 +9,10 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
+    completeChecklist(caseId) {
+      return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-completion`)
+    },
+
     listMyCases() {
       return restClient.get<readonly LegalCaseSummary[]>('/cases/my')
     },

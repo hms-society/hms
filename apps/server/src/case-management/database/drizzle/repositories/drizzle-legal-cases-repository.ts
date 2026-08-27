@@ -3,6 +3,7 @@ import type {
   LegalCaseSummary,
   LegalCaseTeamMemberSummary,
 } from '@hms/core/case-management/domain/entities'
+import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 
@@ -44,6 +45,29 @@ export class DrizzleLegalCasesRepository
 
   async removeAll(): Promise<void> {
     await this.database.delete(legalCaseModel)
+  }
+
+  async completeChecklist(
+    caseId: string,
+    completedBy: string,
+  ): ReturnType<LegalCasesRepository['completeChecklist']> {
+    const [updatedCase] = await this.database
+      .update(legalCaseModel)
+      .set({
+        checklistCompletedAt: new Date(),
+        checklistCompletedBy: completedBy,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.status, LegalCaseStatus.Documentation),
+          isNull(legalCaseModel.checklistGateDecision),
+        ),
+      )
+      .returning()
+
+    return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
   }
 
   async findById(caseId: string): ReturnType<LegalCasesRepository['findById']> {
