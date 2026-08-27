@@ -273,7 +273,7 @@ export function useConsultationDocumentsPage({
       documentId,
       classificacaoAcesso: classification,
     })
-    handleRefresh()
+    await handleRefresh()
   }
 
   return {
