@@ -29,9 +29,13 @@ export const ChecklistDossierTab = ({
   reviewDisabledReason,
 }: ChecklistDossierTabProps) => {
   const {
+    actionFeedback,
     canStartLegalWriting,
+    checklistGateAuditLabel,
     checklistGateLabel,
     checklistGateRemarks,
+    checklistItems,
+    complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,
     error,
@@ -41,8 +45,13 @@ export const ChecklistDossierTab = ({
     handleCancelDecisionReason,
     handleConfirmDecisionReason,
     handleDecisionReasonDialogOpenChange,
+    handleAddComplementaryItem,
+    handleFilterByCase,
+    handleOpenValidationDesk,
     handleRejectOnMerit,
     handleRemarksChange,
+    handleRequestDocumentException,
+    handleValidateChecklistItem,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
     isReviewDisabled: isChecklistReviewDisabled,
@@ -96,6 +105,11 @@ export const ChecklistDossierTab = ({
                 Ressalvas: {checklistGateRemarks}
               </p>
             )}
+            {checklistGateAuditLabel && (
+              <p className='mt-1 text-[11px] font-medium text-amber-900'>
+                {checklistGateAuditLabel}
+              </p>
+            )}
             {error && (
               <p className='mt-1 text-[11px] font-medium text-destructive'>
                 {error.message}
@@ -104,6 +118,11 @@ export const ChecklistDossierTab = ({
             {isChecklistReviewDisabled && reviewDisabledReason && (
               <p className='mt-1 text-[11px] font-medium text-amber-900'>
                 {reviewDisabledReason}
+              </p>
+            )}
+            {actionFeedback && (
+              <p className='mt-1 text-[11px] font-medium text-primary'>
+                {actionFeedback}
               </p>
             )}
           </div>
@@ -205,6 +224,7 @@ export const ChecklistDossierTab = ({
             variant='brand'
             size='xs'
             className='h-7 rounded-full bg-background text-[10px]'
+            onClick={handleOpenValidationDesk}
           >
             <Icon name='check-circle-2' className='size-3' />
             Mesa de Validação
@@ -214,6 +234,7 @@ export const ChecklistDossierTab = ({
             variant='brand'
             size='xs'
             className='h-7 rounded-full bg-background text-[10px]'
+            onClick={handleFilterByCase}
           >
             Filtrado por este caso
             <Icon name='arrow-right' className='size-3' />
@@ -225,7 +246,7 @@ export const ChecklistDossierTab = ({
             Itens obrigatórios
           </h3>
           <div className='flex flex-col gap-1.5'>
-            {checklist.map((item) => (
+            {checklistItems.map((item) => (
               <div
                 key={item.id}
                 className={`flex min-w-0 flex-col gap-3 rounded-md border px-3 py-2 md:flex-row md:items-center md:justify-between ${getChecklistRowClasses(
@@ -290,6 +311,7 @@ export const ChecklistDossierTab = ({
                     variant={item.status === 'validado' ? 'brand' : 'outline'}
                     size='xs'
                     className='h-7 rounded-full bg-accent px-2 text-[10px] text-accent-foreground'
+                    onClick={() => handleValidateChecklistItem(item.id)}
                   >
                     <Icon name={getChecklistActionIcon(item.status)} className='size-3' />
                     {getChecklistActionLabel(item.status)}
@@ -297,8 +319,9 @@ export const ChecklistDossierTab = ({
                   <Button
                     variant='outline'
                     size='icon-xs'
-                    aria-label={`Abrir ${item.title}`}
+                    aria-label={`Validar ${item.title}`}
                     className='size-7 rounded-full bg-card text-muted-foreground'
+                    onClick={() => handleValidateChecklistItem(item.id)}
                   >
                     <Icon name='arrow-right' className='size-3' />
                   </Button>
@@ -313,14 +336,26 @@ export const ChecklistDossierTab = ({
             Itens complementares do caso
           </h3>
           <div className='flex items-center justify-between gap-3 rounded-md border border-border bg-background p-3'>
-            <span className='text-[10px] text-muted-foreground'>
-              Nenhum item complementar adicionado. Itens complementares são específicos
-              deste caso e exigem justificativa — não alteram o template de origem.
-            </span>
+            <div className='flex min-w-0 flex-col gap-1'>
+              {complementaryItems.length === 0 ? (
+                <span className='text-[10px] text-muted-foreground'>
+                  Nenhum item complementar adicionado. Itens complementares são
+                  específicos deste caso e exigem justificativa — não alteram o template
+                  de origem.
+                </span>
+              ) : (
+                complementaryItems.map((item) => (
+                  <span key={item} className='text-[10px] font-medium text-foreground'>
+                    {item}
+                  </span>
+                ))
+              )}
+            </div>
             <Button
               variant='brand'
               size='xs'
               className='h-7 rounded-full bg-background text-[10px]'
+              onClick={handleAddComplementaryItem}
             >
               <Icon name='plus' className='size-3' />
               Adicionar item
@@ -390,6 +425,7 @@ export const ChecklistDossierTab = ({
           variant='brand'
           size='xs'
           className='h-8 w-full rounded-full bg-background text-[11px]'
+          onClick={handleRequestDocumentException}
         >
           <Icon name='alert-triangle' className='size-3.5' />
           Solicitar exceção documental

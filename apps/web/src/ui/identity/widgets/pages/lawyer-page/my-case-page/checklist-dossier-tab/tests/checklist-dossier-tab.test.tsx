@@ -14,9 +14,16 @@ function createController(
   overrides: Partial<ReturnType<typeof useChecklistDossierTab>> = {},
 ): ReturnType<typeof useChecklistDossierTab> {
   return {
+    actionFeedback: null,
     canStartLegalWriting: false,
+    checklistGateAuditLabel: undefined,
     checklistGateLabel: 'Checklist pendente',
     checklistGateRemarks: undefined,
+    checklistItems: [
+      { id: '1', title: 'Procuração', status: 'validado' },
+      { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+    ],
+    complementaryItems: [],
     decisionReasonDialog: {
       confirmLabel: 'Confirmar exceção',
       description: 'Ao confirmar, o checklist avançará com ressalvas.',
@@ -30,8 +37,13 @@ function createController(
     handleCancelDecisionReason: vi.fn(),
     handleConfirmDecisionReason: vi.fn(),
     handleDecisionReasonDialogOpenChange: vi.fn(),
+    handleAddComplementaryItem: vi.fn(),
+    handleFilterByCase: vi.fn(),
+    handleOpenValidationDesk: vi.fn(),
     handleRejectOnMerit: vi.fn(),
     handleRemarksChange: vi.fn(),
+    handleRequestDocumentException: vi.fn(),
+    handleValidateChecklistItem: vi.fn(),
     isDecisionReasonDialogOpen: false,
     isChecklistComplete: false,
     isReviewDisabled: false,
@@ -111,6 +123,123 @@ describe('ChecklistDossierTab', () => {
       checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
       isReviewDisabled: true,
     })
+  })
+
+  it('delegates checklist item validation from the row action button', () => {
+    const handleValidateChecklistItem = vi.fn()
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({ handleValidateChecklistItem }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[
+          { id: '1', title: 'Procuração', status: 'validado' },
+          { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+        ]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /validar cnis/i }))
+
+    expect(handleValidateChecklistItem).toHaveBeenCalledWith('2')
+  })
+
+  it('renders the locally validated document audit line', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        checklistItems: [
+          {
+            documentName: 'CNIS - validado por João Pedro hoje 09:12',
+            id: '2',
+            status: 'validado',
+            title: 'CNIS',
+          },
+        ],
+        isChecklistComplete: true,
+        mandatoryItemsCount: 1,
+        pendingItemsCount: 0,
+        validatedItemsCount: 1,
+      }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[{ id: '2', title: 'CNIS', status: 'solicitado' }]}
+      />,
+    )
+
+    expect(screen.getByText('CNIS - validado por João Pedro hoje 09:12')).toBeTruthy()
+    expect(screen.getByText('1 de 1 obrigatórios - 100%')).toBeTruthy()
+  })
+
+  it('renders the checklist gate audit line after a review decision', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        checklistGateAuditLabel: 'Decisão registrada por João Pedro em 24/08/2026 09:00',
+        checklistGateLabel: 'Aprovado com exceção',
+        checklistGateRemarks: 'CNIS será complementado.',
+      }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
+      />,
+    )
+
+    expect(screen.getByText('Aprovado com exceção')).toBeTruthy()
+    expect(screen.getByText('Ressalvas: CNIS será complementado.')).toBeTruthy()
+    expect(
+      screen.getByText('Decisão registrada por João Pedro em 24/08/2026 09:00'),
+    ).toBeTruthy()
+  })
+
+  it('delegates support actions and renders visible action feedback', () => {
+    const handleAddComplementaryItem = vi.fn()
+    const handleFilterByCase = vi.fn()
+    const handleOpenValidationDesk = vi.fn()
+    const handleRequestDocumentException = vi.fn()
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        actionFeedback: 'Filtro do caso aplicado ao checklist documental.',
+        complementaryItems: ['Item complementar 1 - adicionado por João Pedro'],
+        handleAddComplementaryItem,
+        handleFilterByCase,
+        handleOpenValidationDesk,
+        handleRequestDocumentException,
+      }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /mesa de validação/i }))
+    fireEvent.click(screen.getByRole('button', { name: /filtrado por este caso/i }))
+    fireEvent.click(screen.getByRole('button', { name: /adicionar item/i }))
+    fireEvent.click(screen.getByRole('button', { name: /solicitar exceção documental/i }))
+
+    expect(
+      screen.getByText('Filtro do caso aplicado ao checklist documental.'),
+    ).toBeTruthy()
+    expect(
+      screen.getByText('Item complementar 1 - adicionado por João Pedro'),
+    ).toBeTruthy()
+    expect(handleOpenValidationDesk).toHaveBeenCalledOnce()
+    expect(handleFilterByCase).toHaveBeenCalledOnce()
+    expect(handleAddComplementaryItem).toHaveBeenCalledOnce()
+    expect(handleRequestDocumentException).toHaveBeenCalledOnce()
   })
 
   it('renders the decision reason dialog and delegates form actions', () => {

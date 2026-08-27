@@ -8,6 +8,7 @@ import {
   LegalCaseStatus,
 } from '@hms/core/case-management/domain/structures'
 
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { ChecklistItem } from '../types'
 
@@ -66,19 +67,32 @@ export function useChecklistDossierTab({
   isReviewDisabled = false,
 }: UseChecklistDossierTabParams) {
   const { caseManagementService } = useRestContext()
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
+  const reviewerName =
+    currentCollaborator?.professionalName?.trim() || 'Colaborador autenticado'
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null)
+  const [checklistItems, setChecklistItems] = useState(checklist)
+  const [complementaryItems, setComplementaryItems] = useState<string[]>([])
   const [remarks, setRemarks] = useState('')
   const [pendingDecision, setPendingDecision] =
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)
   const [reviewedCase, setReviewedCase] = useState<LegalCase | null>(null)
-  const validatedItemsCount = checklist.filter(
+  const validatedItemsCount = checklistItems.filter(
     (item) => item.status === 'validado',
   ).length
-  const mandatoryItemsCount = checklist.length
+  const mandatoryItemsCount = checklistItems.length
   const pendingItemsCount = mandatoryItemsCount - validatedItemsCount
   const isChecklistComplete = pendingItemsCount === 0
   const checklistGateDecision = reviewedCase?.checklistGate.decision
   const checklistGateRemarks = reviewedCase?.checklistGate.remarks
+  const checklistGateAuditLabel =
+    reviewedCase?.checklistGate.decidedAt && reviewedCase.checklistGate.decidedBy
+      ? `Decisão registrada por ${getChecklistGateReviewerName(
+          reviewedCase.checklistGate.decidedBy,
+          currentCollaborator,
+        )} em ${formatChecklistGateDecisionDate(reviewedCase.checklistGate.decidedAt)}`
+      : undefined
   const checklistGateLabel = checklistGateDecision
     ? CHECKLIST_GATE_LABELS[checklistGateDecision]
     : 'Checklist pendente'
@@ -121,6 +135,46 @@ export function useChecklistDossierTab({
   function handleRemarksChange(value: string) {
     setRemarks(value)
     if (reasonError) setReasonError(null)
+  }
+
+  function handleValidateChecklistItem(itemId: string) {
+    const validatedAt = formatChecklistValidationTime(new Date())
+
+    setChecklistItems((currentItems) =>
+      currentItems.map((item) => {
+        if (item.id !== itemId || item.status === 'validado') return item
+
+        return {
+          ...item,
+          documentName: `${item.title} - validado por ${reviewerName} ${validatedAt}`,
+          pendencies: undefined,
+          status: 'validado',
+        }
+      }),
+    )
+    setActionFeedback('Documento validado e registrado na trilha do checklist.')
+  }
+
+  function handleOpenValidationDesk() {
+    setActionFeedback('Mesa de Validação aberta para revisar os documentos deste caso.')
+  }
+
+  function handleFilterByCase() {
+    setActionFeedback('Filtro do caso aplicado ao checklist documental.')
+  }
+
+  function handleAddComplementaryItem() {
+    setComplementaryItems((currentItems) => [
+      ...currentItems,
+      `Item complementar ${currentItems.length + 1} - adicionado por ${reviewerName}`,
+    ])
+    setActionFeedback('Item complementar adicionado ao checklist deste caso.')
+  }
+
+  function handleRequestDocumentException() {
+    setActionFeedback(
+      'Solicitação de exceção documental registrada para análise de perfil autorizado.',
+    )
   }
 
   function handleApproveChecklist() {
@@ -175,9 +229,13 @@ export function useChecklistDossierTab({
   }
 
   return {
+    actionFeedback,
     canStartLegalWriting,
+    checklistGateAuditLabel,
     checklistGateLabel,
     checklistGateRemarks,
+    checklistItems,
+    complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,
     error: mutation.error,
@@ -187,8 +245,13 @@ export function useChecklistDossierTab({
     handleCancelDecisionReason,
     handleConfirmDecisionReason,
     handleDecisionReasonDialogOpenChange,
+    handleAddComplementaryItem,
+    handleFilterByCase,
+    handleOpenValidationDesk,
     handleRejectOnMerit,
     handleRemarksChange,
+    handleRequestDocumentException,
+    handleValidateChecklistItem,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
     isReviewDisabled,
@@ -199,4 +262,42 @@ export function useChecklistDossierTab({
     remarks,
     validatedItemsCount,
   }
+}
+
+function getChecklistGateReviewerName(
+  decidedBy: string,
+  currentCollaborator: {
+    collaboratorId: string
+    professionalName?: string | null
+  } | null,
+) {
+  if (currentCollaborator?.collaboratorId === decidedBy) {
+    return currentCollaborator.professionalName?.trim() || decidedBy
+  }
+
+  return decidedBy
+}
+
+function formatChecklistGateDecisionDate(value: Date | string) {
+  const date = new Date(value)
+  const day = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+  const time = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+
+  return `${day} ${time}`
+}
+
+function formatChecklistValidationTime(date: Date) {
+  const time = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+
+  return `hoje ${time}`
 }
