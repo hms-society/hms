@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseUUIDPipe,
   Patch,
   UseGuards,
   UsePipes,
@@ -60,7 +61,7 @@ export class ReviewCaseChecklistGateController {
   })
   @UsePipes(ZodValidationPipe)
   handle(
-    @Param('caseId') caseId: string,
+    @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
     @Body() body: ReviewCaseChecklistGateControllerRequestBody,
   ) {

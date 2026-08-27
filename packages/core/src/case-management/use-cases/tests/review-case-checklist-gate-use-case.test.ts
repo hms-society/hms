@@ -18,7 +18,10 @@ describe('Review Case Checklist Gate Use Case', () => {
 
   it('approves a complete checklist as the first gate without releasing legal writing', async () => {
     const decidedBy = '00000000-0000-4000-8000-000000000101'
-    const legalCase = LegalCaseFaker.fake()
+    const legalCase = LegalCaseFaker.fake({
+      checklistCompletedAt: new Date('2026-08-24T11:00:00.000Z'),
+      checklistCompletedBy: decidedBy,
+    })
     const reviewedCase = LegalCaseFaker.fake({
       id: legalCase.id,
       checklistGate: {
@@ -57,6 +60,25 @@ describe('Review Case Checklist Gate Use Case', () => {
       expectedStatus: LegalCaseStatus.Documentation,
       status: LegalCaseStatus.ReadyForLegalProduction,
     })
+  })
+
+  it('rejects approval when the persisted checklist is incomplete', async () => {
+    const legalCase = LegalCaseFaker.fake()
+
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy: '00000000-0000-4000-8000-000000000110',
+      }),
+    ).rejects.toThrow('itens obrigatórios')
+
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
 
   it('records approval with exception only when remarks explain the exception', async () => {
@@ -227,7 +249,10 @@ describe('Review Case Checklist Gate Use Case', () => {
   })
 
   it('rejects checklist review when the conditional update loses the race', async () => {
-    const legalCase = LegalCaseFaker.fake()
+    const legalCase = LegalCaseFaker.fake({
+      checklistCompletedAt: new Date('2026-08-24T11:00:00.000Z'),
+      checklistCompletedBy: '00000000-0000-4000-8000-000000000109',
+    })
 
     repository.findById.mockResolvedValue(legalCase)
     repository.listByTeamMember.mockResolvedValue([

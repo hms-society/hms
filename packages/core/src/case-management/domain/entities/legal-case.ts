@@ -9,6 +9,8 @@ export type LegalCase = Entity & {
   legalTopicId: string
   title: string
   status: LegalCaseStatus
+  checklistCompletedAt?: Date
+  checklistCompletedBy?: string
   checklistGate: CaseChecklistGate
   dossierGate: CaseDossierGate
   openedAt: Date

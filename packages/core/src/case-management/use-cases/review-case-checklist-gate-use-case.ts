@@ -41,6 +41,7 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
 
     const remarks = request.remarks?.trim() || undefined
     this.ensureRemarksWhenRequired(request.decision, remarks)
+    this.ensureChecklistIsCompleteWhenApproving(legalCase, request.decision)
     const status = this.getStatusAfterDecision(request.decision)
 
     const reviewedCase = await this.legalCasesRepository.reviewChecklistGate({
@@ -94,6 +95,19 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     if (decision === CaseChecklistGateDecision.RejectedOnMerit && !remarks) {
       throw new CaseChecklistGateReviewError(
         'Informe o motivo para reprovar o checklist.',
+      )
+    }
+  }
+
+  private ensureChecklistIsCompleteWhenApproving(
+    legalCase: LegalCase,
+    decision: CaseChecklistGateDecisionValue,
+  ) {
+    if (decision !== CaseChecklistGateDecision.Approved) return
+
+    if (!legalCase.checklistCompletedAt) {
+      throw new CaseChecklistGateReviewError(
+        'Valide todos os itens obrigatórios do checklist antes da aprovação.',
       )
     }
   }

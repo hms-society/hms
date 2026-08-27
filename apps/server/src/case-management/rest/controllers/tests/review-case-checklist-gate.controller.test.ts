@@ -55,6 +55,53 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     expect(response.body.dossierGate.homologatedAt).toBeUndefined()
   })
 
+  it('rejects an invalid case id before querying the repository', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch('/cases/not-a-uuid/checklist-gate')
+      .send({
+        decision: CaseChecklistGateDecision.Approved,
+      })
+      .expect(400)
+
+    expect(response.body.statusCode).toBe(400)
+  })
+
+  it('rejects approval when mandatory checklist items are not complete', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.LeadLawyer,
+        isPrimary: true,
+      },
+    ])
+
+    const response = await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/checklist-gate`)
+      .send({
+        decision: CaseChecklistGateDecision.Approved,
+      })
+      .expect(409)
+
+    expect(response.body.message).toBe(
+      'Valide todos os itens obrigatórios do checklist antes da aprovação.',
+    )
+    expect(response.body.statusCode).toBe(409)
+  })
+
   it('rejects approval with exception without remarks', async () => {
     const collaborator = await fixture.registerCollaborator()
     const legalCase = await fixture.registerLegalCase({

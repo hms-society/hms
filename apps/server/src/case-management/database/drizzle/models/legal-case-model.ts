@@ -23,6 +23,11 @@ export const legalCaseModel = pgTable(
     legalTopicId: uuid('legal_topic_id').notNull(),
     title: text('title').notNull(),
     status: legalCaseStatusModel('status').default('documentation').notNull(),
+    checklistCompletedAt: timestamp('checklist_completed_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    checklistCompletedBy: uuid('checklist_completed_by'),
     checklistGateDecision: caseChecklistGateDecisionModel('checklist_gate_decision'),
     checklistGateDecidedAt: timestamp('checklist_gate_decided_at', {
       withTimezone: true,

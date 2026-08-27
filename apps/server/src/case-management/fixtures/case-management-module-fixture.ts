@@ -241,6 +241,8 @@ export class CaseManagementModuleFixture {
       legalTopicId: draft.legalTopicId,
       title: draft.title,
       status: draft.status,
+      checklistCompletedAt: draft.checklistCompletedAt,
+      checklistCompletedBy: draft.checklistCompletedBy,
       openedAt: draft.openedAt,
     }
   }
