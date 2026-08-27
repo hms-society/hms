@@ -6,7 +6,10 @@ import type {
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
 import type { PackageDocument } from '../../document-production/domain/entities'
-import { DocumentGenerationMoment, DocumentSpecificationStatus } from '../../document-production/domain/structures'
+import {
+  DocumentGenerationMoment,
+  DocumentSpecificationStatus,
+} from '../../document-production/domain/structures'
 import type { UseCase, DatetimeProvider, IdProvider } from '../../shared/interfaces'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import {
@@ -51,12 +54,16 @@ export class ReplaceFormalizationDocumentSelectionUseCase
   }
 
   async execute(request: Request): Promise<FormalizationDocumentSelection> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     FormalizationDocumentGuard.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
-      throw new FormalizationStateConflictError('Reabra a confirmação antes de alterar a seleção.')
+      throw new FormalizationStateConflictError(
+        'Reabra a confirmação antes de alterar a seleção.',
+      )
     }
     const selection = await this.getSelectionUseCase.execute(request)
     const allowedIds = new Set(
@@ -64,7 +71,9 @@ export class ReplaceFormalizationDocumentSelectionUseCase
     )
     const selectedIds = [...new Set(request.documentSpecificationIds)]
     if (selectedIds.some((id) => !allowedIds.has(id))) {
-      throw new FormalizationStateConflictError('Um ou mais modelos não estão disponíveis para esta formalização.')
+      throw new FormalizationStateConflictError(
+        'Um ou mais modelos não estão disponíveis para esta formalização.',
+      )
     }
     const documentPackage =
       (await this.documentPackagesRepository.findByContext({
@@ -103,7 +112,10 @@ export class ReplaceFormalizationDocumentSelectionUseCase
       status: DocumentSpecificationStatus.Available,
     })
     const specificationsById = new Map(
-      specifications.items.map((specification) => [specification.documentSpecificationId, specification]),
+      specifications.items.map((specification) => [
+        specification.documentSpecificationId,
+        specification,
+      ]),
     )
     const packageDocuments: PackageDocument[] = []
     for (const specificationId of selectedIds) {
@@ -113,10 +125,12 @@ export class ReplaceFormalizationDocumentSelectionUseCase
         continue
       }
       const specification = specificationsById.get(specificationId)
-      if (!specification) throw new FormalizationStateConflictError('Modelo indisponível.')
+      if (!specification)
+        throw new FormalizationStateConflictError('Modelo indisponível.')
       const document = await this.documentsRepository.add({
         id: this.idProvider.generate(),
         title: specification.name,
+        classificacaoAcesso: 'INTERNO',
       })
       packageDocuments.push({
         id: this.idProvider.generate(),
