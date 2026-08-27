@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,13 @@ export function ChangeAccessDialog({
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelected(currentClassification || 'INTERNO')
+      setError(null)
+    }
+  }, [isOpen, currentClassification])
 
   const handleConfirm = async () => {
     try {
