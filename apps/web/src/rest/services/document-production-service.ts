@@ -36,7 +36,6 @@ export const DocumentProductionService = (
   updateDocumentAccess: (request: {
     documentId: string
     classificacaoAcesso: string
-    partnerId?: string
   }) => Promise<any>
 } => {
   return {
@@ -90,7 +89,6 @@ export const DocumentProductionService = (
         `/documents/${request.documentId}/access-classification`,
         {
           classification: request.classificacaoAcesso,
-          destinatarioIdentificador: request.partnerId,
         },
       )
     },

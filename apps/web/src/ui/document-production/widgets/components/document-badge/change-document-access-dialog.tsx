@@ -24,7 +24,7 @@ interface ChangeAccessDialogProps {
   onClose: () => void
   documentTitle: string
   currentClassification: ClassificacaoAcesso
-  onConfirm: (newClassification: ClassificacaoAcesso, partnerId?: string) => void
+  onConfirm: (newClassification: ClassificacaoAcesso) => Promise<void>
 }
 
 export function ChangeAccessDialog({
@@ -37,14 +37,22 @@ export function ChangeAccessDialog({
   const [selected, setSelected] = useState<ClassificacaoAcesso>(
     currentClassification || 'INTERNO',
   )
-  const [partnerId, setPartnerId] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const isPartner = selected === 'PARCEIRO_LIBERADO'
-  const isSaveDisabled = isPartner && partnerId.trim() === ''
-
-  const handleConfirm = () => {
-    onConfirm(selected, isPartner ? partnerId : undefined)
-    onClose()
+  const handleConfirm = async () => {
+    try {
+      setIsSubmitting(true)
+      setError(null)
+      await onConfirm(selected)
+      onClose()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Ocorreu um erro ao alterar o acesso.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -58,6 +66,11 @@ export function ChangeAccessDialog({
         </DialogHeader>
 
         <div className='space-y-3'>
+          {error && (
+            <div className='p-3 text-sm text-destructive bg-destructive/10 rounded-md'>
+              {error}
+            </div>
+          )}
           <label className='text-sm font-medium'>Nova Classificação</label>
           <Select
             value={selected}
@@ -74,29 +87,23 @@ export function ChangeAccessDialog({
               <SelectItem value='PARCEIRO_LIBERADO'>Parceiro Liberado</SelectItem>
             </SelectContent>
           </Select>
-
-          {isPartner && (
-            <div className='space-y-2'>
-              <label className='text-sm font-medium'>Identificador do Parceiro *</label>
-              <Input
-                value={partnerId}
-                onChange={(e) => setPartnerId(e.target.value)}
-                placeholder='Ex: CNPJ ou ID interno do parceiro'
-              />
-            </div>
-          )}
         </div>
 
         <DialogFooter>
-          <Button variant='outline' className='rounded-full' onClick={onClose}>
+          <Button
+            variant='outline'
+            className='rounded-full'
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
           <Button
             className='rounded-full'
             onClick={handleConfirm}
-            disabled={isSaveDisabled}
+            disabled={isSubmitting}
           >
-            Confirmar Alteração
+            {isSubmitting ? 'Salvando...' : 'Confirmar Alteração'}
           </Button>
         </DialogFooter>
       </DialogContent>

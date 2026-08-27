@@ -266,17 +266,12 @@ export function useConsultationDocumentsPage({
     await packageReopeningAction.reopenDocumentPackage()
   }
 
-  async function handleUpdateAccess(
-    documentId: string,
-    classification: string,
-    partnerId?: string,
-  ) {
+  async function handleUpdateAccess(documentId: string, classification: string) {
     if (isReadOnly) return
 
     await updateAccessAction.updateDocumentAccess({
       documentId,
       classificacaoAcesso: classification,
-      partnerId,
     })
     handleRefresh()
   }

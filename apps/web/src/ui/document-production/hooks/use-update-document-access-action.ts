@@ -4,7 +4,6 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 type UpdateAccessRequest = {
   documentId: string
   classificacaoAcesso: string
-  partnerId?: string // Mantendo o uso de IDs para identificação do parceiro
 }
 
 export function useUpdateDocumentAccessAction() {

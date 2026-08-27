@@ -15,11 +15,7 @@ export type ConsultationDocumentRowProps = {
   isCancellingDocument: boolean
   onRefreshDocument: () => Promise<unknown>
   isReadOnly: boolean
-  onUpdateAccess?: (
-    documentId: string,
-    classification: string,
-    partnerId?: string,
-  ) => Promise<void>
+  onUpdateAccess?: (documentId: string, classification: string) => Promise<void>
 }
 
 export const ConsultationDocumentRow = ({
@@ -161,8 +157,8 @@ export const ConsultationDocumentRow = ({
           onClose={() => setIsModalOpen(false)}
           documentTitle={item.document.title}
           currentClassification={item.document.classificacaoAcesso || 'INTERNO'}
-          onConfirm={(classification, partnerId) => {
-            void onUpdateAccess(item.document.id, classification, partnerId)
+          onConfirm={async (classification) => {
+            await onUpdateAccess(item.document.id, classification)
           }}
         />
       )}

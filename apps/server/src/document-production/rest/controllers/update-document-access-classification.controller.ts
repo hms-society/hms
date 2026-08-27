@@ -22,7 +22,13 @@ import { ZodValidationPipe } from 'nestjs-zod'
 import { AuthGuard } from '@/identity/guards/auth.guard'
 import { ActiveCollaboratorGuard } from '@/identity/guards/active-collaborator.guard'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
-import type { DocumentsRepository } from '@hms/core/document-production/interfaces'
+import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
+import type {
+  DocumentsRepository,
+  PackageDocumentsRepository,
+  DocumentPackagesRepository,
+} from '@hms/core/document-production/interfaces'
+import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import type { IdentityRequest } from '@/identity/context'
 import { UpdateDocumentAccessClassificationRequestDto } from '@/document-production/rest/dtos'
 
@@ -36,9 +42,18 @@ export class UpdateDocumentAccessClassificationController {
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
     documentsRepository: DocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
+    packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
+    documentPackagesRepository: DocumentPackagesRepository,
+    @Inject(CONSULTATION_REPOSITORIES.consultations)
+    consultationsRepository: ConsultationsRepository,
   ) {
     this.updateClassificationUseCase = new UpdateDocumentAccessClassificationUseCase(
       documentsRepository,
+      packageDocumentsRepository,
+      documentPackagesRepository,
+      consultationsRepository,
     )
   }
 
@@ -60,8 +75,8 @@ export class UpdateDocumentAccessClassificationController {
       const result = await this.updateClassificationUseCase.execute({
         documentId,
         userId: req.identity!.user.id,
+        collaboratorProfile: req.identity!.collaborator!.profile,
         newClassification: body.classification,
-        destinatarioIdentificador: body.destinatarioIdentificador,
       })
 
       return result

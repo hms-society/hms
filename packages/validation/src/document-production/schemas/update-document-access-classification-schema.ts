@@ -8,5 +8,4 @@ export const updateDocumentAccessClassificationSchema = z.object({
     'CONFIDENCIAL',
     'PARCEIRO_LIBERADO',
   ]),
-  destinatarioIdentificador: z.string().trim().uuid().optional(),
 })

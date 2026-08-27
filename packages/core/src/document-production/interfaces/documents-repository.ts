@@ -5,7 +5,6 @@ export interface UpdateClassificationWithAuditParams {
   userId: string
   valorAnterior: ClassificacaoAcesso
   valorNovo: ClassificacaoAcesso
-  destinatarioIdentificador?: string
 }
 
 export interface DocumentsRepository {

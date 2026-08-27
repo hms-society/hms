@@ -10,5 +10,6 @@ export interface PackageDocumentsRepository {
     packageDocuments: readonly PackageDocumentCreation[],
   ): Promise<readonly PackageDocument[]>
   findByDocumentPackageId(documentPackageId: string): Promise<readonly PackageDocument[]>
+  findByDocumentId(documentId: string): Promise<PackageDocument | undefined>
   removeAll(): Promise<void>
 }
