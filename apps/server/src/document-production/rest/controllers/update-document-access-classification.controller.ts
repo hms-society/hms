@@ -6,6 +6,9 @@ import {
   UseGuards,
   Request,
   BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  NotImplementedException,
   Inject,
   UsePipes,
 } from '@nestjs/common'
@@ -82,7 +85,25 @@ export class UpdateDocumentAccessClassificationController {
 
       return result
     } catch (error: any) {
-      throw new BadRequestException(error.message)
+      if (error.message === 'Documento não encontrado.') {
+        throw new NotFoundException(error.message)
+      }
+      if (error.message.startsWith('Acesso negado')) {
+        throw new ForbiddenException(error.message)
+      }
+      if (
+        error.message === 'Documento não está vinculado a um pacote.' ||
+        error.message === 'Pacote de documentos não encontrado.'
+      ) {
+        throw new BadRequestException(error.message)
+      }
+      if (
+        error.message ===
+        'Acesso a documentos de formalização ainda não foi implementado.'
+      ) {
+        throw new NotImplementedException(error.message)
+      }
+      throw error // Let NestJS handle 5xx
     }
   }
 }

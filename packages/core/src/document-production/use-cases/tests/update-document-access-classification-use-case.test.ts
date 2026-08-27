@@ -47,7 +47,7 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue(undefined)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([])
 
     await expect(
       useCase.execute({
@@ -64,9 +64,11 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue({
-      documentPackageId: 'pkg-1',
-    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
     documentPackagesRepository.findById.mockResolvedValue(undefined)
 
     await expect(
@@ -84,9 +86,11 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue({
-      documentPackageId: 'pkg-1',
-    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
     documentPackagesRepository.findById.mockResolvedValue({
       context: { type: 'formalization' },
     } as any)
@@ -106,9 +110,11 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue({
-      documentPackageId: 'pkg-1',
-    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
     documentPackagesRepository.findById.mockResolvedValue({
       context: { type: 'consultation', consultationId: 'cons-1' },
     } as any)
@@ -133,9 +139,11 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue({
-      documentPackageId: 'pkg-1',
-    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
     documentPackagesRepository.findById.mockResolvedValue({
       context: { type: 'consultation', consultationId: 'cons-1' },
     } as any)
@@ -165,9 +173,11 @@ describe('Update Document Access Classification Use Case', () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',
     } as any)
-    packageDocumentsRepository.findByDocumentId.mockResolvedValue({
-      documentPackageId: 'pkg-1',
-    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
     documentPackagesRepository.findById.mockResolvedValue({
       context: { type: 'consultation', consultationId: 'cons-1' },
     } as any)

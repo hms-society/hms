@@ -38,26 +38,32 @@ export class UpdateDocumentAccessClassificationUseCase {
     }
 
     // Authorization Check
-    const packageDoc = await this.packageDocumentsRepository.findByDocumentId(documentId)
-    if (!packageDoc) {
+    const packageDocs =
+      await this.packageDocumentsRepository.findAllByDocumentId(documentId)
+    if (packageDocs.length === 0) {
       throw new Error('Documento não está vinculado a um pacote.')
     }
 
-    const docPackage = await this.documentPackagesRepository.findById(
-      packageDoc.documentPackageId,
-    )
-    if (!docPackage) {
-      throw new Error('Pacote de documentos não encontrado.')
-    }
-
-    let hasAccess = false
-    if (docPackage.context.type === 'consultation') {
-      const consultation = await this.consultationsRepository.findById(
-        docPackage.context.consultationId,
+    let hasAccess = true
+    for (const packageDoc of packageDocs) {
+      const docPackage = await this.documentPackagesRepository.findById(
+        packageDoc.documentPackageId,
       )
-      hasAccess = consultation?.assignedLawyerId === collaboratorId
-    } else if (docPackage.context.type === 'formalization') {
-      throw new Error('Acesso a documentos de formalização ainda não foi implementado.')
+      if (!docPackage) {
+        throw new Error('Pacote de documentos não encontrado.')
+      }
+
+      if (docPackage.context.type === 'consultation') {
+        const consultation = await this.consultationsRepository.findById(
+          docPackage.context.consultationId,
+        )
+        if (consultation?.assignedLawyerId !== collaboratorId) {
+          hasAccess = false
+          break
+        }
+      } else if (docPackage.context.type === 'formalization') {
+        throw new Error('Acesso a documentos de formalização ainda não foi implementado.')
+      }
     }
 
     if (!hasAccess && collaboratorProfile !== CollaboratorProfile.Admin) {
