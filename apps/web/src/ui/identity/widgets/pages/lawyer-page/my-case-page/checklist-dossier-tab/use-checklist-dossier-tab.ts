@@ -283,11 +283,13 @@ function formatChecklistGateDecisionDate(value: Date | string) {
   const day = new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
+    timeZone: 'America/Sao_Paulo',
     year: 'numeric',
   }).format(date)
   const time = new Intl.DateTimeFormat('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
   }).format(date)
 
   return `${day} ${time}`
@@ -297,6 +299,7 @@ function formatChecklistValidationTime(date: Date) {
   const time = new Intl.DateTimeFormat('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
   }).format(date)
 
   return `hoje ${time}`

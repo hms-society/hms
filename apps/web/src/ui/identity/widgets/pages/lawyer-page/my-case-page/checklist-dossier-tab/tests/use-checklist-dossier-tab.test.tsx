@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
@@ -39,6 +39,10 @@ describe('useChecklistDossierTab', () => {
     useRestContextMock.mockReturnValue({
       caseManagementService,
     } as never)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('approves the checklist with exception and keeps the dossier gate locked', async () => {
@@ -183,7 +187,6 @@ describe('useChecklistDossierTab', () => {
         status: 'validado',
       }),
     )
-    vi.useRealTimers()
   })
 
   it('submits checklist approval after all documents are locally validated', async () => {
