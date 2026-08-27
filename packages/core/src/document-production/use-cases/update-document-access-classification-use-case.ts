@@ -9,6 +9,7 @@ import { CollaboratorProfile } from '../../identity/domain/structures/collaborat
 export interface UpdateDocumentAccessClassificationRequest {
   documentId: string
   userId: string
+  collaboratorId: string
   collaboratorProfile: CollaboratorProfileValue
   newClassification: ClassificacaoAcesso
 }
@@ -28,7 +29,8 @@ export class UpdateDocumentAccessClassificationUseCase {
   async execute(
     request: UpdateDocumentAccessClassificationRequest,
   ): Promise<UpdateDocumentAccessClassificationResponse> {
-    const { documentId, userId, collaboratorProfile, newClassification } = request
+    const { documentId, userId, collaboratorId, collaboratorProfile, newClassification } =
+      request
 
     const document = await this.documentsRepository.findById(documentId)
     if (!document) {
@@ -53,7 +55,7 @@ export class UpdateDocumentAccessClassificationUseCase {
       const consultation = await this.consultationsRepository.findById(
         docPackage.context.consultationId,
       )
-      hasAccess = consultation?.assignedLawyerId === userId
+      hasAccess = consultation?.assignedLawyerId === collaboratorId
     } else if (docPackage.context.type === 'formalization') {
       throw new Error('Acesso a documentos de formalização ainda não foi implementado.')
     }
@@ -64,12 +66,9 @@ export class UpdateDocumentAccessClassificationUseCase {
       )
     }
 
-    const valorAnterior = document.classificacaoAcesso
-
     await this.documentsRepository.updateClassificationWithAudit({
       documentId,
       userId,
-      valorAnterior,
       valorNovo: newClassification,
     })
 

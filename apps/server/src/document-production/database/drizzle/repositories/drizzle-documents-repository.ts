@@ -84,6 +84,18 @@ export class DrizzleDocumentsRepository
     params: Parameters<DocumentsRepository['updateClassificationWithAudit']>[0],
   ): Promise<void> {
     await this.database.transaction(async (tx) => {
+      const [doc] = await tx
+        .select({ classificacaoAcesso: documentModel.classificacaoAcesso })
+        .from(documentModel)
+        .where(eq(documentModel.id, params.documentId))
+        .for('update')
+
+      if (!doc) {
+        throw new Error('Documento não encontrado.')
+      }
+
+      const valorAnterior = doc.classificacaoAcesso
+
       await tx
         .update(documentModel)
         .set({
@@ -95,7 +107,7 @@ export class DrizzleDocumentsRepository
       await tx.insert(documentAuditModel).values({
         documentoId: params.documentId,
         usuarioResponsavelId: params.userId,
-        valorAnterior: params.valorAnterior,
+        valorAnterior,
         valorNovo: params.valorNovo,
       })
     })

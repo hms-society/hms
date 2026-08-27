@@ -75,6 +75,7 @@ export class UpdateDocumentAccessClassificationController {
       const result = await this.updateClassificationUseCase.execute({
         documentId,
         userId: req.identity!.user.id,
+        collaboratorId: req.identity!.collaborator!.collaboratorId,
         collaboratorProfile: req.identity!.collaborator!.profile,
         newClassification: body.classification,
       })

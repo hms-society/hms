@@ -3,7 +3,6 @@ import type { Document, DocumentCreation, ClassificacaoAcesso } from '../domain/
 export interface UpdateClassificationWithAuditParams {
   documentId: string
   userId: string
-  valorAnterior: ClassificacaoAcesso
   valorNovo: ClassificacaoAcesso
 }
 
