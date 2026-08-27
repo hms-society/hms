@@ -106,6 +106,30 @@ describe('Update Document Access Classification Use Case', () => {
     ).rejects.toThrow('Acesso a documentos de formalização ainda não foi implementado.')
   })
 
+  it('denies access if package is case (unsupported)', async () => {
+    documentsRepository.findById.mockResolvedValue({
+      classificacaoAcesso: 'INTERNO',
+    } as any)
+    packageDocumentsRepository.findAllByDocumentId.mockResolvedValue([
+      {
+        documentPackageId: 'pkg-1',
+      } as any,
+    ])
+    documentPackagesRepository.findById.mockResolvedValue({
+      context: { type: 'case' },
+    } as any)
+
+    await expect(
+      useCase.execute({
+        documentId: 'doc-1',
+        userId: 'user-1',
+        collaboratorId: 'collab-1',
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+        newClassification: 'CLIENTE',
+      }),
+    ).rejects.toThrow("Acesso a documentos do contexto 'case' não suportado.")
+  })
+
   it('denies access if lawyer is not assigned and is not admin', async () => {
     documentsRepository.findById.mockResolvedValue({
       classificacaoAcesso: 'INTERNO',

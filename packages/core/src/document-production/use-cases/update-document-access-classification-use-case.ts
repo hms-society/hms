@@ -63,6 +63,10 @@ export class UpdateDocumentAccessClassificationUseCase {
         }
       } else if (docPackage.context.type === 'formalization') {
         throw new Error('Acesso a documentos de formalização ainda não foi implementado.')
+      } else {
+        throw new Error(
+          `Acesso a documentos do contexto '${docPackage.context.type}' não suportado.`,
+        )
       }
     }
 

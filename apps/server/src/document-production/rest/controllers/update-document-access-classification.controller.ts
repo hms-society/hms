@@ -99,7 +99,8 @@ export class UpdateDocumentAccessClassificationController {
       }
       if (
         error.message ===
-        'Acesso a documentos de formalização ainda não foi implementado.'
+          'Acesso a documentos de formalização ainda não foi implementado.' ||
+        error.message.includes('não suportado')
       ) {
         throw new NotImplementedException(error.message)
       }
