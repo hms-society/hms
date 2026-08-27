@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from '@/ui/shadcn/select'
 import { Button } from '@/ui/shadcn/button'
-import { Input } from '@/ui/shadcn/input'
 
 import type { ClassificacaoAcesso } from './document-access-badge'
 
