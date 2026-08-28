@@ -1,7 +1,7 @@
 import type { CollaboratorSummary } from '../domain/entities'
 import { CollaboratorNotFoundError } from '../domain/errors'
 import type { AuthUser } from '../domain/structures'
-import type { CollaboratorsRepository } from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 type Request = {

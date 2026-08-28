@@ -14,7 +14,10 @@ import {
   type IntakeListQuery,
   type IntakeListRow,
 } from '../domain/structures'
-import type { IntakeListRepository, IntakeListResponse } from '../interfaces'
+import type {
+  IntakeListRepository,
+  IntakeListResponse,
+} from '../interfaces/intake-list-repository'
 
 const DEFAULT_PAGE = 1
 const DEFAULT_PAGE_SIZE = 20

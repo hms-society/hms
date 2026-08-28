@@ -66,14 +66,14 @@ describe('Collaborator action use cases', () => {
       useCase.execute({
         authUser,
         collaboratorId: collaborator.id,
-        invitationRedirectTo: 'http://localhost:3000/convite',
+        invitationRedirectTo: 'http://localhost:5000/convite',
       }),
     ).resolves.toBe(summary)
 
     expect(authorizeAdministrator).toHaveBeenCalledWith(authUser)
     expect(authAdministrationProvider.resendInvitation).toHaveBeenCalledWith(
       user.email,
-      'http://localhost:3000/convite',
+      'http://localhost:5000/convite',
     )
   })
 

@@ -1,6 +1,7 @@
 import type { AuthUser } from '../domain/structures'
 import { CollaboratorNotAuthorizedError } from '../domain/errors'
-import type { CollaboratorsRepository, UsersRepository } from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
+import type { UsersRepository } from '../interfaces/users-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 type Request = {

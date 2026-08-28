@@ -1,4 +1,4 @@
-import type { ClientsRepository } from '../interfaces'
+import type { ClientsRepository } from '../interfaces/clients-repository'
 
 export interface ListClientsRequest {
   page: number

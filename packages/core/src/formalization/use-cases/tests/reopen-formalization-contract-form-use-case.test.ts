@@ -12,8 +12,15 @@ describe('Reopen Formalization Contract Form Use Case', () => {
   })
 
   it('opens a closed active form without changing its revision', async () => {
-    const formalization = fakeFormalization({ contractFormState: 'closed', contractFormRevision: 1 })
-    const reopened = fakeFormalization({ ...formalization, contractFormState: 'open', version: 2 })
+    const formalization = fakeFormalization({
+      contractFormState: 'closed',
+      contractFormRevision: 1,
+    })
+    const reopened = fakeFormalization({
+      ...formalization,
+      contractFormState: 'open',
+      version: 2,
+    })
     repository.findById.mockResolvedValue(formalization)
     repository.replace.mockResolvedValue(reopened)
 

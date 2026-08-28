@@ -91,7 +91,9 @@
     "#shared/*": "./src/shared/*"
   },
   "scripts": {
+    "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "biome lint src",
     "check-types": "tsc --noEmit"
   },
