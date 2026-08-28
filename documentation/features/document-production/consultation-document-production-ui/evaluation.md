@@ -6,7 +6,7 @@ Spec avaliada: revisão 24 (`spec.md`).
 
 Plan: `plan.md`.
 
-PRD: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+PRD: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 
 Jira: SCRUM-138.
 

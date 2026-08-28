@@ -1,7 +1,3 @@
----
-description: Developer tooling used in this repository — package manager, monorepo orchestration, linting/formatting, testing, database, git hooks, and helper scripts.
----
-
 # Tooling
 
 This document describes the **developer tooling** of the HMS monorepo: how to
@@ -10,7 +6,7 @@ install, run, lint, test, and contribute. For the application/runtime tech stack
 
 ## Requirements
 
-- **Node.js** `>= 18` (see `engines` in the root `package.json`)
+- **Node.js** `^18.17 || >= 20` (see `engines` in the root `package.json`)
 - **pnpm** `9.0.0` (pinned via `packageManager`) — use `corepack enable` so the
   correct version is used automatically
 
@@ -20,7 +16,7 @@ Managed as a pnpm workspace (`pnpm-workspace.yaml`):
 
 - `apps/*` — `apps/web` (frontend), `apps/server` (backend)
 - `packages/*` — `packages/core` (shared domain) and `packages/validation`
-  (shared Zod schemas)
+  (shared Zod schemas; lint and type-check only)
 
 Run a script in a single workspace with `--filter`:
 
@@ -47,6 +43,7 @@ Configured in `turbo.json`. Root scripts fan out to every workspace:
 | `pnpm build`         | `turbo run build`                     |
 | `pnpm dev`           | `turbo run dev` (persistent, no cache)|
 | `pnpm lint`          | `turbo run lint`                      |
+| `pnpm check:architecture` | `turbo run check:architecture`   |
 | `pnpm test`          | `turbo run test`                      |
 | `pnpm check-types`   | `turbo run check-types`               |
 | `pnpm format`        | `biome format --write .`              |
@@ -94,18 +91,67 @@ The application workspaces keep code and type validation as separate checks:
 The shared packages currently retain their package-specific `lint` and
 `check-types` scripts.
 
+## Dependency architecture — Dependency Cruiser
+
+Dependency Cruiser validates the import graph independently in `apps/web`,
+`apps/server`, `packages/core`, and `packages/validation`. Each workspace owns a
+`.dependency-cruiser.mjs` configuration so its own `tsconfig.json` and aliases are
+resolved without conflating the Web and Server `@/` aliases.
+
+The root command runs every workspace through Turborepo:
+
+```bash
+pnpm check:architecture
+```
+
+Run one boundary while developing with a workspace filter:
+
+```bash
+pnpm --filter web check:architecture
+pnpm --filter server check:architecture
+pnpm --filter @hms/core check:architecture
+pnpm --filter @hms/validation check:architecture
+```
+
+The shared root configuration rejects circular dependencies. Workspace rules
+enforce the dependency directions documented in Architecture, Modules, and the
+selected repository Rules: Core remains framework-independent, Validation does
+not depend on applications, Server modules do not reach into another module's
+database implementation, and Web widgets consume feature query/action hooks
+instead of TanStack Query or REST infrastructure directly. The command is part
+of `pnpm validate` and must pass without ignored known violations.
+
 ## Testing — Vitest
 
-The application and core workspaces use Vitest for automated tests.
+The application and core workspaces use Vitest for automated tests. The
+`packages/validation` workspace is intentionally test-free: its shared Zod
+schemas are checked through TypeScript and Biome, while behavior is covered at
+the consuming core and application boundaries.
 
 - `apps/web`: `pnpm --filter web test` (`vitest run`)
 - `apps/server`:
   - `pnpm --filter server test` — unit and REST integration tests
   - `pnpm --filter server test:watch` — watch mode
-  - `pnpm --filter server test:cov` — coverage
+  - `pnpm --filter server test:coverage` — coverage
   - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
 - `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
-- `pnpm test` runs the test task across all workspaces through Turborepo.
+- `pnpm test` runs the test task across all test-enabled workspaces through Turborepo.
+
+Coverage is a mandatory post-implementation validation step:
+
+```
+pnpm test:coverage                 # all covered workspaces
+pnpm --filter web test:coverage
+pnpm --filter server test:coverage
+pnpm --filter @hms/core test:coverage
+```
+
+If the coverage gate fails, implementation is not complete. Add or improve
+behavior-focused tests in the covered application or core boundary, rerun
+coverage, and repeat until the gate passes. Do not add tests to
+`packages/validation`; its schemas are intentionally covered by their
+consumers. A coverage report alone does not enforce a percentage; Vitest fails
+the command when configured thresholds are not met.
 
 Server REST integration tests use Testcontainers and are configured with
 `fileParallelism: false` so each module fixture can own an isolated database
@@ -143,7 +189,7 @@ The `production` and `staging` GitHub environments must provide these secrets:
 
 ## Frontend tooling (`apps/web`)
 
-- **Vite** (`vite dev --port 3000`, `vite build`, `vite preview`).
+- **Vite** (`vite dev --port 5000`, `vite build`, `vite preview`).
 - **TanStack Router** route generation: `pnpm --filter web generate-routes`
   (`tsr generate`) — `routeTree.gen.ts` is generated and treated as read-only.
 - **shadcn/ui**: components added via `pnpm --filter web shadcn add <name>`, output
@@ -196,8 +242,9 @@ Bring it up with `docker compose up`.
   `.opencode/commands`) and generated Codex skills under `.codex/skills`, removing
   stale managed artifacts when a workflow is retired.
 - `sync-agents.sh` — generates Codex, Claude, and OpenCode role configuration from
-  `documentation/agents/*-agent.md`; Searcher and Integrated Reviewer roles are
-  read-only, while Builders receive workspace-write access without subagent creation.
+  `documentation/agents/*-agent.md`; the Integrated Reviewer is read-only, while Builders
+  receive workspace-write access without subagent creation. Spec research remains in the
+  Orchestrator and has no generated Searcher role.
 
 ## Editor configuration
 

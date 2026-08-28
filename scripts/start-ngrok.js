@@ -30,7 +30,7 @@ const serverEnv = loadEnvFile(path.join(__dirname, '..', 'apps', 'server', '.env
 
 const env = { ...rootEnv, ...serverEnv, ...process.env }
 
-const port = env.HMS_SERVER_APP_PORT || '3333'
+const port = env.HMS_SERVER_APP_PORT || '5555'
 const DEFAULT_NGROK_DOMAIN = 'buckle-stinger-swoop.ngrok-free.dev'
 const ngrokDomain = env.NGROK_DOMAIN || DEFAULT_NGROK_DOMAIN
 
