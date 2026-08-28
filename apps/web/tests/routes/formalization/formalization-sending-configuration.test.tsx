@@ -12,6 +12,7 @@ test('keeps direct sending configuration access locked until package confirmatio
   documentProduction,
   page,
 }, testInfo) => {
+  documentProduction.formalization.details.formalization.contractFormState = 'closed'
   await page.goto(`/formalizacoes/${FORMALIZATION_ID}/configuracao-envio`)
   await expect(page).toHaveURL(`/formalizacoes/${FORMALIZATION_ID}/configuracao-envio`)
   await expect(
