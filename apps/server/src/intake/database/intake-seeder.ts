@@ -51,7 +51,7 @@ export class IntakeSeeder {
       urgency: 'normal',
       demandNotes:
         'The client needs representation to review and negotiate a residential lease agreement.',
-      status: IntakeStatus.ConsultationScheduled,
+      status: IntakeStatus.InFormalization,
     })
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
@@ -83,19 +83,6 @@ export class IntakeSeeder {
               urgency: 'high',
               demandNotes: 'Demissão sem justa causa, verbas rescisórias não pagas.',
               status: IntakeStatus.Registered,
-            }),
-            this.createIntake({
-              clientId,
-              responsibleId: references.responsibleId,
-              createdBy: references.actorId,
-              updatedBy: references.actorId,
-              origin: 'direct',
-              contactChannel: 'email',
-              legalAreaId: references.legalAreaId,
-              legalTopicId: references.legalTopicId,
-              urgency: 'normal',
-              demandNotes: 'Divórcio consensual e partilha de bens.',
-              status: IntakeStatus.InFormalization,
             }),
           ]
         }
@@ -130,7 +117,7 @@ export class IntakeSeeder {
     const createdDocumentProductionIntake = intakes.find(
       ({ clientId, status }) =>
         clientId === references.documentProductionClientId &&
-        status === IntakeStatus.ConsultationScheduled,
+        status === IntakeStatus.InFormalization,
     )
 
     if (!createdDocumentProductionIntake) {
@@ -140,7 +127,11 @@ export class IntakeSeeder {
       )
     }
 
-    return { intakes, documentProductionIntake: createdDocumentProductionIntake }
+    return {
+      intakes,
+      documentProductionIntake: createdDocumentProductionIntake,
+      formalizationIntake: createdDocumentProductionIntake,
+    }
   }
 
   private createIntake(overrides: Partial<Intake>): IntakeCreation {

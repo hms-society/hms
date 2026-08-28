@@ -46,7 +46,7 @@ $ pnpm run start:prod
 
 ## API reference
 
-When the server is running, open [http://localhost:3333/docs](http://localhost:3333/docs)
+When the server is running, open [http://localhost:5555/docs](http://localhost:5555/docs)
 to browse the Scalar REST API reference generated from the NestJS controllers.
 
 ## Run tests
@@ -59,7 +59,7 @@ $ pnpm run test
 $ pnpm run test:e2e
 
 # test coverage
-$ pnpm run test:cov
+$ pnpm run test:coverage
 ```
 
 ## Deployment
