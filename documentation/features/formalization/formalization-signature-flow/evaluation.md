@@ -48,6 +48,23 @@ Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 | `CA-09` | `EV-04`; `EV-15` | `passed` |
 | `CA-10` | `EV-06`; `EV-13`; `MV-01` | `passed` |
 
+## Delivery PR set
+
+Publication follows the coherent dependency chain recorded in the Plan. Each PR is ready
+for review, uses the preceding slice as its base when dependent, and remains within the
+authoritative 5,000 added TypeScript-line gate.
+
+| Order | PR | Base → head | TypeScript added lines | Scope | Validation / criteria | Status |
+| --- | --- | --- | ---: | --- | --- | --- |
+| 1 | pending | `develop` → `codex/formalization-tooling-slice` | 0 | Tooling/manifests | lockfile/package alignment; enables all criteria | pending publication |
+| 2 | pending | `codex/formalization-tooling-slice` → `codex/formalization-core-v2-slice` | 4,670 | Core contracts and use cases | Core checks; `RF-01`–`RF-18`, `CA-01`–`CA-10` | pending publication |
+| 3 | pending | `codex/formalization-core-v2-slice` → `codex/formalization-validation-v2-slice` | 563 | Validation schemas | Validation lint/type-check; boundary criteria | pending publication |
+| 4 | pending | `codex/formalization-validation-v2-slice` → `codex/formalization-server-foundation-v3-slice` | 4,091 | Server persistence/provider foundation | Server static/type/focused checks; persistence criteria | pending publication |
+| 5 | pending | `codex/formalization-server-foundation-v3-slice` → `codex/formalization-server-app-v3-slice` | 3,642 | Server REST/jobs/composition | Server feature checks; REST/job criteria | pending publication |
+| 6 | pending | `codex/formalization-server-app-v3-slice` → `codex/formalization-web-foundation-v3-slice` | 4,491 | Web REST/shared foundation | Web static/type/REST checks; Web enablement criteria | pending publication |
+| 7 | pending | `codex/formalization-web-foundation-v3-slice` → `codex/formalization-web-page-v3-slice` | 4,537 | Formalization page | focused Web/route checks; page criteria | pending publication |
+| 8 | pending | `codex/formalization-web-page-v3-slice` → `codex/formalization-sending-configuration-v3-slice` | 4,866 | Dedicated sending configuration page and SDD records | focused/full Web coverage and Playwright evidence; configuration criteria | pending publication |
+
 ## Automated and runtime evidence
 
 | ID | Layer | Command or scenario | Result | Status |

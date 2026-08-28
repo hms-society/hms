@@ -20,6 +20,25 @@ updated_at: 2026-08-28
 - **Builders:** F2 `builder_validation`, F3 `builder_server`, and F4 resumed `builder_core` completed and passed Orchestrator verification. F5 `builder_server` and its real migration-backed regression are complete. The same `builder_web` identity completed F6 and its available F7 scope; the Orchestrator completed the remaining F7 UI pieces after the Builder became unresponsive. Root/generated paths remain Orchestrator-owned.
 - **Shared ownership:** The Orchestrator owns `docker-compose.yaml`, `apps/server/src/app.module.ts`, generated Drizzle migration artifacts, package installation/lockfile updates, and final integrated authority/conformance checks. Existing authority-document changes are preserved and are not reassigned to Builders.
 
+## Delivery PR set
+
+The implementation is published as a dependency-ordered set of coherent, reviewable
+pull requests. The authoritative TypeScript added-line count is calculated against each
+declared base using `.github/workflows/check-pr-size.yml`; every slice is at or below 5,000
+added lines. PRs 2–8 intentionally depend on the immediately preceding branch so each
+review can consume the contracts and generated configuration required by its layer.
+
+| Order | Slice | Base | Head | Scope | RF/CA coverage | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Tooling/manifests | `develop` | `codex/formalization-tooling-slice` | package manifests and lockfile alignment | `RF-01`–`RF-18`; `CA-01`–`CA-10` enablement | pending publication |
+| 2 | Core contracts and use cases | `codex/formalization-tooling-slice` | `codex/formalization-core-v2-slice` | `packages/core` domain, ports and behavior | `RF-01`–`RF-18`; `CA-01`–`CA-10` | pending publication |
+| 3 | Validation schemas | `codex/formalization-core-v2-slice` | `codex/formalization-validation-v2-slice` | `packages/validation` transport schemas and exports | `RF-04`, `RF-08`, `RF-10`, `RF-11`, `RF-18`; `CA-03`, `CA-05`, `CA-06`, `CA-09`, `CA-10` | pending publication |
+| 4 | Server foundation | `codex/formalization-validation-v2-slice` | `codex/formalization-server-foundation-v3-slice` | persistence, migrations, storage and provider foundation | `RF-03`, `RF-08`, `RF-14`, `RF-16`–`RF-18`; `CA-02`, `CA-05`, `CA-08`–`CA-10` | pending publication |
+| 5 | Server application | `codex/formalization-server-foundation-v3-slice` | `codex/formalization-server-app-v3-slice` | REST, jobs, messaging and module composition | `RF-04`, `RF-08`, `RF-10`–`RF-18`; `CA-03`, `CA-05`–`CA-10` | pending publication |
+| 6 | Web foundation | `codex/formalization-server-app-v3-slice` | `codex/formalization-web-foundation-v3-slice` | REST client, queries/actions, routes and shared Web infrastructure | `RF-01`–`RF-18`; `CA-01`–`CA-10` enablement | pending publication |
+| 7 | Formalization page | `codex/formalization-web-foundation-v3-slice` | `codex/formalization-web-page-v3-slice` | formalization page and embedded configuration summary | `RF-01`–`RF-04`, `RF-12`, `RF-13`; `CA-01`–`CA-04`, `CA-07` | pending publication |
+| 8 | Sending configuration page | `codex/formalization-web-page-v3-slice` | `codex/formalization-sending-configuration-v3-slice` | dedicated configuration page, signatories, fields and SDD closure records | `RF-05`–`RF-11`, `RF-14`–`RF-18`; `CA-05`–`CA-10` | pending publication |
+
 ## Execution ledger
 
 | Wave | Builder | Phase | Name | Depends on | Parallel with | Status | Exit condition |
