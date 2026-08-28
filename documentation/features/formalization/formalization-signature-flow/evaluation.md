@@ -63,8 +63,9 @@ authoritative 5,000 added TypeScript-line gate.
 | 5 | [#111](https://github.com/hms-society/hms/pull/111) | `codex/formalization-server-foundation-v3-slice` → `codex/formalization-server-app-v3-slice` | 3,769 | Server REST/jobs/composition and app fixtures | Server feature checks; REST/job criteria | published |
 | 6 | [#109](https://github.com/hms-society/hms/pull/109) | `codex/formalization-server-app-v3-slice` → `codex/formalization-web-foundation-v3-slice` | 3,423 | Web REST/shared foundation | Web static/type/REST checks; Web enablement criteria | published |
 | 7 | [#110](https://github.com/hms-society/hms/pull/110) | `codex/formalization-web-foundation-v3-slice` → `codex/formalization-web-page-v3-slice` | 4,569 | Formalization page and route files | focused Web/page checks; page criteria | published |
-| 8 | [#112](https://github.com/hms-society/hms/pull/112) | `codex/formalization-web-page-v3-slice` → `codex/formalization-web-page-route-tests-v3-slice` | 564 | Formalization and sending-configuration route coverage | focused Playwright CLI route suites; route criteria | published |
+| 8 | [#112](https://github.com/hms-society/hms/pull/112) | `codex/formalization-web-page-v3-slice` → `codex/formalization-web-page-route-tests-v3-slice` | 306 | Formalization route coverage | focused Playwright CLI route suite; route criteria | published |
 | 9 | [#107](https://github.com/hms-society/hms/pull/107) | `codex/formalization-web-page-route-tests-v3-slice` → `codex/formalization-sending-configuration-v3-slice` | 4,866 | Dedicated sending configuration page and SDD records | focused/full Web coverage and Playwright evidence; configuration criteria | published |
+| 10 | [#113](https://github.com/hms-society/hms/pull/113) | `codex/formalization-sending-configuration-v3-slice` → `codex/formalization-sending-configuration-route-tests-v3-slice` | 258 | Sending configuration route coverage | focused Playwright CLI configuration-route suite; route criteria | published |
 
 ## Automated and runtime evidence
 

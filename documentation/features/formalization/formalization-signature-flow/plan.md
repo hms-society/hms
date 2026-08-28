@@ -25,7 +25,7 @@ updated_at: 2026-08-28
 The implementation is published as a dependency-ordered set of coherent, reviewable
 pull requests. The authoritative TypeScript added-line count is calculated against each
 declared base using `.github/workflows/check-pr-size.yml`; every slice is at or below 5,000
-added lines. PRs 2–9 intentionally depend on the immediately preceding branch so each
+added lines. PRs 2–10 intentionally depend on the immediately preceding branch so each
 review can consume the contracts and generated configuration required by its layer.
 
 | Order | PR | Slice | Base | Head | Scope | RF/CA coverage | Status |
@@ -37,8 +37,9 @@ review can consume the contracts and generated configuration required by its lay
 | 5 | [#111](https://github.com/hms-society/hms/pull/111) | Server application | `codex/formalization-server-foundation-v3-slice` | `codex/formalization-server-app-v3-slice` | REST, jobs, messaging and module composition | `RF-04`, `RF-08`, `RF-10`–`RF-18`; `CA-03`, `CA-05`–`CA-10` | open |
 | 6 | [#109](https://github.com/hms-society/hms/pull/109) | Web foundation | `codex/formalization-server-app-v3-slice` | `codex/formalization-web-foundation-v3-slice` | REST client, queries/actions and shared Web infrastructure | `RF-01`–`RF-18`; `CA-01`–`CA-10` enablement | open |
 | 7 | [#110](https://github.com/hms-society/hms/pull/110) | Formalization page | `codex/formalization-web-foundation-v3-slice` | `codex/formalization-web-page-v3-slice` | formalization page, route files and embedded configuration summary | `RF-01`–`RF-04`, `RF-12`, `RF-13`; `CA-01`–`CA-04`, `CA-07` | open |
-| 8 | [#112](https://github.com/hms-society/hms/pull/112) | Formalization route coverage | `codex/formalization-web-page-v3-slice` | `codex/formalization-web-page-route-tests-v3-slice` | Playwright coverage for the formalization and sending-configuration routes | `RF-01`–`RF-05`, `RF-12`, `RF-13`; `CA-01`–`CA-05`, `CA-07` | open |
+| 8 | [#112](https://github.com/hms-society/hms/pull/112) | Formalization route coverage | `codex/formalization-web-page-v3-slice` | `codex/formalization-web-page-route-tests-v3-slice` | Playwright coverage for the main Formalization route | `RF-01`–`RF-04`, `RF-12`, `RF-13`; `CA-01`–`CA-04`, `CA-07` | open |
 | 9 | [#107](https://github.com/hms-society/hms/pull/107) | Sending configuration page | `codex/formalization-web-page-route-tests-v3-slice` | `codex/formalization-sending-configuration-v3-slice` | dedicated configuration page, signatories, fields and SDD closure records | `RF-05`–`RF-11`, `RF-14`–`RF-18`; `CA-05`–`CA-10` | open |
+| 10 | [#113](https://github.com/hms-society/hms/pull/113) | Sending configuration route coverage | `codex/formalization-sending-configuration-v3-slice` | `codex/formalization-sending-configuration-route-tests-v3-slice` | Playwright coverage for the dedicated configuration route | `RF-05`–`RF-11`, `RF-14`–`RF-18`; `CA-05`–`CA-10` | open |
 
 ## Execution ledger
 
@@ -71,7 +72,7 @@ The three-way parallelism in Wave 2 is justified by the completed Core contract 
 | `2026-08-28` | Full covered-workspace `pnpm test:coverage` completed successfully for Core, Server and Web after stale signatory test mocks were corrected. | F9-T1 coverage evidence added; remaining F9 manual/visual gaps stay open. |
 | `2026-08-28` | The Contract was narrowed to remove supplemental cross-tenant, concurrent-conflict, changed-package, historical-DOCX and pending visual-comparison closure obligations. Reopen preservation/reset remain covered by automated tests and the real authenticated continuation. | Spec revision 15; F9 handoff and Evaluation reconciled so these removed scenarios no longer block conclusion. |
 | `2026-08-28` | The latest Web work was recorded: unique-signatory field progress, Fields Editor document/tab unsaved-change prompts, focused route coverage `2/2`, focused Web coverage `16` files/`71` tests, and full Web coverage `110` files/`403` tests. | F9-T1 evidence refreshed in Evaluation `EV-22`. |
-| `2026-08-28` | The delivery was split into nine dependency-ordered PRs: Web page production files, route coverage for both Formalization screens, and sending configuration are separate review slices; each slice is measured against its declared base and remains below 5,000 added TypeScript lines. | Delivery PR set and Evaluation table updated with PR `#112`; the sending-configuration PR now depends on the route-coverage slice. |
+| `2026-08-28` | The delivery was split into ten dependency-ordered PRs: Web page production files, main-route coverage, sending-configuration production, and dedicated-route coverage are separate review slices; each slice is measured against its declared base and remains below 5,000 added TypeScript lines. | Delivery PR set and Evaluation table updated with PRs `#112` and `#113`; route tests now depend on the production slice they exercise. |
 
 ### F1 — Core contracts and ports
 
