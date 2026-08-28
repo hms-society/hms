@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type {
   DocumentGenerationCreation,
   DocumentGeneration,
@@ -17,9 +19,11 @@ import {
   DocumentVersionFaker,
 } from '@hms/core/document-production/domain/entities/fakers'
 import type {
+  DocumentGenerationSource,
   DocumentTemplateContent,
   DocumentTemplateVariable,
 } from '@hms/core/document-production/domain/structures'
+import type { File } from '@hms/core/shared/domain/entities'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
@@ -29,13 +33,17 @@ import type {
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
+import type { StorageProvider, StoredFilesRepository } from '@hms/core/shared/interfaces'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
+import { STORED_FILES_REPOSITORY } from '@/shared/database/drizzle/database.module'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
+  readonly formalizationId?: string
   readonly requestedByCollaboratorId?: string
 }
 
@@ -105,6 +113,43 @@ const DOCUMENT_TEMPLATES = [
 ] as const satisfies readonly DocumentTemplateSeed[]
 
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
+const FORMALIZATION_DOCUMENT_PACKAGE_ID = '00000000-0000-4000-8000-000000000302'
+const FORMALIZATION_DOCUMENT_TEMPLATES = [
+  {
+    documentId: '00000000-0000-4000-8000-000000000204',
+    packageDocumentId: '00000000-0000-4000-8000-000000000604',
+    name: 'Contrato de formalização',
+    description: 'Documento de apoio para a formalização das condições comerciais.',
+    paragraphs: [
+      'As condições comerciais foram registradas a partir da formalização do atendimento.',
+      'Cliente: {cliente_nome}.',
+      'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
+    ],
+    variables: [
+      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+      { label: 'Área jurídica', technicalName: 'area_juridica' },
+      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+    ],
+  },
+  {
+    documentId: '00000000-0000-4000-8000-000000000205',
+    packageDocumentId: '00000000-0000-4000-8000-000000000605',
+    name: 'Termo de honorários',
+    description: 'Termo complementar com as condições de honorários da contratação.',
+    paragraphs: [
+      'Os honorários e as condições de pagamento foram registrados para este atendimento.',
+      'Cliente: {cliente_nome}.',
+      'Tema jurídico: {tema_juridico}.',
+    ],
+    variables: [
+      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+    ],
+  },
+] as const satisfies readonly (Omit<DocumentTemplateSeed, 'documentId'> & {
+  readonly documentId: string
+  readonly packageDocumentId: string
+})[]
 
 const SEEDED_GENERATION_IDS = [
   '00000000-0000-4000-8000-000000000401',
@@ -124,6 +169,25 @@ const SEEDED_FILE_IDS = [
   '00000000-0000-4000-8000-000000000603',
 ] as const
 
+const SEEDED_FORMALIZATION_GENERATION_IDS = [
+  '00000000-0000-4000-8000-000000000404',
+  '00000000-0000-4000-8000-000000000405',
+] as const
+
+const SEEDED_FORMALIZATION_VERSION_IDS = [
+  '00000000-0000-4000-8000-000000000504',
+  '00000000-0000-4000-8000-000000000505',
+] as const
+
+const SEEDED_FORMALIZATION_FILE_IDS = [
+  '00000000-0000-4000-8000-000000000606',
+  '00000000-0000-4000-8000-000000000607',
+] as const
+
+const SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE = new Date(
+  '2026-08-20T15:20:00.000Z',
+)
+
 @Injectable()
 export class DocumentProductionSeeder {
   constructor(
@@ -139,9 +203,14 @@ export class DocumentProductionSeeder {
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(STORED_FILES_REPOSITORY)
+    private readonly storedFilesRepository: StoredFilesRepository,
+    @Inject(PROVISION_PROVIDERS.storage)
+    private readonly storageProvider: StorageProvider,
   ) {}
 
   async clear() {
+    await this.clearFormalizationSeedFiles()
     await this.packageDocumentsRepository.removeAll()
     await this.versionsRepository.removeAll()
     await this.generationsRepository.removeAll()
@@ -238,29 +307,219 @@ export class DocumentProductionSeeder {
       packageDocumentCreations,
     )
 
+    const formalizationFixture = references.formalizationId
+      ? await this.seedFormalizationFixture({
+          areaId: area.id,
+          topicId: topic.id,
+          formalizationId: references.formalizationId,
+        })
+      : undefined
+
     const generatedDocuments = references.requestedByCollaboratorId
       ? await this.seedApprovedDocumentVersions({
           documents,
           specifications,
-          consultationId: references.consultationId,
+          source: { type: 'consultation', id: references.consultationId, data: {} },
           requestedByCollaboratorId: references.requestedByCollaboratorId,
+          generationIds: SEEDED_GENERATION_IDS,
+          versionIds: SEEDED_VERSION_IDS,
+          fileIds: SEEDED_FILE_IDS,
         })
       : { generations: [], versions: [] }
+
+    const generatedFormalizationDocuments =
+      references.requestedByCollaboratorId &&
+      formalizationFixture &&
+      references.formalizationId
+        ? await this.seedApprovedDocumentVersions({
+            documents: formalizationFixture.formalizationDocuments,
+            specifications: formalizationFixture.formalizationSpecifications,
+            source: { type: 'formalization', id: references.formalizationId, data: {} },
+            requestedByCollaboratorId: references.requestedByCollaboratorId,
+            generationIds: SEEDED_FORMALIZATION_GENERATION_IDS,
+            versionIds: SEEDED_FORMALIZATION_VERSION_IDS,
+            fileIds: await this.seedFormalizationFiles(),
+          })
+        : { generations: [], versions: [] }
+
+    if (formalizationFixture && references.requestedByCollaboratorId) {
+      const confirmedPackage = await this.documentPackagesRepository.confirm(
+        formalizationFixture.formalizationPackage.id,
+        references.requestedByCollaboratorId,
+        SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+      )
+      if (!confirmedPackage) {
+        throw new AppError(
+          'The Formalization document package could not be confirmed.',
+          'Seed Error',
+        )
+      }
+    }
 
     return {
       specifications,
       documents,
       documentPackage,
       packageDocuments,
+      ...(formalizationFixture ?? {}),
       ...generatedDocuments,
+      formalizationGenerations: generatedFormalizationDocuments.generations,
+      formalizationVersions: generatedFormalizationDocuments.versions,
     }
+  }
+
+  private async seedFormalizationFixture({
+    areaId,
+    topicId,
+    formalizationId,
+  }: {
+    readonly areaId: string
+    readonly topicId: string
+    readonly formalizationId: string
+  }) {
+    const specifications = await this.specificationsRepository.addMany(
+      FORMALIZATION_DOCUMENT_TEMPLATES.map((template) => ({
+        name: template.name,
+        description: template.description,
+        content: this.createTemplateContent(template.name, template.paragraphs),
+        variables: [...template.variables],
+        application: {
+          scope: 'legal_context' as const,
+          moment: 'formalization' as const,
+          legalAreaIds: [areaId],
+          legalTopicIdsByArea: { [areaId]: [topicId] },
+        },
+        status: 'available' as const,
+      })),
+    )
+
+    if (specifications.length !== FORMALIZATION_DOCUMENT_TEMPLATES.length) {
+      throw new AppError(
+        'The Formalization document specifications could not be seeded.',
+        'Seed Error',
+      )
+    }
+
+    const documents = FORMALIZATION_DOCUMENT_TEMPLATES.map((template) => {
+      const {
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        ...document
+      } = DocumentFaker.fake({
+        id: template.documentId,
+        title: template.name,
+      })
+      return document
+    })
+    const formalizationDocuments = await this.documentsRepository.addMany(documents)
+
+    if (formalizationDocuments.length !== documents.length) {
+      throw new AppError('The Formalization documents could not be seeded.', 'Seed Error')
+    }
+
+    const seededPackage = DocumentPackageFaker.fake({
+      id: FORMALIZATION_DOCUMENT_PACKAGE_ID,
+      context: { type: 'formalization', formalizationId },
+    })
+    const formalizationPackage = await this.documentPackagesRepository.add({
+      id: seededPackage.id,
+      context: seededPackage.context,
+    })
+    const packageDocuments = FORMALIZATION_DOCUMENT_TEMPLATES.map((template, index) => {
+      const document = formalizationDocuments[index]
+      const specification = specifications[index]
+      if (!document || !specification) {
+        throw new AppError(
+          'A Formalization document reference could not be resolved.',
+          'Seed Error',
+        )
+      }
+
+      const {
+        createdAt: _packageDocumentCreatedAt,
+        updatedAt: _packageDocumentUpdatedAt,
+        ...packageDocument
+      } = PackageDocumentFaker.fake({
+        id: template.packageDocumentId,
+        documentPackageId: formalizationPackage.id,
+        documentId: document.id,
+        documentSpecificationId: specification.id,
+      })
+      return packageDocument
+    })
+    const formalizationPackageDocuments =
+      await this.packageDocumentsRepository.addMany(packageDocuments)
+
+    return {
+      formalizationSpecifications: specifications,
+      formalizationDocuments,
+      formalizationPackage,
+      formalizationPackageDocuments,
+    }
+  }
+
+  private async clearFormalizationSeedFiles() {
+    for (const fileId of SEEDED_FORMALIZATION_FILE_IDS) {
+      const file = await this.storedFilesRepository.findById(fileId)
+      if (!file) continue
+
+      await this.storageProvider.remove(file.filePath)
+      await this.storedFilesRepository.remove(file.id)
+    }
+  }
+
+  private async seedFormalizationFiles(): Promise<readonly string[]> {
+    const fileSeeds = [
+      {
+        id: SEEDED_FORMALIZATION_FILE_IDS[0],
+        fileName: 'contrato-de-formalizacao.docx',
+      },
+      {
+        id: SEEDED_FORMALIZATION_FILE_IDS[1],
+        fileName: 'termo-de-honorarios.docx',
+      },
+    ] as const
+
+    return Promise.all(
+      fileSeeds.map(async ({ id, fileName }) => {
+        const filePath = `seed/formalization/${fileName}`
+        const content = new Uint8Array(
+          await readFile(join('src/document-production/database/seed-assets', fileName)),
+        )
+        const contentType =
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+        await this.storageProvider.upload(filePath, content, contentType)
+
+        const file: File = {
+          id,
+          filePath,
+          fileName,
+          contentType,
+          sizeInBytes: content.byteLength,
+          createdAt: SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+        }
+
+        try {
+          await this.storedFilesRepository.add(file)
+        } catch (error) {
+          await this.storageProvider.remove(filePath)
+          throw error
+        }
+
+        return id
+      }),
+    )
   }
 
   private async seedApprovedDocumentVersions({
     documents,
     specifications,
-    consultationId,
+    source,
     requestedByCollaboratorId,
+    generationIds,
+    versionIds,
+    fileIds,
   }: {
     readonly documents: readonly { id: string; title: string }[]
     readonly specifications: readonly {
@@ -269,8 +528,11 @@ export class DocumentProductionSeeder {
       content: DocumentTemplateContent
       variables: readonly DocumentTemplateVariable[]
     }[]
-    readonly consultationId: string
+    readonly source: DocumentGenerationSource
     readonly requestedByCollaboratorId: string
+    readonly generationIds: readonly string[]
+    readonly versionIds: readonly string[]
+    readonly fileIds: readonly string[]
   }) {
     const startedAt = new Date('2026-08-20T15:05:00.000Z')
     const reviewedAt = new Date('2026-08-20T15:10:00.000Z')
@@ -279,9 +541,9 @@ export class DocumentProductionSeeder {
 
     for (const [index, document] of documents.entries()) {
       const specification = specifications[index]
-      const generationId = SEEDED_GENERATION_IDS[index]
-      const versionId = SEEDED_VERSION_IDS[index]
-      const fileId = SEEDED_FILE_IDS[index]
+      const generationId = generationIds[index]
+      const versionId = versionIds[index]
+      const fileId = fileIds[index]
 
       if (!specification || !generationId || !versionId || !fileId) {
         throw new AppError(
@@ -295,11 +557,7 @@ export class DocumentProductionSeeder {
         documentId: document.id,
         documentSpecificationVersionId: specification.id,
         requestedByCollaboratorId,
-        source: {
-          type: 'consultation',
-          id: consultationId,
-          data: { documentTitle: document.title },
-        },
+        source: { ...source, data: { ...source.data, documentTitle: document.title } },
         template: {
           name: specification.name,
           content: specification.content,
@@ -397,6 +655,16 @@ export class DocumentProductionSeeder {
       if (!completedGeneration) {
         throw new AppError(
           'The seeded document generation could not be completed.',
+          'Seed Error',
+        )
+      }
+
+      const currentDocument = await this.documentsRepository.replace(document.id, {
+        currentVersionId: approvedVersion.id,
+      })
+      if (!currentDocument) {
+        throw new AppError(
+          'The seeded document could not be updated with its current version.',
           'Seed Error',
         )
       }

@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1).url(),
-  HMS_SERVER_APP_PORT: z.coerce.number().default(3333),
+  HMS_SERVER_APP_PORT: z.coerce.number().default(5555),
   HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'stg']),
   HMS_WEB_APP_URL: z.string(),
   OLLAMA_AI_MODEL: z.string().min(1).default('qwen3.5:2b'),
@@ -25,6 +25,18 @@ export const envSchema = z.object({
     (value) => (value === '' ? undefined : value),
     z.string().default('documents'),
   ),
+  GOTENBERG_URL: z.string().url().default('http://127.0.0.1:3003'),
+  GOTENBERG_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
+  GOTENBERG_MAX_INPUT_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(25 * 1024 * 1024),
+  GOTENBERG_MAX_OUTPUT_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(50 * 1024 * 1024),
 })
 
 type Env = z.infer<typeof envSchema>

@@ -49,7 +49,7 @@ export class ConsultationSeeder {
       legalTopicId: references.legalTopicId,
       modality: ConsultationModality.Virtual,
       channel: ConsultationChannel.GoogleMeet,
-      status: ConsultationStatus.Pending,
+      status: ConsultationStatus.Completed,
       primaryLegalQuestion:
         'Quais poderes são necessários para representar o cliente na negociação do contrato de locação?',
       guidanceProvided:
