@@ -44,7 +44,7 @@ describe('Document specification migration 0014', () => {
     `
 
     migrationSql = await readFile(
-      new URL('../0014_noisy_true_believers.sql', import.meta.url),
+      new URL('../0014_noisy_true_believers.sql', `file://${__filename}`),
       'utf8',
     )
     for (const statement of migrationSql.split('--> statement-breakpoint')) {
