@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { ProcessWhatsappEventJob } from '@/communication/messaging/inngest/jobs'
+import { IdentityModule } from '@/identity/identity.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-options'
@@ -8,7 +9,7 @@ import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-op
 export const COMMUNICATION_INNGEST_FUNCTIONS = Symbol('COMMUNICATION_INNGEST_FUNCTIONS')
 
 @Module({
-  imports: [SharedDatabaseModule, SharedMessagingModule],
+  imports: [IdentityModule, SharedDatabaseModule, SharedMessagingModule],
   providers: [
     ProcessWhatsappEventJob,
     {
