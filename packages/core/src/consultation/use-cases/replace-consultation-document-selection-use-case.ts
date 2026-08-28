@@ -150,6 +150,7 @@ export class ReplaceConsultationDocumentSelectionUseCase
     const document = await this.documentsRepository.add({
       id: this.idProvider.generate(),
       title,
+      classificacaoAcesso: 'INTERNO',
     })
     return document.id
   }
