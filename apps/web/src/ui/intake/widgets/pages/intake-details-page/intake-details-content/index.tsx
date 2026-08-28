@@ -25,7 +25,6 @@ const statusLabels: Record<Intake['status'], string> = {
   contracted: 'Contratado',
   closed_without_contract: 'Encerrado sem contratação',
 }
-
 const originLabels: Record<Intake['origin'], string> = {
   direct: 'Entrada direta',
   referral: 'Indicação',

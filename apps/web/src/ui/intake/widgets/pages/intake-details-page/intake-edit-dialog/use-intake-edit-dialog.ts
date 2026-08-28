@@ -15,7 +15,6 @@ export type IntakeEditDialogProps = {
   intake: Intake
   onOpenChange: (open: boolean) => void
 }
-
 export function useIntakeEditDialog({
   open,
   intake,

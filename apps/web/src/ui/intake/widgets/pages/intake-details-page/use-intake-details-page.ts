@@ -29,7 +29,6 @@ export type IntakeDetailsContentController = {
   onConfirmClosure: () => void
   onStartFormalization: () => void
 }
-
 export function useIntakeDetailsPage(intakeId: string) {
   const intakeQuery = useIntakeDetailsQuery(intakeId)
   const startFormalizationMutation = useStartFormalizationAction()

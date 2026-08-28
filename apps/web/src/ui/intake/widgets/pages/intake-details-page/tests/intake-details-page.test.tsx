@@ -57,7 +57,6 @@ const startFormalizationMutation = {
   isPending: false,
   error: null,
 }
-
 const baseIntake: Intake = {
   id: 'intake-1',
   sequenceNumber: 339,
