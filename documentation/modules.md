@@ -11,7 +11,7 @@ compartilhadas.
 Organiza o ciclo de entrada de uma nova demanda no escritório, desde o primeiro
 contato até a contratação ou o encerramento sem contratação.
 
-Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassian.net/wiki/x/AYAY).
+Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2719765).
 
 - Registra a demanda, o canal de contato, a origem, o responsável operacional e
   o cliente relacionado.
@@ -39,7 +39,7 @@ ou o andamento jurídico posterior à contratação.
 Centraliza a classificação jurídica usada em toda a HMS, mantendo as áreas
 jurídicas e os temas pertencentes a cada área.
 
-Requisito de produto: [PRD — Módulo de Catálogo Jurídico](https://plataformahms.atlassian.net/wiki/x/AQAT).
+Requisito de produto: [PRD — Módulo de Catálogo Jurídico](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2654209).
 
 - Cadastra, edita, disponibiliza e indisponibiliza áreas jurídicas e temas.
 - Garante que cada tema pertença a uma única área.
@@ -63,7 +63,7 @@ Recebe arquivos enviados ao HMS, identifica a qual cliente pertencem e governa
 sua entrada na plataforma antes que sejam usados por consultas, casos ou outros
 fluxos de trabalho.
 
-Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/x/FoAT).
+Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2719745).
 
 - Cria um lote de documentos para cada ocorrência válida recebida pelo WhatsApp
   ou e-mail, os únicos canais compatíveis com o MVP.
@@ -107,7 +107,7 @@ deste módulo, mas não fazem parte do MVP atual.
 
 Produz pacotes de documentos reutilizáveis para consultas, formalizações e casos.
 
-Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/x/AQAQ).
+Requisito de produto: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673).
 
 - É responsável pelos modelos de origem usados para produzir documentos.
 - Permite selecionar modelos e acrescentar documentos ao conjunto associado a
@@ -150,7 +150,7 @@ Governa todas as interações registradas com pessoas e as notificações intern
 Sabe quem são todas as pessoas, como elas acessam o sistema e quais autorizações
 possuem globalmente.
 
-Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232).
+Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2228232).
 
 - Mantém um cadastro único de pessoas, com detecção de duplicatas por identificador
   fiscal.
@@ -171,7 +171,7 @@ Requisito de produto: [PRD — Módulo de Identidade](https://plataformahms.atla
 É responsável pela disponibilidade dos colaboradores e pelas reservas de
 compromissos.
 
-Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/x/AYAT).
+Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2686977).
 
 - Configura a duração padrão dos compromissos na agenda de cada colaborador.
 - Registra a disponibilidade semanal como intervalos de horário local agrupados
@@ -191,7 +191,7 @@ Requisito de produto: [PRD — Módulo de Agendamento](https://plataformahms.atl
 É responsável pela consulta jurídica realizada a partir de um compromisso
 agendado.
 
-Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlassian.net/wiki/x/A4AH).
+Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2621441).
 
 - Cria uma consulta para um cliente e um advogado designado a partir da referência
   de um compromisso do módulo de Agendamento.
@@ -205,7 +205,7 @@ Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlass
 Coordena os documentos contratuais, os signatários, as solicitações de assinatura
 e a transição entre o Intake viável e a abertura do Caso.
 
-Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.atlassian.net/wiki/x/AQBvAQ).
+Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713).
 
 - Mantém uma única Formalização por Intake e exatamente um cliente no MVP.
 - Controla os estados agregados `Em andamento`, `Concluída` e `Cancelada`; os
@@ -215,14 +215,18 @@ Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.
 - Mantém o cliente como primeiro signatário e adiciona o advogado responsável por
   padrão, sem selecionar documentos automaticamente para qualquer signatário.
 - Permite adicionar e remover signatários colaboradores ativos com perfil
-  Advogado, Paralegal ou Supervisor, usando nome, CPF e contatos de Identidade.
-- Exige CPF e pelo menos um canal disponível entre e-mail e WhatsApp, sem exigir
-  ambos e sem manter papel na assinatura ou comprovação de representação.
+  Advogado, Paralegal ou Supervisor, usando nome e contatos de Identidade.
+- Não coleta, valida, armazena nem usa CPF na etapa de assinatura e exige pelo
+  menos um canal disponível entre e-mail e WhatsApp, sem exigir ambos e sem
+  manter papel na assinatura ou comprovação de representação.
 - Relaciona signatários aos documentos e mantém a posição dos campos de assinatura
   em um modelo interno independente do provedor.
-- Congela o conteúdo-fonte no envio, gera e preserva o PDF original e solicita a
-  assinatura eletrônica por uma porta substituível, inicialmente integrada ao
-  Documenso e sem ICP-Brasil no MVP.
+- Depois da confirmação do pacote, gera em lote e preserva PDFs privados de
+  configuração a partir dos DOCX imutáveis das versões vigentes; enquanto o lote
+  executa, a configuração permanece em preparação e não aceita posicionamento de campos.
+- Congela o conteúdo-fonte no envio, preserva o PDF original e solicita a assinatura
+  eletrônica por uma porta substituível, inicialmente integrada ao Documenso e sem
+  ICP-Brasil no MVP.
 - Solicita à Comunicação o envio dos links por e-mail ou WhatsApp, respeitando o
   consentimento específico de cada canal e sem fallback automático.
 - Acompanha o progresso por documento; um documento só é considerado assinado
