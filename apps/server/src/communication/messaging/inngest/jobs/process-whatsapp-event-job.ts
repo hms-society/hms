@@ -115,6 +115,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 eventoId: evento.id,
                 sender,
                 clientId: client.id,
+                mediaId: media.id,
                 mimeType: media.mime_type,
                 originalName:
                   typeof media.filename === 'string'

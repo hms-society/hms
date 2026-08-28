@@ -72,4 +72,52 @@ export class WhatsappProvider implements IWhatsappProvider {
       externalMessageId,
     }
   }
+
+  async downloadMedia(
+    mediaId: string,
+  ): Promise<{ buffer: Uint8Array; mimeType: string }> {
+    const token = this.envProvider.get('WHATSAPP_API_TOKEN')
+
+    const metadataUrl = `https://graph.facebook.com/v25.0/${mediaId}`
+    const metadataResponse = await fetch(metadataUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!metadataResponse.ok) {
+      const errorText = await metadataResponse.text()
+      throw new Error(
+        `Failed to fetch WhatsApp media metadata: ${metadataResponse.status} - ${errorText}`,
+      )
+    }
+
+    const metadata = (await metadataResponse.json()) as {
+      url?: string
+      mime_type?: string
+    }
+
+    if (!metadata.url) {
+      throw new Error('Meta Cloud API response did not contain a media URL')
+    }
+
+    const downloadResponse = await fetch(metadata.url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!downloadResponse.ok) {
+      const errorText = await downloadResponse.text()
+      throw new Error(
+        `Failed to download WhatsApp media bytes: ${downloadResponse.status} - ${errorText}`,
+      )
+    }
+
+    const arrayBuffer = await downloadResponse.arrayBuffer()
+    return {
+      buffer: new Uint8Array(arrayBuffer),
+      mimeType: metadata.mime_type ?? 'application/octet-stream',
+    }
+  }
 }

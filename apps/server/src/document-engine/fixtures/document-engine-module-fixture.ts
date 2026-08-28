@@ -9,7 +9,7 @@ import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { SharedModule } from '@/shared/shared.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
-import { AuthGuard } from '@/identity/guards'
+import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 
 export class DocumentEngineModuleFixture {
   private constructor(
@@ -50,24 +50,32 @@ export class DocumentEngineModuleFixture {
         controllers: controller ? [controller] : [],
       },
       (builder) => {
-        const authenticatedBuilder = builder.overrideGuard(AuthGuard).useValue({
-          canActivate(context: {
-            switchToHttp(): {
-              getRequest(): {
-                user?: { id: string; email: string }
-                auth?: { accessToken: string; user: { id: string; email: string } }
+        const authenticatedBuilder = builder
+          .overrideGuard(AuthGuard)
+          .useValue({
+            canActivate(context: {
+              switchToHttp(): {
+                getRequest(): {
+                  user?: { id: string; email: string }
+                  auth?: { accessToken: string; user: { id: string; email: string } }
+                }
               }
-            }
-          }) {
-            const request = context.switchToHttp().getRequest()
-            request.user = { id: userId, email: 'lawyer@hms.com' }
-            request.auth = {
-              accessToken: 'test-token',
-              user: { id: userId, email: 'lawyer@hms.com' },
-            }
-            return true
-          },
-        })
+            }) {
+              const request = context.switchToHttp().getRequest()
+              request.user = { id: userId, email: 'lawyer@hms.com' }
+              request.auth = {
+                accessToken: 'test-token',
+                user: { id: userId, email: 'lawyer@hms.com' },
+              }
+              return true
+            },
+          })
+          .overrideGuard(ActiveCollaboratorGuard)
+          .useValue({
+            canActivate() {
+              return true
+            },
+          })
 
         return configure?.(authenticatedBuilder) ?? authenticatedBuilder
       },

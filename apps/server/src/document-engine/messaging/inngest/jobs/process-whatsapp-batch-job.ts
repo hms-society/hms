@@ -1,9 +1,12 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
+import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
 
+import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
+import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
@@ -20,6 +23,12 @@ export class ProcessWhatsappBatchJob extends InngestJob {
     inngest: InngestClient,
     @Inject(CreateDocumentBatchUseCase)
     private readonly createDocumentBatchUseCase: CreateDocumentBatchUseCase,
+    @Inject(STORAGE_PROVIDER)
+    @Optional()
+    private readonly storageProvider?: StorageProvider,
+    @Inject(WhatsappProvider)
+    @Optional()
+    private readonly whatsappProvider?: WhatsappProvider,
   ) {
     super(inngest)
 
@@ -42,11 +51,29 @@ export class ProcessWhatsappBatchJob extends InngestJob {
             typeof data.originalName === 'string' ? data.originalName : 'documento'
           const mimeType =
             typeof data.mimeType === 'string' ? data.mimeType : 'application/octet-stream'
-          const sizeBytes = typeof data.sizeBytes === 'number' ? data.sizeBytes : 1024
+          const mediaId = typeof data.mediaId === 'string' ? data.mediaId : undefined
+          let sizeBytes = typeof data.sizeBytes === 'number' ? data.sizeBytes : 1024
           const storagePath =
             typeof data.storagePath === 'string'
               ? data.storagePath
-              : `whatsapp/${data.eventoId}/${originalName}`
+              : `whatsapp/${data.eventoId ?? mediaId ?? 'media'}/${originalName}`
+
+          if (mediaId && this.whatsappProvider && this.storageProvider) {
+            try {
+              const { buffer, mimeType: fetchedMimeType } =
+                await this.whatsappProvider.downloadMedia(mediaId)
+              await this.storageProvider.upload(
+                storagePath,
+                buffer,
+                mimeType ?? fetchedMimeType,
+              )
+              sizeBytes = buffer.length
+            } catch (error) {
+              ProcessWhatsappBatchJob.logger.warn(
+                `Failed to download/upload WhatsApp media ${mediaId}: ${(error as Error).message}`,
+              )
+            }
+          }
 
           const batch = await this.createDocumentBatchUseCase.execute({
             channel: DocumentBatchChannel.WhatsApp,

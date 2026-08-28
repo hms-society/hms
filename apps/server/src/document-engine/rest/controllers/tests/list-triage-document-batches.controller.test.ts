@@ -1,35 +1,66 @@
-import { describe, expect, it, vi } from 'vitest'
+import { randomUUID } from 'node:crypto'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import request from 'supertest'
+
+import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
+import { ListTriageDocumentBatchesController } from '@/document-engine/rest/controllers/list-triage-document-batches.controller'
 import {
   DocumentBatchChannel,
   DocumentBatchStatus,
 } from '@hms/core/document-engine/domain/structures'
-import type { ListTriageDocumentBatchesUseCase } from '@hms/core/document-engine/use-cases'
-import { ListTriageDocumentBatchesController } from '../list-triage-document-batches.controller'
 
-describe('ListTriageDocumentBatchesController', () => {
-  it('returns document batches currently in triage box', async () => {
-    const mockBatches = [
-      {
-        id: 'batch-1',
-        readableId: 'LOTE-20260826-0001',
-        status: DocumentBatchStatus.PendingIdentification,
-        channel: DocumentBatchChannel.WhatsApp,
-        sender: '5511999998888',
-        inTriageBox: true,
-        files: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]
+describe('List Triage Document Batches Controller [GET /document-batches/triage]', () => {
+  let fixture: DocumentEngineModuleFixture
+  let unauthFixture: DocumentEngineModuleFixture
+  let userId: string
 
-    const mockUseCase = {
-      execute: vi.fn().mockResolvedValue(mockBatches),
-    } as unknown as ListTriageDocumentBatchesUseCase
+  beforeAll(async () => {
+    userId = randomUUID()
+    fixture = await DocumentEngineModuleFixture.registerAuthenticated(
+      ListTriageDocumentBatchesController,
+      userId,
+    )
+    unauthFixture = await DocumentEngineModuleFixture.register(
+      ListTriageDocumentBatchesController,
+    )
+  })
 
-    const controller = new ListTriageDocumentBatchesController(mockUseCase)
-    const result = await controller.handle()
+  beforeEach(async () => {
+    await fixture.resetDatabase()
+    await unauthFixture.resetDatabase()
+  })
 
-    expect(mockUseCase.execute).toHaveBeenCalled()
-    expect(result).toEqual(mockBatches)
+  afterAll(async () => {
+    await fixture.close()
+    await unauthFixture.close()
+  })
+
+  it('rejects unauthenticated requests with 401', async () => {
+    await request(unauthFixture.app.getHttpServer())
+      .get('/document-batches/triage')
+      .expect(401)
+  })
+
+  it('returns document batches currently in triage box for authenticated collaborators', async () => {
+    await fixture.documentBatchesRepository.add({
+      readableId: 'LOTE-20260826-0001',
+      channel: DocumentBatchChannel.WhatsApp,
+      sender: '5511999998888',
+      inTriageBox: true,
+      status: DocumentBatchStatus.PendingIdentification,
+      files: [],
+    })
+
+    const response = await request(fixture.app.getHttpServer())
+      .get('/document-batches/triage')
+      .expect(200)
+
+    expect(response.body).toHaveLength(1)
+    expect(response.body[0]).toMatchObject({
+      readableId: 'LOTE-20260826-0001',
+      channel: DocumentBatchChannel.WhatsApp,
+      inTriageBox: true,
+      status: DocumentBatchStatus.PendingIdentification,
+    })
   })
 })

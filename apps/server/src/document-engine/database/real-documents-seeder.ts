@@ -103,13 +103,16 @@ export class RealDocumentsSeeder {
         }),
       )
 
+      const inTriageBox = index < 5
       const batch = await this.documentBatchesRepository.add({
         readableId,
-        status: DocumentBatchStatus.Identified,
+        status: inTriageBox
+          ? DocumentBatchStatus.PendingIdentification
+          : DocumentBatchStatus.Identified,
         channel: DocumentBatchChannel.WhatsApp,
         sender: '5511999999999',
-        inTriageBox: false,
-        clientId: client.id,
+        inTriageBox,
+        clientId: inTriageBox ? undefined : client.id,
         files,
       })
 

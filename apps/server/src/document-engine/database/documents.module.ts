@@ -50,6 +50,7 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
     ListClientDocumentBatchUseCase,
     DocumentEngineMessagingModule,
     DocumentsDatabaseModule,
+    IdentityModule,
   ],
 })
 export class DocumentsModule {}
