@@ -1,9 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { DocumentPackagesRepository, DocumentSpecificationsRepository, DocumentVersionsRepository, DocumentsRepository, PackageDocumentsRepository } from '../../../document-production/interfaces'
+import type {
+  DocumentPackagesRepository,
+  DocumentSpecificationsRepository,
+  DocumentVersionsRepository,
+  DocumentsRepository,
+  PackageDocumentsRepository,
+} from '../../../document-production/interfaces'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../../interfaces'
+import type {
+  FormalizationSourceReader,
+  FormalizationsRepository,
+} from '../../interfaces'
 import { ReplaceFormalizationDocumentSelectionUseCase } from '../replace-formalization-document-selection-use-case'
 
 describe('Replace Formalization Document Selection Use Case', () => {
@@ -22,7 +31,11 @@ describe('Replace Formalization Document Selection Use Case', () => {
         mock<DocumentVersionsRepository>(),
         mock<IdProvider>(),
         mock<DatetimeProvider>(),
-      ).execute({ formalizationId: formalization.id, actorId: formalization.assignedLawyerId, documentSpecificationIds: [] }),
+      ).execute({
+        formalizationId: formalization.id,
+        actorId: formalization.assignedLawyerId,
+        documentSpecificationIds: [],
+      }),
     ).rejects.toThrow('Feche o formulário')
   })
 

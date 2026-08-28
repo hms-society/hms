@@ -5,7 +5,7 @@ import {
   InvalidLegalExpertiseError,
 } from '../domain/errors'
 import type { AuthUser } from '../domain/structures'
-import type { CollaboratorsRepository } from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 import type { LegalExpertiseCatalogProvider } from '@hms/core/legal-catalog/interfaces'
 import type { UseCase } from '#shared/interfaces/use-case'
 

@@ -1,6 +1,7 @@
 import type { ClientDetails } from '../domain/entities'
 import { ClientNotFoundError } from '../domain/errors'
-import type { ClientConsentsRepository, ClientsRepository } from '../interfaces'
+import type { ClientConsentsRepository } from '../interfaces/client-consents-repository'
+import type { ClientsRepository } from '../interfaces/clients-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 export type GetClientRequest = {

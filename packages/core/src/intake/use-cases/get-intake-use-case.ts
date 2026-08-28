@@ -1,6 +1,6 @@
 import { IntakeNotFoundError } from '../domain/errors'
 import type { Intake } from '../domain/entities'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 type Request = {

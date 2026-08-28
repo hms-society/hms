@@ -1,4 +1,5 @@
-import type { DocumentGenerationMoment, DocumentSpecificationStatus } from '.'
+import type { DocumentGenerationMoment } from './document-generation-moment'
+import type { DocumentSpecificationStatus } from './document-specification-status'
 
 export type DocumentSpecificationListQuery = {
   readonly search?: string
