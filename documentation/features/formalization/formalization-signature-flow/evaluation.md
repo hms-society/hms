@@ -56,14 +56,14 @@ authoritative 5,000 added TypeScript-line gate.
 
 | Order | PR | Base → head | TypeScript added lines | Scope | Validation / criteria | Status |
 | --- | --- | --- | ---: | --- | --- | --- |
-| 1 | pending | `develop` → `codex/formalization-tooling-slice` | 0 | Tooling/manifests | lockfile/package alignment; enables all criteria | pending publication |
-| 2 | pending | `codex/formalization-tooling-slice` → `codex/formalization-core-v2-slice` | 4,670 | Core contracts and use cases | Core checks; `RF-01`–`RF-18`, `CA-01`–`CA-10` | pending publication |
-| 3 | pending | `codex/formalization-core-v2-slice` → `codex/formalization-validation-v2-slice` | 563 | Validation schemas | Validation lint/type-check; boundary criteria | pending publication |
-| 4 | pending | `codex/formalization-validation-v2-slice` → `codex/formalization-server-foundation-v3-slice` | 4,091 | Server persistence/provider foundation | Server static/type/focused checks; persistence criteria | pending publication |
-| 5 | pending | `codex/formalization-server-foundation-v3-slice` → `codex/formalization-server-app-v3-slice` | 3,642 | Server REST/jobs/composition | Server feature checks; REST/job criteria | pending publication |
-| 6 | pending | `codex/formalization-server-app-v3-slice` → `codex/formalization-web-foundation-v3-slice` | 4,491 | Web REST/shared foundation | Web static/type/REST checks; Web enablement criteria | pending publication |
-| 7 | pending | `codex/formalization-web-foundation-v3-slice` → `codex/formalization-web-page-v3-slice` | 4,537 | Formalization page | focused Web/route checks; page criteria | pending publication |
-| 8 | pending | `codex/formalization-web-page-v3-slice` → `codex/formalization-sending-configuration-v3-slice` | 4,866 | Dedicated sending configuration page and SDD records | focused/full Web coverage and Playwright evidence; configuration criteria | pending publication |
+| 1 | [#106](https://github.com/hms-society/hms/pull/106) | `develop` → `codex/formalization-tooling-slice` | 0 | Tooling/manifests | lockfile/package alignment; enables all criteria | published |
+| 2 | [#108](https://github.com/hms-society/hms/pull/108) | `codex/formalization-tooling-slice` → `codex/formalization-core-v2-slice` | 4,670 | Core contracts and use cases | Core checks; `RF-01`–`RF-18`, `CA-01`–`CA-10` | published |
+| 3 | [#105](https://github.com/hms-society/hms/pull/105) | `codex/formalization-core-v2-slice` → `codex/formalization-validation-v2-slice` | 563 | Validation schemas | Validation lint/type-check; boundary criteria | published |
+| 4 | [#104](https://github.com/hms-society/hms/pull/104) | `codex/formalization-validation-v2-slice` → `codex/formalization-server-foundation-v3-slice` | 4,091 | Server persistence/provider foundation | Server static/type/focused checks; persistence criteria | published |
+| 5 | [#111](https://github.com/hms-society/hms/pull/111) | `codex/formalization-server-foundation-v3-slice` → `codex/formalization-server-app-v3-slice` | 3,642 | Server REST/jobs/composition | Server feature checks; REST/job criteria | published |
+| 6 | [#109](https://github.com/hms-society/hms/pull/109) | `codex/formalization-server-app-v3-slice` → `codex/formalization-web-foundation-v3-slice` | 4,491 | Web REST/shared foundation | Web static/type/REST checks; Web enablement criteria | published |
+| 7 | [#110](https://github.com/hms-society/hms/pull/110) | `codex/formalization-web-foundation-v3-slice` → `codex/formalization-web-page-v3-slice` | 4,537 | Formalization page | focused Web/route checks; page criteria | published |
+| 8 | [#107](https://github.com/hms-society/hms/pull/107) | `codex/formalization-web-page-v3-slice` → `codex/formalization-sending-configuration-v3-slice` | 4,866 | Dedicated sending configuration page and SDD records | focused/full Web coverage and Playwright evidence; configuration criteria | published |
 
 ## Automated and runtime evidence
 
