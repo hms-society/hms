@@ -26,10 +26,10 @@ vi.mock('../../../../hooks/use-consultation-document-selection-query', () => ({
 vi.mock('../../../../hooks/use-replace-consultation-document-selection-action', () => ({
   useReplaceConsultationDocumentSelectionAction: vi.fn(),
 }))
-vi.mock('../../document-specifications-page/use-document-catalog-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-catalog-query', () => ({
   useDocumentCatalogQuery: vi.fn(() => ({ areas: { data: [] } })),
 }))
-vi.mock('../../document-specifications-page/use-document-topics-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-topics-query', () => ({
   useDocumentTopicsQuery: vi.fn(() => ({ data: [] })),
 }))
 

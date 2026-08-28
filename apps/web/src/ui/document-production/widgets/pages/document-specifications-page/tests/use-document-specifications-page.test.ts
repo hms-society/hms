@@ -2,18 +2,18 @@ import { act, renderHook } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useDocumentCatalogQuery } from '../use-document-catalog-query'
+import { useDocumentCatalogQuery } from '@/ui/document-production/hooks/use-document-catalog-query'
 import { useDocumentSpecificationsPage } from '../use-document-specifications-page'
-import { useDocumentSpecificationsQuery } from '../use-document-specifications-query'
-import { useDocumentTopicsQuery } from '../use-document-topics-query'
+import { useDocumentSpecificationsQuery } from '@/ui/document-production/hooks/use-document-specifications-query'
+import { useDocumentTopicsQuery } from '@/ui/document-production/hooks/use-document-topics-query'
 
-vi.mock('../use-document-catalog-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-catalog-query', () => ({
   useDocumentCatalogQuery: vi.fn(),
 }))
-vi.mock('../use-document-specifications-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-specifications-query', () => ({
   useDocumentSpecificationsQuery: vi.fn(),
 }))
-vi.mock('../use-document-topics-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-topics-query', () => ({
   useDocumentTopicsQuery: vi.fn(),
 }))
 

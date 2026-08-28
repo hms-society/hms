@@ -5,9 +5,9 @@ import {
   DOCUMENT_SPECIFICATIONS_SEARCH_PARAMS,
   type DocumentSpecificationsSearchParams,
 } from './document-specifications-page-search'
-import { useDocumentSpecificationsQuery } from './use-document-specifications-query'
-import { useDocumentCatalogQuery } from './use-document-catalog-query'
-import { useDocumentTopicsQuery } from './use-document-topics-query'
+import { useDocumentCatalogQuery } from '@/ui/document-production/hooks/use-document-catalog-query'
+import { useDocumentSpecificationsQuery } from '@/ui/document-production/hooks/use-document-specifications-query'
+import { useDocumentTopicsQuery } from '@/ui/document-production/hooks/use-document-topics-query'
 
 function toQuery(
   params: DocumentSpecificationsSearchParams,

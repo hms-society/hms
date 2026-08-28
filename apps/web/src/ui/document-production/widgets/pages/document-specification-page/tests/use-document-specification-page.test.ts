@@ -1,6 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { createElement, type ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type {
@@ -10,35 +8,35 @@ import type {
 } from '@hms/core/document-production/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-import { useDocumentCatalogQuery } from '../../document-specifications-page/use-document-catalog-query'
-import { useDocumentTopicsQuery } from '../../document-specifications-page/use-document-topics-query'
-import { useDocumentSpecificationActions } from '../use-document-specification-actions'
+import { useDocumentCatalogQuery } from '@/ui/document-production/hooks/use-document-catalog-query'
+import { useDocumentSpecificationActions } from '@/ui/document-production/hooks/use-document-specification-action'
+import { useDocumentSpecificationQuery } from '@/ui/document-production/hooks/use-document-specification-query'
+import { useDocumentTopicsQuery } from '@/ui/document-production/hooks/use-document-topics-query'
 import {
   type DocumentSpecificationPageProps,
   useDocumentSpecificationPage,
 } from '../use-document-specification-page'
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: vi.fn(),
-}))
-
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: vi.fn(),
 }))
 
-vi.mock('../../document-specifications-page/use-document-catalog-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-catalog-query', () => ({
   useDocumentCatalogQuery: vi.fn(),
 }))
 
-vi.mock('../../document-specifications-page/use-document-topics-query', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-topics-query', () => ({
   useDocumentTopicsQuery: vi.fn(),
 }))
 
-vi.mock('../use-document-specification-actions', () => ({
+vi.mock('@/ui/document-production/hooks/use-document-specification-action', () => ({
   useDocumentSpecificationActions: vi.fn(),
+}))
+
+vi.mock('@/ui/document-production/hooks/use-document-specification-query', () => ({
+  useDocumentSpecificationQuery: vi.fn(),
 }))
 
 vi.mock('@tanstack/react-router', () => ({
@@ -52,11 +50,11 @@ vi.mock('sonner', () => ({
   },
 }))
 
-const useRestContextMock = vi.mocked(useRestContext)
 const useNavigationMock = vi.mocked(useNavigation)
 const useDocumentCatalogQueryMock = vi.mocked(useDocumentCatalogQuery)
 const useDocumentTopicsQueryMock = vi.mocked(useDocumentTopicsQuery)
 const useDocumentSpecificationActionsMock = vi.mocked(useDocumentSpecificationActions)
+const useDocumentSpecificationQueryMock = vi.mocked(useDocumentSpecificationQuery)
 
 const TEMPLATE_CONTENT = {
   type: 'doc',
@@ -107,41 +105,22 @@ function createActions(
   }
 }
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  })
-
-  return function QueryWrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children)
-  }
-}
-
-function renderDocumentSpecificationPage(
-  props: DocumentSpecificationPageProps,
-  wrapper = createWrapper(),
-) {
-  return renderHook(() => useDocumentSpecificationPage(props), { wrapper })
-}
-
-function createRestServices() {
-  return {
-    documentProductionService: {
-      getDocumentSpecification: vi
-        .fn()
-        .mockResolvedValue(new RestResponse({ body: DETAIL })),
-    },
-    legalCatalogService: {
-      listLegalAreas: vi.fn().mockResolvedValue(new RestResponse({ body: [] })),
-      listLegalTopics: vi.fn().mockResolvedValue(new RestResponse({ body: [] })),
-    },
-  }
+function renderDocumentSpecificationPage(props: DocumentSpecificationPageProps) {
+  return renderHook(() => useDocumentSpecificationPage(props))
 }
 
 describe('useDocumentSpecificationPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useRestContextMock.mockReturnValue(createRestServices() as never)
+    useDocumentSpecificationQueryMock.mockImplementation((_id, enabled) => {
+      return {
+        data: enabled ? DETAIL : undefined,
+        error: null,
+        isError: false,
+        isLoading: false,
+        refetch: vi.fn(),
+      } as never
+    })
     useNavigationMock.mockReturnValue({
       navigateTo: vi.fn().mockResolvedValue(undefined),
       navigateCollaboratorsSearch: vi.fn().mockResolvedValue(undefined),

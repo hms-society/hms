@@ -4,11 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 
 import type { ConsentType } from '@hms/core/identity/domain/structures'
-import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import { lookupClientSchema, registerClientSchema } from '@hms/validation/identity'
-import type { ClientDetails, ClientConsent } from '@hms/core/identity/domain/entities'
+import type { ClientDetails } from '@hms/core/identity/domain/entities'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useClientRegistrationActions } from '@/ui/identity/hooks/use-client-registration-actions'
 
 export type ClientRegisterDialogState =
   | 'identification'
@@ -93,7 +92,8 @@ export function useClientRegisterDialog({
   onOpenChange,
   onClientSelected,
 }: ClientRegisterDialogProps) {
-  const { identityService } = useRestContext()
+  const { grantClientConsents, lookupClient, registerClient } =
+    useClientRegistrationActions()
   const [state, setState] = useState<ClientRegisterDialogState>('identification')
   const [searchResult, setSearchResult] = useState<ClientRegisterDialogSearchResult>()
   const [asyncError, setAsyncError] = useState<string>()
@@ -143,12 +143,12 @@ export function useClientRegisterDialog({
       setAsyncError(undefined)
 
       try {
-        const response = await identityService.lookupClient(criteria)
+        const result = await lookupClient(criteria)
 
-        if (response.isSuccessful) {
-          setSearchResult({ kind: 'existing', details: response.body })
+        if (result.kind === 'existing') {
+          setSearchResult({ kind: 'existing', details: result.details })
           setState('existing-client')
-        } else if (response.statusCode === HTTP_STATUS_CODE.notFound) {
+        } else if (result.kind === 'not-found') {
           setSearchResult({
             kind: 'not-found',
             criteria: criteria as z.output<typeof lookupClientSchema>,
@@ -284,50 +284,17 @@ export function useClientRegisterDialog({
 
       setRequestLock('consents')
       setAsyncError(undefined)
-      let currentDetails = clientDetails
-      const pending: RegistrationConsentType[] = []
-
-      for (const type of types) {
-        const response = await identityService.grantClientConsent(
-          clientDetails.client.id,
-          type,
-        )
-
-        if (response.isSuccessful) {
-          currentDetails = {
-            ...currentDetails,
-            consents: [
-              ...currentDetails.consents.filter(function isDifferentConsent(consent) {
-                return consent.type !== type
-              }),
-              response.body as ClientConsent,
-            ],
-          }
-          continue
-        }
-
-        if (response.statusCode === HTTP_STATUS_CODE.conflict) {
-          const refreshed = await identityService.getClient(clientDetails.client.id)
-          if (
-            refreshed.isSuccessful &&
-            refreshed.body.consents.some(function hasGrantedConsent(consent) {
-              return consent.type === type
-            })
-          ) {
-            currentDetails = refreshed.body
-            continue
-          }
-        }
-
-        pending.push(type)
-      }
+      const { details: currentDetails, pendingConsentTypes } = await grantClientConsents(
+        clientDetails,
+        types,
+      )
 
       setCreatedClientDetails(currentDetails)
       setRequestLock(undefined)
 
-      if (pending.length > 0) {
+      if (pendingConsentTypes.length > 0) {
         setAsyncError(
-          `O cliente foi criado, mas há consentimentos pendentes: ${pending
+          `O cliente foi criado, mas há consentimentos pendentes: ${pendingConsentTypes
             .map(function getConsentLabel(type) {
               return CONSENT_LABELS[type]
             })
@@ -339,7 +306,7 @@ export function useClientRegisterDialog({
       onClientSelected(currentDetails)
       onOpenChange(false)
     },
-    [identityService, onClientSelected, onOpenChange],
+    [grantClientConsents, onClientSelected, onOpenChange],
   )
 
   async function handleSubmitRegistration(event?: BaseSyntheticEvent) {
@@ -365,22 +332,19 @@ export function useClientRegisterDialog({
         email: values.email,
         address: values.address,
       }
-      const response = await identityService.registerClient(request)
+      const result = await registerClient(request)
       setRequestLock(undefined)
 
-      if (response.isSuccessful) {
-        setCreatedClientDetails(response.body)
-        await completeCreatedClient(response.body, getSelectedConsentTypes(values))
+      if (result.kind === 'registered') {
+        setCreatedClientDetails(result.details)
+        await completeCreatedClient(result.details, getSelectedConsentTypes(values))
         return
       }
 
-      if (response.statusCode === HTTP_STATUS_CODE.conflict && request.taxId) {
-        const lookup = await identityService.lookupClient({ taxId: request.taxId })
-        if (lookup.isSuccessful) {
-          setSearchResult({ kind: 'existing', details: lookup.body })
-          setState('existing-client')
-          return
-        }
+      if (result.kind === 'existing') {
+        setSearchResult({ kind: 'existing', details: result.details })
+        setState('existing-client')
+        return
       }
 
       setAsyncError(

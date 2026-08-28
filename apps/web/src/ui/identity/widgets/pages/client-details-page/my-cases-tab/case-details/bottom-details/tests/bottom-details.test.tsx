@@ -10,7 +10,7 @@ vi.mock('../use-bottom-details', () => ({
 
 const useBottomDetailsMock = vi.mocked(useBottomDetails)
 
-function createController(overrides: Record<string, unknown> = {}) {
+function fakeHook(overrides: Record<string, unknown> = {}) {
   return {
     approvedDocuments: [],
     error: null,
@@ -27,7 +27,7 @@ describe('BottomDetails', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('renders the loading state', () => {
-    useBottomDetailsMock.mockReturnValue(createController({ isLoading: true }) as never)
+    useBottomDetailsMock.mockReturnValue(fakeHook({ isLoading: true }) as never)
 
     render(<BottomDetails />)
 
@@ -37,7 +37,7 @@ describe('BottomDetails', () => {
   it('renders pending and approved documents and handles upload', () => {
     const handleUploadError = vi.fn()
     useBottomDetailsMock.mockReturnValue(
-      createController({
+      fakeHook({
         handleUploadError,
         pendingDocuments: [{ name: 'Contrato pendente', status: 'pending' }],
         approvedDocuments: [
