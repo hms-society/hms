@@ -1,6 +1,12 @@
 import type { FormalizationService as FormalizationRestService } from '@hms/core/formalization/interfaces'
 import type { DocumentVersion } from '@hms/core/document-production/domain/entities'
+import type { Formalization } from '@hms/core/formalization/domain/entities'
+import type {
+  FormalizationSignatureCandidatePage,
+  FormalizationSignatureConfiguration,
+} from '@hms/core/formalization/domain/structures'
 import type { RestClient } from '@hms/core/shared/interfaces'
+import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
 type DocumentVersionResponse = Omit<DocumentVersion, 'createdAt' | 'reviewedAt'> & {
@@ -31,6 +37,14 @@ function mapDocumentVersionResponse(
 
 function toDate(value: Date | string): Date {
   return value instanceof Date ? value : new Date(value)
+}
+
+function getContentType(headers: Record<string, string>): string | undefined {
+  const header = Object.entries(headers).find(
+    ([key]) => key.toLowerCase() === 'content-type',
+  )?.[1]
+
+  return header?.split(';', 1)[0]?.trim().toLowerCase()
 }
 
 export const FormalizationService = (
@@ -139,8 +153,113 @@ export const FormalizationService = (
   },
 
   confirmDocuments(formalizationId, expectedVersion) {
-    return restClient.patch(`/formalizations/${formalizationId}/documents/confirm`, {
-      expectedVersion,
-    })
+    return restClient.patch<Formalization>(
+      `/formalizations/${formalizationId}/documents/confirm`,
+      { expectedVersion },
+    )
+  },
+
+  getSignatureConfiguration(formalizationId) {
+    return restClient.get<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration`,
+    )
+  },
+
+  initializeSignatureConfiguration(formalizationId, expectedVersion) {
+    return restClient.post<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/initialize`,
+      { expectedVersion },
+    )
+  },
+
+  listSignatureCandidates(formalizationId, query) {
+    const searchParams = new URLSearchParams()
+
+    if (query.page !== undefined) searchParams.set('page', String(query.page))
+    if (query.limit !== undefined) searchParams.set('limit', String(query.limit))
+    if (query.search !== undefined) searchParams.set('search', query.search)
+
+    const queryString = searchParams.toString()
+    const path = `/formalizations/${formalizationId}/signature-configuration/candidates`
+
+    return restClient.get<FormalizationSignatureCandidatePage>(
+      queryString ? `${path}?${queryString}` : path,
+    )
+  },
+
+  addSignatureSignatory(formalizationId, input) {
+    return restClient.post<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/signatories`,
+      input,
+    )
+  },
+
+  removeSignatureSignatory(formalizationId, signatoryId, expectedVersion) {
+    return restClient.delete<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/signatories/${signatoryId}`,
+      { expectedVersion },
+    )
+  },
+
+  replaceSignatureSignatoryDocuments(formalizationId, signatoryId, input) {
+    return restClient.put<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/signatories/${signatoryId}/documents`,
+      input,
+    )
+  },
+
+  selectSignatureSignatoryChannel(formalizationId, signatoryId, input) {
+    return restClient.put<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/signatories/${signatoryId}/channel`,
+      input,
+    )
+  },
+
+  replaceSignatureFields(formalizationId, documentId, input) {
+    return restClient.put<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/documents/${documentId}/fields`,
+      input,
+    )
+  },
+
+  retrySignaturePreview(formalizationId, previewId, expectedVersion) {
+    return restClient.post<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/previews/${previewId}/retry`,
+      { expectedVersion },
+    )
+  },
+
+  getSignaturePreviewContent(formalizationId, previewId) {
+    return restClient
+      .getFile(
+        `/formalizations/${formalizationId}/signature-configuration/previews/${previewId}/content`,
+      )
+      .then((response): RestResponse<Blob> => {
+        if (!response.isSuccessful) return response as unknown as RestResponse<Blob>
+
+        if (getContentType(response.headers) === 'application/pdf') {
+          return response as unknown as RestResponse<Blob>
+        }
+
+        return new RestResponse<Blob>({
+          statusCode: HTTP_STATUS_CODE.unprocessableEntity,
+          errorMessage: 'A prévia retornou um tipo de conteúdo inválido.',
+          headers: response.headers,
+        })
+      })
+  },
+
+  resetSignatureConfiguration(formalizationId, expectedVersion) {
+    return restClient.post<FormalizationSignatureConfiguration>(
+      `/formalizations/${formalizationId}/signature-configuration/reset`,
+      { expectedVersion },
+    )
+  },
+
+  reopenDocumentPackage(formalizationId, expectedVersion) {
+    return restClient.patch<Formalization>(
+      `/formalizations/${formalizationId}/documents/reopen`,
+      { expectedVersion },
+    )
   },
 })

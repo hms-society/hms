@@ -1,3 +1,4 @@
+import type { ClientConsent } from './client-consent'
 import type { Address, TaxId } from '../structures'
 import type { Entity } from '../../../shared/domain/entities/entity'
 
@@ -32,5 +33,5 @@ export type ClientCreation = NaturalClientCreation | LegalClientCreation
 
 export type ClientDetails = {
   readonly client: Client
-  readonly consents: readonly import('./client-consent').ClientConsent[]
+  readonly consents: readonly ClientConsent[]
 }

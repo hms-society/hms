@@ -1,5 +1,13 @@
 import type { Consultation } from '../../../consultation/domain/entities'
-import type { DynamicFormAnswer, DynamicFormSnapshot } from '../../../shared/domain/structures'
+import type {
+  Collaborator,
+  LegalClient,
+  NaturalClient,
+} from '../../../identity/domain/entities'
+import type {
+  DynamicFormAnswer,
+  DynamicFormSnapshot,
+} from '../../../shared/domain/structures'
 
 type ImmutableSnapshot<Value> = Value extends Date
   ? string
@@ -36,17 +44,25 @@ type FormalizationDocumentSourceDataBase = {
   }
   client:
     | Pick<
-        import('../../../identity/domain/entities').NaturalClient,
+        NaturalClient,
         'id' | 'type' | 'name' | 'taxId' | 'email' | 'phone' | 'address'
       >
     | Pick<
-        import('../../../identity/domain/entities').LegalClient,
-        'id' | 'type' | 'legalName' | 'tradeName' | 'taxId' | 'email' | 'phone' | 'address'
+        LegalClient,
+        | 'id'
+        | 'type'
+        | 'legalName'
+        | 'tradeName'
+        | 'taxId'
+        | 'email'
+        | 'phone'
+        | 'address'
       >
   assignedLawyer: Pick<
-    import('../../../identity/domain/entities').Collaborator,
+    Collaborator,
     'id' | 'professionalName' | 'jobTitle' | 'profile' | 'legalExpertises'
   >
 }
 
-export type FormalizationDocumentSourceData = ImmutableSnapshot<FormalizationDocumentSourceDataBase>
+export type FormalizationDocumentSourceData =
+  ImmutableSnapshot<FormalizationDocumentSourceDataBase>

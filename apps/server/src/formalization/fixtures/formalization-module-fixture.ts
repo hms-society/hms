@@ -3,10 +3,16 @@ import type { TestingModuleBuilder } from '@nestjs/testing'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
 import type { Broker } from '@hms/core/shared/interfaces'
+import type {
+  DocumentPdfConverter,
+  FormalizationDocumentPdfInspector,
+  FormalizationSignatureSourceReader,
+} from '@hms/core/formalization/interfaces'
 import { vi, type Mock } from 'vitest'
 
 import { FormalizationModule } from '@/formalization/formalization.module'
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
@@ -36,6 +42,31 @@ export class FormalizationModuleFixture {
       email: 'formalization.fixture@hms.test',
     }
     const broker: Broker & { publish: Mock } = { publish: vi.fn() }
+    const sourceReader: FormalizationSignatureSourceReader = {
+      findPerson: vi.fn().mockResolvedValue(null),
+      listEligibleCandidates: vi.fn().mockResolvedValue({
+        items: [],
+        page: 1,
+        limit: 20,
+        total: 0,
+      }),
+      listCurrentDocuments: vi.fn().mockResolvedValue([]),
+      findCurrentDocument: vi.fn().mockResolvedValue(null),
+      findDocumentVersion: vi.fn().mockResolvedValue(null),
+    }
+    const converter: DocumentPdfConverter = {
+      convert: vi.fn().mockResolvedValue({
+        contentType: 'application/pdf',
+        content: new Uint8Array([37, 80, 68, 70]),
+        converterVersion: 'fixture-converter',
+      }),
+    }
+    const inspector: FormalizationDocumentPdfInspector = {
+      inspect: vi.fn().mockResolvedValue({
+        pageCount: 1,
+        pages: [{ page: 1, width: 595, height: 842 }],
+      }),
+    }
     const restFixture = await RestFixture.register(
       {
         imports: [FormalizationModule],
@@ -48,6 +79,12 @@ export class FormalizationModuleFixture {
       },
       (builder) =>
         (configure?.(builder) ?? builder)
+          .overrideProvider(FORMALIZATION_PROVIDERS.signatureSourceReader)
+          .useValue(sourceReader)
+          .overrideProvider(FORMALIZATION_PROVIDERS.documentPdfConverter)
+          .useValue(converter)
+          .overrideProvider(FORMALIZATION_PROVIDERS.documentPdfInspector)
+          .useValue(inspector)
           .overrideGuard(AuthGuard)
           .useValue({
             canActivate: (context: ExecutionContext) => {

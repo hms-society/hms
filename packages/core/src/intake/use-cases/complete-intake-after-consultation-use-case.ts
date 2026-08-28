@@ -7,7 +7,7 @@ import {
   InvalidIntakeTransitionError,
 } from '../domain/errors'
 import { IntakeStatus } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type Request = {
   readonly intakeId: string

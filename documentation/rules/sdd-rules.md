@@ -55,13 +55,12 @@ Prompt names such as `create-spec` and `conclude-spec` are workflows, not agents
 
 | Role | Responsibility | Restrictions |
 | --- | --- | --- |
-| Orchestrator | Selects workflows, owns artifact state, creates subagents, integrates diffs, runs sensors, records evidence, publishes the PR, and routes failures. | Does not delegate the official evidence verdict, skip required sensors, or claim unexecuted evidence. |
+| Orchestrator | Selects workflows, owns artifact state, researches Specs directly, creates implementation/review subagents, integrates diffs, runs sensors, records evidence, publishes the PR, and routes failures. | Does not delegate Spec research or authoring, the official evidence verdict, required sensors, or claimed evidence. |
 | [Builder](../agents/builder-agent.md) | Implements one bounded direct, ownership, phase, task, or correction scope. | Does not edit Spec, Plan, Evaluation, PRD, Rules, commits, branches, or PRs. |
-| [Searcher](../agents/searcher-agent.md) | Researches one bounded repository boundary and returns exact read-only evidence. | Does not edit files, decide the Contract, or create subagents. |
 | [Integrated Reviewer](../agents/reviewer-agent.md) | Independently audits one integrated Plan-backed candidate. | Does not edit, implement fixes, or decide the official readiness verdict. |
 
-All subagents are siblings created by the Orchestrator in the current task. No subagent creates
-another subagent, user-owned task, fork, or handoff.
+Builder and Integrated Reviewer subagents are siblings created by the Orchestrator in the
+current task. No subagent creates another subagent, user-owned task, fork, or handoff.
 
 ## Durable artifacts
 
@@ -85,12 +84,15 @@ documentation/features/<domain>/<feature>/changes/<change-name>/
 | --- | --- | --- |
 | `spec.md` | Product, design, technical, and validation Contracts. | Attempts or actual test results. |
 | `plan.md` | Waves, dependencies, stable Builder ownership, status, blockers, and next action. | Duplicate product or technical Contracts. |
-| `evaluation.md` | Commands, runtime/manual/visual evidence, findings, history, and PR CI. | Product or architecture authority. |
+| `evaluation.md` | Commands, runtime/manual/visual validation results, findings, history, and PR CI. | Product or architecture authority. |
 | `design/manifest.md` | Reference inventory, Pencil node, state, viewport, implementation surface, and comparison requirement. | Implementation-generated proof. |
 
-Implementation screenshots are transient validation artifacts. Store them in ignored test or
-browser output, or retain them as CI artifacts, and record their path or identifier in
-`evaluation.md`. Do not create new feature-local `evidence/` directories.
+Implementation screenshots are transient validation aids, not SDD deliverables. Do not
+create feature-local `evidence/` directories, commit implementation screenshots, or make
+stored visual files a requirement for closing a Spec. Capture a screenshot only when it
+helps inspect a live or CI run, then record the visual observation and validation result in
+`evaluation.md` without retaining the image in the feature artifacts. Design reference
+images under `design/` remain authoritative inputs and are not implementation evidence.
 
 ## Artifact statuses
 
@@ -161,6 +163,10 @@ authorize implementation, commits, or pull-request publication.
 [`create-spec`](../prompts/create-spec-prompt.md) researches the repository and authors an
 implementation-ready Contract. It resolves every material product, technical, design, and
 validation ambiguity before writing.
+
+The Orchestrator performs all create-spec research directly. Spec creation does not dispatch
+research or architecture subagents; batching read-only repository commands is the supported
+way to cover independent boundaries efficiently while preserving one verified research context.
 
 The Spec has five top-level sections:
 
@@ -290,7 +296,9 @@ authorization.
 
 | Workflow | Source |
 | --- | --- |
+| Create or refine the canonical product PRD | [`create-prd-prompt.md`](../prompts/create-prd-prompt.md) |
 | Create an authorized Jira feature ticket | [`create-jira-feat-ticket.md`](../prompts/create-jira-feat-ticket.md) |
+| Grill unresolved product or delivery decisions | [`grilling-prompt.md`](../prompts/grilling-prompt.md) |
 | Create or amend a Spec | [`create-spec-prompt.md`](../prompts/create-spec-prompt.md) |
 | Create an optional Plan | [`create-plan-prompt.md`](../prompts/create-plan-prompt.md) |
 | Implement directly or through a Plan | [`implement-spec-prompt.md`](../prompts/implement-spec-prompt.md) |

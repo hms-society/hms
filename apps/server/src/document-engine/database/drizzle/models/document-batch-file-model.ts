@@ -6,9 +6,9 @@ import {
   integer,
   jsonb,
   boolean,
-  AnyPgColumn,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
-import { userModel } from '@/identity/database/drizzle/models'
+
 import { documentBatchModel } from './document-batch-model'
 import { documentStatusModel } from './document-status-model'
 
@@ -35,9 +35,7 @@ export const documentBatchFileModel = pgTable('document_batch_files', {
   ),
   aiSuggestion: jsonb('ai_suggestion'),
   humanCorrection: jsonb('human_correction'),
-  reviewedBy: uuid('reviewed_by').references(() => userModel.id, {
-    onDelete: 'set null',
-  }),
+  reviewedBy: uuid('reviewed_by'),
   reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })

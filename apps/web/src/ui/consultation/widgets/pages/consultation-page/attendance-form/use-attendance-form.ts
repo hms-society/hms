@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import {
   ConsultationDecision,
   ConsultationViability,
@@ -7,10 +6,9 @@ import {
 import type { IntakeClosureReason } from '@hms/core/intake/domain/structures'
 import { finalizeConsultationAttendanceSchema } from '@hms/validation/consultation'
 import type { DynamicFormAnswerValue } from '@hms/core/shared/domain'
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
-import type { LegalAreaOption, LegalTopicOption } from './sections/legal-area-section'
+import { useConsultationLegalCatalogQuery } from '@/ui/consultation/hooks/use-consultation-legal-catalog-query'
+import { useCloseIntakeWithoutContractAction } from '@/ui/intake/hooks/use-close-intake-without-contract-action'
 import type { LegalClaim } from './sections/claim-section'
 import type { TimelineFact } from './sections/timeline-section'
 import type { FormOption } from '@/ui/shared/widgets/dynamic-form/select-form/use-select-form'
@@ -65,7 +63,6 @@ export function useAttendanceForm({
     isEditingAttendance,
     editAttendanceError,
   } = useConsultation(consultationId)
-  const { user } = useAuthContext()
 
   const DRAFT_KEY = `consultation_draft_${consultationId}`
 
@@ -453,27 +450,11 @@ export function useAttendanceForm({
     DRAFT_KEY,
   ])
 
-  const { intakeService, legalCatalogService } = useRestContext()
-  const { data: areasData } = useQuery({
-    queryKey: ['legal-areas'],
-    queryFn: async () => {
-      const response = await legalCatalogService.listLegalAreas()
-      if (response.isFailure) return []
-      return (response.body as LegalAreaOption[]) ?? []
-    },
-  })
-  const { data: topicsData } = useQuery({
-    queryKey: ['legal-topics', legalAreaId],
-    queryFn: async () => {
-      if (!legalAreaId) return []
-      const response = await legalCatalogService.listLegalTopics(legalAreaId)
-      if (response.isFailure) return []
-      return (response.body as LegalTopicOption[]) ?? []
-    },
-    enabled: Boolean(legalAreaId),
-  })
-  const areasList = areasData ?? []
-  const topicsList = topicsData ?? []
+  const { legalAreas: areasList, legalTopics: topicsList } =
+    useConsultationLegalCatalogQuery(legalAreaId)
+  const { closeIntakeWithoutContract } = useCloseIntakeWithoutContractAction(
+    consultation?.intakeId,
+  )
   const currentAreaName = areasList.find((area) => area.id === legalAreaId)?.name || '—'
   const currentTopicName =
     topicsList.find((topic) => topic.id === legalTopicId)?.name || '—'
@@ -649,7 +630,7 @@ export function useAttendanceForm({
       return
     }
 
-    if (!consultation?.intakeId || !consultation.intake?.version || !user) {
+    if (!consultation?.intakeId || !consultation.intake?.version) {
       setClosureError(new Error('Não foi possível identificar o Intake atual.'))
       return
     }
@@ -659,17 +640,11 @@ export function useAttendanceForm({
 
     try {
       setIsSubmitting(true)
-      const response = await intakeService.closeIntakeWithoutContract(
-        consultation.intakeId,
-        {
-          expectedVersion: consultation.intake.version,
-          closureReason,
-          closureNotes: closureNotes.trim() || undefined,
-          updatedBy: user.id,
-        },
-      )
-
-      if (response.isFailure) response.throwError()
+      await closeIntakeWithoutContract({
+        expectedVersion: consultation.intake.version,
+        closureReason,
+        closureNotes: closureNotes.trim() || undefined,
+      })
 
       setClosureError(null)
       setClosureReason('')

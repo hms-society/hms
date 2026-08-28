@@ -6,6 +6,42 @@ description: Source organization rules for the shared core domain package.
 
 These rules apply to TypeScript source files under `packages/core`.
 
+## Type imports use explicit declarations
+
+When a Core source file consumes a type from another module, import it explicitly
+with a top-level `import type` declaration and reference the imported name in the
+type expression. Do not use inline type imports such as `import('...').Type`,
+including inside `readonly` arrays, function parameters, `Pick`, or mapped types.
+
+Use this form:
+
+```ts
+import type { DocumentVersion } from '../../document-production/domain/entities'
+
+function selectLatest(versions: readonly DocumentVersion[]): DocumentVersion | undefined {
+  // ...
+}
+```
+
+Do not use this form:
+
+```ts
+function selectLatest(
+  versions: readonly import('../../document-production/domain/entities').DocumentVersion[],
+) {
+  // ...
+}
+```
+
+`import type` is erased from the runtime output and makes the dependency visible
+at the top of the file, so this convention does not require a runtime module load.
+It applies equally to local and external types, including Core tests. Runtime
+`import()` expressions remain valid when a value must actually be loaded
+dynamically.
+
+**Validation:** search the changed Core scope for `import(` type expressions, then
+run `pnpm --filter @hms/core check-types` and the affected test suite.
+
 ## One exported type per file
 
 Every declaration written with `export type` must live in its own source file.
@@ -64,6 +100,25 @@ be checked by a `ConfirmDocumentPackage` use case class, not by a
 Use cases may coordinate entities, structures, interfaces, errors, and events while
 enforcing the rules required by one application action. Keep one exported use case
 class per file and use a verb-led name that describes the action.
+
+### Shared use-case behavior
+
+When several use cases share business invariants or orchestration helpers, place
+that behavior in an abstract use-case superclass under the owning module's
+`use-cases` directory. Concrete use cases should extend the narrowest applicable
+superclass and invoke its protected methods from `execute`.
+
+Reusable abstract use-case names describe the module or capability directly and
+must not add a redundant `Base` suffix. For example, use
+`FormalizationUseCase` and `FormalizationSignatureConfigurationUseCase`, not
+`FormalizationBaseUseCase` or `FormalizationSignatureConfigurationBaseUseCase`.
+The `Base` suffix does not communicate an additional responsibility and makes the
+inheritance contract less precise.
+
+Do not reintroduce standalone authorization objects, guard objects, or helper
+modules for business behavior that belongs to a use-case hierarchy. Keep one
+exported class per file, keep shared methods `protected`, and retain the concrete
+business action in the leaf use case.
 
 ## Enum-like domain structures are canonical
 

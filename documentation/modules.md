@@ -215,14 +215,18 @@ Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.
 - Mantém o cliente como primeiro signatário e adiciona o advogado responsável por
   padrão, sem selecionar documentos automaticamente para qualquer signatário.
 - Permite adicionar e remover signatários colaboradores ativos com perfil
-  Advogado, Paralegal ou Supervisor, usando nome, CPF e contatos de Identidade.
-- Exige CPF e pelo menos um canal disponível entre e-mail e WhatsApp, sem exigir
-  ambos e sem manter papel na assinatura ou comprovação de representação.
+  Advogado, Paralegal ou Supervisor, usando nome e contatos de Identidade.
+- Não coleta, valida, armazena nem usa CPF na etapa de assinatura e exige pelo
+  menos um canal disponível entre e-mail e WhatsApp, sem exigir ambos e sem
+  manter papel na assinatura ou comprovação de representação.
 - Relaciona signatários aos documentos e mantém a posição dos campos de assinatura
   em um modelo interno independente do provedor.
-- Congela o conteúdo-fonte no envio, gera e preserva o PDF original e solicita a
-  assinatura eletrônica por uma porta substituível, inicialmente integrada ao
-  Documenso e sem ICP-Brasil no MVP.
+- Depois da confirmação do pacote, gera em lote e preserva PDFs privados de
+  configuração a partir dos DOCX imutáveis das versões vigentes; enquanto o lote
+  executa, a configuração permanece em preparação e não aceita posicionamento de campos.
+- Congela o conteúdo-fonte no envio, preserva o PDF original e solicita a assinatura
+  eletrônica por uma porta substituível, inicialmente integrada ao Documenso e sem
+  ICP-Brasil no MVP.
 - Solicita à Comunicação o envio dos links por e-mail ou WhatsApp, respeitando o
   consentimento específico de cada canal e sem fallback automático.
 - Acompanha o progresso por documento; um documento só é considerado assinado

@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useIntakeResponsiblesQuery } from '@/ui/intake/hooks/use-intake-responsibles-query'
 import { useIntakesPage } from '../use-intakes-page'
-import { useIntakesQuery } from '../use-intakes-query'
+import { useIntakesQuery } from '@/ui/intake/hooks/use-intakes-query'
 
-vi.mock('../use-intakes-query', () => ({
+vi.mock('@/ui/intake/hooks/use-intakes-query', () => ({
   useIntakesQuery: vi.fn(),
 }))
 vi.mock('@/ui/intake/hooks/use-intake-responsibles-query', () => ({

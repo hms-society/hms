@@ -13,7 +13,13 @@ describe('Save Formalization Contract Form Draft Use Case', () => {
 
   it('persists normalized valid partial answers with the optimistic version', async () => {
     const formalization = fakeFormalization()
-    const updated = fakeFormalization({ ...formalization, version: 2, contractFormAnswers: [{ fieldId: formalization.contractFormSnapshot.fields[0].id, value: 'Rita' }] })
+    const updated = fakeFormalization({
+      ...formalization,
+      version: 2,
+      contractFormAnswers: [
+        { fieldId: formalization.contractFormSnapshot.fields[0].id, value: 'Rita' },
+      ],
+    })
     repository.findById.mockResolvedValue(formalization)
     repository.replace.mockResolvedValue(updated)
 
@@ -22,13 +28,19 @@ describe('Save Formalization Contract Form Draft Use Case', () => {
         formalizationId: formalization.id,
         actorId: formalization.assignedLawyerId,
         expectedVersion: formalization.version,
-        answers: [{ fieldId: formalization.contractFormSnapshot.fields[0].id, value: ' Rita ' }],
+        answers: [
+          { fieldId: formalization.contractFormSnapshot.fields[0].id, value: ' Rita ' },
+        ],
       }),
     ).resolves.toBe(updated)
     expect(repository.replace).toHaveBeenCalledWith({
       formalizationId: formalization.id,
       expectedVersion: formalization.version,
-      changes: { contractFormAnswers: [{ fieldId: formalization.contractFormSnapshot.fields[0].id, value: 'Rita' }] },
+      changes: {
+        contractFormAnswers: [
+          { fieldId: formalization.contractFormSnapshot.fields[0].id, value: 'Rita' },
+        ],
+      },
     })
   })
 })

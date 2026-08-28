@@ -1,19 +1,17 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Intake } from '@hms/core/intake/domain/entities'
 
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useStartFormalizationAction } from '@/ui/formalization/hooks/use-start-formalization-action'
+import { useCloseIntakeWithoutContractAction } from '@/ui/intake/hooks/use-close-intake-without-contract-action'
 
 import { IntakeDetailsPage } from '..'
 import {
   useIntakeDetailsQuery,
   type IntakeDetailsData,
-} from '../use-intake-details-query'
+} from '@/ui/intake/hooks/use-intake-details-query'
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   Anchor: ({ children, route, params, ...props }: Record<string, unknown>) => (
@@ -36,24 +34,21 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   ),
 }))
 
-vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
-  useAuthContext: vi.fn(),
-}))
-
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: vi.fn(),
-}))
-
 vi.mock('@/ui/formalization/hooks/use-start-formalization-action', () => ({
   useStartFormalizationAction: vi.fn(),
 }))
 
-vi.mock('../use-intake-details-query', () => ({
+vi.mock('@/ui/intake/hooks/use-intake-details-query', () => ({
   useIntakeDetailsQuery: vi.fn(),
 }))
 
-const useAuthContextMock = vi.mocked(useAuthContext)
-const useRestContextMock = vi.mocked(useRestContext)
+vi.mock('@/ui/intake/hooks/use-close-intake-without-contract-action', () => ({
+  useCloseIntakeWithoutContractAction: vi.fn(),
+}))
+
+const useCloseIntakeWithoutContractActionMock = vi.mocked(
+  useCloseIntakeWithoutContractAction,
+)
 const useIntakeDetailsQueryMock = vi.mocked(useIntakeDetailsQuery)
 const useStartFormalizationActionMock = vi.mocked(useStartFormalizationAction)
 
@@ -113,13 +108,7 @@ function createDetails(status: Intake['status'] = baseIntake.status): IntakeDeta
 }
 
 function renderPage(data: IntakeDetailsData) {
-  const queryClient = new QueryClient()
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <IntakeDetailsPage intakeId={data.intake.id} />
-    </QueryClientProvider>,
-  )
+  return render(<IntakeDetailsPage intakeId={data.intake.id} />)
 }
 
 function createQueryResult(data: IntakeDetailsData) {
@@ -136,12 +125,11 @@ describe('IntakeDetailsPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useAuthContextMock.mockReturnValue({ user: { id: 'user-1' } } as never)
-    useRestContextMock.mockReturnValue({
-      intakeService: {
-        closeIntakeWithoutContract: vi.fn(),
-      },
-    } as never)
+    useCloseIntakeWithoutContractActionMock.mockReturnValue({
+      closeIntakeError: null,
+      isClosingIntake: false,
+      closeIntakeWithoutContract: vi.fn(),
+    })
     useStartFormalizationActionMock.mockReturnValue({
       ...startFormalizationMutation,
     } as never)

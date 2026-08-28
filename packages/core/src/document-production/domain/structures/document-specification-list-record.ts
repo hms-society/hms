@@ -1,4 +1,5 @@
-import type { DocumentSpecificationApplication, DocumentSpecificationStatus } from '.'
+import type { DocumentSpecificationApplication } from './document-specification-application'
+import type { DocumentSpecificationStatus } from './document-specification-status'
 
 export type DocumentSpecificationListRecord = {
   readonly documentSpecificationId: string

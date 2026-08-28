@@ -1,6 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
-import { createElement, type ReactNode } from 'react'
+import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
@@ -14,13 +12,13 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: vi.fn(),
 }))
 
-const useRestContextMock = vi.mocked(useRestContext)
+const { useQueryMock } = vi.hoisted(() => ({ useQueryMock: vi.fn() }))
 
-function createWrapper(queryClient: QueryClient) {
-  return function QueryClientWrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient, children })
-  }
-}
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: useQueryMock,
+}))
+
+const useRestContextMock = vi.mocked(useRestContext)
 
 describe('useFormalizationQuery', () => {
   const getFormalizationMock = vi.fn()
@@ -30,6 +28,13 @@ describe('useFormalizationQuery', () => {
     useRestContextMock.mockReturnValue({
       formalizationService: { get: getFormalizationMock },
     } as never)
+    useQueryMock.mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isFetching: false,
+      isLoading: false,
+    })
   })
 
   it('resolves a forbidden response to an error without retrying', async () => {
@@ -39,19 +44,13 @@ describe('useFormalizationQuery', () => {
         errorMessage: 'Forbidden',
       }),
     )
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: true, retryDelay: 0 },
-      },
+    renderHook(() => useFormalizationQuery('formalization-id'))
+    const queryOptions = useQueryMock.mock.calls[0]?.[0]
+
+    await expect(queryOptions.queryFn()).rejects.toMatchObject({
+      statusCode: HTTP_STATUS_CODE.forbidden,
     })
-
-    const { result } = renderHook(() => useFormalizationQuery('formalization-id'), {
-      wrapper: createWrapper(queryClient),
-    })
-
-    await waitFor(() => expect(result.current.isError).toBe(true))
-
+    expect(queryOptions.retry).toBe(false)
     expect(getFormalizationMock).toHaveBeenCalledTimes(1)
-    expect(result.current.data).toBeUndefined()
   })
 })

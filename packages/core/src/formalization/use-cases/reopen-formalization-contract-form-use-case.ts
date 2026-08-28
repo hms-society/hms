@@ -7,23 +7,28 @@ import {
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import type { UseCase } from '../../shared/interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly expectedVersion: number
 }
 
-export class ReopenFormalizationContractFormUseCase
-  implements UseCase<Request, Formalization>
-{
-  constructor(private readonly formalizationsRepository: FormalizationsRepository) {}
+export class ReopenFormalizationContractFormUseCase extends FormalizationUseCase<
+  Request,
+  Formalization
+> {
+  constructor(private readonly formalizationsRepository: FormalizationsRepository) {
+    super()
+  }
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    this.assertAccess(formalization.assignedLawyerId, request)
     if (formalization.status !== FormalizationStatus.InProgress) {
       throw new FormalizationStateConflictError()
     }

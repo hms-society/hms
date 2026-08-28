@@ -1,7 +1,7 @@
-import { useConsultationAttendanceActions } from './use-consultation-attendance-actions'
+import { useConsultationAttendanceActions } from './use-consultation-attendance-action'
 import { useConsultationCompletionAction } from './use-consultation-completion-action'
 import { useConsultationQuery } from './use-consultation-query'
-import { useConsultationStatusActions } from './use-consultation-status-actions'
+import { useConsultationStatusActions } from './use-consultation-status-action'
 
 export function useConsultation(consultationId?: string) {
   const consultationQuery = useConsultationQuery(consultationId)

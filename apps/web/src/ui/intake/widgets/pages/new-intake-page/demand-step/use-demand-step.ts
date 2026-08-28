@@ -1,8 +1,8 @@
 import type { IntakeFormData } from '@hms/validation/intake'
 import { useFormContext } from 'react-hook-form'
 
-import { useLegalAreasQuery } from './use-legal-areas-query'
-import { useLegalTopicsQuery } from './use-legal-topics-query'
+import { useLegalAreasQuery } from '@/ui/intake/hooks/use-legal-areas-query'
+import { useLegalTopicsQuery } from '@/ui/intake/hooks/use-legal-topics-query'
 
 export const NO_LEGAL_AREA_VALUE = '__no_legal_area__'
 

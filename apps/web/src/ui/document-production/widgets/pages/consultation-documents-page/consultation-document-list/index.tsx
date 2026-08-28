@@ -2,7 +2,7 @@ import {
   DocumentPackageList,
   type DocumentPackageAction,
   type DocumentPackageItem,
-} from '../../../components/document-package'
+} from '../../../components/document-package/document-package-list'
 import type { ConsultationDocumentViewModel } from '../use-consultation-documents-page'
 import type { ReactNode } from 'react'
 

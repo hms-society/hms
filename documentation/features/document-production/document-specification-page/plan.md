@@ -287,7 +287,7 @@ Implementation.
 Preflight obrigatório do fluxo real:
 
 1. executar `docker compose ps -a`, `curl http://localhost:8000/auth/v1/health`
-   e `curl http://localhost:3333/health`;
+   e `curl http://localhost:5555/health`;
 2. iniciar `pnpm --filter server dev` e `pnpm --filter web dev` em sessões
    persistentes e esperar compilação/restart terminar;
 3. resolver `admin@hmsadvogados.com.br` e `HMS_USER_SEED_PASSWORD` lendo fonte

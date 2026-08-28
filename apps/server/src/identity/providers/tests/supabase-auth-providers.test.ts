@@ -126,10 +126,10 @@ describe('SupabaseAuthAdministrationProvider', () => {
     const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
 
     await expect(
-      provider.inviteUserByEmail('person@example.com', 'http://localhost:3000/convite'),
+      provider.inviteUserByEmail('person@example.com', 'http://localhost:5000/convite'),
     ).resolves.toEqual({ id: 'invited-user', email: 'person@example.com' })
     expect(inviteUserByEmail).toHaveBeenCalledWith('person@example.com', {
-      redirectTo: 'http://localhost:3000/convite',
+      redirectTo: 'http://localhost:5000/convite',
     })
   })
 
@@ -174,10 +174,10 @@ describe('SupabaseAuthAdministrationProvider', () => {
     const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
 
     await expect(
-      provider.resendInvitation('person@example.com', 'http://localhost:3000/convite'),
+      provider.resendInvitation('person@example.com', 'http://localhost:5000/convite'),
     ).resolves.toEqual({ id: 'resent-invited-user', email: 'person@example.com' })
     expect(inviteUserByEmail).toHaveBeenCalledWith('person@example.com', {
-      redirectTo: 'http://localhost:3000/convite',
+      redirectTo: 'http://localhost:5000/convite',
     })
   })
 
@@ -187,12 +187,12 @@ describe('SupabaseAuthAdministrationProvider', () => {
     const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
 
     await expect(
-      provider.inviteUserByEmail('person@example.com', 'http://localhost:3000/convite'),
+      provider.inviteUserByEmail('person@example.com', 'http://localhost:5000/convite'),
     ).rejects.toMatchObject({
       message: 'Não foi possível enviar o convite para o colaborador.',
     })
     await expect(
-      provider.inviteUserByEmail('person@example.com', 'http://localhost:3000/convite'),
+      provider.inviteUserByEmail('person@example.com', 'http://localhost:5000/convite'),
     ).rejects.toBeInstanceOf(AppError)
   })
 
@@ -204,13 +204,13 @@ describe('SupabaseAuthAdministrationProvider', () => {
     const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
 
     await expect(
-      provider.resendInvitation('person@example.com', 'http://localhost:3000/convite'),
+      provider.resendInvitation('person@example.com', 'http://localhost:5000/convite'),
     ).rejects.toMatchObject({
       message:
         'Este e-mail já possui uma conta no Auth. O colaborador precisa concluir o acesso ou ser reconciliado.',
     })
     await expect(
-      provider.resendInvitation('person@example.com', 'http://localhost:3000/convite'),
+      provider.resendInvitation('person@example.com', 'http://localhost:5000/convite'),
     ).rejects.toBeInstanceOf(ConflictError)
   })
 

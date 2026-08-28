@@ -1,10 +1,8 @@
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import { useInfiniteQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useIntakeLawyersQuery } from '@/ui/intake/hooks/use-intake-lawyers-query'
 
-const LAWYERS_PAGE_LIMIT = 10
 const AVATAR_CLASS_NAMES = [
   'bg-primary/15 text-primary',
   'bg-brand-highlight text-primary-foreground',
@@ -34,39 +32,29 @@ export function useLawyerSelectorDialog({
   selectedLawyer,
   onSelect,
 }: LawyerSelectorDialogProps) {
-  const { identityService } = useRestContext()
   const [draftSelection, setDraftSelection] = useState(selectedLawyer ?? '')
   const [search, setSearch] = useState('')
   const [area, setArea] = useState('all')
   const [topic, setTopic] = useState('all')
 
-  const lawyersQuery = useInfiniteQuery({
-    queryKey: ['intake-lawyers', { search }],
-    queryFn: async function fetchLawyers({ pageParam }) {
-      const response = await identityService.listLawyers({
-        page: pageParam,
-        limit: LAWYERS_PAGE_LIMIT,
-        search: search.trim() || undefined,
-      })
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
-    enabled: open,
-  })
+  const {
+    hasNextPage,
+    intakeLawyerPages,
+    intakeLawyersError,
+    isFetchingNextPage,
+    isLoadingIntakeLawyers,
+    fetchNextPage,
+    refetchIntakeLawyers,
+  } = useIntakeLawyersQuery(search, open)
 
   const lawyers = useMemo(
     () =>
-      lawyersQuery.data?.pages.flatMap((page) =>
+      intakeLawyerPages.flatMap((page) =>
         page.items.map((collaborator, index) =>
           mapCollaboratorToLawyerOption(collaborator, index),
         ),
       ) ?? [],
-    [lawyersQuery.data],
+    [intakeLawyerPages],
   )
   const areas = useMemo(
     () => [...new Set(lawyers.map((lawyer) => lawyer.area))].sort(),
@@ -122,8 +110,8 @@ export function useLawyerSelectorDialog({
   }
 
   function handleLoadMore() {
-    if (lawyersQuery.hasNextPage && !lawyersQuery.isFetchingNextPage) {
-      return lawyersQuery.fetchNextPage()
+    if (hasNextPage && !isFetchingNextPage) {
+      return fetchNextPage()
     }
   }
 
@@ -134,7 +122,7 @@ export function useLawyerSelectorDialog({
   }
 
   function handleRetry() {
-    return lawyersQuery.refetch()
+    return refetchIntakeLawyers()
   }
 
   return {
@@ -150,10 +138,10 @@ export function useLawyerSelectorDialog({
     handleRetry,
     handleSearchChange,
     handleTopicChange,
-    isError: lawyersQuery.isError,
-    isFetchingNextPage: lawyersQuery.isFetchingNextPage,
-    isLoading: lawyersQuery.isLoading,
-    hasNextPage: lawyersQuery.hasNextPage,
+    isError: Boolean(intakeLawyersError),
+    isFetchingNextPage,
+    isLoading: isLoadingIntakeLawyers,
+    hasNextPage,
     search,
     selectedLawyerOption,
     topic,

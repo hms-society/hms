@@ -364,7 +364,8 @@ Phase completion must be sensor-backed. Do not use a Builder report as official 
 
 Each Builder runs focused feedback checks for the paths it changes before handoff:
 
-- `builder_core` and `builder_validation` run their applicable code, type and unit sensors;
+- `builder_core` runs its applicable code, type and unit sensors; `builder_validation` runs
+  lint and type-check sensors only because `packages/validation` intentionally has no test suite;
 - `builder_server` runs applicable sensors plus focused `curl` scenarios against the real local
   server for changed runtime behavior, covering status/body, validation, authentication,
   authorization, persistence, side effects and relevant logs;
@@ -539,7 +540,12 @@ After implementation work is complete, validate the exact Spec revision and impl
 Plan-backed execution, activate the `reviewer` subagent on the integrated candidate while
 the Orchestrator runs the applicable sensors:
 
-1. run integrated technical sensors and the final build Quality Gate;
+1. run integrated technical sensors, the repository-wide `pnpm test:coverage` command and the
+   final build Quality Gate. Coverage is mandatory after implementation and after every correction;
+   it is not optional or replaced by a focused test run. If the coverage gate fails, write or improve
+   behavior-focused tests at the covered application or core boundary, rerun coverage, and keep the
+   implementation in progress until it passes. Do not create tests in `packages/validation`, which is
+   intentionally linted and type-checked without its own test suite;
 2. review generated artifacts and migration bodies;
 3. preflight real services, database/Auth/provider state, accounts and fixtures;
 4. execute every applicable `MV-*` with the Playwright MCP;

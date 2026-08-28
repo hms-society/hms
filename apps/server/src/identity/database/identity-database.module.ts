@@ -42,6 +42,10 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       useExisting: DrizzleClientsRepository,
     },
     {
+      provide: IDENTITY_REPOSITORIES.clientList,
+      useExisting: DrizzleClientsRepository,
+    },
+    {
       provide: IDENTITY_REPOSITORIES.clientConsents,
       useExisting: DrizzleClientConsentsRepository,
     },
@@ -70,6 +74,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
   exports: [
     IdentityUsersDatabaseModule,
     IDENTITY_REPOSITORIES.clients,
+    IDENTITY_REPOSITORIES.clientList,
     IDENTITY_REPOSITORIES.clientConsents,
     IDENTITY_REPOSITORIES.collaborators,
     IDENTITY_REPOSITORIES.registrationAttempts,

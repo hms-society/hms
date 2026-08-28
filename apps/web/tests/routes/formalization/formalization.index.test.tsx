@@ -11,7 +11,7 @@ import {
 test('runs the formalization form and individual document contract', async ({
   documentProduction,
   page,
-}) => {
+}, testInfo) => {
   const { formalization } = documentProduction
   const consoleErrors: string[] = []
   const failedRequests: string[] = []
@@ -55,6 +55,13 @@ test('runs the formalization form and individual document contract', async ({
   await expect(
     page.getByRole('heading', { name: 'Documentos da formalização' }),
   ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Configuração do envio' }),
+  ).not.toBeVisible()
+  await page.screenshot({
+    path: testInfo.outputPath('formalization-configuration-summary.png'),
+    fullPage: true,
+  })
   await expect(page.getByRole('button', { name: 'Gerar documento' })).toBeVisible()
 
   await page.setViewportSize({ width: 390, height: 844 })
@@ -67,6 +74,7 @@ test('runs the formalization form and individual document contract', async ({
     method: 'POST',
     path: `/formalizations/${FORMALIZATION_ID}/documents/formalization-document-1/generations`,
   })
+  await expect(page.getByRole('button', { name: 'Revisar' })).toBeVisible()
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'scroll')
 
   if (consoleErrors.length || failedRequests.length) {
@@ -191,7 +199,7 @@ test('confirms the document package and closes without contract with the selecte
   const generationResponsePromise = page.waitForResponse(
     (response) =>
       response.url() ===
-        `${DOCUMENT_PRODUCTION_BACKEND}/formalizations/${FORMALIZATION_ID}/documents/formalization-document-1/generations`,
+      `${DOCUMENT_PRODUCTION_BACKEND}/formalizations/${FORMALIZATION_ID}/documents/formalization-document-1/generations`,
   )
   await page.getByRole('button', { name: 'Gerar documento' }).click()
   await generationResponsePromise
@@ -212,7 +220,7 @@ test('confirms the document package and closes without contract with the selecte
   const reviewResponsePromise = page.waitForResponse(
     (response) =>
       response.url() ===
-        `${DOCUMENT_PRODUCTION_BACKEND}/formalizations/${FORMALIZATION_ID}/document-versions/formalization-version-1/review`,
+      `${DOCUMENT_PRODUCTION_BACKEND}/formalizations/${FORMALIZATION_ID}/document-versions/formalization-version-1/review`,
   )
   await approveDialog.getByRole('button', { name: 'Aprovar versão' }).click()
   await reviewResponsePromise
@@ -239,6 +247,10 @@ test('confirms the document package and closes without contract with the selecte
   await expect(page.getByRole('button', { name: 'Confirmar pacote' })).toBeEnabled()
   await reopenedPackageDialog.getByRole('button', { name: 'Confirmar pacote' }).click()
   await expect.poll(() => formalization.confirmRequests).toBe(1)
+  await expect(page.getByRole('link', { name: 'Configuração do envio' })).toHaveAttribute(
+    'href',
+    `/formalizacoes/${FORMALIZATION_ID}/configuracao-envio`,
+  )
   expect(
     formalization.requests
       .filter(

@@ -21,7 +21,7 @@ vi.mock('../use-document-viewer', () => ({
 
 const useDocumentViewerMock = vi.mocked(useDocumentViewer)
 
-function createController(overrides: Partial<ReturnType<typeof useDocumentViewer>> = {}) {
+function fakeHook(overrides: Partial<ReturnType<typeof useDocumentViewer>> = {}) {
   return {
     file: {
       id: 'file-123',
@@ -66,7 +66,7 @@ describe('DocumentViewerPage', () => {
 
   it('renders the loading state while file metadata is loading', () => {
     useDocumentViewerMock.mockReturnValue(
-      createController({ file: undefined, isLoadingFile: true }),
+      fakeHook({ file: undefined, isLoadingFile: true }),
     )
 
     render(<DocumentViewerPage />)
@@ -76,7 +76,7 @@ describe('DocumentViewerPage', () => {
 
   it('renders the file metadata and download action', () => {
     const handleDownload = vi.fn()
-    useDocumentViewerMock.mockReturnValue(createController({ handleDownload }))
+    useDocumentViewerMock.mockReturnValue(fakeHook({ handleDownload }))
 
     render(<DocumentViewerPage />)
 

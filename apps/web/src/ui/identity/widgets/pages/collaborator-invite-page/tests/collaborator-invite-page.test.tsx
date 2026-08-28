@@ -1,13 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { RestResponse } from '@hms/core/shared/responses/rest-response'
-
+import { useCompleteCollaboratorInviteAction } from '@/ui/identity/hooks/use-complete-collaborator-invite-action'
 import type { AnchorProps } from '@/ui/shared/widgets/components/anchor'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { CollaboratorInvitePage } from '../index'
@@ -16,8 +12,8 @@ vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
   useAuthContext: vi.fn(),
 }))
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: vi.fn(),
+vi.mock('@/ui/identity/hooks/use-complete-collaborator-invite-action', () => ({
+  useCompleteCollaboratorInviteAction: vi.fn(),
 }))
 
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
@@ -33,7 +29,9 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
 }))
 
 const useAuthContextMock = vi.mocked(useAuthContext)
-const useRestContextMock = vi.mocked(useRestContext)
+const useCompleteCollaboratorInviteActionMock = vi.mocked(
+  useCompleteCollaboratorInviteAction,
+)
 const useNavigationMock = vi.mocked(useNavigation)
 
 const session = {
@@ -43,23 +41,11 @@ const session = {
 
 const getSession = vi.fn()
 const updatePassword = vi.fn()
-const completeSignIn = vi.fn()
+const completeCollaboratorInvite = vi.fn()
 const navigateTo = vi.fn()
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { mutations: { retry: false } },
-  })
-
-  return function QueryWrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  }
-}
-
 function renderPage() {
-  return render(<CollaboratorInvitePage inviteSearch={{ code: 'invite-code' }} />, {
-    wrapper: createWrapper(),
-  })
+  return render(<CollaboratorInvitePage inviteSearch={{ code: 'invite-code' }} />)
 }
 
 function getInviteForm() {
@@ -75,9 +61,9 @@ describe('CollaboratorInvitePage', () => {
     vi.clearAllMocks()
     getSession.mockResolvedValue(session)
     updatePassword.mockResolvedValue(undefined)
-    completeSignIn.mockResolvedValue(
-      new RestResponse({ body: { collaboratorId: 'collaborator-id' } }),
-    )
+    completeCollaboratorInvite.mockResolvedValue({
+      collaboratorId: 'collaborator-id',
+    })
     navigateTo.mockResolvedValue(undefined)
 
     useAuthContextMock.mockReturnValue({
@@ -86,7 +72,11 @@ describe('CollaboratorInvitePage', () => {
       session,
       updatePassword,
     } as never)
-    useRestContextMock.mockReturnValue({ identityService: { completeSignIn } } as never)
+    useCompleteCollaboratorInviteActionMock.mockReturnValue({
+      completeCollaboratorInviteError: null,
+      isCompletingCollaboratorInvite: false,
+      completeCollaboratorInvite,
+    })
     useNavigationMock.mockReturnValue({
       navigateTo,
       navigateCollaboratorsSearch: vi.fn(),
@@ -149,7 +139,6 @@ describe('CollaboratorInvitePage', () => {
           error_description: 'Email link is invalid or has expired',
         }}
       />,
-      { wrapper: createWrapper() },
     )
 
     expect((await screen.findByRole('alert')).textContent).toContain(
@@ -159,7 +148,7 @@ describe('CollaboratorInvitePage', () => {
   })
 
   it('renders the password form when the invite token was consumed into a session', () => {
-    render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+    render(<CollaboratorInvitePage />)
 
     expect(screen.getByRole('button', { name: 'Criar minha senha' })).toBeTruthy()
     expect(screen.queryByRole('alert')).toBeNull()
@@ -173,7 +162,7 @@ describe('CollaboratorInvitePage', () => {
       updatePassword,
     } as never)
 
-    render(<CollaboratorInvitePage />, { wrapper: createWrapper() })
+    render(<CollaboratorInvitePage />)
 
     expect((await screen.findByRole('alert')).textContent).toContain(
       'Abra esta página pelo link recebido no convite.',
@@ -193,9 +182,7 @@ describe('CollaboratorInvitePage', () => {
     fireEvent.submit(getInviteForm())
 
     expect(screen.getByRole('alert').textContent).toContain('As senhas não coincidem.')
-    expect(getSession).not.toHaveBeenCalled()
-    expect(updatePassword).not.toHaveBeenCalled()
-    expect(completeSignIn).not.toHaveBeenCalled()
+    expect(completeCollaboratorInvite).not.toHaveBeenCalled()
   })
 
   it('completes the invite and navigates home after creating the password', async () => {
@@ -214,15 +201,12 @@ describe('CollaboratorInvitePage', () => {
         'Senha criada. Redirecionando para a HMS…',
       ),
     )
-    expect(updatePassword).toHaveBeenCalledWith('secret-password')
-    expect(completeSignIn).toHaveBeenCalledOnce()
+    expect(completeCollaboratorInvite).toHaveBeenCalledWith('secret-password')
     expect(navigateTo).toHaveBeenCalledWith('home')
   })
 
   it('shows the completion error and keeps the form available for retry', async () => {
-    completeSignIn.mockResolvedValue(
-      new RestResponse({ statusCode: 403, errorMessage: 'Convite não autorizado.' }),
-    )
+    completeCollaboratorInvite.mockRejectedValue(new Error('Convite não autorizado.'))
 
     renderPage()
 

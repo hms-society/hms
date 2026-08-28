@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 
 import { INTAKE_SEARCH_PARAMS, type IntakeSearchParams } from './intakes-page-search'
 import { useIntakeResponsiblesQuery } from '@/ui/intake/hooks/use-intake-responsibles-query'
-import { useIntakesQuery } from './use-intakes-query'
+import { useIntakesQuery } from '@/ui/intake/hooks/use-intakes-query'
 
 function toQuery(params: IntakeSearchParams): IntakeListQuery {
   return {

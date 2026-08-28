@@ -1,5 +1,5 @@
 import type { AuthUser } from '../domain/structures'
-import type { CollaboratorsRepository } from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 
 import type { AuthorizeAdminUseCase } from './authorize-admin-use-case'
 

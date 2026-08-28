@@ -174,8 +174,6 @@ export type {
   DocumentPackageItem,
   DocumentPackageStatus,
 } from './types'
-export { DocumentPackageList } from './document-package-list'
-export { DocumentPackageRow } from './document-package-row'
 export {
   type DocumentPackageSourceItem,
   type DocumentPackageSourceVersion,

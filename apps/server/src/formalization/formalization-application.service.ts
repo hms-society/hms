@@ -5,6 +5,18 @@ import {
   CloseFormalizationContractFormUseCase,
   CloseFormalizationWithoutContractUseCase,
   ConfirmFormalizationDocumentsUseCase,
+  AddFormalizationSignatoryUseCase,
+  GetFormalizationSignatureConfigurationUseCase,
+  GetFormalizationSignaturePreviewContentUseCase,
+  InitializeFormalizationSignatureConfigurationUseCase,
+  ListFormalizationSignatureCandidatesUseCase,
+  RemoveFormalizationSignatoryUseCase,
+  ReopenFormalizationDocumentPackageUseCase,
+  ReplaceFormalizationSignatoryDocumentsUseCase,
+  ReplaceFormalizationSignatureFieldsUseCase,
+  RequestFormalizationSignaturePreviewGenerationUseCase,
+  ResetFormalizationSignatureConfigurationUseCase,
+  SelectFormalizationSignatoryChannelUseCase,
   GenerateFormalizationDocumentUseCase,
   GetFormalizationDocumentSelectionUseCase,
   GetFormalizationDocumentVersionUseCase,
@@ -24,6 +36,9 @@ import type {
   FormalizationIntakeClosureService,
   FormalizationIntakeLifecycleService,
   FormalizationSourceReader,
+  FormalizationSignatureConfigurationRepository,
+  FormalizationSignatureSourceReader,
+  FormalizationDocumentConfirmationTransaction,
 } from '@hms/core/formalization/interfaces'
 import type {
   DocumentFileExporter,
@@ -38,6 +53,7 @@ import { FormalizationStateConflictError } from '@hms/core/formalization/domain/
 import { FormalizationStatus } from '@hms/core/formalization/domain/structures'
 
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import {
   ServerFormalizationIntakeClosureService,
   ServerFormalizationIntakeLifecycleService,
@@ -69,6 +85,18 @@ export class FormalizationApplicationService {
   private readonly reviewVersionUseCase: ReviewFormalizationDocumentVersionUseCase
   private readonly selectCurrentVersionUseCase: SelectCurrentFormalizationDocumentVersionUseCase
   private readonly confirmDocumentsUseCase: ConfirmFormalizationDocumentsUseCase
+  private readonly getSignatureConfigurationUseCase: GetFormalizationSignatureConfigurationUseCase
+  private readonly initializeSignatureConfigurationUseCase: InitializeFormalizationSignatureConfigurationUseCase
+  private readonly listSignatureCandidatesUseCase: ListFormalizationSignatureCandidatesUseCase
+  private readonly addSignatureSignatoryUseCase: AddFormalizationSignatoryUseCase
+  private readonly removeSignatureSignatoryUseCase: RemoveFormalizationSignatoryUseCase
+  private readonly replaceSignatureSignatoryDocumentsUseCase: ReplaceFormalizationSignatoryDocumentsUseCase
+  private readonly selectSignatureSignatoryChannelUseCase: SelectFormalizationSignatoryChannelUseCase
+  private readonly replaceSignatureFieldsUseCase: ReplaceFormalizationSignatureFieldsUseCase
+  private readonly requestSignaturePreviewGenerationUseCase: RequestFormalizationSignaturePreviewGenerationUseCase
+  private readonly getSignaturePreviewContentUseCase: GetFormalizationSignaturePreviewContentUseCase
+  private readonly resetSignatureConfigurationUseCase: ResetFormalizationSignatureConfigurationUseCase
+  private readonly reopenDocumentPackageUseCase: ReopenFormalizationDocumentPackageUseCase
 
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
@@ -95,6 +123,12 @@ export class FormalizationApplicationService {
     documentFileExporter: DocumentFileExporter,
     @Inject(PROVISION_PROVIDERS.fileStorage)
     fileStorageProvider: FileStorageProvider,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
+    signatureSourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.documentConfirmationTransaction)
+    confirmationTransaction: FormalizationDocumentConfirmationTransaction,
     broker: InngestBroker,
     datetimeProvider: DatetimeProvider,
     idProvider: IdProvider,
@@ -208,6 +242,92 @@ export class FormalizationApplicationService {
       versionsRepository,
       generationsRepository,
       datetimeProvider,
+      documentsRepository,
+      confirmationTransaction,
+      signatureConfigurationRepository,
+      broker,
+    )
+
+    this.getSignatureConfigurationUseCase =
+      new GetFormalizationSignatureConfigurationUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+      )
+    this.initializeSignatureConfigurationUseCase =
+      new InitializeFormalizationSignatureConfigurationUseCase(
+        formalizationsRepository,
+        confirmationTransaction,
+        signatureConfigurationRepository,
+        broker,
+        datetimeProvider,
+      )
+    this.listSignatureCandidatesUseCase = new ListFormalizationSignatureCandidatesUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+    )
+    this.addSignatureSignatoryUseCase = new AddFormalizationSignatoryUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+      datetimeProvider,
+      idProvider,
+    )
+    this.removeSignatureSignatoryUseCase = new RemoveFormalizationSignatoryUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+      datetimeProvider,
+      idProvider,
+    )
+    this.replaceSignatureSignatoryDocumentsUseCase =
+      new ReplaceFormalizationSignatoryDocumentsUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+        signatureSourceReader,
+        datetimeProvider,
+        idProvider,
+      )
+    this.selectSignatureSignatoryChannelUseCase =
+      new SelectFormalizationSignatoryChannelUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+        signatureSourceReader,
+        datetimeProvider,
+        idProvider,
+      )
+    this.replaceSignatureFieldsUseCase = new ReplaceFormalizationSignatureFieldsUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+      datetimeProvider,
+      idProvider,
+    )
+    this.requestSignaturePreviewGenerationUseCase =
+      new RequestFormalizationSignaturePreviewGenerationUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+        broker,
+        datetimeProvider,
+      )
+    this.getSignaturePreviewContentUseCase =
+      new GetFormalizationSignaturePreviewContentUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+        fileStorageProvider,
+      )
+    this.resetSignatureConfigurationUseCase =
+      new ResetFormalizationSignatureConfigurationUseCase(
+        formalizationsRepository,
+        signatureConfigurationRepository,
+        signatureSourceReader,
+        datetimeProvider,
+        idProvider,
+      )
+    this.reopenDocumentPackageUseCase = new ReopenFormalizationDocumentPackageUseCase(
+      formalizationsRepository,
+      confirmationTransaction,
+      datetimeProvider,
     )
   }
 
@@ -320,6 +440,80 @@ export class FormalizationApplicationService {
     return this.assertDocumentOperationAllowed(input.formalizationId).then(() =>
       this.confirmDocumentsUseCase.execute(input),
     )
+  }
+
+  getSignatureConfiguration(
+    input: Parameters<GetFormalizationSignatureConfigurationUseCase['execute']>[0],
+  ) {
+    return this.getSignatureConfigurationUseCase.execute(input)
+  }
+
+  initializeSignatureConfiguration(
+    input: Parameters<InitializeFormalizationSignatureConfigurationUseCase['execute']>[0],
+  ) {
+    return this.initializeSignatureConfigurationUseCase.execute(input)
+  }
+
+  listSignatureCandidates(
+    input: Parameters<ListFormalizationSignatureCandidatesUseCase['execute']>[0],
+  ) {
+    return this.listSignatureCandidatesUseCase.execute(input)
+  }
+
+  addSignatureSignatory(
+    input: Parameters<AddFormalizationSignatoryUseCase['execute']>[0],
+  ) {
+    return this.addSignatureSignatoryUseCase.execute(input)
+  }
+
+  removeSignatureSignatory(
+    input: Parameters<RemoveFormalizationSignatoryUseCase['execute']>[0],
+  ) {
+    return this.removeSignatureSignatoryUseCase.execute(input)
+  }
+
+  replaceSignatureSignatoryDocuments(
+    input: Parameters<ReplaceFormalizationSignatoryDocumentsUseCase['execute']>[0],
+  ) {
+    return this.replaceSignatureSignatoryDocumentsUseCase.execute(input)
+  }
+
+  selectSignatureSignatoryChannel(
+    input: Parameters<SelectFormalizationSignatoryChannelUseCase['execute']>[0],
+  ) {
+    return this.selectSignatureSignatoryChannelUseCase.execute(input)
+  }
+
+  replaceSignatureFields(
+    input: Parameters<ReplaceFormalizationSignatureFieldsUseCase['execute']>[0],
+  ) {
+    return this.replaceSignatureFieldsUseCase.execute(input)
+  }
+
+  retrySignaturePreview(
+    input: Parameters<
+      RequestFormalizationSignaturePreviewGenerationUseCase['execute']
+    >[0],
+  ) {
+    return this.requestSignaturePreviewGenerationUseCase.execute(input)
+  }
+
+  getSignaturePreviewContent(
+    input: Parameters<GetFormalizationSignaturePreviewContentUseCase['execute']>[0],
+  ) {
+    return this.getSignaturePreviewContentUseCase.execute(input)
+  }
+
+  resetSignatureConfiguration(
+    input: Parameters<ResetFormalizationSignatureConfigurationUseCase['execute']>[0],
+  ) {
+    return this.resetSignatureConfigurationUseCase.execute(input)
+  }
+
+  reopenDocumentPackage(
+    input: Parameters<ReopenFormalizationDocumentPackageUseCase['execute']>[0],
+  ) {
+    return this.reopenDocumentPackageUseCase.execute(input)
   }
 
   private async assertDocumentOperationAllowed(formalizationId: string) {

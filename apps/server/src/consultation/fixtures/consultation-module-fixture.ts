@@ -16,7 +16,11 @@ import type {
 import type { User, UserCreation } from '@hms/core/identity/domain/entities'
 import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
-import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import type {
+  ClientsRepository,
+  CollaboratorsRepository,
+  UsersRepository,
+} from '@hms/core/identity/interfaces'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type {
   LegalAreasRepository,
@@ -296,14 +300,10 @@ export class ConsultationModuleFixture {
   }
 
   private static resolveUsersRepository(restFixture: RestFixture) {
-    return restFixture.get<import('@hms/core/identity/interfaces').UsersRepository>(
-      IDENTITY_REPOSITORIES.users,
-    )
+    return restFixture.get<UsersRepository>(IDENTITY_REPOSITORIES.users)
   }
 
   private static resolveCollaboratorsRepository(restFixture: RestFixture) {
-    return restFixture.get<
-      import('@hms/core/identity/interfaces').CollaboratorsRepository
-    >(IDENTITY_REPOSITORIES.collaborators)
+    return restFixture.get<CollaboratorsRepository>(IDENTITY_REPOSITORIES.collaborators)
   }
 }

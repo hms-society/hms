@@ -1,7 +1,8 @@
 import type { ClientConsent, ClientConsentCreation } from '../domain/entities'
 import { ClientConsentAlreadyGrantedError, ClientNotFoundError } from '../domain/errors'
 import type { ConsentType } from '../domain/structures'
-import type { ClientConsentsRepository, ClientsRepository } from '../interfaces'
+import type { ClientConsentsRepository } from '../interfaces/client-consents-repository'
+import type { ClientsRepository } from '../interfaces/clients-repository'
 import type { DatetimeProvider, UseCase } from '#shared/interfaces'
 
 export type GrantClientConsentRequest = {

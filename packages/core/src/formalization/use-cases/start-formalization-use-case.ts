@@ -1,4 +1,4 @@
-import type { IdProvider, UseCase } from '../../shared/interfaces'
+import type { IdProvider } from '../../shared/interfaces'
 import { CollaboratorProfile } from '../../identity/domain/structures'
 import { IntakeStatus } from '../../intake/domain/structures'
 import type { Formalization, FormalizationCreation } from '../domain/entities'
@@ -13,26 +13,32 @@ import type {
   FormalizationSourceReader,
   FormalizationsRepository,
 } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly intakeId: string
 }
 
-export class StartFormalizationUseCase implements UseCase<Request, Formalization> {
+export class StartFormalizationUseCase extends FormalizationUseCase<
+  Request,
+  Formalization
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly sourceReader: FormalizationSourceReader,
     private readonly intakeLifecycleService: FormalizationIntakeLifecycleService,
     private readonly idProvider: IdProvider,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<Formalization> {
     const source = await this.sourceReader.findStartSource(request.intakeId)
+
     if (!source) throw new FormalizationIneligibleError()
     if (
       source.assignedLawyer.profile !== CollaboratorProfile.Lawyer ||
-      (!FormalizationActorAuthorization.isAdmin(request.actorProfile) &&
+      (!this.isAdmin(request.actorProfile) &&
         source.assignedLawyer.id !== request.actorId)
     ) {
       throw new FormalizationAccessDeniedError()
@@ -47,7 +53,7 @@ export class StartFormalizationUseCase implements UseCase<Request, Formalization
 
     const existing = await this.formalizationsRepository.findByIntakeId(request.intakeId)
     if (existing) {
-      FormalizationActorAuthorization.assertAccess(existing.assignedLawyerId, request)
+      this.assertAccess(existing.assignedLawyerId, request)
       return existing
     }
 
@@ -77,7 +83,7 @@ export class StartFormalizationUseCase implements UseCase<Request, Formalization
       actorId: request.actorId,
       expectedIntakeVersion: source.intake.version,
     })
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    this.assertAccess(formalization.assignedLawyerId, request)
     return formalization
   }
 }

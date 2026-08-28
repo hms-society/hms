@@ -3,16 +3,16 @@ import {
   DocumentReviewDecisionBar,
   DocumentReviewHeader,
 } from '../../components/document-review'
+import { CancelManualEditDialog } from '../../components/document-review-dialogs/cancel-manual-edit-dialog'
+import { DocumentVersionHistoryDialog } from '../../components/document-review-dialogs/document-version-history-dialog'
+import { RegenerateDocumentVersionDialog } from '../../components/document-review-dialogs/regenerate-document-version-dialog'
+import { RejectDocumentVersionDialog } from '../../components/document-review-dialogs/reject-document-version-dialog'
+import { SaveManualVersionDialog } from '../../components/document-review-dialogs/save-manual-version-dialog'
 import { Button } from '@/ui/shadcn/button'
 import { ConsultationDocumentReviewErrorState } from './consultation-document-review-error-state'
 import { ConsultationDocumentReviewLoading } from './consultation-document-review-loading'
-import { CancelManualEditDialog } from './cancel-manual-edit-dialog'
-import { DocumentVersionHistoryDialog } from './document-version-history-dialog'
 import { PendingMarkerNotFoundDialog } from './pending-marker-not-found-dialog'
 import { PendingMarkersDialog } from './pending-markers-dialog'
-import { RegenerateDocumentVersionDialog } from './regenerate-document-version-dialog'
-import { RejectDocumentVersionDialog } from './reject-document-version-dialog'
-import { SaveManualVersionDialog } from './save-manual-version-dialog'
 import { ViewRejectionReasonDialog } from './view-rejection-reason-dialog'
 import {
   type ConsultationDocumentReviewPageProps,

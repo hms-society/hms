@@ -792,13 +792,13 @@ texto informativo dos dialogs da feature deve permanecer abaixo de `text-sm`.
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/consultation-document-review-loading/index.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/consultation-document-review-error-state/index.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx`
-- `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-history-dialog/index.tsx`
-- `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/reject-document-version-dialog/index.tsx`
-- `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/save-manual-version-dialog/index.tsx`
-- `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/cancel-manual-edit-dialog/index.tsx`
+- `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/document-version-history-dialog/index.tsx`
+- `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/reject-document-version-dialog/index.tsx`
+- `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/save-manual-version-dialog/index.tsx`
+- `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/cancel-manual-edit-dialog/index.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/pending-markers-dialog/index.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/pending-marker-not-found-dialog/index.tsx`
-- `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/regenerate-document-version-dialog/index.tsx`
+- `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/regenerate-document-version-dialog/index.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`
 - `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/use-consultation-document-review-page.test.ts`
 
@@ -948,7 +948,7 @@ Seguir integralmente o workflow obrigatório do `AGENTS.md`:
 
 1. verificar `docker compose ps -a`, Auth em
    `http://localhost:8000/auth/v1/health` e server em
-   `http://localhost:3333/health`;
+   `http://localhost:5555/health`;
 2. iniciar `pnpm --filter server dev` e `pnpm --filter web dev` em sessões
    persistentes, esperando bootstrap/compilação;
 3. confirmar `lawyer@hmsadvogados.com.br` e a senha em seed/env antes do login;

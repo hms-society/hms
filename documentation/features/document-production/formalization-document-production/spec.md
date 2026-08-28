@@ -722,7 +722,7 @@ repository’s Docker/Testcontainers boundary.
 
 ### `MV-01` — assigned-lawyer end-to-end
 
-1. Confirm Docker database/Auth health and `http://localhost:3333/health`, then start
+1. Confirm Docker database/Auth health and `http://localhost:5555/health`, then start
    persistent Server and Web dev sessions as required by `AGENTS.md`.
 2. Resolve `admin@hmsadvogados.com.br` and `HMS_USER_SEED_PASSWORD` from the seeder/env
    only for authentication setup; use the seeded currently assigned lawyer for the

@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CollaboratorProfile } from '../../../identity/domain/structures'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { FormalizationContext, FormalizationSourceReader, FormalizationsRepository } from '../../interfaces'
+import type {
+  FormalizationContext,
+  FormalizationSourceReader,
+  FormalizationsRepository,
+} from '../../interfaces'
 import { GetFormalizationUseCase } from '../get-formalization-use-case'
 
 describe('Get Formalization Use Case', () => {
@@ -33,7 +37,7 @@ describe('Get Formalization Use Case', () => {
     ).resolves.toEqual({ formalization, ...context })
   })
 
-  it('allows an admin to read another collaborator\'s Formalization', async () => {
+  it("allows an admin to read another collaborator's Formalization", async () => {
     const formalization = fakeFormalization()
     const context = {
       intake: { id: formalization.intakeId },

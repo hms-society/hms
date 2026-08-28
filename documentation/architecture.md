@@ -58,6 +58,10 @@
 - **Supabase Storage:** Armazenamento principal de arquivos, na região de São Paulo.
 - **Signed Upload URL:** Usado para escrita/upload direto do front-end para o Storage, sem passar bytes pela VPS.
 - **RLS para Leitura:** Usuários baixam arquivos privados com JWT e políticas RLS.
+- **Artefatos documentais duráveis:** DOCX e PDFs internos são objetos imutáveis em
+  bucket privado, com metadados persistidos no PostgreSQL. Uma versão documental não
+  troca silenciosamente a referência do seu artefato; bytes históricos ausentes exigem
+  uma nova versão e nova confirmação do pacote.
 
 ### ✉️ E-mails
 
@@ -72,6 +76,21 @@
 - **Inngest:** Orquestração de jobs, retries, workflows assíncronos e automações.
 - **Inngest Dev Server:** Ambiente local para testar workflows.
 - **Inngest Cloud:** Usado em staging e produção.
+- **Ledger de trabalho limitado:** Fluxos assíncronos com estado visível ao usuário
+  podem persistir seu próprio lifecycle e usar reconciliação periódica limitada para
+  republicar trabalho pendente ou com lease expirada. Isso não cria um outbox genérico;
+  a publicação principal continua direta e o fan-out continua sendo responsabilidade
+  do Inngest.
+
+### 📄 Conversão de documentos
+
+- **Gotenberg:** Serviço privado e sem estado permanente para conversão de DOCX
+  durável em PDF de configuração. O NestJS envia apenas os bytes necessários,
+  valida e armazena o resultado no Supabase Storage; o Gotenberg não recebe
+  credenciais de Storage nem fica exposto publicamente.
+- **Execução assíncrona:** A confirmação do pacote registra atomicamente um lote
+  durável. Depois do commit, um evento de lote faz fan-out para um job independente
+  por documento, com token de tentativa, lease, retry e finalização idempotente.
 
 Fluxo típico:
 

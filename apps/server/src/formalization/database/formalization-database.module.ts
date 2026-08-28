@@ -1,43 +1,36 @@
 import { Module } from '@nestjs/common'
 
-import {
-  FORMALIZATION_DATABASE_OPERATIONS,
-  FORMALIZATION_REPOSITORIES,
-} from '@/formalization/constants/formalization-repositories'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { FormalizationSeeder } from '@/formalization/database/formalization-seeder'
-import { DrizzleFormalizationCloseTransaction } from '@/formalization/database/formalization-close-transaction'
-import { DrizzleFormalizationStartTransaction } from '@/formalization/database/formalization-start-transaction'
 import { DrizzleFormalizationMapper } from '@/formalization/database/drizzle/mappers'
 import { DrizzleFormalizationsRepository } from '@/formalization/database/drizzle/repositories'
-import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { DrizzleFormalizationSignatureConfigurationRepository } from '@/formalization/database/drizzle/repositories'
+import { DrizzleFormalizationSignatureMapper } from '@/formalization/database/drizzle/mappers'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 
 @Module({
-  imports: [SharedDatabaseModule, IntakeDatabaseModule],
+  imports: [SharedDatabaseModule, FormalizationProvisionModule],
   providers: [
     DrizzleFormalizationMapper,
     DrizzleFormalizationsRepository,
-    DrizzleFormalizationStartTransaction,
-    DrizzleFormalizationCloseTransaction,
+    DrizzleFormalizationSignatureMapper,
+    DrizzleFormalizationSignatureConfigurationRepository,
     FormalizationSeeder,
     {
       provide: FORMALIZATION_REPOSITORIES.formalizations,
       useExisting: DrizzleFormalizationsRepository,
     },
     {
-      provide: FORMALIZATION_DATABASE_OPERATIONS.startTransaction,
-      useExisting: DrizzleFormalizationStartTransaction,
-    },
-    {
-      provide: FORMALIZATION_DATABASE_OPERATIONS.closeTransaction,
-      useExisting: DrizzleFormalizationCloseTransaction,
+      provide: FORMALIZATION_PROVIDERS.signatureConfigurationRepository,
+      useExisting: DrizzleFormalizationSignatureConfigurationRepository,
     },
   ],
   exports: [
     FORMALIZATION_REPOSITORIES.formalizations,
-    FORMALIZATION_DATABASE_OPERATIONS.startTransaction,
-    FORMALIZATION_DATABASE_OPERATIONS.closeTransaction,
     FormalizationSeeder,
+    FORMALIZATION_PROVIDERS.signatureConfigurationRepository,
   ],
 })
 export class FormalizationDatabaseModule {}

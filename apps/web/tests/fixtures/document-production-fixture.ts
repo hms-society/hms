@@ -379,7 +379,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       })
       await page.goto('/login')
       await page.getByLabel('Email:').fill(AUTHENTICATED_USER.email)
-      await page.getByRole('textbox', { name: 'Senha' }).fill('playwright-password')
+      await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
       await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
       await page.waitForURL('**/home')
 
@@ -677,6 +677,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       ) {
         formalization.confirmRequests += 1
         recordFormalizationRequest(request.postDataJSON())
+        formalization.selection.confirmedAt = '2026-01-05T00:00:00.000Z'
         await route.fulfill({
           status: 200,
           contentType: 'application/json',

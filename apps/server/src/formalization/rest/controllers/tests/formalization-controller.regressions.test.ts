@@ -23,6 +23,7 @@ import type { FormalizationStartSource } from '@hms/core/formalization/interface
 
 import { FormalizationModuleFixture } from '@/formalization/fixtures'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { DYNAMIC_FORMS_REPOSITORIES } from '@/shared/constants/dynamic-forms-repositories'
 import { ServerFormalizationSourceReader } from '@/formalization/provision'
@@ -388,6 +389,8 @@ describe('Formalization controllers', () => {
       .add(packageDocument)
     await fixture.app.get(DOCUMENT_PRODUCTION_REPOSITORIES.generations).add(generation)
     await fixture.app.get(DOCUMENT_PRODUCTION_REPOSITORIES.versions).add(version)
+    const client = ClientFaker.fake({ id: formalization.clientId })
+    await fixture.app.get(IDENTITY_REPOSITORIES.clients).add(client)
 
     const persistedGeneration = await fixture.app
       .get(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
@@ -399,7 +402,7 @@ describe('Formalization controllers', () => {
     vi.spyOn(sourceReader, 'findContext').mockResolvedValue({
       intake: IntakeFaker.fake({ id: formalization.intakeId }),
       consultation: consultationFor(formalization),
-      client: ClientFaker.fake({ id: formalization.clientId }),
+      client,
       assignedLawyer: CollaboratorFaker.legal({ id: fixture.collaboratorId }),
     })
 

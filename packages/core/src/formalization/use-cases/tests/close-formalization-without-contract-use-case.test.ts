@@ -3,7 +3,10 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CollaboratorProfile } from '../../../identity/domain/structures'
 import type { DatetimeProvider } from '../../../shared/interfaces'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { FormalizationIntakeClosureService, FormalizationsRepository } from '../../interfaces'
+import type {
+  FormalizationIntakeClosureService,
+  FormalizationsRepository,
+} from '../../interfaces'
 import { CloseFormalizationWithoutContractUseCase } from '../close-formalization-without-contract-use-case'
 
 describe('Close Formalization Without Contract Use Case', () => {
@@ -26,7 +29,11 @@ describe('Close Formalization Without Contract Use Case', () => {
     datetimeProvider.now.mockReturnValue(now)
 
     await expect(
-      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+      new CloseFormalizationWithoutContractUseCase(
+        repository,
+        closureService,
+        datetimeProvider,
+      ).execute({
         formalizationId: formalization.id,
         intakeId: formalization.intakeId,
         actorId: formalization.assignedLawyerId,
@@ -35,14 +42,16 @@ describe('Close Formalization Without Contract Use Case', () => {
         expectedFormalizationVersion: formalization.version,
       }),
     ).resolves.toBe(cancelled)
-    expect(closureService.closeWithoutContract).toHaveBeenCalledWith(expect.objectContaining({
-      formalizationId: formalization.id,
-      intakeId: formalization.intakeId,
-      actorId: formalization.assignedLawyerId,
-      expectedIntakeVersion: 3,
-      expectedFormalizationVersion: formalization.version,
-      cancelledAt: now,
-    }))
+    expect(closureService.closeWithoutContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formalizationId: formalization.id,
+        intakeId: formalization.intakeId,
+        actorId: formalization.assignedLawyerId,
+        expectedIntakeVersion: 3,
+        expectedFormalizationVersion: formalization.version,
+        cancelledAt: now,
+      }),
+    )
     expect(repository.replace).not.toHaveBeenCalled()
   })
 
@@ -51,7 +60,11 @@ describe('Close Formalization Without Contract Use Case', () => {
     repository.findById.mockResolvedValue(formalization)
 
     await expect(
-      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+      new CloseFormalizationWithoutContractUseCase(
+        repository,
+        closureService,
+        datetimeProvider,
+      ).execute({
         formalizationId: formalization.id,
         intakeId: 'another-intake',
         actorId: formalization.assignedLawyerId,
@@ -71,7 +84,11 @@ describe('Close Formalization Without Contract Use Case', () => {
     closureService.closeWithoutContract.mockRejectedValue(conflict)
 
     await expect(
-      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+      new CloseFormalizationWithoutContractUseCase(
+        repository,
+        closureService,
+        datetimeProvider,
+      ).execute({
         formalizationId: formalization.id,
         intakeId: formalization.intakeId,
         actorId: formalization.assignedLawyerId,
@@ -93,7 +110,11 @@ describe('Close Formalization Without Contract Use Case', () => {
     datetimeProvider.now.mockReturnValue(now)
 
     await expect(
-      new CloseFormalizationWithoutContractUseCase(repository, closureService, datetimeProvider).execute({
+      new CloseFormalizationWithoutContractUseCase(
+        repository,
+        closureService,
+        datetimeProvider,
+      ).execute({
         formalizationId: formalization.id,
         intakeId: formalization.intakeId,
         actorId: adminId,

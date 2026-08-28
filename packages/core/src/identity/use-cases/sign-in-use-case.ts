@@ -1,4 +1,4 @@
-import type { AuthProvider } from '../interfaces'
+import type { AuthProvider } from '../interfaces/auth-provider'
 
 export class SignInUseCase {
   constructor(private readonly authProvider: AuthProvider) {}

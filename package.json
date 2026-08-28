@@ -6,11 +6,13 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "test": "turbo run test",
+    "check:architecture": "turbo run check:architecture",
+    "test": "turbo run test --filter='!@hms/validation'",
+    "test:coverage": "turbo run test:coverage --filter='!@hms/validation'",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check-types": "turbo run check-types",
-    "validate": "pnpm check && pnpm check-types && pnpm test",
+    "validate": "pnpm check && pnpm check:architecture && pnpm check-types && pnpm test && pnpm test:coverage",
     "seed": "pnpm --filter server db:seed",
     "ngrok": "node scripts/start-ngrok.js",
     "prepare": "husky"
@@ -19,13 +21,15 @@
     "@biomejs/biome": "^2.5.1",
     "@commitlint/cli": "^21.1.0",
     "@commitlint/config-conventional": "^21.1.0",
+    "@vitest/coverage-v8": "4.1.9",
+    "dependency-cruiser": "^16.10.4",
     "husky": "^9.1.7",
     "turbo": "^2.10.0",
     "typescript": "5.9.2"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=18"
+    "node": "^18.17 || >=20"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

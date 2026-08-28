@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/ui/shadcn/card'
 import { Skeleton } from '@/ui/shadcn/skeleton'
 
 import type { IntakeDetailsContentController } from '../use-intake-details-page'
-import type { IntakeDetailsData } from '../use-intake-details-query'
+import type { IntakeDetailsData } from '@/ui/intake/hooks/use-intake-details-query'
 import { IntakeEditDialog } from '../intake-edit-dialog'
 import { ConfirmConsultationClosureDialog } from '@/ui/intake/widgets/components/confirm-consultation-closure-dialog'
 const statusLabels: Record<Intake['status'], string> = {

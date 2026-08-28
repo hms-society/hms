@@ -19,9 +19,10 @@ import {
   DrizzlePackageDocumentsRepository,
 } from '@/document-production/database/drizzle/repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 
 @Module({
-  imports: [SharedDatabaseModule],
+  imports: [ProvisionModule, SharedDatabaseModule],
   providers: [
     DrizzleDocumentGenerationMapper,
     DrizzleDocumentMapper,

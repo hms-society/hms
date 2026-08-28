@@ -72270,7 +72270,7 @@
       "name": "Advogado - Formalização: Preparação RF-010, RF-056",
       "clip": true,
       "width": 1200,
-      "height": 1828,
+      "height": 1830,
       "fill": "#F5F2ED",
       "children": [
         {
@@ -74544,7 +74544,7 @@
                           "id": "camRW",
                           "name": "Add Note",
                           "fill": "$muted-foreground",
-                          "content": "Cliente PJ ou representante legal? Adicione signatários adicionais por documento.",
+                          "content": "Adicione colaboradores elegíveis como signatários e defina os documentos de cada um.",
                           "fontFamily": "$font-sans",
                           "fontSize": 11,
                           "fontWeight": "normal",
@@ -74624,7 +74624,7 @@
                           "fill": "$foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "Olá {nome_signatario}, segue o link seguro para assinar {nome_documento}: [link]. Válido por 48 horas. — HMS Advocacia",
+                          "content": "Olá {nome_signatario}, segue o link seguro para assinar {nome_documento}: [link]. Válido por 7 dias. — HMS Advocacia",
                           "lineHeight": 1.5,
                           "fontFamily": "$font-sans",
                           "fontSize": 12,
@@ -74652,7 +74652,7 @@
                         {
                           "type": "frame",
                           "id": "aBTXC",
-                          "name": "Cancelar todos os envios",
+                          "name": "Cancelar configuração",
                           "opacity": 0.42,
                           "fill": "$destructive-muted",
                           "cornerRadius": 999,
@@ -74679,7 +74679,7 @@
                               "id": "p7VNcK",
                               "name": "Label",
                               "fill": "$destructive-foreground",
-                              "content": "Cancelar todos os envios",
+                              "content": "Cancelar configuração",
                               "fontFamily": "$font-sans",
                               "fontSize": 13,
                               "fontWeight": "600"
@@ -160394,535 +160394,6 @@
     },
     {
       "type": "frame",
-      "id": "ok0D8",
-      "x": 15845,
-      "y": -9420,
-      "name": "Componente - Modal selecionar colaborador",
-      "context": "Lista colaboradores ativos com perfil Advogado, Paralegal ou Supervisor para seleção em fluxos operacionais.",
-      "reusable": true,
-      "clip": true,
-      "width": 620,
-      "height": 680,
-      "fill": "$card",
-      "cornerRadius": 16,
-      "stroke": "$border",
-      "strokeWidth": 1,
-      "layout": "none",
-      "children": [
-        {
-          "type": "text",
-          "id": "blrAW",
-          "x": 28,
-          "y": 24,
-          "name": "Título",
-          "fill": "$brand",
-          "content": "Selecionar colaborador",
-          "fontFamily": "$font-serif",
-          "fontSize": 22,
-          "fontWeight": "700"
-        },
-        {
-          "type": "text",
-          "id": "HPjUf",
-          "x": 28,
-          "y": 56,
-          "name": "Descrição",
-          "fill": "$muted-foreground",
-          "content": "Busque pelo nome ou filtre por perfil.",
-          "fontFamily": "$font-sans",
-          "fontSize": 11,
-          "fontWeight": "normal"
-        },
-        {
-          "type": "frame",
-          "id": "H3zokd",
-          "x": 560,
-          "y": 24,
-          "name": "Fechar modal",
-          "width": 32,
-          "height": 32,
-          "fill": "$secondary",
-          "cornerRadius": 999,
-          "layout": "none",
-          "children": [
-            {
-              "type": "icon",
-              "id": "SDBPy",
-              "x": 8,
-              "y": 8,
-              "name": "Ícone fechar",
-              "width": 16,
-              "height": 16,
-              "icon": "x",
-              "library": "lucide",
-              "fill": "$muted-foreground"
-            }
-          ]
-        },
-        {
-          "type": "rectangle",
-          "id": "M0JOFh",
-          "x": 28,
-          "y": 92,
-          "name": "Divisor do cabeçalho",
-          "fill": "$border",
-          "width": 564,
-          "height": 1
-        },
-        {
-          "type": "frame",
-          "id": "ANvKl",
-          "x": 28,
-          "y": 116,
-          "name": "Filtro por nome",
-          "width": 564,
-          "height": 42,
-          "fill": "$card",
-          "cornerRadius": 8,
-          "stroke": "$input",
-          "strokeWidth": 1,
-          "layout": "none",
-          "children": [
-            {
-              "type": "icon",
-              "id": "PRNVB",
-              "x": 12,
-              "y": 13,
-              "name": "Ícone buscar",
-              "width": 16,
-              "height": 16,
-              "icon": "search",
-              "library": "lucide",
-              "fill": "$muted-foreground"
-            },
-            {
-              "type": "text",
-              "id": "wZmFj",
-              "x": 38,
-              "y": 13,
-              "name": "Placeholder nome",
-              "fill": "$muted-foreground",
-              "content": "Buscar colaborador por nome",
-              "fontFamily": "$font-sans",
-              "fontSize": 11,
-              "fontWeight": "500"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "id": "A0mVq",
-          "x": 28,
-          "y": 176,
-          "name": "Label perfil",
-          "fill": "$foreground",
-          "content": "Perfil",
-          "fontFamily": "$font-sans",
-          "fontSize": 9,
-          "fontWeight": "700"
-        },
-        {
-          "type": "text",
-          "id": "N3xvDd",
-          "x": 318,
-          "y": 176,
-          "name": "Label tema",
-          "enabled": false,
-          "fill": "$foreground",
-          "content": "Tema jurídico",
-          "fontFamily": "$font-sans",
-          "fontSize": 9,
-          "fontWeight": "700"
-        },
-        {
-          "id": "y6bmV",
-          "type": "ref",
-          "ref": "Y83nV1",
-          "name": "Filtro perfil",
-          "x": 28,
-          "y": 194,
-          "width": 564,
-          "height": 38,
-          "descendants": {
-            "jh0J4": {
-              "icon": "users",
-              "fill": "$brand"
-            },
-            "wO6E2": {
-              "content": "Todos os perfis"
-            },
-            "H8abGt": {
-              "fill": "$brand"
-            }
-          }
-        },
-        {
-          "id": "uPwlu",
-          "type": "ref",
-          "ref": "Y83nV1",
-          "name": "Filtro tema jurídico",
-          "x": 318,
-          "y": 194,
-          "width": 274,
-          "height": 38,
-          "enabled": false,
-          "descendants": {
-            "jh0J4": {
-              "icon": "tags",
-              "fill": "$brand"
-            },
-            "wO6E2": {
-              "content": "Todos os temas"
-            },
-            "H8abGt": {
-              "fill": "$brand"
-            }
-          }
-        },
-        {
-          "type": "text",
-          "id": "R9bcq6",
-          "x": 28,
-          "y": 252,
-          "name": "Contagem",
-          "fill": "$muted-foreground",
-          "content": "6 colaboradores encontrados",
-          "fontFamily": "$font-sans",
-          "fontSize": 9,
-          "fontWeight": "600"
-        },
-        {
-          "type": "text",
-          "id": "m8bnA",
-          "x": 522,
-          "y": 252,
-          "name": "Limpar filtros",
-          "fill": "$brand",
-          "content": "Limpar",
-          "fontFamily": "$font-sans",
-          "fontSize": 9,
-          "fontWeight": "700"
-        },
-        {
-          "type": "frame",
-          "id": "qCm7Y",
-          "x": 28,
-          "y": 276,
-          "name": "Colaborador Camila Nogueira",
-          "width": 564,
-          "height": 80,
-          "fill": "$secondary",
-          "cornerRadius": 8,
-          "stroke": "$primary",
-          "strokeWidth": 1.5,
-          "layout": "none",
-          "children": [
-            {
-              "type": "frame",
-              "id": "qnbPj",
-              "x": 14,
-              "y": 14,
-              "name": "Avatar Dra. Camila Nogueira",
-              "width": 38,
-              "height": 38,
-              "fill": "$brand-highlight",
-              "cornerRadius": 999,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "L5AbKi",
-                  "x": 11,
-                  "y": 12,
-                  "name": "Iniciais",
-                  "fill": "$primary-foreground",
-                  "content": "CN",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 10,
-                  "fontWeight": "700"
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "id": "SIcri",
-              "x": 66,
-              "y": 12,
-              "name": "Nome",
-              "fill": "$foreground",
-              "content": "Camila Nogueira",
-              "fontFamily": "$font-sans",
-              "fontSize": 11,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "rTd5K",
-              "x": 66,
-              "y": 34,
-              "name": "Perfil",
-              "fill": "$brand",
-              "content": "Perfil: Advogado",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "bKITF",
-              "x": 66,
-              "y": 53,
-              "name": "Detalhes",
-              "fill": "$muted-foreground",
-              "content": "Direito Civil · Contratos",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "500"
-            },
-            {
-              "type": "frame",
-              "id": "yh689",
-              "x": 520,
-              "y": 28,
-              "name": "Selecionado",
-              "width": 26,
-              "height": 26,
-              "fill": "$primary",
-              "cornerRadius": 999,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "i9Lk0",
-                  "x": 7,
-                  "y": 7,
-                  "name": "Ícone selecionado",
-                  "width": 12,
-                  "height": 12,
-                  "icon": "check",
-                  "library": "lucide",
-                  "fill": "$primary-foreground"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "suwP3",
-          "x": 28,
-          "y": 368,
-          "name": "Colaborador Rafael Martins",
-          "width": 564,
-          "height": 80,
-          "fill": "$card",
-          "cornerRadius": 8,
-          "stroke": "$border",
-          "strokeWidth": 1,
-          "layout": "none",
-          "children": [
-            {
-              "type": "frame",
-              "id": "pF2fH",
-              "x": 14,
-              "y": 14,
-              "name": "Avatar Dr. Rafael Martins",
-              "width": 38,
-              "height": 38,
-              "fill": "$chart-3",
-              "cornerRadius": 999,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "OgA6P",
-                  "x": 11,
-                  "y": 12,
-                  "name": "Iniciais",
-                  "fill": "$primary-foreground",
-                  "content": "RM",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 10,
-                  "fontWeight": "700"
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "id": "JP3p9",
-              "x": 66,
-              "y": 12,
-              "name": "Nome",
-              "fill": "$foreground",
-              "content": "Rafael Martins",
-              "fontFamily": "$font-sans",
-              "fontSize": 11,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "J5BLlo",
-              "x": 66,
-              "y": 34,
-              "name": "Perfil",
-              "fill": "$brand",
-              "content": "Perfil: Paralegal",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "WNo7G",
-              "x": 66,
-              "y": 53,
-              "name": "Detalhes",
-              "fill": "$muted-foreground",
-              "content": "Equipe jurídica · Documentação",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "500"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "RMvXr",
-          "x": 28,
-          "y": 460,
-          "name": "Colaborador Helena Costa",
-          "width": 564,
-          "height": 80,
-          "fill": "$card",
-          "cornerRadius": 8,
-          "stroke": "$border",
-          "strokeWidth": 1,
-          "layout": "none",
-          "children": [
-            {
-              "type": "frame",
-              "id": "bSgmf",
-              "x": 14,
-              "y": 14,
-              "name": "Avatar Dra. Helena Costa",
-              "width": 38,
-              "height": 38,
-              "fill": "$chart-2",
-              "cornerRadius": 999,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "jmcT3",
-                  "x": 11,
-                  "y": 12,
-                  "name": "Iniciais",
-                  "fill": "$primary-foreground",
-                  "content": "HC",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 10,
-                  "fontWeight": "700"
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "id": "AdDAt",
-              "x": 66,
-              "y": 12,
-              "name": "Nome",
-              "fill": "$foreground",
-              "content": "Helena Costa",
-              "fontFamily": "$font-sans",
-              "fontSize": 11,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "s1FZd",
-              "x": 66,
-              "y": 34,
-              "name": "Perfil",
-              "fill": "$brand",
-              "content": "Perfil: Supervisor",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "s6xbx",
-              "x": 66,
-              "y": 53,
-              "name": "Detalhes",
-              "fill": "$muted-foreground",
-              "content": "Supervisão jurídica",
-              "fontFamily": "$font-sans",
-              "fontSize": 9,
-              "fontWeight": "500"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "id": "r7Zry",
-          "x": 28,
-          "y": 556,
-          "name": "Ajuda",
-          "fill": "$muted-foreground",
-          "content": "Somente colaboradores ativos com perfil Advogado, Paralegal ou Supervisor são exibidos.",
-          "fontFamily": "$font-sans",
-          "fontSize": 9,
-          "fontWeight": "500"
-        },
-        {
-          "type": "rectangle",
-          "id": "UgKAQ",
-          "x": 28,
-          "y": 588,
-          "name": "Divisor das ações",
-          "fill": "$border",
-          "width": 564,
-          "height": 1
-        },
-        {
-          "id": "K3ffRZ",
-          "type": "ref",
-          "ref": "yR4IE",
-          "name": "Cancelar",
-          "x": 248,
-          "y": 612,
-          "width": 132,
-          "height": 40,
-          "justifyContent": "center",
-          "alignItems": "center",
-          "descendants": {
-            "BCKt5": {
-              "content": "Cancelar"
-            }
-          }
-        },
-        {
-          "id": "Vb5Lx",
-          "type": "ref",
-          "ref": "SQoVa",
-          "name": "Selecionar colaborador",
-          "x": 392,
-          "y": 612,
-          "width": 200,
-          "height": 40,
-          "justifyContent": "center",
-          "alignItems": "center",
-          "descendants": {
-            "hKQ6y": {
-              "content": "Selecionar colaborador"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "DlEfU",
       "x": 11416,
       "y": 2338,
@@ -192012,112 +191483,670 @@
       ]
     },
     {
+      "type": "frame",
       "id": "c7tlDG",
-      "type": "ref",
-      "ref": "ok0D8",
-      "name": "Modal/Filtro/Selecionar cliente",
-      "context": "Aberto ao clicar no filtro de cliente zBJa0. Permite buscar pelo nome e selecionar um único cliente para filtrar a caixa de documentos.",
       "x": 16545,
       "y": -9420,
+      "name": "Modal/Filtro/Selecionar cliente",
+      "context": "Aberto ao clicar no filtro de cliente zBJa0. Permite buscar pelo nome e selecionar um único cliente para filtrar a caixa de documentos.",
+      "clip": true,
       "width": 620,
       "height": 604,
-      "descendants": {
-        "blrAW": {
-          "content": "Selecionar cliente"
+      "fill": "$card",
+      "cornerRadius": 16,
+      "stroke": "$border",
+      "strokeWidth": 1,
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "ek6Mp",
+          "x": 28,
+          "y": 24,
+          "name": "Título",
+          "fill": "$brand",
+          "content": "Selecionar cliente",
+          "fontFamily": "$font-serif",
+          "fontSize": 22,
+          "fontWeight": "700"
         },
-        "HPjUf": {
-          "content": "Busque pelo nome e selecione um cliente para filtrar os documentos."
+        {
+          "type": "text",
+          "id": "V7vGY9",
+          "x": 28,
+          "y": 56,
+          "name": "Descrição",
+          "fill": "$muted-foreground",
+          "content": "Busque pelo nome e selecione um cliente para filtrar os documentos.",
+          "fontFamily": "$font-sans",
+          "fontSize": 11,
+          "fontWeight": "normal"
         },
-        "wZmFj": {
-          "content": "Buscar cliente por nome"
+        {
+          "type": "frame",
+          "id": "yjqlK",
+          "x": 560,
+          "y": 24,
+          "name": "Fechar modal",
+          "width": 32,
+          "height": 32,
+          "fill": "$secondary",
+          "cornerRadius": 999,
+          "layout": "none",
+          "children": [
+            {
+              "type": "icon",
+              "id": "wVkQm",
+              "x": 8,
+              "y": 8,
+              "name": "Ícone fechar",
+              "width": 16,
+              "height": 16,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$muted-foreground"
+            }
+          ]
         },
-        "A0mVq": {
-          "enabled": false
+        {
+          "type": "rectangle",
+          "id": "an5ui",
+          "x": 28,
+          "y": 92,
+          "name": "Divisor do cabeçalho",
+          "fill": "$border",
+          "width": 564,
+          "height": 1
         },
-        "N3xvDd": {
-          "enabled": false
+        {
+          "type": "frame",
+          "id": "AC2km",
+          "x": 28,
+          "y": 116,
+          "name": "Filtro por nome",
+          "width": 564,
+          "height": 42,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$input",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "icon",
+              "id": "Rqn67",
+              "x": 12,
+              "y": 13,
+              "name": "Ícone buscar",
+              "width": 16,
+              "height": 16,
+              "icon": "search",
+              "library": "lucide",
+              "fill": "$muted-foreground"
+            },
+            {
+              "type": "text",
+              "id": "kAvL5",
+              "x": 38,
+              "y": 13,
+              "name": "Placeholder nome",
+              "fill": "$muted-foreground",
+              "content": "Buscar cliente por nome",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
         },
-        "y6bmV": {
-          "enabled": false
+        {
+          "type": "text",
+          "id": "cCAeD",
+          "x": 28,
+          "y": 176,
+          "name": "Label perfil",
+          "enabled": false,
+          "fill": "$foreground",
+          "content": "Perfil",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
         },
-        "uPwlu": {
-          "enabled": false
+        {
+          "type": "text",
+          "id": "BjDar",
+          "x": 318,
+          "y": 176,
+          "name": "Label tema",
+          "enabled": false,
+          "fill": "$foreground",
+          "content": "Tema jurídico",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
         },
-        "R9bcq6": {
+        {
+          "type": "frame",
+          "id": "b93gy",
+          "x": 28,
+          "y": 194,
+          "name": "Filtro perfil",
+          "enabled": false,
+          "width": 564,
+          "height": 38,
+          "fill": "$card",
+          "cornerRadius": 6,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "DHaL7",
+              "name": "Valor do input",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "IA2B9",
+                  "name": "Ícone do input",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "users",
+                  "library": "lucide",
+                  "fill": "$brand"
+                },
+                {
+                  "type": "text",
+                  "id": "K9VWmT",
+                  "name": "Valor do input",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Todos os perfis",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "I5exWF",
+              "name": "Chevron do input",
+              "width": 14,
+              "height": 14,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$brand"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "fxBce",
+          "x": 318,
+          "y": 194,
+          "name": "Filtro tema jurídico",
+          "enabled": false,
+          "width": 274,
+          "height": 38,
+          "fill": "$card",
+          "cornerRadius": 6,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "L4Aan",
+              "name": "Valor do input",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "p4UCfv",
+                  "name": "Ícone do input",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "tags",
+                  "library": "lucide",
+                  "fill": "$brand"
+                },
+                {
+                  "type": "text",
+                  "id": "g3fgD",
+                  "name": "Valor do input",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Todos os temas",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "mqAo3",
+              "name": "Chevron do input",
+              "width": 14,
+              "height": 14,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$brand"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "k57JKY",
+          "x": 28,
+          "y": 176,
+          "name": "Contagem",
+          "fill": "$muted-foreground",
           "content": "3 clientes encontrados",
-          "y": 176
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "600"
         },
-        "m8bnA": {
-          "content": "Limpar busca",
+        {
+          "type": "text",
+          "id": "wYbPn",
           "x": 510,
-          "y": 176
+          "y": 176,
+          "name": "Limpar filtros",
+          "fill": "$brand",
+          "content": "Limpar busca",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
         },
-        "qCm7Y": {
+        {
+          "type": "frame",
+          "id": "xAEE3",
+          "x": 28,
+          "y": 200,
           "name": "Cliente Mariana Costa Silva",
-          "y": 200
+          "width": 564,
+          "height": 80,
+          "fill": "$secondary",
+          "cornerRadius": 8,
+          "stroke": "$primary",
+          "strokeWidth": 1.5,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "cS2gH",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dra. Camila Nogueira",
+              "width": 38,
+              "height": 38,
+              "fill": "$brand-highlight",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "tLLg5",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "MC",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "SmEmg",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "Mariana Costa Silva",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "ahrBs",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "CPF ***.456.789-**",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "eQ7HI",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "mariana.silva@email.com",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "KFlI3",
+              "x": 520,
+              "y": 28,
+              "name": "Selecionado",
+              "width": 26,
+              "height": 26,
+              "fill": "$primary",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "MHSg4",
+                  "x": 7,
+                  "y": 7,
+                  "name": "Ícone selecionado",
+                  "width": 12,
+                  "height": 12,
+                  "icon": "check",
+                  "library": "lucide",
+                  "fill": "$primary-foreground"
+                }
+              ]
+            }
+          ]
         },
-        "L5AbKi": {
-          "content": "MC"
-        },
-        "SIcri": {
-          "content": "Mariana Costa Silva"
-        },
-        "rTd5K": {
-          "content": "CPF ***.456.789-**"
-        },
-        "bKITF": {
-          "content": "mariana.silva@email.com"
-        },
-        "suwP3": {
+        {
+          "type": "frame",
+          "id": "tcNYY",
+          "x": 28,
+          "y": 292,
           "name": "Cliente João Paulo Mendes",
-          "y": 292
+          "width": 564,
+          "height": 80,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "KDaVC",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dr. Rafael Martins",
+              "width": 38,
+              "height": 38,
+              "fill": "$chart-3",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kWpu5",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "JM",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "V8a7s",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "João Paulo Mendes",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "UuxHV",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "CPF ***.318.442-**",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "N4QN1",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "joao.mendes@email.com",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            }
+          ]
         },
-        "OgA6P": {
-          "content": "JM"
-        },
-        "JP3p9": {
-          "content": "João Paulo Mendes"
-        },
-        "J5BLlo": {
-          "content": "CPF ***.318.442-**"
-        },
-        "WNo7G": {
-          "content": "joao.mendes@email.com"
-        },
-        "RMvXr": {
+        {
+          "type": "frame",
+          "id": "x3HeY0",
+          "x": 28,
+          "y": 384,
           "name": "Cliente Ana Beatriz Lima",
-          "y": 384
+          "width": 564,
+          "height": 80,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "gIhgA",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dra. Helena Costa",
+              "width": 38,
+              "height": 38,
+              "fill": "$chart-2",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "D9ScU",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "AL",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "T3RUpn",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "Ana Beatriz Lima",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "U7MF1U",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "CPF ***.902.117-**",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "v5NM7Y",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "ana.lima@email.com",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            }
+          ]
         },
-        "jmcT3": {
-          "content": "AL"
-        },
-        "AdDAt": {
-          "content": "Ana Beatriz Lima"
-        },
-        "s1FZd": {
-          "content": "CPF ***.902.117-**"
-        },
-        "s6xbx": {
-          "content": "ana.lima@email.com"
-        },
-        "r7Zry": {
+        {
+          "type": "text",
+          "id": "tAthp",
+          "x": 28,
+          "y": 480,
+          "name": "Ajuda",
+          "fill": "$muted-foreground",
           "content": "A seleção será aplicada somente como filtro da listagem.",
-          "y": 480
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "500"
         },
-        "UgKAQ": {
-          "y": 512
+        {
+          "type": "rectangle",
+          "id": "fjLTu",
+          "x": 28,
+          "y": 512,
+          "name": "Divisor das ações",
+          "fill": "$border",
+          "width": 564,
+          "height": 1
         },
-        "K3ffRZ": {
-          "y": 536
+        {
+          "type": "frame",
+          "id": "iq3Ss",
+          "x": 248,
+          "y": 536,
+          "name": "Cancelar",
+          "width": 132,
+          "height": 40,
+          "cornerRadius": 999,
+          "stroke": "$primary",
+          "strokeWidth": 1.5,
+          "strokeAlignment": "inner",
+          "gap": 6,
+          "padding": [
+            10,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "YkamO",
+              "x": 0,
+              "y": 0,
+              "name": "Icon",
+              "enabled": false,
+              "width": 14,
+              "height": 14,
+              "icon": "plus",
+              "library": "lucide",
+              "fill": "$primary"
+            },
+            {
+              "type": "text",
+              "id": "I00zK",
+              "name": "Label",
+              "fill": "$primary",
+              "content": "Cancelar",
+              "fontFamily": "$font-sans",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
         },
-        "Vb5Lx": {
+        {
+          "type": "frame",
+          "id": "htdTp",
+          "x": 392,
+          "y": 536,
           "name": "Aplicar filtro de cliente",
-          "y": 536
-        },
-        "Vb5Lx/hKQ6y": {
-          "content": "Aplicar filtro"
+          "width": 200,
+          "height": 40,
+          "fill": "$primary",
+          "cornerRadius": 999,
+          "gap": 6,
+          "padding": [
+            10,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "dFNLc",
+              "x": 0,
+              "y": 0,
+              "name": "Icon",
+              "enabled": false,
+              "width": 14,
+              "height": 14,
+              "icon": "plus",
+              "library": "lucide",
+              "fill": "$primary-foreground"
+            },
+            {
+              "type": "text",
+              "id": "c3rxjt",
+              "name": "Label",
+              "fill": "$primary-foreground",
+              "content": "Aplicar filtro",
+              "fontFamily": "$font-sans",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
         }
-      }
+      ]
     },
     {
       "type": "frame",
@@ -196321,7 +196350,7 @@
     {
       "type": "frame",
       "id": "sxENj",
-      "x": 4577,
+      "x": 4569,
       "y": 10235,
       "name": "Advogado - Formalização: Adicionar signatário — página",
       "clip": true,
@@ -196459,6 +196488,12 @@
                   "width": 944,
                   "height": 58,
                   "descendants": {
+                    "m5kJ6": {
+                      "name": "Tab 1 — Signatários"
+                    },
+                    "aBcVL": {
+                      "content": "Signatários"
+                    },
                     "hPch8": {
                       "opacity": 0.4
                     },
@@ -196607,7 +196642,7 @@
                                   "id": "omZi9",
                                   "name": "Texto ajuda",
                                   "fill": "$muted-foreground",
-                                  "content": "Nome, CPF e contatos serão obtidos do cadastro do colaborador.",
+                                  "content": "Nome e contatos serão obtidos do cadastro do colaborador.",
                                   "fontFamily": "$font-sans",
                                   "fontSize": 10,
                                   "fontWeight": "normal"
@@ -197251,7 +197286,7 @@
       "name": "Advogado - Formalização: Posicionar campos",
       "clip": true,
       "width": 1200,
-      "height": 1080,
+      "height": 1100,
       "fill": "#F5F2ED",
       "children": [
         {
@@ -197259,14 +197294,14 @@
           "type": "ref",
           "ref": "u7g6V",
           "name": "Sidebar",
-          "height": "fill_container"
+          "height": 1100
         },
         {
           "type": "frame",
           "id": "key94",
           "name": "Right Side",
           "width": "fill_container",
-          "height": "fill_container",
+          "height": 1100,
           "layout": "vertical",
           "padding": [
             12,
@@ -197346,7 +197381,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "Defina onde cada signatário deve preencher e assinar os documentos selecionados.",
+                          "content": "Defina onde cada signatário deve assinar os documentos selecionados.",
                           "fontFamily": "$font-sans",
                           "fontSize": 12,
                           "fontWeight": "normal"
@@ -197364,7 +197399,11 @@
                   "height": 58,
                   "descendants": {
                     "m5kJ6": {
-                      "opacity": 1
+                      "opacity": 1,
+                      "name": "Tab 1 — Signatários"
+                    },
+                    "aBcVL": {
+                      "content": "Signatários"
                     },
                     "UIrir": {
                       "fill": "$border"
@@ -197398,7 +197437,7 @@
                       "id": "HQCDn",
                       "name": "Introdução",
                       "width": "fill_container",
-                      "height": 56,
+                      "height": 61,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -197424,7 +197463,7 @@
                               "fill": "$muted-foreground",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "Arraste os campos para a prévia. Cada documento deve conter todos os campos necessários antes do envio.",
+                              "content": "Arraste os campos para a prévia. Cada documento deve conter todos os campos de assinatura necessários antes do envio.",
                               "fontFamily": "$font-sans",
                               "fontSize": 12,
                               "fontWeight": "normal"
@@ -197442,7 +197481,7 @@
                               "type": "text",
                               "id": "PC0LK",
                               "fill": "$foreground",
-                              "content": "1 de 3 documentos prontos",
+                              "content": "1 de 4 documentos prontos",
                               "fontFamily": "$font-sans",
                               "fontSize": 12,
                               "fontWeight": "600"
@@ -197463,7 +197502,7 @@
                                   "x": 0,
                                   "y": 0,
                                   "fill": "$primary",
-                                  "width": 64,
+                                  "width": 48,
                                   "height": 6
                                 }
                               ]
@@ -197627,13 +197666,6 @@
                                   "alignItems": "center",
                                   "children": [
                                     {
-                                      "type": "ellipse",
-                                      "id": "c3WOh0",
-                                      "fill": "$muted-foreground",
-                                      "width": 7,
-                                      "height": 7
-                                    },
-                                    {
                                       "type": "text",
                                       "id": "agrAJ",
                                       "fill": "$muted-foreground",
@@ -197679,7 +197711,7 @@
                                       "fill": "$foreground",
                                       "textGrowth": "fixed-width",
                                       "width": "fill_container",
-                                      "content": "Declaração de hipossuficiência",
+                                      "content": "Termo de Ciência e Consentimento LGPD",
                                       "lineHeight": 1.25,
                                       "fontFamily": "$font-sans",
                                       "fontSize": 12,
@@ -197699,6 +197731,68 @@
                                       "id": "b4GO8",
                                       "fill": "$muted-foreground",
                                       "content": "0 de 1 campo · Pendente",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "uqWgN",
+                              "name": "Contrato de Prestação de Serviços",
+                              "width": "fill_container",
+                              "fill": "$background",
+                              "cornerRadius": 6,
+                              "stroke": "$border",
+                              "strokeWidth": 1,
+                              "layout": "vertical",
+                              "gap": 7,
+                              "padding": 10,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "a8Nlza",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "E82qc",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "file-text",
+                                      "library": "lucide",
+                                      "fill": "$muted-foreground"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "C4uQO",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Contrato de Prestação de Serviços",
+                                      "lineHeight": 1.25,
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "T7jbv2",
+                                  "width": "fill_container",
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "CfNmY",
+                                      "fill": "$muted-foreground",
+                                      "content": "0 de 2 campos · Pendente",
                                       "fontFamily": "$font-sans",
                                       "fontSize": 10,
                                       "fontWeight": "normal"
@@ -198195,7 +198289,7 @@
                   "id": "UV4cu",
                   "name": "Título",
                   "fill": "$foreground",
-                  "content": "Configurar envio",
+                  "content": "Revisar e confirmar envio",
                   "fontFamily": "$font-serif",
                   "fontSize": 22,
                   "fontWeight": "600"
@@ -198375,7 +198469,7 @@
                           "id": "e0gtH",
                           "name": "Número",
                           "fill": "$foreground",
-                          "content": "3",
+                          "content": "4",
                           "fontFamily": "$font-serif",
                           "fontSize": 18,
                           "fontWeight": "600"
@@ -198696,7 +198790,7 @@
                     {
                       "type": "frame",
                       "id": "s5F6j",
-                      "name": "Declaração de hipossuficiência",
+                      "name": "Termo de Ciência e Consentimento LGPD",
                       "width": "fill_container",
                       "fill": "$muted",
                       "cornerRadius": 8,
@@ -198743,7 +198837,7 @@
                               "id": "eMd5U",
                               "name": "Nome",
                               "fill": "$foreground",
-                              "content": "Declaração de hipossuficiência",
+                              "content": "Termo de Ciência e Consentimento LGPD",
                               "fontFamily": "$font-sans",
                               "fontSize": 11,
                               "fontWeight": "600"
@@ -198754,6 +198848,75 @@
                               "name": "Quantidade",
                               "fill": "$muted-foreground",
                               "content": "1 signatário",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 9,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Bys1P",
+                      "name": "Contrato de Prestação de Serviços",
+                      "width": "fill_container",
+                      "fill": "$muted",
+                      "cornerRadius": 8,
+                      "gap": 9,
+                      "padding": [
+                        9,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "l3neUN",
+                          "name": "Pronto",
+                          "width": 28,
+                          "height": 28,
+                          "fill": "$highlight",
+                          "cornerRadius": 7,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "YZ5IY",
+                              "name": "Check",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vs6Tk",
+                          "name": "Dados",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "QiNiI",
+                              "name": "Nome",
+                              "fill": "$foreground",
+                              "content": "Contrato de Prestação de Serviços",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "AHbzS",
+                              "name": "Quantidade",
+                              "fill": "$muted-foreground",
+                              "content": "2 signatários",
                               "fontFamily": "$font-sans",
                               "fontSize": 9,
                               "fontWeight": "normal"
@@ -198866,7 +199029,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "CPF 123.456.789-00 · joao.pereira@email.com",
+                          "content": "joao.pereira@email.com",
                           "fontFamily": "$font-sans",
                           "fontSize": 9,
                           "fontWeight": "normal"
@@ -198967,7 +199130,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "CPF 987.654.321-00 · +55 (11) 98765-4321",
+                          "content": "+55 (11) 98765-4321",
                           "fontFamily": "$font-sans",
                           "fontSize": 9,
                           "fontWeight": "normal"
@@ -207430,12 +207593,668 @@
           "layout": "none",
           "children": [
             {
+              "type": "frame",
               "id": "JSV4Y",
-              "type": "ref",
-              "ref": "ok0D8",
-              "name": "Modal selecionar colaborador",
               "x": 290,
-              "y": 117
+              "y": 117,
+              "name": "Modal selecionar colaborador",
+              "context": "Lista colaboradores ativos com perfil Advogado, Paralegal ou Supervisor para seleção em fluxos operacionais.",
+              "clip": true,
+              "width": 620,
+              "height": 680,
+              "fill": "$card",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ghpc1",
+                  "x": 28,
+                  "y": 24,
+                  "name": "Título",
+                  "fill": "$brand",
+                  "content": "Selecionar colaborador",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "B9gXa",
+                  "x": 28,
+                  "y": 56,
+                  "name": "Descrição",
+                  "fill": "$muted-foreground",
+                  "content": "Busque pelo nome ou filtre por perfil.",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "a2oNwe",
+                  "x": 560,
+                  "y": 24,
+                  "name": "Fechar modal",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "$secondary",
+                  "cornerRadius": 999,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "PAmsM",
+                      "x": 8,
+                      "y": 8,
+                      "name": "Ícone fechar",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "kyOGr",
+                  "x": 28,
+                  "y": 92,
+                  "name": "Divisor do cabeçalho",
+                  "fill": "$border",
+                  "width": 564,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "aVAgM",
+                  "x": 28,
+                  "y": 116,
+                  "name": "Filtro por nome",
+                  "width": 564,
+                  "height": 42,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$input",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "mKtve",
+                      "x": 12,
+                      "y": 13,
+                      "name": "Ícone buscar",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uI6p8",
+                      "x": 38,
+                      "y": 13,
+                      "name": "Placeholder nome",
+                      "fill": "$muted-foreground",
+                      "content": "Buscar colaborador por nome",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "QrbTz",
+                  "x": 28,
+                  "y": 176,
+                  "name": "Label perfil",
+                  "fill": "$foreground",
+                  "content": "Perfil",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 9,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "G1x4zE",
+                  "x": 318,
+                  "y": 176,
+                  "name": "Label tema",
+                  "enabled": false,
+                  "fill": "$foreground",
+                  "content": "Tema jurídico",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 9,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "uu0al",
+                  "x": 28,
+                  "y": 194,
+                  "name": "Filtro perfil",
+                  "width": 564,
+                  "height": 38,
+                  "fill": "$card",
+                  "cornerRadius": 6,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Qkz3W",
+                      "name": "Valor do input",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "FCx0T",
+                          "name": "Ícone do input",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "users",
+                          "library": "lucide",
+                          "fill": "$brand"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ALj4X",
+                          "name": "Valor do input",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Todos os perfis",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "UTX0y",
+                      "name": "Chevron do input",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$brand"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j3pyAn",
+                  "x": 318,
+                  "y": 194,
+                  "name": "Filtro tema jurídico",
+                  "enabled": false,
+                  "width": 274,
+                  "height": 38,
+                  "fill": "$card",
+                  "cornerRadius": 6,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "a9LWV",
+                      "name": "Valor do input",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "rg4Yo",
+                          "name": "Ícone do input",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "tags",
+                          "library": "lucide",
+                          "fill": "$brand"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZKolf",
+                          "name": "Valor do input",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Todos os temas",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "nlTph",
+                      "name": "Chevron do input",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$brand"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "j8yPK",
+                  "x": 28,
+                  "y": 252,
+                  "name": "Contagem",
+                  "fill": "$muted-foreground",
+                  "content": "6 colaboradores encontrados",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 9,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "ZsI20",
+                  "x": 522,
+                  "y": 252,
+                  "name": "Limpar filtros",
+                  "fill": "$brand",
+                  "content": "Limpar",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 9,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "lLS3N",
+                  "x": 28,
+                  "y": 276,
+                  "name": "Colaborador Camila Nogueira",
+                  "width": 564,
+                  "height": 80,
+                  "fill": "$secondary",
+                  "cornerRadius": 8,
+                  "stroke": "$primary",
+                  "strokeWidth": 1.5,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "fXlpV",
+                      "x": 14,
+                      "y": 14,
+                      "name": "Avatar Dra. Camila Nogueira",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "$brand-highlight",
+                      "cornerRadius": 999,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "N3S3km",
+                          "x": 11,
+                          "y": 12,
+                          "name": "Iniciais",
+                          "fill": "$primary-foreground",
+                          "content": "CN",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 10,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "nUKVC",
+                      "x": 66,
+                      "y": 12,
+                      "name": "Nome",
+                      "fill": "$foreground",
+                      "content": "Camila Nogueira",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "j926X1",
+                      "x": 66,
+                      "y": 34,
+                      "name": "Perfil",
+                      "fill": "$brand",
+                      "content": "Perfil: Advogado",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "v0G9Jf",
+                      "x": 66,
+                      "y": 53,
+                      "name": "Detalhes",
+                      "fill": "$muted-foreground",
+                      "content": "Direito Civil · Contratos",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hNyUn",
+                      "x": 520,
+                      "y": 28,
+                      "name": "Selecionado",
+                      "width": 26,
+                      "height": 26,
+                      "fill": "$primary",
+                      "cornerRadius": 999,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "OBmgK",
+                          "x": 7,
+                          "y": 7,
+                          "name": "Ícone selecionado",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$primary-foreground"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ieTpd",
+                  "x": 28,
+                  "y": 368,
+                  "name": "Colaborador Rafael Martins",
+                  "width": 564,
+                  "height": 80,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WlIPP",
+                      "x": 14,
+                      "y": 14,
+                      "name": "Avatar Dr. Rafael Martins",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "$chart-3",
+                      "cornerRadius": 999,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Q6WC4V",
+                          "x": 11,
+                          "y": 12,
+                          "name": "Iniciais",
+                          "fill": "$primary-foreground",
+                          "content": "RM",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 10,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "FEDWn",
+                      "x": 66,
+                      "y": 12,
+                      "name": "Nome",
+                      "fill": "$foreground",
+                      "content": "Rafael Martins",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QTncl",
+                      "x": 66,
+                      "y": 34,
+                      "name": "Perfil",
+                      "fill": "$brand",
+                      "content": "Perfil: Paralegal",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uvTAx",
+                      "x": 66,
+                      "y": 53,
+                      "name": "Detalhes",
+                      "fill": "$muted-foreground",
+                      "content": "Equipe jurídica · Documentação",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ufuqi",
+                  "x": 28,
+                  "y": 460,
+                  "name": "Colaborador Helena Costa",
+                  "width": 564,
+                  "height": 80,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "N7glCH",
+                      "x": 14,
+                      "y": 14,
+                      "name": "Avatar Dra. Helena Costa",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "$chart-2",
+                      "cornerRadius": 999,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Y8LkVX",
+                          "x": 11,
+                          "y": 12,
+                          "name": "Iniciais",
+                          "fill": "$primary-foreground",
+                          "content": "HC",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 10,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "NYQyy",
+                      "x": 66,
+                      "y": 12,
+                      "name": "Nome",
+                      "fill": "$foreground",
+                      "content": "Helena Costa",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "J6hk95",
+                      "x": 66,
+                      "y": 34,
+                      "name": "Perfil",
+                      "fill": "$brand",
+                      "content": "Perfil: Supervisor",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "L44FE",
+                      "x": 66,
+                      "y": 53,
+                      "name": "Detalhes",
+                      "fill": "$muted-foreground",
+                      "content": "Supervisão jurídica",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "D6tgoZ",
+                  "x": 28,
+                  "y": 556,
+                  "name": "Ajuda",
+                  "fill": "$muted-foreground",
+                  "content": "Somente colaboradores ativos com perfil Advogado, Paralegal ou Supervisor são exibidos.",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 9,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "XQ9ca",
+                  "x": 28,
+                  "y": 588,
+                  "name": "Divisor das ações",
+                  "fill": "$border",
+                  "width": 564,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "pcdDN",
+                  "x": 248,
+                  "y": 612,
+                  "name": "Cancelar",
+                  "width": 132,
+                  "height": 40,
+                  "cornerRadius": 999,
+                  "stroke": "$primary",
+                  "strokeWidth": 1.5,
+                  "strokeAlignment": "inner",
+                  "gap": 6,
+                  "padding": [
+                    10,
+                    24
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HlElf",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Icon",
+                      "enabled": false,
+                      "width": 14,
+                      "height": 14,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "y6O0eb",
+                      "name": "Label",
+                      "fill": "$primary",
+                      "content": "Cancelar",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QBkEF",
+                  "x": 392,
+                  "y": 612,
+                  "name": "Selecionar colaborador",
+                  "width": 200,
+                  "height": 40,
+                  "fill": "$primary",
+                  "cornerRadius": 999,
+                  "gap": 6,
+                  "padding": [
+                    10,
+                    24
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "B2KN9",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Icon",
+                      "enabled": false,
+                      "width": 14,
+                      "height": 14,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$primary-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vmITZ",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Selecionar colaborador",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -212436,20 +213255,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "C3CmhP",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "01 · ACESSO",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "iQmtT",
@@ -212753,20 +213561,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "AjiZm",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "02 · VERIFICAÇÃO",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "fBtWU",
@@ -213156,20 +213953,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "aAtFu",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "02 · VERIFICAÇÃO",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "fSc1T",
@@ -213571,20 +214357,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "XroxN",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "03 · LEITURA",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "v5BdHr",
@@ -214031,20 +214806,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "KFrJd",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "04 · ASSINATURA",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "I2zhH",
@@ -214630,20 +215394,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "d10D6",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "ENVIO",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "OJork",
@@ -214961,20 +215714,9 @@
             0,
             44
           ],
-          "justifyContent": "space_between",
+          "justifyContent": "end",
           "alignItems": "center",
           "children": [
-            {
-              "type": "text",
-              "id": "CREds",
-              "name": "Etapa atual",
-              "fill": "$primary",
-              "content": "CONCLUÍDO",
-              "fontFamily": "$font-sans",
-              "fontSize": 12,
-              "fontWeight": "700",
-              "letterSpacing": 0.6
-            },
             {
               "type": "text",
               "id": "ExxFh",
@@ -215182,6 +215924,671 @@
                   "fontWeight": "normal"
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Vx43H",
+      "x": 4781,
+      "y": 9435,
+      "name": "Componente - Modal selecionar colaborador",
+      "context": "Lista colaboradores ativos com perfil Advogado, Paralegal ou Supervisor para seleção em fluxos operacionais.",
+      "reusable": true,
+      "clip": true,
+      "width": 620,
+      "height": 680,
+      "fill": "$card",
+      "cornerRadius": 16,
+      "stroke": "$border",
+      "strokeWidth": 1,
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "y5MaSo",
+          "x": 28,
+          "y": 24,
+          "name": "Título",
+          "fill": "$brand",
+          "content": "Selecionar colaborador",
+          "fontFamily": "$font-serif",
+          "fontSize": 22,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "Sa6j5",
+          "x": 28,
+          "y": 56,
+          "name": "Descrição",
+          "fill": "$muted-foreground",
+          "content": "Busque pelo nome ou filtre por perfil.",
+          "fontFamily": "$font-sans",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "LDw45",
+          "x": 560,
+          "y": 24,
+          "name": "Fechar modal",
+          "width": 32,
+          "height": 32,
+          "fill": "$secondary",
+          "cornerRadius": 999,
+          "layout": "none",
+          "children": [
+            {
+              "type": "icon",
+              "id": "sCubo",
+              "x": 8,
+              "y": 8,
+              "name": "Ícone fechar",
+              "width": 16,
+              "height": 16,
+              "icon": "x",
+              "library": "lucide",
+              "fill": "$muted-foreground"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "j4uaw",
+          "x": 28,
+          "y": 92,
+          "name": "Divisor do cabeçalho",
+          "fill": "$border",
+          "width": 564,
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "I2X1K",
+          "x": 28,
+          "y": 116,
+          "name": "Filtro por nome",
+          "width": 564,
+          "height": 42,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$input",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "icon",
+              "id": "U8Tdkr",
+              "x": 12,
+              "y": 13,
+              "name": "Ícone buscar",
+              "width": 16,
+              "height": 16,
+              "icon": "search",
+              "library": "lucide",
+              "fill": "$muted-foreground"
+            },
+            {
+              "type": "text",
+              "id": "z1RAPe",
+              "x": 38,
+              "y": 13,
+              "name": "Placeholder nome",
+              "fill": "$muted-foreground",
+              "content": "Buscar colaborador por nome",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "HEGby",
+          "x": 28,
+          "y": 176,
+          "name": "Label perfil",
+          "fill": "$foreground",
+          "content": "Perfil",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "Sj5Yy",
+          "x": 318,
+          "y": 176,
+          "name": "Label tema",
+          "enabled": false,
+          "fill": "$foreground",
+          "content": "Tema jurídico",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
+        },
+        {
+          "type": "frame",
+          "id": "PMz7Y",
+          "x": 28,
+          "y": 194,
+          "name": "Filtro perfil",
+          "width": 564,
+          "height": 38,
+          "fill": "$card",
+          "cornerRadius": 6,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ISZtv",
+              "name": "Valor do input",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "cQRHh",
+                  "name": "Ícone do input",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "users",
+                  "library": "lucide",
+                  "fill": "$brand"
+                },
+                {
+                  "type": "text",
+                  "id": "rdcmN",
+                  "name": "Valor do input",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Todos os perfis",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "GOiuO",
+              "name": "Chevron do input",
+              "width": 14,
+              "height": 14,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$brand"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NYbmA",
+          "x": 318,
+          "y": 194,
+          "name": "Filtro tema jurídico",
+          "enabled": false,
+          "width": 274,
+          "height": 38,
+          "fill": "$card",
+          "cornerRadius": 6,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "teQSP",
+              "name": "Valor do input",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "FDz04",
+                  "name": "Ícone do input",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "tags",
+                  "library": "lucide",
+                  "fill": "$brand"
+                },
+                {
+                  "type": "text",
+                  "id": "vrinb",
+                  "name": "Valor do input",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Todos os temas",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "Q4xnxZ",
+              "name": "Chevron do input",
+              "width": 14,
+              "height": 14,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$brand"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "h5Sjv",
+          "x": 28,
+          "y": 252,
+          "name": "Contagem",
+          "fill": "$muted-foreground",
+          "content": "6 colaboradores encontrados",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "600"
+        },
+        {
+          "type": "text",
+          "id": "vgFCF",
+          "x": 522,
+          "y": 252,
+          "name": "Limpar filtros",
+          "fill": "$brand",
+          "content": "Limpar",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "700"
+        },
+        {
+          "type": "frame",
+          "id": "WJ1JS",
+          "x": 28,
+          "y": 276,
+          "name": "Colaborador Camila Nogueira",
+          "width": 564,
+          "height": 80,
+          "fill": "$secondary",
+          "cornerRadius": 8,
+          "stroke": "$primary",
+          "strokeWidth": 1.5,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "xu0XY",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dra. Camila Nogueira",
+              "width": 38,
+              "height": 38,
+              "fill": "$brand-highlight",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jPhpk",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "CN",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "E0Xtp",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "Camila Nogueira",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "OhZW8",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "Perfil: Advogado",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "TLlv7",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "Direito Civil · Contratos",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "gT72O",
+              "x": 520,
+              "y": 28,
+              "name": "Selecionado",
+              "width": 26,
+              "height": 26,
+              "fill": "$primary",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "z8I9XH",
+                  "x": 7,
+                  "y": 7,
+                  "name": "Ícone selecionado",
+                  "width": 12,
+                  "height": 12,
+                  "icon": "check",
+                  "library": "lucide",
+                  "fill": "$primary-foreground"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lfwY0",
+          "x": 28,
+          "y": 368,
+          "name": "Colaborador Rafael Martins",
+          "width": 564,
+          "height": 80,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "b5ATy",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dr. Rafael Martins",
+              "width": 38,
+              "height": 38,
+              "fill": "$chart",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "a0wPS",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "RM",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "mjNXG",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "Rafael Martins",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "sbXBW",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "Perfil: Paralegal",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "gb7Ik",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "Equipe jurídica · Documentação",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ihhp0",
+          "x": 28,
+          "y": 460,
+          "name": "Colaborador Helena Costa",
+          "width": 564,
+          "height": 80,
+          "fill": "$card",
+          "cornerRadius": 8,
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "TtlQg",
+              "x": 14,
+              "y": 14,
+              "name": "Avatar Dra. Helena Costa",
+              "width": 38,
+              "height": 38,
+              "fill": "$chart-6",
+              "cornerRadius": 999,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Ymen7",
+                  "x": 11,
+                  "y": 12,
+                  "name": "Iniciais",
+                  "fill": "$primary-foreground",
+                  "content": "HC",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "QP4A3",
+              "x": 66,
+              "y": 12,
+              "name": "Nome",
+              "fill": "$foreground",
+              "content": "Helena Costa",
+              "fontFamily": "$font-sans",
+              "fontSize": 11,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "laxNU",
+              "x": 66,
+              "y": 34,
+              "name": "Perfil",
+              "fill": "$brand",
+              "content": "Perfil: Supervisor",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "ia8I9",
+              "x": 66,
+              "y": 53,
+              "name": "Detalhes",
+              "fill": "$muted-foreground",
+              "content": "Supervisão jurídica",
+              "fontFamily": "$font-sans",
+              "fontSize": 9,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "hRwWq",
+          "x": 28,
+          "y": 556,
+          "name": "Ajuda",
+          "fill": "$muted-foreground",
+          "content": "Somente colaboradores ativos com perfil Advogado, Paralegal ou Supervisor são exibidos.",
+          "fontFamily": "$font-sans",
+          "fontSize": 9,
+          "fontWeight": "500"
+        },
+        {
+          "type": "rectangle",
+          "id": "Qp8nN",
+          "x": 28,
+          "y": 588,
+          "name": "Divisor das ações",
+          "fill": "$border",
+          "width": 564,
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "Ujaem",
+          "x": 248,
+          "y": 612,
+          "name": "Cancelar",
+          "width": 132,
+          "height": 40,
+          "cornerRadius": 999,
+          "stroke": "$primary",
+          "strokeWidth": 1.5,
+          "strokeAlignment": "inner",
+          "gap": 6,
+          "padding": [
+            10,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "foxz0",
+              "x": 0,
+              "y": 0,
+              "name": "Icon",
+              "enabled": false,
+              "width": 14,
+              "height": 14,
+              "icon": "plus",
+              "library": "lucide",
+              "fill": "$primary"
+            },
+            {
+              "type": "text",
+              "id": "gKs1Q",
+              "name": "Label",
+              "fill": "$primary",
+              "content": "Cancelar",
+              "fontFamily": "$font-sans",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q9Djp",
+          "x": 392,
+          "y": 612,
+          "name": "Selecionar colaborador",
+          "width": 200,
+          "height": 40,
+          "fill": "$primary",
+          "cornerRadius": 999,
+          "gap": 6,
+          "padding": [
+            10,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "MNWoE",
+              "x": 0,
+              "y": 0,
+              "name": "Icon",
+              "enabled": false,
+              "width": 14,
+              "height": 14,
+              "icon": "plus",
+              "library": "lucide",
+              "fill": "$primary-foreground"
+            },
+            {
+              "type": "text",
+              "id": "sHLif",
+              "name": "Label",
+              "fill": "$primary-foreground",
+              "content": "Selecionar colaborador",
+              "fontFamily": "$font-sans",
+              "fontSize": 14,
+              "fontWeight": "600"
             }
           ]
         }
@@ -215424,6 +216831,14 @@
     "field-type-percentage-fg": {
       "type": "color",
       "value": "#9A3412"
+    },
+    "chart": {
+      "type": "color",
+      "value": "#6BA09A"
+    },
+    "chart-6": {
+      "type": "color",
+      "value": "#B8862C"
     }
   },
   "fileToken": "02cc69b1-0462-4319-a9fe-b13e7b75ef04"

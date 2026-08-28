@@ -31,6 +31,22 @@ Este prompt **não cria Spec de correção**. Quando uma Spec for necessária, e
   - Ambiente (local, staging, produção)
   - Feature ou fluxo afetado
 
+## Gate de grilling
+
+Depois de pesquisar os fatos e antes de escrever ou criar/atualizar o ticket, aplique o
+protocolo [`grilling-prompt.md`](./grilling-prompt.md). Modele o diagnóstico como uma árvore de
+decisões, calcule a fronteira atual e faça todas as perguntas da fronteira em uma única rodada,
+numeradas, com recomendação explícita e no formato obrigatório `❓`/`➡️`. Recalcule a fronteira
+depois de cada resposta e adie perguntas que dependam de decisões ainda abertas.
+
+Busque no repositório, nas regras, no PRD e no Jira os fatos verificáveis; nunca peça ao usuário
+um fato que possa ser pesquisado. Explore, no mínimo, sintoma versus esperado, escopo do bug,
+ambiente afetado, severidade, frequência, autorização/tenancy, causa confirmada versus hipótese,
+comportamento de recuperação e se a correção deve permanecer como Bug Report ou exigir uma nova
+Spec. Não crie nem atualize o ticket enquanto houver uma decisão material aberta. Quando a
+fronteira estiver vazia, peça confirmação explícita de entendimento compartilhado antes da
+mutação externa e registre as decisões no relatório, não a transcrição da entrevista.
+
 ---
 
 ## Regras Aplicáveis
@@ -63,6 +79,9 @@ Use as rules apenas para validar fronteiras e padrões técnicos; o bug report n
 
 - Interprete o problema focando em **comportamento observado vs comportamento esperado**.
 - Elimine ambiguidades do relato original.
+
+- Trate cada ambiguidade material como uma decisão da árvore de grilling; não a resolva por
+  inferência silenciosa.
 
 ### 2. Diagnóstico
 

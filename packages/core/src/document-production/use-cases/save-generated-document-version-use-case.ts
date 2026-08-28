@@ -71,18 +71,23 @@ export class SaveGeneratedDocumentVersionUseCase
       content: exportedFile.content,
     })
 
-    return this.versionsRepository.add({
-      documentId: generation.documentId,
-      documentGenerationId: generation.id,
-      fileId: file.id,
-      versionNumber,
-      source: DocumentVersionSource.Ai,
-      content: request.content,
-      pendingMarkers: request.pendingMarkers,
-      createdByCollaboratorId: generation.requestedByCollaboratorId,
-      createdAt: this.datetimeProvider.now(),
-      status: DocumentVersionStatus.InReview,
-    })
+    try {
+      return await this.versionsRepository.add({
+        documentId: generation.documentId,
+        documentGenerationId: generation.id,
+        fileId: file.id,
+        versionNumber,
+        source: DocumentVersionSource.Ai,
+        content: request.content,
+        pendingMarkers: request.pendingMarkers,
+        createdByCollaboratorId: generation.requestedByCollaboratorId,
+        createdAt: this.datetimeProvider.now(),
+        status: DocumentVersionStatus.InReview,
+      })
+    } catch (error) {
+      await this.fileStorageProvider.remove(file.id)
+      throw error
+    }
   }
 
   private normalizeFileName(title: string): string {

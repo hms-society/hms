@@ -4,6 +4,12 @@ import type {
 } from '../../document-production/domain/entities'
 import type { RestResponse } from '../../shared/responses/rest-response'
 import type { Formalization, FormalizationDetails } from '../domain/entities'
+import type {
+  FormalizationSignatureCandidatePage,
+  FormalizationSignatureConfiguration,
+  FormalizationSignatureFieldView,
+} from '../domain/structures'
+import type { CommunicationChannel } from '../../communication/domain/structures'
 import type { FormalizationDocumentListItem } from '../domain/structures/formalization-document-list-item'
 import type { FormalizationDocumentSelection } from '../domain/structures/formalization-document-selection'
 import type { CloseFormalizationWithoutContractRequest } from './close-formalization-without-contract-request'
@@ -77,6 +83,70 @@ export interface FormalizationService {
     versionId: string,
   ): Promise<RestResponse<DocumentVersion>>
   confirmDocuments(
+    formalizationId: string,
+    expectedVersion: number,
+  ): Promise<RestResponse<Formalization>>
+  getSignatureConfiguration(
+    formalizationId: string,
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  initializeSignatureConfiguration(
+    formalizationId: string,
+    expectedVersion: number,
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  listSignatureCandidates(
+    formalizationId: string,
+    query: {
+      readonly page?: number
+      readonly limit?: number
+      readonly search?: string
+    },
+  ): Promise<RestResponse<FormalizationSignatureCandidatePage>>
+  addSignatureSignatory(
+    formalizationId: string,
+    input: { readonly personId: string; readonly expectedVersion: number },
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  removeSignatureSignatory(
+    formalizationId: string,
+    signatoryId: string,
+    expectedVersion: number,
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  replaceSignatureSignatoryDocuments(
+    formalizationId: string,
+    signatoryId: string,
+    input: { readonly documentIds: readonly string[]; readonly expectedVersion: number },
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  selectSignatureSignatoryChannel(
+    formalizationId: string,
+    signatoryId: string,
+    input: {
+      readonly channel: CommunicationChannel
+      readonly selected: boolean
+      readonly expectedVersion: number
+    },
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  replaceSignatureFields(
+    formalizationId: string,
+    documentId: string,
+    input: {
+      readonly previewId: string
+      readonly fields: readonly FormalizationSignatureFieldView[]
+      readonly expectedVersion: number
+    },
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  retrySignaturePreview(
+    formalizationId: string,
+    previewId: string,
+    expectedVersion: number,
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  getSignaturePreviewContent(
+    formalizationId: string,
+    previewId: string,
+  ): Promise<RestResponse<Blob>>
+  resetSignatureConfiguration(
+    formalizationId: string,
+    expectedVersion: number,
+  ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  reopenDocumentPackage(
     formalizationId: string,
     expectedVersion: number,
   ): Promise<RestResponse<Formalization>>

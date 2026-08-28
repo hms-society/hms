@@ -45,7 +45,7 @@ const invitedCollaborator = {
   lastAccessAt: undefined,
 }
 
-function createController(
+function fakeHook(
   overrides: Partial<CollaboratorsPageController> = {},
 ): CollaboratorsPageController {
   return {
@@ -91,7 +91,7 @@ describe('CollaboratorsPage', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('renders the table and the create action', () => {
-    useCollaboratorsPageMock.mockReturnValue(createController())
+    useCollaboratorsPageMock.mockReturnValue(fakeHook())
 
     render(<CollaboratorsPage onCreateCollaborator={vi.fn()} />)
 
@@ -119,7 +119,7 @@ describe('CollaboratorsPage', () => {
   it('refetches the current URL query when loading fails', async () => {
     const refetch = vi.fn()
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaboratorsPage: null,
         collaboratorsPageError: new Error('temporary failure'),
         refetch,
@@ -140,7 +140,7 @@ describe('CollaboratorsPage', () => {
       lastAccessAt: new Date('2026-07-29T15:30:00.000Z'),
     }
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaboratorsPage: {
           items: [cancelledInvitation],
           page: 1,
@@ -164,7 +164,7 @@ describe('CollaboratorsPage', () => {
 
   it('exposes invitation actions only for a pending collaborator', () => {
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaboratorsPage: {
           items: [invitedCollaborator],
           page: 1,
@@ -191,7 +191,7 @@ describe('CollaboratorsPage', () => {
     const handleUpdateSearch = vi.fn()
     const handleClearFilters = vi.fn()
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         handleUpdateSearch,
         handleClearFilters,
         page: 1,
@@ -222,7 +222,7 @@ describe('CollaboratorsPage', () => {
   it('renders the filtered empty state and delegates filter clearing', () => {
     const handleClearFilters = vi.fn()
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaboratorsPage: {
           items: [],
           page: 1,
@@ -253,7 +253,7 @@ describe('CollaboratorsPage', () => {
     const handleConfirmAction = vi.fn().mockResolvedValue(undefined)
     const selectedAction: CollaboratorAction = { kind: 'deactivate', collaborator }
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         handleConfirmAction,
         selectedAction,
         getCollaboratorActionButtonLabel: vi.fn(() => 'Inativar colaborador' as const),
@@ -278,7 +278,7 @@ describe('CollaboratorsPage', () => {
 
   it('shows the domain error message inside the action dialog', () => {
     useCollaboratorsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         actionError: new Error(
           'Este colaborador já confirmou o acesso no Auth. Ele deve entrar pela tela de login para ativar o cadastro local.',
         ),

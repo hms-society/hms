@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 
 import type { DynamicForm } from '@hms/core/shared/domain'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-
-type LegalAreaOption = {
-  id: string
-  name: string
-}
-
-type LegalTopicOption = {
-  id: string
-  legalAreaId?: string
-  name: string
-}
+import {
+  useDynamicFormOptionsQuery,
+  type LegalAreaOption,
+  type LegalTopicOption,
+} from '@/ui/shared/hooks/use-dynamic-form-options-query'
 
 export type FormOption = {
   id: string
@@ -41,7 +33,6 @@ export function useSelectForm({
   initialSelectedFormId,
   contextType,
 }: UseSelectFormOptions) {
-  const { dynamicFormService, legalCatalogService } = useRestContext()
   const [search, setSearch] = useState('')
   const [selectedArea, setSelectedArea] = useState(initialLegalAreaId ?? '')
   const [selectedTheme, setSelectedTheme] = useState(initialLegalTopicId ?? '')
@@ -59,59 +50,20 @@ export function useSelectForm({
     [isOpen, initialLegalAreaId, initialLegalTopicId, initialSelectedFormId],
   )
 
-  const { data: areasData } = useQuery({
-    queryKey: ['legal-areas'],
-    queryFn: async () => {
-      const response = await legalCatalogService.listLegalAreas()
-
-      if (response.isFailure) return []
-
-      return (response.body as LegalAreaOption[]) ?? []
-    },
-    enabled: isOpen,
-  })
-
-  const { data: topicsData } = useQuery({
-    queryKey: ['legal-topics', selectedArea],
-    queryFn: async () => {
-      if (!selectedArea) return []
-
-      const response = await legalCatalogService.listLegalTopics(selectedArea)
-
-      if (response.isFailure) return []
-
-      return (response.body as LegalTopicOption[]) ?? []
-    },
-    enabled: isOpen && Boolean(selectedArea),
-  })
-
   const {
-    data: formsData,
-    isLoading: isFormsLoading,
-    isError: isFormsError,
-  } = useQuery({
-    queryKey: ['dynamic-forms', contextType, search, selectedArea, selectedTheme],
-    queryFn: async () => {
-      const response = await dynamicFormService.listDynamicForms({
-        search,
-        legalAreaId: selectedArea,
-        legalTopicId: selectedTheme,
-        contextType,
-      })
-
-      if (response.isFailure)
-        throw new Error('Não foi possível carregar as fichas dinâmicas')
-
-      return (response.body as DynamicForm[]) ?? []
-    },
+    dynamicForms,
+    isDynamicFormsError: isFormsError,
+    isLoadingDynamicForms: isFormsLoading,
+    legalAreas: areas,
+    legalTopics: topics,
+  } = useDynamicFormOptionsQuery({
+    contextType,
     enabled: isOpen,
+    legalAreaId: selectedArea,
+    legalTopicId: selectedTheme,
+    search,
   })
-
-  const areas = areasData ?? []
-  const topics = topicsData ?? []
-  const forms = (formsData ?? []).map((form) =>
-    toFormOption(form, areas, topics, contextType),
-  )
+  const forms = dynamicForms.map((form) => toFormOption(form, areas, topics, contextType))
 
   useEffect(
     function preserveSelectedFormForContext() {

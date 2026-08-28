@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Intake } from '@hms/core/intake/domain/entities'
 import { updateIntakeSchema, type UpdateIntakeFormData } from '@hms/validation/intake'
 import { useEffect } from 'react'
@@ -7,11 +6,9 @@ import { useForm, type Resolver } from 'react-hook-form'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useIntakeResponsiblesQuery } from '@/ui/intake/hooks/use-intake-responsibles-query'
-import { useLegalAreasQuery } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-areas-query'
-import { useLegalTopicsQuery } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-topics-query'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-
-import type { IntakeDetailsData } from '../use-intake-details-query'
+import { useLegalAreasQuery } from '@/ui/intake/hooks/use-legal-areas-query'
+import { useLegalTopicsQuery } from '@/ui/intake/hooks/use-legal-topics-query'
+import { useUpdateIntakeAction } from '@/ui/intake/hooks/use-update-intake-action'
 
 export type IntakeEditDialogProps = {
   open: boolean
@@ -24,9 +21,10 @@ export function useIntakeEditDialog({
   intake,
   onOpenChange,
 }: IntakeEditDialogProps) {
-  const { intakeService } = useRestContext()
   const { user } = useAuthContext()
-  const queryClient = useQueryClient()
+  const { isUpdatingIntake, updateIntakeError, updateIntake } = useUpdateIntakeAction(
+    intake.id,
+  )
   const form = useForm<UpdateIntakeFormData, unknown, UpdateIntakeFormData>({
     resolver: zodResolver(updateIntakeSchema) as Resolver<
       UpdateIntakeFormData,
@@ -41,24 +39,6 @@ export function useIntakeEditDialog({
   const legalTopicsQuery = useLegalTopicsQuery(selectedLegalAreaId ?? '')
   const responsiblesQuery = useIntakeResponsiblesQuery()
 
-  const updateMutation = useMutation({
-    mutationFn: async (values: UpdateIntakeFormData) => {
-      const response = await intakeService.updateIntake(intake.id, values)
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    onSuccess: (updatedIntake) => {
-      queryClient.setQueryData<IntakeDetailsData>(
-        ['intakes', 'detail', intake.id],
-        (current) => (current ? { ...current, intake: updatedIntake } : current),
-      )
-      form.reset(createDefaultValues(updatedIntake, user?.id ?? ''))
-      onOpenChange(false)
-    },
-  })
-
   useEffect(() => {
     if (!open) return
 
@@ -70,16 +50,18 @@ export function useIntakeEditDialog({
     form.setValue('legalTopicId', '', { shouldDirty: true, shouldValidate: true })
   }
 
-  function handleSubmit(values: UpdateIntakeFormData) {
-    updateMutation.mutate(values)
+  async function handleSubmit(values: UpdateIntakeFormData) {
+    const updatedIntake = await updateIntake(values)
+    form.reset(createDefaultValues(updatedIntake, user?.id ?? ''))
+    onOpenChange(false)
   }
 
   return {
     form,
     handleLegalAreaChange,
     handleSubmit,
-    isPending: updateMutation.isPending,
-    error: updateMutation.error,
+    isPending: isUpdatingIntake,
+    error: updateIntakeError,
     legalAreas: legalAreasQuery.legalAreas,
     legalTopics: legalTopicsQuery.legalTopics,
     responsibles: responsiblesQuery.data ?? [],

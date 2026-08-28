@@ -51,6 +51,7 @@ import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consu
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as FormalizacoesFormalizationIdIndexRouteImport } from './routes/formalizacoes/$formalizationId/index'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
+import { Route as FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport } from './routes/formalizacoes/$formalizationId/configuracao-envio/index'
 import { Route as FormalizacoesFormalizationIdDocumentosDocumentVersionIdRouteImport } from './routes/formalizacoes/$formalizationId/documentos/$documentVersionId'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
@@ -274,6 +275,12 @@ const ConsultasConsultationIdDocumentosIndexRoute =
     path: '/documentos/',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
+const FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute =
+  FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport.update({
+    id: '/configuracao-envio/',
+    path: '/configuracao-envio/',
+    getParentRoute: () => FormalizacoesFormalizationIdRouteRoute,
+  } as any)
 const FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute =
   FormalizacoesFormalizationIdDocumentosDocumentVersionIdRouteImport.update({
     id: '/documentos/$documentVersionId',
@@ -333,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
   '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/formalizacoes/$formalizationId/configuracao-envio/': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesByTo {
@@ -374,6 +382,7 @@ export interface FileRoutesByTo {
   '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdIndexRoute
   '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/formalizacoes/$formalizationId/configuracao-envio': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesById {
@@ -421,6 +430,7 @@ export interface FileRoutesById {
   '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
   '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/formalizacoes/$formalizationId/configuracao-envio/': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRouteTypes {
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/formalizacoes/$formalizationId/'
     | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos/'
+    | '/formalizacoes/$formalizationId/configuracao-envio/'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -510,6 +521,7 @@ export interface FileRouteTypes {
     | '/formalizacoes/$formalizationId'
     | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos'
+    | '/formalizacoes/$formalizationId/configuracao-envio'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   id:
     | '__root__'
@@ -556,6 +568,7 @@ export interface FileRouteTypes {
     | '/formalizacoes/$formalizationId/'
     | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos/'
+    | '/formalizacoes/$formalizationId/configuracao-envio/'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesById: FileRoutesById
 }
@@ -881,6 +894,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
+    '/formalizacoes/$formalizationId/configuracao-envio/': {
+      id: '/formalizacoes/$formalizationId/configuracao-envio/'
+      path: '/configuracao-envio'
+      fullPath: '/formalizacoes/$formalizationId/configuracao-envio/'
+      preLoaderRoute: typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport
+      parentRoute: typeof FormalizacoesFormalizationIdRouteRoute
+    }
     '/formalizacoes/$formalizationId/documentos/$documentVersionId': {
       id: '/formalizacoes/$formalizationId/documentos/$documentVersionId'
       path: '/documentos/$documentVersionId'
@@ -996,6 +1016,7 @@ const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(
 interface FormalizacoesFormalizationIdRouteRouteChildren {
   FormalizacoesFormalizationIdIndexRoute: typeof FormalizacoesFormalizationIdIndexRoute
   FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute: typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
+  FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute: typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
 }
 
 const FormalizacoesFormalizationIdRouteRouteChildren: FormalizacoesFormalizationIdRouteRouteChildren =
@@ -1004,6 +1025,8 @@ const FormalizacoesFormalizationIdRouteRouteChildren: FormalizacoesFormalization
       FormalizacoesFormalizationIdIndexRoute,
     FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute:
       FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute,
+    FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute:
+      FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute,
   }
 
 const FormalizacoesFormalizationIdRouteRouteWithChildren =

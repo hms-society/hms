@@ -40,6 +40,7 @@ export const ROUTES = {
     '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId',
   formalizations: '/formalizacoes',
   formalization: '/formalizacoes/$formalizationId',
+  formalizationSendingConfiguration: '/formalizacoes/$formalizationId/configuracao-envio',
   formalizationDocumentVersion:
     '/formalizacoes/$formalizationId/documentos/$documentVersionId',
 } as const
@@ -68,6 +69,15 @@ export function buildConsultationDocumentVersionPath(params: {
 
 export function buildFormalizationPath(formalizationId: string): string {
   return ROUTES.formalization.replace('$formalizationId', formalizationId)
+}
+
+export function buildFormalizationSendingConfigurationPath(
+  formalizationId: string,
+): string {
+  return ROUTES.formalizationSendingConfiguration.replace(
+    '$formalizationId',
+    formalizationId,
+  )
 }
 
 export function buildFormalizationDocumentVersionPath(params: {

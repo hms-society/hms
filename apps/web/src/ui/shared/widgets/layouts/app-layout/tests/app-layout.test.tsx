@@ -6,7 +6,7 @@ import { CollaboratorProfile } from '@hms/core/identity/domain/structures'
 import { ROUTES } from '@/constants/routes'
 import { SIDEBAR_ITEMS } from '@/constants/sidebar-items'
 import { AppLayout } from '../index'
-import { useSignOutAction } from '../sidebar/use-sign-out-action'
+import { useSignOutAction } from '@/ui/shared/hooks/use-sign-out-action'
 import { useAppLayout } from '../use-app-layout'
 import type { AnchorProps } from '../../../components/anchor'
 
@@ -30,7 +30,7 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   ),
 }))
 
-vi.mock('../sidebar/use-sign-out-action', () => ({
+vi.mock('@/ui/shared/hooks/use-sign-out-action', () => ({
   useSignOutAction: vi.fn(),
 }))
 

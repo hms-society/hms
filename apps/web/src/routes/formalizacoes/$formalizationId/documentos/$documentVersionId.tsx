@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { FormalizationDocumentReviewPage } from '@/ui/formalization/widgets/pages/formalization-page/formalization-document-review-page'
+import { FormalizationDocumentReviewPage } from '@/ui/formalization/widgets/pages/formalization-document-review-page'
 
 export const Route = createFileRoute(
   '/formalizacoes/$formalizationId/documentos/$documentVersionId',

@@ -17,7 +17,7 @@ import {
   type IntakeClosureReason,
   type IntakeStatus as IntakeStatusValue,
 } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type BaseRequest = Omit<
   IntakeCreation,

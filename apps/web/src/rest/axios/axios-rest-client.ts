@@ -53,7 +53,7 @@ export const AxiosRestClient = (
     },
 
     getFile(url) {
-      return request<File>(client, { method: 'get', url, responseType: 'blob' })
+      return request<Blob>(client, { method: 'get', url, responseType: 'blob' })
     },
 
     post<ResponseBody>(url: string, body?: unknown) {

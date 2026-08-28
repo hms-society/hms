@@ -38,6 +38,26 @@ material ambiguity or requires a different contract, stop, return the Spec to th
 Use the Spec's real source and Jira ticket traceability. Do not invent or migrate external
 records.
 
+## Grilling gate
+
+Before writing `plan.md`, apply the `grilling` protocol from
+[`grilling-prompt.md`](./grilling-prompt.md). Build the execution design tree from the open
+Spec's technical contracts, then ask the whole current frontier in one numbered round using the
+required `❓`/`➡️` format with a recommendation for each question. Recompute the frontier after
+every answer and defer questions whose technical or ownership prerequisites are not settled.
+
+Facts about repository paths, ownership patterns, tooling, dependencies, and existing artifacts
+must be researched or delegated to bounded read-only search; do not ask the user for facts that
+can be verified. Grill unresolved execution decisions about phase boundaries, dependency order,
+Builder ownership, parallelism, migration/generated-file coordination, recovery state, validation
+handoff, and any PR decomposition required by repository limits. Do not use Plan questions to
+silently redefine the Spec; route a product or technical Contract change back through
+`create-spec`.
+
+Do not create or modify `plan.md` while a material decision remains open. When the frontier is
+empty, obtain explicit confirmation that shared understanding is complete, then record the
+decisions in the Plan's execution status or ledger rather than preserving an interview transcript.
+
 ## Location and metadata
 
 Create `plan.md` beside the governing `spec.md`, including inside a concluded feature's

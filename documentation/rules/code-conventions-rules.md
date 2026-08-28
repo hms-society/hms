@@ -31,6 +31,11 @@ Classes, interfaces, types, React components, and factory functions use
 React hooks use the `use<Name>` form, such as `useSignInPage` or
 `useClientRegisterDialog`.
 
+Reusable abstract classes should be named for the context or capability they
+provide rather than appending a redundant `Base` suffix. For example, prefer
+`FormalizationUseCase` to `FormalizationBaseUseCase` when the class is the shared
+use-case context for the formalization module.
+
 ### Descriptive and clear names
 
 Choose names that clearly communicate the purpose of the value. Prefer
@@ -181,6 +186,32 @@ A module-level function is allowed only when it is genuinely independent of a
 class, is shared by multiple declarations, or is intentionally exposed as the
 module's functional API. Do not move class-owned behavior out of a class merely
 to shorten the class body.
+
+## Blank lines and logical phases
+
+Use blank lines to separate meaningful sections of a function or use case. In an
+`execute` method, common sections include loading data, authorizing and
+validating, constructing the next state, and persisting or publishing the result.
+Keep directly related guard conditions together, and do not insert a blank line
+between every statement.
+
+For example:
+
+```ts
+const formalization = await repository.findById(request.formalizationId)
+
+if (!formalization) throw new FormalizationNotFoundError()
+this.assertAccess(formalization.assignedLawyerId, request)
+
+const configuration = await configurationRepository.findByFormalizationId(
+  formalization.id,
+)
+
+const updated = await configurationRepository.replaceConfiguration(nextState)
+```
+
+Apply the same separation between a constructor and the public methods that use
+its dependencies, and between private methods that represent distinct phases.
 
 ## Known application failures use AppError
 

@@ -24,7 +24,8 @@ apps/web/src/ui/shared/
 Use these shared directories consistently:
 
 - `contexts` for application composition and dependency contexts;
-- `hooks` for reusable application hooks;
+- `hooks` for reusable shared application hooks; feature-level `hooks` directories are
+  reserved for action and query hooks;
 - `styles` for global styles and theme integration;
 - `widgets/components` for reusable application components;
 - `widgets/layouts` for composed application shells and layouts.
@@ -32,6 +33,28 @@ Use these shared directories consistently:
 Generated or installed shadcn primitives belong under `apps/web/src/ui/shadcn`.
 Application widgets may compose those primitives, but feature code must not copy
 or fork a primitive into a feature directory merely to change its presentation.
+
+### shadcn/ui component policy
+
+Use shadcn/ui components whenever an appropriate primitive exists for the
+interaction or visual pattern being implemented. Prefer composing and styling
+the existing primitive over building an equivalent native or feature-local
+component. This applies to controls such as buttons, inputs, labels, checkboxes,
+dialogs, menus, tabs, cards, badges, alerts, tables, and loading states.
+
+When the required primitive is not already present, install it with the
+workspace's configured shadcn command:
+
+```bash
+pnpm --filter web shadcn add <component>
+```
+
+Review the generated implementation and keep it under `apps/web/src/ui/shadcn`.
+Do not install a competing component library or hand-roll a replacement unless
+shadcn/ui does not provide a suitable primitive; in that case, document the
+reason in the implementation review and preserve the same accessibility,
+keyboard, focus, disabled, loading, and error behavior expected of the
+equivalent shadcn/ui component.
 
 Business decisions and use-case orchestration do not belong in widgets, pages, or
 hooks. The UI consumes core contracts through application adapters.
@@ -98,33 +121,67 @@ interaction handlers.
 
 Every nested component is a widget and follows the same directory convention as
 its parent widget. A parent and each nested widget use an `index.tsx` entry point;
-the widget may also have a colocated `use-<widget-name>.ts` hook when it owns UI
-logic:
+every widget also has a colocated `use-<widget-name>.ts` hook and a `tests/`
+directory containing separately named component and hook tests:
 
 ```text
 client-register-dialog/
 ├── index.tsx
 ├── use-client-register-dialog.ts
+├── tests/
+│   ├── client-register-dialog.test.tsx
+│   └── use-client-register-dialog.test.ts
 └── steps/
     └── client-identification/
         ├── index.tsx
-        └── use-client-identification.ts
+        ├── use-client-identification.ts
+        └── tests/
+            ├── client-identification.test.tsx
+            └── use-client-identification.test.ts
 ```
 
 This is mandatory: do not define a nested component as a local component inside
 its parent's `index.tsx`. Every internal component must be promoted to an
 internal widget with its own widget directory and `index.tsx` entry point. Give
-it an exported widget-specific prop type and a colocated hook when it owns
-behavior, even when the widget is not reused outside its parent.
+it an exported widget-specific prop type, a colocated hook and both tests, even
+when the widget is not reused outside its parent or is currently a pure renderer.
+
+The production entrypoint is always `index.tsx`, but its component test is never
+`index.test.tsx`. The test filename mirrors the widget directory basename:
+
+```text
+signature-fields-tab/
+├── index.tsx
+├── use-signature-fields-tab.ts
+└── tests/
+    ├── signature-fields-tab.test.tsx
+    └── use-signature-fields-tab.test.ts
+```
+
+Feature-level action/query hooks under `apps/web/src/ui/<module>/hooks/` are not
+widgets and do not require this component/hook test pair.
+
+### Keep React Query behind query/action hooks
+
+Only domain query hooks named `use-<name>-query.ts`, domain action hooks named
+`use-<name>-action.ts`, and the shared `RootLayout` widget may import
+`@tanstack/react-query` directly. `RootLayout` owns the application-level
+`QueryClient` and `QueryClientProvider` composition.
+
+Widget components, widget behavior hooks, tests, contexts, routes, REST adapters,
+and other modules consume domain query/action hooks instead of importing React
+Query. Tests mock the nearest HMS query/action hook and must never construct a
+`QueryClient` or `QueryClientProvider`.
 
 ### Keep UI logic inside the owning widget hook
 
-Widgets with non-trivial interface behavior must have a colocated
-`use-<widget-name>.ts` hook. Non-trivial behavior includes local state, effects,
+Every widget must have a colocated `use-<widget-name>.ts` hook, including a widget
+whose current rendering is a pure prop-to-markup projection. This keeps the component and
+hook test boundaries stable as behavior evolves. Non-trivial behavior includes local state, effects,
 refs, form state or validation, field arrays, request/action orchestration,
-derived UI state, transitions, and user-interaction handlers. A widget may omit
-the hook only when it is a pure prop-to-markup renderer with no behavior of its
-own.
+derived UI state, transitions, and user-interaction handlers. A pure widget hook may only
+derive presentation values and return callback props unchanged; do not invent state or
+effects merely to make the hook non-empty.
 
 The widget `index.tsx` is a composition and rendering boundary. Its component
 must be declared as an exported `const` using the widget-specific props type:
@@ -217,18 +274,34 @@ The hook must remain the single owner of the widget's behavior. Nested widgets
 apply the same rule in their own hooks and must not reach into a parent's local
 state except through explicit props or callbacks.
 
-Page-owned hooks live beside the page widget under its feature directory, for
-example `widgets/pages/<page>/use-<page>.ts`. Query hooks, action hooks and query
-keys that exist only for that page stay within the same page boundary. Every
+Page-owned behavior hooks live beside the page widget under its feature directory, for
+example `widgets/pages/<page>/use-<page>.ts`. Feature action/query hooks live under
+`apps/web/src/ui/<module>/hooks/`, including when currently consumed by one page. Query keys
+are implementation details colocated in the action/query hook module that owns the cached
+resource. The owning module may export a narrowly named key builder when another action or
+consumer must invalidate/read that cache; do not create query-key files, objects or a
+feature-level `queries/` directory. Every
 named function in a page hook—including helpers and interaction handlers—must be
 declared with the `function` form; do not use arrow-function declarations for
 page-hook behavior.
 
-When a hook is consumed by more than one widget, it is a feature-level shared
-hook and must live under `apps/web/src/ui/<module>/hooks/`. It must not remain
-inside the first widget that used it. A hook that is exclusive to one component
-widget remains colocated with that widget. The placement follows actual
-consumers: do not promote a hook merely because it might be reused later.
+Do not move presentation or interaction behavior hooks into a feature `hooks/` directory.
+They remain colocated with the widget that owns the behavior. When multiple widgets need
+the same interaction behavior, establish a shared owning widget or an explicitly documented
+feature concern instead of turning `hooks/` into a miscellaneous utility directory.
+
+## Antipatterns to Avoid
+
+- **Mixing widget behavior with action/query hooks:** do not place page state, dialog state,
+  presentation derivation or interaction handlers under a feature `hooks/` directory. Keep
+  them in the owning widget hook; reserve the directory for server query/action orchestration.
+- **Creating query-key registries:** do not create `*-query-keys.ts`, a shared query-key
+  object or a feature `queries/` directory. Colocate a narrowly named key builder with the
+  query/action hook that owns the resource. Dedicated query/action-hook tests are not
+  required; prove consumer behavior in widget-hook and integration coverage.
+- **Naming a widget test after its entrypoint:** do not create `tests/index.test.tsx`.
+  Keep `index.tsx` as the production entrypoint and name the component test after the
+  widget directory, for example `tests/signature-fields-tab.test.tsx`.
 
 ### Use shared HTTP status constants
 

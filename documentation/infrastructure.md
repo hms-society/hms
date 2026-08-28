@@ -26,6 +26,7 @@
 
 * **BiomeJS:** Analyzes code to find errors and inconsistencies, standardizes code formatting across the monorepo, and enforces good practices with React, TypeScript, and Node.
 * **Turborepo:** Organizes the monorepo, sharing packages between front-end, back-end, database, emails, UI, and tests.
+* **Dependency Cruiser:** Validates workspace dependency graphs, circular dependencies, application/package direction, module-owned database boundaries, and Web query/action boundaries.
 
 ### Testing and Reliability
 
@@ -58,6 +59,10 @@
 
 * **Supabase Storage:** Main file storage, located in the São Paulo region.
 * **Signed Upload URL:** Used for direct front-end uploads to Storage without passing file bytes through the VPS.
+* **Durable document artifacts:** Generated DOCX and internal PDFs use immutable
+  objects in a private bucket with PostgreSQL metadata. Missing historical bytes are
+  not silently regenerated into an existing document version; recovery creates a new
+  version and requires package reconfirmation.
 * **RLS for Reading:** Users download private files using JWT and RLS policies.
 
 ### Emails
@@ -73,6 +78,19 @@
 * **Inngest:** Orchestrates jobs, retries, asynchronous workflows, and automations.
 * **Inngest Dev Server:** Local environment for testing workflows.
 * **Inngest Cloud:** Used in staging and production.
+* **Bounded work reconciliation:** A module may reconcile its own pending or
+  lease-expired durable work when direct event loss would strand a user-visible
+  asynchronous state. This does not introduce a generic outbox or arbitrary event relay.
+
+### Document conversion
+
+* **Gotenberg:** Private, stateless DOCX-to-PDF conversion service. Locally it is
+  reachable from the host only through a loopback-bound port; staging and production
+  use private Coolify service DNS with no public Traefik route.
+* **Formalization previews:** Package confirmation persists a batch, Inngest fans it
+  out to one conversion job per document, and NestJS stores each validated PDF in the
+  private Supabase Storage bucket. Gotenberg has no Storage credentials or permanent
+  document volume.
 
 Typical flow:
 

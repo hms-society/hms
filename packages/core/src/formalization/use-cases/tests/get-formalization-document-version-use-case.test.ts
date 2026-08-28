@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { DocumentPackagesRepository, DocumentVersionsRepository, PackageDocumentsRepository } from '../../../document-production/interfaces'
+import type {
+  DocumentPackagesRepository,
+  DocumentVersionsRepository,
+  PackageDocumentsRepository,
+} from '../../../document-production/interfaces'
 import type { FormalizationsRepository } from '../../interfaces'
 import { GetFormalizationDocumentVersionUseCase } from '../get-formalization-document-version-use-case'
 
@@ -18,7 +22,11 @@ describe('Get Formalization Document Version Use Case', () => {
         mock<DocumentPackagesRepository>(),
         mock<PackageDocumentsRepository>(),
         versionsRepository,
-      ).execute({ formalizationId: formalization.id, versionId: 'missing', actorId: formalization.assignedLawyerId }),
+      ).execute({
+        formalizationId: formalization.id,
+        versionId: 'missing',
+        actorId: formalization.assignedLawyerId,
+      }),
     ).rejects.toThrow('não foi encontrada')
   })
 

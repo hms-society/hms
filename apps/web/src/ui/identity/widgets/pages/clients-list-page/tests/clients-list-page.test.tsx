@@ -17,7 +17,7 @@ const client = {
   phone: '11999999999',
 }
 
-function createController(
+function fakeHook(
   overrides: Partial<ReturnType<typeof useClientsListPage>> = {},
 ): ReturnType<typeof useClientsListPage> {
   return {
@@ -53,7 +53,7 @@ describe('ClientsListPage', () => {
   afterEach(cleanup)
 
   it('renders the page heading and loading state', () => {
-    useClientsListPageMock.mockReturnValue(createController({ isLoading: true }))
+    useClientsListPageMock.mockReturnValue(fakeHook({ isLoading: true }))
 
     render(<ClientsListPage />)
 
@@ -62,7 +62,7 @@ describe('ClientsListPage', () => {
   })
 
   it('renders the empty state when no client is returned', () => {
-    useClientsListPageMock.mockReturnValue(createController())
+    useClientsListPageMock.mockReturnValue(fakeHook())
 
     render(<ClientsListPage />)
 
@@ -74,7 +74,7 @@ describe('ClientsListPage', () => {
     const handleClientSelect = vi.fn()
     const handleSearchChange = vi.fn()
     useClientsListPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         clients: [
           {
             client,
@@ -113,9 +113,7 @@ describe('ClientsListPage', () => {
 
   it('opens the client registration dialog from the page action', () => {
     const handleOpenClientRegisterDialog = vi.fn()
-    useClientsListPageMock.mockReturnValue(
-      createController({ handleOpenClientRegisterDialog }),
-    )
+    useClientsListPageMock.mockReturnValue(fakeHook({ handleOpenClientRegisterDialog }))
 
     render(<ClientsListPage />)
 
@@ -128,7 +126,7 @@ describe('ClientsListPage', () => {
     const handleNextPage = vi.fn()
     const handlePreviousPage = vi.fn()
     useClientsListPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         clients: [],
         handleNextPage,
         handlePreviousPage,

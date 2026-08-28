@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
@@ -19,8 +18,6 @@ import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
-
-const LOGGER = new Logger('DatabaseSeed')
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(SeedModule)
@@ -152,7 +149,7 @@ async function bootstrap() {
       contractForm: formalizationForm,
     })
 
-    const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
+    await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
@@ -160,23 +157,26 @@ async function bootstrap() {
       requestedByCollaboratorId: lawyer.id,
     })
 
-    await app.get(CommunicationSeeder).run()
+    await app.get(CommunicationSeeder).run({
+      authorId: actor.id,
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      lawyerId: lawyer.id,
+      intakes: intakeSeed.intakes.map(({ id, clientId, createdAt }) => ({
+        id,
+        clientId,
+        createdAt,
+      })),
+    })
     await app.get(RealDocumentsSeeder).run()
-    await app.get(DocumentsSeeder).run()
-
-    LOGGER.log(
-      JSON.stringify({
-        consultationId: consultationSeed.consultation.id,
-        documentIds: documentProductionSeed.documents.map(({ id }) => id),
-        assignedLawyerEmail: actor.email,
-      }),
-    )
+    await app.get(DocumentsSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      userIds: identitySeed.users.map(({ id }) => id),
+    })
   } finally {
     await app.close()
   }
 }
 
-bootstrap().catch((err) => {
-  console.error('SEED FAILED:', err)
+bootstrap().catch(() => {
   process.exit(1)
 })

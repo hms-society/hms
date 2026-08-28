@@ -14,14 +14,12 @@ import {
   InvalidLegalExpertiseError,
   UserDisabledError,
 } from '../domain/errors'
-import type {
-  AuthAdministrationProvider,
-  CollaboratorRegistrationAttemptsRepository,
-  CollaboratorsRepository,
-  IdentityTransaction,
-  IdentityTransactionScope,
-  UsersRepository,
-} from '../interfaces'
+import type { AuthAdministrationProvider } from '../interfaces/auth-administration-provider'
+import type { CollaboratorRegistrationAttemptsRepository } from '../interfaces/collaborator-registration-attempts-repository'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
+import type { IdentityTransaction } from '../interfaces/identity-transaction'
+import type { IdentityTransactionScope } from '../interfaces/identity-transaction-scope'
+import type { UsersRepository } from '../interfaces/users-repository'
 import type {
   AuthUser,
   CollaboratorRegistration,

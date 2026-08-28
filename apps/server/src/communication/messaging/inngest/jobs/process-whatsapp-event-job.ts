@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common'
+import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
-import { like } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { clientModel } from '@/identity/database/drizzle/models'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { integracaoEvento } from '@/shared/database/drizzle/schema/integracao-evento'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
@@ -44,6 +44,8 @@ export class ProcessWhatsappEventJob extends InngestJob {
     inngest: InngestClient,
     @Inject(DrizzleClient)
     private readonly drizzleClient: DrizzleClient,
+    @Inject(IDENTITY_REPOSITORIES.clients)
+    private readonly clientsRepository: ClientsRepository,
   ) {
     super(inngest)
 
@@ -80,11 +82,9 @@ export class ProcessWhatsappEventJob extends InngestJob {
               continue
             }
 
-            const [client] = await database
-              .select()
-              .from(clientModel)
-              .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-              .limit(1)
+            const normalizedSender = sender.startsWith('+') ? sender : `+${sender}`
+            const clients = await this.clientsRepository.findByPhone(normalizedSender)
+            const client = clients[0]
 
             if (!client) {
               await database.insert(integracaoEvento).values({

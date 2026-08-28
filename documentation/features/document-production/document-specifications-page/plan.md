@@ -261,7 +261,7 @@ Sensores oficiais da fase, sem build:
 - revisão da rota gerada, serviço REST, query keys e contratos de URL;
 - `pnpm --filter web test:integration` na F4, com escopo explicitamente
   mockado por `page.route` e rotulado como integração determinística de widget/
-  rota, não como E2E real. A configuração atual usa Vite em `127.0.0.1:3100`
+  rota, não como E2E real. A configuração atual usa Vite em `127.0.0.1:5000`
   e endpoints fictícios (`hms-api.test`/`supabase.test`); o fluxo com serviços
   reais será separado no Playwright MCP.
 
@@ -287,7 +287,7 @@ testes e referência visual, então fechar com um único Judge Implementation.
 Há dois sensores de navegador distintos:
 
 1. **Playwright automatizado mockado** — `pnpm --filter web test:integration`,
-   usando o `playwright.config.ts` atual (`127.0.0.1:3100`, `page.route` para
+   usando o `playwright.config.ts` atual (`127.0.0.1:5000`, `page.route` para
    API/Auth quando necessário). A evidência deve ser rotulada como mockada e
    cobre loader, route integration, URL/request e composição determinística;
    não prova autenticação real, bootstrap do Nest ou integração com banco.
@@ -300,7 +300,7 @@ Preflight obrigatório de browser real, conforme `AGENTS.md`:
 
 1. `docker compose ps -a`;
 2. `curl http://localhost:8000/auth/v1/health`;
-3. `curl http://localhost:3333/health`;
+3. `curl http://localhost:5555/health`;
 4. iniciar `pnpm --filter server dev` e `pnpm --filter web dev` em sessões
    persistentes e aguardar compilação/restart terminar;
 5. confirmar `admin@hmsadvogados.com.br` e `HMS_USER_SEED_PASSWORD` lendo a

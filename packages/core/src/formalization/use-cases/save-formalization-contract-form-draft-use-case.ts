@@ -1,4 +1,3 @@
-import type { UseCase } from '../../shared/interfaces'
 import { ValidateDynamicFormAnswersUseCase } from '../../shared/use-cases'
 import type { DynamicFormAnswer } from '../../shared/domain/structures'
 import type { Formalization } from '../domain/entities'
@@ -11,7 +10,7 @@ import {
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -19,22 +18,30 @@ type Request = FormalizationActor & {
   readonly answers: readonly DynamicFormAnswer[]
 }
 
-export class SaveFormalizationContractFormDraftUseCase
-  implements UseCase<Request, Formalization>
-{
+export class SaveFormalizationContractFormDraftUseCase extends FormalizationUseCase<
+  Request,
+  Formalization
+> {
   private readonly validateAnswersUseCase = new ValidateDynamicFormAnswersUseCase()
 
-  constructor(private readonly formalizationsRepository: FormalizationsRepository) {}
+  constructor(private readonly formalizationsRepository: FormalizationsRepository) {
+    super()
+  }
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    this.assertAccess(formalization.assignedLawyerId, request)
     if (
       formalization.status !== FormalizationStatus.InProgress ||
       formalization.contractFormState !== FormalizationContractFormState.Open
     ) {
-      throw new FormalizationStateConflictError('O formulário não está aberto para rascunho.')
+      throw new FormalizationStateConflictError(
+        'O formulário não está aberto para rascunho.',
+      )
     }
 
     const validation = await this.validateAnswersUseCase.execute({

@@ -2,7 +2,7 @@ import { ROUTES } from '@/constants/routes'
 import type { SidebarItem } from '@/constants/sidebar-items'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { useSignOutAction } from './use-sign-out-action'
+import { useSignOutAction } from '@/ui/shared/hooks/use-sign-out-action'
 import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export type SidebarProps = {

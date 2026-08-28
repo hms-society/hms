@@ -1,18 +1,18 @@
 import { useMemo, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { DynamicFormAnswerValue } from '@hms/core/shared/domain'
 
+import {
+  useCloseFormalizationWithoutContractAction,
+  type CloseFormalizationWithoutContractInput,
+} from '@/ui/formalization/hooks/use-close-formalization-without-contract-action'
 import { useFormalizationQuery } from '@/ui/formalization/hooks/use-formalization-query'
 import { useSaveFormalizationContractFormAction } from '@/ui/formalization/hooks/use-save-formalization-contract-form-action'
-import { useFormalizationDocumentProduction } from '@/ui/formalization/hooks/use-formalization-document-production'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { formalizationQueryKeys } from '@/ui/formalization/hooks/formalization-query-keys'
+import { useFormalizationDocumentProduction } from '@/ui/formalization/hooks/use-formalization-document-production-action'
+import { useFormalizationSignatureConfiguration } from '@/ui/formalization/hooks/use-formalization-signature-configuration-action'
 
 export function useFormalizationPage(formalizationId: string) {
   const query = useFormalizationQuery(formalizationId)
   const actions = useSaveFormalizationContractFormAction(formalizationId)
-  const { formalizationService } = useRestContext()
-  const queryClient = useQueryClient()
   const [answers, setAnswers] = useState<Record<string, DynamicFormAnswerValue>>({})
   const [dialog, setDialog] = useState<
     'close' | 'reopen' | 'confirm' | 'without-contract' | null
@@ -23,6 +23,10 @@ export function useFormalizationPage(formalizationId: string) {
   const documentProduction = useFormalizationDocumentProduction(
     formalizationId,
     formalization?.contractFormState === 'closed',
+  )
+  const signatureConfiguration = useFormalizationSignatureConfiguration(
+    formalizationId,
+    documentProduction.isPackageConfirmed,
   )
   const initialAnswers = useMemo(
     () =>
@@ -54,32 +58,27 @@ export function useFormalizationPage(formalizationId: string) {
     value,
   }))
 
-  const closeWithoutContract = useMutation({
-    mutationFn: async (input: {
-      reason: Parameters<typeof formalizationService.closeWithoutContract>[1]['reason']
-      notes?: string
-    }) => {
+  const closeFormalizationWithoutContract =
+    useCloseFormalizationWithoutContractAction(formalizationId)
+
+  const closeWithoutContract = {
+    ...closeFormalizationWithoutContract,
+    mutate(
+      input: Omit<
+        CloseFormalizationWithoutContractInput,
+        'expectedIntakeVersion' | 'expectedVersion'
+      >,
+    ) {
       const intakeVersion = query.data?.intake.version
-      if (!formalization || intakeVersion === undefined) {
-        throw new Error('Formalização indisponível.')
-      }
-      const response = await formalizationService.closeWithoutContract(formalizationId, {
-        expectedVersion: formalization.version,
+      if (!formalization || intakeVersion === undefined) return
+
+      closeFormalizationWithoutContract.mutate({
+        ...input,
         expectedIntakeVersion: intakeVersion,
-        reason: input.reason,
-        notes: input.notes,
+        expectedVersion: formalization.version,
       })
-      if (response.isFailure) response.throwError()
-      return response.body
     },
-    onSuccess: () => {
-      void queryClient
-        .invalidateQueries({
-          queryKey: formalizationQueryKeys.detail(formalizationId),
-        })
-        .catch(() => undefined)
-    },
-  })
+  }
 
   return {
     query,
@@ -91,6 +90,7 @@ export function useFormalizationPage(formalizationId: string) {
     answerList,
     setAnswer,
     documentProduction,
+    signatureConfiguration,
     closeWithoutContract,
     isFormSelectionOpen,
     setIsFormSelectionOpen,
