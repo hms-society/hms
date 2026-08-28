@@ -130,14 +130,21 @@ export function useDocumentInbox() {
     const statusStyle = getStatusStyle(statusLabel)
     const channel = batch.channel ?? DocumentBatchChannel.WhatsApp
 
+    const senderString =
+      typeof batch.sender === 'string'
+        ? batch.sender
+        : 'phone' in batch.sender
+          ? batch.sender.phone
+          : batch.sender.email
+
     if (batch.files && batch.files.length > 0) {
       return batch.files.map((file) => ({
         id: file.id,
         fileName: file.originalName,
         fileSize: formatFileSize(file.sizeBytes),
         receivedFromIcon: getChannelIcon(channel),
-        receivedFrom: batch.sender,
-        contactInfo: `${getChannelLabel(channel)} · ${batch.sender}`,
+        receivedFrom: senderString,
+        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
         caseId: batch.readableId ?? 'Sem vínculo seguro',
         caseDesc: batch.clientId
           ? 'Titular pré-identificado'
@@ -156,8 +163,8 @@ export function useDocumentInbox() {
         fileName: batch.readableId ?? 'Lote sem arquivos',
         fileSize: '0 KB',
         receivedFromIcon: getChannelIcon(channel),
-        receivedFrom: batch.sender,
-        contactInfo: `${getChannelLabel(channel)} · ${batch.sender}`,
+        receivedFrom: senderString,
+        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
         caseId: batch.readableId ?? 'Sem vínculo seguro',
         caseDesc: batch.clientId
           ? 'Titular pré-identificado'
