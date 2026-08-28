@@ -1,14 +1,20 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common'
+import type { UsersRepository } from '@hms/core/identity/interfaces'
+import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common'
+import { desc, eq } from 'drizzle-orm'
+
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { AuthGuard } from '@/identity/guards'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
-import { userModel } from '@/identity/database/drizzle/models/user-model'
-import { eq, desc } from 'drizzle-orm'
-import { AuthGuard } from '@/identity/guards'
 
 @Controller('communications')
 @UseGuards(AuthGuard)
 export class ListClientCommunicationsController {
-  constructor(private readonly drizzleClient: DrizzleClient) {}
+  constructor(
+    private readonly drizzleClient: DrizzleClient,
+    @Inject(IDENTITY_REPOSITORIES.users)
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
   @Get('clients/:clientId')
   async handle(@Param('clientId') clientId: string) {
@@ -21,20 +27,27 @@ export class ListClientCommunicationsController {
         direction: communicationModel.direction,
         content: communicationModel.content,
         createdAt: communicationModel.createdAt,
-        authorName: userModel.email,
+        authorId: communicationModel.authorId,
       })
       .from(communicationModel)
-      .leftJoin(userModel, eq(communicationModel.authorId, userModel.id))
       .where(eq(communicationModel.clientId, clientId))
       .orderBy(desc(communicationModel.createdAt))
 
-    return records.map((record) => ({
-      id: record.id,
-      channel: record.channel,
-      direction: record.direction,
-      content: record.content,
-      createdAt: record.createdAt.toISOString(),
-      author: record.authorName || 'Cliente',
-    }))
+    return Promise.all(
+      records.map(async (record) => {
+        const author = record.authorId
+          ? await this.usersRepository.findById(record.authorId)
+          : undefined
+
+        return {
+          id: record.id,
+          channel: record.channel,
+          direction: record.direction,
+          content: record.content,
+          createdAt: record.createdAt.toISOString(),
+          author: author?.email ?? 'Cliente',
+        }
+      }),
+    )
   }
 }
