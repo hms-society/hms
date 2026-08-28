@@ -1,6 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
-import type { PropsWithChildren } from 'react'
+import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
@@ -14,6 +12,12 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: vi.fn(),
 }))
 
+const { useQueryMock } = vi.hoisted(() => ({ useQueryMock: vi.fn() }))
+
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: useQueryMock,
+}))
+
 const useRestContextMock = vi.mocked(useRestContext)
 
 describe('legal catalog query hooks', () => {
@@ -25,29 +29,25 @@ describe('legal catalog query hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useRestContextMock.mockReturnValue({ legalCatalogService } as never)
-  })
-
-  function createWrapper() {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
+    useQueryMock.mockReturnValue({
+      data: undefined,
+      error: null,
+      isLoading: false,
     })
-
-    return function QueryProvider({ children }: PropsWithChildren) {
-      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    }
-  }
+  })
 
   it('loads legal areas through the catalog service', async () => {
     const areas = [{ id: 'area-id', name: 'Cível' }]
     legalCatalogService.listLegalAreas.mockResolvedValue(
       new RestResponse({ body: areas }),
     )
+    useQueryMock.mockReturnValue({ data: areas, error: null, isLoading: false })
 
-    const { result } = renderHook(() => useLegalAreasQuery(), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useLegalAreasQuery())
+    const queryOptions = useQueryMock.mock.calls[0]?.[0]
 
-    await waitFor(() => expect(result.current.legalAreas).toEqual(areas))
+    expect(result.current.legalAreas).toEqual(areas)
+    await expect(queryOptions.queryFn()).resolves.toEqual(areas)
     expect(legalCatalogService.listLegalAreas).toHaveBeenCalledOnce()
   })
 
@@ -56,18 +56,20 @@ describe('legal catalog query hooks', () => {
     legalCatalogService.listLegalTopics.mockResolvedValue(
       new RestResponse({ body: topics }),
     )
+    useQueryMock.mockReturnValue({ data: topics, error: null, isLoading: false })
 
-    const { result } = renderHook(() => useLegalTopicsQuery('area-id'), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useLegalTopicsQuery('area-id'))
+    const queryOptions = useQueryMock.mock.calls[0]?.[0]
 
-    await waitFor(() => expect(result.current.legalTopics).toEqual(topics))
+    expect(result.current.legalTopics).toEqual(topics)
+    await expect(queryOptions.queryFn()).resolves.toEqual(topics)
     expect(legalCatalogService.listLegalTopics).toHaveBeenCalledWith('area-id')
   })
 
   it('does not load topics without a selected legal area', () => {
-    renderHook(() => useLegalTopicsQuery(''), { wrapper: createWrapper() })
+    renderHook(() => useLegalTopicsQuery(''))
 
+    expect(useQueryMock.mock.calls[0]?.[0].enabled).toBe(false)
     expect(legalCatalogService.listLegalTopics).not.toHaveBeenCalled()
   })
 
@@ -76,10 +78,9 @@ describe('legal catalog query hooks', () => {
       new RestResponse({ statusCode: 500, errorMessage: 'temporary failure' }),
     )
 
-    const { result } = renderHook(() => useLegalAreasQuery(), {
-      wrapper: createWrapper(),
-    })
+    renderHook(() => useLegalAreasQuery())
+    const queryOptions = useQueryMock.mock.calls[0]?.[0]
 
-    await waitFor(() => expect(result.current.legalAreasError).toBeInstanceOf(Error))
+    await expect(queryOptions.queryFn()).rejects.toBeInstanceOf(Error)
   })
 })

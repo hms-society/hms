@@ -19,7 +19,7 @@ const communication = {
   createdAt: '2026-08-10T12:00:00.000Z',
 }
 
-function createController(
+function fakeHook(
   overrides: Partial<ReturnType<typeof useClientCommunicationsTab>> = {},
 ): ReturnType<typeof useClientCommunicationsTab> {
   return {
@@ -42,7 +42,7 @@ describe('ClientCommunicationsTab', () => {
 
   it('renders the loading state', () => {
     useClientCommunicationsTabMock.mockReturnValue(
-      createController({ isLoadingCommunications: true }),
+      fakeHook({ isLoadingCommunications: true }),
     )
 
     render(<ClientCommunicationsTab clientId='client-1' />)
@@ -52,7 +52,7 @@ describe('ClientCommunicationsTab', () => {
 
   it('renders the error state', () => {
     useClientCommunicationsTabMock.mockReturnValue(
-      createController({ isErrorCommunications: true }),
+      fakeHook({ isErrorCommunications: true }),
     )
 
     render(<ClientCommunicationsTab clientId='client-1' />)
@@ -61,7 +61,7 @@ describe('ClientCommunicationsTab', () => {
   })
 
   it('renders the empty state when no communication matches the filters', () => {
-    useClientCommunicationsTabMock.mockReturnValue(createController())
+    useClientCommunicationsTabMock.mockReturnValue(fakeHook())
 
     render(<ClientCommunicationsTab clientId='client-1' />)
 
@@ -72,7 +72,7 @@ describe('ClientCommunicationsTab', () => {
 
   it('renders communication content and metadata', () => {
     useClientCommunicationsTabMock.mockReturnValue(
-      createController({ filteredCommunications: [communication] }),
+      fakeHook({ filteredCommunications: [communication] }),
     )
 
     render(<ClientCommunicationsTab clientId='client-1' />)

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { useSchedule } from './use-scheduling'
+import { useSchedule } from './use-scheduling-query'
 
 export function useConsultation() {
   const { user } = useAuthContext()

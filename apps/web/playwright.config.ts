@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const WEB_APP_URL = 'http://127.0.0.1:3100'
+const WEB_APP_URL = process.env.PLAYWRIGHT_WEB_APP_URL ?? 'http://127.0.0.1:5000'
+const WEB_APP_PORT = new URL(WEB_APP_URL).port
 
 export default defineConfig({
   testDir: './tests',
@@ -21,7 +22,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm exec vite dev --host 127.0.0.1 --port 3100',
+    command: `pnpm exec vite dev --host 127.0.0.1 --port ${WEB_APP_PORT}`,
     url: WEB_APP_URL,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,
