@@ -33,6 +33,18 @@ removes supplemental authorization, concurrent-conflict, changed-package,
 historical-DOCX and pending visual-comparison closure obligations. The latest Fields
 Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 
+## Delivery PR set
+
+| Order | PR | Base | Head | Scope |
+| --- | --- | --- | --- | --- |
+| 1 | [#97](https://github.com/hms-society/hms/pull/97) | `develop` | `codex/formalization-core-slice` | Core contracts and use cases |
+| 2 | [#98](https://github.com/hms-society/hms/pull/98) | `codex/formalization-core-slice` | `codex/formalization-validation-slice` | Validation schemas and policy |
+| 3 | [#99](https://github.com/hms-society/hms/pull/99) | `codex/formalization-validation-slice` | `codex/formalization-server-foundation-slice` | Server persistence and provider foundation |
+| 4 | [#100](https://github.com/hms-society/hms/pull/100) | `codex/formalization-server-foundation-slice` | `codex/formalization-server-app-slice` | Server REST, jobs and composition |
+| 5 | [#101](https://github.com/hms-society/hms/pull/101) | `codex/formalization-server-app-slice` | `codex/formalization-web-foundation-slice` | Web REST, routes and shared UI |
+| 6 | [#102](https://github.com/hms-society/hms/pull/102) | `codex/formalization-web-foundation-slice` | `codex/formalization-web-page-slice` | Formalization page and shared hooks |
+| 7 | [#103](https://github.com/hms-society/hms/pull/103) | `codex/formalization-web-page-slice` | `codex/formalization-sending-configuration-slice` | Dedicated sending-configuration UI and SDD records |
+
 ## Acceptance matrix
 
 | Criterion | Evidence | Status |

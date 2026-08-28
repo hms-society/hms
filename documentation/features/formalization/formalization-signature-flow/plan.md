@@ -22,6 +22,22 @@ updated_at: 2026-08-28
 
 ## Execution ledger
 
+## Delivery PR set
+
+The delivery is partitioned by dependency and ownership so every PR remains at or below the
+repository's 5,000 added-TypeScript-line limit. Merge in this order; each dependent PR uses
+the preceding slice branch as its base.
+
+| Order | PR | Base | Head | Scope |
+| --- | --- | --- | --- | --- |
+| 1 | [#97](https://github.com/hms-society/hms/pull/97) | `develop` | `codex/formalization-core-slice` | Core contracts and use cases |
+| 2 | [#98](https://github.com/hms-society/hms/pull/98) | `codex/formalization-core-slice` | `codex/formalization-validation-slice` | Validation schemas and policy |
+| 3 | [#99](https://github.com/hms-society/hms/pull/99) | `codex/formalization-validation-slice` | `codex/formalization-server-foundation-slice` | Server persistence and provider foundation |
+| 4 | [#100](https://github.com/hms-society/hms/pull/100) | `codex/formalization-server-foundation-slice` | `codex/formalization-server-app-slice` | Server REST, jobs and composition |
+| 5 | [#101](https://github.com/hms-society/hms/pull/101) | `codex/formalization-server-app-slice` | `codex/formalization-web-foundation-slice` | Web REST, routes and shared UI |
+| 6 | [#102](https://github.com/hms-society/hms/pull/102) | `codex/formalization-web-foundation-slice` | `codex/formalization-web-page-slice` | Formalization page and shared hooks |
+| 7 | [#103](https://github.com/hms-society/hms/pull/103) | `codex/formalization-web-page-slice` | `codex/formalization-sending-configuration-slice` | Dedicated sending-configuration UI and SDD records |
+
 | Wave | Builder | Phase | Name | Depends on | Parallel with | Status | Exit condition |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `builder_core` | F1 | Core contracts and ports | — | — | `completed` | Core exports, contracts and canonical structures pass type/lint checks. |
