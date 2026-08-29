@@ -308,13 +308,16 @@ export const ChecklistDossierTab = ({
 
                 <div className='flex shrink-0 items-center gap-2 self-end md:self-center'>
                   <Button
-                    variant={item.status === 'validado' ? 'brand' : 'outline'}
+                    variant={item.documentName ? 'brand' : 'outline'}
                     size='xs'
                     className='h-7 rounded-full bg-accent px-2 text-[10px] text-accent-foreground'
                     onClick={() => handleValidateChecklistItem(item.id)}
                   >
-                    <Icon name={getChecklistActionIcon(item.status)} className='size-3' />
-                    {getChecklistActionLabel(item.status)}
+                    <Icon
+                      name={getChecklistActionIcon(item.status, Boolean(item.documentName))}
+                      className='size-3'
+                    />
+                    {getChecklistActionLabel(item.status, Boolean(item.documentName))}
                   </Button>
                   <Button
                     variant='outline'

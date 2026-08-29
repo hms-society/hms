@@ -55,6 +55,9 @@ describe('useDocumentInbox', () => {
   it('maps backend documents to the inbox view model', () => {
     const { result } = renderHook(() => useDocumentInbox())
 
+    expect(useDocumentValidationDocumentsQueryMock).toHaveBeenCalledWith({
+      caseId: undefined,
+    })
     expect(result.current.totalItems).toBe(2)
     expect(result.current.paginatedData[0]).toMatchObject({
       fileName: 'validado.pdf',
@@ -82,6 +85,14 @@ describe('useDocumentInbox', () => {
 
     expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'document-file-1' },
+    })
+  })
+
+  it('loads inbox documents filtered by case id', () => {
+    renderHook(() => useDocumentInbox({ caseId: 'case-1' }))
+
+    expect(useDocumentValidationDocumentsQueryMock).toHaveBeenCalledWith({
+      caseId: 'case-1',
     })
   })
 })

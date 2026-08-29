@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { LegalCase } from '@hms/core/case-management/domain/entities'
+import type {
+  CaseChecklistItem as PersistedChecklistItem,
+  LegalCase,
+} from '@hms/core/case-management/domain/entities'
 import {
   CaseChecklistGateDecision,
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,
@@ -10,6 +13,7 @@ import {
 
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import type { ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
@@ -67,6 +71,8 @@ export function useChecklistDossierTab({
   isReviewDisabled = false,
 }: UseChecklistDossierTabParams) {
   const { caseManagementService } = useRestContext()
+  const { navigateTo } = useNavigation()
+  const queryClient = useQueryClient()
   const { currentCollaborator } = useCurrentCollaboratorQuery()
   const reviewerName =
     currentCollaborator?.professionalName?.trim() || 'Colaborador autenticado'
@@ -78,10 +84,28 @@ export function useChecklistDossierTab({
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)
   const [reviewedCase, setReviewedCase] = useState<LegalCase | null>(null)
-  const validatedItemsCount = checklistItems.filter(
+  const { data: persistedChecklistItems = [] } = useQuery({
+    queryKey: ['case-management', 'cases', caseId, 'checklist'],
+    queryFn: async () => {
+      const response = await caseManagementService.listCaseChecklist(caseId)
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+    enabled: Boolean(caseId),
+  })
+  const displayChecklistItems =
+    persistedChecklistItems.length > 0
+      ? persistedChecklistItems.map(mapPersistedChecklistItem)
+      : checklistItems
+  const requiredChecklistItems = displayChecklistItems.filter(
+    (item) => item.isRequired !== false,
+  )
+  const validatedItemsCount = requiredChecklistItems.filter(
     (item) => item.status === 'validado',
   ).length
-  const mandatoryItemsCount = checklistItems.length
+  const mandatoryItemsCount = requiredChecklistItems.length
   const pendingItemsCount = mandatoryItemsCount - validatedItemsCount
   const isChecklistComplete = pendingItemsCount === 0
   const checklistGateDecision = reviewedCase?.checklistGate.decision
@@ -115,12 +139,6 @@ export function useChecklistDossierTab({
         throw new Error('A revisão deste checklist ainda não está disponível.')
       }
 
-      if (decision === CaseChecklistGateDecision.Approved) {
-        const completionResponse = await caseManagementService.completeChecklist(caseId)
-
-        if (completionResponse.isFailure) completionResponse.throwError()
-      }
-
       const response = await caseManagementService.reviewChecklistGate(caseId, {
         decision,
         remarks: remarks.trim() || undefined,
@@ -138,12 +156,51 @@ export function useChecklistDossierTab({
     },
   })
 
+  const addComplementaryItemMutation = useMutation({
+    mutationFn: async () => {
+      const itemNumber = complementaryItems.length + 1
+      const response = await caseManagementService.addComplementaryChecklistItem(caseId, {
+        templateItemKey: `complementary-item-${itemNumber}`,
+        title: `Item complementar ${itemNumber}`,
+      })
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+    onSuccess: async (item) => {
+      setComplementaryItems((currentItems) => [
+        ...currentItems,
+        `${item.title} - adicionado por ${reviewerName}`,
+      ])
+      await queryClient.invalidateQueries({
+        queryKey: ['case-management', 'cases', caseId, 'checklist'],
+      })
+      setActionFeedback('Item complementar adicionado ao checklist deste caso.')
+    },
+  })
+
   function handleRemarksChange(value: string) {
     setRemarks(value)
     if (reasonError) setReasonError(null)
   }
 
   function handleValidateChecklistItem(itemId: string) {
+    const checklistItem = displayChecklistItems.find((item) => item.id === itemId)
+
+    if (checklistItem?.documentFileId) {
+      return navigateTo('documentAnalysis', {
+        params: { fileId: checklistItem.documentFileId },
+      })
+    }
+
+    if (persistedChecklistItems.length > 0) {
+      setActionFeedback(
+        'Validação documental deve ser concluída na Mesa de Validação para atualizar o checklist persistido.',
+      )
+      return
+    }
+
     const validatedAt = formatChecklistValidationTime(new Date())
 
     setChecklistItems((currentItems) =>
@@ -162,19 +219,15 @@ export function useChecklistDossierTab({
   }
 
   function handleOpenValidationDesk() {
-    setActionFeedback('Mesa de Validação aberta para revisar os documentos deste caso.')
+    return navigateTo('documentInbox')
   }
 
   function handleFilterByCase() {
-    setActionFeedback('Filtro do caso aplicado ao checklist documental.')
+    return navigateTo('documentInbox', { search: { caseId } })
   }
 
   function handleAddComplementaryItem() {
-    setComplementaryItems((currentItems) => [
-      ...currentItems,
-      `Item complementar ${currentItems.length + 1} - adicionado por ${reviewerName}`,
-    ])
-    setActionFeedback('Item complementar adicionado ao checklist deste caso.')
+    return addComplementaryItemMutation.mutateAsync()
   }
 
   function handleRequestDocumentException() {
@@ -240,7 +293,7 @@ export function useChecklistDossierTab({
     checklistGateAuditLabel,
     checklistGateLabel,
     checklistGateRemarks,
-    checklistItems,
+    checklistItems: displayChecklistItems,
     complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,
@@ -261,7 +314,8 @@ export function useChecklistDossierTab({
     isDecisionReasonDialogOpen,
     isChecklistComplete,
     isReviewDisabled,
-    isReviewingChecklistGate: mutation.isPending,
+    isReviewingChecklistGate:
+      mutation.isPending || addComplementaryItemMutation.isPending,
     mandatoryItemsCount,
     pendingItemsCount,
     reasonError,
@@ -309,4 +363,34 @@ function formatChecklistValidationTime(date: Date) {
   }).format(date)
 
   return `hoje ${time}`
+}
+
+function mapPersistedChecklistItem(item: PersistedChecklistItem): ChecklistItem {
+  const validatedBy = item.validatedBy ? ` por ${item.validatedBy}` : ''
+  const validatedAt = item.validatedAt
+    ? ` em ${formatChecklistGateDecisionDate(item.validatedAt)}`
+    : ''
+  const documentLabel = item.documentFileName ?? item.documentFileId
+  const documentName =
+    documentLabel && item.status === 'validated'
+      ? `${documentLabel} - validado${validatedBy}${validatedAt}`
+      : documentLabel
+        ? `${documentLabel} - aguardando validação documental`
+        : undefined
+
+  return {
+    id: item.id,
+    documentFileId: item.documentFileId,
+    isRequired: item.isRequired,
+    title: item.title,
+    status: item.status === 'validated' ? 'validado' : 'solicitado',
+    documentName,
+    pendencies: item.status === 'validated' ? undefined : 1,
+    subtitle:
+      item.status === 'validated'
+        ? 'Documento validado pelo Motor Documental'
+        : documentLabel
+          ? 'Documento recebido e aguardando validação'
+          : 'Documento ainda não recebido',
+  }
 }

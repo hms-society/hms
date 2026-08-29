@@ -26,14 +26,18 @@ type InboxDocument = {
 
 const ITEMS_PER_PAGE = 6
 
-export function useDocumentInbox() {
+export type UseDocumentInboxParams = {
+  caseId?: string
+}
+
+export function useDocumentInbox({ caseId }: UseDocumentInboxParams = {}) {
   const { navigateTo } = useNavigation()
   const {
     documents: rawDocuments,
     documentsError,
     isFetchingDocuments,
     refetchDocuments,
-  } = useDocumentValidationDocumentsQuery()
+  } = useDocumentValidationDocumentsQuery({ caseId })
   const [currentPage, setCurrentPage] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [appliedDateRange, setAppliedDateRange] = useState<DateRange | undefined>()

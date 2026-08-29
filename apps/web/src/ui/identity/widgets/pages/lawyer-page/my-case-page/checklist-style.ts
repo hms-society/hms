@@ -25,14 +25,22 @@ export function getChecklistRowClasses(itemStatus: ChecklistItemStatus) {
   return 'border-border bg-card'
 }
 
-export function getChecklistActionLabel(itemStatus: ChecklistItemStatus) {
+export function getChecklistActionLabel(
+  itemStatus: ChecklistItemStatus,
+  hasDocument = false,
+) {
   if (itemStatus === 'validado') return 'Ver documento'
+  if (itemStatus === 'solicitado' && hasDocument) return 'Ver documento'
   if (itemStatus === 'solicitado') return 'Reenviar cobrança'
   return 'Solicitar'
 }
 
-export function getChecklistActionIcon(itemStatus: ChecklistItemStatus): IconName {
+export function getChecklistActionIcon(
+  itemStatus: ChecklistItemStatus,
+  hasDocument = false,
+): IconName {
   if (itemStatus === 'validado') return 'eye'
+  if (itemStatus === 'solicitado' && hasDocument) return 'eye'
   if (itemStatus === 'solicitado') return 'send'
   return 'plus'
 }

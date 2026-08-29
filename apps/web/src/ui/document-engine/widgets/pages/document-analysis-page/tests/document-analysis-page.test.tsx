@@ -10,6 +10,7 @@ import type { AnalysisFormPanelProps } from '../analysis-form-panel'
 import type { PdfViewerPanelProps } from '../pdf-viewer-panel'
 import type { ProcessingFailurePanelProps } from '../processing-failure-panel'
 import type { ReadOnlyIncompletePanelProps } from '../read-only-incomplete-panel'
+import type { ReadOnlyValidatedPanelProps } from '../read-only-validated-panel'
 import type { RequestResendModalProps } from '../request-resend-modal'
 import { DocumentAnalysisPage } from '..'
 import { useDocumentAnalysis } from '../use-document-analysis'
@@ -39,6 +40,12 @@ vi.mock('../processing-failure-panel', () => ({
 vi.mock('../read-only-incomplete-panel', () => ({
   ReadOnlyIncompletePanel: ({ document }: ReadOnlyIncompletePanelProps) => (
     <div data-testid='read-only-incomplete-panel'>{document.id}</div>
+  ),
+}))
+
+vi.mock('../read-only-validated-panel', () => ({
+  ReadOnlyValidatedPanel: ({ document }: ReadOnlyValidatedPanelProps) => (
+    <div data-testid='read-only-validated-panel'>{document.id}</div>
   ),
 }))
 
@@ -101,11 +108,29 @@ describe('DocumentAnalysisPage', () => {
   })
 
   it('renders the form and viewer widgets for a regular validation state', () => {
+    useDocumentAnalysisMock.mockReturnValue(
+      getDocumentAnalysisController({
+        documentView: {
+          ...getDocumentAnalysisController().documentView,
+          status: 'Aguardando validação',
+        },
+      }),
+    )
+
     render(<DocumentAnalysisPage fileId={document.id} />)
 
     expect(screen.getByTestId('pdf-viewer-panel')).toBeDefined()
     expect(screen.getByTestId('analysis-form-panel').textContent).toContain('validate')
     expect(screen.getByTestId('request-resend-modal').textContent).toContain('closed')
+  })
+
+  it('renders the read-only widget after the document is validated', () => {
+    render(<DocumentAnalysisPage fileId={document.id} />)
+
+    expect(screen.getByTestId('read-only-validated-panel').textContent).toContain(
+      document.id,
+    )
+    expect(screen.queryByTestId('analysis-form-panel')).toBeNull()
   })
 
   it('renders the processing failure widget for failed documents', () => {

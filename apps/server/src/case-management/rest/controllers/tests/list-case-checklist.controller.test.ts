@@ -4,20 +4,20 @@ import request from 'supertest'
 import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 
 import { CaseManagementModuleFixture } from '@/case-management/fixtures/case-management-module-fixture'
-import { CompleteCaseChecklistController } from '@/case-management/rest/controllers/complete-case-checklist.controller'
+import { ListCaseChecklistController } from '@/case-management/rest/controllers/list-case-checklist.controller'
 
-describe('Complete Case Checklist Controller [PATCH /cases/:caseId/checklist-completion]', () => {
+describe('List Case Checklist Controller [GET /cases/:caseId/checklist]', () => {
   let fixture: CaseManagementModuleFixture
 
   beforeAll(async () => {
-    fixture = await CaseManagementModuleFixture.register(CompleteCaseChecklistController)
+    fixture = await CaseManagementModuleFixture.register(ListCaseChecklistController)
   })
 
   beforeEach(async () => fixture.resetDatabase())
 
-  afterAll(async () => fixture.close())
+  afterAll(async () => fixture?.close())
 
-  it('persists checklist completion for a team member', async () => {
+  it('returns the instantiated checklist for a team member', async () => {
     const collaborator = await fixture.registerCollaborator()
     const legalCase = await fixture.registerLegalCase({
       clientId: collaborator.clientId,
@@ -32,13 +32,29 @@ describe('Complete Case Checklist Controller [PATCH /cases/:caseId/checklist-com
         isPrimary: true,
       },
     ])
+    await fixture.registerCaseChecklistItems([
+      {
+        caseId: legalCase.id,
+        templateItemKey: 'procuracao-assinada',
+        title: 'Procuração previdenciária assinada',
+        isRequired: true,
+      },
+    ])
 
     const response = await request(fixture.app.getHttpServer())
-      .patch(`/cases/${legalCase.id}/checklist-completion`)
+      .get(`/cases/${legalCase.id}/checklist`)
       .expect(200)
 
-    expect(response.body.checklistCompletedAt).toBeDefined()
-    expect(response.body.checklistCompletedBy).toBe(collaborator.collaboratorId)
-    expect(response.body.status).toBe('documentation')
+    expect(response.body).toHaveLength(1)
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          caseId: legalCase.id,
+          templateItemKey: 'procuracao-assinada',
+          status: 'pending',
+          isRequired: true,
+        }),
+      ]),
+    )
   })
 })

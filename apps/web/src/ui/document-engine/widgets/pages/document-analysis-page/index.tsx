@@ -6,6 +6,7 @@ import { AnalysisFormPanel } from './analysis-form-panel'
 import { PdfViewerPanel } from './pdf-viewer-panel'
 import { ProcessingFailurePanel } from './processing-failure-panel'
 import { ReadOnlyIncompletePanel } from './read-only-incomplete-panel'
+import { ReadOnlyValidatedPanel } from './read-only-validated-panel'
 import { RequestResendModal } from './request-resend-modal'
 import { useDocumentAnalysis } from './use-document-analysis'
 
@@ -33,6 +34,7 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
   const documentStatus = documentView.status
   const isProcessingFailure = documentStatus === 'Falha no processamento'
   const isResendRequested = documentStatus === 'Reenvio solicitado'
+  const isValidated = documentStatus === 'Válido'
 
   if (isLoading) {
     return (
@@ -144,6 +146,8 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
               />
             ) : isResendRequested ? (
               <ReadOnlyIncompletePanel document={document} />
+            ) : isValidated ? (
+              <ReadOnlyValidatedPanel document={document} />
             ) : (
               <AnalysisFormPanel
                 form={form}

@@ -23,7 +23,11 @@ import { Calendar } from '@/ui/shadcn/calendar'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useDocumentInbox } from './use-document-inbox'
 
-export const DocumentInboxPage = () => {
+export type DocumentInboxPageProps = {
+  caseId?: string
+}
+
+export const DocumentInboxPage = ({ caseId }: DocumentInboxPageProps) => {
   const {
     currentPage,
     totalPages,
@@ -44,7 +48,7 @@ export const DocumentInboxPage = () => {
     handleRefresh,
     handleApplyFilters,
     handleClearFilters,
-  } = useDocumentInbox()
+  } = useDocumentInbox({ caseId })
 
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * 6 + 1
   const endItem = Math.min(currentPage * 6, totalItems)

@@ -7,6 +7,7 @@ import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/stru
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useChecklistDossierTab } from '../use-checklist-dossier-tab'
 
@@ -18,12 +19,19 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: vi.fn(),
 }))
 
+vi.mock('@/ui/shared/hooks/use-navigation', () => ({
+  useNavigation: vi.fn(),
+}))
+
 const useCurrentCollaboratorQueryMock = vi.mocked(useCurrentCollaboratorQuery)
+const useNavigationMock = vi.mocked(useNavigation)
 const useRestContextMock = vi.mocked(useRestContext)
 
 describe('useChecklistDossierTab', () => {
+  const navigateTo = vi.fn()
   const caseManagementService = {
-    completeChecklist: vi.fn(),
+    addComplementaryChecklistItem: vi.fn(),
+    listCaseChecklist: vi.fn(),
     reviewChecklistGate: vi.fn(),
   }
 
@@ -40,6 +48,31 @@ describe('useChecklistDossierTab', () => {
     useRestContextMock.mockReturnValue({
       caseManagementService,
     } as never)
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn(),
+    })
+    caseManagementService.listCaseChecklist.mockResolvedValue(
+      new RestResponse({
+        body: [],
+        statusCode: 200,
+      }),
+    )
+    caseManagementService.addComplementaryChecklistItem.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'complementary-1',
+          caseId: 'case-1',
+          templateItemKey: 'complementary-item-1',
+          title: 'Item complementar 1',
+          isRequired: false,
+          status: 'pending',
+          createdAt: '2026-08-27T12:00:00.000Z',
+          updatedAt: '2026-08-27T12:00:00.000Z',
+        },
+        statusCode: 201,
+      }),
+    )
   })
 
   afterEach(() => {
@@ -55,19 +88,6 @@ describe('useChecklistDossierTab', () => {
     })
     const wrapper = ({ children }: PropsWithChildren) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    )
-    caseManagementService.completeChecklist.mockResolvedValue(
-      new RestResponse({
-        body: {
-          id: 'case-1',
-          status: 'documentation',
-          checklistCompletedAt: '2026-08-27T12:12:00.000Z',
-          checklistCompletedBy: 'collaborator-1',
-          checklistGate: {},
-          dossierGate: {},
-        },
-        statusCode: 200,
-      }),
     )
     caseManagementService.reviewChecklistGate.mockResolvedValue(
       new RestResponse({
@@ -203,6 +223,62 @@ describe('useChecklistDossierTab', () => {
     )
   })
 
+  it('opens the persisted validation document instead of locally validating it', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.listCaseChecklist.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'checklist-item-1',
+            caseId: 'case-1',
+            templateItemKey: 'procuracao-assinada',
+            title: 'Procuração previdenciária assinada',
+            isRequired: true,
+            status: 'pending',
+            documentFileId: 'document-file-1',
+            documentFileName: 'pdf_teste_2_paginas.pdf',
+            createdAt: '2026-08-27T12:00:00.000Z',
+            updatedAt: '2026-08-27T12:00:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [],
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() =>
+      expect(result.current.checklistItems[0]).toMatchObject({
+        documentFileId: 'document-file-1',
+        documentName: 'pdf_teste_2_paginas.pdf - aguardando validação documental',
+        status: 'solicitado',
+      }),
+    )
+
+    await act(async () => {
+      await result.current.handleValidateChecklistItem('checklist-item-1')
+    })
+
+    expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
+      params: { fileId: 'document-file-1' },
+    })
+  })
+
   it('submits checklist approval after all documents are locally validated', async () => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -251,7 +327,6 @@ describe('useChecklistDossierTab', () => {
 
     await result.current.handleApproveChecklist()
 
-    expect(caseManagementService.completeChecklist).toHaveBeenCalledWith('case-1')
     expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
       decision: CaseChecklistGateDecision.Approved,
       remarks: undefined,
@@ -259,7 +334,7 @@ describe('useChecklistDossierTab', () => {
     await waitFor(() => expect(result.current.checklistGateLabel).toBe('Aprovado'))
   })
 
-  it('updates local checklist support actions with visible feedback', () => {
+  it('updates local checklist support actions with visible feedback', async () => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -279,17 +354,21 @@ describe('useChecklistDossierTab', () => {
       { wrapper },
     )
 
-    act(() => result.current.handleOpenValidationDesk())
-    expect(result.current.actionFeedback).toBe(
-      'Mesa de Validação aberta para revisar os documentos deste caso.',
-    )
+    await act(async () => {
+      await result.current.handleOpenValidationDesk()
+    })
+    expect(navigateTo).toHaveBeenCalledWith('documentInbox')
 
-    act(() => result.current.handleFilterByCase())
-    expect(result.current.actionFeedback).toBe(
-      'Filtro do caso aplicado ao checklist documental.',
-    )
+    await act(async () => {
+      await result.current.handleFilterByCase()
+    })
+    expect(navigateTo).toHaveBeenCalledWith('documentInbox', {
+      search: { caseId: 'case-1' },
+    })
 
-    act(() => result.current.handleAddComplementaryItem())
+    await act(async () => {
+      await result.current.handleAddComplementaryItem()
+    })
     expect(result.current.complementaryItems).toEqual([
       'Item complementar 1 - adicionado por João Pedro',
     ])

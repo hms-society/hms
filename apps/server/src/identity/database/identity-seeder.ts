@@ -30,6 +30,12 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
     name: 'Cliente HMS Teste',
     phone: '5511999999999',
   }),
+  ClientFaker.fake({
+    email: 'vinicius.lopes.machado@hms.test',
+    name: 'Vinicius Lopes Machado',
+    phone: '5511987654321',
+    taxId: { type: 'cpf', value: '12345678909' },
+  }),
   ...ClientFaker.fakeMany(9),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
@@ -272,6 +278,12 @@ export class IdentitySeeder {
         ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
         id: clientUser?.id,
       },
+      ClientFaker.fake({
+        email: 'vinicius.lopes.machado@hms.test',
+        name: 'Vinicius Lopes Machado',
+        phone: '5511987654321',
+        taxId: { type: 'cpf', value: '12345678909' },
+      }),
       ...ClientFaker.fakeMany(9),
     ].map(({ id, createdAt, updatedAt, ...client }) => ({
       ...client,

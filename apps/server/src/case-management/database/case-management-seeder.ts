@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type {
-  CaseMemberCreation,
   LegalCase,
+  CaseMemberCreation,
   LegalCaseCreation,
 } from '@hms/core/case-management/domain/entities'
 import {
@@ -10,6 +10,7 @@ import {
 } from '@hms/core/case-management/domain/structures'
 import type {
   CaseMembersRepository,
+  CaseChecklistItemsRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
 import type { Intake } from '@hms/core/intake/domain/entities'
@@ -23,6 +24,7 @@ export type CaseManagementSeedReferences = {
   paralegalIds: readonly string[]
   supervisorIds: readonly string[]
   actorId: string
+  validationScenarioClientId?: string
 }
 
 @Injectable()
@@ -32,9 +34,12 @@ export class CaseManagementSeeder {
     private readonly legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
     private readonly caseMembersRepository: CaseMembersRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
+    private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
   ) {}
 
   async clear() {
+    await this.caseChecklistItemsRepository.removeAll()
     await this.caseMembersRepository.removeAll()
     await this.legalCasesRepository.removeAll()
   }
@@ -49,7 +54,10 @@ export class CaseManagementSeeder {
     }
 
     const legalCases = await this.legalCasesRepository.addMany(
-      this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
+      this.createLegalCaseSeeds(
+        references.contractedIntakes.slice(0, 8),
+        references.validationScenarioClientId,
+      ),
     )
 
     const caseMembers = await this.caseMembersRepository.addMany(
@@ -62,11 +70,63 @@ export class CaseManagementSeeder {
       }),
     )
 
-    return { legalCases, caseMembers }
+    const validationScenarioCase = legalCases.find(
+      (legalCase) => legalCase.clientId === references.validationScenarioClientId,
+    )
+    const validationScenarioChecklistItems = validationScenarioCase
+      ? await this.caseChecklistItemsRepository.addMany(
+          this.createValidationScenarioChecklistItems(validationScenarioCase.id),
+        )
+      : []
+
+    return {
+      legalCases,
+      caseMembers,
+      validationScenarioCase,
+      validationScenarioChecklistItems,
+    }
+  }
+
+  private createValidationScenarioChecklistItems(
+    caseId: string,
+  ): Parameters<CaseChecklistItemsRepository['addMany']>[0] {
+    return [
+      {
+        caseId,
+        templateItemKey: 'Documento teste 1',
+        title: 'Documento teste 1',
+        isRequired: true,
+      },
+      {
+        caseId,
+        templateItemKey: 'documento teste 2',
+        title: 'Documento teste 2',
+        isRequired: true,
+      },
+      {
+        caseId,
+        templateItemKey: 'comprovante-residencia',
+        title: 'Comprovante de residência',
+        isRequired: true,
+      },
+      {
+        caseId,
+        templateItemKey: 'comprovante-vinculo',
+        title: 'Comprovante de vínculo previdenciário',
+        isRequired: true,
+      },
+      {
+        caseId,
+        templateItemKey: 'ctps-carteira-trabalho',
+        title: 'CTPS - Carteira de Trabalho',
+        isRequired: true,
+      },
+    ]
   }
 
   private createLegalCaseSeeds(
     contractedIntakes: readonly Intake[],
+    validationScenarioClientId?: string,
   ): LegalCaseCreation[] {
     const openedAt = new Date()
 
@@ -83,7 +143,10 @@ export class CaseManagementSeeder {
         intakeId: intake.id,
         legalAreaId: intake.legalAreaId,
         legalTopicId: intake.legalTopicId,
-        title: this.getTitleByIndex(index),
+        title:
+          intake.clientId === validationScenarioClientId
+            ? 'Checklist documental previdenciário - Vinicius Lopes Machado'
+            : this.getTitleByIndex(index),
         status: LegalCaseStatus.Documentation,
         openedAt,
       }
