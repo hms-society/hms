@@ -34,6 +34,7 @@ function createController(overrides: Partial<ReturnType<typeof useDocumentViewer
     format: 'PDF',
     formattedDate: '10/08/2026 09:00',
     formattedFileSize: '2 KB',
+    backLabel: 'Voltar aos documentos',
     handleBack: vi.fn(),
     ...overrides,
   } as ReturnType<typeof useDocumentViewer>

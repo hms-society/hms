@@ -12,6 +12,7 @@ export const DocumentViewerPage = () => {
     isErrorFile,
     format,
     formattedDate,
+    backLabel,
     handleBack,
     formattedFileSize,
   } = useDocumentViewer()
@@ -40,7 +41,7 @@ export const DocumentViewerPage = () => {
           className='rounded-pill gap-2 border-border/80 text-foreground mb-4'
           onClick={handleBack}
         >
-          Voltar aos documentos
+          {backLabel}
         </Button>
 
         <Card className='shadow-sm border-border overflow-hidden rounded-xl bg-card w-full'>

@@ -28,4 +28,19 @@ describe('ReadOnlyValidatedPanel', () => {
       ),
     ).toBeNull()
   })
+
+  it('does not expose the reviewer id when the reviewer name is unavailable', () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      reviewedBy: '4d70cfbf-cae3-4f15-8365-e951f9fcb9e4',
+      reviewedByName: undefined,
+      reviewedAt: new Date('2026-08-29T14:45:00.000Z'),
+    })
+
+    render(<ReadOnlyValidatedPanel document={document} />)
+
+    expect(
+      screen.getByText('Documento validado por responsável não identificado'),
+    ).toBeDefined()
+    expect(screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/)).toBeNull()
+  })
 })

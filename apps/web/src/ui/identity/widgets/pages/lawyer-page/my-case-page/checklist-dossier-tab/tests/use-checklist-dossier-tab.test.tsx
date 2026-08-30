@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/structures'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
@@ -34,6 +35,9 @@ describe('useChecklistDossierTab', () => {
     listCaseChecklist: vi.fn(),
     reviewChecklistGate: vi.fn(),
   }
+  const documentValidationService = {
+    listDocuments: vi.fn(),
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -47,6 +51,7 @@ describe('useChecklistDossierTab', () => {
     } as never)
     useRestContextMock.mockReturnValue({
       caseManagementService,
+      documentValidationService,
     } as never)
     useNavigationMock.mockReturnValue({
       navigateTo,
@@ -71,6 +76,12 @@ describe('useChecklistDossierTab', () => {
           updatedAt: '2026-08-27T12:00:00.000Z',
         },
         statusCode: 201,
+      }),
+    )
+    documentValidationService.listDocuments.mockResolvedValue(
+      new RestResponse({
+        body: [],
+        statusCode: 200,
       }),
     )
   })
@@ -276,6 +287,7 @@ describe('useChecklistDossierTab', () => {
 
     expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'document-file-1' },
+      search: { fromCaseId: 'case-1' },
     })
 
     await act(async () => {
@@ -285,6 +297,78 @@ describe('useChecklistDossierTab', () => {
     expect(navigateTo).toHaveBeenCalledWith('lawyerCaseChecklistItem', {
       params: { caseId: 'case-1', checklistItemId: 'checklist-item-1' },
     })
+  })
+
+  it('shows a requested resend for a persisted checklist document', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.listCaseChecklist.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'checklist-item-1',
+            caseId: 'case-1',
+            templateItemKey: 'identificacao-oficial',
+            title: 'Documento de Identificação Oficial',
+            isRequired: true,
+            status: 'pending',
+            documentFileId: 'document-file-1',
+            documentFileName: 'rg_antonio_carvalho.jpg',
+            createdAt: '2026-08-27T12:00:00.000Z',
+            updatedAt: '2026-08-27T12:00:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+    documentValidationService.listDocuments.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            batchId: 'batch-1',
+            channel: 'whatsapp',
+            createdAt: '2026-08-30T12:00:00.000Z',
+            extractedFields: [],
+            fileName: 'rg_antonio_carvalho.jpg',
+            id: 'document-file-1',
+            mimeType: 'image/jpeg',
+            missingFields: [],
+            receivedAt: '2026-08-30T12:00:00.000Z',
+            sender: 'cliente@exemplo.com',
+            sizeBytes: 1024,
+            status: DocumentValidationStatus.ResendRequested,
+            storagePath: 'documents/rg_antonio_carvalho.jpg',
+            updatedAt: '2026-08-30T12:02:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [],
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() =>
+      expect(result.current.checklistItems[0]).toMatchObject({
+        documentName: 'rg_antonio_carvalho.jpg - reenvio solicitado',
+        status: 'solicitado',
+        statusLabel: 'Reenvio solicitado',
+        subtitle: 'Documento com reenvio solicitado ao cliente',
+      }),
+    )
   })
 
   it('submits checklist approval after all documents are locally validated', async () => {

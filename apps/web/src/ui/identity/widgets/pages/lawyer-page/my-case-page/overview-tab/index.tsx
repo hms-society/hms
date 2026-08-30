@@ -12,12 +12,53 @@ import type { CaseTask, CaseTeamMember, CaseTimelineItem, ChecklistItem } from '
 
 export type OverviewTabProps = {
   checklist: ChecklistItem[]
+  completionPercentage: number
+  mandatoryItemsCount: number
+  pendingItemsCount: number
   tasks: CaseTask[]
   team: CaseTeamMember[]
   timeline: CaseTimelineItem[]
+  validatedItemsCount: number
+  onOpenChecklist: () => void
 }
 
-export const OverviewTab = ({ checklist, tasks, team, timeline }: OverviewTabProps) => {
+export const OverviewTab = ({
+  checklist,
+  completionPercentage,
+  mandatoryItemsCount,
+  pendingItemsCount,
+  tasks,
+  team,
+  timeline,
+  validatedItemsCount,
+  onOpenChecklist,
+}: OverviewTabProps) => {
+  const hasChecklistItems = mandatoryItemsCount > 0
+  const isChecklistComplete = hasChecklistItems && pendingItemsCount === 0
+  const checklistProgressLabel = `${validatedItemsCount} de ${mandatoryItemsCount} - ${completionPercentage}%`
+  const checklistStatusLabel = isChecklistComplete
+    ? 'Completo para validação'
+    : pendingItemsCount > 0
+      ? 'Recebimento parcial'
+      : 'Checklist não instanciado'
+  const nextActionTitle = isChecklistComplete
+    ? 'Próxima ação: revisar o checklist final'
+    : hasChecklistItems
+      ? 'Próxima ação: completar a documentação do caso'
+      : 'Próxima ação: instanciar o checklist documental'
+  const nextActionDescription = !hasChecklistItems
+    ? 'Nenhum item de checklist foi encontrado para este caso.'
+    : isChecklistComplete
+      ? 'Todos os documentos obrigatórios foram atendidos. Revise o gate do checklist para avançar.'
+      : pendingItemsCount === 1
+        ? '1 documento obrigatório ainda depende de recebimento ou validação.'
+        : `${pendingItemsCount} documentos obrigatórios ainda dependem de recebimento ou validação.`
+  const checklistBadgeVariant = !hasChecklistItems
+    ? 'secondary'
+    : isChecklistComplete
+      ? 'success'
+      : 'attention'
+
   return (
     <div className='grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]'>
       <div className='flex min-w-0 flex-col gap-4'>
@@ -28,17 +69,19 @@ export const OverviewTab = ({ checklist, tasks, team, timeline }: OverviewTabPro
             </div>
             <div className='flex flex-col gap-0.5'>
               <h2 className='text-sm font-semibold text-primary'>
-                Próxima ação: completar a documentação do caso
+                {nextActionTitle}
               </h2>
               <p className='text-xs text-primary/80'>
-                6 documentos pendentes de recebimento. Solicite ao cliente para avançar ao
-                checklist final.
+                {nextActionDescription}
               </p>
             </div>
           </div>
-          <Button size='xs' className='rounded-full'>
-            <Icon name='send' className='size-3' />
-            Solicitar documentos
+          <Button size='xs' className='rounded-full' onClick={onOpenChecklist}>
+            <Icon
+              name={isChecklistComplete ? 'check-circle-2' : 'send'}
+              className='size-3'
+            />
+            {isChecklistComplete ? 'Revisar checklist' : 'Abrir checklist'}
           </Button>
         </div>
 
@@ -48,14 +91,18 @@ export const OverviewTab = ({ checklist, tasks, team, timeline }: OverviewTabPro
               <h2 className='font-serif text-lg font-semibold text-foreground'>
                 Checklist Documental
               </h2>
-              <Badge variant='attention' className='h-5 rounded-full px-2 text-[10px]'>
-                Recebimento parcial
+              <Badge
+                variant={checklistBadgeVariant}
+                className='h-5 rounded-full px-2 text-[10px]'
+              >
+                {checklistStatusLabel}
               </Badge>
             </div>
             <Button
               variant='link'
               size='xs'
               className='h-auto justify-start px-0 text-primary'
+              onClick={onOpenChecklist}
             >
               Abrir checklist completo
               <Icon name='arrow-right' className='size-3' />
@@ -64,51 +111,63 @@ export const OverviewTab = ({ checklist, tasks, team, timeline }: OverviewTabPro
 
           <div className='flex items-center gap-3'>
             <div className='h-2 flex-1 overflow-hidden rounded-full bg-muted'>
-              <div className='h-full w-[14%] rounded-full bg-primary' />
+              <div
+                className='h-full rounded-full bg-primary'
+                style={{ width: `${completionPercentage}%` }}
+              />
             </div>
             <span className='text-[11px] font-semibold text-foreground'>
-              1 de 7 - 14%
+              {checklistProgressLabel}
             </span>
           </div>
 
           <div className='flex flex-col gap-2'>
-            {checklist.map((item) => (
-              <div
-                key={item.id}
-                className={`flex min-w-0 items-center justify-between gap-3 rounded-md border px-3 py-2 ${getChecklistRowClasses(
-                  item.status,
-                )}`}
-              >
-                <div className='flex min-w-0 items-center gap-3'>
-                  <div
-                    className={`flex size-6 shrink-0 items-center justify-center rounded-md ${getChecklistIconClasses(
-                      item.status,
-                    )}`}
-                  >
-                    <Icon name={getChecklistIcon(item.status)} className='size-3' />
-                  </div>
-                  <span className='truncate text-xs font-semibold text-foreground'>
-                    {item.title}
-                  </span>
-                </div>
-                <Badge
-                  variant={
-                    item.status === 'validado'
-                      ? 'success'
-                      : item.status === 'solicitado'
-                        ? 'attention'
-                        : 'secondary'
-                  }
-                  className='h-5 rounded-full px-2 text-[10px]'
+            {checklist.length > 0 ? (
+              checklist.map((item) => (
+                <div
+                  key={item.id}
+                  className={`flex min-w-0 items-center justify-between gap-3 rounded-md border px-3 py-2 ${getChecklistRowClasses(
+                    item.status,
+                  )}`}
                 >
-                  {item.status === 'validado'
-                    ? 'Validado'
-                    : item.status === 'solicitado'
-                      ? 'Solicitado'
-                      : 'Não solicitado'}
-                </Badge>
+                  <div className='flex min-w-0 items-center gap-3'>
+                    <div
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-md ${getChecklistIconClasses(
+                        item.status,
+                      )}`}
+                    >
+                      <Icon name={getChecklistIcon(item.status)} className='size-3' />
+                    </div>
+                    <span className='truncate text-xs font-semibold text-foreground'>
+                      {item.title}
+                    </span>
+                  </div>
+                  {item.documentFileId ? (
+                    <Badge
+                      variant={
+                        item.status === 'validado'
+                          ? 'success'
+                          : item.status === 'solicitado'
+                            ? 'attention'
+                            : 'secondary'
+                      }
+                      className='h-5 rounded-full px-2 text-[10px]'
+                    >
+                      {item.statusLabel ??
+                        (item.status === 'validado'
+                          ? 'Validado'
+                          : item.status === 'solicitado'
+                            ? 'Solicitado'
+                            : 'Não solicitado')}
+                    </Badge>
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <div className='rounded-md border border-border bg-muted/30 px-3 py-4 text-xs text-muted-foreground'>
+                Nenhum item de checklist documental foi encontrado para este caso.
               </div>
-            ))}
+            )}
           </div>
         </section>
 

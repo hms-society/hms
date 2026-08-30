@@ -19,19 +19,29 @@ import {
   CASE_TEAM,
   CASE_TIMELINE,
   MOCK_ACTIVITIES,
-  MOCK_CHECKLIST,
   TEAM_MEMBERS,
 } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
+import { useMyCasePage } from './use-my-case-page'
 
 export type CasoDetalheChecklistPageProps = {
   caseId?: string
 }
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
-  const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
-  const displayCaseId = 'CASO-20260703-0089'
+  const {
+    activeTab,
+    caseUuid,
+    checklistItems,
+    completionPercentage,
+    displayCaseId,
+    mandatoryItemsCount,
+    pendingItemsCount,
+    validatedItemsCount,
+    handleOpenChecklistTab,
+    setActiveTab,
+  } = useMyCasePage({ caseId })
 
   return (
     <div className='flex w-full flex-col gap-4 pb-10 font-sans'>
@@ -152,7 +162,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </div>
       </section>
 
-      <Tabs defaultValue='visao-geral' className='w-full'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
         <TabsList
           variant='line'
           className='flex-wrap gap-x-8 gap-y-1 overflow-hidden text-[11px]'
@@ -163,7 +173,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <TabsTrigger value='checklist' className='gap-2 py-2 text-[11px]'>
             Checklist & Dossiê
             <Badge variant='secondary' className='h-4 rounded-full px-1 text-[9px]'>
-              6
+              {pendingItemsCount}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value='pecas' className='py-2 text-[11px]' disabled>
@@ -186,10 +196,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
 
         <TabsContent value='visao-geral' className='mt-3 flex flex-col gap-4'>
           <OverviewTab
-            checklist={MOCK_CHECKLIST}
+            checklist={checklistItems}
+            completionPercentage={completionPercentage}
+            mandatoryItemsCount={mandatoryItemsCount}
+            pendingItemsCount={pendingItemsCount}
             tasks={CASE_TASKS}
             team={CASE_TEAM}
             timeline={CASE_TIMELINE}
+            validatedItemsCount={validatedItemsCount}
+            onOpenChecklist={handleOpenChecklistTab}
           />
         </TabsContent>
 
@@ -197,7 +212,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <ChecklistDossierTab
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
-            checklist={MOCK_CHECKLIST}
+            checklist={checklistItems}
           />
         </TabsContent>
       </Tabs>

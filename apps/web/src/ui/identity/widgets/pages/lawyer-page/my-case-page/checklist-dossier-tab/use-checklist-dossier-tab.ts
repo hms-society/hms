@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type {
-  CaseChecklistItem as PersistedChecklistItem,
   LegalCase,
 } from '@hms/core/case-management/domain/entities'
 import {
@@ -14,6 +13,7 @@ import {
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
+import { useCaseChecklist } from '../hooks/use-case-checklist'
 import type { ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
@@ -84,30 +84,14 @@ export function useChecklistDossierTab({
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)
   const [reviewedCase, setReviewedCase] = useState<LegalCase | null>(null)
-  const { data: persistedChecklistItems = [] } = useQuery({
-    queryKey: ['case-management', 'cases', caseId, 'checklist'],
-    queryFn: async () => {
-      const response = await caseManagementService.listCaseChecklist(caseId)
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    enabled: Boolean(caseId),
-  })
-  const displayChecklistItems =
-    persistedChecklistItems.length > 0
-      ? persistedChecklistItems.map(mapPersistedChecklistItem)
-      : checklistItems
-  const requiredChecklistItems = displayChecklistItems.filter(
-    (item) => item.isRequired !== false,
-  )
-  const validatedItemsCount = requiredChecklistItems.filter(
-    (item) => item.status === 'validado',
-  ).length
-  const mandatoryItemsCount = requiredChecklistItems.length
-  const pendingItemsCount = mandatoryItemsCount - validatedItemsCount
-  const isChecklistComplete = pendingItemsCount === 0
+  const {
+    checklistItems: displayChecklistItems,
+    isChecklistComplete,
+    mandatoryItemsCount,
+    pendingItemsCount,
+    persistedChecklistItems,
+    validatedItemsCount,
+  } = useCaseChecklist({ caseId, fallbackChecklist: checklistItems })
   const checklistGateDecision = reviewedCase?.checklistGate.decision
   const checklistGateRemarks = reviewedCase?.checklistGate.remarks
   const checklistGateAuditLabel =
@@ -191,6 +175,7 @@ export function useChecklistDossierTab({
     if (checklistItem?.documentFileId) {
       return navigateTo('documentAnalysis', {
         params: { fileId: checklistItem.documentFileId },
+        search: { fromCaseId: caseId },
       })
     }
 
@@ -369,33 +354,4 @@ function formatChecklistValidationTime(date: Date) {
   }).format(date)
 
   return `hoje ${time}`
-}
-
-function mapPersistedChecklistItem(item: PersistedChecklistItem): ChecklistItem {
-  const validatedBy = item.validatedBy ? ` por ${item.validatedBy}` : ''
-  const validatedAt = item.validatedAt
-    ? ` em ${formatChecklistGateDecisionDate(item.validatedAt)}`
-    : ''
-  const documentLabel = item.documentFileName ?? item.documentFileId
-  const documentName =
-    documentLabel && item.status === 'validated'
-      ? `${documentLabel} - validado${validatedBy}${validatedAt}`
-      : documentLabel
-        ? `${documentLabel} - aguardando validação documental`
-        : undefined
-
-  return {
-    id: item.id,
-    documentFileId: item.documentFileId,
-    isRequired: item.isRequired,
-    title: item.title,
-    status: item.status === 'validated' ? 'validado' : 'solicitado',
-    documentName,
-    subtitle:
-      item.status === 'validated'
-        ? 'Documento validado pelo Motor Documental'
-        : documentLabel
-          ? 'Documento recebido e aguardando validação'
-          : 'Documento ainda não recebido',
-  }
 }

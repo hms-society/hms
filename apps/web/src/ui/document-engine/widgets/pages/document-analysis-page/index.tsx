@@ -12,9 +12,13 @@ import { useDocumentAnalysis } from './use-document-analysis'
 
 export type DocumentAnalysisPageProps = {
   fileId: string
+  fromCaseId?: string
 }
 
-export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
+export const DocumentAnalysisPage = ({
+  fileId,
+  fromCaseId,
+}: DocumentAnalysisPageProps) => {
   const {
     form,
     currentDecision,
@@ -29,12 +33,15 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
     handleOpenDocument,
     document,
     documentView,
-  } = useDocumentAnalysis({ fileId })
+  } = useDocumentAnalysis({ fileId, fromCaseId })
 
   const documentStatus = documentView.status
   const isProcessingFailure = documentStatus === 'Falha no processamento'
   const isResendRequested = documentStatus === 'Reenvio solicitado'
   const isValidated = documentStatus === 'Válido'
+  const backRoute = fromCaseId ? 'lawyerCaseDetails' : 'documentInbox'
+  const backRouteParams = fromCaseId ? { caseId: fromCaseId } : undefined
+  const backLabel = fromCaseId ? 'Voltar para o caso' : 'Voltar aos documentos'
 
   if (isLoading) {
     return (
@@ -60,11 +67,12 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
           </p>
         </div>
         <Anchor
-          route='documentInbox'
+          route={backRoute}
+          params={backRouteParams}
           className='inline-flex h-10 items-center gap-2 rounded-pill border border-border bg-transparent px-4 font-sans text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted'
         >
           <Icon name='arrow-left' className='size-4' />
-          Voltar aos documentos
+          {backLabel}
         </Anchor>
       </div>
     )
@@ -83,11 +91,12 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
             </p>
           </div>
           <Anchor
-            route='documentInbox'
+            route={backRoute}
+            params={backRouteParams}
             className='inline-flex h-10 items-center gap-2 rounded-pill border border-border bg-transparent px-4 font-sans text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted'
           >
             <Icon name='arrow-left' className='size-4' />
-            Voltar aos documentos
+            {backLabel}
           </Anchor>
         </header>
 

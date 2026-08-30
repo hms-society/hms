@@ -1,10 +1,11 @@
-import { useParams } from '@tanstack/react-router'
+import { useParams, useSearch } from '@tanstack/react-router'
 
 import { useDocumentFileQuery } from '@/ui/document-engine/hooks/use-document-file-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 export function useDocumentViewer() {
   const { fileId } = useParams({ from: '/lotes-documentos/$fileId' })
+  const { fromCaseId } = useSearch({ from: '/lotes-documentos/$fileId' })
   const { navigateTo } = useNavigation()
 
   const { file, isLoadingFile, isErrorFile } = useDocumentFileQuery(fileId)
@@ -19,9 +20,15 @@ export function useDocumentViewer() {
   }
 
   function handleBack() {
+    if (fromCaseId) {
+      void navigateTo('lawyerCaseDetails', { params: { caseId: fromCaseId } })
+      return
+    }
+
     void navigateTo('documentInbox')
   }
 
+  const backLabel = fromCaseId ? 'Voltar para o caso' : 'Voltar aos documentos'
   const format = file?.mimeType.split('/')[1]?.toUpperCase() || 'ARQUIVO'
   const formattedDate = file
     ? new Intl.DateTimeFormat('pt-BR', {
@@ -39,6 +46,7 @@ export function useDocumentViewer() {
     format,
     formattedDate,
     formattedFileSize,
+    backLabel,
     handleBack,
   }
 }
