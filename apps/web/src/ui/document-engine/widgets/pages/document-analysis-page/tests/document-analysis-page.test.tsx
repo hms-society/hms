@@ -67,6 +67,12 @@ const useDocumentAnalysisMock = vi.mocked(useDocumentAnalysis)
 const document = DocumentValidationDocumentFaker.fake({
   id: 'document-file-1',
   fileName: 'comprovante-residencia.pdf',
+  checklistLink: {
+    caseId: 'case-1',
+    caseLabel: 'Caso Vinicius Lopes Machado',
+    checklistItemId: 'checklist-item-1',
+    checklistItemLabel: 'Documento teste 1',
+  },
 })
 
 describe('DocumentAnalysisPage', () => {

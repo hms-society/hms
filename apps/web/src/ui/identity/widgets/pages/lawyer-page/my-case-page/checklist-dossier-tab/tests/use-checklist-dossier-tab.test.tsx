@@ -112,7 +112,7 @@ describe('useChecklistDossierTab', () => {
           caseId: 'case-1',
           checklist: [
             { id: '1', title: 'Procuração', status: 'validado' },
-            { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+            { id: '2', title: 'CNIS', status: 'solicitado' },
           ],
         }),
       { wrapper },
@@ -223,7 +223,7 @@ describe('useChecklistDossierTab', () => {
     )
   })
 
-  it('opens the persisted validation document instead of locally validating it', async () => {
+  it('opens the persisted validation document from the row action', async () => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -276,6 +276,14 @@ describe('useChecklistDossierTab', () => {
 
     expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'document-file-1' },
+    })
+
+    await act(async () => {
+      await result.current.handleOpenChecklistItemDetail('checklist-item-1')
+    })
+
+    expect(navigateTo).toHaveBeenCalledWith('lawyerCaseChecklistItem', {
+      params: { caseId: 'case-1', checklistItemId: 'checklist-item-1' },
     })
   })
 

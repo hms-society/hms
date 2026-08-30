@@ -195,10 +195,9 @@ export function useChecklistDossierTab({
     }
 
     if (persistedChecklistItems.length > 0) {
-      setActionFeedback(
-        'Validação documental deve ser concluída na Mesa de Validação para atualizar o checklist persistido.',
-      )
-      return
+      return navigateTo('lawyerCaseChecklistItem', {
+        params: { caseId, checklistItemId: itemId },
+      })
     }
 
     const validatedAt = formatChecklistValidationTime(new Date())
@@ -216,6 +215,12 @@ export function useChecklistDossierTab({
       }),
     )
     setActionFeedback('Documento validado e registrado na trilha do checklist.')
+  }
+
+  function handleOpenChecklistItemDetail(itemId: string) {
+    return navigateTo('lawyerCaseChecklistItem', {
+      params: { caseId, checklistItemId: itemId },
+    })
   }
 
   function handleOpenValidationDesk() {
@@ -310,6 +315,7 @@ export function useChecklistDossierTab({
     handleRejectOnMerit,
     handleRemarksChange,
     handleRequestDocumentException,
+    handleOpenChecklistItemDetail,
     handleValidateChecklistItem,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
@@ -385,7 +391,6 @@ function mapPersistedChecklistItem(item: PersistedChecklistItem): ChecklistItem 
     title: item.title,
     status: item.status === 'validated' ? 'validado' : 'solicitado',
     documentName,
-    pendencies: item.status === 'validated' ? undefined : 1,
     subtitle:
       item.status === 'validated'
         ? 'Documento validado pelo Motor Documental'

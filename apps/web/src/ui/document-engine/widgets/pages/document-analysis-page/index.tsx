@@ -132,10 +132,10 @@ export const DocumentAnalysisPage = ({ fileId }: DocumentAnalysisPageProps) => {
 
           <div className='grid flex-1 grid-cols-1 divide-y border-border lg:grid-cols-[1fr_420px] lg:divide-y-0 lg:divide-x'>
             <PdfViewerPanel
+              documentFileId={document.id}
               fileSize={documentView.fileSize}
               integrity={documentView.integrity}
               duplicity={documentView.duplicity}
-              onOpenDocument={() => handleOpenDocument(document.id)}
             />
 
             {isProcessingFailure ? (

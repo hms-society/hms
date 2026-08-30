@@ -1,18 +1,15 @@
 import { cleanup, render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type { DocumentFilePreviewProps } from '@/ui/document-engine/widgets/components/document-file-preview'
 
 import { DocumentViewerPage } from '../index'
 import { useDocumentViewer } from '../use-document-viewer'
 
-vi.mock('react-pdf', () => ({
-  Document: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Page: () => <div />,
-  pdfjs: { GlobalWorkerOptions: {} },
-}))
-
-vi.mock('pdfjs-dist/build/pdf.worker.min.mjs?url', () => ({
-  default: 'worker.js',
+vi.mock('@/ui/document-engine/widgets/components/document-file-preview', () => ({
+  DocumentFilePreview: ({ documentFileId }: DocumentFilePreviewProps) => (
+    <div data-testid='document-file-preview'>{documentFileId}</div>
+  ),
 }))
 
 vi.mock('../use-document-viewer', () => ({
@@ -31,31 +28,13 @@ function createController(overrides: Partial<ReturnType<typeof useDocumentViewer
       sizeBytes: 2048,
       createdAt: '2026-08-10T12:00:00.000Z',
     },
-    fileUrl: 'blob:document',
     fileId: 'file-123',
-    numPages: 0,
-    setNumPages: vi.fn(),
-    zoom: 1,
-    pageWidth: 900,
-    isDragging: false,
-    canPan: false,
-    viewerRef: { current: null },
     isLoadingFile: false,
     isErrorFile: false,
-    isLoadingUrl: false,
-    isErrorUrl: false,
     format: 'PDF',
     formattedDate: '10/08/2026 09:00',
     formattedFileSize: '2 KB',
     handleBack: vi.fn(),
-    handleDownload: vi.fn(),
-    handleZoomIn: vi.fn(),
-    handleZoomOut: vi.fn(),
-    handleMouseDown: vi.fn(),
-    handleMouseMove: vi.fn(),
-    handleMouseUp: vi.fn(),
-    minZoom: 0.5,
-    maxZoom: 2,
     ...overrides,
   } as ReturnType<typeof useDocumentViewer>
 }
@@ -74,17 +53,14 @@ describe('DocumentViewerPage', () => {
     expect(screen.getByText('Carregando visualizador...')).toBeDefined()
   })
 
-  it('renders the file metadata and download action', () => {
-    const handleDownload = vi.fn()
-    useDocumentViewerMock.mockReturnValue(createController({ handleDownload }))
+  it('renders the file metadata and shared preview', () => {
+    useDocumentViewerMock.mockReturnValue(createController())
 
     render(<DocumentViewerPage />)
 
     expect(screen.getByRole('heading', { name: 'Editor de validação' })).toBeDefined()
     expect(screen.getByText('documento.pdf')).toBeDefined()
-
-    screen.getByRole('button', { name: 'Baixar arquivo' }).click()
-
-    expect(handleDownload).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('document-file-preview').textContent).toBe('file-123')
+    expect(screen.queryByRole('button', { name: 'Baixar arquivo' })).toBeNull()
   })
 })

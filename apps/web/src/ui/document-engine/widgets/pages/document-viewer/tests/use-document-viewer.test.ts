@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDocumentFileQuery } from '@/ui/document-engine/hooks/use-document-file-query'
-import { useDocumentFileUrlQuery } from '@/ui/document-engine/hooks/use-document-file-url-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useDocumentViewer } from '../use-document-viewer'
@@ -17,16 +16,11 @@ vi.mock('@/ui/document-engine/hooks/use-document-file-query', () => ({
   useDocumentFileQuery: vi.fn(),
 }))
 
-vi.mock('@/ui/document-engine/hooks/use-document-file-url-query', () => ({
-  useDocumentFileUrlQuery: vi.fn(),
-}))
-
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: vi.fn(),
 }))
 
 const useDocumentFileQueryMock = vi.mocked(useDocumentFileQuery)
-const useDocumentFileUrlQueryMock = vi.mocked(useDocumentFileUrlQuery)
 const useNavigationMock = vi.mocked(useNavigation)
 
 function createWrapper() {
@@ -57,12 +51,6 @@ describe('useDocumentViewer', () => {
       isLoadingFile: false,
       isErrorFile: false,
     } as never)
-    useDocumentFileUrlQueryMock.mockReturnValue({
-      fileUrl: 'blob:document',
-      fileUrlError: null,
-      isLoadingFileUrl: false,
-      isErrorFileUrl: false,
-    })
     useNavigationMock.mockReturnValue({
       navigateTo,
       navigateCollaboratorsSearch: vi.fn(),
@@ -77,27 +65,6 @@ describe('useDocumentViewer', () => {
     expect(result.current.file?.id).toBe('file-123')
     expect(result.current.format).toBe('PDF')
     expect(result.current.formattedFileSize).toBe('2 KB')
-  })
-
-  it('changes zoom within the configured limits', () => {
-    const { result } = renderHook(() => useDocumentViewer(), {
-      wrapper: createWrapper(),
-    })
-
-    act(() => {
-      result.current.handleZoomIn()
-    })
-    expect(result.current.zoom).toBe(1.25)
-
-    act(() => {
-      for (let index = 0; index < 10; index++) result.current.handleZoomIn()
-    })
-    expect(result.current.zoom).toBe(2)
-
-    act(() => {
-      for (let index = 0; index < 10; index++) result.current.handleZoomOut()
-    })
-    expect(result.current.zoom).toBe(0.5)
   })
 
   it('navigates back to the document inbox', () => {

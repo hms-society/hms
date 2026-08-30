@@ -13,7 +13,7 @@ import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-type AnalysisDocumentView = {
+export type AnalysisDocumentView = {
   id: string
   fileName: string
   confidence: string
