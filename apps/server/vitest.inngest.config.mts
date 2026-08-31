@@ -10,11 +10,13 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: [...configDefaults.exclude, 'src/**/messaging/inngest/jobs/tests/**'],
+    exclude: configDefaults.exclude,
     fileParallelism: false,
     globals: true,
-    hookTimeout: 120_000,
+    hookTimeout: 240_000,
+    include: ['src/**/messaging/inngest/jobs/tests/**/*.test.ts'],
     root: './',
+    testTimeout: 240_000,
   },
   plugins: [
     swc.vite({

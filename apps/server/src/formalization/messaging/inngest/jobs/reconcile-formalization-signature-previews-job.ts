@@ -13,6 +13,7 @@ import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-prov
 
 @Injectable()
 export class ReconcileFormalizationSignaturePreviewsJob extends InngestJob {
+  static readonly ID = 'formalization/reconcile-signature-previews'
   readonly function: InngestFunction.Like
 
   constructor(
@@ -35,7 +36,7 @@ export class ReconcileFormalizationSignaturePreviewsJob extends InngestJob {
 
     this.function = this.inngest.createFunction(
       {
-        id: 'formalization/reconcile-signature-previews',
+        id: ReconcileFormalizationSignaturePreviewsJob.ID,
         name: 'Reconcile Formalization Signature Previews',
         triggers: [cron('* * * * *')],
       },

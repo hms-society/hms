@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConsultationLegalContextUpdatedEvent } from '@hms/core/consultation/domain/events'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { UpdateIntakeLegalContextUseCase } from '@hms/core/intake/use-cases'
-import { eventType, type InngestFunction } from 'inngest'
+import { AppError } from '@hms/core/shared/domain/errors'
+import { eventType, type InngestFunction, NonRetriableError } from 'inngest'
 import { z } from 'zod'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
@@ -25,6 +26,7 @@ const consultationLegalContextUpdatedEvent = eventType(
 
 @Injectable()
 export class SyncIntakeLegalContextJob extends InngestJob {
+  static readonly ID = 'intake/sync-legal-context-from-consultation'
   readonly function: InngestFunction.Like
 
   constructor(
@@ -37,19 +39,27 @@ export class SyncIntakeLegalContextJob extends InngestJob {
 
     this.function = this.inngest.createFunction(
       {
-        id: 'intake/sync-legal-context-from-consultation',
+        id: SyncIntakeLegalContextJob.ID,
         name: 'Sync Intake Legal Context From Consultation',
         triggers: [consultationLegalContextUpdatedEvent],
       },
       ({ event, step }) =>
-        step.run('sync-intake-legal-context', () =>
-          useCase.execute({
-            intakeId: event.data.intakeId,
-            legalAreaId: event.data.legalAreaId,
-            legalTopicId: event.data.legalTopicId,
-            updatedBy: event.data.updatedBy,
-          }),
-        ),
+        step.run('sync-intake-legal-context', async () => {
+          try {
+            return await useCase.execute({
+              intakeId: event.data.intakeId,
+              legalAreaId: event.data.legalAreaId,
+              legalTopicId: event.data.legalTopicId,
+              updatedBy: event.data.updatedBy,
+            })
+          } catch (error) {
+            if (error instanceof AppError) {
+              throw new NonRetriableError(error.message, { cause: error })
+            }
+
+            throw error
+          }
+        }),
     )
   }
 }

@@ -18,6 +18,7 @@ const batchEvent = eventType(
 
 @Injectable()
 export class GenerateFormalizationSignaturePreviewsInBatchJob extends InngestJob {
+  static readonly ID = 'formalization/generate-signature-previews-in-batch'
   readonly function: InngestFunction.Like
 
   constructor(inngest: InngestClient) {
@@ -25,7 +26,7 @@ export class GenerateFormalizationSignaturePreviewsInBatchJob extends InngestJob
 
     this.function = this.inngest.createFunction(
       {
-        id: 'formalization/generate-signature-previews-in-batch',
+        id: GenerateFormalizationSignaturePreviewsInBatchJob.ID,
         name: 'Generate Formalization Signature Previews In Batch',
         triggers: [batchEvent],
       },

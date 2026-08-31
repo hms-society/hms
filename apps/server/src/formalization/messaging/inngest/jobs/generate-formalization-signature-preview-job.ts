@@ -16,7 +16,7 @@ import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { ProcessFormalizationSignaturePreviewUseCase } from '@hms/core/formalization/use-cases'
 import { FailFormalizationSignaturePreviewUseCase } from '@hms/core/formalization/use-cases'
 import { formalizationSignaturePreviewEventSchema } from '@hms/validation/formalization'
-import { eventType, type InngestFunction } from 'inngest'
+import { eventType, type InngestFunction, NonRetriableError } from 'inngest'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
@@ -33,6 +33,7 @@ const previewEvent = eventType(
 
 @Injectable()
 export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
+  static readonly ID = 'formalization/generate-signature-preview'
   readonly function: InngestFunction.Like
 
   constructor(
@@ -65,7 +66,7 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
 
     this.function = this.inngest.createFunction(
       {
-        id: 'formalization/generate-signature-preview',
+        id: GenerateFormalizationSignaturePreviewJob.ID,
         name: 'Generate Formalization Signature Preview',
         concurrency: 2,
         retries: 3,
@@ -82,22 +83,35 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
         },
       },
       ({ event, step }) =>
-        step.run('generate-formalization-signature-preview', () =>
-          processPreview.execute({
-            formalizationId: event.data.formalizationId,
-            previewId: event.data.previewId,
-            attemptToken: event.data.attemptToken,
-            traceId: event.data.previewId,
-          }),
-        ),
+        step.run('generate-formalization-signature-preview', async () => {
+          try {
+            return await processPreview.execute({
+              formalizationId: event.data.formalizationId,
+              previewId: event.data.previewId,
+              attemptToken: event.data.attemptToken,
+              traceId: event.data.previewId,
+            })
+          } catch (error) {
+            if (this.isNonRetriable(error)) {
+              throw new NonRetriableError(error.message, { cause: error })
+            }
+
+            throw error
+          }
+        }),
     )
   }
 
   private getFailureCode(error: Error) {
+    if (error.cause instanceof Error) return this.getFailureCode(error.cause)
+
     if (error instanceof FormalizationSignaturePreviewClaimConflictError) {
       return 'conversion_unavailable' as const
     }
     if (error instanceof FormalizationSignatureDocumentVersionFileUnavailableError) {
+      return 'document_version_file_unavailable' as const
+    }
+    if (error.message === 'O arquivo da versão do documento não está disponível.') {
       return 'document_version_file_unavailable' as const
     }
     if (error instanceof FormalizationDocumentPdfInspectionError) {
@@ -109,5 +123,14 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
         : ('conversion_rejected' as const)
     }
     return 'storage_unavailable' as const
+  }
+
+  private isNonRetriable(error: unknown): error is Error {
+    return (
+      error instanceof FormalizationSignaturePreviewClaimConflictError ||
+      error instanceof FormalizationSignatureDocumentVersionFileUnavailableError ||
+      error instanceof FormalizationDocumentPdfInspectionError ||
+      (error instanceof FormalizationDocumentPdfConversionError && !error.retryable)
+    )
   }
 }
