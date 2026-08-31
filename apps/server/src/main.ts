@@ -38,7 +38,7 @@ async function bootstrap() {
     credentials: true,
   })
 
-  await app.listen(process.env.PORT ?? 5555)
+  await app.listen(envProvider.get('HMS_SERVER_APP_PORT'))
 }
 
 bootstrap()
