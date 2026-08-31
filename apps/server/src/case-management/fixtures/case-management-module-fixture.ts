@@ -223,9 +223,7 @@ export class CaseManagementModuleFixture {
     )
   }
 
-  registerCaseChecklistItems(
-    checklistItems: readonly CaseChecklistItemCreation[],
-  ) {
+  registerCaseChecklistItems(checklistItems: readonly CaseChecklistItemCreation[]) {
     return this.caseChecklistItemsRepository.addMany(checklistItems)
   }
 

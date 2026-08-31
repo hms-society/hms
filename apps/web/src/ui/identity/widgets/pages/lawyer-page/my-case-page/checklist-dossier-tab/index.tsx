@@ -314,7 +314,10 @@ export const ChecklistDossierTab = ({
                     onClick={() => handleValidateChecklistItem(item.id)}
                   >
                     <Icon
-                      name={getChecklistActionIcon(item.status, Boolean(item.documentName))}
+                      name={getChecklistActionIcon(
+                        item.status,
+                        Boolean(item.documentName),
+                      )}
                       className='size-3'
                     />
                     {getChecklistActionLabel(item.status, Boolean(item.documentName))}
