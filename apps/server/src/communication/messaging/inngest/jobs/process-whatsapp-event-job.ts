@@ -84,21 +84,13 @@ export class ProcessWhatsappEventJob extends InngestJob {
               continue
             }
 
-            const [client] = await database
+            const matchingClients = await database
               .select()
               .from(clientModel)
               .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-              .limit(1)
+              .limit(2)
 
-            if (!client) {
-              await database.insert(integracaoEvento).values({
-                provedor: 'whatsapp',
-                payload: message,
-                status: 'falha_definitiva',
-                erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
-              })
-              continue
-            }
+            const clientId = matchingClients.length === 1 ? matchingClients[0].id : undefined
 
             const [evento] = await database
               .insert(integracaoEvento)
@@ -114,7 +106,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
               data: {
                 eventoId: evento.id,
                 sender,
-                clientId: client.id,
+                clientId,
                 mediaId: media.id,
                 mimeType: media.mime_type,
                 originalName:
