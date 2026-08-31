@@ -90,7 +90,8 @@ export class ProcessWhatsappEventJob extends InngestJob {
               .where(like(clientModel.phone, `%${sender.slice(-8)}`))
               .limit(2)
 
-            const clientId = matchingClients.length === 1 ? matchingClients[0].id : undefined
+            const clientId =
+              matchingClients.length === 1 ? matchingClients[0].id : undefined
 
             const [evento] = await database
               .insert(integracaoEvento)
