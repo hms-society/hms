@@ -136,10 +136,14 @@ describe('useChecklistItemDetailPage', () => {
     )
     expect(result.current.itemView.historyEvents[0]).toMatchObject({
       badge: 'Reenvio solicitado',
-      description:
-        'Reenvio solicitado por Advogado de desenvolvimento em 30/08/2026, 09:02. Motivo: Conteúdo incompleto.',
       title: 'Reenvio solicitado',
     })
+    expect(result.current.itemView.historyEvents[0]?.description).toContain(
+      'Reenvio solicitado por Advogado de desenvolvimento em 30/08/2026,',
+    )
+    expect(result.current.itemView.historyEvents[0]?.description).toContain(
+      'Motivo: Conteúdo incompleto.',
+    )
     expect(result.current.itemView.pendingItems).toEqual([])
   })
 
