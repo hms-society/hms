@@ -1,10 +1,22 @@
-import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, uuid, pgEnum } from 'drizzle-orm/pg-core' // Alterado PgEnum para pgEnum
+
+export const classificacaoAcessoEnum = pgEnum('classificacao_acesso', [
+  'INTERNO',
+  'CLIENTE',
+  'RESTRITO',
+  'CONFIDENCIAL',
+  'PARCEIRO_LIBERADO',
+])
 
 export const documentModel = pgTable(
   'documents',
   {
     id: uuid('id').primaryKey(),
     title: text('title').notNull(),
+    classificacaoAcesso: classificacaoAcessoEnum('classificacao_acesso')
+      .default('INTERNO')
+      .notNull(),
+
     currentVersionId: uuid('current_version_id'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()

@@ -217,6 +217,7 @@ export class ConsultationModuleFixture {
     const document = await this.documentsRepository.add({
       id: 'a7b4f7c1-98e8-4f20-a5a6-30d35ee694d2',
       title: specification.name,
+      classificacaoAcesso: 'INTERNO',
     })
     const documentPackage = await this.documentPackagesRepository.add({
       id: '6c42cf59-5102-4bb8-9513-a47c8ffea1e8',

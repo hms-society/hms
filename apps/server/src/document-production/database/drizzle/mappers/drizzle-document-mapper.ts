@@ -7,6 +7,7 @@ export class DrizzleDocumentMapper {
     return {
       id: record.id,
       title: record.title,
+      classificacaoAcesso: record.classificacaoAcesso,
       currentVersionId: record.currentVersionId ?? undefined,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,

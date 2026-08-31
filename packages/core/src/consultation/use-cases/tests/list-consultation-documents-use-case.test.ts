@@ -52,6 +52,7 @@ describe('List Consultation Documents Use Case', () => {
     const document = {
       id: 'a7b4f7c1-98e8-4f20-a5a6-30d35ee694d2',
       title: 'Procuração',
+      classificacaoAcesso: 'INTERNO' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -96,6 +97,7 @@ describe('List Consultation Documents Use Case', () => {
     const document = {
       id: 'a7b4f7c1-98e8-4f20-a5a6-30d35ee694d2',
       title: 'Procuração',
+      classificacaoAcesso: 'INTERNO' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

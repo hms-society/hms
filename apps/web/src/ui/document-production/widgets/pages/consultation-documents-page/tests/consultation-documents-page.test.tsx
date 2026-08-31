@@ -51,6 +51,9 @@ vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', ()
 vi.mock('../../../../hooks/use-reopen-consultation-document-package-action', () => ({
   useReopenConsultationDocumentPackageAction: vi.fn(),
 }))
+vi.mock('../../../../hooks/use-update-document-access-action', () => ({
+  useUpdateDocumentAccessAction: vi.fn(),
+}))
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   Anchor: ({ children, route, params, ...props }: AnchorProps) => {
     const href =

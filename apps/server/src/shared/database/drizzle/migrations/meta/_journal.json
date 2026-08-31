@@ -271,12 +271,19 @@
     {
       "idx": 38,
       "version": "7",
+      "when": 1787772311608,
+      "tag": "0038_eager_kate_bishop",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
       "when": 1787598000000,
       "tag": "0040_case_checklist_gate",
       "breakpoints": true
     },
     {
-      "idx": 39,
+      "idx": 40,
       "version": "7",
       "when": 1787932800000,
       "tag": "0041_case_checklist_completion",
