@@ -22,6 +22,10 @@ export interface IdentityService {
     clientId: string,
     type: ConsentType,
   ): Promise<RestResponse<ClientConsent>>
+  updateClient(
+    clientId: string,
+    changes: any,
+  ): Promise<RestResponse<ClientDetails>>
   listClients(params: {
     page: number
     limit: number

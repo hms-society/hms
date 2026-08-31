@@ -39,7 +39,7 @@ export const clientModel = pgTable(
       .notNull(),
   },
   (table) => [
-    uniqueIndex('clients_tax_id_uidx').on(table.taxIdType, table.taxIdValue),
+    index('clients_tax_id_idx').on(table.taxIdType, table.taxIdValue),
     index('clients_phone_idx').on(table.phone),
     check(
       'clients_identity_fields_check',

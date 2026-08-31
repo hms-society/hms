@@ -1,10 +1,9 @@
-import { AppError } from '#shared/domain/errors/app-error'
+import { ForbiddenError } from '#shared/domain/errors'
 
-export class CollaboratorNotAuthorizedError extends AppError {
-  constructor() {
+export class CollaboratorNotAuthorizedError extends ForbiddenError {
+  constructor(message?: string) {
     super(
-      'O colaborador autenticado não tem autorização para esta operação.',
-      'Acesso não autorizado',
+      message || 'O colaborador autenticado não tem autorização para esta operação.'
     )
   }
 }

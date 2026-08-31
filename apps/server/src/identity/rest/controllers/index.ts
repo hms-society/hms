@@ -17,3 +17,4 @@ export { UpdateCollaboratorController } from '@/identity/rest/controllers/update
 export { RegisterClientController } from '@/identity/rest/controllers/register-client.controller'
 export { SignInController } from '@/identity/rest/controllers/sign-in.controller'
 export { ListClientsController } from '@/identity/rest/controllers/list-clients.controller'
+export { UpdateClientController } from '@/identity/rest/controllers/update-client.controller'
