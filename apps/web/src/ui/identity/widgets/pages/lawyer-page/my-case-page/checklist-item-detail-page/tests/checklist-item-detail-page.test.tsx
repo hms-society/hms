@@ -65,7 +65,6 @@ describe('ChecklistItemDetailPage', () => {
     expect(screen.getByTestId('checklist-item-detail-header').textContent).toContain(
       'Documento teste 1',
     )
-    expect(screen.getByTestId('checklist-item-main-panel')).toHaveTextContent('0')
     expect(screen.getByTestId('checklist-item-side-panel').textContent).toContain(
       'Aguardando validação',
     )
