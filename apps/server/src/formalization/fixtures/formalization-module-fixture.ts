@@ -70,15 +70,11 @@ export class FormalizationModuleFixture {
     const restFixture = await RestFixture.register(
       {
         imports: [FormalizationModule],
-        providers: [
-          {
-            provide: InngestBroker,
-            useValue: broker,
-          },
-        ],
       },
       (builder) =>
         (configure?.(builder) ?? builder)
+          .overrideProvider(InngestBroker)
+          .useValue(broker)
           .overrideProvider(FORMALIZATION_PROVIDERS.signatureSourceReader)
           .useValue(sourceReader)
           .overrideProvider(FORMALIZATION_PROVIDERS.documentPdfConverter)
