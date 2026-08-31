@@ -57,12 +57,13 @@ vi.mock('../request-resend-modal', () => ({
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   Anchor: ({ children, params, route, search, ...props }: AnchorProps) => {
+    const routePath: string = ROUTES[route]
     const path = params
       ? Object.entries(params).reduce(
           (currentPath, [key, value]) => currentPath.replace(`$${key}`, value),
-          ROUTES[route],
+          routePath,
         )
-      : ROUTES[route]
+      : routePath
     const queryString = search ? new URLSearchParams(search as never).toString() : ''
 
     return (
