@@ -2,8 +2,8 @@ name: Hermes code review
 
 on:
   pull_request_target:
-    branches:
-      - develop
+    branches-ignore:
+      - main
     types:
       - opened
       - synchronize
