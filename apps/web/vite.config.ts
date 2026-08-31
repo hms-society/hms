@@ -7,11 +7,14 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const config = defineConfig(({ mode }) => {
+const config = defineConfig(({ command, mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
   const webAppPort = Number(env.HMS_WEB_APP_PORT)
 
-  if (!Number.isInteger(webAppPort) || webAppPort < 1 || webAppPort > 65535) {
+  if (
+    command !== 'build' &&
+    (!Number.isInteger(webAppPort) || webAppPort < 1 || webAppPort > 65535)
+  ) {
     throw new Error('HMS_WEB_APP_PORT must be an integer between 1 and 65535.')
   }
 
@@ -24,8 +27,9 @@ const config = defineConfig(({ mode }) => {
       ...(mode === 'test' ? [] : [nitro()]),
       viteReact(),
     ],
-    server: { port: webAppPort },
-    preview: { port: webAppPort },
+    ...(command === 'build'
+      ? {}
+      : { server: { port: webAppPort }, preview: { port: webAppPort } }),
   }
 })
 
