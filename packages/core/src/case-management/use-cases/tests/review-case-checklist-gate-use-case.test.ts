@@ -16,31 +16,17 @@ describe('Review Case Checklist Gate Use Case', () => {
     useCase = new ReviewCaseChecklistGateUseCase(repository)
   })
 
-  it('approves a complete checklist as the first gate without releasing legal writing', async () => {
+  it('rejects full approval until required checklist items can be verified server-side', async () => {
     const decidedBy = '00000000-0000-4000-8000-000000000101'
     const legalCase = LegalCaseFaker.fake({
       checklistCompletedAt: new Date('2026-08-24T11:00:00.000Z'),
       checklistCompletedBy: decidedBy,
-    })
-    const reviewedCase = LegalCaseFaker.fake({
-      id: legalCase.id,
-      checklistGate: {
-        decision: CaseChecklistGateDecision.Approved,
-        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
-        decidedBy,
-        remarks: undefined,
-      },
-      dossierGate: {
-        homologatedAt: undefined,
-        homologatedBy: undefined,
-      },
     })
 
     repository.findById.mockResolvedValue(legalCase)
     repository.listByTeamMember.mockResolvedValue([
       fakeLegalCaseSummary({ id: legalCase.id }),
     ])
-    repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
       useCase.execute({
@@ -48,18 +34,9 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy,
       }),
-    ).resolves.toBe(reviewedCase)
+    ).rejects.toThrow('validação server-side')
 
-    expect(repository.reviewChecklistGate).toHaveBeenCalledWith({
-      caseId: legalCase.id,
-      checklistGate: {
-        decision: CaseChecklistGateDecision.Approved,
-        decidedBy,
-        remarks: undefined,
-      },
-      expectedStatus: LegalCaseStatus.Documentation,
-      status: LegalCaseStatus.ReadyForLegalProduction,
-    })
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
 
   it('rejects approval when the persisted checklist is incomplete', async () => {
@@ -76,7 +53,7 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy: '00000000-0000-4000-8000-000000000110',
       }),
-    ).rejects.toThrow('itens obrigatórios')
+    ).rejects.toThrow('validação server-side')
 
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
@@ -263,8 +240,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     await expect(
       useCase.execute({
         caseId: legalCase.id,
-        decision: CaseChecklistGateDecision.Approved,
+        decision: CaseChecklistGateDecision.ApprovedWithException,
         decidedBy: '00000000-0000-4000-8000-000000000109',
+        remarks: 'Checklist aprovado com pendência documental registrada.',
       }),
     ).rejects.toThrow('não pode mais ser revisado')
   })

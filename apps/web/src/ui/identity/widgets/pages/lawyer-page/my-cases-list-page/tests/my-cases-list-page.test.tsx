@@ -49,9 +49,9 @@ describe('LawyerCasesListPage', () => {
             },
           ],
           progress: {
-            completedCount: 1,
+            completedCount: 0,
             totalCount: 7,
-            icon: 'list-checks',
+            icon: 'file-text',
           },
           displayTeam: 'Dr. Ricardo Mendes',
           statusStyle: 'bg-amber-100 text-amber-800 hover:bg-amber-100',

@@ -87,9 +87,9 @@ export function useMyCasesListPage() {
             className: getTeamMemberClassName(index),
           })),
           progress: {
-            completedCount: caseItem.checklistGate.decision ? 7 : 1,
+            completedCount: 0,
             totalCount: 7,
-            icon: caseItem.checklistGate.decision ? 'list-checks' : 'file-text',
+            icon: 'file-text',
           },
           displayTeam: caseItem.team.map((member) => member.name).join(', '),
           statusStyle: STATUS_STYLES[statusLabel],
