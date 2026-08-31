@@ -3,7 +3,8 @@ import { IntakeConsultationSchedulingFailedEvent } from '@hms/core/intake/domain
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { ResolveIntakeConsultationSchedulingUseCase } from '@hms/core/intake/use-cases'
 import { IntakeConsultationSchedulingOutcome } from '@hms/core/intake/domain/structures'
-import { eventType, type InngestFunction } from 'inngest'
+import { AppError } from '@hms/core/shared/domain/errors'
+import { eventType, type InngestFunction, NonRetriableError } from 'inngest'
 import { z } from 'zod'
 
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
@@ -23,6 +24,7 @@ const consultationSchedulingFailedEvent = eventType(
 
 @Injectable()
 export class FailIntakeConsultationSchedulingJob extends InngestJob {
+  static readonly ID = 'intake/fail-consultation-scheduling'
   readonly function: InngestFunction.Like
 
   constructor(
@@ -35,18 +37,26 @@ export class FailIntakeConsultationSchedulingJob extends InngestJob {
 
     this.function = this.inngest.createFunction(
       {
-        id: 'intake/fail-consultation-scheduling',
+        id: FailIntakeConsultationSchedulingJob.ID,
         name: 'Fail Intake Consultation Scheduling',
         triggers: [consultationSchedulingFailedEvent],
       },
       ({ event, step }) =>
-        step.run('fail-consultation-scheduling', () =>
-          useCase.execute({
-            intakeId: event.data.intakeId,
-            outcome: IntakeConsultationSchedulingOutcome.Failed,
-            updatedBy: event.data.requestedBy,
-          }),
-        ),
+        step.run('fail-consultation-scheduling', async () => {
+          try {
+            return await useCase.execute({
+              intakeId: event.data.intakeId,
+              outcome: IntakeConsultationSchedulingOutcome.Failed,
+              updatedBy: event.data.requestedBy,
+            })
+          } catch (error) {
+            if (error instanceof AppError) {
+              throw new NonRetriableError(error.message, { cause: error })
+            }
+
+            throw error
+          }
+        }),
     )
   }
 }
