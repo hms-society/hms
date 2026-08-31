@@ -11,8 +11,7 @@ export const Route = createFileRoute('/lotes-documentos/$fileId')({
   beforeLoad: requireAuthMiddleware,
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): DocumentViewerSearch => ({
-    fromCaseId:
-      typeof search.fromCaseId === 'string' ? search.fromCaseId : undefined,
+    fromCaseId: typeof search.fromCaseId === 'string' ? search.fromCaseId : undefined,
   }),
 })
 

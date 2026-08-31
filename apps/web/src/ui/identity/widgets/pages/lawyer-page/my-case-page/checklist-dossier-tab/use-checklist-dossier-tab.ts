@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import type {
-  LegalCase,
-} from '@hms/core/case-management/domain/entities'
+import type { LegalCase } from '@hms/core/case-management/domain/entities'
 import {
   CaseChecklistGateDecision,
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,

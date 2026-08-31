@@ -115,9 +115,7 @@ export const DocumentFilePreview = ({
               <div className='flex min-w-max justify-start px-4 py-4' draggable={false}>
                 <PdfDocument
                   file={fileUrl}
-                  onLoadSuccess={({ numPages: totalPages }) =>
-                    setNumPages(totalPages)
-                  }
+                  onLoadSuccess={({ numPages: totalPages }) => setNumPages(totalPages)}
                   loading={
                     <div className='flex flex-col items-center gap-2 py-10 text-muted-foreground'>
                       <Icon name='refresh-cw' className='size-8 animate-spin' />

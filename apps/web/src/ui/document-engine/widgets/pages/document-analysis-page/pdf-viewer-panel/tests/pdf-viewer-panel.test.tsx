@@ -11,7 +11,6 @@ vi.mock('@/ui/document-engine/widgets/components/document-file-preview', () => (
   ),
 }))
 
-
 describe('PdfViewerPanel', () => {
   it('renders the shared document preview and validation metadata', () => {
     render(

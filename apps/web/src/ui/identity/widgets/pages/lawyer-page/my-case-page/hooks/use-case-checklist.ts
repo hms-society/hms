@@ -110,8 +110,9 @@ function mapPersistedChecklistItem(
     isRequired: item.isRequired,
     status: documentStatusView.isValidated ? 'validado' : 'solicitado',
     statusLabel: documentLabel ? documentStatusView.label : undefined,
-    subtitle:
-      documentLabel ? documentStatusView.subtitle : 'Documento ainda não recebido',
+    subtitle: documentLabel
+      ? documentStatusView.subtitle
+      : 'Documento ainda não recebido',
     title: item.title,
   }
 }

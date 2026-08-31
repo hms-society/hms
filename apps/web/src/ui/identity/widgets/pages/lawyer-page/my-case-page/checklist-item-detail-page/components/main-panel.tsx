@@ -9,9 +9,7 @@ export type ChecklistItemMainPanelProps = {
   itemView: ChecklistItemDetailView
 }
 
-export const ChecklistItemMainPanel = ({
-  itemView,
-}: ChecklistItemMainPanelProps) => {
+export const ChecklistItemMainPanel = ({ itemView }: ChecklistItemMainPanelProps) => {
   const hasPendingItems = itemView.pendingItems.length > 0
 
   return (

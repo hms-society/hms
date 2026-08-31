@@ -32,9 +32,7 @@ export const ChecklistItemHistoryPanel = ({
           </div>
           <div className='flex min-w-0 flex-1 flex-col gap-0.5'>
             <div className='flex flex-wrap items-center justify-between gap-2'>
-              <span className='text-sm font-semibold text-foreground'>
-                {event.title}
-              </span>
+              <span className='text-sm font-semibold text-foreground'>{event.title}</span>
               {event.badge && (
                 <Badge variant='secondary' className='h-5 rounded-full px-2 text-[10px]'>
                   {event.badge}

@@ -169,8 +169,7 @@ function getChecklistItemDetailView({
     fallbackReviewerId: checklistItem.validatedBy ?? document?.reviewedBy,
     reviewerName: document?.reviewedByName,
   })
-  const reviewedAt =
-    checklistItem.validatedAt ?? document?.reviewedAt ?? undefined
+  const reviewedAt = checklistItem.validatedAt ?? document?.reviewedAt ?? undefined
   const historyEvents = getChecklistItemHistoryEvents({
     checklistItem,
     document,

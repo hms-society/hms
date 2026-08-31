@@ -52,10 +52,7 @@ export type UseDocumentAnalysisParams = {
   fromCaseId?: string
 }
 
-export function useDocumentAnalysis({
-  fileId,
-  fromCaseId,
-}: UseDocumentAnalysisParams) {
+export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisParams) {
   const { navigateTo } = useNavigation()
   const [isResendModalOpen, setIsResendModalOpen] = useState(false)
   const { document, documentError, isLoadingDocument } =

@@ -49,9 +49,9 @@ export class DrizzleCaseChecklistItemsRepository
     checklistItemId,
     documentFileId,
     documentFileName,
-  }: Parameters<
+  }: Parameters<CaseChecklistItemsRepository['linkPendingDocument']>[0]): ReturnType<
     CaseChecklistItemsRepository['linkPendingDocument']
-  >[0]): ReturnType<CaseChecklistItemsRepository['linkPendingDocument']> {
+  > {
     const [updatedItem] = await this.database
       .update(caseChecklistItemModel)
       .set({

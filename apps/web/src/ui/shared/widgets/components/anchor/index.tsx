@@ -10,13 +10,7 @@ export type AnchorProps = Omit<ComponentPropsWithoutRef<'a'>, 'href'> & {
   search?: Record<string, unknown>
 }
 
-export const Anchor = ({
-  children,
-  route,
-  params,
-  search,
-  ...props
-}: AnchorProps) => {
+export const Anchor = ({ children, route, params, search, ...props }: AnchorProps) => {
   return (
     <Link
       to={ROUTES[route] as ToPathOption}

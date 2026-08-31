@@ -68,12 +68,8 @@ export const OverviewTab = ({
               <Icon name='list-checks' className='size-5' />
             </div>
             <div className='flex flex-col gap-0.5'>
-              <h2 className='text-sm font-semibold text-primary'>
-                {nextActionTitle}
-              </h2>
-              <p className='text-xs text-primary/80'>
-                {nextActionDescription}
-              </p>
+              <h2 className='text-sm font-semibold text-primary'>{nextActionTitle}</h2>
+              <p className='text-xs text-primary/80'>{nextActionDescription}</p>
             </div>
           </div>
           <Button size='xs' className='rounded-full' onClick={onOpenChecklist}>

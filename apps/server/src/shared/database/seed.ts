@@ -166,10 +166,9 @@ async function bootstrap() {
             }
           : undefined,
     })
-    const caseChecklistItemsRepository =
-      app.get<CaseChecklistItemsRepository>(
-        CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
-      )
+    const caseChecklistItemsRepository = app.get<CaseChecklistItemsRepository>(
+      CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
+    )
     await Promise.all(
       realDocumentsSeed.validationScenarioDocumentLinks.map((documentLink) =>
         caseChecklistItemsRepository.linkPendingDocument(documentLink),

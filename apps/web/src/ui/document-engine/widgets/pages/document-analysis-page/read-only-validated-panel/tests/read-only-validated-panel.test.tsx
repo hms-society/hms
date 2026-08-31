@@ -23,9 +23,7 @@ describe('ReadOnlyValidatedPanel', () => {
       screen.getByText('Documento validado por Advogado de desenvolvimento'),
     ).toBeDefined()
     expect(
-      screen.queryByText(
-        'Documento validado por 4d70cfbf-cae3-4f15-8365-e951f9fcb9e4',
-      ),
+      screen.queryByText('Documento validado por 4d70cfbf-cae3-4f15-8365-e951f9fcb9e4'),
     ).toBeNull()
   })
 

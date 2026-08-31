@@ -22,17 +22,13 @@ vi.mock('../components/detail-header', () => ({
 
 vi.mock('../components/main-panel', () => ({
   ChecklistItemMainPanel: ({ itemView }: ChecklistItemMainPanelProps) => (
-    <div data-testid='checklist-item-main-panel'>
-      {itemView.pendingItems.length}
-    </div>
+    <div data-testid='checklist-item-main-panel'>{itemView.pendingItems.length}</div>
   ),
 }))
 
 vi.mock('../components/history-panel', () => ({
   ChecklistItemHistoryPanel: ({ itemView }: ChecklistItemHistoryPanelProps) => (
-    <div data-testid='checklist-item-history-panel'>
-      {itemView.historyEvents.length}
-    </div>
+    <div data-testid='checklist-item-history-panel'>{itemView.historyEvents.length}</div>
   ),
 }))
 
@@ -55,12 +51,7 @@ describe('ChecklistItemDetailPage', () => {
   })
 
   it('composes the real checklist item detail sections', () => {
-    render(
-      <ChecklistItemDetailPage
-        caseId='case-1'
-        checklistItemId='checklist-item-1'
-      />,
-    )
+    render(<ChecklistItemDetailPage caseId='case-1' checklistItemId='checklist-item-1' />)
 
     expect(screen.getByTestId('checklist-item-detail-header').textContent).toContain(
       'Documento teste 1',

@@ -1,10 +1,7 @@
 import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
-export type ChecklistDocumentStatusVariant =
-  | 'attention'
-  | 'secondary'
-  | 'success'
+export type ChecklistDocumentStatusVariant = 'attention' | 'secondary' | 'success'
 
 export type ChecklistDocumentStatusView = {
   badge: string
@@ -110,7 +107,6 @@ export function getChecklistDocumentStatusView({
         subtitle: 'Documento com falha no processamento',
         variant: 'attention',
       }
-    case DocumentValidationStatus.AwaitingValidation:
     default:
       return {
         badge: 'Recebido',
@@ -123,9 +119,7 @@ export function getChecklistDocumentStatusView({
   }
 }
 
-export function getChecklistDocumentStatusLabel(
-  status?: DocumentValidationStatus,
-) {
+export function getChecklistDocumentStatusLabel(status?: DocumentValidationStatus) {
   switch (status) {
     case DocumentValidationStatus.Valid:
       return 'Documento validado'
@@ -143,7 +137,6 @@ export function getChecklistDocumentStatusLabel(
       return 'Falha no processamento'
     case DocumentValidationStatus.ResendRequested:
       return 'Reenvio solicitado'
-    case DocumentValidationStatus.AwaitingValidation:
     default:
       return 'Aguardando validação'
   }

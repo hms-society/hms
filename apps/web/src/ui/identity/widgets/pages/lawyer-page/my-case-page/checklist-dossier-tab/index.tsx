@@ -218,9 +218,7 @@ export const ChecklistDossierTab = ({
                 {checklistStatusLabel}
               </Badge>
             </div>
-            <p className='text-[11px] text-muted-foreground'>
-              {checklistOriginLabel}
-            </p>
+            <p className='text-[11px] text-muted-foreground'>{checklistOriginLabel}</p>
           </div>
 
           <div className='flex w-full max-w-56 flex-col items-end gap-1.5'>
@@ -340,10 +338,7 @@ export const ChecklistDossierTab = ({
                           )}
                           className='size-3'
                         />
-                        {getChecklistActionLabel(
-                          item.status,
-                          Boolean(item.documentName),
-                        )}
+                        {getChecklistActionLabel(item.status, Boolean(item.documentName))}
                       </Button>
                     )}
                     <Button

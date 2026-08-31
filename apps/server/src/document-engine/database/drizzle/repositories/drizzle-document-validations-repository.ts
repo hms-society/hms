@@ -43,7 +43,9 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
-        reviewerName: sql<string | null>`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
       })
       .from(documentBatchFileModel)
       .innerJoin(
@@ -81,7 +83,9 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
-        reviewerName: sql<string | null>`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
       })
       .from(documentBatchFileModel)
       .innerJoin(

@@ -68,9 +68,7 @@ export const ChecklistItemSidePanel = ({
         <dt className='text-muted-foreground'>Posição</dt>
         <dd className='font-semibold text-foreground'>{itemView.itemPositionLabel}</dd>
         <dt className='text-muted-foreground'>Template</dt>
-        <dd className='font-semibold text-foreground'>
-          {checklistItem.templateItemKey}
-        </dd>
+        <dd className='font-semibold text-foreground'>{checklistItem.templateItemKey}</dd>
         <dt className='text-muted-foreground'>Bloqueia gate</dt>
         <dd className='font-semibold text-foreground'>
           {checklistItem.isRequired ? 'Sim' : 'Não'}
@@ -88,8 +86,8 @@ export const ChecklistItemSidePanel = ({
         <span className='text-[10px] font-semibold text-primary'>Eventos do item</span>
       </div>
       <p className='mb-3 text-xs text-muted-foreground'>
-        Toda ação sobre este item fica registrada para acompanhar recebimento,
-        validação e decisões posteriores.
+        Toda ação sobre este item fica registrada para acompanhar recebimento, validação e
+        decisões posteriores.
       </p>
       <div className='grid grid-cols-3 gap-2'>
         {itemView.auditMetrics.map((metric) => (

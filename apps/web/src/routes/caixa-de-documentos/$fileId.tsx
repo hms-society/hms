@@ -9,8 +9,7 @@ type DocumentAnalysisSearch = {
 export const Route = createFileRoute('/caixa-de-documentos/$fileId')({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): DocumentAnalysisSearch => ({
-    fromCaseId:
-      typeof search.fromCaseId === 'string' ? search.fromCaseId : undefined,
+    fromCaseId: typeof search.fromCaseId === 'string' ? search.fromCaseId : undefined,
   }),
 })
 
