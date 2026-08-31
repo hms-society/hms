@@ -6,12 +6,12 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { LawyerCaseViewItem } from './types'
 
 const STATUS_STYLES = {
-  'Em formação': 'bg-amber-100 text-amber-800 hover:bg-amber-100',
-  'Em andamento': 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100',
+  'Em formação': 'bg-accent text-accent-foreground hover:bg-accent',
+  'Em andamento': 'bg-highlight text-highlight-foreground hover:bg-highlight',
   'Aguardando cliente': 'bg-highlight text-highlight-foreground hover:bg-highlight',
-  'Em produção jurídica': 'bg-sky-100 text-sky-800 hover:bg-sky-100',
-  'Protocolo e entrega': 'bg-violet-100 text-violet-800 hover:bg-violet-100',
-  Execução: 'bg-rose-100 text-rose-800 hover:bg-rose-100',
+  'Em produção jurídica': 'bg-secondary text-secondary-foreground hover:bg-secondary',
+  'Protocolo e entrega': 'bg-muted text-foreground hover:bg-muted',
+  Execução: 'bg-accent text-accent-foreground hover:bg-accent',
   Encerrado: 'bg-muted text-muted-foreground hover:bg-muted',
 } as const
 
@@ -146,9 +146,9 @@ function getInitials(name: string) {
 function getTeamMemberClassName(index: number) {
   const classes = [
     'bg-primary text-primary-foreground',
-    'bg-amber-500 text-white',
-    'bg-emerald-600 text-white',
-    'bg-zinc-500 text-white',
+    'bg-accent text-accent-foreground',
+    'bg-highlight text-highlight-foreground',
+    'bg-muted text-foreground',
   ]
 
   return classes[index % classes.length] ?? classes[0]

@@ -54,7 +54,7 @@ describe('LawyerCasesListPage', () => {
             icon: 'file-text',
           },
           displayTeam: 'Dr. Ricardo Mendes',
-          statusStyle: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+          statusStyle: 'bg-accent text-accent-foreground hover:bg-accent',
         },
       ],
       handleAreaChange: vi.fn(),

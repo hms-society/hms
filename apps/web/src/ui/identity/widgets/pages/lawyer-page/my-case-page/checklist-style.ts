@@ -14,7 +14,7 @@ export function getChecklistIconClasses(itemStatus: ChecklistItemStatus) {
   }
 
   if (itemStatus === 'solicitado') {
-    return 'border border-amber-500/40 bg-amber-500/10 text-amber-700'
+    return 'border border-accent bg-accent text-accent-foreground'
   }
 
   return 'bg-muted text-muted-foreground'
@@ -22,7 +22,7 @@ export function getChecklistIconClasses(itemStatus: ChecklistItemStatus) {
 
 export function getChecklistRowClasses(itemStatus: ChecklistItemStatus) {
   if (itemStatus === 'validado') return 'border-primary/10 bg-highlight'
-  return 'border-border bg-card'
+  return 'border-border bg-secondary'
 }
 
 export function getChecklistActionLabel(itemStatus: ChecklistItemStatus) {
