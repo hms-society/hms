@@ -157,25 +157,7 @@ export function useDocumentInbox() {
       }))
     }
 
-    return [
-      {
-        id: batch.id,
-        fileName: batch.readableId ?? 'Lote sem arquivos',
-        fileSize: '0 KB',
-        receivedFromIcon: getChannelIcon(channel),
-        receivedFrom: senderString,
-        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
-        caseId: batch.readableId ?? 'Sem vínculo seguro',
-        caseDesc: batch.clientId
-          ? 'Titular pré-identificado'
-          : 'Escolha manual necessária',
-        receivedDate: formatReceivedDate(receivedAt),
-        receivedTime: format(receivedAt, 'HH:mm'),
-        status: statusLabel,
-        badgeClasses: statusStyle.badgeClasses,
-        dotClasses: statusStyle.dotClasses,
-      },
-    ]
+    return []
   }
 
   const documents = batches.flatMap(batchToInboxDocuments)

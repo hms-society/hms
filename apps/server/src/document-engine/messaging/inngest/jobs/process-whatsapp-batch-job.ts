@@ -69,9 +69,10 @@ export class ProcessWhatsappBatchJob extends InngestJob {
               )
               sizeBytes = buffer.length
             } catch (error) {
-              ProcessWhatsappBatchJob.logger.warn(
+              ProcessWhatsappBatchJob.logger.error(
                 `Failed to download/upload WhatsApp media ${mediaId}: ${(error as Error).message}`,
               )
+              throw error
             }
           }
 

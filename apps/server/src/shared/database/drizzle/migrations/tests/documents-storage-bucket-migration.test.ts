@@ -35,7 +35,7 @@ describe('Documents storage bucket migration 0024', () => {
     `)
 
     migrationSql = await readFile(
-      new URL('../0024_documents_storage_bucket.sql', `file://${__filename}`),
+      new URL('../0024_documents_storage_bucket.sql', import.meta.url),
       'utf8',
     )
   }, 120_000)
