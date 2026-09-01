@@ -1,12 +1,7 @@
 import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { clientModel } from '@/identity/database/drizzle/models/client-model'
-import { userModel } from '@/identity/database/drizzle/models/user-model'
 
-export const communicationChannelModel = pgEnum('communication_channel', [
-  'whatsapp',
-  'email',
-  'phone',
-])
+import { communicationChannelModel } from '@/shared/database/drizzle/models/communication-channel-model'
+
 export const communicationDirectionModel = pgEnum('communication_direction', [
   'inbound',
   'outbound',
@@ -14,10 +9,8 @@ export const communicationDirectionModel = pgEnum('communication_direction', [
 
 export const communicationModel = pgTable('communications', {
   id: uuid('id').defaultRandom().primaryKey(),
-  clientId: uuid('client_id')
-    .notNull()
-    .references(() => clientModel.id, { onDelete: 'cascade' }),
-  authorId: uuid('author_id').references(() => userModel.id, { onDelete: 'set null' }),
+  clientId: uuid('client_id').notNull(),
+  authorId: uuid('author_id'),
   channel: communicationChannelModel('channel').notNull(),
   direction: communicationDirectionModel('direction').notNull(),
   content: text('content').notNull(),

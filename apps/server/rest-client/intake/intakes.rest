@@ -1,5 +1,5 @@
 # Preconditions
-# Run `pnpm seed`, start the API on http://localhost:3333, and replace the
+# Run `pnpm seed`, start the API on http://localhost:5555, and replace the
 # UUID placeholders using the identity and legal-catalog REST clients.
 
 @url = {{BASE_URL}}/intakes

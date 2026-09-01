@@ -6,7 +6,6 @@ import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structure
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { clientModel, userModel } from '@/identity/database/drizzle/models'
 import { getMimeTypeFromExtension } from '../utils/mime-type.map'
 import { extname } from 'node:path'
 import { eq } from 'drizzle-orm'
@@ -23,6 +22,11 @@ const VALIDATION_STATUS_CYCLE = [
   DocumentValidationStatus.ResendRequested,
 ] as const
 
+type DocumentsSeedInput = {
+  readonly clientIds: readonly string[]
+  readonly userIds: readonly string[]
+}
+
 @Injectable()
 export class DocumentsSeeder {
   constructor(
@@ -36,15 +40,15 @@ export class DocumentsSeeder {
 
   async clear() {}
 
-  async run() {
+  async run(input: DocumentsSeedInput) {
     await this.clear()
 
     const db = this.drizzleClient.requireDatabase()
 
-    const users = await db.select().from(userModel).limit(5)
-    const clients = await db.select().from(clientModel).limit(10)
+    const userIds = input.userIds.slice(0, 5)
+    const clientIds = input.clientIds.slice(0, 10)
 
-    if (users.length === 0 || clients.length === 0) return null
+    if (userIds.length === 0 || clientIds.length === 0) return null
 
     const dummyFiles = [
       {
@@ -68,11 +72,11 @@ export class DocumentsSeeder {
     const batches: any[] = []
     const batchesPerClient = 3
 
-    for (const [index, client] of clients.entries()) {
-      const user = users[index % users.length]
+    for (const [index, clientId] of clientIds.entries()) {
+      const userId = userIds[index % userIds.length]
 
       for (let batchIndex = 1; batchIndex <= batchesPerClient; batchIndex++) {
-        const batchName = `LOTE-${client.id}-${batchIndex}-${randomUUID()}`
+        const batchName = `LOTE-${clientId}-${batchIndex}-${randomUUID()}`
 
         const uploadedFiles = await Promise.all(
           dummyFiles.map(async (file) => {
@@ -80,7 +84,7 @@ export class DocumentsSeeder {
             const extension = extname(file.name)
             const mimeType = getMimeTypeFromExtension(extension)
 
-            const storagePath = `seed/${client.id}/${batchName}/${file.name}`
+            const storagePath = `seed/${clientId}/${batchName}/${file.name}`
 
             await this.storageProvider.upload(storagePath, buffer, mimeType)
 
@@ -97,8 +101,8 @@ export class DocumentsSeeder {
           readableId: batchName,
           channel: DocumentBatchChannel.InternalUpload,
           sender: 'admin@hms.com.br',
-          createdBy: user.id,
-          clientId: client.id,
+          createdBy: userId,
+          clientId,
           files: uploadedFiles,
         })
 

@@ -16,7 +16,11 @@ import type {
 import type { User, UserCreation } from '@hms/core/identity/domain/entities'
 import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
-import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import type {
+  ClientsRepository,
+  CollaboratorsRepository,
+  UsersRepository,
+} from '@hms/core/identity/interfaces'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type {
   LegalAreasRepository,
@@ -38,7 +42,9 @@ import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { FakeStorageProvider } from '@/shared/provision/storage/fixtures/fake-storage-provider'
 import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
@@ -89,24 +95,28 @@ export class ConsultationModuleFixture {
         providers: [{ provide: InngestBroker, useValue: broker }],
       },
       (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              user?: AuthUser
-              auth?: { accessToken: string; user: AuthUser }
-            }>()
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
-            request.user = authentication.user
-            request.auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            return true
-          },
-        }),
+        builder
+          .overrideGuard(AuthGuard)
+          .useValue({
+            canActivate: (context: ExecutionContext) => {
+              const request = context.switchToHttp().getRequest<{
+                headers: { authorization?: string }
+                user?: AuthUser
+                auth?: { accessToken: string; user: AuthUser }
+              }>()
+              if (!authentication.user || !request.headers.authorization) {
+                throw new UnauthorizedException('Authentication token is required')
+              }
+              request.user = authentication.user
+              request.auth = {
+                accessToken: 'fixture-access-token',
+                user: authentication.user,
+              }
+              return true
+            },
+          })
+          .overrideProvider(PROVISION_PROVIDERS.storage)
+          .useClass(FakeStorageProvider),
     )
 
     return new ConsultationModuleFixture(
@@ -296,14 +306,10 @@ export class ConsultationModuleFixture {
   }
 
   private static resolveUsersRepository(restFixture: RestFixture) {
-    return restFixture.get<import('@hms/core/identity/interfaces').UsersRepository>(
-      IDENTITY_REPOSITORIES.users,
-    )
+    return restFixture.get<UsersRepository>(IDENTITY_REPOSITORIES.users)
   }
 
   private static resolveCollaboratorsRepository(restFixture: RestFixture) {
-    return restFixture.get<
-      import('@hms/core/identity/interfaces').CollaboratorsRepository
-    >(IDENTITY_REPOSITORIES.collaborators)
+    return restFixture.get<CollaboratorsRepository>(IDENTITY_REPOSITORIES.collaborators)
   }
 }
