@@ -7,14 +7,14 @@ status: ready
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 jira_tickets:
   - SCRUM-140
-updated_at: 2026-08-28
+updated_at: 2026-08-31
 ---
 
 # Evaluation
 
 Evaluation of Spec revision `15` against the current implementation.
 
-Current result: Kickoff preflight passed for the real database/Auth/Server stack and
+Current result: PR #107 is green on head `174b27197ee78d9c1bc13b67a2bcd24416658187` after correcting the failed Server App CI revision `2868be41cb5f5a213bbc370fac0fef0a20720cf`. The validated PR #104 fixture corrections and imported `InngestBroker` override are propagated into the dependent sending-configuration branch. Server code/type/diff checks and integrated review pass; Core, Server, Web and Supabase PR checks are green. Prior kickoff preflight passed for the real database/Auth/Server stack and
 the five-test authenticated login baseline. F1-F8 Core/Validation/Server/Web contracts,
 runtime wiring, focused sensors and integrated review are verified. The Orchestrator-generated migration
 initially exposed a composite foreign-key DDL defect; the model and migration were
@@ -74,6 +74,9 @@ Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 | `EV-20` | Real seeded runtime | `pnpm --filter server db:seed`; authenticated Playwright CLI against Web `5000` and Server `5555` | Seed now provides two approved current DOCX-backed documents (`Contrato de formalização` and `Termo de honorários`). Inngest/Gotenberg preview preparation, retry, PDF loading and field editing were revalidated through the real authenticated flow with no console or failed-request errors in the final run. | `passed` |
 | `EV-21` | Web composition and behavior | Focused Web suites and authenticated CLI continuation | The `YWfhi` summary links to the dedicated sending-configuration page; tabs, nested document-package widgets, extracted page widgets, candidate dialog, shared avatar/skeleton, multi-channel toggles, centralized assignment save, field progress/details and save-above-viewer refinements are reflected in the implementation tree. Focused route coverage passed 4/4 and the final Web suite passed 106 files/372 tests. | `passed` |
 | `EV-22` | Latest Web UI regression | Focused configuration Web suites; Playwright CLI route suite; `pnpm --filter web test:coverage` | Duplicate signature fields now count once per signatory in progress/details. Fields Editor document changes and tab changes warn about unsaved changes. Focused Web coverage passed 16 files/71 tests; the focused Playwright CLI route suite passed 2/2; full Web coverage passed 110 files/403 tests. | `passed` |
+| `EV-23` | Server test-fixture correction | `git diff --check`; `pnpm --filter server check:code`; `pnpm --filter server check:types`; focused seven-suite controller command attempted locally; integrated reviewer re-review | Diff check, Biome over 588 files and Server type-check passed. The correction uses the database-module-owned seeder and substitutes only external object storage while preserving real file metadata persistence. Focused integration execution was blocked before application assertions by the unavailable local Testcontainers runtime; the same GitHub Server App CI suite is the required runtime gate. Reviewer found no remaining blocker. | `passed` |
+| `EV-24` | Server messaging/controller fixture correction | Corrected-base ancestry inspection; `git diff --check`; `pnpm --filter server check:code`; `pnpm --filter server check:types`; focused Formalization regression attempt; integrated reviewer re-review | PR #104 correction is present in the dependent branch. Diff check, Biome over 653 files and Server type-check passed. The fixture now overrides the imported broker token while retaining real Formalization module/repository wiring. Focused integration execution and root coverage are locally blocked by the unavailable Testcontainers runtime; updated PR CI is the runtime gate. Reviewer found no blocker. | `passed` |
+| `EV-25` | PR #107 dependent-branch fixture correction | `git diff --check`; `pnpm --filter server check:code`; `pnpm --filter server check:types`; integrated reviewer re-review; PR #107 CI | The four fixture corrections were applied to the dependent branch: module-owned seeder resolution, narrow external-storage substitution, and imported broker override. Server static/type checks and reviewer validation passed; the full CI suite passed the Server, Core, Web and Supabase checks. | `passed` |
 
 ## Manual evidence
 
@@ -128,6 +131,10 @@ Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 | `FND-020` | architecture | Dependency Cruiser checks across Core, Validation, Server and Web | `EV-19` | `resolved` | The architecture audit initially found cross-module/database imports, direct Web React Query/REST usage and a generated-route cycle. Ownership boundaries were corrected, the generated route was narrowly excluded, and known-violation baselines were removed; all four checks now pass. |
 | `FND-021` | Contract/documentation | Validation package test-free policy reconciliation | `EV-03`; `EV-18` | `resolved` | The Spec and Plan still listed removed Validation test files and a package test command. Those references were replaced with the explicit lint/type-check policy, consuming-boundary behavior coverage, and root coverage exclusion. |
 | `FND-022` | test fixture | Covered-workspace `pnpm test:coverage` rerun | `EV-18` | `resolved` | Two stale signatory hook mocks caused the first coverage attempt to fail after the hook boundary changes. The mocks were corrected, focused signatory tests passed, and the full Core/Server/Web coverage run completed successfully. |
+| `FND-023` | test fixture/CI | PR #104 Server App CI run `33196827796`, job `98938392770` | `EV-23`; `CI-02` | `resolved` | The document-production fixture now resolves the seeder exported by its owning database module; the consultation fixture replaces only external object storage while retaining real provider/repository persistence. Static checks and integrated review pass; runtime proof proceeds through updated PR CI. |
+| `FND-024` | review/test fixture | Integrated reviewer review of the first `FND-023` correction | `EV-23`; `CI-02` | `resolved` | The first correction was replaced before publication. The final candidate removes the duplicate seeder registration, preserves real `SupabaseFileStorageProvider` plus `StoredFilesRepository`, and keeps the low-level in-memory adapter in a fixture-only path. |
+| `FND-025` | test fixture/CI | PR #111 Server App CI run `33198825345`, job `98945054780` | `EV-24`; `CI-06` | `resolved` | Corrected PR #104 head was propagated. The Formalization fixture now overrides the imported `InngestBroker`, so confirmation publishes through the fixture mock without requiring a real event key; static checks and integrated review pass, with updated PR CI as runtime proof. |
+| `FND-026` | test fixture/CI | PR #107 Server App CI run `33199719220`, job `98945907115` | `EV-25`; `CI-07`; `CI-08` | `resolved` | PR #107 now carries the validated PR #104 fixture wiring and the imported `InngestBroker` override. The updated head passed all applicable Core, Server, Web and Supabase checks. |
 
 ## Lessons learned
 
@@ -146,6 +153,10 @@ Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 | Architecture checks should run for every workspace without a known-violation baseline so new cross-layer imports remain visible. | `FND-020` | Architecture and package rule changes record the enforced Dependency Cruiser boundaries and the required zero-violation result. |
 | A schema-only package can remain test-free when its consuming Core/Server/Web boundaries own executable behavior coverage and static checks remain mandatory. | `FND-021` | `documentation/rules/validation-package-rules.md` is the package authority; root test and coverage orchestration excludes `@hms/validation`. |
 | Coverage must be rerun after hook-boundary changes, including test doubles and provider setup, until the covered workspaces complete cleanly. | `FND-022` | No new test framework or package was introduced; the corrected consumer tests and final root coverage run are recorded. |
+| Module fixtures must evolve with exported seeder and provider constructor dependencies so controller integration tests retain production-equivalent wiring. | `FND-023` | Existing Controller Testing and Server App Layer rules already require actual feature modules/providers; no authority change is needed. |
+| Integration fixtures should replace the narrowest external adapter and retain the real application provider plus repository path under test. | `FND-024` | Already required by `documentation/rules/controllers-testing-rules.md`; no authority change is needed. |
+| A Nest integration fixture must override a provider imported by the real module rather than register a duplicate token in the root testing module. | `FND-025` | Already covered by production-equivalent module wiring in `documentation/rules/controllers-testing-rules.md`; no authority change is needed. |
+| Dependent delivery branches must carry forward corrected shared fixtures before adding later-layer changes. | `FND-026` | Existing SDD dependency-chain and Controller Testing rules already require base/head ancestry and production-equivalent fixture wiring; no authority change is needed. |
 
 ## PR CI quality gate
 
@@ -155,6 +166,18 @@ is not SDD current-commit metadata. Retain failed and superseded-head runs as hi
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
 | `CI-01` | `<applicable workflow>` | `<sha>` | `pending` | `<run URL when available>` |
+| `CI-02` | Server App CI / Server app checks | `734487ba2309ed19f4a32de8582446a28300a3d3` | `failed` | `https://github.com/hms-society/hms/actions/runs/33196827796/job/98938392770` |
+| `CI-03` | Server App CI / Server app checks | `b88897f7b03570dbdbb67ab2bb0a05d3f9236730` | `passed` | `https://github.com/hms-society/hms/actions/runs/33389529211/job/99479711180` |
+| `CI-04` | Core Package CI / Core package checks | `b88897f7b03570dbdbb67ab2bb0a05d3f9236730` | `passed` | `https://github.com/hms-society/hms/actions/runs/33389529209/job/99479711188` |
+| `CI-05` | Web App CI / Web app checks | `b88897f7b03570dbdbb67ab2bb0a05d3f9236730` | `passed` | `https://github.com/hms-society/hms/actions/runs/33389529144/job/99479711114` |
+| `CI-06` | Server App CI / Server app checks | `d30818b3d74b2c27caebea369741b1d9a5d42e64` | `failed` | `https://github.com/hms-society/hms/actions/runs/33198825345/job/98945054780` |
+| `CI-07` | Server App CI / Server app checks | `e8a6b017a685df2f46fc2295bd95378468817681` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391108572/job/99484694062` |
+| `CI-08` | Server App CI / Server app checks | `174b27197ee78d9c1bc13b67a2bcd24416658187` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391590131/job/99486246431` |
+| `CI-09` | Core Package CI / Core package checks | `174b27197ee78d9c1bc13b67a2bcd24416658187` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391590152/job/99486246486` |
+| `CI-10` | Web App CI / Web app checks | `174b27197ee78d9c1bc13b67a2bcd24416658187` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391590124/job/99486246205` |
+| `CI-08` | Core Package CI / Core package checks | `e8a6b017a685df2f46fc2295bd95378468817681` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391108582/job/99484694086` |
+| `CI-09` | Web App CI / Web app checks | `e8a6b017a685df2f46fc2295bd95378468817681` | `passed` | `https://github.com/hms-society/hms/actions/runs/33391108560/job/99484694189` |
+| `CI-10` | Server App CI / Server app checks | `2868be41cb5f5a213bbc370fac0fef0a20720cf2` | `failed` | `https://github.com/hms-society/hms/actions/runs/33199719220/job/98945907115` |
 
 ## History
 
@@ -184,3 +207,12 @@ is not SDD current-commit metadata. Retain failed and superseded-head runs as hi
 | `2026-08-28` | Validation package tests/tooling were removed per policy. Validation lint/type-check passed, and the root covered-workspace `pnpm test:coverage` completed with 3 successful tasks for Core, Server and Web after stale signatory mocks were corrected. |
 | `2026-08-28` | Spec revision `15` removed supplemental authorization, concurrent-conflict, changed-package, historical-DOCX and pending visual-comparison obligations from the closure Contract. Automated evidence and the real authenticated continuation cover the retained access, reset and reopen behavior; historical broad Web and unrelated Server failures remain recorded as non-blocking findings. |
 | `2026-08-28` | The latest Web implementation was reconciled into `EV-22`: duplicate signature fields count once per signatory, Fields Editor document/tab changes warn about unsaved work, focused route coverage passed 2/2, focused Web coverage passed 16 files/71 tests, and full Web coverage passed 110 files/403 tests. |
+| `2026-08-31` | PR #104 feedback cycle reopened after Server App CI run `33196827796` failed. `FND-023` records the two fixture regressions; `builder_server` (`/root/builder_server`) was activated for Spec revision 15 with `apps/server/**` ownership and focused/full Server plus coverage/CI exits. |
+| `2026-08-31` | The integrated reviewer rejected the first fixture correction because it bypassed real file metadata persistence and duplicated an exported seeder. `FND-024` invalidated its static evidence and resumed the same `builder_server` with a narrow external-storage override and production-equivalent module wiring. |
+| `2026-08-31` | `builder_server` corrected `FND-024`; Orchestrator diff/code/type checks passed and the resumed integrated reviewer reported no remaining blocker. `EV-23` is current; local Testcontainers remains unavailable, so the same Server App CI suite is the runtime publication gate. |
+| `2026-08-31` | PR #104 was updated with commit `b88897f7`; Core, Server and Web PR checks completed successfully, including the formerly failing 57-file Server suite. PR remains ready for review with clean merge state. |
+| `2026-08-31` | PR #111 feedback cycle reopened for failed Server App CI. The corrected PR #104 base was merged into its dependent branch, and `FND-025` records the remaining Formalization fixture broker-composition defect for `builder_server`. |
+| `2026-08-31` | `builder_server` corrected the Formalization broker override. Orchestrator diff/code/type checks passed; focused integration remained blocked by unavailable Testcontainers, and the integrated reviewer reported no blocker. `EV-24` is current for publication. |
+| `2026-08-31` | `builder_server` applied the validated fixture corrections to PR #107. Integrated review passed; head `174b2719` completed Core, Server, Web and Supabase checks successfully. `FND-026` resolved and `EV-25` is current. |
+| `2026-08-31` | PR #111 was updated at `e8a6b017`; Core, Server and Web checks completed successfully. The Server gate passed code, type, the complete test suite, build and Docker image build; PR is ready for review with clean merge state. |
+| `2026-08-31` | PR #107 Server App CI was inspected: six document-production fixture bootstrap failures, consultation manual-version `500`, and Formalization confirmation `500` were all inherited from stale Server fixture wiring. `FND-026` records the correction assignment for the dependent branch. |

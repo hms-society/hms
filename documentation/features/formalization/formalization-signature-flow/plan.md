@@ -26,9 +26,9 @@ updated_at: 2026-08-28
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `builder_core` | F1 | Core contracts and ports | — | — | `completed` | Core exports, contracts and canonical structures pass type/lint checks. |
 | 2 | `builder_validation` | F2 | Shared validation and event schemas | F1 | F3, F4 | `completed` | Validation lint/type-check pass and transport schemas reject non-contract payloads; behavior tests live at consuming boundaries. |
-| 2 | `builder_server` | F3 | Persistence and provider foundation | F1 | F2, F4 | `completed` | Storage/provider/database foundation passes focused server checks and preserves ownership boundaries. |
+| 2 | `builder_server` | F3 | Persistence and provider foundation | F1 | F2, F4 | `completed` | PR #104 fixture correction preserves module-owned seeder and real provider/repository wiring; static checks and integrated review pass (`FND-023`, `FND-024`). |
 | 2 | `builder_core` | F4 | Core behavior and use cases | F1 | F2, F3 | `completed` | Core use-case suites pass for actor CAS, preview lifecycle, reconciliation, reset and producer compensation. |
-| 3 | `builder_server` | F5 | Server REST, jobs and feature composition | F2, F3, F4 | — | `completed` | Server tests, controller routes, REST examples and feature job composition pass with real persistence boundaries. |
+| 3 | `builder_server` | F5 | Server REST, jobs and feature composition | F2, F3, F4 | — | `completed` | PR #107 carries the validated foundation fixture wiring and broker override; Server, Core, Web and Supabase CI checks pass (`FND-026`). |
 | 4 | `builder_web` | F6 | Web REST and action/query orchestration | F2, F5 | — | `completed` | Service, key ownership and query/action orchestration pass Web checks without direct storage/converter access. |
 | 5 | `builder_web`/`orchestrator` | F7 | Signature configuration UI and browser route | F6 | — | `completed` | Widget/hook checks, full Web suite and focused route test cover the assembled Spec tree, state matrix, 390px and keyboard paths; private Blob preview lifecycle is verified in code. |
 | 6 | `orchestrator` | F8 | Root/runtime wiring and integrated sensors | F5, F7 | — | `completed` | Generated artifacts and root runtime wiring are reviewed; integrated static, build and focused sensors pass. |
@@ -51,6 +51,7 @@ The three-way parallelism in Wave 2 is justified by the completed Core contract 
 | `2026-08-28` | Full covered-workspace `pnpm test:coverage` completed successfully for Core, Server and Web after stale signatory test mocks were corrected. | F9-T1 coverage evidence added; remaining F9 manual/visual gaps stay open. |
 | `2026-08-28` | The Contract was narrowed to remove supplemental cross-tenant, concurrent-conflict, changed-package, historical-DOCX and pending visual-comparison closure obligations. Reopen preservation/reset remain covered by automated tests and the real authenticated continuation. | Spec revision 15; F9 handoff and Evaluation reconciled so these removed scenarios no longer block conclusion. |
 | `2026-08-28` | The latest Web work was recorded: unique-signatory field progress, Fields Editor document/tab unsaved-change prompts, focused route coverage `2/2`, focused Web coverage `16` files/`71` tests, and full Web coverage `110` files/`403` tests. | F9-T1 evidence refreshed in Evaluation `EV-22`. |
+| `2026-08-31` | PR #107 CI correction scope was reconciled to include the dependent Server fixture paths `apps/server/src/document-production/fixtures/document-production-module-fixture.ts`, `apps/server/src/consultation/fixtures/consultation-module-fixture.ts`, `apps/server/src/formalization/fixtures/formalization-module-fixture.ts` and `apps/server/src/shared/provision/storage/fixtures/fake-storage-provider.ts`. | F5 correction for `FND-026`; no Contract or ownership change. |
 
 ### F1 — Core contracts and ports
 
