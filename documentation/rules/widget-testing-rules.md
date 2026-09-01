@@ -11,7 +11,7 @@ evidence required before a widget is considered covered.
 
 ## Separate widget tests from hook tests
 
-Every widget with an owning hook has two complementary test boundaries:
+Every widget has two complementary test boundaries:
 
 1. The widget component test (`<widget>.test.tsx`) mocks the widget's own
    colocated hook and verifies that the component maps the hook state to
@@ -21,7 +21,7 @@ Every widget with an owning hook has two complementary test boundaries:
    `renderHook` and verifies its state, derived values, effects, guards, and
    interaction behavior.
 
-This separation is mandatory for every behavior-owning widget. A component test
+This separation is mandatory for every widget, including a currently pure renderer. A component test
 must not use the real owning hook as a substitute for the hook test, and a hook
 test must not render the component as a substitute for the component test. The
 widget test is intentionally isolated from query, mutation, router, context, and
@@ -31,11 +31,10 @@ Tests exercise the smallest public widget or layout that owns a user-visible
 behavior. Assert what the user can render, identify, click, and observe rather
 than internal JSX structure or implementation details.
 
-An internal widget receives its own pair of tests when it owns behavior or has a
-public prop contract. A pure structural child may be covered through its owner.
-For example, `AppLayout` may cover a purely structural `Sidebar` through
-`app-layout.test.tsx`, while a `Sidebar` with its own hook requires
-`sidebar.test.tsx` and `use-sidebar.test.ts`.
+Every internal widget receives its own pair of tests. A structural fragment that does not
+justify its own hook and tests must remain markup inside its owning widget rather than being
+promoted to a widget directory. Once extracted as a widget with an `index.tsx`, it requires
+the colocated hook, component test and hook test.
 
 Do not mock internal child widgets merely to make a widget test smaller. Render
 the real child composition by default. A parent/page state-matrix test may mock
@@ -78,6 +77,11 @@ Place widget and hook tests in a colocated `tests` directory:
 widgets/layouts/app-layout/tests/app-layout.test.tsx
 widgets/layouts/app-layout/tests/use-app-layout.test.ts
 ```
+
+The component test filename mirrors the widget directory basename, even though the
+production entrypoint is `index.tsx`. For example,
+`signature-fields-tab/tests/signature-fields-tab.test.tsx` tests
+`signature-fields-tab/index.tsx`. Never name a component test `index.test.tsx`.
 
 Use `.test.tsx` for React component tests and `.test.ts` for hook or non-React
 tests. Do not use `.spec.ts` or `.spec.tsx`.
@@ -129,6 +133,13 @@ factory for a controller or service mock, create a fresh factory result per
 test and override only the behavior under examination.
 
 ## Hook tests cover hook-owned behavior
+
+This section applies to colocated widget/page behavior hooks. Feature-level action and query
+hooks under `apps/web/src/ui/<module>/hooks/` do not require dedicated test files. Their
+transport mapping remains covered by REST-adapter tests, while widget-hook tests mock those
+hooks and prove the consumer-visible orchestration, state and recovery behavior. Do not add
+`hooks/tests/use-*-query.test.ts` or `hooks/tests/use-*-action.test.ts` merely to mirror an
+action/query implementation.
 
 Use `renderHook` for application hooks. A hook test covers the state, derived
 values, effects, and handlers owned by that hook. Use `act` when an operation

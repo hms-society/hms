@@ -144,3 +144,22 @@ event table, polling relay, or outbox framework unless a requirement explicitly
 changes the delivery guarantee. Revisit an outbox when database mutation and
 event publication must become atomic or when observed event loss justifies the
 additional operational complexity.
+
+A durable domain work ledger may be reconciled periodically when a user-visible
+asynchronous state would otherwise remain stranded after direct publication fails.
+This is not a generic outbox: the owning module persists the work lifecycle required
+by its domain, publishes the normal batch event after commit, and lets a bounded
+reconciler republish only unfinished or lease-expired work. The exception must be
+approved in Architecture and the feature Spec, must keep payloads minimized, and
+must not introduce a shared event table or relay arbitrary events.
+
+## Antipatterns to Avoid
+
+- **Using a work reconciler as an implicit outbox:** do not persist arbitrary event
+  envelopes or relay unrelated events. Persist the domain work state, publish the
+  canonical batch event directly after commit, and prove bounded reconciliation of
+  only pending or lease-expired work.
+- **Retrying leased work without an attempt identity:** do not finalize asynchronous
+  work by state alone. Scheduling creates an attempt token, a claim activates its lease,
+  and completion, terminal failure and cleanup use compare-and-set with that token so an
+  expired worker cannot overwrite a newer attempt.
