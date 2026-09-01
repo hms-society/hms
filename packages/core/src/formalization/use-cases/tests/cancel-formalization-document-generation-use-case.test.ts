@@ -15,7 +15,12 @@ describe('Cancel Formalization Document Generation Use Case', () => {
     generationsRepository.findById.mockResolvedValue(undefined)
     const broker = mock<Broker>()
     await expect(
-      new CancelFormalizationDocumentGenerationUseCase(repository, generationsRepository, mock<DatetimeProvider>(), broker).execute({
+      new CancelFormalizationDocumentGenerationUseCase(
+        repository,
+        generationsRepository,
+        mock<DatetimeProvider>(),
+        broker,
+      ).execute({
         formalizationId: formalization.id,
         generationId: 'missing',
         actorId: formalization.assignedLawyerId,

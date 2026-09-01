@@ -140,4 +140,62 @@ describe('Save Manual Consultation Document Version Use Case', () => {
       }),
     )
   })
+
+  it('removes the stored file when version persistence fails', async () => {
+    const consultation = ConsultationFaker.fake()
+    const document = DocumentFaker.fake()
+    const sourceVersion = DocumentVersionFaker.fake({ documentId: document.id })
+    const createdAt = new Date('2026-08-12T19:00:00.000Z')
+    const storedFile = {
+      id: 'stored-file-id',
+      filePath: 'document.docx',
+      fileName: 'document.docx',
+      contentType: 'application/docx',
+      sizeInBytes: 1,
+      createdAt,
+    }
+    const persistenceError = new Error('version persistence failed')
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    documentPackagesRepository.findByContext.mockResolvedValue({
+      id: 'package-id',
+      context: { type: 'consultation', consultationId: consultation.id },
+      documents: [],
+      createdAt,
+      updatedAt: createdAt,
+    })
+    packageDocumentsRepository.findByDocumentPackageId.mockResolvedValue([
+      {
+        id: 'package-document-id',
+        documentPackageId: 'package-id',
+        documentId: document.id,
+        documentSpecificationId: 'specification-id',
+        createdAt,
+        updatedAt: createdAt,
+      },
+    ])
+    documentsRepository.findById.mockResolvedValue(document)
+    versionsRepository.findById.mockResolvedValue(sourceVersion)
+    versionsRepository.findLatestByDocumentId.mockResolvedValue(sourceVersion)
+    documentFileExporter.export.mockResolvedValue({
+      content: new Uint8Array([1]),
+      contentType: 'application/docx',
+      extension: 'docx',
+    })
+    fileStorageProvider.save.mockResolvedValue(storedFile)
+    idProvider.generate.mockReturnValue('new-version-id')
+    datetimeProvider.now.mockReturnValue(createdAt)
+    versionsRepository.add.mockRejectedValue(persistenceError)
+
+    await expect(
+      useCase.execute({
+        consultationId: consultation.id,
+        documentId: document.id,
+        sourceDocumentVersionId: sourceVersion.id,
+        createdByCollaboratorId: 'admin-collaborator-id',
+        createdByCollaboratorProfile: 'admin',
+        content: { type: 'doc' },
+      }),
+    ).rejects.toBe(persistenceError)
+    expect(fileStorageProvider.remove).toHaveBeenCalledWith(storedFile.id)
+  })
 })
