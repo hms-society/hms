@@ -21,6 +21,7 @@ export type CaseManagementSeedReferences = {
   contractedIntakes: readonly Intake[]
   lawyerIds: readonly string[]
   paralegalIds: readonly string[]
+  supervisorIds: readonly string[]
   actorId: string
 }
 
@@ -43,14 +44,12 @@ export class CaseManagementSeeder {
       throw new AppError('Case management seed references are required')
     }
 
-    const [leadLawyerId] = references.lawyerIds
-
-    if (!leadLawyerId || references.contractedIntakes.length === 0) {
+    if (references.lawyerIds.length === 0 || references.contractedIntakes.length === 0) {
       throw new AppError('Case management seed requirements are not met')
     }
 
     const legalCases = await this.legalCasesRepository.addMany(
-      this.createLegalCaseSeeds(references.contractedIntakes),
+      this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
     )
 
     const caseMembers = await this.caseMembersRepository.addMany(
@@ -59,6 +58,7 @@ export class CaseManagementSeeder {
         legalCases,
         lawyerIds: references.lawyerIds,
         paralegalIds: references.paralegalIds,
+        supervisorIds: references.supervisorIds,
       }),
     )
 
@@ -95,22 +95,27 @@ export class CaseManagementSeeder {
     legalCases,
     lawyerIds,
     paralegalIds,
+    supervisorIds,
   }: {
     actorId: string
     legalCases: readonly LegalCase[]
     lawyerIds: readonly string[]
     paralegalIds: readonly string[]
+    supervisorIds: readonly string[]
   }): CaseMemberCreation[] {
-    const [leadLawyerId] = lawyerIds
-    const supportLawyerId = lawyerIds[1]
-    const paralegalId = paralegalIds[0]
-
-    if (!leadLawyerId) {
-      throw new AppError('At least one lawyer is required to seed case members')
+    if (lawyerIds.length === 0) {
+      throw new AppError('At least one lawyer is required to seed case teams')
     }
 
-    return legalCases.flatMap((legalCase) => {
-      const members: CaseMemberCreation[] = [
+    return legalCases.flatMap((legalCase, caseIndex) => {
+      const leadLawyerId = lawyerIds[0]
+      const supportingLawyerIds = this.pickCollaboratorIds(
+        lawyerIds.filter((lawyerId) => lawyerId !== leadLawyerId),
+        caseIndex,
+        1,
+      )
+
+      const teamMembers = [
         {
           caseId: legalCase.id,
           collaboratorId: leadLawyerId,
@@ -119,31 +124,47 @@ export class CaseManagementSeeder {
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
         },
-      ]
-
-      if (supportLawyerId) {
-        members.push({
+        ...supportingLawyerIds.map((collaboratorId) => ({
           caseId: legalCase.id,
-          collaboratorId: supportLawyerId,
+          collaboratorId,
           role: CaseMemberRole.Lawyer,
           isPrimary: false,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
-        })
-      }
-
-      if (paralegalId) {
-        members.push({
+        })),
+        ...this.pickCollaboratorIds(paralegalIds, caseIndex, 1).map((collaboratorId) => ({
           caseId: legalCase.id,
-          collaboratorId: paralegalId,
+          collaboratorId,
           role: CaseMemberRole.Paralegal,
           isPrimary: false,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
-        })
-      }
+        })),
+        ...this.pickCollaboratorIds(supervisorIds, caseIndex, 1).map(
+          (collaboratorId) => ({
+            caseId: legalCase.id,
+            collaboratorId,
+            role: CaseMemberRole.Supervisor,
+            isPrimary: false,
+            assignedAt: legalCase.openedAt,
+            assignedBy: actorId,
+          }),
+        ),
+      ] satisfies CaseMemberCreation[]
 
-      return members
+      return teamMembers
+    })
+  }
+
+  private pickCollaboratorIds(
+    collaboratorIds: readonly string[],
+    seedIndex: number,
+    count: number,
+  ): string[] {
+    if (collaboratorIds.length === 0) return []
+
+    return Array.from({ length: Math.min(count, collaboratorIds.length) }, (_, index) => {
+      return collaboratorIds[(seedIndex + index) % collaboratorIds.length]
     })
   }
 

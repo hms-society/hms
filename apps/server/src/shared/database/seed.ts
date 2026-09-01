@@ -106,6 +106,9 @@ async function bootstrap() {
     const paralegalIds = identitySeed.collaborators
       .filter(({ profile }) => profile === 'paralegal')
       .map(({ id }) => id)
+    const supervisorIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === 'supervisor')
+      .map(({ id }) => id)
 
     await app.get(CaseManagementSeeder).run({
       contractedIntakes: intakeSeed.intakes.filter(
@@ -113,6 +116,7 @@ async function bootstrap() {
       ),
       lawyerIds,
       paralegalIds,
+      supervisorIds,
       actorId: actor.id,
     })
 

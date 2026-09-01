@@ -1,0 +1,77 @@
+@BASE_URL = http://localhost:3333
+@url = {{BASE_URL}}/cases
+
+# Preconditions
+# Run `pnpm seed`, start the API on http://localhost:3333, execute the login
+# request, then provide a seeded case ID when prompted.
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Confirm the authenticated collaborator
+# @name getCurrentCollaborator
+GET {{BASE_URL}}/collaborators/me
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### List my legal cases
+# @name listMyLegalCases
+GET {{url}}/my
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Review case checklist gate - approve
+# @prompt caseId Enter the case ID to review
+PATCH {{url}}/{{caseId}}/checklist-gate
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "approved",
+  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}"
+}
+
+### Review case checklist gate - approve with exception
+# @prompt caseId Enter the case ID to review
+PATCH {{url}}/{{caseId}}/checklist-gate
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "approved_with_exception",
+  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
+  "remarks": "Exceção documental previamente autorizada."
+}
+
+### Review case checklist gate - reject on merit
+# @prompt caseId Enter the case ID to review
+PATCH {{url}}/{{caseId}}/checklist-gate
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "rejected_on_merit",
+  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
+  "remarks": "Documentação formal completa, mas insuficiente para sustentar a tese jurídica."
+}
+
+### Review case checklist gate - block for insufficient documentation
+# @prompt caseId Enter the case ID to review
+PATCH {{url}}/{{caseId}}/checklist-gate
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "blocked_insufficient",
+  "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
+  "remarks": "Pendências documentais impedem o avanço para produção jurídica."
+}

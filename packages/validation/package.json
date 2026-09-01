@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     "./identity": "./src/identity/index.ts",
+    "./case-management": "./src/case-management/index.ts",
     "./intake": "./src/intake/index.ts",
     "./legal-catalog": "./src/legal-catalog/index.ts",
     "./shared": "./src/shared/index.ts",
