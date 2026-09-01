@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
 import { ListDocumentValidationLogsController } from '@/document-engine/rest/controllers/list-document-validation-logs.controller'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 import {
   DocumentBatchChannel,
   DocumentValidationLogAction,
@@ -11,12 +11,13 @@ import {
 } from '@hms/core/document-engine/domain/structures'
 
 describe('List Document Validation Logs Controller [GET /document-validation/documents/:documentFileId/logs]', () => {
+  const idProvider = new IdProvider()
   let fixture: DocumentEngineModuleFixture
   let userId: string
   let clientId: string
 
   beforeAll(async () => {
-    userId = randomUUID()
+    userId = idProvider.generate()
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       ListDocumentValidationLogsController,
       userId,
@@ -24,7 +25,7 @@ describe('List Document Validation Logs Controller [GET /document-validation/doc
   })
 
   beforeEach(async () => {
-    clientId = randomUUID()
+    clientId = idProvider.generate()
     await fixture.resetDatabase()
     await fixture.seedUserAndClient(userId, clientId)
   })
@@ -35,7 +36,7 @@ describe('List Document Validation Logs Controller [GET /document-validation/doc
 
   it('returns the validation history for a document file', async () => {
     const batch = await fixture.documentBatchesRepository.add({
-      readableId: `LOTE-${randomUUID()}`,
+      readableId: `LOTE-${idProvider.generate()}`,
       channel: DocumentBatchChannel.InternalUpload,
       sender: 'lawyer@hms.com',
       inTriageBox: false,

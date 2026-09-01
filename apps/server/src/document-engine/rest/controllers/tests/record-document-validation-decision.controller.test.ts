@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
 import { RecordDocumentValidationDecisionController } from '@/document-engine/rest/controllers/record-document-validation-decision.controller'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 import {
   DocumentBatchChannel,
   DocumentValidationDecision,
@@ -12,12 +12,13 @@ import {
 } from '@hms/core/document-engine/domain/structures'
 
 describe('Record Document Validation Decision Controller [PATCH /document-validation/documents/:documentFileId/decision]', () => {
+  const idProvider = new IdProvider()
   let fixture: DocumentEngineModuleFixture
   let userId: string
   let clientId: string
 
   beforeAll(async () => {
-    userId = randomUUID()
+    userId = idProvider.generate()
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       RecordDocumentValidationDecisionController,
       userId,
@@ -25,7 +26,7 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
   })
 
   beforeEach(async () => {
-    clientId = randomUUID()
+    clientId = idProvider.generate()
     await fixture.resetDatabase()
     await fixture.seedUserAndClient(userId, clientId)
   })
@@ -36,7 +37,7 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
 
   it('records a validation decision without writing mock labels into uuid columns', async () => {
     const batch = await fixture.documentBatchesRepository.add({
-      readableId: `LOTE-${randomUUID()}`,
+      readableId: `LOTE-${idProvider.generate()}`,
       channel: DocumentBatchChannel.InternalUpload,
       sender: 'lawyer@hms.com',
       inTriageBox: false,
