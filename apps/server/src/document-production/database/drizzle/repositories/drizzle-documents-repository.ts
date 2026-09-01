@@ -5,7 +5,10 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import { eq, inArray } from 'drizzle-orm'
 
 import { DrizzleDocumentMapper } from '@/document-production/database/drizzle/mappers'
-import { documentModel } from '@/document-production/database/drizzle/models'
+import {
+  documentModel,
+  documentAuditModel,
+} from '@/document-production/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -75,6 +78,39 @@ export class DrizzleDocumentsRepository
       .returning()
 
     return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async updateClassificationWithAudit(
+    params: Parameters<DocumentsRepository['updateClassificationWithAudit']>[0],
+  ): Promise<void> {
+    await this.database.transaction(async (tx) => {
+      const [doc] = await tx
+        .select({ classificacaoAcesso: documentModel.classificacaoAcesso })
+        .from(documentModel)
+        .where(eq(documentModel.id, params.documentId))
+        .for('update')
+
+      if (!doc) {
+        throw new Error('Documento não encontrado.')
+      }
+
+      const valorAnterior = doc.classificacaoAcesso
+
+      await tx
+        .update(documentModel)
+        .set({
+          classificacaoAcesso: params.valorNovo,
+          updatedAt: new Date(),
+        })
+        .where(eq(documentModel.id, params.documentId))
+
+      await tx.insert(documentAuditModel).values({
+        documentoId: params.documentId,
+        usuarioResponsavelId: params.userId,
+        valorAnterior,
+        valorNovo: params.valorNovo,
+      })
+    })
   }
 
   async removeAll() {

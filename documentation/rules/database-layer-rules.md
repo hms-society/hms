@@ -114,9 +114,17 @@ packages/core/src/<module>/interfaces/
 Repository names are plural, such as `IntakesRepository`. Method and parameter
 names must describe the operation and target explicitly.
 
+Repository methods describe persistence capabilities, not business actions or
+use-case vocabulary. A use case translates domain intent into the generic
+persistence operation before calling the repository. For an accumulator or
+balance, for example, the repository may atomically add a signed quantity; it
+must not expose domain-command methods merely to choose the arithmetic direction.
+
 Use the following write vocabulary:
 
 - `add(input)` inserts one record.
+- `add(target, signedQuantity, constraints?)` atomically changes an accumulator
+  when that repository represents a balance rather than a record collection.
 - `addMany(inputs)` inserts several records.
 - `replace(id, changes, ...)` updates an existing record.
 - `remove(id)` removes one record.
@@ -133,6 +141,12 @@ Do not use `delete` or `deleteAll` as repository method names; use `remove` or
 
 Creation and update inputs are domain types, not database types. A repository
 must not accept a Drizzle model or expose query-builder details in its contract.
+
+Do not overload one repository's `add` with both insertion and numeric addition.
+Choose the meaning that matches the represented resource. Numeric parameters
+must be explicit, such as `signedQuantity` and `minimumQuantity`, and the
+implementation must update atomically in the database rather than read a value
+and issue a later absolute replacement.
 
 `addMany` must:
 
@@ -221,14 +235,19 @@ Seeders must also follow these rules:
 - implement `clear()` through the injected repository contracts and their
   `removeAll()` methods; never import `DrizzleClient`, `DrizzleDB`, models,
   query builders, or SQL into a seeder or the seed orchestration entrypoint;
+- make `clear()` a complete reset of the tables owned by that module. Remove
+  dependent rows in reverse foreign-key order, including `RESTRICT` relations;
+  do not clear only a root table or rely implicitly on cascades;
 - implement `run()` through repository methods, normally `addMany()`, and pass
   domain creation records rather than persistence rows;
 - use domain fakers for generated development records. Fixed credentials or
   other values required to make a development account usable may remain
   explicit;
-- keep cleanup ownership inside module seeders. When foreign keys require an
-  order, the central orchestrator must call the module `clear()` methods in
-  dependency order before calling their `run()` methods;
+- keep cleanup ownership inside module seeders. The central orchestrator must
+  finish every module `clear()` before any module `run()` begins. When
+  cross-module foreign keys require ordering, call `clear()` in reverse
+  dependency order so dependents are removed first, then call `run()` in normal
+  dependency order so referenced records exist before dependents;
 - centralize execution in `apps/server/src/shared/database/seed.ts`. It must
   verify `HMS_SERVER_APP_MODE` is `dev` or `stg` before any cleanup or insertion,
   abort in every other mode, require `HMS_USER_SEED_PASSWORD` in `dev` and `stg`, and

@@ -1,4 +1,9 @@
-import type { Broker, DatetimeProvider, IdProvider, UseCase } from '../../shared/interfaces'
+import type {
+  Broker,
+  DatetimeProvider,
+  IdProvider,
+  UseCase,
+} from '../../shared/interfaces'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
@@ -45,7 +50,9 @@ export class GenerateFormalizationDocumentUseCase
   ) {}
 
   async execute(request: Request): Promise<FormalizationDocumentGeneration> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     FormalizationDocumentGuard.assertWritable(formalization)
@@ -53,14 +60,19 @@ export class GenerateFormalizationDocumentUseCase
       type: 'formalization',
       formalizationId: formalization.id,
     })
-    if (!documentPackage) throw new FormalizationStateConflictError('Selecione um documento antes de gerar uma versão.')
-    const packageDocuments = await this.packageDocumentsRepository.findByDocumentPackageId(
-      documentPackage.id,
-    )
+    if (!documentPackage)
+      throw new FormalizationStateConflictError(
+        'Selecione um documento antes de gerar uma versão.',
+      )
+    const packageDocuments =
+      await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
     const packageDocument = packageDocuments.find(
       (candidate) => candidate.documentId === request.documentId,
     )
-    if (!packageDocument) throw new FormalizationStateConflictError('O documento não pertence à formalização.')
+    if (!packageDocument)
+      throw new FormalizationStateConflictError(
+        'O documento não pertence à formalização.',
+      )
     const latestGeneration = await this.generationsRepository.findLatestByDocumentId(
       request.documentId,
     )
@@ -68,16 +80,23 @@ export class GenerateFormalizationDocumentUseCase
       latestGeneration?.status === DocumentGenerationStatus.Pending ||
       latestGeneration?.status === DocumentGenerationStatus.Running
     ) {
-      throw new FormalizationStateConflictError('O documento já possui uma geração ativa.')
+      throw new FormalizationStateConflictError(
+        'O documento já possui uma geração ativa.',
+      )
     }
     const specification = await this.specificationsRepository.findById(
       packageDocument.documentSpecificationId,
     )
-    if (!specification) throw new FormalizationStateConflictError('O modelo do documento não foi encontrado.')
+    if (!specification)
+      throw new FormalizationStateConflictError(
+        'O modelo do documento não foi encontrado.',
+      )
     const context = await this.sourceReader.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
     const source = this.buildSource(formalization, context)
-    if (source.formalization.contractFormRevision !== formalization.contractFormRevision) {
+    if (
+      source.formalization.contractFormRevision !== formalization.contractFormRevision
+    ) {
       throw new FormalizationDocumentStaleError()
     }
     const documentGenerationId = this.idProvider.generate()

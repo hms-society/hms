@@ -13,10 +13,11 @@ import type {
 } from '../interfaces'
 import { FormalizationActorAuthorization } from './formalization-actor-authorization'
 
-type Request = CloseFormalizationIntakeRequest & FormalizationActor & {
-  readonly formalizationId: string
-  readonly expectedFormalizationVersion: number
-}
+type Request = CloseFormalizationIntakeRequest &
+  FormalizationActor & {
+    readonly formalizationId: string
+    readonly expectedFormalizationVersion: number
+  }
 
 export class CloseFormalizationWithoutContractUseCase
   implements UseCase<Request, Formalization>
@@ -28,7 +29,9 @@ export class CloseFormalizationWithoutContractUseCase
   ) {}
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (request.intakeId !== formalization.intakeId) {

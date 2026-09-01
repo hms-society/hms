@@ -1,8 +1,6 @@
 import type { UseCase } from '../../shared/interfaces'
 import type { FormalizationDetails } from '../domain/entities'
-import {
-  FormalizationNotFoundError,
-} from '../domain/errors'
+import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
 import { FormalizationActorAuthorization } from './formalization-actor-authorization'
@@ -18,7 +16,9 @@ export class GetFormalizationUseCase implements UseCase<Request, FormalizationDe
   ) {}
 
   async execute(request: Request): Promise<FormalizationDetails> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     const context = await this.sourceReader.findContext(formalization)

@@ -268,10 +268,49 @@ composition. Do not mock the owning page or hook in a Playwright route test. Kee
 unit-level controller and hook tests under `apps/web/src/ui/**/tests`; do not use
 them as a substitute for route coverage.
 
+### Route coverage matrix
+
+Before considering a route complete, derive a coverage matrix from its public
+contract. Review every applicable dimension:
+
+- access and navigation: anonymous, authenticated, unauthorized, canonical URL,
+  redirects, return state, malformed path parameters, and malformed or missing
+  search parameters;
+- data lifecycle: unresolved loading, success, empty results with and without
+  filters, expected failures, malformed responses, retry, and recovery;
+- interactions: every link, button, select, checkbox, row action, dialog cancel
+  and confirmation path, keyboard path, and duplicate-submit guard;
+- validation and boundaries: required, malformed, minimum, maximum, conflicting,
+  disabled, pending, and mutation-error states;
+- transport and synchronization: exact method, path, parameters, query, body,
+  response, resulting URL, refreshed visible state, and persisted browser state;
+- responsive and accessibility behavior: a narrow viewport when layout changes,
+  accessible names and roles, keyboard operation, focus behavior, console errors,
+  failed requests, and relevant 4xx/5xx responses.
+
+Use focused scenarios rather than one oversized happy-path test. A test may share
+setup through a module fixture, but request, response, and visible-state
+assertions must remain inspectable. If a dimension is genuinely inapplicable,
+record the reason in the suite or evaluation evidence instead of silently
+omitting it.
+
+An integration scenario proves both sides of the interaction: the user observes
+the outcome and the application makes the expected transport or navigation
+decision. For mutations, assert the request and response contract, then the
+visible success or error state and any refresh or redirect. Do not use arbitrary
+sleeps or brittle implementation selectors.
+
 If the backend is mocked, describe the suite as browser integration with mocked
 transport. It verifies the UI-to-REST contract and route behavior; server
 authorization, controller, and persistence behavior require their own server/core
 tests.
+
+Mocked browser evidence and real server-backed evidence are different layers.
+Use deterministic `page.route` coverage for isolated route behavior. When the
+root `AGENTS.md`, Spec, or affected authentication/REST flow requires an
+authenticated real-service pass, run that pass separately and record database,
+Auth, Server, console, network, narrow-viewport, and keyboard evidence without
+presenting the mocked suite as proof of the live integration.
 
 ## Route failure boundaries
 

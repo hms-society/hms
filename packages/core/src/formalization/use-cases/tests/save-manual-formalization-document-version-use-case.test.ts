@@ -1,8 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { DocumentFileExporter, DocumentPackagesRepository, DocumentsRepository, DocumentVersionsRepository, PackageDocumentsRepository } from '../../../document-production/interfaces'
-import type { DatetimeProvider, FileStorageProvider, IdProvider } from '../../../shared/interfaces'
+import type {
+  DocumentFileExporter,
+  DocumentPackagesRepository,
+  DocumentsRepository,
+  DocumentVersionsRepository,
+  PackageDocumentsRepository,
+} from '../../../document-production/interfaces'
+import type {
+  DatetimeProvider,
+  FileStorageProvider,
+  IdProvider,
+} from '../../../shared/interfaces'
 import type { FormalizationsRepository } from '../../interfaces'
 import { SaveManualFormalizationDocumentVersionUseCase } from '../save-manual-formalization-document-version-use-case'
 

@@ -17,6 +17,8 @@ import { ListDocumentValidationLogsController } from '../rest/controllers/list-d
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
 
+import { ListTriageDocumentBatchesController } from '../rest/controllers/list-triage-document-batches.controller'
+
 @Module({
   imports: [
     DocumentsDatabaseModule,
@@ -29,6 +31,7 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
+    ListTriageDocumentBatchesController,
     GetDocumentFileController,
     GetDocumentValidationController,
     ListDocumentValidationsController,
@@ -49,6 +52,7 @@ import { RequestDocumentResendController } from '../rest/controllers/request-doc
     ListClientDocumentBatchUseCase,
     DocumentEngineMessagingModule,
     DocumentsDatabaseModule,
+    IdentityModule,
   ],
 })
 export class DocumentsModule {}

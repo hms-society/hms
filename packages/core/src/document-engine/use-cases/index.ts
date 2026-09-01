@@ -1,5 +1,6 @@
 export * from './create-document-batch-use-case'
 export * from './list-client-document-batch-use-case'
+export * from './list-triage-document-batches-use-case'
 export * from './get-document-file-use-case'
 export * from './list-document-validations-use-case'
 export * from './list-document-validation-logs-use-case'
