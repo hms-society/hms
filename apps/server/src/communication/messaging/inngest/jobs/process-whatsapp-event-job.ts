@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { WhatsappDocumentBatchReceivedEvent } from '@hms/core/document-engine/domain/events'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
@@ -106,7 +107,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
               .returning()
 
             await step.sendEvent('dispatch-document-batch', {
-              name: 'documents/whatsapp.batch.received',
+              name: WhatsappDocumentBatchReceivedEvent._NAME,
               data: {
                 eventoId: evento.id,
                 sender,

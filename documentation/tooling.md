@@ -104,6 +104,18 @@ The application and core workspaces use Vitest for automated tests.
   - `pnpm --filter server test:watch` — watch mode
   - `pnpm --filter server test:cov` — coverage
   - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
+  - `pnpm --filter server test:inngest` — runs the opt-in Dockerized Inngest integration test
+
+The Dockerized Inngest suite uses each feature's module fixture for both Nest
+controllers and Inngest jobs. For a job test, the module fixture composes
+`InngestFixture`, starts an isolated Inngest Dev Server with Testcontainers,
+injects the real container-backed `InngestClient` into Nest, and owns all startup
+and cleanup. Jobs that exercise file storage also start an isolated Supabase
+Storage API, its metadata database, and a local gateway through Testcontainers;
+the production storage adapters remain active while external infrastructure is
+kept disposable and CI-owned. The suite is colocated under each module's
+`messaging/inngest/jobs/tests` directory, excluded from the default server test
+command, and run separately in server CI.
 - `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
 - `pnpm test` runs the test task across all workspaces through Turborepo.
 

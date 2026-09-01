@@ -81,22 +81,31 @@ The application composition registers every exported job function in the single
 Inngest endpoint. A feature messaging module owns and exports its jobs; the
 feature root module imports that messaging module.
 
-## Jobs expose `this.function`
+## Jobs expose a stable ID and `this.function`
 
 Every Inngest job is an injectable class that extends `InngestJob` and assigns a
-typed function in its constructor:
+stable function identifier and a typed function in its constructor:
 
 ```ts
 @Injectable()
 export class ExampleJob extends InngestJob {
+  static readonly ID = 'module/example'
+
   readonly function: InngestFunction.Like
 
   constructor(inngest: InngestClient, dependency: Dependency) {
     super(inngest)
-    this.function = this.inngest.createFunction(/* ... */)
+    this.function = this.inngest.createFunction(
+      { id: ExampleJob.ID },
+      /* trigger and handler */,
+    )
   }
 }
 ```
+
+Use `ExampleJob.ID` everywhere the function must be identified, including
+application registration and test fixtures. Do not repeat the function ID
+literal outside the job class.
 
 Do not put a generic `handle(context)` method in the base class and do not pass a
 handler through `super`. Those shapes erase the event-specific inference that
@@ -106,6 +115,11 @@ interfaces, may be injected normally through NestJS.
 Jobs coordinate durable execution and translation between events. Business
 decisions belong to core use cases. A job may invoke a workflow or use case, but
 must not reproduce its rules inline.
+
+Translate known deterministic `AppError` business failures into Inngest
+`NonRetriableError` at the job boundary. Such failures cannot succeed until a new
+event or domain-state change occurs. Leave unexpected infrastructure failures
+retriable so Inngest can apply the function's retry policy.
 
 ## Event schemas validate transport payloads
 
@@ -144,3 +158,33 @@ event table, polling relay, or outbox framework unless a requirement explicitly
 changes the delivery guarantee. Revisit an outbox when database mutation and
 event publication must become atomic or when observed event loss justifies the
 additional operational complexity.
+
+A durable domain work ledger may be reconciled periodically when a user-visible
+asynchronous state would otherwise remain stranded after direct publication fails.
+This is not a generic outbox: the owning module persists the work lifecycle required
+by its domain, publishes the normal batch event after commit, and lets a bounded
+reconciler republish only unfinished or lease-expired work. The exception must be
+approved in Architecture and the feature Spec, must keep payloads minimized, and
+must not introduce a shared event table or relay arbitrary events.
+
+## Test jobs through the integration boundary
+
+Job tests must exercise the real Inngest Dev Server and the owning Nest module,
+including applicable database and external-service effects. Do not call a job
+handler or durable step directly and do not treat mocked use-case execution as
+job integration evidence.
+
+Follow [`jobs-testing-rules.md`](jobs-testing-rules.md) for test location, module
+fixture composition, canonical event construction, Testcontainers services,
+business-rule scenarios, isolation, execution APIs, and CI requirements.
+
+## Antipatterns to Avoid
+
+- **Using a work reconciler as an implicit outbox:** do not persist arbitrary event
+  envelopes or relay unrelated events. Persist the domain work state, publish the
+  canonical batch event directly after commit, and prove bounded reconciliation of
+  only pending or lease-expired work.
+- **Retrying leased work without an attempt identity:** do not finalize asynchronous
+  work by state alone. Scheduling creates an attempt token, a claim activates its lease,
+  and completion, terminal failure and cleanup use compare-and-set with that token so an
+  expired worker cannot overwrite a newer attempt.
