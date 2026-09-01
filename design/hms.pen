@@ -74549,42 +74549,6 @@
                           "fontSize": 11,
                           "fontWeight": "normal",
                           "fontStyle": "italic"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "q2D215",
-                          "name": "Add Btn",
-                          "cornerRadius": 6,
-                          "stroke": "$border",
-                          "strokeWidth": 1,
-                          "gap": 5,
-                          "padding": [
-                            6,
-                            10
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "uuwdU",
-                              "name": "Plus",
-                              "width": 12,
-                              "height": 12,
-                              "icon": "user-plus",
-                              "library": "lucide",
-                              "fill": "$foreground"
-                            },
-                            {
-                              "type": "text",
-                              "id": "hFioh",
-                              "name": "Add Text",
-                              "fill": "$foreground",
-                              "content": "Adicionar signatário",
-                              "fontFamily": "$font-sans",
-                              "fontSize": 11,
-                              "fontWeight": "500"
-                            }
-                          ]
                         }
                       ]
                     },
@@ -169079,7 +169043,7 @@
       "name": "Administrador - Formulário Dinâmico: Consulta",
       "clip": true,
       "width": 1440,
-      "height": 1120,
+      "height": 1200,
       "fill": "#F5F2EC",
       "children": [
         {
@@ -169116,9 +169080,11 @@
               "height": "fill_container",
               "fill": "#F5F2EC",
               "layout": "vertical",
-              "gap": 18,
+              "gap": 14,
               "padding": [
                 24,
+                0,
+                10,
                 0
               ],
               "children": [
@@ -169200,7 +169166,7 @@
                     {
                       "type": "frame",
                       "id": "UXKy8",
-                      "gap": 6,
+                      "gap": 14,
                       "alignItems": "center",
                       "children": [
                         {
@@ -169229,48 +169195,6 @@
                       "gap": 10,
                       "alignItems": "center",
                       "children": [
-                        {
-                          "type": "frame",
-                          "id": "c1ahfQ",
-                          "name": "Cancelar",
-                          "fill": "$accent",
-                          "cornerRadius": 999,
-                          "stroke": "$ghost-stroke",
-                          "strokeWidth": 1,
-                          "strokeAlignment": "inner",
-                          "gap": 6,
-                          "padding": [
-                            9,
-                            18
-                          ],
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "NKQ4A",
-                              "x": 0,
-                              "y": 0,
-                              "name": "Icon",
-                              "enabled": false,
-                              "width": 14,
-                              "height": 14,
-                              "icon": "plus",
-                              "library": "lucide",
-                              "fill": "$foreground"
-                            },
-                            {
-                              "type": "text",
-                              "id": "eoamx",
-                              "name": "Label",
-                              "fill": "$foreground",
-                              "content": "Cancelar",
-                              "fontFamily": "$font-sans",
-                              "fontSize": 13,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
                         {
                           "type": "frame",
                           "id": "UDtf3",
@@ -169303,6 +169227,42 @@
                               "content": "Salvar modelo",
                               "fontFamily": "$font-sans",
                               "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "LPIwC",
+                          "name": "Excluir formulário",
+                          "fill": "$destructive-muted",
+                          "cornerRadius": 999,
+                          "gap": 6,
+                          "padding": [
+                            9,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "xdw7j",
+                              "name": "Ícone excluir",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "trash-2",
+                              "library": "lucide",
+                              "fill": "$destructive-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BPDHA",
+                              "name": "Label",
+                              "fill": "$destructive-foreground",
+                              "content": "Excluir formulário",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 12,
                               "fontWeight": "600"
                             }
                           ]
@@ -169742,7 +169702,7 @@
                   "id": "oJYnB",
                   "name": "Fields Card",
                   "width": "fill_container",
-                  "height": "fill_container",
+                  "height": 456,
                   "fill": "$card",
                   "cornerRadius": 10,
                   "stroke": "$border",
@@ -180058,21 +180018,6 @@
                 24
               ],
               "children": [
-                {
-                  "id": "kL1rW",
-                  "type": "ref",
-                  "ref": "C2Kaf",
-                  "name": "Breadcrumb",
-                  "width": "fill_container",
-                  "descendants": {
-                    "IzpyN": {
-                      "content": "Documentos"
-                    },
-                    "TyZSi": {
-                      "content": "Caixa de documentos"
-                    }
-                  }
-                },
                 {
                   "type": "frame",
                   "id": "TLtHX",
@@ -212659,48 +212604,6 @@
           "children": [
             {
               "type": "frame",
-              "id": "ogYTz",
-              "name": "Cancelar",
-              "fill": "$accent",
-              "cornerRadius": 999,
-              "stroke": "$ghost-stroke",
-              "strokeWidth": 1,
-              "strokeAlignment": "inner",
-              "gap": 6,
-              "padding": [
-                9,
-                18
-              ],
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "wiL42",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Icon",
-                  "enabled": false,
-                  "width": 14,
-                  "height": 14,
-                  "icon": "plus",
-                  "library": "lucide",
-                  "fill": "$foreground"
-                },
-                {
-                  "type": "text",
-                  "id": "AM4Z8",
-                  "name": "Label",
-                  "fill": "$foreground",
-                  "content": "Cancelar",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 13,
-                  "fontWeight": "600"
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "iJagD",
               "name": "Salvar",
               "fill": "$primary",
@@ -212731,6 +212634,42 @@
                   "content": "Salvar modelo",
                   "fontFamily": "$font-sans",
                   "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zVI7Y",
+              "name": "Excluir formulário",
+              "fill": "$destructive-muted",
+              "cornerRadius": 999,
+              "gap": 6,
+              "padding": [
+                9,
+                18
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "nZFKh",
+                  "name": "Ícone excluir",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "trash-2",
+                  "library": "lucide",
+                  "fill": "$destructive-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "w6T0HB",
+                  "name": "Label",
+                  "fill": "$destructive-foreground",
+                  "content": "Excluir formulário",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
                   "fontWeight": "600"
                 }
               ]
@@ -212794,48 +212733,6 @@
           "gap": 10,
           "alignItems": "center",
           "children": [
-            {
-              "type": "frame",
-              "id": "p7RWMO",
-              "name": "Cancelar",
-              "fill": "$muted",
-              "cornerRadius": 999,
-              "stroke": "$border",
-              "strokeWidth": 1,
-              "strokeAlignment": "inner",
-              "gap": 6,
-              "padding": [
-                9,
-                18
-              ],
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "Hygxm",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Icon",
-                  "enabled": false,
-                  "width": 14,
-                  "height": 14,
-                  "icon": "plus",
-                  "library": "lucide",
-                  "fill": "$foreground"
-                },
-                {
-                  "type": "text",
-                  "id": "ClbX0",
-                  "name": "Label",
-                  "fill": "$muted-foreground",
-                  "content": "Cancelar",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 13,
-                  "fontWeight": "600"
-                }
-              ]
-            },
             {
               "type": "frame",
               "id": "BDtRh",
@@ -212933,48 +212830,6 @@
           "children": [
             {
               "type": "frame",
-              "id": "fpIWe",
-              "name": "Cancelar",
-              "fill": "$accent",
-              "cornerRadius": 999,
-              "stroke": "$ghost-stroke",
-              "strokeWidth": 1,
-              "strokeAlignment": "inner",
-              "gap": 6,
-              "padding": [
-                9,
-                18
-              ],
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "EaLQP",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Icon",
-                  "enabled": false,
-                  "width": 14,
-                  "height": 14,
-                  "icon": "plus",
-                  "library": "lucide",
-                  "fill": "$foreground"
-                },
-                {
-                  "type": "text",
-                  "id": "ftS7U",
-                  "name": "Label",
-                  "fill": "$foreground",
-                  "content": "Cancelar",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 13,
-                  "fontWeight": "600"
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "JUKXI",
               "name": "Salvar",
               "fill": "$destructive",
@@ -213005,6 +212860,42 @@
                   "content": "Tentar novamente",
                   "fontFamily": "$font-sans",
                   "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "N23CY",
+              "name": "Excluir formulário",
+              "fill": "$destructive-muted",
+              "cornerRadius": 999,
+              "gap": 6,
+              "padding": [
+                9,
+                18
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "mdxcx",
+                  "name": "Ícone excluir",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "trash-2",
+                  "library": "lucide",
+                  "fill": "$destructive-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "YUVoI",
+                  "name": "Label",
+                  "fill": "$destructive-foreground",
+                  "content": "Excluir formulário",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
                   "fontWeight": "600"
                 }
               ]
@@ -213070,48 +212961,6 @@
           "children": [
             {
               "type": "frame",
-              "id": "UlidR",
-              "name": "Cancelar",
-              "fill": "$accent",
-              "cornerRadius": 999,
-              "stroke": "$ghost-stroke",
-              "strokeWidth": 1,
-              "strokeAlignment": "inner",
-              "gap": 6,
-              "padding": [
-                9,
-                18
-              ],
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "l1jVC",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Icon",
-                  "enabled": false,
-                  "width": 14,
-                  "height": 14,
-                  "icon": "plus",
-                  "library": "lucide",
-                  "fill": "$foreground"
-                },
-                {
-                  "type": "text",
-                  "id": "nVfCX",
-                  "name": "Label",
-                  "fill": "$foreground",
-                  "content": "Cancelar",
-                  "fontFamily": "$font-sans",
-                  "fontSize": 13,
-                  "fontWeight": "600"
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "FsoRJ",
               "name": "Salvar",
               "fill": "$primary",
@@ -213142,6 +212991,42 @@
                   "content": "Salvar modelo",
                   "fontFamily": "$font-sans",
                   "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "lejI0",
+              "name": "Excluir formulário",
+              "fill": "$destructive-muted",
+              "cornerRadius": 999,
+              "gap": 6,
+              "padding": [
+                9,
+                18
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "EBlwO",
+                  "name": "Ícone excluir",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "trash-2",
+                  "library": "lucide",
+                  "fill": "$destructive-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "CZji0",
+                  "name": "Label",
+                  "fill": "$destructive-foreground",
+                  "content": "Excluir formulário",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
                   "fontWeight": "600"
                 }
               ]
@@ -216589,6 +216474,328 @@
               "fontFamily": "$font-sans",
               "fontSize": 14,
               "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "aSbsz",
+      "x": -16427,
+      "y": 3727,
+      "name": "Administrador - Formulários Dinâmicos: Modal Excluir Formulário",
+      "width": 440,
+      "fill": "$card",
+      "cornerRadius": 12,
+      "stroke": "$border",
+      "strokeWidth": 1,
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#1C2C2A18",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 24
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "xmKhc",
+          "name": "Cabeçalho do modal",
+          "width": "fill_container",
+          "padding": [
+            20,
+            20,
+            16,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "BeFTl",
+              "name": "Título e descrição",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "nST7s",
+                  "name": "Título",
+                  "fill": "$brand",
+                  "content": "Excluir “Verbas rescisórias”?",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "P2JLdn",
+                  "name": "Descrição",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Esta ação remove permanentemente o formulário.",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "S8Y390",
+              "name": "Fechar modal",
+              "width": 30,
+              "height": 30,
+              "fill": "$secondary",
+              "cornerRadius": 999,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "o91SV",
+                  "name": "Ícone fechar",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$secondary-foreground"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "cUnEK",
+          "name": "Divisor superior",
+          "fill": "$border",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "iIqUo",
+          "name": "Consequências do encerramento",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            18,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "ZCJFs",
+              "name": "Aviso de encerramento",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kngiP",
+                  "name": "Ícone do encerramento",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$accent",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "EfgUh",
+                      "name": "Símbolo encerrar",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "archive",
+                      "library": "lucide",
+                      "fill": "$destructive"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iO0us",
+                  "name": "Texto do encerramento",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L9s6oA",
+                      "name": "Título do aviso",
+                      "fill": "$foreground",
+                      "content": "O formulário será excluído",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qunLY",
+                      "name": "Consequência principal",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Ele não poderá ser recuperado nem usado em novas consultas.",
+                      "lineHeight": 1.45,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GcPes",
+              "name": "Nota sobre o histórico",
+              "width": "fill_container",
+              "fill": "$secondary",
+              "cornerRadius": 8,
+              "gap": 8,
+              "padding": [
+                10,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "b5vvMR",
+                  "name": "Ícone informativo",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "info",
+                  "library": "lucide",
+                  "fill": "$highlight-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "t1AZO",
+                  "name": "Texto informativo",
+                  "fill": "$secondary-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Disponível somente porque o formulário nunca foi usado. Caso contrário, indisponibilize-o.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 10,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "Ok9Jo",
+          "name": "Divisor inferior",
+          "fill": "$border",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "czG7v",
+          "name": "Ações do modal",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            16,
+            20
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "YYv6c",
+              "name": "Cancelar",
+              "cornerRadius": 999,
+              "stroke": "$primary",
+              "strokeWidth": 1.5,
+              "strokeAlignment": "inner",
+              "gap": 6,
+              "padding": [
+                8,
+                18
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "aUIAI",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Icon",
+                  "enabled": false,
+                  "width": 14,
+                  "height": 14,
+                  "icon": "plus",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "iTUbz",
+                  "name": "Label",
+                  "fill": "$primary",
+                  "content": "Cancelar",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "t7SZnu",
+              "name": "Confirmar encerramento",
+              "fill": "$destructive-muted",
+              "cornerRadius": 999,
+              "gap": 6,
+              "padding": [
+                8,
+                18
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "ZIryP",
+                  "name": "Icon",
+                  "width": 12,
+                  "height": 12,
+                  "icon": "archive",
+                  "library": "lucide",
+                  "fill": "$destructive-foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "C69lrl",
+                  "name": "Label",
+                  "fill": "$destructive-foreground",
+                  "content": "Excluir formulário",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
             }
           ]
         }
