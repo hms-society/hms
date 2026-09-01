@@ -31,7 +31,7 @@ export function getChecklistActionLabel(
 ) {
   if (itemStatus === 'validado') return 'Ver documento'
   if (itemStatus === 'solicitado' && hasDocument) return 'Ver documento'
-  if (itemStatus === 'solicitado') return 'Reenviar cobrança'
+  if (itemStatus === 'solicitado') return 'Aguardando documento'
   return 'Solicitar'
 }
 
@@ -41,6 +41,6 @@ export function getChecklistActionIcon(
 ): IconName {
   if (itemStatus === 'validado') return 'eye'
   if (itemStatus === 'solicitado' && hasDocument) return 'eye'
-  if (itemStatus === 'solicitado') return 'send'
+  if (itemStatus === 'solicitado') return 'clock'
   return 'plus'
 }

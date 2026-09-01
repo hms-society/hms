@@ -19,8 +19,7 @@ export const ReadOnlyValidatedPanel = ({ document }: ReadOnlyValidatedPanelProps
   const extractedCount = document.extractedFields.filter(
     (field) => !field.isMissing && field.value,
   ).length
-  const reviewedBy =
-    document.reviewedByName ?? document.reviewedBy ?? 'responsável não identificado'
+  const reviewedBy = document.reviewedByName?.trim() || 'responsável não identificado'
   const reviewedAt = document.reviewedAt
     ? new Intl.DateTimeFormat('pt-BR', {
         dateStyle: 'short',

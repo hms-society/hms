@@ -56,17 +56,34 @@ vi.mock('../request-resend-modal', () => ({
 }))
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
-  Anchor: ({ children, route, ...props }: AnchorProps) => (
-    <a href={ROUTES[route]} {...props}>
-      {children}
-    </a>
-  ),
+  Anchor: ({ children, params, route, search, ...props }: AnchorProps) => {
+    const routePath: string = ROUTES[route]
+    const path = params
+      ? Object.entries(params).reduce(
+          (currentPath, [key, value]) => currentPath.replace(`$${key}`, value),
+          routePath,
+        )
+      : routePath
+    const queryString = search ? new URLSearchParams(search as never).toString() : ''
+
+    return (
+      <a href={queryString ? `${path}?${queryString}` : path} {...props}>
+        {children}
+      </a>
+    )
+  },
 }))
 
 const useDocumentAnalysisMock = vi.mocked(useDocumentAnalysis)
 const document = DocumentValidationDocumentFaker.fake({
   id: 'document-file-1',
   fileName: 'comprovante-residencia.pdf',
+  checklistLink: {
+    caseId: 'case-1',
+    caseLabel: 'Caso Vinicius Lopes Machado',
+    checklistItemId: 'checklist-item-1',
+    checklistItemLabel: 'Documento teste 1',
+  },
 })
 
 describe('DocumentAnalysisPage', () => {
@@ -105,6 +122,18 @@ describe('DocumentAnalysisPage', () => {
     expect(
       screen.getByRole('link', { name: 'Voltar aos documentos' }).getAttribute('href'),
     ).toBe(ROUTES.documentInbox)
+  })
+
+  it('renders a case return link when the document was opened from a case', () => {
+    render(<DocumentAnalysisPage fileId={document.id} fromCaseId='case-1' />)
+
+    expect(
+      screen.getByRole('link', { name: 'Voltar para o caso' }).getAttribute('href'),
+    ).toBe('/advogado/meus-casos/case-1')
+    expect(useDocumentAnalysisMock).toHaveBeenCalledWith({
+      fileId: document.id,
+      fromCaseId: 'case-1',
+    })
   })
 
   it('renders the form and viewer widgets for a regular validation state', () => {

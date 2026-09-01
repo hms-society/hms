@@ -7,6 +7,7 @@ export type ChecklistItem = {
   isRequired?: boolean
   title: string
   status: ChecklistItemStatus
+  statusLabel?: string
   subtitle?: string
   pendencies?: number
   documentFileId?: string

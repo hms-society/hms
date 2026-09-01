@@ -13,7 +13,7 @@ import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-type AnalysisDocumentView = {
+export type AnalysisDocumentView = {
   id: string
   fileName: string
   confidence: string
@@ -47,7 +47,12 @@ const FALLBACK_DOCUMENT: AnalysisDocumentView = {
   statusClasses: 'bg-[#E1F5F6] text-[#0F5C61]',
 }
 
-export function useDocumentAnalysis({ fileId }: { fileId: string }) {
+export type UseDocumentAnalysisParams = {
+  fileId: string
+  fromCaseId?: string
+}
+
+export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisParams) {
   const { navigateTo } = useNavigation()
   const [isResendModalOpen, setIsResendModalOpen] = useState(false)
   const { document, documentError, isLoadingDocument } =
@@ -243,7 +248,14 @@ export function useDocumentAnalysis({ fileId }: { fileId: string }) {
   }
 
   function handleOpenDocument(documentFileId: string) {
-    void navigateTo('documentViewer', { params: { fileId: documentFileId } })
+    const navigationOptions = fromCaseId
+      ? {
+          params: { fileId: documentFileId },
+          search: { fromCaseId },
+        }
+      : { params: { fileId: documentFileId } }
+
+    void navigateTo('documentViewer', navigationOptions)
   }
 
   return {
