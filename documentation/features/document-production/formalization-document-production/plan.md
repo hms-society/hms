@@ -6,13 +6,13 @@ spec_revision: 8
 evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-139
-prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713/PRD+M+dulo+de+Formaliza+o
-updated_at: 2026-08-25
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
+updated_at: 2026-08-26
 ---
 
 # Execution status
 
-- **Spec:** [`spec.md`](./spec.md), revisão 8, pending final PR CI quality gate.
+- **Spec:** [`spec.md`](./spec.md), revisão 8, completed.
 - **Revision 7 amendment:** replace the persisted contract-form snapshot only while
   open, clear answers on replacement, expose the shared selector through the
   Formalization context, and seed two temporary matching definitions.
@@ -20,23 +20,34 @@ updated_at: 2026-08-25
   the Formalization projection and use that inherited context for form discovery.
 - **Authorization correction:** administrators may operate any Formalization; the assigned lawyer remains the owner and authenticated actors remain the audit subjects.
 - **Rationale:** Plan-backed execution é necessário porque a entrega cruza Core, Validation, Server/REST/persistência/seed, reutilização de UI entre Formalização e Consulta e validação autenticada com migração, concorrência e estados visuais.
-- **Current phase:** F7 — final same-reviewer read-only recheck completed; PR publication and CI quality gate remain.
-- **Next action:** publish the PR and run the applicable CI quality gate; the contracted Pencil state remains outside this delivery until an owner-approved read contract exists.
-- **Active blockers:** none in the implementation or current evidence. The final Reviewer gate and PR CI are pending. `WNe1f` is a deferred supplemental state, not a contract requirement for this revision.
-- **Builders:** nenhum ativo antes do kickoff; próximo Builder pronto: `builder_core`. Reutilizar `builder_validation` em F2, `builder_server` em F4 e `builder_web` em F3/F5; executar no máximo dois Builders em paralelo por onda.
+- **Current phase:** Review correction implementation, integrated runtime evidence, same-Reviewer recheck and final PR CI gate are complete for F1-T2/F4-T3/F7-T1.
+- **Next action:** none; revision 8 delivery is concluded.
+- **Active blockers:** none for the corrected contract. `WNe1f` remains a deferred supplemental state, not a contract requirement for this revision.
+- **Builders:** `builder_core` and `builder_server` completed the correction without editing SDD artifacts; reuse the same Reviewer for F7 recheck and keep the Orchestrator responsible for integration/evidence.
 - **Shared ownership:** o Orchestrator coordena `evaluation.md`, lockfile/dependências caso surjam, geração das migrations/meta do Drizzle, `routeTree.gen.ts`, integração final e evidência oficial. Builders não editam este Plan, a Spec ou a Evaluation.
 
 # Execution ledger
 
+## Published delivery
+
+The implementation is published as a ready-for-review dependent chain:
+
+| Order | PR | Base | Head | Head SHA |
+| --- | --- | --- | --- | --- |
+| 1 | [#89](https://github.com/hms-society/hms/pull/89) | `develop` | `codex/formalization-core-validation` | `369eab754a8226cbe3ccaf99a5e93ed8f126bb55` |
+| 2 | [#90](https://github.com/hms-society/hms/pull/90) | `codex/formalization-core-validation` | `codex/formalization-server` | `8edd62fddd06f9c453e3da8418d2185532bc45a5` |
+| 3 | [#91](https://github.com/hms-society/hms/pull/91) | `codex/formalization-server` | `codex/formalization-web-shared` | `de3bc5161dfef8adb057c5eaeed3db22cba6fb37` |
+| 4 | [#92](https://github.com/hms-society/hms/pull/92) | `codex/formalization-web-shared` | `codex/formalization-web` | `59e4c3a17e1ff45df79958fb74da80632c500363` |
+
 | Wave | Builder | Phase | Name | Depends on | Parallel with | Status | Exit condition |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `builder_core` | F1 | Contratos de domínio, agregação e ações da Formalização | — | — | `completed` | Core contracts, use cases, exports and focused unit suites pass |
+| 1 | `builder_core` | F1 | Contratos de domínio, agregação e ações da Formalização | — | — | `completed` | Core contracts, use cases, exports and focused unit suites pass; review correction FND-034/FND-035/FND-036 is resolved |
 | 2 | `builder_validation` | F2 | Schemas de transporte da Formalização | F1 | F3 | `completed` | Validation schemas/tests, lint and types pass |
 | 2 | `builder_web` | F3 | Extração source-neutral de Document Production | F1 | F2 | `completed` | Neutral package/review surfaces compile and Consultation regression coverage passes |
-| 3 | `builder_server` | F4 | Persistência, seed, REST e composição do Server | F2 | F5 | `completed` | Real transaction rollback regression and server fixture prove persistence, authorization, source/event and convergence contracts |
+| 3 | `builder_server` | F4 | Persistência, seed, REST e composição do Server | F2 | F5 | `completed` | Real transaction rollback regression and server fixture prove persistence, authorization, source/event and convergence contracts after the closure correction |
 | 3 | `builder_web` | F5 | Página, rotas e jornada Web da Formalização | F2, F3; REST Contract da Spec congelado | F4 | `completed` | Web unit/route coverage and generated/static checks pass with all required UI evidence |
-| 4 | `orchestrator` | F6 | Integração, artefatos gerados e validação executável | F4, F5 | — | `completed` | Integrated candidate reflects repeated clean seed and current runtime/visual evidence |
-| 5 | `reviewer` | F7 | Revisão integrada read-only | F6 | — | `completed` | Same Reviewer rechecked the corrected candidate; no blocking findings remain |
+| 4 | `orchestrator` | F6 | Integração, artefatos gerados e validação executável | F4, F5 | — | `completed` | Integrated candidate reflects the corrected closure behavior and current runtime/visual evidence |
+| 5 | `reviewer` | F7 | Revisão integrada read-only | F6 | — | `completed` | Same Reviewer rechecks the corrected candidate; no blocking findings remain |
 
 #### Revision 7 amendment — persisted contract-form replacement
 
@@ -58,13 +69,13 @@ updated_at: 2026-08-25
 
 #### F1-T2 — Implementar portas, validador e ações da Formalização
 
-- **Status/owner:** `completed` — `builder_core` (`01a035f7-ffc3-7562-927f-ba31f2d9cbd7`)
+- **Status/owner:** `completed` — `builder_core` (`01a035f7-ffc3-7562-927f-ba31f2d9cbd7`), resumed for FND-034/FND-035/FND-036.
 - **Depends/parallel:** F1-T1; bloqueia F2, F4 e F5. The current integrated candidate is evaluated against Spec revision 8; this historical task was activated at revision 5.
 - **Paths:** `packages/core/src/shared/use-cases/validate-dynamic-form-answers-use-case.ts` e testes; `packages/core/src/formalization/interfaces/**`; `packages/core/src/formalization/use-cases/**`; `packages/core/src/formalization/use-cases/tests/**`; eventos/exports do Core e `packages/core/package.json`.
 - **Contract:** `RF-01`–`RF-10`; `CA-01`–`CA-11`, com cobertura de autorização do advogado associado, corrida `addOrGet`, `expectedVersion`, revisão/freshness, fechamento convergente e snapshot autoritativo.
 - **Outcome:** cada ação da Spec existe como use case verb-led, usa apenas portas do módulo/Shared, publica a geração individual pelo contrato Broker existente, não cria batch/signature event e contém a matriz de testes unitários exigida.
 - **Rules:** `documentation/rules/core-package-rules.md` §§ “Business rules belong to use cases”, “Contracts belong to interfaces directories”, “Enum-like domain structures are canonical”; `documentation/rules/use-case-testing-rules.md` §§ “One test file per use case”, “Mock dependencies with vitest-mock-extended”, “Time is deterministic”, “Unit tests stay infrastructure-free”; `documentation/rules/messaging-layer-rules.md` §§ “Core owns domain events and the broker contract”, “The originating module builds authoritative event data”.
-- **Exit:** `pnpm --filter @hms/core test`; `pnpm --filter @hms/core lint`; `pnpm --filter @hms/core check-types`; integrado com `pnpm --filter server check:types`; cada novo use case possui seu próprio `.test.ts`, fakers válidos e asserções de resultado/interações/erros, inclusive CA-10 sem evento de assinatura. Lifecycle eligibility, atomic start/CAS and document lock/terminal guards are covered. **Passed; EV-03, EV-05, EV-27.**
+- **Exit:** `pnpm --filter @hms/core test`; `pnpm --filter @hms/core lint`; `pnpm --filter @hms/core check-types`; `pnpm --filter @hms/core exec vitest run src/formalization/use-cases/tests`; integrado com `pnpm --filter server check:types`; cada novo use case possui seu próprio `.test.ts`, fakers válidos e asserções de resultado/interações/erros, inclusive CA-10 sem evento de assinatura. Lifecycle eligibility, atomic start/CAS, Intake/Formalization closure binding and deterministic answer comparison are covered. **Passed 2026-08-26; EV-54.**
 
 ### F2 — Schemas de transporte
 
@@ -124,13 +135,13 @@ updated_at: 2026-08-25
 
 #### F4-T3 — Provar REST, autorização, geração e convergência em integração
 
-- **Status/owner:** `completed` — `builder_server` (`01a038fe-e3ae-70d1-9c00-3403e056779a`, reviewer rollback correction); real post-insert rollback passed in EV-45.
+- **Status/owner:** `completed` — `builder_server` (`01a03627-3518-7730-aaf1-e7514852ab0c`), resumed for FND-035; transaction adapter and real HTTP rollback/idempotency regressions are implemented and the Docker-enabled Testcontainers run passes in EV-55.
 - **Depends/parallel:** F4-T2; mantém o mesmo `builder_server` e não cria testes de repository/mapper isolados.
 - **Paths:** `apps/server/src/formalization/rest/controllers/tests/**`; `apps/server/src/formalization/fixtures/formalization-module-fixture.ts`; testes de regressão do job/Document Production somente quando o contrato existente for diretamente afetado.
 - **Contract:** `CA-01`–`CA-03`, `CA-05`–`CA-11`, `CA-13`; `RF-02`, `RF-08`–`RF-10`.
 - **Outcome:** cada controller tem teste HTTP próprio com Testcontainers/RestFixture, verifica 403 sem payload/efeito, corrida idempotente, source exato, freshness/terminalidade, retry de fechamento e ausência de assinatura/contratação.
 - **Rules:** `documentation/rules/controllers-testing-rules.md` §§ “Controller tests are integration tests”, “One test file per controller”, “Use real infrastructure and minimize mocks”, “Build the test application with real module wiring”, “Assert the HTTP and persistence contracts”; `documentation/rules/database-layer-rules.md` § “Repositories do not receive tests”; `documentation/rules/messaging-layer-rules.md` §§ “The originating module builds authoritative event data”, “Direct publication is the MVP reliability boundary”.
-- **Exit:** `pnpm --filter server test -- src/formalization` e a regressão de Document Production passam com banco real, evento/source verificável e nenhum teste dependente de mock para substituir persistência/autorização.
+- **Exit:** `pnpm --filter server test -- src/formalization` e a regressão de Document Production passam com banco real, evento/source verificável e nenhum teste dependente de mock para substituir persistência/autorização. Static correction checks and the Docker-enabled 1-file/11-test Formalization suite passed 2026-08-26; EV-55.
 
 ### F5 — Página, rotas e jornada Web da Formalização
 
@@ -168,7 +179,7 @@ updated_at: 2026-08-25
 
 #### F6-T1 — Gerar artefatos e executar o Quality Gate integrado
 
-- **Status/owner:** `completed` — `orchestrator`
+- **Status/owner:** `completed` — `orchestrator`; correction integrated and propagated, with current CI/review results recorded in Evaluation.
 - **Depends/parallel:** F4 e F5 integrados; sem Builder concorrente.
 - **Paths:** `apps/server/src/shared/database/drizzle/migrations/**` e `meta/**` gerados pelo Drizzle; `apps/web/src/routeTree.gen.ts` gerado pelo TanStack Router; `evaluation.md` criado pelo kickoff de `implement-spec`; nenhum lockfile/dependência nova sem decisão explícita.
 - **Contract:** todos os `RF-*`/`CA-*`; especialmente `CA-01`, `CA-06`, `CA-12`, `CA-13` e o Quality Gate da Spec.
@@ -178,7 +189,7 @@ updated_at: 2026-08-25
 
 #### F6-T2 — Executar MV-01/MV-02 com serviços reais e evidência visual
 
-- **Status/owner:** `completed` — `orchestrator`, reviewer evidence refresh; EV-45, EV-49, EV-50 and EV-51 pass.
+- **Status/owner:** `completed` — `orchestrator`; the existing browser matrix remains valid for the unchanged Web surface, and the corrected Server closure behavior is covered by the Docker-enabled real HTTP regressions in EV-55/EV-52.
 - **Depends/parallel:** F6-T1 e artefatos/fixtures aplicados; não considerar testes `page.route` como prova server-backed.
 - **Paths:** `./evaluation.md` e artefatos ignorados de Playwright/CI; não criar diretório local `evidence/`.
 - **Contract:** `CA-01`–`CA-13`; `MV-01` fluxo do advogado associado e `MV-02` limites de autorização (outro advogado é rejeitado, administrador é permitido).
@@ -190,7 +201,7 @@ updated_at: 2026-08-25
 
 #### F7-T1 — Auditar candidato integrado e revalidar superfícies de risco
 
-- **Status/owner:** `completed` — `reviewer` (`01a0368c-9323-7dc1-a5d4-06aff0ce1fb9`, final same-reviewer recheck completed)
+- **Status/owner:** `completed` — `reviewer` (`01a0368c-9323-7dc1-a5d4-06aff0ce1fb9`, current-candidate recheck complete with no new blocking implementation findings)
 - **Depends/parallel:** F6 completo; exatamente um Reviewer para todo o candidato. Correções retornam ao Builder proprietário via `implement-spec` e reativam este mesmo Reviewer.
 - **Paths:** candidato integrado completo; Core/Validation/Server/Web/documentação afetados, sem editar arquivos.
 - **Contract:** todos os `RF-*`, `CA-*`, `MV-*`, Design Contract e Rule Pack; atenção especial a autorização, source imutável, revisão/freshness, seed/migration e regressão Consultation.

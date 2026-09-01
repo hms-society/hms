@@ -7,6 +7,7 @@ import type { Intake } from '@hms/core/intake/domain/entities'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useStartFormalizationAction } from '@/ui/formalization/hooks/use-start-formalization-action'
 
 import { IntakeDetailsPage } from '..'
 import {
@@ -43,6 +44,10 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: vi.fn(),
 }))
 
+vi.mock('@/ui/formalization/hooks/use-start-formalization-action', () => ({
+  useStartFormalizationAction: vi.fn(),
+}))
+
 vi.mock('../use-intake-details-query', () => ({
   useIntakeDetailsQuery: vi.fn(),
 }))
@@ -50,6 +55,13 @@ vi.mock('../use-intake-details-query', () => ({
 const useAuthContextMock = vi.mocked(useAuthContext)
 const useRestContextMock = vi.mocked(useRestContext)
 const useIntakeDetailsQueryMock = vi.mocked(useIntakeDetailsQuery)
+const useStartFormalizationActionMock = vi.mocked(useStartFormalizationAction)
+
+const startFormalizationMutation = {
+  mutate: vi.fn(),
+  isPending: false,
+  error: null,
+}
 
 const baseIntake: Intake = {
   id: 'intake-1',
@@ -128,8 +140,10 @@ describe('IntakeDetailsPage', () => {
     useRestContextMock.mockReturnValue({
       intakeService: {
         closeIntakeWithoutContract: vi.fn(),
-        transitionIntakeStatus: vi.fn(),
       },
+    } as never)
+    useStartFormalizationActionMock.mockReturnValue({
+      ...startFormalizationMutation,
     } as never)
     useIntakeDetailsQueryMock.mockReturnValue(createQueryResult(createDetails()))
   })
@@ -161,14 +175,19 @@ describe('IntakeDetailsPage', () => {
     expect(screen.getByRole('button', { name: 'Iniciar formalização' })).toBeDefined()
   })
 
-  it('reveals the contracting action during formalization', () => {
+  it('opens the existing formalization from the in-progress status card', () => {
     useIntakeDetailsQueryMock.mockReturnValue(
       createQueryResult(createDetails('in_formalization')),
     )
     renderPage(createDetails('in_formalization'))
 
     expect(screen.getAllByText('Formalização iniciada').length).toBeGreaterThan(0)
-    expect(screen.getByRole('button', { name: 'Confirmar contratação' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Abrir formalização' })).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'Confirmar contratação' })).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir formalização' }))
+
+    expect(startFormalizationMutation.mutate).toHaveBeenCalledWith('intake-1')
   })
 
   it('opens the completed attendance form in the consultation ficha tab', () => {

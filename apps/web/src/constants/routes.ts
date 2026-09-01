@@ -38,6 +38,10 @@ export const ROUTES = {
   consultationAttendanceForm: '/consultas/$consultationId/ficha-atendimento',
   consultationDocumentVersion:
     '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId',
+  formalizations: '/formalizacoes',
+  formalization: '/formalizacoes/$formalizationId',
+  formalizationDocumentVersion:
+    '/formalizacoes/$formalizationId/documentos/$documentVersionId',
 } as const
 
 export type RouteName = keyof typeof ROUTES
@@ -59,5 +63,18 @@ export function buildConsultationDocumentVersionPath(params: {
   return ROUTES.consultationDocumentVersion
     .replace('$consultationId', params.consultationId)
     .replace('$documentId', params.documentId)
+    .replace('$documentVersionId', params.documentVersionId)
+}
+
+export function buildFormalizationPath(formalizationId: string): string {
+  return ROUTES.formalization.replace('$formalizationId', formalizationId)
+}
+
+export function buildFormalizationDocumentVersionPath(params: {
+  formalizationId: string
+  documentVersionId: string
+}): string {
+  return ROUTES.formalizationDocumentVersion
+    .replace('$formalizationId', params.formalizationId)
     .replace('$documentVersionId', params.documentVersionId)
 }

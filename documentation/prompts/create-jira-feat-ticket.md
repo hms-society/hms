@@ -53,10 +53,22 @@ Create the ticket with the repository- and project-approved values:
 - **Related tickets:** `<Jira keys, when applicable>`
 
 Discover available projects, fields, workflows, labels, and conventions from the
-connected Jira workspace and repository instructions. Confirm the project, ticket
-type, sprint, and assignee before creating the ticket when any of them materially
-changes routing or ownership. Never create a label, project, sprint, user, or
-custom field as part of this prompt.
+connected Jira workspace and repository instructions. Confirm the project and ticket
+type before creating the ticket when either materially changes routing or ownership.
+Never create a label, project, sprint, user, or custom field as part of this prompt.
+
+Before creating the ticket, obtain explicit answers to both questions:
+
+1. Which existing sprint should the ticket belong to, or should it remain without a
+   sprint?
+2. Which existing Jira user should be assigned, or should it remain unassigned?
+
+If the initial request already answers either question unambiguously, reuse that
+answer and ask only for the missing one. Do not infer sprint or assignee from similar
+tickets, project defaults, the current user, repository ownership, or prior Jira
+activity. Resolve the supplied sprint and user against Jira before creation; if a
+value does not identify an existing option, ask the user to choose again. Create the
+ticket only after both choices are explicit and valid.
 
 Search for similar Jira tickets before creating the new one to avoid duplicates.
 Do not change the status, assignee, sprint, or content of existing tickets unless

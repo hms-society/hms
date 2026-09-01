@@ -3,7 +3,7 @@ spec: ./spec.md
 evaluation: ./evaluation.md
 spec_revision: 24
 status: completed
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 jira_tickets:
   - SCRUM-138
 ---
@@ -200,7 +200,7 @@ alterados. Nenhuma dependência nova é autorizada nesta Spec.
 ## Fonte de verdade e fronteiras
 
 - Spec: spec.md, revisão 8.
-- PRD: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673), versão 9, especialmente as decisões 12.1–12.8.
+- PRD: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673), versão 9, especialmente as decisões 12.1–12.8.
 - Jira: [SCRUM-138](https://plataformahms.atlassian.net/browse/SCRUM-138).
 - Design: design/hms.pen, nodes F9JxU, hq7Ty e Y5vBQ como referências incluídas na
   Spec; os demais nodes design-only não expandem o Contract.

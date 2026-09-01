@@ -27,6 +27,23 @@
   --destructive: oklch(0.439 0.176 26);
   --destructive-foreground: oklch(1 0 0);
 
+  /* Badges semânticos */
+  --badge-destructive: oklch(0.94 0.035 26);
+  --badge-destructive-foreground: oklch(0.36 0.145 26);
+  --badge-destructive-border: oklch(0.82 0.075 26);
+  --badge-success: oklch(0.93 0.045 155);
+  --badge-success-foreground: oklch(0.34 0.095 155);
+  --badge-success-border: oklch(0.81 0.075 155);
+  --badge-waiting: oklch(0.94 0.035 15);
+  --badge-waiting-foreground: oklch(0.37 0.12 15);
+  --badge-waiting-border: oklch(0.82 0.07 15);
+  --badge-attention: oklch(0.94 0.055 75);
+  --badge-attention-foreground: oklch(0.38 0.09 60);
+  --badge-attention-border: oklch(0.81 0.085 75);
+  --badge-info: oklch(0.93 0.04 245);
+  --badge-info-foreground: oklch(0.35 0.095 245);
+  --badge-info-border: oklch(0.81 0.07 245);
+
   /* Estrutura */
   --border: oklch(0.886 0.013 85);
   --input: oklch(0.768 0.022 85);
@@ -117,6 +134,23 @@
   --accent-foreground: oklch(0.808 0.08 68);
   --destructive: oklch(0.55 0.18 26);
   --destructive-foreground: oklch(1 0 0);
+
+  /* Badges semânticos */
+  --badge-destructive: oklch(0.28 0.065 26);
+  --badge-destructive-foreground: oklch(0.82 0.095 26);
+  --badge-destructive-border: oklch(0.43 0.095 26);
+  --badge-success: oklch(0.27 0.05 155);
+  --badge-success-foreground: oklch(0.84 0.09 155);
+  --badge-success-border: oklch(0.43 0.075 155);
+  --badge-waiting: oklch(0.28 0.05 15);
+  --badge-waiting-foreground: oklch(0.84 0.08 15);
+  --badge-waiting-border: oklch(0.43 0.075 15);
+  --badge-attention: oklch(0.29 0.055 75);
+  --badge-attention-foreground: oklch(0.86 0.09 75);
+  --badge-attention-border: oklch(0.45 0.08 75);
+  --badge-info: oklch(0.28 0.05 245);
+  --badge-info-foreground: oklch(0.84 0.08 245);
+  --badge-info-border: oklch(0.44 0.075 245);
 
   /* Estrutura */
   --border: oklch(0.22 0.008 80);
