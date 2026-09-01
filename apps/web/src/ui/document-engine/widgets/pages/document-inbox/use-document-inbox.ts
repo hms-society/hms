@@ -28,10 +28,10 @@ const ITEMS_PER_PAGE = 6
 
 export function useDocumentInbox() {
   const { navigateTo } = useNavigation()
-  const { batches, batchesError, isFetchingBatches, refetchBatches } =
-    useDocumentBatchesTriageQuery()
-
   const [currentPage, setCurrentPage] = useState(1)
+  const { batches, total, batchesError, isFetchingBatches, refetchBatches } =
+    useDocumentBatchesTriageQuery({ page: currentPage, limit: ITEMS_PER_PAGE })
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [appliedDateRange, setAppliedDateRange] = useState<DateRange | undefined>()
   const [statusFilter, setStatusFilter] = useState('')
@@ -197,13 +197,19 @@ export function useDocumentInbox() {
     return true
   })
 
-  const totalItems = filteredData.length
+  const hasClientFilter = Boolean(
+    appliedStatusFilter || appliedClientFilter || appliedDateRange?.from,
+  )
+  const totalItems = hasClientFilter
+    ? filteredData.length
+    : total > 0
+      ? total
+      : filteredData.length
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  )
+  const paginatedData = hasClientFilter
+    ? filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    : filteredData
 
   function handlePageChange(page: number) {
     if (page >= 1 && page <= totalPages) {

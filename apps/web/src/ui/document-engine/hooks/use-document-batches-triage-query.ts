@@ -2,19 +2,23 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-const DOCUMENT_BATCHES_TRIAGE_QUERY_KEY = ['document-batches', 'triage'] as const
-
-export function useDocumentBatchesTriageQuery() {
+export function useDocumentBatchesTriageQuery(params?: {
+  page?: number
+  limit?: number
+}) {
   const { documentService } = useRestContext()
+  const page = params?.page ?? 1
+  const limit = params?.limit ?? 6
+
   const {
-    data: batches = [],
+    data: triageData = { items: [], total: 0, page, limit },
     error: batchesError,
     isFetching: isFetchingBatches,
     refetch: refetchBatches,
   } = useQuery({
-    queryKey: DOCUMENT_BATCHES_TRIAGE_QUERY_KEY,
+    queryKey: ['document-batches', 'triage', page, limit] as const,
     queryFn: async () => {
-      const response = await documentService.listTriageBatches()
+      const response = await documentService.listTriageBatches({ page, limit })
 
       if (response.isFailure) response.throwError()
 
@@ -23,7 +27,10 @@ export function useDocumentBatchesTriageQuery() {
   })
 
   return {
-    batches,
+    batches: triageData.items,
+    total: triageData.total,
+    page: triageData.page,
+    limit: triageData.limit,
     batchesError,
     isFetchingBatches,
     refetchBatches,

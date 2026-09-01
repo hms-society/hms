@@ -55,8 +55,13 @@ describe('List Triage Document Batches Controller [GET /document-batches/triage]
       .get('/document-batches/triage')
       .expect(200)
 
-    expect(response.body).toHaveLength(1)
-    expect(response.body[0]).toMatchObject({
+    expect(response.body).toMatchObject({
+      total: 1,
+      page: 1,
+      limit: 20,
+    })
+    expect(response.body.items).toHaveLength(1)
+    expect(response.body.items[0]).toMatchObject({
       readableId: 'LOTE-20260826-0001',
       channel: DocumentBatchChannel.WhatsApp,
       inTriageBox: true,

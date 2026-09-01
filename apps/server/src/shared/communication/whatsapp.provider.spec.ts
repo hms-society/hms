@@ -130,4 +130,23 @@ describe('WhatsappProvider', () => {
       mimeType: 'application/pdf',
     })
   })
+
+  it('should throw an error when media size exceeds 50MB limit from metadata', async () => {
+    const mockMetadata = {
+      url: 'https://lookaside.fbsbx.com/whatsapp_business/attachments/12345',
+      mime_type: 'application/pdf',
+      file_size: 60 * 1024 * 1024,
+    }
+
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockResolvedValue(mockMetadata),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(provider.downloadMedia('media-oversized')).rejects.toThrow(
+      'exceeds maximum allowed limit of 50MB',
+    )
+  })
 })

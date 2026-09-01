@@ -19,9 +19,19 @@ export type CreateDocumentBatchRecord = {
   files: CreateDocumentBatchFileRecord[]
 }
 
+export type PaginatedTriageBatches = {
+  items: DocumentBatch[]
+  total: number
+  page: number
+  limit: number
+}
+
 export interface DocumentBatchesRepository {
   add(batch: CreateDocumentBatchRecord): Promise<DocumentBatch>
   findById(clientId: string): Promise<DocumentBatch[]>
-  findTriageBatches(): Promise<DocumentBatch[]>
+  findTriageBatches(params?: {
+    page?: number
+    limit?: number
+  }): Promise<PaginatedTriageBatches>
   findFileById(fileId: string): Promise<DocumentBatchFile | undefined>
 }

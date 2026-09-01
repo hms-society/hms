@@ -6,6 +6,8 @@ import type {
   SendWhatsappMessageResult,
 } from '@hms/core/communication/interfaces'
 
+const MAX_MEDIA_SIZE_BYTES = 50 * 1024 * 1024 // 50MB
+
 @Injectable()
 export class WhatsappProvider implements IWhatsappProvider {
   constructor(private readonly envProvider: EnvProvider) {}
@@ -95,10 +97,17 @@ export class WhatsappProvider implements IWhatsappProvider {
     const metadata = (await metadataResponse.json()) as {
       url?: string
       mime_type?: string
+      file_size?: number
     }
 
     if (!metadata.url) {
       throw new Error('Meta Cloud API response did not contain a media URL')
+    }
+
+    if (metadata.file_size && metadata.file_size > MAX_MEDIA_SIZE_BYTES) {
+      throw new Error(
+        `WhatsApp media size (${metadata.file_size} bytes) exceeds maximum allowed limit of 50MB`,
+      )
     }
 
     const downloadResponse = await fetch(metadata.url, {
@@ -114,7 +123,63 @@ export class WhatsappProvider implements IWhatsappProvider {
       )
     }
 
+    const contentLengthHeader = downloadResponse.headers?.get?.('content-length')
+    if (contentLengthHeader) {
+      const contentLength = Number.parseInt(contentLengthHeader, 10)
+      if (!Number.isNaN(contentLength) && contentLength > MAX_MEDIA_SIZE_BYTES) {
+        throw new Error(
+          `WhatsApp media content-length (${contentLength} bytes) exceeds maximum allowed limit of 50MB`,
+        )
+      }
+    }
+
+    const reader = downloadResponse.body?.getReader?.()
+    if (reader) {
+      const chunks: Uint8Array[] = []
+      let totalBytes = 0
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (value) {
+            totalBytes += value.byteLength
+            if (totalBytes > MAX_MEDIA_SIZE_BYTES) {
+              await reader.cancel()
+              throw new Error(
+                'WhatsApp media stream size exceeds maximum allowed limit of 50MB',
+              )
+            }
+            chunks.push(value)
+          }
+        }
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('exceeds maximum')) {
+          throw err
+        }
+        throw new Error(`Failed during WhatsApp media stream reading: ${err}`)
+      }
+
+      const buffer = new Uint8Array(totalBytes)
+      let offset = 0
+      for (const chunk of chunks) {
+        buffer.set(chunk, offset)
+        offset += chunk.byteLength
+      }
+
+      return {
+        buffer,
+        mimeType: metadata.mime_type ?? 'application/octet-stream',
+      }
+    }
+
     const arrayBuffer = await downloadResponse.arrayBuffer()
+    if (arrayBuffer.byteLength > MAX_MEDIA_SIZE_BYTES) {
+      throw new Error(
+        `WhatsApp media size (${arrayBuffer.byteLength} bytes) exceeds maximum allowed limit of 50MB`,
+      )
+    }
+
     return {
       buffer: new Uint8Array(arrayBuffer),
       mimeType: metadata.mime_type ?? 'application/octet-stream',
