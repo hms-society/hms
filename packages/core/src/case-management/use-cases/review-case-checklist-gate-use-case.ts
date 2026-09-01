@@ -41,7 +41,7 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
 
     const remarks = request.remarks?.trim() || undefined
     this.ensureRemarksWhenRequired(request.decision, remarks)
-    this.ensureChecklistIsCompleteWhenApproving(legalCase, request.decision)
+    this.ensureChecklistIsCompleteWhenApproving(request.decision)
     const status = this.getStatusAfterDecision(request.decision)
 
     const reviewedCase = await this.legalCasesRepository.reviewChecklistGate({
@@ -100,16 +100,13 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
   }
 
   private ensureChecklistIsCompleteWhenApproving(
-    legalCase: LegalCase,
     decision: CaseChecklistGateDecisionValue,
   ) {
     if (decision !== CaseChecklistGateDecision.Approved) return
 
-    if (!legalCase.checklistCompletedAt) {
-      throw new CaseChecklistGateReviewError(
-        'Valide todos os itens obrigatórios do checklist antes da aprovação.',
-      )
-    }
+    throw new CaseChecklistGateReviewError(
+      'A aprovação integral do checklist exige validação server-side dos itens obrigatórios.',
+    )
   }
 
   private getStatusAfterDecision(decision: CaseChecklistGateDecisionValue) {

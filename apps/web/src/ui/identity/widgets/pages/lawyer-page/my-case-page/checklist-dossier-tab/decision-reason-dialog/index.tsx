@@ -40,7 +40,7 @@ export const DecisionReasonDialog = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
       showCloseButton={false}
-      className='flex w-[calc(100%-2rem)] max-w-[420px] flex-col items-center gap-6 rounded-xl border border-border bg-card p-6 text-center shadow-2xl sm:max-w-[420px]'
+      className='flex w-[calc(100%-2rem)] max-w-[420px] flex-col items-center gap-6 rounded-xl border border-border bg-secondary p-6 text-center shadow-2xl sm:max-w-[420px]'
     >
       <DialogHeader className='items-center gap-4 text-center'>
         <div className='flex size-10 items-center justify-center rounded-full bg-primary/15 text-primary'>
@@ -50,7 +50,7 @@ export const DecisionReasonDialog = ({
           <DialogTitle className='font-sans text-lg font-semibold leading-normal text-foreground'>
             {title}
           </DialogTitle>
-          <DialogDescription className='text-sm leading-6 text-muted-foreground'>
+          <DialogDescription className='text-[14px] leading-6 text-muted-foreground'>
             {description}
           </DialogDescription>
         </div>
@@ -71,12 +71,12 @@ export const DecisionReasonDialog = ({
           placeholder='Descreva o motivo da decisão...'
           aria-invalid={Boolean(error)}
           aria-describedby={error ? 'checklist-gate-decision-reason-error' : undefined}
-          className='min-h-[90px] resize-none rounded-[10px] border-border bg-card px-3 py-3 text-sm'
+          className='min-h-[90px] resize-none rounded-[10px] border-border bg-background px-3 py-3 text-[14px]'
         />
         {error && (
           <p
             id='checklist-gate-decision-reason-error'
-            className='text-[11px] font-medium text-destructive'
+            className='text-[14px] font-medium text-destructive'
           >
             {error}
           </p>
@@ -87,7 +87,7 @@ export const DecisionReasonDialog = ({
         <Button
           type='button'
           variant='outline'
-          className='h-11 rounded-full border-primary text-sm font-semibold text-primary hover:bg-primary/10'
+          className='h-11 rounded-full border-primary text-[14px] font-semibold text-primary hover:bg-primary/10'
           disabled={isConfirming}
           onClick={onCancel}
         >
@@ -95,7 +95,7 @@ export const DecisionReasonDialog = ({
         </Button>
         <Button
           type='button'
-          className='h-11 rounded-full text-sm font-semibold'
+          className='h-11 rounded-full text-[14px] font-semibold'
           disabled={isConfirming}
           onClick={onConfirm}
         >

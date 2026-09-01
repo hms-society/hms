@@ -64,12 +64,14 @@ export const OverviewTab = ({
       <div className='flex min-w-0 flex-col gap-4'>
         <div className='flex flex-col gap-3 rounded-lg border border-primary/30 bg-highlight p-4 shadow-xs md:flex-row md:items-center md:justify-between'>
           <div className='flex items-start gap-3'>
-            <div className='flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-primary'>
+            <div className='flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-primary'>
               <Icon name='list-checks' className='size-5' />
             </div>
             <div className='flex flex-col gap-0.5'>
-              <h2 className='text-sm font-semibold text-primary'>{nextActionTitle}</h2>
-              <p className='text-xs text-primary/80'>{nextActionDescription}</p>
+              <h2 className='text-[16px] font-semibold text-primary'>
+                {nextActionTitle}
+              </h2>
+              <p className='text-[14px] text-primary/80'>{nextActionDescription}</p>
             </div>
           </div>
           <Button size='xs' className='rounded-full' onClick={onOpenChecklist}>
@@ -81,7 +83,7 @@ export const OverviewTab = ({
           </Button>
         </div>
 
-        <section className='flex flex-col gap-4 rounded-lg border border-border bg-card p-5 shadow-xs'>
+        <section className='flex flex-col gap-4 rounded-lg border border-border bg-secondary p-5 shadow-xs'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
             <div className='flex flex-wrap items-center gap-2'>
               <h2 className='font-serif text-lg font-semibold text-foreground'>
@@ -89,7 +91,7 @@ export const OverviewTab = ({
               </h2>
               <Badge
                 variant={checklistBadgeVariant}
-                className='h-5 rounded-full px-2 text-[10px]'
+                className='h-6 rounded-full px-3 text-[12px]'
               >
                 {checklistStatusLabel}
               </Badge>
@@ -112,7 +114,7 @@ export const OverviewTab = ({
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
-            <span className='text-[11px] font-semibold text-foreground'>
+            <span className='text-[14px] font-semibold text-foreground'>
               {checklistProgressLabel}
             </span>
           </div>
@@ -134,7 +136,7 @@ export const OverviewTab = ({
                     >
                       <Icon name={getChecklistIcon(item.status)} className='size-3' />
                     </div>
-                    <span className='truncate text-xs font-semibold text-foreground'>
+                    <span className='truncate text-[14px] font-semibold text-foreground'>
                       {item.title}
                     </span>
                   </div>
@@ -147,7 +149,7 @@ export const OverviewTab = ({
                             ? 'attention'
                             : 'secondary'
                       }
-                      className='h-5 rounded-full px-2 text-[10px]'
+                      className='h-6 rounded-full px-3 text-[12px]'
                     >
                       {item.statusLabel ??
                         (item.status === 'validado'
@@ -167,7 +169,7 @@ export const OverviewTab = ({
           </div>
         </section>
 
-        <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-5 shadow-xs'>
+        <section className='flex flex-col gap-3 rounded-lg border border-border bg-secondary p-5 shadow-xs'>
           <div className='flex items-center justify-between gap-4'>
             <h2 className='font-serif text-lg font-semibold text-foreground'>
               Pendências e Tarefas
@@ -180,32 +182,32 @@ export const OverviewTab = ({
             {tasks.map((task) => (
               <div
                 key={task.title}
-                className='flex flex-col gap-3 rounded-md border border-border bg-card px-3 py-3 md:flex-row md:items-center md:justify-between'
+                className='flex flex-col gap-3 rounded-md border border-border bg-background px-3 py-3 md:flex-row md:items-center md:justify-between'
               >
                 <div className='flex min-w-0 items-start gap-3'>
                   <div className='flex size-8 shrink-0 items-center justify-center rounded-md bg-highlight text-primary'>
                     <Icon name={task.icon} className='size-4' />
                   </div>
                   <div className='flex min-w-0 flex-col gap-0.5'>
-                    <span className='text-xs font-semibold text-foreground'>
+                    <span className='text-[14px] font-semibold text-foreground'>
                       {task.title}
                     </span>
-                    <span className='text-[10px] text-muted-foreground'>
+                    <span className='text-[14px] text-muted-foreground'>
                       {task.description} · {task.assignee}
                     </span>
                   </div>
                 </div>
                 <Badge
                   variant={task.status === 'Em aberto' ? 'secondary' : 'attention'}
-                  className='h-5 self-start rounded-full px-2 text-[10px] md:self-center'
+                  className='h-6 self-start rounded-full px-3 text-[12px] md:self-center'
                 >
                   {task.status}
                 </Badge>
               </div>
             ))}
           </div>
-          <div className='flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground'>
-            <Icon name='shield-check' className='size-3 text-primary' />
+          <div className='flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-[14px] text-muted-foreground'>
+            <Icon name='shield-check' className='size-3.5 text-primary' />
             Nenhum prazo processual crítico. Prazos passam a ser monitorados após o
             protocolo.
           </div>
@@ -213,9 +215,9 @@ export const OverviewTab = ({
       </div>
 
       <aside className='flex min-w-0 flex-col gap-4'>
-        <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-xs'>
+        <section className='flex flex-col gap-3 rounded-lg border border-border bg-secondary p-4 shadow-xs'>
           <div className='flex items-center justify-between'>
-            <h2 className='font-serif text-base font-semibold text-foreground'>
+            <h2 className='font-serif text-[16px] font-semibold text-foreground'>
               Equipe do Caso
             </h2>
             <Button variant='link' size='xs' className='h-auto px-0 text-primary'>
@@ -230,16 +232,16 @@ export const OverviewTab = ({
                   index === 0 ? 'bg-highlight' : ''
                 }`}
               >
-                <Avatar className='size-8'>
-                  <AvatarFallback className={`${member.className} text-[10px]`}>
+                <Avatar className='size-9'>
+                  <AvatarFallback className={`${member.className} text-[12px]`}>
                     {member.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className='min-w-0 flex-1'>
-                  <p className='truncate text-xs font-semibold text-foreground'>
+                  <p className='truncate text-[14px] font-semibold text-foreground'>
                     {member.name}
                   </p>
-                  <p className='truncate text-[10px] text-muted-foreground'>
+                  <p className='truncate text-[14px] text-muted-foreground'>
                     {member.role}
                   </p>
                 </div>
@@ -251,11 +253,11 @@ export const OverviewTab = ({
           </div>
         </section>
 
-        <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-xs'>
-          <h2 className='font-serif text-base font-semibold text-foreground'>
+        <section className='flex flex-col gap-3 rounded-lg border border-border bg-secondary p-4 shadow-xs'>
+          <h2 className='font-serif text-[16px] font-semibold text-foreground'>
             Dados do Caso
           </h2>
-          <dl className='grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-[11px]'>
+          <dl className='grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-[14px]'>
             <dt className='text-muted-foreground'>Contratação</dt>
             <dd className='font-semibold text-foreground'>CONT-20260701-0113</dd>
             <dt className='text-muted-foreground'>Tipo de serviço</dt>
@@ -271,8 +273,8 @@ export const OverviewTab = ({
           </dl>
         </section>
 
-        <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-xs'>
-          <h2 className='font-serif text-base font-semibold text-foreground'>
+        <section className='flex flex-col gap-3 rounded-lg border border-border bg-secondary p-4 shadow-xs'>
+          <h2 className='font-serif text-[16px] font-semibold text-foreground'>
             Linha do Tempo
           </h2>
           <div className='relative flex flex-col gap-3 before:absolute before:inset-y-2 before:left-3 before:w-px before:bg-border'>
@@ -282,10 +284,10 @@ export const OverviewTab = ({
                   <Icon name={item.icon} className='size-3 text-primary' />
                 </div>
                 <div className='flex flex-col gap-0.5'>
-                  <span className='text-xs font-semibold text-foreground'>
+                  <span className='text-[14px] font-semibold text-foreground'>
                     {item.title}
                   </span>
-                  <span className='text-[10px] text-muted-foreground'>
+                  <span className='text-[14px] text-muted-foreground'>
                     {item.description}
                   </span>
                 </div>
