@@ -95,6 +95,19 @@ describe('useDocumentAnalysis', () => {
     })
   })
 
+  it('keeps the case return context when opening the original document', () => {
+    const { result } = renderHook(() =>
+      useDocumentAnalysis({ fileId: document.id, fromCaseId: 'case-1' }),
+    )
+
+    act(() => result.current.handleOpenDocument('original-file-1'))
+
+    expect(navigateTo).toHaveBeenCalledWith('documentViewer', {
+      params: { fileId: 'original-file-1' },
+      search: { fromCaseId: 'case-1' },
+    })
+  })
+
   it('sends the resend request with the form reason', async () => {
     const { result } = renderHook(() => useDocumentAnalysis({ fileId: document.id }))
 

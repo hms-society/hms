@@ -288,6 +288,20 @@
       "when": 1787932800000,
       "tag": "0041_case_checklist_completion",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1788000000000,
+      "tag": "0042_case_checklist_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1788043200000,
+      "tag": "0043_case_checklist_document_file_name",
+      "breakpoints": true
     }
   ]
 }

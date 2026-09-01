@@ -9,6 +9,7 @@ import type {
 import type { RestResponse } from '../../shared/responses/rest-response'
 
 export type ListDocumentValidationsQuery = {
+  caseId?: string
   status?: DocumentValidationStatus
 }
 

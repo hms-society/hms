@@ -128,19 +128,19 @@ export const CASE_TEAM: CaseTeamMember[] = [
     initials: 'MC',
     name: 'Mariana Costa',
     role: 'Advogada Auxiliar - Execução',
-    className: 'bg-amber-500 text-white',
+    className: 'bg-accent text-accent-foreground',
   },
   {
     initials: 'JP',
     name: 'João Pedro Silva',
     role: 'Paralegal - Edição',
-    className: 'bg-emerald-600 text-white',
+    className: 'bg-highlight text-highlight-foreground',
   },
   {
     initials: 'BO',
     name: 'Beatriz Oliveira',
     role: 'Estagiária - Visualização',
-    className: 'bg-zinc-500 text-white',
+    className: 'bg-muted text-foreground',
   },
 ]
 

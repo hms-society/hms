@@ -9,6 +9,7 @@ import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { SharedModule } from '@/shared/shared.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
+import { DocumentEngineProvisionModule } from '@/document-engine/provision/document-engine-provision.module'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 
 export class DocumentEngineModuleFixture {
@@ -26,7 +27,7 @@ export class DocumentEngineModuleFixture {
 
   static async register(controller?: Type<unknown>) {
     const restFixture = await RestFixture.register({
-      imports: [SharedModule, DocumentsModule],
+      imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
       controllers: controller ? [controller] : [],
     })
 
@@ -46,7 +47,7 @@ export class DocumentEngineModuleFixture {
   ) {
     const restFixture = await RestFixture.register(
       {
-        imports: [SharedModule, DocumentsModule],
+        imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
         controllers: controller ? [controller] : [],
       },
       (builder) => {

@@ -26,7 +26,11 @@ type InboxDocument = {
 
 const ITEMS_PER_PAGE = 6
 
-export function useDocumentInbox() {
+export type UseDocumentInboxParams = {
+  caseId?: string
+}
+
+export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   const { navigateTo } = useNavigation()
   const [currentPage, setCurrentPage] = useState(1)
   const { batches, total, batchesError, isFetchingBatches, refetchBatches } =

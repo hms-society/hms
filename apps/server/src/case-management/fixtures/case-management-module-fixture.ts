@@ -1,5 +1,6 @@
 import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import type {
+  CaseChecklistItemCreation,
   CaseMemberCreation,
   LegalCase,
   LegalCaseCreation,
@@ -11,6 +12,7 @@ import type { AuthUser } from '@hms/core/identity/domain/structures'
 
 import { CaseManagementDatabaseModule } from '@/case-management/database'
 import {
+  DrizzleCaseChecklistItemsRepository,
   DrizzleCaseMembersRepository,
   DrizzleLegalCasesRepository,
 } from '@/case-management/database/drizzle/repositories'
@@ -43,6 +45,7 @@ export class CaseManagementModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
     private readonly legalCasesRepository: DrizzleLegalCasesRepository,
+    private readonly caseChecklistItemsRepository: DrizzleCaseChecklistItemsRepository,
     private readonly caseMembersRepository: DrizzleCaseMembersRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
@@ -111,6 +114,7 @@ export class CaseManagementModuleFixture {
     return new CaseManagementModuleFixture(
       restFixture,
       restFixture.get(DrizzleLegalCasesRepository),
+      restFixture.get(DrizzleCaseChecklistItemsRepository),
       restFixture.get(DrizzleCaseMembersRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
@@ -217,6 +221,10 @@ export class CaseManagementModuleFixture {
         ...member,
       })),
     )
+  }
+
+  registerCaseChecklistItems(checklistItems: readonly CaseChecklistItemCreation[]) {
+    return this.caseChecklistItemsRepository.addMany(checklistItems)
   }
 
   resetDatabase() {

@@ -29,6 +29,24 @@ GET {{url}}/my
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### List case checklist
+# @prompt caseId Enter the case ID to inspect
+GET {{url}}/{{caseId}}/checklist
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Add complementary checklist item
+# @prompt caseId Enter the case ID to update
+POST {{url}}/{{caseId}}/checklist/items
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "templateItemKey": "complementary-proof",
+  "title": "Prova complementar"
+}
+
 ### Review case checklist gate - approve
 # @prompt caseId Enter the case ID to review
 PATCH {{url}}/{{caseId}}/checklist-gate

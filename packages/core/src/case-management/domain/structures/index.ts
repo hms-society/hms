@@ -1,5 +1,6 @@
 export * from './case-member-role'
 export * from './case-checklist-gate'
 export * from './case-checklist-gate-decision'
+export * from './case-checklist-item-status'
 export * from './case-dossier-gate'
 export * from './legal-case-status'

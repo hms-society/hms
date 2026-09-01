@@ -67,6 +67,10 @@ describe('useDocumentInbox', () => {
   it('maps triage document batches to the inbox view model', () => {
     const { result } = renderHook(() => useDocumentInbox())
 
+    expect(useDocumentBatchesTriageQueryMock).toHaveBeenCalledWith({
+      page: 1,
+      limit: 6,
+    })
     expect(result.current.totalItems).toBe(1)
     expect(result.current.paginatedData[0]).toMatchObject({
       fileName: 'cnh.pdf',
@@ -84,6 +88,15 @@ describe('useDocumentInbox', () => {
 
     expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'file-1' },
+    })
+  })
+
+  it('keeps accepting a case id without changing the triage query contract', () => {
+    renderHook(() => useDocumentInbox({ caseId: 'case-1' }))
+
+    expect(useDocumentBatchesTriageQueryMock).toHaveBeenCalledWith({
+      page: 1,
+      limit: 6,
     })
   })
 })

@@ -36,13 +36,13 @@ export const LawyerCasesListPage = () => {
   } = useMyCasesListPage()
 
   return (
-    <div className='mt-12 flex w-full flex-col gap-6'>
-      <div className='flex flex-col justify-between gap-4 sm:flex-row sm:items-center'>
+    <div className='mt-12 flex w-full flex-col gap-8'>
+      <div className='flex flex-col justify-between gap-5 sm:flex-row sm:items-center'>
         <div>
-          <h1 className='font-serif text-2xl font-semibold text-foreground'>
+          <h1 className='font-serif text-[28px] font-semibold text-foreground'>
             Meus casos
           </h1>
-          <p className='text-sm text-muted-foreground'>
+          <p className='mt-1 text-[14px] text-muted-foreground'>
             {total} casos disponíveis para sua equipe
           </p>
         </div>
@@ -57,14 +57,14 @@ export const LawyerCasesListPage = () => {
           value={search}
           onChange={(event) => handleSearchChange(event.target.value)}
           placeholder='Buscar por caso, cliente, código ou área jurídica...'
-          className='border-border/60 bg-card pl-9 shadow-sm'
+          className='h-11 border-border/60 bg-card pl-10 text-[14px] shadow-sm'
         />
       </div>
 
-      <div className='flex flex-wrap items-center gap-3'>
-        <span className='mr-1 text-sm text-muted-foreground'>Filtros</span>
+      <div className='flex flex-wrap items-center gap-4'>
+        <span className='mr-1 text-[14px] text-muted-foreground'>Filtros</span>
         <Select value={status} onValueChange={handleStatusChange}>
-          <SelectTrigger className='h-9 w-[180px] border-border/60 bg-card shadow-sm'>
+          <SelectTrigger className='h-10 w-[190px] border-border/60 bg-card text-[12px] shadow-sm'>
             <SelectValue placeholder='Status do caso' />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +75,7 @@ export const LawyerCasesListPage = () => {
           </SelectContent>
         </Select>
         <Select value={area} onValueChange={handleAreaChange}>
-          <SelectTrigger className='h-9 w-[210px] border-border/60 bg-card shadow-sm'>
+          <SelectTrigger className='h-10 w-[220px] border-border/60 bg-card text-[12px] shadow-sm'>
             <SelectValue placeholder='Área jurídica' />
           </SelectTrigger>
           <SelectContent>
@@ -90,16 +90,22 @@ export const LawyerCasesListPage = () => {
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent'>
-              <TableHead className='w-[320px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 w-[340px] px-5 text-[12px] font-medium text-muted-foreground'>
                 Caso
               </TableHead>
-              <TableHead className='font-medium text-muted-foreground'>Cliente</TableHead>
-              <TableHead className='font-medium text-muted-foreground'>Status</TableHead>
-              <TableHead className='font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+                Cliente
+              </TableHead>
+              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+                Status
+              </TableHead>
+              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
                 Checklist
               </TableHead>
-              <TableHead className='font-medium text-muted-foreground'>Equipe</TableHead>
-              <TableHead className='font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+                Equipe
+              </TableHead>
+              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
                 Próxima ação
               </TableHead>
             </TableRow>
@@ -126,45 +132,45 @@ export const LawyerCasesListPage = () => {
             ) : (
               cases.map((caseItem) => (
                 <TableRow key={caseItem.id} className='cursor-pointer'>
-                  <TableCell>
+                  <TableCell className='px-5 py-5 align-top'>
                     <Anchor
                       route='lawyerCaseDetails'
                       params={{ caseId: caseItem.id }}
-                      className='flex flex-col gap-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                      className='flex flex-col gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     >
-                      <span className='font-semibold text-foreground'>
+                      <span className='text-[14px] font-semibold leading-6 text-foreground'>
                         {caseItem.title}
                       </span>
-                      <span className='flex items-center gap-1 text-xs text-muted-foreground'>
-                        <Icon name='tag' className='size-3' />
+                      <span className='flex items-center gap-1.5 text-[12px] leading-5 text-muted-foreground'>
+                        <Icon name='tag' className='size-3.5' />
                         {caseItem.publicCode} · {caseItem.legalArea}
                       </span>
                     </Anchor>
                   </TableCell>
-                  <TableCell className='text-muted-foreground'>
+                  <TableCell className='px-5 py-5 align-top text-[12px] leading-6 text-muted-foreground'>
                     {caseItem.clientName}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='px-5 py-5 align-top'>
                     <Badge
                       variant='secondary'
-                      className={`border-transparent font-medium shadow-none ${caseItem.statusStyle}`}
+                      className={`border-transparent px-3 py-1 text-[12px] font-medium shadow-none ${caseItem.statusStyle}`}
                     >
                       {caseItem.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    <span className='flex items-center gap-2'>
-                      <Icon name={caseItem.progress.icon} className='size-4' />
+                  <TableCell className='px-5 py-5 align-top text-[12px] leading-6 text-muted-foreground'>
+                    <span className='flex items-center gap-2.5'>
+                      <Icon name={caseItem.progress.icon} className='size-5' />
                       {caseItem.progress.completedCount}/{caseItem.progress.totalCount}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='px-5 py-5 align-top'>
                     <div className='flex items-center gap-2'>
                       <div className='flex -space-x-1.5'>
                         {caseItem.team.map((member) => (
                           <Avatar
                             key={`${caseItem.id}-${member.collaboratorId}`}
-                            className='size-7 border-2 border-card'
+                            className='size-8 border-2 border-card'
                           >
                             <AvatarFallback
                               className={`${member.className} text-[10px]`}
@@ -178,10 +184,12 @@ export const LawyerCasesListPage = () => {
                       <span className='sr-only'>{caseItem.displayTeam}</span>
                     </div>
                   </TableCell>
-                  <TableCell className='max-w-[260px] text-muted-foreground'>
-                    <div className='flex flex-col gap-1'>
-                      <span className='truncate'>{caseItem.nextAction}</span>
-                      <span className='text-xs'>{caseItem.updatedAt}</span>
+                  <TableCell className='max-w-[280px] px-5 py-5 align-top text-muted-foreground'>
+                    <div className='flex flex-col gap-2'>
+                      <span className='truncate text-[12px] leading-5'>
+                        {caseItem.nextAction}
+                      </span>
+                      <span className='text-[12px] leading-5'>{caseItem.updatedAt}</span>
                     </div>
                   </TableCell>
                 </TableRow>
