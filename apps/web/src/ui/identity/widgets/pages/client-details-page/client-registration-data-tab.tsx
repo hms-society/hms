@@ -14,10 +14,13 @@ import { useUpdateClientAction } from '@/ui/identity/hooks/use-update-client-act
 
 export type ClientRegistrationDataTabProps = {
   clientId: string
-  initialData: any 
+  initialData: any
 }
 
-export function ClientRegistrationDataTab({ clientId, initialData }: ClientRegistrationDataTabProps) {
+export function ClientRegistrationDataTab({
+  clientId,
+  initialData,
+}: ClientRegistrationDataTabProps) {
   const { currentCollaborator } = useCurrentCollaboratorQuery()
   const { updateClient, isUpdatingClient } = useUpdateClientAction()
 
@@ -65,12 +68,12 @@ export function ClientRegistrationDataTab({ clientId, initialData }: ClientRegis
       setIsModalOpen(false)
       setPendingChanges(null)
     } catch (error: any) {
-      const isConflict = 
-        error?.name === 'ConflictError' || 
-        error?.title === 'Erro de Conflito' || 
+      const isConflict =
+        error?.name === 'ConflictError' ||
+        error?.title === 'Erro de Conflito' ||
         error?.message?.includes('Documento já cadastrado') ||
         error?.response?.status === 409
-        
+
       if (isConflict) {
         setIsDuplicityConflict(true)
       } else {
@@ -85,9 +88,8 @@ export function ClientRegistrationDataTab({ clientId, initialData }: ClientRegis
       <Card>
         <CardContent className='p-6'>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            
             <h3 className='font-semibold text-lg'>Dados Pessoais</h3>
-            
+
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               {initialData.type === 'natural' ? (
                 <div className='space-y-2'>
@@ -106,7 +108,7 @@ export function ClientRegistrationDataTab({ clientId, initialData }: ClientRegis
                   </div>
                 </>
               )}
-              
+
               <div className='space-y-2'>
                 <Label>{initialData.type === 'natural' ? 'CPF' : 'CNPJ'}</Label>
                 <Input {...form.register('taxId.value')} disabled={isAttendant} />
@@ -125,7 +127,7 @@ export function ClientRegistrationDataTab({ clientId, initialData }: ClientRegis
             </div>
 
             <h3 className='font-semibold text-lg mt-6'>Endereço</h3>
-            
+
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div className='space-y-2'>
                 <Label>CEP</Label>

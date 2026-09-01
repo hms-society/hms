@@ -3,8 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-
-
 type UpdateClientRequest = {
   clientId: Parameters<IdentityService['updateClient']>[0]
   changes: any
@@ -14,10 +12,7 @@ export function useUpdateClientAction() {
   const queryClient = useQueryClient()
   const { identityService } = useRestContext()
 
-  async function updateClientRequest({
-    clientId,
-    changes,
-  }: UpdateClientRequest) {
+  async function updateClientRequest({ clientId, changes }: UpdateClientRequest) {
     const response = await identityService.updateClient(clientId, changes)
 
     if (response.isFailure) response.throwError()
@@ -27,7 +22,9 @@ export function useUpdateClientAction() {
 
   function invalidateClientData(_data: any, variables: UpdateClientRequest) {
     void queryClient.invalidateQueries({ queryKey: ['clients'] })
-    void queryClient.invalidateQueries({ queryKey: ['identity', 'client', variables.clientId] })
+    void queryClient.invalidateQueries({
+      queryKey: ['identity', 'client', variables.clientId],
+    })
   }
 
   const {

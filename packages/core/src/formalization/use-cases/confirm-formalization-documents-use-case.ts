@@ -37,7 +37,9 @@ export class ConfirmFormalizationDocumentsUseCase
   ) {}
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (formalization.documentsConfirmedAt) return formalization
@@ -47,21 +49,28 @@ export class ConfirmFormalizationDocumentsUseCase
       formalizationId: formalization.id,
     })
     if (!documentPackage) {
-      throw new FormalizationConfirmationError('Selecione ao menos um documento antes de confirmar.')
+      throw new FormalizationConfirmationError(
+        'Selecione ao menos um documento antes de confirmar.',
+      )
     }
-    const packageDocuments = await this.packageDocumentsRepository.findByDocumentPackageId(
-      documentPackage.id,
-    )
+    const packageDocuments =
+      await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
     if (packageDocuments.length === 0) {
-      throw new FormalizationConfirmationError('Selecione ao menos um documento antes de confirmar.')
+      throw new FormalizationConfirmationError(
+        'Selecione ao menos um documento antes de confirmar.',
+      )
     }
     const versions = await this.versionsRepository.findByDocumentIds(
       packageDocuments.map((document) => document.documentId),
     )
     const generations = await this.loadGenerations(versions)
     for (const document of packageDocuments) {
-      const documentVersions = versions.filter((version) => version.documentId === document.documentId)
-      const latest = documentVersions.reduce<typeof documentVersions[number] | undefined>(
+      const documentVersions = versions.filter(
+        (version) => version.documentId === document.documentId,
+      )
+      const latest = documentVersions.reduce<
+        (typeof documentVersions)[number] | undefined
+      >(
         (current, version) =>
           !current || version.versionNumber > current.versionNumber ? version : current,
         undefined,
@@ -104,10 +113,12 @@ export class ConfirmFormalizationDocumentsUseCase
       ),
     ]
     const generations = await Promise.all(
-      generationIds.map((generationId) => this.generationsRepository.findById(generationId)),
+      generationIds.map((generationId) =>
+        this.generationsRepository.findById(generationId),
+      ),
     )
-    return generations.filter(
-      (generation): generation is DocumentGeneration => Boolean(generation),
+    return generations.filter((generation): generation is DocumentGeneration =>
+      Boolean(generation),
     )
   }
 
@@ -121,15 +132,21 @@ export class ConfirmFormalizationDocumentsUseCase
     let version = versionsById.get(versionId)
     while (version) {
       if (version.documentGenerationId) {
-        const generation = generations.find((candidate) => candidate.id === version?.documentGenerationId)
+        const generation = generations.find(
+          (candidate) => candidate.id === version?.documentGenerationId,
+        )
         const data = generation?.source.data as {
-          readonly formalization?: { readonly id?: string; readonly contractFormRevision?: number }
+          readonly formalization?: {
+            readonly id?: string
+            readonly contractFormRevision?: number
+          }
         }
         return Boolean(
           generation?.source.type === 'formalization' &&
             generation.source.id === formalization.id &&
             data.formalization?.id === formalization.id &&
-            data.formalization.contractFormRevision === formalization.contractFormRevision,
+            data.formalization.contractFormRevision ===
+              formalization.contractFormRevision,
         )
       }
       version = version.sourceDocumentVersionId

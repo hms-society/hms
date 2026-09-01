@@ -1,6 +1,10 @@
 import { Body, HttpStatus, Inject, Param, Patch, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger'
-import type { ClientsRepository, CollaboratorsRepository, UsersRepository } from '@hms/core/identity/interfaces'
+import type {
+  ClientsRepository,
+  CollaboratorsRepository,
+  UsersRepository,
+} from '@hms/core/identity/interfaces'
 import { UpdateClientUseCase } from '@hms/core/identity/use-cases'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import { updateClientSchema } from '@hms/validation/identity'
@@ -21,7 +25,8 @@ export class UpdateClientController {
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients) clientsRepository: ClientsRepository,
     @Inject(IDENTITY_REPOSITORIES.users) usersRepository: UsersRepository,
-    @Inject(IDENTITY_REPOSITORIES.collaborators) collaboratorsRepository: CollaboratorsRepository,
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
+    collaboratorsRepository: CollaboratorsRepository,
   ) {
     this.useCase = new UpdateClientUseCase(
       clientsRepository,
@@ -35,7 +40,7 @@ export class UpdateClientController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The client was updated successfully.',
-    type: ClientDetailsResponseDto, 
+    type: ClientDetailsResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,

@@ -1,4 +1,5 @@
 import type {
+  CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '../interfaces'
@@ -24,6 +25,7 @@ export class RecordDocumentValidationDecisionUseCase {
   constructor(
     private readonly documentValidationsRepository: DocumentValidationsRepository,
     private readonly documentValidationLogsRepository: DocumentValidationLogsRepository,
+    private readonly caseChecklistUpdateProvider?: CaseChecklistUpdateProvider,
   ) {}
 
   async execute(request: RecordDocumentValidationDecisionRequest) {
@@ -41,8 +43,18 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
-    const updatedDocument = await this.documentValidationsRepository.recordDecision({
+    const checklistRequirementId = this.resolveChecklistRequirementId(
+      request,
+      currentDocument,
+    )
+    const decisionRequest = {
       ...request,
+      checklistRequirementId,
+    }
+
+    const updatedDocument = await this.documentValidationsRepository.recordDecision({
+      ...decisionRequest,
+      caseId: currentDocument.checklistLink?.caseId,
       status,
     })
 
@@ -51,20 +63,34 @@ export class RecordDocumentValidationDecisionUseCase {
       actorId: request.reviewedBy,
       action: DocumentValidationLogAction.DecisionRecorded,
       status,
-      decision: request.decision,
-      reason: request.reason,
-      metadata: this.buildMetadata(request),
+      decision: decisionRequest.decision,
+      reason: decisionRequest.reason,
+      metadata: this.buildMetadata(decisionRequest),
     })
 
-    if (this.shouldRecordAiCorrection(currentDocument, request, status)) {
+    if (this.shouldRecordAiCorrection(currentDocument, decisionRequest, status)) {
       await this.documentValidationLogsRepository.add({
         documentFileId: request.documentFileId,
         actorId: request.reviewedBy,
         action: DocumentValidationLogAction.AiCorrectionRecorded,
         status,
-        decision: request.decision,
-        reason: request.reason,
-        metadata: this.buildAiCorrectionMetadata(currentDocument, request, status),
+        decision: decisionRequest.decision,
+        reason: decisionRequest.reason,
+        metadata: this.buildAiCorrectionMetadata(
+          currentDocument,
+          decisionRequest,
+          status,
+        ),
+      })
+    }
+
+    const checklistItemId = this.getChecklistItemIdToUpdate(decisionRequest, status)
+
+    if (checklistItemId) {
+      await this.tryLinkValidatedDocumentToChecklist({
+        checklistItemId,
+        documentFileId: request.documentFileId,
+        validatedBy: request.reviewedBy,
       })
     }
 
@@ -149,6 +175,57 @@ export class RecordDocumentValidationDecisionUseCase {
 
   private hasAiSuggestionMetadata(document: DocumentValidationDocument) {
     return Boolean(document.aiSuggestion && Object.keys(document.aiSuggestion).length > 0)
+  }
+
+  private getChecklistItemIdToUpdate(
+    request: RecordDocumentValidationDecisionRequest,
+    status: DocumentValidationStatus,
+  ) {
+    if (status !== DocumentValidationStatus.Valid) return undefined
+    if (!request.checklistRequirementId) return undefined
+    if (!this.isUuid(request.checklistRequirementId)) return undefined
+
+    return request.checklistRequirementId
+  }
+
+  private resolveChecklistRequirementId(
+    request: RecordDocumentValidationDecisionRequest,
+    document: DocumentValidationDocument,
+  ) {
+    if (
+      request.checklistRequirementId &&
+      this.isUuid(request.checklistRequirementId)
+    ) {
+      return request.checklistRequirementId
+    }
+
+    if (
+      document.checklistLink?.checklistItemId &&
+      this.isUuid(document.checklistLink.checklistItemId)
+    ) {
+      return document.checklistLink.checklistItemId
+    }
+
+    return request.checklistRequirementId
+  }
+
+  private isUuid(value: string) {
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+    return uuidPattern.test(value)
+  }
+
+  private async tryLinkValidatedDocumentToChecklist(request: {
+    checklistItemId: string
+    documentFileId: string
+    validatedBy: string
+  }) {
+    try {
+      await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)
+    } catch {
+      return
+    }
   }
 
   private buildAiCorrectionMetadata(

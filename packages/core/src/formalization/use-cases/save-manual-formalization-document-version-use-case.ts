@@ -1,4 +1,9 @@
-import type { DatetimeProvider, FileStorageProvider, IdProvider, UseCase } from '../../shared/interfaces'
+import type {
+  DatetimeProvider,
+  FileStorageProvider,
+  IdProvider,
+  UseCase,
+} from '../../shared/interfaces'
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import { FindDocumentPendingMarkersUseCase } from '../../document-production/use-cases'
 import {
@@ -47,32 +52,46 @@ export class SaveManualFormalizationDocumentVersionUseCase
   ) {}
 
   async execute(request: Request): Promise<DocumentVersion> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     FormalizationDocumentGuard.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
-      throw new FormalizationStateConflictError('Reabra a confirmação antes de editar documentos.')
+      throw new FormalizationStateConflictError(
+        'Reabra a confirmação antes de editar documentos.',
+      )
     }
     const documentPackage = await this.documentPackagesRepository.findByContext({
       type: 'formalization',
       formalizationId: formalization.id,
     })
-    if (!documentPackage) throw new FormalizationStateConflictError('O documento não pertence à formalização.')
-    const packageDocuments = await this.packageDocumentsRepository.findByDocumentPackageId(
-      documentPackage.id,
-    )
-    if (!packageDocuments.some((document) => document.documentId === request.documentId)) {
-      throw new FormalizationStateConflictError('O documento não pertence à formalização.')
+    if (!documentPackage)
+      throw new FormalizationStateConflictError(
+        'O documento não pertence à formalização.',
+      )
+    const packageDocuments =
+      await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
+    if (
+      !packageDocuments.some((document) => document.documentId === request.documentId)
+    ) {
+      throw new FormalizationStateConflictError(
+        'O documento não pertence à formalização.',
+      )
     }
     const [document, sourceVersion] = await Promise.all([
       this.documentsRepository.findById(request.documentId),
       this.versionsRepository.findById(request.sourceDocumentVersionId),
     ])
     if (!document || !sourceVersion || sourceVersion.documentId !== document.id) {
-      throw new FormalizationStateConflictError('A versão de origem não pertence ao documento.')
+      throw new FormalizationStateConflictError(
+        'A versão de origem não pertence ao documento.',
+      )
     }
-    const latestVersion = await this.versionsRepository.findLatestByDocumentId(document.id)
+    const latestVersion = await this.versionsRepository.findLatestByDocumentId(
+      document.id,
+    )
     const versionNumber = (latestVersion?.versionNumber ?? 0) + 1
     const documentVersionId = this.idProvider.generate()
     const pendingMarkers = await this.findPendingMarkersUseCase.execute({

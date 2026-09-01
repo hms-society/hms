@@ -58,6 +58,9 @@ export class UpdateClientRequestDto extends createZodDto(updateClientSchema) {
   @ApiPropertyOptional({ type: () => AddressDto })
   address?: AddressDto
 
-  @ApiPropertyOptional({ description: 'Justificativa para override de documento duplicado (apenas para Admin/Supervisor)' })
+  @ApiPropertyOptional({
+    description:
+      'Justificativa para override de documento duplicado (apenas para Admin/Supervisor)',
+  })
   duplicityOverrideJustification?: string
 }

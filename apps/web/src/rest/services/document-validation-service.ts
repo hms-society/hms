@@ -16,6 +16,10 @@ export const DocumentValidationService = (
         searchParams.set('status', query.status)
       }
 
+      if (query.caseId) {
+        searchParams.set('caseId', query.caseId)
+      }
+
       const queryString = searchParams.toString()
       const path = queryString
         ? `/document-validation/documents?${queryString}`

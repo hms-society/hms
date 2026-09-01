@@ -4,7 +4,10 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
-import { DocumentGenerationMoment, DocumentSpecificationStatus } from '../../document-production/domain/structures'
+import {
+  DocumentGenerationMoment,
+  DocumentSpecificationStatus,
+} from '../../document-production/domain/structures'
 import type { UseCase } from '../../shared/interfaces'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import { FormalizationNotFoundError } from '../domain/errors'
@@ -30,7 +33,9 @@ export class GetFormalizationDocumentSelectionUseCase
   ) {}
 
   async execute(request: Request): Promise<FormalizationDocumentSelection> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     FormalizationDocumentGuard.assertFormClosed(formalization)
@@ -40,7 +45,9 @@ export class GetFormalizationDocumentSelectionUseCase
       moment: DocumentGenerationMoment.Formalization,
       status: DocumentSpecificationStatus.Available,
       ...(context.intake.legalAreaId ? { legalAreaId: context.intake.legalAreaId } : {}),
-      ...(context.intake.legalTopicId ? { legalTopicId: context.intake.legalTopicId } : {}),
+      ...(context.intake.legalTopicId
+        ? { legalTopicId: context.intake.legalTopicId }
+        : {}),
     })
     const documentPackage = await this.documentPackagesRepository.findByContext({
       type: 'formalization',

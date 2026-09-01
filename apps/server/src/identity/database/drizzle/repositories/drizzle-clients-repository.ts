@@ -134,11 +134,15 @@ export class DrizzleClientsRepository
     }
   }
 
-  async replace(clientId: string, changes: any, auditLogs: any[]): Promise<Client | undefined> {
+  async replace(
+    clientId: string,
+    changes: any,
+    auditLogs: any[],
+  ): Promise<Client | undefined> {
     const updatedClientDrizzle = await this.database.transaction(async (tx) => {
       const [updated] = await tx
         .update(clientModel)
-        .set(this.toDrizzle(changes)) 
+        .set(this.toDrizzle(changes))
         .where(eq(clientModel.id, clientId))
         .returning()
 
@@ -151,7 +155,9 @@ export class DrizzleClientsRepository
       return updated
     })
 
-    return updatedClientDrizzle ? this.clientMapper.toDomain(updatedClientDrizzle) : undefined
+    return updatedClientDrizzle
+      ? this.clientMapper.toDomain(updatedClientDrizzle)
+      : undefined
   }
 
   private toDrizzle(client: ClientCreation) {

@@ -39,11 +39,12 @@ export function AuditConfirmationModal({
         <DialogHeader className='pt-10 px-6 pb-2'>
           <DialogTitle className='flex flex-col items-center gap-4 text-center'>
             <div className='flex size-14 items-center justify-center rounded-full shadow-sm ring-4 ring-offset-2 ring-transparent transition-all bg-amber-100 ring-amber-50'>
-              <Icon name={isDuplicityConflict ? 'triangle-alert' : 'shield-alert'} className='size-7 text-amber-500' />
+              <Icon
+                name={isDuplicityConflict ? 'triangle-alert' : 'shield-alert'}
+                className='size-7 text-amber-500'
+              />
             </div>
-            <span className='text-xl tracking-tight'>
-              Confirmar Alterações
-            </span>
+            <span className='text-xl tracking-tight'>Confirmar Alterações</span>
           </DialogTitle>
           <DialogDescription className='text-center px-4 pt-1'>
             {isDuplicityConflict
@@ -60,11 +61,15 @@ export function AuditConfirmationModal({
                 Documento Duplicado
               </div>
               <p className='text-xs text-red-800 leading-relaxed text-center font-medium'>
-                Apenas perfis autorizados (Administrador ou Supervisor) podem forçar o salvamento de um documento duplicado mediante justificativa.
+                Apenas perfis autorizados (Administrador ou Supervisor) podem forçar o
+                salvamento de um documento duplicado mediante justificativa.
               </p>
             </div>
             <div className='space-y-2.5 mt-2'>
-              <Label htmlFor='justification' className='text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1'>
+              <Label
+                htmlFor='justification'
+                className='text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1'
+              >
                 Justificativa Obrigatória
               </Label>
               <Input
@@ -80,17 +85,19 @@ export function AuditConfirmationModal({
         )}
 
         <DialogFooter className='px-8 pb-8 pt-6 sm:justify-center flex-col-reverse sm:flex-row gap-3 border-t border-gray-100/50 mt-2 bg-gray-50/30'>
-          <Button 
-            variant='outline' 
-            onClick={onClose} 
-            disabled={isPending} 
+          <Button
+            variant='outline'
+            onClick={onClose}
+            disabled={isPending}
             className='rounded-full sm:w-1/2 h-11 font-medium border-gray-200 shadow-sm'
           >
             Cancelar
           </Button>
-          <Button 
-            onClick={handleConfirm} 
-            disabled={isPending || (isDuplicityConflict && justification.trim().length < 5)}
+          <Button
+            onClick={handleConfirm}
+            disabled={
+              isPending || (isDuplicityConflict && justification.trim().length < 5)
+            }
             className='rounded-full sm:w-1/2 h-11 font-medium shadow-md'
           >
             {isPending ? 'Confirmando...' : 'Confirmar'}

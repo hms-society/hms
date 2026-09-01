@@ -24,6 +24,4 @@ export type FormalizationDocumentGenerationResponse = z.infer<
   typeof formalizationDocumentGenerationResponseSchema
 >
 
-export type FormalizationErrorResponse = z.infer<
-  typeof formalizationErrorResponseSchema
->
+export type FormalizationErrorResponse = z.infer<typeof formalizationErrorResponseSchema>

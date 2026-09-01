@@ -8,7 +8,11 @@ export interface ClientsRepository {
   findById(clientId: string): Promise<Client | undefined>
   findByTaxId(taxId: TaxId): Promise<Client | undefined>
   findByPhone(phone: string): Promise<Client[]>
-  replace(clientId: string, changes: ClientUpdate, auditLogs: any[]): Promise<Client | undefined>
+  replace(
+    clientId: string,
+    changes: ClientUpdate,
+    auditLogs: any[],
+  ): Promise<Client | undefined>
   findAll(params: { page: number; limit: number; search?: string }): Promise<{
     data: {
       client: Client

@@ -1,9 +1,170 @@
 {
-  "id": "65fec1c8-5d30-4c38-9e0b-31481c972515",
+  "id": "2a52169e-afd3-4fed-b12d-b18e85fe128e",
   "prevId": "e3fe6fec-2124-4e23-a273-60d1b4797910",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.case_checklist_items": {
+      "name": "case_checklist_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_item_key": {
+          "name": "template_item_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_required": {
+          "name": "is_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "status": {
+          "name": "status",
+          "type": "case_checklist_item_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "document_file_id": {
+          "name": "document_file_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_file_name": {
+          "name": "document_file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validated_at": {
+          "name": "validated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validated_by": {
+          "name": "validated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "case_checklist_items_case_template_key_uidx": {
+          "name": "case_checklist_items_case_template_key_uidx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "template_item_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_checklist_items_case_status_idx": {
+          "name": "case_checklist_items_case_status_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_checklist_items_case_id_cases_id_fk": {
+          "name": "case_checklist_items_case_id_cases_id_fk",
+          "tableFrom": "case_checklist_items",
+          "tableTo": "cases",
+          "columnsFrom": [
+            "case_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "case_checklist_items_template_key_not_blank_check": {
+          "name": "case_checklist_items_template_key_not_blank_check",
+          "value": "char_length(btrim(\"case_checklist_items\".\"template_item_key\")) > 0"
+        },
+        "case_checklist_items_title_not_blank_check": {
+          "name": "case_checklist_items_title_not_blank_check",
+          "value": "char_length(btrim(\"case_checklist_items\".\"title\")) > 0"
+        },
+        "case_checklist_items_validated_document_check": {
+          "name": "case_checklist_items_validated_document_check",
+          "value": "\"case_checklist_items\".\"status\" <> 'validated' OR (\"case_checklist_items\".\"document_file_id\" IS NOT NULL AND \"case_checklist_items\".\"validated_at\" IS NOT NULL AND \"case_checklist_items\".\"validated_by\" IS NOT NULL)"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.case_members": {
       "name": "case_members",
       "schema": "",
@@ -207,19 +368,61 @@
           "notNull": true,
           "default": "'documentation'"
         },
+        "checklist_completed_at": {
+          "name": "checklist_completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_completed_by": {
+          "name": "checklist_completed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decision": {
+          "name": "checklist_gate_decision",
+          "type": "case_checklist_gate_decision",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decided_at": {
+          "name": "checklist_gate_decided_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decided_by": {
+          "name": "checklist_gate_decided_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_remarks": {
+          "name": "checklist_gate_remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dossier_gate_homologated_at": {
+          "name": "dossier_gate_homologated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dossier_gate_homologated_by": {
+          "name": "dossier_gate_homologated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "opened_at": {
           "name": "opened_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -309,10 +512,6 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "cases_version_positive_check": {
-          "name": "cases_version_positive_check",
-          "value": "\"cases\".\"version\" > 0"
-        },
         "cases_public_code_format_check": {
           "name": "cases_public_code_format_check",
           "value": "\"cases\".\"public_code\" ~ '^CASO-[0-9]{8}-[0-9]{4}$'"
@@ -324,6 +523,10 @@
         "cases_title_not_blank_check": {
           "name": "cases_title_not_blank_check",
           "value": "char_length(btrim(\"cases\".\"title\")) > 0"
+        },
+        "cases_checklist_reason_remarks_check": {
+          "name": "cases_checklist_reason_remarks_check",
+          "value": "\"cases\".\"checklist_gate_decision\" NOT IN ('approved_with_exception', 'blocked_insufficient', 'rejected_on_merit') OR (\"cases\".\"checklist_gate_remarks\" IS NOT NULL AND char_length(btrim(\"cases\".\"checklist_gate_remarks\")) > 0)"
         },
         "cases_updated_after_created_check": {
           "name": "cases_updated_after_created_check",
@@ -778,8 +981,8 @@
         }
       },
       "indexes": {
-        "clients_tax_id_uidx": {
-          "name": "clients_tax_id_uidx",
+        "clients_tax_id_idx": {
+          "name": "clients_tax_id_idx",
           "columns": [
             {
               "expression": "tax_id_type",
@@ -794,7 +997,7 @@
               "nulls": "last"
             }
           ],
-          "isUnique": true,
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -3860,6 +4063,24 @@
     }
   },
   "enums": {
+    "public.case_checklist_gate_decision": {
+      "name": "case_checklist_gate_decision",
+      "schema": "public",
+      "values": [
+        "approved",
+        "approved_with_exception",
+        "blocked_insufficient",
+        "rejected_on_merit"
+      ]
+    },
+    "public.case_checklist_item_status": {
+      "name": "case_checklist_item_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "validated"
+      ]
+    },
     "public.case_member_role": {
       "name": "case_member_role",
       "schema": "public",
@@ -3875,6 +4096,7 @@
       "schema": "public",
       "values": [
         "documentation",
+        "ready_for_legal_production",
         "legal_production",
         "protocol_delivery",
         "execution",

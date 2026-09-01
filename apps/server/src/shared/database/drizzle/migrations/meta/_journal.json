@@ -278,8 +278,43 @@
     {
       "idx": 39,
       "version": "7",
-      "when": 1788205972610,
-      "tag": "0039_sparkling_wolf_cub",
+      "when": 1787598000000,
+      "tag": "0040_case_checklist_gate",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1787932800000,
+      "tag": "0041_case_checklist_completion",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1788000000000,
+      "tag": "0042_case_checklist_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1788043200000,
+      "tag": "0043_case_checklist_document_file_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1788298614281,
+      "tag": "0042_secret_fixer",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1788299116485,
+      "tag": "0043_moaning_proudstar",
       "breakpoints": true
     }
   ]
