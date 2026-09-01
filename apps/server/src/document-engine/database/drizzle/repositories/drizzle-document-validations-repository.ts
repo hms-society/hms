@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import type {
   DocumentValidationDocument,
   DocumentValidationDuplicateMatch,
@@ -17,12 +17,14 @@ import type {
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
+import { collaboratorModel, userModel } from '@/identity/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { documentBatchFileModel, documentBatchModel } from '../models'
 
 type DocumentValidationRecord = typeof documentBatchFileModel.$inferSelect & {
   batch: typeof documentBatchModel.$inferSelect
+  reviewerName?: string | null
 }
 
 @Injectable()
@@ -41,21 +43,37 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
       })
       .from(documentBatchFileModel)
       .innerJoin(
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
       )
+      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
+      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .$dynamic()
 
-    if (filters.status) {
-      query.where(eq(documentBatchFileModel.status, filters.status))
+    const conditions = [
+      filters.caseId ? eq(documentBatchFileModel.caseId, filters.caseId) : undefined,
+      filters.status ? eq(documentBatchFileModel.status, filters.status) : undefined,
+    ].filter((condition) => condition !== undefined)
+
+    if (conditions.length > 0) {
+      query.where(and(...conditions))
     }
 
     const records = await query.orderBy(desc(documentBatchFileModel.createdAt))
 
-    return records.map((record) => this.toDomain({ ...record.file, batch: record.batch }))
+    return records.map((record) =>
+      this.toDomain({
+        ...record.file,
+        batch: record.batch,
+        reviewerName: record.reviewerName,
+      }),
+    )
   }
 
   async findByFileId(
@@ -65,19 +83,28 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
       })
       .from(documentBatchFileModel)
       .innerJoin(
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
       )
+      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
+      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .where(eq(documentBatchFileModel.id, documentFileId))
 
     if (!record) {
       return undefined
     }
 
-    return this.toDomain({ ...record.file, batch: record.batch })
+    return this.toDomain({
+      ...record.file,
+      batch: record.batch,
+      reviewerName: record.reviewerName,
+    })
   }
 
   async recordAnalysis(
@@ -119,9 +146,9 @@ export class DrizzleDocumentValidationsRepository
         humanCorrection,
         reviewedBy: input.reviewedBy,
         reviewedAt: new Date(),
-        caseId: this.toOptionalUuid(input.documentTypeId),
+        caseId: input.caseId,
         checklistItemId: this.toOptionalUuid(input.checklistRequirementId),
-        originalDocumentId: input.originalDocumentId,
+        originalDocumentId: this.toOptionalUuid(input.originalDocumentId),
         isDuplicate: input.status === DocumentValidationStatus.Duplicate,
       })
       .where(eq(documentBatchFileModel.id, input.documentFileId))
@@ -188,6 +215,7 @@ export class DrizzleDocumentValidationsRepository
       receivedAt: record.batch.createdAt,
       createdAt: record.createdAt,
       reviewedBy: record.reviewedBy ?? undefined,
+      reviewedByName: record.reviewerName ?? undefined,
       reviewedAt: record.reviewedAt ?? undefined,
       aiConfidence: record.aiConfidence ?? undefined,
       aiSuggestion,

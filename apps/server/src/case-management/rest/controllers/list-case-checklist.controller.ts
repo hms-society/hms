@@ -1,40 +1,41 @@
-import {
-  HttpStatus,
-  Inject,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  UseGuards,
-} from '@nestjs/common'
+import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
-import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import { CompleteCaseChecklistUseCase } from '@hms/core/case-management/use-cases'
+import type {
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '@hms/core/case-management/interfaces'
+import { ListCaseChecklistUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CasesController } from '@/case-management/decorators'
-import { LegalCaseResponseDto } from '@/case-management/rest/dtos'
+import { CaseChecklistItemResponseDto } from '@/case-management/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 @CasesController()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
-export class CompleteCaseChecklistController {
-  private readonly useCase: CompleteCaseChecklistUseCase
+export class ListCaseChecklistController {
+  private readonly useCase: ListCaseChecklistUseCase
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
     legalCasesRepository: LegalCasesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
+    caseChecklistItemsRepository: CaseChecklistItemsRepository,
   ) {
-    this.useCase = new CompleteCaseChecklistUseCase(legalCasesRepository)
+    this.useCase = new ListCaseChecklistUseCase(
+      legalCasesRepository,
+      caseChecklistItemsRepository,
+    )
   }
 
-  @Patch(':caseId/checklist-completion')
+  @Get(':caseId/checklist')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'The case checklist was completed successfully.',
-    type: LegalCaseResponseDto,
+    description: 'The case checklist was returned successfully.',
+    type: [CaseChecklistItemResponseDto],
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -43,12 +44,7 @@ export class CompleteCaseChecklistController {
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'The case was not found.',
-    type: ErrorResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.CONFLICT,
-    description: 'The checklist cannot be completed.',
+    description: 'The case checklist was not found for this collaborator.',
     type: ErrorResponseDto,
   })
   handle(
@@ -57,7 +53,7 @@ export class CompleteCaseChecklistController {
   ) {
     return this.useCase.execute({
       caseId,
-      completedBy: collaborator.collaboratorId,
+      collaboratorId: collaborator.collaboratorId,
     })
   }
 }

@@ -1,4 +1,4 @@
-import { Get, Inject, Query } from '@nestjs/common'
+import { Get, Inject, ParseUUIDPipe, Query } from '@nestjs/common'
 import type { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
 import { ListDocumentValidationsUseCase } from '@hms/core/document-engine/use-cases'
@@ -18,7 +18,10 @@ export class ListDocumentValidationsController {
   }
 
   @Get('documents')
-  handle(@Query('status') status?: DocumentValidationStatus) {
-    return this.useCase.execute({ status })
+  handle(
+    @Query('caseId', new ParseUUIDPipe({ optional: true })) caseId?: string,
+    @Query('status') status?: DocumentValidationStatus,
+  ) {
+    return this.useCase.execute({ caseId, status })
   }
 }

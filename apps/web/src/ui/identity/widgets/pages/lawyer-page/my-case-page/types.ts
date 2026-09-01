@@ -4,10 +4,13 @@ export type ChecklistItemStatus = 'validado' | 'solicitado' | 'nao_solicitado'
 
 export type ChecklistItem = {
   id: string
+  isRequired?: boolean
   title: string
   status: ChecklistItemStatus
+  statusLabel?: string
   subtitle?: string
   pendencies?: number
+  documentFileId?: string
   documentName?: string
 }
 

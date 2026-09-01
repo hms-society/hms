@@ -21,7 +21,7 @@ function createController(
     checklistGateRemarks: undefined,
     checklistItems: [
       { id: '1', title: 'Procuração', status: 'validado' },
-      { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+      { id: '2', title: 'CNIS', status: 'solicitado' },
     ],
     complementaryItems: [],
     decisionReasonDialog: {
@@ -39,6 +39,7 @@ function createController(
     handleDecisionReasonDialogOpenChange: vi.fn(),
     handleAddComplementaryItem: vi.fn(),
     handleFilterByCase: vi.fn(),
+    handleOpenChecklistItemDetail: vi.fn(),
     handleOpenValidationDesk: vi.fn(),
     handleRejectOnMerit: vi.fn(),
     handleRemarksChange: vi.fn(),
@@ -73,7 +74,7 @@ describe('ChecklistDossierTab', () => {
         caseId='case-1'
         checklist={[
           { id: '1', title: 'Procuração', status: 'validado' },
-          { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+          { id: '2', title: 'CNIS', status: 'solicitado' },
         ]}
       />,
     )
@@ -90,7 +91,7 @@ describe('ChecklistDossierTab', () => {
       caseId: 'case-1',
       checklist: [
         { id: '1', title: 'Procuração', status: 'validado' },
-        { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+        { id: '2', title: 'CNIS', status: 'solicitado' },
       ],
       isReviewDisabled: false,
     })
@@ -127,8 +128,22 @@ describe('ChecklistDossierTab', () => {
 
   it('delegates checklist item validation from the row action button', () => {
     const handleValidateChecklistItem = vi.fn()
+    const handleOpenChecklistItemDetail = vi.fn()
     useChecklistDossierTabMock.mockReturnValue(
-      createController({ handleValidateChecklistItem }),
+      createController({
+        checklistItems: [
+          { id: '1', title: 'Procuração', status: 'validado' },
+          {
+            documentFileId: 'document-file-1',
+            documentName: 'cnis.pdf - aguardando validação documental',
+            id: '2',
+            status: 'solicitado',
+            title: 'CNIS',
+          },
+        ],
+        handleOpenChecklistItemDetail,
+        handleValidateChecklistItem,
+      }),
     )
 
     render(
@@ -137,14 +152,18 @@ describe('ChecklistDossierTab', () => {
         caseId='case-1'
         checklist={[
           { id: '1', title: 'Procuração', status: 'validado' },
-          { id: '2', title: 'CNIS', status: 'solicitado', pendencies: 1 },
+          { id: '2', title: 'CNIS', status: 'solicitado' },
         ]}
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /validar cnis/i }))
+    fireEvent.click(screen.getByRole('button', { name: /ver documento/i }))
 
     expect(handleValidateChecklistItem).toHaveBeenCalledWith('2')
+
+    fireEvent.click(screen.getByRole('button', { name: /abrir cnis/i }))
+
+    expect(handleOpenChecklistItemDetail).toHaveBeenCalledWith('2')
   })
 
   it('renders the locally validated document audit line', () => {

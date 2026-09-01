@@ -47,6 +47,7 @@ export const ChecklistDossierTab = ({
     handleDecisionReasonDialogOpenChange,
     handleAddComplementaryItem,
     handleFilterByCase,
+    handleOpenChecklistItemDetail,
     handleOpenValidationDesk,
     handleRejectOnMerit,
     handleRemarksChange,
@@ -70,6 +71,20 @@ export const ChecklistDossierTab = ({
     mandatoryItemsCount > 0
       ? Math.round((validatedItemsCount / mandatoryItemsCount) * 100)
       : 0
+  const hasChecklistItems = mandatoryItemsCount > 0
+  const checklistStatusLabel = isChecklistComplete
+    ? 'Completo para validação'
+    : hasChecklistItems
+      ? 'Recebimento parcial'
+      : 'Checklist não instanciado'
+  const checklistStatusVariant = isChecklistComplete
+    ? 'success'
+    : hasChecklistItems
+      ? 'attention'
+      : 'secondary'
+  const checklistOriginLabel = hasChecklistItems
+    ? `${mandatoryItemsCount} item(ns) obrigatório(s) carregado(s) do checklist do caso`
+    : 'Nenhum checklist documental foi encontrado para este caso'
 
   return (
     <>
@@ -196,13 +211,14 @@ export const ChecklistDossierTab = ({
               <h2 className='font-serif text-lg font-semibold text-foreground'>
                 Checklist Documental
               </h2>
-              <Badge variant='attention' className='h-6 rounded-full px-3 text-[12px]'>
-                Recebimento parcial
+              <Badge
+                variant={checklistStatusVariant}
+                className='h-6 rounded-full px-3 text-[12px]'
+              >
+                {checklistStatusLabel}
               </Badge>
             </div>
-            <p className='text-[14px] text-muted-foreground'>
-              Instanciado do template Previdenciário v3 - 03/07/2026
-            </p>
+            <p className='text-[14px] text-muted-foreground'>{checklistOriginLabel}</p>
           </div>
 
           <div className='flex w-full max-w-56 flex-col items-end gap-1.5'>
@@ -246,88 +262,102 @@ export const ChecklistDossierTab = ({
             Itens obrigatórios
           </h3>
           <div className='flex flex-col gap-1.5'>
-            {checklistItems.map((item) => (
-              <div
-                key={item.id}
-                className={`flex min-w-0 flex-col gap-3 rounded-md border px-3 py-2 md:flex-row md:items-center md:justify-between ${getChecklistRowClasses(
-                  item.status,
-                )}`}
-              >
-                <div className='flex min-w-0 items-center gap-3'>
-                  <div
-                    className={`flex size-6 shrink-0 items-center justify-center rounded-md ${getChecklistIconClasses(
-                      item.status,
-                    )}`}
-                  >
-                    <Icon name={getChecklistIcon(item.status)} className='size-3' />
-                  </div>
-                  <div className='flex min-w-0 flex-col gap-0.5'>
-                    <div className='flex flex-wrap items-center gap-1.5'>
-                      <span className='text-[14px] font-semibold text-foreground'>
-                        {item.title}
-                      </span>
-                      {item.status === 'validado' && (
-                        <Badge
-                          variant='success'
-                          className='h-5 rounded-full px-2 text-[12px]'
-                        >
-                          Validado
-                        </Badge>
-                      )}
-                      {item.status === 'solicitado' && (
-                        <Badge
-                          variant='attention'
-                          className='h-5 rounded-full px-2 text-[12px]'
-                        >
-                          Solicitado
-                        </Badge>
-                      )}
-                      {item.status === 'nao_solicitado' && (
-                        <Badge
-                          variant='secondary'
-                          className='h-5 rounded-full px-2 text-[12px]'
-                        >
-                          Não solicitado
-                        </Badge>
-                      )}
-                      {item.pendencies && (
-                        <Badge
-                          variant='destructive'
-                          className='h-5 rounded-full px-2 text-[12px]'
-                        >
-                          <Icon name='alert-circle' className='size-3' />
-                          {item.pendencies} pendência
-                        </Badge>
-                      )}
+            {checklistItems.length > 0 ? (
+              checklistItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={`flex min-w-0 flex-col gap-3 rounded-md border px-3 py-2 md:flex-row md:items-center md:justify-between ${getChecklistRowClasses(
+                    item.status,
+                  )}`}
+                >
+                  <div className='flex min-w-0 items-center gap-3'>
+                    <div
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-md ${getChecklistIconClasses(
+                        item.status,
+                      )}`}
+                    >
+                      <Icon name={getChecklistIcon(item.status)} className='size-3' />
                     </div>
-                    <span className='truncate text-[14px] text-muted-foreground'>
-                      {item.documentName || item.subtitle}
-                    </span>
+                    <div className='flex min-w-0 flex-col gap-0.5'>
+                      <div className='flex flex-wrap items-center gap-1.5'>
+                        <span className='text-[14px] font-semibold text-foreground'>
+                          {item.title}
+                        </span>
+                        {item.status === 'validado' && (
+                          <Badge
+                            variant='success'
+                            className='h-5 rounded-full px-2 text-[12px]'
+                          >
+                            Validado
+                          </Badge>
+                        )}
+                        {item.status === 'solicitado' && item.documentFileId && (
+                          <Badge
+                            variant='attention'
+                            className='h-5 rounded-full px-2 text-[12px]'
+                          >
+                            {item.statusLabel ?? 'Aguardando validação'}
+                          </Badge>
+                        )}
+                        {item.status === 'nao_solicitado' && (
+                          <Badge
+                            variant='secondary'
+                            className='h-5 rounded-full px-2 text-[12px]'
+                          >
+                            Não solicitado
+                          </Badge>
+                        )}
+                        {item.pendencies && (
+                          <Badge
+                            variant='destructive'
+                            className='h-5 rounded-full px-2 text-[12px]'
+                          >
+                            <Icon name='alert-circle' className='size-3' />
+                            {item.pendencies} pendência
+                          </Badge>
+                        )}
+                      </div>
+                      <span className='truncate text-[14px] text-muted-foreground'>
+                        {item.documentName || item.subtitle}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className='flex shrink-0 items-center gap-2 self-end md:self-center'>
+                    {item.documentFileId && (
+                      <Button
+                        variant='brand'
+                        size='xs'
+                        className='h-8 rounded-full bg-accent px-3 text-[12px] text-accent-foreground'
+                        onClick={() => handleValidateChecklistItem(item.id)}
+                      >
+                        <Icon
+                          name={getChecklistActionIcon(
+                            item.status,
+                            Boolean(item.documentName),
+                          )}
+                          className='size-3'
+                        />
+                        {getChecklistActionLabel(item.status, Boolean(item.documentName))}
+                      </Button>
+                    )}
+                    <Button
+                      variant='outline'
+                      size='icon-xs'
+                      aria-label={`Abrir ${item.title}`}
+                      className='size-7 rounded-full bg-background text-muted-foreground'
+                      onClick={() => handleOpenChecklistItemDetail(item.id)}
+                    >
+                      <Icon name='arrow-right' className='size-3' />
+                    </Button>
                   </div>
                 </div>
-
-                <div className='flex shrink-0 items-center gap-2 self-end md:self-center'>
-                  <Button
-                    variant={item.status === 'validado' ? 'brand' : 'outline'}
-                    size='xs'
-                    className='h-8 rounded-full bg-accent px-3 text-[12px] text-accent-foreground'
-                    onClick={() => handleValidateChecklistItem(item.id)}
-                  >
-                    <Icon name={getChecklistActionIcon(item.status)} className='size-3' />
-                    {getChecklistActionLabel(item.status)}
-                  </Button>
-                  <Button
-                    variant='outline'
-                    size='icon-xs'
-                    aria-label={`Validar ${item.title}`}
-                    className='size-7 rounded-full bg-background text-muted-foreground'
-                    onClick={() => handleValidateChecklistItem(item.id)}
-                  >
-                    <Icon name='arrow-right' className='size-3' />
-                  </Button>
-                </div>
+              ))
+            ) : (
+              <div className='rounded-md border border-border bg-muted/30 px-3 py-4 text-xs text-muted-foreground'>
+                Nenhum item de checklist documental foi encontrado para este caso.
               </div>
-            ))}
+            )}
           </div>
         </div>
 

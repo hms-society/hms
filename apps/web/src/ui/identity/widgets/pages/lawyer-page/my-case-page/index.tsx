@@ -19,19 +19,29 @@ import {
   CASE_TEAM,
   CASE_TIMELINE,
   MOCK_ACTIVITIES,
-  MOCK_CHECKLIST,
   TEAM_MEMBERS,
 } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
+import { useMyCasePage } from './use-my-case-page'
 
 export type CasoDetalheChecklistPageProps = {
   caseId?: string
 }
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
-  const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
-  const displayCaseId = 'CASO-20260703-0089'
+  const {
+    activeTab,
+    caseUuid,
+    checklistItems,
+    completionPercentage,
+    displayCaseId,
+    mandatoryItemsCount,
+    pendingItemsCount,
+    validatedItemsCount,
+    handleOpenChecklistTab,
+    setActiveTab,
+  } = useMyCasePage({ caseId })
 
   return (
     <div className='flex w-full flex-col gap-5 pb-10 font-sans'>
@@ -92,7 +102,10 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             <div className='mr-1 flex items-center'>
               <div className='flex -space-x-1.5'>
                 {TEAM_MEMBERS.map((member) => (
-                  <Avatar key={member.initials} className='size-8 border-2 border-secondary'>
+                  <Avatar
+                    key={member.initials}
+                    className='size-8 border-2 border-secondary'
+                  >
                     <AvatarFallback className={`${member.className} text-[12px]`}>
                       {member.initials}
                     </AvatarFallback>
@@ -152,12 +165,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </div>
       </section>
 
-      <Tabs defaultValue='visao-geral' className='w-full'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
         <TabsList
           variant='line'
           className='grid w-full grid-cols-2 items-center gap-x-0 gap-y-1 text-[14px] sm:grid-cols-4 xl:grid-cols-7'
         >
-          <TabsTrigger value='visao-geral' className='w-full justify-center py-3 text-[13px]'>
+          <TabsTrigger
+            value='visao-geral'
+            className='w-full justify-center py-3 text-[13px]'
+          >
             Visão Geral
           </TabsTrigger>
           <TabsTrigger
@@ -166,33 +182,51 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           >
             Checklist & Dossiê
             <Badge variant='secondary' className='h-5 rounded-full px-1.5 text-[12px]'>
-              6
+              {pendingItemsCount}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value='pecas' className='w-full justify-center py-3 text-[13px]' disabled>
+          <TabsTrigger
+            value='pecas'
+            className='w-full justify-center py-3 text-[13px]'
+            disabled
+          >
             <Icon name='lock' className='size-3.5' />
             Peças
           </TabsTrigger>
           <TabsTrigger value='prazos' className='w-full justify-center py-3 text-[13px]'>
             Prazos & Tarefas
           </TabsTrigger>
-          <TabsTrigger value='andamentos' className='w-full justify-center py-3 text-[13px]'>
+          <TabsTrigger
+            value='andamentos'
+            className='w-full justify-center py-3 text-[13px]'
+          >
             Andamentos
           </TabsTrigger>
-          <TabsTrigger value='comunicacoes' className='w-full justify-center py-3 text-[13px]'>
+          <TabsTrigger
+            value='comunicacoes'
+            className='w-full justify-center py-3 text-[13px]'
+          >
             Comunicações
           </TabsTrigger>
-          <TabsTrigger value='encerramento' className='w-full justify-center py-3 text-[13px]'>
+          <TabsTrigger
+            value='encerramento'
+            className='w-full justify-center py-3 text-[13px]'
+          >
             Encerramento
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value='visao-geral' className='mt-4 flex flex-col gap-4'>
           <OverviewTab
-            checklist={MOCK_CHECKLIST}
+            checklist={checklistItems}
+            completionPercentage={completionPercentage}
+            mandatoryItemsCount={mandatoryItemsCount}
+            pendingItemsCount={pendingItemsCount}
             tasks={CASE_TASKS}
             team={CASE_TEAM}
             timeline={CASE_TIMELINE}
+            validatedItemsCount={validatedItemsCount}
+            onOpenChecklist={handleOpenChecklistTab}
           />
         </TabsContent>
 
@@ -200,7 +234,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <ChecklistDossierTab
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
-            checklist={MOCK_CHECKLIST}
+            checklist={checklistItems}
           />
         </TabsContent>
       </Tabs>

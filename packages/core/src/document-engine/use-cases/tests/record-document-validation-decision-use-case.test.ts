@@ -8,22 +8,28 @@ import {
   DocumentValidationStatus,
 } from '../../domain/structures'
 import type {
+  CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '../../interfaces'
 import { RecordDocumentValidationDecisionUseCase } from '../record-document-validation-decision-use-case'
 
 describe('Record Document Validation Decision Use Case', () => {
+  const checklistItemId = '00000000-0000-4000-8000-000000000702'
+
   let documentValidationsRepository: MockProxy<DocumentValidationsRepository>
   let documentValidationLogsRepository: MockProxy<DocumentValidationLogsRepository>
+  let caseChecklistUpdateProvider: MockProxy<CaseChecklistUpdateProvider>
   let useCase: RecordDocumentValidationDecisionUseCase
 
   beforeEach(() => {
     documentValidationsRepository = mock<DocumentValidationsRepository>()
     documentValidationLogsRepository = mock<DocumentValidationLogsRepository>()
+    caseChecklistUpdateProvider = mock<CaseChecklistUpdateProvider>()
     useCase = new RecordDocumentValidationDecisionUseCase(
       documentValidationsRepository,
       documentValidationLogsRepository,
+      caseChecklistUpdateProvider,
     )
   })
 
@@ -33,6 +39,10 @@ describe('Record Document Validation Decision Use Case', () => {
       aiSuggestion: {
         documentTypeId: 'comprovante_residencia',
         checklistItemId: 'residence-proof',
+      },
+      checklistLink: {
+        caseId: '00000000-0000-4000-8000-000000000701',
+        checklistItemId,
       },
     })
     documentValidationsRepository.findByFileId.mockResolvedValue(document)
@@ -51,8 +61,9 @@ describe('Record Document Validation Decision Use Case', () => {
       documentFileId: document.id,
       reviewedBy: 'reviewer-id',
       decision: DocumentValidationDecision.Validate,
+      caseId: '00000000-0000-4000-8000-000000000701',
       documentTypeId: 'comprovante_residencia',
-      checklistRequirementId: 'residence-proof',
+      checklistRequirementId: checklistItemId,
       status: DocumentValidationStatus.Valid,
     })
     expect(documentValidationLogsRepository.add).toHaveBeenCalledWith({
@@ -63,9 +74,99 @@ describe('Record Document Validation Decision Use Case', () => {
       decision: DocumentValidationDecision.Validate,
       metadata: {
         documentTypeId: 'comprovante_residencia',
-        checklistRequirementId: 'residence-proof',
+        checklistRequirementId: checklistItemId,
       },
     })
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).toHaveBeenCalledWith({
+      checklistItemId,
+      documentFileId: document.id,
+      validatedBy: 'reviewer-id',
+    })
+  })
+
+  it('does not update the case checklist when the selected checklist value is not a persisted item id', async () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      status: DocumentValidationStatus.Valid,
+      aiSuggestion: {
+        checklistItemId: 'Documento teste 1',
+      },
+    })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+    documentValidationsRepository.recordDecision.mockResolvedValue(document)
+
+    await useCase.execute({
+      documentFileId: document.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Validate,
+      documentTypeId: 'documento-teste',
+      checklistRequirementId: 'Documento teste 1',
+    })
+
+    expect(documentValidationsRepository.recordDecision).toHaveBeenCalledWith({
+      documentFileId: document.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Validate,
+      caseId: undefined,
+      documentTypeId: 'documento-teste',
+      checklistRequirementId: 'Documento teste 1',
+      status: DocumentValidationStatus.Valid,
+    })
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).not.toHaveBeenCalled()
+  })
+
+  it('keeps the document decision recorded when the checklist synchronization fails', async () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      status: DocumentValidationStatus.Valid,
+      checklistLink: {
+        caseId: '00000000-0000-4000-8000-000000000701',
+        checklistItemId,
+      },
+    })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+    documentValidationsRepository.recordDecision.mockResolvedValue(document)
+    caseChecklistUpdateProvider.linkValidatedDocumentToChecklist.mockRejectedValue(
+      new Error('checklist sync failed'),
+    )
+
+    await expect(
+      useCase.execute({
+        documentFileId: document.id,
+        reviewedBy: 'reviewer-id',
+        decision: DocumentValidationDecision.Validate,
+        checklistRequirementId: checklistItemId,
+      }),
+    ).resolves.toEqual(document)
+
+    expect(documentValidationsRepository.recordDecision).toHaveBeenCalledWith({
+      documentFileId: document.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Validate,
+      caseId: '00000000-0000-4000-8000-000000000701',
+      checklistRequirementId: checklistItemId,
+      status: DocumentValidationStatus.Valid,
+    })
+  })
+
+  it('does not update the case checklist when the validated document has no checklist link', async () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      status: DocumentValidationStatus.Valid,
+    })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+    documentValidationsRepository.recordDecision.mockResolvedValue(document)
+
+    await useCase.execute({
+      documentFileId: document.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Validate,
+    })
+
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).not.toHaveBeenCalled()
   })
 
   it('maps mismatch decision to not corresponding status', async () => {
@@ -86,6 +187,7 @@ describe('Record Document Validation Decision Use Case', () => {
       documentFileId: document.id,
       reviewedBy: 'reviewer-id',
       decision: DocumentValidationDecision.Mismatch,
+      caseId: undefined,
       reason: 'Documento enviado não corresponde ao checklist.',
       status: DocumentValidationStatus.NotCorresponding,
     })

@@ -49,6 +49,7 @@ import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './r
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
+import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
@@ -259,6 +260,12 @@ const ConsultasConsultationIdDocumentosIndexRoute =
     path: '/documentos/',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
+const AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute =
+  AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport.update({
+    id: '/meus-casos_/$caseId/checklist/$checklistItemId',
+    path: '/meus-casos/$caseId/checklist/$checklistItemId',
+    getParentRoute: () => AdvogadoRouteRoute,
+  } as any)
 const ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute =
   ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport.update(
     {
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesByTo {
@@ -348,6 +356,7 @@ export interface FileRoutesByTo {
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRoutesById {
@@ -392,6 +401,7 @@ export interface FileRoutesById {
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
 export interface FileRouteTypes {
@@ -437,6 +447,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos'
     | '/consultas/$consultationId'
     | '/consultas/$consultationId/documentos'
+    | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   id:
     | '__root__'
@@ -519,6 +531,7 @@ export interface FileRouteTypes {
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesById: FileRoutesById
 }
@@ -829,6 +842,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
+    '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': {
+      id: '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
+      path: '/meus-casos/$caseId/checklist/$checklistItemId'
+      fullPath: '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
+    }
     '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': {
       id: '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
       path: '/documentos/$documentId/versoes/$documentVersionId'
@@ -843,12 +863,15 @@ interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
   AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRoute
   AdvogadoMeusCasosIndexRoute: typeof AdvogadoMeusCasosIndexRoute
+  AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
 }
 
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
   AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRoute,
   AdvogadoMeusCasosIndexRoute: AdvogadoMeusCasosIndexRoute,
+  AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute:
+    AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute,
 }
 
 const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
