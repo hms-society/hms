@@ -20,7 +20,11 @@ type Request = {
 export class ValidateDynamicFormAnswersUseCase
   implements UseCase<Request, DynamicFormValidationResult>
 {
-  async execute({ snapshot, answers, mode }: Request): Promise<DynamicFormValidationResult> {
+  async execute({
+    snapshot,
+    answers,
+    mode,
+  }: Request): Promise<DynamicFormValidationResult> {
     this.validateDefinition(snapshot)
 
     const issues: DynamicFormValidationIssue[] = []
@@ -90,12 +94,20 @@ export class ValidateDynamicFormAnswersUseCase
 
     for (const field of snapshot.fields) {
       if (!field.id || fieldIds.has(field.id)) {
-        throw new InvalidDynamicFormDefinitionError('Os identificadores dos campos devem ser únicos.')
+        throw new InvalidDynamicFormDefinitionError(
+          'Os identificadores dos campos devem ser únicos.',
+        )
       }
       if (!field.key.trim() || fieldKeys.has(field.key)) {
-        throw new InvalidDynamicFormDefinitionError('As chaves dos campos devem ser únicas.')
+        throw new InvalidDynamicFormDefinitionError(
+          'As chaves dos campos devem ser únicas.',
+        )
       }
-      if (!Number.isInteger(field.position) || field.position < 0 || positions.has(field.position)) {
+      if (
+        !Number.isInteger(field.position) ||
+        field.position < 0 ||
+        positions.has(field.position)
+      ) {
         throw new InvalidDynamicFormDefinitionError(
           'As posições dos campos devem ser inteiras e únicas.',
         )
@@ -125,7 +137,10 @@ export class ValidateDynamicFormAnswersUseCase
               `As opções do campo ${field.key} devem ter valores únicos.`,
             )
           }
-          if (optionPositions.has(option.position) || !Number.isInteger(option.position)) {
+          if (
+            optionPositions.has(option.position) ||
+            !Number.isInteger(option.position)
+          ) {
             throw new InvalidDynamicFormDefinitionError(
               `As posições das opções do campo ${field.key} devem ser únicas.`,
             )
@@ -157,16 +172,25 @@ export class ValidateDynamicFormAnswersUseCase
     if (!validation) return
     const isNumeric =
       field.type === 'integer' || field.type === 'currency' || field.type === 'percentage'
-    if (!isNumeric && (validation.min !== undefined || validation.max !== undefined || validation.scale !== undefined)) {
+    if (
+      !isNumeric &&
+      (validation.min !== undefined ||
+        validation.max !== undefined ||
+        validation.scale !== undefined)
+    ) {
       throw new InvalidDynamicFormDefinitionError(
         `As regras numéricas do campo ${field.key} são incompatíveis com seu tipo.`,
       )
     }
     if (validation.min !== undefined && !Number.isFinite(validation.min)) {
-      throw new InvalidDynamicFormDefinitionError(`O mínimo do campo ${field.key} é inválido.`)
+      throw new InvalidDynamicFormDefinitionError(
+        `O mínimo do campo ${field.key} é inválido.`,
+      )
     }
     if (validation.max !== undefined && !Number.isFinite(validation.max)) {
-      throw new InvalidDynamicFormDefinitionError(`O máximo do campo ${field.key} é inválido.`)
+      throw new InvalidDynamicFormDefinitionError(
+        `O máximo do campo ${field.key} é inválido.`,
+      )
     }
     if (
       validation.min !== undefined &&
@@ -181,9 +205,12 @@ export class ValidateDynamicFormAnswersUseCase
       validation.scale !== undefined &&
       (!Number.isInteger(validation.scale) || validation.scale < 0)
     ) {
-      throw new InvalidDynamicFormDefinitionError(`A escala do campo ${field.key} é inválida.`)
+      throw new InvalidDynamicFormDefinitionError(
+        `A escala do campo ${field.key} é inválida.`,
+      )
     }
-    if (validation.requiredWhen && !fieldKeys.has(validation.requiredWhen.fieldKey)) return
+    if (validation.requiredWhen && !fieldKeys.has(validation.requiredWhen.fieldKey))
+      return
   }
 
   private normalizeValue(field: DynamicFormField, value: DynamicFormAnswer['value']) {
@@ -234,7 +261,8 @@ export class ValidateDynamicFormAnswersUseCase
         : issue('Uma ou mais opções não pertencem ao campo.')
     }
     if (field.type === 'single_selection') {
-      return typeof value === 'string' && field.options?.some((option) => option.value === value)
+      return typeof value === 'string' &&
+        field.options?.some((option) => option.value === value)
         ? []
         : issue('Informe uma opção válida.')
     }
@@ -251,8 +279,10 @@ export class ValidateDynamicFormAnswersUseCase
       }
       const min = field.validation?.min ?? (field.type === 'percentage' ? 0 : undefined)
       const max = field.validation?.max ?? (field.type === 'percentage' ? 100 : undefined)
-      if (min !== undefined && value < min) return issue(`Informe um valor maior ou igual a ${min}.`)
-      if (max !== undefined && value > max) return issue(`Informe um valor menor ou igual a ${max}.`)
+      if (min !== undefined && value < min)
+        return issue(`Informe um valor maior ou igual a ${min}.`)
+      if (max !== undefined && value > max)
+        return issue(`Informe um valor menor ou igual a ${max}.`)
       const scale = field.validation?.scale
       if (scale !== undefined && this.decimalPlaces(value) > scale) {
         return issue(`Informe no máximo ${scale} casas decimais.`)

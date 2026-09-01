@@ -11,10 +11,10 @@ const templateContent: DocumentTemplateContent = {
   content: [
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'Conteúdo de teste' }],
+      content: [{ type: 'text', text: 'Conteúdo de teste' as any }],
     },
   ],
-}
+} as unknown as DocumentTemplateContent
 
 function createSpecification(
   overrides: Partial<DocumentSpecificationCreation> = {},

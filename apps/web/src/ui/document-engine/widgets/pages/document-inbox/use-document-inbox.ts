@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { isSameDay, isWithinInterval, startOfDay, endOfDay, format } from 'date-fns'
 import type { DateRange } from 'react-day-picker'
-import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
+import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 
-import { useDocumentValidationDocumentsQuery } from '@/ui/document-engine/hooks/use-document-validation-documents-query'
+import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
 import type { IconName } from '@/ui/shared/widgets/components/icon'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
@@ -28,13 +28,10 @@ const ITEMS_PER_PAGE = 6
 
 export function useDocumentInbox() {
   const { navigateTo } = useNavigation()
-  const {
-    documents: rawDocuments,
-    documentsError,
-    isFetchingDocuments,
-    refetchDocuments,
-  } = useDocumentValidationDocumentsQuery()
   const [currentPage, setCurrentPage] = useState(1)
+  const { batches, total, batchesError, isFetchingBatches, refetchBatches } =
+    useDocumentBatchesTriageQuery({ page: currentPage, limit: ITEMS_PER_PAGE })
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [appliedDateRange, setAppliedDateRange] = useState<DateRange | undefined>()
   const [statusFilter, setStatusFilter] = useState('')
@@ -66,22 +63,6 @@ export function useDocumentInbox() {
     }
 
     return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-
-  function getStatusLabel(status: DocumentValidationDocument['status']) {
-    const labels: Record<DocumentValidationDocument['status'], string> = {
-      awaiting_validation: 'Aguardando validação',
-      validated: 'Validado',
-      not_linked: 'Não vinculado',
-      illegible: 'Ilegível',
-      incomplete: 'Incompleto',
-      duplicate: 'Duplicado',
-      not_corresponding: 'Não correspondente',
-      processing_failure: 'Falha no processamento',
-      resend_requested: 'Reenvio solicitado',
-    }
-
-    return labels[status]
   }
 
   function getStatusStyle(status: string) {
@@ -126,50 +107,60 @@ export function useDocumentInbox() {
     }
   }
 
-  function getChannelIcon(channel: DocumentValidationDocument['channel']): IconName {
+  function getChannelIcon(channel?: string): IconName {
     if (channel === DocumentBatchChannel.WhatsApp) return 'message-square'
     if (channel === DocumentBatchChannel.Email) return 'mail'
 
     return 'help-circle'
   }
 
-  function getChannelLabel(channel: DocumentValidationDocument['channel']) {
+  function getChannelLabel(channel?: string) {
     if (channel === DocumentBatchChannel.WhatsApp) return 'WhatsApp'
     if (channel === DocumentBatchChannel.Email) return 'E-mail'
 
     return 'Portal do cliente'
   }
 
-  function getSenderName(document: DocumentValidationDocument) {
-    const titular = document.extractedFields.find((field) => field.label === 'Titular')
+  function batchToInboxDocuments(batch: DocumentBatch): InboxDocument[] {
+    const receivedAt = new Date(batch.createdAt)
+    const statusLabel =
+      batch.status === 'pending_identification' || batch.status === 'received'
+        ? 'Aguardando validação'
+        : 'Pendente'
+    const statusStyle = getStatusStyle(statusLabel)
+    const channel = batch.channel ?? DocumentBatchChannel.WhatsApp
 
-    return titular?.value ?? document.sender
-  }
+    const senderString =
+      typeof batch.sender === 'string'
+        ? batch.sender
+        : 'phone' in batch.sender
+          ? batch.sender.phone
+          : batch.sender.email
 
-  function toInboxDocument(document: DocumentValidationDocument): InboxDocument {
-    const status = getStatusLabel(document.status)
-    const statusStyle = getStatusStyle(status)
-    const checklistLink = document.checklistLink
-    const receivedAt = new Date(document.receivedAt)
-
-    return {
-      id: document.id,
-      fileName: document.fileName,
-      fileSize: formatFileSize(document.sizeBytes),
-      receivedFromIcon: getChannelIcon(document.channel),
-      receivedFrom: getSenderName(document),
-      contactInfo: `${getChannelLabel(document.channel)} · ${document.sender}`,
-      caseId: checklistLink?.caseLabel ?? 'Sem vínculo seguro',
-      caseDesc: checklistLink?.checklistItemLabel ?? 'Escolha manual necessária',
-      receivedDate: formatReceivedDate(receivedAt),
-      receivedTime: format(receivedAt, 'HH:mm'),
-      status,
-      badgeClasses: statusStyle.badgeClasses,
-      dotClasses: statusStyle.dotClasses,
+    if (batch.files && batch.files.length > 0) {
+      return batch.files.map((file) => ({
+        id: file.id,
+        fileName: file.originalName,
+        fileSize: formatFileSize(file.sizeBytes),
+        receivedFromIcon: getChannelIcon(channel),
+        receivedFrom: senderString,
+        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
+        caseId: batch.readableId ?? 'Sem vínculo seguro',
+        caseDesc: batch.clientId
+          ? 'Titular pré-identificado'
+          : 'Escolha manual necessária',
+        receivedDate: formatReceivedDate(receivedAt),
+        receivedTime: format(receivedAt, 'HH:mm'),
+        status: statusLabel,
+        badgeClasses: statusStyle.badgeClasses,
+        dotClasses: statusStyle.dotClasses,
+      }))
     }
+
+    return []
   }
 
-  const documents = rawDocuments.map(toInboxDocument)
+  const documents = batches.flatMap(batchToInboxDocuments)
 
   const uniqueStatuses = useMemo(
     () => Array.from(new Set(documents.map((item) => item.status))),
@@ -206,13 +197,19 @@ export function useDocumentInbox() {
     return true
   })
 
-  const totalItems = filteredData.length
+  const hasClientFilter = Boolean(
+    appliedStatusFilter || appliedClientFilter || appliedDateRange?.from,
+  )
+  const totalItems = hasClientFilter
+    ? filteredData.length
+    : total > 0
+      ? total
+      : filteredData.length
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  )
+  const paginatedData = hasClientFilter
+    ? filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    : filteredData
 
   function handlePageChange(page: number) {
     if (page >= 1 && page <= totalPages) {
@@ -242,7 +239,7 @@ export function useDocumentInbox() {
   }
 
   async function handleRefresh() {
-    await refetchDocuments()
+    await refetchBatches()
   }
 
   return {
@@ -258,8 +255,8 @@ export function useDocumentInbox() {
     setClientFilter,
     uniqueStatuses,
     uniqueClients,
-    error: documentsError,
-    isFetching: isFetchingDocuments,
+    error: batchesError,
+    isFetching: isFetchingBatches,
     handlePageChange,
     handleAnalyze,
     handleRefresh,

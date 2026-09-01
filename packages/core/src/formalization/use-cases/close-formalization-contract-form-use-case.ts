@@ -1,6 +1,9 @@
 import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
 import { ValidateDynamicFormAnswersUseCase } from '../../shared/use-cases'
-import type { DynamicFormAnswer, DynamicFormAnswerValue } from '../../shared/domain/structures'
+import type {
+  DynamicFormAnswer,
+  DynamicFormAnswerValue,
+} from '../../shared/domain/structures'
 import type { Formalization } from '../domain/entities'
 import {
   FormalizationContractFormValidationError,
@@ -30,14 +33,18 @@ export class CloseFormalizationContractFormUseCase
   ) {}
 
   async execute(request: Request): Promise<Formalization> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (formalization.status !== FormalizationStatus.InProgress) {
       throw new FormalizationStateConflictError()
     }
     if (formalization.contractFormState !== FormalizationContractFormState.Open) {
-      throw new FormalizationStateConflictError('Reabra o formulário antes de fechá-lo novamente.')
+      throw new FormalizationStateConflictError(
+        'Reabra o formulário antes de fechá-lo novamente.',
+      )
     }
 
     const validation = await this.validateAnswersUseCase.execute({
@@ -53,11 +60,12 @@ export class CloseFormalizationContractFormUseCase
       formalization.contractFormAnswers,
       validation.answers,
     )
-    const contractFormRevision = formalization.contractFormRevision === 0
-      ? 1
-      : hasChanged
-        ? formalization.contractFormRevision + 1
-        : formalization.contractFormRevision
+    const contractFormRevision =
+      formalization.contractFormRevision === 0
+        ? 1
+        : hasChanged
+          ? formalization.contractFormRevision + 1
+          : formalization.contractFormRevision
     const now = this.datetimeProvider.now()
     const updated = await this.formalizationsRepository.replace({
       formalizationId: formalization.id,
@@ -88,7 +96,9 @@ export class CloseFormalizationContractFormUseCase
     if (first.length !== second.length) return false
 
     const firstByFieldId = new Map(first.map((answer) => [answer.fieldId, answer.value]))
-    const secondByFieldId = new Map(second.map((answer) => [answer.fieldId, answer.value]))
+    const secondByFieldId = new Map(
+      second.map((answer) => [answer.fieldId, answer.value]),
+    )
     if (firstByFieldId.size !== first.length || secondByFieldId.size !== second.length) {
       return false
     }
@@ -105,7 +115,11 @@ export class CloseFormalizationContractFormUseCase
     second: DynamicFormAnswerValue | undefined,
   ): boolean {
     if (Array.isArray(first) || Array.isArray(second)) {
-      if (!Array.isArray(first) || !Array.isArray(second) || first.length !== second.length) {
+      if (
+        !Array.isArray(first) ||
+        !Array.isArray(second) ||
+        first.length !== second.length
+      ) {
         return false
       }
       const firstValues = [...first].sort()

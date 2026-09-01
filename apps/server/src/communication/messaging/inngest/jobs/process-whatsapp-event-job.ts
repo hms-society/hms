@@ -61,8 +61,12 @@ export class ProcessWhatsappEventJob extends InngestJob {
           return
         }
 
-        await step.run('route-whatsapp-media', async () => {
+        const eventsToDispatch = await step.run('route-whatsapp-media', async () => {
           const database = this.drizzleClient.requireDatabase()
+          const events: Array<{
+            name: 'documents/whatsapp.batch.received'
+            data: Record<string, unknown>
+          }> = []
 
           for (const message of messages) {
             if (message.type !== 'document' && message.type !== 'image') {
@@ -80,21 +84,14 @@ export class ProcessWhatsappEventJob extends InngestJob {
               continue
             }
 
-            const [client] = await database
+            const matchingClients = await database
               .select()
               .from(clientModel)
               .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-              .limit(1)
+              .limit(2)
 
-            if (!client) {
-              await database.insert(integracaoEvento).values({
-                provedor: 'whatsapp',
-                payload: message,
-                status: 'falha_definitiva',
-                erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
-              })
-              continue
-            }
+            const clientId =
+              matchingClients.length === 1 ? matchingClients[0].id : undefined
 
             const [evento] = await database
               .insert(integracaoEvento)
@@ -105,12 +102,13 @@ export class ProcessWhatsappEventJob extends InngestJob {
               })
               .returning()
 
-            await step.sendEvent('dispatch-document-batch', {
+            events.push({
               name: 'documents/whatsapp.batch.received',
               data: {
                 eventoId: evento.id,
                 sender,
-                clientId: client.id,
+                clientId,
+                mediaId: media.id,
                 mimeType: media.mime_type,
                 originalName:
                   typeof media.filename === 'string'
@@ -119,7 +117,13 @@ export class ProcessWhatsappEventJob extends InngestJob {
               },
             })
           }
+
+          return events
         })
+
+        if (eventsToDispatch && eventsToDispatch.length > 0) {
+          await step.sendEvent('dispatch-document-batches', eventsToDispatch)
+        }
       },
     )
   }

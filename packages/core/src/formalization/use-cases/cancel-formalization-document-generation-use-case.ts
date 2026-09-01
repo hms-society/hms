@@ -29,7 +29,9 @@ export class CancelFormalizationDocumentGenerationUseCase
   ) {}
 
   async execute(request: Request): Promise<DocumentGeneration> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
     if (!formalization) throw new FormalizationNotFoundError()
     FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     FormalizationDocumentGuard.assertWritable(formalization)
@@ -64,7 +66,8 @@ export class CancelFormalizationDocumentGenerationUseCase
       },
       [DocumentGenerationStatus.Pending, DocumentGenerationStatus.Running],
     )
-    if (!cancelled) throw new FormalizationStateConflictError('A geração já foi alterada.')
+    if (!cancelled)
+      throw new FormalizationStateConflictError('A geração já foi alterada.')
     await this.broker.publish(
       new DocumentGenerationCancelledEvent({
         documentGenerationId: generation.id,
