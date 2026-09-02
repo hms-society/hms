@@ -20,7 +20,8 @@ jobs:
     name: Web app checks
     runs-on: ubuntu-latest
     env:
-      VITE_HMS_SERVER_APP_URL: http://localhost:3333
+      HMS_WEB_APP_PORT: '5000'
+      VITE_HMS_SERVER_APP_URL: http://localhost:5555
       VITE_SUPABASE_URL: http://localhost:8000
       VITE_SUPABASE_KEY: test-anon-key
 

@@ -20,8 +20,8 @@ import {
   SelectValue,
 } from '@/ui/shadcn/select'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { useDocumentCatalogQuery } from '../../document-specifications-page/use-document-catalog-query'
-import { useDocumentTopicsQuery } from '../../document-specifications-page/use-document-topics-query'
+import { useDocumentCatalogQuery } from '@/ui/document-production/hooks/use-document-catalog-query'
+import { useDocumentTopicsQuery } from '@/ui/document-production/hooks/use-document-topics-query'
 import { cn } from '@/ui/shadcn/utils'
 
 export type SelectConsultationDocumentsDialogProps = {

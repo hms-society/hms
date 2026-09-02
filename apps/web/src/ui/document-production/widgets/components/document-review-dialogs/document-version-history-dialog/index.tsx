@@ -7,14 +7,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/shadcn/dialog'
+import { DocumentStatusChip } from '@/ui/document-production/widgets/components/document-status-chip'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { DocumentStatusChip } from '../../../components/document-status-chip'
-import type { ConsultationDocumentReviewHistoryItem } from '../use-consultation-document-review-page'
+
+export type DocumentVersionHistoryItem = {
+  id: string
+  versionNumber: number
+  sourceLabel: string
+  status: 'in_review' | 'approved' | 'rejected'
+  statusLabel: string
+  createdAtLabel: string
+  rejectionReason?: string
+  isCurrent: boolean
+}
 
 export type DocumentVersionHistoryDialogProps = {
   open: boolean
   title?: string
-  items: readonly ConsultationDocumentReviewHistoryItem[]
+  items: readonly DocumentVersionHistoryItem[]
   onOpenChange: (open: boolean) => void
   onSelect: (versionId: string) => void
 }

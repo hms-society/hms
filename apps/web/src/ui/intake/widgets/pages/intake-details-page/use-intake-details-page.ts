@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Intake } from '@hms/core/intake/domain/entities'
 import type { IntakeClosureReason } from '@hms/core/intake/domain/structures'
 
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useStartFormalizationAction } from '@/ui/formalization/hooks/use-start-formalization-action'
+import { useCloseIntakeWithoutContractAction } from '@/ui/intake/hooks/use-close-intake-without-contract-action'
 
-import { useIntakeDetailsQuery, type IntakeDetailsData } from './use-intake-details-query'
+import {
+  useIntakeDetailsQuery,
+  type IntakeDetailsData,
+} from '@/ui/intake/hooks/use-intake-details-query'
 
 export type IntakeDetailsContentController = {
   data: IntakeDetailsData
@@ -27,72 +28,30 @@ export type IntakeDetailsContentController = {
   onClosureNotesChange: (notes: string) => void
   onConfirmClosure: () => void
   onStartFormalization: () => void
-  onConfirmContract: () => void
 }
-
 export function useIntakeDetailsPage(intakeId: string) {
   const intakeQuery = useIntakeDetailsQuery(intakeId)
-  const { intakeService } = useRestContext()
-  const { user } = useAuthContext()
-  const queryClient = useQueryClient()
+  const startFormalizationMutation = useStartFormalizationAction()
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false)
   const [closureReason, setClosureReason] = useState<IntakeClosureReason | ''>('')
   const [closureNotes, setClosureNotes] = useState('')
   const intake = intakeQuery.data?.intake
+  const { closeIntakeError, isClosingIntake, closeIntakeWithoutContract } =
+    useCloseIntakeWithoutContractAction(intake?.id)
 
-  const closeMutation = useMutation({
-    mutationFn: async () => {
-      if (!intake) throw new Error('Não foi possível carregar o Intake.')
-      if (!user) throw new Error('Não foi possível identificar o usuário atual.')
-      if (!closureReason) throw new Error('Selecione um motivo para encerrar o Intake.')
+  async function handleConfirmClosure() {
+    if (!intake || !closureReason) return
 
-      const response = await intakeService.closeIntakeWithoutContract(intake.id, {
-        expectedVersion: intake.version,
-        closureReason,
-        closureNotes: closureNotes.trim() || undefined,
-        updatedBy: user.id,
-      })
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    onSuccess: (updatedIntake) => {
-      if (!intake) return
-      setIsClosureDialogOpen(false)
-      setClosureReason('')
-      setClosureNotes('')
-      queryClient.setQueryData<IntakeDetailsData>(
-        ['intakes', 'detail', intake.id],
-        (current) => (current ? { ...current, intake: updatedIntake } : current),
-      )
-    },
-  })
-
-  const transitionMutation = useMutation({
-    mutationFn: async (status: Intake['status']) => {
-      if (!intake) throw new Error('Não foi possível carregar o Intake.')
-      if (!user) throw new Error('Não foi possível identificar o usuário atual.')
-
-      const response = await intakeService.transitionIntakeStatus(intake.id, {
-        expectedVersion: intake.version,
-        status,
-        updatedBy: user.id,
-      })
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    onSuccess: (updatedIntake) => {
-      if (!intake) return
-      queryClient.setQueryData<IntakeDetailsData>(
-        ['intakes', 'detail', intake.id],
-        (current) => (current ? { ...current, intake: updatedIntake } : current),
-      )
-    },
-  })
+    await closeIntakeWithoutContract({
+      closureNotes: closureNotes.trim() || undefined,
+      closureReason,
+      expectedVersion: intake.version,
+    })
+    setIsClosureDialogOpen(false)
+    setClosureReason('')
+    setClosureNotes('')
+  }
 
   if (!intakeQuery.data) {
     return { intakeQuery, content: undefined }
@@ -112,19 +71,19 @@ export function useIntakeDetailsPage(intakeId: string) {
       closureNotes,
       canEdit: !isTerminal,
       canClose: !isTerminal,
-      isClosing: closeMutation.isPending,
-      isTransitioning: transitionMutation.isPending,
-      closeError: closeMutation.error,
-      actionError: closeMutation.error ?? transitionMutation.error,
+      isClosing: isClosingIntake,
+      isTransitioning: startFormalizationMutation.isPending,
+      closeError: closeIntakeError,
+      actionError: closeIntakeError ?? startFormalizationMutation.error,
       responsibleName:
         intakeQuery.data.responsible?.professionalName ?? 'Atendente não identificado',
       onEditDialogOpenChange: setIsEditDialogOpen,
       onClosureDialogOpenChange: setIsClosureDialogOpen,
       onClosureReasonChange: setClosureReason,
       onClosureNotesChange: setClosureNotes,
-      onConfirmClosure: () => closeMutation.mutate(),
-      onStartFormalization: () => transitionMutation.mutate('in_formalization'),
-      onConfirmContract: () => transitionMutation.mutate('contracted'),
+      onConfirmClosure: handleConfirmClosure,
+      onStartFormalization: () =>
+        startFormalizationMutation.mutate(intakeQuery.data.intake.id),
     } satisfies IntakeDetailsContentController,
   }
 }

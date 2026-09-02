@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/ui/shadcn/card'
 import { Skeleton } from '@/ui/shadcn/skeleton'
 
 import type { IntakeDetailsContentController } from '../use-intake-details-page'
-import type { IntakeDetailsData } from '../use-intake-details-query'
+import type { IntakeDetailsData } from '@/ui/intake/hooks/use-intake-details-query'
 import { IntakeEditDialog } from '../intake-edit-dialog'
 import { ConfirmConsultationClosureDialog } from '@/ui/intake/widgets/components/confirm-consultation-closure-dialog'
 const statusLabels: Record<Intake['status'], string> = {
@@ -25,7 +25,6 @@ const statusLabels: Record<Intake['status'], string> = {
   contracted: 'Contratado',
   closed_without_contract: 'Encerrado sem contratação',
 }
-
 const originLabels: Record<Intake['origin'], string> = {
   direct: 'Entrada direta',
   referral: 'Indicação',
@@ -86,7 +85,6 @@ export function IntakeDetailsContent({
   onClosureNotesChange,
   onConfirmClosure,
   onStartFormalization,
-  onConfirmContract,
 }: IntakeDetailsContentController) {
   const { intake } = data
   const clientName = getClientName(data.client?.client)
@@ -206,7 +204,7 @@ export function IntakeDetailsContent({
       {intake.status === 'in_formalization' && (
         <FormalizationCard
           isPending={isTransitioning}
-          onConfirmContract={onConfirmContract}
+          onOpenFormalization={onStartFormalization}
         />
       )}
 
@@ -471,47 +469,33 @@ function ViabilityCard({
 
 function FormalizationCard({
   isPending,
-  onConfirmContract,
+  onOpenFormalization,
 }: {
   isPending: boolean
-  onConfirmContract: () => void
+  onOpenFormalization: () => void
 }) {
   return (
     <Card className='border border-border shadow-sm'>
       <CardContent className='p-5 sm:p-6'>
-        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
+        <div className='flex items-center justify-between gap-4'>
           <div>
-            <p className='text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground'>
+            <p className='flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground'>
+              <Icon name='pencil' className='size-3.5' />
               Formalização iniciada
-            </p>
-            <h2 className='mt-1 text-lg font-semibold text-foreground'>Em andamento</h2>
-            <p className='mt-1 max-w-3xl text-sm leading-6 text-muted-foreground'>
-              Os documentos e as assinaturas são acompanhados pelo módulo responsável pela
-              formalização.
             </p>
           </div>
           <Badge variant='attention'>Em andamento</Badge>
         </div>
-        <div className='mt-4 grid gap-2 sm:grid-cols-2'>
-          <ReferenceRow
-            icon='file-text'
-            label='Pacote de formalização'
-            value='Referência disponível no módulo responsável'
-          />
-          <ReferenceRow
-            icon='check-circle-2'
-            label='Progresso'
-            value='Aguardando conclusão da formalização'
-          />
-        </div>
-        <div className='mt-4 flex justify-end'>
+        <div className='mt-4 flex items-center border-t border-border/70 pt-3'>
           <Button
             type='button'
+            variant='outline'
             size='sm'
-            onClick={onConfirmContract}
+            className='rounded-full border-primary/50 text-primary hover:bg-secondary'
+            onClick={onOpenFormalization}
             disabled={isPending}
           >
-            {isPending ? 'Confirmando...' : 'Confirmar contratação'} <Icon name='check' />
+            {isPending ? 'Abrindo...' : 'Abrir formalização'} <Icon name='pencil' />
           </Button>
         </div>
       </CardContent>
@@ -703,26 +687,6 @@ function DetailField({
       <dd className='mt-1 truncate text-sm font-medium text-foreground' title={value}>
         {value}
       </dd>
-    </div>
-  )
-}
-
-function ReferenceRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: Parameters<typeof Icon>[0]['name']
-  label: string
-  value: string
-}) {
-  return (
-    <div className='flex min-w-0 items-center gap-3 rounded-lg border border-border bg-muted/40 px-3 py-3'>
-      <Icon name={icon} className='size-4 shrink-0 text-primary' />
-      <div className='min-w-0'>
-        <p className='text-xs font-semibold text-foreground'>{label}</p>
-        <p className='truncate text-xs text-muted-foreground'>{value}</p>
-      </div>
     </div>
   )
 }

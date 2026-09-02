@@ -1,11 +1,14 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { IntakeFormData } from '@hms/validation/intake'
 
 import { ROUTES } from '@/constants/routes'
+import { useClientRegistrationActions } from '@/ui/identity/hooks/use-client-registration-actions'
+import { useIntakeLawyersQuery } from '@/ui/intake/hooks/use-intake-lawyers-query'
+import { useLegalAreasQuery } from '@/ui/intake/hooks/use-legal-areas-query'
+import { useLegalTopicsQuery } from '@/ui/intake/hooks/use-legal-topics-query'
 import type { AnchorProps } from '@/ui/shared/widgets/components/anchor'
 
 import { NewIntakePage } from '../index'
@@ -19,15 +22,20 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
   ),
 }))
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: () => ({
-    intakeService: {},
-    identityService: {},
-    legalCatalogService: {
-      listLegalAreas: vi.fn().mockResolvedValue({ isFailure: false, body: [] }),
-      listLegalTopics: vi.fn().mockResolvedValue({ isFailure: false, body: [] }),
-    },
-  }),
+vi.mock('@/ui/intake/hooks/use-legal-areas-query', () => ({
+  useLegalAreasQuery: vi.fn(),
+}))
+
+vi.mock('@/ui/intake/hooks/use-legal-topics-query', () => ({
+  useLegalTopicsQuery: vi.fn(),
+}))
+
+vi.mock('@/ui/identity/hooks/use-client-registration-actions', () => ({
+  useClientRegistrationActions: vi.fn(),
+}))
+
+vi.mock('@/ui/intake/hooks/use-intake-lawyers-query', () => ({
+  useIntakeLawyersQuery: vi.fn(),
 }))
 
 vi.mock('../use-new-intake', () => ({
@@ -35,6 +43,10 @@ vi.mock('../use-new-intake', () => ({
 }))
 
 const useNewIntakeMock = vi.mocked(useNewIntake)
+const useLegalAreasQueryMock = vi.mocked(useLegalAreasQuery)
+const useLegalTopicsQueryMock = vi.mocked(useLegalTopicsQuery)
+const useClientRegistrationActionsMock = vi.mocked(useClientRegistrationActions)
+const useIntakeLawyersQueryMock = vi.mocked(useIntakeLawyersQuery)
 
 const handleClosureDialogChange = vi.fn()
 const handleConfirmClosure = vi.fn()
@@ -85,15 +97,7 @@ function useNewIntakeTestController(): ReturnType<typeof useNewIntake> {
 }
 
 function renderNewIntakePage() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <NewIntakePage />
-    </QueryClientProvider>,
-  )
+  return render(<NewIntakePage />)
 }
 
 describe('NewIntakePage', () => {
@@ -103,6 +107,30 @@ describe('NewIntakePage', () => {
     vi.clearAllMocks()
     controllerOverrides = {}
     useNewIntakeMock.mockImplementation(useNewIntakeTestController)
+    useLegalAreasQueryMock.mockReturnValue({
+      legalAreas: [],
+      legalAreasError: null,
+      isLoadingLegalAreas: false,
+    })
+    useLegalTopicsQueryMock.mockReturnValue({
+      legalTopics: [],
+      legalTopicsError: null,
+      isLoadingLegalTopics: false,
+    })
+    useClientRegistrationActionsMock.mockReturnValue({
+      grantClientConsents: vi.fn(),
+      lookupClient: vi.fn(),
+      registerClient: vi.fn(),
+    })
+    useIntakeLawyersQueryMock.mockReturnValue({
+      hasNextPage: false,
+      intakeLawyerPages: [],
+      intakeLawyersError: null,
+      isFetchingNextPage: false,
+      isLoadingIntakeLawyers: false,
+      fetchNextPage: vi.fn(),
+      refetchIntakeLawyers: vi.fn(),
+    })
   })
 
   it('renders the demand step and delegates the next action', () => {
