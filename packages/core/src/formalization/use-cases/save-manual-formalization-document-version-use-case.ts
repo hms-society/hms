@@ -2,7 +2,6 @@ import type {
   DatetimeProvider,
   FileStorageProvider,
   IdProvider,
-  UseCase,
 } from '../../shared/interfaces'
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import { FindDocumentPendingMarkersUseCase } from '../../document-production/use-cases'
@@ -24,8 +23,7 @@ import {
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -33,10 +31,10 @@ type Request = FormalizationActor & {
   readonly sourceDocumentVersionId: string
   readonly content: DocumentTemplateContent
 }
-
-export class SaveManualFormalizationDocumentVersionUseCase
-  implements UseCase<Request, DocumentVersion>
-{
+export class SaveManualFormalizationDocumentVersionUseCase extends FormalizationUseCase<
+  Request,
+  DocumentVersion
+> {
   private readonly findPendingMarkersUseCase = new FindDocumentPendingMarkersUseCase()
 
   constructor(
@@ -49,15 +47,18 @@ export class SaveManualFormalizationDocumentVersionUseCase
     private readonly fileStorageProvider: FileStorageProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<DocumentVersion> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertWritable(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
       throw new FormalizationStateConflictError(
         'Reabra a confirmação antes de editar documentos.',
@@ -109,19 +110,24 @@ export class SaveManualFormalizationDocumentVersionUseCase
       sizeInBytes: exportedFile.content.byteLength,
       content: exportedFile.content,
     })
-    return this.versionsRepository.add({
-      id: documentVersionId,
-      documentId: document.id,
-      sourceDocumentVersionId: sourceVersion.id,
-      fileId: file.id,
-      versionNumber,
-      source: DocumentVersionSource.Manual,
-      content: request.content,
-      pendingMarkers,
-      createdByCollaboratorId: request.actorId,
-      createdAt: this.datetimeProvider.now(),
-      status: DocumentVersionStatus.InReview,
-    })
+    try {
+      return await this.versionsRepository.add({
+        id: documentVersionId,
+        documentId: document.id,
+        sourceDocumentVersionId: sourceVersion.id,
+        fileId: file.id,
+        versionNumber,
+        source: DocumentVersionSource.Manual,
+        content: request.content,
+        pendingMarkers,
+        createdByCollaboratorId: request.actorId,
+        createdAt: this.datetimeProvider.now(),
+        status: DocumentVersionStatus.InReview,
+      })
+    } catch (error) {
+      await this.fileStorageProvider.remove(file.id)
+      throw error
+    }
   }
 
   private normalizeFileName(title: string): string {

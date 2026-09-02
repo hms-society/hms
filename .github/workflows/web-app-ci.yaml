@@ -20,6 +20,7 @@ jobs:
     name: Web app checks
     runs-on: ubuntu-latest
     env:
+      HMS_WEB_APP_PORT: '5000'
       VITE_HMS_SERVER_APP_URL: http://localhost:3333
       VITE_SUPABASE_URL: http://localhost:8000
       VITE_SUPABASE_KEY: test-anon-key
@@ -36,7 +37,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^apps/web/'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Web changes detected.'
           else
@@ -64,6 +65,10 @@ jobs:
       - name: Generate routes
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter web generate-routes
+
+      - name: Architecture checks
+        if: steps.scope.outputs.relevant == 'true'
+        run: pnpm --filter web check:architecture
 
       - name: Code checks
         if: steps.scope.outputs.relevant == 'true'
