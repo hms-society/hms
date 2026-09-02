@@ -8,20 +8,21 @@ import {
   DocumentGenerationMoment,
   DocumentSpecificationStatus,
 } from '../../document-production/domain/structures'
-import { FormalizationUseCase } from './formalization-use-case'
+import type { UseCase } from '../../shared/interfaces'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
+import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
 }
 
-export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCase<
-  Request,
-  FormalizationDocumentSelection
-> {
+export class GetFormalizationDocumentSelectionUseCase
+  implements UseCase<Request, FormalizationDocumentSelection>
+{
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly sourceReader: FormalizationSourceReader,
@@ -29,21 +30,17 @@ export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCa
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly documentVersionsRepository: DocumentVersionsRepository,
-  ) {
-    super()
-  }
+  ) {}
 
   async execute(request: Request): Promise<FormalizationDocumentSelection> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
-
     if (!formalization) throw new FormalizationNotFoundError()
-    this.assertAccess(formalization.assignedLawyerId, request)
-    this.assertFormClosed(formalization)
+    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    FormalizationDocumentGuard.assertFormClosed(formalization)
     const context = await this.sourceReader.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
-
     const specifications = await this.specificationsRepository.list({
       moment: DocumentGenerationMoment.Formalization,
       status: DocumentSpecificationStatus.Available,
@@ -56,7 +53,6 @@ export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCa
       type: 'formalization',
       formalizationId: formalization.id,
     })
-
     const packageDocuments = documentPackage
       ? await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
       : []

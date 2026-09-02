@@ -1,4 +1,4 @@
-import type { DatetimeProvider } from '../../shared/interfaces'
+import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
 import { ValidateDynamicFormAnswersUseCase } from '../../shared/use-cases'
 import type {
   DynamicFormAnswer,
@@ -14,7 +14,7 @@ import {
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationUseCase } from './formalization-use-case'
+import { FormalizationActorAuthorization } from './formalization-actor-authorization'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -22,26 +22,22 @@ type Request = FormalizationActor & {
   readonly answers: readonly DynamicFormAnswer[]
 }
 
-export class CloseFormalizationContractFormUseCase extends FormalizationUseCase<
-  Request,
-  Formalization
-> {
+export class CloseFormalizationContractFormUseCase
+  implements UseCase<Request, Formalization>
+{
   private readonly validateAnswersUseCase = new ValidateDynamicFormAnswersUseCase()
 
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly datetimeProvider: DatetimeProvider,
-  ) {
-    super()
-  }
+  ) {}
 
   async execute(request: Request): Promise<Formalization> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
-
     if (!formalization) throw new FormalizationNotFoundError()
-    this.assertAccess(formalization.assignedLawyerId, request)
+    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (formalization.status !== FormalizationStatus.InProgress) {
       throw new FormalizationStateConflictError()
     }

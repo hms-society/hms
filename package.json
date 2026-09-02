@@ -14,6 +14,8 @@
     "check-types": "turbo run check-types",
     "validate": "pnpm check && pnpm check:architecture && pnpm check-types && pnpm test && pnpm test:coverage",
     "seed": "pnpm --filter server db:seed",
+    "server": "pnpm --filter server dev",
+    "web": "pnpm --filter web dev",
     "ngrok": "node scripts/start-ngrok.js",
     "prepare": "husky"
   },

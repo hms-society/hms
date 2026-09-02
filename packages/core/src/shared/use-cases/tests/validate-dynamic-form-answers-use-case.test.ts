@@ -139,7 +139,10 @@ describe('Validate Dynamic Form Answers Use Case', () => {
     expect(result.issues).toEqual(
       expect.arrayContaining([
         { path: 'field:number', message: 'Informe um valor menor ou igual a 4.' },
-        { path: 'field:unknown', message: 'O campo informado não pertence à definição do formulário.' },
+        {
+          path: 'field:unknown',
+          message: 'O campo informado não pertence à definição do formulário.',
+        },
         { path: 'field:required', message: 'Este campo é obrigatório.' },
       ]),
     )

@@ -1,4 +1,4 @@
-import type { DatetimeProvider } from '../../shared/interfaces'
+import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import type {
   DocumentPackagesRepository,
@@ -12,7 +12,8 @@ import {
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationUseCase } from './formalization-use-case'
+import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -21,28 +22,24 @@ type Request = FormalizationActor & {
   readonly rejectionReason?: string
 }
 
-export class ReviewFormalizationDocumentVersionUseCase extends FormalizationUseCase<
-  Request,
-  DocumentVersion
-> {
+export class ReviewFormalizationDocumentVersionUseCase
+  implements UseCase<Request, DocumentVersion>
+{
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly versionsRepository: DocumentVersionsRepository,
     private readonly datetimeProvider: DatetimeProvider,
-  ) {
-    super()
-  }
+  ) {}
 
   async execute(request: Request): Promise<DocumentVersion> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
-
     if (!formalization) throw new FormalizationNotFoundError()
-    this.assertAccess(formalization.assignedLawyerId, request)
-    this.assertWritable(formalization)
+    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    FormalizationDocumentGuard.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
       throw new FormalizationStateConflictError(
         'Reabra a confirmação antes de revisar documentos.',

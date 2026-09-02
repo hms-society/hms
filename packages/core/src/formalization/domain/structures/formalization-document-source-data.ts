@@ -1,10 +1,5 @@
 import type { Consultation } from '../../../consultation/domain/entities'
 import type {
-  Collaborator,
-  LegalClient,
-  NaturalClient,
-} from '../../../identity/domain/entities'
-import type {
   DynamicFormAnswer,
   DynamicFormSnapshot,
 } from '../../../shared/domain/structures'
@@ -44,11 +39,11 @@ type FormalizationDocumentSourceDataBase = {
   }
   client:
     | Pick<
-        NaturalClient,
+        import('../../../identity/domain/entities').NaturalClient,
         'id' | 'type' | 'name' | 'taxId' | 'email' | 'phone' | 'address'
       >
     | Pick<
-        LegalClient,
+        import('../../../identity/domain/entities').LegalClient,
         | 'id'
         | 'type'
         | 'legalName'
@@ -59,7 +54,7 @@ type FormalizationDocumentSourceDataBase = {
         | 'address'
       >
   assignedLawyer: Pick<
-    Collaborator,
+    import('../../../identity/domain/entities').Collaborator,
     'id' | 'professionalName' | 'jobTitle' | 'profile' | 'legalExpertises'
   >
 }

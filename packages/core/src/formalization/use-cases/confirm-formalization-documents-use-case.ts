@@ -1,15 +1,11 @@
-import type { Broker, DatetimeProvider } from '../../shared/interfaces'
-import type {
-  DocumentGeneration,
-  DocumentVersion,
-} from '../../document-production/domain/entities'
+import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
+import type { DocumentGeneration } from '../../document-production/domain/entities'
 import { DocumentVersionStatus } from '../../document-production/domain/structures'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
-  DocumentsRepository,
 } from '../../document-production/interfaces'
 import type { Formalization } from '../domain/entities'
 import {
@@ -19,22 +15,18 @@ import {
   FormalizationVersionConflictError,
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
-import type {
-  FormalizationDocumentConfirmationTransaction,
-  FormalizationSignatureConfigurationRepository,
-  FormalizationsRepository,
-} from '../interfaces'
-import { FormalizationSignatureConfigurationUseCase } from './formalization-signature-configuration-use-case'
+import type { FormalizationsRepository } from '../interfaces'
+import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly expectedVersion: number
 }
 
-export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignatureConfigurationUseCase<
-  Request,
-  Formalization
-> {
+export class ConfirmFormalizationDocumentsUseCase
+  implements UseCase<Request, Formalization>
+{
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
@@ -42,23 +34,16 @@ export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignature
     private readonly versionsRepository: DocumentVersionsRepository,
     private readonly generationsRepository: DocumentGenerationsRepository,
     private readonly datetimeProvider: DatetimeProvider,
-    private readonly documentsRepository?: DocumentsRepository,
-    private readonly confirmationTransaction?: FormalizationDocumentConfirmationTransaction,
-    private readonly signatureConfigurationRepository?: FormalizationSignatureConfigurationRepository,
-    private readonly broker?: Broker,
-  ) {
-    super()
-  }
+  ) {}
 
   async execute(request: Request): Promise<Formalization> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
-
     if (!formalization) throw new FormalizationNotFoundError()
-    this.assertAccess(formalization.assignedLawyerId, request)
+    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
     if (formalization.documentsConfirmedAt) return formalization
-    this.assertWritable(formalization)
+    FormalizationDocumentGuard.assertWritable(formalization)
     const documentPackage = await this.documentPackagesRepository.findByContext({
       type: 'formalization',
       formalizationId: formalization.id,
@@ -75,32 +60,26 @@ export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignature
         'Selecione ao menos um documento antes de confirmar.',
       )
     }
-
     const versions = await this.versionsRepository.findByDocumentIds(
       packageDocuments.map((document) => document.documentId),
     )
-    const documents = this.documentsRepository
-      ? await this.documentsRepository.findByIds(
-          packageDocuments.map((document) => document.documentId),
-        )
-      : []
-    const documentsById = new Map(documents.map((document) => [document.id, document]))
     const generations = await this.loadGenerations(versions)
     for (const document of packageDocuments) {
       const documentVersions = versions.filter(
         (version) => version.documentId === document.documentId,
       )
-      const selectedVersionId = documentsById.get(document.documentId)?.currentVersionId
-      const latest = selectedVersionId
-        ? documentVersions.find((version) => version.id === selectedVersionId)
-        : documentVersions.reduce<(typeof documentVersions)[number] | undefined>(
-            (current, version) =>
-              !current || version.versionNumber > current.versionNumber
-                ? version
-                : current,
-            undefined,
-          )
-      if (!latest || latest.status !== DocumentVersionStatus.Approved) {
+      const latest = documentVersions.reduce<
+        (typeof documentVersions)[number] | undefined
+      >(
+        (current, version) =>
+          !current || version.versionNumber > current.versionNumber ? version : current,
+        undefined,
+      )
+      if (
+        !latest ||
+        (latest.status !== DocumentVersionStatus.Approved &&
+          latest.status !== DocumentVersionStatus.Rejected)
+      ) {
         throw new FormalizationConfirmationError(
           'Gere e revise todos os documentos antes de confirmar o pacote.',
         )
@@ -109,26 +88,7 @@ export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignature
         throw new FormalizationDocumentStaleError()
       }
     }
-
     const now = this.datetimeProvider.now()
-    if (this.confirmationTransaction) {
-      const result = await this.confirmationTransaction.confirm({
-        formalizationId: formalization.id,
-        expectedVersion: request.expectedVersion,
-        actorId: request.actorId,
-        occurredAt: now,
-      })
-      if (this.signatureConfigurationRepository && this.broker) {
-        await this.publishPendingPreviewBatch(
-          formalization.id,
-          result.pendingPreviewIds,
-          now,
-          this.signatureConfigurationRepository,
-          this.broker,
-        )
-      }
-      return result.formalization
-    }
     const confirmed = await this.formalizationsRepository.replace({
       formalizationId: formalization.id,
       expectedVersion: request.expectedVersion,
@@ -143,7 +103,7 @@ export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignature
   }
 
   private async loadGenerations(
-    versions: readonly DocumentVersion[],
+    versions: readonly import('../../document-production/domain/entities').DocumentVersion[],
   ): Promise<readonly DocumentGeneration[]> {
     const generationIds = [
       ...new Set(
@@ -164,7 +124,7 @@ export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignature
 
   private isFreshVersion(
     versionId: string,
-    versions: readonly DocumentVersion[],
+    versions: readonly import('../../document-production/domain/entities').DocumentVersion[],
     generations: readonly DocumentGeneration[],
     formalization: Formalization,
   ): boolean {

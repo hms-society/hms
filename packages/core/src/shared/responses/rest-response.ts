@@ -1,5 +1,11 @@
 import { HTTP_STATUS_CODE } from '../constants/http-status-code'
-import { AppError, BadRequestError, ConflictError, NotFoundError } from '../domain/errors'
+import {
+  AppError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../domain/errors'
 
 type RestResponseProps<Body> = {
   body?: Body
@@ -25,6 +31,9 @@ export class RestResponse<Body = unknown> {
     const message = this._errorMessage ?? 'Rest Response failed'
 
     if (this.statusCode === HTTP_STATUS_CODE.notFound) throw new NotFoundError(message)
+
+    if (this.statusCode === HTTP_STATUS_CODE.unauthorized)
+      throw new UnauthorizedError(message)
 
     if (this.statusCode === HTTP_STATUS_CODE.conflict) throw new ConflictError(message)
 

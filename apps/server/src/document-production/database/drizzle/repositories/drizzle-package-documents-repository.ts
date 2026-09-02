@@ -52,6 +52,15 @@ export class DrizzlePackageDocumentsRepository
     return records.map((record) => this.mapper.toDomain(record))
   }
 
+  async findAllByDocumentId(documentId: string) {
+    const records = await this.database
+      .select()
+      .from(packageDocumentModel)
+      .where(eq(packageDocumentModel.documentId, documentId))
+
+    return records.map((record) => this.mapper.toDomain(record))
+  }
+
   async replaceForDocumentPackage(
     documentPackageId: string,
     packageDocuments: readonly PackageDocumentCreation[],
