@@ -12,6 +12,7 @@ export type ListDocumentValidationsFilters = {
 export type RecordDocumentValidationAnalysisInput = {
   documentFileId: string
   status: DocumentValidationStatus
+  hashSha256?: string
   aiConfidence?: number
   aiSuggestion?: Record<string, unknown>
   extractedFields: Record<string, unknown>[]

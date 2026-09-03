@@ -37,4 +37,14 @@ export class SupabaseStorageProvider implements StorageProvider {
 
     return path
   }
+
+  async download(path: string): Promise<Uint8Array> {
+    const { data, error } = await this.supabase.storage.from(this.bucketName).download(path)
+
+    if (error) {
+      throw new AppError(error.message, 'Erro no Armazenamento de Documentos')
+    }
+
+    return new Uint8Array(await data.arrayBuffer())
+  }
 }

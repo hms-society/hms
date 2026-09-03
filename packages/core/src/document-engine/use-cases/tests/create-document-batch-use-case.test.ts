@@ -4,7 +4,8 @@ import { CreateDocumentBatchUseCase } from '../create-document-batch-use-case'
 import { DocumentBatchChannel } from '../../domain/structures/document-batch-channel'
 import { DocumentBatchStatus } from '../../domain/structures/document-batch-status'
 import type { ClientsRepository } from '../../../identity/interfaces/clients-repository'
-import type { DatetimeProvider } from '../../../shared/interfaces/datetime-provider'
+import type { Broker, DatetimeProvider } from '../../../shared/interfaces'
+import { DocumentFileProcessingRequestedEvent } from '../../domain/events'
 import type { DailyCountersRepository } from '../../interfaces/daily-counters-repository'
 import type { DocumentBatchesRepository } from '../../interfaces/document-batches-repository'
 
@@ -13,6 +14,7 @@ describe('CreateDocumentBatchUseCase', () => {
   let dailyCountersRepository: MockProxy<DailyCountersRepository>
   let clientsRepository: MockProxy<ClientsRepository>
   let datetimeProvider: MockProxy<DatetimeProvider>
+  let broker: MockProxy<Broker>
   let useCase: CreateDocumentBatchUseCase
 
   beforeEach(() => {
@@ -20,6 +22,7 @@ describe('CreateDocumentBatchUseCase', () => {
     dailyCountersRepository = mock<DailyCountersRepository>()
     clientsRepository = mock<ClientsRepository>()
     datetimeProvider = mock<DatetimeProvider>()
+    broker = mock<Broker>()
 
     const fixedDate = new Date('2026-08-07T12:00:00.000Z')
     datetimeProvider.now.mockReturnValue(fixedDate)
@@ -41,6 +44,7 @@ describe('CreateDocumentBatchUseCase', () => {
       dailyCountersRepository,
       clientsRepository,
       datetimeProvider,
+      broker,
     )
   })
 
@@ -115,5 +119,83 @@ describe('CreateDocumentBatchUseCase', () => {
     })
 
     expect(result.readableId).toBe(customReadableId)
+  })
+
+  it('should publish one processing event for each created file', async () => {
+    const fixedDate = new Date('2026-08-07T12:00:00.000Z')
+
+    documentBatchesRepository.add.mockResolvedValue({
+      id: 'batch-123',
+      readableId: 'LOTE-20260807-0001',
+      status: DocumentBatchStatus.Identified,
+      channel: DocumentBatchChannel.InternalUpload,
+      sender: 'internal-user-id',
+      inTriageBox: false,
+      clientId: 'client-123',
+      createdAt: fixedDate,
+      updatedAt: fixedDate,
+      files: [
+        {
+          id: 'file-1',
+          batchId: 'batch-123',
+          originalName: 'documento.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 123,
+          storagePath: 'seed/documento.pdf',
+          createdAt: fixedDate,
+        },
+        {
+          id: 'file-2',
+          batchId: 'batch-123',
+          originalName: 'documento.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 456,
+          storagePath: 'seed/documento.jpg',
+          createdAt: fixedDate,
+        },
+      ],
+    } as any)
+
+    await useCase.execute({
+      channel: DocumentBatchChannel.InternalUpload,
+      sender: 'internal-user-id',
+      clientId: 'client-123',
+      files: [
+        {
+          originalName: 'documento.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 123,
+          storagePath: 'seed/documento.pdf',
+        },
+        {
+          originalName: 'documento.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 456,
+          storagePath: 'seed/documento.jpg',
+        },
+      ],
+    })
+
+    expect(broker.publish).toHaveBeenCalledTimes(2)
+    expect(broker.publish).toHaveBeenCalledWith(
+      new DocumentFileProcessingRequestedEvent({
+        batchId: 'batch-123',
+        documentFileId: 'file-1',
+        storagePath: 'seed/documento.pdf',
+        originalName: 'documento.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 123,
+      }),
+    )
+    expect(broker.publish).toHaveBeenCalledWith(
+      new DocumentFileProcessingRequestedEvent({
+        batchId: 'batch-123',
+        documentFileId: 'file-2',
+        storagePath: 'seed/documento.jpg',
+        originalName: 'documento.jpg',
+        mimeType: 'image/jpeg',
+        sizeBytes: 456,
+      }),
+    )
   })
 })

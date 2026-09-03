@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+import { basename, extname, join } from 'node:path'
 
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
@@ -8,20 +10,6 @@ import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { clientModel, userModel } from '@/identity/database/drizzle/models'
 import { getMimeTypeFromExtension } from '../utils/mime-type.map'
-import { extname } from 'node:path'
-import { eq } from 'drizzle-orm'
-import { documentBatchFileModel } from './drizzle/models'
-import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
-
-const VALIDATION_STATUS_CYCLE = [
-  DocumentValidationStatus.NotLinked,
-  DocumentValidationStatus.Valid,
-  DocumentValidationStatus.Illegible,
-  DocumentValidationStatus.Incomplete,
-  DocumentValidationStatus.Duplicate,
-  DocumentValidationStatus.ProcessingFailure,
-  DocumentValidationStatus.ResendRequested,
-] as const
 
 @Injectable()
 export class DocumentsSeeder {
@@ -46,24 +34,7 @@ export class DocumentsSeeder {
 
     if (users.length === 0 || clients.length === 0) return null
 
-    const dummyFiles = [
-      {
-        name: 'contrato_social_simulado.pdf',
-        content: 'PDF_DUMMY_CONTENT_123',
-      },
-      {
-        name: 'comprovante_endereco_simulado.jpg',
-        content: 'JPG_DUMMY_CONTENT_456',
-      },
-      {
-        name: 'cartao_cnpj.pdf',
-        content: 'PDF_DUMMY_CONTENT_789',
-      },
-      {
-        name: 'balanco_patrimonial.pdf',
-        content: 'PDF_DUMMY_CONTENT_101',
-      },
-    ]
+    const seedFiles = await this.loadSeedFiles()
 
     const batches: any[] = []
     const batchesPerClient = 3
@@ -75,8 +46,8 @@ export class DocumentsSeeder {
         const batchName = `LOTE-${client.id}-${batchIndex}-${randomUUID()}`
 
         const uploadedFiles = await Promise.all(
-          dummyFiles.map(async (file) => {
-            const buffer = Buffer.from(file.content)
+          seedFiles.map(async (file) => {
+            const buffer = file.content
             const extension = extname(file.name)
             const mimeType = getMimeTypeFromExtension(extension)
 
@@ -103,89 +74,38 @@ export class DocumentsSeeder {
         })
 
         batches.push(batch)
-
-        await Promise.all(
-          (batch.files ?? []).map((file, fileIndex) => {
-            const status =
-              VALIDATION_STATUS_CYCLE[
-                (index + batchIndex + fileIndex) % VALIDATION_STATUS_CYCLE.length
-              ]
-
-            return db
-              .update(documentBatchFileModel)
-              .set({
-                status,
-                aiConfidence:
-                  status === DocumentValidationStatus.ProcessingFailure ? 0 : 88,
-                extractedFields: this.createExtractedFields(status),
-                missingFields:
-                  status === DocumentValidationStatus.Incomplete
-                    ? ['Data de emissão']
-                    : [],
-                caseId: undefined,
-                checklistItemId: undefined,
-                isDuplicate: status === DocumentValidationStatus.Duplicate,
-                originalDocumentId:
-                  status === DocumentValidationStatus.Duplicate ? file.id : undefined,
-                aiSuggestion: this.createAiSuggestion(status),
-              })
-              .where(eq(documentBatchFileModel.id, file.id))
-          }),
-        )
       }
     }
 
     return batches
   }
 
-  private createExtractedFields(status: DocumentValidationStatus) {
-    if (
-      status === DocumentValidationStatus.Illegible ||
-      status === DocumentValidationStatus.ProcessingFailure
-    ) {
-      return []
-    }
-
-    const fields = [
-      { label: 'Titular', value: 'Mariana Costa Silva', confidence: 94 },
-      { label: 'CPF', value: '284.***.***-19', confidence: 91 },
-      { label: 'Endereço', value: 'Rua das Palmeiras, 147', confidence: 89 },
-      { label: 'CEP', value: '01452-001', confidence: 88 },
-      { label: 'Data de emissão', value: '04/08/2026', confidence: 83 },
+  private async loadSeedFiles() {
+    const seedAssetsPath = join(
+      process.cwd(),
+      'src',
+      'document-engine',
+      'database',
+      'seed-assets',
+    )
+    const assetPaths = [
+      join(seedAssetsPath, 'pdf_teste_2_paginas.pdf'),
+      join(seedAssetsPath, 'pdf_teste_3_paginas.pdf'),
     ]
 
-    if (status === DocumentValidationStatus.Incomplete) {
-      return fields.slice(0, 4)
-    }
+    const pdfFiles = await Promise.all(
+      assetPaths.map(async (path) => ({
+        name: basename(path),
+        content: await readFile(path),
+      })),
+    )
 
-    return fields
-  }
-
-  private createAiSuggestion(status: DocumentValidationStatus) {
-    if (status === DocumentValidationStatus.ProcessingFailure) {
-      return {
-        confidenceLabel: 'Falha no processamento',
-        failureReason: 'Arquivo protegido por senha',
-        failureInstruction:
-          'Solicite ao remetente uma nova cópia do arquivo sem proteção por senha.',
-      }
-    }
-
-    return {
-      confidenceLabel:
-        status === DocumentValidationStatus.Valid
-          ? 'Sugerido pela IA - Confiança alta'
-          : 'Sugerido pela IA',
-      documentTypeId: 'comprovante_residencia',
-      caseLabel: status === DocumentValidationStatus.NotLinked ? undefined : 'Caso 0089',
-      checklistItemLabel:
-        status === DocumentValidationStatus.NotLinked
-          ? undefined
-          : 'Comprovante de residência',
-      originalDocumentFileName:
-        status === DocumentValidationStatus.Duplicate
-          ? 'comprovante-residencia.pdf'
-          : undefined,
-    }
+    return [
+      ...pdfFiles,
+      {
+        name: 'comprovante_endereco_simulado.jpg',
+        content: Buffer.from('JPG_DUMMY_CONTENT_456'),
+      },
+    ]
   }
 }

@@ -2,7 +2,8 @@ import type { DocumentBatch, DocumentBatchFile } from '../domain/entities/docume
 import { DocumentBatchChannel } from '../domain/structures/document-batch-channel'
 import { DocumentBatchStatus } from '../domain/structures/document-batch-status'
 import type { ClientsRepository } from '../../identity/interfaces/clients-repository'
-import type { DatetimeProvider } from '../../shared/interfaces/datetime-provider'
+import type { Broker, DatetimeProvider } from '../../shared/interfaces'
+import { DocumentFileProcessingRequestedEvent } from '../domain/events'
 import type { DailyCountersRepository } from '../interfaces/daily-counters-repository'
 import type { DocumentBatchesRepository } from '../interfaces/document-batches-repository'
 
@@ -22,6 +23,7 @@ export class CreateDocumentBatchUseCase {
     private readonly dailyCountersRepository: DailyCountersRepository,
     private readonly clientsRepository: ClientsRepository,
     private readonly datetimeProvider: DatetimeProvider,
+    private readonly broker: Broker,
   ) {}
 
   async execute(request: CreateDocumentBatchRequest): Promise<DocumentBatch> {
@@ -57,7 +59,7 @@ export class CreateDocumentBatchUseCase {
 
     const readableId = request.readableId ?? `LOTE-${dateStringNoDashes}-${sequence}`
 
-    return this.documentBatchesRepository.add({
+    const batch = await this.documentBatchesRepository.add({
       readableId,
       status,
       channel: request.channel,
@@ -68,5 +70,22 @@ export class CreateDocumentBatchUseCase {
       createdBy: request.createdBy,
       files: request.files,
     })
+
+    await Promise.all(
+      (batch.files ?? []).map((file) =>
+        this.broker.publish(
+          new DocumentFileProcessingRequestedEvent({
+            batchId: batch.id,
+            documentFileId: file.id,
+            storagePath: file.storagePath,
+            originalName: file.originalName,
+            mimeType: file.mimeType,
+            sizeBytes: file.sizeBytes,
+          }),
+        ),
+      ),
+    )
+
+    return batch
   }
 }

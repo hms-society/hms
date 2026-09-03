@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common'
 
+import { DocumentEngineAiModule } from '@/document-engine/ai/document-engine-ai.module'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
-import { ProcessWhatsappBatchJob } from '@/document-engine/messaging/inngest/jobs'
+import {
+  ProcessDocumentFileJob,
+  ProcessWhatsappBatchJob,
+} from '@/document-engine/messaging/inngest/jobs'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -14,18 +18,30 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
 @Module({
   imports: [
     SharedMessagingModule,
+    DocumentEngineAiModule,
     DocumentsDatabaseModule,
     ProvisionModule,
     CommunicationModule,
   ],
   providers: [
+    ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
     {
       provide: DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
-      inject: [ProcessWhatsappBatchJob],
-      useFactory: (job: ProcessWhatsappBatchJob): InngestFunctionGroup => [job.function],
+      inject: [ProcessDocumentFileJob, ProcessWhatsappBatchJob],
+      useFactory: (
+        processFileJob: ProcessDocumentFileJob,
+        processWhatsappBatchJob: ProcessWhatsappBatchJob,
+      ): InngestFunctionGroup => [
+        processFileJob.function,
+        processWhatsappBatchJob.function,
+      ],
     },
   ],
-  exports: [ProcessWhatsappBatchJob, DOCUMENT_ENGINE_INNGEST_FUNCTIONS],
+  exports: [
+    ProcessDocumentFileJob,
+    ProcessWhatsappBatchJob,
+    DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
+  ],
 })
 export class DocumentEngineMessagingModule {}

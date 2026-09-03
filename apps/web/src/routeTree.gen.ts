@@ -9,72 +9,52 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
-import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
-import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
-import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
-import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
-import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
-import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
-import { Route as ModelosDeDocumentosIndexRouteImport } from './routes/modelos-de-documentos/index'
-import { Route as LoginIndexRouteImport } from './routes/login/index'
-import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
-import { Route as HomeIndexRouteImport } from './routes/home/index'
-import { Route as ConviteIndexRouteImport } from './routes/convite/index'
-import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
-import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
-import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
-import { Route as CaixaDeDocumentosIndexRouteImport } from './routes/caixa-de-documentos/index'
-import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
-import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
-import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
-import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
-import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
-import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
-import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
-import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
-import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
-import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
-import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
-import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
-import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AdvogadoRouteRouteImport } from './routes/advogado/route'
+import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
+import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
+import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
+import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
+import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
+import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
+import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
+import { Route as CaixaDeDocumentosIndexRouteImport } from './routes/caixa-de-documentos/index'
+import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
+import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
+import { Route as ClientePrivacidadeRouteImport } from './routes/cliente/privacidade'
+import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
+import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
+import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
+import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
+import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
-import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
-import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
+import { Route as ConviteIndexRouteImport } from './routes/convite/index'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
+import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
+import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
+import { Route as IntakesNovoRouteImport } from './routes/intakes/novo'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as LotesDocumentosFileIdRouteImport } from './routes/lotes-documentos/$fileId'
+import { Route as ModelosDeDocumentosIndexRouteImport } from './routes/modelos-de-documentos/index'
+import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from './routes/modelos-de-documentos/$documentSpecificationId'
+import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
+import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
+import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
 import { Route as AdvogadoMeusCasosIndexRouteImport } from './routes/advogado/meus-casos/index'
-import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
-import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
+import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
+import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
+import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
+import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
 import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
-const IntakesRouteRoute = IntakesRouteRouteImport.update({
-  id: '/intakes',
-  path: '/intakes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConsultasRouteRoute = ConsultasRouteRouteImport.update({
-  id: '/consultas',
-  path: '/consultas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClienteRouteRoute = ClienteRouteRouteImport.update({
-  id: '/cliente',
-  path: '/cliente',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtendimentoRouteRoute = AtendimentoRouteRouteImport.update({
-  id: '/atendimento',
-  path: '/atendimento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgendaRouteRoute = AgendaRouteRouteImport.update({
-  id: '/agenda',
-  path: '/agenda',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdvogadoRouteRoute = AdvogadoRouteRouteImport.update({
@@ -82,14 +62,153 @@ const AdvogadoRouteRoute = AdvogadoRouteRouteImport.update({
   path: '/advogado',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AgendaRouteRoute = AgendaRouteRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
-  id: '/redefinir-senha/',
-  path: '/redefinir-senha/',
+const AtendimentoRouteRoute = AtendimentoRouteRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteRouteRoute = ClienteRouteRouteImport.update({
+  id: '/cliente',
+  path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultasRouteRoute = ConsultasRouteRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntakesRouteRoute = IntakesRouteRouteImport.update({
+  id: '/intakes',
+  path: '/intakes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
+  id: '/comunicacao',
+  path: '/comunicacao',
+  getParentRoute: () => AdvogadoRouteRoute,
+} as any)
+const AgendaIndexRoute = AgendaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AgendaRouteRoute,
+} as any)
+const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
+  id: '/consultas',
+  path: '/consultas',
+  getParentRoute: () => AtendimentoRouteRoute,
+} as any)
+const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AtendimentoRouteRoute,
+} as any)
+const CaixaDeDocumentosIndexRoute = CaixaDeDocumentosIndexRouteImport.update({
+  id: '/caixa-de-documentos/',
+  path: '/caixa-de-documentos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaixaDeDocumentosFileIdRoute = CaixaDeDocumentosFileIdRouteImport.update({
+  id: '/caixa-de-documentos/$fileId',
+  path: '/caixa-de-documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteMensagensRoute = ClienteMensagensRouteImport.update({
+  id: '/mensagens',
+  path: '/mensagens',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
+const ClientePrivacidadeRoute = ClientePrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
+const ClientesIndexRoute = ClientesIndexRouteImport.update({
+  id: '/clientes/',
+  path: '/clientes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
+  id: '/clientes/$clienteId',
+  path: '/clientes/$clienteId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColaboradoresIndexRoute = ColaboradoresIndexRouteImport.update({
+  id: '/colaboradores/',
+  path: '/colaboradores/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColaboradoresColaboradorIdRoute =
+  ColaboradoresColaboradorIdRouteImport.update({
+    id: '/colaboradores/$colaboradorId',
+    path: '/colaboradores/$colaboradorId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ConsultasIndexRoute = ConsultasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConsultasRouteRoute,
+} as any)
+const ConsultasConsultationIdRouteRoute =
+  ConsultasConsultationIdRouteRouteImport.update({
+    id: '/$consultationId',
+    path: '/$consultationId',
+    getParentRoute: () => ConsultasRouteRoute,
+  } as any)
+const ConviteIndexRoute = ConviteIndexRouteImport.update({
+  id: '/convite/',
+  path: '/convite/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/home/',
+  path: '/home/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntakesIndexRoute = IntakesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => IntakesRouteRoute,
+} as any)
+const IntakesIntakeIdRoute = IntakesIntakeIdRouteImport.update({
+  id: '/$intakeId',
+  path: '/$intakeId',
+  getParentRoute: () => IntakesRouteRoute,
+} as any)
+const IntakesNovoRoute = IntakesNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => IntakesRouteRoute,
+} as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
+  id: '/lotes-documentos/$fileId',
+  path: '/lotes-documentos/$fileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelosDeDocumentosIndexRoute =
+  ModelosDeDocumentosIndexRouteImport.update({
+    id: '/modelos-de-documentos/',
+    path: '/modelos-de-documentos/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ModelosDeDocumentosDocumentSpecificationIdRoute =
+  ModelosDeDocumentosDocumentSpecificationIdRouteImport.update({
+    id: '/modelos-de-documentos/$documentSpecificationId',
+    path: '/modelos-de-documentos/$documentSpecificationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ModelosDeDocumentosNovoRoute = ModelosDeDocumentosNovoRouteImport.update({
+  id: '/modelos-de-documentos/novo',
+  path: '/modelos-de-documentos/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PedirRedefinirSenhaIndexRoute =
@@ -98,162 +217,43 @@ const PedirRedefinirSenhaIndexRoute =
     path: '/pedir-redefinir-senha/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ModelosDeDocumentosIndexRoute =
-  ModelosDeDocumentosIndexRouteImport.update({
-    id: '/modelos-de-documentos/',
-    path: '/modelos-de-documentos/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
+const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
+  id: '/redefinir-senha/',
+  path: '/redefinir-senha/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const IntakesIndexRoute = IntakesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => IntakesRouteRoute,
-} as any)
-const HomeIndexRoute = HomeIndexRouteImport.update({
-  id: '/home/',
-  path: '/home/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConviteIndexRoute = ConviteIndexRouteImport.update({
-  id: '/convite/',
-  path: '/convite/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConsultasIndexRoute = ConsultasIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ConsultasRouteRoute,
-} as any)
-const ColaboradoresIndexRoute = ColaboradoresIndexRouteImport.update({
-  id: '/colaboradores/',
-  path: '/colaboradores/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientesIndexRoute = ClientesIndexRouteImport.update({
-  id: '/clientes/',
-  path: '/clientes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaixaDeDocumentosIndexRoute = CaixaDeDocumentosIndexRouteImport.update({
-  id: '/caixa-de-documentos/',
-  path: '/caixa-de-documentos/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgendaIndexRoute = AgendaIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AgendaRouteRoute,
-} as any)
-const ModelosDeDocumentosNovoRoute = ModelosDeDocumentosNovoRouteImport.update({
-  id: '/modelos-de-documentos/novo',
-  path: '/modelos-de-documentos/novo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModelosDeDocumentosDocumentSpecificationIdRoute =
-  ModelosDeDocumentosDocumentSpecificationIdRouteImport.update({
-    id: '/modelos-de-documentos/$documentSpecificationId',
-    path: '/modelos-de-documentos/$documentSpecificationId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LotesDocumentosFileIdRoute = LotesDocumentosFileIdRouteImport.update({
-  id: '/lotes-documentos/$fileId',
-  path: '/lotes-documentos/$fileId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntakesNovoRoute = IntakesNovoRouteImport.update({
-  id: '/novo',
-  path: '/novo',
-  getParentRoute: () => IntakesRouteRoute,
-} as any)
-const IntakesIntakeIdRoute = IntakesIntakeIdRouteImport.update({
-  id: '/$intakeId',
-  path: '/$intakeId',
-  getParentRoute: () => IntakesRouteRoute,
-} as any)
-const ColaboradoresColaboradorIdRoute =
-  ColaboradoresColaboradorIdRouteImport.update({
-    id: '/colaboradores/$colaboradorId',
-    path: '/colaboradores/$colaboradorId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ClientesClienteIdRoute = ClientesClienteIdRouteImport.update({
-  id: '/clientes/$clienteId',
-  path: '/clientes/$clienteId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientePrivacidadeRoute = ClientePrivacidadeRouteImport.update({
-  id: '/privacidade',
-  path: '/privacidade',
-  getParentRoute: () => ClienteRouteRoute,
-} as any)
-const ClienteMensagensRoute = ClienteMensagensRouteImport.update({
-  id: '/mensagens',
-  path: '/mensagens',
-  getParentRoute: () => ClienteRouteRoute,
-} as any)
-const CaixaDeDocumentosFileIdRoute = CaixaDeDocumentosFileIdRouteImport.update({
-  id: '/caixa-de-documentos/$fileId',
-  path: '/caixa-de-documentos/$fileId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AtendimentoRouteRoute,
-} as any)
-const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
-  id: '/consultas',
-  path: '/consultas',
-  getParentRoute: () => AtendimentoRouteRoute,
-} as any)
-const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
-  id: '/comunicacao',
-  path: '/comunicacao',
-  getParentRoute: () => AdvogadoRouteRoute,
-} as any)
-const ConsultasConsultationIdRouteRoute =
-  ConsultasConsultationIdRouteRouteImport.update({
-    id: '/$consultationId',
-    path: '/$consultationId',
-    getParentRoute: () => ConsultasRouteRoute,
-  } as any)
-const ConsultasConsultationIdIndexRoute =
-  ConsultasConsultationIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => ConsultasConsultationIdRouteRoute,
-  } as any)
-const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
-  id: '/meus-casos/',
-  path: '/meus-casos/',
-  getParentRoute: () => ClienteRouteRoute,
 } as any)
 const AdvogadoMeusCasosIndexRoute = AdvogadoMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
+const AdvogadoMeusCasosCaseIdRoute = AdvogadoMeusCasosCaseIdRouteImport.update({
+  id: '/meus-casos/$caseId',
+  path: '/meus-casos/$caseId',
+  getParentRoute: () => AdvogadoRouteRoute,
+} as any)
+const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
+  id: '/meus-casos/',
+  path: '/meus-casos/',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
+const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
+  id: '/meus-casos/$caseId',
+  path: '/meus-casos/$caseId',
+  getParentRoute: () => ClienteRouteRoute,
+} as any)
+const ConsultasConsultationIdIndexRoute =
+  ConsultasConsultationIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ConsultasConsultationIdRouteRoute,
+  } as any)
 const ConsultasConsultationIdFichaAtendimentoRoute =
   ConsultasConsultationIdFichaAtendimentoRouteImport.update({
     id: '/ficha-atendimento',
     path: '/ficha-atendimento',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
-const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
-  id: '/meus-casos/$caseId',
-  path: '/meus-casos/$caseId',
-  getParentRoute: () => ClienteRouteRoute,
-} as any)
-const AdvogadoMeusCasosCaseIdRoute = AdvogadoMeusCasosCaseIdRouteImport.update({
-  id: '/meus-casos/$caseId',
-  path: '/meus-casos/$caseId',
-  getParentRoute: () => AdvogadoRouteRoute,
-} as any)
 const ConsultasConsultationIdDocumentosIndexRoute =
   ConsultasConsultationIdDocumentosIndexRouteImport.update({
     id: '/documentos/',
@@ -562,39 +562,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/intakes': {
-      id: '/intakes'
-      path: '/intakes'
-      fullPath: '/intakes'
-      preLoaderRoute: typeof IntakesRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/consultas': {
-      id: '/consultas'
-      path: '/consultas'
-      fullPath: '/consultas'
-      preLoaderRoute: typeof ConsultasRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cliente': {
-      id: '/cliente'
-      path: '/cliente'
-      fullPath: '/cliente'
-      preLoaderRoute: typeof ClienteRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atendimento': {
-      id: '/atendimento'
-      path: '/atendimento'
-      fullPath: '/atendimento'
-      preLoaderRoute: typeof AtendimentoRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agenda': {
-      id: '/agenda'
-      path: '/agenda'
-      fullPath: '/agenda'
-      preLoaderRoute: typeof AgendaRouteRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advogado': {
@@ -604,89 +576,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/redefinir-senha/': {
-      id: '/redefinir-senha/'
-      path: '/redefinir-senha'
-      fullPath: '/redefinir-senha/'
-      preLoaderRoute: typeof RedefinirSenhaIndexRouteImport
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pedir-redefinir-senha/': {
-      id: '/pedir-redefinir-senha/'
-      path: '/pedir-redefinir-senha'
-      fullPath: '/pedir-redefinir-senha/'
-      preLoaderRoute: typeof PedirRedefinirSenhaIndexRouteImport
+    '/cliente': {
+      id: '/cliente'
+      path: '/cliente'
+      fullPath: '/cliente'
+      preLoaderRoute: typeof ClienteRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/modelos-de-documentos/': {
-      id: '/modelos-de-documentos/'
-      path: '/modelos-de-documentos'
-      fullPath: '/modelos-de-documentos/'
-      preLoaderRoute: typeof ModelosDeDocumentosIndexRouteImport
+    '/consultas': {
+      id: '/consultas'
+      path: '/consultas'
+      fullPath: '/consultas'
+      preLoaderRoute: typeof ConsultasRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login/': {
-      id: '/login/'
-      path: '/login'
-      fullPath: '/login/'
-      preLoaderRoute: typeof LoginIndexRouteImport
+    '/intakes': {
+      id: '/intakes'
+      path: '/intakes'
+      fullPath: '/intakes'
+      preLoaderRoute: typeof IntakesRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/intakes/': {
-      id: '/intakes/'
-      path: '/'
-      fullPath: '/intakes/'
-      preLoaderRoute: typeof IntakesIndexRouteImport
-      parentRoute: typeof IntakesRouteRoute
-    }
-    '/home/': {
-      id: '/home/'
-      path: '/home'
-      fullPath: '/home/'
-      preLoaderRoute: typeof HomeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/convite/': {
-      id: '/convite/'
-      path: '/convite'
-      fullPath: '/convite/'
-      preLoaderRoute: typeof ConviteIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/consultas/': {
-      id: '/consultas/'
-      path: '/'
-      fullPath: '/consultas/'
-      preLoaderRoute: typeof ConsultasIndexRouteImport
-      parentRoute: typeof ConsultasRouteRoute
-    }
-    '/colaboradores/': {
-      id: '/colaboradores/'
-      path: '/colaboradores'
-      fullPath: '/colaboradores/'
-      preLoaderRoute: typeof ColaboradoresIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/clientes/': {
-      id: '/clientes/'
-      path: '/clientes'
-      fullPath: '/clientes/'
-      preLoaderRoute: typeof ClientesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/caixa-de-documentos/': {
-      id: '/caixa-de-documentos/'
-      path: '/caixa-de-documentos'
-      fullPath: '/caixa-de-documentos/'
-      preLoaderRoute: typeof CaixaDeDocumentosIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/advogado/comunicacao': {
+      id: '/advogado/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/advogado/comunicacao'
+      preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
     }
     '/agenda/': {
       id: '/agenda/'
@@ -695,46 +625,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaIndexRouteImport
       parentRoute: typeof AgendaRouteRoute
     }
-    '/modelos-de-documentos/novo': {
-      id: '/modelos-de-documentos/novo'
-      path: '/modelos-de-documentos/novo'
-      fullPath: '/modelos-de-documentos/novo'
-      preLoaderRoute: typeof ModelosDeDocumentosNovoRouteImport
+    '/atendimento/consultas': {
+      id: '/atendimento/consultas'
+      path: '/consultas'
+      fullPath: '/atendimento/consultas'
+      preLoaderRoute: typeof AtendimentoConsultasRouteImport
+      parentRoute: typeof AtendimentoRouteRoute
+    }
+    '/atendimento/dashboard': {
+      id: '/atendimento/dashboard'
+      path: '/dashboard'
+      fullPath: '/atendimento/dashboard'
+      preLoaderRoute: typeof AtendimentoDashboardRouteImport
+      parentRoute: typeof AtendimentoRouteRoute
+    }
+    '/caixa-de-documentos/': {
+      id: '/caixa-de-documentos/'
+      path: '/caixa-de-documentos'
+      fullPath: '/caixa-de-documentos/'
+      preLoaderRoute: typeof CaixaDeDocumentosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/modelos-de-documentos/$documentSpecificationId': {
-      id: '/modelos-de-documentos/$documentSpecificationId'
-      path: '/modelos-de-documentos/$documentSpecificationId'
-      fullPath: '/modelos-de-documentos/$documentSpecificationId'
-      preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
+    '/caixa-de-documentos/$fileId': {
+      id: '/caixa-de-documentos/$fileId'
+      path: '/caixa-de-documentos/$fileId'
+      fullPath: '/caixa-de-documentos/$fileId'
+      preLoaderRoute: typeof CaixaDeDocumentosFileIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lotes-documentos/$fileId': {
-      id: '/lotes-documentos/$fileId'
-      path: '/lotes-documentos/$fileId'
-      fullPath: '/lotes-documentos/$fileId'
-      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/cliente/mensagens': {
+      id: '/cliente/mensagens'
+      path: '/mensagens'
+      fullPath: '/cliente/mensagens'
+      preLoaderRoute: typeof ClienteMensagensRouteImport
+      parentRoute: typeof ClienteRouteRoute
     }
-    '/intakes/novo': {
-      id: '/intakes/novo'
-      path: '/novo'
-      fullPath: '/intakes/novo'
-      preLoaderRoute: typeof IntakesNovoRouteImport
-      parentRoute: typeof IntakesRouteRoute
+    '/cliente/privacidade': {
+      id: '/cliente/privacidade'
+      path: '/privacidade'
+      fullPath: '/cliente/privacidade'
+      preLoaderRoute: typeof ClientePrivacidadeRouteImport
+      parentRoute: typeof ClienteRouteRoute
     }
-    '/intakes/$intakeId': {
-      id: '/intakes/$intakeId'
-      path: '/$intakeId'
-      fullPath: '/intakes/$intakeId'
-      preLoaderRoute: typeof IntakesIntakeIdRouteImport
-      parentRoute: typeof IntakesRouteRoute
-    }
-    '/colaboradores/$colaboradorId': {
-      id: '/colaboradores/$colaboradorId'
-      path: '/colaboradores/$colaboradorId'
-      fullPath: '/colaboradores/$colaboradorId'
-      preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+    '/clientes/': {
+      id: '/clientes/'
+      path: '/clientes'
+      fullPath: '/clientes/'
+      preLoaderRoute: typeof ClientesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes/$clienteId': {
@@ -744,47 +681,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesClienteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cliente/privacidade': {
-      id: '/cliente/privacidade'
-      path: '/privacidade'
-      fullPath: '/cliente/privacidade'
-      preLoaderRoute: typeof ClientePrivacidadeRouteImport
-      parentRoute: typeof ClienteRouteRoute
-    }
-    '/cliente/mensagens': {
-      id: '/cliente/mensagens'
-      path: '/mensagens'
-      fullPath: '/cliente/mensagens'
-      preLoaderRoute: typeof ClienteMensagensRouteImport
-      parentRoute: typeof ClienteRouteRoute
-    }
-    '/caixa-de-documentos/$fileId': {
-      id: '/caixa-de-documentos/$fileId'
-      path: '/caixa-de-documentos/$fileId'
-      fullPath: '/caixa-de-documentos/$fileId'
-      preLoaderRoute: typeof CaixaDeDocumentosFileIdRouteImport
+    '/colaboradores/': {
+      id: '/colaboradores/'
+      path: '/colaboradores'
+      fullPath: '/colaboradores/'
+      preLoaderRoute: typeof ColaboradoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/atendimento/dashboard': {
-      id: '/atendimento/dashboard'
-      path: '/dashboard'
-      fullPath: '/atendimento/dashboard'
-      preLoaderRoute: typeof AtendimentoDashboardRouteImport
-      parentRoute: typeof AtendimentoRouteRoute
+    '/colaboradores/$colaboradorId': {
+      id: '/colaboradores/$colaboradorId'
+      path: '/colaboradores/$colaboradorId'
+      fullPath: '/colaboradores/$colaboradorId'
+      preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/atendimento/consultas': {
-      id: '/atendimento/consultas'
-      path: '/consultas'
-      fullPath: '/atendimento/consultas'
-      preLoaderRoute: typeof AtendimentoConsultasRouteImport
-      parentRoute: typeof AtendimentoRouteRoute
-    }
-    '/advogado/comunicacao': {
-      id: '/advogado/comunicacao'
-      path: '/comunicacao'
-      fullPath: '/advogado/comunicacao'
-      preLoaderRoute: typeof AdvogadoComunicacaoRouteImport
-      parentRoute: typeof AdvogadoRouteRoute
+    '/consultas/': {
+      id: '/consultas/'
+      path: '/'
+      fullPath: '/consultas/'
+      preLoaderRoute: typeof ConsultasIndexRouteImport
+      parentRoute: typeof ConsultasRouteRoute
     }
     '/consultas/$consultationId': {
       id: '/consultas/$consultationId'
@@ -793,19 +709,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdRouteRouteImport
       parentRoute: typeof ConsultasRouteRoute
     }
-    '/consultas/$consultationId/': {
-      id: '/consultas/$consultationId/'
-      path: '/'
-      fullPath: '/consultas/$consultationId/'
-      preLoaderRoute: typeof ConsultasConsultationIdIndexRouteImport
-      parentRoute: typeof ConsultasConsultationIdRouteRoute
+    '/convite/': {
+      id: '/convite/'
+      path: '/convite'
+      fullPath: '/convite/'
+      preLoaderRoute: typeof ConviteIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/cliente/meus-casos/': {
-      id: '/cliente/meus-casos/'
-      path: '/meus-casos'
-      fullPath: '/cliente/meus-casos/'
-      preLoaderRoute: typeof ClienteMeusCasosIndexRouteImport
-      parentRoute: typeof ClienteRouteRoute
+    '/home/': {
+      id: '/home/'
+      path: '/home'
+      fullPath: '/home/'
+      preLoaderRoute: typeof HomeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intakes/': {
+      id: '/intakes/'
+      path: '/'
+      fullPath: '/intakes/'
+      preLoaderRoute: typeof IntakesIndexRouteImport
+      parentRoute: typeof IntakesRouteRoute
+    }
+    '/intakes/$intakeId': {
+      id: '/intakes/$intakeId'
+      path: '/$intakeId'
+      fullPath: '/intakes/$intakeId'
+      preLoaderRoute: typeof IntakesIntakeIdRouteImport
+      parentRoute: typeof IntakesRouteRoute
+    }
+    '/intakes/novo': {
+      id: '/intakes/novo'
+      path: '/novo'
+      fullPath: '/intakes/novo'
+      preLoaderRoute: typeof IntakesNovoRouteImport
+      parentRoute: typeof IntakesRouteRoute
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lotes-documentos/$fileId': {
+      id: '/lotes-documentos/$fileId'
+      path: '/lotes-documentos/$fileId'
+      fullPath: '/lotes-documentos/$fileId'
+      preLoaderRoute: typeof LotesDocumentosFileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/': {
+      id: '/modelos-de-documentos/'
+      path: '/modelos-de-documentos'
+      fullPath: '/modelos-de-documentos/'
+      preLoaderRoute: typeof ModelosDeDocumentosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/$documentSpecificationId': {
+      id: '/modelos-de-documentos/$documentSpecificationId'
+      path: '/modelos-de-documentos/$documentSpecificationId'
+      fullPath: '/modelos-de-documentos/$documentSpecificationId'
+      preLoaderRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos-de-documentos/novo': {
+      id: '/modelos-de-documentos/novo'
+      path: '/modelos-de-documentos/novo'
+      fullPath: '/modelos-de-documentos/novo'
+      preLoaderRoute: typeof ModelosDeDocumentosNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedir-redefinir-senha/': {
+      id: '/pedir-redefinir-senha/'
+      path: '/pedir-redefinir-senha'
+      fullPath: '/pedir-redefinir-senha/'
+      preLoaderRoute: typeof PedirRedefinirSenhaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha/': {
+      id: '/redefinir-senha/'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha/'
+      preLoaderRoute: typeof RedefinirSenhaIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/advogado/meus-casos/': {
       id: '/advogado/meus-casos/'
@@ -814,12 +800,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoMeusCasosIndexRouteImport
       parentRoute: typeof AdvogadoRouteRoute
     }
-    '/consultas/$consultationId/ficha-atendimento': {
-      id: '/consultas/$consultationId/ficha-atendimento'
-      path: '/ficha-atendimento'
-      fullPath: '/consultas/$consultationId/ficha-atendimento'
-      preLoaderRoute: typeof ConsultasConsultationIdFichaAtendimentoRouteImport
-      parentRoute: typeof ConsultasConsultationIdRouteRoute
+    '/advogado/meus-casos/$caseId': {
+      id: '/advogado/meus-casos/$caseId'
+      path: '/meus-casos/$caseId'
+      fullPath: '/advogado/meus-casos/$caseId'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
+    }
+    '/cliente/meus-casos/': {
+      id: '/cliente/meus-casos/'
+      path: '/meus-casos'
+      fullPath: '/cliente/meus-casos/'
+      preLoaderRoute: typeof ClienteMeusCasosIndexRouteImport
+      parentRoute: typeof ClienteRouteRoute
     }
     '/cliente/meus-casos/$caseId': {
       id: '/cliente/meus-casos/$caseId'
@@ -828,12 +821,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteMeusCasosCaseIdRouteImport
       parentRoute: typeof ClienteRouteRoute
     }
-    '/advogado/meus-casos/$caseId': {
-      id: '/advogado/meus-casos/$caseId'
-      path: '/meus-casos/$caseId'
-      fullPath: '/advogado/meus-casos/$caseId'
-      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdRouteImport
-      parentRoute: typeof AdvogadoRouteRoute
+    '/consultas/$consultationId/': {
+      id: '/consultas/$consultationId/'
+      path: '/'
+      fullPath: '/consultas/$consultationId/'
+      preLoaderRoute: typeof ConsultasConsultationIdIndexRouteImport
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
+    }
+    '/consultas/$consultationId/ficha-atendimento': {
+      id: '/consultas/$consultationId/ficha-atendimento'
+      path: '/ficha-atendimento'
+      fullPath: '/consultas/$consultationId/ficha-atendimento'
+      preLoaderRoute: typeof ConsultasConsultationIdFichaAtendimentoRouteImport
+      parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
     '/consultas/$consultationId/documentos/': {
       id: '/consultas/$consultationId/documentos/'

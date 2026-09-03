@@ -114,6 +114,7 @@ export class DrizzleDocumentValidationsRepository
       .update(documentBatchFileModel)
       .set({
         status: input.status,
+        hashSha256: input.hashSha256,
         aiConfidence: input.aiConfidence,
         aiSuggestion: input.aiSuggestion,
         extractedFields: input.extractedFields,
