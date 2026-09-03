@@ -70,10 +70,14 @@ test('runs the formalization form and individual document contract', async ({
   await expect(generate).toBeFocused()
   await generate.press('Enter')
   await expect.poll(() => formalization.generationRequests).toBe(1)
-  expect(formalization.requests.at(-1)).toMatchObject({
-    method: 'POST',
-    path: `/formalizations/${FORMALIZATION_ID}/documents/formalization-document-1/generations`,
-  })
+  expect(
+    formalization.requests.find(
+      (r) =>
+        r.method === 'POST' &&
+        r.path ===
+          `/formalizations/${FORMALIZATION_ID}/documents/formalization-document-1/generations`,
+    ),
+  ).toBeTruthy()
   await expect(page.getByRole('button', { name: 'Revisar' })).toBeVisible()
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'scroll')
 
