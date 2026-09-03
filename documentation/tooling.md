@@ -189,7 +189,7 @@ The `production` and `staging` GitHub environments must provide these secrets:
 
 ## Frontend tooling (`apps/web`)
 
-- **Vite** (`vite dev --port 5000`, `vite build`, `vite preview`).
+- **Vite** (`HMS_WEB_APP_PORT=<port> vite dev`, `vite build`, `vite preview`).
 - **TanStack Router** route generation: `pnpm --filter web generate-routes`
   (`tsr generate`) — `routeTree.gen.ts` is generated and treated as read-only.
 - **shadcn/ui**: components added via `pnpm --filter web shadcn add <name>`, output
