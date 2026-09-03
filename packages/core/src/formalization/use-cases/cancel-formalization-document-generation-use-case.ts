@@ -1,4 +1,4 @@
-import type { Broker, DatetimeProvider, UseCase } from '../../shared/interfaces'
+import type { Broker, DatetimeProvider } from '../../shared/interfaces'
 import type { DocumentGeneration } from '../../document-production/domain/entities'
 import { DocumentGenerationCancelledEvent } from '../../document-production/domain/events'
 import { DocumentGenerationStatus } from '../../document-production/domain/structures'
@@ -10,31 +10,33 @@ import {
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly generationId: string
 }
-
-export class CancelFormalizationDocumentGenerationUseCase
-  implements UseCase<Request, DocumentGeneration>
-{
+export class CancelFormalizationDocumentGenerationUseCase extends FormalizationUseCase<
+  Request,
+  DocumentGeneration
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly generationsRepository: DocumentGenerationsRepository,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly broker: Broker,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<DocumentGeneration> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertWritable(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertWritable(formalization)
     const generation = await this.generationsRepository.findById(request.generationId)
     if (
       generation?.source.type !== 'formalization' ||
@@ -44,16 +46,18 @@ export class CancelFormalizationDocumentGenerationUseCase
     }
     if (
       generation.requestedByCollaboratorId !== request.actorId &&
-      !FormalizationActorAuthorization.isAdmin(request.actorProfile)
+      !this.isAdmin(request.actorProfile)
     ) {
       throw new FormalizationAccessDeniedError()
     }
+
     if (
       generation.status !== DocumentGenerationStatus.Pending &&
       generation.status !== DocumentGenerationStatus.Running
     ) {
       return generation
     }
+
     const now = this.datetimeProvider.now()
     const cancelled = await this.generationsRepository.replace(
       generation.id,

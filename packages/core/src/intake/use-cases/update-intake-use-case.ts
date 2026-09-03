@@ -8,7 +8,7 @@ import {
 } from '../domain/errors'
 import { IntakeStatus } from '../domain/structures'
 import type { ContactChannel, IntakeOrigin, IntakeUrgency } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type Request = {
   intakeId: string

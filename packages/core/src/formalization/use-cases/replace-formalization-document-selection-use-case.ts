@@ -10,7 +10,7 @@ import {
   DocumentGenerationMoment,
   DocumentSpecificationStatus,
 } from '../../document-production/domain/structures'
-import type { UseCase, DatetimeProvider, IdProvider } from '../../shared/interfaces'
+import type { DatetimeProvider, IdProvider } from '../../shared/interfaces'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import {
   FormalizationNotFoundError,
@@ -18,8 +18,7 @@ import {
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
+import { FormalizationUseCase } from './formalization-use-case'
 import { GetFormalizationDocumentSelectionUseCase } from './get-formalization-document-selection-use-case'
 
 type Request = FormalizationActor & {
@@ -27,9 +26,10 @@ type Request = FormalizationActor & {
   readonly documentSpecificationIds: readonly string[]
 }
 
-export class ReplaceFormalizationDocumentSelectionUseCase
-  implements UseCase<Request, FormalizationDocumentSelection>
-{
+export class ReplaceFormalizationDocumentSelectionUseCase extends FormalizationUseCase<
+  Request,
+  FormalizationDocumentSelection
+> {
   private readonly getSelectionUseCase: GetFormalizationDocumentSelectionUseCase
 
   constructor(
@@ -43,6 +43,7 @@ export class ReplaceFormalizationDocumentSelectionUseCase
     private readonly idProvider: IdProvider,
     private readonly datetimeProvider: DatetimeProvider,
   ) {
+    super()
     this.getSelectionUseCase = new GetFormalizationDocumentSelectionUseCase(
       formalizationsRepository,
       sourceReader,
@@ -57,14 +58,16 @@ export class ReplaceFormalizationDocumentSelectionUseCase
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertWritable(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
       throw new FormalizationStateConflictError(
         'Reabra a confirmação antes de alterar a seleção.',
       )
     }
+
     const selection = await this.getSelectionUseCase.execute(request)
     const allowedIds = new Set(
       selection.options.map((option) => option.documentSpecificationId),
@@ -75,6 +78,7 @@ export class ReplaceFormalizationDocumentSelectionUseCase
         'Um ou mais modelos não estão disponíveis para esta formalização.',
       )
     }
+
     const documentPackage =
       (await this.documentPackagesRepository.findByContext({
         type: 'formalization',
