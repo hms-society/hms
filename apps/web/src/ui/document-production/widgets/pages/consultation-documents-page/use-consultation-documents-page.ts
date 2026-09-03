@@ -1,11 +1,11 @@
-import type {
-  ConsultationDocumentListItem,
-  ConsultationDocumentVersionSummary,
-} from '@hms/core/consultation/domain/structures'
-import { DocumentGenerationStatus } from '@hms/core/document-production/domain/structures'
+import type { ConsultationDocumentListItem } from '@hms/core/consultation/domain/structures'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { useMemo, useState } from 'react'
 import { useConsultation } from '@/ui/consultation/hooks/use-consultation'
+import {
+  type DocumentPackageViewModel,
+  useDocumentPackage,
+} from '../../components/document-package'
 import { useConsultationDocumentsQuery } from '../../../hooks/use-consultation-documents-query'
 import { useCancelConsultationDocumentGenerationAction } from '../../../hooks/use-cancel-consultation-document-generation-action'
 import { useGenerateConsultationDocumentAction } from '../../../hooks/use-generate-consultation-document-action'
@@ -19,91 +19,14 @@ export type ConsultationDocumentsPageProps = {
   consultationId: string
 }
 
-export type ConsultationDocumentStatus =
-  | 'not_generated'
-  | 'in_review'
-  | 'rejected'
-  | 'approved'
-  | 'failed'
-  | 'generating'
-
-export type ConsultationDocumentViewModel = {
-  document: ConsultationDocumentListItem
-  latestVersion?: ConsultationDocumentVersionSummary
-  latestVersionRouteParams?: {
-    consultationId: string
-    documentId: string
-    documentVersionId: string
-  }
-  status: ConsultationDocumentStatus
-  statusLabel: string
-  isCurrent: boolean
-  isGenerating: boolean
-  isTimedOut: boolean
-}
-
-function getVersionStatusViewModel(status: ConsultationDocumentVersionSummary['status']) {
-  if (status === 'in_review') {
-    return {
-      statusLabel: 'Em revisão',
+export type ConsultationDocumentViewModel =
+  DocumentPackageViewModel<ConsultationDocumentListItem> & {
+    latestVersionRouteParams?: {
+      consultationId: string
+      documentId: string
+      documentVersionId: string
     }
   }
-
-  if (status === 'rejected') {
-    return {
-      statusLabel: 'Rejeitado',
-    }
-  }
-
-  return {
-    statusLabel: 'Aprovado',
-  }
-}
-
-function getLatestVersion(versions: readonly ConsultationDocumentVersionSummary[]) {
-  return [...versions].sort((left, right) => right.versionNumber - left.versionNumber)[0]
-}
-
-function getDocumentStatus(
-  latestVersion: ConsultationDocumentVersionSummary | undefined,
-  generationStatus: ConsultationDocumentViewModel['document']['generationStatus'],
-  isOptimisticallyGenerating: boolean,
-  isGenerationStopped: boolean,
-): Pick<ConsultationDocumentViewModel, 'status' | 'statusLabel'> {
-  if (generationStatus === DocumentGenerationStatus.Failed) {
-    return {
-      status: 'failed',
-      statusLabel: 'Falha na geração',
-    }
-  }
-
-  const isGenerating =
-    !isGenerationStopped &&
-    (isOptimisticallyGenerating ||
-      generationStatus === DocumentGenerationStatus.Pending ||
-      generationStatus === DocumentGenerationStatus.Running)
-
-  if (isGenerating) {
-    return {
-      status: 'generating',
-      statusLabel: 'Gerando',
-    }
-  }
-
-  if (!latestVersion) {
-    return {
-      status: 'not_generated',
-      statusLabel: 'Não gerado',
-    }
-  }
-
-  const status = getVersionStatusViewModel(latestVersion.status)
-
-  return {
-    status: latestVersion.status,
-    statusLabel: status.statusLabel,
-  }
-}
 
 export function useConsultationDocumentsPage({
   consultationId,
@@ -154,51 +77,25 @@ export function useConsultationDocumentsPage({
     [individualGeneration.timedOutDocumentIds, batchGeneration.timedOutDocumentIds],
   )
 
+  const packageDocuments = useDocumentPackage({
+    documents: documentsQuery.data ?? [],
+    pendingDocumentIds,
+    timedOutDocumentIds,
+    cancelledDocumentIds,
+  })
   const documents = useMemo<readonly ConsultationDocumentViewModel[]>(
     () =>
-      (documentsQuery.data ?? []).map((document) => {
-        const latestVersion = getLatestVersion(document.versions)
-        const isOptimisticallyGenerating =
-          pendingDocumentIds.has(document.id) && !cancelledDocumentIds.has(document.id)
-        const isGenerationStopped =
-          cancelledDocumentIds.has(document.id) || timedOutDocumentIds.has(document.id)
-        const status = getDocumentStatus(
-          latestVersion,
-          document.generationStatus,
-          isOptimisticallyGenerating,
-          isGenerationStopped,
-        )
-
-        return {
-          document,
-          latestVersion,
-          latestVersionRouteParams: latestVersion
-            ? {
-                consultationId,
-                documentId: document.id,
-                documentVersionId: latestVersion.id,
-              }
-            : undefined,
-          ...status,
-          isCurrent: Boolean(
-            latestVersion && latestVersion.id === document.currentVersionId,
-          ),
-          isGenerating: status.status === 'generating',
-          isTimedOut:
-            timedOutDocumentIds.has(document.id) &&
-            status.status !== 'generating' &&
-            document.generationStatus !== DocumentGenerationStatus.Failed &&
-            document.generationStatus !== DocumentGenerationStatus.Cancelled &&
-            !cancelledDocumentIds.has(document.id),
-        }
-      }),
-    [
-      documentsQuery.data,
-      pendingDocumentIds,
-      timedOutDocumentIds,
-      cancelledDocumentIds,
-      consultationId,
-    ],
+      packageDocuments.map((document) => ({
+        ...document,
+        latestVersionRouteParams: document.latestVersion
+          ? {
+              consultationId,
+              documentId: document.id,
+              documentVersionId: document.latestVersion.id,
+            }
+          : undefined,
+      })),
+    [packageDocuments, consultationId],
   )
 
   function handleGenerateDocument(documentId: string) {

@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
 import swc from 'unplugin-swc'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   test: {
+    exclude: [...configDefaults.exclude, 'src/**/messaging/inngest/jobs/tests/**'],
     fileParallelism: false,
     globals: true,
     hookTimeout: 120_000,

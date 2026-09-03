@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
-import { useConsultation } from './use-schedule'
+import { useConsultation } from '@/ui/identity/hooks/use-consultation-action'
 
 const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },

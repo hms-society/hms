@@ -2,17 +2,15 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ClientDetails } from '@hms/core/identity/domain/entities'
-import { RestResponse } from '@hms/core/shared/responses/rest-response'
-
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useClientRegistrationActions } from '@/ui/identity/hooks/use-client-registration-actions'
 
 import { useClientRegisterDialog } from '../use-client-register-dialog'
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: vi.fn(),
+vi.mock('@/ui/identity/hooks/use-client-registration-actions', () => ({
+  useClientRegistrationActions: vi.fn(),
 }))
 
-const useRestContextMock = vi.mocked(useRestContext)
+const useClientRegistrationActionsMock = vi.mocked(useClientRegistrationActions)
 
 const clientDetails = {
   client: {
@@ -27,27 +25,24 @@ const clientDetails = {
 } satisfies ClientDetails
 
 describe('useClientRegisterDialog', () => {
-  const identityService = {
+  const clientRegistrationActions = {
+    grantClientConsents: vi.fn(),
     lookupClient: vi.fn(),
     registerClient: vi.fn(),
-    getClient: vi.fn(),
-    grantClientConsent: vi.fn(),
   }
   const onOpenChange = vi.fn()
   const onClientSelected = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useRestContextMock.mockReturnValue({
-      identityService,
-      intakeService: {},
-    } as never)
+    useClientRegistrationActionsMock.mockReturnValue(clientRegistrationActions)
   })
 
   it('resets on a new opening and selects an existing client', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ body: clientDetails }),
-    )
+    clientRegistrationActions.lookupClient.mockResolvedValue({
+      kind: 'existing',
+      details: clientDetails,
+    })
     const { result, rerender } = renderHook(
       (props: { open: boolean }) =>
         useClientRegisterDialog({ ...props, onOpenChange, onClientSelected }),
@@ -95,22 +90,25 @@ describe('useClientRegisterDialog', () => {
   })
 
   it('creates a client and grants the selected communication consent', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
-    )
-    identityService.registerClient.mockResolvedValue(
-      new RestResponse({ body: clientDetails }),
-    )
-    identityService.grantClientConsent.mockResolvedValue(
-      new RestResponse({
-        body: {
-          id: 'consent-id',
-          clientId: 'client-id',
-          type: 'whatsapp_communication',
-          grantedAt: new Date('2026-01-01'),
-        },
-      }),
-    )
+    clientRegistrationActions.lookupClient.mockResolvedValue({ kind: 'not-found' })
+    clientRegistrationActions.registerClient.mockResolvedValue({
+      kind: 'registered',
+      details: clientDetails,
+    })
+    clientRegistrationActions.grantClientConsents.mockResolvedValue({
+      details: {
+        ...clientDetails,
+        consents: [
+          {
+            id: 'consent-id',
+            clientId: 'client-id',
+            type: 'whatsapp_communication',
+            grantedAt: new Date('2026-01-01'),
+          },
+        ],
+      },
+      pendingConsentTypes: [],
+    })
     const { result } = renderHook(() =>
       useClientRegisterDialog({ open: true, onOpenChange, onClientSelected }),
     )
@@ -127,15 +125,15 @@ describe('useClientRegisterDialog', () => {
     await act(async () => result.current.handleContinueToReview())
     await act(async () => result.current.handleSubmitRegistration())
 
-    expect(identityService.registerClient).toHaveBeenCalledWith(
+    expect(clientRegistrationActions.registerClient).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'natural', taxId: '52998224725' }),
     )
-    expect(identityService.registerClient.mock.calls[0]?.[0]).not.toHaveProperty(
-      'consents',
-    )
-    expect(identityService.grantClientConsent).toHaveBeenCalledWith(
-      'client-id',
-      'whatsapp_communication',
+    expect(
+      clientRegistrationActions.registerClient.mock.calls[0]?.[0],
+    ).not.toHaveProperty('consents')
+    expect(clientRegistrationActions.grantClientConsents).toHaveBeenCalledWith(
+      clientDetails,
+      ['whatsapp_communication'],
     )
     expect(onClientSelected).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -146,26 +144,30 @@ describe('useClientRegisterDialog', () => {
   })
 
   it('keeps the created client and retries only a failed consent', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
-    )
-    identityService.registerClient.mockResolvedValue(
-      new RestResponse({ body: clientDetails }),
-    )
-    identityService.grantClientConsent
-      .mockResolvedValueOnce(
-        new RestResponse({ statusCode: 500, errorMessage: 'temporary' }),
-      )
-      .mockResolvedValueOnce(
-        new RestResponse({
-          body: {
-            id: 'consent-id',
-            clientId: 'client-id',
-            type: 'whatsapp_communication',
-            grantedAt: new Date('2026-01-01'),
-          },
-        }),
-      )
+    clientRegistrationActions.lookupClient.mockResolvedValue({ kind: 'not-found' })
+    clientRegistrationActions.registerClient.mockResolvedValue({
+      kind: 'registered',
+      details: clientDetails,
+    })
+    clientRegistrationActions.grantClientConsents
+      .mockResolvedValueOnce({
+        details: clientDetails,
+        pendingConsentTypes: ['whatsapp_communication'],
+      })
+      .mockResolvedValueOnce({
+        details: {
+          ...clientDetails,
+          consents: [
+            {
+              id: 'consent-id',
+              clientId: 'client-id',
+              type: 'whatsapp_communication',
+              grantedAt: new Date('2026-01-01'),
+            },
+          ],
+        },
+        pendingConsentTypes: [],
+      })
     const { result } = renderHook(() =>
       useClientRegisterDialog({ open: true, onOpenChange, onClientSelected }),
     )
@@ -182,13 +184,13 @@ describe('useClientRegisterDialog', () => {
     await act(async () => result.current.handleContinueToReview())
     await act(async () => result.current.handleSubmitRegistration())
 
-    expect(identityService.registerClient).toHaveBeenCalledTimes(1)
+    expect(clientRegistrationActions.registerClient).toHaveBeenCalledTimes(1)
     expect(result.current.createdClientDetails?.client.id).toBe('client-id')
     expect(onClientSelected).not.toHaveBeenCalled()
 
     await act(async () => result.current.handleRetryPendingConsents())
-    expect(identityService.registerClient).toHaveBeenCalledTimes(1)
-    expect(identityService.grantClientConsent).toHaveBeenCalledTimes(2)
+    expect(clientRegistrationActions.registerClient).toHaveBeenCalledTimes(1)
+    expect(clientRegistrationActions.grantClientConsents).toHaveBeenCalledTimes(2)
     expect(onClientSelected).toHaveBeenCalled()
   })
 })

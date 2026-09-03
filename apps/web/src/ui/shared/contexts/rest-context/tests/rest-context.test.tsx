@@ -62,4 +62,18 @@ describe('RestContext', () => {
       '/consultations/consultation-id/documents',
     )
   })
+
+  it('registers the formalization service with the same authenticated client', async () => {
+    const { result } = renderHook(() => useRestContext(), {
+      wrapper: ({ children }) => <RestContextProvider>{children}</RestContextProvider>,
+    })
+
+    restClient.post.mockResolvedValue({})
+
+    await result.current.formalizationService.startByIntake('intake-1')
+
+    expect(restClient.post).toHaveBeenCalledWith(
+      '/formalizations/by-intake/intake-1/start',
+    )
+  })
 })

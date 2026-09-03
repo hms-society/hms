@@ -5,7 +5,7 @@ import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-conte
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useNewIntake } from '../use-new-intake'
-import { useRegisterIntakeAction } from '../use-register-intake-action'
+import { useRegisterIntakeAction } from '@/ui/intake/hooks/use-register-intake-action'
 
 vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
   useAuthContext: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: vi.fn(),
 }))
 
-vi.mock('../use-register-intake-action', () => ({
+vi.mock('@/ui/intake/hooks/use-register-intake-action', () => ({
   useRegisterIntakeAction: vi.fn(),
 }))
 

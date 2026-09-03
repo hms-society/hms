@@ -3,7 +3,7 @@ services:
     image: inngest/inngest:v1.36.0
     container_name: hms-inngest
     restart: unless-stopped
-    command: inngest dev --no-discovery -u http://host.docker.internal:${HMS_SERVER_APP_PORT:-3333}/api/inngest
+    command: inngest dev --no-discovery -u http://host.docker.internal:${HMS_SERVER_APP_PORT:?HMS_SERVER_APP_PORT must be set}/api/inngest
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -53,7 +53,7 @@ services:
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:-postgres}@supabase-db:5432/${POSTGRES_DB:-postgres}
 
-      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:3000}
+      GOTRUE_SITE_URL: ${SITE_URL}
       GOTRUE_URI_ALLOW_LIST: "*"
       GOTRUE_DISABLE_SIGNUP: "false"
 

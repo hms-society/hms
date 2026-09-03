@@ -1,6 +1,4 @@
-import { createElement, type PropsWithChildren } from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDocumentFileQuery } from '@/ui/document-engine/hooks/use-document-file-query'
@@ -28,16 +26,6 @@ vi.mock('@/ui/shared/hooks/use-navigation', () => ({
 const useDocumentFileQueryMock = vi.mocked(useDocumentFileQuery)
 const useDocumentFileUrlQueryMock = vi.mocked(useDocumentFileUrlQuery)
 const useNavigationMock = vi.mocked(useNavigation)
-
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-
-  return function QueryProvider({ children }: PropsWithChildren) {
-    return createElement(QueryClientProvider, { client: queryClient }, children)
-  }
-}
 
 describe('useDocumentViewer', () => {
   const navigateTo = vi.fn()
@@ -70,9 +58,7 @@ describe('useDocumentViewer', () => {
   })
 
   it('exposes the loaded file metadata and formatted size', () => {
-    const { result } = renderHook(() => useDocumentViewer(), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useDocumentViewer())
 
     expect(result.current.file?.id).toBe('file-123')
     expect(result.current.format).toBe('PDF')
@@ -80,9 +66,7 @@ describe('useDocumentViewer', () => {
   })
 
   it('changes zoom within the configured limits', () => {
-    const { result } = renderHook(() => useDocumentViewer(), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useDocumentViewer())
 
     act(() => {
       result.current.handleZoomIn()
@@ -101,9 +85,7 @@ describe('useDocumentViewer', () => {
   })
 
   it('navigates back to the document inbox', () => {
-    const { result } = renderHook(() => useDocumentViewer(), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useDocumentViewer())
 
     act(() => result.current.handleBack())
 
