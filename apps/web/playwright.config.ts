@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 import { loadEnv } from 'vite'
 
 const env = { ...loadEnv('test', process.cwd(), ''), ...process.env }
-const webAppPort = Number(env.HMS_WEB_APP_PORT)
+const webAppPort = Number(env.HMS_WEB_APP_PORT || 5000)
 
 if (!Number.isInteger(webAppPort) || webAppPort < 1 || webAppPort > 65535) {
   throw new Error('HMS_WEB_APP_PORT must be an integer between 1 and 65535.')
