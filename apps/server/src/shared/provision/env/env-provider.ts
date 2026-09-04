@@ -37,6 +37,32 @@ export const envSchema = z.object({
     .int()
     .positive()
     .default(50 * 1024 * 1024),
+  DOCUMENSO_PRIVATE_BASE_URL: z.string().url().default('http://127.0.0.1:3004'),
+  DOCUMENSO_API_V2_KEY: z.string().default(''),
+  DOCUMENSO_WEBHOOK_SECRET: z.string().default(''),
+  DOCUMENSO_EXPECTED_VERSION: z.string().default('2.17.0'),
+  HMS_SIGNING_OTP_PEPPER: z.string().default(''),
+  HMS_SIGNING_IP_FINGERPRINT_KEY: z.string().default(''),
+  HMS_SIGNING_CIPHER: z.string().default('aes-256-gcm'),
+  HMS_SIGNING_CIPHER_KEY_ID: z.string().default('local'),
+  HMS_SIGNING_PROXY_PUBLIC_PREFIX: z.string().default('/assinaturas/provedor'),
+  HMS_SIGNING_INVITATION_MAX_AGE_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(604_800),
+  HMS_SIGNING_SESSION_MAX_AGE_SECONDS: z.coerce.number().int().positive().default(86_400),
+  HMS_SIGNING_RESULT_MAX_AGE_SECONDS: z.coerce.number().int().positive().default(86_400),
+  HMS_SIGNING_PROXY_IDLE_TIMEOUT_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1_800),
+  HMS_SIGNING_OTP_EXPIRY_SECONDS: z.coerce.number().int().positive().default(1_800),
+  HMS_SIGNING_OTP_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
+  RESEND_API_KEY: z.string().default(''),
+  HMS_SIGNING_EMAIL_FROM: z.string().default(''),
+  MAILPIT_API_URL: z.string().url().default('http://127.0.0.1:8025'),
 })
 
 type Env = z.infer<typeof envSchema>

@@ -45,6 +45,7 @@ import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from '
 import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
 import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
+import { Route as AssinaturasAcessoIndexRouteImport } from './routes/assinaturas/acesso/index'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
@@ -241,6 +242,11 @@ const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
   path: '/redefinir-senha/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssinaturasAcessoIndexRoute = AssinaturasAcessoIndexRouteImport.update({
+  id: '/assinaturas/acesso/',
+  path: '/assinaturas/acesso/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
@@ -377,6 +384,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/assinaturas/acesso': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
   '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdIndexRoute
@@ -425,6 +433,7 @@ export interface FileRoutesById {
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
@@ -474,6 +483,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha/'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/assinaturas/acesso/'
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/formalizacoes/$formalizationId/'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/assinaturas/acesso'
     | '/cliente/meus-casos'
     | '/consultas/$consultationId'
     | '/formalizacoes/$formalizationId'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha/'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/assinaturas/acesso/'
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
     | '/formalizacoes/$formalizationId/'
@@ -596,6 +608,7 @@ export interface RootRouteChildren {
   ModelosDeDocumentosIndexRoute: typeof ModelosDeDocumentosIndexRoute
   PedirRedefinirSenhaIndexRoute: typeof PedirRedefinirSenhaIndexRoute
   RedefinirSenhaIndexRoute: typeof RedefinirSenhaIndexRoute
+  AssinaturasAcessoIndexRoute: typeof AssinaturasAcessoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -852,6 +865,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RedefinirSenhaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assinaturas/acesso/': {
+      id: '/assinaturas/acesso/'
+      path: '/assinaturas/acesso'
+      fullPath: '/assinaturas/acesso/'
+      preLoaderRoute: typeof AssinaturasAcessoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
       path: '/meus-casos'
@@ -1087,6 +1107,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelosDeDocumentosIndexRoute: ModelosDeDocumentosIndexRoute,
   PedirRedefinirSenhaIndexRoute: PedirRedefinirSenhaIndexRoute,
   RedefinirSenhaIndexRoute: RedefinirSenhaIndexRoute,
+  AssinaturasAcessoIndexRoute: AssinaturasAcessoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

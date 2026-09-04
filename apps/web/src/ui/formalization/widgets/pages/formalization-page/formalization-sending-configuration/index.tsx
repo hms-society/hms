@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { FormalizationSignatureConfiguration } from '@hms/core/formalization/domain/structures'
 
 import type { FormalizationSignatureConfigurationController } from '@/ui/formalization/hooks/use-formalization-signature-configuration-action'
+import type { FormalizationSignatureSendingController } from '@/ui/formalization/hooks/use-formalization-signature-sending-action'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +13,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/ui/shadcn/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/shadcn/dialog'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent, CardHeader } from '@/ui/shadcn/card'
@@ -31,6 +40,7 @@ export type FormalizationSendingConfigurationProps = {
   isReadOnly?: boolean
   configuration: SignatureConfiguration
   controller: FormalizationSignatureConfigurationController
+  sending?: FormalizationSignatureSendingController
 }
 
 function getStatusLabel(status: FormalizationSignatureConfiguration['status']) {
@@ -53,6 +63,13 @@ function getIssueLabel(issue: string) {
     field_missing: 'Adicione um campo de assinatura.',
     selected_channel_missing: 'Escolha um canal para cada signatário.',
     selected_channel_unavailable: 'Escolha um canal disponível.',
+    not_ready: 'A configuração ainda não está pronta para envio.',
+    stale_configuration: 'Atualize a configuração antes de enviar.',
+    document_unavailable: 'Verifique se os documentos estão disponíveis.',
+    missing_assignment: 'Atribua todos os documentos e signatários.',
+    missing_field: 'Adicione os campos de assinatura obrigatórios.',
+    channel_unavailable: 'Verifique o canal de envio de cada signatário.',
+    consent_unavailable: 'Verifique o consentimento de comunicação do signatário.',
   }
   return labels[issue] ?? 'Revise a configuração antes de enviar.'
 }
@@ -64,10 +81,35 @@ export const FormalizationSendingConfigurationPanel = ({
   isReadOnly = false,
   configuration,
   controller,
+  sending,
 }: FormalizationSendingConfigurationProps) => {
   const widget = useFormalizationSendingConfiguration()
+  const [isReviewOpen, setIsReviewOpen] = useState(false)
+  const sendingController =
+    sending ??
+    ({
+      review: undefined,
+      status: undefined,
+      reviewError: null,
+      statusError: null,
+      isLoadingReview: false,
+      isFetchingReview: false,
+      isLoadingStatus: false,
+      isConfirming: false,
+      isCancelling: false,
+      isCancellationPending: false,
+      confirmError: null,
+      cancelError: null,
+      confirmSending: async () => undefined,
+      cancelSending: async () => undefined,
+      refetchReview: async () => undefined,
+      refetchStatus: async () => undefined,
+    } as unknown as FormalizationSignatureSendingController)
   const isForbidden =
     (controller.configurationError as { statusCode?: number } | null)?.statusCode === 403
+  const confirmErrorStatus = (
+    sending?.confirmError as { statusCode?: number } | null | undefined
+  )?.statusCode
 
   if (!isPackageConfirmed) {
     return (
@@ -184,10 +226,53 @@ export const FormalizationSendingConfigurationPanel = ({
   const canOpenSummary = configuration.readiness.ready
   const activeTab =
     !canOpenSummary && widget.activeTab === 'summary' ? 'signatories' : widget.activeTab
-  const isReady =
+  const isConfigurationReady =
     configuration.readiness.ready && configuration.status === 'ready_for_sending'
+  const currentRequest = sendingController.review?.currentRequest
+  const hasOpenRequest = Boolean(currentRequest)
+  const isRequestCancelled = currentRequest?.status === 'cancelled'
+  const isRequestConfirmed = currentRequest?.status === 'confirmed'
   const canEdit =
-    configuration.editable && !isReadOnly && configuration.status !== 'read_only'
+    configuration.editable &&
+    !isReadOnly &&
+    configuration.status !== 'read_only' &&
+    (!hasOpenRequest || isRequestCancelled)
+  const displayedConfiguration =
+    configuration.editable === canEdit
+      ? configuration
+      : { ...configuration, editable: canEdit }
+  const isCancellationPending = sendingController.isCancellationPending
+  const isSendingReviewReady = sendingController.review?.ready === true
+  const isRefreshingReview =
+    sendingController.isLoadingReview || sendingController.isFetchingReview
+  const canOpenSendingReview = isConfigurationReady && canEdit && !hasOpenRequest
+  const canResetConfiguration =
+    canEdit && (!hasOpenRequest || isRequestCancelled) && !isCancellationPending
+  const canConfirmSending =
+    canOpenSendingReview &&
+    isSendingReviewReady &&
+    !isRefreshingReview &&
+    !sendingController.reviewError
+  const sendingExpectedVersion = sendingController.review?.version ?? expectedVersion
+  const sendingStatusLabel = !isConfigurationReady
+    ? getStatusLabel(configuration.status)
+    : isCancellationPending
+      ? 'Cancelamento em andamento'
+      : isRequestCancelled
+        ? 'Envio cancelado'
+        : isRequestConfirmed
+          ? 'Envio concluído'
+          : hasOpenRequest
+            ? 'Envio em andamento'
+            : !canEdit
+              ? 'Somente leitura'
+              : isRefreshingReview
+                ? 'Validando envio'
+                : sendingController.reviewError
+                  ? 'Revisão indisponível'
+                  : isSendingReviewReady
+                    ? 'Pronto para envio'
+                    : 'Revisão necessária'
   const progressTotal = configuration.previewPreparation.total
   const progressCompleted = Math.min(
     progressTotal,
@@ -201,6 +286,11 @@ export const FormalizationSendingConfigurationPanel = ({
     widget.handleTabChange('signatories')
   }
 
+  function handleOpenSendingReview() {
+    setIsReviewOpen(true)
+    if (!isRefreshingReview) void sendingController.refetchReview()
+  }
+
   return (
     <Card className='border border-border shadow-sm'>
       <CardHeader className='gap-4 p-5 sm:p-6'>
@@ -209,8 +299,10 @@ export const FormalizationSendingConfigurationPanel = ({
             <Icon name='send' className='size-5 text-primary' />
             Configuração do envio
           </h2>
-          <Badge variant={isReady ? 'success' : 'attention'}>
-            {getStatusLabel(configuration.status)}
+          <Badge
+            variant={canConfirmSending || isRequestConfirmed ? 'success' : 'attention'}
+          >
+            {sendingStatusLabel}
           </Badge>
         </div>
         {controller.isPreparingConfiguration && (
@@ -282,41 +374,108 @@ export const FormalizationSendingConfigurationPanel = ({
           </TabsList>
           <TabsContent value='summary' className='space-y-4 pt-4'>
             <div className='rounded-xl border border-border p-4'>
-              <h3 className='font-medium'>Pronto para revisar</h3>
+              <h3 className='font-medium'>Revisão do envio</h3>
               <p className='mt-1 text-sm text-muted-foreground'>
                 Revise signatários, atribuições, canais e campos antes do envio.
               </p>
             </div>
-            <Button
-              type='button'
-              disabled
-              aria-describedby='formalization-send-help'
-              className='w-full sm:w-auto'
-            >
-              <Icon name='send' className='size-4' /> Iniciar envio de assinaturas
-            </Button>
+            {!isRequestConfirmed && (
+              <Button
+                type='button'
+                disabled={!canOpenSendingReview}
+                className='w-full sm:w-auto'
+                onClick={handleOpenSendingReview}
+              >
+                <Icon name='send' className='size-4' /> Revisar e iniciar envio
+              </Button>
+            )}
             <p id='formalization-send-help' className='text-xs text-muted-foreground'>
-              {isReady
-                ? 'O envio será habilitado em uma etapa futura.'
-                : 'Complete a configuração para habilitar o envio.'}
+              {!isConfigurationReady
+                ? 'Complete a configuração para habilitar o envio.'
+                : isRequestConfirmed
+                  ? 'Todos os documentos foram assinados e o envio foi concluído.'
+                  : !canEdit
+                    ? 'A configuração está disponível somente para leitura.'
+                    : hasOpenRequest
+                      ? isRequestCancelled
+                        ? 'O envio foi cancelado.'
+                        : 'Já existe um envio em andamento para esta configuração.'
+                      : isRefreshingReview
+                        ? 'A revisão do envio está sendo validada.'
+                        : sendingController.reviewError
+                          ? 'Abra a revisão para tentar carregar os dados novamente.'
+                          : !isSendingReviewReady
+                            ? 'Abra a revisão para consultar as pendências antes de confirmar.'
+                            : 'Revise os dados e confirme para iniciar o envio.'}
             </p>
           </TabsContent>
           <TabsContent value='signatories' className='pt-4'>
             <SignatoriesTab
               formalizationId={_formalizationId}
               expectedVersion={expectedVersion}
-              configuration={configuration}
+              configuration={displayedConfiguration}
             />
           </TabsContent>
           <TabsContent value='fields' className='pt-4'>
             <SignatureFieldsTab
               expectedVersion={expectedVersion}
-              configuration={configuration}
+              configuration={displayedConfiguration}
               onUnsavedChangesChange={widget.handleFieldsDirtyChange}
               onOpenSignatories={() => widget.handleTabChange('signatories')}
             />
           </TabsContent>
         </Tabs>
+        {hasOpenRequest && (
+          <div className='rounded-xl border border-primary/30 bg-primary/5 p-4'>
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+              <div>
+                <h3 className='font-medium'>
+                  {isCancellationPending
+                    ? 'Cancelamento do envio em andamento'
+                    : isRequestCancelled
+                      ? 'Envio de assinaturas cancelado'
+                      : isRequestConfirmed
+                        ? 'Envio de assinaturas concluído'
+                        : 'Envio de assinaturas em andamento'}
+                </h3>
+                {isCancellationPending ? (
+                  <p className='mt-1 text-sm text-muted-foreground'>
+                    Revogando o envio e atualizando o estado do provedor...
+                  </p>
+                ) : !isRequestCancelled ? (
+                  <p className='mt-1 text-sm text-muted-foreground'>
+                    {sendingController.status
+                      ? `${sendingController.status.completedDocuments}/${sendingController.status.totalDocuments} documentos concluídos.`
+                      : 'Atualizando o progresso do envio...'}
+                  </p>
+                ) : null}
+              </div>
+              {!isRequestCancelled &&
+                !isCancellationPending &&
+                sendingController.status?.canCancel && (
+                  <Button
+                    variant='outline'
+                    disabled={sendingController.isCancelling}
+                    onClick={() => {
+                      const expectedRequestVersion = sendingController.status?.version
+                      if (!expectedRequestVersion) return
+                      void sendingController.cancelSending({
+                        expectedRequestVersion,
+                        expectedFormalizationVersion: expectedVersion,
+                      })
+                    }}
+                  >
+                    {sendingController.isCancelling ? 'Cancelando...' : 'Cancelar envio'}
+                  </Button>
+                )}
+            </div>
+            {sendingController.cancelError && (
+              <p role='alert' className='mt-3 text-sm text-destructive'>
+                Não foi possível cancelar o envio. Atualize e tente novamente.
+              </p>
+            )}
+          </div>
+        )}
         <div className='flex flex-wrap justify-between gap-3 border-t border-border pt-4'>
           <p className='text-xs text-muted-foreground'>
             {configuration.status === 'read_only'
@@ -325,7 +484,9 @@ export const FormalizationSendingConfigurationPanel = ({
           </p>
           <Button
             variant='outline'
-            disabled={!canEdit || controller.isResettingSignatureConfiguration}
+            disabled={
+              !canResetConfiguration || controller.isResettingSignatureConfiguration
+            }
             onClick={() => widget.setIsResetDialogOpen(true)}
           >
             Redefinir configuração
@@ -379,6 +540,106 @@ export const FormalizationSendingConfigurationPanel = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+        <DialogContent className='max-h-[calc(100vh-1.5rem)] overflow-y-auto sm:max-w-2xl'>
+          <DialogHeader>
+            <DialogTitle>Revisar e iniciar envio</DialogTitle>
+            <DialogDescription>
+              Confirme os documentos e signatários. O convite será enviado por e-mail após
+              a preparação segura do provedor.
+            </DialogDescription>
+          </DialogHeader>
+          {isRefreshingReview ? (
+            <div aria-busy='true' className='rounded-lg bg-muted/50 p-4 text-sm'>
+              {sendingController.isLoadingReview
+                ? 'Carregando revisão...'
+                : 'Atualizando revisão...'}
+            </div>
+          ) : sendingController.reviewError ? (
+            <div
+              role='alert'
+              className='space-y-3 rounded-lg border border-destructive/30 p-4'
+            >
+              <p>Não foi possível carregar a revisão do envio.</p>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => void sendingController.refetchReview()}
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          ) : sendingController.review ? (
+            <div className='space-y-4'>
+              <div className='grid gap-3 sm:grid-cols-2'>
+                <SummaryMetric
+                  label='Documentos'
+                  value={String(sendingController.review.documents.length)}
+                />
+                <SummaryMetric
+                  label='Signatários'
+                  value={String(sendingController.review.signatories.length)}
+                />
+              </div>
+              <div className='rounded-lg border border-border p-4 text-sm'>
+                <p>{sendingController.review.messagePreview}</p>
+                {sendingController.review.issues.length > 0 && (
+                  <ul className='mt-3 list-disc space-y-1 pl-5 text-destructive'>
+                    {sendingController.review.issues.map((issue) => (
+                      <li
+                        key={`${issue.code}-${issue.documentId ?? issue.signatoryId ?? 'general'}`}
+                      >
+                        {getIssueLabel(issue.code)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className='rounded-lg border border-border p-4 text-sm'>
+              A revisão do envio ainda não está disponível.
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setIsReviewOpen(false)}>
+              Voltar
+            </Button>
+            <Button
+              disabled={!canConfirmSending || sendingController.isConfirming}
+              onClick={() =>
+                void sendingController
+                  .confirmSending({
+                    expectedVersion: sendingExpectedVersion,
+                    confirmationKey: crypto.randomUUID(),
+                  })
+                  .then(() => setIsReviewOpen(false))
+              }
+            >
+              {sendingController.isConfirming ? 'Iniciando...' : 'Confirmar envio'}
+            </Button>
+          </DialogFooter>
+          {sendingController.confirmError && (
+            <div
+              role='alert'
+              className='flex flex-col gap-3 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between'
+            >
+              <p>
+                {confirmErrorStatus === 409
+                  ? 'A configuração foi alterada. Atualize a revisão antes de tentar novamente.'
+                  : 'O envio não pôde ser iniciado. Atualize a revisão e tente novamente.'}
+              </p>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => void sendingController.refetchReview()}
+              >
+                Atualizar revisão
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

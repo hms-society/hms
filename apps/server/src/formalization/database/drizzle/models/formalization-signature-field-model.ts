@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   check,
+  foreignKey,
   index,
   integer,
   numeric,
@@ -18,15 +19,9 @@ export const formalizationSignatureFieldModel = pgTable(
   'formalization_signature_fields',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    formalizationId: uuid('formalization_id')
-      .notNull()
-      .references(() => formalizationModel.id, { onDelete: 'cascade' }),
-    signatoryDocumentId: uuid('signatory_document_id')
-      .notNull()
-      .references(() => formalizationSignatoryDocumentModel.id, { onDelete: 'cascade' }),
-    previewId: uuid('preview_id')
-      .notNull()
-      .references(() => formalizationSignaturePreviewModel.id, { onDelete: 'cascade' }),
+    formalizationId: uuid('formalization_id').notNull(),
+    signatoryDocumentId: uuid('signatory_document_id').notNull(),
+    previewId: uuid('preview_id').notNull(),
     type: formalizationSignatureFieldTypeModel('type').notNull().default('signature'),
     page: integer('page').notNull(),
     positionX: numeric('position_x', {
@@ -51,6 +46,21 @@ export const formalizationSignatureFieldModel = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({
+      columns: [table.formalizationId],
+      foreignColumns: [formalizationModel.id],
+      name: 'fs_sig_field_formalization_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.signatoryDocumentId],
+      foreignColumns: [formalizationSignatoryDocumentModel.id],
+      name: 'fs_sig_field_signatory_doc_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.previewId],
+      foreignColumns: [formalizationSignaturePreviewModel.id],
+      name: 'fs_sig_field_preview_fk',
+    }).onDelete('cascade'),
     index('formalization_signature_fields_assignment_idx').on(
       table.signatoryDocumentId,
       table.previewId,

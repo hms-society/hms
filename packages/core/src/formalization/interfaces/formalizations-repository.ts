@@ -1,7 +1,4 @@
-import type {
-  Formalization,
-  FormalizationCreation,
-} from '../domain/entities'
+import type { Formalization, FormalizationCreation } from '../domain/entities'
 import type { ReplaceFormalizationParams } from './replace-formalization-params'
 
 export interface FormalizationsRepository {

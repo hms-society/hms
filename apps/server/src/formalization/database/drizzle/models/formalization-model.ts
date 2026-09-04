@@ -14,6 +14,7 @@ import type {
   DynamicFormAnswer,
   DynamicFormSnapshot,
 } from '@hms/core/shared/domain/structures'
+import { formalizationSignatureRequestStatusModel } from '@/formalization/database/drizzle/models/formalization-signature-request-status-model'
 
 export const formalizationModel = pgTable(
   'formalizations',
@@ -47,6 +48,20 @@ export const formalizationModel = pgTable(
     }),
     documentsConfirmedByCollaboratorId: uuid('documents_confirmed_by_collaborator_id'),
     documentsConfirmedRevision: integer('documents_confirmed_revision'),
+    signatureRequestId: uuid('signature_request_id'),
+    signatureStatus: formalizationSignatureRequestStatusModel('signature_status'),
+    signatureSubmittedAt: timestamp('signature_submitted_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    signatureConfirmedAt: timestamp('signature_confirmed_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    signatureTerminalAt: timestamp('signature_terminal_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
     cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'date' }),
     cancelledByCollaboratorId: uuid('cancelled_by_collaborator_id'),
     version: integer('version').notNull().default(1),

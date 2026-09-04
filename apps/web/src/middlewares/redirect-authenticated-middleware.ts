@@ -5,8 +5,10 @@ import { SupabaseAuthProvider } from '@/provision/auth/supabase/supabase-auth-pr
 
 const authProvider = SupabaseAuthProvider()
 
-export async function redirectAuthenticatedMiddleware() {
+export async function redirectAuthenticatedMiddleware(input: { returnTo?: string } = {}) {
   const session = await authProvider.getSession()
 
-  if (session) throw redirect({ to: ROUTES.home })
+  if (session && input.returnTo !== ROUTES.signingGateway) {
+    throw redirect({ to: ROUTES.home })
+  }
 }

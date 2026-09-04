@@ -1,8 +1,12 @@
+import { createHash } from 'node:crypto'
+
 import { Inject, Injectable } from '@nestjs/common'
 import type {
   CollaboratorsRepository,
   ClientsRepository,
+  ClientConsentsRepository,
 } from '@hms/core/identity/interfaces'
+import { ConsentType } from '@hms/core/identity/domain/structures'
 import type {
   DocumentsRepository,
   DocumentPackagesRepository,
@@ -11,6 +15,8 @@ import type {
 } from '@hms/core/document-production/interfaces'
 import type {
   FormalizationSignatureCandidatePage,
+  FormalizationSignatureAuthenticationChannels,
+  FormalizationSignatureAuthenticationSource,
   FormalizationSignatureSourceDocument,
   FormalizationSignatureSourcePerson,
 } from '@hms/core/formalization/domain/structures'
@@ -31,6 +37,8 @@ export class FormalizationSignatureSourceReader
     private readonly clientsRepository: ClientsRepository,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaboratorsRepository: CollaboratorsRepository,
+    @Inject(IDENTITY_REPOSITORIES.clientConsents)
+    private readonly clientConsentsRepository: ClientConsentsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
@@ -51,7 +59,10 @@ export class FormalizationSignatureSourceReader
         type: client.type,
         email: client.email,
         phone: client.phone,
-        availableChannels: this.getAvailableChannels(client.email, client.phone),
+        availableChannels: await this.getClientAvailableChannels(client.id, {
+          email: client.email,
+          phone: client.phone,
+        }),
       }
     }
 
@@ -108,6 +119,65 @@ export class FormalizationSignatureSourceReader
       limit: result.pageSize,
       total: result.total,
     }
+  }
+
+  async findAuthenticationSource(
+    personId: string,
+  ): Promise<FormalizationSignatureAuthenticationSource | null> {
+    const client = await this.clientsRepository.findById(personId)
+    if (client) {
+      if (client.type !== 'natural') return null
+
+      const channels = await this.listConsentedAuthenticationChannels(client.id)
+      if (channels.length !== 1) return null
+
+      return {
+        personId: client.id,
+        actorKind: 'client',
+        active: true,
+        channels,
+      }
+    }
+
+    const collaborator = await this.collaboratorsRepository.findSummaryById(personId)
+    if (!collaborator) return null
+
+    const collaboratorRole = ELIGIBLE_PROFILES.includes(
+      collaborator.profile as (typeof ELIGIBLE_PROFILES)[number],
+    )
+      ? (collaborator.profile as (typeof ELIGIBLE_PROFILES)[number])
+      : undefined
+
+    if (collaborator.status !== 'active' || !collaboratorRole) return null
+
+    return {
+      personId: collaborator.collaboratorId,
+      actorKind: 'collaborator',
+      active: true,
+      collaboratorRole,
+      channels: [],
+    }
+  }
+
+  async listConsentedAuthenticationChannels(
+    personId: string,
+  ): Promise<FormalizationSignatureAuthenticationChannels> {
+    const client = await this.clientsRepository.findById(personId)
+    if (client?.type !== 'natural' || !client.email) return []
+
+    const consent = await this.clientConsentsRepository.findActiveByClientIdAndType(
+      client.id,
+      ConsentType.EmailCommunication,
+    )
+    if (!consent) return []
+
+    return [
+      {
+        id: this.createEmailChannelId(client.id),
+        kind: 'email',
+        maskedDestination: this.maskEmail(client.email),
+      },
+    ]
   }
 
   async listCurrentDocuments(
@@ -183,5 +253,45 @@ export class FormalizationSignatureSourceReader
       ...(email ? (['email'] as const) : []),
       ...(phone ? (['whatsapp'] as const) : []),
     ]
+  }
+
+  private async getClientAvailableChannels(
+    clientId: string,
+    contacts: { readonly email?: string; readonly phone?: string },
+  ): Promise<CommunicationChannel[]> {
+    const [emailConsent, whatsappConsent] = await Promise.all([
+      contacts.email
+        ? this.clientConsentsRepository.findActiveByClientIdAndType(
+            clientId,
+            ConsentType.EmailCommunication,
+          )
+        : undefined,
+      contacts.phone
+        ? this.clientConsentsRepository.findActiveByClientIdAndType(
+            clientId,
+            ConsentType.WhatsappCommunication,
+          )
+        : undefined,
+    ])
+
+    return [
+      ...(emailConsent && contacts.email ? (['email'] as const) : []),
+      ...(whatsappConsent && contacts.phone ? (['whatsapp'] as const) : []),
+    ]
+  }
+
+  private createEmailChannelId(personId: string): string {
+    const digest = createHash('sha256')
+      .update(`formalization-signing-email:${personId}`)
+      .digest('hex')
+      .slice(0, 32)
+
+    return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-${((Number.parseInt(digest.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0')}${digest.slice(18, 20)}-${digest.slice(20)}`
+  }
+
+  private maskEmail(email: string): string {
+    const [localPart, domain] = email.trim().split('@')
+    if (!localPart || !domain) return '***'
+    return `${localPart[0]}***@${domain}`
   }
 }

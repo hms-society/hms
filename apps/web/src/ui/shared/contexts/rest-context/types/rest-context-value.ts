@@ -11,6 +11,7 @@ import type { DocumentValidationService } from '@/rest/services/document-validat
 import type { SchedulingService } from '@/rest/services/scheduling-service'
 import type { DynamicFormService } from '@/rest/services/dynamic-form-service'
 import type { FormalizationService } from '@/rest/services/formalization-service'
+import type { SigningGatewayService } from '@/rest/services/signing-gateway-service'
 
 export type RestContextValue = {
   intakeService: ReturnType<typeof IntakeService>
@@ -28,4 +29,5 @@ export type RestContextValue = {
   aiSuggestionsService: ReturnType<typeof AiSuggestionsService>
   dynamicFormService: ReturnType<typeof DynamicFormService>
   formalizationService: ReturnType<typeof FormalizationService>
+  signingGatewayService: ReturnType<typeof SigningGatewayService>
 }

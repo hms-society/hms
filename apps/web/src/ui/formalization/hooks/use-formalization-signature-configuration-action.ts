@@ -153,11 +153,43 @@ export function useFormalizationSignatureConfiguration(
     configuration: FormalizationSignatureConfiguration,
   ) {
     primeConfiguration(configuration)
-    void queryClient
-      .invalidateQueries({
-        queryKey: getFormalizationQueryKey(formalizationId),
-      })
-      .catch(() => undefined)
+
+    const formalizationQueryKey = getFormalizationQueryKey(formalizationId)
+    const signatureSendingReviewQueryKey = [
+      ...formalizationQueryKey,
+      'signature-sending-review',
+    ] as const
+    const signatureSendingStatusQueryKey = [
+      ...formalizationQueryKey,
+      'signature-sending-status',
+    ] as const
+
+    void Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: formalizationQueryKey,
+        refetchType: 'none',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: signatureSendingReviewQueryKey,
+        refetchType: 'none',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: signatureSendingStatusQueryKey,
+        refetchType: 'none',
+      }),
+      queryClient.refetchQueries({
+        queryKey: signatureSendingReviewQueryKey,
+        type: 'active',
+      }),
+      queryClient.refetchQueries({
+        queryKey: signatureSendingStatusQueryKey,
+        type: 'active',
+      }),
+      queryClient.refetchQueries({
+        queryKey: formalizationQueryKey,
+        type: 'active',
+      }),
+    ]).catch(() => undefined)
   }
 
   function recoverConfigurationConflict() {

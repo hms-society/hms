@@ -40,7 +40,7 @@ export class DrizzleFormalizationsRepository
       .where(eq(formalizationModel.id, formalizationId))
       .limit(1)
 
-    return record ? this.mapper.toDomain(record) : undefined
+    return record ? this.mapper.toDomain(record as never) : undefined
   }
 
   async findByIntakeId(intakeId: string) {
@@ -50,7 +50,7 @@ export class DrizzleFormalizationsRepository
       .where(eq(formalizationModel.intakeId, intakeId))
       .limit(1)
 
-    return record ? this.mapper.toDomain(record) : undefined
+    return record ? this.mapper.toDomain(record as never) : undefined
   }
 
   async addOrGet(formalization: FormalizationCreation) {
@@ -60,7 +60,7 @@ export class DrizzleFormalizationsRepository
       .onConflictDoNothing({ target: formalizationModel.intakeId })
       .returning()
 
-    if (created) return this.mapper.toDomain(created)
+    if (created) return this.mapper.toDomain(created as never)
 
     const existing = await this.findByIntakeId(formalization.intakeId)
     if (!existing) {
@@ -104,7 +104,7 @@ export class DrizzleFormalizationsRepository
 
     const [record] = await this.database
       .update(formalizationModel)
-      .set(update)
+      .set(update as never)
       .where(
         and(
           eq(formalizationModel.id, formalizationId),
@@ -113,7 +113,7 @@ export class DrizzleFormalizationsRepository
       )
       .returning()
 
-    return record ? this.mapper.toDomain(record) : undefined
+    return record ? this.mapper.toDomain(record as never) : undefined
   }
 
   async removeAll() {

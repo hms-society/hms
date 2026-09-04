@@ -177,6 +177,7 @@ async function bootstrap() {
   }
 }
 
-bootstrap().catch(() => {
+bootstrap().catch((error: unknown) => {
+  console.error(error instanceof Error ? (error.stack ?? error.message) : error)
   process.exit(1)
 })

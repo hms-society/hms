@@ -13,13 +13,14 @@ import type {
 import type { FormalizationSignatureConfigurationRepository } from '@hms/core/formalization/interfaces'
 import type { FormalizationSignatureSourceReader } from '@hms/core/formalization/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { and, asc, eq, lte, or, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, lte, notInArray, or, sql } from 'drizzle-orm'
 
 import { formalizationModel } from '@/formalization/database/drizzle/models/formalization-model'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import {
   formalizationSignatoryDocumentModel,
   formalizationSignatoryModel,
+  formalizationSignatureRecipientModel,
   formalizationSignatureFieldModel,
   formalizationSignaturePreviewModel,
 } from '@/formalization/database/drizzle/models'
@@ -143,15 +144,45 @@ export class DrizzleFormalizationSignatureConfigurationRepository
         .where(
           eq(formalizationSignatoryDocumentModel.formalizationId, input.formalizationId),
         )
-      await transaction
-        .delete(formalizationSignatoryModel)
+
+      const previousSignatories = await transaction
+        .select({ id: formalizationSignatoryModel.id })
+        .from(formalizationSignatoryModel)
         .where(eq(formalizationSignatoryModel.formalizationId, input.formalizationId))
 
+      const previousSignatoryIds = previousSignatories.map(({ id }) => id)
+      const referencedSignatoryRows =
+        previousSignatoryIds.length === 0
+          ? []
+          : await transaction
+              .select({ signatoryId: formalizationSignatureRecipientModel.signatoryId })
+              .from(formalizationSignatureRecipientModel)
+              .where(
+                inArray(
+                  formalizationSignatureRecipientModel.signatoryId,
+                  previousSignatoryIds,
+                ),
+              )
+      const referencedSignatoryIds = new Set<string>(
+        referencedSignatoryRows.map(({ signatoryId }) => signatoryId),
+      )
+
+      await transaction
+        .delete(formalizationSignatoryModel)
+        .where(
+          and(
+            eq(formalizationSignatoryModel.formalizationId, input.formalizationId),
+            referencedSignatoryIds.size > 0
+              ? notInArray(formalizationSignatoryModel.id, [...referencedSignatoryIds])
+              : sql`true`,
+          ),
+        )
+
       if (input.signatories.length > 0) {
-        await transaction.insert(formalizationSignatoryModel).values(
-          input.signatories.map((signatory) => ({
+        for (const signatory of input.signatories) {
+          const values = {
             id: signatory.id,
-            formalizationId: signatory.formalizationId,
+            formalizationId: input.formalizationId,
             personId: signatory.personId,
             role: signatory.role,
             position: signatory.position,
@@ -160,8 +191,20 @@ export class DrizzleFormalizationSignatureConfigurationRepository
             createdAt: signatory.createdAt,
             updatedByCollaboratorId: input.actorId,
             updatedAt: input.occurredAt,
-          })),
-        )
+          }
+          const [updated] = await transaction
+            .update(formalizationSignatoryModel)
+            .set(values)
+            .where(
+              and(
+                eq(formalizationSignatoryModel.id, signatory.id),
+                eq(formalizationSignatoryModel.formalizationId, input.formalizationId),
+              ),
+            )
+            .returning({ id: formalizationSignatoryModel.id })
+          if (!updated)
+            await transaction.insert(formalizationSignatoryModel).values(values)
+        }
       }
 
       if (input.assignments.length > 0) {

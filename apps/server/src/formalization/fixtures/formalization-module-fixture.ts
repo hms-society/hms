@@ -300,6 +300,8 @@ export class FormalizationModuleFixture {
       listCurrentDocuments: vi.fn().mockResolvedValue([]),
       findCurrentDocument: vi.fn().mockResolvedValue(null),
       findDocumentVersion: vi.fn().mockResolvedValue(null),
+      findAuthenticationSource: vi.fn().mockResolvedValue(null),
+      listConsentedAuthenticationChannels: vi.fn().mockResolvedValue([]),
     }
     const converter: Mocked<DocumentPdfConverter> = {
       convert: vi.fn().mockResolvedValue({

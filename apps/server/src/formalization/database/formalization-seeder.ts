@@ -12,7 +12,11 @@ import type { FormalizationCreation } from '@hms/core/formalization/domain/entit
 import { fakeFormalization } from '@hms/core/formalization/domain/entities/fakers'
 import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import {
+  FORMALIZATION_DATABASE_OPERATIONS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants/formalization-repositories'
+import type { FormalizationSignatureGatewayTransaction } from '@hms/core/formalization/interfaces'
 
 const SEEDED_FORMALIZATION_ID = '00000000-0000-4000-8000-000000000701'
 const SEEDED_CONFIRMATION_DATE = new Date('2026-08-20T15:15:00.000Z')
@@ -30,10 +34,15 @@ export class FormalizationSeeder {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     private readonly formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
+    private readonly signatureGatewayTransaction: FormalizationSignatureGatewayTransaction & {
+      removeAll(): Promise<void>
+    },
   ) {}
 
-  clear() {
-    return this.formalizationsRepository.removeAll()
+  async clear() {
+    await this.signatureGatewayTransaction.removeAll()
+    await this.formalizationsRepository.removeAll()
   }
 
   async run(references: FormalizationSeedReferences) {

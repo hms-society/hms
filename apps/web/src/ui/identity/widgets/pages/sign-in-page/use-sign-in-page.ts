@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 
+import type { ROUTES } from '@/constants/routes'
 import { useSignInAction } from '@/ui/identity/hooks/use-sign-in-action'
 
 type SignInFormValues = {
@@ -8,9 +9,13 @@ type SignInFormValues = {
   password: string
 }
 
-export function useSignInPage() {
+export type SignInPageProps = {
+  returnTo?: typeof ROUTES.signingGateway
+}
+
+export function useSignInPage(props: SignInPageProps = {}) {
   const [showPassword, setShowPassword] = useState(false)
-  const { signIn, isPending: isLoading, error } = useSignInAction()
+  const { signIn, isPending: isLoading, error } = useSignInAction(props.returnTo)
   const { handleSubmit: handleFormSubmit, register } = useForm<SignInFormValues>()
 
   function handleTogglePasswordVisibility() {

@@ -203,4 +203,43 @@ describe('FormalizationService', () => {
     expect(response.statusCode).toBe(422)
     expect(response.isFailure).toBe(true)
   })
+
+  it('maps signature sending review, confirmation, status and cancellation', async () => {
+    const response = new RestResponse({ body: {} as never })
+    const restClient = {
+      get: vi.fn().mockResolvedValue(response),
+      post: vi.fn().mockResolvedValue(response),
+    } as unknown as RestClient
+    const service = FormalizationService(restClient)
+
+    await service.getSignatureSendingReview('formalization-1')
+    await service.confirmSignatureSending('formalization-1', {
+      expectedVersion: 4,
+      confirmationKey: 'confirmation-key',
+    })
+    await service.getSignatureSendingStatus('formalization-1')
+    await service.cancelSignatureSending('formalization-1', {
+      expectedRequestVersion: 2,
+      expectedFormalizationVersion: 5,
+    })
+
+    expect(restClient.get).toHaveBeenNthCalledWith(
+      1,
+      '/formalizations/formalization-1/signature-sending/review',
+    )
+    expect(restClient.get).toHaveBeenNthCalledWith(
+      2,
+      '/formalizations/formalization-1/signature-sending/status',
+    )
+    expect(restClient.post).toHaveBeenNthCalledWith(
+      1,
+      '/formalizations/formalization-1/signature-sending/confirm',
+      { expectedVersion: 4, confirmationKey: 'confirmation-key' },
+    )
+    expect(restClient.post).toHaveBeenNthCalledWith(
+      2,
+      '/formalizations/formalization-1/signature-sending/cancel',
+      { expectedRequestVersion: 2, expectedFormalizationVersion: 5 },
+    )
+  })
 })

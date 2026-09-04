@@ -1,6 +1,7 @@
 export const ROUTES = {
   root: '/',
   login: '/login',
+  signingGateway: '/assinaturas/acesso',
   home: '/home',
   intakes: '/intakes',
   intakeDetails: '/intakes/$intakeId',

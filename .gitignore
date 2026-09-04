@@ -76,3 +76,7 @@ AGENTS.local.md
 .env.testing
 .env.staging
 .env.production
+
+# local secret files
+/.secrets/
+volumes/documenso/signing.p12

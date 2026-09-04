@@ -1,0 +1,1 @@
+export const SIGNING_GATEWAY_CSRF_HEADER = 'X-HMS-Signing-CSRF'

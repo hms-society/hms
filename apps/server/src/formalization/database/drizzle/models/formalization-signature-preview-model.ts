@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   bigint,
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -23,14 +24,10 @@ export const formalizationSignaturePreviewModel = pgTable(
   'formalization_signature_previews',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    formalizationId: uuid('formalization_id')
-      .notNull()
-      .references(() => formalizationModel.id, { onDelete: 'cascade' }),
+    formalizationId: uuid('formalization_id').notNull(),
     documentId: uuid('document_id').notNull(),
     documentVersionId: uuid('document_version_id').notNull(),
-    fileId: uuid('file_id').references(() => storedFileModel.id, {
-      onDelete: 'restrict',
-    }),
+    fileId: uuid('file_id'),
     contentChecksumSha256: varchar('content_checksum_sha256', { length: 64 }),
     pdfChecksumSha256: varchar('pdf_checksum_sha256', { length: 64 }),
     converterVersion: varchar('converter_version', { length: 64 }),
@@ -54,6 +51,16 @@ export const formalizationSignaturePreviewModel = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({
+      columns: [table.formalizationId],
+      foreignColumns: [formalizationModel.id],
+      name: 'fs_sig_preview_formalization_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.fileId],
+      foreignColumns: [storedFileModel.id],
+      name: 'fs_sig_preview_file_fk',
+    }).onDelete('restrict'),
     uniqueIndex('formalization_signature_previews_current_key_uq')
       .on(table.formalizationId, table.documentId, table.documentVersionId)
       .where(sql`${table.state} in ('pending', 'processing', 'ready', 'failed')`),

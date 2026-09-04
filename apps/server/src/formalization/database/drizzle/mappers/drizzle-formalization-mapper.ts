@@ -5,7 +5,7 @@ import type { DrizzleFormalization } from '@/formalization/database/drizzle/type
 export class DrizzleFormalizationMapper {
   toDomain(record: DrizzleFormalization): Formalization {
     return {
-      ...record,
+      ...(record as unknown as Formalization),
       legalAreaId: record.legalAreaId ?? undefined,
       legalTopicId: record.legalTopicId ?? undefined,
       status: record.status as Formalization['status'],
@@ -19,6 +19,11 @@ export class DrizzleFormalizationMapper {
       documentsConfirmedRevision: record.documentsConfirmedRevision ?? undefined,
       cancelledAt: record.cancelledAt ?? undefined,
       cancelledByCollaboratorId: record.cancelledByCollaboratorId ?? undefined,
+      signatureRequestId: record.signatureRequestId ?? undefined,
+      signatureStatus: record.signatureStatus ?? undefined,
+      signatureSubmittedAt: record.signatureSubmittedAt ?? undefined,
+      signatureConfirmedAt: record.signatureConfirmedAt ?? undefined,
+      signatureTerminalAt: record.signatureTerminalAt ?? undefined,
     }
   }
 }

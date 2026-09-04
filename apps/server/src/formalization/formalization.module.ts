@@ -8,12 +8,17 @@ import { DrizzleFormalizationCloseTransaction } from '@/formalization/database/f
 import { DrizzleFormalizationDocumentConfirmationTransaction } from '@/formalization/database/formalization-document-confirmation-transaction'
 import { DrizzleFormalizationStartTransaction } from '@/formalization/database/formalization-start-transaction'
 import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import {
+  FormalizationSignatureSendingService,
+  FormalizationSigningGatewayService,
+} from '@/formalization/formalization-signature-sending.service'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 import { FormalizationMessagingModule } from '@/formalization/messaging/formalization-messaging.module'
 import {
   ServerFormalizationIntakeClosureService,
   ServerFormalizationIntakeLifecycleService,
   ServerFormalizationSourceReader,
+  DocumensoWebhookNormalizer,
 } from '@/formalization/provision'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
@@ -33,6 +38,10 @@ import {
   GetFormalizationDocumentSelectionController,
   GetFormalizationDocumentVersionController,
   GetFormalizationSignatureConfigurationController,
+  GetFormalizationSignatureSendingStatusController,
+  GetFormalizationSignatureSendingReviewController,
+  ConfirmFormalizationSignatureSendingController,
+  CancelFormalizationSignatureSendingController,
   GetFormalizationSignaturePreviewContentController,
   InitializeFormalizationSignatureConfigurationController,
   ListFormalizationDocumentsController,
@@ -52,7 +61,11 @@ import {
   SelectCurrentFormalizationDocumentVersionController,
   SelectFormalizationSignatoryChannelController,
   StartFormalizationController,
+  SigningGatewayController,
+  SigningGatewayWebhookController,
+  SigningGatewayProxyController,
 } from '@/formalization/rest/controllers'
+import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/guards/optional-signing-gateway-collaborator.guard'
 
 @Module({
   imports: [
@@ -88,6 +101,10 @@ import {
     ConfirmFormalizationDocumentsController,
     AddFormalizationSignatoryController,
     GetFormalizationSignatureConfigurationController,
+    GetFormalizationSignatureSendingStatusController,
+    GetFormalizationSignatureSendingReviewController,
+    ConfirmFormalizationSignatureSendingController,
+    CancelFormalizationSignatureSendingController,
     InitializeFormalizationSignatureConfigurationController,
     ListFormalizationSignatureCandidatesController,
     RemoveFormalizationSignatoryController,
@@ -98,9 +115,16 @@ import {
     ReplaceFormalizationSignatureFieldsController,
     ResetFormalizationSignatureConfigurationController,
     ReopenFormalizationDocumentPackageController,
+    SigningGatewayController,
+    SigningGatewayWebhookController,
+    SigningGatewayProxyController,
   ],
   providers: [
     FormalizationApplicationService,
+    FormalizationSignatureSendingService,
+    FormalizationSigningGatewayService,
+    OptionalSigningGatewayCollaboratorGuard,
+    DocumensoWebhookNormalizer,
     DrizzleFormalizationStartTransaction,
     DrizzleFormalizationCloseTransaction,
     DrizzleFormalizationDocumentConfirmationTransaction,

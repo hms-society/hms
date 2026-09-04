@@ -46,6 +46,7 @@ export const FormalizationSendingConfiguration = ({
         isReadOnly={formalization.status !== 'in_progress'}
         configuration={page.signatureConfiguration.configuration}
         controller={page.signatureConfiguration}
+        sending={page.signatureSending}
       />
     </main>
   )

@@ -2,8 +2,13 @@ import type { FormalizationService as FormalizationRestService } from '@hms/core
 import type { DocumentVersion } from '@hms/core/document-production/domain/entities'
 import type { Formalization } from '@hms/core/formalization/domain/entities'
 import type {
+  CancelFormalizationSignatureSendingCommand,
+  ConfirmFormalizationSignatureSendingCommand,
   FormalizationSignatureCandidatePage,
+  FormalizationSignatureSendingCancellationResponse,
   FormalizationSignatureConfiguration,
+  FormalizationSignatureSendingReviewResponse,
+  FormalizationSignatureSendingStatusResponse,
 } from '@hms/core/formalization/domain/structures'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
@@ -162,6 +167,38 @@ export const FormalizationService = (
   getSignatureConfiguration(formalizationId) {
     return restClient.get<FormalizationSignatureConfiguration>(
       `/formalizations/${formalizationId}/signature-configuration`,
+    )
+  },
+
+  getSignatureSendingReview(formalizationId) {
+    return restClient.get<FormalizationSignatureSendingReviewResponse>(
+      `/formalizations/${formalizationId}/signature-sending/review`,
+    )
+  },
+
+  confirmSignatureSending(
+    formalizationId,
+    input: ConfirmFormalizationSignatureSendingCommand,
+  ) {
+    return restClient.post<FormalizationSignatureSendingStatusResponse>(
+      `/formalizations/${formalizationId}/signature-sending/confirm`,
+      input,
+    )
+  },
+
+  getSignatureSendingStatus(formalizationId) {
+    return restClient.get<FormalizationSignatureSendingStatusResponse>(
+      `/formalizations/${formalizationId}/signature-sending/status`,
+    )
+  },
+
+  cancelSignatureSending(
+    formalizationId,
+    input: CancelFormalizationSignatureSendingCommand,
+  ) {
+    return restClient.post<FormalizationSignatureSendingCancellationResponse>(
+      `/formalizations/${formalizationId}/signature-sending/cancel`,
+      input,
     )
   },
 
