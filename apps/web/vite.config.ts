@@ -9,7 +9,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig(({ command, mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
-  const webAppPort = Number(env.HMS_WEB_APP_PORT)
+  const webAppPort = Number(env.HMS_WEB_APP_PORT || 5000)
 
   if (
     command !== 'build' &&

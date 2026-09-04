@@ -26,7 +26,7 @@ pnpm --filter web exec playwright test --headed
 pnpm --filter web exec playwright test --debug
 ```
 
-The integration config starts the web app on `127.0.0.1:3100` and uses the
+The integration config starts the web app on `127.0.0.1:5000` and uses the
 fixtures under `apps/web/tests`. Existing route tests may use `page.route` for
 isolated widget/route behavior; label those as mocked coverage and do not treat
 them as evidence of real REST or Auth integration. For real server-backed flows,
@@ -40,7 +40,7 @@ transport as sufficient evidence. Use this sequence:
 
 1. Confirm the local dependencies before opening the browser:
    `docker compose ps -a`, `curl http://localhost:8000/auth/v1/health`, and
-   `curl http://localhost:3333/health`. The database and Auth containers must be
+   `curl http://localhost:5555/health`. The database and Auth containers must be
    healthy, and the server must finish Nest bootstrap without
    `UnknownDependenciesException`.
 2. Start `pnpm --filter server dev` and `pnpm --filter web dev` in persistent
@@ -219,6 +219,9 @@ and helper scripts.
 - Always read `AGENTS.local.md` and the rules router first. Read the dynamically
   selected rule documents and the relevant documents above **before** starting,
   not after.
+- When work can be divided into independent workstreams, create subagents and
+  execute those workstreams in parallel. Give each subagent a clear, non-overlapping
+  scope, then review and integrate their results before concluding the task.
 - Re-run dynamic context discovery when implementation reaches files or behavior
   outside the initial scope.
 - When a change spans UI + a new dependency + domain logic, read all of the

@@ -21,8 +21,10 @@ Spec remains unwritten until the gate passes.
 ### 1. Establish repository authority
 
 1. Read root `AGENTS.md`, `AGENTS.local.md`, and applicable nested instructions.
-2. Read `documentation/rules/sdd-rules.md`, `documentation/rules/rules.md`, select Rules from affected paths and behavior, and read
-   every selected Rule in full.
+2. Read `documentation/rules/sdd-rules.md` and `documentation/rules/rules.md`. Build the
+   initial Rule Pack from every path, architectural behavior, companion artifact and
+   validation boundary that the requested outcome can affect, then read every selected Rule
+   in full before researching or drafting that boundary.
 3. Read the actual source request and the applicable Architecture, Modules, PRD, Design and
    Tooling documents.
 4. Inspect the worktree and preserve unrelated or user-owned changes.
@@ -30,6 +32,24 @@ Spec remains unwritten until the gate passes.
 Repository authority overrides generic workflow assumptions. Use actual repository paths,
 commands, versions, terminology and source systems. Never invent tickets, migrations,
 framework conventions or validation categories.
+
+#### Rule-read gate
+
+The Orchestrator must personally complete this gate; prior task context cannot satisfy it. For
+every affected application layer and test boundary:
+
+1. map the boundary through the current routing table in `documentation/rules/rules.md`;
+2. read every matched Rule file in full, including additive testing and cross-layer Rules;
+3. record the exact Rule path and governed boundary in the working Rule Pack;
+4. inspect the repository only after the applicable Rules are loaded; and
+5. stop and extend the Rule Pack before researching or specifying a newly discovered layer.
+
+Conversation history, summaries, an earlier read in another task, generated skill text,
+existing Spec language, code patterns and examples inside this prompt are not substitutes for
+reading the current Rule source files. This prompt describes the workflow but does not own
+layer conventions. If this prompt appears to state a layer rule, verify it against the current
+selected Rule before using it; the Rule wins on any conflict. Do not write or amend `spec.md`
+until every affected layer and validation boundary has passed this gate.
 
 When a Confluence PRD is authoritative, use the Atlassian HMS MCP to search for and read the
 complete canonical page. Derive the Spec's `RF-*` and `CA-*` contract from the applicable
@@ -47,55 +67,38 @@ delivery risk, not file or endpoint counts:
 | `compact` | One cohesive outcome, stable dependencies, limited ownership and low delivery risk. |
 | `complete` | Multiple applications or layers, persistence/integration changes, several UI states, or material security, concurrency, migration or operational risk. |
 
-#### Parallel Searcher research
+#### Direct Orchestrator research
 
-Use [`searcher-agent.md`](../agents/searcher-agent.md) for bounded codebase research. The
-Orchestrator must complete the authority preflight in stage 1 itself before dispatching
-Searchers; Searcher reports do not replace the Orchestrator's required reading of
-`AGENTS.md`, repository authority, or the selected Rules.
+The Orchestrator performs all Spec research directly. Do not create Searcher, Architecture,
+Core, Server, Web, Integration or other research subagents during create-spec. Subagents are
+reserved for the implementation and integrated-review roles defined by SDD.
 
-Prioritize parallel research over serial exploration:
+Identify independent research lanes from real ownership and technical boundaries, then cover
+them in one Orchestrator context. Batch independent read-only commands when practical, but keep
+authority loading, evidence verification, cross-boundary synthesis, ambiguity detection and
+Spec authoring in the Orchestrator. For a complete Spec, inspect every affected Core, Validation,
+Server, Web and Integration boundary; omit unaffected lanes rather than creating placeholder
+research.
 
-- identify independent lanes from real ownership and technical boundaries;
-- for a compact Spec with only one cohesive boundary, the Orchestrator may research it
-  directly or use one Searcher;
-- when two or more independent lanes are affected, dispatch all applicable Searchers in
-  the same parallel wave;
-- for a complete Spec, dispatch the affected `Searcher Core`, `Searcher Server`, and
-  `Searcher Web` lanes concurrently;
-- add `Searcher Integration` only when producer-consumer contracts, generated artifacts,
-  or cross-workspace wiring form a distinct research lane;
-- do not create a mandatory separate Validation Searcher: each owning lane reports its
-  existing tests, fixtures, commands, and validation gaps.
+Before clarification or Spec authoring, the Orchestrator must:
 
-Give every Searcher a bounded question, included paths, explicit search limits, applicable
-authority and Rules, known starting declarations, sibling lanes, and the expected report
-shape. Searchers are read-only sibling subagents in the current task. They do not author
-the Spec, modify authority, create artifacts, make product or architecture decisions, ask
-the user questions, or create other agents.
-
-After all dispatched Searchers return, the Orchestrator must:
-
-1. join the reports by path, declaration, responsibility, and runtime boundary;
-2. deduplicate findings and resolve conflicting reports through direct inspection;
+1. organize findings by path, declaration, responsibility and runtime boundary;
+2. resolve conflicting evidence through direct inspection;
 3. verify every consequential claim before using it in clarification or the Spec;
-4. trace each cross-lane producer → contract → consumer relationship and identify missing,
-   partial, or conflicting ownership;
-5. aggregate material ambiguities for stage 3 instead of letting a Searcher resolve them;
-6. complete any blocked or uncovered research directly, or keep the ambiguity unresolved.
+4. trace each producer → contract → consumer relationship and identify missing, partial or
+   conflicting ownership;
+5. aggregate every material ambiguity for stage 3; and
+6. complete uncovered research directly or keep the ambiguity unresolved.
 
-Searcher reports are research input, not durable SDD artifacts or authoritative evidence.
-Do not paste raw reports into the Spec. Do not begin clarification or Spec authoring until
-the applicable reports have been joined and the Orchestrator has completed its verification
-pass.
-
-The Searchers and Orchestrator must collectively inspect every affected boundary for:
+The Orchestrator must inspect every affected boundary for:
 
 - current paths, declarations, exports, registration, configuration and generated files;
 - current control/data flow, reusable contracts and the exact technical gap;
 - contracts crossing packages, applications, providers or persistence;
 - established implementation and testing patterns to reuse;
 - installed versions and current library documentation when APIs evolve;
+- rule-mandated companion artifacts, including route-group `.rest` files, barrels,
+  registration/modules, environment examples, generated outputs and test fixtures;
 - security, tenancy, concurrency, transactions, side effects, failures, SSR/hydration,
   migration and rollout risk.
 
@@ -104,9 +107,21 @@ record any intentional deviation from supplied references.
 
 ### 3. Clarify product and technical choices
 
-After the Searcher join and verification pass, and before creating or modifying
-`spec.md`, identify every unresolved choice that could materially alter the
-Contract.
+After the direct research and verification pass, and before creating or modifying `spec.md`,
+identify every unresolved choice that could materially alter the Contract.
+
+Apply the `grilling` protocol from [`grilling-prompt.md`](./grilling-prompt.md) as the
+clarification gate. Model the unresolved choices as a design tree and ask the whole current
+frontier in one round using the required numbered `❓`/`➡️` format, including a recommendation
+and the impact of each alternative. Recompute the frontier after every answer; a question whose
+prerequisite is open belongs to a later round. Research facts through the repository, authorities,
+tools, or direct repository inspection instead of asking the user for them.
+
+The Spec, design manifest, Plan, and any other Contract artifact must remain unwritten while a
+material frontier decision is open. After the frontier is empty, obtain explicit confirmation
+that the user and Orchestrator share the same understanding before authoring the Spec. Record
+resolved decisions and accepted assumptions in the prescribed Contract sections, never as an
+interview transcript.
 
 | Area | Clarify when unresolved |
 | --- | --- |
@@ -493,6 +508,29 @@ their owning layer. Put root modules, registries, exports and cross-layer depend
 under **Composition** instead of forcing them into a feature layer. Do not create a
 separate file inventory or separate Domain, Integration or Persistence Contract.
 
+Before writing layer rows, perform a **scope-closure audit**. Starting from every changed
+declaration, follow repository Rules to all mandatory companion artifacts and consumers.
+The metadata `scope` list must authorize every affected path named by the layer contracts,
+validation files, design bundle and documentation alignment. A directory entry may cover
+its descendants; otherwise list the exact file. Do not leave a required path only in prose
+or assume that a later Plan may expand writable scope. Typical closure edges include:
+
+- controller/route group → matching `apps/server/rest-client/<module>/<route-group>.rest`;
+- public declaration → barrel/subpath export and every implementer/caller;
+- provider/configuration → token/module binding, environment schema/example and runtime service;
+- Drizzle model → schema barrel, generated migration/snapshot/journal and fixture/reset behavior;
+- widget → colocated hook and repository-required component/hook test pair;
+- generated artifact → authoritative input and generation command.
+
+Before writing each layer row, also perform a **layer-rule provenance check**. Confirm that
+the row's application layer, companion artifacts and testing boundary map to exact Rule files
+that the Orchestrator read in full during the current create-spec task. Derive conventions
+from those Rules, not from conversation memory, previous Specs, current code alone or the
+illustrative contract models below. If a row has no routed Rule, follow the repository's
+unmapped-scope procedure instead of silently promoting an observed pattern into policy. If an
+applicable Rule has not been read, stop authoring, read it in full and recompute the row and
+scope closure.
+
 Use repository-relative exact paths. A planned path is contractual only when repository
 conventions establish its location; resolve uncertain placement before setting the Spec to
 `open`. Group multiple declarations from one file in one row so the path still appears
@@ -676,6 +714,12 @@ Zod schema declarations under Validation; REST rows name how each operation cons
 | --- | --- | --- | --- | --- | --- | --- |
 | `<exact path>` | `<change>` | `<controller, service, schema, DTO or method/path>` | `<session, actor, permission, tenant and trust boundary>` | `<validation, serialization, compatibility and statuses>` | `<idempotency, use case, service or UI consumer>` | `<decorator, module, Swagger and REST example>` |
 
+For every changed controller route group, inspect its matching `.rest` file and include that
+exact path in both metadata scope and the REST path table. The `.rest` contract covers every
+controller route in the group with a labeled request, reusable identifiers, actual method
+and path, required authorization/headers, query parameters and a representative body when
+applicable. A missing or out-of-scope `.rest` file keeps the Spec `draft`.
+
 Add a request/response field table or short JSON example only when the signature remains
 ambiguous. Do not reproduce unchanged fields.
 
@@ -795,7 +839,7 @@ a child of another widget and the parent of its own children.
 
 | Widget | Kind | Parent/entry | Direct children | Public contract | Behavior owner |
 | --- | --- | --- | --- | --- | --- |
-| `<exported widget declaration>` | `<Page, Layout or Component>` | `<route, layout, widget or application root>` | `<exact direct child widget declarations or —>` | `<named props type, slots, callbacks and visible responsibility>` | `<colocated hook or pure renderer>` |
+| `<exported widget declaration>` | `<Page, Layout or Component>` | `<route, layout, widget or application root>` | `<exact direct child widget declarations or —>` | `<named props type, slots, callbacks and visible responsibility>` | `<colocated use-widget hook>` |
 
 The hierarchy table is the canonical parent/child map. Do not repeat that tree in prose or
 the path table. Contract enough child widgets to keep each behavior-owning boundary
@@ -808,14 +852,16 @@ Then map every affected UI path exactly once:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `<exact path>` | `<change>` | `<route, widget, hook, context, constant or generated declaration>` | `<exact widget declaration and kind, or non-widget role>` | `<props, owned state, derived values, handlers and transitions>` | `<loading, empty, error, recovery, stale and optimistic behavior>` | `<reference, tokens, viewports, semantics, focus, keyboard and reduced motion>` | `<parent/consumer, children, services/providers and test boundary>` |
 
-For widget files, contract the rendering and behavior boundaries separately: `index.tsx`
-owns rendering, composition and DOM event wiring; a colocated `use-<widget-name>.ts` owns
-non-trivial state, effects, refs, forms, derived state, async orchestration and handlers. When
-the repository's widget convention requires a hook, every contracted child widget must name
-both its `index.tsx` and colocated `use-<widget-name>.ts`; do not hide children under a generic
-`components/` folder unless the repository explicitly establishes that convention. Parent
-widgets pass explicit props and callbacks; a child owns its internal behavior and must not reach
-into the parent's local state.
+For widget files, contract rendering and behavior separately: `index.tsx` owns rendering,
+composition and DOM event wiring; a colocated `use-<widget-name>.ts` owns state, effects,
+refs, forms, derived values, async orchestration and handlers. Every contracted widget,
+including a currently pure renderer, must name its entrypoint, colocated hook and the test
+pair required by repository Rules. Component tests mirror the widget-directory basename
+(`tests/signature-fields-tab.test.tsx`), never the production entrypoint
+(`tests/index.test.tsx`); hook tests use `tests/use-signature-fields-tab.test.ts`. Do not hide
+children under a generic `components/` folder unless repository Rules establish it. Parent
+widgets pass explicit props and callbacks; a child owns its internal behavior and must not
+reach into the parent's local state.
 
 Put reusable form and route-search schema declarations under Validation. UI rows name the
 schema they consume, React Hook Form and resolver ownership, field-error presentation and
@@ -824,13 +870,15 @@ submit/recovery behavior without redefining the shared schema.
 For Page widgets, identify the thin route entry, screen-level workflow, page-owned hook and
 children. For Layout widgets, identify the subtree, structural slots, providers and owned
 navigation or responsive state. For Component widgets, identify the focused interaction,
-reuse boundary and whether it is public, feature-shared or internal to its parent. Place a
-hook according to its actual consumers: colocated for one widget, feature-level when shared
-by several widgets and shared application-level only when it represents a reusable
-application concern. For data-backed UI, explicitly name every feature-level query/action hook
-path, the service method it calls, the state/effects it owns, invalidation/recovery behavior and
-its test boundary. Query/action hooks are UI declarations, not widgets; specify their
-responsibilities and paths, but do not require TypeScript code-shape signatures for them.
+reuse boundary and whether it is public, feature-shared or internal to its parent. Widget
+behavior hooks stay colocated; feature-level `hooks/` directories contain only query/action
+hooks. Do not create a query-key registry/file or a feature `queries/` directory: colocate a
+narrow key builder with the query/action hook that owns the cached resource when Rules permit
+one. For data-backed UI, name every query/action hook path, service method, state/effects and
+invalidation/recovery behavior. Query/action hooks are UI declarations, not widgets and do
+not require dedicated test files; prove their observable use through REST-adapter,
+widget-hook and integration/route coverage. Do not require TypeScript code-shape signatures
+for them unless authority does.
 
 Audit the completed UI contract for:
 
@@ -843,6 +891,8 @@ Audit the completed UI contract for:
 - design-token reuse, responsive behavior, semantics, accessible names, focus, keyboard and
   reduced-motion behavior;
 - generated route artifacts tied to their authoritative route input and generation command;
+- every widget has its repository-named component and hook tests, while standalone
+  query/action hooks do not acquire invented dedicated test files;
 - tests owned by the smallest boundary that can prove behavior, with composed behavior
   exercised at the owning parent widget when appropriate.
 
@@ -915,8 +965,9 @@ strategy with these two tables:
 | `<test path>` | `<real test/suite name or descriptive case>` | `<scenario>` | `<observable assertions and side effects>` |
 
 List the relevant cases for every contracted test file, including domain rule branches,
-authorization/tenant boundaries, transport failures, persistence effects, query/action hook
-state and UI recovery. Assertions must describe observable outcomes, not only mocked method
+authorization/tenant boundaries, transport failures, persistence effects, widget-hook
+consumer state and UI recovery. Do not invent dedicated test files for standalone
+query/action hooks when repository Rules exclude them. Assertions must describe observable outcomes, not only mocked method
 calls. Preserve the repository's real naming convention; do not invent arbitrary coverage
 percentages or implementation-only test claims.
 
@@ -959,24 +1010,30 @@ Use these required tables:
 | --- | --- | --- | --- |
 | `1` | `YYYY-MM-DD` | `<contract created or amended>` | `<source decision/change>` |
 
-Searchers, Builders, and the Orchestrator read Rule source files directly. Do not
-put implementation attempts, test results or verdicts in revision history.
+Builders and the Orchestrator read Rule source files directly. Do not put implementation
+attempts, test results or verdicts in revision history.
 
 ## Integrity gate and handoff
 
 There is no separate Spec review stage. Keep the Spec `draft` while clarification, authority alignment
 or integrity work remains. Before changing it to `open`, verify:
 
-- every applicable independent research lane was covered, with parallel Searchers used when
-  two or more lanes could proceed independently;
-- every dispatched Searcher report was joined, conflicting findings were resolved by direct
-  inspection, and consequential claims were verified by the Orchestrator;
+- every applicable research lane was covered directly by the Orchestrator, with no research
+  or architecture subagents dispatched;
+- every affected layer, cross-layer companion artifact and testing boundary is mapped through
+  the current Rule router to exact Rule files read in full by the Orchestrator during this task;
+- no layer convention was accepted solely from conversation history, a prior task, generated
+  skill text, an existing Spec, current code or an example in this prompt;
+- conflicting findings were resolved by direct inspection and consequential claims were
+  verified by the Orchestrator;
 - every cross-lane producer, contract, and consumer relationship is consistent or represented
   as a resolved clarification or explicit Contract decision;
 - metadata, source, status and revision consistency;
 - every applicable Confluence PRD section and Jira statement is mapped without inventing
   requirement IDs or changing external state;
 - complete RF/CA/evidence traceability;
+- metadata-scope closure: every affected/validation/documentation/design path is authorized,
+  and every rule-mandated companion artifact is represented;
 - filesystem-valid layer-contract path and change classifications;
 - complete resulting field schemas for every affected Entity and Structure;
 - no unresolved material product or technical ambiguity;
@@ -995,6 +1052,10 @@ interpretive:
 
 - include an exact, repository-relative file/widget tree for every changed UI surface, with
   one path per line and explicit component boundaries;
+- verify every changed REST route group has its matching `.rest` file in writable scope and
+  synchronized coverage for every controller route;
+- verify every widget tree contains `index.tsx`, its colocated hook, a component test named
+  after the widget directory and its hook test; reject `tests/index.test.tsx`;
 - declare allowed paths, prohibited paths, owning layer/module, generated-file treatment and
   the Builder validation exits;
 - map every supplied design screenshot and every required supplemental state to an exact

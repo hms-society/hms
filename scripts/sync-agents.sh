@@ -77,7 +77,7 @@ def parse_agent(path: Path) -> tuple[str, str, str]:
 
 
 def is_read_only(name: str) -> bool:
-    return name in {"searcher-agent", "reviewer-agent"}
+    return name == "reviewer-agent"
 
 
 def generated_marker(source: Path) -> str:

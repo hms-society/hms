@@ -54,6 +54,19 @@ All pull requests opened or updated by this workflow must be ready for review, n
 The mandatory `create-pr` publication step must create or convert every delivery PR with
 `draft: false`; verify `isDraft: false` before the conclusion summary.
 
+Before publication, calculate the delivery size using the authoritative
+`.github/workflows/check-pr-size.yml` rule: compare `origin/<base>...HEAD` and count only
+added lines in `.ts`, `.tsx`, `.mts` and `.cts` files. When the delivery exceeds 5,000 added
+lines, split it into multiple coherent PR slices before invoking `create-pr`. Partition by
+real dependency and ownership boundaries, such as Core/contracts, Server/persistence or
+Web/UI, and keep each slice independently reviewable and at or below the limit. The first
+or independent slice uses `develop` as its base; each dependent slice uses the immediately
+preceding slice branch as its base and records that dependency, covered `RF-*`/`CA-*` criteria
+and validation evidence in the delivery artifacts. Never split files or behavior arbitrarily
+to satisfy the line limit. If no coherent partition exists, pause publication and route the
+delivery back through `create-plan` or `create-spec` rather than publishing an oversized or
+misleading PR.
+
 ## Authority and late-change routing
 
 If local preflight or closure review finds a discrepancy, pause the closure phase and classify

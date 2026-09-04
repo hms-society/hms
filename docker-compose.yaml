@@ -3,11 +3,11 @@ services:
     image: inngest/inngest:v1.36.0
     container_name: hms-inngest
     restart: unless-stopped
-    command: inngest dev --no-discovery -u http://host.docker.internal:${HMS_SERVER_APP_PORT:?HMS_SERVER_APP_PORT must be set}/api/inngest
+    command: inngest dev --no-discovery -u http://host.docker.internal:${HMS_SERVER_APP_PORT:-5555}/api/inngest
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "${INNGEST_PORT:-8288}:8288"
+      - "${INNGEST_PORT:-9288}:8288"
       - "${INNGEST_CONNECT_PORT:-8299}:8289"
     volumes:
       - hms-inngest-data:/tmp/inngest
@@ -145,7 +145,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:5000/status",
+          "http://127.0.0.1:5000/status",
         ]
       interval: 5s
       timeout: 5s
@@ -242,6 +242,31 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: "true"
       MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+
+  gotenberg:
+    container_name: hms-gotenberg
+    image: gotenberg/gotenberg:8.34.0-libreoffice
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GOTENBERG_PORT:-3003}:3000"
+    environment:
+      GOTENBERG_API_TIMEOUT: ${GOTENBERG_API_TIMEOUT:-120s}
+      GOTENBERG_LIBREOFFICE_AUTO_START: "true"
+    cpus: ${GOTENBERG_CPUS:-2.0}
+    mem_limit: ${GOTENBERG_MEMORY_LIMIT:-1g}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--show-error",
+          "http://127.0.0.1:3000/health",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   templates-server:
     container_name: hms-templates-server

@@ -22,7 +22,7 @@ jobs:
     env:
       HMS_SERVER_APP_PORT: '5555'
       HMS_SERVER_APP_MODE: dev
-      HMS_WEB_APP_URL: http://localhost:3000
+      HMS_WEB_APP_URL: http://localhost:5000
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       SUPABASE_URL: http://localhost:8000
       SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.test-signature
@@ -43,7 +43,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^apps/server/'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/server/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Server changes detected.'
           else
@@ -67,6 +67,10 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm install --frozen-lockfile
+
+      - name: Architecture checks
+        if: steps.scope.outputs.relevant == 'true'
+        run: pnpm --filter server check:architecture
 
       - name: Code checks
         if: steps.scope.outputs.relevant == 'true'
