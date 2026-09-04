@@ -81418,7 +81418,7 @@
       "name": "Advogado - Formalização: Pós-envio RF-057, RF-058",
       "clip": true,
       "width": 1200,
-      "height": 1160,
+      "height": 1240,
       "fill": "#F5F2ED",
       "children": [
         {
@@ -81445,7 +81445,13 @@
               "type": "ref",
               "ref": "AmBqd",
               "name": "Nav Bar",
-              "width": "fill_container"
+              "width": "fill_container",
+              "descendants": {
+                "m7pGK": {
+                  "y": 0,
+                  "x": 10
+                }
+              }
             },
             {
               "type": "frame",
@@ -81674,7 +81680,7 @@
                                   "type": "text",
                                   "id": "ZLvbN",
                                   "fill": "$muted-foreground",
-                                  "content": "Cliente · CPF 123.***.***-00",
+                                  "content": "Cliente",
                                   "fontFamily": "$font-sans",
                                   "fontSize": 10,
                                   "fontWeight": "normal"
@@ -82233,6 +82239,9 @@
                                             {
                                               "type": "text",
                                               "id": "zWq7f",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 123.***.***-00",
                                               "fontFamily": "$font-sans",
@@ -82242,6 +82251,9 @@
                                             {
                                               "type": "text",
                                               "id": "ExAP0",
+                                              "x": 89,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -82366,6 +82378,9 @@
                                             {
                                               "type": "text",
                                               "id": "zTA9b",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 987.***.***-10",
                                               "fontFamily": "$font-sans",
@@ -82375,6 +82390,9 @@
                                             {
                                               "type": "text",
                                               "id": "a4yqp",
+                                              "x": 87,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -82631,6 +82649,9 @@
                                             {
                                               "type": "text",
                                               "id": "Dkf2j",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 123.***.***-00",
                                               "fontFamily": "$font-sans",
@@ -82640,6 +82661,9 @@
                                             {
                                               "type": "text",
                                               "id": "YmZR2",
+                                              "x": 89,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -82874,6 +82898,9 @@
                                             {
                                               "type": "text",
                                               "id": "jAaVP",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 123.***.***-00",
                                               "fontFamily": "$font-sans",
@@ -82883,6 +82910,9 @@
                                             {
                                               "type": "text",
                                               "id": "m51qy",
+                                              "x": 89,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -83139,6 +83169,9 @@
                                             {
                                               "type": "text",
                                               "id": "dgj4y",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 123.***.***-00",
                                               "fontFamily": "$font-sans",
@@ -83148,6 +83181,9 @@
                                             {
                                               "type": "text",
                                               "id": "PWIrL",
+                                              "x": 89,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -83272,6 +83308,9 @@
                                             {
                                               "type": "text",
                                               "id": "pq9wF",
+                                              "x": 0,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "CPF 456.***.***-22",
                                               "fontFamily": "$font-sans",
@@ -83281,6 +83320,9 @@
                                             {
                                               "type": "text",
                                               "id": "FKoen",
+                                              "x": 89,
+                                              "y": 0,
+                                              "enabled": false,
                                               "fill": "$muted-foreground",
                                               "content": "·",
                                               "fontFamily": "$font-sans",
@@ -213548,7 +213590,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Escolha um contato já verificado no cadastro HMS. Não será possível alterá-lo aqui.",
+                  "content": "Escolha um contato cadastrado e autorizado para este envio. Não será possível alterá-lo aqui.",
                   "lineHeight": 1.5,
                   "fontFamily": "$font-sans",
                   "fontSize": 14,
@@ -214302,7 +214344,7 @@
                       "id": "mfwNG",
                       "name": "Nome do documento",
                       "fill": "$muted-foreground",
-                      "content": "Contrato de prestação de serviços advocatícios",
+                      "content": "Contrato de prestação de serviços · PDF · Página 1 de 8 · Zoom 100%",
                       "fontFamily": "$font-sans",
                       "fontSize": 13,
                       "fontWeight": "normal"
@@ -214329,16 +214371,16 @@
                   "cornerRadius": 12,
                   "stroke": "$border",
                   "strokeWidth": 1,
-                  "layout": "vertical",
-                  "padding": 24,
-                  "alignItems": "center",
+                  "layout": "none",
                   "children": [
                     {
                       "type": "frame",
                       "id": "v75Xns",
+                      "x": 104,
+                      "y": 114,
                       "name": "Página do contrato",
                       "width": 570,
-                      "height": 590,
+                      "height": 520,
                       "fill": "$card",
                       "effect": {
                         "type": "shadow",
@@ -214364,10 +214406,10 @@
                           "fill": "$foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "CONTRATO DE PRESTAÇÃO DE SERVIÇOS",
+                          "content": "‹ ANTERIOR   ·   PÁGINA 1 DE 8   ·   PRÓXIMA ›   ·   − 100% +   ·   AJUSTAR",
                           "textAlign": "center",
-                          "fontFamily": "$font-serif",
-                          "fontSize": 17,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 9,
                           "fontWeight": "700"
                         },
                         {
@@ -214499,7 +214541,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Navegue por todas as páginas. Abrir ou ler o documento não registra sua assinatura.",
+                      "content": "Use paginação, zoom e rolagem para revisar todas as páginas. Abrir ou ler o documento não registra sua assinatura.",
                       "lineHeight": 1.5,
                       "fontFamily": "$font-sans",
                       "fontSize": 13,
@@ -214741,7 +214783,7 @@
                       "id": "aflxn",
                       "name": "Título da página",
                       "fill": "$foreground",
-                      "content": "Confirme sua assinatura",
+                      "content": "Confirme antes de assinar",
                       "fontFamily": "$font-serif",
                       "fontSize": 27,
                       "fontWeight": "600"
@@ -214969,7 +215011,7 @@
                       "id": "V48YYc",
                       "name": "Título do painel",
                       "fill": "$foreground",
-                      "content": "Assinar como",
+                      "content": "Continuar como",
                       "fontFamily": "$font-serif",
                       "fontSize": 22,
                       "fontWeight": "600"
@@ -215055,18 +215097,23 @@
                         {
                           "type": "frame",
                           "id": "RrSzX",
-                          "name": "Checkbox marcado",
+                          "name": "Checkbox desmarcado",
                           "width": 20,
                           "height": 20,
-                          "fill": "$primary",
+                          "fill": "$card",
                           "cornerRadius": 5,
+                          "stroke": "$input",
+                          "strokeWidth": 1,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "icon",
                               "id": "p4KUER",
+                              "x": 3,
+                              "y": 3,
                               "name": "Ícone checkbox",
+                              "enabled": false,
                               "width": 14,
                               "height": 14,
                               "icon": "check",
@@ -215120,7 +215167,7 @@
                           "fill": "$accent-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "Data, horário, autenticação e evidências técnicas serão preservados.",
+                          "content": "Ao continuar, a assinatura será realizada pela interface segura do Documenso, protegida pelo Gateway HMS.",
                           "lineHeight": 1.4,
                           "fontFamily": "$font-sans",
                           "fontSize": 11,
@@ -215139,15 +215186,18 @@
                       "id": "cefQr",
                       "type": "ref",
                       "ref": "SQoVa",
-                      "name": "Botão assinar documento",
+                      "name": "Botão continuar desabilitado",
                       "width": "fill_container",
+                      "fill": "$muted",
                       "descendants": {
                         "gfybN": {
                           "enabled": true,
-                          "icon": "pen-line"
+                          "icon": "pen-line",
+                          "fill": "$muted-foreground"
                         },
                         "hKQ6y": {
-                          "content": "Assinar documento"
+                          "content": "Continuar para assinar",
+                          "fill": "$muted-foreground"
                         }
                       }
                     },
@@ -215250,7 +215300,7 @@
                   "name": "Ícone de proteção",
                   "width": 16,
                   "height": 16,
-                  "icon": "shield-check",
+                  "icon": "clock-3",
                   "library": "lucide",
                   "fill": "$primary"
                 },
@@ -215259,7 +215309,7 @@
                   "id": "KTQaH",
                   "name": "Texto de proteção",
                   "fill": "$primary",
-                  "content": "Identidade confirmada",
+                  "content": "Assinatura em processamento",
                   "fontFamily": "$font-sans",
                   "fontSize": 13,
                   "fontWeight": "600"
@@ -215451,7 +215501,7 @@
                       "fill": "$accent-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "A sessão de assinatura foi encerrada. Não é necessário assinar novamente.",
+                      "content": "O convite e a sessão foram invalidados após o envio. Uma segunda assinatura não será aceita.",
                       "lineHeight": 1.4,
                       "fontFamily": "$font-sans",
                       "fontSize": 11,
@@ -215464,7 +215514,8 @@
                   "type": "ref",
                   "ref": "q6auhV",
                   "name": "Botão fechar",
-                  "width": "fill_container",
+                  "width": "fill_container(480)",
+                  "enabled": false,
                   "descendants": {
                     "Joer3": {
                       "enabled": true,
@@ -215482,7 +215533,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Você pode fechar esta página enquanto concluímos a confirmação.",
+                  "content": "Você já pode fechar esta aba enquanto concluímos a confirmação.",
                   "textAlign": "center",
                   "fontFamily": "$font-sans",
                   "fontSize": 12,
@@ -215570,7 +215621,7 @@
                   "name": "Ícone de proteção",
                   "width": 16,
                   "height": 16,
-                  "icon": "shield-check",
+                  "icon": "badge-check",
                   "library": "lucide",
                   "fill": "$primary"
                 },
@@ -215579,7 +215630,7 @@
                   "id": "E5hPw",
                   "name": "Texto de proteção",
                   "fill": "$primary",
-                  "content": "Identidade confirmada",
+                  "content": "Assinatura confirmada",
                   "fontFamily": "$font-sans",
                   "fontSize": 13,
                   "fontWeight": "600"
@@ -215771,7 +215822,7 @@
                       "fill": "$accent-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "O convite e a sessão foram invalidados após a confirmação.",
+                      "content": "O convite e a sessão já foram invalidados no envio da assinatura.",
                       "lineHeight": 1.4,
                       "fontFamily": "$font-sans",
                       "fontSize": 11,
@@ -215784,7 +215835,8 @@
                   "type": "ref",
                   "ref": "q6auhV",
                   "name": "Botão fechar",
-                  "width": "fill_container",
+                  "width": "fill_container(480)",
+                  "enabled": false,
                   "descendants": {
                     "Joer3": {
                       "enabled": true,
@@ -215802,7 +215854,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "A confirmação foi enviada pelo canal cadastrado.",
+                  "content": "A confirmação foi enviada pelo canal cadastrado. Você já pode fechar esta aba.",
                   "textAlign": "center",
                   "fontFamily": "$font-sans",
                   "fontSize": 12,
@@ -216794,6 +216846,4215 @@
                   "fontFamily": "$font-sans",
                   "fontSize": 11,
                   "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Cl6te",
+      "x": 6283,
+      "y": 13908,
+      "name": "Gateway HMS — Colaborador — Ler documento",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "w348bT",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "x1zah",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b4Nvd5",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "f7hLNd",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "G4HGfo",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "U57L1T",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-check",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "azmUr",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Sessão HMS ativa",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Mm6iO",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "M8ssxS",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Conta e elegibilidade revalidadas",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NCkMj",
+          "name": "Área de leitura",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            36,
+            30,
+            36
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "WzkkQ",
+              "name": "Cabeçalho do documento",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "g7bp3y",
+                  "name": "Identificação do documento",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "h7HbSq",
+                      "name": "Título da página",
+                      "fill": "$foreground",
+                      "content": "Leia o documento antes de assinar",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Qwvsv",
+                      "name": "Nome do documento",
+                      "fill": "$muted-foreground",
+                      "content": "Contrato de prestação de serviços advocatícios",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zVCPv",
+              "name": "Área documento e ações",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IGilv",
+                  "name": "Visualizador do documento",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$muted",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "tE3Ts",
+                      "x": 104,
+                      "y": 114,
+                      "name": "Página do contrato",
+                      "width": 570,
+                      "height": 520,
+                      "fill": "$card",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#1C2C2A18",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 18
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        36,
+                        42
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WD3J7",
+                          "name": "Título interno do contrato",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "‹ ANTERIOR   ·   PÁGINA 1 DE 8   ·   PRÓXIMA ›   ·   − 100% +   ·   AJUSTAR",
+                          "textAlign": "center",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 9,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "RHQ0u",
+                          "name": "Linha do cabeçalho",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "lK0Qj",
+                          "name": "Linha de texto 1",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "WKyq2",
+                          "name": "Linha de texto 2",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "D8WPj",
+                          "name": "Linha de texto 3",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "sWmxZ",
+                          "name": "Linha de texto 4",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "KvGQS",
+                          "name": "Linha de texto 5",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "KIEH4",
+                          "name": "Linha de texto 6",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "fL68O",
+                          "name": "Linha de texto 7",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "t5vnd",
+                          "name": "Linha de texto 8",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "HPmES",
+                          "name": "Linha de texto 9",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xTcAO",
+                  "name": "Painel de leitura",
+                  "width": 330,
+                  "height": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": [
+                    24,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xFwPI",
+                      "name": "Título do painel",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Revise com calma",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 23,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Y65zE3",
+                      "name": "Orientação de leitura",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Navegue por todas as páginas usando paginação, zoom e rolagem. A leitura não registra sua assinatura.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "umzfx",
+                      "name": "Informação da sessão",
+                      "width": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 9,
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "iXS10",
+                          "name": "Ícone relógio",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "clock-3",
+                          "library": "lucide",
+                          "fill": "$accent-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Rd0zD",
+                          "name": "Texto da sessão",
+                          "fill": "$accent-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Se a sessão HMS expirar, você fará login novamente e retornará a esta página.",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AFQ8F",
+                      "name": "Espaçador flexível",
+                      "width": "fill_container",
+                      "height": "fill_container"
+                    },
+                    {
+                      "id": "iNxEA",
+                      "type": "ref",
+                      "ref": "SQoVa",
+                      "name": "Botão ir para assinatura",
+                      "width": "fill_container",
+                      "descendants": {
+                        "gfybN": {
+                          "enabled": true,
+                          "icon": "pen-line"
+                        },
+                        "hKQ6y": {
+                          "content": "Ir para assinatura"
+                        }
+                      }
+                    },
+                    {
+                      "id": "AeJEX",
+                      "type": "ref",
+                      "ref": "nHJOO",
+                      "name": "Link sair",
+                      "descendants": {
+                        "E4N9ki": {
+                          "content": "Sair da HMS e continuar depois"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Y64KMM",
+      "x": 7583,
+      "y": 13908,
+      "name": "Gateway HMS — Colaborador — Confirmar assinatura",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "X5rgn",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "KPzTn",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TLc0g",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "aAgLh",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "V195c",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "G8BjcG",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-check",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "N4t1B7",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Sessão HMS ativa",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Z7Lef1",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "pSDWL",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Conta e elegibilidade revalidadas",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "MOEoR",
+          "name": "Área de assinatura",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            36,
+            30,
+            36
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "QOZSI",
+              "name": "Cabeçalho da assinatura",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ejtDp",
+                  "name": "Identificação da assinatura",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ViThP",
+                      "name": "Título da página",
+                      "fill": "$foreground",
+                      "content": "Confirme antes de assinar",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "e15qE",
+                      "name": "Nome do documento",
+                      "fill": "$muted-foreground",
+                      "content": "Contrato de prestação de serviços advocatícios",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NMloL",
+                  "name": "Revalidação concluída",
+                  "fill": "$highlight",
+                  "cornerRadius": 999,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "vO1Fc",
+                      "name": "Ícone revalidado",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "user-check",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Y9JgUD",
+                      "name": "Texto revalidado",
+                      "fill": "$primary",
+                      "content": "Elegibilidade revalidada",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YTxTK",
+              "name": "Documento e confirmação",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "l77hy",
+                  "name": "Visualizador do documento",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$muted",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "padding": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "v6EpO",
+                      "name": "Página do contrato",
+                      "width": 570,
+                      "height": 590,
+                      "fill": "$card",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#1C2C2A18",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 18
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        36,
+                        42
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nOQO0",
+                          "name": "Título interno do contrato",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "CONTRATO DE PRESTAÇÃO DE SERVIÇOS",
+                          "textAlign": "center",
+                          "fontFamily": "$font-serif",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "HtwQn",
+                          "name": "Linha do cabeçalho",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "o3aRz",
+                          "name": "Linha de texto 1",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "QjBsc",
+                          "name": "Linha de texto 2",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "s1Mks",
+                          "name": "Linha de texto 3",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "LUiKa",
+                          "name": "Linha de texto 4",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "jGNws",
+                          "name": "Linha de texto 5",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "n32zH",
+                          "name": "Linha de texto 6",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "a5bAdz",
+                          "name": "Linha de texto 7",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "Q6ci6",
+                          "name": "Linha de texto 8",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "Q4Vdj",
+                          "name": "Linha de texto 9",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UgSYN",
+                  "name": "Painel confirmar assinatura",
+                  "width": 330,
+                  "height": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    24,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L8Xcei",
+                      "name": "Título do painel",
+                      "fill": "$foreground",
+                      "content": "Continuar como",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "czm28",
+                      "name": "Pessoa signatária",
+                      "width": "fill_container",
+                      "fill": "$secondary",
+                      "cornerRadius": 9,
+                      "gap": 11,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "PsCTM",
+                          "name": "Avatar do signatário",
+                          "width": 36,
+                          "height": 36,
+                          "fill": "$primary",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NO7TE",
+                              "name": "Iniciais do signatário",
+                              "fill": "$primary-foreground",
+                              "content": "HM",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vboZs",
+                          "name": "Dados do signatário",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "f3JPb",
+                              "name": "Nome do signatário",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Hudson M. Silva",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "bYVGS",
+                              "name": "Tipo do signatário",
+                              "fill": "$muted-foreground",
+                              "content": "Advogado responsável",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SfHaO",
+                      "name": "Consentimento para assinatura",
+                      "width": "fill_container",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "djpAo",
+                          "name": "Checkbox desmarcado",
+                          "width": 20,
+                          "height": 20,
+                          "fill": "$card",
+                          "cornerRadius": 5,
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "g27ra7",
+                              "x": 3,
+                              "y": 3,
+                              "name": "Ícone checkbox",
+                              "enabled": false,
+                              "width": 14,
+                              "height": 14,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$primary-foreground"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "iUD6M",
+                          "name": "Texto do consentimento",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Li o documento e concordo em registrar minha assinatura eletrônica como colaborador HMS.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XaVf0",
+                      "name": "Aviso de evidências",
+                      "width": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 9,
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Q0Smbr",
+                          "name": "Ícone de evidência",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "shield-check",
+                          "library": "lucide",
+                          "fill": "$accent-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "yTHiz",
+                          "name": "Texto de evidências",
+                          "fill": "$accent-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Ao continuar, a assinatura será realizada pela interface segura do Documenso, protegida pelo Gateway HMS.",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cJ6Rd",
+                      "name": "Espaçador flexível",
+                      "width": "fill_container",
+                      "height": "fill_container"
+                    },
+                    {
+                      "id": "u1yINb",
+                      "type": "ref",
+                      "ref": "SQoVa",
+                      "name": "Botão continuar desabilitado",
+                      "width": "fill_container",
+                      "fill": "$muted",
+                      "descendants": {
+                        "gfybN": {
+                          "enabled": true,
+                          "icon": "pen-line",
+                          "fill": "$muted-foreground"
+                        },
+                        "hKQ6y": {
+                          "content": "Continuar para assinar",
+                          "fill": "$muted-foreground"
+                        }
+                      }
+                    },
+                    {
+                      "id": "b6UwhS",
+                      "type": "ref",
+                      "ref": "yR4IE",
+                      "name": "Botão voltar à leitura",
+                      "width": "fill_container",
+                      "descendants": {
+                        "CfQKb": {
+                          "enabled": false
+                        },
+                        "BCKt5": {
+                          "content": "Voltar à leitura"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ty3Vs",
+      "x": 8883,
+      "y": 13908,
+      "name": "Gateway HMS — Acesso indisponível",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "qiKEn",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "sdaNX",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FKXQ1",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "d5aTs",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W8HXV6",
+              "name": "Indicador de ambiente seguro",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "KPxHc",
+                  "name": "Ícone de cadeado",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "lock-keyhole",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "EzAZb",
+                  "name": "Texto ambiente seguro",
+                  "fill": "$primary",
+                  "content": "Ambiente seguro HMS",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "JHLlm",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Q8UaIB",
+              "name": "Aviso de confidencialidade",
+              "fill": "$muted-foreground",
+              "content": "Seus dados permanecem protegidos durante todo o processo",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RCkUK",
+          "name": "Área principal",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Df8XY",
+              "name": "Painel de acesso",
+              "width": 520,
+              "fill": "$card",
+              "cornerRadius": 12,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1C2C2A14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 28
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": [
+                34,
+                38
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mNjcI",
+                  "name": "Marcador de segurança",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "jWyhC",
+                      "name": "Ícone do marcador",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "shield-x",
+                      "library": "lucide",
+                      "fill": "$brand-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "N678j",
+                      "name": "Texto do marcador",
+                      "fill": "$accent-foreground",
+                      "content": "ACESSO INDISPONÍVEL",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "V179Ip",
+                  "name": "Título do acesso",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Não foi possível liberar este acesso",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-serif",
+                  "fontSize": 32,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Qxrk6",
+                  "name": "Descrição do acesso",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "O convite expirou, foi cancelado, já foi utilizado ou você não está mais elegível para este documento.",
+                  "lineHeight": 1.55,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "V6EIwb",
+                  "name": "Validade do convite",
+                  "width": "fill_container",
+                  "fill": "$accent",
+                  "cornerRadius": 10,
+                  "gap": 12,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "AHnj2",
+                      "name": "Ícone calendário",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "calendar-clock",
+                      "library": "lucide",
+                      "fill": "$accent-foreground"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Lgi3b",
+                      "name": "Texto de validade",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h5ID4J",
+                          "name": "Rótulo de validade",
+                          "fill": "$accent-foreground",
+                          "content": "Convite válido por 7 dias",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k4iqPq",
+                          "name": "Detalhe de validade",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "O convite não libera o documento sem autenticação.",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "Jfpqr",
+                  "type": "ref",
+                  "ref": "SQoVa",
+                  "fill": "$muted",
+                  "name": "Botão continuar",
+                  "width": "fill_container",
+                  "descendants": {
+                    "gfybN": {
+                      "enabled": false,
+                      "icon": "arrow-right"
+                    },
+                    "hKQ6y": {
+                      "content": "Acesso encerrado",
+                      "fill": "$muted-foreground"
+                    }
+                  }
+                },
+                {
+                  "type": "text",
+                  "id": "oPMfc",
+                  "name": "Nota de privacidade",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Por segurança, a HMS não informa qual validação impediu o acesso.",
+                  "textAlign": "center",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HkWES",
+      "x": 10183,
+      "y": 13908,
+      "name": "Gateway HMS — Nenhum canal autorizado",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "r10PGl",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "BXIuV",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qYmnE",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "j7IWDm",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wn1os",
+              "name": "Indicador de ambiente seguro",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "XUmQk",
+                  "name": "Ícone de cadeado",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "lock-keyhole",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "qnKLD",
+                  "name": "Texto ambiente seguro",
+                  "fill": "$primary",
+                  "content": "Ambiente seguro HMS",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Be8WB",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "pT0aw",
+              "name": "Aviso de confidencialidade",
+              "fill": "$muted-foreground",
+              "content": "Seus dados permanecem protegidos durante todo o processo",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Pm9xr",
+          "name": "Área principal",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "K6iNN6",
+              "name": "Painel de escolha de canal",
+              "width": 560,
+              "fill": "$card",
+              "cornerRadius": 12,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1C2C2A14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 28
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                32,
+                38
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uLRF2",
+                  "name": "Marcador de identidade",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "RVjdT",
+                      "name": "Ícone do marcador",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "badge-check",
+                      "library": "lucide",
+                      "fill": "$brand-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Jp2Hg",
+                      "name": "Texto do marcador",
+                      "fill": "$accent-foreground",
+                      "content": "CONTATO NECESSÁRIO",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "H4ah9T",
+                  "name": "Título do canal",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Nenhum canal está disponível",
+                  "lineHeight": 1.2,
+                  "fontFamily": "$font-serif",
+                  "fontSize": 30,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "vZeT2",
+                  "name": "Descrição do canal",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Não encontramos e-mail ou WhatsApp cadastrado e autorizado para este envio. O contato deve ser atualizado no cadastro oficial da HMS.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "id": "iG1pO",
+                  "type": "ref",
+                  "ref": "SQoVa",
+                  "fill": "$muted",
+                  "name": "Botão enviar código",
+                  "width": "fill_container",
+                  "descendants": {
+                    "gfybN": {
+                      "enabled": false,
+                      "icon": "send"
+                    },
+                    "hKQ6y": {
+                      "content": "Envio indisponível",
+                      "fill": "$muted-foreground"
+                    }
+                  }
+                },
+                {
+                  "id": "X4bgD",
+                  "type": "ref",
+                  "ref": "nHJOO",
+                  "name": "Link voltar",
+                  "descendants": {
+                    "E4N9ki": {
+                      "content": "Voltar ao convite"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "wagTq",
+      "x": 11483,
+      "y": 13908,
+      "name": "Gateway HMS — Código inválido ou expirado",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Zuk80",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Wk1Qc",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gVfhW",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "A2qbCx",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "leRh7",
+              "name": "Indicador de ambiente seguro",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "i0Hl4",
+                  "name": "Ícone de cadeado",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "lock-keyhole",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "M0sd3U",
+                  "name": "Texto ambiente seguro",
+                  "fill": "$primary",
+                  "content": "Ambiente seguro HMS",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ExeXe",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "t15HQ",
+              "name": "Aviso de confidencialidade",
+              "fill": "$muted-foreground",
+              "content": "Seus dados permanecem protegidos durante todo o processo",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pxCnl",
+          "name": "Área principal",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "f9hiC",
+              "name": "Painel de código OTP",
+              "width": 560,
+              "fill": "$card",
+              "cornerRadius": 12,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1C2C2A14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 28
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                32,
+                38
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ls27g",
+                  "name": "Marcador do código",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "E4wjA",
+                      "name": "Ícone do marcador",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "key-round",
+                      "library": "lucide",
+                      "fill": "$brand-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fpnwW",
+                      "name": "Texto do marcador",
+                      "fill": "$accent-foreground",
+                      "content": "CÓDIGO NÃO VALIDADO",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "ma4cm",
+                  "name": "Título do código",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Confira o código informado",
+                  "lineHeight": 1.2,
+                  "fontFamily": "$font-serif",
+                  "fontSize": 30,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "HoQOd",
+                  "name": "Destino do código",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Enviamos um código de 6 dígitos para o WhatsApp terminado em ••42.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "N4BEl",
+                  "name": "Campos do código",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uiZ9E",
+                      "name": "Dígito 1",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$highlight",
+                      "cornerRadius": 10,
+                      "stroke": "$primary",
+                      "strokeWidth": 2,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hwI9K",
+                          "name": "Cursor do primeiro dígito",
+                          "fill": "$primary",
+                          "content": "|",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 24,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JaS7H",
+                      "name": "Dígito 2",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fV3wA",
+                      "name": "Dígito 3",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Xf1aG",
+                      "name": "Dígito 4",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oXMba",
+                      "name": "Dígito 5",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L5KktI",
+                      "name": "Dígito 6",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ax4SQ",
+                  "name": "Prazo do código",
+                  "width": "fill_container",
+                  "fill": "$secondary",
+                  "cornerRadius": 10,
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "sY9r3",
+                      "name": "Ícone de tempo",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "timer",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Q3HVSZ",
+                      "name": "Texto de expiração",
+                      "fill": "$secondary-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "O código está incorreto ou expirou. Você pode tentar novamente ou solicitar um novo código.",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "HJJeh",
+                  "type": "ref",
+                  "ref": "SQoVa",
+                  "name": "Botão confirmar código",
+                  "width": "fill_container",
+                  "descendants": {
+                    "gfybN": {
+                      "enabled": true,
+                      "icon": "check"
+                    },
+                    "hKQ6y": {
+                      "content": "Confirmar código"
+                    }
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "xrPsN",
+                  "name": "Ações de reenvio",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W1Qhy",
+                      "name": "Contagem para reenvio",
+                      "fill": "$muted-foreground",
+                      "content": "Reenviar código agora",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "id": "m3q4Tl",
+                      "type": "ref",
+                      "ref": "nHJOO",
+                      "name": "Link usar outro canal",
+                      "descendants": {
+                        "E4N9ki": {
+                          "content": "Usar outro canal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "mBKko",
+      "x": 12783,
+      "y": 13908,
+      "name": "Gateway HMS — Limite de tentativas do código",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "HgNqP",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "m046RG",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jNdha",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "Ceo5m",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "g7tCI",
+              "name": "Indicador de ambiente seguro",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "TnhNo",
+                  "name": "Ícone de cadeado",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "lock-keyhole",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "T2a8jk",
+                  "name": "Texto ambiente seguro",
+                  "fill": "$primary",
+                  "content": "Ambiente seguro HMS",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "F7hPj",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "p72du",
+              "name": "Aviso de confidencialidade",
+              "fill": "$muted-foreground",
+              "content": "Seus dados permanecem protegidos durante todo o processo",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "DE4O6",
+          "name": "Área principal",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "iHijn",
+              "name": "Painel de código OTP",
+              "width": 560,
+              "fill": "$card",
+              "cornerRadius": 12,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1C2C2A14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 28
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                32,
+                38
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "z895u",
+                  "name": "Marcador do código",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "SiBE3",
+                      "name": "Ícone do marcador",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "key-round",
+                      "library": "lucide",
+                      "fill": "$brand-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "WZ3EG",
+                      "name": "Texto do marcador",
+                      "fill": "$accent-foreground",
+                      "content": "ACESSO TEMPORARIAMENTE BLOQUEADO",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n8Sa1",
+                  "name": "Título do código",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Limite de tentativas atingido",
+                  "lineHeight": 1.2,
+                  "fontFamily": "$font-serif",
+                  "fontSize": 30,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "o7Yp4m",
+                  "name": "Destino do código",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Muitas tentativas inválidas foram realizadas. Aguarde antes de solicitar outro código.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-sans",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "GWAS8",
+                  "name": "Campos do código",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "wecN7",
+                      "name": "Dígito 1",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$highlight",
+                      "cornerRadius": 10,
+                      "stroke": "$primary",
+                      "strokeWidth": 2,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JBu6h",
+                          "name": "Cursor do primeiro dígito",
+                          "fill": "$primary",
+                          "content": "|",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 24,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "igFMJ",
+                      "name": "Dígito 2",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qYgAA",
+                      "name": "Dígito 3",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZJBL2",
+                      "name": "Dígito 4",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hPXoo",
+                      "name": "Dígito 5",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "g1oOgW",
+                      "name": "Dígito 6",
+                      "width": 54,
+                      "height": 62,
+                      "fill": "$card",
+                      "cornerRadius": 10,
+                      "stroke": "$input",
+                      "strokeWidth": 1.2,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RAQlZ",
+                  "name": "Prazo do código",
+                  "width": "fill_container",
+                  "fill": "$secondary",
+                  "cornerRadius": 10,
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HCSfF",
+                      "name": "Ícone de tempo",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "timer",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "K5UcF",
+                      "name": "Texto de expiração",
+                      "fill": "$secondary-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "O código anterior foi invalidado. O bloqueio protege seus documentos contra tentativas indevidas.",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "aCqyi",
+                  "type": "ref",
+                  "ref": "SQoVa",
+                  "fill": "$muted",
+                  "name": "Botão confirmar código",
+                  "width": "fill_container",
+                  "descendants": {
+                    "gfybN": {
+                      "enabled": false,
+                      "icon": "check"
+                    },
+                    "hKQ6y": {
+                      "content": "Confirmação bloqueada",
+                      "fill": "$muted-foreground"
+                    }
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "AiTym",
+                  "name": "Ações de reenvio",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Tv6Zw",
+                      "name": "Contagem para reenvio",
+                      "fill": "$muted-foreground",
+                      "content": "Tente novamente em 15:00",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "id": "wepzw",
+                      "type": "ref",
+                      "ref": "nHJOO",
+                      "name": "Link usar outro canal",
+                      "descendants": {
+                        "E4N9ki": {
+                          "content": "Voltar ao convite"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Va6m5",
+      "x": 14083,
+      "y": 13908,
+      "name": "Gateway HMS — Carregando documento",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "QqMFA",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Elwrj",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "C1eUEk",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "QUjvd",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "M46wFv",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Z5yVqe",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-check",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "s6meKk",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Identidade confirmada",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "eHEzL",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "vHHmv",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Sessão protegida · expira após 1 dia",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BwdQY",
+          "name": "Área de leitura",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            36,
+            30,
+            36
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "q73r2v",
+              "name": "Cabeçalho do documento",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "gRI3h",
+                  "name": "Identificação do documento",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "S17wNO",
+                      "name": "Título da página",
+                      "fill": "$foreground",
+                      "content": "Carregando documento",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "oR6nv",
+                      "name": "Nome do documento",
+                      "fill": "$muted-foreground",
+                      "content": "Preparando a visualização segura do PDF",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tiy2G",
+              "name": "Área documento e ações",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WzNLw",
+                  "name": "Visualizador do documento",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$muted",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "a6qHoj",
+                      "x": 104,
+                      "y": 114,
+                      "name": "Página do contrato",
+                      "width": 570,
+                      "height": 520,
+                      "fill": "$card",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#1C2C2A18",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 18
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        36,
+                        42
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "C6s1X6",
+                          "name": "Título interno do contrato",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "CARREGANDO DOCUMENTO",
+                          "textAlign": "center",
+                          "fontFamily": "$font-serif",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "w3ld81",
+                          "name": "Linha do cabeçalho",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "tj5GY",
+                          "name": "Linha de texto 1",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "Jtprr",
+                          "name": "Linha de texto 2",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "lQFSG",
+                          "name": "Linha de texto 3",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "T2YUJY",
+                          "name": "Linha de texto 4",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "FmQ8B",
+                          "name": "Linha de texto 5",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "WKj1W",
+                          "name": "Linha de texto 6",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "fdF7N",
+                          "name": "Linha de texto 7",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "FK0Pv",
+                          "name": "Linha de texto 8",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "bhe90",
+                          "name": "Linha de texto 9",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AuIVj",
+                  "name": "Painel de leitura",
+                  "width": 330,
+                  "height": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": [
+                    24,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W61FD",
+                      "name": "Título do painel",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Preparando o documento",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 23,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pRNRs",
+                      "name": "Orientação de leitura",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "A HMS está carregando o PDF protegido e verificando todas as páginas antes de exibi-lo.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "TdIik",
+                      "name": "Informação da sessão",
+                      "width": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 9,
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "naIgv",
+                          "name": "Ícone relógio",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "clock-3",
+                          "library": "lucide",
+                          "fill": "$accent-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "GhQnn",
+                          "name": "Texto da sessão",
+                          "fill": "$accent-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Não atualize a página. O documento aparecerá assim que estiver pronto.",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bgWnX",
+                      "name": "Espaçador flexível",
+                      "width": "fill_container",
+                      "height": "fill_container"
+                    },
+                    {
+                      "id": "qJOaU",
+                      "type": "ref",
+                      "ref": "SQoVa",
+                      "fill": "$muted",
+                      "name": "Botão ir para assinatura",
+                      "width": "fill_container",
+                      "descendants": {
+                        "gfybN": {
+                          "icon": "loader-circle",
+                          "fill": "$muted-foreground",
+                          "enabled": true
+                        },
+                        "hKQ6y": {
+                          "content": "Aguarde…",
+                          "fill": "$muted-foreground"
+                        }
+                      }
+                    },
+                    {
+                      "id": "nIdbm",
+                      "type": "ref",
+                      "ref": "nHJOO",
+                      "name": "Link sair",
+                      "descendants": {
+                        "E4N9ki": {
+                          "content": "Sair e continuar depois"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "EMwDe",
+      "x": 15383,
+      "y": 13908,
+      "name": "Gateway HMS — Falha ao carregar documento",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "vlnoy",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "sEH3R",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Pj0qM",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "B7CKh",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zTCEJ",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "hVlca",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-check",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "Y4E29Z",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Identidade confirmada",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RcWG8",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "WfQpl",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Sessão protegida · expira após 1 dia",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "M7xGxI",
+          "name": "Área de leitura",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            36,
+            30,
+            36
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "F7cgx",
+              "name": "Cabeçalho do documento",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N50qwt",
+                  "name": "Identificação do documento",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rgp7j",
+                      "name": "Título da página",
+                      "fill": "$foreground",
+                      "content": "Não foi possível carregar o documento",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "o6JMP",
+                      "name": "Nome do documento",
+                      "fill": "$muted-foreground",
+                      "content": "A visualização segura do PDF está indisponível",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AexJN",
+              "name": "Área documento e ações",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "K4SuU",
+                  "name": "Visualizador do documento",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$muted",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "v5jKql",
+                      "x": 104,
+                      "y": 114,
+                      "name": "Página do contrato",
+                      "width": 570,
+                      "height": 520,
+                      "fill": "$card",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#1C2C2A18",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 18
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        36,
+                        42
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EXTHH",
+                          "name": "Título interno do contrato",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "DOCUMENTO INDISPONÍVEL",
+                          "textAlign": "center",
+                          "fontFamily": "$font-serif",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "UeLhy",
+                          "name": "Linha do cabeçalho",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "VJH4U",
+                          "name": "Linha de texto 1",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "h0R3qe",
+                          "name": "Linha de texto 2",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "i3mAUo",
+                          "name": "Linha de texto 3",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "QIQsc",
+                          "name": "Linha de texto 4",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "J7V9A1",
+                          "name": "Linha de texto 5",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "rW7Ln",
+                          "name": "Linha de texto 6",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "HZNKt",
+                          "name": "Linha de texto 7",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "H0O0l",
+                          "name": "Linha de texto 8",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "Wy8IN",
+                          "name": "Linha de texto 9",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P9IIC",
+                  "name": "Painel de leitura",
+                  "width": 330,
+                  "height": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": [
+                    24,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LtrVe",
+                      "name": "Título do painel",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Tente novamente",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 23,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "HF0Rn",
+                      "name": "Orientação de leitura",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "O documento não foi exibido. Nenhuma assinatura foi registrada e nenhum conteúdo parcial foi liberado.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "a2spY2",
+                      "name": "Informação da sessão",
+                      "width": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 9,
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ZE55W",
+                          "name": "Ícone relógio",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "clock-3",
+                          "library": "lucide",
+                          "fill": "$accent-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "a9GNs",
+                          "name": "Texto da sessão",
+                          "fill": "$accent-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Se o erro continuar, saia e retome pelo mesmo convite enquanto ele estiver válido.",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p0UgX",
+                      "name": "Espaçador flexível",
+                      "width": "fill_container",
+                      "height": "fill_container"
+                    },
+                    {
+                      "id": "Id7bt",
+                      "type": "ref",
+                      "ref": "SQoVa",
+                      "name": "Botão ir para assinatura",
+                      "width": "fill_container",
+                      "descendants": {
+                        "gfybN": {
+                          "icon": "refresh-cw",
+                          "enabled": true
+                        },
+                        "hKQ6y": {
+                          "content": "Tentar novamente"
+                        }
+                      }
+                    },
+                    {
+                      "id": "ZSjlP",
+                      "type": "ref",
+                      "ref": "nHJOO",
+                      "name": "Link sair",
+                      "descendants": {
+                        "E4N9ki": {
+                          "content": "Sair com segurança"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "WkDn8",
+      "x": 16683,
+      "y": 13908,
+      "name": "Gateway HMS — Falha ao abrir assinatura",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "K6BNNF",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "rkNNy",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "OSfdM",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "wlKdF",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mHZle",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "rkKTg",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-check",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "BR6NE",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Identidade confirmada",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PlkS8",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "H8RJHF",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Sessão protegida · expira após 1 dia",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "uBbEn",
+          "name": "Área de assinatura",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            36,
+            30,
+            36
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "chjsM",
+              "name": "Cabeçalho da assinatura",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "nNAB9",
+                  "name": "Identificação da assinatura",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QGHcj",
+                      "name": "Título da página",
+                      "fill": "$foreground",
+                      "content": "Não foi possível abrir a assinatura",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "S1TYn",
+                      "name": "Nome do documento",
+                      "fill": "$muted-foreground",
+                      "content": "Contrato de prestação de serviços advocatícios",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "p0ah4",
+                  "name": "Revalidação concluída",
+                  "fill": "$highlight",
+                  "cornerRadius": 999,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zPFOA",
+                      "name": "Ícone revalidado",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "user-check",
+                      "library": "lucide",
+                      "fill": "$primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PV7yr",
+                      "name": "Texto revalidado",
+                      "fill": "$primary",
+                      "content": "Elegibilidade continua válida",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "IG4eq",
+              "name": "Documento e confirmação",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "OHiEP",
+                  "name": "Visualizador do documento",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$muted",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "padding": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Q69LHl",
+                      "name": "Página do contrato",
+                      "width": 570,
+                      "height": 590,
+                      "fill": "$card",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#1C2C2A18",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 18
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        36,
+                        42
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jRtSC",
+                          "name": "Título interno do contrato",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "CONTRATO DE PRESTAÇÃO DE SERVIÇOS",
+                          "textAlign": "center",
+                          "fontFamily": "$font-serif",
+                          "fontSize": 17,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Dxnoo",
+                          "name": "Linha do cabeçalho",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "dgyZS",
+                          "name": "Linha de texto 1",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "K0XgO",
+                          "name": "Linha de texto 2",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "B4rJD",
+                          "name": "Linha de texto 3",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "AB8RU",
+                          "name": "Linha de texto 4",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "LMCy8",
+                          "name": "Linha de texto 5",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "tQHbA",
+                          "name": "Linha de texto 6",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "R5InZi",
+                          "name": "Linha de texto 7",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "J1EMuZ",
+                          "name": "Linha de texto 8",
+                          "fill": "$secondary",
+                          "width": "fill_container",
+                          "height": 7
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 999,
+                          "id": "fhrnG",
+                          "name": "Linha de texto 9",
+                          "fill": "$border",
+                          "width": 390,
+                          "height": 7
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Irrwp",
+                  "name": "Painel confirmar assinatura",
+                  "width": 330,
+                  "height": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 12,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    24,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SPoxk",
+                      "name": "Título do painel",
+                      "fill": "$foreground",
+                      "content": "Tentar novamente como",
+                      "fontFamily": "$font-serif",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "v3kQW",
+                      "name": "Pessoa signatária",
+                      "width": "fill_container",
+                      "fill": "$secondary",
+                      "cornerRadius": 9,
+                      "gap": 11,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "shgz6",
+                          "name": "Avatar do signatário",
+                          "width": 36,
+                          "height": 36,
+                          "fill": "$primary",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "PLo1A",
+                              "name": "Iniciais do signatário",
+                              "fill": "$primary-foreground",
+                              "content": "MS",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uR2Q2",
+                          "name": "Dados do signatário",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Yx1A8",
+                              "name": "Nome do signatário",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Maria Aparecida Silva",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "GMdiI",
+                              "name": "Tipo do signatário",
+                              "fill": "$muted-foreground",
+                              "content": "Cliente",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ldOST",
+                      "name": "Consentimento para assinatura",
+                      "width": "fill_container",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BEBaE",
+                          "name": "Checkbox marcado",
+                          "width": 20,
+                          "height": 20,
+                          "fill": "$primary",
+                          "cornerRadius": 5,
+                          "stroke": "$primary",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "ppFe8",
+                              "name": "Ícone checkbox",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$primary-foreground"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "CgBkX",
+                          "name": "Texto do consentimento",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Li o documento e concordo em registrar minha assinatura eletrônica.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NIIxk",
+                      "name": "Aviso de evidências",
+                      "width": "fill_container",
+                      "fill": "$accent",
+                      "cornerRadius": 9,
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "enNYt",
+                          "name": "Ícone de evidência",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "shield-check",
+                          "library": "lucide",
+                          "fill": "$accent-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "XCyif",
+                          "name": "Texto de evidências",
+                          "fill": "$accent-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "O Documenso está temporariamente indisponível. Nenhuma assinatura foi enviada e você pode tentar novamente com segurança.",
+                          "lineHeight": 1.4,
+                          "fontFamily": "$font-sans",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XsDsR",
+                      "name": "Espaçador flexível",
+                      "width": "fill_container",
+                      "height": "fill_container"
+                    },
+                    {
+                      "id": "Eb6ke",
+                      "type": "ref",
+                      "ref": "SQoVa",
+                      "name": "Botão tentar novamente",
+                      "fill": "$primary",
+                      "width": "fill_container",
+                      "descendants": {
+                        "gfybN": {
+                          "icon": "refresh-cw",
+                          "fill": "$primary-foreground",
+                          "enabled": true
+                        },
+                        "hKQ6y": {
+                          "content": "Tentar novamente",
+                          "fill": "$primary-foreground"
+                        }
+                      }
+                    },
+                    {
+                      "id": "fSwh3",
+                      "type": "ref",
+                      "ref": "yR4IE",
+                      "name": "Botão voltar à leitura",
+                      "width": "fill_container",
+                      "descendants": {
+                        "CfQKb": {
+                          "enabled": false
+                        },
+                        "BCKt5": {
+                          "content": "Voltar à leitura"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "j3mBgp",
+      "x": 17983,
+      "y": 13908,
+      "name": "Gateway HMS — Assinatura recusada ou cancelada",
+      "clip": true,
+      "width": 1200,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "E2BRh",
+          "name": "Cabeçalho público HMS",
+          "width": "fill_container",
+          "height": 82,
+          "fill": "$card",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "VNwVk",
+              "name": "Logo HMS",
+              "width": 72,
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 6,
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "sHNTA",
+                  "name": "Logo Text",
+                  "fill": "$brand",
+                  "content": "HMS",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 999,
+                  "id": "YFu8p",
+                  "name": "Traço da marca",
+                  "fill": "$brand-accent",
+                  "width": 58,
+                  "height": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Absvk",
+              "name": "Sessão protegida",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "eqxgO",
+                  "name": "Ícone de proteção",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "shield-x",
+                  "library": "lucide",
+                  "fill": "$primary"
+                },
+                {
+                  "type": "text",
+                  "id": "jgQi4",
+                  "name": "Texto de proteção",
+                  "fill": "$primary",
+                  "content": "Solicitação encerrada",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oVPwW",
+          "name": "Faixa de segurança",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$secondary",
+          "padding": [
+            0,
+            44
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "TiwQY",
+              "name": "Prazo da sessão",
+              "fill": "$muted-foreground",
+              "content": "Nenhuma assinatura foi registrada",
+              "fontFamily": "$font-sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ybv0E",
+          "name": "Área de conclusão",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "qqOFh",
+              "name": "Painel de conclusão",
+              "width": 560,
+              "fill": "$card",
+              "cornerRadius": 12,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1C2C2A14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 28
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": [
+                36,
+                40
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FbAqF",
+                  "name": "Ícone de sucesso",
+                  "width": 68,
+                  "height": 68,
+                  "fill": "$accent",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "sZj0g",
+                      "name": "Check de sucesso",
+                      "width": 34,
+                      "height": 34,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$accent-foreground"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "ZIlTi",
+                  "name": "Título da conclusão",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Assinatura não concluída",
+                  "textAlign": "center",
+                  "fontFamily": "$font-serif",
+                  "fontSize": 32,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Y4F07",
+                  "name": "Descrição da conclusão",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "A solicitação foi recusada ou cancelada. O documento não foi considerado assinado.",
+                  "lineHeight": 1.55,
+                  "textAlign": "center",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "Ewzez",
+                  "name": "Protocolo da assinatura",
+                  "width": "fill_container",
+                  "fill": "$secondary",
+                  "cornerRadius": 10,
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lFKU0",
+                      "name": "Rótulo do protocolo",
+                      "fill": "$muted-foreground",
+                      "content": "REFERÊNCIA HMS",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 10,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "ErBE1",
+                      "name": "Número do protocolo",
+                      "fill": "$foreground",
+                      "content": "ASS-2026-004812",
+                      "fontFamily": "$font-sans",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pDdBy",
+                  "name": "Sessão encerrada",
+                  "width": "fill_container",
+                  "fill": "$accent",
+                  "cornerRadius": 10,
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Ptiwo",
+                      "name": "Ícone sessão encerrada",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$accent-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "sae7C",
+                      "name": "Texto sessão encerrada",
+                      "fill": "$accent-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "O convite e a sessão foram invalidados. Não é possível enviar outra assinatura por este acesso.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "$font-sans",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "jEogH",
+                  "name": "Nota de confirmação",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Se ainda for necessário assinar, a equipe responsável deverá criar um novo envio.",
+                  "textAlign": "center",
+                  "fontFamily": "$font-sans",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 }
               ]
             }
