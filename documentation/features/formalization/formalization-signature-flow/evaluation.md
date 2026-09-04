@@ -2,15 +2,20 @@
 feature: "formalization/formalization-signature-flow"
 spec: ./spec.md
 plan: ./plan.md
-spec_revision: 15
-status: ready
+spec_revision: 16
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 jira_tickets:
   - SCRUM-140
-updated_at: 2026-08-31
+updated_at: 2026-09-01
 ---
 
 # Evaluation
+
+> Historical evaluation closed on 2026-09-01 when the sibling Spec was suspended.
+> Existing results remain evidence for the implemented `ready_for_sending` baseline;
+> they do not authorize further delivery from the superseded Plan. Active validation
+> continues under [`../signing-gateway/spec.md`](../signing-gateway/spec.md), revision 5.
 
 Evaluation of Spec revision `15` against the current implementation.
 
@@ -102,7 +107,7 @@ Editor behavior and focused/full Web coverage are recorded in `EV-22`.
 
 | Authority | Reference | Result | Notes |
 | --- | --- | --- | --- |
-| SDD | `documentation/rules/sdd-rules.md` | `passed` | Plan-backed execution selected; Evaluation reconciled to Spec revision 15. The narrowed Contract, current implementation, primary flow, required reference comparisons, architecture checks and coverage are recorded. Removed supplemental scenarios are not closure prerequisites. |
+| SDD | `documentation/sdd.md` | `passed` | Plan-backed execution selected; Evaluation reconciled to Spec revision 15. The narrowed Contract, current implementation, primary flow, required reference comparisons, architecture checks and coverage are recorded. Removed supplemental scenarios are not closure prerequisites. |
 | Architecture | `documentation/architecture.md` | `passed` | Integrated review and all four Dependency Cruiser checks found no blocking/high architecture finding; authority-document changes already present in the worktree are preserved. |
 | Modules | `documentation/modules.md` | `passed` | Formalization ownership and cross-module projection boundaries were checked during the integrated review; no blocking/high finding remains. |
 | Tooling | `documentation/tooling.md` | `passed` | Approved pnpm filters, Web `5000`/Server `5555`, persistent sessions and Playwright CLI workflow were used; final static/type/build/test and covered-workspace coverage commands passed. |

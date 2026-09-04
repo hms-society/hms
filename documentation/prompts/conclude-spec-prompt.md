@@ -33,6 +33,8 @@ Require:
   implementation;
 - direct implementation or all Plan phases are complete;
 - required CA, `MV-*`, runtime and visual evidence is current;
+- Evaluation contains a current passing structural path gate row with the exact command,
+  selected base ref, resolved base SHA, reported counts, and result;
 - no blocking implementation finding remains;
 - source and Jira ticket traceability is preserved.
 
@@ -94,7 +96,7 @@ conclusion automatically after it returns evaluation to `ready`.
 
 1. Read the Spec Validation Contract, Rule Pack, current evaluation and
    `documentation/tooling.md`.
-2. Run the applicable local generation, formatting/code, type, unit, integration, Playwright MCP,
+2. Run the applicable local generation, formatting/code, type, unit, integration, Playwright CLI,
    architecture and build preflight required by the Spec and changed paths.
 3. Reconcile generated artifacts, migrations, saved design evidence and factual
    documentation against the current diff.
@@ -103,15 +105,23 @@ conclusion automatically after it returns evaluation to `ready`.
    implementation or acceptance-evidence change routes back to the implementation workflow.
 5. Reconcile the Confluence PRD/Jira/RF/CA evidence map without mutating external state. If
    traceability is incomplete, route the discrepancy through the authority rules.
-6. Invoke `commit-code` to create intentional scoped commits.
-7. Inspect the existing delivery PR set, if any, and compare each base, head SHA, title and body
+6. Rerun
+   `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]` after all local
+   closure reconciliation and before publication. Use the governing selected local base ref;
+   when omitted it defaults to local `origin/develop`, and the command does not fetch. Record a
+   fresh passing row with the exact command, base ref, resolved base SHA, every reported count,
+   and exact result. This is structural-only evidence and does not replace any prior sensor.
+   Any subsequent contracted-path or classification change invalidates the row and requires
+   another rerun before publication.
+7. Invoke `commit-code` to create intentional scoped commits.
+8. Inspect the existing delivery PR set, if any, and compare each base, head SHA, title and body
    with the current candidate. If no matching PR exists, the PR points at an earlier SHA, or
    its publication details are stale or incomplete, **invoke `create-pr` immediately and
    mandatorily** to create or update it. Do not bypass `create-pr` with an ad hoc PR edit or
    proceed to the final CI gate before it returns the complete PR metadata.
-8. Invoke `create-pr` for the final publication whenever the branch was newly committed or
+9. Invoke `create-pr` for the final publication whenever the branch was newly committed or
    any PR needs an update; reuse existing delivery PRs and never create duplicates.
-9. Record every branch and PR URL in the delivery record; update
+10. Record every branch and PR URL in the delivery record; update
    `evaluation.md` only when the operational ledger needs the reference.
 
 ## Final PR CI Quality Gate
@@ -172,6 +182,8 @@ After CI passes, verify `evaluation.md` contains:
   table columns and stable
   evidence IDs;
 - exact Spec revision;
+- a current passing structural path gate row containing the exact command, selected base ref,
+  resolved base SHA, every reported count, and result;
 - complete acceptance-criteria matrix;
 - automated, runtime, manual and visual evidence;
 - saved reference paths and transient Playwright/CI artifact identifiers when visual evidence

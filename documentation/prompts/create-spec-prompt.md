@@ -21,7 +21,7 @@ Spec remains unwritten until the gate passes.
 ### 1. Establish repository authority
 
 1. Read root `AGENTS.md`, `AGENTS.local.md`, and applicable nested instructions.
-2. Read `documentation/rules/sdd-rules.md` and `documentation/rules/rules.md`. Build the
+2. Read `documentation/sdd.md` and `documentation/rules/rules.md`. Build the
    initial Rule Pack from every path, architectural behavior, companion artifact and
    validation boundary that the requested outcome can affect, then read every selected Rule
    in full before researching or drafting that boundary.
@@ -71,7 +71,9 @@ delivery risk, not file or endpoint counts:
 
 The Orchestrator performs all Spec research directly. Do not create Searcher, Architecture,
 Core, Server, Web, Integration or other research subagents during create-spec. Subagents are
-reserved for the implementation and integrated-review roles defined by SDD.
+reserved for the post-authoring Spec Reviewer, implementation, and integrated-review roles
+defined by SDD. The Spec Reviewer is not a research lane and is activated only after the draft
+and the Orchestrator's own integrity checks are complete.
 
 Identify independent research lanes from real ownership and technical boundaries, then cover
 them in one Orchestrator context. Batch independent read-only commands when practical, but keep
@@ -508,6 +510,28 @@ their owning layer. Put root modules, registries, exports and cross-layer depend
 under **Composition** instead of forcing them into a feature layer. Do not create a
 separate file inventory or separate Domain, Integration or Persistence Contract.
 
+Every affected-path table is strict and canonical:
+
+- its first two columns are exactly `Path | Change`, in that order; layer-specific columns may
+  follow them;
+- each body row names exactly one repository-relative file path—never a directory, glob, range,
+  comma-separated list, shorthand, or multiple files in one cell;
+- `Change` is exactly `Create`, `Modify`, `Generate`, or `Remove` with that capitalization;
+- each affected file appears in exactly one affected-path table.
+
+These tables are the complete machine-readable input to the implementation structural path
+gate. Classify each row against the implementation baseline: `Create` requires the file to be
+absent from that baseline and added by the candidate; `Modify` requires it to exist in the
+baseline and be modified; `Generate` requires an added or modified generated file with its
+authoritative input/command documented; and `Remove` requires a baseline file deleted by the
+candidate. `create-spec` defines and verifies this contract but does not run the implementation
+gate before an implementation candidate exists.
+
+A table is noncanonical when either leading header differs, a row does not resolve to one exact
+file path, a change value is outside the four-value vocabulary, or a file is duplicated. Keep
+the Spec `draft` until every affected-path table is canonical; the Spec Reviewer cannot waive
+this structural blocker.
+
 Before writing layer rows, perform a **scope-closure audit**. Starting from every changed
 declaration, follow repository Rules to all mandatory companion artifacts and consumers.
 The metadata `scope` list must authorize every affected path named by the layer contracts,
@@ -547,6 +571,36 @@ JSON/schema example or state table after the layer table only when the columns w
 otherwise leave the contract ambiguous. Domain Entity/Structure declaration code is required
 by the Domain rules above; do not include implementation bodies, migration SQL examples or
 UI query/action hook signatures unless an authoritative source explicitly requires them.
+
+#### Typing completeness gate
+
+An implementation-facing Spec must make every introduced or changed public, cross-file or
+cross-runtime TypeScript contract executable without requiring a Builder to invent its
+shape. After the layer maps, include the complete resulting declaration for every affected:
+
+- Entity, Structure, event payload and named error metadata shape;
+- use-case request, result and `execute` signature;
+- repository, transaction/database, provider, service, broker, storage or reader interface,
+  including every method, parameter object, return type and concurrency/version argument;
+- reusable Validation-inferred request, response, search, event and configuration type;
+- REST service method and boundary DTO not already canonically defined by Validation; and
+- widget props, context/state union and parent-to-child callback contract.
+
+Use exact symbol names and repository-relative owning paths. Prefer references to an already
+defined canonical type over duplicating it, but spell out inline anonymous parameter/result
+objects in full. A declaration is incomplete if it uses `*`, `...`, “and related types”,
+“required fields”, an unnamed generic object, an unexplained `Partial<T>`, or prose in place
+of fields and signatures. `Partial<T>` is allowed only when the Spec enumerates the permitted
+change keys and explains optimistic-version/concurrency semantics. Do not invent wrapper
+types for unchanged repository contracts merely to make the Spec look complete; identify
+the exact existing declaration and specify only its complete resulting changed signature.
+
+The typing gate defines contracts, not implementation bodies. Concrete adapter classes,
+controller bodies and query/action-hook internals remain implementation-owned, but their
+implemented interface/service methods and externally consumed inputs/results must still be
+fully typed. Reconcile every declaration against repository Rules: for example, repository
+write vocabulary and transaction ownership come from the selected Core/Database Rules, not
+from a generic `save` method or an arbitrary business-named persistence operation.
 
 Use the matching contract model below for each affected layer.
 
@@ -846,6 +900,13 @@ the path table. Contract enough child widgets to keep each behavior-owning bound
 independently understandable and testable; do not hide an internal component inside its
 parent row when repository Rules require it to be its own widget.
 
+In addition to the relationship table, include one literal repository-relative tree for
+each changed UI surface. Expand every widget directory to its exact required files—entry,
+colocated hook, component test and hook test—and list route, feature query/action hooks,
+service/context files, constants and generated route artifacts individually. Do not use a
+wildcard, directory-only row, “same files for each widget”, marker shorthand or a collapsed
+`components/*` entry as the tree. The tree and the affected-path map must agree one-for-one.
+
 Then map every affected UI path exactly once:
 
 | Path | Change | Declaration/surface | Widget/role | State/actions contract | Async/failure contract | Design/responsive/accessibility | Dependencies/tests |
@@ -946,7 +1007,7 @@ technical decisions: keep the Spec `draft` and return to clarification.
 
 Testing is part of implementation. Derive each boundary from the repository test taxonomy
 and name real test files/suites and the CA IDs they prove. Keep mocked transport, real
-integration and manual Playwright MCP evidence distinct. Do not invent test functions, arbitrary
+integration and manual Playwright CLI evidence distinct. Do not invent test functions, arbitrary
 coverage percentages or commands.
 
 When a feature has more than one test boundary or test file, include an explicit testing
@@ -989,7 +1050,7 @@ For each `MV-*`, provide:
 List applicable commands in a `Command | Purpose/coverage` table and link the expected
 evidence record as `./evaluation.md`.
 
-The Orchestrator executes every applicable `MV-*` with the Playwright MCP. Design-backed
+The Orchestrator executes every applicable `MV-*` with the Playwright CLI. Design-backed
 visual comparison is optional evidence for material acceptance decisions and does not require
 a dedicated visual-reference integration test. Builder checks and automated results remain
 supporting evidence for the applicable behavioral and manual validation.
@@ -1013,10 +1074,37 @@ Use these required tables:
 Builders and the Orchestrator read Rule source files directly. Do not put implementation
 attempts, test results or verdicts in revision history.
 
+## Independent Spec review
+
+After the Orchestrator has authored an otherwise open-ready draft and completed its own
+deterministic integrity checks, activate exactly one read-only
+[`Spec Reviewer`](../agents/spec-reviewer-agent.md) before changing the Spec to `open`:
+
+- the review is mandatory for every `complete` Spec and every material amendment to one;
+- for a `compact` Spec, activate the Reviewer only when cross-boundary, generated-artifact,
+  security, concurrency, provider, migration, design or validation risk makes independent
+  review useful;
+- provide the exact draft revision, source/mode, authorities, Rule Pack, relevant paths and
+  declarations, change classifications, design manifest, assumptions, exclusions, validation
+  commands and known risks;
+- do not create Reviewers per application, package, layer, Rule, screenshot or research lane;
+- do not provide a Plan, implementation diff, Evaluation, test result or runtime evidence as a
+  substitute for the Spec Contract and its source authorities.
+
+The Reviewer checks source/RF/CA traceability, path and declaration completeness, ownership,
+exports and registration, producer-consumer wiring, generated artifacts, test ownership,
+command ordering, design handoff and validation executability. It is read-only: it does not
+edit files, resolve ambiguity, ask the user questions, create subagents or decide Spec status.
+
+The report is advisory and transient. The Orchestrator verifies each finding, applies accepted
+corrections, reruns deterministic integrity checks and resumes the same Reviewer for affected
+corrections. A material ambiguity returns to the clarification gate. The Spec may become `open`
+only when the applicable review is current and every verified finding is resolved.
+
 ## Integrity gate and handoff
 
-There is no separate Spec review stage. Keep the Spec `draft` while clarification, authority alignment
-or integrity work remains. Before changing it to `open`, verify:
+Keep the Spec `draft` while clarification, authority alignment, integrity work or an applicable
+Spec review remains. Before changing it to `open`, verify:
 
 - every applicable research lane was covered directly by the Orchestrator, with no research
   or architecture subagents dispatched;
@@ -1034,8 +1122,14 @@ or integrity work remains. Before changing it to `open`, verify:
 - complete RF/CA/evidence traceability;
 - metadata-scope closure: every affected/validation/documentation/design path is authorized,
   and every rule-mandated companion artifact is represented;
-- filesystem-valid layer-contract path and change classifications;
+- every affected-path table starts with exactly `Path | Change`, contains one exact
+  repository-relative file path per row, uses only `Create`, `Modify`, `Generate`, or `Remove`,
+  and contains no duplicated affected file;
+- filesystem-valid layer-contract paths and change classifications;
 - complete resulting field schemas for every affected Entity and Structure;
+- complete resulting TypeScript declarations for every affected public/cross-boundary type,
+  including use-case input/result, every interface method, REST/service DTO, event payload,
+  widget props and UI context/state union;
 - no unresolved material product or technical ambiguity;
 - complete/current design bundle and screenshot integrity when applicable;
 - visual analysis inventory for every supplied screenshot and a recorded decision for every
@@ -1046,12 +1140,16 @@ or integrity work remains. Before changing it to `open`, verify:
 - executable manual scenarios and real validation commands;
 - valid documentation and Rule Pack paths;
 - valid Markdown tables, links, Mermaid and artifact structure.
+- the applicable Spec Reviewer inspected the current draft revision, every verified finding was
+  resolved and the same Reviewer rechecked affected corrections.
 
 For every implementation-facing Spec, also verify that the handoff is executable rather than
 interpretive:
 
 - include an exact, repository-relative file/widget tree for every changed UI surface, with
-  one path per line and explicit component boundaries;
+  every route, widget entry, colocated hook, component test, hook test, feature query/action
+  hook, service/context, constant and generated artifact on its own line; no wildcards,
+  directory-only shorthand or implied repeated files;
 - verify every changed REST route group has its matching `.rest` file in writable scope and
   synchronized coverage for every controller route;
 - verify every widget tree contains `index.tsx`, its colocated hook, a component test named
@@ -1067,8 +1165,10 @@ interpretive:
 - ensure the resulting Spec can be checked against the filesystem and the declared validation
   commands without inventing paths, tests, APIs or evidence.
 
-An incomplete tree, ambiguous widget boundary, missing state, missing screenshot mapping or
-non-executable validation command keeps the Spec `draft`; do not hand it to implementation.
+An incomplete tree, malformed or noncanonical affected-path table, ambiguous widget boundary,
+missing state, missing screenshot mapping or non-executable validation command keeps the Spec
+`draft`; do not hand it to implementation. Apply this gate to Specs created or materially
+amended under this workflow; do not normalize existing feature Specs in bulk.
 
 After writing, return a concise author summary containing:
 
@@ -1098,8 +1198,9 @@ For a material amendment before conclusion:
 3. repeat clarification and authority alignment;
 4. refresh affected Contracts, design references and validation coverage;
 5. mark superseded evidence as historical;
-6. rerun the integrity gate and return the Spec directly to `open`;
-7. re-evaluate direct versus Plan-backed `implement-spec` execution.
+6. rerun the integrity gate and the applicable Spec Reviewer against the amended draft;
+7. return the Spec directly to `open` after verified findings are resolved;
+8. re-evaluate direct versus Plan-backed `implement-spec` execution.
 
 Amend the same Spec; do not create another Spec unless the original feature is already
 concluded and the request is a distinct new change.

@@ -72,6 +72,7 @@
 * **Mailpit:** Captures and displays emails locally.
 * **Local SMTP:** Used by local Supabase Auth and local NestJS to send emails to Mailpit.
 * **Supabase Auth Email Templates:** Specific templates for confirmation, recovery, magic link, and invitation emails.
+* **Signing Gateway email templates:** Static HTML assets under `volumes/communication/templates`, following the Supabase Auth template style; the plain-text body remains a client-compatibility fallback.
 
 ### Jobs and Workflows
 

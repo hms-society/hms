@@ -1,7 +1,7 @@
 ---
 title: Configuração de assinaturas da Formalização
-status: in_progress
-revision: 15
+status: cancelled
+revision: 16
 source:
   type: jira-ticket
   ref: https://plataformahms.atlassian.net/browse/SCRUM-140
@@ -42,10 +42,15 @@ scope:
   - documentation/rules/widget-testing-rules.md
   - documentation/tooling.md
   - documentation/features/formalization/formalization-signature-flow
-last_updated_at: 2026-08-28
+last_updated_at: 2026-09-01
 ---
 
 # 1. Context and scope
+
+> Suspended on 2026-09-01 by direct product decision. This historical Contract and
+> its implemented `ready_for_sending` baseline are preserved, but no further work is
+> authorized here. The active continuation and canonical remaining SCRUM-140/SCRUM-144
+> contract is [`../signing-gateway/spec.md`](../signing-gateway/spec.md), revision 5.
 
 ## Objective and source
 
@@ -1219,7 +1224,7 @@ Actual results, mocked/real labels and artifacts belong in [evaluation.md](evalu
 
 | Rule | Applies to | Evaluated revision |
 | --- | --- | --- |
-| `documentation/rules/sdd-rules.md` | Spec lifecycle/traceability | worktree at 2026-08-26 |
+| `documentation/sdd.md` | Spec lifecycle/traceability | worktree at 2026-08-26 |
 | `documentation/rules/code-conventions-rules.md` | TypeScript declarations | worktree at 2026-08-26 |
 | `documentation/rules/core-package-rules.md` | Domain/interfaces | worktree at 2026-08-26 |
 | `documentation/rules/use-case-testing-rules.md` | Core actions/tests | worktree at 2026-08-26 |
@@ -1250,3 +1255,4 @@ Actual results, mocked/real labels and artifacts belong in [evaluation.md](evalu
 | `13` | 2026-08-27 | Changed signatory channels from one selected value to an independently toggleable `selectedChannels` array; selection and deselection revalidate current server-resolved availability, while readiness still requires at least one channel | Direct multi-channel selection decision |
 | `14` | 2026-08-28 | Made `packages/validation` intentionally test-free; its schemas use lint/type-check validation, consuming Core/Server/Web boundaries own behavior tests, and root coverage excludes the package | Direct validation and coverage policy decision |
 | `15` | 2026-08-28 | Narrowed closure evidence to the retained authenticated, automated and required design-reference flows; removed supplemental cross-tenant, concurrent-conflict, changed-package, historical-DOCX and pending visual-comparison scenarios as delivery gates | Direct delivery-scope decision; implementation already satisfies the retained Contract |
+| `16` | 2026-09-01 | Suspended this sibling Contract, preserved its implemented `ready_for_sending` baseline as historical input and transferred all remaining SCRUM-140/SCRUM-144 authority to `../signing-gateway/spec.md` revision 5 | Direct decision to maintain one active signing Contract |

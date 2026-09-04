@@ -166,7 +166,7 @@ Review correction activation (PR #89): `builder_core` (`01a035f7-ffc3-7562-927f-
 | Rule Pack | `documentation/rules/ui-layer-rules.md` | passed | Source-neutral widgets, REST context, error propagation and terminal read-only behavior verified. |
 | Rule Pack | `documentation/rules/web-app-routing-rules.md` | passed | Protected routes, canonical paths and generated route tree pass. |
 | Rule Pack | `documentation/rules/widget-testing-rules.md` | passed | Dynamic form, document package/review and dialog route coverage passes. |
-| SDD | `documentation/rules/sdd-rules.md` | passed | Plan-backed ownership, living Evaluation, correction routing and the same-reviewer follow-up are complete. |
+| SDD | `documentation/sdd.md` | passed | Plan-backed ownership, living Evaluation, correction routing and the same-reviewer follow-up are complete. |
 | Design | `documentation/design.md` and `design/manifest.md` | passed | Seven supplied references compared against fresh CLI captures; differences recorded above. |
 | Architecture/Modules/Tooling | `documentation/architecture.md`; `documentation/modules.md`; `documentation/tooling.md` | passed | Preflight and documented pnpm/Drizzle/TanStack/Biome workflows applied. |
 

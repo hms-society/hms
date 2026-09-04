@@ -12,7 +12,7 @@ duplicates.
 ## Inputs and authority
 
 Read the implemented Spec or Bug Report, Plan when present, `evaluation.md`, actual diff,
-`documentation/rules/sdd-rules.md`, `documentation/tooling.md`, applicable Rules and
+`documentation/sdd.md`, `documentation/tooling.md`, applicable Rules and
 `documentation/rules/commit-rules.md`. For a feature delivery, confirm that the Evaluation
 uses the canonical Evaluation template embedded in `implement-spec` and that its evidence is
 current for the exact Spec revision.
@@ -157,7 +157,7 @@ comparison for every supplied screenshot and every required supplemental screens
 
 - route/state and exact saved reference path or source node ID from `design/manifest.md`;
 - target viewport;
-- Playwright MCP manual result;
+- repository Playwright CLI manual result;
 - implementation screenshot/comparison path;
 - one direct comparison for each supplied and required supplemental reference, recording
   structure, content, hierarchy, spacing, dimensions, tokens, interaction/state and responsive

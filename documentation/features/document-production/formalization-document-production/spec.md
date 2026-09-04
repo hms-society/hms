@@ -785,7 +785,7 @@ is therefore the governing product authority for `RF-09` and `CA-10`.
 
 | Rule | Why it applies |
 | --- | --- |
-| `documentation/rules/sdd-rules.md` | Spec lifecycle, metadata, traceability and artifact boundaries |
+| `documentation/sdd.md` | Spec lifecycle, metadata, traceability and artifact boundaries |
 | `documentation/rules/code-conventions-rules.md` | New declarations, imports, barrels and package exports |
 | `documentation/rules/core-package-rules.md` | Formalization entity/structures/errors/interfaces/use cases; immutable snapshots use the explicit semantic `readonly` exception rather than a blanket Structure convention |
 | `documentation/rules/use-case-testing-rules.md` | One behavior-focused suite per new use case |

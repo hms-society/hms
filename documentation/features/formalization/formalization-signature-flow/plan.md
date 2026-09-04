@@ -1,21 +1,25 @@
 ---
 title: Configuração de assinaturas da Formalização — implementation plan
-status: in_progress
+status: superseded
 spec: ./spec.md
-spec_revision: 15
+spec_revision: 16
 evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-140
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
-updated_at: 2026-08-28
+updated_at: 2026-09-01
 ---
 
 ## Execution status
 
-- **Spec:** [`spec.md`](./spec.md), revision `15`, status `in_progress`.
+> Superseded on 2026-09-01. Completed implementation/evidence remains historical;
+> unfinished closure work is suspended and must not resume from this Plan. Continue only
+> through [`../signing-gateway/spec.md`](../signing-gateway/spec.md), revision 5.
+
+- **Spec:** [`spec.md`](./spec.md), revision `16`, status `cancelled`.
 - **Plan rationale:** The delivery crosses Core, Validation, Server persistence/providers/jobs/REST, Web UI, durable migration and private Gotenberg runtime boundaries, with dependent contracts, asynchronous recovery, and complex authenticated browser validation.
-- **Current phase:** `F9` — Final readiness and handoff (`in_progress`).
-- **Next action:** Run the final conformance and publication gate for the narrowed revision-15 Contract; visual captures remain transient and are not stored as feature artifacts.
+- **Current phase:** `F9` — superseded before final publication; no active task remains in this Plan.
+- **Next action:** None in this Plan. Any remaining signing work must be replanned from the active `signing-gateway` Spec revision 5.
 - **Active blockers:** None for Plan creation. The Atlassian HMS MCP read was unavailable with a `405` WAF response; the Spec retains the canonical PRD/Jira URLs and confirmed authority alignment, and no external authority mutation is planned.
 - **Builders:** F2 `builder_validation`, F3 `builder_server`, and F4 resumed `builder_core` completed and passed Orchestrator verification. F5 `builder_server` and its real migration-backed regression are complete. The same `builder_web` identity completed F6 and its available F7 scope; the Orchestrator completed the remaining F7 UI pieces after the Builder became unresponsive. Root/generated paths remain Orchestrator-owned.
 - **Shared ownership:** The Orchestrator owns `docker-compose.yaml`, `apps/server/src/app.module.ts`, generated Drizzle migration artifacts, package installation/lockfile updates, and final integrated authority/conformance checks. Existing authority-document changes are preserved and are not reassigned to Builders.
@@ -328,7 +332,7 @@ The three-way parallelism in Wave 2 is justified by the completed Core contract 
 - **Paths:** Complete integrated Spec scope, generated artifacts, final widget tree, route examples, design references and `evaluation.md` validation index.
 - **Contract:** All `RF-*` and `CA-*`; all `MV-*`; Design Contract and cross-cutting restrictions.
 - **Outcome:** One independent review reports exact conformance, cross-Builder boundary findings, missing/stale evidence, UI/runtime defects and suggested responsible Builder without editing or deciding readiness.
-- **Rules:** [`documentation/agents/reviewer-agent.md`](../../../agents/reviewer-agent.md); [`documentation/rules/sdd-rules.md`](../../../rules/sdd-rules.md) — “Roles”, “Implementation and living evidence” and “Integrated validation”; applicable Core, Validation, REST, Controller, Database, Provision, Messaging, UI and Widget Rules already assigned above.
+- **Rules:** [`documentation/agents/implementation-reviewer-agent.md`](../../../agents/implementation-reviewer-agent.md); [`documentation/sdd.md`](../../../sdd.md) — “Roles”, “Implementation and living evidence” and “Integrated validation”; applicable Core, Validation, REST, Controller, Database, Provision, Messaging, UI and Widget Rules already assigned above.
 - **Exit:** `reviewer` completes the read-only Spec/Rule/design audit, inspects every final visual comparison, independently replays high-risk authenticated/keyboard/server-backed interactions, and returns a report with explicit `none` or actionable findings. The Orchestrator verifies findings and resumes the responsible Builder when needed.
 
 ### F9 — Final readiness and handoff
@@ -340,7 +344,7 @@ The three-way parallelism in Wave 2 is justified by the completed Core contract 
 - **Paths:** Integrated candidate; `evaluation.md`; generated artifacts; transient validation output; final validation index.
 - **Contract:** `CA-01`–`CA-10`; `MV-01`, `MV-03`, `MV-04`; Spec revision `15`; Validation and handoff table in this Plan.
 - **Outcome:** Current Core/Validation/Server/Web commands, real services/accounts/fixtures, authenticated server-backed scenarios, manual MV flows, visual comparisons, transient IDs and console/network classifications are recorded against the integrated commit. Visual observations are retained; implementation screenshots are not.
-- **Rules:** [`documentation/rules/sdd-rules.md`](../../../rules/sdd-rules.md) — “Integrated validation”, “Changes before conclusion” and “Publication, CI, and closure”; [`documentation/tooling.md`](../../../tooling.md).
+- **Rules:** [`documentation/sdd.md`](../../../sdd.md) — “Integrated validation”, “Changes before conclusion” and “Publication, CI, and closure”; [`documentation/tooling.md`](../../../tooling.md).
 - **Exit:** Primary real authenticated flow, narrow/keyboard path and required ready/preparing/candidate/editor states are inspected and recorded in `evaluation.md`; screenshots, when used, are transient and not stored in the feature directory. No removed supplemental scenario is treated as a closure blocker.
 
 #### F9-T2 — Perform final conformance gate and handoff
@@ -350,7 +354,7 @@ The three-way parallelism in Wave 2 is justified by the completed Core contract 
 - **Paths:** `plan.md`; `spec.md`; `evaluation.md`; final integrated tree; generated migration/runtime artifacts; validation links and identifiers.
 - **Contract:** Spec revision `15`; all in-scope `RF-*`, `CA-*`, `MV-01`, `MV-03`, `MV-04`; Design Contract and final handoff condition in this Plan.
 - **Outcome:** Ledger and task cards are complete, the revision-15 Contract amendment is reconciled, every verified Reviewer finding is resolved, all authority/design/runtime evidence is current and the delivery is ready for `conclude-spec`.
-- **Rules:** [`documentation/rules/sdd-rules.md`](../../../rules/sdd-rules.md) — “Roles”, “Integrated validation”, “Changes before conclusion” and “Publication, CI, and closure”; [`documentation/agents/reviewer-agent.md`](../../../agents/reviewer-agent.md); [`documentation/tooling.md`](../../../tooling.md).
+- **Rules:** [`documentation/sdd.md`](../../../sdd.md) — “Roles”, “Integrated validation”, “Changes before conclusion” and “Publication, CI, and closure”; [`documentation/agents/implementation-reviewer-agent.md`](../../../agents/implementation-reviewer-agent.md); [`documentation/tooling.md`](../../../tooling.md).
 - **Exit:** Independently verify task/phase statuses, current command outputs, generated artifacts, real persistence/authorization results, transient screenshot/reference comparisons, validation IDs, console/network cleanliness and Reviewer finding resolution; then route directly to `conclude-spec`, with no unsupported green status.
 
 ## Validation and handoff

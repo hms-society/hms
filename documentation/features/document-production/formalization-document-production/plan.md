@@ -184,7 +184,7 @@ The implementation is published as a ready-for-review dependent chain:
 - **Paths:** `apps/server/src/shared/database/drizzle/migrations/**` e `meta/**` gerados pelo Drizzle; `apps/web/src/routeTree.gen.ts` gerado pelo TanStack Router; `evaluation.md` criado pelo kickoff de `implement-spec`; nenhum lockfile/dependência nova sem decisão explícita.
 - **Contract:** todos os `RF-*`/`CA-*`; especialmente `CA-01`, `CA-06`, `CA-12`, `CA-13` e o Quality Gate da Spec.
 - **Outcome:** migrations/meta e route tree representam os sources atuais, não há artefato gerado editado manualmente, o commit integrado compõe Nest sem erro e a Evaluation contém evidência corrente/identificadores transitórios.
-- **Rules:** `documentation/rules/sdd-rules.md` §§ “Durable artifacts”, “Implementation and living evidence”, “Integrated validation”; `documentation/tooling.md`; `documentation/rules/database-layer-rules.md` §§ “Drizzle models are declarations, not classes”, “Every module owns a seeder”; `documentation/rules/web-app-routing-rules.md` § “Generated route tree”.
+- **Rules:** `documentation/sdd.md` §§ “Durable artifacts”, “Implementation and living evidence”, “Integrated validation”; `documentation/tooling.md`; `documentation/rules/database-layer-rules.md` §§ “Drizzle models are declarations, not classes”, “Every module owns a seeder”; `documentation/rules/web-app-routing-rules.md` § “Generated route tree”.
 - **Exit:** `pnpm --filter server db:migration:generate`; `pnpm --filter server db:migration:apply`; `pnpm --filter server db:seed`; `pnpm --filter @hms/core test`; `pnpm --filter @hms/validation test`; `pnpm --filter server test`; `pnpm --filter web test`; `pnpm --filter server check:code`; `pnpm --filter server check:types`; `pnpm --filter server build`; `pnpm --filter web generate-routes`; `pnpm --filter web check:code`; `pnpm --filter web check:types`; `pnpm --filter web build`.
 
 #### F6-T2 — Executar MV-01/MV-02 com serviços reais e evidência visual
@@ -194,7 +194,7 @@ The implementation is published as a ready-for-review dependent chain:
 - **Paths:** `./evaluation.md` e artefatos ignorados de Playwright/CI; não criar diretório local `evidence/`.
 - **Contract:** `CA-01`–`CA-13`; `MV-01` fluxo do advogado associado e `MV-02` limites de autorização (outro advogado é rejeitado, administrador é permitido).
 - **Outcome:** o fluxo autenticado real prova start idempotente, persistência/erros do formulário, locks/revisões/freshness, geração/review/terminalidade, confirmação sem assinatura, fechamento sem contratação e acesso proibido, com light/dark, desktop/narrow e teclado.
-- **Rules:** `documentation/rules/sdd-rules.md` § “Integrated validation”; `documentation/tooling.md`; `documentation/rules/controllers-testing-rules.md` §§ “Use real infrastructure and minimize mocks”, “Assert the HTTP and persistence contracts”; `documentation/rules/web-app-routing-rules.md` § “Required validation”; `AGENTS.md` workflow de browser autenticado.
+- **Rules:** `documentation/sdd.md` § “Integrated validation”; `documentation/tooling.md`; `documentation/rules/controllers-testing-rules.md` §§ “Use real infrastructure and minimize mocks”, “Assert the HTTP and persistence contracts”; `documentation/rules/web-app-routing-rules.md` § “Required validation”; `AGENTS.md` workflow de browser autenticado.
 - **Exit:** confirmar `docker compose ps -a`, `curl http://localhost:8000/auth/v1/health` e `curl http://localhost:5555/health`; iniciar sessões persistentes Server/Web, autenticar pelo `/login` com credenciais resolvidas do seeder/env, validar URL e conteúdo autenticado, executar MV-01/MV-02, capturar accessibility snapshots/screenshots/trace quando aplicável e classificar cada console error, hydration warning, auth refresh failure e 4xx/5xx como esperado, corrigido, preexistente ou bloqueador.
 
 ### F7 — Revisão integrada read-only
@@ -206,7 +206,7 @@ The implementation is published as a ready-for-review dependent chain:
 - **Paths:** candidato integrado completo; Core/Validation/Server/Web/documentação afetados, sem editar arquivos.
 - **Contract:** todos os `RF-*`, `CA-*`, `MV-*`, Design Contract e Rule Pack; atenção especial a autorização, source imutável, revisão/freshness, seed/migration e regressão Consultation.
 - **Outcome:** relatório read-only verifica contratos entre Builders, caminhos não sobrepostos, diferenças de cada screenshot, árvore de widgets, keyboard/narrow, console/network e os fluxos de maior risco; o relatório não é evidência oficial até o Orchestrator verificar cada achado.
-- **Rules:** `documentation/rules/sdd-rules.md` §§ “Roles”, “Implementation and living evidence”, “Integrated validation”; todos os Rule Pack paths aplicáveis já registrados nos cards F1–F6; não editar Spec/Plan/Evaluation nem implementar correções.
+- **Rules:** `documentation/sdd.md` §§ “Roles”, “Implementation and living evidence”, “Integrated validation”; todos os Rule Pack paths aplicáveis já registrados nos cards F1–F6; não editar Spec/Plan/Evaluation nem implementar correções.
 - **Exit:** Reviewer concluído; Orchestrator registra findings aceitos na Evaluation, invalida evidência afetada, retoma o Builder responsável e repete os exits. Só concluir quando não houver finding bloqueador ativo.
 
 # Validation and handoff

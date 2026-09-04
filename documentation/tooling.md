@@ -121,6 +121,36 @@ database implementation, and Web widgets consume feature query/action hooks
 instead of TanStack Query or REST infrastructure directly. The command is part
 of `pnpm validate` and must pass without ignored known violations.
 
+## Spec implementation structural path gate
+
+Use the repository structural path gate after every path owned by Builders and the
+Orchestrator has been integrated for a Spec implementation:
+
+```bash
+pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]
+```
+
+`<spec>` is the repository-relative or absolute path to the governing `spec.md`. The
+optional `--base <ref>` selects the local comparison baseline; when omitted, the command
+uses the local `origin/develop` ref. The command never fetches or updates that ref. Resolve
+and record the selected base ref and its SHA before relying on the result, and fetch
+explicitly outside the gate only when the delivery workflow requires a newer remote state.
+Use `--json` when machine-readable output is needed; it does not change validation semantics.
+
+The gate is structural only. It parses the Spec's canonical affected-path tables and compares
+their exact one-file paths and `Create`, `Modify`, `Generate`, or `Remove` classifications with
+the implementation paths changed from the selected baseline. It does not prove RF/CA behavior,
+type correctness, tests, runtime integration, migration correctness, generated output content,
+design fidelity, accessibility, or Playwright CLI results, and it does not replace any of those
+sensors.
+
+Run the gate only after all Builder-owned and Orchestrator-owned paths are integrated, and
+before the Implementation Reviewer, integrated sensors, or a readiness decision. Rerun it after
+any correction that changes a contracted path or its classification. In `evaluation.md`, record
+the exact command, selected base ref, resolved base SHA, every reported count, final result, and
+freshness. A malformed or noncanonical affected-path table, an unresolved base, or a path/change
+mismatch is blocking.
+
 ## Testing — Vitest
 
 The application and core workspaces use Vitest for automated tests. The
@@ -254,7 +284,7 @@ Bring it up with `docker compose up`.
   `.opencode/commands`) and generated Codex skills under `.codex/skills`, removing
   stale managed artifacts when a workflow is retired.
 - `sync-agents.sh` — generates Codex, Claude, and OpenCode role configuration from
-  `documentation/agents/*-agent.md`; the Integrated Reviewer is read-only, while Builders
+  `documentation/agents/*-agent.md`; the Implementation Reviewer is read-only, while Builders
   receive workspace-write access without subagent creation. Spec research remains in the
   Orchestrator and has no generated Searcher role.
 
