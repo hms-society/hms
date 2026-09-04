@@ -89,6 +89,28 @@ Common recovery checks:
   after the run and leave shared Docker services unchanged unless the task
   explicitly requests teardown.
 
+### Inngest Dev MCP (`inngest-dev`)
+
+Use the configured local MCP at `http://localhost:9288/mcp` when investigating
+or verifying asynchronous Inngest behavior during local development. This is
+the Inngest Dev Server endpoint exposed by `docker-compose.yaml` (the
+`INNGEST_PORT` host mapping defaults to `9288`).
+
+Before using it, confirm that the local Inngest and application services are
+running with `docker compose ps -a`, and confirm that the server has finished
+Nest bootstrap and registered its functions. Use the MCP to inspect function
+discovery, event payloads, run status, step output, retries, and failures, and
+to trigger or replay local runs when the available MCP operation supports it.
+
+Treat MCP results as integration evidence only when they come from the real
+local services and canonical event path. Do not use the MCP as a substitute for
+the Dockerized Inngest test suite or for checking the resulting database,
+storage, publication, or provider effects. For any state-changing investigation,
+use local test data, record the function/run identifiers and terminal status,
+and verify the expected effects through the owning application boundary.
+Classify MCP connection or discovery failures separately from application or
+job failures.
+
 ### Context7 (`mcp__context7__*`)
 
 Use Context7 when implementation depends on current documentation for a library,
