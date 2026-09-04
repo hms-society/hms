@@ -117,6 +117,29 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     )
   })
 
+  it('allows only the completion page after submission revokes the binding', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response('<html><head></head><body>Completed</body></html>', {
+        status: 200,
+        headers: { 'content-type': 'text/html' },
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    app = await createApp({ status: 'revoked', revocationReason: 'submitted' })
+
+    const completionResponse = await request(app.getHttpServer()).get(
+      `${PREFIX}/${ALIAS}/sign/${ALIAS}/complete`,
+    )
+    const signingResponse = await request(app.getHttpServer()).get(
+      `${PREFIX}/${ALIAS}/continue`,
+    )
+
+    expect(completionResponse.status).toBe(200)
+    expect(completionResponse.text).toContain('Completed')
+    expect(signingResponse.status).toBe(404)
+    expect(fetchMock).toHaveBeenCalledOnce()
+  })
+
   it('does not inject completion styles on non-completion provider pages', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
@@ -299,7 +322,13 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
   })
 })
 
-async function createApp() {
+async function createApp(
+  bindingOverrides: Partial<{
+    status: 'active' | 'revoked' | 'expired'
+    revocationReason: string
+    expiresAt: Date
+  }> = {},
+) {
   const module = await Test.createTestingModule({
     controllers: [SigningGatewayProxyController],
     providers: [
@@ -313,6 +342,7 @@ async function createApp() {
             aliasHash: 'alias-hash',
             status: 'active',
             expiresAt: new Date(Date.now() + 60_000),
+            ...bindingOverrides,
           }),
         },
       },

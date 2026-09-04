@@ -61,10 +61,21 @@ export class SigningGatewayProxyController {
 
   private async forward(alias: string, request: Request, response: Response) {
     const binding = await this.bindings.findByAliasHash(this.hasher.hash(alias))
+    const proxyTarget = this.proxyTarget(request, alias)
+    if (!proxyTarget || !this.isSafeProxyPath(proxyTarget.pathname)) {
+      response.status(400).send('Signing Gateway request rejected.')
+      return
+    }
+    const isUnexpired = binding?.expiresAt !== undefined && binding.expiresAt > new Date()
+    const canReadSubmittedCompletion =
+      binding?.status === 'revoked' &&
+      binding.revocationReason === 'submitted' &&
+      ['GET', 'HEAD'].includes(request.method) &&
+      this.isCompletionRoute(proxyTarget.pathname)
     if (
-      binding?.status !== 'active' ||
-      binding?.expiresAt === undefined ||
-      binding.expiresAt <= new Date()
+      !binding ||
+      !isUnexpired ||
+      (binding.status !== 'active' && !canReadSubmittedCompletion)
     ) {
       response.status(404).send('Signing Gateway resource unavailable.')
       return
@@ -76,11 +87,6 @@ export class SigningGatewayProxyController {
       contextId: binding.recipientId,
     })
     const providerToken = new TextDecoder().decode(credential)
-    const proxyTarget = this.proxyTarget(request, alias)
-    if (!proxyTarget || !this.isSafeProxyPath(proxyTarget.pathname)) {
-      response.status(400).send('Signing Gateway request rejected.')
-      return
-    }
     const upstream = `${this.env.get('DOCUMENSO_PRIVATE_BASE_URL').replace(/\/$/, '')}${this.upstreamPath(proxyTarget.pathname, providerToken, alias)}${this.upstreamSearch(proxyTarget.search, providerToken, alias)}`
     const headers = new Headers()
     for (const [name, value] of Object.entries(request.headers)) {
