@@ -1,5 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { WhatsappDocumentBatchReceivedEvent } from '@hms/core/document-engine/domain/events'
+import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
+import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
 
