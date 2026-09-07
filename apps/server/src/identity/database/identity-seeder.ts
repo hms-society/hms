@@ -146,18 +146,6 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
   },
 ]
 
-const DEFAULT_CONTRACTS_LAWYER: LegalCollaboratorSeed = {
-  professionalName: 'Advogada de contratos',
-  jobTitle: 'Advogada especialista em contratos',
-  profile: 'lawyer',
-}
-
-const DEFAULT_DOCUMENTS_PARALEGAL: LegalCollaboratorSeed = {
-  professionalName: 'Paralegal documental',
-  jobTitle: 'Paralegal de documentos',
-  profile: 'paralegal',
-}
-
 @Injectable()
 export class IdentitySeeder {
   constructor(
@@ -248,28 +236,8 @@ export class IdentitySeeder {
     const attendantUser = seededUsers.find(
       ({ email }) => email === 'attendant@hmsadvogados.com.br',
     )
-    const lawyerUser = seededUsers.find(
-      ({ email }) => email === 'lawyer@hmsadvogados.com.br',
-    )
-    const paralegalUser = seededUsers.find(
-      ({ email }) => email === 'paralegal@hmsadvogados.com.br',
-    )
-    const contractsLawyerUser = seededUsers.find(
-      ({ email }) => email === 'lawyer.contracts@hmsadvogados.com.br',
-    )
-    const documentsParalegalUser = seededUsers.find(
-      ({ email }) => email === 'paralegal.documents@hmsadvogados.com.br',
-    )
     const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
-    if (
-      !adminUser ||
-      !attendantUser ||
-      !lawyerUser ||
-      !paralegalUser ||
-      !contractsLawyerUser ||
-      !documentsParalegalUser ||
-      !clientUser
-    ) {
+    if (!adminUser || !attendantUser || !clientUser) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -289,29 +257,22 @@ export class IdentitySeeder {
       DEFAULT_LEGAL_COLLABORATORS.map(async ({ email, ...collaborator }) => {
         const user = seededUsers.find((seededUser) => seededUser.email === email)
 
-    const paralegalCreated = await this.collaboratorsRepository.add({
-      userId: paralegalUser.id,
-      ...DEFAULT_PARALEGAL,
-      legalExpertises: [lawyerLegalExpertise],
-    })
-    const contractsLawyerCreated = await this.collaboratorsRepository.add({
-      userId: contractsLawyerUser.id,
-      ...DEFAULT_CONTRACTS_LAWYER,
-      legalExpertises: [lawyerLegalExpertise],
-    })
-    const documentsParalegalCreated = await this.collaboratorsRepository.add({
-      userId: documentsParalegalUser.id,
-      ...DEFAULT_DOCUMENTS_PARALEGAL,
-      legalExpertises: [lawyerLegalExpertise],
-    })
+        if (!user) {
+          throw new AppError(`Seed user for ${email} was not created`)
+        }
+
+        return this.collaboratorsRepository.add({
+          userId: user.id,
+          ...collaborator,
+          legalExpertises: [lawyerLegalExpertise],
+        })
+      }),
+    )
 
     if (
       !administratorCreated ||
       !attendantCreated ||
-      !lawyerCreated ||
-      !paralegalCreated ||
-      !contractsLawyerCreated ||
-      !documentsParalegalCreated
+      legalCollaborators.includes(undefined)
     ) {
       throw new AppError('Default seed collaborators were not created')
     }
@@ -349,10 +310,7 @@ export class IdentitySeeder {
       collaborators: [
         administratorCreated,
         attendantCreated,
-        lawyerCreated,
-        paralegalCreated,
-        contractsLawyerCreated,
-        documentsParalegalCreated,
+        ...legalCollaborators,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,
