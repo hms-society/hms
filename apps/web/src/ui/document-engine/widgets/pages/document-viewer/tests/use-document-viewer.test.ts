@@ -2,21 +2,17 @@ import { renderHook, act } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDocumentFileQuery } from '@/ui/document-engine/hooks/use-document-file-query'
-import { useDocumentFileUrlQuery } from '@/ui/document-engine/hooks/use-document-file-url-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useDocumentViewer } from '../use-document-viewer'
 
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ fileId: 'file-123' }),
+  useSearch: vi.fn(() => ({ fromCaseId: undefined })),
 }))
 
 vi.mock('@/ui/document-engine/hooks/use-document-file-query', () => ({
   useDocumentFileQuery: vi.fn(),
-}))
-
-vi.mock('@/ui/document-engine/hooks/use-document-file-url-query', () => ({
-  useDocumentFileUrlQuery: vi.fn(),
 }))
 
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
@@ -24,8 +20,8 @@ vi.mock('@/ui/shared/hooks/use-navigation', () => ({
 }))
 
 const useDocumentFileQueryMock = vi.mocked(useDocumentFileQuery)
-const useDocumentFileUrlQueryMock = vi.mocked(useDocumentFileUrlQuery)
 const useNavigationMock = vi.mocked(useNavigation)
+const useSearchMock = vi.mocked(useSearch)
 
 describe('useDocumentViewer', () => {
   const navigateTo = vi.fn()
@@ -45,12 +41,6 @@ describe('useDocumentViewer', () => {
       isLoadingFile: false,
       isErrorFile: false,
     } as never)
-    useDocumentFileUrlQueryMock.mockReturnValue({
-      fileUrl: 'blob:document',
-      fileUrlError: null,
-      isLoadingFileUrl: false,
-      isErrorFileUrl: false,
-    })
     useNavigationMock.mockReturnValue({
       navigateTo,
       navigateCollaboratorsSearch: vi.fn(),
@@ -90,5 +80,21 @@ describe('useDocumentViewer', () => {
     act(() => result.current.handleBack())
 
     expect(navigateTo).toHaveBeenCalledWith('documentInbox')
+  })
+
+  it('navigates back to the case when the viewer was opened from a case', () => {
+    useSearchMock.mockReturnValue({ fromCaseId: 'case-1' } as never)
+
+    const { result } = renderHook(() => useDocumentViewer(), {
+      wrapper: createWrapper(),
+    })
+
+    expect(result.current.backLabel).toBe('Voltar para o caso')
+
+    act(() => result.current.handleBack())
+
+    expect(navigateTo).toHaveBeenCalledWith('lawyerCaseDetails', {
+      params: { caseId: 'case-1' },
+    })
   })
 })

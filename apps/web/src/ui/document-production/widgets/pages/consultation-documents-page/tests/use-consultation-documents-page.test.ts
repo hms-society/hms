@@ -42,6 +42,9 @@ vi.mock('../../../../hooks/use-confirm-consultation-document-package-action', ()
 vi.mock('../../../../hooks/use-reopen-consultation-document-package-action', () => ({
   useReopenConsultationDocumentPackageAction: vi.fn(),
 }))
+vi.mock('../../../../hooks/use-update-document-access-action', () => ({
+  useUpdateDocumentAccessAction: vi.fn(),
+}))
 
 const useConsultationDocumentsQueryMock = vi.mocked(useConsultationDocumentsQuery)
 const useCancelConsultationDocumentGenerationActionMock = vi.mocked(

@@ -27,7 +27,6 @@ type Request = FormalizationActor & {
   readonly documentId: string
   readonly instructions?: string
 }
-
 export type FormalizationDocumentGeneration = {
   readonly documentGenerationId: string
   readonly documentId: string
