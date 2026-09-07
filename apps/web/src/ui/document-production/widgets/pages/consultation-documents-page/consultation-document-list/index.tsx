@@ -9,6 +9,11 @@ export type ConsultationDocumentListProps = {
   isCancellingDocument: boolean
   onRefreshDocument: () => Promise<unknown>
   isReadOnly: boolean
+  onUpdateAccess: (
+    documentId: string,
+    classification: string,
+    partnerId?: string,
+  ) => Promise<void>
 }
 
 export const ConsultationDocumentList = ({
@@ -18,6 +23,7 @@ export const ConsultationDocumentList = ({
   isCancellingDocument,
   onRefreshDocument,
   isReadOnly,
+  onUpdateAccess,
 }: ConsultationDocumentListProps) => (
   <TableSurface ariaLabel='Documentos da consulta' className='border-0 p-0 shadow-none'>
     <ul className='divide-y divide-border'>
@@ -30,6 +36,7 @@ export const ConsultationDocumentList = ({
           isCancellingDocument={isCancellingDocument}
           onRefreshDocument={onRefreshDocument}
           isReadOnly={isReadOnly}
+          onUpdateAccess={onUpdateAccess}
         />
       ))}
     </ul>

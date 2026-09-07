@@ -59,47 +59,43 @@ classifica consultas, mantém templates, configura pacotes nem produz documentos
 
 ## Motor Documental
 
-Recebe arquivos enviados ao HMS, identifica a qual cliente pertencem e governa
-sua entrada na plataforma antes que sejam usados por consultas, casos ou outros
-fluxos de trabalho.
+Valida a autorização de origem, recebe arquivos enviados à HMS, identifica e confirma a qual cliente pertencem e governa sua entrada na plataforma antes que sejam utilizados por consultas, casos ou outros fluxos de trabalho.
 
-Requisito de produto: [PRD — Módulo de Motor Documental](https://plataformahms.atlassian.net/wiki/x/FoAT).
+Requisito de produto: PRD — Módulo de Motor Documental.
 
-- Cria um lote de documentos para cada ocorrência válida recebida pelo WhatsApp
-  ou e-mail, os únicos canais compatíveis com o MVP.
-- Preserva o identificador do lote, os arquivos originais, o canal, o remetente e
-  o horário de recebimento.
-- Mantém remetente e cliente como conceitos separados, pois a pessoa que envia
-  os arquivos pode não ser o cliente a quem pertencem.
-- Encaminha todo lote sem cliente confirmado para a caixa de triagem de lotes
-  órfãos como pendente.
-- Usa correspondências determinísticas de identificadores fiscais, contatos e
-  nomes para sugerir no máximo um cliente quando as evidências forem seguras e
-  inequívocas; a IA generativa não decide o cliente.
-- Apresenta as evidências objetivas por trás de uma sugestão de cliente sem
-  tratá-las como prova de identidade ou validade documental.
-- Exige que um colaborador autenticado e autorizado confirme toda associação de
-  cliente; uma sugestão nunca vincula um lote automaticamente.
-- Permite que o colaborador rejeite a sugestão, pesquise manualmente entre os
-  clientes existentes ou registre que não foi possível identificar o cliente.
-- Mantém um lote não identificado como pendente para que seja revisado depois que
-  o cliente for cadastrado ou novas informações estiverem disponíveis.
-- Vincula todo o lote a um cliente no MVP sem exigir que o atendente selecione uma
-  consulta, um caso ou um item da lista de verificação.
-- Permite rejeitar lotes pendentes por um motivo registrado, sem excluir
-  permanentemente seus arquivos ou notificar automaticamente o remetente.
-- Permite somente a um administrador autorizado restaurar um lote rejeitado para
-  o status pendente.
-- Preserva quem realizou cada decisão de triagem e quando ela ocorreu.
-- Disponibiliza os arquivos vinculados aos fluxos de trabalho autorizados a
-  jusante sem pressupor classificação, autenticidade, suficiência jurídica ou
-  aprovação da lista de verificação.
-- Não divide nem mescla lotes no MVP.
+Aplica bloqueio de entrada na borda (gatekeeping): recusa e descarta imediatamente arquivos recebidos de números de WhatsApp ou e-mails que não pertençam a um cliente cadastrado e ativo na HMS, sem armazenar arquivos no storage ou gerar lotes documentais.
 
-A classificação documental, a avaliação de qualidade, a detecção de duplicatas, a
-classificação de acesso, a associação à lista de verificação, as dispensas, a
-aceitação provisória e o envio posterior continuam sendo responsabilidades futuras
-deste módulo, mas não fazem parte do MVP atual.
+Cria um lote de documentos exclusivamente para ocorrências válidas recebidas de remetentes cadastrados via WhatsApp ou e-mail (únicos canais compatíveis com o MVP).
+
+Preserva o identificador do lote, os arquivos originais, o canal, o remetente e o horário exato de recebimento.
+
+Mantém remetente e cliente como conceitos separados, permitindo que um contato cadastrado envie documentos de outro titular também cadastrado (ex.: familiares).
+
+Encaminha os lotes recebidos de contatos cadastrados para a Caixa de Triagem como pendentes para confirmação humana de titularidade.
+
+Sugere prioritariamente o cliente dono do contato de origem e utiliza correspondências determinísticas (CPF, CNPJ, dados de OCR e contatos cadastrados) para apoiar a conferência; a IA generativa não decide o cliente.
+
+Apresenta as evidências objetivas da correspondência sem tratá-las como prova absoluta de identidade ou validade jurídica.
+
+Exige que um colaborador autenticado e autorizado confirme toda associação de cliente; uma sugestão nunca vincula um lote automaticamente.
+
+Permite ao colaborador confirmar o titular sugerido, pesquisar e selecionar outro cliente existente na base ou rejeitar o lote.
+
+Não admite a existência de lotes anônimos na esteira operacional de triagem.
+
+Vincula o lote integralmente ao cliente confirmado sem exigir que o atendente selecione consulta, caso ou item de lista de verificação no MVP.
+
+Permite rejeitar lotes pendentes (por ilegibilidade, duplicidade ou conteúdo indevido) com motivo obrigatório registrado, sem exclusão permanente do histórico e sem notificar o remetente.
+
+Permite somente a um administrador autorizado restaurar um lote rejeitado para o status pendente.
+
+Registra a trilha de auditoria completa (audit trail), preservando quem realizou cada ação de triagem e o momento exato em que ocorreu.
+
+Disponibiliza os arquivos vinculados aos fluxos de trabalho autorizados a jusante sem pressupor classificação, autenticidade, suficiência jurídica ou aprovação de lista de verificação.
+
+Não divide nem mescla lotes no MVP.
+
+A classificação documental, a avaliação de qualidade, a detecção de duplicatas, a classificação de acesso, a associação à lista de verificação, as dispensas, a aceitação provisória e o envio posterior continuam sendo responsabilidades futuras deste módulo, mas não fazem parte do MVP atual.
 
 ---
 
