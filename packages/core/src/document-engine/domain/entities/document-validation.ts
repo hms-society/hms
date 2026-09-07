@@ -53,6 +53,7 @@ export type DocumentValidationDocument = Entity & {
   receivedAt: Date
   createdAt: Date
   reviewedBy?: string
+  reviewedByName?: string
   reviewedAt?: Date
   aiConfidence?: number
   aiSuggestion?: Record<string, unknown>

@@ -4,8 +4,11 @@
   "private": true,
   "exports": {
     "./case-management/domain/entities": "./src/case-management/domain/entities/index.ts",
+    "./case-management/domain/entities/fakers": "./src/case-management/domain/entities/fakers/index.ts",
+    "./case-management/domain/errors": "./src/case-management/domain/errors/index.ts",
     "./case-management/domain/structures": "./src/case-management/domain/structures/index.ts",
     "./case-management/interfaces": "./src/case-management/interfaces/index.ts",
+    "./case-management/use-cases": "./src/case-management/use-cases/index.ts",
     "./communication/domain/entities": "./src/communication/domain/entities/index.ts",
     "./communication/domain/errors": "./src/communication/domain/errors/index.ts",
     "./communication/domain/events": "./src/communication/domain/events/index.ts",

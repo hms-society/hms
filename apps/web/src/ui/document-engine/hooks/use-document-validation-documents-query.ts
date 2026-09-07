@@ -7,7 +7,13 @@ const DOCUMENT_VALIDATION_DOCUMENTS_QUERY_KEY = [
   'documents',
 ] as const
 
-export function useDocumentValidationDocumentsQuery() {
+export type UseDocumentValidationDocumentsQueryParams = {
+  caseId?: string
+}
+
+export function useDocumentValidationDocumentsQuery({
+  caseId,
+}: UseDocumentValidationDocumentsQueryParams = {}) {
   const { documentValidationService } = useRestContext()
   const {
     data: documents = [],
@@ -15,9 +21,9 @@ export function useDocumentValidationDocumentsQuery() {
     isFetching: isFetchingDocuments,
     refetch: refetchDocuments,
   } = useQuery({
-    queryKey: DOCUMENT_VALIDATION_DOCUMENTS_QUERY_KEY,
+    queryKey: [...DOCUMENT_VALIDATION_DOCUMENTS_QUERY_KEY, { caseId }],
     queryFn: async () => {
-      const response = await documentValidationService.listDocuments()
+      const response = await documentValidationService.listDocuments({ caseId })
 
       if (response.isFailure) response.throwError()
 
