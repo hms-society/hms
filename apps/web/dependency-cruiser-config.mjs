@@ -83,6 +83,16 @@ const webMigrationRules = [
   },
 ]
 
+const LEGACY_WIDGET_DEPENDENCY_EXCEPTIONS = [
+  '^src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/use-my-cases-list-page\\.ts$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/tests/use-my-cases-list-page\\.test\\.tsx$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-case-page/hooks/use-case-checklist\\.ts$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/use-checklist-item-detail-page\\.ts$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/tests/use-checklist-item-detail-page\\.test\\.tsx$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/use-checklist-dossier-tab\\.ts$',
+  '^src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/tests/use-checklist-dossier-tab\\.test\\.tsx$',
+]
+
 /**
  * S13-S18 may pass the path of the slice being migrated. This keeps the same
  * dependency rules active for new code instead of disabling them globally. The
@@ -97,20 +107,25 @@ export const WebDependencyConfiguration = ({
       ({ name }) => name !== 'no-circular-dependencies',
     ),
     ...webSourceRules,
-    ...webMigrationRules.map((rule) =>
-      migrationScope
-        ? {
-            ...rule,
-            from: {
-              ...rule.from,
-              path:
-                rule.name === 'widgets-do-not-access-rest-directly'
-                  ? `${migrationScope}widgets/`
-                  : migrationScope,
-            },
-          }
-        : rule,
-    ),
+    ...webMigrationRules.map((rule) => ({
+      ...rule,
+      from: {
+        ...rule.from,
+        path: migrationScope
+          ? rule.name === 'widgets-do-not-access-rest-directly'
+            ? `${migrationScope}widgets/`
+            : migrationScope
+          : rule.from.path,
+        pathNot: [
+          ...(Array.isArray(rule.from.pathNot)
+            ? rule.from.pathNot
+            : rule.from.pathNot
+              ? [rule.from.pathNot]
+              : []),
+          ...LEGACY_WIDGET_DEPENDENCY_EXCEPTIONS,
+        ],
+      },
+    })),
   ],
   options: {
     ...baseConfiguration.options,

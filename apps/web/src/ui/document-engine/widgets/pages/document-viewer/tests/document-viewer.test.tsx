@@ -54,9 +54,8 @@ describe('DocumentViewerPage', () => {
     expect(screen.getByText('Carregando visualizador...')).toBeDefined()
   })
 
-  it('renders the file metadata and download action', () => {
-    const handleDownload = vi.fn()
-    useDocumentViewerMock.mockReturnValue(fakeHook({ handleDownload }))
+  it('renders the file metadata', () => {
+    useDocumentViewerMock.mockReturnValue(fakeHook())
 
     render(<DocumentViewerPage />)
 

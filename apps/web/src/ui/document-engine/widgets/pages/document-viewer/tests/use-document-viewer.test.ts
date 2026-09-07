@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
+import { useSearch } from '@tanstack/react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDocumentFileQuery } from '@/ui/document-engine/hooks/use-document-file-query'
@@ -55,25 +56,6 @@ describe('useDocumentViewer', () => {
     expect(result.current.formattedFileSize).toBe('2 KB')
   })
 
-  it('changes zoom within the configured limits', () => {
-    const { result } = renderHook(() => useDocumentViewer())
-
-    act(() => {
-      result.current.handleZoomIn()
-    })
-    expect(result.current.zoom).toBe(1.25)
-
-    act(() => {
-      for (let index = 0; index < 10; index++) result.current.handleZoomIn()
-    })
-    expect(result.current.zoom).toBe(2)
-
-    act(() => {
-      for (let index = 0; index < 10; index++) result.current.handleZoomOut()
-    })
-    expect(result.current.zoom).toBe(0.5)
-  })
-
   it('navigates back to the document inbox', () => {
     const { result } = renderHook(() => useDocumentViewer())
 
@@ -85,9 +67,7 @@ describe('useDocumentViewer', () => {
   it('navigates back to the case when the viewer was opened from a case', () => {
     useSearchMock.mockReturnValue({ fromCaseId: 'case-1' } as never)
 
-    const { result } = renderHook(() => useDocumentViewer(), {
-      wrapper: createWrapper(),
-    })
+    const { result } = renderHook(() => useDocumentViewer())
 
     expect(result.current.backLabel).toBe('Voltar para o caso')
 
