@@ -24,6 +24,8 @@ jobs:
       VITE_HMS_SERVER_APP_URL: http://localhost:5555
       VITE_SUPABASE_URL: http://localhost:8000
       VITE_SUPABASE_KEY: test-anon-key
+      # Os testes E2E de Formalização dependem do head final da cadeia empilhada.
+      HMS_RUN_FORMALIZATION_E2E: ${{ github.event.pull_request.head.ref == 'codex/signing-gateway-s19-web-support-renames' }}
 
     steps:
       - name: Checkout
