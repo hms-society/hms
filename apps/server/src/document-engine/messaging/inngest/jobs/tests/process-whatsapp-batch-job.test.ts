@@ -18,10 +18,14 @@ describe('Process WhatsApp Batch Job', () => {
   })
 
   it('executes through a real client and Inngest container', async () => {
+    const userId = fixture.idProvider.generate()
+    const clientId = fixture.idProvider.generate()
+    await fixture.seedUserAndClient(userId, clientId)
+
     const event = new WhatsappDocumentBatchReceivedEvent({
       eventoId: fixture.idProvider.generate(),
       sender: '+5511999999999',
-      clientId: fixture.idProvider.generate(),
+      clientId,
       mimeType: 'application/pdf',
       originalName: 'document.pdf',
     })
