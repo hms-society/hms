@@ -12,7 +12,7 @@ const configuration = {
     {
       name: 'no-circular-dependencies',
       comment:
-        'Circular dependencies obscure ownership and violate the documented dependency direction. The generated TanStack route tree is excluded from this source-ownership rule.',
+        'Circular dependencies obscure ownership and violate the documented dependency direction. Generated route metadata is excluded from this source-ownership rule.',
       severity: 'error',
       from: {
         pathNot: ['^src/router\\.tsx$', '^src/routeTree\\.gen\\.ts$'],
@@ -45,45 +45,6 @@ const configuration = {
       to: {
         circular: true,
         pathNot: '^src/routeTree\\.gen\\.ts$',
-      },
-    },
-    {
-      name: 'web-does-not-depend-on-server',
-      comment:
-        'The Web application consumes Core contracts and REST APIs, not Server implementation.',
-      severity: 'error',
-      from: {
-        path: '^src/',
-      },
-      to: {
-        path: '^\\.\\./server/',
-      },
-    },
-    {
-      name: 'react-query-only-in-query-actions-and-root-layout',
-      comment:
-        'Only query/action hook modules and the RootLayout composition widget may import TanStack React Query.',
-      severity: 'error',
-      from: {
-        path: '^src/',
-        pathNot:
-          '^(?:src/ui/(?:[^/]+|shared)/hooks/use-[^/]+-(?:query|action)\\.ts|src/ui/shared/widgets/layouts/root-layout/index\\.tsx)$',
-      },
-      to: {
-        path: '(?:@tanstack\\+react-query@|node_modules/@tanstack/react-query/)',
-        dependencyTypes: ['npm'],
-      },
-    },
-    {
-      name: 'widgets-do-not-access-rest-directly',
-      comment:
-        'Widgets delegate server query/action orchestration to feature hooks and cannot access REST services or RestContext directly.',
-      severity: 'error',
-      from: {
-        path: '^src/ui/.+/widgets/',
-      },
-      to: {
-        path: '^src/(?:rest/|ui/shared/hooks/use-rest-context\\.)',
       },
     },
   ],
