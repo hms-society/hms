@@ -142,9 +142,21 @@ async function bootstrap() {
       requestedByCollaboratorId: lawyer.id,
     })
 
-    await app.get(CommunicationSeeder).run()
+    await app.get(CommunicationSeeder).run({
+      authorId: actor.id,
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      lawyerId: lawyer.id,
+      intakes: intakeSeed.intakes.map(({ id, clientId, createdAt }) => ({
+        id,
+        clientId,
+        createdAt,
+      })),
+    })
     await app.get(RealDocumentsSeeder).run()
-    await app.get(DocumentsSeeder).run()
+    await app.get(DocumentsSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      userIds: identitySeed.users.map(({ id }) => id),
+    })
 
     LOGGER.log(
       JSON.stringify({
