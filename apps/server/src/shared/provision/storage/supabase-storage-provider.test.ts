@@ -35,11 +35,11 @@ describe('SupabaseStorageProvider', () => {
       provider.upload('seed/file.pdf', new Uint8Array([1]), 'application/pdf'),
     ).resolves.toBe('seed/file.pdf')
 
-    expect(createBucket).toHaveBeenCalledWith('documents', { public: false })
+    expect(createBucket).not.toHaveBeenCalled()
     expect(from).toHaveBeenCalledWith('documents')
     expect(upload).toHaveBeenCalledWith('seed/file.pdf', new Uint8Array([1]), {
       contentType: 'application/pdf',
-      upsert: true,
+      upsert: false,
     })
   })
 
