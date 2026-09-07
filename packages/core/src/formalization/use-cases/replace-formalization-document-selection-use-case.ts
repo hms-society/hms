@@ -134,6 +134,7 @@ export class ReplaceFormalizationDocumentSelectionUseCase extends FormalizationU
       const document = await this.documentsRepository.add({
         id: this.idProvider.generate(),
         title: specification.name,
+        classificacaoAcesso: 'INTERNO',
       })
       packageDocuments.push({
         id: this.idProvider.generate(),
