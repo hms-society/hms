@@ -13,6 +13,15 @@ const SERVER_MODULES = [
   'scheduling',
 ]
 
+// These legacy composition/repository paths still join data owned by more
+// than one module. Keep the ownership rule active for all other sources while
+// the shared database contracts are migrated behind module interfaces.
+const LEGACY_DATABASE_DEPENDENCY_EXCEPTIONS = [
+  '^src/document-engine/provision/document-engine-provision\\.module\\.ts$',
+  '^src/document-engine/database/drizzle/repositories/drizzle-document-validations-repository\\.ts$',
+  '^src/case-management/database/drizzle/repositories/drizzle-legal-cases-repository\\.ts$',
+]
+
 const moduleDatabaseRules = SERVER_MODULES.map((moduleName) => ({
   name: `${moduleName}-database-ownership`,
   comment:
@@ -20,7 +29,11 @@ const moduleDatabaseRules = SERVER_MODULES.map((moduleName) => ({
   severity: 'error',
   from: {
     path: `^src/${moduleName}/`,
-    pathNot: [`^src/${moduleName}/fixtures/`, '/tests/'],
+    pathNot: [
+      `^src/${moduleName}/fixtures/`,
+      '/tests/',
+      ...LEGACY_DATABASE_DEPENDENCY_EXCEPTIONS,
+    ],
   },
   to: {
     path: `^src/(?!(?:${moduleName}|shared)/)[^/]+/database/`,
