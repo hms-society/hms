@@ -8,7 +8,10 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../../document-production/interfaces'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../../interfaces'
+import type {
+  FormalizationSourceReader,
+  FormalizationsRepository,
+} from '../../interfaces'
 import { GetFormalizationDocumentSelectionUseCase } from '../get-formalization-document-selection-use-case'
 
 describe('Get Formalization Document Selection Use Case', () => {
@@ -21,7 +24,10 @@ describe('Get Formalization Document Selection Use Case', () => {
   let versionsRepository: MockProxy<DocumentVersionsRepository>
 
   beforeEach(() => {
-    formalization = fakeFormalization({ contractFormState: 'closed', contractFormRevision: 1 })
+    formalization = fakeFormalization({
+      contractFormState: 'closed',
+      contractFormRevision: 1,
+    })
     repository = mock<FormalizationsRepository>()
     sourceReader = mock<FormalizationSourceReader>()
     specificationsRepository = mock<DocumentSpecificationsRepository>()
@@ -33,12 +39,25 @@ describe('Get Formalization Document Selection Use Case', () => {
   it('returns an empty definition-driven selection when no package exists', async () => {
     repository.findById.mockResolvedValue(formalization)
     sourceReader.findContext.mockResolvedValue({ intake: {} } as never)
-    specificationsRepository.list.mockResolvedValue({ items: [], page: 1, pageSize: 20, total: 0, totalPages: 0 })
+    specificationsRepository.list.mockResolvedValue({
+      items: [],
+      page: 1,
+      pageSize: 20,
+      total: 0,
+      totalPages: 0,
+    })
     packagesRepository.findByContext.mockResolvedValue(undefined)
     versionsRepository.findByDocumentIds.mockResolvedValue([])
 
     await expect(
-      new GetFormalizationDocumentSelectionUseCase(repository, sourceReader, specificationsRepository, packagesRepository, packageDocumentsRepository, versionsRepository).execute({
+      new GetFormalizationDocumentSelectionUseCase(
+        repository,
+        sourceReader,
+        specificationsRepository,
+        packagesRepository,
+        packageDocumentsRepository,
+        versionsRepository,
+      ).execute({
         formalizationId: formalization.id,
         actorId: formalization.assignedLawyerId,
       }),

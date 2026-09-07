@@ -4,22 +4,24 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
-import { DocumentGenerationMoment, DocumentSpecificationStatus } from '../../document-production/domain/structures'
-import type { UseCase } from '../../shared/interfaces'
+import {
+  DocumentGenerationMoment,
+  DocumentSpecificationStatus,
+} from '../../document-production/domain/structures'
+import { FormalizationUseCase } from './formalization-use-case'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
 }
 
-export class GetFormalizationDocumentSelectionUseCase
-  implements UseCase<Request, FormalizationDocumentSelection>
-{
+export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCase<
+  Request,
+  FormalizationDocumentSelection
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly sourceReader: FormalizationSourceReader,
@@ -27,25 +29,34 @@ export class GetFormalizationDocumentSelectionUseCase
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly documentVersionsRepository: DocumentVersionsRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<FormalizationDocumentSelection> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertFormClosed(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertFormClosed(formalization)
     const context = await this.sourceReader.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
+
     const specifications = await this.specificationsRepository.list({
       moment: DocumentGenerationMoment.Formalization,
       status: DocumentSpecificationStatus.Available,
       ...(context.intake.legalAreaId ? { legalAreaId: context.intake.legalAreaId } : {}),
-      ...(context.intake.legalTopicId ? { legalTopicId: context.intake.legalTopicId } : {}),
+      ...(context.intake.legalTopicId
+        ? { legalTopicId: context.intake.legalTopicId }
+        : {}),
     })
     const documentPackage = await this.documentPackagesRepository.findByContext({
       type: 'formalization',
       formalizationId: formalization.id,
     })
+
     const packageDocuments = documentPackage
       ? await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
       : []

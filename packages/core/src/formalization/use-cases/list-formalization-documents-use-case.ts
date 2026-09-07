@@ -1,25 +1,28 @@
 import type {
+  DocumentGeneration,
+  DocumentVersion,
+} from '../../document-production/domain/entities'
+import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentsRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
-import type { UseCase } from '../../shared/interfaces'
+import { FormalizationUseCase } from './formalization-use-case'
 import type { FormalizationDocumentListItem } from '../domain/structures'
 import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
 }
 
-export class ListFormalizationDocumentsUseCase
-  implements UseCase<Request, readonly FormalizationDocumentListItem[]>
-{
+export class ListFormalizationDocumentsUseCase extends FormalizationUseCase<
+  Request,
+  readonly FormalizationDocumentListItem[]
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
@@ -27,22 +30,28 @@ export class ListFormalizationDocumentsUseCase
     private readonly documentsRepository: DocumentsRepository,
     private readonly generationsRepository: DocumentGenerationsRepository,
     private readonly versionsRepository: DocumentVersionsRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<readonly FormalizationDocumentListItem[]> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertFormClosed(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertFormClosed(formalization)
     const documentPackage = await this.documentPackagesRepository.findByContext({
       type: 'formalization',
       formalizationId: formalization.id,
     })
     if (!documentPackage) return []
-    const packageDocuments = await this.packageDocumentsRepository.findByDocumentPackageId(
-      documentPackage.id,
-    )
+
+    const packageDocuments =
+      await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
     if (packageDocuments.length === 0) return []
+
     const documents = await this.documentsRepository.findByIds(
       packageDocuments.map((document) => document.documentId),
     )
@@ -50,7 +59,7 @@ export class ListFormalizationDocumentsUseCase
     const versions = await this.versionsRepository.findByDocumentIds(
       packageDocuments.map((document) => document.documentId),
     )
-    const versionsByDocumentId = new Map<string, typeof versions[number][]>()
+    const versionsByDocumentId = new Map<string, (typeof versions)[number][]>()
     for (const version of versions) {
       const current = versionsByDocumentId.get(version.documentId) ?? []
       current.push(version)
@@ -67,7 +76,9 @@ export class ListFormalizationDocumentsUseCase
       const document = documentsById.get(packageDocument.documentId)
       if (!document) return []
       const documentVersions = versionsByDocumentId.get(document.id) ?? []
-      const latestVersion = documentVersions.reduce<typeof documentVersions[number] | undefined>(
+      const latestVersion = documentVersions.reduce<
+        (typeof documentVersions)[number] | undefined
+      >(
         (latest, version) =>
           !latest || version.versionNumber > latest.versionNumber ? version : latest,
         undefined,
@@ -80,7 +91,13 @@ export class ListFormalizationDocumentsUseCase
           currentVersionId: document.currentVersionId,
           generationStatus: generation?.status,
           isFresh: latestVersion
-            ? this.isFreshVersion(latestVersion.id, documentVersions, generations, formalization.id, formalization.contractFormRevision)
+            ? this.isFreshVersion(
+                latestVersion.id,
+                documentVersions,
+                generations,
+                formalization.id,
+                formalization.contractFormRevision,
+              )
             : false,
           versions: documentVersions
             .sort((first, second) => second.versionNumber - first.versionNumber)
@@ -95,8 +112,12 @@ export class ListFormalizationDocumentsUseCase
               ...(version.reviewedByCollaboratorId
                 ? { reviewedByCollaboratorId: version.reviewedByCollaboratorId }
                 : {}),
-              ...(version.reviewedAt ? { reviewedAt: version.reviewedAt.toISOString() } : {}),
-              ...(version.rejectionReason ? { rejectionReason: version.rejectionReason } : {}),
+              ...(version.reviewedAt
+                ? { reviewedAt: version.reviewedAt.toISOString() }
+                : {}),
+              ...(version.rejectionReason
+                ? { rejectionReason: version.rejectionReason }
+                : {}),
             })),
         },
       ]
@@ -105,8 +126,8 @@ export class ListFormalizationDocumentsUseCase
 
   private isFreshVersion(
     versionId: string,
-    versions: readonly import('../../document-production/domain/entities').DocumentVersion[],
-    generations: readonly import('../../document-production/domain/entities').DocumentGeneration[],
+    versions: readonly DocumentVersion[],
+    generations: readonly DocumentGeneration[],
     formalizationId: string,
     revision: number,
   ): boolean {
@@ -114,9 +135,14 @@ export class ListFormalizationDocumentsUseCase
     let version = versionsById.get(versionId)
     while (version) {
       if (version.documentGenerationId) {
-        const generation = generations.find((candidate) => candidate.id === version?.documentGenerationId)
+        const generation = generations.find(
+          (candidate) => candidate.id === version?.documentGenerationId,
+        )
         const data = generation?.source.data as {
-          readonly formalization?: { readonly id?: string; readonly contractFormRevision?: number }
+          readonly formalization?: {
+            readonly id?: string
+            readonly contractFormRevision?: number
+          }
         }
         return Boolean(
           generation?.source.type === 'formalization' &&

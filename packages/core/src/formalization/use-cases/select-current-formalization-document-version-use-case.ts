@@ -1,4 +1,4 @@
-import type { UseCase } from '../../shared/interfaces'
+import { FormalizationUseCase } from './formalization-use-case'
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import { DocumentVersionNotApprovedError } from '../../document-production/domain/errors'
 import type {
@@ -13,8 +13,6 @@ import {
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
-import { FormalizationDocumentGuard } from './formalization-document-guard'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -22,24 +20,32 @@ type Request = FormalizationActor & {
   readonly versionId: string
 }
 
-export class SelectCurrentFormalizationDocumentVersionUseCase
-  implements UseCase<Request, DocumentVersion>
-{
+export class SelectCurrentFormalizationDocumentVersionUseCase extends FormalizationUseCase<
+  Request,
+  DocumentVersion
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly documentsRepository: DocumentsRepository,
     private readonly versionsRepository: DocumentVersionsRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<DocumentVersion> {
-    const formalization = await this.formalizationsRepository.findById(request.formalizationId)
+    const formalization = await this.formalizationsRepository.findById(
+      request.formalizationId,
+    )
+
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
-    FormalizationDocumentGuard.assertWritable(formalization)
+    this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
-      throw new FormalizationStateConflictError('Reabra a confirmação antes de alterar a versão vigente.')
+      throw new FormalizationStateConflictError(
+        'Reabra a confirmação antes de alterar a versão vigente.',
+      )
     }
     const version = await this.versionsRepository.findById(request.versionId)
     if (!version || version.documentId !== request.documentId) {
@@ -50,17 +56,24 @@ export class SelectCurrentFormalizationDocumentVersionUseCase
       type: 'formalization',
       formalizationId: formalization.id,
     })
-    if (!documentPackage) throw new FormalizationStateConflictError('O documento não pertence à formalização.')
-    const packageDocuments = await this.packageDocumentsRepository.findByDocumentPackageId(
-      documentPackage.id,
-    )
-    if (!packageDocuments.some((document) => document.documentId === request.documentId)) {
-      throw new FormalizationStateConflictError('O documento não pertence à formalização.')
+    if (!documentPackage)
+      throw new FormalizationStateConflictError(
+        'O documento não pertence à formalização.',
+      )
+    const packageDocuments =
+      await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
+    if (
+      !packageDocuments.some((document) => document.documentId === request.documentId)
+    ) {
+      throw new FormalizationStateConflictError(
+        'O documento não pertence à formalização.',
+      )
     }
     const selected = await this.documentsRepository.replace(request.documentId, {
       currentVersionId: request.versionId,
     })
-    if (!selected) throw new FormalizationStateConflictError('O documento não foi encontrado.')
+    if (!selected)
+      throw new FormalizationStateConflictError('O documento não foi encontrado.')
     return version
   }
 }
