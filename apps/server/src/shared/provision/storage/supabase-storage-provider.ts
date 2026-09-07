@@ -6,8 +6,6 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const MAX_STORAGE_DOWNLOAD_BYTES = 50 * 1024 * 1024
 
-const MAX_STORAGE_DOWNLOAD_BYTES = 50 * 1024 * 1024
-
 @Injectable()
 export class SupabaseStorageProvider implements StorageProvider {
   private readonly supabase: SupabaseClient
