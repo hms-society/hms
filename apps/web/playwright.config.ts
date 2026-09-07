@@ -9,10 +9,12 @@ if (!Number.isInteger(webAppPort) || webAppPort < 1 || webAppPort > 65535) {
 }
 
 const webAppUrl = env.PLAYWRIGHT_WEB_APP_URL ?? `http://127.0.0.1:${webAppPort}`
+const runFormalizationE2e = env.HMS_RUN_FORMALIZATION_E2E === 'true'
 
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.test.tsx',
+  testIgnore: runFormalizationE2e ? [] : ['**/routes/formalization/**'],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
