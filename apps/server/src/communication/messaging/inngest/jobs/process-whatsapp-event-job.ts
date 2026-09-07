@@ -91,8 +91,15 @@ export class ProcessWhatsappEventJob extends InngestJob {
             const clients = await this.clientsRepository.findByPhone(normalizedSender)
             const client = clients[0]
 
-            const clientId =
-              matchingClients.length === 1 ? matchingClients[0].id : undefined
+            if (!client) {
+              await database.insert(integracaoEvento).values({
+                provedor: 'whatsapp',
+                payload: message,
+                status: 'falha_definitiva',
+                erro: 'Rejeitado: Número desconhecido, não vinculado a um cliente HMS.',
+              })
+              continue
+            }
 
             const [evento] = await database
               .insert(integracaoEvento)
@@ -108,7 +115,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
               data: {
                 eventoId: evento.id,
                 sender,
-                clientId,
+                clientId: client.id,
                 mediaId: media.id,
                 mimeType: media.mime_type,
                 originalName:
