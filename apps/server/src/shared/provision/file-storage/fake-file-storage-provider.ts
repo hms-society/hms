@@ -7,10 +7,7 @@ import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class FakeFileStorageProvider implements FileStorageProvider {
-  private readonly files = new Map<
-    string,
-    { readonly content: Uint8Array; readonly file: File }
-  >()
+  private readonly files = new Map<string, StoredFileContent>()
 
   async save(input: SaveFileInput): Promise<File> {
     const file: File = {
@@ -22,7 +19,7 @@ export class FakeFileStorageProvider implements FileStorageProvider {
       createdAt: new Date(),
     }
 
-    this.files.set(file.filePath, {
+    this.files.set(file.id, {
       content: input.content.slice(),
       file,
     })

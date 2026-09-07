@@ -4,6 +4,7 @@ import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import type {
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
+  PaginatedTriageBatches,
 } from '@hms/core/document-engine/interfaces'
 import type {
   DocumentBatch,
@@ -11,7 +12,7 @@ import type {
 } from '@hms/core/document-engine/domain/entities'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
-import { eq, desc, inArray } from 'drizzle-orm'
+import { eq, desc, inArray, count } from 'drizzle-orm'
 
 @Injectable()
 export class DrizzleDocumentBatchesRepository
@@ -88,6 +89,68 @@ export class DrizzleDocumentBatchesRepository
     }))
 
     return records.map((record) => this.mapper.toDomain(record as any))
+  }
+
+  async findTriageBatches(params?: {
+    page?: number
+    limit?: number
+  }): Promise<PaginatedTriageBatches> {
+    const page = Math.max(1, params?.page ?? 1)
+    const limit = Math.max(1, Math.min(100, params?.limit ?? 20))
+    const offset = (page - 1) * limit
+
+    const [{ value: totalCount }] = await this.database
+      .select({ value: count() })
+      .from(documentBatchModel)
+      .where(eq(documentBatchModel.inTriageBox, true))
+
+    const total = Number(totalCount ?? 0)
+
+    if (total === 0) {
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+      }
+    }
+
+    const batches = await this.database
+      .select()
+      .from(documentBatchModel)
+      .where(eq(documentBatchModel.inTriageBox, true))
+      .orderBy(desc(documentBatchModel.createdAt))
+      .limit(limit)
+      .offset(offset)
+
+    if (batches.length === 0) {
+      return {
+        items: [],
+        total,
+        page,
+        limit,
+      }
+    }
+
+    const batchIds = batches.map((b) => b.id)
+    const files = await this.database
+      .select()
+      .from(documentBatchFileModel)
+      .where(inArray(documentBatchFileModel.batchId, batchIds))
+
+    const records = batches.map((batch) => ({
+      ...batch,
+      files: files.filter((f) => f.batchId === batch.id),
+    }))
+
+    const items = records.map((record) => this.mapper.toDomain(record as any))
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    }
   }
 
   async findFileById(fileId: string): Promise<DocumentBatchFile | undefined> {
