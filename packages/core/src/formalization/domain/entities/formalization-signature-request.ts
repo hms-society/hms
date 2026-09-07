@@ -1,6 +1,7 @@
 import type { Entity } from '#shared/domain/entities/entity'
 import type { FormalizationSignatureRequestStatus } from '../structures/formalization-signature-request-status'
 
+/** Correlates one frozen Formalization package with its signing lifecycle. */
 export type FormalizationSignatureRequest = Entity & {
   formalizationId: string
   signatureConfigurationVersion: number
