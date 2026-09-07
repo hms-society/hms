@@ -1,14 +1,8 @@
 import { Module } from '@nestjs/common'
-import type {
-  DailyCountersRepository,
-  DocumentBatchesRepository,
-} from '@hms/core/document-engine/interfaces'
-import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
-import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IdentityModule } from '@/identity/identity.module'
-import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
 import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
@@ -25,8 +19,6 @@ import { ListDocumentValidationsController } from '../rest/controllers/list-docu
 import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
-import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
-
 import { ListTriageDocumentBatchesController } from '../rest/controllers/list-triage-document-batches.controller'
 
 @Module({
@@ -51,27 +43,6 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
     RequestDocumentResendController,
   ],
   providers: [
-    {
-      provide: CreateDocumentBatchUseCase,
-      useFactory: (
-        documentBatchesRepository: DocumentBatchesRepository,
-        dailyCountersRepository: DailyCountersRepository,
-        clientsRepository: ClientsRepository,
-        datetimeProvider: DatetimeProvider,
-      ) =>
-        new CreateDocumentBatchUseCase(
-          documentBatchesRepository,
-          dailyCountersRepository,
-          clientsRepository,
-          datetimeProvider,
-        ),
-      inject: [
-        DOCUMENT_ENGINE.documentBatches,
-        DOCUMENT_ENGINE.dailyCounters,
-        IDENTITY_REPOSITORIES.clients,
-        DatetimeProvider,
-      ],
-    },
     DocumentsSeeder,
     RealDocumentsSeeder,
     {
@@ -84,7 +55,6 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
   ],
   exports: [
     ListClientDocumentBatchUseCase,
-    CreateDocumentBatchUseCase,
     DocumentsSeeder,
     RealDocumentsSeeder,
     DocumentEngineMessagingModule,
