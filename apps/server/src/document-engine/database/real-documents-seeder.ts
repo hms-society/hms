@@ -1,24 +1,41 @@
-import { Injectable, Inject } from '@nestjs/common'
-import { readdir, stat, readFile } from 'node:fs/promises'
+import { Inject, Injectable } from '@nestjs/common'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
-import { sql } from 'drizzle-orm'
-
-import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
-import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
+import { eq, sql } from 'drizzle-orm'
 import {
   DocumentBatchChannel,
   DocumentBatchStatus,
   DocumentValidationStatus,
 } from '@hms/core/document-engine/domain/structures'
-
-import type { StorageProvider } from '@hms/core/shared/interfaces'
-import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { getMimeTypeFromExtension } from '../utils/mime-type.map'
+import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import { AppError } from '@hms/core/shared/domain/errors'
+import type { StorageProvider } from '@hms/core/shared/interfaces'
+
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
-import { eq } from 'drizzle-orm'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
+
+import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { documentBatchFileModel } from './drizzle/models'
+import { getMimeTypeFromExtension } from '../utils/mime-type.map'
+
+type RealDocumentsSeedReferences = {
+  validationScenario?: {
+    caseId: string
+    checklistItems: readonly {
+      id: string
+      title: string
+    }[]
+    clientId: string
+  }
+}
+
+type ValidationScenarioDocumentLink = {
+  checklistItemId: string
+  documentFileId: string
+  documentFileName: string
+}
 
 const REAL_VALIDATION_STATUS_CYCLE = [
   DocumentValidationStatus.Valid,
@@ -48,7 +65,7 @@ export class RealDocumentsSeeder {
     `)
   }
 
-  async run() {
+  async run(references: RealDocumentsSeedReferences = {}) {
     const db = this.drizzleClient.requireDatabase()
 
     const { data: clientRecords } = await this.clientsRepository.findAll({
@@ -59,14 +76,14 @@ export class RealDocumentsSeeder {
     const clients = clientRecords.map(({ client }) => client)
 
     if (clients.length === 0) {
-      throw new Error('Nenhum cliente encontrado para criar os documentos.')
+      throw new AppError('Nenhum cliente encontrado para criar os documentos.')
     }
 
     const localPath = 'src/document-engine/database/seed-assets'
     const fileNames = await readdir(localPath)
 
     if (fileNames.length === 0) {
-      throw new Error(`Nenhum arquivo encontrado em ${localPath}`)
+      throw new AppError(`Nenhum arquivo encontrado em ${localPath}`)
     }
 
     const batches: any[] = []
@@ -103,13 +120,16 @@ export class RealDocumentsSeeder {
         }),
       )
 
+      const inTriageBox = index < 5
       const batch = await this.documentBatchesRepository.add({
         readableId,
-        status: DocumentBatchStatus.Identified,
+        status: inTriageBox
+          ? DocumentBatchStatus.PendingIdentification
+          : DocumentBatchStatus.Identified,
         channel: DocumentBatchChannel.WhatsApp,
         sender: '5511999999999',
-        inTriageBox: false,
-        clientId: client.id,
+        inTriageBox,
+        clientId: inTriageBox ? undefined : client.id,
         files,
       })
 
@@ -161,6 +181,136 @@ export class RealDocumentsSeeder {
       )
     }
 
-    return batches
+    if (references.validationScenario) {
+      const { batch, documentLinks } = await this.createValidationScenarioBatch(
+        references.validationScenario,
+        fileNames,
+        localPath,
+      )
+      batches.push(batch)
+
+      return {
+        batches,
+        validationScenarioDocumentLinks: documentLinks,
+      }
+    }
+
+    return { batches, validationScenarioDocumentLinks: [] }
+  }
+
+  private async createValidationScenarioBatch(
+    scenario: NonNullable<RealDocumentsSeedReferences['validationScenario']>,
+    fileNames: readonly string[],
+    localPath: string,
+  ): Promise<{
+    batch: Awaited<ReturnType<DocumentBatchesRepository['add']>>
+    documentLinks: readonly ValidationScenarioDocumentLink[]
+  }> {
+    const db = this.drizzleClient.requireDatabase()
+    const now = new Date()
+    const dateStringNoDashes = now.toISOString().slice(0, 10).replaceAll('-', '')
+    const readableId = `LOTE-${dateStringNoDashes}-VINICIUS-CHECKLIST`
+    const pdfFileNames = fileNames.filter((fileName) =>
+      fileName.toLowerCase().endsWith('.pdf'),
+    )
+
+    if (pdfFileNames.length === 0) {
+      throw new AppError(
+        'Nenhum PDF encontrado para criar o lote documental de validação.',
+      )
+    }
+
+    const receivedChecklistItems = scenario.checklistItems.slice(0, 2)
+    const files = await Promise.all(
+      receivedChecklistItems.map(async (_checklistItem, index) => {
+        const fileName = pdfFileNames[index % pdfFileNames.length]
+
+        if (!fileName) {
+          throw new AppError(
+            'Nenhum PDF encontrado para criar o arquivo documental de validação.',
+          )
+        }
+
+        const fullPath = join(localPath, fileName)
+        const fileStat = await stat(fullPath)
+        const buffer = await readFile(fullPath)
+        const extension = extname(fileName)
+        const mimeType = getMimeTypeFromExtension(extension)
+        const storagePath = `seed/${scenario.clientId}/${readableId}/${String(
+          index + 1,
+        ).padStart(2, '0')}-${fileName}`
+
+        await this.storageProvider.upload(storagePath, buffer, mimeType)
+
+        return {
+          storagePath,
+          originalName: basename(fileName),
+          mimeType,
+          sizeBytes: fileStat.size,
+        }
+      }),
+    )
+
+    const batch = await this.documentBatchesRepository.add({
+      readableId,
+      status: DocumentBatchStatus.Identified,
+      channel: DocumentBatchChannel.WhatsApp,
+      sender: '5511987654321',
+      inTriageBox: false,
+      clientId: scenario.clientId,
+      files,
+    })
+
+    await Promise.all(
+      (batch.files ?? []).map((file, index) => {
+        const checklistItem = receivedChecklistItems[index]
+
+        if (!checklistItem) {
+          throw new AppError(
+            'Item de checklist não encontrado para vincular o arquivo documental.',
+          )
+        }
+
+        return db
+          .update(documentBatchFileModel)
+          .set({
+            status: DocumentValidationStatus.AwaitingValidation,
+            aiConfidence: 96,
+            extractedFields: [
+              { label: 'Titular', value: 'Vinicius Lopes Machado' },
+              { label: 'CPF', value: '123.***.***-09' },
+              { label: 'Origem', value: 'Seed de checklist documental' },
+            ],
+            missingFields: [],
+            caseId: scenario.caseId,
+            checklistItemId: checklistItem.id,
+            isDuplicate: false,
+            originalDocumentId: undefined,
+            aiSuggestion: {
+              confidenceLabel: 'Sugerido pela IA - Confiança alta',
+              documentTypeId: 'documento_validacao_seed',
+              caseLabel: 'Caso Vinicius Lopes Machado',
+              checklistItemId: checklistItem.id,
+              checklistItemLabel: checklistItem.title,
+            },
+          })
+          .where(eq(documentBatchFileModel.id, file.id))
+      }),
+    )
+
+    return {
+      batch,
+      documentLinks: (batch.files ?? []).flatMap((file, index) => {
+        const checklistItem = receivedChecklistItems[index]
+
+        if (!checklistItem) return []
+
+        return {
+          checklistItemId: checklistItem.id,
+          documentFileId: file.id,
+          documentFileName: file.originalName,
+        }
+      }),
+    }
   }
 }
