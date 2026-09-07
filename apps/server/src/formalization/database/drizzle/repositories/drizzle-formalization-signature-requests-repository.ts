@@ -1,5 +1,5 @@
 import { Injectable, Optional } from '@nestjs/common'
-import { and, desc, eq, notInArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import {
   DrizzleRepository,
@@ -22,6 +22,14 @@ const TERMINAL_SIGNATURE_REQUEST_STATUSES = [
   'cancelled',
   'expired',
   'failed',
+] as const
+
+const RECONCILABLE_SIGNATURE_REQUEST_STATUSES = [
+  'sent',
+  'in_progress',
+  'partially_submitted',
+  'submitted',
+  'reconciliation_required',
 ] as const
 
 @Injectable()
@@ -48,6 +56,23 @@ export class DrizzleFormalizationSignatureRequestsRepository
       ...request,
       confirmationKeyHash: encodeSignatureHash(request.confirmationKeyHash),
     })
+  }
+  async listReconcilable(limit: number) {
+    const rows = await this.database
+      .select()
+      .from(formalizationSignatureRequestModel)
+      .where(
+        inArray(
+          formalizationSignatureRequestModel.status,
+          RECONCILABLE_SIGNATURE_REQUEST_STATUSES,
+        ),
+      )
+      .orderBy(
+        asc(formalizationSignatureRequestModel.updatedAt),
+        asc(formalizationSignatureRequestModel.id),
+      )
+      .limit(limit)
+    return rows.map((row) => this.mapper.toDomain(row))
   }
   async findById(requestId: string) {
     return this.findOne(eq(formalizationSignatureRequestModel.id, requestId))

@@ -2,6 +2,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -12,9 +13,15 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { reopenFormalizationDocumentPackageSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReopenFormalizationDocumentPackageUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationDocumentConfirmationTransaction,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
@@ -32,7 +39,21 @@ class ReopenFormalizationDocumentPackageBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ReopenFormalizationDocumentPackageController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: ReopenFormalizationDocumentPackageUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.documentConfirmationTransaction)
+    confirmationTransaction: FormalizationDocumentConfirmationTransaction,
+    datetimeProvider: DatetimeProvider,
+  ) {
+    this.useCase = new ReopenFormalizationDocumentPackageUseCase(
+      formalizationsRepository,
+      confirmationTransaction,
+      datetimeProvider,
+    )
+  }
 
   @Patch(':formalizationId/documents/reopen')
   @HttpCode(HttpStatus.OK)
@@ -47,7 +68,7 @@ export class ReopenFormalizationDocumentPackageController {
     body: ReopenFormalizationDocumentPackageBody & RequestBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.reopenDocumentPackage({
+    return this.useCase.execute({
       formalizationId,
       actorId: collaborator.collaboratorId,
       actorProfile: collaborator.profile,

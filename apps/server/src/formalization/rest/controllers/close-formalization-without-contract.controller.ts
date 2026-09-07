@@ -3,11 +3,26 @@ import { ApiBearerAuth } from '@nestjs/swagger'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { closeFormalizationWithoutContractSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import {
+  CloseFormalizationWithoutContractUseCase,
+  GetFormalizationUseCase,
+} from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationIntakeClosureService,
+  FormalizationSourceReader,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
+import {
+  ServerFormalizationIntakeClosureService,
+  ServerFormalizationSourceReader,
+} from '@/formalization/provision'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { Inject } from '@nestjs/common'
 
 class CloseWithoutContractBody extends createZodDto(
   closeFormalizationWithoutContractSchema,
@@ -17,7 +32,25 @@ class CloseWithoutContractBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class CloseFormalizationWithoutContractController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly getUseCase: GetFormalizationUseCase
+  private readonly closeUseCase: CloseFormalizationWithoutContractUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(ServerFormalizationSourceReader)
+    sourceReader: FormalizationSourceReader,
+    @Inject(ServerFormalizationIntakeClosureService)
+    intakeClosureService: FormalizationIntakeClosureService,
+    datetimeProvider: DatetimeProvider,
+  ) {
+    this.getUseCase = new GetFormalizationUseCase(formalizationsRepository, sourceReader)
+    this.closeUseCase = new CloseFormalizationWithoutContractUseCase(
+      formalizationsRepository,
+      intakeClosureService,
+      datetimeProvider,
+    )
+  }
 
   @Patch(':formalizationId/close-without-contract')
   handle(
@@ -26,14 +59,14 @@ export class CloseFormalizationWithoutContractController {
     body: CloseWithoutContractBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service
-      .get({
+    return this.getUseCase
+      .execute({
         formalizationId,
         actorId: collaborator.collaboratorId,
         actorProfile: collaborator.profile,
       })
       .then(({ formalization }) =>
-        this.service.closeWithoutContract({
+        this.closeUseCase.execute({
           formalizationId,
           intakeId: formalization.intakeId,
           actorId: collaborator.collaboratorId,

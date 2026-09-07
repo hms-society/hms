@@ -86,7 +86,17 @@ describe('useDocumentReadingStep', () => {
     })
     const { result } = renderHook(() => useDocumentReadingStep(props))
     void result.current.handleRetry()
-    expect(result.current.error).toBe('Falha ao carregar')
+    expect(result.current.documentError).toBe('Falha ao carregar')
     expect(refetch).toHaveBeenCalledOnce()
+  })
+
+  it('keeps action failures separate from PDF loading failures', () => {
+    const { result } = renderHook(() =>
+      useDocumentReadingStep({ ...props, actionError: 'Não foi possível confirmar.' }),
+    )
+
+    expect(result.current.actionError).toBe('Não foi possível confirmar.')
+    expect(result.current.documentError).toBeUndefined()
+    expect(result.current.content).not.toBeNull()
   })
 })

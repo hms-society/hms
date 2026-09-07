@@ -174,7 +174,11 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
             <div className='space-y-2'>
               <Label htmlFor='signature-fields-document'>Documento</Label>
               <Select value={documentId} onValueChange={selectDocument}>
-                <SelectTrigger id='signature-fields-document' className='h-10 w-full'>
+                <SelectTrigger
+                  id='signature-fields-document'
+                  className='h-10 w-full'
+                  disabled={isReadOnly}
+                >
                   <SelectValue placeholder='Selecione um documento' />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,6 +229,7 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
                     <button
                       type='button'
                       aria-pressed={isSelected}
+                      disabled={isReadOnly}
                       className='flex min-w-0 flex-1 items-start gap-3 rounded-md p-1 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
                       onClick={() => selectDocument(item.documentId)}
                     >
@@ -278,7 +283,11 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
             <div className='space-y-2'>
               <Label htmlFor='signature-fields-signatory'>Signatário</Label>
               <Select value={selectedSignatoryId} onValueChange={setSelectedSignatoryId}>
-                <SelectTrigger id='signature-fields-signatory' className='h-10 w-full'>
+                <SelectTrigger
+                  id='signature-fields-signatory'
+                  className='h-10 w-full'
+                  disabled={isReadOnly}
+                >
                   <SelectValue placeholder='Selecione um signatário' />
                 </SelectTrigger>
                 <SelectContent>
@@ -292,7 +301,7 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
                       <SelectItem
                         key={signatory.signatoryId}
                         value={signatory.signatoryId}
-                        disabled={!isAssigned}
+                        disabled={isReadOnly || !isAssigned}
                       >
                         {signatory.name}
                         {!isAssigned ? ' · atribua ao documento' : ''}
@@ -473,7 +482,7 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
                 <Button
                   type='button'
                   variant='outline'
-                  disabled={isRetryingSignaturePreview}
+                  disabled={isReadOnly || isRetryingSignaturePreview}
                   onClick={() =>
                     void retrySignaturePreview({
                       previewId: preview.previewId,

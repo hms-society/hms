@@ -15,6 +15,7 @@ export type SignatoryCardProps = {
   isRemovingSignatory: boolean
   isReplacingSignatoryDocuments: boolean
   isSelectingSignatoryChannel: boolean
+  isReadOnly: boolean
   removeSignatoryError: unknown
 }
 
@@ -26,12 +27,14 @@ export function useSignatoryCard({
   isRemovingSignatory,
   isReplacingSignatoryDocuments,
   isSelectingSignatoryChannel,
+  isReadOnly,
   removeSignatoryError,
 }: SignatoryCardProps) {
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
   const isPending = isReplacingSignatoryDocuments || isSelectingSignatoryChannel
 
   function handleToggleDocument(documentId: string) {
+    if (isReadOnly) return
     onSelectedDocumentsChange(
       selectedDocuments.includes(documentId)
         ? selectedDocuments.filter((id) => id !== documentId)
@@ -39,11 +42,18 @@ export function useSignatoryCard({
     )
   }
 
+  function handleSelectChannel(channel: CommunicationChannel, selected: boolean) {
+    if (isReadOnly) return
+    onSelectChannel(channel, selected)
+  }
+
   function handleRemoveDialogOpenChange(open: boolean) {
+    if (isReadOnly) return
     setRemoveDialogOpen(open)
   }
 
   async function handleConfirmRemove() {
+    if (isReadOnly) return
     await onRemoveSignatory()
     setRemoveDialogOpen(false)
   }
@@ -52,7 +62,7 @@ export function useSignatoryCard({
     handleConfirmRemove,
     handleRemoveDialogOpenChange,
     handleToggleDocument,
-    onSelectChannel,
+    onSelectChannel: handleSelectChannel,
     isPending,
     isRemovingSignatory,
     removeSignatoryError,

@@ -21,7 +21,14 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
-const COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES = new Set(['invited', 'authenticating'])
+const COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES = new Set([
+  'invited',
+  'authenticating',
+  'locked',
+  'authenticated',
+  'reading',
+  'signing',
+])
 const SIGNABLE_REQUEST_STATUSES = new Set([
   'sending',
   'sent',

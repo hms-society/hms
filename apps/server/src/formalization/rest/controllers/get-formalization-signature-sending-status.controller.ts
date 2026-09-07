@@ -4,7 +4,14 @@ import { createZodDto } from 'nestjs-zod'
 import { formalizationSignatureSendingStatusSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
-import { FormalizationSignatureSendingService } from '@/formalization/formalization-signature-sending.service'
+import { GetFormalizationSignatureSendingStatusUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationSignatureRequestDocumentsRepository,
+  FormalizationSignatureRequestsRepository,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
+import { Inject } from '@nestjs/common'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
@@ -18,7 +25,22 @@ class FormalizationSignatureSendingStatusResponseDto extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class GetFormalizationSignatureSendingStatusController {
-  constructor(private readonly service: FormalizationSignatureSendingService) {}
+  private readonly useCase: GetFormalizationSignatureSendingStatusUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequestDocuments)
+    requestDocumentsRepository: FormalizationSignatureRequestDocumentsRepository,
+  ) {
+    this.useCase = new GetFormalizationSignatureSendingStatusUseCase({
+      formalizationsRepository,
+      requestsRepository,
+      documentsRepository: requestDocumentsRepository,
+    })
+  }
 
   @Get(':formalizationId/signature-sending/status')
   @ApiResponse({
@@ -33,7 +55,7 @@ export class GetFormalizationSignatureSendingStatusController {
     @Param('formalizationId', new ParseUUIDPipe()) formalizationId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.getStatus({
+    return this.useCase.execute({
       formalizationId,
       actorId: collaborator.collaboratorId,
       actorProfile: collaborator.profile,

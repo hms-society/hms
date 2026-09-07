@@ -257,6 +257,26 @@ describe('useSignatureFieldsTab', () => {
     expect(result.current.isRemoveAllFieldsDialogOpen).toBe(false)
   })
 
+  it('does not persist or switch documents from a read-only configuration', async () => {
+    const replaceSignatureFields = vi.fn()
+    useConfigurationMock.mockReturnValue(fakeHook({ replaceSignatureFields }))
+    const readOnlyConfiguration = {
+      ...configuration,
+      editable: false,
+    } as FormalizationSignatureConfiguration
+    const { result } = renderHook(() =>
+      useSignatureFieldsTab({ expectedVersion: 4, configuration: readOnlyConfiguration }),
+    )
+
+    await act(async () => {
+      await result.current.persistLatest()
+    })
+    act(() => result.current.selectDocument('document-2'))
+
+    expect(replaceSignatureFields).not.toHaveBeenCalled()
+    expect(result.current.documentId).toBe('document-1')
+  })
+
   it('uses the returned version when a save is queued during an in-flight save', async () => {
     let resolveFirstSave: (value: FormalizationSignatureConfiguration) => void = () => {}
     const firstSave = new Promise<FormalizationSignatureConfiguration>((resolve) => {

@@ -37,7 +37,14 @@ const SIGNABLE_REQUEST_STATUSES = new Set([
   'partially_submitted',
 ])
 const READABLE_RECIPIENT_STATUSES = new Set(['authenticated', 'reading', 'signing'])
-const FLOW_RECIPIENT_STATUSES = new Set(['invited', 'authenticating', 'locked'])
+const FLOW_RECIPIENT_STATUSES = new Set([
+  'invited',
+  'authenticating',
+  'locked',
+  'authenticated',
+  'reading',
+  'signing',
+])
 const READABLE_DOCUMENT_STATUSES = new Set([
   'provisioned',
   'delivery_pending',
@@ -151,7 +158,10 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       !READABLE_RECIPIENT_STATUSES.has(recipient.status)
     )
       return this.unavailable('document_unavailable', csrfToken)
-    if (request.actorId && request.actorId !== recipient.personId)
+    if (
+      recipient.actorKind === 'collaborator' &&
+      request.actorId !== recipient.personId
+    )
       return this.unavailable('access_unavailable', csrfToken)
 
     const source = await this.dependencies.sourceReader.findAuthenticationSource(

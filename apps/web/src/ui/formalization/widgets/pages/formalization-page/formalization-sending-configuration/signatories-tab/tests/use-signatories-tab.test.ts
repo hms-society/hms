@@ -206,4 +206,44 @@ describe('useSignatoriesTab', () => {
 
     expect(result.current.canSaveAssignments).toBe(false)
   })
+
+  it('does not call mutation actions when a read-only configuration is edited programmatically', async () => {
+    const addSignatory = vi.fn()
+    const removeSignatory = vi.fn()
+    const replaceSignatoryDocuments = vi.fn()
+    const selectSignatoryChannel = vi.fn()
+    useConfigurationMock.mockReturnValue({
+      isReplacingSignatoryDocuments: false,
+      addSignatory,
+      removeSignatory,
+      replaceSignatoryDocuments,
+      selectSignatoryChannel,
+    } as unknown as FormalizationSignatureConfigurationController)
+
+    const { result } = renderHook(() =>
+      useSignatoriesTab({
+        formalizationId: 'formalization-1',
+        expectedVersion: 4,
+        configuration: { ...configuration, editable: false },
+      }),
+    )
+
+    act(() => {
+      result.current.handleSelectedDocumentsChange('signatory-1', ['document-2'])
+    })
+    await act(async () => {
+      await result.current.handleSelectCandidate('person-2')
+      await result.current.handleSelectChannel('signatory-1', 'email', false)
+      await result.current.handleRemoveSignatory('signatory-1')
+      await result.current.handleSaveAssignments()
+    })
+
+    expect(result.current.selectedDocumentsBySignatory['signatory-1']).toEqual([
+      'document-1',
+    ])
+    expect(addSignatory).not.toHaveBeenCalled()
+    expect(removeSignatory).not.toHaveBeenCalled()
+    expect(replaceSignatoryDocuments).not.toHaveBeenCalled()
+    expect(selectSignatoryChannel).not.toHaveBeenCalled()
+  })
 })

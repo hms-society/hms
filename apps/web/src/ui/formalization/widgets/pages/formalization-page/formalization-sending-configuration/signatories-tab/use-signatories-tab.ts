@@ -127,6 +127,7 @@ export function useSignatoriesTab({
     signatoryId: string,
     documentIds: readonly string[],
   ) {
+    if (!configuration.editable) return
     setSelectedDocumentsBySignatory((current) => ({
       ...current,
       [signatoryId]: [...documentIds],
@@ -156,6 +157,7 @@ export function useSignatoriesTab({
   }
 
   async function handleSelectCandidate(personId: string) {
+    if (!configuration.editable) return
     const savedConfiguration = await signatureConfiguration.addSignatory({
       personId,
       expectedVersion: expectedVersionRef.current,
@@ -169,6 +171,7 @@ export function useSignatoriesTab({
     channel: CommunicationChannel,
     selected: boolean,
   ) {
+    if (!configuration.editable) return
     const savedConfiguration = await signatureConfiguration.selectSignatoryChannel({
       signatoryId,
       channel,
@@ -179,6 +182,7 @@ export function useSignatoriesTab({
   }
 
   async function handleRemoveSignatory(signatoryId: string) {
+    if (!configuration.editable) return
     const savedConfiguration = await signatureConfiguration.removeSignatory({
       signatoryId,
       expectedVersion: expectedVersionRef.current,

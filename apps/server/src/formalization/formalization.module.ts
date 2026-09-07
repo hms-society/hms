@@ -7,11 +7,6 @@ import { FormalizationDatabaseModule } from '@/formalization/database'
 import { DrizzleFormalizationCloseTransaction } from '@/formalization/database/formalization-close-transaction'
 import { DrizzleFormalizationDocumentConfirmationTransaction } from '@/formalization/database/formalization-document-confirmation-transaction'
 import { DrizzleFormalizationStartTransaction } from '@/formalization/database/formalization-start-transaction'
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
-import {
-  FormalizationSignatureSendingService,
-  FormalizationSigningGatewayService,
-} from '@/formalization/formalization-signature-sending.service'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 import { FormalizationMessagingModule } from '@/formalization/messaging/formalization-messaging.module'
 import {
@@ -61,7 +56,19 @@ import {
   SelectCurrentFormalizationDocumentVersionController,
   SelectFormalizationSignatoryChannelController,
   StartFormalizationController,
-  SigningGatewayController,
+  ExchangeSigningInvitationController,
+  GetSigningGatewayContextController,
+  ListSigningAuthenticationChannelsController,
+  RequestSigningOtpController,
+  VerifySigningOtpController,
+  EstablishCollaboratorSigningSessionController,
+  GetSigningDocumentController,
+  GetSigningDocumentContentController,
+  ListSigningDocumentsController,
+  AcknowledgeSigningDocumentController,
+  StartSigningController,
+  GetSigningResultController,
+  CloseSigningResultController,
   SigningGatewayWebhookController,
   SigningGatewayProxyController,
 } from '@/formalization/rest/controllers'
@@ -115,14 +122,23 @@ import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/gu
     ReplaceFormalizationSignatureFieldsController,
     ResetFormalizationSignatureConfigurationController,
     ReopenFormalizationDocumentPackageController,
-    SigningGatewayController,
+    ExchangeSigningInvitationController,
+    GetSigningGatewayContextController,
+    ListSigningAuthenticationChannelsController,
+    RequestSigningOtpController,
+    VerifySigningOtpController,
+    EstablishCollaboratorSigningSessionController,
+    GetSigningDocumentController,
+    GetSigningDocumentContentController,
+    ListSigningDocumentsController,
+    AcknowledgeSigningDocumentController,
+    StartSigningController,
+    GetSigningResultController,
+    CloseSigningResultController,
     SigningGatewayWebhookController,
     SigningGatewayProxyController,
   ],
   providers: [
-    FormalizationApplicationService,
-    FormalizationSignatureSendingService,
-    FormalizationSigningGatewayService,
     OptionalSigningGatewayCollaboratorGuard,
     DocumensoWebhookNormalizer,
     DrizzleFormalizationStartTransaction,

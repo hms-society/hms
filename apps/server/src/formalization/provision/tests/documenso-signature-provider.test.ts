@@ -96,7 +96,10 @@ describe('DocumensoSignatureProvider', () => {
     const createPayload = JSON.parse(
       (await (createRequest?.body as FormData).get('payload')) as string,
     )
-    expect(createPayload.meta).toEqual({ distributionMethod: 'NONE' })
+    expect(createPayload.meta).toEqual({
+      distributionMethod: 'NONE',
+      language: 'pt-BR',
+    })
 
     expect(result).toEqual({
       providerEnvelopeId: 'envelope-1',
@@ -366,6 +369,30 @@ describe('DocumensoSignatureProvider', () => {
     ])
   })
 
+  it('keeps unsigned provider recipients eligible to open their HMS invitation', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        jsonResponse({
+          status: 'PENDING',
+          envelopeItems: [{ id: 'item-1' }],
+          recipients: [{ id: 11, signingStatus: 'NOT_SIGNED' }],
+          fields: [{ recipientId: 11, envelopeItemId: 'item-1', inserted: false }],
+        }),
+      ),
+    )
+
+    const result = await provider().findEnvelopeState({
+      providerEnvelopeId: 'envelope-1',
+    })
+
+    expect(result.recipients[0]).toMatchObject({
+      providerRecipientId: '11',
+      recipientStatus: 'invited',
+      items: [expect.objectContaining({ status: 'pending' })],
+    })
+  })
+
   it('treats a provider-missing envelope as already terminal without reading its body', async () => {
     const missingResponse = new Response(
       JSON.stringify({ secret: 'provider-secret', message: 'NOT_FOUND' }),
@@ -430,7 +457,7 @@ describe('DocumensoSignatureProvider', () => {
         method: 'POST',
         body: JSON.stringify({
           envelopeId: 'envelope-1',
-          meta: { distributionMethod: 'NONE' },
+          meta: { distributionMethod: 'NONE', language: 'pt-BR' },
         }),
       }),
     )

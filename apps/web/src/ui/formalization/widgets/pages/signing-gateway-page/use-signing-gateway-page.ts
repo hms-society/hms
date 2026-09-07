@@ -311,7 +311,10 @@ export function useSigningGatewayPage(): SigningGatewayPageState {
         if (response.isFailure) {
           setState((current) =>
             current.step === 'reading'
-              ? { ...current, props: { ...current.props, error: response.errorMessage } }
+              ? {
+                  ...current,
+                  props: { ...current.props, actionError: response.errorMessage },
+                }
               : current,
           )
           return
@@ -331,7 +334,11 @@ export function useSigningGatewayPage(): SigningGatewayPageState {
             }
           return {
             ...current,
-            props: { ...current.props, acknowledgedDocumentIds, error: undefined },
+            props: {
+              ...current.props,
+              acknowledgedDocumentIds,
+              actionError: undefined,
+            },
           }
         })
       })
@@ -389,6 +396,14 @@ export function useSigningGatewayPage(): SigningGatewayPageState {
     return {
       step: 'collaborator_login',
       props: { ...state.props, onContinue: handleCollaboratorContinue },
+    }
+  if (state.step === 'enter_otp')
+    return {
+      step: 'enter_otp',
+      props: {
+        ...state.props,
+        isPending: verifyOtp.isPending || requestOtp.isPending,
+      },
     }
   if (state.step === 'reading')
     return {

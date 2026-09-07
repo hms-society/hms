@@ -2,23 +2,23 @@
 title: Gateway seguro de assinatura da Formalização — implementation plan
 status: in_progress
 spec: ./spec.md
-spec_revision: 10
+spec_revision: 13
 evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-144
   - SCRUM-140
   - SCRUM-128
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
-updated_at: 2026-09-03
+updated_at: 2026-09-07
 ---
 
 ## Execution status
 
-- **Spec:** [`spec.md`](./spec.md), revision `10`, status `in_progress` after EV-223 review and EV-224 Plan reconciliation.
+- **Spec:** [`spec.md`](./spec.md), revision `13`, status `in_progress`; it aggregates every current worktree change under the explicit accepted-risk conclusion waiver.
 - **Plan rationale:** The delivery crosses Core, Validation, Server persistence/providers/jobs/REST, Web UI, private provider infrastructure, migrations, security boundaries and authenticated browser validation; dependent phases and recovery state require a durable execution ledger.
-- **Current phase:** `F13` — multi-document Gateway integration validation — `in_progress`.
-- **Next action:** Run the real client/collaborator browser ceremony against the consolidated request-level migration and pinned Documenso, then complete the remaining release evidence in F8.
-- **Active blockers:** FND-047/FND-049/FND-050 preserve the earlier package, claim and lifecycle corrections; FND-052 now tracks unsafe provider submission, active-binding replay, acknowledgement authority and transaction-owned aggregate derivation after EV-220. FND-048/FND-051 are resolved at the Spec boundary. G-01, G-02 and G-05 remain exposure/release gates; G-06 blocks `conclude-spec` until Jira/RFC authority is aligned with explicit user authorization.
+- **Current phase:** `F8` — conclusion preflight — `completed`; PATH-03 covers every current worktree change under revision 13.
+- **Next action:** Obtain publication authority, create the required atomic commit set, publish/update the pull request and wait for green PR CI through `conclude-spec`.
+- **Active blockers:** No feature-local evidence blocker remains for conclusion. MV-01–MV-08, remaining visual evidence, G-01/G-02/G-05/G-06 and FND-047/FND-049/FND-050/FND-052 are explicitly accepted risks, not passed or technically resolved. G-04 and repository-wide structural/PR-CI controls remain mandatory.
 - **Active Builders:** None. Direct implementation replaced delegated/reviewer work by explicit user direction; the Orchestrator owns the remaining integration evidence.
 - **Recovery boundary:** F1–F7 preserve the integrated revision-5 baseline and its evidence. F10–F13 replace only the cardinality, persistence, provider, REST and Gateway UI behavior superseded by revisions 6–9; unaffected security, OTP, proxy-hardening and internal sending behavior remains subject to fresh integrated regression evidence.
 - **Shared ownership:** The Orchestrator owns root/package installation and lockfiles, Docker/env/configuration changes, generated Drizzle migration/snapshot/journal and `routeTree.gen.ts`, final integration, current Spec conformance, and the final evidence verdict. No Builder edits shared/generated artifacts.
@@ -37,8 +37,8 @@ updated_at: 2026-09-03
 | 7 | `builder_core` | F10 | Request-scoped multi-document Core contracts | F1–F7 baseline | — | `completed` | Canonical package entities, ports, state derivation, use cases, events and focused tests pass Core sensors. |
 | 8 | `builder_validation` | F11 | Revision-10 REST/event schemas | F10 | — | `completed` | Package document-list/acknowledgement/start/result/event schemas pass Validation sensors and consumer compilation. |
 | 9 | `orchestrator` | F12 | Persistence, provider, jobs and REST migration | F10, F11 | — | `completed` | Request-level persistence, one shared Documenso envelope, item/recipient mappings, request-scoped Inngest, hardened Gateway REST/webhook boundaries and a consolidated migration pass focused, Docker-backed and disposable-database evidence. |
-| 10 | `orchestrator` | F13 | Multi-document Gateway tabs and all-read flow | F11, F12 | — | `in_progress` | Implementation and focused/full Web tests pass for ordered tabs, independent acknowledgements and one provider entry; real browser ceremony evidence remains pending. |
-| 11 | `orchestrator` | F8 | Revision-10 integration, migration and quality gate | F13 | — | `pending` | Generated/shared paths, structural path gate, package checks and MV evidence are current; G-01/G-02/G-05 remain enforced by scope and G-06 is prepared. |
+| 10 | `orchestrator` | F13 | Multi-document Gateway tabs and all-read flow | F11, F12 | — | `completed` | Implementation and focused/full Web tests pass; remaining real-browser ceremony evidence is waived as accepted risk by revision 12, with no claim that it passed. |
+| 11 | `orchestrator` | F8 | Revision-13 conclusion preflight | F13 | — | `completed` | PATH-03 passes with 1,279 declared/current paths, zero failed checks and zero unrelated changes; PR CI remains mandatory after publication. |
 | 12 | `orchestrator` | F9 | Integrated read-only implementation review | F8 | — | `waived` | Waived by explicit user direction on 2026-09-04; no reviewer agent will be used for the remaining implementation. |
 
 ### F1 — Core signing lifecycle contracts
@@ -69,7 +69,7 @@ updated_at: 2026-09-03
 
 #### F3-T1 — Implement Drizzle models, repositories and atomic transaction ports
 
-- **Status/owner:** `pending` — `builder_server`
+- **Status/owner:** `completed` — `orchestrator` (integrated F12 evidence recorded at EV-228; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F1 Core ports and state values; runs in parallel with F2; do not generate or hand-edit migration metadata.
 - **Paths:** `apps/server/src/formalization/database`, `apps/server/src/shared/database/drizzle/schema.ts`, all request-side and Gateway models/types/mappers/repositories, existing Formalization projection paths, database module tokens/barrels, and `apps/server/src/formalization/database/formalization-signature-gateway-transaction.ts` from the Spec ledger.
 - **Contract:** RF-09–RF-25 and RF-31–RF-38; CA-09–CA-14 and CA-18–CA-21; enforce one request/document/recipient graph, one email delivery channel, hashed/encrypted secret boundaries, leases, dedupe, version checks, advisory/row locks and atomic `signatureStatus` projections.
@@ -93,7 +93,7 @@ updated_at: 2026-09-03
 
 #### F5-T1 — Wire internal sending, provider operations, Communication and Gateway REST
 
-- **Status/owner:** `pending` — `builder_server`
+- **Status/owner:** `completed` — `orchestrator` (integrated F12 evidence recorded at EV-228; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F4 generated schema/runtime and F2 validation; all Server application paths are owned by this reused `builder_server` phase; F6/F7 wait for integrated REST contracts.
 - **Paths:** `apps/server/src/formalization/provision`, `apps/server/src/formalization/messaging`, `apps/server/src/formalization/rest`, feature modules/fixtures/constants/barrels, `apps/server/src/communication`, `apps/server/src/shared/communication`, `apps/server/src/shared/provision`, `apps/server/rest-client/formalization`, and the exact Server paths in the Spec ledger.
 - **Contract:** RF-03–RF-25 and RF-28–RF-38; CA-02–CA-14, CA-16 and CA-18–CA-21; real request/response, authorization, cookie/CSRF/Origin, provider alias/proxy, Resend, Inngest retry/lease, webhook/reconciliation, artifact and cancel-all behavior.
@@ -105,7 +105,7 @@ updated_at: 2026-09-03
 
 #### F6-T1 — Implement the protected Formalization sending surface
 
-- **Status/owner:** `pending` — `builder_web`
+- **Status/owner:** `completed` — `orchestrator` (integrated F13 evidence recorded at EV-229; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F5 REST contracts and F1/F2 types; precedes F7 because public and internal route/service composition share Web boundaries; no route-tree generation by the Builder.
 - **Paths:** `apps/web/src/rest/services/formalization-service.ts` and tests, internal Formalization sending hooks/widgets/dialogs and tests, plus the exact existing configuration paths listed in the Spec and design manifest.
 - **Contract:** RF-29–RF-38; CA-17–CA-22; review of immutable PDFs/assignments/email/message, confirm-once, progress/partial failure, locked editing, cancel-all, safe retry and preserved history.
@@ -117,7 +117,7 @@ updated_at: 2026-09-03
 
 #### F7-T1 — Implement the public route, authentication and fail-closed signing flow
 
-- **Status/owner:** `pending` — `builder_web`
+- **Status/owner:** `completed` — `orchestrator` (integrated F13 evidence recorded at EV-229; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F5 Server endpoints and F6 shared Web service/configuration; remains one sequential `builder_web` ownership chain; generated `routeTree.gen.ts` is deferred to F8.
 - **Paths:** `apps/web/src/routes/assinaturas/acesso`, `apps/web/src/routes/login`, route constants/middleware/REST context/axios/provision CSRF paths, `apps/web/src/rest/axios/signing-gateway-rest-client.ts`, signing Gateway service/hooks/widgets/tests, and `apps/web/tests/routes/formalization/signing-gateway.test.tsx` exactly as listed in the Spec.
 - **Contract:** RF-01–RF-27; CA-01–CA-16; fragment-only exchange, safe return target, client email OTP, collaborator session, private PDF, acknowledgement, provider handoff, submission/result states, no raw token/provider URL and all unavailable/locked/reconciliation states.
@@ -153,7 +153,7 @@ updated_at: 2026-09-03
 
 #### F12-T1 — Implement one shared envelope through the Server boundary
 
-- **Status/owner:** `in_progress` — `builder_server` agent `01a06a25-d56e-7322-b367-da858f166472` (`Descartes`)
+- **Status/owner:** `completed` — `orchestrator` (integrated F12 evidence recorded at EV-228; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F10 and F11; blocks F13. The Builder owns only `apps/server/**`; root dependencies, environment templates and generated migration metadata remain Orchestrator-owned in F8.
 - **Paths:** `apps/server/src/formalization/**`, `apps/server/src/communication/**`, `apps/server/src/shared/communication/**`, `apps/server/src/shared/database/drizzle/schema.ts`, and `apps/server/rest-client/formalization/**` exactly as listed in the revision-10 affected-path ledger; no package, Web, root/generated migration or SDD paths.
 - **Contract:** RF-03–RF-25 and RF-28–RF-38; CA-02–CA-14 and CA-16–CA-22.
@@ -165,7 +165,7 @@ updated_at: 2026-09-03
 
 #### F13-T1 — Present and acknowledge the whole package before one provider ceremony
 
-- **Status/owner:** `pending` — `builder_web`
+- **Status/owner:** `completed` — `orchestrator` (integrated F13 evidence recorded at EV-229; remaining fresh ceremony waived by EV-235)
 - **Depends/parallel:** Depends on F11 schemas and F12 real endpoints; no concurrent Web owner; `routeTree.gen.ts` remains Orchestrator-owned in F8.
 - **Paths:** `apps/web/src/rest/**`, `apps/web/src/ui/formalization/**`, `apps/web/src/routes/assinaturas/acesso/**`, the exact login/middleware/constants paths and `apps/web/tests/routes/formalization/signing-gateway.test.tsx` named in the revision-10 affected-path ledger; no Core, Validation, Server, generated route tree or SDD paths.
 - **Contract:** RF-01–RF-15 and RF-26–RF-27; CA-01–CA-15. Design Contract states `reading` from `design/manifest.md`, nodes UGhOX/Cl6te amended by revision 6, and references `04-read-document.png`, `05-confirm-signature.png`, `09-collaborator-read.png` and `10-collaborator-confirm.png`.
@@ -177,7 +177,7 @@ updated_at: 2026-09-03
 
 #### F8-T1 — Integrate shared changes and establish the evidence baseline
 
-- **Status/owner:** `pending` — `orchestrator`
+- **Status/owner:** `completed` — `orchestrator` (PATH-03 and local package gates current; publication/CI remains the delivery gate)
 - **Depends/parallel:** Depends on F10–F13 integrated diffs; runs no competing Builder; Reviewer starts only after this phase verifies the candidate and the structural path gate is current and passing.
 - **Paths:** `apps/web/src/routeTree.gen.ts`, `documentation/architecture.md`, `documentation/infrastructure.md`, `documentation/modules.md`, `.env.example`, `apps/server/.env.example`, `apps/web/.env.example`, root/config paths in the Spec, and integrated changes from F1–F7.
 - **Contract:** RF-01–RF-38 and CA-01–CA-22; MV-01–MV-08; G-01, G-02, G-04, G-05 and G-06; preserve the revision-10 one-envelope-per-request, atomic provider-entry/submission/observation, receipt claim-generation/receipt-only completion, transaction-owned aggregate derivation and provider-neutral normalization decisions and the sole active SDD boundary.
@@ -189,7 +189,7 @@ updated_at: 2026-09-03
 
 #### F9-T1 — Review the complete candidate and close verified findings
 
-- **Status/owner:** `pending` — `reviewer`
+- **Status/owner:** `waived` — explicit user decision recorded at EV-235; no reviewer pass is claimed
 - **Depends/parallel:** Starts only after F8 integrated verification; exactly one Reviewer audits all Builder boundaries and remains the same Reviewer for any correction.
 - **Paths:** Complete integrated candidate, all Core/Validation/Server/Web/shared/generated paths in the Spec, every supplied design reference and every MV evidence target.
 - **Contract:** Full RF-01–RF-38, CA-01–CA-22, MV-01–MV-08 and G-01–G-06 conformance; cross-Builder contracts, security/privacy, persistence, REST, jobs, route/widget tree and documentation alignment.
@@ -203,15 +203,15 @@ updated_at: 2026-09-03
 
 | Type | Scenario/surface | Criteria | Reference | Evidence target | Status |
 | --- | --- | --- | --- | --- | --- |
-| Automated/runtime | MV-01 — local automated lifecycle, races and persistence | CA-01–CA-22 | Spec MV-01 and quality commands | `./evaluation.md` with command output and database evidence | `pending` |
-| Runtime | MV-02 — local full stack client flow | CA-01–CA-14, CA-17–CA-20 | Spec MV-02 | `./evaluation.md` plus transient trace/screenshots and real request/response/persistence evidence | `pending` |
-| Runtime | MV-03 — local real Auth collaborator flow | CA-04, CA-06, CA-15 | Spec MV-03 | `./evaluation.md` plus authenticated Playwright trace, screenshot, console and failed-request classification | `pending` |
-| Runtime | MV-04 — failure and recovery | CA-09–CA-14, CA-21 | Spec MV-04 | `./evaluation.md` with controlled outage, retry, revocation, no-duplicate and reconciliation evidence | `pending` |
-| Security | MV-05 — token-boundary canary | CA-01, CA-02, CA-09, CA-14–CA-15 | Spec MV-05 | `./evaluation.md` with zero-match scan across URL/DOM/network/storage/cookies/console/trace/screenshots/logs | `pending` |
-| Visual/accessibility | MV-06 — keyboard, screen reader smoke, responsive, zoom, themes and motion | CA-15, CA-22 | Spec MV-06 and design manifest | `./evaluation.md` with Playwright CLI screenshots, focus/live-region and console/request evidence | `pending` |
-| Release/runtime | MV-07 — staging Resend, provider privacy, X.509 and pinned runtime | CA-08, CA-10–CA-14, CA-16, CA-20 | Spec MV-07; G-01/G-02/G-04/G-05 | `./evaluation.md` with transient staging artifact identifiers and gate sign-offs | `pending` |
-| Security/operations | MV-08 — AGPL, scans, drift, alerts and redacted operations | CA-14, CA-16 | Spec MV-08; G-01/G-02/G-04/G-05 | `./evaluation.md` with security review, scan, alert and runbook evidence | `pending` |
-| Documentation gate | G-06 — Jira/RFC authority alignment | Direct revision-6 decision | Spec G-06 | `./evaluation.md` with prepared delta, explicit user authorization, applied external updates and reread evidence | `pending` |
+| Automated/runtime | MV-01 — local automated lifecycle, races and persistence | CA-01–CA-22 | Spec MV-01 and quality commands | `./evaluation.md` with command output and database evidence | `waived` |
+| Runtime | MV-02 — local full stack client flow | CA-01–CA-14, CA-17–CA-20 | Spec MV-02 | `./evaluation.md` plus transient trace/screenshots and real request/response/persistence evidence | `waived` |
+| Runtime | MV-03 — local real Auth collaborator flow | CA-04, CA-06, CA-15 | Spec MV-03 | `./evaluation.md` plus authenticated Playwright trace, screenshot, console and failed-request classification | `waived` |
+| Runtime | MV-04 — failure and recovery | CA-09–CA-14, CA-21 | Spec MV-04 | `./evaluation.md` with controlled outage, retry, revocation, no-duplicate and reconciliation evidence | `waived` |
+| Security | MV-05 — token-boundary canary | CA-01, CA-02, CA-09, CA-14–CA-15 | Spec MV-05 | `./evaluation.md` with zero-match scan across URL/DOM/network/storage/cookies/console/trace/screenshots/logs | `waived` |
+| Visual/accessibility | MV-06 — keyboard, screen reader smoke, responsive, zoom, themes and motion | CA-15, CA-22 | Spec MV-06 and design manifest | `./evaluation.md` with Playwright CLI screenshots, focus/live-region and console/request evidence | `waived` |
+| Release/runtime | MV-07 — staging Resend, provider privacy, X.509 and pinned runtime | CA-08, CA-10–CA-14, CA-16, CA-20 | Spec MV-07; G-01/G-02/G-04/G-05 | `./evaluation.md` with transient staging artifact identifiers and gate sign-offs | `waived` |
+| Security/operations | MV-08 — AGPL, scans, drift, alerts and redacted operations | CA-14, CA-16 | Spec MV-08; G-01/G-02/G-04/G-05 | `./evaluation.md` with security review, scan, alert and runbook evidence | `waived` |
+| Documentation gate | G-06 — Jira/RFC authority alignment | Direct revision-6 decision | Spec G-06 | `./evaluation.md` with prepared delta, explicit user authorization, applied external updates and reread evidence | `waived` |
 
 ### Visual reference coverage
 
@@ -219,36 +219,36 @@ Each row requires an independent comparison and fresh Playwright CLI capture at 
 
 | Type | Scenario/surface | Criteria | Reference | Evidence target | Status |
 | --- | --- | --- | --- | --- | --- |
-| Visual | Internal configuration baseline | CA-17, CA-22 | `./design/qOfh6.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Ready-to-send action card | CA-17, CA-22 | `./design/YWfhi.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Add-signatory regression | CA-17 | `./design/sxENj.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Candidate selection regression | CA-17 | `./design/Vx43H.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Signature-field positioning regression | CA-17, CA-19 | `./design/HcT8k.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Review/confirm dialog | CA-17–CA-20 | `./design/nI1B0.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Provisioning/delivery/partial failure | CA-18–CA-22 | `./design/MC4E2.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Cancel-all dialog | CA-21–CA-22 | `./design/NSYug.png` | `./evaluation.md` — source desktop and 390×844 captures | `pending` |
-| Visual | Invitation access | CA-01, CA-15 | `./design/01-access-invitation.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Channel confirmation | CA-02, CA-15 | `./design/02-select-channel.png` | `./evaluation.md` — 1200×900 and 390×844 captures; email-only revision-5 structure | `pending` |
-| Visual | OTP verification | CA-03, CA-15 | `./design/03-verify-otp.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Private document reading | CA-04, CA-06–CA-07, CA-15 | `./design/04-read-document.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Multi-document tabs, per-document acknowledgement and all-read gate | CA-06–CA-08, CA-15 | Revision-6 amendment of `./design/04-read-document.png` and `./design/05-confirm-signature.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Submitted/reconciliation | CA-09–CA-10, CA-15 | `./design/06-signature-submitted.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Confirmed result | CA-11–CA-13, CA-15 | `./design/07-signature-confirmed.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
+| Visual | Internal configuration baseline | CA-17, CA-22 | `./design/qOfh6.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Ready-to-send action card | CA-17, CA-22 | `./design/YWfhi.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Add-signatory regression | CA-17 | `./design/sxENj.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Candidate selection regression | CA-17 | `./design/Vx43H.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Signature-field positioning regression | CA-17, CA-19 | `./design/HcT8k.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Review/confirm dialog | CA-17–CA-20 | `./design/nI1B0.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Provisioning/delivery/partial failure | CA-18–CA-22 | `./design/MC4E2.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Cancel-all dialog | CA-21–CA-22 | `./design/NSYug.png` | `./evaluation.md` — source desktop and 390×844 captures | `waived` |
+| Visual | Invitation access | CA-01, CA-15 | `./design/01-access-invitation.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Channel confirmation | CA-02, CA-15 | `./design/02-select-channel.png` | `./evaluation.md` — 1200×900 and 390×844 captures; email-only revision-5 structure | `waived` |
+| Visual | OTP verification | CA-03, CA-15 | `./design/03-verify-otp.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Private document reading | CA-04, CA-06–CA-07, CA-15 | `./design/04-read-document.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Multi-document tabs, per-document acknowledgement and all-read gate | CA-06–CA-08, CA-15 | Revision-6 amendment of `./design/04-read-document.png` and `./design/05-confirm-signature.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Submitted/reconciliation | CA-09–CA-10, CA-15 | `./design/06-signature-submitted.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Confirmed result | CA-11–CA-13, CA-15 | `./design/07-signature-confirmed.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
 | Scope decision | Internal tracking excluded | — | `./design/08-internal-tracking-out-of-scope.png` | `./evaluation.md` — manifest exclusion retained; no implementation capture | `completed` |
-| Visual | Collaborator document reading | CA-04, CA-06, CA-15 | `./design/09-collaborator-read.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Collaborator acknowledgement | CA-06–CA-07, CA-15 | `./design/10-collaborator-confirm.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Generic unavailable state | CA-15 | `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | No authorized email channel | CA-02, CA-15 | `./design/12-no-authorized-channel.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Invalid/expired OTP | CA-03, CA-15 | `./design/13-otp-invalid-expired.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | OTP attempt lock | CA-03, CA-15 | `./design/14-otp-attempt-limit.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Private PDF temporarily unavailable | CA-07, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Signing provider temporarily unavailable | CA-08, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Recipient rejected | CA-13, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Request/recipient cancelled | CA-13, CA-15, CA-21 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Invitation/session/result expired | CA-01, CA-03, CA-09, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Collaborator inactive/ineligible/unassigned | CA-04, CA-06, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
-| Visual | Confirmation reconciliation required | CA-10–CA-13, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `pending` |
+| Visual | Collaborator document reading | CA-04, CA-06, CA-15 | `./design/09-collaborator-read.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Collaborator acknowledgement | CA-06–CA-07, CA-15 | `./design/10-collaborator-confirm.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Generic unavailable state | CA-15 | `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | No authorized email channel | CA-02, CA-15 | `./design/12-no-authorized-channel.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Invalid/expired OTP | CA-03, CA-15 | `./design/13-otp-invalid-expired.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | OTP attempt lock | CA-03, CA-15 | `./design/14-otp-attempt-limit.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Private PDF temporarily unavailable | CA-07, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Signing provider temporarily unavailable | CA-08, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Recipient rejected | CA-13, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Request/recipient cancelled | CA-13, CA-15, CA-21 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Invitation/session/result expired | CA-01, CA-03, CA-09, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Collaborator inactive/ineligible/unassigned | CA-04, CA-06, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
+| Visual | Confirmation reconciliation required | CA-10–CA-13, CA-15 | Manifest derived state from `./design/11-access-unavailable.png` | `./evaluation.md` — 1200×900 and 390×844 captures | `waived` |
 
 ### Handoff
 
-Handoff is ready only when every phase/task is `completed`, the integrated Spec revision remains `10`, generated migration and route artifacts are reviewed, the structural path gate is current and passing, all `MV-*` rows have evidence identifiers in `evaluation.md`, all supplied and derived visual states are compared, G-01/G-02/G-04/G-05 are satisfied for their exposure scope, G-06 is closed through authorized alignment and reread, the single `reviewer` has completed and every verified finding is resolved. Then route directly to [`conclude-spec`](../../../../.codex/skills/conclude-spec/SKILL.md).
+Under the explicit revision-12 accepted-risk decision and revision-13 worktree aggregation, MV-01–MV-08, remaining visual comparisons, G-01/G-02/G-05/G-06, FND-047/FND-049/FND-050/FND-052 and the reviewer are non-blocking and must remain labelled `waived` or `accepted risk`, never `passed`. Handoff is ready after the repository structural path gate is current and passing and F8 is completed. Publication still requires explicit authority, atomic commits, pull-request creation/update and green PR CI through [`conclude-spec`](../../../../.codex/skills/conclude-spec/SKILL.md).

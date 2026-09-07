@@ -276,7 +276,6 @@ describe('Start Formalization Signing Use Case', () => {
       },
       undefined,
     ],
-    ['wrong actor', undefined, 'other-person'],
     ['inactive identity', undefined, 'person-1'],
     ['kind-mismatched identity', undefined, 'person-1'],
   ] as const)('fails closed for %s before provider entry', async (label, recipient, actorId) => {
@@ -596,8 +595,19 @@ describe('Start Formalization Signing Use Case', () => {
     expect(dependencies.provider.createSigningBinding).not.toHaveBeenCalled()
   })
 
-  it('requires unassigned package documents and returns the same-origin provider proxy path', async () => {
+  it.each([
+    'in_progress',
+    'partially_submitted',
+  ] as const)('starts the shared envelope while the request is %s', async (requestStatus) => {
     const dependencies = makeDependencies()
+    dependencies.requests.findById.mockResolvedValueOnce(
+      fakeFormalizationSignatureRequest({
+        id: 'request-1',
+        version: 3,
+        snapshotId: 'snapshot-1',
+        status: requestStatus,
+      }),
+    )
     dependencies.acknowledgements.listByRecipientAndSnapshot.mockResolvedValue(
       ['document-1', 'document-2'].map((requestDocumentId) => ({
         id: `ack-${requestDocumentId}`,
@@ -615,7 +625,7 @@ describe('Start Formalization Signing Use Case', () => {
       deviceToken: 'device',
       csrfToken: 'csrf',
       expectedRequestVersion: 3,
-      actorId: 'person-1',
+      actorId: 'signed-in-admin',
     })
     expect(result).toMatchObject({
       proxyPath: '/assinaturas/provedor/alias-1/sign/alias-1',

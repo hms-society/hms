@@ -6,14 +6,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { SigningGatewayProxyController } from '@/formalization/rest/controllers/signing-gateway-proxy.controller'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { FormalizationSigningGatewayService } from '@/formalization/formalization-signature-sending.service'
+import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 
 const PROVIDER_ORIGIN = 'http://documenso:3000'
 const PROVIDER_TOKEN = 'provider-token'
 const ALIAS = 'safe-alias'
 const PREFIX = '/assinaturas/provedor'
-const recordProviderSubmission = vi.fn()
+const recordSubmission = vi.fn().mockResolvedValue('applied')
 
 describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*path}]', () => {
   let app: INestApplication | undefined
@@ -22,7 +24,8 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     await app?.close()
     app = undefined
     vi.unstubAllGlobals()
-    recordProviderSubmission.mockReset()
+    recordSubmission.mockReset()
+    recordSubmission.mockResolvedValue('applied')
   })
 
   it('routes root assets through the alias and preserves nonce CSP directives', async () => {
@@ -117,12 +120,13 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     )
   })
 
-  it('allows only the completion page after submission revokes the binding', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response('<html><head></head><body>Completed</body></html>', {
-        status: 200,
-        headers: { 'content-type': 'text/html' },
-      }),
+  it('allows only the completion page and its static resources after submission revokes the binding', async () => {
+    const fetchMock = vi.fn().mockImplementation(
+      () =>
+        new Response('<html><head></head><body>Completed</body></html>', {
+          status: 200,
+          headers: { 'content-type': 'text/html' },
+        }),
     )
     vi.stubGlobal('fetch', fetchMock)
     app = await createApp({ status: 'revoked', revocationReason: 'submitted' })
@@ -130,14 +134,18 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     const completionResponse = await request(app.getHttpServer()).get(
       `${PREFIX}/${ALIAS}/sign/${ALIAS}/complete`,
     )
+    const assetResponse = await request(app.getHttpServer()).get(
+      `${PREFIX}/${ALIAS}/assets/completion.css`,
+    )
     const signingResponse = await request(app.getHttpServer()).get(
       `${PREFIX}/${ALIAS}/continue`,
     )
 
     expect(completionResponse.status).toBe(200)
     expect(completionResponse.text).toContain('Completed')
+    expect(assetResponse.status).toBe(200)
     expect(signingResponse.status).toBe(404)
-    expect(fetchMock).toHaveBeenCalledOnce()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it('does not inject completion styles on non-completion provider pages', async () => {
@@ -180,32 +188,21 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
       .send({ documentId: 48, token: ALIAS })
 
     expect(response.status).toBe(200)
-    expect(recordProviderSubmission).toHaveBeenCalledOnce()
-    expect(recordProviderSubmission).toHaveBeenCalledWith('alias-hash')
+    expect(recordSubmission).toHaveBeenCalledOnce()
   })
 
   it.each([
     {
       description: 'without a provider style nonce',
       csp: "default-src 'self'",
-      html: '<html><head><title>Completed</title></head><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
-    },
-    {
-      description: 'without an HTML head',
-      csp: "default-src 'self'; style-src 'self' 'nonce-completion-style'",
-      html: '<html><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
-    },
-    {
-      description: 'without a closing HTML head tag',
-      csp: "default-src 'self'; style-src 'self' 'nonce-completion-style'",
-      html: '<html><head><title>Completed</title><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
     },
     {
       description: 'with an unsafe provider style nonce',
       csp: "default-src 'self'; style-src 'self' 'nonce-unsafe<value'",
-      html: '<html><head><title>Completed</title></head><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
     },
-  ])('fails closed on the completed route $description', async ({ csp, html }) => {
+  ])('creates a safe suppression nonce $description', async ({ csp }) => {
+    const html =
+      '<html><head><title>Completed</title></head><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>'
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(html, {
         status: 200,
@@ -218,8 +215,31 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     const response = await request(app.getHttpServer()).get(`${PREFIX}/${ALIAS}/complete`)
 
     expect(response.status).toBe(200)
-    expect(response.text).toContain('<svg class="lucide lucide-sparkles"></svg>')
-    expect(response.text).toContain('>Share</button>')
+    expect(response.text).toMatch(
+      /<style nonce="[A-Za-z0-9+/]+={0,2}">button:has\(svg\.lucide-sparkles\)\{display:none!important\}<\/style>/,
+    )
+    expect(response.headers['content-security-policy']).toMatch(
+      /style-src[^;]* 'nonce-[A-Za-z0-9+/]+={0,2}'/,
+    )
+    expect(response.headers['content-security-policy']).not.toContain('unsafe<value')
+  })
+
+  it.each([
+    '<html><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
+    '<html><head><title>Completed</title><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
+  ])('does not alter malformed completion HTML', async (html) => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(html, {
+        status: 200,
+        headers: { 'content-type': 'text/html' },
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    app = await createApp()
+
+    const response = await request(app.getHttpServer()).get(`${PREFIX}/${ALIAS}/complete`)
+
+    expect(response.status).toBe(200)
     expect(response.text).not.toContain('<style nonce=')
   })
 
@@ -336,6 +356,9 @@ async function createApp(
         provide: FORMALIZATION_REPOSITORIES.signatureProxyBindings,
         useValue: {
           findByAliasHash: vi.fn().mockResolvedValue({
+            id: 'binding-id',
+            sessionId: 'session-id',
+            requestId: 'request-id',
             encryptedProviderCredential: 'encrypted-token',
             cipherKeyId: 'key-id',
             recipientId: 'recipient-id',
@@ -357,6 +380,77 @@ async function createApp(
         },
       },
       {
+        provide: FORMALIZATION_REPOSITORIES.signatureRequests,
+        useValue: {
+          findById: vi.fn().mockResolvedValue({
+            id: 'request-id',
+            snapshotId: 'snapshot-id',
+            status: 'in_progress',
+          }),
+        },
+      },
+      {
+        provide: FORMALIZATION_REPOSITORIES.signatureRecipients,
+        useValue: {
+          findById: vi.fn().mockResolvedValue({
+            id: 'recipient-id',
+            requestId: 'request-id',
+            status: 'signing',
+            version: 1,
+          }),
+        },
+      },
+      {
+        provide: FORMALIZATION_REPOSITORIES.signatureGatewaySessions,
+        useValue: {
+          findActiveByRecipientId: vi.fn().mockResolvedValue([
+            {
+              id: 'session-id',
+              requestId: 'request-id',
+              recipientId: 'recipient-id',
+              snapshotId: 'snapshot-id',
+              kind: 'authenticated',
+              status: 'active',
+              version: 1,
+              expiresAt: new Date(Date.now() + 60_000),
+            },
+          ]),
+        },
+      },
+      {
+        provide: FORMALIZATION_REPOSITORIES.signatureRequestDocuments,
+        useValue: {
+          listByRequestId: vi
+            .fn()
+            .mockResolvedValue([{ id: 'document-id', requestId: 'request-id' }]),
+        },
+      },
+      {
+        provide: FORMALIZATION_REPOSITORIES.signatureRecipientDocuments,
+        useValue: {
+          listByRecipientId: vi.fn().mockResolvedValue([
+            {
+              id: 'assignment-id',
+              requestId: 'request-id',
+              recipientId: 'recipient-id',
+              requestDocumentId: 'document-id',
+            },
+          ]),
+        },
+      },
+      {
+        provide: FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction,
+        useValue: { recordSubmission },
+      },
+      {
+        provide: ServerDatetimeProvider,
+        useValue: { now: () => new Date() },
+      },
+      {
+        provide: InngestBroker,
+        useValue: { publish: vi.fn().mockResolvedValue(undefined) },
+      },
+      {
         provide: EnvProvider,
         useValue: {
           get: (key: string) => {
@@ -366,10 +460,6 @@ async function createApp(
             return ''
           },
         },
-      },
-      {
-        provide: FormalizationSigningGatewayService,
-        useValue: { recordProviderSubmission },
       },
     ],
   }).compile()

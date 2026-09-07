@@ -12,6 +12,7 @@ import {
   MarkFormalizationSignatureOtpDeliveryJob,
   ReconcileFormalizationSignatureDeliveriesJob,
   ReconcileFormalizationSignatureRequestJob,
+  ReconcileFormalizationSignatureRequestsJob,
 } from '@/formalization/messaging/inngest/jobs'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-options'
@@ -38,6 +39,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
     MarkFormalizationSignatureOtpDeliveryJob,
     ReconcileFormalizationSignatureDeliveriesJob,
     ReconcileFormalizationSignatureRequestJob,
+    ReconcileFormalizationSignatureRequestsJob,
     FormalizationSignatureDocumentMetadataReader,
     {
       provide: FORMALIZATION_PROVIDERS.documentMetadataReader,
@@ -55,6 +57,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
         MarkFormalizationSignatureOtpDeliveryJob,
         ReconcileFormalizationSignatureDeliveriesJob,
         ReconcileFormalizationSignatureRequestJob,
+        ReconcileFormalizationSignatureRequestsJob,
       ],
       useFactory: (
         previewJob: GenerateFormalizationSignaturePreviewJob,
@@ -66,6 +69,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
         otpDeliveryJob: MarkFormalizationSignatureOtpDeliveryJob,
         deliveryReconciliationJob: ReconcileFormalizationSignatureDeliveriesJob,
         requestReconciliationJob: ReconcileFormalizationSignatureRequestJob,
+        requestsReconciliationJob: ReconcileFormalizationSignatureRequestsJob,
       ): InngestFunctionGroup => [
         previewJob.function,
         batchJob.function,
@@ -76,6 +80,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
         otpDeliveryJob.function,
         deliveryReconciliationJob.function,
         requestReconciliationJob.function,
+        requestsReconciliationJob.function,
       ],
     },
   ],
@@ -89,6 +94,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
     MarkFormalizationSignatureOtpDeliveryJob,
     ReconcileFormalizationSignatureDeliveriesJob,
     ReconcileFormalizationSignatureRequestJob,
+    ReconcileFormalizationSignatureRequestsJob,
     FORMALIZATION_INNGEST_FUNCTIONS,
     FORMALIZATION_PROVIDERS.documentMetadataReader,
   ],

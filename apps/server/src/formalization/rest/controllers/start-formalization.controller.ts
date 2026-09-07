@@ -1,6 +1,7 @@
 import {
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -8,19 +9,52 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import {
+  GetFormalizationUseCase,
+  StartFormalizationUseCase,
+} from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationIntakeLifecycleService,
+  FormalizationsRepository,
+  FormalizationSourceReader,
+} from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import {
+  ServerFormalizationIntakeLifecycleService,
+  ServerFormalizationSourceReader,
+} from '@/formalization/provision'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 
 @FormalizationsController()
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class StartFormalizationController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly startUseCase: StartFormalizationUseCase
+  private readonly getUseCase: GetFormalizationUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(ServerFormalizationSourceReader)
+    sourceReader: FormalizationSourceReader,
+    @Inject(ServerFormalizationIntakeLifecycleService)
+    intakeLifecycleService: FormalizationIntakeLifecycleService,
+    idProvider: IdProvider,
+  ) {
+    this.startUseCase = new StartFormalizationUseCase(
+      formalizationsRepository,
+      sourceReader,
+      intakeLifecycleService,
+      idProvider,
+    )
+    this.getUseCase = new GetFormalizationUseCase(formalizationsRepository, sourceReader)
+  }
 
   @Post('by-intake/:intakeId/start')
   @HttpCode(HttpStatus.OK)
@@ -31,14 +65,14 @@ export class StartFormalizationController {
     @Param('intakeId', new ParseUUIDPipe()) intakeId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service
-      .start({
+    return this.startUseCase
+      .execute({
         intakeId,
         actorId: collaborator.collaboratorId,
         actorProfile: collaborator.profile,
       })
       .then((formalization) =>
-        this.service.get({
+        this.getUseCase.execute({
           formalizationId: formalization.id,
           actorId: collaborator.collaboratorId,
           actorProfile: collaborator.profile,

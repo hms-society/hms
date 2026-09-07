@@ -1,10 +1,12 @@
-import { Body, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
+import { Body, Inject, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { updateFormalizationContractFormSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import { SaveFormalizationContractFormDraftUseCase } from '@hms/core/formalization/use-cases'
+import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -16,7 +18,14 @@ class DraftBody extends createZodDto(updateFormalizationContractFormSchema) {}
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class SaveFormalizationContractFormDraftController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: SaveFormalizationContractFormDraftUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+  ) {
+    this.useCase = new SaveFormalizationContractFormDraftUseCase(formalizationsRepository)
+  }
 
   @Patch(':formalizationId/contract-form/draft')
   @ApiResponse({ status: 200, type: FormalizationResponseDto })
@@ -25,8 +34,8 @@ export class SaveFormalizationContractFormDraftController {
     @Body(new ZodValidationPipe(updateFormalizationContractFormSchema)) body: DraftBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service
-      .saveDraft({
+    return this.useCase
+      .execute({
         formalizationId,
         actorId: collaborator.collaboratorId,
         ...body,

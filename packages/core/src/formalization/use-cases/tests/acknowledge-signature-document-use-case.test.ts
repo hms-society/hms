@@ -21,7 +21,11 @@ import type {
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 
 function makeAcknowledgementFixture(
-  requestStatus: 'in_progress' | 'sent' | 'provisioning' = 'in_progress',
+  requestStatus:
+    | 'in_progress'
+    | 'partially_submitted'
+    | 'sent'
+    | 'provisioning' = 'in_progress',
   recipientStatus: 'reading' | 'signing' = 'reading',
 ) {
   const sessions = mock<FormalizationSignatureGatewaySessionsRepository>()
@@ -116,6 +120,46 @@ function makeAcknowledgementFixture(
 }
 
 describe('AcknowledgeSignatureDocumentUseCase', () => {
+  it.each([
+    'in_progress',
+    'partially_submitted',
+  ] as const)('acknowledges while the request is %s', async (requestStatus) => {
+    const fixture = makeAcknowledgementFixture(requestStatus)
+    fixture.transaction.acknowledgeDocument.mockResolvedValueOnce('applied')
+
+    await expect(
+      fixture.useCase.execute({
+        sessionToken: 'session',
+        deviceToken: 'device',
+        csrfToken: 'csrf',
+        requestDocumentId: 'document-1',
+        expectedRequestVersion: 3,
+        acknowledged: true,
+        sourceIpHash: 'ip-hash',
+        userAgentHash: 'ua-hash',
+      }),
+    ).resolves.toMatchObject({ requestDocumentId: 'document-1' })
+  })
+
+  it('ignores a coexisting HMS actor while a client acknowledges a document', async () => {
+    const fixture = makeAcknowledgementFixture()
+    fixture.transaction.acknowledgeDocument.mockResolvedValueOnce('applied')
+
+    await expect(
+      fixture.useCase.execute({
+        sessionToken: 'session',
+        deviceToken: 'device',
+        csrfToken: 'csrf',
+        requestDocumentId: 'document-1',
+        expectedRequestVersion: 3,
+        acknowledged: true,
+        actorId: 'signed-in-admin',
+        sourceIpHash: 'ip-hash',
+        userAgentHash: 'ua-hash',
+      }),
+    ).resolves.toMatchObject({ requestDocumentId: 'document-1' })
+  })
+
   it('requires the acknowledgement request literal to be true', async () => {
     const fixture = makeAcknowledgementFixture()
     await expect(
@@ -317,10 +361,6 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       },
     ],
     [
-      'wrong actor',
-      (_fixture: ReturnType<typeof makeAcknowledgementFixture>): void => {},
-    ],
-    [
       'inactive identity',
       (fixture: ReturnType<typeof makeAcknowledgementFixture>): void => {
         fixture.sourceReader.findAuthenticationSource.mockResolvedValueOnce(null)
@@ -348,7 +388,6 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
         requestDocumentId: 'document-1',
         expectedRequestVersion: 3,
         acknowledged: true,
-        actorId: label === 'wrong actor' ? 'other-person' : undefined,
         sourceIpHash: 'ip-hash',
         userAgentHash: 'ua-hash',
       }),

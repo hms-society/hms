@@ -1,5 +1,4 @@
 import { act, renderHook } from '@testing-library/react'
-import type { ChangeEvent } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { useOtpCodeInput } from '../use-otp-code-input'
 
@@ -7,9 +6,7 @@ describe('useOtpCodeInput', () => {
   it('sanitizes pasted input to the six-digit OTP contract', () => {
     const onChange = vi.fn()
     const { result } = renderHook(() => useOtpCodeInput({ value: '', onChange }))
-    const event = { target: { value: '12a345678' } } as ChangeEvent<HTMLInputElement>
-
-    act(() => result.current.handleChange(event))
+    act(() => result.current.handleChange('12a345678'))
 
     expect(onChange).toHaveBeenCalledWith('123456')
   })
@@ -18,11 +15,7 @@ describe('useOtpCodeInput', () => {
     const onChange = vi.fn()
     const { result } = renderHook(() => useOtpCodeInput({ value: '123456', onChange }))
 
-    act(() =>
-      result.current.handleChange({
-        target: { value: '' },
-      } as ChangeEvent<HTMLInputElement>),
-    )
+    act(() => result.current.handleChange(''))
 
     expect(onChange).toHaveBeenCalledWith('')
   })
@@ -31,11 +24,7 @@ describe('useOtpCodeInput', () => {
     const onChange = vi.fn()
     const { result } = renderHook(() => useOtpCodeInput({ value: '', onChange }))
 
-    act(() =>
-      result.current.handleChange({
-        target: { value: 'abc-def' },
-      } as ChangeEvent<HTMLInputElement>),
-    )
+    act(() => result.current.handleChange('abc-def'))
 
     expect(onChange).toHaveBeenCalledWith('')
   })

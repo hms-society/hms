@@ -2,6 +2,7 @@ import type { FormalizationSignatureRequest } from '../domain/entities'
 import type { FormalizationSignatureRequestChanges } from '../domain/structures'
 export interface FormalizationSignatureRequestsRepository {
   add(request: FormalizationSignatureRequest): Promise<void>
+  listReconcilable(limit: number): Promise<FormalizationSignatureRequest[]>
   findById(requestId: string): Promise<FormalizationSignatureRequest | null>
   findByConfirmationKeyHash(
     confirmationKeyHash: string,

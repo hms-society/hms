@@ -697,6 +697,49 @@ describe('FormalizationSendingConfigurationPanel', () => {
     ).toBe(true)
   })
 
+  it('does not render the active request card on the signatories tab', () => {
+    const readyConfiguration = {
+      ...configuration,
+      status: 'ready_for_sending',
+      readiness: { ready: true, assignmentCount: 2, issues: [] },
+    } as unknown as FormalizationSignatureConfiguration
+    useFormalizationSendingConfigurationMock.mockReturnValue(
+      createWidgetController({ activeTab: 'signatories' }),
+    )
+
+    render(
+      <FormalizationSendingConfigurationPanel
+        formalizationId='formalization-1'
+        expectedVersion={2}
+        isPackageConfirmed
+        configuration={readyConfiguration}
+        controller={createConfigurationController()}
+        sending={createSendingController({
+          review: {
+            formalizationId: 'formalization-1',
+            version: 2,
+            status: 'ready_for_sending',
+            ready: true,
+            documents: [],
+            signatories: [],
+            messagePreview: 'Solicitação de assinatura da formalização.',
+            issues: [],
+            currentRequest: {
+              id: 'request-1',
+              status: 'sending',
+              version: 1,
+              openDocuments: 2,
+              totalDocuments: 2,
+            },
+          },
+        })}
+      />,
+    )
+
+    expect(screen.queryByText('Envio de assinaturas em andamento')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Cancelar envio' })).toBeNull()
+  })
+
   it('keeps a confirmed request visible as a completed, read-only send', () => {
     const readyConfiguration = {
       ...configuration,
@@ -981,6 +1024,59 @@ describe('FormalizationSendingConfigurationPanel', () => {
     expect(screen.getByText('Envio cancelado')).not.toBeNull()
     expect(screen.getByText('Envio de assinaturas cancelado')).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Cancelar envio' })).toBeNull()
+  })
+
+  it('allows a rebuilt configuration to be sent after the previous request was cancelled', () => {
+    const readyConfiguration = {
+      ...configuration,
+      version: 10,
+      status: 'ready_for_sending',
+      readiness: { ready: true, assignmentCount: 2, issues: [] },
+    } as unknown as FormalizationSignatureConfiguration
+
+    render(
+      <FormalizationSendingConfigurationPanel
+        formalizationId='formalization-1'
+        expectedVersion={10}
+        isPackageConfirmed
+        configuration={readyConfiguration}
+        controller={createConfigurationController()}
+        sending={createSendingController({
+          review: {
+            formalizationId: 'formalization-1',
+            version: 10,
+            status: 'ready_for_sending',
+            ready: true,
+            documents: [],
+            signatories: [],
+            messagePreview: 'Solicitação de assinatura da formalização.',
+            issues: [],
+            currentRequest: {
+              id: 'request-1',
+              status: 'cancelled',
+              version: 3,
+              signatureConfigurationVersion: 7,
+              openDocuments: 0,
+              totalDocuments: 2,
+            },
+          },
+        })}
+      />,
+    )
+
+    expect(screen.getByText('Pronto para reenvio')).not.toBeNull()
+    expect(
+      screen.getByText(
+        'O envio anterior foi cancelado. Revise os dados para iniciar um novo envio.',
+      ),
+    ).not.toBeNull()
+    expect(
+      (
+        screen.getByRole('button', {
+          name: 'Revisar e reenviar',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(false)
   })
 
   it('shows the refreshed send state after editing a cancelled request', async () => {

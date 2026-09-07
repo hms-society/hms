@@ -177,6 +177,24 @@ describe('Establish Collaborator Signing Session Use Case', () => {
     expect(dependencies.transaction.establishCollaboratorSession).toHaveBeenCalledOnce()
   })
 
+  it('recovers a collaborator whose provider observation advanced to signing', async () => {
+    const dependencies = makeDependencies()
+    dependencies.recipientsRepository.findById.mockResolvedValue(
+      fakeFormalizationSignatureRecipient({
+        id: 'recipient-1',
+        requestId: 'request-1',
+        personId: 'collaborator-1',
+        actorKind: 'collaborator',
+        status: 'signing',
+      }),
+    )
+
+    await expect(execute(dependencies)).resolves.toBeDefined()
+    expect(dependencies.transaction.establishCollaboratorSession).toHaveBeenCalledWith(
+      expect.objectContaining({ recipientChanges: { status: 'authenticated' } }),
+    )
+  })
+
   it('authenticates the collaborator while invitation delivery is still converging', async () => {
     const dependencies = makeDependencies()
     dependencies.requestsRepository.findById.mockResolvedValue(

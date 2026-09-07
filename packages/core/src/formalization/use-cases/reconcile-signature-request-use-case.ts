@@ -431,7 +431,9 @@ export class ReconcileSignatureRequestUseCase implements UseCase<Request, Respon
         const terminalStatus =
           terminalRecipientStatus(providerRecipient.recipientStatus) ??
           envelopeTerminalStatus
-        const status = terminalStatus ?? derivedRecipientStatus
+        const status =
+          terminalStatus ??
+          this.preserveRecipientProgress(recipient.status, derivedRecipientStatus)
         const changes: FormalizationSignatureRecipientChanges = {
           status,
           ...(status === 'submitted' ? { submittedAt: request.occurredAt } : {}),
@@ -505,6 +507,30 @@ export class ReconcileSignatureRequestUseCase implements UseCase<Request, Respon
       },
     )
     return result !== 'conflict'
+  }
+
+  private preserveRecipientProgress(
+    currentStatus: FormalizationSignatureRecipientStatus,
+    observedStatus: FormalizationSignatureRecipientStatus,
+  ): FormalizationSignatureRecipientStatus {
+    if (currentStatus === 'locked' && observedStatus === 'invited') return currentStatus
+
+    const progression: FormalizationSignatureRecipientStatus[] = [
+      'invited',
+      'authenticating',
+      'authenticated',
+      'reading',
+      'signing',
+      'submitted',
+      'reconciliation_required',
+      'confirmed',
+    ]
+    const currentIndex = progression.indexOf(currentStatus)
+    const observedIndex = progression.indexOf(observedStatus)
+
+    return currentIndex > observedIndex && observedIndex >= 0
+      ? currentStatus
+      : observedStatus
   }
 
   private async preserveArtifactsAndConfirm(

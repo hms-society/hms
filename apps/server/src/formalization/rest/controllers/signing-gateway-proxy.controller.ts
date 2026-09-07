@@ -1,15 +1,27 @@
+import { randomBytes } from 'node:crypto'
 import { All, Controller, Inject, Param, Req, Res } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import type {
   FormalizationSignatureProxyBindingsRepository,
   SensitivePayloadCipherProvider,
   SignatureSecretHasher,
+  FormalizationSignatureGatewaySessionsRepository,
+  FormalizationSignatureRecipientsRepository,
+  FormalizationSignatureRequestsRepository,
+  FormalizationSignatureRequestDocumentsRepository,
+  FormalizationSignatureRecipientDocumentsRepository,
+  FormalizationSignatureGatewayTransaction,
 } from '@hms/core/formalization/interfaces'
+import { RecordProviderSubmissionUseCase } from '@hms/core/formalization/use-cases'
+import { FormalizationSignatureRequestConflictError } from '@hms/core/formalization/domain/errors'
+import type { DatetimeProvider } from '@hms/core/shared/interfaces'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { FormalizationSigningGatewayService } from '@/formalization/formalization-signature-sending.service'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
+import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 const hopByHopHeaders = new Set([
   'connection',
@@ -30,6 +42,11 @@ const DOCUMENSO_SHARE_BUTTON_SELECTOR = 'button:has(svg.lucide-sparkles)'
 
 @Controller('assinaturas/provedor')
 export class SigningGatewayProxyController {
+  private readonly recordSubmissionUseCase: RecordProviderSubmissionUseCase
+  private readonly sessions: FormalizationSignatureGatewaySessionsRepository
+  private readonly recipients: FormalizationSignatureRecipientsRepository
+  private readonly datetimeProvider: DatetimeProvider
+
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.signatureProxyBindings)
     private readonly bindings: FormalizationSignatureProxyBindingsRepository,
@@ -38,8 +55,36 @@ export class SigningGatewayProxyController {
     @Inject(FORMALIZATION_PROVIDERS.sensitivePayloadCipher)
     private readonly cipher: SensitivePayloadCipherProvider,
     private readonly env: EnvProvider,
-    private readonly gateway: FormalizationSigningGatewayService,
-  ) {}
+    @Inject(FORMALIZATION_REPOSITORIES.signatureGatewaySessions)
+    sessionsRepository: FormalizationSignatureGatewaySessionsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRecipients)
+    recipientsRepository: FormalizationSignatureRecipientsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequestDocuments)
+    documentsRepository: FormalizationSignatureRequestDocumentsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRecipientDocuments)
+    assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository,
+    @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
+    transaction: FormalizationSignatureGatewayTransaction,
+    @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
+    @Inject(InngestBroker) broker: import('@hms/core/shared/interfaces').Broker,
+  ) {
+    this.sessions = sessionsRepository
+    this.recipients = recipientsRepository
+    this.datetimeProvider = datetimeProvider
+    this.recordSubmissionUseCase = new RecordProviderSubmissionUseCase({
+      sessionsRepository,
+      bindingsRepository: bindings,
+      requestsRepository,
+      recipientsRepository,
+      documentsRepository,
+      assignmentsRepository,
+      transaction,
+      datetimeProvider,
+      broker,
+    })
+  }
 
   @All(':alias')
   async handleAlias(
@@ -67,15 +112,16 @@ export class SigningGatewayProxyController {
       return
     }
     const isUnexpired = binding?.expiresAt !== undefined && binding.expiresAt > new Date()
-    const canReadSubmittedCompletion =
+    const canReadSubmittedResource =
       binding?.status === 'revoked' &&
       binding.revocationReason === 'submitted' &&
       ['GET', 'HEAD'].includes(request.method) &&
-      this.isCompletionRoute(proxyTarget.pathname)
+      (this.isCompletionRoute(proxyTarget.pathname) ||
+        this.isCompletionStaticResource(proxyTarget.pathname))
     if (
       !binding ||
       !isUnexpired ||
-      (binding.status !== 'active' && !canReadSubmittedCompletion)
+      (binding.status !== 'active' && !canReadSubmittedResource)
     ) {
       response.status(404).send('Signing Gateway resource unavailable.')
       return
@@ -106,16 +152,21 @@ export class SigningGatewayProxyController {
       upstreamResponse.ok &&
       this.isCompletionMutation(request.method, proxyTarget.pathname)
     ) {
-      await this.gateway.recordProviderSubmission(binding.aliasHash)
+      await this.recordProviderSubmission(binding.aliasHash, binding)
     }
     const contentType =
       upstreamResponse.headers.get('content-type') ?? 'application/octet-stream'
+    const isCompletionHtml =
+      contentType.includes('html') && this.isCompletionRoute(proxyTarget.pathname)
     response.status(upstreamResponse.status)
     response.setHeader('Cache-Control', 'no-store')
     const contentSecurityPolicy = upstreamResponse.headers.get('content-security-policy')
+    const completionStyleNonce = isCompletionHtml
+      ? (this.getStyleNonce(contentSecurityPolicy) ?? randomBytes(18).toString('base64'))
+      : undefined
     response.setHeader(
       'Content-Security-Policy',
-      this.rewriteContentSecurityPolicy(contentSecurityPolicy),
+      this.rewriteContentSecurityPolicy(contentSecurityPolicy, completionStyleNonce),
     )
     const location = upstreamResponse.headers.get('location')
     if (location)
@@ -127,17 +178,53 @@ export class SigningGatewayProxyController {
     ) {
       const text = await upstreamResponse.text()
       const rewrittenText = this.rewrite(text, providerToken, alias)
-      const responseText = contentType.includes('html')
+      const responseText = isCompletionHtml
         ? this.injectCompletionShareSuppression(
             rewrittenText,
             proxyTarget.pathname,
-            contentSecurityPolicy,
+            completionStyleNonce,
           )
         : rewrittenText
       response.type(contentType).send(responseText)
       return
     }
     response.type(contentType).send(Buffer.from(await upstreamResponse.arrayBuffer()))
+  }
+
+  private async recordProviderSubmission(
+    aliasHash: string,
+    binding: Awaited<
+      ReturnType<FormalizationSignatureProxyBindingsRepository['findByAliasHash']>
+    >,
+  ) {
+    if (!binding) throw new FormalizationSignatureRequestConflictError()
+    const [recipient, sessions] = await Promise.all([
+      this.recipients.findById(binding.recipientId),
+      this.sessions.findActiveByRecipientId(binding.recipientId),
+    ])
+    const session = sessions.find((item) => item.id === binding.sessionId)
+    if (!recipient || !session) throw new FormalizationSignatureRequestConflictError()
+    return this.recordSubmissionUseCase.execute({
+      requestId: binding.requestId,
+      recipientId: binding.recipientId,
+      sessionId: binding.sessionId,
+      bindingId: binding.id,
+      expectedBindingAliasHash: aliasHash,
+      providerObservationId: await this.submissionObservationId(binding.id),
+      expectedRecipientVersion: recipient.version,
+      expectedSessionVersion: session.version,
+      submittedAt: this.datetimeProvider.now(),
+    })
+  }
+
+  private async submissionObservationId(bindingId: string) {
+    const digest = await globalThis.crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode(`submission:${bindingId}`),
+    )
+    return Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join('')
   }
 
   private proxyTarget(request: Request, alias: string) {
@@ -266,7 +353,7 @@ export class SigningGatewayProxyController {
       )
   }
 
-  private rewriteContentSecurityPolicy(value: string | null) {
+  private rewriteContentSecurityPolicy(value: string | null, styleNonce?: string) {
     const directives = (value ?? "default-src 'self'")
       .split(';')
       .map((directive) => directive.trim())
@@ -274,17 +361,36 @@ export class SigningGatewayProxyController {
         (directive) =>
           directive && !/^(frame-ancestors|form-action)(?:\s|$)/i.test(directive),
       )
+    if (styleNonce) {
+      const styleIndex = directives.findIndex((directive) =>
+        /^style-src(?:\s|$)/i.test(directive),
+      )
+      const nonceSource = `'nonce-${styleNonce}'`
+      if (styleIndex >= 0) {
+        directives[styleIndex] = directives[styleIndex]
+          ?.split(/\s+/)
+          .filter(
+            (source) =>
+              !source.startsWith("'nonce-") ||
+              /^'nonce-[A-Za-z0-9+/_-]+={0,2}'$/.test(source),
+          )
+          .join(' ')
+        if (!directives[styleIndex]?.includes(nonceSource))
+          directives[styleIndex] = `${directives[styleIndex]} ${nonceSource}`
+      } else {
+        directives.push(`style-src 'self' ${nonceSource}`)
+      }
+    }
     return [...directives, "frame-ancestors 'none'", "form-action 'self'"].join('; ')
   }
 
   private injectCompletionShareSuppression(
     value: string,
     pathname: string,
-    contentSecurityPolicy: string | null,
+    styleNonce: string | undefined,
   ) {
     if (!this.isCompletionRoute(pathname)) return value
 
-    const styleNonce = this.getStyleNonce(contentSecurityPolicy)
     const headMatch = value.match(/<head(?:\s[^>]*)?>/i)
     const headEndMatch = value.match(/<\/head\s*>/i)
     if (
@@ -303,6 +409,16 @@ export class SigningGatewayProxyController {
 
   private isCompletionRoute(pathname: string) {
     return pathname === '/complete'
+  }
+
+  private isCompletionStaticResource(pathname: string) {
+    return (
+      pathname === '/assets' ||
+      pathname.startsWith('/assets/') ||
+      pathname === '/fonts' ||
+      pathname.startsWith('/fonts/') ||
+      pathname === '/__manifest'
+    )
   }
 
   private isCompletionMutation(method: string, pathname: string) {

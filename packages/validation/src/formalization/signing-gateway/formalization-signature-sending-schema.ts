@@ -73,6 +73,7 @@ export const formalizationSignatureSendingReviewSchema = z
         id: uuidSchema,
         status: requestStatusSchema,
         version: z.number().int().positive(),
+        signatureConfigurationVersion: z.number().int().positive().optional(),
         openDocuments: z.number().int().nonnegative(),
         totalDocuments: z.number().int().positive(),
       })

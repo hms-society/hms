@@ -2,6 +2,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Put,
@@ -12,11 +13,19 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { replaceFormalizationSignatoryDocumentsSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReplaceFormalizationSignatoryDocumentsUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationsRepository,
+  FormalizationSignatureConfigurationRepository,
+  FormalizationSignatureSourceReader,
+} from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 type RequestBody = Omit<
@@ -32,7 +41,26 @@ class ReplaceFormalizationSignatoryDocumentsBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ReplaceFormalizationSignatoryDocumentsController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: ReplaceFormalizationSignatoryDocumentsUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
+    signatureSourceReader: FormalizationSignatureSourceReader,
+    datetimeProvider: DatetimeProvider,
+    idProvider: IdProvider,
+  ) {
+    this.useCase = new ReplaceFormalizationSignatoryDocumentsUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+      datetimeProvider,
+      idProvider,
+    )
+  }
 
   @Put(':formalizationId/signature-configuration/signatories/:signatoryId/documents')
   @HttpCode(HttpStatus.OK)
@@ -49,7 +77,7 @@ export class ReplaceFormalizationSignatoryDocumentsController {
     body: ReplaceFormalizationSignatoryDocumentsBody & RequestBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.replaceSignatureSignatoryDocuments({
+    return this.useCase.execute({
       formalizationId,
       signatoryId,
       actorId: collaborator.collaboratorId,

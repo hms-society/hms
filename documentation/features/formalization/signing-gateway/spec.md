@@ -1,7 +1,7 @@
 ---
 title: Gateway seguro de assinatura da Formalização
 status: in_progress
-revision: 10
+revision: 13
 source:
   type: jira-ticket
   ref: https://plataformahms.atlassian.net/browse/SCRUM-140
@@ -12,6 +12,7 @@ jira_tickets:
   - SCRUM-140
   - SCRUM-128
 scope:
+  - .
   - packages/core/src/formalization
   - packages/core/src/communication
   - packages/core/src/shared
@@ -43,7 +44,7 @@ scope:
   - documentation/modules.md
   - documentation/features/formalization/signing-gateway
   - documentation/features/formalization/formalization-signature-flow
-last_updated_at: 2026-09-03
+last_updated_at: 2026-09-07
 ---
 
 # 1. Context and scope
@@ -227,11 +228,10 @@ with the following model:
 The PRD's document assignment and progress rules remain authoritative. Shared-envelope
 visibility and delayed final artifact availability are explicit accepted trade-offs.
 The canonical RFC and Jira descriptions still state one envelope per document; their
-packaging clauses are stale. The Orchestrator owns G-06: prepare the exact authority
-delta during implementation and, before `conclude-spec`, request the user's explicit
-authorization required to update Jira/Confluence. This mismatch does not block local
-implementation, but the delivery cannot claim documentation alignment or conclude
-while G-06 is open.
+packaging clauses are stale. The Orchestrator owns G-06. Revision 12 records the
+user's explicit decision to defer that external alignment and accept the mismatch as
+a non-blocking delivery risk. The delivery must not claim that Jira or Confluence was
+updated or aligned.
 
 ## Revision 7 atomic provider-observation amendment
 
@@ -329,19 +329,38 @@ exact source person, permitted current role and current request assignment at mu
 
 ## Delivery gates and Spec status
 
-The contract is ready to plan and implement. G-01 and G-02 are staged delivery gates,
-not Spec-opening or planning prerequisites: they permit local, reversible implementation
-and automated testing while preventing the specifically gated exposure or release. A
-Plan must attach each gate to the phase named below and may not mark that phase complete
-without its exit evidence.
+The contract is implemented and eligible for conclusion under the explicit revision-12
+risk waiver below. The waiver changes delivery evidence requirements; it does not weaken
+the runtime security, privacy, authorization, state-machine or data-integrity behavior
+defined by this Contract.
+
+### Revision 12 conclusion risk waiver
+
+On 2026-09-07, the user explicitly selected accepted-risk conclusion. For this delivery:
+
+- MV-01 through MV-08, the remaining visual comparisons, and G-01, G-02, G-05 and G-06
+  are deferred and are not preconditions for conclusion;
+- those items must be recorded as `waived`, never `passed`, and their missing evidence
+  remains an accepted deployment, security, legal, operational or documentation risk;
+- FND-047, FND-049, FND-050 and FND-052 are accepted without fresh integrated closure
+  evidence; this is not a technical resolution of those findings;
+- the previously requested independent implementation reviewer is waived for this
+  feature delivery;
+- G-04 remains an implementation invariant, while the repository-wide structural path
+  check and pull-request CI remain mandatory because they are SDD controls outside this
+  feature Contract.
+
+This waiver permits conclusion of the checked-in implementation. It does not authorize
+public/staging/production activation, assert legal approval, certify the provider setup,
+or claim that an unexecuted validation passed.
 
 | Gate | Classification | Exit evidence |
 | --- | --- | --- |
-| G-01 AGPL/network-use review | Public proxy exposure and shared-environment release gate; open for execution | Written legal/organizational decision covering private self-hosting, modified proxy behavior, source/notice obligations and the deployment model. Until then the proxy remains disabled outside isolated local contract tests. |
-| G-02 staging signing certificate | Real-provider acceptance and release gate; local certificate generation satisfied | A non-production X.509 PKCS#12 bundle is mounted from ignored/managed secret storage, Documenso boots with it and a staging envelope signs and verifies end to end. No private key or bundle is committed or shared through source control. |
+| G-01 AGPL/network-use review | Accepted risk; non-blocking for revision-12 conclusion | Deferred. No legal/organizational approval is claimed and this waiver does not authorize public proxy exposure. |
+| G-02 staging signing certificate | Accepted risk; non-blocking for revision-12 conclusion | Deferred. No staging certificate or real-provider release acceptance is claimed. |
 | G-04 provider pin | Implementation and release invariant | Deployment and lock/config use v2.17.0 at the approved digest; an automated check rejects tag-only or changed-digest configuration. |
-| G-05 same-origin ingress | Shared-environment activation gate | Platform ingress routes `/assinaturas/provedor/` to Nest before the Web SPA fallback and leaves every other `/assinaturas/` path on Web. Local parity is owned by `apps/web/vite.config.ts`; the deployment change is external to this repository and its applied rule/order evidence is attached to MV-05. |
-| G-06 Jira/RFC authority alignment | `conclude-spec` documentation gate; owned by the Orchestrator | Exact SCRUM-140/SCRUM-144 and RFC 24215554 cardinality/access/finalization deltas are prepared, explicit user authorization for external mutation is obtained, and the canonical pages are updated and reread. If authorization is withheld, the accepted exception remains open and this Spec cannot be marked complete. |
+| G-05 same-origin ingress | Accepted risk; non-blocking for revision-12 conclusion | Deferred. Shared-environment ingress activation is not validated or authorized by this waiver. |
+| G-06 Jira/RFC authority alignment | Accepted documentation mismatch; non-blocking for revision-12 conclusion | Deferred by explicit user decision. Jira/Confluence remain unchanged and must not be represented as aligned. |
 
 # 2. Implementation Contract
 
@@ -3377,51 +3396,175 @@ files without revising this Spec. The checked-in SCRUM-140 configuration files a
 modified only where the affected-path ledger names them; request-side declarations are
 new files and must not be collapsed into the existing configuration repository.
 
+## Revision 13 current-worktree scope aggregation
+
+By explicit user direction on 2026-09-07, this Spec is the delivery ledger for every
+tracked or untracked repository file currently changed relative to `origin/develop`,
+including changes outside the Formalization bounded context. The affected-path ledger
+is generated from the same Git state consumed by `check:spec-implementation` and is
+authoritative for structural inclusion. This aggregation records delivery scope; it
+does not retroactively claim that unrelated behavior was designed, validated or
+approved as Signing Gateway behavior. Existing feature contracts remain the semantic
+authority for their own changes, and the revision-12 evidence waiver remains in force.
+
 ### Affected-path ledger
 
-This deduplicated ledger incorporates the revision-5 baseline and the authoritative
-revision-6 through revision-10 changes. Ignored certificate outputs are operational evidence, not repository
-paths, and therefore do not appear here.
+This deduplicated ledger incorporates every current repository change relative to the
+resolved `origin/develop` baseline, including untracked non-ignored files. Ignored
+certificate outputs are operational evidence, not repository paths, and therefore do
+not appear here.
 
 | Path | Change |
 | --- | --- |
 | `.dockerignore` | Modify |
 | `.env.example` | Modify |
+| `.github/workflows/check-pr-size.yml` | Modify |
+| `.github/workflows/core-package-ci.yaml` | Modify |
+| `.github/workflows/hermes-code-review.yaml` | Modify |
+| `.github/workflows/server-app-ci.yaml` | Modify |
+| `.github/workflows/web-app-ci.yaml` | Modify |
 | `.gitignore` | Modify |
+| `AGENTS.md` | Modify |
+| `apps/server/.dependency-cruiser.mjs` | Modify |
 | `apps/server/.env.example` | Modify |
 | `apps/server/package.json` | Modify |
-| `apps/server/rest-client/formalization/formalizations.rest` | Modify |
-| `apps/server/rest-client/formalization/signing-gateway-proxy.rest` | Create |
-| `apps/server/rest-client/formalization/signing-gateway.rest` | Create |
-| `apps/server/src/communication/communication.module.ts` | Modify |
-| `apps/server/src/communication/messaging/inngest/jobs/deliver-formalization-signature-invitation-job.ts` | Create |
-| `apps/server/src/communication/messaging/inngest/jobs/deliver-signature-otp-job.ts` | Create |
-| `apps/server/src/communication/messaging/inngest/jobs/tests/deliver-formalization-signature-invitation-job.test.ts` | Create |
-| `apps/server/src/formalization/constants/formalization-providers.ts` | Modify |
-| `apps/server/src/formalization/constants/formalization-repositories.ts` | Modify |
-| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-mapper.ts` | Modify |
+| `apps/server/README.md` | Modify |
+| `apps/server/rest-client/case-management/cases.rest` | Remove |
+| `apps/server/rest-client/consultation/consultations.rest` | Modify |
+| `apps/server/rest-client/document-production/document-specifications.rest` | Modify |
+| `apps/server/rest-client/formalization/formalizations.rest` | Create |
+| `apps/server/rest-client/intake/intakes.rest` | Modify |
+| `apps/server/rest-client/shared/dynamic-forms.rest` | Modify |
+| `apps/server/src/app.module.ts` | Modify |
+| `apps/server/src/case-management/case-management.module.ts` | Modify |
+| `apps/server/src/case-management/constants/case-management-repositories.ts` | Modify |
+| `apps/server/src/case-management/database/case-management-database.module.ts` | Modify |
+| `apps/server/src/case-management/database/case-management-seeder.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/mappers/drizzle-case-checklist-item-mapper.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/mappers/drizzle-legal-case-mapper.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/mappers/index.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/models/case-checklist-gate-decision-model.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/models/case-checklist-item-model.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/models/case-checklist-item-status-model.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/models/index.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/models/legal-case-model.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/models/legal-case-status-model.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/repositories/drizzle-case-checklist-items-repository.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/repositories/drizzle-legal-cases-repository.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/repositories/index.ts` | Modify |
+| `apps/server/src/case-management/database/drizzle/types/entities/drizzle-case-checklist-item.ts` | Remove |
+| `apps/server/src/case-management/database/drizzle/types/entities/index.ts` | Modify |
+| `apps/server/src/case-management/decorators/cases-controller.decorator.ts` | Remove |
+| `apps/server/src/case-management/decorators/index.ts` | Remove |
+| `apps/server/src/case-management/fixtures/case-management-module-fixture.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/add-case-checklist-complementary-item.controller.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/index.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/list-case-checklist.controller.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/list-my-legal-cases.controller.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/review-case-checklist-gate.controller.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/tests/add-case-checklist-complementary-item.controller.test.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/tests/list-case-checklist.controller.test.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/tests/list-my-legal-cases.controller.test.ts` | Remove |
+| `apps/server/src/case-management/rest/controllers/tests/review-case-checklist-gate.controller.test.ts` | Remove |
+| `apps/server/src/case-management/rest/dtos/case-checklist-item-response.dto.ts` | Remove |
+| `apps/server/src/case-management/rest/dtos/index.ts` | Remove |
+| `apps/server/src/case-management/rest/dtos/legal-case-response.dto.ts` | Remove |
+| `apps/server/src/communication/constants/communication-providers.ts` | Create |
+| `apps/server/src/communication/database/communication-seeder.ts` | Modify |
+| `apps/server/src/communication/database/drizzle/models/communication-model.ts` | Modify |
+| `apps/server/src/communication/database/drizzle/models/private-message-model.ts` | Modify |
+| `apps/server/src/communication/messaging/communication-messaging.module.ts` | Modify |
+| `apps/server/src/communication/messaging/inngest/jobs/index.ts` | Modify |
+| `apps/server/src/communication/messaging/inngest/jobs/process-whatsapp-event-job.ts` | Modify |
+| `apps/server/src/communication/messaging/inngest/jobs/send-formalization-signature-invitation-job.ts` | Create |
+| `apps/server/src/communication/messaging/inngest/jobs/send-formalization-signature-otp-job.ts` | Create |
+| `apps/server/src/communication/provision/formalization-signature-email-delivery-provider.ts` | Create |
+| `apps/server/src/communication/provision/index.ts` | Create |
+| `apps/server/src/communication/provision/resend-email-provider.ts` | Create |
+| `apps/server/src/communication/provision/tests/formalization-signature-email-delivery-provider.test.ts` | Create |
+| `apps/server/src/communication/provision/tests/resend-email-provider.test.ts` | Create |
+| `apps/server/src/communication/rest/controllers/list-client-communications.controller.ts` | Modify |
+| `apps/server/src/consultation/database/consultation-seeder.ts` | Modify |
+| `apps/server/src/consultation/fixtures/consultation-module-fixture.ts` | Modify |
+| `apps/server/src/consultation/rest/dtos/list-consultation-documents-response.dto.ts` | Modify |
+| `apps/server/src/consultation/rest/dtos/select-current-consultation-document-version-response.dto.ts` | Modify |
+| `apps/server/src/document-engine/constants/document-engine-providers.ts` | Remove |
+| `apps/server/src/document-engine/database/documents-database.module.ts` | Modify |
+| `apps/server/src/document-engine/database/documents-seeder.ts` | Modify |
+| `apps/server/src/document-engine/database/documents.module.ts` | Modify |
+| `apps/server/src/document-engine/database/drizzle/models/document-batch-file-model.ts` | Modify |
+| `apps/server/src/document-engine/database/drizzle/models/document-batch-model.ts` | Modify |
+| `apps/server/src/document-engine/database/drizzle/models/document-validation-log-model.ts` | Modify |
+| `apps/server/src/document-engine/database/drizzle/repositories/document-batches-repository.ts` | Modify |
+| `apps/server/src/document-engine/database/drizzle/repositories/drizzle-document-validations-repository.ts` | Modify |
+| `apps/server/src/document-engine/database/real-documents-seeder.ts` | Modify |
+| `apps/server/src/document-engine/fixtures/document-engine-module-fixture.ts` | Modify |
+| `apps/server/src/document-engine/messaging/document-engine-messaging.module.ts` | Modify |
+| `apps/server/src/document-engine/messaging/inngest/jobs/process-whatsapp-batch-job.ts` | Modify |
+| `apps/server/src/document-engine/messaging/inngest/jobs/tests/process-whatsapp-batch-job.test.ts` | Create |
+| `apps/server/src/document-engine/provision/case-checklist-update-provider.ts` | Remove |
+| `apps/server/src/document-engine/provision/document-engine-provision.module.ts` | Remove |
+| `apps/server/src/document-engine/rest/controllers/list-document-validations.controller.ts` | Modify |
+| `apps/server/src/document-engine/rest/controllers/list-triage-document-batches.controller.ts` | Remove |
+| `apps/server/src/document-engine/rest/controllers/record-document-validation-decision.controller.ts` | Modify |
+| `apps/server/src/document-engine/rest/controllers/tests/list-document-validation-logs.controller.test.ts` | Modify |
+| `apps/server/src/document-engine/rest/controllers/tests/list-triage-document-batches.controller.test.ts` | Remove |
+| `apps/server/src/document-engine/rest/controllers/tests/record-document-validation-decision.controller.test.ts` | Modify |
+| `apps/server/src/document-engine/rest/controllers/tests/request-document-resend.controller.test.ts` | Modify |
+| `apps/server/src/document-production/ai/mastra/tools/save-generated-document-version-tool.test.ts` | Create |
+| `apps/server/src/document-production/database/document-production-database.module.ts` | Modify |
+| `apps/server/src/document-production/database/document-production-seeder.ts` | Modify |
+| `apps/server/src/document-production/database/drizzle/mappers/drizzle-document-mapper.ts` | Modify |
+| `apps/server/src/document-production/database/drizzle/models/document-model.ts` | Modify |
+| `apps/server/src/document-production/database/drizzle/models/document-security-model.ts` | Remove |
+| `apps/server/src/document-production/database/drizzle/models/index.ts` | Modify |
+| `apps/server/src/document-production/database/drizzle/repositories/drizzle-documents-repository.ts` | Modify |
+| `apps/server/src/document-production/database/drizzle/repositories/drizzle-package-documents-repository.ts` | Modify |
+| `apps/server/src/document-production/database/seed-assets/contrato-de-formalizacao.docx` | Create |
+| `apps/server/src/document-production/database/seed-assets/termo-de-honorarios.docx` | Create |
+| `apps/server/src/document-production/document-production.module.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/index.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/tests/delete-document-specification.controller.test.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/tests/get-document-specification.controller.test.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/tests/update-document-specification-configuration.controller.test.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/tests/update-document-specification-template.controller.test.ts` | Modify |
+| `apps/server/src/document-production/rest/controllers/update-document-access-classification.controller.ts` | Remove |
+| `apps/server/src/document-production/rest/dtos/index.ts` | Modify |
+| `apps/server/src/document-production/rest/dtos/update-document-access-classification-request.dto.ts` | Remove |
+| `apps/server/src/formalization/constants/formalization-providers.ts` | Create |
+| `apps/server/src/formalization/constants/formalization-repositories.ts` | Create |
+| `apps/server/src/formalization/constants/index.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/index.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-artifact-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-audit-entry-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-cancellation-attempt-mapper.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-document-acknowledgement-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-gateway-session-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-invitation-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-invitation-send-attempt-mapper.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-otp-challenge-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-otp-guard-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-otp-rate-reservation-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-otp-send-attempt-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-protocol-mapper.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-provider-document-resource-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-provider-recipient-resource-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-provider-resource-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-provisioning-attempt-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-proxy-binding-mapper.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-recipient-document-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-recipient-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-request-document-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-request-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-snapshot-mapper.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-webhook-receipt-mapper.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/mappers/index.ts` | Modify |
-| `apps/server/src/formalization/database/drizzle/models/formalization-model.ts` | Modify |
+| `apps/server/src/formalization/database/drizzle/mappers/index.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signatory-document-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signatory-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signatory-role-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-access-status-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-artifact-kind-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-artifact-model.ts` | Create |
@@ -3429,21 +3572,30 @@ paths, and therefore do not appear here.
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-cancellation-attempt-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-cancellation-attempt-status-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-delivery-status-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-document-acknowledgement-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-field-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-field-type-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-gateway-session-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-invitation-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-invitation-send-attempt-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-invitation-status-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-otp-challenge-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-otp-challenge-status-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-otp-guard-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-otp-rate-reservation-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-otp-send-attempt-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-preview-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-preview-state-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-protocol-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-provider-document-resource-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-provider-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-provider-recipient-resource-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-provider-resource-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-provisioning-attempt-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-provisioning-attempt-status-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-proxy-binding-model.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/models/formalization-signature-recipient-document-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-recipient-kind-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-recipient-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-recipient-status-model.ts` | Create |
@@ -3453,13 +3605,14 @@ paths, and therefore do not appear here.
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-request-status-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-session-kind-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-snapshot-model.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/models/formalization-signature-webhook-hint-kind-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-webhook-receipt-model.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/models/formalization-signature-webhook-status-model.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/models/index.ts` | Modify |
+| `apps/server/src/formalization/database/drizzle/models/index.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-artifacts-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-audit-writer.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-cancellation-attempts-repository.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-configuration-repository.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-document-acknowledgements-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-gateway-sessions-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-invitation-send-attempts-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-invitations-repository.ts` | Create |
@@ -3468,20 +3621,26 @@ paths, and therefore do not appear here.
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-otp-rate-reservations-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-otp-send-attempts-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-protocols-repository.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-provider-document-resources-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-provider-recipient-resources-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-provider-resources-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-provisioning-attempts-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-proxy-bindings-repository.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-recipient-documents-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-recipients-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-request-documents-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-requests-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-snapshots-repository.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-webhook-receipts-repository.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalizations-repository.ts` | Modify |
-| `apps/server/src/formalization/database/drizzle/repositories/index.ts` | Modify |
+| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalizations-repository.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/index.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/repositories/signature-repository-utils.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/signature-binary.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/signature-bytea.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-artifact.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-audit-entry.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-cancellation-attempt.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-document-acknowledgement.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-gateway-session.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-invitation-send-attempt.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-invitation.ts` | Create |
@@ -3490,129 +3649,456 @@ paths, and therefore do not appear here.
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-otp-rate-reservation.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-otp-send-attempt.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-protocol.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-provider-document-resource.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-provider-recipient-resource.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-provider-resource.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-provisioning-attempt.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-proxy-binding.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-recipient-document.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-recipient.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-request-document.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-request.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-snapshot.ts` | Create |
 | `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-webhook-receipt.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization.ts` | Modify |
-| `apps/server/src/formalization/database/drizzle/types/entities/index.ts` | Modify |
-| `apps/server/src/formalization/database/drizzle/types/index.ts` | Modify |
-| `apps/server/src/formalization/database/formalization-database.module.ts` | Modify |
+| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/entities/index.ts` | Create |
+| `apps/server/src/formalization/database/drizzle/types/index.ts` | Create |
+| `apps/server/src/formalization/database/formalization-close-transaction.ts` | Create |
+| `apps/server/src/formalization/database/formalization-database.module.ts` | Create |
+| `apps/server/src/formalization/database/formalization-document-confirmation-transaction.ts` | Create |
+| `apps/server/src/formalization/database/formalization-seeder.ts` | Create |
 | `apps/server/src/formalization/database/formalization-signature-gateway-transaction.ts` | Create |
+| `apps/server/src/formalization/database/formalization-start-transaction.ts` | Create |
+| `apps/server/src/formalization/database/index.ts` | Create |
+| `apps/server/src/formalization/decorators/formalizations-controller.decorator.ts` | Create |
+| `apps/server/src/formalization/decorators/index.ts` | Create |
 | `apps/server/src/formalization/decorators/signing-gateway-controller.decorator.ts` | Create |
-| `apps/server/src/formalization/decorators/signing-gateway-proxy-controller.decorator.ts` | Create |
-| `apps/server/src/formalization/fixtures/formalization-module-fixture.ts` | Modify |
-| `apps/server/src/formalization/formalization.module.ts` | Modify |
-| `apps/server/src/formalization/messaging/formalization-messaging.module.ts` | Modify |
-| `apps/server/src/formalization/messaging/inngest/jobs/cancel-formalization-signature-request-document-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/expire-signature-gateway-access-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/index.ts` | Modify |
+| `apps/server/src/formalization/fixtures/formalization-module-fixture.ts` | Create |
+| `apps/server/src/formalization/fixtures/index.ts` | Create |
+| `apps/server/src/formalization/formalization.module.ts` | Create |
+| `apps/server/src/formalization/index.ts` | Create |
+| `apps/server/src/formalization/messaging/formalization-messaging.module.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/generate-formalization-signature-preview-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/generate-formalization-signature-previews-in-batch-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/index.ts` | Create |
 | `apps/server/src/formalization/messaging/inngest/jobs/mark-formalization-signature-invitation-delivery-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/mark-signature-otp-delivery-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/process-signature-provider-webhook-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/provision-formalization-signature-request-document-job.ts` | Remove |
-| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-invitation-deliveries-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-provisioning-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-signature-otp-deliveries-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-signature-request-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/cancel-formalization-signature-request-document-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/mark-formalization-signature-invitation-delivery-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/mark-signature-otp-delivery-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/provision-formalization-signature-request-document-job.test.ts` | Remove |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-formalization-signature-invitation-deliveries-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-formalization-signature-provisioning-job.test.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/mark-formalization-signature-otp-delivery-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/process-formalization-signature-cancellation-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/provision-formalization-signature-request-document-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-deliveries-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-previews-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-request-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/reconcile-formalization-signature-requests-job.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/tests/generate-formalization-signature-preview-job.test.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/tests/generate-formalization-signature-previews-in-batch-job.test.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/tests/provision-formalization-signature-request-document-job.test.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-formalization-signature-previews-job.test.ts` | Create |
+| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-formalization-signature-requests-job.test.ts` | Create |
 | `apps/server/src/formalization/provision/documenso-signature-provider.ts` | Create |
-| `apps/server/src/formalization/provision/documenso-signing-gateway-contract.ts` | Create |
-| `apps/server/src/formalization/provision/documenso-signing-gateway-proxy.ts` | Create |
 | `apps/server/src/formalization/provision/documenso-webhook-normalizer.ts` | Create |
-| `apps/server/src/formalization/provision/formalization-provision.module.ts` | Modify |
-| `apps/server/src/formalization/provision/formalization-signature-source-reader.ts` | Modify |
-| `apps/server/src/formalization/provision/index.ts` | Modify |
-| `apps/server/src/formalization/provision/signature-payload-cipher-provider.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-intake-closure-service.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-intake-lifecycle-service.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-provision.module.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-signature-crypto.providers.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-signature-document-content-reader.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-signature-document-metadata-reader.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-signature-secret-hasher.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-signature-source-reader.ts` | Create |
+| `apps/server/src/formalization/provision/formalization-source-reader.ts` | Create |
+| `apps/server/src/formalization/provision/gotenberg-document-pdf-converter-provider.ts` | Create |
+| `apps/server/src/formalization/provision/index.ts` | Create |
+| `apps/server/src/formalization/provision/pdf-js-formalization-document-pdf-inspector-provider.ts` | Create |
 | `apps/server/src/formalization/provision/tests/documenso-signature-provider.test.ts` | Create |
-| `apps/server/src/formalization/provision/tests/documenso-signing-gateway-proxy.test.ts` | Create |
-| `apps/server/src/formalization/provision/tests/documenso-webhook-normalizer.test.ts` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/bootstrap.html` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/complete-document.json` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/envelope-loader.json` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/recipient-loader.json` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/reject-document.json` | Create |
-| `apps/server/src/formalization/provision/tests/fixtures/documenso-v2-17-0-signing/sign-field.json` | Create |
+| `apps/server/src/formalization/provision/tests/formalization-signature-document-metadata-reader.test.ts` | Create |
+| `apps/server/src/formalization/provision/tests/formalization-signature-secret-hasher.test.ts` | Create |
+| `apps/server/src/formalization/provision/tests/formalization-signature-source-reader.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/acknowledge-signing-document.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/add-formalization-signatory.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/cancel-formalization-document-generation.controller.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/cancel-formalization-signature-sending.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/close-signature-result.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/close-formalization-contract-form.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/close-formalization-without-contract.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/close-signing-result.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/confirm-formalization-documents.controller.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/confirm-formalization-signature-sending.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/signing-gateway-proxy.controller.ts` | Modify |
 | `apps/server/src/formalization/rest/controllers/establish-collaborator-signing-session.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/exchange-signature-invitation.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/exchange-signing-invitation.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/generate-formalization-document.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-formalization-document-selection.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-formalization-document-version.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-formalization-signature-configuration.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-formalization-signature-preview-content.controller.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/get-formalization-signature-sending-review.controller.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/get-formalization-signature-sending-status.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/get-signature-document-content.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/list-signature-documents.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/get-signature-gateway-context.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/get-signature-result.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/index.ts` | Modify |
-| `apps/server/src/formalization/rest/controllers/list-signature-authentication-channels.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/signing-gateway-webhook.controller.ts` | Modify |
-| `apps/server/src/formalization/rest/controllers/request-signature-otp.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-formalization.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-signing-document-content.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-signing-document.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-signing-gateway-context.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/get-signing-result.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/index.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/initialize-formalization-signature-configuration.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/list-formalization-documents.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/list-formalization-signature-candidates.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/list-signing-authentication-channels.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/list-signing-documents.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/remove-formalization-signatory.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/reopen-formalization-contract-form.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/reopen-formalization-document-package.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/replace-formalization-contract-form.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/replace-formalization-document-selection.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/replace-formalization-signatory-documents.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/replace-formalization-signature-fields.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/request-formalization-signature-preview-generation.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/request-signing-otp.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/reset-formalization-signature-configuration.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/review-formalization-document-version.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/save-formalization-contract-form-draft.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/save-manual-formalization-document-version.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/select-current-formalization-document-version.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/select-formalization-signatory-channel.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/signing-gateway-proxy.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/signing-gateway-webhook.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/signing-gateway.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/start-formalization.controller.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/start-signing.controller.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/acknowledge-signing-document.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/add-formalization-signatory.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/cancel-formalization-document-generation.controller.test.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/tests/cancel-formalization-signature-sending.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/close-formalization-contract-form.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/close-formalization-without-contract.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/close-signing-result.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/confirm-formalization-documents.controller.test.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/tests/confirm-formalization-signature-sending.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/establish-collaborator-signing-session.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/exchange-signing-invitation.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/formalization-controller.regressions.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/generate-formalization-document.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-formalization-document-selection.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-formalization-document-version.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-formalization-signature-configuration.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-formalization-signature-preview-content.controller.test.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/tests/get-formalization-signature-sending-review.controller.test.ts` | Create |
 | `apps/server/src/formalization/rest/controllers/tests/get-formalization-signature-sending-status.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/verify-signature-otp.controller.ts` | Create |
-| `apps/server/src/shared/communication/email-provider.fixture.ts` | Create |
-| `apps/server/src/communication/provision/resend-email-provider.ts` | Create |
-| `apps/server/src/communication/provision/tests/resend-email-provider.test.ts` | Create |
-| `apps/server/src/shared/database/drizzle/migrations/0042_signing_gateway.sql` | Generate |
-| `apps/server/src/shared/database/drizzle/migrations/meta/_journal.json` | Generate |
-| `apps/server/src/shared/database/drizzle/migrations/meta/0042_snapshot.json` | Generate |
+| `apps/server/src/formalization/rest/controllers/tests/get-formalization.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-signing-document-content.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-signing-document.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-signing-gateway-context.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/get-signing-result.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/initialize-formalization-signature-configuration.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/list-formalization-documents.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/list-formalization-signature-candidates.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/list-signing-authentication-channels.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/list-signing-documents.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/remove-formalization-signatory.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/reopen-formalization-contract-form.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/reopen-formalization-document-package.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/replace-formalization-contract-form.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/replace-formalization-document-selection.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/replace-formalization-signatory-documents.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/replace-formalization-signature-fields.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/request-formalization-signature-preview-generation.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/request-signing-otp.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/reset-formalization-signature-configuration.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/review-formalization-document-version.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/save-formalization-contract-form-draft.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/save-manual-formalization-document-version.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/select-current-formalization-document-version.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/select-formalization-signatory-channel.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/signing-gateway-proxy.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/signing-gateway-webhook.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/start-formalization.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/start-signing.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/tests/verify-signing-otp.controller.test.ts` | Create |
+| `apps/server/src/formalization/rest/controllers/verify-signing-otp.controller.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/formalization-document-generation-response.dto.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/formalization-document-list-response.dto.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/formalization-document-selection-response.dto.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/formalization-document-version-response.dto.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/formalization-response.dto.ts` | Create |
+| `apps/server/src/formalization/rest/dtos/index.ts` | Create |
+| `apps/server/src/formalization/rest/guards/optional-signing-gateway-collaborator.guard.ts` | Create |
+| `apps/server/src/formalization/rest/index.ts` | Create |
+| `apps/server/src/identity/constants/identity-repositories.ts` | Modify |
+| `apps/server/src/identity/database/drizzle/repositories/drizzle-clients-repository.ts` | Modify |
+| `apps/server/src/identity/database/identity-database.module.ts` | Modify |
+| `apps/server/src/identity/database/identity-seeder.ts` | Modify |
+| `apps/server/src/identity/fixtures/identity-module-fixture.ts` | Modify |
+| `apps/server/src/identity/identity.module.ts` | Modify |
+| `apps/server/src/identity/providers/tests/is-valid-supabase-server-key.test.ts` | Remove |
+| `apps/server/src/identity/providers/tests/supabase-auth-providers.test.ts` | Remove |
+| `apps/server/src/identity/rest/controllers/list-clients.controller.ts` | Modify |
+| `apps/server/src/identity/rest/repositories/clients-with-intakes-repository.ts` | Create |
+| `apps/server/src/intake/database/drizzle/repositories/drizzle-intakes-repository.ts` | Modify |
+| `apps/server/src/intake/database/intake-seeder.ts` | Modify |
+| `apps/server/src/intake/fixtures/intake-module-fixture.ts` | Modify |
+| `apps/server/src/intake/intake.module.ts` | Modify |
+| `apps/server/src/intake/messaging/inngest/jobs/complete-intake-after-consultation-job.ts` | Modify |
+| `apps/server/src/intake/messaging/inngest/jobs/complete-intake-consultation-scheduling-job.ts` | Modify |
+| `apps/server/src/intake/messaging/inngest/jobs/fail-intake-consultation-scheduling-job.ts` | Modify |
+| `apps/server/src/intake/messaging/inngest/jobs/sync-intake-legal-context-job.ts` | Modify |
+| `apps/server/src/intake/messaging/inngest/jobs/tests/complete-intake-after-consultation-job.test.ts` | Create |
+| `apps/server/src/intake/messaging/inngest/jobs/tests/complete-intake-consultation-scheduling-job.test.ts` | Create |
+| `apps/server/src/intake/messaging/inngest/jobs/tests/fail-intake-consultation-scheduling-job.test.ts` | Create |
+| `apps/server/src/intake/messaging/inngest/jobs/tests/sync-intake-legal-context-job.test.ts` | Create |
+| `apps/server/src/intake/rest/controllers/tests/list-client-intakes.controller.test.ts` | Modify |
+| `apps/server/src/main.ts` | Modify |
+| `apps/server/src/shared/communication/whatsapp.provider.spec.ts` | Modify |
+| `apps/server/src/shared/communication/whatsapp.provider.ts` | Modify |
+| `apps/server/src/shared/database/drizzle/database.module.ts` | Modify |
+| `apps/server/src/shared/database/drizzle/drizzle-client.ts` | Modify |
+| `apps/server/src/shared/database/drizzle/drizzle-repository.ts` | Modify |
+| `apps/server/src/shared/database/drizzle/mappers/stored-file-mapper.ts` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0038_eager_kate_bishop.sql` | Remove |
+| `apps/server/src/shared/database/drizzle/migrations/0038_sharp_captain_flint.sql` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0039_pink_spacker_dave.sql` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0040_case_checklist_gate.sql` | Remove |
+| `apps/server/src/shared/database/drizzle/migrations/0040_formalization_signature_configuration.sql` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0041_case_checklist_completion.sql` | Remove |
+| `apps/server/src/shared/database/drizzle/migrations/0041_worried_texas_twister.sql` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0042_blushing_sinister_six.sql` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/0042_case_checklist_items.sql` | Remove |
+| `apps/server/src/shared/database/drizzle/migrations/0043_case_checklist_document_file_name.sql` | Remove |
+| `apps/server/src/shared/database/drizzle/migrations/meta/_journal.json` | Modify |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0038_snapshot.json` | Modify |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0039_snapshot.json` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0040_snapshot.json` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0041_snapshot.json` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0042_snapshot.json` | Create |
+| `apps/server/src/shared/database/drizzle/migrations/tests/formalization-signature-configuration-migration.test.ts` | Create |
+| `apps/server/src/shared/database/drizzle/models/communication-channel-model.ts` | Create |
+| `apps/server/src/shared/database/drizzle/models/stored-file-model.ts` | Create |
+| `apps/server/src/shared/database/drizzle/repositories/drizzle-stored-files-repository.ts` | Create |
 | `apps/server/src/shared/database/drizzle/schema.ts` | Modify |
+| `apps/server/src/shared/database/dynamic-forms-seed-data.ts` | Modify |
+| `apps/server/src/shared/database/seed.module.ts` | Modify |
+| `apps/server/src/shared/database/seed.ts` | Modify |
+| `apps/server/src/shared/messaging/inngest/inngest-fixture.ts` | Create |
+| `apps/server/src/shared/provision/constants/provision-providers.ts` | Modify |
+| `apps/server/src/shared/provision/env/env-provider.test.ts` | Remove |
 | `apps/server/src/shared/provision/env/env-provider.ts` | Modify |
+| `apps/server/src/shared/provision/file-storage/fake-file-storage-provider.ts` | Remove |
+| `apps/server/src/shared/provision/file-storage/supabase-file-storage-provider.ts` | Create |
+| `apps/server/src/shared/provision/provision.module.ts` | Modify |
+| `apps/server/src/shared/provision/storage/supabase-storage-fixture.ts` | Create |
+| `apps/server/src/shared/provision/storage/supabase-storage-provider.test.ts` | Remove |
+| `apps/server/src/shared/provision/storage/supabase-storage-provider.ts` | Modify |
+| `apps/server/src/shared/rest/configure-cors.ts` | Create |
+| `apps/server/src/shared/rest/controllers/list-dynamic-forms.controller.ts` | Modify |
+| `apps/server/src/shared/rest/filters/global-error-handler.ts` | Modify |
+| `apps/server/src/shared/rest/signing-gateway-headers.ts` | Create |
+| `apps/server/tsconfig.build.json` | Modify |
+| `apps/server/vitest.config.mts` | Modify |
+| `apps/server/vitest.inngest.config.mts` | Create |
+| `apps/web/.dependency-cruiser.mjs` | Modify |
 | `apps/web/.env.example` | Modify |
+| `apps/web/package.json` | Modify |
+| `apps/web/playwright.config.ts` | Modify |
 | `apps/web/src/constants/routes.ts` | Modify |
 | `apps/web/src/middlewares/redirect-authenticated-middleware.ts` | Modify |
 | `apps/web/src/middlewares/require-auth-middleware.ts` | Modify |
+| `apps/web/src/middlewares/tests/redirect-authenticated-middleware.test.ts` | Create |
 | `apps/web/src/provision/signing-gateway-csrf-store.ts` | Create |
 | `apps/web/src/rest/axios/axios-rest-client.ts` | Modify |
 | `apps/web/src/rest/axios/signing-gateway-rest-client.ts` | Create |
-| `apps/web/src/rest/services/formalization-service.ts` | Modify |
+| `apps/web/src/rest/services/case-management-service.ts` | Remove |
+| `apps/web/src/rest/services/document-engine-service.ts` | Modify |
+| `apps/web/src/rest/services/document-production-service.ts` | Modify |
+| `apps/web/src/rest/services/document-validation-service.ts` | Modify |
+| `apps/web/src/rest/services/dynamic-form-service.ts` | Modify |
+| `apps/web/src/rest/services/formalization-service.ts` | Create |
 | `apps/web/src/rest/services/signing-gateway-service.ts` | Create |
-| `apps/web/src/rest/services/tests/formalization-service.test.ts` | Modify |
+| `apps/web/src/rest/services/tests/formalization-service.test.ts` | Create |
 | `apps/web/src/rest/services/tests/signing-gateway-service.test.ts` | Create |
+| `apps/web/src/routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId.tsx` | Remove |
+| `apps/web/src/routes/advogado/meus-casos.tsx` | Create |
+| `apps/web/src/routes/advogado/meus-casos/$caseId.tsx` | Remove |
+| `apps/web/src/routes/advogado/meus-casos/index.tsx` | Remove |
 | `apps/web/src/routes/assinaturas/acesso/index.tsx` | Create |
+| `apps/web/src/routes/caixa-de-documentos/$fileId.tsx` | Modify |
+| `apps/web/src/routes/caixa-de-documentos/index.tsx` | Modify |
+| `apps/web/src/routes/formalizacoes/$formalizationId/configuracao-envio/index.tsx` | Create |
+| `apps/web/src/routes/formalizacoes/$formalizationId/documentos/$documentVersionId.tsx` | Create |
+| `apps/web/src/routes/formalizacoes/$formalizationId/index.tsx` | Create |
+| `apps/web/src/routes/formalizacoes/$formalizationId/route.tsx` | Create |
+| `apps/web/src/routes/formalizacoes/route.tsx` | Create |
 | `apps/web/src/routes/login/index.tsx` | Modify |
-| `apps/web/src/routeTree.gen.ts` | Generate |
-| `apps/web/src/ui/formalization/hooks/use-cancel-formalization-signature-sending-action.ts` | Create |
+| `apps/web/src/routes/lotes-documentos/$fileId.tsx` | Modify |
+| `apps/web/src/routeTree.gen.ts` | Modify |
+| `apps/web/src/ui/consultation/hooks/use-consultation-attendance-action.ts` | Create |
+| `apps/web/src/ui/consultation/hooks/use-consultation-attendance-actions.ts` | Remove |
+| `apps/web/src/ui/consultation/hooks/use-consultation-legal-catalog-query.ts` | Create |
+| `apps/web/src/ui/consultation/hooks/use-consultation-status-action.ts` | Create |
+| `apps/web/src/ui/consultation/hooks/use-consultation-status-actions.ts` | Remove |
+| `apps/web/src/ui/consultation/hooks/use-consultation.ts` | Modify |
+| `apps/web/src/ui/consultation/widgets/pages/consultation-page/attendance-form/use-attendance-form.ts` | Modify |
+| `apps/web/src/ui/consultation/widgets/pages/consultation-page/tests/attendance-form.test.tsx` | Modify |
+| `apps/web/src/ui/consultation/widgets/pages/consultation-page/tests/consultation-details.test.tsx` | Modify |
+| `apps/web/src/ui/document-engine/hooks/use-document-batches-triage-query.ts` | Remove |
+| `apps/web/src/ui/document-engine/hooks/use-document-validation-documents-query.ts` | Modify |
+| `apps/web/src/ui/document-engine/hooks/use-record-document-validation-decision-action.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/components/document-file-preview/index.tsx` | Remove |
+| `apps/web/src/ui/document-engine/widgets/components/document-file-preview/tests/document-file-preview.test.tsx` | Remove |
+| `apps/web/src/ui/document-engine/widgets/components/document-file-preview/tests/use-document-file-preview.test.ts` | Remove |
+| `apps/web/src/ui/document-engine/widgets/components/document-file-preview/use-document-file-preview.ts` | Remove |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/index.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/pdf-viewer-panel/index.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/pdf-viewer-panel/tests/pdf-viewer-panel.test.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/read-only-validated-panel/index.tsx` | Remove |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/read-only-validated-panel/tests/read-only-validated-panel.test.tsx` | Remove |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/tests/document-analysis-page.test.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/tests/use-document-analysis.test.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-analysis-page/use-document-analysis.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-inbox/index.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-inbox/tests/use-document-inbox.test.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-inbox/use-document-inbox.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-viewer/index.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-viewer/tests/document-viewer.test.tsx` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-viewer/tests/use-document-viewer.test.ts` | Modify |
+| `apps/web/src/ui/document-engine/widgets/pages/document-viewer/use-document-viewer.ts` | Modify |
+| `apps/web/src/ui/document-production/hooks/tests/use-generate-consultation-document-action.test.tsx` | Remove |
+| `apps/web/src/ui/document-production/hooks/use-document-catalog-query.ts` | Create |
+| `apps/web/src/ui/document-production/hooks/use-document-specification-action.ts` | Create |
+| `apps/web/src/ui/document-production/hooks/use-document-specification-query.ts` | Create |
+| `apps/web/src/ui/document-production/hooks/use-document-specifications-query.ts` | Create |
+| `apps/web/src/ui/document-production/hooks/use-document-topics-query.ts` | Create |
+| `apps/web/src/ui/document-production/hooks/use-update-document-access-action.ts` | Remove |
+| `apps/web/src/ui/document-production/widgets/components/document-badge/change-document-access-dialog.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/components/document-badge/document-access-badge.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-list/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-list/tests/document-package-list.test.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-list/tests/use-document-package-list.test.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-list/use-document-package-list.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-row/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-row/tests/document-package-row.test.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-row/tests/use-document-package-row.test.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/document-package-row/use-document-package-row.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/tests/document-package.test.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/tests/use-document-package.test.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/types.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-package/use-document-package.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/cancel-manual-edit-dialog/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/document-version-history-dialog/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/regenerate-document-version-dialog/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/reject-document-version-dialog/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/save-manual-version-dialog/index.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review/document-review-decision-bar.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review/document-review-header.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review/index.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review/tests/document-review.test.tsx` | Create |
+| `apps/web/src/ui/document-production/widgets/components/document-review/types.ts` | Create |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/cancel-manual-edit-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/consultation-document-review-header/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-history-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/regenerate-document-version-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/reject-document-version-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/save-manual-version-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/consultation-document-list/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/consultation-document-row/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/select-consultation-documents-dialog/index.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/tests/consultation-documents-page.test.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/tests/use-consultation-documents-page.test.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/use-consultation-documents-page.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specification-page/tests/use-document-specification-page.test.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specification-page/use-document-specification-actions.ts` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/document-specification-page/use-document-specification-page.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/tests/document-specifications-page.test.tsx` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/tests/use-document-specifications-page.test.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/use-document-catalog-query.ts` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/use-document-specifications-page.ts` | Modify |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/use-document-specifications-query.ts` | Remove |
+| `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/use-document-topics-query.ts` | Remove |
+| `apps/web/src/ui/formalization/hooks/tests/use-formalization-signature-configuration-action.test.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/tests/use-formalization-signature-sending-action.test.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/tests/use-signature-document-query.test.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/tests/use-signing-package-actions.test.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-acknowledge-signature-document-action.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-close-formalization-without-contract-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-close-signature-result-action.ts` | Create |
-| `apps/web/src/ui/formalization/hooks/use-confirm-formalization-signature-sending-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-establish-collaborator-signing-session-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-exchange-signature-invitation-action.ts` | Create |
-| `apps/web/src/ui/formalization/hooks/use-formalization-signature-sending-review-query.ts` | Create |
-| `apps/web/src/ui/formalization/hooks/use-formalization-signature-sending-status-query.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-document-production-action.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-document-review-action.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-document-version-query.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-query.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-signature-configuration-action.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-formalization-signature-sending-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-request-signature-otp-action.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-save-formalization-contract-form-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-signature-channels-query.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-signature-document-query.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-signature-result-query.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-signing-gateway-context-query.ts` | Create |
+| `apps/web/src/ui/formalization/hooks/use-start-formalization-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-start-signing-action.ts` | Create |
 | `apps/web/src/ui/formalization/hooks/use-verify-signature-otp-action.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/cancel-all-signature-sending-dialog/index.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/cancel-all-signature-sending-dialog/tests/cancel-all-signature-sending-dialog.test.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/cancel-all-signature-sending-dialog/tests/use-cancel-all-signature-sending-dialog.test.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/cancel-all-signature-sending-dialog/use-cancel-all-signature-sending-dialog.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/index.tsx` | Modify |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/review-and-confirm-sending-dialog/index.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/review-and-confirm-sending-dialog/tests/review-and-confirm-sending-dialog.test.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/review-and-confirm-sending-dialog/tests/use-review-and-confirm-sending-dialog.test.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/review-and-confirm-sending-dialog/use-review-and-confirm-sending-dialog.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/tests/formalization-sending-configuration.test.tsx` | Modify |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/tests/use-formalization-sending-configuration.test.ts` | Modify |
-| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/use-formalization-sending-configuration.ts` | Modify |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-document-review-page/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-document-review-page/tests/formalization-document-review-page.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-document-review-page/tests/use-formalization-document-review-page.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-document-review-page/use-formalization-document-review-page.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-action/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-action/tests/close-without-contract-action.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-action/tests/use-close-without-contract-action.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-action/use-close-without-contract-action.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-dialog/tests/close-without-contract-dialog.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-dialog/tests/use-close-without-contract-dialog.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/close-without-contract-dialog/use-close-without-contract-dialog.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/commercial-conditions-card/close-form-confirmation-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/commercial-conditions-card/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/commercial-conditions-card/reopen-form-confirmation-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/commercial-conditions-card/tests/use-commercial-conditions-card.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/commercial-conditions-card/use-commercial-conditions-card.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/document-package-confirmation-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-context-header/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-documents-section/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-documents-section/tests/formalization-documents-section.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-documents-section/tests/use-formalization-documents-section.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-documents-section/use-formalization-documents-section.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration-summary/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration-summary/tests/formalization-sending-configuration-summary.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration-summary/tests/use-formalization-sending-configuration-summary.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration-summary/use-formalization-sending-configuration-summary.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/remove-signature-signatory-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/candidate-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/candidate-dialog/tests/candidate-dialog.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/candidate-dialog/tests/use-candidate-dialog.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/candidate-dialog/use-candidate-dialog.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/signatory-card/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/signatory-card/tests/signatory-card.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/signatory-card/tests/use-signatory-card.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/signatory-card/use-signatory-card.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/tests/signatories-tab.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/tests/use-signatories-tab.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signatories-tab/use-signatories-tab.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/remove-all-signature-fields-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/remove-all-signature-fields-dialog/tests/remove-all-signature-fields-dialog.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/remove-all-signature-fields-dialog/tests/use-remove-all-signature-fields-dialog.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/remove-all-signature-fields-dialog/use-remove-all-signature-fields-dialog.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/signature-fields-progress-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/signature-fields-progress-dialog/tests/signature-fields-progress-dialog.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/signature-fields-progress-dialog/tests/use-signature-fields-progress-dialog.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/signature-fields-progress-dialog/use-signature-fields-progress-dialog.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/tests/signature-fields-tab.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/tests/use-signature-fields-tab.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/signature-fields-tab/use-signature-fields-tab.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/tests/formalization-sending-configuration.test.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/tests/use-formalization-sending-configuration.test.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-sending-configuration/use-formalization-sending-configuration.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/formalization-state-panels/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/select-formalization-documents-dialog/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-page/use-formalization-page.ts` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-sending-configuration/index.tsx` | Create |
+| `apps/web/src/ui/formalization/widgets/pages/formalization-sending-configuration/use-formalization-sending-configuration-page.ts` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/channel-selection-step/index.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/channel-selection-step/tests/channel-selection-step.test.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/channel-selection-step/tests/use-channel-selection-step.test.ts` | Create |
@@ -3646,10 +4132,6 @@ paths, and therefore do not appear here.
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/provider-signing-step/tests/provider-signing-step.test.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/provider-signing-step/tests/use-provider-signing-step.test.ts` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/provider-signing-step/use-provider-signing-step.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-acknowledgement-step/index.tsx` | Remove |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-acknowledgement-step/tests/signature-acknowledgement-step.test.tsx` | Remove |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-acknowledgement-step/tests/use-signature-acknowledgement-step.test.ts` | Remove |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-acknowledgement-step/use-signature-acknowledgement-step.ts` | Remove |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-confirmed-step/index.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-confirmed-step/tests/signature-confirmed-step.test.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/signature-confirmed-step/tests/use-signature-confirmed-step.test.ts` | Create |
@@ -3665,19 +4147,166 @@ paths, and therefore do not appear here.
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/tests/signing-gateway-page.test.tsx` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/tests/use-signing-gateway-page.test.ts` | Create |
 | `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/use-signing-gateway-page.ts` | Create |
-| `apps/web/src/ui/shared/contexts/rest-context/index.tsx` | Modify |
+| `apps/web/src/ui/identity/hooks/use-client-registration-actions.ts` | Create |
+| `apps/web/src/ui/identity/hooks/use-complete-collaborator-invite-action.ts` | Create |
+| `apps/web/src/ui/identity/hooks/use-consultation-action.ts` | Create |
+| `apps/web/src/ui/identity/hooks/use-scheduling-query.ts` | Create |
+| `apps/web/src/ui/identity/hooks/use-send-communication-action.ts` | Create |
+| `apps/web/src/ui/identity/hooks/use-send-communication-mutation.ts` | Remove |
+| `apps/web/src/ui/identity/hooks/use-sign-in-action.ts` | Modify |
+| `apps/web/src/ui/identity/widgets/components/collaborator-register-dialog/tests/collaborator-register-dialog.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/client-details-page/client-communications-tab/tests/client-communications-tab.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/client-details-page/my-cases-tab/case-details/bottom-details/tests/bottom-details.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/clients-list-page/tests/clients-list-page.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/collaborator-details-page/tests/collaborator-details-page.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/collaborator-invite-page/tests/collaborator-invite-page.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/collaborator-invite-page/tests/use-collaborator-invite-page.test.ts` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/collaborator-invite-page/use-collaborator-invite-page.ts` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/collaborators-page/tests/collaborators-page.test.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/communication.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/case-page-data.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-document-status.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/decision-reason-dialog/index.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/index.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/tests/checklist-dossier-tab.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/tests/use-checklist-dossier-tab.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-dossier-tab/use-checklist-dossier-tab.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/checklist-item-history-events.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/components/detail-header.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/components/history-panel.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/components/main-panel.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/components/side-panel.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/index.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/tests/checklist-item-detail-page.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/tests/use-checklist-item-detail-page.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-item-detail-page/use-checklist-item-detail-page.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/checklist-style.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/hooks/use-case-checklist.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/index.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/overview-tab/index.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/types.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-case-page/use-my-case-page.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/index.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/tests/my-cases-list-page.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/tests/use-my-cases-list-page.test.tsx` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/types.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/my-cases-list-page/use-my-cases-list-page.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/schedule.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/use-schedule.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/lawyer-page/use-scheduling.ts` | Remove |
+| `apps/web/src/ui/identity/widgets/pages/sign-in-page/index.tsx` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/sign-in-page/tests/use-sign-in-page.test.ts` | Modify |
+| `apps/web/src/ui/identity/widgets/pages/sign-in-page/use-sign-in-page.ts` | Modify |
+| `apps/web/src/ui/intake/hooks/tests/use-legal-catalog-queries.test.tsx` | Create |
+| `apps/web/src/ui/intake/hooks/use-close-intake-without-contract-action.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-intake-details-query.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-intake-lawyers-query.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-intakes-query.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-legal-areas-query.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-legal-topics-query.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-register-intake-action.ts` | Create |
+| `apps/web/src/ui/intake/hooks/use-update-intake-action.ts` | Create |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/intake-details-content/index.tsx` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/intake-edit-dialog/tests/intake-edit-dialog.test.tsx` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/intake-edit-dialog/use-intake-edit-dialog.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/tests/intake-details-page.test.tsx` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/use-intake-details-page.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intake-details-page/use-intake-details-query.ts` | Remove |
+| `apps/web/src/ui/intake/widgets/pages/intakes-page/tests/use-intakes-page.test.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intakes-page/use-intakes-page.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/intakes-page/use-intakes-query.ts` | Remove |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/decision-step/tests/use-lawyer-selector-dialog.test.tsx` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/decision-step/use-lawyer-selector-dialog.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/demand-step/tests/use-legal-catalog-queries.test.tsx` | Remove |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/demand-step/use-demand-step.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-areas-query.ts` | Remove |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-topics-query.ts` | Remove |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/tests/new-intake-page.test.tsx` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/tests/use-new-intake.test.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/use-new-intake.ts` | Modify |
+| `apps/web/src/ui/intake/widgets/pages/new-intake-page/use-register-intake-action.ts` | Remove |
+| `apps/web/src/ui/shadcn/badge.tsx` | Modify |
+| `apps/web/src/ui/shadcn/input-otp.tsx` | Create |
+| `apps/web/src/ui/shadcn/tabs.tsx` | Modify |
 | `apps/web/src/ui/shared/contexts/rest-context/tests/rest-context.test.tsx` | Modify |
 | `apps/web/src/ui/shared/contexts/rest-context/types/rest-context-value.ts` | Modify |
 | `apps/web/src/ui/shared/contexts/rest-context/use-rest-context-provider.ts` | Modify |
-| `apps/web/tests/routes/formalization/formalization-sending-configuration.test.tsx` | Modify |
+| `apps/web/src/ui/shared/hooks/use-dynamic-form-options-query.ts` | Create |
+| `apps/web/src/ui/shared/hooks/use-navigation.ts` | Modify |
+| `apps/web/src/ui/shared/hooks/use-sign-out-action.ts` | Create |
+| `apps/web/src/ui/shared/styles/global.css` | Modify |
+| `apps/web/src/ui/shared/widgets/components/client-register-dialog/tests/client-register-dialog.test.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/components/client-register-dialog/tests/use-client-register-dialog.test.ts` | Modify |
+| `apps/web/src/ui/shared/widgets/components/client-register-dialog/use-client-register-dialog.ts` | Modify |
+| `apps/web/src/ui/shared/widgets/dynamic-form/dynamic-form-fields/index.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/dynamic-form/select-form/index.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/dynamic-form/select-form/tests/select-form.test.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/dynamic-form/select-form/use-select-form.ts` | Modify |
+| `apps/web/src/ui/shared/widgets/layouts/app-layout/sidebar/index.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/layouts/app-layout/sidebar/use-sign-out-action.ts` | Remove |
+| `apps/web/src/ui/shared/widgets/layouts/app-layout/tests/app-layout.test.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/layouts/root-layout/index.tsx` | Modify |
+| `apps/web/src/ui/shared/widgets/pages/landing-page/index.tsx` | Modify |
+| `apps/web/tests/fixtures/document-production-fixture.ts` | Modify |
+| `apps/web/tests/routes/document-production/consultation-document-version.test.tsx` | Modify |
+| `apps/web/tests/routes/document-production/consultation-documents.index.test.tsx` | Modify |
+| `apps/web/tests/routes/formalization/formalization-sending-configuration.test.tsx` | Create |
+| `apps/web/tests/routes/formalization/formalization.index.test.tsx` | Create |
 | `apps/web/tests/routes/formalization/signing-gateway.test.tsx` | Create |
+| `apps/web/tests/routes/identity/login.index.test.tsx` | Modify |
 | `apps/web/vite.config.ts` | Modify |
+| `biome.json` | Modify |
+| `design/hms.pen` | Modify |
 | `docker-compose.yaml` | Modify |
+| `Dockerfile.server` | Modify |
+| `documentation/agents/builder-agent.md` | Modify |
+| `documentation/agents/implementation-reviewer-agent.md` | Create |
+| `documentation/agents/reviewer-agent.md` | Remove |
+| `documentation/agents/searcher-agent.md` | Remove |
+| `documentation/agents/spec-reviewer-agent.md` | Create |
 | `documentation/architecture.md` | Modify |
-| `documentation/features/formalization/formalization-signature-flow/evaluation.md` | Modify |
-| `documentation/features/formalization/formalization-signature-flow/plan.md` | Modify |
-| `documentation/features/formalization/formalization-signature-flow/spec.md` | Modify |
+| `documentation/diagrams/client-collaborator-signing-workflows.excalidraw` | Create |
+| `documentation/diagrams/hms-signing-gateway-technical-workflows.excalidraw` | Create |
+| `documentation/diagrams/pr-creation-review-workflow.excalidraw` | Modify |
+| `documentation/features/document-production/consultation-document-production-ui/evaluation.md` | Modify |
+| `documentation/features/document-production/consultation-document-production-ui/plan.md` | Modify |
+| `documentation/features/document-production/consultation-document-production-ui/spec.md` | Modify |
+| `documentation/features/document-production/document-specification-page/plan.md` | Modify |
+| `documentation/features/document-production/document-specification-page/spec.md` | Modify |
+| `documentation/features/document-production/document-specifications-page/plan.md` | Modify |
+| `documentation/features/document-production/document-specifications-page/spec.md` | Modify |
+| `documentation/features/document-production/formalization-document-production/evaluation.md` | Modify |
+| `documentation/features/document-production/formalization-document-production/plan.md` | Modify |
+| `documentation/features/document-production/formalization-document-production/spec.md` | Modify |
+| `documentation/features/formalization/formalization-signature-flow/design/GlZGA.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/HcT8k.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/manifest.md` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/MC4E2.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/nI1B0.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/NSYug.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/qOfh6.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/sxENj.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/Vx43H.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/design/YWfhi.png` | Create |
+| `documentation/features/formalization/formalization-signature-flow/evaluation.md` | Create |
+| `documentation/features/formalization/formalization-signature-flow/plan.md` | Create |
+| `documentation/features/formalization/formalization-signature-flow/spec.md` | Create |
+| `documentation/features/formalization/signing-gateway/design/01-access-invitation.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/02-select-channel.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/03-verify-otp.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/04-read-document.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/05-confirm-signature.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/06-signature-submitted.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/07-signature-confirmed.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/08-internal-tracking-out-of-scope.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/09-collaborator-read.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/10-collaborator-confirm.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/11-access-unavailable.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/12-no-authorized-channel.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/13-otp-invalid-expired.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/14-otp-attempt-limit.png` | Create |
 | `documentation/features/formalization/signing-gateway/design/HcT8k.png` | Create |
+| `documentation/features/formalization/signing-gateway/design/manifest.md` | Create |
 | `documentation/features/formalization/signing-gateway/design/MC4E2.png` | Create |
 | `documentation/features/formalization/signing-gateway/design/nI1B0.png` | Create |
 | `documentation/features/formalization/signing-gateway/design/NSYug.png` | Create |
@@ -3685,30 +4314,117 @@ paths, and therefore do not appear here.
 | `documentation/features/formalization/signing-gateway/design/sxENj.png` | Create |
 | `documentation/features/formalization/signing-gateway/design/Vx43H.png` | Create |
 | `documentation/features/formalization/signing-gateway/design/YWfhi.png` | Create |
+| `documentation/features/formalization/signing-gateway/evaluation.md` | Create |
+| `documentation/features/formalization/signing-gateway/plan.md` | Create |
+| `documentation/features/formalization/signing-gateway/spec.md` | Create |
+| `documentation/features/identity/client-registration/specs/client-register-dialog-spec.md` | Modify |
+| `documentation/features/identity/collaborators-page/plan.md` | Modify |
+| `documentation/features/identity/collaborators-page/spec.md` | Modify |
 | `documentation/infrastructure.md` | Modify |
 | `documentation/modules.md` | Modify |
+| `documentation/prompts/conclude-spec-prompt.md` | Modify |
+| `documentation/prompts/create-bug-report-prompt.md` | Modify |
+| `documentation/prompts/create-jira-feat-ticket.md` | Modify |
+| `documentation/prompts/create-plan-prompt.md` | Modify |
+| `documentation/prompts/create-pr-prompt.md` | Modify |
+| `documentation/prompts/create-prd-prompt.md` | Create |
+| `documentation/prompts/create-spec-prompt.md` | Modify |
+| `documentation/prompts/grilling-prompt.md` | Create |
+| `documentation/prompts/implement-spec-prompt.md` | Modify |
+| `documentation/rules/code-conventions-rules.md` | Modify |
+| `documentation/rules/core-package-rules.md` | Modify |
+| `documentation/rules/database-layer-rules.md` | Modify |
+| `documentation/rules/jobs-testing-rules.md` | Create |
+| `documentation/rules/messaging-layer-rules.md` | Modify |
+| `documentation/rules/rules.md` | Modify |
+| `documentation/rules/sdd-rules.md` | Remove |
+| `documentation/rules/ui-layer-rules.md` | Modify |
+| `documentation/rules/use-case-testing-rules.md` | Modify |
+| `documentation/rules/validation-package-rules.md` | Modify |
+| `documentation/rules/web-app-routing-rules.md` | Modify |
+| `documentation/rules/widget-testing-rules.md` | Modify |
+| `documentation/sdd.md` | Modify |
+| `documentation/tooling.md` | Modify |
 | `package.json` | Modify |
+| `packages/core/package.json` | Modify |
+| `packages/core/src/case-management/domain/entities/case-checklist-item.ts` | Remove |
+| `packages/core/src/case-management/domain/entities/fakers/index.ts` | Remove |
+| `packages/core/src/case-management/domain/entities/fakers/legal-case-faker.ts` | Remove |
+| `packages/core/src/case-management/domain/entities/index.ts` | Modify |
+| `packages/core/src/case-management/domain/entities/legal-case-summary.ts` | Remove |
+| `packages/core/src/case-management/domain/entities/legal-case.ts` | Modify |
+| `packages/core/src/case-management/domain/errors/case-checklist-gate-review-error.ts` | Remove |
+| `packages/core/src/case-management/domain/errors/index.ts` | Remove |
+| `packages/core/src/case-management/domain/errors/legal-case-not-found-error.ts` | Remove |
+| `packages/core/src/case-management/domain/structures/case-checklist-gate-decision.ts` | Remove |
+| `packages/core/src/case-management/domain/structures/case-checklist-gate.ts` | Remove |
+| `packages/core/src/case-management/domain/structures/case-checklist-item-status.ts` | Remove |
+| `packages/core/src/case-management/domain/structures/case-dossier-gate.ts` | Remove |
+| `packages/core/src/case-management/domain/structures/index.ts` | Modify |
+| `packages/core/src/case-management/domain/structures/legal-case-status.ts` | Modify |
+| `packages/core/src/case-management/interfaces/case-checklist-items-repository.ts` | Remove |
+| `packages/core/src/case-management/interfaces/case-management-service.ts` | Remove |
+| `packages/core/src/case-management/interfaces/index.ts` | Modify |
+| `packages/core/src/case-management/interfaces/legal-cases-repository.ts` | Modify |
+| `packages/core/src/case-management/use-cases/add-case-checklist-complementary-item-use-case.ts` | Remove |
+| `packages/core/src/case-management/use-cases/index.ts` | Remove |
+| `packages/core/src/case-management/use-cases/list-case-checklist-use-case.ts` | Remove |
+| `packages/core/src/case-management/use-cases/list-my-legal-cases-use-case.ts` | Remove |
+| `packages/core/src/case-management/use-cases/mark-case-checklist-item-validated-use-case.ts` | Remove |
+| `packages/core/src/case-management/use-cases/review-case-checklist-gate-use-case.ts` | Remove |
+| `packages/core/src/case-management/use-cases/tests/add-case-checklist-complementary-item-use-case.test.ts` | Remove |
+| `packages/core/src/case-management/use-cases/tests/list-my-legal-cases-use-case.test.ts` | Remove |
+| `packages/core/src/case-management/use-cases/tests/mark-case-checklist-item-validated-use-case.test.ts` | Remove |
+| `packages/core/src/case-management/use-cases/tests/review-case-checklist-gate-use-case.test.ts` | Remove |
 | `packages/core/src/communication/domain/events/communication-signature-invitation-delivered-event.ts` | Create |
 | `packages/core/src/communication/domain/events/communication-signature-otp-delivered-event.ts` | Create |
 | `packages/core/src/communication/domain/events/index.ts` | Modify |
 | `packages/core/src/communication/interfaces/send-email-message-params.ts` | Modify |
+| `packages/core/src/communication/interfaces/whatsapp-provider.ts` | Modify |
+| `packages/core/src/consultation/domain/structures/consultation-document-list-item.ts` | Modify |
+| `packages/core/src/consultation/use-cases/replace-consultation-document-selection-use-case.ts` | Modify |
+| `packages/core/src/consultation/use-cases/tests/list-consultation-documents-use-case.test.ts` | Modify |
+| `packages/core/src/document-engine/domain/entities/document-validation.ts` | Modify |
+| `packages/core/src/document-engine/domain/events/index.ts` | Modify |
+| `packages/core/src/document-engine/domain/events/whatsapp-document-batch-received-event.ts` | Create |
+| `packages/core/src/document-engine/interfaces/case-checklist-update-provider.ts` | Remove |
+| `packages/core/src/document-engine/interfaces/document-batches-repository.ts` | Modify |
+| `packages/core/src/document-engine/interfaces/document-validation-service.ts` | Modify |
+| `packages/core/src/document-engine/interfaces/document-validations-repository.ts` | Modify |
+| `packages/core/src/document-engine/interfaces/index.ts` | Modify |
+| `packages/core/src/document-engine/use-cases/index.ts` | Modify |
+| `packages/core/src/document-engine/use-cases/list-document-validations-use-case.ts` | Modify |
+| `packages/core/src/document-engine/use-cases/list-triage-document-batches-use-case.ts` | Remove |
+| `packages/core/src/document-engine/use-cases/record-document-validation-decision-use-case.ts` | Modify |
+| `packages/core/src/document-engine/use-cases/tests/record-document-validation-decision-use-case.test.ts` | Modify |
+| `packages/core/src/document-production/domain/entities/document.ts` | Modify |
+| `packages/core/src/document-production/domain/entities/fakers/document-faker.ts` | Modify |
+| `packages/core/src/document-production/interfaces/documents-repository.ts` | Modify |
+| `packages/core/src/document-production/interfaces/package-documents-repository.ts` | Modify |
+| `packages/core/src/document-production/use-cases/index.ts` | Modify |
+| `packages/core/src/document-production/use-cases/tests/update-document-access-classification-use-case.test.ts` | Remove |
+| `packages/core/src/document-production/use-cases/update-document-access-classification-use-case.ts` | Remove |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-artifact-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-cancellation-attempt-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-gateway-session-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-invitation-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-otp-challenge-faker.ts` | Create |
+| `packages/core/src/formalization/domain/entities/fakers/formalization-signature-otp-rate-reservation-faker.ts` | Create |
+| `packages/core/src/formalization/domain/entities/fakers/formalization-signature-otp-send-attempt-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-protocol-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-provider-recipient-resource-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-provider-resource-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-provisioning-attempt-faker.ts` | Create |
+| `packages/core/src/formalization/domain/entities/fakers/formalization-signature-proxy-binding-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-recipient-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-request-document-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-request-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-snapshot-faker.ts` | Create |
 | `packages/core/src/formalization/domain/entities/fakers/formalization-signature-webhook-receipt-faker.ts` | Create |
-| `packages/core/src/formalization/domain/entities/fakers/index.ts` | Create |
+| `packages/core/src/formalization/domain/entities/fakers/index.ts` | Modify |
 | `packages/core/src/formalization/domain/entities/formalization-signature-artifact.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-cancellation-attempt.ts` | Create |
+| `packages/core/src/formalization/domain/entities/formalization-signature-document-acknowledgement.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-gateway-session.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-invitation-send-attempt.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-invitation.ts` | Create |
@@ -3716,10 +4432,12 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/domain/entities/formalization-signature-otp-rate-reservation.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-otp-send-attempt.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-protocol.ts` | Create |
+| `packages/core/src/formalization/domain/entities/formalization-signature-provider-document-resource.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-provider-recipient-resource.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-provider-resource.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-provisioning-attempt.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-proxy-binding.ts` | Create |
+| `packages/core/src/formalization/domain/entities/formalization-signature-recipient-document.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-recipient.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-request-document.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization-signature-request.ts` | Create |
@@ -3727,13 +4445,17 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/domain/entities/formalization-signature-webhook-receipt.ts` | Create |
 | `packages/core/src/formalization/domain/entities/formalization.ts` | Modify |
 | `packages/core/src/formalization/domain/entities/index.ts` | Modify |
+| `packages/core/src/formalization/domain/errors/formalization-access-denied-error.ts` | Modify |
+| `packages/core/src/formalization/domain/errors/formalization-confirmation-error.ts` | Modify |
+| `packages/core/src/formalization/domain/errors/formalization-document-stale-error.ts` | Modify |
 | `packages/core/src/formalization/domain/errors/formalization-signature-cancellation-partial-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/formalization-signature-not-ready-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/formalization-signature-provisioning-failed-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/formalization-signature-request-conflict-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/formalization-signature-sending-forbidden-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/formalization-signature-stale-configuration-error.ts` | Create |
-| `packages/core/src/formalization/domain/errors/index.ts` | Create |
+| `packages/core/src/formalization/domain/errors/formalization-state-conflict-error.ts` | Modify |
+| `packages/core/src/formalization/domain/errors/index.ts` | Modify |
 | `packages/core/src/formalization/domain/errors/signature-channel-unavailable-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/signature-collaborator-ineligible-error.ts` | Create |
 | `packages/core/src/formalization/domain/errors/signature-collaborator-unassigned-error.ts` | Create |
@@ -3761,22 +4483,29 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/domain/events/formalization-signature-recipient-submitted-event.ts` | Create |
 | `packages/core/src/formalization/domain/events/formalization-signature-recipient-terminal-event.ts` | Create |
 | `packages/core/src/formalization/domain/events/formalization-signature-reconciliation-requested-event.ts` | Create |
-| `packages/core/src/formalization/domain/events/formalization-signature-request-document-cancellation-requested-event.ts` | Remove |
-| `packages/core/src/formalization/domain/events/formalization-signature-request-document-provisioning-requested-event.ts` | Remove |
+| `packages/core/src/formalization/domain/events/formalization-signature-request-cancellation-requested-event.ts` | Create |
+| `packages/core/src/formalization/domain/events/formalization-signature-request-provisioning-requested-event.ts` | Create |
 | `packages/core/src/formalization/domain/events/index.ts` | Modify |
+| `packages/core/src/formalization/domain/structures/acknowledge-signature-document-command.ts` | Create |
 | `packages/core/src/formalization/domain/structures/cancel-formalization-signature-sending-command.ts` | Create |
 | `packages/core/src/formalization/domain/structures/confirm-formalization-signature-sending-command.ts` | Create |
 | `packages/core/src/formalization/domain/structures/exchange-signature-invitation-command.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-document-source-data.ts` | Modify |
 | `packages/core/src/formalization/domain/structures/formalization-signature-access-status.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-artifact-kind.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-authentication-channel.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-authentication-channels.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-authentication-source.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-cancellation-attempt-changes.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-candidate.ts` | Modify |
 | `packages/core/src/formalization/domain/structures/formalization-signature-channel-kind.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-document-acknowledgement-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-context-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-context.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-gateway-document-metadata-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-document-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-document.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-gateway-documents-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-result-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-session-changes.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-gateway-session-kind.ts` | Create |
@@ -3788,6 +4517,10 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/domain/structures/formalization-signature-otp-guard-changes.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-otp-guard.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-otp-send-attempt-changes.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-pending-result-status.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-projection-changes.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-provider-envelope-status.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-provider-item-status.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-provider-observation.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-provider-recipient-resource-changes.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-provider-resource-changes.ts` | Create |
@@ -3801,7 +4534,9 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/domain/structures/formalization-signature-request-document-changes.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-request-document-status.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-request-status.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-result-status.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-result.ts` | Create |
+| `packages/core/src/formalization/domain/structures/formalization-signature-sending-cancellation-response.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-sending-issue-code.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-sending-issue.ts` | Create |
 | `packages/core/src/formalization/domain/structures/formalization-signature-sending-review-response.ts` | Create |
@@ -3817,6 +4552,9 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/interfaces/formalization-signature-artifacts-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-audit-writer.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-cancellation-attempts-repository.ts` | Create |
+| `packages/core/src/formalization/interfaces/formalization-signature-document-acknowledgements-repository.ts` | Create |
+| `packages/core/src/formalization/interfaces/formalization-signature-document-content-reader.ts` | Create |
+| `packages/core/src/formalization/interfaces/formalization-signature-document-metadata-reader.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-gateway-sessions-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-gateway-transaction.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-invitation-send-attempts-repository.ts` | Create |
@@ -3826,10 +4564,12 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/interfaces/formalization-signature-otp-rate-reservations-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-otp-send-attempts-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-protocols-repository.ts` | Create |
+| `packages/core/src/formalization/interfaces/formalization-signature-provider-document-resources-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-provider-recipient-resources-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-provider-resources-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-provisioning-attempts-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-proxy-bindings-repository.ts` | Create |
+| `packages/core/src/formalization/interfaces/formalization-signature-recipient-documents-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-recipients-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-request-documents-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/formalization-signature-requests-repository.ts` | Create |
@@ -3838,111 +4578,53 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/interfaces/formalization-signature-webhook-receipts-repository.ts` | Create |
 | `packages/core/src/formalization/interfaces/index.ts` | Modify |
 | `packages/core/src/formalization/interfaces/sensitive-payload-cipher-provider.ts` | Create |
+| `packages/core/src/formalization/interfaces/signature-otp-mac-provider.ts` | Create |
 | `packages/core/src/formalization/interfaces/signature-provider.ts` | Create |
+| `packages/core/src/formalization/interfaces/signature-secret-hasher.ts` | Create |
+| `packages/core/src/formalization/interfaces/signature-secret-verifier.ts` | Create |
 | `packages/core/src/formalization/interfaces/signing-gateway-service.ts` | Create |
-| `packages/core/src/formalization/use-cases/acknowledge-and-start-signing-use-case.ts` | Remove |
+| `packages/core/src/formalization/use-cases/acknowledge-signature-document-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/cancel-formalization-document-generation-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/cancel-formalization-signature-sending-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/close-formalization-contract-form-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/close-signature-result-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/confirm-formalization-documents-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/confirm-formalization-signature-sending-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/establish-collaborator-signing-session-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/exchange-signature-invitation-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/expire-signature-gateway-access-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/generate-formalization-document-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/get-formalization-document-selection-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/get-formalization-document-version-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/get-formalization-signature-sending-review-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/get-formalization-signature-sending-status-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/get-signature-document-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/get-signature-gateway-context-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/get-signature-result-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/index.ts` | Modify |
+| `packages/core/src/formalization/use-cases/list-formalization-documents-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/list-signature-authentication-channels-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/mark-formalization-signature-invitation-delivery-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/mark-signature-otp-delivery-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/process-formalization-signature-cancellation-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/process-signature-provider-webhook-use-case.ts` | Create |
-| `packages/core/src/formalization/use-cases/provision-formalization-signature-request-document-use-case.ts` | Remove |
+| `packages/core/src/formalization/use-cases/provision-formalization-signature-request-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/receive-signature-provider-webhook-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/reconcile-formalization-signature-invitation-deliveries-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/reconcile-formalization-signature-otp-deliveries-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/reconcile-formalization-signature-previews-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/reconcile-formalization-signature-requests-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/reconcile-signature-request-use-case.ts` | Create |
 | `packages/core/src/formalization/use-cases/record-provider-submission-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/reopen-formalization-contract-form-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/replace-formalization-document-selection-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/request-signature-otp-use-case.ts` | Create |
-| `packages/core/src/formalization/use-cases/tests/reconcile-formalization-signature-invitation-deliveries-use-case.test.ts` | Create |
-| `packages/core/src/formalization/use-cases/verify-signature-otp-use-case.ts` | Create |
-| `packages/validation/src/formalization/index.ts` | Modify |
-| `packages/validation/src/formalization/signing-gateway/documenso-webhook-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/exchange-signature-invitation-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/formalization-signature-sending-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/index.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/request-signature-otp-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/signature-gateway-context-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/signature-gateway-document-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/signature-gateway-event-schemas.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/signature-result-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/start-signing-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/verify-signature-otp-schema.ts` | Create |
-| `packages/core/src/formalization/domain/entities/formalization-signature-recipient-document.ts` | Create |
-| `packages/core/src/formalization/domain/entities/formalization-signature-provider-document-resource.ts` | Create |
-| `packages/core/src/formalization/domain/entities/formalization-signature-document-acknowledgement.ts` | Create |
-| `packages/core/src/formalization/domain/structures/acknowledge-signature-document-command.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-gateway-documents-response.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-document-acknowledgement-response.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-result-status.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-pending-result-status.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-provider-envelope-status.ts` | Create |
-| `packages/core/src/formalization/domain/structures/formalization-signature-provider-item-status.ts` | Create |
-| `packages/core/src/formalization/interfaces/formalization-signature-recipient-documents-repository.ts` | Create |
-| `packages/core/src/formalization/interfaces/formalization-signature-provider-document-resources-repository.ts` | Create |
-| `packages/core/src/formalization/interfaces/formalization-signature-document-acknowledgements-repository.ts` | Create |
-| `packages/core/src/formalization/use-cases/provision-formalization-signature-request-use-case.ts` | Create |
-| `packages/core/src/formalization/use-cases/acknowledge-signature-document-use-case.ts` | Create |
+| `packages/core/src/formalization/use-cases/review-formalization-document-version-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/save-formalization-contract-form-draft-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/save-manual-formalization-document-version-use-case.ts` | Modify |
+| `packages/core/src/formalization/use-cases/select-current-formalization-document-version-use-case.ts` | Modify |
 | `packages/core/src/formalization/use-cases/start-formalization-signing-use-case.ts` | Create |
-| `packages/core/src/formalization/use-cases/tests/provision-formalization-signature-request-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/acknowledge-signature-document-use-case.test.ts` | Create |
-| `packages/core/src/formalization/use-cases/tests/start-formalization-signing-use-case.test.ts` | Create |
-| `packages/core/src/formalization/domain/events/formalization-signature-request-provisioning-requested-event.ts` | Create |
-| `packages/core/src/formalization/domain/events/formalization-signature-request-cancellation-requested-event.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/acknowledge-signature-document-schema.ts` | Create |
-| `packages/validation/src/formalization/signing-gateway/signature-gateway-documents-schema.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/models/formalization-signature-recipient-document-model.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-recipient-document.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-recipient-document-mapper.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-recipient-documents-repository.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/models/formalization-signature-provider-document-resource-model.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-provider-document-resource.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-provider-document-resource-mapper.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-provider-document-resources-repository.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/models/formalization-signature-document-acknowledgement-model.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/types/entities/drizzle-formalization-signature-document-acknowledgement.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/mappers/drizzle-formalization-signature-document-acknowledgement-mapper.ts` | Create |
-| `apps/server/src/formalization/database/drizzle/repositories/drizzle-formalization-signature-document-acknowledgements-repository.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/provision-formalization-signature-request-job.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/provision-formalization-signature-request-job.test.ts` | Create |
-| `apps/web/src/ui/formalization/hooks/use-acknowledge-signature-document-action.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/document-reading-step/document-tab-list/index.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/document-reading-step/document-tab-list/use-document-tab-list.ts` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/document-reading-step/document-tab-list/tests/document-tab-list.test.tsx` | Create |
-| `apps/web/src/ui/formalization/widgets/pages/signing-gateway-page/document-reading-step/document-tab-list/tests/use-document-tab-list.test.ts` | Create |
-| `apps/server/src/communication/messaging/inngest/jobs/tests/deliver-signature-otp-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/cancel-formalization-signature-request-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/expire-signature-gateway-access-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/process-signature-provider-webhook-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-signature-otp-deliveries-job.test.ts` | Create |
-| `apps/server/src/formalization/messaging/inngest/jobs/tests/reconcile-signature-request-job.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/close-signature-result.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/signing-gateway-proxy.controller.test.ts` | Modify |
-| `apps/server/src/formalization/rest/controllers/tests/establish-collaborator-signing-session.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/exchange-signature-invitation.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/get-signature-document-content.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/list-signature-documents.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/get-signature-gateway-context.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/get-signature-result.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/list-signature-authentication-channels.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/signing-gateway-webhook.controller.test.ts` | Modify |
-| `apps/server/src/formalization/rest/controllers/tests/request-signature-otp.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/start-signing.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/verify-signature-otp.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/acknowledge-signature-document.controller.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/tests/acknowledge-signature-document.controller.test.ts` | Create |
-| `apps/server/src/formalization/rest/controllers/signing-gateway.controller.ts` | Remove |
-| `apps/server/src/formalization/rest/controllers/tests/signing-gateway.controller.test.ts` | Remove |
-| `apps/server/src/shared/database/drizzle/migrations/tests/signing-gateway-migration.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/cancel-formalization-signature-sending-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/close-signature-result-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/confirm-formalization-signature-sending-use-case.test.ts` | Create |
@@ -3950,6 +4632,7 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/use-cases/tests/exchange-signature-invitation-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/expire-signature-gateway-access-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/get-formalization-signature-sending-review-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/tests/get-formalization-signature-sending-status-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/get-signature-document-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/get-signature-gateway-context-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/get-signature-result-use-case.test.ts` | Create |
@@ -3958,13 +4641,61 @@ paths, and therefore do not appear here.
 | `packages/core/src/formalization/use-cases/tests/mark-signature-otp-delivery-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/process-formalization-signature-cancellation-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/process-signature-provider-webhook-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/tests/provision-formalization-signature-request-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/receive-signature-provider-webhook-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/tests/reconcile-formalization-signature-invitation-deliveries-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/tests/reconcile-formalization-signature-requests-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/reconcile-signature-request-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/record-provider-submission-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/request-signature-otp-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/tests/start-formalization-signing-use-case.test.ts` | Create |
 | `packages/core/src/formalization/use-cases/tests/verify-signature-otp-use-case.test.ts` | Create |
+| `packages/core/src/formalization/use-cases/verify-signature-otp-use-case.ts` | Create |
+| `packages/core/src/shared/domain/errors/index.ts` | Modify |
+| `packages/core/src/shared/domain/errors/unauthorized-error.ts` | Remove |
+| `packages/core/src/shared/interfaces/rest-client.ts` | Modify |
+| `packages/core/src/shared/responses/rest-response.ts` | Modify |
+| `packages/core/src/shared/use-cases/tests/validate-dynamic-form-answers-use-case.test.ts` | Modify |
+| `packages/core/src/shared/use-cases/validate-dynamic-form-answers-use-case.ts` | Modify |
+| `packages/validation/package.json` | Modify |
+| `packages/validation/src/case-management/index.ts` | Remove |
+| `packages/validation/src/case-management/schemas/case-checklist-gate-decision-schema.ts` | Remove |
+| `packages/validation/src/case-management/schemas/index.ts` | Remove |
+| `packages/validation/src/case-management/schemas/legal-case-schema.ts` | Remove |
+| `packages/validation/src/case-management/schemas/legal-case-status-schema.ts` | Remove |
+| `packages/validation/src/case-management/schemas/review-case-checklist-gate-schema.ts` | Remove |
+| `packages/validation/src/document-production/schemas/index.ts` | Modify |
+| `packages/validation/src/document-production/schemas/update-document-access-classification-schema.ts` | Remove |
+| `packages/validation/src/formalization/index.ts` | Modify |
+| `packages/validation/src/formalization/schemas/formalization-response-schema.ts` | Modify |
+| `packages/validation/src/formalization/signing-gateway/acknowledge-signature-document-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/documenso-webhook-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/exchange-signature-invitation-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/formalization-signature-sending-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/index.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/request-signature-otp-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-channels-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-context-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-document-metadata-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-document-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-documents-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-gateway-event-schemas.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/signature-result-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/start-signing-schema.ts` | Create |
+| `packages/validation/src/formalization/signing-gateway/verify-signature-otp-schema.ts` | Create |
 | `pnpm-lock.yaml` | Modify |
+| `scripts/check-spec-implementation.mjs` | Create |
 | `scripts/generate-documenso-certificate.mjs` | Create |
+| `scripts/seed-documenso.mjs` | Create |
+| `scripts/start-ngrok.js` | Modify |
+| `scripts/sync-agents.sh` | Modify |
+| `scripts/tests/check-spec-implementation.test.mjs` | Create |
+| `skills-lock.json` | Modify |
+| `supabase/config.toml` | Modify |
+| `turbo.json` | Modify |
+| `volumes/communication/templates/formalization-signature-invitation.html` | Create |
+| `volumes/communication/templates/formalization-signature-otp.html` | Create |
+
 No repository-only test files are added. The exact non-Web automated test files are:
 
 ```text
@@ -4028,16 +4759,14 @@ apps/server/src/shared/database/drizzle/migrations/tests/signing-gateway-migrati
 
 # 4. Validation Contract
 
-The evaluation matrix, commands, manual evidence and rollout gates defined above are
-normative. Core implementation acceptance requires every CA that does not depend on
-shared provider exposure to map to automated or recorded manual evidence, the affected
-workspace quality commands to pass and the real authenticated browser workflow to have
-no unexplained console/network errors. G-01 is required before public proxy exposure;
-G-02 is required before real-provider acceptance and release. Neither prevents Plan
-creation or isolated implementation. Package Validation schemas receive lint, type and
-architecture checks only; behavior is exercised through consuming Core, Server and Web
-tests. Provider, transaction, proxy and full-system evidence cannot be replaced by
-mocked route coverage.
+The evaluation matrix, commands, manual evidence and rollout gates below remain the
+recommended validation contract and must not be reported as passed without evidence.
+For revision-12 conclusion only, MV-01 through MV-08 and the remaining manual, visual,
+accessibility, staging, security, legal and operations evidence are explicitly waived
+and non-blocking under the accepted-risk decision above. Package Validation schemas
+receive lint, type and architecture checks only; behavior is exercised through consuming
+Core, Server and Web tests. Provider, transaction, proxy and full-system evidence cannot
+be replaced by mocked route coverage when those scenarios are executed later.
 
 ## Contracted test cases by file
 
@@ -4171,3 +4900,5 @@ suite.
 | 9 | 2026-09-03 | in_progress | Adds an exact-token receipt-only completion transaction and a strict provider-neutral encrypted webhook hint discriminator so unknown/reconciliation-only provider events can finalize their receipt, publish only a trusted request reconciliation and return `reconciliation_requested` without speculative graph observations or Documenso event-name coupling in Core; removes raw provider event metadata/payload from the Core receipt and persistence contract; declares the exact Server `DocumensoWebhookNormalizer` path and composition; assigns complete normalizer/controller/PostgreSQL-job evidence; resolves the independent Spec Reviewer findings without ambiguity; and resumes Plan-backed F10 implementation. |
 | 10 | 2026-09-03 | in_progress | Reopens F10 after EV-220: adds atomic first-entry/active-binding alias rotation so provider-entry responses are recoverable without persisted plaintext; makes context GET rotate only refresh-safe CSRF and return a non-mutating signing recovery state; converts the presenting authenticated session in place to result-only so submission responses are recoverable without a second bearer secret; persists deterministic duplicate proof, revokes all other access and derives aggregate state inside one transaction; requires acknowledgement expiry and exact collaborator person/role/assignment checks; and forbids partial terminal webhook hints or callers from dictating request/Formalization projections. Mandatory same-reviewer audit passed at EV-223; Plan reconciliation resumed implementation at EV-224. |
 | 11 | 2026-09-04 | in_progress | Makes collaborator access recoverable across HMS login, account switching, refresh and sequential signers in one browser: collaborator exchange rotates a single pre-authentication flow without consuming the invitation; exact assigned-account authentication atomically consumes it, revokes prior flow/authenticated sessions, creates the bound authenticated session and advances recipient/request state; a different current account receives an explicit account-switch state. Client exchange remains one-time. |
+| 12 | 2026-09-07 | in_progress | Records the user's explicit accepted-risk decision to proceed to conclusion without fresh MV-01–MV-08, remaining visual, staging, security, legal, operations or external authority-alignment evidence; waives the feature reviewer and makes G-01/G-02/G-05/G-06 plus FND-047/FND-049/FND-050/FND-052 non-blocking without falsely marking them passed or technically resolved. Repository-wide structural validation and pull-request CI remain mandatory. |
+| 13 | 2026-09-07 | in_progress | Expands the delivery scope, by explicit user direction, to every current tracked and untracked non-ignored repository change relative to `origin/develop`; regenerates the affected-path ledger from the gate's Git model while preserving other feature contracts as semantic authorities and making no new validation claim. |

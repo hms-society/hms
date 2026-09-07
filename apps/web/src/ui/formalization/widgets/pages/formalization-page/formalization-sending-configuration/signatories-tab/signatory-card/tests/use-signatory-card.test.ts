@@ -35,6 +35,7 @@ function createProps() {
     isRemovingSignatory: false,
     isReplacingSignatoryDocuments: false,
     isSelectingSignatoryChannel: false,
+    isReadOnly: false,
     removeSignatoryError: null,
   }
 }
@@ -51,5 +52,24 @@ describe('useSignatoryCard', () => {
 
     expect(props.onSelectedDocumentsChange).toHaveBeenCalledWith([])
     expect(props.onSelectChannel).toHaveBeenCalledWith('whatsapp', true)
+  })
+
+  it('does not mutate assignments or open removal while read-only', async () => {
+    const props = { ...createProps(), isReadOnly: true }
+    const { result } = renderHook(() => useSignatoryCard(props))
+
+    act(() => {
+      result.current.handleToggleDocument('document-1')
+      result.current.onSelectChannel('whatsapp', true)
+      result.current.handleRemoveDialogOpenChange(true)
+    })
+    await act(async () => {
+      await result.current.handleConfirmRemove()
+    })
+
+    expect(props.onSelectedDocumentsChange).not.toHaveBeenCalled()
+    expect(props.onSelectChannel).not.toHaveBeenCalled()
+    expect(props.onRemoveSignatory).not.toHaveBeenCalled()
+    expect(result.current.removeDialogOpen).toBe(false)
   })
 })

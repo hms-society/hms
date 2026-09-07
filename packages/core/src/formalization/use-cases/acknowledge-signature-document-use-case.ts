@@ -17,6 +17,8 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
+const ACKNOWLEDGEABLE_REQUEST_STATUSES = new Set(['in_progress', 'partially_submitted'])
+
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -79,7 +81,7 @@ export class AcknowledgeSignatureDocumentUseCase implements UseCase<Request, Res
       !document ||
       document.requestId !== session.requestId ||
       signatureRequest.version !== request.expectedRequestVersion ||
-      signatureRequest.status !== 'in_progress' ||
+      !ACKNOWLEDGEABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
       ['confirmed', 'rejected', 'cancelled', 'expired', 'failed'].includes(
         signatureRequest.status,
       )
@@ -93,8 +95,7 @@ export class AcknowledgeSignatureDocumentUseCase implements UseCase<Request, Res
       recipient.requestId !== signatureRequest.id ||
       recipient.id !== session.recipientId ||
       !['authenticated', 'reading'].includes(recipient.status) ||
-      ['confirmed', 'rejected', 'cancelled', 'expired'].includes(recipient.status) ||
-      (request.actorId && request.actorId !== recipient.personId)
+      ['confirmed', 'rejected', 'cancelled', 'expired'].includes(recipient.status)
     )
       throw new SignatureSessionInvalidError()
     const eligibility = await this.dependencies.sourceReader.findAuthenticationSource(

@@ -4,7 +4,26 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { confirmFormalizationSignatureSendingSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
-import { FormalizationSignatureSendingService } from '@/formalization/formalization-signature-sending.service'
+import { ConfirmFormalizationSignatureSendingUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationSignatureConfigurationRepository,
+  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureRequestsRepository,
+  FormalizationSignatureSourceReader,
+  FormalizationSignatureGatewayTransaction,
+  FormalizationsRepository,
+  SignatureSecretHasher,
+} from '@hms/core/formalization/interfaces'
+import type { Broker, DatetimeProvider, IdProvider } from '@hms/core/shared/interfaces'
+import { Inject } from '@nestjs/common'
+import {
+  FORMALIZATION_DATABASE_OPERATIONS,
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
+import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider as ServerIdProvider } from '@/shared/provision/id/id-provider'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
@@ -18,7 +37,39 @@ class ConfirmFormalizationSignatureSendingBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ConfirmFormalizationSignatureSendingController {
-  constructor(private readonly service: FormalizationSignatureSendingService) {}
+  private readonly useCase: ConfirmFormalizationSignatureSendingUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    configurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
+    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
+    @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
+    transaction: FormalizationSignatureGatewayTransaction,
+    @Inject(ServerIdProvider) idProvider: IdProvider,
+    @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
+    @Inject(InngestBroker) broker: Broker,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
+    @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
+    metadataReader: FormalizationSignatureDocumentMetadataReader,
+  ) {
+    this.useCase = new ConfirmFormalizationSignatureSendingUseCase({
+      formalizationsRepository,
+      configurationRepository,
+      sourceReader,
+      requestsRepository,
+      transaction,
+      idProvider,
+      datetimeProvider,
+      broker,
+      hasher,
+      metadataReader,
+    })
+  }
 
   @Post(':formalizationId/signature-sending/confirm')
   @HttpCode(200)
@@ -31,7 +82,7 @@ export class ConfirmFormalizationSignatureSendingController {
     body: ConfirmFormalizationSignatureSendingBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.confirm({
+    return this.useCase.execute({
       formalizationId,
       actorId: collaborator.collaboratorId,
       actorProfile: collaborator.profile,

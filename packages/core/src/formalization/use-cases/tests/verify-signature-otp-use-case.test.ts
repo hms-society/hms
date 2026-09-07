@@ -162,6 +162,27 @@ describe('Verify Signature Otp Use Case', () => {
       verifier: expect.any(String),
     })
   })
+  it('recovers a client whose provider observation advanced to signing', async () => {
+    const dependencies = makeDependencies()
+    dependencies.recipientsRepository.findById.mockResolvedValue(
+      fakeFormalizationSignatureRecipient({
+        id: 'recipient-1',
+        requestId: 'request-1',
+        status: 'signing',
+        version: 2,
+      }),
+    )
+    dependencies.verifier.verify.mockReturnValue(true)
+    const useCase = new VerifySignatureOtpUseCase({
+      ...dependencies,
+      secretGenerator: { generate: () => 'secret' },
+    })
+
+    await expect(useCase.execute(request())).resolves.toBeDefined()
+    expect(dependencies.transaction.verifyOtp).toHaveBeenCalledWith(
+      expect.objectContaining({ recipientChanges: { status: 'authenticated' } }),
+    )
+  })
   it('rejects a superseded challenge without consuming it', async () => {
     const dependencies = makeDependencies({ status: 'superseded' })
     const useCase = new VerifySignatureOtpUseCase({

@@ -12,7 +12,7 @@ export type DocumentReadingStepProps = {
   acknowledgedDocumentIds: readonly string[]
   activeDocumentId: string
   isPending: boolean
-  error?: string
+  actionError?: string
   onSelectDocument: (requestDocumentId: string) => void
   onAcknowledgeDocument: (requestDocumentId: string) => void
   onContinue: () => void
@@ -32,10 +32,11 @@ export function useDocumentReadingStep(props: DocumentReadingStepProps) {
 
   return {
     activeDocument,
+    actionError: props.actionError,
     acknowledged,
     allAcknowledged,
     content: query.content,
-    error: props.error ?? query.error,
+    documentError: query.error,
     isLoading: query.isLoading,
     handleRetry: query.refetch,
     handleAcknowledge: () => {

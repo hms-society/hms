@@ -3,13 +3,16 @@ import { Test } from '@nestjs/testing'
 import type { INestApplication } from '@nestjs/common'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { FormalizationSigningGatewayService } from '@/formalization/formalization-signature-sending.service'
 import {
   DocumensoWebhookNormalizer,
   UnprocessableDocumensoWebhookError,
 } from '@/formalization/provision'
 import { SigningGatewayWebhookController } from '@/formalization/rest/controllers/signing-gateway-webhook.controller'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { IdProvider as ServerIdProvider } from '@/shared/provision/id/id-provider'
+import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 const webhook = {
   id: 'event-1',
@@ -117,9 +120,22 @@ async function createApp(input: {
     controllers: [SigningGatewayWebhookController],
     providers: [
       {
-        provide: FormalizationSigningGatewayService,
-        useValue: { receiveWebhookPayload: input.receiveWebhookPayload },
+        provide: FORMALIZATION_REPOSITORIES.signatureWebhookReceipts,
+        useValue: {
+          findByDedupeKey: vi.fn().mockResolvedValue(null),
+          add: input.receiveWebhookPayload,
+        },
       },
+      {
+        provide: FORMALIZATION_PROVIDERS.sensitivePayloadCipher,
+        useValue: {
+          encrypt: vi
+            .fn()
+            .mockResolvedValue({ ciphertext: 'encrypted-hint', keyId: 'key-id' }),
+        },
+      },
+      { provide: ServerIdProvider, useValue: { generate: () => 'receipt-id' } },
+      { provide: ServerDatetimeProvider, useValue: { now: () => new Date() } },
       { provide: DocumensoWebhookNormalizer, useValue: { normalize: input.normalize } },
       {
         provide: EnvProvider,

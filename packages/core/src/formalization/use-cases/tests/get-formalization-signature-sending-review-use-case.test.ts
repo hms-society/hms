@@ -82,6 +82,7 @@ describe('Get Formalization Signature Sending Review Use Case', () => {
         id: confirmedRequest.id,
         status: 'confirmed',
         version: 4,
+        signatureConfigurationVersion: confirmedRequest.signatureConfigurationVersion,
       },
     })
   })

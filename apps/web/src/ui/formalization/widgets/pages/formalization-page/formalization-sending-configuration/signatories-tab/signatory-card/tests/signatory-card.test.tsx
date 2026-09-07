@@ -30,6 +30,7 @@ const props = {
   isRemovingSignatory: false,
   isReplacingSignatoryDocuments: false,
   isSelectingSignatoryChannel: false,
+  isReadOnly: false,
   removeSignatoryError: null,
 } as const
 
@@ -98,5 +99,25 @@ describe('SignatoryCard', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'E-mail' }))
 
     expect(props.onSelectChannel).toHaveBeenCalledWith('email', false)
+  })
+
+  it('disables document, channel, and removal controls when read-only', () => {
+    render(<SignatoryCard {...props} isReadOnly />)
+
+    expect(screen.getByRole('checkbox', { name: 'E-mail' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByRole('checkbox', { name: 'Contrato' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByRole('button', { name: 'Remover Cliente' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Contrato' }))
+    expect(props.onSelectedDocumentsChange).not.toHaveBeenCalled()
   })
 })

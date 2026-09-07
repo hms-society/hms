@@ -4,7 +4,19 @@ import { createZodDto } from 'nestjs-zod'
 import { formalizationSignatureSendingReviewSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
-import { FormalizationSignatureSendingService } from '@/formalization/formalization-signature-sending.service'
+import { GetFormalizationSignatureSendingReviewUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationSignatureConfigurationRepository,
+  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureRequestsRepository,
+  FormalizationSignatureSourceReader,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
+import { Inject } from '@nestjs/common'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
@@ -18,7 +30,28 @@ class FormalizationSignatureSendingReviewResponseDto extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class GetFormalizationSignatureSendingReviewController {
-  constructor(private readonly service: FormalizationSignatureSendingService) {}
+  private readonly useCase: GetFormalizationSignatureSendingReviewUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    configurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
+    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
+    metadataReader: FormalizationSignatureDocumentMetadataReader,
+  ) {
+    this.useCase = new GetFormalizationSignatureSendingReviewUseCase({
+      formalizationsRepository,
+      configurationRepository,
+      sourceReader,
+      metadataReader,
+      requestsRepository,
+    })
+  }
 
   @Get(':formalizationId/signature-sending/review')
   @ApiResponse({
@@ -33,7 +66,7 @@ export class GetFormalizationSignatureSendingReviewController {
     @Param('formalizationId', new ParseUUIDPipe()) formalizationId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.getReview({
+    return this.useCase.execute({
       formalizationId,
       actorId: collaborator.collaboratorId,
       actorProfile: collaborator.profile,

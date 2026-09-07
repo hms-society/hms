@@ -23,7 +23,7 @@ export const SignatoryCard = (props: SignatoryCardProps) => {
     removeSignatoryError,
     removeDialogOpen,
   } = useSignatoryCard(props)
-  const { signatory, documents, selectedDocuments } = props
+  const { isReadOnly, signatory, documents, selectedDocuments } = props
 
   return (
     <Card className='overflow-hidden border-border/80'>
@@ -61,7 +61,7 @@ export const SignatoryCard = (props: SignatoryCardProps) => {
               variant='ghost'
               size='sm'
               aria-label={`Remover ${signatory.name}`}
-              disabled={isRemovingSignatory}
+              disabled={isReadOnly || isRemovingSignatory}
               onClick={() => handleRemoveDialogOpenChange(true)}
             >
               <Icon name='trash-2' className='size-4' />
@@ -86,12 +86,12 @@ export const SignatoryCard = (props: SignatoryCardProps) => {
               <label
                 key={channel}
                 htmlFor={`${signatory.signatoryId}-channel-${channel}`}
-                className='flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors hover:bg-muted/50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10'
+                className={`flex min-h-10 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10 ${isReadOnly ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-muted/50'}`}
               >
                 <Checkbox
                   id={`${signatory.signatoryId}-channel-${channel}`}
                   checked={signatory.selectedChannels.includes(channel)}
-                  disabled={isPending}
+                  disabled={isReadOnly || isPending}
                   aria-label={channel === 'whatsapp' ? 'WhatsApp' : 'E-mail'}
                   onCheckedChange={(checked) =>
                     onSelectChannel(channel, checked === true)
@@ -128,12 +128,12 @@ export const SignatoryCard = (props: SignatoryCardProps) => {
               <label
                 key={document.documentId}
                 htmlFor={`${signatory.signatoryId}-${document.documentId}`}
-                className='flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors hover:bg-muted/50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring'
+                className={`flex min-h-11 items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${isReadOnly ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-muted/50'}`}
               >
                 <Checkbox
                   id={`${signatory.signatoryId}-${document.documentId}`}
                   checked={selectedDocuments.includes(document.documentId)}
-                  disabled={isPending}
+                  disabled={isReadOnly || isPending}
                   onCheckedChange={() => handleToggleDocument(document.documentId)}
                 />
                 <span className='truncate'>{document.name}</span>

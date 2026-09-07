@@ -14,6 +14,7 @@ import { getFormalizationSignatureConfigurationQueryKey } from './use-formalizat
 type ResponseError = Error & { statusCode?: number }
 
 const CANCELLATION_POLL_INTERVAL_MS = 1_000
+const SIGNATURE_SENDING_POLL_INTERVAL_MS = 3_000
 const TERMINAL_REQUEST_STATUSES = new Set<FormalizationSignatureRequestStatus>([
   'confirmed',
   'rejected',
@@ -21,6 +22,17 @@ const TERMINAL_REQUEST_STATUSES = new Set<FormalizationSignatureRequestStatus>([
   'expired',
   'failed',
 ])
+
+function getSignatureSendingPollInterval(
+  status: FormalizationSignatureRequestStatus | undefined,
+  isCancellationPending: boolean,
+) {
+  if (isCancellationPending) return CANCELLATION_POLL_INTERVAL_MS
+
+  return status && !TERMINAL_REQUEST_STATUSES.has(status)
+    ? SIGNATURE_SENDING_POLL_INTERVAL_MS
+    : false
+}
 
 function readResponse<Body>(response: {
   readonly isFailure: boolean
@@ -59,7 +71,11 @@ export function useFormalizationSignatureSending(
     queryKey: getFormalizationSignatureSendingReviewQueryKey(formalizationId),
     enabled: Boolean(formalizationId) && enabled,
     retry: false,
-    refetchInterval: isCancellationPending ? CANCELLATION_POLL_INTERVAL_MS : false,
+    refetchInterval: (query) =>
+      getSignatureSendingPollInterval(
+        query.state.data?.currentRequest?.status,
+        isCancellationPending,
+      ),
     queryFn: async () =>
       readResponse(await formalizationService.getSignatureSendingReview(formalizationId)),
   })
@@ -69,7 +85,14 @@ export function useFormalizationSignatureSending(
     enabled:
       Boolean(formalizationId) && enabled && Boolean(reviewQuery.data?.currentRequest),
     retry: false,
-    refetchInterval: isCancellationPending ? CANCELLATION_POLL_INTERVAL_MS : false,
+    refetchInterval: (query) => {
+      if (!reviewQuery.data?.currentRequest) return false
+
+      return getSignatureSendingPollInterval(
+        query.state.data?.status ?? reviewQuery.data.currentRequest.status,
+        isCancellationPending,
+      )
+    },
     queryFn: async () =>
       readResponse(await formalizationService.getSignatureSendingStatus(formalizationId)),
   })

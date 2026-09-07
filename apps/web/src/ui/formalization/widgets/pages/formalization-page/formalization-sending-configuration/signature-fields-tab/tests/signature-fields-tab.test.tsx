@@ -135,6 +135,30 @@ describe('SignatureFieldsTab', () => {
     expect(screen.getByText('Tudo salvo')).not.toBeNull()
   })
 
+  it('disables configuration controls when the owning hook is read-only', () => {
+    useSignatureFieldsTabMock.mockReturnValue({ ...fakeHook(), isReadOnly: true })
+
+    render(<SignatureFieldsTab expectedVersion={4} configuration={configuration} />)
+
+    expect(
+      screen
+        .getAllByRole('combobox')
+        .every((control) => control.hasAttribute('disabled')),
+    ).toBe(true)
+    expect(screen.getByRole('button', { name: 'Adicionar campo' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByRole('button', { name: 'Salvar campos' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByRole('button', { name: /Contrato0\/1/ })).toHaveProperty(
+      'disabled',
+      true,
+    )
+  })
+
   it('keeps a ready preview pending until every expected field is placed', () => {
     render(<SignatureFieldsTab expectedVersion={4} configuration={configuration} />)
 

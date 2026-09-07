@@ -132,6 +132,12 @@ describe('Get Signature Document Use Case', () => {
     })
   })
 
+  it('ignores a coexisting HMS actor while a client reads a private PDF', async () => {
+    await expect(execute(makeDependencies(), 'signed-in-admin')).resolves.toMatchObject({
+      privateFileId: 'private-file-1',
+    })
+  })
+
   it.each([
     { label: 'revoked', status: 'revoked' as const },
     { label: 'expired', status: 'expired' as const },

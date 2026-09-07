@@ -64,6 +64,15 @@ export class DrizzleFormalizationSignatureOtpChallengesRepository
       .limit(1)
     return row ? this.mapper.toDomain(row) : null
   }
+  async findLatestByInvitationId(invitationId: string) {
+    const [row] = await this.database
+      .select()
+      .from(formalizationSignatureOtpChallengeModel)
+      .where(eq(formalizationSignatureOtpChallengeModel.invitationId, invitationId))
+      .orderBy(desc(formalizationSignatureOtpChallengeModel.generation))
+      .limit(1)
+    return row ? this.mapper.toDomain(row) : null
+  }
   async replace(input: { challengeId: string; changes: any }) {
     await this.database
       .update(formalizationSignatureOtpChallengeModel)

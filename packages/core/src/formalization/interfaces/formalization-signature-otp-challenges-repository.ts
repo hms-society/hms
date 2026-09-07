@@ -6,6 +6,9 @@ export interface FormalizationSignatureOtpChallengesRepository {
   findCurrentByInvitationId(
     invitationId: string,
   ): Promise<FormalizationSignatureOtpChallenge | null>
+  findLatestByInvitationId(
+    invitationId: string,
+  ): Promise<FormalizationSignatureOtpChallenge | null>
   replace(input: {
     challengeId: string
     changes: FormalizationSignatureOtpChallengeChanges

@@ -24,6 +24,8 @@ import {
   SignatureProviderUnavailableError,
 } from '../domain/errors'
 
+const SIGNABLE_REQUEST_STATUSES = new Set(['in_progress', 'partially_submitted'])
+
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -74,7 +76,7 @@ export class StartFormalizationSigningUseCase implements UseCase<Request, Respon
       !signatureRequest ||
       signatureRequest.version !== request.expectedRequestVersion ||
       signatureRequest.snapshotId !== session.snapshotId ||
-      signatureRequest.status !== 'in_progress' ||
+      !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
       ['confirmed', 'rejected', 'cancelled', 'expired', 'failed'].includes(
         signatureRequest.status,
       )
@@ -101,8 +103,6 @@ export class StartFormalizationSigningUseCase implements UseCase<Request, Respon
       (recipient.actorKind === 'collaborator' &&
         !['lawyer', 'paralegal', 'supervisor'].includes(recipient.collaboratorRole ?? ''))
     )
-      throw new SignatureSessionInvalidError()
-    if (request.actorId && request.actorId !== signatureRecipient.personId)
       throw new SignatureSessionInvalidError()
     if (
       recipient.actorKind === 'collaborator' &&

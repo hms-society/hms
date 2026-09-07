@@ -40,6 +40,15 @@ type Dependencies = {
   readonly hasher: SignatureSecretHasher
 }
 
+const RECOVERABLE_RECIPIENT_STATUSES = new Set([
+  'invited',
+  'authenticating',
+  'locked',
+  'authenticated',
+  'reading',
+  'signing',
+])
+
 export class ExchangeSignatureInvitationUseCase implements UseCase<Request, Response> {
   constructor(private readonly dependencies: Dependencies) {}
   async execute(request: Request): Promise<Response> {
@@ -58,11 +67,10 @@ export class ExchangeSignatureInvitationUseCase implements UseCase<Request, Resp
     )
     if (!signatureRequest || !recipient || recipient.requestId !== signatureRequest.id)
       throw new SignatureSessionInvalidError()
-    const recoverableCollaboratorInvitation =
+    const recoverableInvitation =
       invitation.status === 'consumed' &&
-      recipient.actorKind === 'collaborator' &&
-      ['invited', 'authenticating'].includes(recipient.status)
-    if (invitation.status !== 'active' && !recoverableCollaboratorInvitation)
+      RECOVERABLE_RECIPIENT_STATUSES.has(recipient.status)
+    if (invitation.status !== 'active' && !recoverableInvitation)
       throw new SignatureInvitationConsumedError()
     const flowToken = this.dependencies.secretGenerator.generate()
     const deviceToken = this.dependencies.secretGenerator.generate()
@@ -88,7 +96,7 @@ export class ExchangeSignatureInvitationUseCase implements UseCase<Request, Resp
     const result = await this.dependencies.transaction.exchangeInvitation({
       invitationId: invitation.id,
       expectedInvitationGeneration: invitation.generation,
-      ...(recipient.actorKind === 'client'
+      ...(recipient.actorKind === 'client' && invitation.status === 'active'
         ? { invitationChanges: { status: 'consumed' as const, consumedAt: now } }
         : {}),
       flowSessionIdsToRevoke: previousSessions

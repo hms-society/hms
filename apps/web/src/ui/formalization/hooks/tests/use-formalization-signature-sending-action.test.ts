@@ -73,6 +73,22 @@ type MutationOptions = {
   }) => void | Promise<void>
 }
 
+type RefetchInterval<Body> = (query: {
+  readonly state: { readonly data?: Body }
+}) => number | false
+
+function getRefetchInterval<Body>(queryCallIndex: number) {
+  const options = useQueryMock.mock.calls[queryCallIndex]?.[0] as
+    | { readonly refetchInterval?: RefetchInterval<Body> }
+    | undefined
+
+  if (typeof options?.refetchInterval !== 'function') {
+    throw new Error('Expected a refetch interval callback')
+  }
+
+  return options.refetchInterval
+}
+
 describe('useFormalizationSignatureSending', () => {
   let reviewData: FormalizationSignatureSendingReviewResponse | undefined
   let statusData: FormalizationSignatureSendingStatusResponse | undefined
@@ -127,6 +143,43 @@ describe('useFormalizationSignatureSending', () => {
     )
   })
 
+  it('polls the review while a signature request is non-terminal', () => {
+    renderHook(() => useFormalizationSignatureSending('formalization-1'))
+
+    const refetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingReviewResponse>(0)
+
+    expect(refetchInterval({ state: { data: review } })).toBe(3_000)
+  })
+
+  it('polls the sending status while a signature request is non-terminal', () => {
+    renderHook(() => useFormalizationSignatureSending('formalization-1'))
+
+    const refetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingStatusResponse>(1)
+
+    expect(refetchInterval({ state: { data: status } })).toBe(3_000)
+  })
+
+  it('stops regular polling when the request becomes terminal', () => {
+    renderHook(() => useFormalizationSignatureSending('formalization-1'))
+
+    const reviewRefetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingReviewResponse>(0)
+    const statusRefetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingStatusResponse>(1)
+    const confirmedReview = {
+      ...review,
+      currentRequest: review.currentRequest
+        ? { ...review.currentRequest, status: 'confirmed' as const }
+        : undefined,
+    }
+    const confirmedStatus = { ...status, status: 'confirmed' as const }
+
+    expect(reviewRefetchInterval({ state: { data: confirmedReview } })).toBe(false)
+    expect(statusRefetchInterval({ state: { data: confirmedStatus } })).toBe(false)
+  })
+
   it('starts cancellation polling after the server accepts an asynchronous cancellation', async () => {
     const { result } = renderHook(() =>
       useFormalizationSignatureSending('formalization-1'),
@@ -145,9 +198,11 @@ describe('useFormalizationSignatureSending', () => {
     expect(reviewRefetch).toHaveBeenCalledOnce()
     expect(statusRefetch).toHaveBeenCalledOnce()
     expect(result.current.isCancellationPending).toBe(true)
-    expect(useQueryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ refetchInterval: 1_000 }),
-    )
+    const refetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingStatusResponse>(
+        useQueryMock.mock.calls.length - 1,
+      )
+    expect(refetchInterval({ state: { data: status } })).toBe(1_000)
   })
 
   it('stops cancellation polling when the refreshed response is already terminal', async () => {
@@ -174,10 +229,9 @@ describe('useFormalizationSignatureSending', () => {
     })
 
     expect(result.current.isCancellationPending).toBe(false)
-    expect(useQueryMock).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ refetchInterval: false }),
-    )
+    const refetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingReviewResponse>(0)
+    expect(refetchInterval({ state: { data: reviewData } })).toBe(false)
   })
 
   it('stops cancellation polling when the review has no current request', async () => {
@@ -197,9 +251,11 @@ describe('useFormalizationSignatureSending', () => {
     })
 
     expect(result.current.isCancellationPending).toBe(false)
-    expect(useQueryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ refetchInterval: false }),
-    )
+    const refetchInterval =
+      getRefetchInterval<FormalizationSignatureSendingStatusResponse>(
+        useQueryMock.mock.calls.length - 1,
+      )
+    expect(refetchInterval({ state: { data: statusData } })).toBe(false)
   })
 
   it('keeps cancellation pending without fabricating review or status data', async () => {

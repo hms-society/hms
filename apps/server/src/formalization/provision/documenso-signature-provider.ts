@@ -51,6 +51,7 @@ export class DocumensoSignatureProvider implements SignatureProvider {
       externalId: input.externalId,
       meta: {
         distributionMethod: 'NONE',
+        language: 'pt-BR',
       },
       recipients: input.recipients.map((recipient) => ({
         externalId: recipient.externalId,
@@ -168,7 +169,7 @@ export class DocumensoSignatureProvider implements SignatureProvider {
       method: 'POST',
       body: JSON.stringify({
         envelopeId: input.providerEnvelopeId,
-        meta: { distributionMethod: 'NONE' },
+        meta: { distributionMethod: 'NONE', language: 'pt-BR' },
       }),
       json: true,
     })
@@ -229,7 +230,7 @@ export class DocumensoSignatureProvider implements SignatureProvider {
               ? 'rejected'
               : envelopeStatus === 'cancelled'
                 ? 'cancelled'
-                : 'signing'
+                : 'invited'
         return {
           providerRecipientId: this.string(recipient.id) ?? '',
           recipientStatus,

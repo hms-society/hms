@@ -12,9 +12,11 @@ const mocks = vi.hoisted(() => ({
   contextRefetch: vi.fn(),
   exchangeExecute: vi.fn(),
   requestOtpExecute: vi.fn(),
+  requestOtpPending: false,
   resultRefetch: vi.fn(),
   startSigningExecute: vi.fn(),
   verifyOtpExecute: vi.fn(),
+  verifyOtpPending: false,
 }))
 
 vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
@@ -35,13 +37,13 @@ vi.mock('@/ui/formalization/hooks/use-exchange-signature-invitation-action', () 
 vi.mock('@/ui/formalization/hooks/use-request-signature-otp-action', () => ({
   useRequestSignatureOtpAction: () => ({
     execute: mocks.requestOtpExecute,
-    isPending: false,
+    isPending: mocks.requestOtpPending,
   }),
 }))
 vi.mock('@/ui/formalization/hooks/use-verify-signature-otp-action', () => ({
   useVerifySignatureOtpAction: () => ({
     execute: mocks.verifyOtpExecute,
-    isPending: false,
+    isPending: mocks.verifyOtpPending,
   }),
 }))
 vi.mock(
@@ -99,6 +101,8 @@ describe('useSigningGatewayPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.authSession = undefined
+    mocks.requestOtpPending = false
+    mocks.verifyOtpPending = false
     window.history.replaceState(null, '', '/assinaturas/acesso')
     mocks.contextRefetch.mockResolvedValue(invitationContext)
     mocks.acknowledgeExecute.mockImplementation(({ requestDocumentId }) =>
@@ -125,6 +129,45 @@ describe('useSigningGatewayPage', () => {
     const { result } = renderHook(() => useSigningGatewayPage())
     await waitFor(() => expect(result.current.step).toBe('invitation'))
     expect(mocks.contextRefetch).toHaveBeenCalledOnce()
+  })
+
+  it('keeps the OTP input editable after the code request completes', async () => {
+    mocks.contextRefetch.mockResolvedValue({
+      step: 'choose_channel',
+      channels: [
+        {
+          id: '00000000-0000-4000-8000-000000000003',
+          kind: 'email',
+          maskedDestination: 't***@example.com',
+        },
+      ],
+      csrfToken: 'csrf',
+    } satisfies SignatureGatewayContextDto)
+    mocks.requestOtpExecute.mockResolvedValue(
+      new RestResponse({
+        body: {
+          challengeId: '00000000-0000-4000-8000-000000000004',
+          expiresAt: '2026-09-04T22:00:00Z',
+          resendAvailableAt: '2026-09-04T21:31:00Z',
+        },
+      }),
+    )
+
+    const { result, rerender } = renderHook(() => useSigningGatewayPage())
+    await waitFor(() => expect(result.current.step).toBe('choose_channel'))
+
+    mocks.requestOtpPending = true
+    rerender()
+    act(() => {
+      if (result.current.step === 'choose_channel') result.current.props.onContinue()
+    })
+    await waitFor(() => expect(result.current.step).toBe('enter_otp'))
+
+    mocks.requestOtpPending = false
+    rerender()
+
+    if (result.current.step !== 'enter_otp') throw new Error('Expected OTP step')
+    expect(result.current.props.isPending).toBe(false)
   })
 
   it('exchanges and removes the fragment without putting it in history', async () => {
@@ -192,6 +235,33 @@ describe('useSigningGatewayPage', () => {
     expect(mocks.acknowledgeExecute).toHaveBeenCalledWith({
       requestDocumentId: documents[0].id,
       expectedRequestVersion: 4,
+    })
+  })
+
+  it('keeps the reading surface available when acknowledgement fails', async () => {
+    mocks.contextRefetch.mockResolvedValue(readingContext)
+    mocks.acknowledgeExecute.mockResolvedValueOnce(
+      new RestResponse({
+        statusCode: 409,
+        errorMessage: 'Não foi possível confirmar a leitura.',
+      }),
+    )
+    const { result } = renderHook(() => useSigningGatewayPage())
+    await waitFor(() => expect(result.current.step).toBe('reading'))
+
+    act(() => {
+      if (result.current.step === 'reading')
+        result.current.props.onAcknowledgeDocument(documents[0].id)
+    })
+
+    await waitFor(() => {
+      expect(result.current.step).toBe('reading')
+      if (result.current.step === 'reading') {
+        expect(result.current.props.actionError).toBe(
+          'Não foi possível confirmar a leitura.',
+        )
+        expect(result.current.props.activeDocumentId).toBe(documents[0].id)
+      }
     })
   })
 

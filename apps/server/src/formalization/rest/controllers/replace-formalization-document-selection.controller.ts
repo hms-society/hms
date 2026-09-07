@@ -3,12 +3,29 @@ import { ApiBearerAuth } from '@nestjs/swagger'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { replaceFormalizationDocumentSelectionSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import { ReplaceFormalizationDocumentSelectionUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationsRepository,
+  FormalizationSourceReader,
+} from '@hms/core/formalization/interfaces'
+import type {
+  DocumentPackagesRepository,
+  DocumentsRepository,
+  DocumentSpecificationsRepository,
+  DocumentVersionsRepository,
+  PackageDocumentsRepository,
+} from '@hms/core/document-production/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
+import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
+import { ServerFormalizationSourceReader } from '@/formalization/provision'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationDocumentSelectionResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
+import { Inject } from '@nestjs/common'
 
 class ReplaceSelectionBody extends createZodDto(
   replaceFormalizationDocumentSelectionSchema,
@@ -18,7 +35,38 @@ class ReplaceSelectionBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ReplaceFormalizationDocumentSelectionController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: ReplaceFormalizationDocumentSelectionUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(ServerFormalizationSourceReader)
+    sourceReader: FormalizationSourceReader,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
+    specificationsRepository: DocumentSpecificationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
+    documentPackagesRepository: DocumentPackagesRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
+    packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
+    documentsRepository: DocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
+    versionsRepository: DocumentVersionsRepository,
+    idProvider: IdProvider,
+    datetimeProvider: DatetimeProvider,
+  ) {
+    this.useCase = new ReplaceFormalizationDocumentSelectionUseCase(
+      formalizationsRepository,
+      sourceReader,
+      specificationsRepository,
+      documentPackagesRepository,
+      packageDocumentsRepository,
+      documentsRepository,
+      versionsRepository,
+      idProvider,
+      datetimeProvider,
+    )
+  }
 
   @Put(':formalizationId/documents/selection')
   handle(
@@ -27,8 +75,8 @@ export class ReplaceFormalizationDocumentSelectionController {
     body: ReplaceSelectionBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service
-      .replaceSelection({
+    return this.useCase
+      .execute({
         formalizationId,
         actorId: collaborator.collaboratorId,
         ...body,

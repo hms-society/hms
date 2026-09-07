@@ -2,25 +2,49 @@ import {
   Get,
   Header,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiProduces, ApiResponse } from '@nestjs/swagger'
+import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { GetFormalizationSignaturePreviewContentUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationsRepository,
+  FormalizationSignatureConfigurationRepository,
+} from '@hms/core/formalization/interfaces'
+
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 @FormalizationsController()
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class GetFormalizationSignaturePreviewContentController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: GetFormalizationSignaturePreviewContentUseCase
 
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(PROVISION_PROVIDERS.fileStorage)
+    fileStorageProvider: FileStorageProvider,
+  ) {
+    this.useCase = new GetFormalizationSignaturePreviewContentUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      fileStorageProvider,
+    )
+  }
   @Get(':formalizationId/signature-configuration/previews/:previewId/content')
   @ApiProduces('application/pdf')
   @Header('Cache-Control', 'private, no-store')
@@ -39,7 +63,7 @@ export class GetFormalizationSignaturePreviewContentController {
     @Param('previewId', new ParseUUIDPipe()) previewId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    const storedFile = await this.service.getSignaturePreviewContent({
+    const storedFile = await this.useCase.execute({
       formalizationId,
       previewId,
       actorId: collaborator.collaboratorId,

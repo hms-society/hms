@@ -133,6 +133,7 @@ export class GetFormalizationSignatureSendingReviewUseCase
               id: currentRequest.id,
               status: currentRequest.status,
               version: currentRequest.version,
+              signatureConfigurationVersion: currentRequest.signatureConfigurationVersion,
               openDocuments: 0,
               totalDocuments: documents.length,
             },

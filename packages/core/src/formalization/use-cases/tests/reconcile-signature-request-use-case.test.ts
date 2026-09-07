@@ -308,6 +308,36 @@ describe('ReconcileSignatureRequestUseCase', () => {
     expect(input).not.toHaveProperty('formalizationChanges')
   })
 
+  it('does not regress an authenticated recipient from an unsigned provider observation', async () => {
+    const fixture = makeFixture()
+    fixture.observation.recipients = fixture.observation.recipients.map((recipient) => ({
+      ...recipient,
+      recipientStatus: 'invited',
+      items: recipient.items.map((item) => ({ ...item, status: 'pending' })),
+    }))
+    fixture.provider.findEnvelopeState.mockResolvedValue(fixture.observation)
+    fixture.recipients.listByRequestId.mockReset()
+    fixture.recipients.listByRequestId.mockResolvedValue(
+      fixture.packageRecipients.map((recipient, index) => ({
+        ...recipient,
+        status: index === 0 ? ('authenticated' as const) : ('invited' as const),
+      })),
+    )
+
+    await expect(
+      useCase(fixture).execute({
+        requestId: 'request-1',
+        reason: 'scheduled',
+        occurredAt: NOW,
+      }),
+    ).resolves.toEqual({ outcome: 'unchanged' })
+    const input =
+      fixture.transaction.recordProviderObservationAndDerive.mock.calls[0]?.[0]
+    expect(
+      input?.recipientObservations.map((item) => item.recipientChanges.status),
+    ).toEqual(['authenticated', 'invited'])
+  })
+
   it('applies envelope terminal state only to non-completed documents', async () => {
     const fixture = makeFixture()
     fixture.observation.envelopeStatus = 'rejected'

@@ -82,7 +82,8 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     if (
       !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
       !READABLE_RECIPIENT_STATUSES.has(recipient.status) ||
-      (request.actorId && request.actorId !== recipient.personId)
+      (recipient.actorKind === 'collaborator' &&
+        request.actorId !== recipient.personId)
     )
       throw new SignatureDocumentUnavailableError()
 

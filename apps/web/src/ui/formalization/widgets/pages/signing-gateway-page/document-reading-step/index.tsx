@@ -48,9 +48,15 @@ export const DocumentReadingStep = (props: DocumentReadingStepProps) => {
               pageCount={document.pageCount}
               content={state.content}
               isLoading={state.isLoading}
-              error={state.error}
+              error={state.documentError}
               onRetry={() => void state.handleRetry()}
             />
+          ) : null}
+
+          {state.actionError ? (
+            <p role='alert' className='text-destructive'>
+              {state.actionError}
+            </p>
           ) : null}
 
           <div className='flex flex-col gap-3 sm:flex-row sm:justify-end'>
@@ -60,7 +66,7 @@ export const DocumentReadingStep = (props: DocumentReadingStepProps) => {
                 !document ||
                 state.acknowledged ||
                 state.isLoading ||
-                Boolean(state.error) ||
+                Boolean(state.documentError) ||
                 props.isPending
               }
               onClick={state.handleAcknowledge}

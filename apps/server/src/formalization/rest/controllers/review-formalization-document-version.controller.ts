@@ -1,14 +1,23 @@
-import { Body, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
+import { Body, Inject, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth } from '@nestjs/swagger'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { reviewFormalizationDocumentVersionSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import { ReviewFormalizationDocumentVersionUseCase } from '@hms/core/formalization/use-cases'
+import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
+import type {
+  DocumentPackagesRepository,
+  DocumentVersionsRepository,
+  PackageDocumentsRepository,
+} from '@hms/core/document-production/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationDocumentVersionResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 class ReviewBody extends createZodDto(reviewFormalizationDocumentVersionSchema) {}
 
@@ -16,7 +25,27 @@ class ReviewBody extends createZodDto(reviewFormalizationDocumentVersionSchema) 
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ReviewFormalizationDocumentVersionController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: ReviewFormalizationDocumentVersionUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
+    documentPackagesRepository: DocumentPackagesRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
+    packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
+    versionsRepository: DocumentVersionsRepository,
+    datetimeProvider: DatetimeProvider,
+  ) {
+    this.useCase = new ReviewFormalizationDocumentVersionUseCase(
+      formalizationsRepository,
+      documentPackagesRepository,
+      packageDocumentsRepository,
+      versionsRepository,
+      datetimeProvider,
+    )
+  }
 
   @Patch(':formalizationId/document-versions/:versionId/review')
   handle(
@@ -26,8 +55,8 @@ export class ReviewFormalizationDocumentVersionController {
     body: ReviewBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service
-      .reviewVersion({
+    return this.useCase
+      .execute({
         formalizationId,
         versionId,
         actorId: collaborator.collaboratorId,

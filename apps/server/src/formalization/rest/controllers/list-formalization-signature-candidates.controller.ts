@@ -3,7 +3,15 @@ import { ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { listFormalizationSignatureCandidatesSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { ListFormalizationSignatureCandidatesUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationSignatureConfigurationRepository,
+  FormalizationSignatureSourceReader,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import { Inject } from '@nestjs/common'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
@@ -17,7 +25,22 @@ class ListFormalizationSignatureCandidatesQuery extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ListFormalizationSignatureCandidatesController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: ListFormalizationSignatureCandidatesUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
+    signatureSourceReader: FormalizationSignatureSourceReader,
+  ) {
+    this.useCase = new ListFormalizationSignatureCandidatesUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      signatureSourceReader,
+    )
+  }
 
   @Get(':formalizationId/signature-configuration/candidates')
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -36,7 +59,7 @@ export class ListFormalizationSignatureCandidatesController {
     query: ListFormalizationSignatureCandidatesQuery,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.listSignatureCandidates({
+    return this.useCase.execute({
       formalizationId,
       actorId: collaborator.collaboratorId,
       actorProfile: collaborator.profile,

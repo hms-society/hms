@@ -5,7 +5,11 @@ import { useDocumentReadingStep } from '../use-document-reading-step'
 
 vi.mock('../use-document-reading-step', () => ({ useDocumentReadingStep: vi.fn() }))
 vi.mock('../signing-document-viewer', () => ({
-  SigningDocumentViewer: ({ title }: { title: string }) => <div>{title}</div>,
+  SigningDocumentViewer: ({ title, error }: { title: string; error?: string }) => (
+    <div data-testid='document-viewer' data-error={error}>
+      {title}
+    </div>
+  ),
 }))
 
 const documents = [
@@ -27,10 +31,11 @@ describe('DocumentReadingStep', () => {
   beforeEach(() => {
     vi.mocked(useDocumentReadingStep).mockReturnValue({
       activeDocument: documents[0],
+      actionError: undefined,
       acknowledged: false,
       allAcknowledged: false,
       content: new ArrayBuffer(1),
-      error: undefined,
+      documentError: undefined,
       isLoading: false,
       handleRetry: vi.fn(),
       handleAcknowledge: vi.fn(),
@@ -68,10 +73,11 @@ describe('DocumentReadingStep', () => {
     vi.mocked(useDocumentReadingStep).mockReturnValue({
       ...vi.mocked(useDocumentReadingStep).getMockImplementation()?.(props),
       activeDocument: documents[0],
+      actionError: undefined,
       acknowledged: true,
       allAcknowledged: true,
       content: new ArrayBuffer(1),
-      error: undefined,
+      documentError: undefined,
       isLoading: false,
       handleRetry: vi.fn(),
       handleAcknowledge: vi.fn(),
@@ -86,5 +92,27 @@ describe('DocumentReadingStep', () => {
     expect(
       screen.getByRole('button', { name: 'Assinar todos os documentos' }),
     ).toHaveProperty('disabled', false)
+  })
+
+  it('keeps the document viewer visible when acknowledgement fails', () => {
+    vi.mocked(useDocumentReadingStep).mockReturnValue({
+      activeDocument: documents[0],
+      actionError: 'Não foi possível confirmar a leitura.',
+      acknowledged: false,
+      allAcknowledged: false,
+      content: new ArrayBuffer(1),
+      documentError: undefined,
+      isLoading: false,
+      handleRetry: vi.fn(),
+      handleAcknowledge: vi.fn(),
+      handleContinue: vi.fn(),
+    })
+
+    render(<DocumentReadingStep {...props} />)
+
+    expect(screen.getByTestId('document-viewer').getAttribute('data-error')).toBeNull()
+    expect(screen.getByRole('alert').textContent).toBe(
+      'Não foi possível confirmar a leitura.',
+    )
   })
 })

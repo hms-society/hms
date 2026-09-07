@@ -232,6 +232,10 @@ export const FormalizationSendingConfigurationPanel = ({
   const hasOpenRequest = Boolean(currentRequest)
   const isRequestCancelled = currentRequest?.status === 'cancelled'
   const isRequestConfirmed = currentRequest?.status === 'confirmed'
+  const canResendCancelledRequest =
+    isRequestCancelled &&
+    currentRequest?.signatureConfigurationVersion !== undefined &&
+    currentRequest.signatureConfigurationVersion !== configuration.version
   const canEdit =
     configuration.editable &&
     !isReadOnly &&
@@ -245,7 +249,8 @@ export const FormalizationSendingConfigurationPanel = ({
   const isSendingReviewReady = sendingController.review?.ready === true
   const isRefreshingReview =
     sendingController.isLoadingReview || sendingController.isFetchingReview
-  const canOpenSendingReview = isConfigurationReady && canEdit && !hasOpenRequest
+  const canOpenSendingReview =
+    isConfigurationReady && canEdit && (!hasOpenRequest || canResendCancelledRequest)
   const canResetConfiguration =
     canEdit && (!hasOpenRequest || isRequestCancelled) && !isCancellationPending
   const canConfirmSending =
@@ -259,7 +264,9 @@ export const FormalizationSendingConfigurationPanel = ({
     : isCancellationPending
       ? 'Cancelamento em andamento'
       : isRequestCancelled
-        ? 'Envio cancelado'
+        ? canResendCancelledRequest
+          ? 'Pronto para reenvio'
+          : 'Envio cancelado'
         : isRequestConfirmed
           ? 'Envio concluído'
           : hasOpenRequest
@@ -386,7 +393,10 @@ export const FormalizationSendingConfigurationPanel = ({
                 className='w-full sm:w-auto'
                 onClick={handleOpenSendingReview}
               >
-                <Icon name='send' className='size-4' /> Revisar e iniciar envio
+                <Icon name='send' className='size-4' />{' '}
+                {canResendCancelledRequest
+                  ? 'Revisar e reenviar'
+                  : 'Revisar e iniciar envio'}
               </Button>
             )}
             <p id='formalization-send-help' className='text-xs text-muted-foreground'>
@@ -394,20 +404,75 @@ export const FormalizationSendingConfigurationPanel = ({
                 ? 'Complete a configuração para habilitar o envio.'
                 : isRequestConfirmed
                   ? 'Todos os documentos foram assinados e o envio foi concluído.'
-                  : !canEdit
-                    ? 'A configuração está disponível somente para leitura.'
-                    : hasOpenRequest
-                      ? isRequestCancelled
-                        ? 'O envio foi cancelado.'
-                        : 'Já existe um envio em andamento para esta configuração.'
-                      : isRefreshingReview
-                        ? 'A revisão do envio está sendo validada.'
-                        : sendingController.reviewError
-                          ? 'Abra a revisão para tentar carregar os dados novamente.'
-                          : !isSendingReviewReady
-                            ? 'Abra a revisão para consultar as pendências antes de confirmar.'
-                            : 'Revise os dados e confirme para iniciar o envio.'}
+                  : canResendCancelledRequest
+                    ? 'O envio anterior foi cancelado. Revise os dados para iniciar um novo envio.'
+                    : !canEdit
+                      ? 'A configuração está disponível somente para leitura.'
+                      : hasOpenRequest
+                        ? isRequestCancelled
+                          ? 'O envio foi cancelado.'
+                          : 'Já existe um envio em andamento para esta configuração.'
+                        : isRefreshingReview
+                          ? 'A revisão do envio está sendo validada.'
+                          : sendingController.reviewError
+                            ? 'Abra a revisão para tentar carregar os dados novamente.'
+                            : !isSendingReviewReady
+                              ? 'Abra a revisão para consultar as pendências antes de confirmar.'
+                              : 'Revise os dados e confirme para iniciar o envio.'}
             </p>
+            {hasOpenRequest && (
+              <div className='rounded-xl border border-primary/30 bg-primary/5 p-4'>
+                <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                  <div>
+                    <h3 className='font-medium'>
+                      {isCancellationPending
+                        ? 'Cancelamento do envio em andamento'
+                        : isRequestCancelled
+                          ? 'Envio de assinaturas cancelado'
+                          : isRequestConfirmed
+                            ? 'Envio de assinaturas concluído'
+                            : 'Envio de assinaturas em andamento'}
+                    </h3>
+                    {isCancellationPending ? (
+                      <p className='mt-1 text-sm text-muted-foreground'>
+                        Revogando o envio e atualizando o estado do provedor...
+                      </p>
+                    ) : !isRequestCancelled ? (
+                      <p className='mt-1 text-sm text-muted-foreground'>
+                        {sendingController.status
+                          ? `${sendingController.status.completedDocuments}/${sendingController.status.totalDocuments} documentos concluídos.`
+                          : 'Atualizando o progresso do envio...'}
+                      </p>
+                    ) : null}
+                  </div>
+                  {!isRequestCancelled &&
+                    !isCancellationPending &&
+                    sendingController.status?.canCancel && (
+                      <Button
+                        variant='outline'
+                        disabled={sendingController.isCancelling}
+                        onClick={() => {
+                          const expectedRequestVersion = sendingController.status?.version
+                          if (!expectedRequestVersion) return
+                          void sendingController.cancelSending({
+                            expectedRequestVersion,
+                            expectedFormalizationVersion: expectedVersion,
+                          })
+                        }}
+                      >
+                        {sendingController.isCancelling
+                          ? 'Cancelando...'
+                          : 'Cancelar envio'}
+                      </Button>
+                    )}
+                </div>
+                {sendingController.cancelError && (
+                  <p role='alert' className='mt-3 text-sm text-destructive'>
+                    Não foi possível cancelar o envio. Atualize e tente novamente.
+                  </p>
+                )}
+              </div>
+            )}
           </TabsContent>
           <TabsContent value='signatories' className='pt-4'>
             <SignatoriesTab
@@ -425,57 +490,6 @@ export const FormalizationSendingConfigurationPanel = ({
             />
           </TabsContent>
         </Tabs>
-        {hasOpenRequest && (
-          <div className='rounded-xl border border-primary/30 bg-primary/5 p-4'>
-            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-              <div>
-                <h3 className='font-medium'>
-                  {isCancellationPending
-                    ? 'Cancelamento do envio em andamento'
-                    : isRequestCancelled
-                      ? 'Envio de assinaturas cancelado'
-                      : isRequestConfirmed
-                        ? 'Envio de assinaturas concluído'
-                        : 'Envio de assinaturas em andamento'}
-                </h3>
-                {isCancellationPending ? (
-                  <p className='mt-1 text-sm text-muted-foreground'>
-                    Revogando o envio e atualizando o estado do provedor...
-                  </p>
-                ) : !isRequestCancelled ? (
-                  <p className='mt-1 text-sm text-muted-foreground'>
-                    {sendingController.status
-                      ? `${sendingController.status.completedDocuments}/${sendingController.status.totalDocuments} documentos concluídos.`
-                      : 'Atualizando o progresso do envio...'}
-                  </p>
-                ) : null}
-              </div>
-              {!isRequestCancelled &&
-                !isCancellationPending &&
-                sendingController.status?.canCancel && (
-                  <Button
-                    variant='outline'
-                    disabled={sendingController.isCancelling}
-                    onClick={() => {
-                      const expectedRequestVersion = sendingController.status?.version
-                      if (!expectedRequestVersion) return
-                      void sendingController.cancelSending({
-                        expectedRequestVersion,
-                        expectedFormalizationVersion: expectedVersion,
-                      })
-                    }}
-                  >
-                    {sendingController.isCancelling ? 'Cancelando...' : 'Cancelar envio'}
-                  </Button>
-                )}
-            </div>
-            {sendingController.cancelError && (
-              <p role='alert' className='mt-3 text-sm text-destructive'>
-                Não foi possível cancelar o envio. Atualize e tente novamente.
-              </p>
-            )}
-          </div>
-        )}
         <div className='flex flex-wrap justify-between gap-3 border-t border-border pt-4'>
           <p className='text-xs text-muted-foreground'>
             {configuration.status === 'read_only'

@@ -173,6 +173,7 @@ export function useSignatureFieldsTab({
   }
 
   function moveField(fieldId: string, dx: number, dy: number) {
+    if (isReadOnly) return
     setFields((current) =>
       current.map((field) =>
         field.fieldId === fieldId
@@ -188,6 +189,7 @@ export function useSignatureFieldsTab({
   }
 
   function resizeField(fieldId: string, dw: number, dh: number) {
+    if (isReadOnly) return
     setFields((current) =>
       current.map((field) =>
         field.fieldId === fieldId
@@ -356,6 +358,7 @@ export function useSignatureFieldsTab({
   }
 
   const persistLatest = useCallback(async () => {
+    if (isReadOnly) return
     const activeDocumentId = documentIdRef.current
     const activeDocument = configuration.documents.find(
       (item) => item.documentId === activeDocumentId,
@@ -397,7 +400,7 @@ export function useSignatureFieldsTab({
         void persistLatestRef.current().catch(() => undefined)
       }
     }
-  }, [configuration.documents, signatureConfiguration])
+  }, [configuration.documents, isReadOnly, signatureConfiguration])
 
   persistLatestRef.current = persistLatest
 
@@ -415,6 +418,7 @@ export function useSignatureFieldsTab({
   }
 
   function selectDocument(nextDocumentId: string) {
+    if (isReadOnly) return
     if (nextDocumentId === documentId) return
     const nextDocument = configuration.documents.find(
       (item) => item.documentId === nextDocumentId,
@@ -434,6 +438,7 @@ export function useSignatureFieldsTab({
   }
 
   function handleConfirmDocumentChange() {
+    if (isReadOnly) return
     if (!pendingDocumentId) return
     changeDocument(pendingDocumentId)
     setPendingDocumentId(null)

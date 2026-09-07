@@ -224,22 +224,38 @@ describe('SignatoriesTab', () => {
     )
   })
 
-  it('keeps adding a signatory available when the configuration is not editable', () => {
+  it('disables all signatory configuration controls when read-only', () => {
     render(
       <SignatoriesTab
         formalizationId='formalization-1'
         expectedVersion={2}
-        configuration={{ ...configuration, editable: false }}
+        configuration={{
+          ...configuration,
+          editable: false,
+          signatories: configuration.signatories.map((signatory, index) =>
+            index === 0 ? { ...signatory, removable: true } : signatory,
+          ),
+        }}
       />,
     )
 
     expect(screen.getByRole('button', { name: 'Adicionar signatário' })).toHaveProperty(
       'disabled',
-      false,
+      true,
+    )
+    expect(screen.getAllByRole('checkbox')).toHaveLength(4)
+    expect(
+      screen
+        .getAllByRole('checkbox')
+        .every((checkbox) => checkbox.hasAttribute('disabled')),
+    ).toBe(true)
+    expect(screen.getByRole('button', { name: 'Remover Cliente' })).toHaveProperty(
+      'disabled',
+      true,
     )
   })
 
-  it('keeps adding a signatory available while another add request is pending', () => {
+  it('disables adding a signatory while another add request is pending', () => {
     useConfigurationMock.mockReturnValue(fakeHook({ isAddingSignatory: true }))
 
     render(
@@ -252,7 +268,7 @@ describe('SignatoriesTab', () => {
 
     expect(screen.getByRole('button', { name: 'Adicionar signatário' })).toHaveProperty(
       'disabled',
-      false,
+      true,
     )
   })
 })

@@ -2,6 +2,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -12,9 +13,16 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { requestFormalizationSignaturePreviewGenerationSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { RequestFormalizationSignaturePreviewGenerationUseCase } from '@hms/core/formalization/use-cases'
+import type {
+  FormalizationsRepository,
+  FormalizationSignatureConfigurationRepository,
+} from '@hms/core/formalization/interfaces'
 
-import { FormalizationApplicationService } from '@/formalization/formalization-application.service'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
@@ -32,7 +40,23 @@ class RequestFormalizationSignaturePreviewGenerationBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class RequestFormalizationSignaturePreviewGenerationController {
-  constructor(private readonly service: FormalizationApplicationService) {}
+  private readonly useCase: RequestFormalizationSignaturePreviewGenerationUseCase
+
+  constructor(
+    @Inject(FORMALIZATION_REPOSITORIES.formalizations)
+    formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
+    broker: InngestBroker,
+    datetimeProvider: DatetimeProvider,
+  ) {
+    this.useCase = new RequestFormalizationSignaturePreviewGenerationUseCase(
+      formalizationsRepository,
+      signatureConfigurationRepository,
+      broker,
+      datetimeProvider,
+    )
+  }
 
   @Post(':formalizationId/signature-configuration/previews/:previewId/retry')
   @HttpCode(HttpStatus.OK)
@@ -48,7 +72,7 @@ export class RequestFormalizationSignaturePreviewGenerationController {
     body: RequestFormalizationSignaturePreviewGenerationBody & RequestBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.service.retrySignaturePreview({
+    return this.useCase.execute({
       formalizationId,
       previewId,
       actorId: collaborator.collaboratorId,

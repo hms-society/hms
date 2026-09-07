@@ -275,6 +275,18 @@ describe('Get Signature Gateway Context Use Case', () => {
     })
   })
 
+  it('ignores a coexisting HMS actor for a client OTP session', async () => {
+    const dependencies = makeDependencies()
+
+    await expect(
+      new GetSignatureGatewayContextUseCase(dependencies).execute({
+        sessionToken: 'token',
+        deviceToken: 'device',
+        actorId: 'signed-in-admin',
+      }),
+    ).resolves.toMatchObject({ step: 'reading', csrfToken: 'fresh-csrf' })
+  })
+
   it.each([
     'missing',
     'foreign',
@@ -500,6 +512,51 @@ describe('Get Signature Gateway Context Use Case', () => {
         personId: 'collaborator-1',
         actorKind: 'collaborator',
         status: 'invited',
+      }),
+    )
+    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+      personId: 'collaborator-1',
+      actorKind: 'collaborator',
+      active: true,
+      collaboratorRole: 'lawyer',
+      channels: [],
+    })
+    dependencies.assignmentsRepository.listByRecipientId.mockResolvedValue([
+      {
+        id: 'assignment-1',
+        requestId: 'request-1',
+        recipientId: 'recipient-1',
+        requestDocumentId: 'document-1',
+        createdAt: NOW,
+      },
+    ])
+
+    await expect(execute(dependencies)).resolves.toEqual({
+      step: 'collaborator_login',
+      loginPath: '/login?returnTo=%2Fassinaturas%2Facesso',
+      csrfToken: 'fresh-csrf',
+    })
+  })
+
+  it('allows a pending collaborator invite after provider reconciliation reports signing', async () => {
+    const dependencies = makeDependencies()
+    dependencies.sessionsRepository.findByTokenHash.mockResolvedValue(
+      fakeFormalizationSignatureGatewaySession({
+        kind: 'flow',
+        requestId: 'request-1',
+        recipientId: 'recipient-1',
+        snapshotId: 'snapshot-1',
+        deviceSecretHash: 'device-hash',
+        expiresAt: new Date(NOW.getTime() + 60_000),
+      }),
+    )
+    dependencies.recipientsRepository.findById.mockResolvedValue(
+      fakeFormalizationSignatureRecipient({
+        id: 'recipient-1',
+        requestId: 'request-1',
+        personId: 'collaborator-1',
+        actorKind: 'collaborator',
+        status: 'signing',
       }),
     )
     dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({

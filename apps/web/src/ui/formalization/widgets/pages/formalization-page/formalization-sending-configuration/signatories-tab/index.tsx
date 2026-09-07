@@ -48,6 +48,7 @@ export const SignatoriesTab = ({
           type='button'
           variant='outline'
           className='shrink-0'
+          disabled={!configuration.editable || isAddingSignatory}
           onClick={() => setIsCandidateDialogOpen(true)}
         >
           <Icon name='user' className='size-4' /> Adicionar signatário
@@ -69,6 +70,7 @@ export const SignatoriesTab = ({
             isRemovingSignatory={isRemovingSignatory}
             isReplacingSignatoryDocuments={isReplacingSignatoryDocuments}
             isSelectingSignatoryChannel={isSelectingSignatoryChannel}
+            isReadOnly={!configuration.editable}
             removeSignatoryError={removeSignatoryError}
             onRemoveSignatory={() => handleRemoveSignatory(signatory.signatoryId)}
             onSelectChannel={(channel, selected) =>
