@@ -1,25 +1,24 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { DocumentValidationDocumentFaker } from '@hms/core/document-engine/domain/entities/fakers'
-import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
-
-import { useDocumentValidationDocumentsQuery } from '@/ui/document-engine/hooks/use-document-validation-documents-query'
+import {
+  DocumentBatchChannel,
+  DocumentBatchStatus,
+} from '@hms/core/document-engine/domain/structures'
+import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useDocumentInbox } from '../use-document-inbox'
 
-vi.mock('@/ui/document-engine/hooks/use-document-validation-documents-query', () => ({
-  useDocumentValidationDocumentsQuery: vi.fn(),
+vi.mock('@/ui/document-engine/hooks/use-document-batches-triage-query', () => ({
+  useDocumentBatchesTriageQuery: vi.fn(),
 }))
 
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: vi.fn(),
 }))
 
-const useDocumentValidationDocumentsQueryMock = vi.mocked(
-  useDocumentValidationDocumentsQuery,
-)
+const useDocumentBatchesTriageQueryMock = vi.mocked(useDocumentBatchesTriageQuery)
 const useNavigationMock = vi.mocked(useNavigation)
 
 describe('useDocumentInbox', () => {
@@ -27,24 +26,37 @@ describe('useDocumentInbox', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useDocumentValidationDocumentsQueryMock.mockReturnValue({
-      documents: [
-        DocumentValidationDocumentFaker.fake({
-          id: 'document-file-1',
-          fileName: 'validado.pdf',
-          status: DocumentValidationStatus.Valid,
-          extractedFields: [{ label: 'Titular', value: 'Mariana Costa Silva' }],
-        }),
-        DocumentValidationDocumentFaker.fake({
-          id: 'document-file-2',
-          fileName: 'ilegivel.pdf',
-          status: DocumentValidationStatus.Illegible,
-          extractedFields: [{ label: 'Titular', value: 'Mariana Costa Silva' }],
-        }),
+    useDocumentBatchesTriageQueryMock.mockReturnValue({
+      batches: [
+        {
+          id: 'batch-1',
+          readableId: 'LOTE-20260826-0001',
+          status: DocumentBatchStatus.PendingIdentification,
+          channel: DocumentBatchChannel.WhatsApp,
+          sender: '5511999998888',
+          inTriageBox: true,
+          clientId: 'client-1',
+          files: [
+            {
+              id: 'file-1',
+              batchId: 'batch-1',
+              originalName: 'cnh.pdf',
+              mimeType: 'application/pdf',
+              sizeBytes: 102400,
+              storagePath: 'batches/cnh.pdf',
+              createdAt: new Date(),
+            },
+          ],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
-      documentsError: null,
-      isFetchingDocuments: false,
-      refetchDocuments: vi.fn(),
+      total: 1,
+      page: 1,
+      limit: 6,
+      batchesError: null,
+      isFetchingBatches: false,
+      refetchBatches: vi.fn(),
     })
     useNavigationMock.mockReturnValue({
       navigateTo,
@@ -52,36 +64,39 @@ describe('useDocumentInbox', () => {
     })
   })
 
-  it('maps backend documents to the inbox view model', () => {
+  it('maps triage document batches to the inbox view model', () => {
     const { result } = renderHook(() => useDocumentInbox())
 
-    expect(result.current.totalItems).toBe(2)
-    expect(result.current.paginatedData[0]).toMatchObject({
-      fileName: 'validado.pdf',
-      status: 'Validado',
-      receivedFrom: 'Mariana Costa Silva',
+    expect(useDocumentBatchesTriageQueryMock).toHaveBeenCalledWith({
+      page: 1,
+      limit: 6,
     })
-  })
-
-  it('applies the selected status filter and resets pagination', () => {
-    const { result } = renderHook(() => useDocumentInbox())
-
-    act(() => result.current.setStatusFilter('Ilegível'))
-    act(() => result.current.handleApplyFilters())
-
     expect(result.current.totalItems).toBe(1)
-    expect(result.current.paginatedData[0].fileName).toBe('ilegivel.pdf')
+    expect(result.current.paginatedData[0]).toMatchObject({
+      fileName: 'cnh.pdf',
+      status: 'Aguardando validação',
+      receivedFrom: '5511999998888',
+    })
   })
 
   it('navigates to the analysis page for a selected document', async () => {
     const { result } = renderHook(() => useDocumentInbox())
 
     await act(async () => {
-      await result.current.handleAnalyze('document-file-1')
+      await result.current.handleAnalyze('file-1')
     })
 
     expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
-      params: { fileId: 'document-file-1' },
+      params: { fileId: 'file-1' },
+    })
+  })
+
+  it('keeps accepting a case id without changing the triage query contract', () => {
+    renderHook(() => useDocumentInbox({ caseId: 'case-1' }))
+
+    expect(useDocumentBatchesTriageQueryMock).toHaveBeenCalledWith({
+      page: 1,
+      limit: 6,
     })
   })
 })

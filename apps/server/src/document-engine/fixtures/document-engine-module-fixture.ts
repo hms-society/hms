@@ -70,24 +70,32 @@ export class DocumentEngineModuleFixture {
     const restFixture = await DocumentEngineModuleFixture.registerRestFixture(
       controller,
       (builder) => {
-        const authenticatedBuilder = builder.overrideGuard(AuthGuard).useValue({
-          canActivate(context: {
-            switchToHttp(): {
-              getRequest(): {
-                user?: { id: string; email: string }
-                auth?: { accessToken: string; user: { id: string; email: string } }
+        const authenticatedBuilder = builder
+          .overrideGuard(AuthGuard)
+          .useValue({
+            canActivate(context: {
+              switchToHttp(): {
+                getRequest(): {
+                  user?: { id: string; email: string }
+                  auth?: { accessToken: string; user: { id: string; email: string } }
+                }
               }
-            }
-          }) {
-            const request = context.switchToHttp().getRequest()
-            request.user = { id: userId, email: 'lawyer@hms.com' }
-            request.auth = {
-              accessToken: 'test-token',
-              user: { id: userId, email: 'lawyer@hms.com' },
-            }
-            return true
-          },
-        })
+            }) {
+              const request = context.switchToHttp().getRequest()
+              request.user = { id: userId, email: 'lawyer@hms.com' }
+              request.auth = {
+                accessToken: 'test-token',
+                user: { id: userId, email: 'lawyer@hms.com' },
+              }
+              return true
+            },
+          })
+          .overrideGuard(ActiveCollaboratorGuard)
+          .useValue({
+            canActivate() {
+              return true
+            },
+          })
 
         return configure?.(authenticatedBuilder) ?? authenticatedBuilder
       },

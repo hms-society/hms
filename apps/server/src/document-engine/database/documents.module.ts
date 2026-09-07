@@ -11,6 +11,7 @@ import { IdentityModule } from '@/identity/identity.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
+import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
@@ -26,6 +27,8 @@ import { RecordDocumentValidationDecisionController } from '../rest/controllers/
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
+import { ListTriageDocumentBatchesController } from '../rest/controllers/list-triage-document-batches.controller'
+
 @Module({
   imports: [
     DocumentsDatabaseModule,
@@ -34,10 +37,12 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
     IdentityModule,
     CommunicationModule,
     DocumentEngineMessagingModule,
+    DocumentEngineProvisionModule,
   ],
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
+    ListTriageDocumentBatchesController,
     GetDocumentFileController,
     GetDocumentValidationController,
     ListDocumentValidationsController,
@@ -84,6 +89,7 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
     RealDocumentsSeeder,
     DocumentEngineMessagingModule,
     DocumentsDatabaseModule,
+    IdentityModule,
   ],
 })
 export class DocumentsModule {}

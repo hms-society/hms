@@ -2,6 +2,7 @@ import type { DocumentValidationsRepository } from '../interfaces'
 import type { DocumentValidationStatus } from '../domain/structures'
 
 export type ListDocumentValidationsRequest = {
+  caseId?: string
   status?: DocumentValidationStatus
 }
 
