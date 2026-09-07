@@ -134,17 +134,24 @@ Fakers must use `@faker-js/faker`, return valid domain data by default, and acce
 partial overrides so a test can express only the fields relevant to its scenario:
 
 ```ts
-export function fakeIntake(overrides: Partial<Intake> = {}): Intake {
-  return {
-    id: faker.string.uuid(),
-    // valid defaults...
-    ...overrides,
+export class IntakeFaker {
+  static fake(overrides: Partial<Intake> = {}): Intake {
+    return {
+      id: faker.string.uuid(),
+      // valid defaults...
+      ...overrides,
+    }
+  }
+
+  static fakeMany(count = 10): Intake[] {
+    return Array.from({ length: count }, () => IntakeFaker.fake())
   }
 }
 ```
 
-Add a `fakeMany` helper only when tests need collections repeatedly. Export fakers
-through the local `fakers/index.ts` barrel.
+New and materially changed entity fakers expose `static fake` and
+`static fakeMany`; structure fakers may omit `fakeMany` when collections have no
+meaningful use. Export faker classes through the local `fakers/index.ts` barrel.
 
 Use the owning core faker from tests instead of defining local entity fixtures such
 as `fakeDocument`, `createDocument`, or `fake<DomainEntity>`. A test may override

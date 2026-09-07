@@ -1,5 +1,5 @@
 import type { Entity } from '#shared/domain/entities/entity'
-import type { LegalCaseStatus } from '../structures'
+import type { CaseChecklistGate, CaseDossierGate, LegalCaseStatus } from '../structures'
 
 export type LegalCase = Entity & {
   publicCode: string
@@ -9,13 +9,16 @@ export type LegalCase = Entity & {
   legalTopicId: string
   title: string
   status: LegalCaseStatus
+  checklistCompletedAt?: Date
+  checklistCompletedBy?: string
+  checklistGate: CaseChecklistGate
+  dossierGate: CaseDossierGate
   openedAt: Date
-  version: number
   createdAt: Date
   updatedAt: Date
 }
 
 export type LegalCaseCreation = Omit<
   LegalCase,
-  'createdAt' | 'id' | 'updatedAt' | 'version'
+  'checklistGate' | 'createdAt' | 'dossierGate' | 'id' | 'updatedAt'
 >
