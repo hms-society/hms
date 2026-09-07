@@ -9,7 +9,10 @@ import { DocumentEngineProvisionModule } from '../provision/document-engine-prov
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
-import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
+import {
+  ListClientDocumentBatchUseCase,
+  ListTriageDocumentBatchesUseCase,
+} from '@hms/core/document-engine/use-cases'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { DocumentsSeeder } from './documents-seeder'
 import { RealDocumentsSeeder } from './real-documents-seeder'
@@ -52,12 +55,21 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
       },
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
+    {
+      provide: ListTriageDocumentBatchesUseCase,
+      useFactory: (repository: DocumentBatchesRepository) => {
+        return new ListTriageDocumentBatchesUseCase(repository)
+      },
+      inject: [DOCUMENT_ENGINE.documentBatches],
+    },
   ],
   exports: [
     ListClientDocumentBatchUseCase,
+    ListTriageDocumentBatchesUseCase,
     DocumentsSeeder,
     RealDocumentsSeeder,
     DocumentEngineMessagingModule,
+    DocumentEngineProvisionModule,
     DocumentsDatabaseModule,
     IdentityModule,
   ],
