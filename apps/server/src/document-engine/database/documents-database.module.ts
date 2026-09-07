@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common'
-import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
-
+import {
+  CreateDocumentBatchUseCase,
+  ListTriageDocumentBatchesUseCase,
+} from '@hms/core/document-engine/use-cases'
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -62,6 +64,13 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
         DatetimeProvider,
       ],
     },
+    {
+      provide: ListTriageDocumentBatchesUseCase,
+      useFactory: (documentBatchesRepo: any) => {
+        return new ListTriageDocumentBatchesUseCase(documentBatchesRepo)
+      },
+      inject: [DOCUMENT_ENGINE.documentBatches],
+    },
     DocumentsSeeder,
     RealDocumentsSeeder,
   ],
@@ -71,6 +80,7 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DOCUMENT_ENGINE.documentValidations,
     DOCUMENT_ENGINE.documentValidationLogs,
     CreateDocumentBatchUseCase,
+    ListTriageDocumentBatchesUseCase,
     DocumentsSeeder,
     RealDocumentsSeeder,
   ],
