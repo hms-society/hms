@@ -22,7 +22,7 @@ describe('SupabaseStorageProvider', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockReturnValue(supabaseClient)
+    vi.mocked(createClient).mockReturnValue(supabaseClient as any)
     createBucket.mockResolvedValue({ data: null, error: null })
     upload.mockResolvedValue({ data: { path: 'seed/file.pdf' }, error: null })
     from.mockReturnValue({ upload })

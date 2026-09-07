@@ -5,6 +5,7 @@ import type {
 } from '../domain/structures'
 
 export type ListDocumentValidationsFilters = {
+  caseId?: string
   status?: DocumentValidationStatus
 }
 
@@ -25,6 +26,7 @@ export type RecordDocumentValidationDecisionInput = {
   status: DocumentValidationStatus
   reviewedBy: string
   decision: DocumentValidationDecision
+  caseId?: string
   documentTypeId?: string
   checklistRequirementId?: string
   reason?: string
