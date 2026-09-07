@@ -42,7 +42,6 @@ export class DocumentProductionModuleFixture {
       {
         imports: [IdentityModule, LegalCatalogModule, DocumentProductionDatabaseModule],
         controllers: controller ? [controller] : [],
-        providers: [DocumentProductionSeeder],
       },
       (builder) =>
         builder.overrideGuard(AuthGuard).useValue({
