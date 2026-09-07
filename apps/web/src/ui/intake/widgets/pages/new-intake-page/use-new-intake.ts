@@ -12,7 +12,7 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-import { useRegisterIntakeAction } from './use-register-intake-action'
+import { useRegisterIntakeAction } from '@/ui/intake/hooks/use-register-intake-action'
 
 const DEFAULT_VALUES: IntakeFormData = {
   origin: 'direct',

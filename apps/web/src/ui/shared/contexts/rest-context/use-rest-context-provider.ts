@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import { BROWSER_ENV } from '@/constants'
 import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
+import { SigningGatewayRestClient } from '@/rest/axios/signing-gateway-rest-client'
 import { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
 import { DocumentEngineService } from '@/rest/services/document-engine-service'
 import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
@@ -10,10 +11,15 @@ import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
 import { DocumentValidationService } from '@/rest/services/document-validation-service'
 import { DynamicFormService } from '@/rest/services/dynamic-form-service'
+import { FormalizationService } from '@/rest/services/formalization-service'
 import { IdentityService } from '@/rest/services/identity-service'
 import { IntakeService } from '@/rest/services/intake-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { SchedulingService } from '@/rest/services/scheduling-service'
+import {
+  createSigningGatewayCsrfStore,
+  SigningGatewayService,
+} from '@/rest/services/signing-gateway-service'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -40,6 +46,11 @@ export function useRestContextProvider(): RestContextValue {
     },
     [getSession, handleUnauthorized],
   )
+  const signingGatewayClient = useMemo(
+    () => SigningGatewayRestClient(BROWSER_ENV.hmsServerAppUrl, getSession),
+    [getSession],
+  )
+  const signingGatewayCsrfStore = useMemo(createSigningGatewayCsrfStore, [])
 
   return {
     intakeService: IntakeService(restClient),
@@ -55,5 +66,10 @@ export function useRestContextProvider(): RestContextValue {
     aiSuggestionsService: AiSuggestionsService(restClient),
     documentValidationService: DocumentValidationService(restClient),
     dynamicFormService: DynamicFormService(restClient),
+    formalizationService: FormalizationService(restClient),
+    signingGatewayService: SigningGatewayService(
+      signingGatewayClient,
+      signingGatewayCsrfStore,
+    ),
   }
 }

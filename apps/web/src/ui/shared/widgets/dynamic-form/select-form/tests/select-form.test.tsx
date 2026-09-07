@@ -1,67 +1,60 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { useDynamicFormOptionsQuery } from '@/ui/shared/hooks/use-dynamic-form-options-query'
 
 import { SelectFormDialog } from '../index'
 
-const { listDynamicFormsMock, listLegalAreasMock, listLegalTopicsMock } = vi.hoisted(
-  () => ({
-    listDynamicFormsMock: vi.fn(),
-    listLegalAreasMock: vi.fn(),
-    listLegalTopicsMock: vi.fn(),
-  }),
-)
-
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: () => ({
-    dynamicFormService: { listDynamicForms: listDynamicFormsMock },
-    legalCatalogService: {
-      listLegalAreas: listLegalAreasMock,
-      listLegalTopics: listLegalTopicsMock,
-    },
-  }),
+vi.mock('@/ui/shared/hooks/use-dynamic-form-options-query', () => ({
+  useDynamicFormOptionsQuery: vi.fn(),
 }))
+
+const useDynamicFormOptionsQueryMock = vi.mocked(useDynamicFormOptionsQuery)
 
 const forms = [
   {
     id: '11111111-1111-4111-8111-111111111111',
     name: 'Entrevista Cível',
+    status: 'available' as const,
     contexts: [],
     fields: [],
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
   },
   {
     id: '22222222-2222-4222-8222-222222222222',
     name: 'Triagem Cível',
+    status: 'available' as const,
     contexts: [],
     fields: [],
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
   },
 ]
 
 function renderDialog(onSelect = vi.fn(), initialSelectedFormId?: string) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-
   return {
     onSelect,
     ...render(
-      <QueryClientProvider client={queryClient}>
-        <SelectFormDialog
-          isOpen
-          onClose={vi.fn()}
-          onSelect={onSelect}
-          initialSelectedFormId={initialSelectedFormId}
-        />
-      </QueryClientProvider>,
+      <SelectFormDialog
+        isOpen
+        onClose={vi.fn()}
+        onSelect={onSelect}
+        initialSelectedFormId={initialSelectedFormId}
+      />,
     ),
   }
 }
 
 describe('SelectFormDialog', () => {
   beforeEach(() => {
-    listDynamicFormsMock.mockResolvedValue({ isFailure: false, body: forms })
-    listLegalAreasMock.mockResolvedValue({ isFailure: false, body: [] })
-    listLegalTopicsMock.mockResolvedValue({ isFailure: false, body: [] })
+    useDynamicFormOptionsQueryMock.mockReturnValue({
+      dynamicForms: forms,
+      isDynamicFormsError: false,
+      isLoadingDynamicForms: false,
+      legalAreas: [],
+      legalTopics: [],
+    })
   })
 
   afterEach(() => {

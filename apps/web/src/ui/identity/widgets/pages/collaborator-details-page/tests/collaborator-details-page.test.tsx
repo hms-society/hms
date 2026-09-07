@@ -37,7 +37,7 @@ const collaborator = {
   ],
 }
 
-function createController(
+function fakeHook(
   overrides: Partial<CollaboratorDetailsPageController> = {},
 ): CollaboratorDetailsPageController {
   return {
@@ -79,7 +79,7 @@ describe('Collaborator Details Page', () => {
   })
 
   it('renders the overview tab with collaborator information', () => {
-    useCollaboratorDetailsPageMock.mockReturnValue(createController())
+    useCollaboratorDetailsPageMock.mockReturnValue(fakeHook())
 
     render(<CollaboratorDetailsPage collaboratorId='collaborator-id' />)
 
@@ -95,7 +95,7 @@ describe('Collaborator Details Page', () => {
   it('allows retrying when the collaborator cannot be loaded', () => {
     const refetch = vi.fn()
     useCollaboratorDetailsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaborator: null,
         collaboratorError: new Error('failure'),
         refetch,
@@ -112,7 +112,7 @@ describe('Collaborator Details Page', () => {
   it('shows the reactivation action for a disabled collaborator', () => {
     const handleOpenReactivate = vi.fn()
     useCollaboratorDetailsPageMock.mockReturnValue(
-      createController({
+      fakeHook({
         collaborator: { ...collaborator, status: 'disabled' },
         handleOpenReactivate,
         isCollaboratorDisabled: true,
@@ -131,7 +131,7 @@ describe('Collaborator Details Page', () => {
     const handleOpenEdit = vi.fn()
     const handleOpenDeactivate = vi.fn()
     useCollaboratorDetailsPageMock.mockReturnValue(
-      createController({ handleOpenEdit, handleOpenDeactivate }),
+      fakeHook({ handleOpenEdit, handleOpenDeactivate }),
     )
 
     render(<CollaboratorDetailsPage collaboratorId='collaborator-id' />)

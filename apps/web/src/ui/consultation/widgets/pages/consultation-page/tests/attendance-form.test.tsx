@@ -6,20 +6,22 @@ import {
   waitFor,
   within,
 } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AttendanceForm } from '../attendance-form'
 import { ConsultationPageActionProvider } from '../consultation-page-action-context'
 import { ConsultationPagePrimaryAction } from '../consultation-page-primary-action'
 import type { useConsultation } from '@/ui/consultation/hooks/use-consultation'
+import { useConsultationLegalCatalogQuery } from '@/ui/consultation/hooks/use-consultation-legal-catalog-query'
+import { useCloseIntakeWithoutContractAction } from '@/ui/intake/hooks/use-close-intake-without-contract-action'
+import { useDynamicFormOptionsQuery } from '@/ui/shared/hooks/use-dynamic-form-options-query'
 
 const handleCompleteConsultation = vi.fn().mockResolvedValue(undefined)
 const handleFinalizeAttendance = vi.fn().mockResolvedValue(undefined)
 const handleEditAttendance = vi.fn().mockResolvedValue(undefined)
 const handleBack = vi.fn()
-const listDynamicFormsMock = vi.hoisted(() => vi.fn())
 const closeIntakeWithoutContractMock = vi.hoisted(() => vi.fn())
+let dynamicForms: any[] = []
 
 type ControllerOverrides = Partial<ReturnType<typeof useConsultation>>
 
@@ -89,40 +91,33 @@ vi.mock('@/ui/consultation/hooks/use-consultation', () => ({
   useConsultation: () => useConsultationTestController(),
 }))
 
-vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
-  useAuthContext: () => ({ user: { id: 'user-1' } }),
+vi.mock('@/ui/consultation/hooks/use-consultation-legal-catalog-query', () => ({
+  useConsultationLegalCatalogQuery: vi.fn(),
 }))
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: () => ({
-    legalCatalogService: {
-      listLegalAreas: vi.fn().mockResolvedValue({ isFailure: false, body: [] }),
-      listLegalTopics: vi.fn().mockResolvedValue({ isFailure: false, body: [] }),
-    },
-    intakeService: {
-      closeIntakeWithoutContract: closeIntakeWithoutContractMock,
-    },
-    dynamicFormService: {
-      listDynamicForms: listDynamicFormsMock,
-    },
-  }),
+vi.mock('@/ui/intake/hooks/use-close-intake-without-contract-action', () => ({
+  useCloseIntakeWithoutContractAction: vi.fn(),
 }))
+
+vi.mock('@/ui/shared/hooks/use-dynamic-form-options-query', () => ({
+  useDynamicFormOptionsQuery: vi.fn(),
+}))
+
+const useConsultationLegalCatalogQueryMock = vi.mocked(useConsultationLegalCatalogQuery)
+const useCloseIntakeWithoutContractActionMock = vi.mocked(
+  useCloseIntakeWithoutContractAction,
+)
+const useDynamicFormOptionsQueryMock = vi.mocked(useDynamicFormOptionsQuery)
 
 function renderAttendanceFormPage() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-
   return render(
-    <QueryClientProvider client={queryClient}>
-      <ConsultationPageActionProvider>
-        <ConsultationPagePrimaryAction />
-        <AttendanceForm
-          consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
-          onBack={handleBack}
-        />
-      </ConsultationPageActionProvider>
-    </QueryClientProvider>,
+    <ConsultationPageActionProvider>
+      <ConsultationPagePrimaryAction />
+      <AttendanceForm
+        consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+        onBack={handleBack}
+      />
+    </ConsultationPageActionProvider>,
   )
 }
 
@@ -133,11 +128,24 @@ describe('AttendanceForm', () => {
     window.scrollTo = vi.fn()
     Element.prototype.scrollIntoView = vi.fn()
     controllerOverrides = {}
-    listDynamicFormsMock.mockResolvedValue({ isFailure: false, body: [] })
-    closeIntakeWithoutContractMock.mockResolvedValue({
-      isFailure: false,
-      body: {},
+    dynamicForms = []
+    closeIntakeWithoutContractMock.mockResolvedValue({})
+    useConsultationLegalCatalogQueryMock.mockReturnValue({
+      legalAreas: [],
+      legalTopics: [],
     })
+    useCloseIntakeWithoutContractActionMock.mockReturnValue({
+      closeIntakeError: null,
+      isClosingIntake: false,
+      closeIntakeWithoutContract: closeIntakeWithoutContractMock,
+    })
+    useDynamicFormOptionsQueryMock.mockImplementation(() => ({
+      dynamicForms,
+      isDynamicFormsError: false,
+      isLoadingDynamicForms: false,
+      legalAreas: [],
+      legalTopics: [],
+    }))
   })
 
   afterEach(cleanup)
@@ -228,10 +236,7 @@ describe('AttendanceForm', () => {
         },
       } as any,
     }
-    listDynamicFormsMock.mockResolvedValue({
-      isFailure: false,
-      body: [firstForm, secondForm],
-    })
+    dynamicForms = [firstForm, secondForm]
 
     renderAttendanceFormPage()
 
@@ -327,8 +332,8 @@ describe('AttendanceForm', () => {
     await waitFor(() => {
       expect(handleFinalizeAttendance).toHaveBeenCalled()
       expect(closeIntakeWithoutContractMock).toHaveBeenCalledWith(
-        '5eb2b8d8-cc84-42b3-bc64-ff40d7e9debd',
         expect.objectContaining({
+          expectedVersion: 1,
           closureReason: 'other',
           closureNotes: undefined,
         }),

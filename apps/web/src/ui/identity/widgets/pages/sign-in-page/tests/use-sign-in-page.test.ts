@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ROUTES } from '@/constants/routes'
 import { useSignInAction } from '@/ui/identity/hooks/use-sign-in-action'
 import { useSignInPage } from '../use-sign-in-page'
 
@@ -30,6 +31,12 @@ describe('Use Sign In Page', () => {
     expect(result.current.showPassword).toBe(false)
     expect(result.current.isLoading).toBe(false)
     expect(result.current.error).toBeNull()
+  })
+
+  it('passes the signing gateway return target to the sign-in action', () => {
+    renderHook(() => useSignInPage({ returnTo: ROUTES.signingGateway }))
+
+    expect(useSignInActionMock).toHaveBeenCalledWith(ROUTES.signingGateway)
   })
 
   it('toggles password visibility', () => {
