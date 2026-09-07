@@ -33,7 +33,7 @@ describe('SupabaseAuthProvider', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockReturnValue(authClient)
+    vi.mocked(createClient).mockReturnValue(authClient as any)
   })
 
   it('maps a Supabase password session to the common auth contract', async () => {
@@ -102,7 +102,7 @@ describe('SupabaseAuthAdministrationProvider', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockReturnValue(authClient)
+    vi.mocked(createClient).mockReturnValue(authClient as any)
   })
 
   it('creates a confirmed user with the supplied password', async () => {

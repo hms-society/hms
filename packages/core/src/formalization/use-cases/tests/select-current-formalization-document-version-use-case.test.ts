@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { fakeFormalization } from '../../domain/entities/fakers'
-import type { DocumentPackagesRepository, DocumentsRepository, DocumentVersionsRepository, PackageDocumentsRepository } from '../../../document-production/interfaces'
+import type {
+  DocumentPackagesRepository,
+  DocumentsRepository,
+  DocumentVersionsRepository,
+  PackageDocumentsRepository,
+} from '../../../document-production/interfaces'
 import type { FormalizationsRepository } from '../../interfaces'
 import { SelectCurrentFormalizationDocumentVersionUseCase } from '../select-current-formalization-document-version-use-case'
 
@@ -20,7 +25,12 @@ describe('Select Current Formalization Document Version Use Case', () => {
         mock<PackageDocumentsRepository>(),
         mock<DocumentsRepository>(),
         mock<DocumentVersionsRepository>(),
-      ).execute({ formalizationId: formalization.id, documentId: 'document', versionId: 'version', actorId: formalization.assignedLawyerId }),
+      ).execute({
+        formalizationId: formalization.id,
+        documentId: 'document',
+        versionId: 'version',
+        actorId: formalization.assignedLawyerId,
+      }),
     ).rejects.toThrow('Reabra a confirmação')
   })
 

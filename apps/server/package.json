@@ -14,6 +14,7 @@
     "prod": "node dist/main",
     "check:code": "biome check src drizzle.config.ts",
     "check:types": "tsc --noEmit -p tsconfig.build.json",
+    "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
     "db:migration:generate": "drizzle-kit generate",
     "db:migration:apply": "drizzle-kit migrate",
     "db:schema:push": "drizzle-kit push",
@@ -21,7 +22,7 @@
     "db:seed": "nest start --entryFile shared/database/seed",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "test:cov": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "drizzle-orm": "^0.45.2",
     "inngest": "^4.13.0",
     "nestjs-zod": "^5.5.0",
+    "pdfjs-dist": "5",
     "postgres": "^3.4.9",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

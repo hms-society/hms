@@ -50,7 +50,12 @@ describe('Start Formalization Use Case', () => {
     idProvider.generate.mockReturnValue(formalization.id)
 
     await expect(
-      new StartFormalizationUseCase(repository, sourceReader, lifecycle, idProvider).execute({
+      new StartFormalizationUseCase(
+        repository,
+        sourceReader,
+        lifecycle,
+        idProvider,
+      ).execute({
         intakeId: source.intake.id,
         actorId: source.assignedLawyer.id,
       }),
@@ -89,7 +94,12 @@ describe('Start Formalization Use Case', () => {
     idProvider.generate.mockReturnValue(formalization.id)
 
     await expect(
-      new StartFormalizationUseCase(repository, sourceReader, lifecycle, idProvider).execute({
+      new StartFormalizationUseCase(
+        repository,
+        sourceReader,
+        lifecycle,
+        idProvider,
+      ).execute({
         intakeId: source.intake.id,
         actorId: adminId,
         actorProfile: CollaboratorProfile.Admin,
@@ -125,7 +135,12 @@ describe('Start Formalization Use Case', () => {
     sourceReader.findStartSource.mockResolvedValue(source)
 
     await expect(
-      new StartFormalizationUseCase(repository, sourceReader, lifecycle, idProvider).execute({
+      new StartFormalizationUseCase(
+        repository,
+        sourceReader,
+        lifecycle,
+        idProvider,
+      ).execute({
         intakeId: source.intake.id,
         actorId: source.assignedLawyer.id,
       }),
@@ -153,7 +168,12 @@ describe('Start Formalization Use Case', () => {
     repository.findByIntakeId.mockResolvedValue(formalization)
 
     await expect(
-      new StartFormalizationUseCase(repository, sourceReader, lifecycle, idProvider).execute({
+      new StartFormalizationUseCase(
+        repository,
+        sourceReader,
+        lifecycle,
+        idProvider,
+      ).execute({
         intakeId: source.intake.id,
         actorId: source.assignedLawyer.id,
       }),
@@ -182,7 +202,12 @@ describe('Start Formalization Use Case', () => {
     idProvider.generate.mockReturnValue(formalization.id)
 
     await expect(
-      new StartFormalizationUseCase(repository, sourceReader, lifecycle, idProvider).execute({
+      new StartFormalizationUseCase(
+        repository,
+        sourceReader,
+        lifecycle,
+        idProvider,
+      ).execute({
         intakeId: source.intake.id,
         actorId: source.assignedLawyer.id,
       }),
