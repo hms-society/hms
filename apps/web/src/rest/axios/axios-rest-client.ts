@@ -2,15 +2,32 @@ import axios from 'axios'
 
 import type { AuthSession } from '@hms/core/identity/domain/structures'
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
-import type { RestClient } from '@hms/core/shared/interfaces'
+import type { RestClient, RestRequestOptions } from '@hms/core/shared/interfaces'
 import { request } from './utils'
 
 const REST_REQUEST_TIMEOUT_MS = 15_000
+
+function toAxiosRequestOptions(
+  options?: RestRequestOptions,
+  defaults?: RestRequestOptions,
+) {
+  const requestOptions = { ...defaults, ...options }
+
+  return {
+    ...(requestOptions.credentials === 'include' ? { withCredentials: true } : {}),
+    ...(requestOptions.headers
+      ? { headers: { ...defaults?.headers, ...requestOptions.headers } }
+      : defaults?.headers
+        ? { headers: defaults.headers }
+        : {}),
+  }
+}
 
 export const AxiosRestClient = (
   baseUrl?: string,
   getSession?: () => Promise<AuthSession | null>,
   onUnauthorized?: () => Promise<void>,
+  defaultRequestOptions?: RestRequestOptions,
 ): RestClient => {
   const client = axios.create({
     baseURL: baseUrl,
@@ -48,32 +65,66 @@ export const AxiosRestClient = (
   }
 
   return {
-    get<ResponseBody>(url: string) {
-      return request<ResponseBody>(client, { method: 'get', url })
+    get<ResponseBody>(url: string, options?: RestRequestOptions) {
+      return request<ResponseBody>(client, {
+        method: 'get',
+        url,
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
-    getFile(url) {
-      return request<File>(client, { method: 'get', url, responseType: 'blob' })
+    getFile(url, options?: RestRequestOptions) {
+      return request<Blob>(client, {
+        method: 'get',
+        url,
+        responseType: 'blob',
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
-    post<ResponseBody>(url: string, body?: unknown) {
-      return request<ResponseBody>(client, { method: 'post', url, data: body })
+    post<ResponseBody>(url: string, body?: unknown, options?: RestRequestOptions) {
+      return request<ResponseBody>(client, {
+        method: 'post',
+        url,
+        data: body,
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
     postFormData<ResponseBody>(url: string, body: FormData) {
-      return request<ResponseBody>(client, { method: 'post', url, data: body })
+      return request<ResponseBody>(client, {
+        method: 'post',
+        url,
+        data: body,
+        ...toAxiosRequestOptions(undefined, defaultRequestOptions),
+      })
     },
 
-    patch<ResponseBody>(url: string, body?: unknown) {
-      return request<ResponseBody>(client, { method: 'patch', url, data: body })
+    patch<ResponseBody>(url: string, body?: unknown, options?: RestRequestOptions) {
+      return request<ResponseBody>(client, {
+        method: 'patch',
+        url,
+        data: body,
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
-    put<ResponseBody>(url: string, body?: unknown) {
-      return request<ResponseBody>(client, { method: 'put', url, data: body })
+    put<ResponseBody>(url: string, body?: unknown, options?: RestRequestOptions) {
+      return request<ResponseBody>(client, {
+        method: 'put',
+        url,
+        data: body,
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
-    delete<ResponseBody>(url: string, body?: unknown) {
-      return request<ResponseBody>(client, { method: 'delete', url, data: body })
+    delete<ResponseBody>(url: string, body?: unknown, options?: RestRequestOptions) {
+      return request<ResponseBody>(client, {
+        method: 'delete',
+        url,
+        data: body,
+        ...toAxiosRequestOptions(options, defaultRequestOptions),
+      })
     },
 
     setBaseUrl(url) {

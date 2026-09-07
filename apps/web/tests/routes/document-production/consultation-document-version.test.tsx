@@ -6,6 +6,15 @@ test('opens a version, preserves JSON editor content, and approves it with the r
   documentProduction,
   page,
 }) => {
+  const consoleErrors: string[] = []
+  const failedRequests: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text())
+  })
+  page.on('requestfailed', (request) => {
+    failedRequests.push(`${request.method()} ${request.url()}`)
+  })
+
   await page.goto(`/consultas/${CONSULTATION_ID}/documentos/document-1/versoes/version-1`)
   await expect(
     page.getByText('Contrato de prestação de serviços', { exact: true }),
@@ -28,6 +37,16 @@ test('opens a version, preserves JSON editor content, and approves it with the r
       'A aprovação é definitiva. Selecione esta versão para torná-la vigente.',
     ),
   ).toBeVisible()
+  await page.screenshot({
+    path: 'test-results/consultation-document-review-approved.png',
+    fullPage: true,
+  })
+  if (consoleErrors.length || failedRequests.length) {
+    test.info().annotations.push({
+      type: 'environment-diagnostic',
+      description: `Fixture browser diagnostics: console=${JSON.stringify(consoleErrors)} requests=${JSON.stringify(failedRequests)}`,
+    })
+  }
 })
 
 test('shows a conflict without claiming the review succeeded', async ({

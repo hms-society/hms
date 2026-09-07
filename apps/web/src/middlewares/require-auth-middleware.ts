@@ -9,7 +9,7 @@ export async function requireAuthMiddleware() {
   const session = await authProvider.getSession()
 
   if (!session) {
-    throw redirect({ to: ROUTES.login })
+    throw redirect({ to: ROUTES.login, search: { returnTo: undefined } })
   }
 
   return { authSession: session }

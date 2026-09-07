@@ -106,6 +106,20 @@ playwrightTest(
 )
 
 playwrightTest(
+  'returns a collaborator to the Signing Gateway after sign-in',
+  async ({ page }) => {
+    await mockSuccessfulAuthentication(page)
+    await page.goto(`${ROUTES.login}?returnTo=${encodeURIComponent(ROUTES.signingGateway)}`)
+
+    await page.getByLabel('Email:').fill(SUPABASE_USER.email)
+    await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
+    await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
+
+    await expect(page).toHaveURL(new RegExp(`${ROUTES.signingGateway}$`))
+  },
+)
+
+playwrightTest(
   'shows an authentication error and keeps the login form available',
   async ({ page }) => {
     await page.route('**/auth/v1/token*', async (route) => {
