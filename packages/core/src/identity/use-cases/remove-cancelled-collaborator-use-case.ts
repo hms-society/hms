@@ -1,10 +1,8 @@
-import type { AuthAdministrationProvider } from '../interfaces'
+import type { AuthAdministrationProvider } from '../interfaces/auth-administration-provider'
 import type { AuthUser } from '../domain/structures'
-import type {
-  CollaboratorsRepository,
-  IdentityTransaction,
-  UsersRepository,
-} from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
+import type { IdentityTransaction } from '../interfaces/identity-transaction'
+import type { UsersRepository } from '../interfaces/users-repository'
 import {
   CollaboratorNotFoundError,
   InvalidClientDataError,

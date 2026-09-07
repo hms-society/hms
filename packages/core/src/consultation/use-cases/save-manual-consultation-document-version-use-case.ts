@@ -86,19 +86,24 @@ export class SaveManualConsultationDocumentVersionUseCase
       content: exportedFile.content,
     })
 
-    return this.versionsRepository.add({
-      id: documentVersionId,
-      documentId: document.id,
-      sourceDocumentVersionId: sourceVersion.id,
-      fileId: file.id,
-      versionNumber,
-      source: DocumentVersionSource.Manual,
-      content: request.content,
-      pendingMarkers,
-      createdByCollaboratorId: request.createdByCollaboratorId,
-      createdAt: this.datetimeProvider.now(),
-      status: DocumentVersionStatus.InReview,
-    })
+    try {
+      return await this.versionsRepository.add({
+        id: documentVersionId,
+        documentId: document.id,
+        sourceDocumentVersionId: sourceVersion.id,
+        fileId: file.id,
+        versionNumber,
+        source: DocumentVersionSource.Manual,
+        content: request.content,
+        pendingMarkers,
+        createdByCollaboratorId: request.createdByCollaboratorId,
+        createdAt: this.datetimeProvider.now(),
+        status: DocumentVersionStatus.InReview,
+      })
+    } catch (error) {
+      await this.fileStorageProvider.remove(file.id)
+      throw error
+    }
   }
 
   private async assertDocumentAccess(request: Request): Promise<void> {

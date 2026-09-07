@@ -1,7 +1,7 @@
 import type { Client, ClientCreation, ClientDetails } from '../domain/entities'
 import { ClientAlreadyExistsError, InvalidClientDataError } from '../domain/errors'
 import type { Address, TaxId } from '../domain/structures'
-import type { ClientsRepository } from '../interfaces'
+import type { ClientsRepository } from '../interfaces/clients-repository'
 import type { UseCase } from '#shared/interfaces'
 
 export type RegisterClientRequest = {

@@ -7,12 +7,10 @@ import {
   UserNotFoundError,
 } from '../domain/errors'
 import type { AuthUser } from '../domain/structures'
-import type {
-  AuthAdministrationProvider,
-  CollaboratorsRepository,
-  IdentityTransaction,
-  UsersRepository,
-} from '../interfaces'
+import type { AuthAdministrationProvider } from '../interfaces/auth-administration-provider'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
+import type { IdentityTransaction } from '../interfaces/identity-transaction'
+import type { UsersRepository } from '../interfaces/users-repository'
 
 type Request = {
   readonly authUser: AuthUser
