@@ -32,6 +32,12 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
     name: 'Cliente HMS Teste',
     phone: '5511999999999',
   }),
+  ClientFaker.fake({
+    email: 'vinicius.lopes.machado@hms.test',
+    name: 'Vinicius Lopes Machado',
+    phone: '5511987654321',
+    taxId: { type: 'cpf', value: '12345678909' },
+  }),
   ...ClientFaker.fakeMany(9),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
@@ -46,6 +52,14 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'lawyer@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'ricardo.mendes@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'mariana.costa@hmsadvogados.com.br',
     status: 'active',
   },
   {
@@ -71,9 +85,10 @@ type AdministrativeCollaboratorCreation = Extract<
   { legalExpertises?: never }
 >
 type LegalCollaboratorSeed = {
+  email: string
   professionalName: string
   jobTitle?: string
-  profile: 'lawyer' | 'paralegal'
+  profile: 'lawyer' | 'paralegal' | 'supervisor'
 }
 
 const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
@@ -92,17 +107,44 @@ const DEFAULT_ATTENDANT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   profile: 'attendant',
 }
 
-const DEFAULT_LAWYER: LegalCollaboratorSeed = {
-  professionalName: 'Advogado de desenvolvimento',
-  jobTitle: 'Advogado',
-  profile: 'lawyer',
-}
-
-const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
-  professionalName: 'Paralegal de desenvolvimento',
-  jobTitle: 'Paralegal',
-  profile: 'paralegal',
-}
+const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
+  {
+    email: 'lawyer@hmsadvogados.com.br',
+    professionalName: 'Advogado de desenvolvimento',
+    jobTitle: 'Advogado',
+    profile: 'lawyer',
+  },
+  {
+    email: 'ricardo.mendes@hmsadvogados.com.br',
+    professionalName: 'Dr. Ricardo Mendes',
+    jobTitle: 'Advogado Previdenciário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'mariana.costa@hmsadvogados.com.br',
+    professionalName: 'Mariana Costa',
+    jobTitle: 'Advogada Auxiliar',
+    profile: 'lawyer',
+  },
+  {
+    email: 'paralegal@hmsadvogados.com.br',
+    professionalName: 'Paralegal de desenvolvimento',
+    jobTitle: 'Paralegal',
+    profile: 'paralegal',
+  },
+  {
+    email: 'joao.pedro@hmsadvogados.com.br',
+    professionalName: 'João Pedro Silva',
+    jobTitle: 'Paralegal',
+    profile: 'paralegal',
+  },
+  {
+    email: 'beatriz.oliveira@hmsadvogados.com.br',
+    professionalName: 'Beatriz Oliveira',
+    jobTitle: 'Supervisora Jurídica',
+    profile: 'supervisor',
+  },
+]
 
 const DEFAULT_CONTRACTS_LAWYER: LegalCollaboratorSeed = {
   professionalName: 'Advogada de contratos',
@@ -243,11 +285,9 @@ export class IdentitySeeder {
       ...DEFAULT_ATTENDANT,
     })
 
-    const lawyerCreated = await this.collaboratorsRepository.add({
-      userId: lawyerUser.id,
-      ...DEFAULT_LAWYER,
-      legalExpertises: [lawyerLegalExpertise],
-    })
+    const legalCollaborators = await Promise.all(
+      DEFAULT_LEGAL_COLLABORATORS.map(async ({ email, ...collaborator }) => {
+        const user = seededUsers.find((seededUser) => seededUser.email === email)
 
     const paralegalCreated = await this.collaboratorsRepository.add({
       userId: paralegalUser.id,
@@ -281,6 +321,12 @@ export class IdentitySeeder {
         ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
         id: clientUser?.id,
       },
+      ClientFaker.fake({
+        email: 'vinicius.lopes.machado@hms.test',
+        name: 'Vinicius Lopes Machado',
+        phone: '5511987654321',
+        taxId: { type: 'cpf', value: '12345678909' },
+      }),
       ...ClientFaker.fakeMany(9),
     ].map(({ id, createdAt, updatedAt, ...client }) => ({
       ...client,

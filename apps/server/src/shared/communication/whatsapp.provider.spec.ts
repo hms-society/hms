@@ -81,4 +81,72 @@ describe('WhatsappProvider', () => {
       }),
     ).rejects.toThrow('Failed to send WhatsApp message: 400 - Bad Request')
   })
+
+  it('should successfully download WhatsApp media', async () => {
+    const mockMetadata = {
+      url: 'https://lookaside.fbsbx.com/whatsapp_business/attachments/12345',
+      mime_type: 'application/pdf',
+    }
+
+    const mockBuffer = new Uint8Array([1, 2, 3, 4])
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValue(mockMetadata),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        arrayBuffer: vi.fn().mockResolvedValue(mockBuffer.buffer),
+      })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await provider.downloadMedia('media-123')
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://graph.facebook.com/v25.0/media-123',
+      expect.objectContaining({
+        headers: {
+          Authorization: 'Bearer fake-token',
+        },
+      }),
+    )
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://lookaside.fbsbx.com/whatsapp_business/attachments/12345',
+      expect.objectContaining({
+        headers: {
+          Authorization: 'Bearer fake-token',
+        },
+      }),
+    )
+
+    expect(result).toEqual({
+      buffer: mockBuffer,
+      mimeType: 'application/pdf',
+    })
+  })
+
+  it('should throw an error when media size exceeds 50MB limit from metadata', async () => {
+    const mockMetadata = {
+      url: 'https://lookaside.fbsbx.com/whatsapp_business/attachments/12345',
+      mime_type: 'application/pdf',
+      file_size: 60 * 1024 * 1024,
+    }
+
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockResolvedValue(mockMetadata),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(provider.downloadMedia('media-oversized')).rejects.toThrow(
+      'exceeds maximum allowed limit of 50MB',
+    )
+  })
 })

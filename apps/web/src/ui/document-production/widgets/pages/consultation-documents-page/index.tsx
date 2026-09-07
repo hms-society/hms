@@ -40,6 +40,7 @@ export const ConsultationDocumentsPage = ({
     handleSaveSelection,
     handleConfirmPackage,
     handleReopenPackage,
+    handleUpdateAccess,
   } = useConsultationDocumentsPage({ consultationId })
 
   if (!isAttendanceFinalized || isDocumentsBlockedByClosure) {

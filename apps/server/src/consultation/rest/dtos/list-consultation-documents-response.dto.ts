@@ -27,6 +27,15 @@ export class ListConsultationDocumentsResponseDto {
   @ApiPropertyOptional({ format: 'uuid' }) readonly currentVersionId?: string
   @ApiPropertyOptional({ enum: Object.values(DocumentGenerationStatus) })
   readonly generationStatus?: DocumentGenerationStatusValue
+  @ApiPropertyOptional({
+    enum: ['INTERNO', 'CLIENTE', 'RESTRITO', 'CONFIDENCIAL', 'PARCEIRO_LIBERADO'],
+  })
+  readonly classificacaoAcesso?:
+    | 'INTERNO'
+    | 'CLIENTE'
+    | 'RESTRITO'
+    | 'CONFIDENCIAL'
+    | 'PARCEIRO_LIBERADO'
   @ApiProperty({ type: [ConsultationDocumentVersionSummaryDto] })
   readonly versions!: readonly ConsultationDocumentVersionSummaryDto[]
 
@@ -40,6 +49,7 @@ export class ListConsultationDocumentsResponseDto {
       title: input.document.title,
       currentVersionId: input.document.currentVersionId,
       generationStatus: input.generationStatus,
+      classificacaoAcesso: input.document.classificacaoAcesso,
       versions: input.versions.map((version) => ({
         id: version.id,
         versionNumber: version.versionNumber,

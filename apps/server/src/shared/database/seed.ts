@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
+import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
@@ -18,6 +19,7 @@ import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
+import type { CaseChecklistItemsRepository } from '@hms/core/case-management/interfaces'
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(SeedModule)
@@ -78,6 +80,9 @@ async function bootstrap() {
         seedPassword,
       )
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+    const validationScenarioClient = identitySeed.clients.find(
+      ({ email }) => email === 'vinicius.lopes.machado@hms.test',
+    )
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
     const attendant = identitySeed.collaborators.find(
       ({ profile }) => profile === 'attendant',
@@ -86,7 +91,7 @@ async function bootstrap() {
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
 
-    if (!client || !lawyer || !attendant || !actor) {
+    if (!client || !validationScenarioClient || !lawyer || !attendant || !actor) {
       throw new AppError('Document Production seed identities could not be resolved')
     }
 
@@ -105,14 +110,19 @@ async function bootstrap() {
     const paralegalIds = identitySeed.collaborators
       .filter(({ profile }) => profile === 'paralegal')
       .map(({ id }) => id)
+    const supervisorIds = identitySeed.collaborators
+      .filter(({ profile }) => profile === 'supervisor')
+      .map(({ id }) => id)
 
-    await app.get(CaseManagementSeeder).run({
+    const caseManagementSeed = await app.get(CaseManagementSeeder).run({
       contractedIntakes: intakeSeed.intakes.filter(
         ({ status }) => status === IntakeStatus.Contracted,
       ),
       lawyerIds,
       paralegalIds,
+      supervisorIds,
       actorId: actor.id,
+      validationScenarioClientId: validationScenarioClient.id,
     })
 
     const schedulingSeed = await app.get(SchedulingSeeder).run({
