@@ -7,7 +7,7 @@ import { DrizzleDocumentBatchesRepository } from '@/document-engine/database/dri
 import { DrizzleDocumentValidationLogsRepository } from '@/document-engine/database/drizzle/repositories/drizzle-document-validation-logs-repository'
 import { DrizzleDocumentValidationsRepository } from '@/document-engine/database/drizzle/repositories/drizzle-document-validations-repository'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
-import { AuthGuard } from '@/identity/guards'
+import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
