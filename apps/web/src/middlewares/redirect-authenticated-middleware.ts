@@ -8,7 +8,13 @@ const authProvider = SupabaseAuthProvider()
 export async function redirectAuthenticatedMiddleware(input: { returnTo?: string } = {}) {
   const session = await authProvider.getSession()
 
-  if (session && input.returnTo !== ROUTES.signingGateway) {
+  const returnTo =
+    input.returnTo ??
+    (typeof window !== 'undefined'
+      ? (new URLSearchParams(window.location.search).get('returnTo') ?? undefined)
+      : undefined)
+
+  if (session && returnTo !== ROUTES.signingGateway) {
     throw redirect({ to: ROUTES.home })
   }
 }
