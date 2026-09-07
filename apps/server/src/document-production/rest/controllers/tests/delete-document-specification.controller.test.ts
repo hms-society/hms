@@ -8,8 +8,13 @@ import { DeleteDocumentSpecificationController } from '@/document-production/res
 
 const templateContent: DocumentTemplateContent = {
   type: 'doc',
-  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Conteúdo' }] }],
-}
+  content: [
+    {
+      type: 'paragraph',
+      content: [{ type: 'text', text: 'Conteúdo' as any }],
+    },
+  ],
+} as unknown as DocumentTemplateContent
 
 function createSpecification(): DocumentSpecificationCreation {
   return {

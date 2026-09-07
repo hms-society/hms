@@ -5,7 +5,11 @@ import { ROUTES, type RouteName } from '@/constants/routes'
 export type Navigation = {
   navigateTo: (
     route: RouteName,
-    options?: { params?: Record<string, string>; replace?: boolean },
+    options?: {
+      params?: Record<string, string>
+      replace?: boolean
+      search?: Record<string, unknown>
+    },
   ) => Promise<void>
   navigateCollaboratorsSearch: (
     search:
@@ -19,12 +23,17 @@ export function useNavigation(): Navigation {
 
   function navigateTo(
     route: RouteName,
-    options?: { params?: Record<string, string>; replace?: boolean },
+    options?: {
+      params?: Record<string, string>
+      replace?: boolean
+      search?: Record<string, unknown>
+    },
   ): Promise<void> {
     return navigate({
       to: ROUTES[route] as any,
       params: options?.params as any,
       replace: options?.replace,
+      search: options?.search as any,
     })
   }
 

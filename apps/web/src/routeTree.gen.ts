@@ -314,7 +314,6 @@ export interface FileRoutesByFullPath {
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -339,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
@@ -357,7 +357,6 @@ export interface FileRoutesByTo {
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/formalizacoes': typeof FormalizacoesRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -382,6 +381,7 @@ export interface FileRoutesByTo {
   '/modelos-de-documentos': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/assinaturas/acesso': typeof AssinaturasAcessoIndexRoute
@@ -406,7 +406,6 @@ export interface FileRoutesById {
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/advogado/meus-casos': typeof AdvogadoMeusCasosRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -431,6 +430,7 @@ export interface FileRoutesById {
   '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
@@ -456,7 +456,6 @@ export interface FileRouteTypes {
     | '/consultas/$consultationId'
     | '/formalizacoes/$formalizationId'
     | '/advogado/comunicacao'
-    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -481,6 +480,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/advogado/meus-casos/$caseId'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/assinaturas/acesso/'
@@ -499,7 +499,6 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/formalizacoes'
     | '/advogado/comunicacao'
-    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -524,6 +523,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos'
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
+    | '/advogado/meus-casos/$caseId'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/assinaturas/acesso'
@@ -547,7 +547,6 @@ export interface FileRouteTypes {
     | '/consultas/$consultationId'
     | '/formalizacoes/$formalizationId'
     | '/advogado/comunicacao'
-    | '/advogado/meus-casos'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -572,6 +571,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/advogado/meus-casos/$caseId'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/assinaturas/acesso/'
@@ -940,12 +940,17 @@ declare module '@tanstack/react-router' {
 
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
-  AdvogadoMeusCasosRoute: typeof AdvogadoMeusCasosRoute
+  AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRoute
+  AdvogadoMeusCasosIndexRoute: typeof AdvogadoMeusCasosIndexRoute
+  AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
 }
 
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
-  AdvogadoMeusCasosRoute: AdvogadoMeusCasosRoute,
+  AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRoute,
+  AdvogadoMeusCasosIndexRoute: AdvogadoMeusCasosIndexRoute,
+  AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute:
+    AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute,
 }
 
 const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(

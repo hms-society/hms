@@ -10,6 +10,7 @@ import type { AnalysisFormPanelProps } from '../analysis-form-panel'
 import type { PdfViewerPanelProps } from '../pdf-viewer-panel'
 import type { ProcessingFailurePanelProps } from '../processing-failure-panel'
 import type { ReadOnlyIncompletePanelProps } from '../read-only-incomplete-panel'
+import type { ReadOnlyValidatedPanelProps } from '../read-only-validated-panel'
 import type { RequestResendModalProps } from '../request-resend-modal'
 import { DocumentAnalysisPage } from '..'
 import { useDocumentAnalysis } from '../use-document-analysis'
@@ -42,6 +43,12 @@ vi.mock('../read-only-incomplete-panel', () => ({
   ),
 }))
 
+vi.mock('../read-only-validated-panel', () => ({
+  ReadOnlyValidatedPanel: ({ document }: ReadOnlyValidatedPanelProps) => (
+    <div data-testid='read-only-validated-panel'>{document.id}</div>
+  ),
+}))
+
 vi.mock('../request-resend-modal', () => ({
   RequestResendModal: ({ isOpen }: RequestResendModalProps) => (
     <div data-testid='request-resend-modal'>{isOpen ? 'open' : 'closed'}</div>
@@ -49,17 +56,34 @@ vi.mock('../request-resend-modal', () => ({
 }))
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
-  Anchor: ({ children, route, ...props }: AnchorProps) => (
-    <a href={ROUTES[route]} {...props}>
-      {children}
-    </a>
-  ),
+  Anchor: ({ children, params, route, search, ...props }: AnchorProps) => {
+    const routePath: string = ROUTES[route]
+    const path = params
+      ? Object.entries(params).reduce(
+          (currentPath, [key, value]) => currentPath.replace(`$${key}`, value),
+          routePath,
+        )
+      : routePath
+    const queryString = search ? new URLSearchParams(search as never).toString() : ''
+
+    return (
+      <a href={queryString ? `${path}?${queryString}` : path} {...props}>
+        {children}
+      </a>
+    )
+  },
 }))
 
 const useDocumentAnalysisMock = vi.mocked(useDocumentAnalysis)
 const document = DocumentValidationDocumentFaker.fake({
   id: 'document-file-1',
   fileName: 'comprovante-residencia.pdf',
+  checklistLink: {
+    caseId: 'case-1',
+    caseLabel: 'Caso Vinicius Lopes Machado',
+    checklistItemId: 'checklist-item-1',
+    checklistItemLabel: 'Documento teste 1',
+  },
 })
 
 describe('DocumentAnalysisPage', () => {
@@ -100,12 +124,42 @@ describe('DocumentAnalysisPage', () => {
     ).toBe(ROUTES.documentInbox)
   })
 
+  it('renders a case return link when the document was opened from a case', () => {
+    render(<DocumentAnalysisPage fileId={document.id} fromCaseId='case-1' />)
+
+    expect(
+      screen.getByRole('link', { name: 'Voltar para o caso' }).getAttribute('href'),
+    ).toBe('/advogado/meus-casos/case-1')
+    expect(useDocumentAnalysisMock).toHaveBeenCalledWith({
+      fileId: document.id,
+      fromCaseId: 'case-1',
+    })
+  })
+
   it('renders the form and viewer widgets for a regular validation state', () => {
+    useDocumentAnalysisMock.mockReturnValue(
+      getDocumentAnalysisController({
+        documentView: {
+          ...getDocumentAnalysisController().documentView,
+          status: 'Aguardando validação',
+        },
+      }),
+    )
+
     render(<DocumentAnalysisPage fileId={document.id} />)
 
     expect(screen.getByTestId('pdf-viewer-panel')).toBeDefined()
     expect(screen.getByTestId('analysis-form-panel').textContent).toContain('validate')
     expect(screen.getByTestId('request-resend-modal').textContent).toContain('closed')
+  })
+
+  it('renders the read-only widget after the document is validated', () => {
+    render(<DocumentAnalysisPage fileId={document.id} />)
+
+    expect(screen.getByTestId('read-only-validated-panel').textContent).toContain(
+      document.id,
+    )
+    expect(screen.queryByTestId('analysis-form-panel')).toBeNull()
   })
 
   it('renders the processing failure widget for failed documents', () => {
