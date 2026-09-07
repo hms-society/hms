@@ -39,6 +39,7 @@ jobs:
             echo 'relevant=false' >> "$GITHUB_OUTPUT"
             echo 'No Core/Validation changes detected; this check is not applicable.'
           fi
+          echo "Scope comparison: origin/${{ github.base_ref }}...HEAD"
 
       - name: Setup pnpm
         if: steps.scope.outputs.relevant == 'true'
