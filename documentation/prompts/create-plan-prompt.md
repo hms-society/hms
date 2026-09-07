@@ -19,7 +19,7 @@ create or reference a parallel implementation workflow.
 
 ## Preconditions and authority
 
-Read `AGENTS.md`, `AGENTS.local.md`, `documentation/rules/sdd-rules.md`, the
+Read `AGENTS.md`, `AGENTS.local.md`, `documentation/sdd.md`, the
 current Spec, its Rule Pack, Architecture, Modules, and Tooling. Confirm:
 
 - the Spec is `open` and its revision is current;
@@ -28,6 +28,9 @@ current Spec, its Rule Pack, Architecture, Modules, and Tooling. Confirm:
 - every supplied design screenshot has a completed visual inventory, and all required
   supplemental-screenshot suggestions are captured or explicitly accepted as documented
   assumptions;
+- the applicable Spec Reviewer completed its read-only audit against the current Spec revision,
+  and every verified finding was resolved or explicitly recorded as not applicable by the
+  Orchestrator;
 - Plan-backed execution remains appropriate;
 - no material product or technical ambiguity remains.
 
@@ -37,6 +40,26 @@ material ambiguity or requires a different contract, stop, return the Spec to th
 
 Use the Spec's real source and Jira ticket traceability. Do not invent or migrate external
 records.
+
+## Grilling gate
+
+Before writing `plan.md`, apply the `grilling` protocol from
+[`grilling-prompt.md`](./grilling-prompt.md). Build the execution design tree from the open
+Spec's technical contracts, then ask the whole current frontier in one numbered round using the
+required `❓`/`➡️` format with a recommendation for each question. Recompute the frontier after
+every answer and defer questions whose technical or ownership prerequisites are not settled.
+
+Facts about repository paths, ownership patterns, tooling, dependencies, and existing artifacts
+must be researched or delegated to bounded read-only search; do not ask the user for facts that
+can be verified. Grill unresolved execution decisions about phase boundaries, dependency order,
+Builder ownership, parallelism, migration/generated-file coordination, recovery state, validation
+handoff, and any PR decomposition required by repository limits. Do not use Plan questions to
+silently redefine the Spec; route a product or technical Contract change back through
+`create-spec`.
+
+Do not create or modify `plan.md` while a material decision remains open. When the frontier is
+empty, obtain explicit confirmation that shared understanding is complete, then record the
+decisions in the Plan's execution status or ledger rather than preserving an interview transcript.
 
 ## Location and metadata
 
@@ -143,7 +166,7 @@ Paths may not overlap between active Builders.
 
 For every task that changes UI or browser behavior, its exit must also require: the exact Spec
 widget tree comparison, applicable keyboard/narrow-viewport states, console and failed-request
-inspection, and a fresh Playwright MCP screenshot for each affected design state. For every task
+inspection, and a fresh Playwright CLI screenshot for each affected design state. For every task
 that changes server-backed behavior, its exit must require the real request/response and
 persistence or authorization result; mocked transport is not sufficient evidence.
 
@@ -167,6 +190,25 @@ the Plan or switches to direct implementation.
 
 ### 3. Validation and handoff
 
+Schedule the structural path gate as the first integrated checkpoint after all Builder-owned
+and Orchestrator-owned paths have been integrated and before the `reviewer`, integrated sensors,
+or readiness assessment:
+
+```bash
+pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]
+```
+
+Map every canonical Spec path to exactly one Builder or Orchestrator-owned task, including
+generated outputs, configuration, dependencies and lockfiles. The local baseline defaults to
+`origin/develop`; the command does not fetch it. Record an explicit `--base <ref>` in the Plan
+when another local baseline governs the delivery, and request `--json` when machine-readable
+output is useful; neither option broadens the structural-only boundary.
+
+Require Evaluation to record the exact command, selected base ref, resolved base SHA, every
+reported count, and result. A change to the Spec path contract, selected base SHA, integrated
+changed-file set, or any declared path's diff status invalidates the row and schedules a rerun
+before the same Reviewer/sensor/readiness sequence resumes.
+
 Use one coverage table to schedule evidence without repeating the Spec's scenario steps:
 
 | Type | Scenario/surface | Criteria | Reference | Evidence target | Status |
@@ -184,12 +226,13 @@ the Orchestrator reopens Pencil through MCP when the Design Contract changes, a 
 be refreshed, or the final comparison requires confirmation against the canonical node.
 
 Schedule exactly one read-only subagent named `reviewer` using the
-[`Integrated Reviewer`](../agents/reviewer-agent.md) contract after Builder
-diffs are integrated and before readiness. Do not create Reviewers per Builder, phase, application
-or package. The Reviewer checks
+[`Implementation Reviewer`](../agents/implementation-reviewer-agent.md) contract after Builder
+and Orchestrator-owned paths are integrated and the structural path gate has a current passing
+Evaluation row, and before readiness. Do not create Reviewers per Builder, phase, application
+or package. The Reviewer consumes that passing row without rerunning the gate, then checks
 the complete candidate, cross-Builder contracts and all affected surfaces; when UI is affected,
 it also inspects every required final visual comparison and independently replays high-risk
-Playwright MCP interactions. Its report is not evidence: the Orchestrator verifies each finding,
+Playwright CLI interactions. Its report is not evidence: the Orchestrator verifies each finding,
 records accepted findings in Evaluation and resumes the responsible Builder for correction. After
 any correction, resume the same `reviewer` subagent to recheck the affected candidate; never
 activate a replacement Reviewer merely because the implementation changed.
@@ -198,7 +241,8 @@ Define the final handoff condition: all tasks and phases completed, Spec validat
 commands current on the integrated commit, generated artifacts/migrations reviewed,
 services/accounts/fixtures ready, every `MV-*` executable, transient validation-artifact
 identifiers recorded, the final Spec tree/conformance comparison passed, all additional-screenshot
-decisions resolved, `reviewer` completed, every verified review finding resolved and
+decisions resolved, the structural path gate row is current and passing, `reviewer` completed,
+every verified review finding resolved and
 no blocking finding active. Then
 route directly to `conclude-spec`.
 
@@ -219,8 +263,8 @@ details and verdicts belong in `evaluation.md`.
 
 Before saving, verify the Spec revision, acyclic dependencies, complete RF/CA scheduling,
 non-overlapping active paths, valid Rule paths, executable exits, complete `MV-*`/design
-coverage, stable Builder ownership, justified concurrency, final conformance checkpoints and
-valid colocated links.
+coverage, stable Builder ownership, justified concurrency, correctly ordered structural path
+gate, final conformance checkpoints and valid colocated links.
 
 After creating or materially revising `plan.md`, return a concise summary with:
 

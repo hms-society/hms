@@ -3,7 +3,7 @@ spec: ./spec.md
 evaluation: ./evaluation.md
 spec_revision: 24
 status: completed
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 jira_tickets:
   - SCRUM-138
 ---
@@ -130,14 +130,13 @@ reexecutar a descoberta em documentation/rules/rules.md, ler as regras novas em
 sua totalidade e registrar a expansão no Plan. Não carregar regras de banco ou
 server-app apenas por hipótese: a Spec mantém essas camadas fora da entrega.
 
-Para interação browser com a aplicação, usar também o skill `browser-use` com
-controle CDP. O Browser Use deve ser usado para navegação, login já autorizado,
-interações, inspeção da árvore de acessibilidade, screenshots e verificação de
+Para interação browser com a aplicação, usar exclusivamente o Playwright CLI
+configurado em `apps/web/playwright.config.ts`. O Playwright deve ser usado para
+navegação, login já autorizado, interações, screenshots e verificação de
 layout/viewport; não usar apenas `curl` como evidência de comportamento de UI.
-Preferir a árvore de acessibilidade a coordenadas ou screenshots para localizar
-controles, chamar `wait_for_load()` após navegação e verificar o resultado depois
-de cada ação. Se houver pedido de gravação, iniciar e encerrar a gravação pelo
-fluxo oficial do Browser Use, preservando o caminho retornado.
+Preferir locators acessíveis, aguardar a conclusão de cada navegação e verificar
+o resultado depois de cada ação. Para fluxos reais, coletar trace, screenshot,
+console e requests falhos conforme necessário, sem mocks de transporte.
 
 ### Convenções de código e fronteiras
 
@@ -200,7 +199,7 @@ alterados. Nenhuma dependência nova é autorizada nesta Spec.
 ## Fonte de verdade e fronteiras
 
 - Spec: spec.md, revisão 8.
-- PRD: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673), versão 9, especialmente as decisões 12.1–12.8.
+- PRD: [PRD — Módulo de Produção Documental](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673), versão 9, especialmente as decisões 12.1–12.8.
 - Jira: [SCRUM-138](https://plataformahms.atlassian.net/browse/SCRUM-138).
 - Design: design/hms.pen, nodes F9JxU, hq7Ty e Y5vBQ como referências incluídas na
   Spec; os demais nodes design-only não expandem o Contract.
@@ -722,7 +721,7 @@ Dependência: F10-T1. Estado: verified.
 
 #### F11-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/reject-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`
+Paths: `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/reject-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`
 Resultado observável: o dialog de rejeição aproxima o node `design/hms.pen#RGqCe`
 com largura controlada, cabeçalho/corpo/rodapé separados, descrição contextual,
 label obrigatório, textarea maior e ações alinhadas à direita, preservando a
@@ -757,10 +756,10 @@ dialog foi fechado sem disparar mutation. Screenshots:
 Checkpoint de formatação: o Biome formatou o dialog e o teste alterados; a nova
 execução de `check:code` ainda está pendente.
 
-Workflow browser obrigatório (Playwright MCP + Browser Use/CDP):
+Workflow browser obrigatório (Playwright CLI):
 
 1. Executar docker compose ps -a, curl http://localhost:8000/auth/v1/health e
-   curl http://localhost:3333/health; confirmar DB/Auth saudáveis e bootstrap Nest sem
+   curl http://localhost:5555/health; confirmar DB/Auth saudáveis e bootstrap Nest sem
    UnknownDependenciesException.
 2. Iniciar pnpm --filter server dev e pnpm --filter web dev em sessões persistentes;
    registrar os IDs e aguardar compilação/restart estabilizar.
@@ -768,13 +767,13 @@ Workflow browser obrigatório (Playwright MCP + Browser Use/CDP):
    nunca assumir senha.
 4. Abrir /login, obter snapshot novo, autenticar, confirmar URL e conteúdo protegido e
    só então acessar a rota de documentos.
-5. Após cada navegação ou interação mutável, obter novo browser_snapshot; nunca reutilizar
-   refs de snapshot anterior. No final, coletar console e network e classificar cada erro,
+5. Após cada navegação ou interação mutável, resolver novos locators; nunca reutilizar
+   referências de elementos após rerender. No final, coletar console e network e classificar cada erro,
    warning, hydration warning, refresh failure ou 4xx/5xx.
-6. Usar Browser Use/CDP para a interação do fluxo real, preferindo accessibility
-   tree, `wait_for_load()` e verificações direcionadas após cada ação; testar pelo
-   menos viewport estreito e caminho de teclado. Não usar `page.route` nessa
-   passagem real. Parar apenas as sessões Web/Server iniciadas, preservando Docker.
+6. Usar o Playwright CLI para a interação do fluxo real, preferindo locators
+   acessíveis e verificações direcionadas após cada ação; testar pelo menos
+   viewport estreito e caminho de teclado. Não usar `page.route` nessa passagem
+   real. Parar apenas as sessões Web/Server iniciadas, preservando Docker.
 
 ### F12 — Folha editável mais ampla
 
@@ -961,7 +960,7 @@ Dependência: F13-T1. Estado: verified.
 
 #### F15-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/components/document-status-chip/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-history-dialog/index.tsx`; testes da página
+Paths: `apps/web/src/ui/document-production/widgets/components/document-status-chip/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx`; `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/document-version-history-dialog/index.tsx`; testes da página
 Resultado observável: o histórico usa exatamente os mesmos chips de status da
 decision bar para revisão, rejeição, aprovação, geração e falha, mantendo ícone,
 cor, borda, tipografia e espaçamento consistentes.
@@ -994,7 +993,7 @@ Dependência: F15-T1. Estado: in_progress.
 
 #### F16-T1 — in_progress
 
-Paths: `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/reject-document-version-dialog/index.tsx`; testes da página
+Paths: `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/reject-document-version-dialog/index.tsx`; testes da página
 Resultado observável: o dialog usa composição compacta, header e footer separados,
 textarea fixa, botões pill e ação destrutiva preenchida, aproximando-se do node
 `RGqCe` sem alterar o fluxo de decisão.
@@ -1019,7 +1018,7 @@ Dependência: F16-T1. Estado: verified.
 
 #### F17-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/reject-document-version-dialog/index.tsx`; testes da página
+Paths: `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/reject-document-version-dialog/index.tsx`; testes da página
 Resultado observável: o dialog mantém a composição do `RGqCe`, mas com título,
 descrição, label, textarea, helper e botões mais legíveis.
 RF / CA: RF-005; CA-08
@@ -1091,7 +1090,7 @@ Dependência: F14-T1. Estado: verified.
 
 #### F15-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-history-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
+Paths: `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/document-version-history-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
 Resultado observável: o histórico abre em um dialog amplo com cabeçalho contextual, divisor e uma lista linear de versões. Cada linha apresenta versão, status semântico, vigência, origem/data e ação **Visualizar**; em viewport estreito, a linha refluí sem overflow e a navegação continua usando os três IDs tipados. O sensor fixa uma versão vigente no fixture para verificar a apresentação condicional do chip.
 RF / CA: RF-005; CA-05, CA-12, CA-15
 Parallelizável: não. A composição depende do view model, do dialog compartilhado e da navegação da review page.
@@ -1131,7 +1130,7 @@ Dependência: F16-T1. Estado: verified.
 
 #### F17-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/regenerate-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
+Paths: `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/regenerate-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/tests/consultation-document-review-page.test.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
 Resultado observável: o dialog de nova versão usa superfície de 480 px efetivos, cabeçalho com fechamento, corpo contextual, rodapé separado e ações pill. A confirmação continua chamando o endpoint existente sem inventar instruções não suportadas pelo contrato.
 RF / CA: RF-004, RF-005; CA-04, CA-05, CA-12
 Parallelizável: não. A composição depende do action hook de geração e da confirmação da review page.
@@ -1178,7 +1177,7 @@ Dependência: F18-T1. Estado: verified.
 
 #### F19-T1 — verified
 
-Paths: `packages/validation/src/document-production/schemas/generate-consultation-document-schema.ts`; `packages/core/src/consultation/use-cases/generate-consultation-document-use-case.ts`; `packages/core/src/document-production/domain/events/document-generation-requested-event.ts`; `apps/server/src/consultation/rest/controllers/generate-consultation-document.controller.ts`; `apps/server/src/document-production/messaging/inngest/jobs/generate-document-job.ts`; `apps/server/src/document-production/ai/mastra`; `apps/web/src/rest/services/consultation-document-production-service.ts`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/regenerate-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/use-consultation-document-review-page.ts`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
+Paths: `packages/validation/src/document-production/schemas/generate-consultation-document-schema.ts`; `packages/core/src/consultation/use-cases/generate-consultation-document-use-case.ts`; `packages/core/src/document-production/domain/events/document-generation-requested-event.ts`; `apps/server/src/consultation/rest/controllers/generate-consultation-document.controller.ts`; `apps/server/src/document-production/messaging/inngest/jobs/generate-document-job.ts`; `apps/server/src/document-production/ai/mastra`; `apps/web/src/rest/services/consultation-document-production-service.ts`; `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/regenerate-document-version-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/use-consultation-document-review-page.ts`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/plan.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
 
 Resultado observável: o dialog alinhado ao CcIqS coleta instruções obrigatórias,
 desabilita a confirmação sem texto válido e envia o conteúdo normalizado no request.
@@ -1242,7 +1241,7 @@ Dependência: F15-T1. Estado: verified.
 
 #### F21-T1 — verified
 
-Paths: `apps/web/src/ui/document-production/widgets/components/document-status-chip/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/consultation-document-row/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/use-consultation-documents-page.ts`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-history-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
+Paths: `apps/web/src/ui/document-production/widgets/components/document-status-chip/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/consultation-document-row/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-documents-page/use-consultation-documents-page.ts`; `apps/web/src/ui/document-production/widgets/components/document-review-dialogs/document-version-history-dialog/index.tsx`; `apps/web/src/ui/document-production/widgets/pages/consultation-document-review-page/document-version-decision-bar/index.tsx`; `documentation/features/document-production/consultation-document-production-ui/spec.md`; `documentation/features/document-production/consultation-document-production-ui/evaluation.md`
 
 Resultado observável: `DocumentStatusChip` vive em `widgets/components` e é a fonte
 única de apresentação dos status no histórico, na barra de decisão e na lista de

@@ -26,7 +26,7 @@ pnpm --filter web exec playwright test --headed
 pnpm --filter web exec playwright test --debug
 ```
 
-The integration config starts the web app on `127.0.0.1:3100` and uses the
+The integration config starts the web app on `127.0.0.1:5000` and uses the
 fixtures under `apps/web/tests`. Existing route tests may use `page.route` for
 isolated widget/route behavior; label those as mocked coverage and do not treat
 them as evidence of real REST or Auth integration. For real server-backed flows,
@@ -40,7 +40,7 @@ transport as sufficient evidence. Use this sequence:
 
 1. Confirm the local dependencies before opening the browser:
    `docker compose ps -a`, `curl http://localhost:8000/auth/v1/health`, and
-   `curl http://localhost:3333/health`. The database and Auth containers must be
+   `curl http://localhost:5555/health`. The database and Auth containers must be
    healthy, and the server must finish Nest bootstrap without
    `UnknownDependenciesException`.
 2. Start `pnpm --filter server dev` and `pnpm --filter web dev` in persistent
@@ -88,6 +88,28 @@ Common recovery checks:
 - If the browser process is left running, stop the recorded Web/Server sessions
   after the run and leave shared Docker services unchanged unless the task
   explicitly requests teardown.
+
+### Inngest Dev MCP (`inngest-dev`)
+
+Use the configured local MCP at `http://localhost:9288/mcp` when investigating
+or verifying asynchronous Inngest behavior during local development. This is
+the Inngest Dev Server endpoint exposed by `docker-compose.yaml` (the
+`INNGEST_PORT` host mapping defaults to `9288`).
+
+Before using it, confirm that the local Inngest and application services are
+running with `docker compose ps -a`, and confirm that the server has finished
+Nest bootstrap and registered its functions. Use the MCP to inspect function
+discovery, event payloads, run status, step output, retries, and failures, and
+to trigger or replay local runs when the available MCP operation supports it.
+
+Treat MCP results as integration evidence only when they come from the real
+local services and canonical event path. Do not use the MCP as a substitute for
+the Dockerized Inngest test suite or for checking the resulting database,
+storage, publication, or provider effects. For any state-changing investigation,
+use local test data, record the function/run identifiers and terminal status,
+and verify the expected effects through the owning application boundary.
+Classify MCP connection or discovery failures separately from application or
+job failures.
 
 ### Context7 (`mcp__context7__*`)
 
@@ -219,6 +241,9 @@ and helper scripts.
 - Always read `AGENTS.local.md` and the rules router first. Read the dynamically
   selected rule documents and the relevant documents above **before** starting,
   not after.
+- When work can be divided into independent workstreams, create subagents and
+  execute those workstreams in parallel. Give each subagent a clear, non-overlapping
+  scope, then review and integrate their results before concluding the task.
 - Re-run dynamic context discovery when implementation reaches files or behavior
   outside the initial scope.
 - When a change spans UI + a new dependency + domain logic, read all of the

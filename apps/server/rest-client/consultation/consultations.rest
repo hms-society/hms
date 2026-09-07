@@ -1,5 +1,5 @@
 # Preconditions
-# Run `pnpm seed`, start the API on http://localhost:3333, and replace the
+# Run `pnpm seed`, start the API on http://localhost:5555, and replace the
 # legal/dynamic-form/document-specification placeholders with IDs returned by
 # the requests in this directory and apps/server/rest-client/shared/.
 
@@ -163,7 +163,7 @@ POST {{url}}/{{consultationId}}/document-generations/batch
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
-# Generation is asynchronous. Follow the runs at http://localhost:8288.
+# Generation is asynchronous. Follow the runs at http://localhost:9288.
 # Wait for the generation to complete before listing its immutable version.
 
 ### List consultation documents and version history

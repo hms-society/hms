@@ -58,6 +58,10 @@
 - **Supabase Storage:** Armazenamento principal de arquivos, na região de São Paulo.
 - **Signed Upload URL:** Usado para escrita/upload direto do front-end para o Storage, sem passar bytes pela VPS.
 - **RLS para Leitura:** Usuários baixam arquivos privados com JWT e políticas RLS.
+- **Artefatos documentais duráveis:** DOCX e PDFs internos são objetos imutáveis em
+  bucket privado, com metadados persistidos no PostgreSQL. Uma versão documental não
+  troca silenciosamente a referência do seu artefato; bytes históricos ausentes exigem
+  uma nova versão e nova confirmação do pacote.
 
 ### ✉️ E-mails
 
@@ -66,12 +70,28 @@
 - **Mailpit:** Captura e visualização de e-mails localmente.
 - **SMTP local:** Usado pelo Supabase Auth local e pelo NestJS local para enviar e-mails ao Mailpit.
 - **Supabase Auth Email Templates:** Templates específicos para confirmação, recuperação, magic link e convite.
+- **Templates de e-mail do Signing Gateway:** Assets HTML estáticos em `volumes/communication/templates`, seguindo o estilo dos templates do Supabase Auth; o corpo em texto puro permanece como fallback de compatibilidade.
 
 ### ⚙️ Jobs e Workflows
 
 - **Inngest:** Orquestração de jobs, retries, workflows assíncronos e automações.
 - **Inngest Dev Server:** Ambiente local para testar workflows.
 - **Inngest Cloud:** Usado em staging e produção.
+- **Ledger de trabalho limitado:** Fluxos assíncronos com estado visível ao usuário
+  podem persistir seu próprio lifecycle e usar reconciliação periódica limitada para
+  republicar trabalho pendente ou com lease expirada. Isso não cria um outbox genérico;
+  a publicação principal continua direta e o fan-out continua sendo responsabilidade
+  do Inngest.
+
+### 📄 Conversão de documentos
+
+- **Gotenberg:** Serviço privado e sem estado permanente para conversão de DOCX
+  durável em PDF de configuração. O NestJS envia apenas os bytes necessários,
+  valida e armazena o resultado no Supabase Storage; o Gotenberg não recebe
+  credenciais de Storage nem fica exposto publicamente.
+- **Execução assíncrona:** A confirmação do pacote registra atomicamente um lote
+  durável. Depois do commit, um evento de lote faz fan-out para um job independente
+  por documento, com token de tentativa, lease, retry e finalização idempotente.
 
 Fluxo típico:
 
@@ -251,7 +271,8 @@ api.seudominio.com
 
 ### Assinatura Eletrônica
 
-- **DocuSeal (Self-Hosted)**
+- **Documenso self-hosted (pinned runtime):** provider privado acessado somente pelo
+  adaptador Server; o Signing Gateway não expõe a URL do provedor ao navegador.
 
 ### Infra
 
@@ -265,45 +286,40 @@ api.seudominio.com
 
 ---
 
-### ✍️ Assinatura Eletrônica
+### ✍️ Gateway de Assinatura Eletrônica
 
-- **DocuSeal (Self-Hosted):** Plataforma open source de assinatura eletrônica de documentos, hospedada na própria VPS. Substitui plataformas pagas como DocuSign, Clicksign e D4Sign com custo zero por documento.
-- **API REST:** DocuSeal expõe uma API REST completa para criação de templates, envio de documentos para assinatura, pré-preenchimento de campos e consulta de status. SDKs disponíveis para JavaScript, TypeScript, Python, PHP, Ruby, Java, C# e Go.
-- **Webhooks:** Notificações em tempo real quando documentos são assinados, permitindo que o NestJS atualize automaticamente o status do cliente no banco.
-- **Embedding:** Componentes embarcáveis (React, HTML) para incorporar o formulário de assinatura diretamente na interface do sistema HMS.
-- **Banco de dados:** SQLite interno (dentro do volume /data do container). Sem dependência de banco externo.
-- **Armazenamento:** Templates, PDFs preenchidos, PDFs assinados e certificados de auditoria ficam no volume /data do DocuSeal. Após assinatura, o NestJS copia o PDF assinado para o Supabase Storage (pasta do cliente) via webhook.
-- **Trilha de auditoria:** Gerada automaticamente com e-mail do signatário, IP, timestamps e hash do documento. Embutida como última página do PDF assinado e armazenada no banco.
-- **Validade jurídica:** Assinatura eletrônica simples com validade jurídica no Brasil conforme MP 2.200-2/2001, Lei 14.063/2020 e artigos 104/107 do Código Civil. Cobre procuração, contrato de honorários, declaração de pobreza e ficha de atendimento. Não substitui assinatura ICP-Brasil (certificado digital do advogado) para petições e atos judiciais.
-- **SMTP:** Reutiliza o Resend já configurado na stack para envio dos links de assinatura por e-mail.
-- **Deploy:** Container Docker no Coolify, atrás do Traefik, com subdomínio dedicado (ex: assinatura.seudominio.com.br).
-- **Backup:** Volume /data (SQLite + PDFs) incluso na rotina de backup existente da VPS. Backup e restauração devem ser testados periodicamente.
+- **Documenso self-hosted:** runtime privado e fixado, integrado por um provider
+  Server-side. A aplicação cria um envelope por solicitação, com os PDFs prontos
+  e as atribuições imutáveis dos destinatários.
+- **Fronteira de acesso:** o browser acessa apenas as rotas do HMS. O Server
+  remove cookies, autorização e URLs arbitrárias antes de fazer proxy para o
+  provider, e injeta somente o contexto de idioma permitido.
+- **Persistência e artefatos:** o estado da solicitação, destinatários, itens,
+  tentativas, recibos e referências de resultado ficam no PostgreSQL/Supabase;
+  PDFs privados permanecem no Supabase Storage. O provider não é a fonte de
+  verdade do estado do HMS.
+- **Eventos e reconciliação:** webhooks normalizados, jobs Inngest e reconciliação
+  periódica são idempotentes e preservam evidências de submissão, rejeição,
+  cancelamento e resultado.
+- **Entrega:** convites e OTP usam os templates HTML estáticos em
+  `volumes/communication/templates`, Resend em staging/produção e Mailpit local,
+  sempre com corpo em texto puro como fallback.
 
-### Fluxo de Integração DocuSeal ↔ Sistema HMS
+### Fluxo do Signing Gateway
 
-1. Advogado decide formalizar contratação no sistema HMS
-2. NestJS chama API do DocuSeal: cria submission com template_id + dados do cliente (pré-preenchidos, readonly)
-3. DocuSeal gera PDF preenchido e envia link de assinatura por e-mail (Resend) ou o sistema envia via Meta Cloud API
-4. Cliente abre o link no celular, assina com dedo/digitação
-5. DocuSeal embute assinatura no PDF, gera certificado de auditoria
-6. DocuSeal dispara webhook para o NestJS
-7. NestJS recebe o evento, baixa o PDF assinado via API do DocuSeal
-8. NestJS salva cópia no Supabase Storage (pasta do cliente)
-9. NestJS atualiza status do cliente no banco para "contratado"
+1. O advogado confirma uma solicitação de formalização no HMS.
+2. O Server cria um envelope Documenso compartilhado com os PDFs prontos e os
+   destinatários autorizados.
+3. O HMS envia o convite pelo canal permitido e autentica clientes por OTP ou
+   colaboradores pela sessão HMS, sem expor a credencial do provider.
+4. O destinatário lê e reconhece cada documento no Gateway, em abas ordenadas.
+5. O HMS inicia uma única cerimônia do provider depois que todo o pacote foi lido.
+6. Webhooks e reconciliação atualizam o estado agregado e registram o resultado
+   privado no HMS.
 
-### Escopo da Assinatura Eletrônica
-
-| Documento | Quem assina | Método | Solução |
-| --- | --- | --- | --- |
-| Procuração | Cliente | Assinatura eletrônica simples | DocuSeal |
-| Contrato de honorários | Cliente | Assinatura eletrônica simples | DocuSeal |
-| Declaração de pobreza | Cliente | Assinatura eletrônica simples | DocuSeal |
-| Ficha de atendimento | Cliente | Assinatura eletrônica simples | DocuSeal |
-| Petições e peças processuais | Advogado | Certificado ICP-Brasil (A1/A3) | Sistema do tribunal (PJe, e-SAJ) |
-
-### Domínio sugerido
-
-`assinatura.seudominio.com.br` → DocuSeal (via Traefik no Coolify)
+O escopo jurídico, a ativação em staging/produção e a validação de requisitos
+externos permanecem condicionados às evidências e autorizações registradas no
+Spec e na Evaluation; esta arquitetura não declara esses gates como aprovados.
 
 ---
 
@@ -324,7 +340,7 @@ A estratégia de backup segue a regra 3-2-1: 3 cópias dos dados, em 2 tipos de 
 | Dado | Origem | Formato do backup |
 | --- | --- | --- |
 | Supabase PostgreSQL (banco principal) | Supabase gerenciado | pg_dump compactado (.sql.gz) |
-| DocuSeal (SQLite + PDFs assinados) | Volume /data do container | tar.gz do volume completo |
+| Documenso e seus dados do provider | Volumes privados do serviço | Backup conforme runbook do ambiente |
 | Variáveis de ambiente e configs | Coolify / .env files | Cópia criptografada |
 
 ### Ferramenta recomendada: rclone
@@ -354,4 +370,9 @@ rclone config
 
 ### Nota sobre o Supabase gerenciado
 
-O Supabase gerenciado (banco principal da aplicação) é a cópia primária da regra 3-2-1, com backups automáticos diários feitos pelo próprio Supabase. O script de backup adiciona as cópias offsite (Google Drive e Dropbox) para o DocuSeal e as configurações. Para autonomia total, é recomendado manter também um pg_dump periódico do Supabase como cópia adicional nos storages remotos, especialmente para cenários de migração ou desastre.
+O Supabase gerenciado (banco principal da aplicação) é a cópia primária da regra
+3-2-1, com backups automáticos diários feitos pelo próprio Supabase. O script de
+backup adiciona cópias offsite para os dados persistentes do Documenso e as
+configurações. Para autonomia total, é recomendado manter também um pg_dump
+periódico do Supabase como cópia adicional nos storages remotos, especialmente
+para cenários de migração ou desastre.

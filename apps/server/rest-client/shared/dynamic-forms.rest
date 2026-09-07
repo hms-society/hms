@@ -1,5 +1,5 @@
 # Preconditions
-# Run `pnpm seed`, start the API on http://localhost:3333, and use the legal
+# Run `pnpm seed`, start the API on http://localhost:5555, and use the legal
 # catalog REST client to obtain the area/topic IDs for the context filter.
 
 @url = {{BASE_URL}}/dynamic-forms

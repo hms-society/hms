@@ -36,7 +36,7 @@ create a hierarchy between Builders.
 
 ## Execution
 
-1. Read `documentation/rules/sdd-rules.md`, `documentation/rules/rules.md`, the Spec,
+1. Read `documentation/sdd.md`, `documentation/rules/rules.md`, the Spec,
    and every document in the Rule Pack,
    including each applicable `Antipatterns to Avoid` subsection.
 2. Confirm paths, contracts, and similar implementations in the codebase.
@@ -50,14 +50,14 @@ create a hierarchy between Builders.
    - use saved references during implementation and use Pencil MCP only when the
      Orchestrator requires canonical-node confirmation or refresh;
    - implement in sections and compare the result with the saved reference at the
-     same viewport using the Playwright MCP, recording one comparison per screenshot
+     same viewport using the Playwright CLI, recording one comparison per screenshot
      or state and every material discrepancy for the Orchestrator;
    - if a reference reveals unexpected or uncontracted behavior, pause that part and
      report the question to the Orchestrator; do not turn the inference into scope.
 6. Use only the tools that are applicable and available in the current environment.
 7. Run the exact proportional commands defined by the Spec, Plan, and
    `documentation/tooling.md`; do not invent generic validation aliases.
-8. Run integration, Playwright MCP, architecture, and build checks when required
+8. Run integration, Playwright CLI, architecture, and build checks when required
    by the scope and Validation Contract.
 9. Report documentation, Contract, visual, or scope discrepancies to the
    Orchestrator.

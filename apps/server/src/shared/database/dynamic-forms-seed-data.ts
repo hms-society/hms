@@ -5,10 +5,163 @@ type DynamicFormSeedDefinition = {
   readonly name: string
   readonly description: string
   readonly areaName: string
+  readonly contextType?: 'legal' | 'formalization'
   readonly fields: readonly DynamicFormField[]
 }
 
 const dynamicFormSeedDefinitions: readonly DynamicFormSeedDefinition[] = [
+  {
+    name: 'Condições comerciais da formalização',
+    description: 'Definição dinâmica das condições comerciais do atendimento.',
+    areaName: 'Cível',
+    contextType: 'formalization',
+    fields: [
+      {
+        id: '00000000-0000-4000-8000-000000000801',
+        key: 'service_type',
+        label: 'Tipo de serviço',
+        type: 'single_selection',
+        position: 1,
+        required: true,
+        options: [
+          { value: 'consulting', label: 'Consultoria', position: 1 },
+          { value: 'representation', label: 'Representação', position: 2 },
+        ],
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000802',
+        key: 'payment_method',
+        label: 'Forma de pagamento',
+        type: 'single_selection',
+        position: 2,
+        required: true,
+        options: [
+          { value: 'monthly', label: 'Mensal', position: 1 },
+          { value: 'upfront', label: 'À vista', position: 2 },
+        ],
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000803',
+        key: 'fixed_fee',
+        label: 'Honorários fixos',
+        type: 'currency',
+        position: 3,
+        required: true,
+        validation: { min: 0, scale: 2 },
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000804',
+        key: 'success_fee',
+        label: 'Honorários de êxito',
+        type: 'percentage',
+        position: 4,
+        required: false,
+        validation: { min: 0, max: 100, scale: 2 },
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000805',
+        key: 'installments',
+        label: 'Quantidade de parcelas',
+        type: 'integer',
+        position: 5,
+        required: true,
+        validation: { min: 1, max: 36 },
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000806',
+        key: 'start_date',
+        label: 'Data de início',
+        type: 'date',
+        position: 6,
+        required: true,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000807',
+        key: 'has_exclusivity',
+        label: 'Possui exclusividade?',
+        type: 'boolean',
+        position: 7,
+        required: true,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000808',
+        key: 'commercial_notes',
+        label: 'Observações comerciais',
+        type: 'long_text',
+        position: 8,
+        required: false,
+      },
+    ],
+  },
+  {
+    name: 'Ficha provisória de contratação',
+    description: 'Ficha temporária para experimentar a troca da definição contratual.',
+    areaName: 'Cível',
+    contextType: 'formalization',
+    fields: [
+      {
+        id: '00000000-0000-4000-8000-000000000821',
+        key: 'contracting_party_name',
+        label: 'Nome da parte contratante',
+        type: 'short_text',
+        position: 1,
+        required: true,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000822',
+        key: 'contract_start_date',
+        label: 'Data prevista para início',
+        type: 'date',
+        position: 2,
+        required: true,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000823',
+        key: 'needs_custom_clause',
+        label: 'Precisa de cláusula personalizada?',
+        type: 'boolean',
+        position: 3,
+        required: true,
+      },
+    ],
+  },
+  {
+    name: 'Ficha complementar de contratação',
+    description: 'Ficha temporária para registrar informações adicionais do contrato.',
+    areaName: 'Cível',
+    contextType: 'formalization',
+    fields: [
+      {
+        id: '00000000-0000-4000-8000-000000000831',
+        key: 'contract_object',
+        label: 'Objeto principal do contrato',
+        type: 'long_text',
+        position: 1,
+        required: true,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000832',
+        key: 'payment_schedule',
+        label: 'Periodicidade de pagamento',
+        type: 'single_selection',
+        position: 2,
+        required: true,
+        options: [
+          { value: 'monthly', label: 'Mensal', position: 1 },
+          { value: 'quarterly', label: 'Trimestral', position: 2 },
+          { value: 'single_payment', label: 'Pagamento único', position: 3 },
+        ],
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000833',
+        key: 'additional_notes',
+        label: 'Observações adicionais',
+        type: 'long_text',
+        position: 3,
+        required: false,
+      },
+    ],
+  },
   {
     name: 'Triagem Trabalhista',
     description:
@@ -266,7 +419,7 @@ export function createDynamicFormSeeds({
       status: 'available',
       contexts: [
         {
-          type: 'legal',
+          type: definition.contextType ?? 'legal',
           data: {
             legalAreaId: area.id,
             legalTopicIds,

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Optional } from '@nestjs/common'
 import type {
   IntakesRepository,
   UpdateIntakesRepositoryParams,
@@ -6,7 +6,10 @@ import type {
 import { and, desc, eq, sql } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+import {
+  DrizzleRepository,
+  type DrizzleDatabaseExecutor,
+} from '@/shared/database/drizzle/drizzle-repository'
 import { DrizzleIntakeMapper } from '@/intake/database/drizzle/mappers/drizzle-intake-mapper'
 import { intakeModel } from '@/intake/database/drizzle/models'
 
@@ -18,8 +21,14 @@ export class DrizzleIntakesRepository
   constructor(
     drizzle: DrizzleClient,
     @Inject(DrizzleIntakeMapper) private readonly intakeMapper: DrizzleIntakeMapper,
+    @Optional()
+    databaseOverride?: DrizzleDatabaseExecutor,
   ) {
-    super(drizzle)
+    super(drizzle, databaseOverride)
+  }
+
+  withDatabase(database: DrizzleDatabaseExecutor) {
+    return new DrizzleIntakesRepository(this.drizzleClient, this.intakeMapper, database)
   }
 
   async add(

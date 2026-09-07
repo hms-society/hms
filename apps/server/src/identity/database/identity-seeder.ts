@@ -1,13 +1,15 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import type {
+  ClientConsentCreation,
   ClientCreation,
   CollaboratorCreation,
   UserCreation,
 } from '@hms/core/identity/domain/entities'
 import { ClientFaker } from '@hms/core/identity/domain/entities/fakers'
-import type { LegalExpertise } from '@hms/core/identity/domain/structures'
+import { ConsentType, type LegalExpertise } from '@hms/core/identity/domain/structures'
 import type {
   AuthAdministrationProvider,
+  ClientConsentsRepository,
   ClientsRepository,
   CollaboratorRegistrationAttemptsRepository,
   CollaboratorsRepository,
@@ -48,6 +50,14 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'paralegal@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'lawyer.contracts@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'paralegal.documents@hmsadvogados.com.br',
     status: 'active',
   },
   {
@@ -94,11 +104,25 @@ const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
   profile: 'paralegal',
 }
 
+const DEFAULT_CONTRACTS_LAWYER: LegalCollaboratorSeed = {
+  professionalName: 'Advogada de contratos',
+  jobTitle: 'Advogada especialista em contratos',
+  profile: 'lawyer',
+}
+
+const DEFAULT_DOCUMENTS_PARALEGAL: LegalCollaboratorSeed = {
+  professionalName: 'Paralegal documental',
+  jobTitle: 'Paralegal de documentos',
+  profile: 'paralegal',
+}
+
 @Injectable()
 export class IdentitySeeder {
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)
     private readonly clientsRepository: ClientsRepository,
+    @Inject(IDENTITY_REPOSITORIES.clientConsents)
+    private readonly clientConsentsRepository: ClientConsentsRepository,
     @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
@@ -188,8 +212,22 @@ export class IdentitySeeder {
     const paralegalUser = seededUsers.find(
       ({ email }) => email === 'paralegal@hmsadvogados.com.br',
     )
+    const contractsLawyerUser = seededUsers.find(
+      ({ email }) => email === 'lawyer.contracts@hmsadvogados.com.br',
+    )
+    const documentsParalegalUser = seededUsers.find(
+      ({ email }) => email === 'paralegal.documents@hmsadvogados.com.br',
+    )
     const clientUser = seededUsers.find(({ email }) => email === 'client@hms.br')
-    if (!adminUser || !attendantUser || !lawyerUser || !paralegalUser || !clientUser) {
+    if (
+      !adminUser ||
+      !attendantUser ||
+      !lawyerUser ||
+      !paralegalUser ||
+      !contractsLawyerUser ||
+      !documentsParalegalUser ||
+      !clientUser
+    ) {
       throw new AppError('Default seed users were not created')
     }
 
@@ -216,12 +254,24 @@ export class IdentitySeeder {
       ...DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
     })
+    const contractsLawyerCreated = await this.collaboratorsRepository.add({
+      userId: contractsLawyerUser.id,
+      ...DEFAULT_CONTRACTS_LAWYER,
+      legalExpertises: [lawyerLegalExpertise],
+    })
+    const documentsParalegalCreated = await this.collaboratorsRepository.add({
+      userId: documentsParalegalUser.id,
+      ...DEFAULT_DOCUMENTS_PARALEGAL,
+      legalExpertises: [lawyerLegalExpertise],
+    })
 
     if (
       !administratorCreated ||
       !attendantCreated ||
       !lawyerCreated ||
-      !paralegalCreated
+      !paralegalCreated ||
+      !contractsLawyerCreated ||
+      !documentsParalegalCreated
     ) {
       throw new AppError('Default seed collaborators were not created')
     }
@@ -237,6 +287,16 @@ export class IdentitySeeder {
       id,
     })) satisfies ClientCreation[]
     const clients = await this.seed(clientsToSeed)
+    const seededClient = clients.find(({ email }) => email === 'client@hms.br')
+    if (!seededClient) throw new AppError('Default seed client was not created')
+
+    await this.clientConsentsRepository.addMany([
+      {
+        clientId: seededClient.id,
+        type: ConsentType.EmailCommunication,
+        grantedAt: new Date(),
+      } satisfies ClientConsentCreation,
+    ])
 
     return {
       clients,
@@ -245,6 +305,8 @@ export class IdentitySeeder {
         attendantCreated,
         lawyerCreated,
         paralegalCreated,
+        contractsLawyerCreated,
+        documentsParalegalCreated,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
           collaborator !== undefined,

@@ -26,6 +26,7 @@
 
 * **BiomeJS:** Analyzes code to find errors and inconsistencies, standardizes code formatting across the monorepo, and enforces good practices with React, TypeScript, and Node.
 * **Turborepo:** Organizes the monorepo, sharing packages between front-end, back-end, database, emails, UI, and tests.
+* **Dependency Cruiser:** Validates workspace dependency graphs, circular dependencies, application/package direction, module-owned database boundaries, and Web query/action boundaries.
 
 ### Testing and Reliability
 
@@ -58,6 +59,10 @@
 
 * **Supabase Storage:** Main file storage, located in the São Paulo region.
 * **Signed Upload URL:** Used for direct front-end uploads to Storage without passing file bytes through the VPS.
+* **Durable document artifacts:** Generated DOCX and internal PDFs use immutable
+  objects in a private bucket with PostgreSQL metadata. Missing historical bytes are
+  not silently regenerated into an existing document version; recovery creates a new
+  version and requires package reconfirmation.
 * **RLS for Reading:** Users download private files using JWT and RLS policies.
 
 ### Emails
@@ -67,12 +72,26 @@
 * **Mailpit:** Captures and displays emails locally.
 * **Local SMTP:** Used by local Supabase Auth and local NestJS to send emails to Mailpit.
 * **Supabase Auth Email Templates:** Specific templates for confirmation, recovery, magic link, and invitation emails.
+* **Signing Gateway email templates:** Static HTML assets under `volumes/communication/templates`, following the Supabase Auth template style; the plain-text body remains a client-compatibility fallback.
 
 ### Jobs and Workflows
 
 * **Inngest:** Orchestrates jobs, retries, asynchronous workflows, and automations.
 * **Inngest Dev Server:** Local environment for testing workflows.
 * **Inngest Cloud:** Used in staging and production.
+* **Bounded work reconciliation:** A module may reconcile its own pending or
+  lease-expired durable work when direct event loss would strand a user-visible
+  asynchronous state. This does not introduce a generic outbox or arbitrary event relay.
+
+### Document conversion
+
+* **Gotenberg:** Private, stateless DOCX-to-PDF conversion service. Locally it is
+  reachable from the host only through a loopback-bound port; staging and production
+  use private Coolify service DNS with no public Traefik route.
+* **Formalization previews:** Package confirmation persists a batch, Inngest fans it
+  out to one conversion job per document, and NestJS stores each validated PDF in the
+  private Supabase Storage bucket. Gotenberg has no Storage credentials or permanent
+  document volume.
 
 Typical flow:
 
@@ -340,7 +359,8 @@ api.yourdomain.com
 
 ### Electronic Signature
 
-* **DocuSeal — Self-Hosted**
+* **Documenso self-hosted:** pinned private provider runtime accessed only through
+  the Server-side Signing Gateway adapter.
 
 ### Infra
 
@@ -354,47 +374,38 @@ api.yourdomain.com
 
 ---
 
-## ✍️ Electronic Signature
+## ✍️ Electronic Signing Gateway
 
-* **DocuSeal — Self-Hosted:** Open-source electronic document signature platform, hosted on the VPS itself. Replaces paid platforms like DocuSign, Clicksign, and D4Sign with zero cost per document.
-* **REST API:** DocuSeal exposes a complete REST API for creating templates, sending documents for signature, pre-filling fields, and checking status. SDKs are available for JavaScript, TypeScript, Python, PHP, Ruby, Java, C#, and Go.
-* **Webhooks:** Real-time notifications when documents are signed, allowing NestJS to automatically update the client status in the database.
-* **Embedding:** Embeddable components, React and HTML, to include the signature form directly inside the HMS system interface.
-* **Database:** Internal SQLite database inside the container’s `/data` volume. No external database dependency.
-* **Storage:** Templates, filled PDFs, signed PDFs, and audit certificates remain in DocuSeal’s `/data` volume. After signing, NestJS copies the signed PDF to Supabase Storage, inside the client folder, via webhook.
-* **Audit trail:** Automatically generated with signer email, IP, timestamps, and document hash. Embedded as the final page of the signed PDF and stored in the database.
-* **Legal validity:** Simple electronic signature with legal validity in Brazil under MP 2.200-2/2001, Law 14.063/2020, and articles 104/107 of the Civil Code. Covers power of attorney, legal fee agreement, poverty declaration, and intake form. Does not replace ICP-Brasil signature, meaning the lawyer’s digital certificate, for petitions and judicial acts.
-* **SMTP:** Reuses Resend already configured in the stack to send signature links by email.
-* **Deploy:** Docker container on Coolify, behind Traefik, with a dedicated subdomain, for example `signature.yourdomain.com.br`.
-* **Backup:** `/data` volume, including SQLite and PDFs, included in the existing VPS backup routine. Backup and restoration should be tested periodically.
+* **Documenso self-hosted:** Pinned private provider runtime integrated through a
+  Server-side adapter. HMS creates one shared envelope per signing request from
+  ready PDFs and immutable recipient assignments.
+* **Access boundary:** Browsers call HMS routes only. The Server strips provider
+  cookies, authorization and arbitrary URLs before proxying, and adds only the
+  allowed locale preference.
+* **Persistence:** Request, recipient, item, attempt, receipt and result state is
+  stored in Supabase PostgreSQL; private PDFs and signed results use Supabase
+  Storage. The provider is not the HMS source of truth.
+* **Async lifecycle:** Normalized webhooks, Inngest jobs and bounded reconciliation
+  preserve idempotent submission, rejection, cancellation and result evidence.
+* **Delivery:** Invitations and OTP messages use static templates in
+  `volumes/communication/templates`, Resend in staging/production and Mailpit
+  locally, with a plain-text fallback.
 
-### DocuSeal ↔ HMS System Integration Flow
+### Signing Gateway integration flow
 
-1. The lawyer decides to formalize the engagement in the HMS system.
-2. NestJS calls the DocuSeal API and creates a submission with `template_id` plus pre-filled, read-only client data.
-3. DocuSeal generates the filled PDF and sends the signature link by email through Resend, or the system sends it through the Meta Cloud API.
-4. The client opens the link on their phone and signs with a finger or typed signature.
-5. DocuSeal embeds the signature in the PDF and generates an audit certificate.
-6. DocuSeal triggers a webhook to NestJS.
-7. NestJS receives the event and downloads the signed PDF through the DocuSeal API.
-8. NestJS saves a copy in Supabase Storage, inside the client folder.
-9. NestJS updates the client status in the database to `"hired"`.
+1. A lawyer confirms a formalization signing request in HMS.
+2. Server creates the shared Documenso envelope with ready PDFs and authorized
+   recipients.
+3. HMS delivers the invitation and authenticates clients through OTP or
+   collaborators through the HMS session, without exposing provider credentials.
+4. The recipient reads and acknowledges every ordered document in HMS tabs.
+5. HMS starts one provider ceremony only after the package all-read gate passes.
+6. Webhooks and reconciliation update the aggregate state and persist private
+   signed results in HMS.
 
-### Electronic Signature Scope
-
-| Document                           | Who signs | Method                        | Solution                |
-| ---------------------------------- | --------- | ----------------------------- | ----------------------- |
-| Power of attorney                  | Client    | Simple electronic signature   | DocuSeal                |
-| Legal fee agreement                | Client    | Simple electronic signature   | DocuSeal                |
-| Poverty declaration                | Client    | Simple electronic signature   | DocuSeal                |
-| Intake form                        | Client    | Simple electronic signature   | DocuSeal                |
-| Petitions and procedural documents | Lawyer    | ICP-Brasil certificate, A1/A3 | Court system, PJe/e-SAJ |
-
-### Suggested Domain
-
-```text
-signature.yourdomain.com.br → DocuSeal via Traefik on Coolify
-```
+Legal scope, staging/production activation and external requirement validation
+remain conditional on the evidence and authorization recorded in the Spec and
+Evaluation; this document does not mark those gates approved.
 
 ---
 
@@ -415,7 +426,7 @@ The backup strategy follows the 3-2-1 rule: 3 copies of the data, on 2 different
 | Data                               | Source                   | Backup format                 |
 | ---------------------------------- | ------------------------ | ----------------------------- |
 | Supabase PostgreSQL, main database | Managed Supabase         | Compressed pg_dump, `.sql.gz` |
-| DocuSeal, SQLite + signed PDFs     | Container `/data` volume | Full volume `tar.gz`          |
+| Documenso provider data             | Private service volumes | Environment runbook backup |
 | Environment variables and configs  | Coolify / `.env` files   | Encrypted copy                |
 
 ### Recommended Tool: rclone
@@ -445,6 +456,6 @@ rclone config
 
 ### Note on Managed Supabase
 
-Managed Supabase, the main application database, is the primary copy in the 3-2-1 rule, with automatic daily backups handled by Supabase itself. The backup script adds offsite copies, Google Drive and Dropbox, for DocuSeal and configs.
+Managed Supabase, the main application database, is the primary copy in the 3-2-1 rule, with automatic daily backups handled by Supabase itself. The backup script adds offsite copies, Google Drive and Dropbox, for the persistent Documenso provider data and configs.
 
 For full autonomy, it is also recommended to keep a periodic `pg_dump` of Supabase as an additional copy in the remote storage providers, especially for migration or disaster-recovery scenarios.

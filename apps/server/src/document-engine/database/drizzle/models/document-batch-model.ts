@@ -9,8 +9,6 @@ import {
 } from 'drizzle-orm/pg-core'
 import { documentBatchStatusModel } from './document-batch-status-model'
 import { documentChannelModel } from './document-channel-model'
-import { clientModel, userModel } from '@/identity/database/drizzle/models'
-import { intakeModel } from '@/intake/database/drizzle/models'
 
 export const documentBatchModel = pgTable(
   'document_batches',
@@ -21,15 +19,9 @@ export const documentBatchModel = pgTable(
     channel: documentChannelModel('channel').notNull(),
     sender: text('sender').notNull(),
     inTriageBox: boolean('in_triage_box').default(false).notNull(),
-    clientId: uuid('client_id').references(() => clientModel.id, {
-      onDelete: 'set null',
-    }),
-    intakeId: uuid('intake_id').references(() => intakeModel.id, {
-      onDelete: 'set null',
-    }),
-    createdBy: uuid('created_by').references(() => userModel.id, {
-      onDelete: 'set null',
-    }),
+    clientId: uuid('client_id'),
+    intakeId: uuid('intake_id'),
+    createdBy: uuid('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
