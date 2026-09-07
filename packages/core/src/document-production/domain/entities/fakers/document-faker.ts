@@ -9,6 +9,14 @@ export class DocumentFaker {
     return {
       id: faker.string.uuid(),
       title: faker.lorem.words(3),
+      classificacaoAcesso: faker.helpers.arrayElement([
+        'INTERNO',
+        'CLIENTE',
+        'RESTRITO',
+        'CONFIDENCIAL',
+        'PARCEIRO_LIBERADO',
+      ]) as any,
+      currentVersionId: undefined,
       createdAt,
       updatedAt: createdAt,
       ...overrides,

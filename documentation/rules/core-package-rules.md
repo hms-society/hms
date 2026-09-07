@@ -47,6 +47,42 @@ export type LegalTopic = {
 Non-exported helper types may remain in the file where they are used. Barrel files named
 `index.ts` must only re-export declarations and must not declare types of their own.
 
+## Domain faker conventions
+
+Test-data builders for core entities and structures belong in a `fakers`
+directory under the owning domain kind. Name new and materially changed builders
+`<DomainType>Faker` and implement them as classes:
+
+```ts
+export class ClientFaker {
+  static fake(overrides: Partial<Client> = {}): Client {
+    return {
+      id: faker.string.uuid(),
+      name: faker.person.fullName(),
+      ...overrides,
+    }
+  }
+
+  static fakeMany(count = 10): Client[] {
+    return Array.from({ length: count }, () => ClientFaker.fake())
+  }
+}
+```
+
+Every new or materially changed entity faker exposes `static fake(overrides)`
+and `static fakeMany(count)`. A structure faker may omit `fakeMany` when a
+collection has no meaningful test use, but must still expose
+`static fake(overrides)`. Use `@faker-js/faker` for identity and realistic values,
+keep defaults valid, and apply overrides last. When records are related, override
+their identifiers explicitly so the fixture cannot create an incoherent
+relationship.
+
+Fakers are test-data builders only. They must not contain business decisions or
+live in production entities, use cases, interfaces, or application layers.
+Export them from the nearest `fakers/index.ts` barrel. Tests use the canonical
+faker and keep only scenario-specific overrides instead of scattering complete
+handwritten domain objects or local `fake<Entity>()` helpers.
+
 ## Business rules belong to use cases
 
 Every business rule in `packages/core` must be implemented exclusively inside a
