@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import type { File } from '@hms/core/shared/domain/entities'
-import type {
-  SaveFileInput,
-  StoredFileContent,
-} from '@hms/core/shared/domain/structures'
+import type { SaveFileInput, StoredFileContent } from '@hms/core/shared/domain/structures'
 import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { Injectable } from '@nestjs/common'
 
