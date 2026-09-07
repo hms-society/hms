@@ -5,6 +5,7 @@ import { AxiosRestClient } from '@/rest/axios/axios-rest-client'
 import { ConsultationDocumentProductionService } from '@/rest/services/consultation-document-production-service'
 import { DocumentEngineService } from '@/rest/services/document-engine-service'
 import { AiSuggestionsService } from '@/rest/services/AiSuggestionsService'
+import { CaseManagementService } from '@/rest/services/case-management-service'
 import { CommunicationService } from '@/rest/services/communication-service'
 import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
@@ -46,6 +47,7 @@ export function useRestContextProvider(): RestContextValue {
     identityService: IdentityService(restClient),
     legalCatalogService: LegalCatalogService(restClient),
     communicationService: CommunicationService(restClient),
+    caseManagementService: CaseManagementService(restClient),
     consultationService: ConsultationService(restClient),
     consultationDocumentProductionService:
       ConsultationDocumentProductionService(restClient),
