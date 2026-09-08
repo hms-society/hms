@@ -52,7 +52,7 @@ selected Rule before using it; the Rule wins on any conflict. Do not write or am
 until every affected layer and validation boundary has passed this gate.
 
 When a Confluence PRD is authoritative, use the Atlassian HMS MCP to search for and read the
-complete canonical page. Derive the Spec's `RF-*` and `CA-*` contract from the applicable
+complete canonical page. Derive the Spec's `FR-*` and `AC-*` contract from the applicable
 product outcomes, actors, capabilities, experience, dependencies, and journeys without
 inventing a local PRD taxonomy. Preserve the direct Confluence URL and Jira keys. Do not
 change either external source unless the user explicitly authorizes it.
@@ -138,7 +138,7 @@ writing the Spec. This includes inferred actions, permission boundaries, read-on
 editable fields, session/device controls, deletion or destructive controls, status badges,
 workflow transitions, empty/loading/error behavior, role-specific differences, and any
 element whose presence suggests product behavior rather than decoration. Do not silently
-promote an inferred screenshot detail into an RF, CA, API, route or implementation scope.
+promote an inferred screenshot detail into an FR, AC, API, route or implementation scope.
 
 Each screenshot-derived clarification must include:
 
@@ -184,6 +184,11 @@ their authoritative document. If implementation exposes a missing or easily misa
 reusable Rule, add a focused `## Antipatterns to Avoid` entry stating the prohibited
 pattern, required alternative and validating proof. Record the authority change in the
 Spec, reread the Rule and rebuild the Rule Pack.
+
+This authority-before-Contract step is the preferred place to correct a Rule that is already
+known to be missing, ambiguous or incorrect for the requested delivery. Do not defer a known
+reusable convention to conclusion merely because implementation has not started; the resulting
+Spec and validation plan must be authored against the corrected Rule Pack.
 
 ### 4. Create the artifacts
 
@@ -250,7 +255,7 @@ Use Markdown tables whenever repeated items share the same attributes or exact m
 important. Tables are required for:
 
 - scope/product alignment when more than one item is involved;
-- PRD/Jira/RF/CA traceability;
+- PRD/Jira/FR/AC traceability;
 - design-frame inventory in `design/manifest.md`;
 - implementation paths grouped by affected application and layer;
 - technical decisions, when any are recorded;
@@ -290,9 +295,9 @@ Do not put repository implementation evidence or technical decisions in this sec
 
 ### 2. Implementation Contract
 
-Define observable requirements as `RF-*`. Keep internal paths and algorithms out of them.
-Map every RF to the exact Confluence PRD section, Jira ticket statement, report section, or
-direct-request decision that authorizes it. Do not invent PRD requirement IDs. Derive CA
+Define observable requirements as `FR-*`. Keep internal paths and algorithms out of them.
+Map every FR to the exact Confluence PRD section, Jira ticket statement, report section, or
+direct-request decision that authorizes it. Do not invent PRD requirement IDs. Derive AC
 criteria from the complete applicable source behavior, including actors, authorization,
 success, rejection, states, dependencies, and user-visible experience.
 
@@ -300,19 +305,19 @@ Use a requirements table when there is more than one requirement:
 
 | ID | PRD/Jira/source coverage | Required behavior |
 | --- | --- | --- |
-| `RF-01` | `<Confluence section, Jira key/statement, report anchor, or direct decision>` | `<observable behavior and applicable restrictions>` |
+| `FR-01` | `<Confluence section, Jira key/statement, report anchor, or direct decision>` | `<observable behavior and applicable restrictions>` |
 
-Map every requirement to acceptance evidence using this required table. Every CA must link to
-one or more RFs, and every RF must link to one or more CAs; do not leave either direction
+Map every requirement to acceptance evidence using this required table. Every AC must link to
+one or more FRs, and every FR must link to one or more ACs; do not leave either direction
 implicit:
 
-| ID | RF coverage | Requirement | Given | When | Then | Expected evidence |
+| ID | FR coverage | Requirement | Given | When | Then | Expected evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `CA-01` | `RF-01` | `<observable criterion>` | `<precondition>` | `<action>` | `<observable result>` | `<test boundary and/or MV-01>` |
+| `AC-01` | `FR-01` | `<observable criterion>` | `<precondition>` | `<action>` | `<observable result>` | `<test boundary and/or MV-01>` |
 
 Cover applicable success, rejection, authorization, tenant isolation, concurrency,
 provider failure, session/hydration restoration, accessibility, performance and secret
-boundaries. Every RF must have acceptance evidence. `MV-*` identifies a manual scenario;
+boundaries. Every FR must have acceptance evidence. `MV-*` identifies a manual scenario;
 it is not another requirement system.
 
 Add **Cross-cutting restrictions** only when needed. Use a `Concern | Contract` table when
@@ -337,13 +342,13 @@ inventory covering:
 - hierarchy, alignment, spacing relationships, dimensions, typography, color tokens,
   borders, radii, shadows and responsive implications;
 - elements intentionally absent, ambiguous, or likely to be confused with adjacent scope;
-- the RF/CA criteria and implementation surface that the screenshot must validate.
+- the FR/AC criteria and implementation surface that the screenshot must validate.
 
 The design manifest must preserve that analysis in a concise table or linked design note:
 
 | Reference | Route/surface/state | Viewport | Required visible inventory | Interaction/state coverage | Ambiguities or exclusions | Validation target |
 | --- | --- | --- | --- | --- | --- | --- |
-| `<screenshot>` | `<route and state>` | `<width × height>` | `<elements and hierarchy>` | `<controls/states>` | `<explicit notes>` | `<CA/MV/validation-artifact identifier>` |
+| `<screenshot>` | `<route and state>` | `<width × height>` | `<elements and hierarchy>` | `<controls/states>` | `<explicit notes>` | `<AC/MV/validation-artifact identifier>` |
 
 After reviewing the supplied screenshots, the Spec creator must decide whether additional
 screenshots are necessary. Suggest them whenever the supplied bundle leaves a material gap,
@@ -353,7 +358,7 @@ role, tenant, mobile or breakpoint states. Each suggestion must state:
 - the proposed route/surface/state and role or fixture;
 - the exact viewport;
 - why the supplied references are insufficient;
-- the RF/CA/MV criteria it would clarify;
+- the FR/AC/MV criteria it would clarify;
 - whether it is **required before implementation** or **recommended supplemental coverage**.
 
 Required supplemental screenshots must be captured and added to the feature-local design
@@ -454,7 +459,7 @@ path in its owning application and layer.
 
 Do not turn this section into an execution Plan. Specify required declarations and
 semantics, not task order, implementation attempts or incidental algorithms. Do not repeat
-RF/CA behavior, validation procedures or the same technical responsibility in multiple
+FR/AC behavior, validation procedures or the same technical responsibility in multiple
 subsections.
 
 #### Current technical state
@@ -565,7 +570,7 @@ contract a manual edit to a generated file.
 For every row, name exact declarations rather than describing a file generically. Include
 types, named errors, side-effect timing, exports, registration and generated outputs when
 they are part of the contract. State both what changes and the runtime guarantee the change
-must preserve. Reference RF/CA IDs only where they disambiguate the responsibility; the
+must preserve. Reference FR/AC IDs only where they disambiguate the responsibility; the
 Validation Contract remains the canonical evidence map. Add a short TypeScript signature,
 JSON/schema example or state table after the layer table only when the columns would
 otherwise leave the contract ambiguous. Domain Entity/Structure declaration code is required
@@ -1006,7 +1011,7 @@ technical decisions: keep the Spec `draft` and return to clarification.
 ### 4. Validation Contract
 
 Testing is part of implementation. Derive each boundary from the repository test taxonomy
-and name real test files/suites and the CA IDs they prove. Keep mocked transport, real
+and name real test files/suites and the AC IDs they prove. Keep mocked transport, real
 integration and manual Playwright CLI evidence distinct. Do not invent test functions, arbitrary
 coverage percentages or commands.
 
@@ -1036,11 +1041,11 @@ Use this required coverage table:
 
 | Acceptance | Automated boundary | Manual scenario | Evidence target |
 | --- | --- | --- | --- |
-| `CA-01` | `<real test file/suite or none with reason>` | `MV-01` or `—` | `<evaluation section/artifact>` |
+| `AC-01` | `<real test file/suite or none with reason>` | `MV-01` or `—` | `<evaluation section/artifact>` |
 
 For each `MV-*`, provide:
 
-- mapped CA IDs, services/health checks, accounts/fixtures and preconditions;
+- mapped AC IDs, services/health checks, accounts/fixtures and preconditions;
 - starting route/state, exact viewport and saved design reference when applicable;
 - numbered actions, including a keyboard path;
 - expected visible result, final URL, network and persistence/provider effect;
@@ -1091,7 +1096,7 @@ deterministic integrity checks, activate exactly one read-only
 - do not provide a Plan, implementation diff, Evaluation, test result or runtime evidence as a
   substitute for the Spec Contract and its source authorities.
 
-The Reviewer checks source/RF/CA traceability, path and declaration completeness, ownership,
+The Reviewer checks source/FR/AC traceability, path and declaration completeness, ownership,
 exports and registration, producer-consumer wiring, generated artifacts, test ownership,
 command ordering, design handoff and validation executability. It is read-only: it does not
 edit files, resolve ambiguity, ask the user questions, create subagents or decide Spec status.
@@ -1119,7 +1124,7 @@ Spec review remains. Before changing it to `open`, verify:
 - metadata, source, status and revision consistency;
 - every applicable Confluence PRD section and Jira statement is mapped without inventing
   requirement IDs or changing external state;
-- complete RF/CA/evidence traceability;
+- complete FR/AC/evidence traceability;
 - metadata-scope closure: every affected/validation/documentation/design path is authorized,
   and every rule-mandated companion artifact is represented;
 - every affected-path table starts with exactly `Path | Change`, contains one exact

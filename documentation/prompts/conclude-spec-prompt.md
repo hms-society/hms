@@ -32,7 +32,7 @@ Require:
 - `evaluation.md` has `status: ready` and references the current Spec revision and
   implementation;
 - direct implementation or all Plan phases are complete;
-- required CA, `MV-*`, runtime and visual evidence is current;
+- required AC, `MV-*`, runtime and visual evidence is current;
 - Evaluation contains a current passing structural path gate row with the exact command,
   selected base ref, resolved base SHA, reported counts, and result;
 - no blocking implementation finding remains;
@@ -45,7 +45,7 @@ network, HTTP status, accessibility, keyboard and responsive checks are classifi
 tests without this record is not validation-ready.
 
 Require explicit product traceability in that record. Map every in-scope Confluence PRD section
-and Jira statement through the Spec's `RF-*` and `CA-*` criteria to current Evaluation evidence,
+and Jira statement through the Spec's `FR-*` and `AC-*` criteria to current Evaluation evidence,
 then classify the delivery as full, partial, or deferred without changing Jira or Confluence.
 
 Conclusion requires authorization to create commits, push the delivery branch and create or
@@ -63,7 +63,7 @@ lines, split it into multiple coherent PR slices before invoking `create-pr`. Pa
 real dependency and ownership boundaries, such as Core/contracts, Server/persistence or
 Web/UI, and keep each slice independently reviewable and at or below the limit. The first
 or independent slice uses `develop` as its base; each dependent slice uses the immediately
-preceding slice branch as its base and records that dependency, covered `RF-*`/`CA-*` criteria
+preceding slice branch as its base and records that dependency, covered `FR-*`/`AC-*` criteria
 and validation evidence in the delivery artifacts. Never split files or behavior arbitrarily
 to satisfy the line limit. If no coherent partition exists, pause publication and route the
 delivery back through `create-plan` or `create-spec` rather than publishing an oversized or
@@ -103,7 +103,7 @@ conclusion automatically after it returns evaluation to `ready`.
 4. Rerun the final Spec conformance comparison and verify the current validation evidence covers
    the exact implementation diff. Any later
    implementation or acceptance-evidence change routes back to the implementation workflow.
-5. Reconcile the Confluence PRD/Jira/RF/CA evidence map without mutating external state. If
+5. Reconcile the Confluence PRD/Jira/FR/AC evidence map without mutating external state. If
    traceability is incomplete, route the discrepancy through the authority rules.
 6. Rerun
    `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]` after all local
@@ -202,7 +202,7 @@ Check PRD, Architecture, Modules, Design, Tooling and the Rule Pack against deli
 Apply factual documentation corrections only. Product, Contract, global Rule, module
 ownership or architecture changes require user authority and the late-change route.
 
-Reconcile final Confluence PRD/Jira/RF/CA traceability against the delivered candidate. A
+Reconcile final Confluence PRD/Jira/FR/AC traceability against the delivered candidate. A
 material mismatch is a blocking closure finding and follows correction or amendment routing.
 
 Treat material findings as inputs to durable documentation improvement, not only as closure
@@ -247,6 +247,11 @@ approved Contract and delivered architecture is part of conclusion; a new produc
 Contract obligation, module-ownership decision, architecture decision or global policy still
 requires user authority and the late-change route.
 
+Known Rule gaps belong to the Spec-authoring authority step and must not be deferred to
+conclusion. Conclusion is the fallback for reusable guidance discovered through implementation,
+validation or review. If the same gap was already known but was not resolved before the Spec,
+record the process miss in the Evaluation and route the authority correction before closing.
+
 ## Complete the delivery
 
 Only after the PR CI gate passes and no blocking finding remains:
@@ -277,7 +282,7 @@ Return:
 - clickable Spec, Plan when present, evaluation and PR links;
 - Spec revision and completed status;
 - delivery references, when present;
-- validation result and CA/manual/visual coverage;
+- validation result and AC/manual/visual coverage;
 - fully delivered, partially delivered, and deferred Confluence PRD/Jira source statements;
 - applicable PR CI workflows and results for every delivery PR;
 - documentation alignment and remaining non-blocking limitations;

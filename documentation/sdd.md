@@ -44,8 +44,16 @@ design authority, or tooling convention, update that authority first. Product be
 global Rules, architecture, and module ownership require explicit user approval. Update the
 canonical Confluence PRD rather than creating a local `prd.md` substitute.
 
+Use a two-stage authority update for reusable Rules. During Spec creation, resolve any known
+Rule gap before authoring the Contract: obtain the required approval, update the applicable
+Rule, reread it, and rebuild the Rule Pack. During conclusion, apply the same check to material
+implementation and validation findings. Update a Rule only when the finding exposes reusable
+guidance that is consistent with the approved Contract; otherwise record `No change` in the
+Evaluation. A new global policy follows the authority and late-change route instead of being
+introduced silently during conclusion.
+
 HMS PRDs do not need a repository-specific requirement-ID or checkbox format. A Spec maps the
-relevant PRD sections and Jira scope to its own observable `RF-*` requirements and `CA-*`
+relevant PRD sections and Jira scope to its own observable `FR-*` requirements and `AC-*`
 acceptance criteria. Jira workflow state and Confluence content are never changed
 automatically by `create-spec`, `implement-spec`, or `conclude-spec`.
 
@@ -180,12 +188,12 @@ The Spec has five top-level sections:
 | Section | Content |
 | --- | --- |
 | Context and scope | Objective, source, current gap, boundaries, product alignment, and accepted assumptions. |
-| Implementation Contract | Observable `RF-*`, `CA-*` Given/When/Then acceptance, restrictions, and conditional Design Contract. |
+| Implementation Contract | Observable `FR-*`, `AC-*` Given/When/Then acceptance, restrictions, and conditional Design Contract. |
 | Technical Contract | Current state, runtime flow, exact layer contracts, file/widget tree, and consequential decisions. |
 | Validation Contract | Automated boundaries, executable `MV-*` scenarios, commands, and evidence targets. |
 | Documentation alignment and revision history | Confluence PRD, Jira ticket, Architecture, Modules, Design, Tooling, Rule Pack, and revisions. |
 
-The Spec stays `draft` until metadata, RF/CA traceability, technical mapping, design bundle,
+The Spec stays `draft` until metadata, FR/AC traceability, technical mapping, design bundle,
 manual scenarios, commands, links, and Rule Pack pass Orchestrator integrity checks and the
 applicable independent [`Spec Reviewer`](agents/spec-reviewer-agent.md) findings are
 verified and resolved. This review is part of `create-spec`, not a separate user-facing stage
@@ -221,7 +229,7 @@ deterministic integrity checks, activate exactly one read-only
 - do not provide a Plan, implementation diff, Evaluation, test result, or runtime evidence as a
   substitute for the Spec Contract and its source authorities.
 
-The Reviewer checks source/RF/CA traceability, path and declaration completeness, ownership,
+The Reviewer checks source/FR/AC traceability, path and declaration completeness, ownership,
 exports and registration, producer-consumer wiring, generated artifacts, test ownership,
 command ordering, design handoff, and validation executability. It is read-only: it does not
 edit files, resolve ambiguity, ask the user questions, create subagents, or decide Spec status.
@@ -239,7 +247,7 @@ For UI backed by Pencil or supplied screenshots, the Spec creator:
 2. visually inventories every relevant frame and asks about uncontracted behavior;
 3. identifies missing states or viewports and classifies supplemental references;
 4. saves one reference image per required state under the feature-local `design/` directory;
-5. writes `design/manifest.md` with node, state, viewport, implementation surface, and CA/MV mapping;
+5. writes `design/manifest.md` with node, state, viewport, implementation surface, and AC/MV mapping;
 6. verifies every saved image exists, is non-empty, has the expected dimensions, and was visually inspected.
 
 The Spec stays `draft` if a required reference cannot be captured or a design-derived product
@@ -264,7 +272,7 @@ Implementation always starts through [`implement-spec`](prompts/implement-spec-p
 2. set the Spec and current Plan to `in_progress`;
 3. create or reconcile `evaluation.md` from the canonical template embedded in
    [`implement-spec`](prompts/implement-spec-prompt.md#canonical-evaluation-template);
-4. activate a bounded direct assignment or stable ownership Builders with RF/CA, allowed paths,
+4. activate a bounded direct assignment or stable ownership Builders with FR/AC, allowed paths,
    Rule Pack, Architecture, design references, and exits;
 5. integrate every Builder-owned and Orchestrator-owned path, then run
    `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]`;

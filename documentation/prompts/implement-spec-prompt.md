@@ -94,8 +94,9 @@ stop before editing feature source and report the exact blocker:
   Evaluation.
 - This applies equally to small maintenance and UI-only changes. Any class, CSS or layout
   adjustment—including margin, padding, width, max-width, gap, alignment, container,
-  responsive or spacing changes—must add or update the relevant `EV-*`, `VIS-*` and `FND-*`
-  records in `evaluation.md` during the same task. Mark affected screenshots or comparisons
+  responsive or spacing changes—must add or update the relevant `EV-*` and `FND-*` records;
+  visual evidence uses `EV-*` with `Type = visual`. Record these rows in `evaluation.md`
+  during the same task. Mark affected screenshots or comparisons
   `stale` until they are recaptured and inspected; do not treat a passing test or an old visual
   capture as current evidence.
 - In `apps/web`, page surfaces must not set horizontal outer margins or page-level maximum-width
@@ -108,7 +109,7 @@ stop before editing feature source and report the exact blocker:
 
 For feature implementation changes, the Orchestrator must activate a scoped execution assignment
 before any feature source is edited. The assignment must receive the exact Spec revision,
-Spec `CA-*` acceptance criteria, mapped Confluence PRD and Jira source statements, required
+Spec `AC-*` acceptance criteria, mapped Confluence PRD and Jira source statements, required
 file/widget tree, allowed paths, Rule Pack, design references and validation exits; its
 activation and scope must be recorded in Evaluation and the current execution artifacts. PRDs do
 not define a separate Acceptance Criteria section.
@@ -158,7 +159,7 @@ Before the first implementation change for the current revision:
 4. create colocated `evaluation.md` from the canonical template embedded below when absent,
    or reconcile an existing file to that structure without discarding existing evidence;
 5. activate the direct assignment or affected ownership Builders and record, before any feature
-   edit, their identifiers, exact Spec revision, RF/CA mapping, owned and prohibited paths,
+   edit, their identifiers, exact Spec revision, FR/AC mapping, owned and prohibited paths,
    assigned phases, required file/widget tree, Rule Pack, design references, validation exits
    and expected evidence locations;
 6. compare the untouched implementation against the Spec's required tree, contracts, states and
@@ -200,11 +201,12 @@ evidence into them without deleting historical commands, findings, failed attemp
 visual comparisons. Remove unused example rows; use an explicit `not_applicable` row only when
 the absence itself needs traceability.
 
-Add one row per `CA-*`, executed automated/runtime sensor, `MV-*`, each supplied or required
+Add one row per `AC-*`, executed automated/runtime sensor, `MV-*`, each supplied or required
 supplemental design screenshot, finding and PR CI run; do not collapse criterion or screenshot
 ranges into one row. Visual rows are mandatory for design-backed UI and optional only when no
 design reference applies. Use stable
-`EV-*`, `MV-*`, `VIS-*`, `FND-*` and `CI-*` IDs so findings can invalidate exact evidence.
+`EV-*`, `MV-*`, `FND-*` and `CI-*` IDs so findings can invalidate exact evidence. Use `EV-*`
+for every evidence row; visual rows must set `Type = visual`.
 
 Use `pending`, `passed`, `failed`, `stale` or `not_applicable` for ordinary evidence.
 Visual evidence may use `passed_with_authorized_difference`; findings use `active`,
@@ -238,13 +240,13 @@ Current result: `<concise statement of validated, pending and blocking evidence>
 
 | Criterion | Evidence | Status |
 | --- | --- | --- |
-| `CA-01` | `EV-01`; `MV-01` | `pending` |
+| `AC-01` | `EV-01`; `MV-01` | `pending` |
 
 ## Automated and runtime evidence
 
-| ID | Layer | Command or scenario | Result | Status |
-| --- | --- | --- | --- | --- |
-| `EV-01` | `<Domain, Use cases, Interfaces, Validation, REST, Provision, Database, Messaging, UI or Cross-layer>` | `<exact command or runtime scenario>` | `<observed result>` | `pending` |
+| ID | Type | Layer | Command or scenario | Result | Status |
+| --- | --- | --- | --- | --- | --- |
+| `EV-01` | `runtime` | `<Domain, Use cases, Interfaces, Validation, REST, Provision, Database, Messaging, UI or Cross-layer>` | `<exact command or runtime scenario>` | `<observed result>` | `pending` |
 
 ## Structural path gate
 
@@ -256,13 +258,13 @@ Current result: `<concise statement of validated, pending and blocking evidence>
 
 | ID | Scenario | Criteria | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| `MV-01` | `<user-visible scenario>` | `CA-01` | `<expected outcome>` | `<actual observation>` | `pending` |
+| `MV-01` | `<user-visible scenario>` | `AC-01` | `<expected outcome>` | `<actual observation>` | `pending` |
 
 ## Visual evidence
 
-| ID | Surface and state | Viewport | Reference | Implementation | Differences | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| `VIS-01` | `<surface and state>` | `<width × height>` | `design/<reference>.png` | `<Playwright CLI screenshot path or CI artifact identifier; — when not retained>` | `<missing, extra, altered or mismatched elements>` | `pending` |
+| ID | Type | Surface and state | Viewport | Reference | Implementation | Differences | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `EV-02` | `visual` | `<surface and state>` | `<width × height>` | `design/<reference>.png` | `<Playwright CLI screenshot path or CI artifact identifier; — when not retained>` | `<missing, extra, altered or mismatched elements>` | `pending` |
 
 ## Rule and documentation compliance
 
@@ -274,7 +276,7 @@ Current result: `<concise statement of validated, pending and blocking evidence>
 
 | ID | Classification | Source | Affected evidence | Status | Resolution |
 | --- | --- | --- | --- | --- | --- |
-| `FND-001` | `<implementation, Contract, Rule, environment or CI>` | `<CA, Rule, screenshot, command or PR run>` | `<EV, MV, VIS or CI IDs>` | `active` | `<correction, accepted limitation or next action>` |
+| `FND-001` | `<implementation, Contract, Rule, environment or CI>` | `<AC, Rule, screenshot, command or PR run>` | `<EV, MV or CI IDs>` | `active` | `<correction, accepted limitation or next action>` |
 
 ## Lessons learned
 
@@ -328,7 +330,7 @@ and evidence unless they overlap evaluated paths, contaminate evidence or cause 
 
 Use when no current Plan exists:
 
-1. activate `Builder Direct` in the current context with the current revision, RF/CA mapping,
+1. activate `Builder Direct` in the current context with the current revision, FR/AC mapping,
    observable outcome, allowed/prohibited paths, Rule Pack, Architecture, design bundle and
    applicable tools;
 2. implement within that recorded scope, then inspect the diff; while acting as `Builder Direct`,
@@ -414,7 +416,7 @@ no automatic fetch. Use an explicit local base ref when the delivery contract re
 selected base ref, resolved base SHA, every reported count, exact result, and status.
 
 This gate checks only structural agreement between canonical affected-path tables and changed
-implementation paths/classifications. It does not validate behavior, RF/CA satisfaction, tests,
+implementation paths/classifications. It does not validate behavior, FR/AC satisfaction, tests,
 types, runtime integration, migration semantics, generated content, design fidelity,
 accessibility, or Playwright CLI behavior. Do not start the Implementation Reviewer or integrated
 sensors and do not assess readiness until it passes. A malformed/noncanonical table or mismatch
@@ -502,7 +504,7 @@ the result is unchanged:
 | --- | --- |
 | File/widget tree | Every required path exists, no path is misplaced, and any intentional extra path is mapped to the Spec or explicitly excluded from the candidate. |
 | Boundary ownership | Each changed path is inside the active Builder scope and the Spec's declared layer/module boundary. |
-| Contract | RF/CA, API fields, domain rules, persistence behavior, error semantics and exclusions match the current revision. |
+| Contract | FR/AC, API fields, domain rules, persistence behavior, error semantics and exclusions match the current revision. |
 | UI states | Loading, empty, success, error, recovery, disabled, selected, focus, keyboard and responsive states applicable to the change are exercised. |
 | Design references | Every supplied and required supplemental screenshot has an exact state/viewport capture, direct comparison, and current transient artifact identifier. |
 | Validation | Commands actually ran on the current candidate; console errors, failed requests, HTTP 4xx/5xx, hydration warnings and persistence results are classified. |
@@ -603,7 +605,7 @@ subagent while the Orchestrator runs the applicable integrated sensors:
 3. review generated artifacts and migration bodies;
 4. preflight real services, database/Auth/provider state, accounts and fixtures;
 5. execute every applicable `MV-*` with the Playwright CLI;
-6. inspect every CA, manual scenario and supplied/supplemental screenshot with exact
+6. inspect every AC, manual scenario and supplied/supplemental screenshot with exact
    viewport/state, console/network, accessibility, DOM/layout and persistence evidence;
 7. when `reviewer` applies, verify and classify every finding;
 8. record commands, captures, results, review findings and resolutions in Evaluation.

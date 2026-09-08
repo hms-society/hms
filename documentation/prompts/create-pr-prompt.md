@@ -49,7 +49,7 @@ determines where to cut the work.
   arbitrary line-count fragments.
 - The first or independent slice uses `develop` as its base. A dependent slice may use the
   immediately preceding slice branch as its base, forming an explicit PR dependency chain.
-  Record each slice's scope, base PR, dependency order and covered `RF-*`/`CA-*` criteria in
+  Record each slice's scope, base PR, dependency order and covered `FR-*`/`AC-*` criteria in
   the delivery artifacts and PR body.
 - If no coherent partition satisfies the limit, stop publication and route the delivery back
   through `create-plan` or `create-spec` rather than publishing an oversized or arbitrary PR.
@@ -206,7 +206,7 @@ Include these sections in this order:
 - **Objetivo** — problem, expected outcome, scope and explicit exclusions;
 - **Tickets Jira relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
 - **Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
-  exact revision, delivery boundary, and covered `RF-*`/`CA-*` criteria. This workflow does
+  exact revision, delivery boundary, and covered `FR-*`/`AC-*` criteria. This workflow does
   not change Jira or Confluence;
 - **Implementação** — coherent frontend, backend, domain, persistence and test slices with
   the most relevant changed paths. Describe each affected layer concretely: name the

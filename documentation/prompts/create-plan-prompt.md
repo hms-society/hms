@@ -152,14 +152,14 @@ Below the table, group concise task cards by phase:
 - **Status/owner:** `pending` — `builder_<boundary>`
 - **Depends/parallel:** <dependencies and safe parallel work>
 - **Paths:** <exact owned paths or coherent path groups>
-- **Contract:** <RF-* and CA-*>
+- **Contract:** <FR-* and AC-*>
 - **Outcome:** <observable result>
 - **Rules:** <exact applicable Rule paths and relevant `Antipatterns to Avoid` subsections, when present>
 - **Exit:** <focused commands/sensors and required evidence>
 ```
 
 Every task has exactly these seven concerns: status/owner, dependency/parallelism, owned
-paths, RF/CA coverage, observable outcome, applicable Rules (including relevant
+paths, FR/AC coverage, observable outcome, applicable Rules (including relevant
 `Antipatterns to Avoid` subsections) and validation/exit. Reference the Spec for technical
 detail. Assign every task to its stable ownership Builder; do not create one Builder per task.
 Paths may not overlap between active Builders.
@@ -213,9 +213,9 @@ Use one coverage table to schedule evidence without repeating the Spec's scenari
 
 | Type | Scenario/surface | Criteria | Reference | Evidence target | Status |
 | --- | --- | --- | --- | --- | --- |
-| Manual | MV-01 | CA-01 | Spec MV-01 | `./evaluation.md` | `pending` |
-| Visual (optional) | `<state>` | CA-02 | `./design/<reference>.png` | `Playwright screenshot path or CI artifact identifier` | `pending` |
-| Runtime | `<integration>` | CA-03 | Integration Contract | `./evaluation.md` | `pending` |
+| Manual | MV-01 | AC-01 | Spec MV-01 | `./evaluation.md` | `pending` |
+| Visual (optional) | `<state>` | AC-02 | `./design/<reference>.png` | `Playwright screenshot path or CI artifact identifier` | `pending` |
+| Runtime | `<integration>` | AC-03 | Integration Contract | `./evaluation.md` | `pending` |
 
 Include only applicable rows. For design-backed UI, schedule every supplied screenshot and every
 required supplemental state at its exact viewport and record an independent comparison row for
@@ -261,7 +261,7 @@ details and verdicts belong in `evaluation.md`.
 
 ## Plan integrity and author summary
 
-Before saving, verify the Spec revision, acyclic dependencies, complete RF/CA scheduling,
+Before saving, verify the Spec revision, acyclic dependencies, complete FR/AC scheduling,
 non-overlapping active paths, valid Rule paths, executable exits, complete `MV-*`/design
 coverage, stable Builder ownership, justified concurrency, correctly ordered structural path
 gate, final conformance checkpoints and valid colocated links.

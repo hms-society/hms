@@ -106,7 +106,7 @@ sua aplicação e disponibilidade, sem criar ou alterar dados.
 
 | Fonte | Node | Estado observado | Aplicação na Spec |
 |---|---|---|---|
-| `design/hms.pen` | `K2Fvp` — administração de modelos de documentos | viewport desktop com lista preenchida, busca, filtros, tabela, ações e paginação | SR-002, SR-004, SR-005, SR-009 e CA-03, CA-04, CA-06, CA-10, CA-21 |
+| `design/hms.pen` | `K2Fvp` — administração de modelos de documentos | viewport desktop com lista preenchida, busca, filtros, tabela, ações e paginação | FR-002, FR-004, FR-005, FR-009 e AC-03, AC-04, AC-06, AC-10, AC-21 |
 
 A aparência da sidebar do node é ignorada porque a implementação reutiliza a
 sidebar existente do HMS; sua presença e o item **Documentos** continuam parte
@@ -123,14 +123,14 @@ alteração.
 
 ## Requisitos
 
-### SR-001 — Autorizar somente administradores ativos
+### FR-001 — Autorizar somente administradores ativos
 
 A rota e o endpoint devem aceitar somente uma sessão válida vinculada a um
 colaborador local ativo com perfil `admin`. Uma sessão ausente recebe `401`; uma
 conta sem vínculo ativo ou de outro perfil recebe `403`. Nenhum dado de Produção
 Documental pode ser retornado antes da autorização.
 
-### SR-002 — Listar modelos com projeção administrativa
+### FR-002 — Listar modelos com projeção administrativa
 
 Cada item deve apresentar:
 
@@ -147,14 +147,14 @@ descrição permanecem juntos em **Modelo**. A aplicação global é identificad
 `Global`; a aplicação restrita apresenta os nomes disponíveis e resume
 visualmente conjuntos longos sem retirar seu nome acessível completo.
 
-### SR-003 — Buscar por nome ou descrição
+### FR-003 — Buscar por nome ou descrição
 
 A busca remove espaços periféricos e compara substring de nome ou descrição sem
 diferença entre maiúsculas e minúsculas. Nome e descrição são combinados por
 `OR`. Uma busca vazia ou composta apenas por espaços equivale à ausência de
 busca.
 
-### SR-004 — Filtrar modelos
+### FR-004 — Filtrar modelos
 
 A consulta aceita filtros opcionais por `legalAreaId`, `legalTopicId`, `moment`
 e `status`. Filtros presentes são combinados por `AND`; cada um também é combinado
@@ -172,9 +172,9 @@ ativos. Trocar ou limpar a área limpa o tema selecionado e recarrega as opçõe
 compatíveis. Falha ao carregar essas opções mantém a listagem utilizável e
 informa por que os filtros dependentes não estão disponíveis. Falha do provider
 usado pelo servidor para resolver nomes da própria projeção é falha de listagem e
-segue SR-007.
+segue FR-007.
 
-### SR-005 — Paginar e ordenar de forma estável
+### FR-005 — Paginar e ordenar de forma estável
 
 A query aceita `page?: number` e `pageSize?: number`. `page` começa em 1 e usa 1
 como padrão; `pageSize` usa 20 como padrão e aceita valores de 1 a 100. A
@@ -185,7 +185,7 @@ A resposta contém `items`, `page`, `pageSize`, `total` e `totalPages`. Uma pág
 válida além do total retorna `items: []` e preserva os metadados reais, sem ajustar
 silenciosamente a página solicitada.
 
-### SR-006 — Preservar o estado da consulta na URL
+### FR-006 — Preservar o estado da consulta na URL
 
 A rota canônica é `/modelos-de-documentos`. Os parâmetros opcionais são
 `search`, `legalAreaId`, `legalTopicId`, `moment`, `status`, `page` e `pageSize`.
@@ -196,7 +196,7 @@ os demais parâmetros. Limpar filtros remove os parâmetros opcionais e restaura
 primeira página. Recarregar ou compartilhar a URL reproduz a mesma consulta e os
 mesmos controles visíveis.
 
-### SR-007 — Distinguir carregamento, vazio e falha
+### FR-007 — Distinguir carregamento, vazio e falha
 
 Antes da primeira resposta, a região da tabela apresenta carregamento sem simular
 registros reais. Uma base sem modelos informa que ainda não há modelos
@@ -204,7 +204,7 @@ cadastrados, sem oferecer ação de cadastro. Uma consulta filtrada sem resultad
 informa que nenhum modelo corresponde aos critérios e oferece **Limpar filtros**.
 Falhas de listagem exibem mensagem orientada à recuperação e **Tentar novamente**.
 
-### SR-008 — Manter limites entre módulos
+### FR-008 — Manter limites entre módulos
 
 Produção Documental é proprietária dos modelos, do momento, da abrangência e da
 disponibilidade. Associações armazenam apenas referências de
@@ -215,7 +215,7 @@ repositories ou tabelas do catálogo.
 Conteúdo e variáveis existentes no agregado não são retornados pela projeção da
 listagem.
 
-### SR-009 — Seguir fielmente a experiência visual e acessível do HMS
+### FR-009 — Seguir fielmente a experiência visual e acessível do HMS
 
 A composição deve reproduzir o conteúdo principal de `K2Fvp` para cabeçalho,
 filtros, tabela, coluna de ações, chips e paginação, com a exceção de escopo
@@ -228,7 +228,7 @@ nomes acessíveis. O estado usa texto e ícone, nunca somente cor.
 A página preserva leitura e operação em viewport estreito, zoom/reflow, tema
 escuro e WCAG 2.2 nível AA.
 
-### SR-010 — Reutilizar a navegação administrativa existente
+### FR-010 — Reutilizar a navegação administrativa existente
 
 A página é acessível pelo item **Documentos** da sidebar já implementada no
 `AppLayout`. O item existe somente para o perfil `admin`, usa a rota
@@ -239,46 +239,46 @@ sidebar além de registrar o novo item.
 
 ## Critérios de aceitação
 
-| CA | SR | Dado | Quando | Então | Evidência esperada |
+| AC | SR | Dado | Quando | Então | Evidência esperada |
 |---|---|---|---|---|---|
-| CA-01 | SR-001 | administrador ativo autenticado | acessa a rota ou consulta a API | a página e os dados são disponibilizados | integração REST + integração de rota + navegador real |
-| CA-02 | SR-001 | sessão ausente, conta inativa, sem vínculo ou perfil não administrador | tenta ler modelos | recebe `401` ou `403` sem dados | integração REST + integração de rota |
-| CA-03 | SR-002 | modelos globais e restritos | a listagem conclui | cada linha apresenta modelo, aplicação e estado | teste de use case + integração REST + widget + navegador |
-| CA-04 | SR-002 | tabela renderizada | inspeciona o cabeçalho e as linhas | **Atualizado** não existe; **Ação** contém **Editar** e **Duplicar** com nomes acessíveis por modelo | widget + navegador |
-| CA-05 | SR-003 | modelos correspondentes somente por nome ou descrição, com caixa diferente | pesquisa | ambos são retornados e os demais são excluídos | teste de use case + integração REST |
-| CA-06 | SR-004 | busca, área, tema, momento e estado válidos | aplica todos os critérios | o servidor combina todos por `AND` e retorna somente compatíveis | teste de use case + integração REST + integração de rota |
-| CA-07 | SR-004 | área selecionada com tema | troca ou limpa a área | tema é limpo, opções são recarregadas e página volta para 1 | teste de hook/widget + navegador |
-| CA-08 | SR-004 | REST de opções do Catálogo Jurídico indisponível e endpoint de modelos saudável | abre a página | lista continua consultável e filtros dependentes explicam a falha | widget + integração de rota |
-| CA-09 | SR-004 | enum ou identificador inválido | consulta diretamente a API | recebe `400` com o erro REST padrão | integração REST |
-| CA-10 | SR-005 | mais registros que `pageSize` | navega entre páginas | recorte, total e total de páginas são corretos, sem repetição ou salto | teste de use case + integração REST + widget |
-| CA-11 | SR-005 | dois modelos com mesmo nome normalizado | lista repetidamente | ordem secundária por identificador permanece estável | integração REST |
-| CA-12 | SR-005 | página válida além do total | consulta | mantém a página, retorna `items: []` e metadados reais | teste de use case + integração REST |
-| CA-13 | SR-006 | URL com busca, filtros e página | abre ou recarrega a rota | controles, request e resultado reproduzem os parâmetros | teste de rota/hook + integração de rota + navegador |
-| CA-14 | SR-006 | consulta em página posterior | altera busca ou filtro | URL e request voltam à página 1 sem perder outros critérios | teste de hook/widget + navegador |
-| CA-15 | SR-007 | base sem modelos | conclui a primeira consulta | apresenta estado vazio sem ação de cadastro | widget + integração de rota |
-| CA-16 | SR-007 | há modelos, mas nenhum corresponde | aplica critérios | oferece **Limpar filtros** | widget + navegador |
-| CA-17 | SR-007 | API falha e depois se recupera | seleciona **Tentar novamente** | erro é substituído pelo resultado sem recarregar a aplicação | widget + integração de rota |
-| CA-18 | SR-008 | modelo restrito com referências do catálogo | lista os modelos | nomes são resolvidos pelo provider público sem acesso às tabelas do catálogo pelo módulo | teste de use case + revisão arquitetural + integração REST |
-| CA-19 | SR-009 | usuário usa teclado | percorre filtros e paginação | ordem, nomes e foco visível permitem concluir a consulta | widget + navegador real |
-| CA-20 | SR-009 | viewport estreito, zoom/reflow ou tema escuro | consulta e filtra | conteúdo permanece legível, operável e com contraste AA | navegador real + auditoria de acessibilidade |
-| CA-21 | SR-009 | conteúdo principal de `K2Fvp` | compara a implementação ignorando somente a sidebar | hierarquia, vocabulário, densidade, proporções, agrupamento da aplicação e ações correspondem à referência | comparação visual no Pencil + navegador |
-| CA-22 | SR-010 | administrador autenticado com sidebar expandida ou recolhida | usa **Documentos** e visita a rota exata ou um descendente | navega para `/modelos-de-documentos`, o item permanece operável nos dois estados e fica ativo na rota e em descendentes | widget do AppLayout + integração de rota + navegador real |
-| CA-23 | SR-010 | colaborador `attendant`, `lawyer`, `paralegal` ou `supervisor` | usa a aplicação | o item **Documentos** não integra a sidebar de nenhum perfil não administrador | teste matricial de `useAppLayout` + widget |
+| AC-01 | FR-001 | administrador ativo autenticado | acessa a rota ou consulta a API | a página e os dados são disponibilizados | integração REST + integração de rota + navegador real |
+| AC-02 | FR-001 | sessão ausente, conta inativa, sem vínculo ou perfil não administrador | tenta ler modelos | recebe `401` ou `403` sem dados | integração REST + integração de rota |
+| AC-03 | FR-002 | modelos globais e restritos | a listagem conclui | cada linha apresenta modelo, aplicação e estado | teste de use case + integração REST + widget + navegador |
+| AC-04 | FR-002 | tabela renderizada | inspeciona o cabeçalho e as linhas | **Atualizado** não existe; **Ação** contém **Editar** e **Duplicar** com nomes acessíveis por modelo | widget + navegador |
+| AC-05 | FR-003 | modelos correspondentes somente por nome ou descrição, com caixa diferente | pesquisa | ambos são retornados e os demais são excluídos | teste de use case + integração REST |
+| AC-06 | FR-004 | busca, área, tema, momento e estado válidos | aplica todos os critérios | o servidor combina todos por `AND` e retorna somente compatíveis | teste de use case + integração REST + integração de rota |
+| AC-07 | FR-004 | área selecionada com tema | troca ou limpa a área | tema é limpo, opções são recarregadas e página volta para 1 | teste de hook/widget + navegador |
+| AC-08 | FR-004 | REST de opções do Catálogo Jurídico indisponível e endpoint de modelos saudável | abre a página | lista continua consultável e filtros dependentes explicam a falha | widget + integração de rota |
+| AC-09 | FR-004 | enum ou identificador inválido | consulta diretamente a API | recebe `400` com o erro REST padrão | integração REST |
+| AC-10 | FR-005 | mais registros que `pageSize` | navega entre páginas | recorte, total e total de páginas são corretos, sem repetição ou salto | teste de use case + integração REST + widget |
+| AC-11 | FR-005 | dois modelos com mesmo nome normalizado | lista repetidamente | ordem secundária por identificador permanece estável | integração REST |
+| AC-12 | FR-005 | página válida além do total | consulta | mantém a página, retorna `items: []` e metadados reais | teste de use case + integração REST |
+| AC-13 | FR-006 | URL com busca, filtros e página | abre ou recarrega a rota | controles, request e resultado reproduzem os parâmetros | teste de rota/hook + integração de rota + navegador |
+| AC-14 | FR-006 | consulta em página posterior | altera busca ou filtro | URL e request voltam à página 1 sem perder outros critérios | teste de hook/widget + navegador |
+| AC-15 | FR-007 | base sem modelos | conclui a primeira consulta | apresenta estado vazio sem ação de cadastro | widget + integração de rota |
+| AC-16 | FR-007 | há modelos, mas nenhum corresponde | aplica critérios | oferece **Limpar filtros** | widget + navegador |
+| AC-17 | FR-007 | API falha e depois se recupera | seleciona **Tentar novamente** | erro é substituído pelo resultado sem recarregar a aplicação | widget + integração de rota |
+| AC-18 | FR-008 | modelo restrito com referências do catálogo | lista os modelos | nomes são resolvidos pelo provider público sem acesso às tabelas do catálogo pelo módulo | teste de use case + revisão arquitetural + integração REST |
+| AC-19 | FR-009 | usuário usa teclado | percorre filtros e paginação | ordem, nomes e foco visível permitem concluir a consulta | widget + navegador real |
+| AC-20 | FR-009 | viewport estreito, zoom/reflow ou tema escuro | consulta e filtra | conteúdo permanece legível, operável e com contraste AA | navegador real + auditoria de acessibilidade |
+| AC-21 | FR-009 | conteúdo principal de `K2Fvp` | compara a implementação ignorando somente a sidebar | hierarquia, vocabulário, densidade, proporções, agrupamento da aplicação e ações correspondem à referência | comparação visual no Pencil + navegador |
+| AC-22 | FR-010 | administrador autenticado com sidebar expandida ou recolhida | usa **Documentos** e visita a rota exata ou um descendente | navega para `/modelos-de-documentos`, o item permanece operável nos dois estados e fica ativo na rota e em descendentes | widget do AppLayout + integração de rota + navegador real |
+| AC-23 | FR-010 | colaborador `attendant`, `lawyer`, `paralegal` ou `supervisor` | usa a aplicação | o item **Documentos** não integra a sidebar de nenhum perfil não administrador | teste matricial de `useAppLayout` + widget |
 
 ## Rastreabilidade
 
 | Requisito | Origem |
 |---|---|
-| SR-001 | `SCRUM-134` — acesso administrativo; PRD REQ-027 |
-| SR-002 | `SCRUM-134`; PRD REQ-005 e seção 11.4; frame `K2Fvp`; amendment de fidelidade visual |
-| SR-003 | `SCRUM-134`; PRD REQ-005 e seção 11.4 |
-| SR-004 | `SCRUM-134`; PRD seção 11.4; frame `K2Fvp` |
-| SR-005 | `SCRUM-134`; PRD REQ-005 e seção 11.4 |
-| SR-006 | `SCRUM-134`; regras de roteamento do repositório |
-| SR-007 | `SCRUM-134`; PRD REQ-005; decisão direta de não cadastrar |
-| SR-008 | PRD seções 2 e 8; `documentation/modules.md` |
-| SR-009 | `SCRUM-134`; frame `K2Fvp`; `documentation/design.md`; amendment de fidelidade visual e exceção explícita somente para a sidebar |
-| SR-010 | decisão direta do usuário sobre reutilizar a sidebar existente; frame `K2Fvp`; `AppLayout` atual |
+| FR-001 | `SCRUM-134` — acesso administrativo; PRD REQ-027 |
+| FR-002 | `SCRUM-134`; PRD REQ-005 e seção 11.4; frame `K2Fvp`; amendment de fidelidade visual |
+| FR-003 | `SCRUM-134`; PRD REQ-005 e seção 11.4 |
+| FR-004 | `SCRUM-134`; PRD seção 11.4; frame `K2Fvp` |
+| FR-005 | `SCRUM-134`; PRD REQ-005 e seção 11.4 |
+| FR-006 | `SCRUM-134`; regras de roteamento do repositório |
+| FR-007 | `SCRUM-134`; PRD REQ-005; decisão direta de não cadastrar |
+| FR-008 | PRD seções 2 e 8; `documentation/modules.md` |
+| FR-009 | `SCRUM-134`; frame `K2Fvp`; `documentation/design.md`; amendment de fidelidade visual e exceção explícita somente para a sidebar |
+| FR-010 | decisão direta do usuário sobre reutilizar a sidebar existente; frame `K2Fvp`; `AppLayout` atual |
 
 # Estado atual
 
@@ -453,7 +453,7 @@ O caso de uso normaliza texto/paginação, consulta o repository e resolve somen
 aplicações restritas;
 - criar e exportar `documentSpecificationListQuerySchema` em
   `@hms/validation/document-production`, com coerção de inteiros na borda HTTP,
-  limites de SR-005 e enums importados do core;
+  limites de FR-005 e enums importados do core;
 - exportar os novos subpaths `./document-production/interfaces` e
   `./document-production/use-cases` em `packages/core/package.json`; os subpaths
   de entities e structures já existentes apenas ganham novos exports internos.
@@ -555,7 +555,7 @@ O parâmetro real recebe `@Query()`. O controller expõe somente
   `useDocumentSpecificationsPage()` sob o novo diretório de UI; o hook coordena
   URL, queries e handlers, e a view recebe o estado já preparado;
 - criar `useDocumentSpecificationsQuery(query)` com chave que contém todos os
-  parâmetros de SR-006 e executa `listDocumentSpecifications(query)`;
+  parâmetros de FR-006 e executa `listDocumentSpecifications(query)`;
 - reutilizar o serviço do Catálogo Jurídico para opções e carregar temas somente
   quando uma área estiver selecionada;
 - criar widgets de filtros, tabela e paginação com props derivadas do hook; a
@@ -572,7 +572,7 @@ O parâmetro real recebe `@Query()`. O controller expõe somente
   documentos**, alinhados ao PRD e ao frame; a alternativa `Documentos` do ticket
   perde precedência por ser menos específica;
 - **Consulta server-side:** busca, filtros, ordenação e paginação ficam no banco;
-  carregar tudo no browser foi rejeitado por quebrar SR-005 e escalar mal;
+  carregar tudo no browser foi rejeitado por quebrar FR-005 e escalar mal;
 - **Resolução cross-domain:** armazenar somente IDs e resolver nomes pelo
   `LegalExpertiseCatalogProvider`; joins ou FKs com tabelas do Catálogo foram
   rejeitados pela fronteira modular;

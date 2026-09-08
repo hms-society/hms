@@ -15,7 +15,7 @@ Read the open PR, current head SHA, unresolved conversations, reviews, Spec, Pla
 present, `evaluation.md`, actual diff and Jira ticket traceability. Ignore stale comments
 that target superseded code only after verifying they are no longer applicable.
 
-Read the complete applicable Confluence PRD and the delivery's Jira/RF/CA traceability. Preserve
+Read the complete applicable Confluence PRD and the delivery's Jira/FR/AC traceability. Preserve
 external state; this workflow does not change Jira or Confluence without explicit authorization.
 
 Preserve only actual Jira ticket or direct-request traceability. Do not resolve a
@@ -46,7 +46,7 @@ Spec or Rules while the PR remains open:
 2. set the Plan and affected tasks/phases to `in_progress` when a Plan exists;
 3. set `evaluation.md` to `status: in_progress`, append a review-cycle entry and record the
    comment URL as a mapped finding;
-4. verify the finding against the delivered product and its Confluence PRD/Jira/RF/CA mapping;
+4. verify the finding against the delivered product and its Confluence PRD/Jira/FR/AC mapping;
 5. invoke `implement-spec`; it automatically resumes the current Plan when one exists;
 6. let that implementation workflow own fixes, invalidated evidence and manual validation;
 7. after it returns evaluation to `ready`, invoke `conclude-spec` to commit, update the
@@ -103,7 +103,7 @@ Return:
 - classification and evidence for every actionable comment;
 - replies or PR metadata changes made;
 - Spec/Plan/evaluation transition when reopened;
-- affected Confluence PRD sections and Jira/RF/CA traceability;
+- affected Confluence PRD sections and Jira/FR/AC traceability;
 - workflow invoked or required next;
 - unresolved comments and blockers.
 

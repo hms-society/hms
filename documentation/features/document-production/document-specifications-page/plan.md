@@ -83,7 +83,7 @@ A inspeção obrigatória foi executada pelo Pencil MCP em
 `/home/petros/projects/hms/design/hms.pen`, antes da criação deste Plan:
 
 - `get_app_state` com schema e canvas incluídos: documento ativo confirmado;
-- `get_screenshot` de `K2Fvp`: frame `Administrador - Modelos de Documentos RF-055`,
+- `get_screenshot` de `K2Fvp`: frame `Administrador - Modelos de Documentos FR-055`,
   1440×1050, com sidebar, navbar, cabeçalho, busca, quatro selects, tabela e
   paginação;
 - `Get("K2Fvp")`: confirmou a hierarquia e o conteúdo visual do frame;
@@ -171,9 +171,9 @@ persistência e serviço sem expor conteúdo/variáveis.
 
 | Tarefa | Estado | Paths principais | Resultado observável | Traceabilidade | Parallelizable |
 |---|---|---|---|---|---|
-| F1-T1 — Atualizar domínio e exports | `verified` | `packages/core/src/document-production/domain/entities/document-specification.ts`; `domain/entities/index.ts`; `domain/structures/*`; `interfaces/document-specifications-repository.ts`; `interfaces/document-production-service.ts`; `interfaces/index.ts`; `use-cases/index.ts`; `packages/core/package.json` | `DocumentSpecification` possui os dados de configuração sem classificação de obrigatoriedade; query, item, record, creation, repository e service têm contratos exportados nos subpaths corretos | SR-002, SR-008; CA-03, CA-04, CA-18 | não; todos os consumers dependem deste contrato |
-| F1-T2 — Implementar caso de uso | `verified` | `packages/core/src/document-production/use-cases/list-document-specifications-use-case.ts`; `use-cases/index.ts` | normaliza busca/paginação, delega filtros/ordenação ao repository e resolve somente aplicações restritas pelo provider público | SR-003–SR-005, SR-008; CA-05, CA-06, CA-10–CA-12, CA-18 | não; depende de F1-T1 |
-| F1-T3 — Criar schema e testes de domínio | `verified` | `packages/validation/src/document-production/schemas/document-specification-list-query-schema.ts`; exports do package; `packages/core/src/document-production/use-cases/tests`; testes de schema | enums, IDs, inteiros, defaults e limites são validados/coagidos na borda; use case cobre busca, filtros, resolução, paginação, estabilidade e página além do total | SR-003–SR-005, SR-008; CA-05, CA-06, CA-09–CA-12, CA-18 | sim após F1-T1; não compartilha paths de produção com F1-T2 |
+| F1-T1 — Atualizar domínio e exports | `verified` | `packages/core/src/document-production/domain/entities/document-specification.ts`; `domain/entities/index.ts`; `domain/structures/*`; `interfaces/document-specifications-repository.ts`; `interfaces/document-production-service.ts`; `interfaces/index.ts`; `use-cases/index.ts`; `packages/core/package.json` | `DocumentSpecification` possui os dados de configuração sem classificação de obrigatoriedade; query, item, record, creation, repository e service têm contratos exportados nos subpaths corretos | FR-002, FR-008; AC-03, AC-04, AC-18 | não; todos os consumers dependem deste contrato |
+| F1-T2 — Implementar caso de uso | `verified` | `packages/core/src/document-production/use-cases/list-document-specifications-use-case.ts`; `use-cases/index.ts` | normaliza busca/paginação, delega filtros/ordenação ao repository e resolve somente aplicações restritas pelo provider público | FR-003–FR-005, FR-008; AC-05, AC-06, AC-10–AC-12, AC-18 | não; depende de F1-T1 |
+| F1-T3 — Criar schema e testes de domínio | `verified` | `packages/validation/src/document-production/schemas/document-specification-list-query-schema.ts`; exports do package; `packages/core/src/document-production/use-cases/tests`; testes de schema | enums, IDs, inteiros, defaults e limites são validados/coagidos na borda; use case cobre busca, filtros, resolução, paginação, estabilidade e página além do total | FR-003–FR-005, FR-008; AC-05, AC-06, AC-09–AC-12, AC-18 | sim após F1-T1; não compartilha paths de produção com F1-T2 |
 
 Sensores oficiais da fase, sem build:
 
@@ -200,9 +200,9 @@ de leitura protegida.
 
 | Tarefa | Estado | Paths principais | Resultado observável | Traceabilidade | Parallelizable |
 |---|---|---|---|---|---|
-| F2-T1 — Models, migration e repository | `verified` | `apps/server/src/document-production/constants/document-production-repositories.ts`; `database/drizzle/{models,mappers,repositories,types}/**`; `database/document-production-database.module.ts`; `apps/server/src/shared/database/drizzle/schema.ts`; `apps/server/src/shared/database/drizzle/migrations/**` | tabelas principal/área/tema têm constraints, defaults, índices, PK/FK internas e query com `ILIKE`, `EXISTS`, count separado e ordem estável | SR-002, SR-004, SR-005, SR-008; CA-03, CA-06, CA-10–CA-12, CA-18 | não; module/seed/testes dependem dos tokens e models |
-| F2-T2 — Seeder e composição de banco | `verified` | `apps/server/src/document-production/database/document-production-seeder.ts`; `apps/server/src/document-production/database/index.ts`; `apps/server/src/document-production/document-production.module.ts`; `apps/server/src/shared/database/seed.ts`; `apps/server/src/document-production/fixtures/document-production-module-fixture.ts` | seed limpa por contrato, recebe IDs reais do `LegalCatalogSeeder`, cria globais/restritos via `addMany` e não hardcode IDs jurídicos; fixture expõe `static register`, compõe `RestFixture`, resolve providers reais e isola/resetta o banco | SR-002, SR-008; CA-03, CA-18 | não; a ordem do seed é uma dependência externa |
-| F2-T3 — Controller, DTOs e integração REST | `verified` | `apps/server/src/document-production/decorators/document-production-controller.decorator.ts`; `decorators/index.ts`; `rest/controllers/list-document-specifications.controller.ts`; `rest/controllers/index.ts`; `rest/controllers/tests/list-document-specifications.controller.test.ts`; `rest/dtos/{document-specification-list-item-response,document-specifications-page-response}.dto.ts`; `rest/dtos/index.ts`; `apps/server/src/document-production/document-production.module.ts`; `apps/server/src/app.module.ts`; `apps/server/rest-client/document-production/document-specifications.rest` | `GET /document-specifications` usa DTO Zod, retorna `PaginationResponse`, documenta `200/400/401/403`, usa `AuthGuard` + `ActiveAdminGuard` e passa `query` diretamente ao caso de uso; o teste exerce HTTP, use case manual, repository Drizzle, mapper e banco real | SR-001–SR-005, SR-008; CA-01, CA-02, CA-03, CA-05, CA-06, CA-09–CA-12, CA-18 | não; depende de F2-T1/T2 e compõe AppModule |
+| F2-T1 — Models, migration e repository | `verified` | `apps/server/src/document-production/constants/document-production-repositories.ts`; `database/drizzle/{models,mappers,repositories,types}/**`; `database/document-production-database.module.ts`; `apps/server/src/shared/database/drizzle/schema.ts`; `apps/server/src/shared/database/drizzle/migrations/**` | tabelas principal/área/tema têm constraints, defaults, índices, PK/FK internas e query com `ILIKE`, `EXISTS`, count separado e ordem estável | FR-002, FR-004, FR-005, FR-008; AC-03, AC-06, AC-10–AC-12, AC-18 | não; module/seed/testes dependem dos tokens e models |
+| F2-T2 — Seeder e composição de banco | `verified` | `apps/server/src/document-production/database/document-production-seeder.ts`; `apps/server/src/document-production/database/index.ts`; `apps/server/src/document-production/document-production.module.ts`; `apps/server/src/shared/database/seed.ts`; `apps/server/src/document-production/fixtures/document-production-module-fixture.ts` | seed limpa por contrato, recebe IDs reais do `LegalCatalogSeeder`, cria globais/restritos via `addMany` e não hardcode IDs jurídicos; fixture expõe `static register`, compõe `RestFixture`, resolve providers reais e isola/resetta o banco | FR-002, FR-008; AC-03, AC-18 | não; a ordem do seed é uma dependência externa |
+| F2-T3 — Controller, DTOs e integração REST | `verified` | `apps/server/src/document-production/decorators/document-production-controller.decorator.ts`; `decorators/index.ts`; `rest/controllers/list-document-specifications.controller.ts`; `rest/controllers/index.ts`; `rest/controllers/tests/list-document-specifications.controller.test.ts`; `rest/dtos/{document-specification-list-item-response,document-specifications-page-response}.dto.ts`; `rest/dtos/index.ts`; `apps/server/src/document-production/document-production.module.ts`; `apps/server/src/app.module.ts`; `apps/server/rest-client/document-production/document-specifications.rest` | `GET /document-specifications` usa DTO Zod, retorna `PaginationResponse`, documenta `200/400/401/403`, usa `AuthGuard` + `ActiveAdminGuard` e passa `query` diretamente ao caso de uso; o teste exerce HTTP, use case manual, repository Drizzle, mapper e banco real | FR-001–FR-005, FR-008; AC-01, AC-02, AC-03, AC-05, AC-06, AC-09–AC-12, AC-18 | não; depende de F2-T1/T2 e compõe AppModule |
 
 Implementação de migration: atualizar o barrel de schema e executar o comando
 documentado `pnpm --filter server db:migration:generate`; aplicar em ambiente de
@@ -230,9 +230,9 @@ filtros do Catálogo Jurídico, com URL determinística e estados acessíveis.
 
 | Tarefa | Estado | Paths principais | Resultado observável | Traceabilidade | Parallelizable |
 |---|---|---|---|---|---|
-| F3-T1 — Adapter, contexto e rota | `verified` | `apps/web/src/rest/services/document-production-service.ts`; testes do serviço; `apps/web/src/ui/shared/contexts/rest-context/**`; `apps/web/src/constants/routes.ts`; `apps/web/src/routes/modelos-de-documentos/index.tsx`; `apps/web/src/routeTree.gen.ts` | serviço implementa contrato core; RestContext fornece dependência readonly; rota valida/descarta parâmetros inválidos, usa `requireAdminMiddleware`, `ssr: false` e `AppLayout` | SR-001, SR-006, SR-010; CA-01, CA-02, CA-09, CA-13, CA-22 | não; routeTree e contexto são pontos de composição |
-| F3-T2 — Sidebar administrativa | `verified` | `apps/web/src/constants/sidebar-items.ts`; `apps/web/src/ui/shared/widgets/layouts/app-layout/tests/**` | **Documentos** aparece somente em `SIDEBAR_ITEMS[Admin]`, usa a rota canônica e mantém ativo exact/nested, expandido/recolhido, sem mudar a estrutura da sidebar | SR-010; CA-22, CA-23 | não; depende da entrada de `ROUTES` criada em F3-T1 |
-| F3-T3 — Page hook, query e widgets | `verified` | `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/**`; testes colocados em `tests/`; `apps/web/tests/routes/document-production/**` | tabela, filtros, paginação, busca, estados loading/error/empty-base/empty-filtered/content e retry; mudança de filtro limpa tema e volta à página 1; URL reproduz a consulta | SR-002–SR-007, SR-009; CA-03–CA-08, CA-10, CA-13–CA-21 | não; hook, widgets e testes compartilham o contrato de view |
+| F3-T1 — Adapter, contexto e rota | `verified` | `apps/web/src/rest/services/document-production-service.ts`; testes do serviço; `apps/web/src/ui/shared/contexts/rest-context/**`; `apps/web/src/constants/routes.ts`; `apps/web/src/routes/modelos-de-documentos/index.tsx`; `apps/web/src/routeTree.gen.ts` | serviço implementa contrato core; RestContext fornece dependência readonly; rota valida/descarta parâmetros inválidos, usa `requireAdminMiddleware`, `ssr: false` e `AppLayout` | FR-001, FR-006, FR-010; AC-01, AC-02, AC-09, AC-13, AC-22 | não; routeTree e contexto são pontos de composição |
+| F3-T2 — Sidebar administrativa | `verified` | `apps/web/src/constants/sidebar-items.ts`; `apps/web/src/ui/shared/widgets/layouts/app-layout/tests/**` | **Documentos** aparece somente em `SIDEBAR_ITEMS[Admin]`, usa a rota canônica e mantém ativo exact/nested, expandido/recolhido, sem mudar a estrutura da sidebar | FR-010; AC-22, AC-23 | não; depende da entrada de `ROUTES` criada em F3-T1 |
+| F3-T3 — Page hook, query e widgets | `verified` | `apps/web/src/ui/document-production/widgets/pages/document-specifications-page/**`; testes colocados em `tests/`; `apps/web/tests/routes/document-production/**` | tabela, filtros, paginação, busca, estados loading/error/empty-base/empty-filtered/content e retry; mudança de filtro limpa tema e volta à página 1; URL reproduz a consulta | FR-002–FR-007, FR-009; AC-03–AC-08, AC-10, AC-13–AC-21 | não; hook, widgets e testes compartilham o contrato de view |
 
 Decisões de UI para F3-T3:
 
@@ -279,8 +279,8 @@ testes e referência visual, então fechar com um único Judge Implementation.
 
 | Tarefa | Estado | Paths/evidência | Resultado observável | Traceabilidade | Parallelizable |
 |---|---|---|---|---|---|
-| F4-T1 — Preflight de dependências | `verified` | task/session evidence; não persistir credenciais | Docker/Auth/DB saudáveis, Nest sem `UnknownDependenciesException`, servidor/web estáveis e credencial seed resolvida de `identity-seeder.ts` + env | SR-001, SR-009; CA-01, CA-02, CA-20 | não; bloqueia browser |
-| F4-T2 — Fluxo browser autenticado real | `verified` | `apps/web/tests/routes/document-production/**` para o teste mockado; evidência Playwright MCP para o fluxo real; snapshots, requests e console | login fresco, URL protegida, listagem real, busca/filtros/paginação/URL/retry, sidebar, teclado, viewport estreito, zoom/reflow, dark mode e ausência das mutações | SR-001–SR-010; CA-01–CA-23 | não; depende do ambiente real |
+| F4-T1 — Preflight de dependências | `verified` | task/session evidence; não persistir credenciais | Docker/Auth/DB saudáveis, Nest sem `UnknownDependenciesException`, servidor/web estáveis e credencial seed resolvida de `identity-seeder.ts` + env | FR-001, FR-009; AC-01, AC-02, AC-20 | não; bloqueia browser |
+| F4-T2 — Fluxo browser autenticado real | `verified` | `apps/web/tests/routes/document-production/**` para o teste mockado; evidência Playwright MCP para o fluxo real; snapshots, requests e console | login fresco, URL protegida, listagem real, busca/filtros/paginação/URL/retry, sidebar, teclado, viewport estreito, zoom/reflow, dark mode e ausência das mutações | FR-001–FR-010; AC-01–AC-23 | não; depende do ambiente real |
 | F4-T3 — Sensores integrados e Quality Gate | `verified` | saída dos comandos e `evaluation.md` após implementação | ciclo curto integrado verde; `pnpm build` executado uma vez como gate final; findings classificados e handoff pronto | todos | não |
 | F4-T4 — Judge Implementation | `verified` | `plan.md` + evidências + diff final | 1ª tentativa `failed` (JI-01–JI-04); Builder Fix aplicado, sensores invalidados e repetidos; 2ª tentativa `accepted`, sem findings bloqueantes | todos | não; é etapa final read-only |
 
@@ -347,36 +347,36 @@ artefatos de migration. O CI continua sendo a fonte oficial do Quality Gate.
 
 | IDs | Fases/tarefas | Evidência principal |
 |---|---|---|
-| SR-001 / CA-01–02 | F2-T3, F3-T1, F4-T1/T2 | integração REST e rota protegida; browser autenticado |
-| SR-002 / CA-03–04 | F1-T1, F2-T1/T3, F3-T3 | use case, REST, widget, browser sem colunas/ações proibidas |
-| SR-003 / CA-05 | F1-T2/T3, F2-T3, F3-T3 | teste de use case/REST e busca real |
-| SR-004 / CA-06–09 | F1-T2/T3, F2-T1/T3, F3-T3 | schema, integração REST, hook/widget, catálogo indisponível |
-| SR-005 / CA-10–12 | F1-T2/T3, F2-T1/T3, F3-T3 | paginação/count/ordem em banco e UI |
-| SR-006 / CA-13–14 | F3-T1/T3, F4-T2 | route validation, hook e URL/request browser |
-| SR-007 / CA-15–17 | F3-T3, F4-T2 | matriz de estados e retry sem reload |
-| SR-008 / CA-18 | F1-T1/T2, F2-T1/T3 | revisão arquitetural e provider público |
-| SR-009 / CA-19–21 | F3-T3, F4-T2 | widget/a11y/browser/visual comparison |
-| SR-010 / CA-22–23 | F3-T1/T2, F4-T2 | sidebar layout, perfis e rota descendente |
+| FR-001 / AC-01–02 | F2-T3, F3-T1, F4-T1/T2 | integração REST e rota protegida; browser autenticado |
+| FR-002 / AC-03–04 | F1-T1, F2-T1/T3, F3-T3 | use case, REST, widget, browser sem colunas/ações proibidas |
+| FR-003 / AC-05 | F1-T2/T3, F2-T3, F3-T3 | teste de use case/REST e busca real |
+| FR-004 / AC-06–09 | F1-T2/T3, F2-T1/T3, F3-T3 | schema, integração REST, hook/widget, catálogo indisponível |
+| FR-005 / AC-10–12 | F1-T2/T3, F2-T1/T3, F3-T3 | paginação/count/ordem em banco e UI |
+| FR-006 / AC-13–14 | F3-T1/T3, F4-T2 | route validation, hook e URL/request browser |
+| FR-007 / AC-15–17 | F3-T3, F4-T2 | matriz de estados e retry sem reload |
+| FR-008 / AC-18 | F1-T1/T2, F2-T1/T3 | revisão arquitetural e provider público |
+| FR-009 / AC-19–21 | F3-T3, F4-T2 | widget/a11y/browser/visual comparison |
+| FR-010 / AC-22–23 | F3-T1/T2, F4-T2 | sidebar layout, perfis e rota descendente |
 
 ## Riscos, findings e tentativas
 
 | ID | Tipo | Estado | Impacto | Mitigação/evidência | Próxima ação |
 |---|---|---|---|---|---|
-| R-001 | migration + FKs internas | aberto | associação de tema pode permitir referência sem associação de área | PK/FK composta, checks, fixture real e migration aplicada | validar em F2-T1 |
-| R-002 | fronteira cross-module | aberto | importar Catálogo diretamente quebraria ownership | somente `LegalExpertiseCatalogProvider`; revisão arquitetural e teste de resolução | validar em F1/F2 |
-| R-003 | autorização | aberto | endpoint ou rota poderia vazar dados | `AuthGuard` + `ActiveAdminGuard` e `requireAdminMiddleware`; casos `401/403` | validar em F2-T3/F4-T2 |
-| R-004 | URL state | aberto | filtro pode preservar tema incompatível ou página antiga | query key completa, reset determinístico e hook/route tests | validar em F3-T3 |
-| R-005 | referência visual conflitante | resolvido | frame mostra mutações fora do escopo | exceção registrada na Spec e no Plan; comparação ignora ações/sidebar | manter na revisão visual F4 |
-| R-006 | worktree sujo | ativo, não bloqueante | alterações alheias podem contaminar diff | não reverter nem editar paths fora deste feature; revisar diff antes do handoff | reavaliar no Quality Gate |
-| R-007 | ambiente browser/Auth | aberto | sem serviços saudáveis não há evidência real | preflight obrigatório e classificação de bloqueio antes do Judge final | executar somente em F4 |
-| R-008 | migration operacional | aberto | migration aditiva pode falhar em aplicação, deixar schema parcial ou invalidar o seed | gerar migration pelo Drizzle, revisar SQL/constraints antes de aplicar, aplicar primeiro em fixture/staging controlado; em falha, preservar o artefato, interromper o seed e fazer forward-fix ou rollback operacional aprovado, sem editar migration já aplicada | validar SQL, fixture e procedimento de recuperação em F2-T1/F2-T2 |
-| R-009 | sensor global preexistente | classificado, não bloqueante para F2 | `pnpm --filter server test` falha em Intake com `total: 3` esperado `2`, fora dos paths da feature | teste dedicado da feature passou 4/4; falha reproduzida isoladamente em `src/intake/rest/controllers/tests/list-intakes.controller.test.ts`; preservar e reportar sem alterar escopo | reavaliar no Quality Gate integrado |
-| R-010 | harness Playwright mockado | aberto, não bloqueante para sensores unitários | fixture de rota protegida sofre `beforeLoad` no SSR antes do `localStorage`; fluxo redireciona para `/login` e não prova a página | `generate-routes`, check:code, check:types e 6 testes determinísticos passaram; autenticação real será validada via login no F4 | corrigir harness ou classificar no Judge após fluxo real |
-| R-011 | suíte global preexistente | classificado, não bloqueante para a feature | `pnpm test` falha em testes de Identity/Intake fora dos paths da feature | testes core/validation/REST/UI da feature passaram; falhas globais reproduzidas e preservadas | reavaliar no CI sem atribuir à feature |
-| R-012 | transporte Playwright MCP | classificado, não bloqueante para evidência alternativa | MCP não abriu por perfis Chrome órfãos; após encerrar processos órfãos, o transporte permaneceu fechado | fluxo real equivalente executado com Playwright direto contra login/Auth/REST/Web, sem `page.route`; nenhum erro de console/network | registrar no Judge como limitação de ferramenta |
+| FND-001 | migration + FKs internas | aberto | associação de tema pode permitir referência sem associação de área | PK/FK composta, checks, fixture real e migration aplicada | validar em F2-T1 |
+| FND-002 | fronteira cross-module | aberto | importar Catálogo diretamente quebraria ownership | somente `LegalExpertiseCatalogProvider`; revisão arquitetural e teste de resolução | validar em F1/F2 |
+| FND-003 | autorização | aberto | endpoint ou rota poderia vazar dados | `AuthGuard` + `ActiveAdminGuard` e `requireAdminMiddleware`; casos `401/403` | validar em F2-T3/F4-T2 |
+| FND-004 | URL state | aberto | filtro pode preservar tema incompatível ou página antiga | query key completa, reset determinístico e hook/route tests | validar em F3-T3 |
+| FND-005 | referência visual conflitante | resolvido | frame mostra mutações fora do escopo | exceção registrada na Spec e no Plan; comparação ignora ações/sidebar | manter na revisão visual F4 |
+| FND-006 | worktree sujo | ativo, não bloqueante | alterações alheias podem contaminar diff | não reverter nem editar paths fora deste feature; revisar diff antes do handoff | reavaliar no Quality Gate |
+| FND-007 | ambiente browser/Auth | aberto | sem serviços saudáveis não há evidência real | preflight obrigatório e classificação de bloqueio antes do Judge final | executar somente em F4 |
+| FND-008 | migration operacional | aberto | migration aditiva pode falhar em aplicação, deixar schema parcial ou invalidar o seed | gerar migration pelo Drizzle, revisar SQL/constraints antes de aplicar, aplicar primeiro em fixture/staging controlado; em falha, preservar o artefato, interromper o seed e fazer forward-fix ou rollback operacional aprovado, sem editar migration já aplicada | validar SQL, fixture e procedimento de recuperação em F2-T1/F2-T2 |
+| FND-009 | sensor global preexistente | classificado, não bloqueante para F2 | `pnpm --filter server test` falha em Intake com `total: 3` esperado `2`, fora dos paths da feature | teste dedicado da feature passou 4/4; falha reproduzida isoladamente em `src/intake/rest/controllers/tests/list-intakes.controller.test.ts`; preservar e reportar sem alterar escopo | reavaliar no Quality Gate integrado |
+| FND-010 | harness Playwright mockado | aberto, não bloqueante para sensores unitários | fixture de rota protegida sofre `beforeLoad` no SSR antes do `localStorage`; fluxo redireciona para `/login` e não prova a página | `generate-routes`, check:code, check:types e 6 testes determinísticos passaram; autenticação real será validada via login no F4 | corrigir harness ou classificar no Judge após fluxo real |
+| FND-011 | suíte global preexistente | classificado, não bloqueante para a feature | `pnpm test` falha em testes de Identity/Intake fora dos paths da feature | testes core/validation/REST/UI da feature passaram; falhas globais reproduzidas e preservadas | reavaliar no CI sem atribuir à feature |
+| FND-012 | transporte Playwright MCP | classificado, não bloqueante para evidência alternativa | MCP não abriu por perfis Chrome órfãos; após encerrar processos órfãos, o transporte permaneceu fechado | fluxo real equivalente executado com Playwright direto contra login/Auth/REST/Web, sem `page.route`; nenhum erro de console/network | registrar no Judge como limitação de ferramenta |
 
 Tentativas de implementação F1 e F2 concluídas. F1 teve sensores verdes; F2 teve
-sensores de escopo e integração REST verdes, com R-009 classificado como falha
+sensores de escopo e integração REST verdes, com FND-009 classificado como falha
 preexistente fora do escopo. Houve
 duas avaliações do Judge Plan: a primeira falhou com JP-01–JP-04; a segunda
 aceitou após as correções registradas acima. Qualquer falha futura deve registrar
@@ -388,7 +388,7 @@ O `Judge Plan` deve confirmar que:
 
 - a necessidade de Plan é proporcional ao escopo e risco;
 - as fases são ordenadas e não há Builder antes de F1/F2/F3 estar aceito;
-- cada tarefa possui paths reais, resultado observável, `SR-*`/`CA-*` e
+- cada tarefa possui paths reais, resultado observável, `FR-*`/`AC-*` e
   `parallelizable` com motivo;
 - core, validation, database, REST, Auth, web provision/context, route, UI,
   sidebar, testes e browser estão cobertos sem cruzar ownership;

@@ -18,14 +18,14 @@ resolution and reported no structural problems.
 
 | Order | Pencil/export | Route, viewport and state | Implementation surface | Contract/evidence |
 | --- | --- | --- | --- | --- |
-| 1 | qOfh6 / [qOfh6.png](qOfh6.png) | `/formalizacoes/$formalizationId`; 1200×1830 source plus 390×844; package confirmed/configuring | `FormalizationSendingConfiguration` | Preserve configuration composition; CA-17/CA-22; MV-06 transient comparison screenshot. |
-| 2 | YWfhi / [YWfhi.png](YWfhi.png) | Same route; 1200 desktop plus 390×844; `ready_for_sending`, no request | `FormalizationSendingConfiguration` action card | `Configurar envio` only when ready; `Cancelar configuração` remains distinct; CA-17/CA-22. |
-| 3 | sxENj / [sxENj.png](sxENj.png) | Same route; 1200×914 plus 390×844; add-signatory open | Existing `SignatoriesTab`/`CandidateDialog` | Regression only: no automatic document assignment; CA-17. |
-| 4 | Vx43H / [Vx43H.png](Vx43H.png) | Same route; 620×680 dialog plus reflow at 390×844; candidate search/filter/results | Existing `CandidateDialog` | Regression only: accessible eligible-collaborator selection; CA-17. |
-| 5 | HcT8k / [HcT8k.png](HcT8k.png) | Same route; 1200×1100 plus 390×844; positioning fields | Existing `SignatureFieldsTab` | Regression only: coordinates frozen into request; CA-17/CA-19. |
-| 6 | nI1B0 / [nI1B0.png](nI1B0.png) | Same route; 760-wide dialog plus 390×844; review loading/ready/blocking/error/confirming | `ReviewAndConfirmSendingDialog` | Authoritative summary, no CPF/provider data, action `Confirmar e enviar`; CA-17–CA-20; MV-02/MV-06 transient comparison screenshot. |
-| 7 | MC4E2 / [MC4E2.png](MC4E2.png) | Same route; 1200×1374 plus 390×844; provisioning/delivery/partial failure/sent | `FormalizationSendingConfiguration` status branch | Locked editing, safe progress, retry and conditional cancel-all; CA-18–CA-22; MV-02/MV-04/MV-06. |
-| 8 | NSYug / [NSYug.png](NSYug.png) | Same route; 480-wide dialog plus 390×844; cancel idle/pending/error/partial retry | `CancelAllSignatureSendingDialog` | Immediate access revocation, history preservation, explicit destructive action; CA-21/CA-22; MV-04/MV-06 transient comparison screenshot. |
+| 1 | qOfh6 / [qOfh6.png](qOfh6.png) | `/formalizacoes/$formalizationId`; 1200×1830 source plus 390×844; package confirmed/configuring | `FormalizationSendingConfiguration` | Preserve configuration composition; AC-17/AC-22; MV-06 transient comparison screenshot. |
+| 2 | YWfhi / [YWfhi.png](YWfhi.png) | Same route; 1200 desktop plus 390×844; `ready_for_sending`, no request | `FormalizationSendingConfiguration` action card | `Configurar envio` only when ready; `Cancelar configuração` remains distinct; AC-17/AC-22. |
+| 3 | sxENj / [sxENj.png](sxENj.png) | Same route; 1200×914 plus 390×844; add-signatory open | Existing `SignatoriesTab`/`CandidateDialog` | Regression only: no automatic document assignment; AC-17. |
+| 4 | Vx43H / [Vx43H.png](Vx43H.png) | Same route; 620×680 dialog plus reflow at 390×844; candidate search/filter/results | Existing `CandidateDialog` | Regression only: accessible eligible-collaborator selection; AC-17. |
+| 5 | HcT8k / [HcT8k.png](HcT8k.png) | Same route; 1200×1100 plus 390×844; positioning fields | Existing `SignatureFieldsTab` | Regression only: coordinates frozen into request; AC-17/AC-19. |
+| 6 | nI1B0 / [nI1B0.png](nI1B0.png) | Same route; 760-wide dialog plus 390×844; review loading/ready/blocking/error/confirming | `ReviewAndConfirmSendingDialog` | Authoritative summary, no CPF/provider data, action `Confirmar e enviar`; AC-17–AC-20; MV-02/MV-06 transient comparison screenshot. |
+| 7 | MC4E2 / [MC4E2.png](MC4E2.png) | Same route; 1200×1374 plus 390×844; provisioning/delivery/partial failure/sent | `FormalizationSendingConfiguration` status branch | Locked editing, safe progress, retry and conditional cancel-all; AC-18–AC-22; MV-02/MV-04/MV-06. |
+| 8 | NSYug / [NSYug.png](NSYug.png) | Same route; 480-wide dialog plus 390×844; cancel idle/pending/error/partial retry | `CancelAllSignatureSendingDialog` | Immediate access revocation, history preservation, explicit destructive action; AC-21/AC-22; MV-04/MV-06 transient comparison screenshot. |
 
 ## Canonical flow
 

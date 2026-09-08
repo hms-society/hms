@@ -19,16 +19,16 @@ feature.
 
 | Requisitos / critérios | Evidência | Veredito |
 |---|---|---|
-| SR-001 / CA-01–02 | Controller REST com `AuthGuard` + `ActiveAdminGuard`; teste REST dedicado 7/7; login real do administrador e rota protegida | aceito |
-| SR-002 / CA-03–04 | Projeção core, DTO, componente de tabela e teste web; resposta real contém `status`; DOM real contém `Disponível`; headers são `Modelo`, `Aplicação`, `Estado`, `Ação`, sem `Atualizado` | aceito |
-| SR-003 / CA-05 | Caso de uso, repository com busca por nome/descrição e fluxo real `Contrato` com request 200 | aceito |
-| SR-004 / CA-06–09 | Schema Zod, filtros REST combinados, correlação área/tema no teste 7/7 e filtro real por área; tema dependente é habilitado após selecionar área | aceito |
-| SR-005 / CA-10–12 | Repository com contagem separada, ordenação estável e paginação; teste REST cobre filtros/paginação/ordenação | aceito |
-| SR-006 / CA-13–14 | Rota real sincroniza `search`, `legalAreaId`, `page` e `pageSize`; alteração de busca e área reinicia a página | aceito |
-| SR-007 / CA-15–17 | Estados loading/error/empty-base/empty-filtered/content no componente e testes web; retry coberto no teste de página | aceito |
-| SR-008 / CA-18 | IDs jurídicos persistidos como referências; resolução por `LegalExpertiseCatalogProvider`; revisão de imports e FKs sem acesso à persistência do Catálogo | aceito |
-| SR-009 / CA-19–21 | Testes de composição, rota e layout; login/consulta reais, filtro e viewport 390×844; foco e nomes acessíveis presentes no snapshot; DOM confirma textos omitidos pela serialização do snapshot | aceito com observação de ferramenta |
-| SR-010 / CA-22–23 | `Documentos` somente no array administrativo, rota canônica e testes de `useAppLayout`; fluxo real alcança a rota protegida | aceito |
+| FR-001 / AC-01–02 | Controller REST com `AuthGuard` + `ActiveAdminGuard`; teste REST dedicado 7/7; login real do administrador e rota protegida | aceito |
+| FR-002 / AC-03–04 | Projeção core, DTO, componente de tabela e teste web; resposta real contém `status`; DOM real contém `Disponível`; headers são `Modelo`, `Aplicação`, `Estado`, `Ação`, sem `Atualizado` | aceito |
+| FR-003 / AC-05 | Caso de uso, repository com busca por nome/descrição e fluxo real `Contrato` com request 200 | aceito |
+| FR-004 / AC-06–09 | Schema Zod, filtros REST combinados, correlação área/tema no teste 7/7 e filtro real por área; tema dependente é habilitado após selecionar área | aceito |
+| FR-005 / AC-10–12 | Repository com contagem separada, ordenação estável e paginação; teste REST cobre filtros/paginação/ordenação | aceito |
+| FR-006 / AC-13–14 | Rota real sincroniza `search`, `legalAreaId`, `page` e `pageSize`; alteração de busca e área reinicia a página | aceito |
+| FR-007 / AC-15–17 | Estados loading/error/empty-base/empty-filtered/content no componente e testes web; retry coberto no teste de página | aceito |
+| FR-008 / AC-18 | IDs jurídicos persistidos como referências; resolução por `LegalExpertiseCatalogProvider`; revisão de imports e FKs sem acesso à persistência do Catálogo | aceito |
+| FR-009 / AC-19–21 | Testes de composição, rota e layout; login/consulta reais, filtro e viewport 390×844; foco e nomes acessíveis presentes no snapshot; DOM confirma textos omitidos pela serialização do snapshot | aceito com observação de ferramenta |
+| FR-010 / AC-22–23 | `Documentos` somente no array administrativo, rota canônica e testes de `useAppLayout`; fluxo real alcança a rota protegida | aceito |
 
 ## Sensores executados
 
@@ -66,13 +66,13 @@ preflight posteriores passaram.
 
 | ID | Estado | Classificação | Evidência / ação |
 |---|---|---|---|
-| R-009 / R-011 | resolvido | suíte global | `pnpm test` integrado passou nos 4 workspaces; a falha anterior de Intake não foi reproduzida |
-| R-010 | resolvido | harness Playwright mockado | `pnpm --filter web exec playwright test` passou 38/38 com o `webServer` oficial e as variáveis isoladas do Playwright |
-| R-012 | resolvido como limitação de ferramenta | transporte Playwright | MCP real funcionou nesta validação após login fresco; não é falha de produto |
-| R-013 | não bloqueante | configuração de geração de rotas | `index.test.ts` dentro de `routes/` gera aviso; build e geração passam; deve ser renomeado/excluído em manutenção futura |
-| R-014 | não bloqueante | serialização do snapshot | Snapshot omitiu conteúdo de duas células, mas API, `innerText`, estilos computados e DOM real confirmam os valores |
-| R-015 | classificado, não bloqueante | ambiente/sessão | Refresh token stale retornou 400 antes do login fresco; após autenticar novamente, requests da feature foram 200. Warning de state update aponta para `RootLayout`, fora do escopo |
-| R-006 | ativo, não bloqueante | worktree | Alterações de Intake e documentação global permanecem fora do commit desta Spec e não serão revertidas nem incluídas especulativamente |
+| FND-009 / FND-011 | resolvido | suíte global | `pnpm test` integrado passou nos 4 workspaces; a falha anterior de Intake não foi reproduzida |
+| FND-010 | resolvido | harness Playwright mockado | `pnpm --filter web exec playwright test` passou 38/38 com o `webServer` oficial e as variáveis isoladas do Playwright |
+| FND-012 | resolvido como limitação de ferramenta | transporte Playwright | MCP real funcionou nesta validação após login fresco; não é falha de produto |
+| FND-013 | não bloqueante | configuração de geração de rotas | `index.test.ts` dentro de `routes/` gera aviso; build e geração passam; deve ser renomeado/excluído em manutenção futura |
+| FND-014 | não bloqueante | serialização do snapshot | Snapshot omitiu conteúdo de duas células, mas API, `innerText`, estilos computados e DOM real confirmam os valores |
+| FND-015 | classificado, não bloqueante | ambiente/sessão | Refresh token stale retornou 400 antes do login fresco; após autenticar novamente, requests da feature foram 200. Warning de state update aponta para `RootLayout`, fora do escopo |
+| FND-006 | ativo, não bloqueante | worktree | Alterações de Intake e documentação global permanecem fora do commit desta Spec e não serão revertidas nem incluídas especulativamente |
 
 ## Alinhamento documental e arquitetural
 

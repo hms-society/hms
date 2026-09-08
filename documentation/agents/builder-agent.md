@@ -27,7 +27,7 @@ create a hierarchy between Builders.
 
 - Spec path and revision;
 - direct scope, phase, or task;
-- associated `RF-*` and `CA-*` criteria;
+- associated `FR-*` and `AC-*` criteria;
 - observable result;
 - allowed and prohibited paths;
 - applicable Rule Pack and Architecture;
@@ -46,7 +46,7 @@ create a hierarchy between Builders.
    - read `documentation/design.md`, the UI Rules, `design/manifest.md`, and every
      applicable reference screenshot;
    - use the Spec visual inventory as an executable checklist; do not omit inventoried
-     elements or introduce inferred behavior without an RF/CA or recorded decision;
+     elements or introduce inferred behavior without an FR/AC or recorded decision;
    - use saved references during implementation and use Pencil MCP only when the
      Orchestrator requires canonical-node confirmation or refresh;
    - implement in sections and compare the result with the saved reference at the
@@ -69,7 +69,7 @@ coordinates integration of their diffs.
 ## Discrepancies
 
 - Factual Spec correction: report the document, evidence, and affected passage.
-- Change to `RF-*`, `CA-*`, product, Architecture, or a Rule: pause the affected
+- Change to `FR-*`, `AC-*`, product, Architecture, or a Rule: pause the affected
   work and report the required decision.
 - Existing Rule violation: correct the implementation according to the Rule; do
   not duplicate or weaken the Rule.

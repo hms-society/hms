@@ -16,7 +16,7 @@ duplicates.
 ## Inputs and authority
 
 Read the implemented Spec or Bug Report, Plan when present, `evaluation.md`, actual diff,
-`documentation/rules/sdd-rules.md`, `documentation/tooling.md`, applicable Rules and
+`documentation/sdd.md`, `documentation/tooling.md`, applicable Rules and
 `documentation/rules/commit-rules.md`. For a feature delivery, confirm that the Evaluation
 uses the canonical Evaluation template embedded in `implement-spec` and that its evidence is
 current for the exact Spec revision.
@@ -53,7 +53,7 @@ determines where to cut the work.
   arbitrary line-count fragments.
 - The first or independent slice uses `develop` as its base. A dependent slice may use the
   immediately preceding slice branch as its base, forming an explicit PR dependency chain.
-  Record each slice's scope, base PR, dependency order and covered `RF-*`/`CA-*` criteria in
+  Record each slice's scope, base PR, dependency order and covered `FR-*`/`AC-*` criteria in
   the delivery artifacts and PR body.
 - If no coherent partition satisfies the limit, stop publication and route the delivery back
   through `create-plan` or `create-spec` rather than publishing an oversized or arbitrary PR.
@@ -161,7 +161,7 @@ comparison for every supplied screenshot and every required supplemental screens
 
 - route/state and exact saved reference path or source node ID from `design/manifest.md`;
 - target viewport;
-- Playwright MCP manual result;
+- repository Playwright CLI manual result;
 - implementation screenshot/comparison path;
 - one direct comparison for each supplied and required supplemental reference, recording
   structure, content, hierarchy, spacing, dimensions, tokens, interaction/state and responsive
@@ -210,7 +210,7 @@ Include these sections in this order:
 - **Objetivo** — problem, expected outcome, scope and explicit exclusions;
 - **Tickets Jira relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
 - **Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
-  exact revision, delivery boundary, and covered `RF-*`/`CA-*` criteria. This workflow does
+  exact revision, delivery boundary, and covered `FR-*`/`AC-*` criteria. This workflow does
   not change Jira or Confluence;
 - **Implementação** — coherent frontend, backend, domain, persistence and test slices with
   the most relevant changed paths. Describe each affected layer concretely: name the

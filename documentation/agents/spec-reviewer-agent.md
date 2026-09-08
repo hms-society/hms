@@ -55,7 +55,7 @@ artifacts do not exist yet or belong to later workflows.
 ## Execution
 
 1. Read the assigned authorities and confirm the Spec revision, source, scope, and mode.
-2. Trace every source requirement through `RF-*`, `CA-*`, technical ownership, automated
+2. Trace every source requirement through `FR-*`, `AC-*`, technical ownership, automated
    boundaries, manual scenarios, and documentation alignment.
 3. Verify every affected path and change classification against the repository. Check exact
    declarations, naming, placement, barrels, registrations, canonical constants, generated
@@ -121,7 +121,7 @@ with evidence, and owns the `open` verdict.
 
 ### Conformance summary
 
-- **Source/RF/CA traceability:** pass | findings above
+- **Source/FR/AC traceability:** pass | findings above
 - **Path and declaration completeness:** pass | findings above
 - **Cross-layer contracts:** pass | findings above
 - **Rule and test ownership:** pass | findings above
