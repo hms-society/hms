@@ -132,6 +132,27 @@ describe('Get Signature Document Use Case', () => {
     })
   })
 
+  it('rejects a document that is not assigned to the authenticated recipient', async () => {
+    const dependencies = makeDependencies()
+    dependencies.documentsRepository.findById.mockResolvedValue(
+      fakeFormalizationSignatureRequestDocument({
+        id: 'request-document-2',
+        requestId: 'request-1',
+        sourceDocumentId: 'source-document-2',
+        sourceDocumentVersionId: 'source-version-2',
+      }),
+    )
+
+    await expect(
+      new GetSignatureDocumentUseCase(dependencies).execute({
+        sessionToken: 'token',
+        deviceToken: 'device',
+        requestDocumentId: 'request-document-2',
+      }),
+    ).rejects.toThrow()
+    expect(dependencies.sourceReader.findDocumentVersion).not.toHaveBeenCalled()
+  })
+
   it('ignores a coexisting HMS actor while a client reads a private PDF', async () => {
     await expect(execute(makeDependencies(), 'signed-in-admin')).resolves.toMatchObject({
       privateFileId: 'private-file-1',

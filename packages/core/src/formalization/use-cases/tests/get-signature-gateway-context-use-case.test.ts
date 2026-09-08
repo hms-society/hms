@@ -275,6 +275,74 @@ describe('Get Signature Gateway Context Use Case', () => {
     })
   })
 
+  it('returns only documents assigned to an authenticated collaborator', async () => {
+    const dependencies = makeDependencies()
+    dependencies.recipientsRepository.findById.mockResolvedValue(
+      fakeFormalizationSignatureRecipient({
+        id: 'recipient-1',
+        requestId: 'request-1',
+        personId: 'collaborator-1',
+        actorKind: 'collaborator',
+        status: 'reading',
+      }),
+    )
+    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+      personId: 'collaborator-1',
+      actorKind: 'collaborator',
+      active: true,
+      collaboratorRole: 'lawyer',
+      channels: [],
+    })
+    dependencies.assignmentsRepository.listByRecipientId.mockResolvedValue([
+      {
+        id: 'assignment-1',
+        requestId: 'request-1',
+        recipientId: 'recipient-1',
+        requestDocumentId: 'document-1',
+        createdAt: NOW,
+      },
+    ])
+    dependencies.documentsRepository.listByRequestId.mockResolvedValue([
+      fakeFormalizationSignatureRequestDocument({
+        id: 'document-1',
+        requestId: 'request-1',
+        sourceDocumentId: 'source-document-1',
+        sourceDocumentVersionId: 'source-version-1',
+        position: 1,
+        status: 'provisioned',
+      }),
+      fakeFormalizationSignatureRequestDocument({
+        id: 'document-2',
+        requestId: 'request-1',
+        sourceDocumentId: 'source-document-2',
+        sourceDocumentVersionId: 'source-version-2',
+        position: 2,
+        status: 'provisioned',
+      }),
+    ])
+    dependencies.sourceReader.findDocumentVersion.mockImplementation(
+      async (_formalizationId, versionId) => ({
+        documentId: versionId.replace('version', 'document'),
+        documentVersionId: versionId,
+        name: versionId,
+        reviewStatus: 'approved',
+        fileId: `${versionId}-file`,
+      }),
+    )
+
+    await expect(
+      new GetSignatureGatewayContextUseCase(dependencies).execute({
+        sessionToken: 'token',
+        deviceToken: 'device',
+        actorId: 'collaborator-1',
+      }),
+    ).resolves.toMatchObject({
+      step: 'reading',
+      documents: [{ id: 'document-1', position: 1 }],
+      csrfToken: 'fresh-csrf',
+    })
+  })
+
   it('ignores a coexisting HMS actor for a client OTP session', async () => {
     const dependencies = makeDependencies()
 

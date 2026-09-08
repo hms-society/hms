@@ -374,4 +374,30 @@ describe('Request Signature Otp Use Case', () => {
     ).not.toHaveBeenCalled()
     expect(dependencies.transaction.issueOtp).not.toHaveBeenCalled()
   })
+
+  it.each([
+    { label: 'expired', expiresAt: new Date(NOW.getTime() - 1) },
+    { label: 'invalid', expiresAt: new Date('invalid') },
+  ])('rejects an $label flow session before reading the invitation', async ({
+    expiresAt,
+  }) => {
+    const dependencies = makeDependencies()
+    dependencies.sessionsRepository.findByTokenHash.mockResolvedValue(
+      fakeFormalizationSignatureGatewaySession({
+        kind: 'flow',
+        expiresAt,
+      }),
+    )
+    const useCase = new RequestSignatureOtpUseCase({
+      ...dependencies,
+      secretGenerator: { generate: () => '123456', generateNumeric: () => '123456' },
+    })
+
+    await expect(useCase.execute(request())).rejects.toThrow()
+    expect(dependencies.recipientsRepository.findById).not.toHaveBeenCalled()
+    expect(
+      dependencies.invitationsRepository.findConsumedByRecipientAndRequest,
+    ).not.toHaveBeenCalled()
+    expect(dependencies.transaction.issueOtp).not.toHaveBeenCalled()
+  })
 })

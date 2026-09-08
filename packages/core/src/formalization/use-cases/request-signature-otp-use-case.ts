@@ -70,10 +70,13 @@ export class RequestSignatureOtpUseCase implements UseCase<Request, Response> {
     const session = await this.dependencies.sessionsRepository.findByTokenHash(
       this.dependencies.hasher.hash(request.flowToken),
     )
+    const now = this.dependencies.datetimeProvider.now()
     if (
       !session ||
       session.kind !== 'flow' ||
       session.status !== 'active' ||
+      !Number.isFinite(session.expiresAt.getTime()) ||
+      session.expiresAt <= now ||
       session.deviceSecretHash !== this.dependencies.hasher.hash(request.deviceToken) ||
       session.csrfHash !== this.dependencies.hasher.hash(request.csrfToken)
     )
@@ -101,7 +104,6 @@ export class RequestSignatureOtpUseCase implements UseCase<Request, Response> {
     if (channels.length !== 1) throw new SignatureConsentMissingError()
     if (channels[0].id !== request.channelChoiceId || channels[0].kind !== 'email')
       throw new SignatureChannelUnavailableError()
-    const now = this.dependencies.datetimeProvider.now()
     const guard = await this.dependencies.guardsRepository.findByInvitationId(
       invitation.id,
     )

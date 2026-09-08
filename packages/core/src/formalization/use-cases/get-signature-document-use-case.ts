@@ -82,8 +82,7 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     if (
       !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
       !READABLE_RECIPIENT_STATUSES.has(recipient.status) ||
-      (recipient.actorKind === 'collaborator' &&
-        request.actorId !== recipient.personId)
+      (recipient.actorKind === 'collaborator' && request.actorId !== recipient.personId)
     )
       throw new SignatureDocumentUnavailableError()
 
@@ -92,7 +91,13 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     )
     if (!this.isLiveIdentity(recipient, source, request.actorId))
       throw new SignatureDocumentUnavailableError()
-    if (!(await this.hasExactAssignment(recipient.id, signatureRequest.id)))
+    if (
+      !(await this.hasExactAssignment(
+        recipient.id,
+        signatureRequest.id,
+        request.requestDocumentId,
+      ))
+    )
       throw new SignatureDocumentUnavailableError()
 
     const document = await this.dependencies.documentsRepository.findById(
@@ -155,22 +160,15 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
   private async hasExactAssignment(
     recipientId: string,
     requestId: string,
+    requestDocumentId: string,
   ): Promise<boolean> {
     const assignments =
       await this.dependencies.assignmentsRepository.listByRecipientId(recipientId)
-    const keys = assignments.map(
+    return assignments.some(
       (assignment) =>
-        `${assignment.requestId}:${assignment.recipientId}:${assignment.requestDocumentId}`,
-    )
-    return (
-      assignments.length > 0 &&
-      new Set(keys).size === keys.length &&
-      assignments.every(
-        (assignment) =>
-          assignment.requestId === requestId &&
-          assignment.recipientId === recipientId &&
-          assignment.requestDocumentId.length > 0,
-      )
+        assignment.requestId === requestId &&
+        assignment.recipientId === recipientId &&
+        assignment.requestDocumentId === requestDocumentId,
     )
   }
 

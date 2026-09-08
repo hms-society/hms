@@ -158,10 +158,7 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       !READABLE_RECIPIENT_STATUSES.has(recipient.status)
     )
       return this.unavailable('document_unavailable', csrfToken)
-    if (
-      recipient.actorKind === 'collaborator' &&
-      request.actorId !== recipient.personId
-    )
+    if (recipient.actorKind === 'collaborator' && request.actorId !== recipient.personId)
       return this.unavailable('access_unavailable', csrfToken)
 
     const source = await this.dependencies.sourceReader.findAuthenticationSource(
@@ -169,16 +166,21 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     )
     if (!this.isLiveIdentity(recipient, source, request.actorId))
       return this.unavailable('access_unavailable', csrfToken)
-    if (
-      recipient.actorKind === 'collaborator' &&
-      !(await this.hasExactAssignment(recipient.id, signatureRequest.id))
-    )
+    const assignedDocumentIds =
+      recipient.actorKind === 'collaborator'
+        ? await this.getAssignedDocumentIds(recipient.id, signatureRequest.id)
+        : undefined
+    if (recipient.actorKind === 'collaborator' && assignedDocumentIds?.size === 0)
       return this.unavailable('access_unavailable', csrfToken)
 
     const documents = await this.dependencies.documentsRepository.listByRequestId(
       signatureRequest.id,
     )
-    const mapped = await this.mapDocuments(signatureRequest, documents)
+    const mapped = await this.mapDocuments(
+      signatureRequest,
+      documents,
+      assignedDocumentIds,
+    )
     if (!mapped) return this.unavailable('document_unavailable', csrfToken)
 
     const acknowledgements =
@@ -389,12 +391,18 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
   private async mapDocuments(
     signatureRequest: FormalizationSignatureRequest,
     documents: readonly FormalizationSignatureRequestDocument[],
+    allowedDocumentIds?: ReadonlySet<string>,
   ) {
+    const visibleDocuments = allowedDocumentIds
+      ? documents.filter((document) => allowedDocumentIds.has(document.id))
+      : documents
     if (
-      documents.length === 0 ||
-      new Set(documents.map((document) => document.id)).size !== documents.length ||
-      new Set(documents.map((document) => document.position)).size !== documents.length ||
-      documents.some(
+      visibleDocuments.length === 0 ||
+      new Set(visibleDocuments.map((document) => document.id)).size !==
+        visibleDocuments.length ||
+      new Set(visibleDocuments.map((document) => document.position)).size !==
+        visibleDocuments.length ||
+      visibleDocuments.some(
         (document) =>
           document.requestId !== signatureRequest.id ||
           !READABLE_DOCUMENT_STATUSES.has(document.status) ||
@@ -407,7 +415,7 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       return null
 
     const mapped = await Promise.all(
-      [...documents]
+      [...visibleDocuments]
         .sort((left, right) => left.position - right.position)
         .map(async (document) => {
           const sourceDocument = await this.dependencies.sourceReader.findDocumentVersion(
@@ -432,6 +440,24 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
           (document): document is NonNullable<typeof document> => document !== null,
         )
       : null
+  }
+
+  private async getAssignedDocumentIds(
+    recipientId: string,
+    requestId: string,
+  ): Promise<ReadonlySet<string>> {
+    const assignments =
+      await this.dependencies.assignmentsRepository.listByRecipientId(recipientId)
+    return new Set(
+      assignments
+        .filter(
+          (assignment) =>
+            assignment.requestId === requestId &&
+            assignment.recipientId === recipientId &&
+            assignment.requestDocumentId.length > 0,
+        )
+        .map((assignment) => assignment.requestDocumentId),
+    )
   }
 
   private terminalStatus(
