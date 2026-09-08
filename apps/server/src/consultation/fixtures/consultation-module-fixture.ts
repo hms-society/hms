@@ -31,6 +31,7 @@ import { vi, type Mock } from 'vitest'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
+import { InMemoryFileStorageProvider } from '@/consultation/fixtures/in-memory-file-storage-provider'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
@@ -43,6 +44,7 @@ import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-cata
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
@@ -93,24 +95,28 @@ export class ConsultationModuleFixture {
         providers: [{ provide: InngestBroker, useValue: broker }],
       },
       (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              user?: AuthUser
-              auth?: { accessToken: string; user: AuthUser }
-            }>()
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
-            request.user = authentication.user
-            request.auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            return true
-          },
-        }),
+        builder
+          .overrideProvider(PROVISION_PROVIDERS.fileStorage)
+          .useClass(InMemoryFileStorageProvider)
+          .overrideGuard(AuthGuard)
+          .useValue({
+            canActivate: (context: ExecutionContext) => {
+              const request = context.switchToHttp().getRequest<{
+                headers: { authorization?: string }
+                user?: AuthUser
+                auth?: { accessToken: string; user: AuthUser }
+              }>()
+              if (!authentication.user || !request.headers.authorization) {
+                throw new UnauthorizedException('Authentication token is required')
+              }
+              request.user = authentication.user
+              request.auth = {
+                accessToken: 'fixture-access-token',
+                user: authentication.user,
+              }
+              return true
+            },
+          }),
     )
 
     return new ConsultationModuleFixture(
