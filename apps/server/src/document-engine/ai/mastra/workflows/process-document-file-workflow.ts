@@ -63,7 +63,14 @@ export class ProcessDocumentFileWorkflow implements IProcessDocumentFileWorkflow
         ],
       ])
       .map(async ({ inputData }) => {
-        const result = Object.values(inputData)[0]
+        const result = Object.values(inputData).find(Boolean)
+
+        if (!result) {
+          throw new AppError(
+            'Nenhuma estratégia de extração documental retornou resultado.',
+            'Erro de Processamento Documental',
+          )
+        }
 
         return outputSchema.parse(result)
       })

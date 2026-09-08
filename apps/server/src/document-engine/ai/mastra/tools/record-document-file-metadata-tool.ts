@@ -43,13 +43,24 @@ export class RecordMetadataTool {
           documentFileId: input.documentFileId,
           status: DocumentValidationStatus.AwaitingValidation,
           hashSha256: input.metadata.hashSha256,
-          aiConfidence: 0,
+          aiConfidence: input.suggestion
+            ? Math.round(input.suggestion.confidence * 100)
+            : 0,
           aiSuggestion: {
             metadataCaptured: true,
             metadata: input.metadata,
+            ...(input.suggestion
+              ? {
+                  documentTypeId: input.suggestion.documentTypeId,
+                  documentTypeLabel: input.suggestion.documentTypeLabel,
+                  checklistRequirementId: input.suggestion.checklistRequirementId,
+                  checklistItemLabel: input.suggestion.checklistItemLabel,
+                  evidence: input.suggestion.evidence,
+                }
+              : {}),
           },
-          extractedFields: [],
-          missingFields: [],
+          extractedFields: input.suggestion?.extractedFields ?? [],
+          missingFields: input.suggestion?.missingFields ?? [],
         })
 
         await this.logsRepository.add({

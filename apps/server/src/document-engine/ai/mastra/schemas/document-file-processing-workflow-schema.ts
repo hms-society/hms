@@ -18,7 +18,32 @@ export const metadataSchema = z.object({
   extractedTextFull: z.string().optional(),
 })
 
+export const extractedFieldSchema = z.object({
+  label: z.string().min(1),
+  value: z.string(),
+  confidence: z.number().min(0).max(1).optional(),
+  isRequired: z.boolean().optional(),
+  isMissing: z.boolean().optional(),
+})
+
+export const evidenceSchema = z.object({
+  field: z.string().min(1),
+  sourceText: z.string().min(1),
+})
+
+export const suggestionSchema = z.object({
+  documentTypeId: z.string().optional(),
+  documentTypeLabel: z.string().optional(),
+  checklistRequirementId: z.string().optional(),
+  checklistItemLabel: z.string().optional(),
+  confidence: z.number().min(0).max(1),
+  extractedFields: z.array(extractedFieldSchema),
+  missingFields: z.array(z.string().min(1)),
+  evidence: z.array(evidenceSchema),
+})
+
 export const outputSchema = z.object({
   documentFileId: z.string().uuid(),
   metadata: metadataSchema,
+  suggestion: suggestionSchema.optional(),
 })

@@ -1,5 +1,6 @@
 import { createTool } from '@mastra/core/tools'
 import { Injectable } from '@nestjs/common'
+import { resolve } from 'node:path'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { z } from 'zod'
 
@@ -66,6 +67,7 @@ export class ExtractPdfTool {
   private async extractText(content: Buffer) {
     const loadingTask = getDocument({
       data: new Uint8Array(content),
+      standardFontDataUrl: this.getStandardFontDataUrl(),
     })
     const pdf = await loadingTask.promise
 
@@ -103,6 +105,10 @@ export class ExtractPdfTool {
 
   private isTextItem(item: unknown): item is PdfTextItem {
     return typeof item === 'object' && item !== null && 'str' in item
+  }
+
+  private getStandardFontDataUrl() {
+    return `${resolve('node_modules/pdfjs-dist/standard_fonts').replace(/\\/g, '/')}/`
   }
 
   private normalizeText(text: string) {

@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { DocumentFileProcessingRequestedEvent } from '@hms/core/document-engine/domain/events'
+import {
+  DocumentFileExtractionCompletedEvent,
+  DocumentFileProcessingRequestedEvent,
+} from '@hms/core/document-engine/domain/events'
 import type { ProcessDocumentFileWorkflow } from '@hms/core/document-engine/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
@@ -40,8 +43,31 @@ export class ProcessDocumentFileJob extends InngestJob {
         name: 'Process Document File',
         triggers: [documentFileProcessingRequested],
       },
-      async ({ event, step }) =>
-        step.run('process-document-file', async () => workflow.run(event.data)),
+      async ({ event, step }) => {
+        const result = await step.run('process-document-file', async () =>
+          workflow.run(event.data),
+        )
+
+        if (
+          !event.data.mimeType.startsWith('image/') ||
+          event.data.storagePath.startsWith('seed/')
+        ) {
+          return result
+        }
+
+        const completedEvent = new DocumentFileExtractionCompletedEvent({
+          batchId: event.data.batchId,
+          documentFileId: result.documentFileId,
+          metadata: result.metadata,
+        })
+
+        await step.sendEvent('send-document-file-extraction-completed', {
+          name: completedEvent.name,
+          data: completedEvent.payload,
+        })
+
+        return result
+      },
     )
   }
 }

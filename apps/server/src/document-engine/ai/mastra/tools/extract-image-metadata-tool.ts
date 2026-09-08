@@ -1,6 +1,9 @@
 import { createTool } from '@mastra/core/tools'
 import { Injectable } from '@nestjs/common'
+import { AppError } from '@hms/core/shared/domain/errors'
 import { z } from 'zod'
+
+import { DocumentImageAnalyzerAgent } from '@/document-engine/ai/mastra/agents'
 
 const inputSchema = z.object({
   batchId: z.string().uuid(),
@@ -30,23 +33,90 @@ export class ExtractImageTool {
     typeof createTool<'extract-image-metadata', typeof inputSchema, typeof outputSchema>
   >
 
-  constructor() {
+  constructor(private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent) {
     this.function = createTool({
       id: 'extract-image-metadata',
-      description: 'Capture basic metadata from an image document.',
+      description: 'Extract text from an image document with a local vision model.',
       inputSchema,
       outputSchema,
       strict: true,
-      execute: async (input) => ({
-        documentFileId: input.documentFileId,
-        metadata: {
-          mimeType: input.mimeType,
-          sizeBytes: input.sizeBytes,
-          hashSha256: input.hashSha256,
-          textLength: 0,
-          extractedTextFull: '',
-        },
-      }),
+      execute: async (input) => {
+        const extractedTextFull = await this.extractText(
+          input.contentBase64,
+          input.mimeType,
+        )
+
+        return {
+          documentFileId: input.documentFileId,
+          metadata: {
+            mimeType: input.mimeType,
+            sizeBytes: input.sizeBytes,
+            hashSha256: input.hashSha256,
+            textLength: extractedTextFull.length,
+            extractedTextFull,
+          },
+        }
+      },
     })
+  }
+
+  private async extractText(contentBase64: string, mimeType: string) {
+    const response = await this.imageAnalyzerAgent.generate(
+      [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Transcribe only the readable text from this image. Return plain text only.',
+            },
+            {
+              type: 'image',
+              image: contentBase64,
+              mimeType,
+            },
+          ],
+        },
+      ],
+    )
+
+    const extractedTextFull = response.text
+
+    if (typeof extractedTextFull !== 'string') {
+      throw new AppError(
+        'O agente de análise de imagem não retornou uma extração válida.',
+        'Erro de Extração de Imagem',
+      )
+    }
+
+    return this.normalizeText(extractedTextFull)
+  }
+
+  private normalizeText(text: string) {
+    const normalized = text
+      .replace(/[^\S\r\n]+/g, ' ')
+      .replace(/\s*\n\s*/g, '\n')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    if (this.isEmptyTextResponse(normalized)) {
+      return ''
+    }
+
+    return normalized
+  }
+
+  private isEmptyTextResponse(text: string) {
+    return [
+      '',
+      '""',
+      "''",
+      'não há texto legível',
+      'nao ha texto legivel',
+      'sem texto legível',
+      'sem texto legivel',
+      'no readable text',
+      'no text detected',
+    ].includes(text.toLowerCase())
   }
 }

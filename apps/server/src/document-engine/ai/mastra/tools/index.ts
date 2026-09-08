@@ -1,3 +1,4 @@
+export { CreateSuggestionTool } from './create-document-suggestion-tool'
 export { ExtractImageTool } from './extract-image-metadata-tool'
 export { ExtractPdfTool } from './extract-pdf-metadata-tool'
 export { ExtractUnsupportedFileTool } from './extract-unsupported-file-metadata-tool'
