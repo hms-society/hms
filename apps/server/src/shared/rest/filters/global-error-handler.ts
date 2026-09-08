@@ -13,6 +13,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@hms/core/shared/domain/errors'
+import { FormalizationContractFormValidationError } from '@hms/core/formalization/domain/errors'
 
 export type ErrorResponse = {
   readonly statusCode: number
@@ -20,6 +21,7 @@ export type ErrorResponse = {
   readonly message: string
   readonly timestamp: string
   readonly path: string
+  readonly issues?: readonly { path: string; message: string }[]
 }
 
 @Catch()
@@ -96,6 +98,14 @@ export class GlobalErrorHandler implements ExceptionFilter {
       message: exception.message,
       timestamp: new Date().toISOString(),
       path,
+      ...(exception instanceof FormalizationContractFormValidationError
+        ? {
+            issues: exception.issues.map((issue) => ({
+              path: issue.path,
+              message: issue.message,
+            })),
+          }
+        : {}),
     }
   }
 

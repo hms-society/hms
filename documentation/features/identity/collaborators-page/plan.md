@@ -4,7 +4,7 @@ spec: ../spec.md
 evaluation: ../evaluation.md
 spec_revision: 6
 status: completed
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2228232
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2228232
 jira_tickets:
   - SCRUM-132
 ---

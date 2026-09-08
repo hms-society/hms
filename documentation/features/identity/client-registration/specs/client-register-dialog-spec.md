@@ -1,6 +1,6 @@
 ---
 title: Client registration and selection through the shared dialog
-prd: https://plataformahms.atlassian.net/wiki/x/BIAC
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2228232
 jira_tickets: []
 workspaces: validation, core, server, web
 status: open
@@ -558,7 +558,7 @@ flowchart TD
 
 References:
 
-- PRD v8 — `https://plataformahms.atlassian.net/wiki/x/BIAC`, version 8, whose version
+- PRD v8 — `https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2228232`, version 8, whose version
   message translates to `Aligns Client, consents, and the Intake boundary`;
 - `design/hms.pen` — frames `ajF8M`, `hfLfd`, `u7yjFZ`, `yO9zK`, `CmxME`, and `v30SR`;
 - `documentation/modules.md` and `documentation/design.md`;

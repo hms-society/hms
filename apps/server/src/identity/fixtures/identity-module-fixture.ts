@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import { UnauthorizedException } from '@nestjs/common'
 import type {
@@ -35,15 +34,17 @@ import { ActiveAdminGuard, ActiveCollaboratorGuard, AuthGuard } from '@/identity
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
+const idProvider = new IdProvider()
 const authAdministrationFixture: AuthAdministrationProvider = {
-  createUser: async (email) => ({ id: randomUUID(), email }),
+  createUser: async (email) => ({ id: idProvider.generate(), email }),
   removeUser: async () => undefined,
   removeAllUsers: async () => undefined,
-  inviteUserByEmail: async (email) => ({ id: randomUUID(), email }),
-  resendInvitation: async (email) => ({ id: randomUUID(), email }),
+  inviteUserByEmail: async (email) => ({ id: idProvider.generate(), email }),
+  resendInvitation: async (email) => ({ id: idProvider.generate(), email }),
   findUserByEmail: async () => undefined,
   setInvitationAttemptId: async () => undefined,
   setUserBanned: async () => undefined,

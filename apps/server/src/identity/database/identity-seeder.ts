@@ -1,13 +1,15 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import type {
+  ClientConsentCreation,
   ClientCreation,
   CollaboratorCreation,
   UserCreation,
 } from '@hms/core/identity/domain/entities'
 import { ClientFaker } from '@hms/core/identity/domain/entities/fakers'
-import type { LegalExpertise } from '@hms/core/identity/domain/structures'
+import { ConsentType, type LegalExpertise } from '@hms/core/identity/domain/structures'
 import type {
   AuthAdministrationProvider,
+  ClientConsentsRepository,
   ClientsRepository,
   CollaboratorRegistrationAttemptsRepository,
   CollaboratorsRepository,
@@ -65,11 +67,11 @@ const DEFAULT_USERS: UserSeed[] = [
     status: 'active',
   },
   {
-    email: 'joao.pedro@hmsadvogados.com.br',
+    email: 'lawyer.contracts@hmsadvogados.com.br',
     status: 'active',
   },
   {
-    email: 'beatriz.oliveira@hmsadvogados.com.br',
+    email: 'paralegal.documents@hmsadvogados.com.br',
     status: 'active',
   },
   {
@@ -149,6 +151,8 @@ export class IdentitySeeder {
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)
     private readonly clientsRepository: ClientsRepository,
+    @Inject(IDENTITY_REPOSITORIES.clientConsents)
+    private readonly clientConsentsRepository: ClientConsentsRepository,
     @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
@@ -290,6 +294,16 @@ export class IdentitySeeder {
       id,
     })) satisfies ClientCreation[]
     const clients = await this.seed(clientsToSeed)
+    const seededClient = clients.find(({ email }) => email === 'client@hms.br')
+    if (!seededClient) throw new AppError('Default seed client was not created')
+
+    await this.clientConsentsRepository.addMany([
+      {
+        clientId: seededClient.id,
+        type: ConsentType.EmailCommunication,
+        grantedAt: new Date(),
+      } satisfies ClientConsentCreation,
+    ])
 
     return {
       clients,

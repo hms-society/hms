@@ -14,7 +14,7 @@ export class ListClientsController {
   private readonly useCase: ListClientsUseCase
 
   constructor(
-    @Inject(IDENTITY_REPOSITORIES.clients)
+    @Inject(IDENTITY_REPOSITORIES.clientList)
     clientsRepository: ClientsRepository,
   ) {
     this.useCase = new ListClientsUseCase(clientsRepository)

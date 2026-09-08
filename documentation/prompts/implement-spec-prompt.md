@@ -16,6 +16,8 @@ implement-spec
                      ↓
              integrated candidate
                      ↓
+            structural path gate
+                     ↓
                   reviewer + sensors
                      ↓
                 conclude-spec
@@ -25,7 +27,7 @@ Run the workflow in the current task. Do not create another user-owned thread.
 
 ## Strategy selection
 
-Read `documentation/rules/sdd-rules.md` and its mandatory authorities—the Spec, Modules,
+Read `documentation/sdd.md` and its mandatory authorities—the Spec, Modules,
 Architecture, `documentation/rules/rules.md`, every selected Rule and
 `documentation/tooling.md`—then inspect colocated `plan.md` when present.
 
@@ -42,7 +44,7 @@ correction; reopen only its affected phases/tasks. Never route from this workflo
 another implementation prompt.
 
 When resuming a legacy Judge-based artifact, apply the migration rule in
-`documentation/rules/sdd-rules.md`: preserve completed history, reconcile active artifact
+`documentation/sdd.md`: preserve completed history, reconcile active artifact
 structure and Evaluation before feature edits, and do not revive removed Judge or
 `implement-plan` workflows.
 
@@ -75,8 +77,13 @@ stop before editing feature source and report the exact blocker:
   cannot be resumed or the correction is genuinely independent, fix it immediately, and rerun the
   affected checks. Never pause for permission to resolve an in-Contract discrepancy.
 - A UI change is not validated by a passing test alone. It requires the required behavioral
-  assertions plus a fresh Playwright MCP screenshot at each affected reference/state and an
+  assertions plus a fresh Playwright CLI screenshot at each affected reference/state and an
   inspected comparison recorded in Evaluation.
+- The structural path gate runs only after every Builder-owned and Orchestrator-owned path is
+  integrated and before the Implementation Reviewer, integrated sensors, or readiness. Use
+  `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]`; its local baseline
+  defaults to `origin/develop` and it never fetches. A failure or stale result blocks downstream
+  review and readiness.
 - Never claim readiness from evidence captured before the latest affected change. Mark it
   `stale` and recapture it.
 - Evaluation is a living ledger, not a final report: after every implementation, test, browser,
@@ -143,7 +150,7 @@ copy the PRD into the repository, or treat product-document ordering as executio
 
 Before the first implementation change for the current revision:
 
-1. when authenticated web validation applies, record the required Playwright MCP preflight
+1. when authenticated web validation applies, record the required Playwright CLI preflight
    from root `AGENTS.md`: Docker/Auth/Server health, persistent Server/Web sessions, seed
    credentials resolved from source and environment, and the target protected flow;
 2. freeze the Spec revision;
@@ -239,6 +246,12 @@ Current result: `<concise statement of validated, pending and blocking evidence>
 | --- | --- | --- | --- | --- |
 | `EV-01` | `<Domain, Use cases, Interfaces, Validation, REST, Provision, Database, Messaging, UI or Cross-layer>` | `<exact command or runtime scenario>` | `<observed result>` | `pending` |
 
+## Structural path gate
+
+| ID | Command | Base ref | Base SHA | Counts | Result | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `PATH-01` | `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]` | `<selected local ref>` | `<resolved SHA>` | `<every count label and value reported by the command>` | `<exact summary/result>` | `pending` |
+
 ## Manual evidence
 
 | ID | Scenario | Criteria | Expected | Observed | Status |
@@ -249,7 +262,7 @@ Current result: `<concise statement of validated, pending and blocking evidence>
 
 | ID | Surface and state | Viewport | Reference | Implementation | Differences | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `VIS-01` | `<surface and state>` | `<width × height>` | `design/<reference>.png` | `<Playwright MCP screenshot path or CI artifact identifier; — when not retained>` | `<missing, extra, altered or mismatched elements>` | `pending` |
+| `VIS-01` | `<surface and state>` | `<width × height>` | `design/<reference>.png` | `<Playwright CLI screenshot path or CI artifact identifier; — when not retained>` | `<missing, extra, altered or mismatched elements>` | `pending` |
 
 ## Rule and documentation compliance
 
@@ -288,6 +301,13 @@ is not SDD current-commit metadata. Retain failed and superseded-head runs as hi
 Preserve the template's column names, evidence ID conventions and status vocabulary exactly.
 The PR CI table is populated only during `conclude-spec`; its head SHA identifies the PR
 revision checked by CI and is not current-implementation metadata.
+
+The `PATH-01` row is current only while the integrated affected paths and their Spec
+classifications remain unchanged after the recorded run. Record the exact invoked command, not
+the synopsis placeholder; record the selected base ref even when it is the default local
+`origin/develop`, its resolved SHA, every emitted count, and the exact result. The command is
+structural only and does not replace any automated, runtime, migration, generated-content,
+design, accessibility, or Playwright CLI evidence.
 
 ## Persistence and user questions
 
@@ -364,11 +384,12 @@ Phase completion must be sensor-backed. Do not use a Builder report as official 
 
 Each Builder runs focused feedback checks for the paths it changes before handoff:
 
-- `builder_core` and `builder_validation` run their applicable code, type and unit sensors;
+- `builder_core` runs its applicable code, type and unit sensors; `builder_validation` runs
+  lint and type-check sensors only because `packages/validation` intentionally has no test suite;
 - `builder_server` runs applicable sensors plus focused `curl` scenarios against the real local
   server for changed runtime behavior, covering status/body, validation, authentication,
   authorization, persistence, side effects and relevant logs;
-- `builder_web` uses the Playwright MCP for affected interactions and states, including keyboard,
+- `builder_web` uses the Playwright CLI for affected interactions and states, including keyboard,
   focus, narrow viewport, console, failed requests and fresh screenshots against applicable
   design references.
 
@@ -378,19 +399,48 @@ in Evaluation in the same task turn. A Builder handoff is incomplete until its c
 affected evidence freshness and any applicable lesson are materialized there. Keep Builder checks focused;
 do not run a full workspace or UI regression after every small edit unless the task exit requires it.
 
-### Integrated Reviewer
+### Structural path gate
+
+After all implementation Builder diffs and every Orchestrator-owned shared, generated,
+configuration, dependency, and lockfile path are integrated, run:
+
+```bash
+pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]
+```
+
+When `--base` is omitted, the comparison uses the local `origin/develop`; the command performs
+no automatic fetch. Use an explicit local base ref when the delivery contract requires one and
+`--json` when machine-readable output is useful. Record `PATH-01` with the exact command,
+selected base ref, resolved base SHA, every reported count, exact result, and status.
+
+This gate checks only structural agreement between canonical affected-path tables and changed
+implementation paths/classifications. It does not validate behavior, RF/CA satisfaction, tests,
+types, runtime integration, migration semantics, generated content, design fidelity,
+accessibility, or Playwright CLI behavior. Do not start the Implementation Reviewer or integrated
+sensors and do not assess readiness until it passes. A malformed/noncanonical table or mismatch
+routes to the responsible Spec amendment or implementation correction.
+
+`implement-spec` owns execution and freshness of this gate. Mark `PATH-01` stale and rerun it
+whenever the Spec's canonical path rows or classifications change, the selected base resolves to
+a different SHA, the integrated changed-file set changes, or a declared path's diff status
+changes. This includes resumed implementation after review feedback or branch/base preparation
+changes. Run the fresh gate before resuming downstream review, sensors, readiness, or conclusion;
+later workflows consume implementation evidence and do not own a second path-checking policy.
+
+### Implementation Reviewer
 
 For Plan-backed execution, activate exactly one read-only subagent named `reviewer` using the
-[`Integrated Reviewer`](../agents/reviewer-agent.md) contract after all
+[`Implementation Reviewer`](../agents/implementation-reviewer-agent.md) contract after all
 implementation Builder diffs are integrated. Never create a Reviewer per Builder, phase,
 application or package, and do not add specialist Reviewers. Direct execution does not require a
 separate Reviewer unless the Spec or another repository authority explicitly requires one.
 
-Give the Reviewer the exact Spec revision, Plan, Rule Pack, integrated diff, design references and
-current evidence index. It reviews the complete candidate for Spec conformance, cross-Builder
+Give the Reviewer the exact Spec revision, Plan, Rule Pack, integrated diff, design references,
+current evidence index, and current passing `PATH-01` row. The Reviewer consumes that row and must
+not rerun the structural path gate or substitute its own path comparison for it. It reviews the complete candidate for Spec conformance, cross-Builder
 contracts, missing states/tests, integration conflicts and stale evidence. When UI is affected, it
 must inspect every required final screenshot and comparison and independently replay high-risk
-interactions with the Playwright MCP, including applicable responsive, keyboard, accessibility,
+interactions with the Playwright CLI, including applicable responsive, keyboard, accessibility,
 console and network behavior. When server-backed behavior is affected, it may replay high-risk
 real `curl` scenarios and inspect the resulting authorization, persistence or side effects.
 
@@ -474,7 +524,7 @@ When a Design Contract exists:
   console, failed-request and persistence evidence;
 - do not create a dedicated visual-reference integration test;
 - capture and compare every supplied design screenshot and every required supplemental state at
-  its exact viewport, using an existing behavioral scenario or a manual Playwright MCP run;
+  its exact viewport, using an existing behavioral scenario or a manual Playwright CLI run;
   supplemental screenshots marked recommended may be deferred only when the manifest records
   the decision and the state is not an acceptance gap;
 - capture every design-backed state at its exact viewport into ignored Playwright/browser
@@ -535,18 +585,28 @@ ambiguous.
 
 ## Integrated validation and readiness
 
-After implementation work is complete, validate the exact Spec revision and implementation. For
-Plan-backed execution, activate the `reviewer` subagent on the integrated candidate while
-the Orchestrator runs the applicable sensors:
+After implementation work is complete, validate the exact Spec revision and implementation.
+First integrate all Builder-owned and Orchestrator-owned paths and obtain a current passing
+`PATH-01` structural gate row. Only then, for Plan-backed execution, activate the `reviewer`
+subagent while the Orchestrator runs the applicable integrated sensors:
 
-1. run integrated technical sensors and the final build Quality Gate;
-2. review generated artifacts and migration bodies;
-3. preflight real services, database/Auth/provider state, accounts and fixtures;
-4. execute every applicable `MV-*` with the Playwright MCP;
-5. inspect every CA, manual scenario and supplied/supplemental screenshot with exact
+1. run and record
+   `pnpm check:spec-implementation -- <spec> [--base origin/develop] [--json]` against the
+   selected local base ref, blocking on any malformed table or path/classification mismatch;
+2. after it passes, run integrated technical sensors, the repository-wide
+   `pnpm test:coverage` command and the
+   final build Quality Gate. Coverage is mandatory after implementation and after every correction;
+   it is not optional or replaced by a focused test run. If the coverage gate fails, write or improve
+   behavior-focused tests at the covered application or core boundary, rerun coverage, and keep the
+   implementation in progress until it passes. Do not create tests in `packages/validation`, which is
+   intentionally linted and type-checked without its own test suite;
+3. review generated artifacts and migration bodies;
+4. preflight real services, database/Auth/provider state, accounts and fixtures;
+5. execute every applicable `MV-*` with the Playwright CLI;
+6. inspect every CA, manual scenario and supplied/supplemental screenshot with exact
    viewport/state, console/network, accessibility, DOM/layout and persistence evidence;
-6. when `reviewer` applies, verify and classify every finding;
-7. record commands, captures, results, review findings and resolutions in Evaluation.
+7. when `reviewer` applies, verify and classify every finding;
+8. record commands, captures, results, review findings and resolutions in Evaluation.
 
 For Plan-backed execution, keep the integrated phase `in_progress` during this validation and
 complete the Plan only after all affected phases and evidence pass, `reviewer` has

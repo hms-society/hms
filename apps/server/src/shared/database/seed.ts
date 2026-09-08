@@ -2,7 +2,6 @@ import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
-import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
 import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
@@ -19,7 +18,6 @@ import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
-import type { CaseChecklistItemsRepository } from '@hms/core/case-management/interfaces'
 
 const LOGGER = new Logger('DatabaseSeed')
 
@@ -115,7 +113,7 @@ async function bootstrap() {
       .filter(({ profile }) => profile === 'supervisor')
       .map(({ id }) => id)
 
-    const caseManagementSeed = await app.get(CaseManagementSeeder).run({
+    await app.get(CaseManagementSeeder).run({
       contractedIntakes: intakeSeed.intakes.filter(
         ({ status }) => status === IntakeStatus.Contracted,
       ),
@@ -152,29 +150,21 @@ async function bootstrap() {
       requestedByCollaboratorId: lawyer.id,
     })
 
-    await app.get(CommunicationSeeder).run()
-    const realDocumentsSeed = await app.get(RealDocumentsSeeder).run({
-      validationScenario:
-        caseManagementSeed.validationScenarioCase &&
-        caseManagementSeed.validationScenarioChecklistItems.length > 0
-          ? {
-              caseId: caseManagementSeed.validationScenarioCase.id,
-              checklistItems: caseManagementSeed.validationScenarioChecklistItems.map(
-                ({ id, title }) => ({ id, title }),
-              ),
-              clientId: validationScenarioClient.id,
-            }
-          : undefined,
+    await app.get(CommunicationSeeder).run({
+      authorId: actor.id,
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      lawyerId: lawyer.id,
+      intakes: intakeSeed.intakes.map(({ id, clientId, createdAt }) => ({
+        id,
+        clientId,
+        createdAt,
+      })),
     })
-    const caseChecklistItemsRepository = app.get<CaseChecklistItemsRepository>(
-      CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
-    )
-    await Promise.all(
-      realDocumentsSeed.validationScenarioDocumentLinks.map((documentLink) =>
-        caseChecklistItemsRepository.linkPendingDocument(documentLink),
-      ),
-    )
-    await app.get(DocumentsSeeder).run()
+    await app.get(RealDocumentsSeeder).run()
+    await app.get(DocumentsSeeder).run({
+      clientIds: identitySeed.clients.map(({ id }) => id),
+      userIds: identitySeed.users.map(({ id }) => id),
+    })
 
     LOGGER.log(
       JSON.stringify({

@@ -7,7 +7,7 @@ sources:
     ref: https://plataformahms.atlassian.net/browse/SCRUM-134
     role: delivery_scope
   - type: prd
-    ref: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+    ref: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
     role: product_requirements
   - type: design
     ref: design/hms.pen#K2Fvp
@@ -18,7 +18,7 @@ sources:
   - type: design
     ref: changes/visual-fidelity-and-row-actions/spec.md
     role: technical_context
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 jira_tickets:
   - SCRUM-134
 plan: ./plan.md
@@ -51,10 +51,11 @@ O módulo de Produção Documental já possui estruturas iniciais no `packages/c
 mas não possui persistência, API REST nem interface para consultar modelos. O
 ticket `SCRUM-134` entrega a primeira experiência administrativa desse módulo.
 
-A origem canônica de produto é a página Confluence `2588673`, referenciada pelo
-tiny link `AYAn` em `documentation/modules.md`. A seção 11 do PRD, datada de
-05/08/2026, prevalece sobre regras anteriores conflitantes e define uma aplicação
-por modelo, os momentos aceitos e os estados **Disponível** e **Indisponível**.
+A origem canônica de produto é a página Confluence `2588673`, listada no índice
+canônico de PRDs `AYAm` e referenciada em `documentation/modules.md`. A seção 11
+do PRD, datada de 05/08/2026, prevalece sobre regras anteriores conflitantes e
+define uma aplicação por modelo, os momentos aceitos e os estados **Disponível**
+e **Indisponível**.
 
 O conteúdo principal do frame `K2Fvp` de `design/hms.pen` é a referência visual.
 A sidebar do frame não deve ser redesenhada: a aplicação já possui e usa a
@@ -648,9 +649,8 @@ avaliado é `1e5cb6a`.
 
 ## Premissas aceitas nesta revisão
 
-- o tiny link `AYAn` continua sendo a origem canônica mesmo existindo uma cópia
-  mais recente do PRD em outro espaço; ambas continham o mesmo REQ-005 e a
-  mesma seção 11 na data da pesquisa;
+- o índice `AYAm` e a página `2588673` são a origem canônica; cópias do PRD em
+  outros espaços não substituem essa autoridade;
 - a rota interna usa `/modelos-de-documentos`, alinhada ao PRD e ao frame;
 - a página não executa mutações nesta entrega; os controles **Editar** e
   **Duplicar** podem existir visualmente sem handlers conectados.

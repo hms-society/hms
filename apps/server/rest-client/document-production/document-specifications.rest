@@ -3,7 +3,7 @@
 @legalTopicId = replace-with-legal-topic-uuid
 
 # Preconditions
-# Run `pnpm seed`, start the API on http://localhost:3333, and execute the
+# Run `pnpm seed`, start the API on http://localhost:5555, and execute the
 # login request before sending the document specification requests.
 
 ### Sign in as the seeded administrator

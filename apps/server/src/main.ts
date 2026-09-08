@@ -5,6 +5,7 @@ import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from '@/app.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { configureCors } from '@/shared/rest/configure-cors'
 import { GlobalErrorHandler } from '@/shared/rest/filters'
 
 async function bootstrap() {
@@ -32,13 +33,9 @@ async function bootstrap() {
 
   const envProvider = app.get(EnvProvider)
 
-  app.enableCors({
-    origin: envProvider.get('HMS_WEB_APP_URL'),
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  })
+  configureCors(app, envProvider.get('HMS_WEB_APP_URL'))
 
-  await app.listen(process.env.PORT ?? 3333)
+  await app.listen(envProvider.get('HMS_SERVER_APP_PORT'))
 }
 
 bootstrap()

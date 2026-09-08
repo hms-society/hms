@@ -10,7 +10,7 @@ sources:
     ref: https://plataformahms.atlassian.net/browse/SCRUM-136
     role: delivery_scope
   - type: prd
-    ref: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+    ref: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
     role: product_requirements
   - type: design
     ref: design/hms.pen#K2Fvp
@@ -30,7 +30,7 @@ sources:
   - type: direct-request
     ref: codex-task
     role: delivery_scope
-prd: https://plataformahms.atlassian.net/wiki/pages/viewpage.action?pageId=2588673
+prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2588673
 jira_tickets:
   - SCRUM-136
 scope:

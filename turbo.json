@@ -1,5 +1,6 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": ["dependency-cruiser.config.mjs"],
   "ui": "tui",
   "tasks": {
     "build": {
@@ -10,11 +11,18 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "check:architecture": {
+      "dependsOn": []
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "dependsOn": []
+    },
+    "test:coverage": {
+      "dependsOn": [],
+      "outputs": ["coverage/**"]
     },
     "dev": {
       "cache": false,

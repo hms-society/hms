@@ -30,6 +30,12 @@
       "sourceType": "github",
       "skillPath": "SKILL.md",
       "computedHash": "7e243b4b047c4ff98b33c47d36e44d07e2aae90c0293f9d2a4ee48ea9694a839"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "f602822b51bcb6d033749c60731b8f1e80f308222fcb2e4af551905a817c6e08"
     }
   }
 }
