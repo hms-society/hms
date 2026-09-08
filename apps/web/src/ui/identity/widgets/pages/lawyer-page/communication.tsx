@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useClientsQuery } from '@/ui/identity/hooks/use-clients-query'
 import { useClientCommunicationsQuery } from '@/ui/identity/hooks/use-client-communications-query'
-import { useSendCommunicationMutation } from '@/ui/identity/hooks/use-send-communication-mutation'
+import { useSendCommunicationMutation } from '@/ui/identity/hooks/use-send-communication-action'
 import { toast } from 'sonner'
 
 import {

@@ -4,6 +4,8 @@ import { Anchor } from '@/ui/shared/widgets/components/anchor'
 
 import { useSignInPage, type SignInPageProps } from './use-sign-in-page'
 
+export type { SignInPageProps } from './use-sign-in-page'
+
 export const SignInPage = (props: SignInPageProps = {}) => {
   const {
     error,

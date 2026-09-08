@@ -1,8 +1,7 @@
-import { useMutation } from '@tanstack/react-query'
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 
+import { useCompleteCollaboratorInviteAction } from '@/ui/identity/hooks/use-complete-collaborator-invite-action'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 type InviteStatus = 'idle' | 'error' | 'success'
@@ -15,13 +14,9 @@ export type CollaboratorInviteSearch = {
 }
 
 export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {}) {
-  const {
-    getSession,
-    isLoading: isLoadingSession,
-    session,
-    updatePassword,
-  } = useAuthContext()
-  const { identityService } = useRestContext()
+  const { isLoading: isLoadingSession, session } = useAuthContext()
+  const { isCompletingCollaboratorInvite, completeCollaboratorInvite } =
+    useCompleteCollaboratorInviteAction()
   const { navigateTo } = useNavigation()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -38,34 +33,6 @@ export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {})
     },
     [isLoadingSession],
   )
-
-  async function completeInviteRequest(nextPassword: string) {
-    const currentSession = await getSession()
-
-    if (!currentSession) {
-      throw new Error('Link de convite inválido ou expirado.')
-    }
-
-    await updatePassword(nextPassword)
-    const response = await identityService.completeSignIn()
-
-    if (response.isFailure) response.throwError()
-
-    return response.body
-  }
-
-  const { mutate: completeInvite, isPending } = useMutation({
-    mutationFn: completeInviteRequest,
-    onSuccess: function handleInviteSuccess() {
-      setStatus('success')
-      setErrorMessage('')
-      void navigateTo('home')
-    },
-    onError: function handleInviteError(error: Error) {
-      setErrorMessage(error.message)
-      setStatus('error')
-    },
-  })
 
   function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {
     setPassword(event.target.value)
@@ -99,7 +66,16 @@ export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {})
     }
 
     setStatus('idle')
-    completeInvite(password)
+    void completeCollaboratorInvite(password)
+      .then(function handleInviteSuccess() {
+        setStatus('success')
+        setErrorMessage('')
+        void navigateTo('home')
+      })
+      .catch(function handleInviteError(error: Error) {
+        setErrorMessage(error.message)
+        setStatus('error')
+      })
   }
 
   return {
@@ -108,7 +84,7 @@ export function useCollaboratorInvitePage(search: CollaboratorInviteSearch = {})
     hasCheckedSession,
     inviteUnavailableMessage: getInviteUnavailableMessage(inviteUrlState.hasError),
     isInviteUnavailable,
-    isLoading: isLoadingSession || isPending,
+    isLoading: isLoadingSession || isCompletingCollaboratorInvite,
     password,
     session,
     showPassword,

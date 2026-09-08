@@ -9,21 +9,24 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
-        secondary: 'bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80',
+        default:
+          'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] [a]:hover:border-[var(--brand)] [a]:hover:bg-[var(--brand)]',
+        secondary:
+          'border-[var(--border)] bg-[var(--secondary)] text-[var(--secondary-foreground)] [a]:hover:border-[var(--input)] [a]:hover:bg-[var(--muted)]',
         destructive:
-          'bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20',
+          'border-[var(--badge-destructive-border)] bg-[var(--badge-destructive)] text-[var(--badge-destructive-foreground)] focus-visible:ring-destructive/30 [a]:hover:brightness-95',
         outline:
-          'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
-        ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'border-[var(--input)] bg-[var(--card)] text-[var(--foreground)] [a]:hover:border-[var(--primary)] [a]:hover:bg-[var(--secondary)] [a]:hover:text-[var(--secondary-foreground)]',
+        ghost:
+          'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]',
+        link: 'text-[var(--brand)] underline-offset-4 hover:text-[var(--primary)] hover:underline',
         success:
-          'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-none',
+          'border-[var(--badge-success-border)] bg-[var(--badge-success)] text-[var(--badge-success-foreground)] [a]:hover:brightness-95',
         waiting:
-          'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 border-none',
+          'border-[var(--badge-waiting-border)] bg-[var(--badge-waiting)] text-[var(--badge-waiting-foreground)] [a]:hover:brightness-95',
         attention:
-          'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-none',
-        info: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-none',
+          'border-[var(--badge-attention-border)] bg-[var(--badge-attention)] text-[var(--badge-attention-foreground)] [a]:hover:brightness-95',
+        info: 'border-[var(--badge-info-border)] bg-[var(--badge-info)] text-[var(--badge-info-foreground)] [a]:hover:brightness-95',
       },
     },
     defaultVariants: {
