@@ -30,6 +30,7 @@ export class ReopenFormalizationDocumentPackageUseCase extends FormalizationUseC
 
     if (!formalization) throw new FormalizationNotFoundError()
     this.assertAccess(formalization.assignedLawyerId, request)
+    this.assertWritable(formalization)
     if (!formalization.documentsConfirmedAt) return formalization
 
     const now = this.datetimeProvider.now()

@@ -17,6 +17,7 @@ import type { FormalizationSourceReader, FormalizationsRepository } from '../int
 type Request = FormalizationActor & {
   readonly formalizationId: string
 }
+
 export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCase<
   Request,
   FormalizationDocumentSelection

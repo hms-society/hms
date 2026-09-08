@@ -16,6 +16,7 @@ type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly generationId: string
 }
+
 export class CancelFormalizationDocumentGenerationUseCase extends FormalizationUseCase<
   Request,
   DocumentGeneration

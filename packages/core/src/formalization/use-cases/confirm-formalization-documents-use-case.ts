@@ -30,6 +30,7 @@ type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly expectedVersion: number
 }
+
 export class ConfirmFormalizationDocumentsUseCase extends FormalizationSignatureConfigurationUseCase<
   Request,
   Formalization

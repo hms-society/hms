@@ -13,6 +13,7 @@ type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly expectedVersion: number
 }
+
 export class ReopenFormalizationContractFormUseCase extends FormalizationUseCase<
   Request,
   Formalization

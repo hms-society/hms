@@ -17,6 +17,7 @@ type Request = FormalizationActor & {
   readonly expectedVersion: number
   readonly answers: readonly DynamicFormAnswer[]
 }
+
 export class SaveFormalizationContractFormDraftUseCase extends FormalizationUseCase<
   Request,
   Formalization

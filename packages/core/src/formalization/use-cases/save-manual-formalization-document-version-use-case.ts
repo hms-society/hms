@@ -31,6 +31,7 @@ type Request = FormalizationActor & {
   readonly sourceDocumentVersionId: string
   readonly content: DocumentTemplateContent
 }
+
 export class SaveManualFormalizationDocumentVersionUseCase extends FormalizationUseCase<
   Request,
   DocumentVersion
