@@ -49,6 +49,7 @@ export class RemoveFormalizationSignatoryUseCase extends FormalizationSignatureC
     )
 
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     const signatory = this.findSignatureSignatory(configuration, request.signatoryId)
     if (!signatory.removable) throw new FormalizationDefaultSignatoryRemovalError()
     const nextConfiguration: FormalizationSignatureConfiguration = {

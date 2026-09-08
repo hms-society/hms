@@ -52,6 +52,7 @@ export class SelectFormalizationSignatoryChannelUseCase extends FormalizationSig
     )
 
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     const signatory = this.findSignatureSignatory(configuration, request.signatoryId)
     const person = await this.sourceReader.findPerson(signatory.personId)
     const availableChannels = person?.availableChannels ?? signatory.availableChannels

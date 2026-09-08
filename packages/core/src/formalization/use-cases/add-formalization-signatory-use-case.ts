@@ -52,7 +52,7 @@ export class AddFormalizationSignatoryUseCase extends FormalizationSignatureConf
       formalization.id,
     )
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
-    if (!configuration.editable) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     if (configuration.signatories.some(({ personId }) => personId === request.personId)) {
       throw new FormalizationSignatoryDuplicateError()
     }

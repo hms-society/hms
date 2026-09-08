@@ -50,6 +50,7 @@ export class ReplaceFormalizationSignatoryDocumentsUseCase extends Formalization
     )
 
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     const signatory = this.findSignatureSignatory(configuration, request.signatoryId)
     const uniqueDocumentIds = new Set(request.documentIds)
     if (uniqueDocumentIds.size !== request.documentIds.length) {

@@ -2,13 +2,17 @@ import type {
   FormalizationsRepository,
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureSourceReader,
 } from '../interfaces'
 import type { FormalizationSignatureSendingReview } from '../domain/structures/formalization-signature-sending-review'
 import type { FormalizationSignatureSendingIssue } from '../domain/structures/formalization-signature-sending-issue'
 import { FormalizationSignatureSendingIssueCode } from '../domain/structures/formalization-signature-sending-issue-code'
-import { FormalizationSignatureStatus } from '../domain/structures'
+import {
+  FormalizationSignatureRequestDocumentStatus,
+  FormalizationSignatureStatus,
+} from '../domain/structures'
 import { CollaboratorProfile } from '../../identity/domain/structures'
 import {
   FormalizationNotFoundError,
@@ -31,7 +35,15 @@ type Dependencies = {
   readonly sourceReader: FormalizationSignatureSourceReader
   readonly metadataReader: FormalizationSignatureDocumentMetadataReader
   readonly requestsRepository: FormalizationSignatureRequestsRepository
+  readonly documentsRepository: FormalizationSignatureRequestDocumentsRepository
 }
+
+const terminalDocumentStatuses = new Set<FormalizationSignatureRequestDocumentStatus>([
+  FormalizationSignatureRequestDocumentStatus.confirmed,
+  FormalizationSignatureRequestDocumentStatus.rejected,
+  FormalizationSignatureRequestDocumentStatus.cancelled,
+  FormalizationSignatureRequestDocumentStatus.expired,
+])
 
 export class GetFormalizationSignatureSendingReviewUseCase
   implements UseCase<Request, Response>
@@ -117,6 +129,9 @@ export class GetFormalizationSignatureSendingReviewUseCase
       await this.dependencies.requestsRepository.findLatestByFormalizationId(
         formalization.id,
       )
+    const currentRequestDocuments = currentRequest
+      ? await this.dependencies.documentsRepository.listByRequestId(currentRequest.id)
+      : []
     return {
       formalizationId: formalization.id,
       version: formalization.version,
@@ -134,8 +149,10 @@ export class GetFormalizationSignatureSendingReviewUseCase
               status: currentRequest.status,
               version: currentRequest.version,
               signatureConfigurationVersion: currentRequest.signatureConfigurationVersion,
-              openDocuments: 0,
-              totalDocuments: documents.length,
+              openDocuments: currentRequestDocuments.filter(
+                (document) => !terminalDocumentStatuses.has(document.status),
+              ).length,
+              totalDocuments: currentRequestDocuments.length,
             },
           }
         : {}),
