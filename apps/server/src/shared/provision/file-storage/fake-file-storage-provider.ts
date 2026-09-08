@@ -28,16 +28,16 @@ export class FakeFileStorageProvider implements FileStorageProvider {
   }
 
   async get(fileId: string): Promise<StoredFileContent | null> {
-    const storedFile = this.files.get(fileId)
-    if (!storedFile) return null
-
-    return {
-      file: storedFile.file,
-      content: storedFile.content.slice(),
+    for (const entry of this.files.values()) {
+      if (entry.file.id === fileId) {
+        return { file: entry.file, content: entry.content.slice() }
+      }
     }
+
+    return null
   }
 
-  async remove(fileId: string): Promise<void> {
-    this.files.delete(fileId)
+  async remove(filePath: string): Promise<void> {
+    this.files.delete(filePath)
   }
 }

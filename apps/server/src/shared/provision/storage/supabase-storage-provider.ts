@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { AppError } from '@hms/core/shared/domain/errors'
-import { EnvProvider } from '../env/env-provider'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const MAX_STORAGE_DOWNLOAD_BYTES = 50 * 1024 * 1024
 
@@ -20,17 +20,11 @@ export class SupabaseStorageProvider implements StorageProvider {
   }
 
   async upload(path: string, file: Uint8Array, mimeType: string): Promise<string> {
-    // Ensure the bucket exists
-    await this.supabase.storage
-      .createBucket(this.bucketName, {
-        public: false,
-      })
-      .catch(() => {})
     const { error } = await this.supabase.storage
       .from(this.bucketName)
       .upload(path, file, {
         contentType: mimeType,
-        upsert: true,
+        upsert: false,
       })
 
     if (error) {
