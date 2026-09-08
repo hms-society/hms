@@ -47,6 +47,7 @@ import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus
 import { Route as AdvogadoMeusCasosIndexRouteImport } from './routes/advogado/meus-casos/index'
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
+import { Route as AdvogadoMeusCasosNovoCasoRouteImport } from './routes/advogado/meus-casos/novo-caso'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
 import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
@@ -249,6 +250,12 @@ const ClienteMeusCasosCaseIdRoute = ClienteMeusCasosCaseIdRouteImport.update({
   path: '/meus-casos/$caseId',
   getParentRoute: () => ClienteRouteRoute,
 } as any)
+const AdvogadoMeusCasosNovoCasoRoute =
+  AdvogadoMeusCasosNovoCasoRouteImport.update({
+    id: '/meus-casos/novo-caso',
+    path: '/meus-casos/novo-caso',
+    getParentRoute: () => AdvogadoRouteRoute,
+  } as any)
 const AdvogadoMeusCasosCaseIdRoute = AdvogadoMeusCasosCaseIdRouteImport.update({
   id: '/meus-casos/$caseId',
   path: '/meus-casos/$caseId',
@@ -310,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
@@ -350,6 +358,7 @@ export interface FileRoutesByTo {
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos': typeof AdvogadoMeusCasosIndexRoute
@@ -395,6 +404,7 @@ export interface FileRoutesById {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
@@ -441,6 +451,7 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos/'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos'
@@ -525,6 +537,7 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos/'
@@ -828,6 +841,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteMeusCasosCaseIdRouteImport
       parentRoute: typeof ClienteRouteRoute
     }
+    '/advogado/meus-casos/novo-caso': {
+      id: '/advogado/meus-casos/novo-caso'
+      path: '/meus-casos/novo-caso'
+      fullPath: '/advogado/meus-casos/novo-caso'
+      preLoaderRoute: typeof AdvogadoMeusCasosNovoCasoRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
+    }
     '/advogado/meus-casos/$caseId': {
       id: '/advogado/meus-casos/$caseId'
       path: '/meus-casos/$caseId'
@@ -862,6 +882,7 @@ declare module '@tanstack/react-router' {
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
   AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRoute
+  AdvogadoMeusCasosNovoCasoRoute: typeof AdvogadoMeusCasosNovoCasoRoute
   AdvogadoMeusCasosIndexRoute: typeof AdvogadoMeusCasosIndexRoute
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
 }
@@ -869,6 +890,7 @@ interface AdvogadoRouteRouteChildren {
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
   AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRoute,
+  AdvogadoMeusCasosNovoCasoRoute: AdvogadoMeusCasosNovoCasoRoute,
   AdvogadoMeusCasosIndexRoute: AdvogadoMeusCasosIndexRoute,
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute:
     AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute,

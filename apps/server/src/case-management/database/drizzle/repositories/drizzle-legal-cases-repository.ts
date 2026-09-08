@@ -5,9 +5,9 @@ import type {
 } from '@hms/core/case-management/domain/entities'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, sql, gte, lt } from 'drizzle-orm'
 
-import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
+import { DrizzleCaseMemberMapper, DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import {
   caseMemberModel,
   legalCaseModel,
@@ -26,8 +26,52 @@ export class DrizzleLegalCasesRepository
     drizzle: DrizzleClient,
     @Inject(DrizzleLegalCaseMapper)
     private readonly legalCaseMapper: DrizzleLegalCaseMapper,
+    @Inject(DrizzleCaseMemberMapper)
+    private readonly caseMemberMapper: DrizzleCaseMemberMapper,
   ) {
     super(drizzle)
+  }
+
+  async createCaseWithTeam({ legalCase, team }: Parameters<LegalCasesRepository['createCaseWithTeam']>[0]): ReturnType<LegalCasesRepository['createCaseWithTeam']> {
+    return await this.database.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(1001)`)
+
+      const startOfDay = new Date(legalCase.openedAt)
+      startOfDay.setHours(0, 0, 0, 0)
+      const endOfDay = new Date(legalCase.openedAt)
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const [result] = await tx
+        .select({ count: sql<number>`cast(count(${legalCaseModel.id}) as integer)` })
+        .from(legalCaseModel)
+        .where(
+          and(
+            gte(legalCaseModel.openedAt, startOfDay),
+            lt(legalCaseModel.openedAt, endOfDay)
+          )
+        )
+
+      const casesToday = result.count
+      const nextSequence = casesToday + 1
+      const dateStr = legalCase.openedAt.toISOString().slice(0, 10).replaceAll('-', '')
+      const sequenceStr = nextSequence.toString().padStart(4, '0')
+      const publicCode = `CASO-${dateStr}-${sequenceStr}`
+
+      const [createdLegalCase] = await tx
+        .insert(legalCaseModel)
+        .values({ ...legalCase, publicCode })
+        .returning()
+
+      if (team.length > 0) {
+        const caseMembers = team.map((member) => ({
+          ...member,
+          caseId: createdLegalCase.id,
+        }))
+        await tx.insert(caseMemberModel).values(caseMembers)
+      }
+
+      return this.legalCaseMapper.toDomain(createdLegalCase)
+    })
   }
 
   async addMany(

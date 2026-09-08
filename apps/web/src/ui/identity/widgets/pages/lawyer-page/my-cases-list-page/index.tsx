@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
+import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 import {
   Select,
@@ -19,7 +20,7 @@ import {
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-import { useMyCasesListPage } from './use-my-cases-list-page'
+import { useMyCasesListPage, STATUS_LABELS } from './use-my-cases-list-page'
 
 export const LawyerCasesListPage = () => {
   const {
@@ -45,7 +46,12 @@ export const LawyerCasesListPage = () => {
           <p className='mt-1 text-[14px] text-muted-foreground'>
             {total} casos disponíveis para sua equipe
           </p>
-        </div>
+        </div> 
+        <Anchor route='lawyerCaseCreation'>
+          <Button className='rounded-full px-6 py-2'>
+            Abrir novo caso
+          </Button>
+        </Anchor>
       </div>
 
       <div className='relative'>
@@ -69,9 +75,11 @@ export const LawyerCasesListPage = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='todos'>Todos os status</SelectItem>
-            <SelectItem value='Em formação'>Em formação</SelectItem>
-            <SelectItem value='Em andamento'>Em andamento</SelectItem>
-            <SelectItem value='Aguardando cliente'>Aguardando cliente</SelectItem>
+            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={area} onValueChange={handleAreaChange}>
@@ -80,8 +88,11 @@ export const LawyerCasesListPage = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='todas'>Todas as áreas</SelectItem>
-            <SelectItem value='Direito Previdenciário'>Direito Previdenciário</SelectItem>
-            <SelectItem value='Direito Tributário'>Direito Tributário</SelectItem>
+            <SelectItem value='Administrativo'>Administrativo</SelectItem>
+            <SelectItem value='Cível'>Cível</SelectItem>
+            <SelectItem value='Família'>Família</SelectItem>
+            <SelectItem value='Trabalhista'>Trabalhista</SelectItem>
+            <SelectItem value='Previdenciário'>Previdenciário</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -90,22 +101,22 @@ export const LawyerCasesListPage = () => {
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent'>
-              <TableHead className='h-12 w-[340px] px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 w-[28%] px-4 text-[12px] font-medium text-muted-foreground'>
                 Caso
               </TableHead>
-              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-4 text-[12px] font-medium text-muted-foreground'>
                 Cliente
               </TableHead>
-              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-4 text-[12px] font-medium text-muted-foreground'>
                 Status
               </TableHead>
-              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-4 text-[12px] font-medium text-muted-foreground'>
                 Checklist
               </TableHead>
-              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-4 text-[12px] font-medium text-muted-foreground'>
                 Equipe
               </TableHead>
-              <TableHead className='h-12 px-5 text-[12px] font-medium text-muted-foreground'>
+              <TableHead className='h-12 px-4 text-[12px] font-medium text-muted-foreground'>
                 Próxima ação
               </TableHead>
             </TableRow>
@@ -132,39 +143,39 @@ export const LawyerCasesListPage = () => {
             ) : (
               cases.map((caseItem) => (
                 <TableRow key={caseItem.id} className='cursor-pointer'>
-                  <TableCell className='px-5 py-5 align-top'>
+                  <TableCell className='px-4 py-4 align-top w-[28%] max-w-0'>
                     <Anchor
                       route='lawyerCaseDetails'
                       params={{ caseId: caseItem.id }}
-                      className='flex flex-col gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                      className='flex flex-col gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-w-0'
                     >
-                      <span className='text-[14px] font-semibold leading-6 text-foreground'>
+                      <span className='text-[14px] font-semibold leading-6 text-foreground truncate block'>
                         {caseItem.title}
                       </span>
-                      <span className='flex items-center gap-1.5 text-[12px] leading-5 text-muted-foreground'>
-                        <Icon name='tag' className='size-3.5' />
-                        {caseItem.publicCode} · {caseItem.legalArea}
+                      <span className='flex items-center gap-1.5 text-[12px] leading-5 text-muted-foreground truncate'>
+                        <Icon name='tag' className='size-3.5 shrink-0' />
+                        <span className='truncate'>{caseItem.publicCode} · {caseItem.legalArea}</span>
                       </span>
                     </Anchor>
                   </TableCell>
-                  <TableCell className='px-5 py-5 align-top text-[12px] leading-6 text-muted-foreground'>
+                  <TableCell className='px-4 py-4 align-top text-[12px] leading-6 text-muted-foreground max-w-[140px] truncate'>
                     {caseItem.clientName}
                   </TableCell>
-                  <TableCell className='px-5 py-5 align-top'>
+                  <TableCell className='px-4 py-4 align-top'>
                     <Badge
                       variant='secondary'
-                      className={`border-transparent px-3 py-1 text-[12px] font-medium shadow-none ${caseItem.statusStyle}`}
+                      className={`border-transparent px-3 py-1 text-[12px] font-medium shadow-none whitespace-nowrap ${caseItem.statusStyle}`}
                     >
                       {caseItem.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className='px-5 py-5 align-top text-[12px] leading-6 text-muted-foreground'>
+                  <TableCell className='px-4 py-4 align-top text-[12px] leading-6 text-muted-foreground whitespace-nowrap'>
                     <span className='flex items-center gap-2.5'>
-                      <Icon name={caseItem.progress.icon} className='size-5' />
+                      <Icon name={caseItem.progress.icon} className='size-5 shrink-0' />
                       {caseItem.progress.completedCount}/{caseItem.progress.totalCount}
                     </span>
                   </TableCell>
-                  <TableCell className='px-5 py-5 align-top'>
+                  <TableCell className='px-4 py-4 align-top'>
                     <div className='flex items-center gap-2'>
                       <div className='flex -space-x-1.5'>
                         {caseItem.team.map((member) => (
@@ -184,9 +195,9 @@ export const LawyerCasesListPage = () => {
                       <span className='sr-only'>{caseItem.displayTeam}</span>
                     </div>
                   </TableCell>
-                  <TableCell className='max-w-[280px] px-5 py-5 align-top text-muted-foreground'>
-                    <div className='flex flex-col gap-2'>
-                      <span className='truncate text-[12px] leading-5'>
+                  <TableCell className='max-w-[200px] px-4 py-4 align-top text-muted-foreground'>
+                    <div className='flex flex-col gap-2 min-w-0'>
+                      <span className='truncate text-[12px] leading-5 block'>
                         {caseItem.nextAction}
                       </span>
                       <span className='text-[12px] leading-5'>{caseItem.updatedAt}</span>

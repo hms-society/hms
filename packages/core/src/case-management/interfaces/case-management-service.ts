@@ -12,7 +12,20 @@ export type AddCaseChecklistComplementaryItemRequest = {
   title: string
 }
 
+export type CreateLegalCaseRequest = {
+  title: string
+  intakeId: string
+  legalAreaId: string
+  legalTopicId: string
+  team: Array<{
+    collaboratorId: string
+    role: string
+    permission: string
+  }>
+}
+
 export interface CaseManagementService {
+  createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
   addComplementaryChecklistItem(
     caseId: string,
     request: AddCaseChecklistComplementaryItemRequest,

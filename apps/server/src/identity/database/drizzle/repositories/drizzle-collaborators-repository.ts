@@ -21,6 +21,7 @@ import {
   inArray,
   isNotNull,
   ne,
+  notInArray,
   or,
   sql,
   type SQL,
@@ -332,6 +333,9 @@ export class DrizzleCollaboratorsRepository
       if (searchFilter) filters.push(searchFilter)
     }
     if (query.profile) filters.push(eq(collaboratorModel.profile, query.profile))
+    if (query.excludeProfiles && query.excludeProfiles.length > 0) {
+      filters.push(notInArray(collaboratorModel.profile, [...query.excludeProfiles]))
+    }
     if (query.jobTitle) {
       filters.push(
         sql`lower(btrim(${collaboratorModel.jobTitle})) = lower(btrim(${query.jobTitle}))`,
@@ -419,3 +423,4 @@ export class DrizzleCollaboratorsRepository
     return resolvedByCollaborator
   }
 }
+

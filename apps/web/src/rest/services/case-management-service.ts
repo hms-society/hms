@@ -10,6 +10,10 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
+    createLegalCase(request) {
+      return restClient.post<LegalCase>('/cases', request)
+    },
+
     addComplementaryChecklistItem(caseId, request) {
       return restClient.post<CaseChecklistItem>(
         `/cases/${caseId}/checklist/items`,

@@ -6,6 +6,8 @@ import type { PaginationResponse } from '#shared/responses/pagination-response.t
 
 import type { AuthorizeAdminUseCase } from './authorize-admin-use-case'
 
+
+
 type Request = {
   readonly authUser: AuthUser
   readonly query?: CollaboratorListQuery

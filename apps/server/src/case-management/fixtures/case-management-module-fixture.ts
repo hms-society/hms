@@ -218,6 +218,7 @@ export class CaseManagementModuleFixture {
       members.map((member) => ({
         assignedAt: new Date('2026-08-25T12:00:00.000Z'),
         assignedBy: this.authUser.id,
+        permission: 'visualização',
         ...member,
       })),
     )

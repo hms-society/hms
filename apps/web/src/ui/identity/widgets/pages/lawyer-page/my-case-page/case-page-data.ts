@@ -148,7 +148,7 @@ export const CASE_STAGES: CaseStage[] = [
   {
     icon: 'file-text',
     label: 'Documentação',
-    status: 'Em formação',
+    status: 'Documentação',
     isActive: true,
   },
   { icon: 'pencil', label: 'Produção Jurídica' },

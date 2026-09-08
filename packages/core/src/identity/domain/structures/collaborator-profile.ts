@@ -5,6 +5,7 @@ export const CollaboratorProfile = {
   Paralegal: 'paralegal',
   Supervisor: 'supervisor',
   Client: 'client',
+  Intern: 'intern',
 } as const
 
 export type CollaboratorProfile =

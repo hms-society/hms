@@ -76,6 +76,10 @@ const DEFAULT_USERS: UserSeed[] = [
     email: 'client@hms.br',
     status: 'active',
   },
+  {
+    email: 'estagiario@hmsadvogados.com.br',
+    status: 'active',
+  },
 ]
 
 type AdministrativeCollaboratorCreation = Extract<
@@ -86,7 +90,7 @@ type LegalCollaboratorSeed = {
   email: string
   professionalName: string
   jobTitle?: string
-  profile: 'lawyer' | 'paralegal' | 'supervisor'
+  profile: 'lawyer' | 'paralegal' | 'supervisor' | 'intern'
 }
 
 const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
@@ -141,6 +145,12 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     professionalName: 'Beatriz Oliveira',
     jobTitle: 'Supervisora Jurídica',
     profile: 'supervisor',
+  },
+  {
+    email: 'estagiario@hmsadvogados.com.br',
+    professionalName: 'Estagiário de Teste',
+    jobTitle: 'Estagiário',
+    profile: 'intern',
   },
 ]
 

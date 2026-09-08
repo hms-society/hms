@@ -2,3 +2,4 @@ export { AddCaseChecklistComplementaryItemController } from './add-case-checklis
 export { ListCaseChecklistController } from './list-case-checklist.controller'
 export { ListMyLegalCasesController } from './list-my-legal-cases.controller'
 export { ReviewCaseChecklistGateController } from './review-case-checklist-gate.controller'
+export { CreateLegalCaseController } from './create-legal-case.controller'

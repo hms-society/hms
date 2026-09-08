@@ -16,6 +16,7 @@ const LEGAL_PROFILES: readonly CollaboratorProfile[] = [
   'lawyer',
   'paralegal',
   'supervisor',
+  'intern',
 ]
 
 export class CollaboratorCreationFaker {

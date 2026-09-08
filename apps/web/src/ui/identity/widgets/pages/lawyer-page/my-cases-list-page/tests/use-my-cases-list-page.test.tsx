@@ -108,7 +108,7 @@ describe('useMyCasesListPage', () => {
     await waitFor(() => expect(result.current.total).toBe(2))
 
     act(() => {
-      result.current.handleStatusChange('Em formação')
+      result.current.handleStatusChange('documentation')
       result.current.handleAreaChange('Cível')
     })
 
