@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { FormalizationDocumentReviewPage } from '@/ui/formalization/widgets/pages/formalization-document-review-page'
+
 export const Route = createFileRoute(
   '/formalizacoes/$formalizationId/documentos/$documentVersionId',
 )({
@@ -9,8 +11,9 @@ export const Route = createFileRoute(
 function FormalizationDocumentReviewRoute() {
   const { formalizationId, documentVersionId } = Route.useParams()
   return (
-    <main data-document-version-id={documentVersionId}>
-      Revisão de documento da formalização {formalizationId}
-    </main>
+    <FormalizationDocumentReviewPage
+      formalizationId={formalizationId}
+      documentVersionId={documentVersionId}
+    />
   )
 }
