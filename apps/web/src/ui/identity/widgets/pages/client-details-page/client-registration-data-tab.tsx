@@ -57,6 +57,7 @@ export function ClientRegistrationDataTab({
     setIsDuplicityConflict(false)
     setIsModalOpen(true)
   }
+  console.log(form.formState.errors)
 
   const handleConfirm = async (justification?: string) => {
     try {
