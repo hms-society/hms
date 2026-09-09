@@ -16,8 +16,6 @@ type Response = {
   readonly cleanedPreviewIds: readonly string[]
 }
 
-const MAX_PREVIEWS_PER_EVENT = 100
-
 export class ReconcileFormalizationSignaturePreviewsUseCase
   implements UseCase<Request, Response>
 {
@@ -54,15 +52,13 @@ export class ReconcileFormalizationSignaturePreviewsUseCase
       byFormalization.set(preview.formalizationId, items)
     }
     for (const [formalizationId, items] of byFormalization) {
-      for (let index = 0; index < items.length; index += MAX_PREVIEWS_PER_EVENT) {
-        await this.broker.publish(
-          new FormalizationSignaturePreviewBatchGenerationRequestedEvent({
-            formalizationId,
-            items: items.slice(index, index + MAX_PREVIEWS_PER_EVENT),
-            occurredAt: now.toISOString(),
-          }),
-        )
-      }
+      await this.broker.publish(
+        new FormalizationSignaturePreviewBatchGenerationRequestedEvent({
+          formalizationId,
+          items,
+          occurredAt: now.toISOString(),
+        }),
+      )
     }
 
     const cleanedPreviewIds: string[] = []
