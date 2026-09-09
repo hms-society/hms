@@ -2,11 +2,12 @@ import { useMutation } from '@tanstack/react-query'
 
 import { AppError } from '@hms/core/shared/domain/errors'
 
+import { ROUTES } from '@/constants/routes'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-export const useSignInAction = () => {
+export const useSignInAction = (returnTo?: typeof ROUTES.signingGateway) => {
   const { navigateTo } = useNavigation()
   const { getSession, signIn: authenticate, signOut } = useAuthContext()
   const { identityService } = useRestContext()
@@ -42,7 +43,7 @@ export const useSignInAction = () => {
       }
     },
     onSuccess: function navigateAfterSignIn() {
-      navigateTo('home')
+      void navigateTo(returnTo === ROUTES.signingGateway ? 'signingGateway' : 'home')
     },
   })
 

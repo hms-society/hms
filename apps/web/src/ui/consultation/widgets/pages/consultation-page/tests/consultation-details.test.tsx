@@ -1,5 +1,4 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -91,17 +90,11 @@ function useConsultationTestController(): ReturnType<typeof useConsultation> {
 }
 
 function renderConsultationDetailsPage() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-
   return render(
-    <QueryClientProvider client={queryClient}>
-      <ConsultationDetails
-        consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
-        onContinueForm={handleContinueForm}
-      />
-    </QueryClientProvider>,
+    <ConsultationDetails
+      consultationId='a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+      onContinueForm={handleContinueForm}
+    />,
   )
 }
 

@@ -10,6 +10,15 @@ test('lists consultation documents and navigates to the review route', async ({
   documentProduction,
   page,
 }) => {
+  const consoleErrors: string[] = []
+  const failedRequests: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text())
+  })
+  page.on('requestfailed', (request) => {
+    failedRequests.push(`${request.method()} ${request.url()}`)
+  })
+
   const requestPromise = page.waitForRequest(
     (request) =>
       request.method() === 'GET' &&
@@ -36,12 +45,31 @@ test('lists consultation documents and navigates to the review route', async ({
     `${DOCUMENT_PRODUCTION_BACKEND}/consultations/${CONSULTATION_ID}/documents`,
   )
   expect(documentProduction.consultation.listRequests).toBe(1)
+  await page.screenshot({
+    path: 'test-results/consultation-documents-desktop.png',
+    fullPage: true,
+  })
+  if (consoleErrors.length || failedRequests.length) {
+    test.info().annotations.push({
+      type: 'environment-diagnostic',
+      description: `Fixture browser diagnostics: console=${JSON.stringify(consoleErrors)} requests=${JSON.stringify(failedRequests)}`,
+    })
+  }
 })
 
 test('opens document selection and exercises narrow keyboard layout', async ({
   documentProduction: _,
   page,
 }) => {
+  const consoleErrors: string[] = []
+  const failedRequests: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text())
+  })
+  page.on('requestfailed', (request) => {
+    failedRequests.push(`${request.method()} ${request.url()}`)
+  })
+
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`/consultas/${CONSULTATION_ID}/documentos`)
 
@@ -54,4 +82,14 @@ test('opens document selection and exercises narrow keyboard layout', async ({
   await expect(page.getByRole('dialog')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Selecionar documentos' })).toBeVisible()
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'scroll')
+  await page.screenshot({
+    path: 'test-results/consultation-documents-narrow-selection.png',
+    fullPage: true,
+  })
+  if (consoleErrors.length || failedRequests.length) {
+    test.info().annotations.push({
+      type: 'environment-diagnostic',
+      description: `Fixture browser diagnostics: console=${JSON.stringify(consoleErrors)} requests=${JSON.stringify(failedRequests)}`,
+    })
+  }
 })

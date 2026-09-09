@@ -33,6 +33,7 @@ export const LandingPage = () => {
           </a>
           <Link
             to='/login'
+            search={{ returnTo: undefined }}
             className='text-brand font-serif text-[1rem] font-bold hover:opacity-75 transition-opacity'
           >
             Login

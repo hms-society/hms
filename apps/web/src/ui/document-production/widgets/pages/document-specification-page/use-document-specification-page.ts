@@ -9,16 +9,15 @@ import { documentSpecificationConfigurationUpdateSchema } from '@hms/validation/
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useQuery } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
-import { useDocumentCatalogQuery } from '../document-specifications-page/use-document-catalog-query'
-import { useDocumentTopicsQuery } from '../document-specifications-page/use-document-topics-query'
-import { useDocumentSpecificationActions } from './use-document-specification-actions'
+import { useDocumentCatalogQuery } from '@/ui/document-production/hooks/use-document-catalog-query'
+import { useDocumentSpecificationActions } from '@/ui/document-production/hooks/use-document-specification-action'
+import { useDocumentSpecificationQuery } from '@/ui/document-production/hooks/use-document-specification-query'
+import { useDocumentTopicsQuery } from '@/ui/document-production/hooks/use-document-topics-query'
 
 export type DocumentSpecificationPageProps = {
   mode: 'create' | 'edit'
@@ -162,7 +161,6 @@ export function useDocumentSpecificationPage({
   mode,
   documentSpecificationId,
 }: DocumentSpecificationPageProps) {
-  const { documentProductionService } = useRestContext()
   const { navigateTo } = useNavigation()
   const catalog = useDocumentCatalogQuery()
   const [activeTab, setActiveTab] = useState<'configuration' | 'template'>(
@@ -196,21 +194,10 @@ export function useDocumentSpecificationPage({
     resolver: zodResolver(documentSpecificationConfigurationUpdateSchema) as never,
     defaultValues: DEFAULT_CONFIGURATION,
   })
-  const detail = useQuery({
-    queryKey: ['document-specification', documentSpecificationId],
-    enabled: mode === 'edit' && Boolean(documentSpecificationId) && !isDeleted,
-    queryFn: async () => {
-      const response = await documentProductionService.getDocumentSpecification(
-        documentSpecificationId as string,
-      )
-      if (response.isFailure) {
-        const error = new Error(response.errorMessage)
-        Object.assign(error, { statusCode: response.statusCode })
-        throw error
-      }
-      return response.body
-    },
-  })
+  const detail = useDocumentSpecificationQuery(
+    documentSpecificationId,
+    mode === 'edit' && !isDeleted,
+  )
   const watchedConfiguration = form.watch()
   const application = watchedConfiguration.application
   const topics = useDocumentTopicsQuery(

@@ -2,9 +2,11 @@ import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 
-import { useSignInPage } from './use-sign-in-page'
+import { useSignInPage, type SignInPageProps } from './use-sign-in-page'
 
-export const SignInPage = () => {
+export type { SignInPageProps } from './use-sign-in-page'
+
+export const SignInPage = (props: SignInPageProps = {}) => {
   const {
     error,
     showPassword,
@@ -12,7 +14,7 @@ export const SignInPage = () => {
     handleSubmit,
     handleTogglePasswordVisibility,
     register,
-  } = useSignInPage()
+  } = useSignInPage(props)
 
   return (
     <main className='min-h-screen flex bg-background text-foreground font-sans'>

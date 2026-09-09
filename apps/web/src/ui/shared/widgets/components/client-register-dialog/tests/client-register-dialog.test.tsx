@@ -1,17 +1,15 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { RestResponse } from '@hms/core/shared/responses/rest-response'
-
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useClientRegistrationActions } from '@/ui/identity/hooks/use-client-registration-actions'
 
 import { ClientRegisterDialog } from '../index'
 
-vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
-  useRestContext: vi.fn(),
+vi.mock('@/ui/identity/hooks/use-client-registration-actions', () => ({
+  useClientRegistrationActions: vi.fn(),
 }))
 
-const useRestContextMock = vi.mocked(useRestContext)
+const useClientRegistrationActionsMock = vi.mocked(useClientRegistrationActions)
 
 const clientDetails = {
   client: {
@@ -26,18 +24,17 @@ const clientDetails = {
 }
 
 describe('ClientRegisterDialog', () => {
-  const identityService = {
+  const clientRegistrationActions = {
+    grantClientConsents: vi.fn(),
     lookupClient: vi.fn(),
     registerClient: vi.fn(),
-    getClient: vi.fn(),
-    grantClientConsent: vi.fn(),
   }
   const onOpenChange = vi.fn()
   const onClientSelected = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useRestContextMock.mockReturnValue({ identityService, intakeService: {} } as never)
+    useClientRegistrationActionsMock.mockReturnValue(clientRegistrationActions)
   })
 
   afterEach(cleanup)
@@ -70,13 +67,14 @@ describe('ClientRegisterDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Buscar cliente' }))
 
     expect((await screen.findByRole('alert')).textContent).toContain('válido')
-    expect(identityService.lookupClient).not.toHaveBeenCalled()
+    expect(clientRegistrationActions.lookupClient).not.toHaveBeenCalled()
   })
 
   it('shows an existing client and delegates selection to the consumer', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ body: clientDetails }),
-    )
+    clientRegistrationActions.lookupClient.mockResolvedValue({
+      kind: 'existing',
+      details: clientDetails,
+    })
     const outerSubmit = vi.fn()
     render(
       <form onSubmit={outerSubmit}>
@@ -103,9 +101,7 @@ describe('ClientRegisterDialog', () => {
   })
 
   it('shows the not-found state and preserves masked criteria before registration', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
-    )
+    clientRegistrationActions.lookupClient.mockResolvedValue({ kind: 'not-found' })
     render(
       <ClientRegisterDialog
         open
@@ -127,9 +123,7 @@ describe('ClientRegisterDialog', () => {
   })
 
   it('validates WhatsApp on blur and enables only the matching communication consent', async () => {
-    identityService.lookupClient.mockResolvedValue(
-      new RestResponse({ statusCode: 404, errorMessage: 'not found' }),
-    )
+    clientRegistrationActions.lookupClient.mockResolvedValue({ kind: 'not-found' })
     render(
       <ClientRegisterDialog
         open

@@ -7,56 +7,72 @@ import { FormalizationDatabaseModule } from '@/formalization/database'
 import { DrizzleFormalizationCloseTransaction } from '@/formalization/database/formalization-close-transaction'
 import { DrizzleFormalizationDocumentConfirmationTransaction } from '@/formalization/database/formalization-document-confirmation-transaction'
 import { DrizzleFormalizationStartTransaction } from '@/formalization/database/formalization-start-transaction'
-import { FormalizationMessagingModule } from '@/formalization/messaging/formalization-messaging.module'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
+import { FormalizationMessagingModule } from '@/formalization/messaging/formalization-messaging.module'
 import {
-  DocumensoWebhookNormalizer,
   ServerFormalizationIntakeClosureService,
   ServerFormalizationIntakeLifecycleService,
   ServerFormalizationSourceReader,
+  DocumensoWebhookNormalizer,
 } from '@/formalization/provision'
+import { IdentityModule } from '@/identity/identity.module'
+import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import {
-  AddFormalizationSignatoryController,
   CancelFormalizationDocumentGenerationController,
-  CancelFormalizationSignatureSendingController,
   CloseFormalizationContractFormController,
   CloseFormalizationWithoutContractController,
   ConfirmFormalizationDocumentsController,
-  ConfirmFormalizationSignatureSendingController,
+  AddFormalizationSignatoryController,
   GenerateFormalizationDocumentController,
   GetFormalizationController,
   GetFormalizationDocumentSelectionController,
   GetFormalizationDocumentVersionController,
   GetFormalizationSignatureConfigurationController,
-  GetFormalizationSignaturePreviewContentController,
-  GetFormalizationSignatureSendingReviewController,
   GetFormalizationSignatureSendingStatusController,
+  GetFormalizationSignatureSendingReviewController,
+  ConfirmFormalizationSignatureSendingController,
+  CancelFormalizationSignatureSendingController,
+  GetFormalizationSignaturePreviewContentController,
   InitializeFormalizationSignatureConfigurationController,
   ListFormalizationDocumentsController,
   ListFormalizationSignatureCandidatesController,
   RemoveFormalizationSignatoryController,
-  ReopenFormalizationContractFormController,
-  ReopenFormalizationDocumentPackageController,
-  ReplaceFormalizationContractFormController,
-  ReplaceFormalizationDocumentSelectionController,
   ReplaceFormalizationSignatoryDocumentsController,
   ReplaceFormalizationSignatureFieldsController,
   RequestFormalizationSignaturePreviewGenerationController,
   ResetFormalizationSignatureConfigurationController,
+  ReopenFormalizationDocumentPackageController,
+  ReplaceFormalizationDocumentSelectionController,
+  ReopenFormalizationContractFormController,
+  ReplaceFormalizationContractFormController,
   ReviewFormalizationDocumentVersionController,
   SaveFormalizationContractFormDraftController,
   SaveManualFormalizationDocumentVersionController,
   SelectCurrentFormalizationDocumentVersionController,
   SelectFormalizationSignatoryChannelController,
   StartFormalizationController,
+  ExchangeSigningInvitationController,
+  GetSigningGatewayContextController,
+  ListSigningAuthenticationChannelsController,
+  RequestSigningOtpController,
+  VerifySigningOtpController,
+  EstablishCollaboratorSigningSessionController,
+  GetSigningDocumentController,
+  GetSigningDocumentContentController,
+  ListSigningDocumentsController,
+  AcknowledgeSigningDocumentController,
+  StartSigningController,
+  GetSigningResultController,
+  CloseSigningResultController,
+  SigningGatewayWebhookController,
+  SigningGatewayProxyController,
 } from '@/formalization/rest/controllers'
-import { IdentityModule } from '@/identity/identity.module'
-import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
-import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
-import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
-import { ProvisionModule } from '@/shared/provision/provision.module'
+import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/guards/optional-signing-gateway-collaborator.guard'
 
 @Module({
   imports: [
@@ -106,8 +122,24 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     ReplaceFormalizationSignatureFieldsController,
     ResetFormalizationSignatureConfigurationController,
     ReopenFormalizationDocumentPackageController,
+    ExchangeSigningInvitationController,
+    GetSigningGatewayContextController,
+    ListSigningAuthenticationChannelsController,
+    RequestSigningOtpController,
+    VerifySigningOtpController,
+    EstablishCollaboratorSigningSessionController,
+    GetSigningDocumentController,
+    GetSigningDocumentContentController,
+    ListSigningDocumentsController,
+    AcknowledgeSigningDocumentController,
+    StartSigningController,
+    GetSigningResultController,
+    CloseSigningResultController,
+    SigningGatewayWebhookController,
+    SigningGatewayProxyController,
   ],
   providers: [
+    OptionalSigningGatewayCollaboratorGuard,
     DocumensoWebhookNormalizer,
     DrizzleFormalizationStartTransaction,
     DrizzleFormalizationCloseTransaction,
