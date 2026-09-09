@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import { SignatoriesTab } from './signatories-tab'
+import { SignatureFieldsTab } from './signature-fields-tab'
 import { useFormalizationSendingConfiguration } from './use-formalization-sending-configuration'
 
 type SignatureConfiguration = FormalizationSignatureConfiguration | undefined
@@ -481,9 +482,12 @@ export const FormalizationSendingConfigurationPanel = ({
             />
           </TabsContent>
           <TabsContent value='fields' className='pt-4'>
-            <div className='rounded-xl bg-muted/50 p-5 text-sm text-muted-foreground'>
-              Os campos de assinatura serão configurados nesta etapa.
-            </div>
+            <SignatureFieldsTab
+              expectedVersion={expectedVersion}
+              configuration={displayedConfiguration}
+              onUnsavedChangesChange={widget.handleFieldsDirtyChange}
+              onOpenSignatories={() => widget.handleTabChange('signatories')}
+            />
           </TabsContent>
         </Tabs>
         <div className='flex flex-wrap justify-between gap-3 border-t border-border pt-4'>
