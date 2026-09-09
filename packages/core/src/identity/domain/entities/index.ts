@@ -1,4 +1,5 @@
 export * from './client'
+export * from './client-update'
 export * from './client-consent'
 export * from './collaborator'
 export * from './collaborator-creation'

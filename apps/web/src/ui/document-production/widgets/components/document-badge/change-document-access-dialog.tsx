@@ -77,12 +77,14 @@ export function ChangeAccessDialog({
               {error}
             </div>
           )}
-          <label className='text-sm font-medium'>Nova Classificação</label>
+          <label htmlFor='classification-select' className='text-sm font-medium'>
+            Nova Classificação
+          </label>
           <Select
             value={selected}
             onValueChange={(value) => setSelected(value as ClassificacaoAcesso)}
           >
-            <SelectTrigger className='w-full rounded-full'>
+            <SelectTrigger id='classification-select' className='w-full rounded-full'>
               <SelectValue placeholder='Selecione o acesso...' />
             </SelectTrigger>
             <SelectContent>
