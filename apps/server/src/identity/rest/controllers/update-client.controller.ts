@@ -73,7 +73,7 @@ export class UpdateClientController {
     @Body(new ZodValidationPipe(updateClientSchema)) body: UpdateClientRequestDto,
   ) {
     const changes = { ...body }
-    delete changes.duplicityOverrideJustification
+    changes.duplicityOverrideJustification = undefined
 
     const client = await this.useCase.execute({
       authUser,

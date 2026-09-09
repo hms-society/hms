@@ -5,11 +5,9 @@ import {
   ClientDocumentDuplicatedError,
 } from '../domain/errors'
 import type { AuthUser } from '../domain/structures'
-import type {
-  ClientsRepository,
-  CollaboratorsRepository,
-  UsersRepository,
-} from '../interfaces'
+import type { ClientsRepository } from '../interfaces/clients-repository'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
+import type { UsersRepository } from '../interfaces/users-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 type Request = {

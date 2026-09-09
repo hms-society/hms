@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ClientRegistrationDataTab } from './client-registration-data-tab'
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useUpdateClientAction } from '@/ui/identity/hooks/use-update-client-action'
@@ -8,8 +8,8 @@ import { Toaster } from 'sonner'
 vi.mock('@hookform/resolvers/zod', () => ({
   zodResolver: () => async (values: any) => ({
     values,
-    errors: {}
-  })
+    errors: {},
+  }),
 }))
 
 // Mock the hooks
@@ -32,7 +32,7 @@ describe('ClientRegistrationDataTab', () => {
   afterEach(() => {
     if (unmountComponent) unmountComponent()
   })
-  
+
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useUpdateClientAction).mockReturnValue({
@@ -46,7 +46,9 @@ describe('ClientRegistrationDataTab', () => {
       currentCollaborator: { profile: 'attendant' },
     } as any)
 
-    const { unmount } = render(<ClientRegistrationDataTab clientId="123" initialData={getInitialData()} />)
+    const { unmount } = render(
+      <ClientRegistrationDataTab clientId='123' initialData={getInitialData()} />,
+    )
     unmountComponent = unmount
 
     // Using querySelector since labels aren't associated with IDs
@@ -69,15 +71,19 @@ describe('ClientRegistrationDataTab', () => {
       currentCollaborator: { profile: 'admin' },
     } as any)
 
-    const { unmount } = render(<ClientRegistrationDataTab clientId="123" initialData={getInitialData()} />)
+    const { unmount } = render(
+      <ClientRegistrationDataTab clientId='123' initialData={getInitialData()} />,
+    )
     unmountComponent = unmount
 
-    const form = document.querySelector('form')!
+    const form = document.querySelector('form') as HTMLFormElement
     fireEvent.submit(form)
 
     // Audit confirmation modal should appear
-    expect(await screen.findByText(/As mudanças serão registradas em auditoria/i)).toBeTruthy()
-    
+    expect(
+      await screen.findByText(/As mudanças serão registradas em auditoria/i),
+    ).toBeTruthy()
+
     // updateClient should not be called yet
     expect(mockUpdateClient).not.toHaveBeenCalled()
   })
@@ -91,22 +97,24 @@ describe('ClientRegistrationDataTab', () => {
     const { unmount } = render(
       <>
         <Toaster />
-        <ClientRegistrationDataTab clientId="123" initialData={getInitialData()} />
-      </>
+        <ClientRegistrationDataTab clientId='123' initialData={getInitialData()} />
+      </>,
     )
     unmountComponent = unmount
 
-    const form = document.querySelector('form')!
+    const form = document.querySelector('form') as HTMLFormElement
     fireEvent.submit(form)
 
     const confirmButton = await screen.findByRole('button', { name: /^Confirmar$/i })
     fireEvent.click(confirmButton)
 
     await waitFor(() => {
-      expect(mockUpdateClient).toHaveBeenCalledWith(expect.objectContaining({
-        clientId: '123',
-        changes: expect.objectContaining({ phone: '11999999999' })
-      }))
+      expect(mockUpdateClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          clientId: '123',
+          changes: expect.objectContaining({ phone: '11999999999' }),
+        }),
+      )
     })
 
     expect(await screen.findByText('Dados atualizados com sucesso.')).toBeTruthy()
@@ -116,15 +124,17 @@ describe('ClientRegistrationDataTab', () => {
     vi.mocked(useCurrentCollaboratorQuery).mockReturnValue({
       currentCollaborator: { profile: 'admin' },
     } as any)
-    
-    const conflictError = new Error('Documento já cadastrado');
-    conflictError.name = 'ConflictError';
+
+    const conflictError = new Error('Documento já cadastrado')
+    conflictError.name = 'ConflictError'
     mockUpdateClient.mockRejectedValueOnce(conflictError)
 
-    const { unmount } = render(<ClientRegistrationDataTab clientId="123" initialData={getInitialData()} />)
+    const { unmount } = render(
+      <ClientRegistrationDataTab clientId='123' initialData={getInitialData()} />,
+    )
     unmountComponent = unmount
 
-    const form = document.querySelector('form')!
+    const form = document.querySelector('form') as HTMLFormElement
     fireEvent.submit(form)
 
     const confirmButton = await screen.findByRole('button', { name: /^Confirmar$/i })
@@ -132,8 +142,10 @@ describe('ClientRegistrationDataTab', () => {
 
     // The modal should stay open and display the duplication warning
     expect(await screen.findByText(/Este documento já está cadastrado/i)).toBeTruthy()
-    
+
     // A justification input should appear
-    expect(screen.getByPlaceholderText(/Por que deseja salvar este documento duplicado/i)).toBeTruthy()
+    expect(
+      screen.getByPlaceholderText(/Por que deseja salvar este documento duplicado/i),
+    ).toBeTruthy()
   })
 })

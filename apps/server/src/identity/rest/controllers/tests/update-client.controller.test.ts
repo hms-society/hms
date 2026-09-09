@@ -65,7 +65,7 @@ describe('UpdateClientController [PATCH /clients/:clientId]', () => {
   })
 
   it('generates audit logs when a client is updated', async () => {
-    const { user, collaborator } = await fixture.registerAdmin({ profile: 'admin' })
+    const { user } = await fixture.registerAdmin({ profile: 'admin' })
     const token = fixture.authenticateAs(user)
 
     const client = await fixture.registerClient({
@@ -83,13 +83,14 @@ describe('UpdateClientController [PATCH /clients/:clientId]', () => {
       })
       .expect(200)
 
-    const logs = await drizzle.requireDatabase()
+    const logs = await drizzle
+      .requireDatabase()
       .select()
       .from(auditLogModel)
       .where(eq(auditLogModel.idEntidade, client.id))
 
     expect(logs.length).toBeGreaterThan(0)
-    
+
     const nameChangeLog = logs.find((l) => l.campoAlterado === 'nome_completo')
     expect(nameChangeLog).toBeDefined()
     expect(nameChangeLog?.valorAnterior).toBe('Old Name')
