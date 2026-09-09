@@ -11,8 +11,15 @@ import { DOCUMENT_PRODUCTION_INNGEST_FUNCTIONS } from '@/document-production/mes
 import { DocumentsModule } from '@/document-engine/database/documents.module'
 import { DOCUMENT_ENGINE_INNGEST_FUNCTIONS } from '@/document-engine/messaging/document-engine-messaging.module'
 import { IntakeModule } from '@/intake/intake.module'
+import {
+  FORMALIZATION_INNGEST_FUNCTIONS,
+  FormalizationMessagingModule,
+} from '@/formalization/messaging/formalization-messaging.module'
 import { INTAKE_INNGEST_FUNCTIONS } from '@/intake/messaging/intake-messaging.module'
 import { IdentityModule } from '@/identity/identity.module'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { ClientsWithIntakesRepository } from '@/identity/rest/repositories/clients-with-intakes-repository'
+import { ListClientsController } from '@/identity/rest/controllers/list-clients.controller'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedModule } from '@/shared/shared.module'
 import { SchedulingModule } from '@/scheduling/database/drizzle/repositories/scheduling.module'
@@ -47,6 +54,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
         ConsultationModule,
         SchedulingModule,
         DocumentProductionModule,
+        FormalizationMessagingModule,
       ],
       inject: [
         InngestClient,
@@ -56,6 +64,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
         CONSULTATION_INNGEST_FUNCTIONS,
         SCHEDULING_INNGEST_FUNCTIONS,
         DOCUMENT_PRODUCTION_INNGEST_FUNCTIONS,
+        FORMALIZATION_INNGEST_FUNCTIONS,
       ],
       useFactory: (
         client: InngestClient,
@@ -65,6 +74,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
         consultationFunctions: InngestFunctionGroup,
         schedulingFunctions: InngestFunctionGroup,
         documentProductionFunctions: InngestFunctionGroup,
+        formalizationFunctions: InngestFunctionGroup,
       ): InngestOptions => ({
         client,
         functions: [
@@ -74,9 +84,18 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
           ...consultationFunctions,
           ...schedulingFunctions,
           ...documentProductionFunctions,
+          ...formalizationFunctions,
         ],
       }),
     }),
+  ],
+  controllers: [ListClientsController],
+  providers: [
+    ClientsWithIntakesRepository,
+    {
+      provide: IDENTITY_REPOSITORIES.clientList,
+      useExisting: ClientsWithIntakesRepository,
+    },
   ],
 })
 export class AppModule {}
