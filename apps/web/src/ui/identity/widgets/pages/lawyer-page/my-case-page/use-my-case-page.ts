@@ -17,7 +17,7 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     queryKey: ['case-details', caseUuid],
     queryFn: async () => {
       const res = await caseManagementService.getLegalCaseDetails(caseUuid)
-      if (res.isFailure) throw new Error(res.error.message)
+      if (res.isFailure) throw new Error('Falha ao buscar detalhes do caso')
       return res.body
     },
     enabled: !!caseUuid,

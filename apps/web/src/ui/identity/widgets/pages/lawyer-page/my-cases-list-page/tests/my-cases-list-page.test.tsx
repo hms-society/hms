@@ -7,6 +7,9 @@ import { useMyCasesListPage } from '../use-my-cases-list-page'
 
 vi.mock('../use-my-cases-list-page', () => ({
   useMyCasesListPage: vi.fn(),
+  STATUS_LABELS: {
+    contracted: 'Contratado',
+  },
 }))
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({

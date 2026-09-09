@@ -16,10 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import {
   CASE_STAGES,
   CASE_TASKS,
-  CASE_TEAM,
   CASE_TIMELINE,
   MOCK_ACTIVITIES,
-  TEAM_MEMBERS,
 } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
@@ -34,7 +32,6 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     activeTab,
     caseUuid,
     caseDetails,
-    isLoading,
     checklistItems,
     completionPercentage,
     displayCaseId,
@@ -225,7 +222,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             mandatoryItemsCount={mandatoryItemsCount}
             pendingItemsCount={pendingItemsCount}
             tasks={CASE_TASKS}
-            team={caseDetails?.team ?? []}
+            team={
+              caseDetails?.team?.map((member) => ({
+                collaboratorId: member.collaboratorId,
+                name: member.name,
+                role: member.role,
+                initials: member.name.substring(0, 2).toUpperCase(),
+                className: 'bg-primary text-primary-foreground',
+              })) ?? []
+            }
             timeline={CASE_TIMELINE}
             validatedItemsCount={validatedItemsCount}
             onOpenChecklist={handleOpenChecklistTab}

@@ -45,7 +45,7 @@ export function useMyCasesListPage() {
   const visibleCases = useMemo(() => {
     return (data ?? [])
       .filter((caseItem) => {
-        const statusLabel = STATUS_LABELS[caseItem.status] ?? 'Documentação'
+
 
         const normalizedSearch = search.trim().toLowerCase()
         const matchesSearch =

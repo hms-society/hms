@@ -467,7 +467,7 @@ export function CreateCasePage() {
       <AddTeamMemberDialog 
         isOpen={isAddTeamModalOpen}
         onClose={() => setIsAddTeamModalOpen(false)}
-        onAdd={(member) => append(member)}
+        onAdd={(member) => append(member as any)}
       />
     </div>
   )
