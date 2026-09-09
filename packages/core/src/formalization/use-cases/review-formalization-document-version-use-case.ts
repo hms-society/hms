@@ -20,6 +20,7 @@ type Request = FormalizationActor & {
   readonly status: Extract<DocumentVersionStatus, 'approved' | 'rejected'>
   readonly rejectionReason?: string
 }
+
 export class ReviewFormalizationDocumentVersionUseCase extends FormalizationUseCase<
   Request,
   DocumentVersion

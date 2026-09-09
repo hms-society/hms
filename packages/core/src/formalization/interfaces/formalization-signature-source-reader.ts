@@ -2,6 +2,8 @@ import type {
   FormalizationSignatureCandidatePage,
   FormalizationSignatureSourceDocument,
   FormalizationSignatureSourcePerson,
+  FormalizationSignatureAuthenticationSource,
+  FormalizationSignatureAuthenticationChannels,
 } from '../domain/structures'
 
 export interface FormalizationSignatureSourceReader {
@@ -24,4 +26,10 @@ export interface FormalizationSignatureSourceReader {
     formalizationId: string,
     documentVersionId: string,
   ): Promise<FormalizationSignatureSourceDocument | null>
+  findAuthenticationSource(
+    personId: string,
+  ): Promise<FormalizationSignatureAuthenticationSource | null>
+  listConsentedAuthenticationChannels(
+    personId: string,
+  ): Promise<FormalizationSignatureAuthenticationChannels>
 }

@@ -8,6 +8,11 @@ import type {
   FormalizationSignatureCandidatePage,
   FormalizationSignatureConfiguration,
   FormalizationSignatureFieldView,
+  FormalizationSignatureSendingReviewResponse,
+  FormalizationSignatureSendingCancellationResponse,
+  FormalizationSignatureSendingStatusResponse,
+  ConfirmFormalizationSignatureSendingCommand,
+  CancelFormalizationSignatureSendingCommand,
 } from '../domain/structures'
 import type { CommunicationChannel } from '../../communication/domain/structures'
 import type { FormalizationDocumentListItem } from '../domain/structures/formalization-document-list-item'
@@ -89,6 +94,20 @@ export interface FormalizationService {
   getSignatureConfiguration(
     formalizationId: string,
   ): Promise<RestResponse<FormalizationSignatureConfiguration>>
+  getSignatureSendingReview(
+    formalizationId: string,
+  ): Promise<RestResponse<FormalizationSignatureSendingReviewResponse>>
+  confirmSignatureSending(
+    formalizationId: string,
+    input: ConfirmFormalizationSignatureSendingCommand,
+  ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse>>
+  getSignatureSendingStatus(
+    formalizationId: string,
+  ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse>>
+  cancelSignatureSending(
+    formalizationId: string,
+    input: CancelFormalizationSignatureSendingCommand,
+  ): Promise<RestResponse<FormalizationSignatureSendingCancellationResponse>>
   initializeSignatureConfiguration(
     formalizationId: string,
     expectedVersion: number,

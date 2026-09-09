@@ -7,7 +7,7 @@ type EligibleCollaboratorProfile = Extract<
 >
 
 export type FormalizationSignatureCandidate = {
-  readonly personId: string
+  readonly collaboratorId: string
   readonly name: string
   readonly profile: EligibleCollaboratorProfile
   readonly email: string

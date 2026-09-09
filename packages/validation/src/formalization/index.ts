@@ -1,5 +1,6 @@
 import '../configure-zod'
 
+export * from './signing-gateway'
 export * from './formalization-signature-configuration-schema'
 export * from './formalization-signature-preview-batch-event-schema'
 export * from './formalization-signature-preview-event-schema'

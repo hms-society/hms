@@ -16,6 +16,7 @@ type Request = FormalizationActor & {
   readonly formalizationId: string
   readonly versionId: string
 }
+
 export class GetFormalizationDocumentVersionUseCase extends FormalizationUseCase<
   Request,
   DocumentVersion

@@ -18,6 +18,7 @@ import type { FormalizationsRepository } from '../interfaces'
 type Request = FormalizationActor & {
   readonly formalizationId: string
 }
+
 export class ListFormalizationDocumentsUseCase extends FormalizationUseCase<
   Request,
   readonly FormalizationDocumentListItem[]
