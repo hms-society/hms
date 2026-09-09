@@ -12,7 +12,7 @@ export type UseMyCasePageParams = {
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
   const { caseManagementService } = useRestContext()
-  
+
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
     queryFn: async () => {

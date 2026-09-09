@@ -6,7 +6,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { LawyerCaseViewItem } from './types'
 
 const STATUS_STYLES = {
-  'Documentação': 'bg-accent text-accent-foreground hover:bg-accent',
+  Documentação: 'bg-accent text-accent-foreground hover:bg-accent',
   'Em andamento': 'bg-highlight text-highlight-foreground hover:bg-highlight',
   'Aguardando cliente': 'bg-highlight text-highlight-foreground hover:bg-highlight',
   'Em produção jurídica': 'bg-secondary text-secondary-foreground hover:bg-secondary',
@@ -45,8 +45,6 @@ export function useMyCasesListPage() {
   const visibleCases = useMemo(() => {
     return (data ?? [])
       .filter((caseItem) => {
-
-
         const normalizedSearch = search.trim().toLowerCase()
         const matchesSearch =
           normalizedSearch.length === 0 ||

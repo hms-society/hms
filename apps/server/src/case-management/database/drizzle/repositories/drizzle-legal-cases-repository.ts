@@ -29,8 +29,6 @@ export class DrizzleLegalCasesRepository
     drizzle: DrizzleClient,
     @Inject(DrizzleLegalCaseMapper)
     private readonly legalCaseMapper: DrizzleLegalCaseMapper,
-    @Inject(DrizzleCaseMemberMapper)
-    private readonly caseMemberMapper: DrizzleCaseMemberMapper,
   ) {
     super(drizzle)
   }

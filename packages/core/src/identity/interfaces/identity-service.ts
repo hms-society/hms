@@ -12,7 +12,8 @@ import type {
 } from '../domain/structures'
 import type { CollaboratorUpdate } from '../domain/entities'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
-import type { LookupClientRequest, RegisterClientRequest } from '../use-cases'
+import type { LookupClientRequest } from '../use-cases/lookup-client-use-case'
+import type { RegisterClientRequest } from '../use-cases/register-client-use-case'
 
 export interface IdentityService {
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>

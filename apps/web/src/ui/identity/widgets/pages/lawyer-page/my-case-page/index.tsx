@@ -13,12 +13,7 @@ import {
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 
-import {
-  CASE_STAGES,
-  CASE_TASKS,
-  CASE_TIMELINE,
-  MOCK_ACTIVITIES,
-} from './case-page-data'
+import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
 import { useMyCasePage } from './use-my-case-page'
@@ -105,7 +100,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
                     key={member.collaboratorId}
                     className='size-8 border-2 border-secondary'
                   >
-                    <AvatarFallback className={`bg-teal-700 text-white text-[12px]`}>
+                    <AvatarFallback className='bg-teal-700 text-white text-[12px]'>
                       {member.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>

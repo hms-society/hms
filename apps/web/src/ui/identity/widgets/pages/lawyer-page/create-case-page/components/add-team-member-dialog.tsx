@@ -1,10 +1,5 @@
 import { useState } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/shadcn/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/shadcn/dialog'
 import { Button } from '@/ui/shadcn/button'
 import { Label } from '@/ui/shadcn/label'
 import {
@@ -21,11 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/ui/shadcn/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/ui/shadcn/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 import { Input } from '@/ui/shadcn/input'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useCollaboratorsQuery } from '@/ui/identity/hooks/use-collaborators-query'
@@ -42,15 +33,24 @@ export type AddTeamMemberDialogProps = {
   onAdd: (member: TeamMember) => void
 }
 
-export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDialogProps) {
+export function AddTeamMemberDialog({
+  isOpen,
+  onClose,
+  onAdd,
+}: AddTeamMemberDialogProps) {
   const [collaboratorId, setCollaboratorId] = useState('')
   const [role, setRole] = useState('')
   const [permission, setPermission] = useState('')
   const [collabOpen, setCollabOpen] = useState(false)
   const [collabSearch, setCollabSearch] = useState('')
-  const { collaboratorsPage, isLoadingCollaborators } = useCollaboratorsQuery({ pageSize: 50, search: collabSearch })
+  const { collaboratorsPage, isLoadingCollaborators } = useCollaboratorsQuery({
+    pageSize: 50,
+    search: collabSearch,
+  })
   const collaborators = collaboratorsPage?.items ?? []
-  const selectedCollaborator = collaborators.find(c => c.collaboratorId === collaboratorId)
+  const selectedCollaborator = collaborators.find(
+    (c) => c.collaboratorId === collaboratorId,
+  )
   const handleAdd = () => {
     if (!collaboratorId || !role || !permission) return
     onAdd({
@@ -76,7 +76,7 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
   const isFormValid = !!collaboratorId && !!role && !!permission
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent 
+      <DialogContent
         className='sm:max-w-[480px] sm:rounded-[16px] p-0 overflow-hidden'
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
@@ -91,13 +91,19 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
             <div className='space-y-2'>
               <Label className='text-[13px] font-semibold text-muted-foreground'>
                 Funcionário<span className='text-destructive'>*</span>
-              </Label>           
+              </Label>
               <Popover open={collabOpen} onOpenChange={setCollabOpen}>
                 <PopoverTrigger asChild>
                   <div className='relative w-full cursor-pointer'>
                     <Input
                       placeholder='Buscar usuário interno...'
-                      value={collabOpen ? collabSearch : (selectedCollaborator ? selectedCollaborator.professionalName : collabSearch)}
+                      value={
+                        collabOpen
+                          ? collabSearch
+                          : selectedCollaborator
+                            ? selectedCollaborator.professionalName
+                            : collabSearch
+                      }
                       onChange={(e) => {
                         if (selectedCollaborator && !collabOpen) {
                           setCollaboratorId('')
@@ -109,17 +115,22 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
                       className='h-10 rounded-lg shadow-sm pl-10 cursor-pointer'
                       readOnly={!collabOpen && !!selectedCollaborator}
                     />
-                    <Icon name='search' className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
+                    <Icon
+                      name='search'
+                      className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground'
+                    />
                   </div>
                 </PopoverTrigger>
-                <PopoverContent 
+                <PopoverContent
                   className='w-[var(--radix-popover-trigger-width)] p-0 rounded-xl max-h-[250px]'
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <Command shouldFilter={false}>
                     <CommandList>
                       <CommandEmpty>
-                        {isLoadingCollaborators ? 'Buscando...' : 'Nenhum usuário encontrado.'}
+                        {isLoadingCollaborators
+                          ? 'Buscando...'
+                          : 'Nenhum usuário encontrado.'}
                       </CommandEmpty>
                       <CommandGroup>
                         {collaborators.map((c) => (
@@ -135,10 +146,12 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
                             <Icon
                               name='check'
                               className={`mr-2 size-4 ${
-                                collaboratorId === c.collaboratorId ? 'opacity-100' : 'opacity-0'
+                                collaboratorId === c.collaboratorId
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
                               }`}
                             />
-                            <span className="truncate">{c.professionalName}</span>
+                            <span className='truncate'>{c.professionalName}</span>
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -156,9 +169,15 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
                   <SelectValue placeholder='Selecione o cargo...' />
                 </SelectTrigger>
                 <SelectContent className='rounded-xl'>
-                  <SelectItem value='lawyer' className='rounded-lg'>Advogado Auxiliar</SelectItem>
-                  <SelectItem value='paralegal' className='rounded-lg'>Paralegal</SelectItem>
-                  <SelectItem value='intern' className='rounded-lg'>Estagiário</SelectItem>
+                  <SelectItem value='lawyer' className='rounded-lg'>
+                    Advogado Auxiliar
+                  </SelectItem>
+                  <SelectItem value='paralegal' className='rounded-lg'>
+                    Paralegal
+                  </SelectItem>
+                  <SelectItem value='intern' className='rounded-lg'>
+                    Estagiário
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -171,9 +190,15 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
                   <SelectValue placeholder='Selecione a permissão...' />
                 </SelectTrigger>
                 <SelectContent className='rounded-xl'>
-                  <SelectItem value='visualização' className='rounded-lg'>Visualização</SelectItem>
-                  <SelectItem value='edição' className='rounded-lg'>Edição</SelectItem>
-                  <SelectItem value='execução' className='rounded-lg'>Execução</SelectItem>
+                  <SelectItem value='visualização' className='rounded-lg'>
+                    Visualização
+                  </SelectItem>
+                  <SelectItem value='edição' className='rounded-lg'>
+                    Edição
+                  </SelectItem>
+                  <SelectItem value='execução' className='rounded-lg'>
+                    Execução
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -188,8 +213,8 @@ export function AddTeamMemberDialog({ isOpen, onClose, onAdd }: AddTeamMemberDia
           >
             Cancelar
           </Button>
-          <Button 
-            type='button' 
+          <Button
+            type='button'
             onClick={handleAdd}
             disabled={!isFormValid}
             className='w-full sm:w-1/2 rounded-full h-11 bg-[#7CB3AA] hover:bg-[#689E95] text-white border-transparent text-[15px]'

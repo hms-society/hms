@@ -233,7 +233,7 @@ export const OverviewTab = ({
                 }`}
               >
                 <Avatar className='size-9'>
-                  <AvatarFallback className={`bg-teal-700 text-white text-[12px]`}>
+                  <AvatarFallback className='bg-teal-700 text-white text-[12px]'>
                     {member.name?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -242,12 +242,20 @@ export const OverviewTab = ({
                     {member.name}
                   </p>
                   <p className='truncate text-[14px] text-muted-foreground'>
-                    {member.role === 'lead_lawyer' ? 'Advogado Principal' :
-                     member.role === 'lawyer' ? 'Advogado' :
-                     member.role === 'paralegal' ? 'Paralegal' :
-                     member.role === 'supervisor' ? 'Supervisor' :
-                     member.role === 'intern' ? 'Estagiário' :
-                     member.role} {member.permission ? `- ${member.permission.charAt(0).toUpperCase() + member.permission.slice(1)}` : ''}
+                    {member.role === 'lead_lawyer'
+                      ? 'Advogado Principal'
+                      : member.role === 'lawyer'
+                        ? 'Advogado'
+                        : member.role === 'paralegal'
+                          ? 'Paralegal'
+                          : member.role === 'supervisor'
+                            ? 'Supervisor'
+                            : member.role === 'intern'
+                              ? 'Estagiário'
+                              : member.role}{' '}
+                    {member.permission
+                      ? `- ${member.permission.charAt(0).toUpperCase() + member.permission.slice(1)}`
+                      : ''}
                   </p>
                 </div>
                 {member.isPrimary && (

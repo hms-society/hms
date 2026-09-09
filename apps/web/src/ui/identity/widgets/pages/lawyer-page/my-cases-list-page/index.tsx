@@ -46,11 +46,9 @@ export const LawyerCasesListPage = () => {
           <p className='mt-1 text-[14px] text-muted-foreground'>
             {total} casos disponíveis para sua equipe
           </p>
-        </div> 
+        </div>
         <Anchor route='lawyerCaseCreation'>
-          <Button className='rounded-full px-6 py-2'>
-            Abrir novo caso
-          </Button>
+          <Button className='rounded-full px-6 py-2'>Abrir novo caso</Button>
         </Anchor>
       </div>
 
@@ -154,7 +152,9 @@ export const LawyerCasesListPage = () => {
                       </span>
                       <span className='flex items-center gap-1.5 text-[12px] leading-5 text-muted-foreground truncate'>
                         <Icon name='tag' className='size-3.5 shrink-0' />
-                        <span className='truncate'>{caseItem.publicCode} · {caseItem.legalArea}</span>
+                        <span className='truncate'>
+                          {caseItem.publicCode} · {caseItem.legalArea}
+                        </span>
                       </span>
                     </Anchor>
                   </TableCell>
