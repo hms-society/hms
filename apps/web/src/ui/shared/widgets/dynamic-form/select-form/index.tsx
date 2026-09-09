@@ -19,6 +19,7 @@ export type SelectFormDialogProps = {
   initialLegalAreaId?: string
   initialLegalTopicId?: string
   initialSelectedFormId?: string
+  contextType?: string
 }
 
 export const SelectFormDialog = ({
@@ -28,6 +29,7 @@ export const SelectFormDialog = ({
   initialLegalAreaId,
   initialLegalTopicId,
   initialSelectedFormId,
+  contextType,
 }: SelectFormDialogProps) => {
   const {
     areas,
@@ -49,6 +51,7 @@ export const SelectFormDialog = ({
     initialLegalAreaId,
     initialLegalTopicId,
     initialSelectedFormId,
+    contextType,
   })
 
   if (!isOpen) return null

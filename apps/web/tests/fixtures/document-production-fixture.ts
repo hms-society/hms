@@ -5,6 +5,9 @@ export const DOCUMENT_PRODUCTION_BACKEND = 'http://hms-api.test'
 export const CONSULTATION_ID = 'consultation-1'
 export const CONSULTATION_DOCUMENT_ID = 'document-1'
 export const CONSULTATION_DOCUMENT_VERSION_ID = 'version-1'
+export const FORMALIZATION_ID = 'formalization-1'
+export const FORMALIZATION_DOCUMENT_ID = 'formalization-document-1'
+export const FORMALIZATION_DOCUMENT_VERSION_ID = 'formalization-version-1'
 
 const AUTHENTICATED_USER = {
   id: '6ecbc5b0-a145-4e0c-9167-31b54fb8318c',
@@ -103,8 +106,151 @@ type ConsultationDocumentProductionState = {
   responseOverrides: Partial<Record<ConsultationResponseOperation, number>>
 }
 
+type FormalizationState = {
+  details: any
+  documents: any[]
+  selection: any
+  versions: Record<string, any>
+  requests: Array<{ method: string; path: string; body: unknown }>
+  startRequests: number
+  draftRequests: number
+  closeRequests: number
+  reopenRequests: number
+  listRequests: number
+  selectionGetRequests: number
+  selectionPutRequests: number
+  generationRequests: number
+  reviewRequests: number
+  confirmRequests: number
+  closeWithoutContractRequests: number
+}
+
 export type DocumentProductionFixture = {
-  documentProduction: DocumentProductionState
+  documentProduction: DocumentProductionState & { formalization: FormalizationState }
+}
+
+function createFormalizationState(): FormalizationState {
+  const details = {
+    formalization: {
+      id: FORMALIZATION_ID,
+      intakeId: 'intake-1',
+      clientId: 'client-1',
+      consultationId: CONSULTATION_ID,
+      assignedLawyerId: 'admin',
+      status: 'in_progress',
+      contractFormId: 'form-1',
+      contractFormSnapshot: {
+        dynamicFormId: 'form-1',
+        name: 'Condições comerciais',
+        fields: [
+          {
+            id: 'field-text',
+            key: 'service',
+            label: 'Serviço contratado',
+            type: 'short_text',
+            position: 1,
+            required: true,
+          },
+          {
+            id: 'field-value',
+            key: 'value',
+            label: 'Valor mensal',
+            type: 'currency',
+            position: 2,
+            required: true,
+          },
+          {
+            id: 'field-kind',
+            key: 'kind',
+            label: 'Modalidade',
+            type: 'single_selection',
+            position: 3,
+            required: true,
+            options: [
+              { value: 'monthly', label: 'Mensal' },
+              { value: 'fixed', label: 'Fixa' },
+            ],
+          },
+        ],
+      },
+      contractFormAnswers: [],
+      contractFormState: 'open',
+      contractFormRevision: 0,
+      version: 1,
+    },
+    intake: { id: 'intake-1', sequenceNumber: 339, version: 1 },
+    consultation: {
+      id: CONSULTATION_ID,
+      primaryLegalQuestion: 'Como estruturar a contratação?',
+      guidanceProvided: '',
+      relevantFacts: [],
+      potentialLegalRequests: [],
+      identifiedRisks: [],
+      suggestions: [],
+    },
+    client: {
+      id: 'client-1',
+      type: 'natural',
+      name: 'Cliente HMS Teste',
+      taxId: { type: 'cpf', value: '98198246304' },
+      email: 'cliente@example.com',
+      phone: '66840566416',
+    },
+    assignedLawyer: {
+      id: 'admin',
+      professionalName: 'Admin',
+      jobTitle: 'Advogado',
+      profile: 'admin',
+      legalExpertises: [],
+    },
+  }
+  return {
+    details,
+    documents: [
+      {
+        id: FORMALIZATION_DOCUMENT_ID,
+        title: 'Contrato de prestação de serviços',
+        isFresh: true,
+        versions: [],
+      },
+    ],
+    selection: {
+      selectedDocumentSpecificationIds: ['spec-1'],
+      options: [
+        {
+          documentSpecificationId: 'spec-1',
+          name: 'Procuração',
+          description: 'Documento de representação',
+          application: { scope: 'global', moment: 'formalization' },
+          status: 'available',
+          selected: true,
+          hasVersion: false,
+        },
+        {
+          documentSpecificationId: 'spec-2',
+          name: 'Aditivo contratual',
+          description: 'Documento complementar',
+          application: { scope: 'global', moment: 'formalization' },
+          status: 'available',
+          selected: false,
+          hasVersion: false,
+        },
+      ],
+    },
+    versions: {},
+    requests: [],
+    startRequests: 0,
+    draftRequests: 0,
+    closeRequests: 0,
+    reopenRequests: 0,
+    listRequests: 0,
+    selectionGetRequests: 0,
+    selectionPutRequests: 0,
+    generationRequests: 0,
+    reviewRequests: 0,
+    confirmRequests: 0,
+    closeWithoutContractRequests: 0,
+  }
 }
 
 function createConsultationVersion(
@@ -233,7 +379,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       })
       await page.goto('/login')
       await page.getByLabel('Email:').fill(AUTHENTICATED_USER.email)
-      await page.getByRole('textbox', { name: 'Senha' }).fill('playwright-password')
+      await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
       await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
       await page.waitForURL('**/home')
 
@@ -242,7 +388,8 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
     { auto: true, scope: 'test' },
   ],
   documentProduction: async ({ page }, use) => {
-    const state: DocumentProductionState = {
+    const formalization = createFormalizationState()
+    const state: DocumentProductionState & { formalization: FormalizationState } = {
       details: structuredClone(documentSpecificationDetails),
       listRequests: 0,
       getRequests: 0,
@@ -250,6 +397,7 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
       templatePatchRequests: 0,
       createRequests: 0,
       consultation: createConsultationState(),
+      formalization,
     }
 
     await page.route(`${DOCUMENT_PRODUCTION_BACKEND}/**`, async (route) => {
@@ -259,6 +407,14 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
 
       function recordRequest(body: unknown = undefined) {
         consultation.requests.push({ method: request.method(), path: url.pathname, body })
+      }
+
+      function recordFormalizationRequest(body: unknown = undefined) {
+        formalization.requests.push({
+          method: request.method(),
+          path: url.pathname,
+          body,
+        })
       }
 
       function consumeOverride(operation: ConsultationResponseOperation) {
@@ -285,6 +441,262 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
             profile: 'admin',
             status: 'active',
           }),
+        })
+        return
+      }
+
+      if (
+        url.pathname === '/formalizations/by-intake/intake-1/start' &&
+        request.method() === 'POST'
+      ) {
+        formalization.startRequests += 1
+        recordFormalizationRequest()
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}` &&
+        request.method() === 'GET'
+      ) {
+        recordFormalizationRequest()
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/contract-form/draft` &&
+        request.method() === 'PATCH'
+      ) {
+        formalization.draftRequests += 1
+        const body = request.postDataJSON() as { answers?: unknown[] }
+        recordFormalizationRequest(body)
+        formalization.details.formalization.contractFormAnswers = body.answers ?? []
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details.formalization),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/contract-form/close` &&
+        request.method() === 'PATCH'
+      ) {
+        formalization.closeRequests += 1
+        const body = request.postDataJSON() as { answers?: unknown[] }
+        recordFormalizationRequest(body)
+        formalization.details.formalization.contractFormAnswers = body.answers ?? []
+        formalization.details.formalization.contractFormState = 'closed'
+        formalization.details.formalization.contractFormRevision = 1
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details.formalization),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/contract-form/reopen` &&
+        request.method() === 'PATCH'
+      ) {
+        formalization.reopenRequests += 1
+        recordFormalizationRequest(request.postDataJSON())
+        formalization.details.formalization.contractFormState = 'open'
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details.formalization),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/documents` &&
+        request.method() === 'GET'
+      ) {
+        formalization.listRequests += 1
+        recordFormalizationRequest()
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.documents),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/documents/selection` &&
+        request.method() === 'GET'
+      ) {
+        formalization.selectionGetRequests += 1
+        recordFormalizationRequest()
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.selection),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/documents/selection` &&
+        request.method() === 'PUT'
+      ) {
+        const body = request.postDataJSON() as { documentSpecificationIds?: string[] }
+        const selectedDocumentSpecificationIds = body.documentSpecificationIds ?? []
+        formalization.selectionPutRequests += 1
+        formalization.selection = {
+          ...formalization.selection,
+          selectedDocumentSpecificationIds,
+          options: formalization.selection.options.map((option: any) => ({
+            ...option,
+            selected: selectedDocumentSpecificationIds.includes(
+              option.documentSpecificationId,
+            ),
+          })),
+        }
+        recordFormalizationRequest(body)
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.selection),
+        })
+        return
+      }
+
+      const formalizationGenerationPath = new RegExp(
+        `^/formalizations/${FORMALIZATION_ID}/documents/([^/]+)/generations$`,
+      ).exec(url.pathname)
+      if (formalizationGenerationPath && request.method() === 'POST') {
+        formalization.generationRequests += 1
+        recordFormalizationRequest(request.postDataJSON())
+        const documentId = formalizationGenerationPath[1]
+        const version = {
+          id: FORMALIZATION_DOCUMENT_VERSION_ID,
+          documentId,
+          fileId: 'formalization-file-1',
+          versionNumber: 1,
+          source: 'ai',
+          content: {
+            type: 'doc',
+            content: [{ type: 'paragraph', attrs: { textAlign: null } }],
+          },
+          pendingMarkers: [],
+          createdByCollaboratorId: 'admin',
+          createdAt: '2026-01-03T00:00:00.000Z',
+          status: 'in_review',
+        }
+        formalization.versions[version.id] = version
+        const document = formalization.documents.find((item) => item.id === documentId)
+        if (document && !document.versions.some((item: any) => item.id === version.id)) {
+          document.versions.push({
+            id: version.id,
+            versionNumber: version.versionNumber,
+            source: version.source,
+            status: version.status,
+            pendingMarkersCount: 0,
+            createdByCollaboratorId: version.createdByCollaboratorId,
+            createdAt: version.createdAt,
+          })
+        }
+        if (document) Object.assign(document, { generationStatus: 'completed' })
+        await route.fulfill({
+          status: 202,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            documentGenerationId: 'generation-1',
+            documentId,
+          }),
+        })
+        return
+      }
+
+      const formalizationVersionPath = new RegExp(
+        `^/formalizations/${FORMALIZATION_ID}/document-versions/([^/]+)$`,
+      ).exec(url.pathname)
+      if (formalizationVersionPath && request.method() === 'GET') {
+        const version = formalization.versions[formalizationVersionPath[1]]
+        await route.fulfill({
+          status: version ? 200 : 404,
+          contentType: 'application/json',
+          body: JSON.stringify(version ?? { message: 'Version not found' }),
+        })
+        return
+      }
+
+      const formalizationReviewPath = new RegExp(
+        `^/formalizations/${FORMALIZATION_ID}/document-versions/([^/]+)/review$`,
+      ).exec(url.pathname)
+      if (formalizationReviewPath && request.method() === 'PATCH') {
+        const body = request.postDataJSON() as {
+          status: 'approved' | 'rejected'
+          rejectionReason?: string
+        }
+        const version = formalization.versions[formalizationReviewPath[1]]
+        formalization.reviewRequests += 1
+        recordFormalizationRequest(body)
+        if (!version) {
+          await route.fulfill({
+            status: 404,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Version not found' }),
+          })
+          return
+        }
+        version.status = body.status
+        version.rejectionReason = body.rejectionReason
+        version.reviewedByCollaboratorId = 'admin'
+        version.reviewedAt = '2026-01-04T00:00:00.000Z'
+        const document = formalization.documents.find(
+          (item) => item.id === version.documentId,
+        )
+        const summary = document?.versions.find((item: any) => item.id === version.id)
+        if (summary) summary.status = version.status
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(version),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/documents/confirm` &&
+        request.method() === 'PATCH'
+      ) {
+        formalization.confirmRequests += 1
+        recordFormalizationRequest(request.postDataJSON())
+        formalization.selection.confirmedAt = '2026-01-05T00:00:00.000Z'
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details.formalization),
+        })
+        return
+      }
+
+      if (
+        url.pathname === `/formalizations/${FORMALIZATION_ID}/close-without-contract` &&
+        request.method() === 'PATCH'
+      ) {
+        formalization.closeWithoutContractRequests += 1
+        recordFormalizationRequest(request.postDataJSON())
+        formalization.details.formalization.status = 'cancelled'
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(formalization.details.formalization),
         })
         return
       }

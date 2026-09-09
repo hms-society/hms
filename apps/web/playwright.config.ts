@@ -1,17 +1,27 @@
 import { defineConfig, devices } from '@playwright/test'
+import { loadEnv } from 'vite'
 
-const WEB_APP_URL = 'http://127.0.0.1:3100'
+const env = { ...loadEnv('test', process.cwd(), ''), ...process.env }
+const webAppPort = Number(env.HMS_WEB_APP_PORT)
+
+if (!Number.isInteger(webAppPort) || webAppPort < 1 || webAppPort > 65535) {
+  throw new Error('HMS_WEB_APP_PORT must be an integer between 1 and 65535.')
+}
+
+const webAppUrl = env.PLAYWRIGHT_WEB_APP_URL ?? `http://127.0.0.1:${webAppPort}`
+const runFormalizationE2e = env.HMS_RUN_FORMALIZATION_E2E === 'true'
 
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.test.tsx',
+  testIgnore: runFormalizationE2e ? [] : ['**/routes/formalization/**'],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: 'html',
   use: {
-    baseURL: WEB_APP_URL,
+    baseURL: webAppUrl,
     trace: 'on-first-retry',
   },
   projects: [
@@ -21,11 +31,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm exec vite dev --host 127.0.0.1 --port 3100',
-    url: WEB_APP_URL,
+    command: 'pnpm exec vite dev --host 127.0.0.1',
+    url: webAppUrl,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,
     env: {
+      HMS_WEB_APP_PORT: String(webAppPort),
       VITE_HMS_SERVER_APP_URL: 'http://hms-api.test',
       VITE_SUPABASE_URL: 'http://supabase.test',
       VITE_SUPABASE_KEY: 'playwright-anon-key',

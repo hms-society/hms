@@ -1,6 +1,10 @@
-import { TableSurface } from '@/ui/shared/widgets/components/table-surface'
-import { ConsultationDocumentRow } from '../consultation-document-row'
+import {
+  DocumentPackageList,
+  type DocumentPackageAction,
+  type DocumentPackageItem,
+} from '../../../components/document-package/document-package-list'
 import type { ConsultationDocumentViewModel } from '../use-consultation-documents-page'
+import type { ReactNode } from 'react'
 
 export type ConsultationDocumentListProps = {
   items: readonly ConsultationDocumentViewModel[]
@@ -9,11 +13,7 @@ export type ConsultationDocumentListProps = {
   isCancellingDocument: boolean
   onRefreshDocument: () => Promise<unknown>
   isReadOnly: boolean
-  onUpdateAccess: (
-    documentId: string,
-    classification: string,
-    partnerId?: string,
-  ) => Promise<void>
+  renderAction?: (action: DocumentPackageAction, item: DocumentPackageItem) => ReactNode
 }
 
 export const ConsultationDocumentList = ({
@@ -23,22 +23,15 @@ export const ConsultationDocumentList = ({
   isCancellingDocument,
   onRefreshDocument,
   isReadOnly,
-  onUpdateAccess,
+  renderAction,
 }: ConsultationDocumentListProps) => (
-  <TableSurface ariaLabel='Documentos da consulta' className='border-0 p-0 shadow-none'>
-    <ul className='divide-y divide-border'>
-      {items.map((item) => (
-        <ConsultationDocumentRow
-          key={item.document.id}
-          item={item}
-          onGenerateDocument={onGenerateDocument}
-          onCancelDocumentGeneration={onCancelDocumentGeneration}
-          isCancellingDocument={isCancellingDocument}
-          onRefreshDocument={onRefreshDocument}
-          isReadOnly={isReadOnly}
-          onUpdateAccess={onUpdateAccess}
-        />
-      ))}
-    </ul>
-  </TableSurface>
+  <DocumentPackageList
+    items={items}
+    onGenerateDocument={onGenerateDocument}
+    onCancelDocumentGeneration={onCancelDocumentGeneration}
+    isCancellingDocument={isCancellingDocument}
+    onRefreshDocument={onRefreshDocument}
+    isReadOnly={isReadOnly}
+    renderAction={renderAction}
+  />
 )
