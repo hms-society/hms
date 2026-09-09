@@ -11,7 +11,9 @@ import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { CollaboratorsPageResponseDto } from '@/identity/rest/dtos'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
-class ListActiveCollaboratorsControllerRequestQuery extends createZodDto(collaboratorListQuerySchema) {}
+class ListActiveCollaboratorsControllerRequestQuery extends createZodDto(
+  collaboratorListQuerySchema,
+) {}
 
 @CollaboratorsController()
 @ApiBearerAuth()

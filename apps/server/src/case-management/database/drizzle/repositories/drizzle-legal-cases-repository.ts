@@ -7,7 +7,10 @@ import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 import { and, desc, eq, inArray, isNull, sql, gte, lt } from 'drizzle-orm'
 
-import { DrizzleCaseMemberMapper, DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
+import {
+  DrizzleCaseMemberMapper,
+  DrizzleLegalCaseMapper,
+} from '@/case-management/database/drizzle/mappers'
 import {
   caseMemberModel,
   legalCaseModel,
@@ -32,7 +35,12 @@ export class DrizzleLegalCasesRepository
     super(drizzle)
   }
 
-  async createCaseWithTeam({ legalCase, team }: Parameters<LegalCasesRepository['createCaseWithTeam']>[0]): ReturnType<LegalCasesRepository['createCaseWithTeam']> {
+  async createCaseWithTeam({
+    legalCase,
+    team,
+  }: Parameters<LegalCasesRepository['createCaseWithTeam']>[0]): ReturnType<
+    LegalCasesRepository['createCaseWithTeam']
+  > {
     return await this.database.transaction(async (tx) => {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(1001)`)
 
@@ -47,8 +55,8 @@ export class DrizzleLegalCasesRepository
         .where(
           and(
             gte(legalCaseModel.openedAt, startOfDay),
-            lt(legalCaseModel.openedAt, endOfDay)
-          )
+            lt(legalCaseModel.openedAt, endOfDay),
+          ),
         )
 
       const casesToday = result.count
@@ -124,7 +132,9 @@ export class DrizzleLegalCasesRepository
     return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
   }
 
-  async getCaseDetails(caseId: string): ReturnType<LegalCasesRepository['getCaseDetails']> {
+  async getCaseDetails(
+    caseId: string,
+  ): ReturnType<LegalCasesRepository['getCaseDetails']> {
     const [assignedCase] = await this.database
       .select({
         id: legalCaseModel.id,

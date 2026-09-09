@@ -40,12 +40,7 @@ import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { AddTeamMemberDialog } from './components/add-team-member-dialog'
 
-export type TeamMember = {
-  collaboratorId: string
-  name: string
-  role: string
-  permission: string
-}
+import type { TeamMember } from './components/add-team-member-dialog'
 
 export function CreateCasePage() {
   const { currentCollaborator } = useCurrentCollaboratorQuery()

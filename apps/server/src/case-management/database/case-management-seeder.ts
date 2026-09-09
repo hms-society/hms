@@ -221,17 +221,15 @@ export class CaseManagementSeeder {
             assignedBy: actorId,
           }),
         ),
-        ...this.pickCollaboratorIds(internIds, caseIndex, 1).map(
-          (collaboratorId) => ({
-            caseId: legalCase.id,
-            collaboratorId,
-            role: CaseMemberRole.Intern,
-            isPrimary: false,
-            permission: 'visualização',
-            assignedAt: legalCase.openedAt,
-            assignedBy: actorId,
-          }),
-        ),
+        ...this.pickCollaboratorIds(internIds, caseIndex, 1).map((collaboratorId) => ({
+          caseId: legalCase.id,
+          collaboratorId,
+          role: CaseMemberRole.Intern,
+          isPrimary: false,
+          permission: 'visualização',
+          assignedAt: legalCase.openedAt,
+          assignedBy: actorId,
+        })),
       ] satisfies CaseMemberCreation[]
 
       return teamMembers

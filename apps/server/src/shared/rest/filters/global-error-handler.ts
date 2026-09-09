@@ -76,9 +76,10 @@ export class GlobalErrorHandler implements ExceptionFilter {
       )
     }
 
-    const rawErrorStr = exception instanceof Error 
-      ? `${exception.message} | CODE: ${(exception as any).code} | CAUSE: ${(exception as any).cause?.message || (exception as any).cause} | DETAIL: ${(exception as any).detail}`
-      : 'Ocorreu um erro inesperado.';
+    const rawErrorStr =
+      exception instanceof Error
+        ? `${exception.message} | CODE: ${(exception as any).code} | CAUSE: ${(exception as any).cause?.message || (exception as any).cause} | DETAIL: ${(exception as any).detail}`
+        : 'Ocorreu um erro inesperado.'
 
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

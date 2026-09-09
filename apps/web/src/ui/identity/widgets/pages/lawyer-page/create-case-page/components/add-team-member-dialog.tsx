@@ -29,7 +29,12 @@ import {
 import { Input } from '@/ui/shadcn/input'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useCollaboratorsQuery } from '@/ui/identity/hooks/use-collaborators-query'
-import type { TeamMember } from '../index'
+export type TeamMember = {
+  collaboratorId: string
+  name: string
+  role: string
+  permission: string
+}
 
 export type AddTeamMemberDialogProps = {
   isOpen: boolean

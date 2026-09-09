@@ -233,4 +233,3 @@ export class IdentityModuleFixture {
     return this.restFixture.close()
   }
 }
-
