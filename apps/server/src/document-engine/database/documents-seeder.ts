@@ -50,10 +50,7 @@ export class DocumentsSeeder {
       for (let batchIndex = 1; batchIndex <= batchesPerClient; batchIndex++) {
         const batchName = `LOTE-${client.id}-${batchIndex}-${randomUUID()}`
 
-        const files = [
-          ...seedFiles.commonFiles,
-          ...(index === 0 && batchIndex === 1 ? seedFiles.imageFiles : []),
-        ]
+        const files = seedFiles.commonFiles
 
         const uploadedFiles = await Promise.all(
           files.map(async (file) => {
@@ -92,7 +89,6 @@ export class DocumentsSeeder {
 
   private async loadSeedFiles(): Promise<{
     commonFiles: SeedFile[]
-    imageFiles: SeedFile[]
   }> {
     const seedAssetsPath = join(
       process.cwd(),
@@ -105,15 +101,9 @@ export class DocumentsSeeder {
       join(seedAssetsPath, 'pdf_teste_2_paginas.pdf'),
       join(seedAssetsPath, 'pdf_teste_3_paginas.pdf'),
     ]
-    const imageAssetPaths = [
-      join(seedAssetsPath, 'teste_documento_id.png'),
-      join(seedAssetsPath, 'teste_ficha_cadastral.png'),
-      join(seedAssetsPath, 'teste_recibo.png'),
-    ]
 
     return {
       commonFiles: await this.loadFiles(commonAssetPaths),
-      imageFiles: await this.loadFiles(imageAssetPaths),
     }
   }
 

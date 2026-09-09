@@ -8,7 +8,6 @@ import type {
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '@hms/core/document-engine/interfaces'
-import { z } from 'zod'
 
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 import { outputSchema as workflowOutputSchema } from '@/document-engine/ai/mastra/schemas'
@@ -39,9 +38,11 @@ export class RecordMetadataTool {
       outputSchema,
       strict: true,
       execute: async (input) => {
+        const status = this.resolveAnalysisStatus(input.suggestion?.suggestedStatus)
+
         await this.validationsRepository.recordAnalysis({
           documentFileId: input.documentFileId,
-          status: DocumentValidationStatus.AwaitingValidation,
+          status,
           hashSha256: input.metadata.hashSha256,
           aiConfidence: input.suggestion
             ? Math.round(input.suggestion.confidence * 100)
@@ -53,20 +54,31 @@ export class RecordMetadataTool {
               ? {
                   documentTypeId: input.suggestion.documentTypeId,
                   documentTypeLabel: input.suggestion.documentTypeLabel,
-                  checklistRequirementId: input.suggestion.checklistRequirementId,
+                  suggestedStatus: input.suggestion.suggestedStatus,
+                  confidenceLabel: input.suggestion.confidenceLabel,
+                  checklistItemId: input.suggestion.checklistItemId,
                   checklistItemLabel: input.suggestion.checklistItemLabel,
+                  caseId: input.suggestion.caseId,
+                  caseLabel: input.suggestion.caseLabel,
                   evidence: input.suggestion.evidence,
+                  failureReason: input.suggestion.failureReason,
+                  failureInstruction: input.suggestion.failureInstruction,
+                  originalDocumentId: input.suggestion.originalDocumentId,
+                  originalDocumentFileName: input.suggestion.originalDocumentFileName,
                 }
               : {}),
           },
           extractedFields: input.suggestion?.extractedFields ?? [],
           missingFields: input.suggestion?.missingFields ?? [],
+          caseId: input.suggestion?.caseId,
+          checklistItemId: input.suggestion?.checklistItemId,
+          originalDocumentId: input.suggestion?.originalDocumentId,
         })
 
         await this.logsRepository.add({
           documentFileId: input.documentFileId,
           action: DocumentValidationLogAction.MetadataCaptured,
-          status: DocumentValidationStatus.AwaitingValidation,
+          status,
           message: 'Metadados do documento captados pelo workflow de IA/OCR.',
           metadata: input.metadata,
         })
@@ -74,5 +86,13 @@ export class RecordMetadataTool {
         return input
       },
     })
+  }
+
+  private resolveAnalysisStatus(status: DocumentValidationStatus | undefined) {
+    if (!status || status === DocumentValidationStatus.Valid) {
+      return DocumentValidationStatus.AwaitingValidation
+    }
+
+    return status
   }
 }

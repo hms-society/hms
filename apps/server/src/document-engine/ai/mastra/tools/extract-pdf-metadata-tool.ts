@@ -4,6 +4,8 @@ import { resolve } from 'node:path'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { z } from 'zod'
 
+import { suggestionSchema } from '@/document-engine/ai/mastra/schemas'
+
 type PdfTextItem = {
   str: string
 }
@@ -17,9 +19,11 @@ const inputSchema = z.object({
   sizeBytes: z.number().int().min(0),
   contentBase64: z.string(),
   hashSha256: z.string().length(64),
+  suggestion: suggestionSchema.optional(),
 })
 
 const outputSchema = z.object({
+  batchId: z.string().uuid(),
   documentFileId: z.string().uuid(),
   metadata: z.object({
     mimeType: z.string().min(1),
@@ -29,6 +33,7 @@ const outputSchema = z.object({
     textLength: z.number().int().min(0),
     extractedTextFull: z.string(),
   }),
+  suggestion: suggestionSchema.optional(),
 })
 
 @Injectable()
@@ -50,6 +55,7 @@ export class ExtractPdfTool {
         const fullText = this.normalizeText(extracted.text)
 
         return {
+          batchId: input.batchId,
           documentFileId: input.documentFileId,
           metadata: {
             mimeType: input.mimeType,
@@ -59,6 +65,7 @@ export class ExtractPdfTool {
             textLength: fullText.length,
             extractedTextFull: fullText,
           },
+          suggestion: input.suggestion,
         }
       },
     })

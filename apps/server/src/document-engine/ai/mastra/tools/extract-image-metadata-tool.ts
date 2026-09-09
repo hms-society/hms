@@ -1,9 +1,11 @@
 import { createTool } from '@mastra/core/tools'
 import { Injectable } from '@nestjs/common'
 import { AppError } from '@hms/core/shared/domain/errors'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { z } from 'zod'
 
 import { DocumentImageAnalyzerAgent } from '@/document-engine/ai/mastra/agents'
+import { suggestionSchema } from '@/document-engine/ai/mastra/schemas'
 
 const inputSchema = z.object({
   batchId: z.string().uuid(),
@@ -14,9 +16,11 @@ const inputSchema = z.object({
   sizeBytes: z.number().int().min(0),
   contentBase64: z.string(),
   hashSha256: z.string().length(64),
+  suggestion: suggestionSchema.optional(),
 })
 
 const outputSchema = z.object({
+  batchId: z.string().uuid(),
   documentFileId: z.string().uuid(),
   metadata: z.object({
     mimeType: z.string().min(1),
@@ -25,6 +29,7 @@ const outputSchema = z.object({
     textLength: z.number().int().min(0),
     extractedTextFull: z.string(),
   }),
+  suggestion: suggestionSchema.optional(),
 })
 
 @Injectable()
@@ -41,12 +46,28 @@ export class ExtractImageTool {
       outputSchema,
       strict: true,
       execute: async (input) => {
+        if (input.suggestion?.suggestedStatus === DocumentValidationStatus.Duplicate) {
+          return {
+            batchId: input.batchId,
+            documentFileId: input.documentFileId,
+            metadata: {
+              mimeType: input.mimeType,
+              sizeBytes: input.sizeBytes,
+              hashSha256: input.hashSha256,
+              textLength: 0,
+              extractedTextFull: '',
+            },
+            suggestion: input.suggestion,
+          }
+        }
+
         const extractedTextFull = await this.extractText(
           input.contentBase64,
           input.mimeType,
         )
 
         return {
+          batchId: input.batchId,
           documentFileId: input.documentFileId,
           metadata: {
             mimeType: input.mimeType,
@@ -55,14 +76,15 @@ export class ExtractImageTool {
             textLength: extractedTextFull.length,
             extractedTextFull,
           },
+          suggestion: input.suggestion,
         }
       },
     })
   }
 
   private async extractText(contentBase64: string, mimeType: string) {
-    const response = await this.imageAnalyzerAgent.generate(
-      [
+    try {
+      const response = await this.imageAnalyzerAgent.generate([
         {
           role: 'user',
           content: [
@@ -77,19 +99,21 @@ export class ExtractImageTool {
             },
           ],
         },
-      ],
-    )
+      ])
 
-    const extractedTextFull = response.text
+      const extractedTextFull = response.text
 
-    if (typeof extractedTextFull !== 'string') {
-      throw new AppError(
-        'O agente de análise de imagem não retornou uma extração válida.',
-        'Erro de Extração de Imagem',
-      )
+      if (typeof extractedTextFull !== 'string') {
+        throw new AppError(
+          'O agente de análise de imagem não retornou uma extração válida.',
+          'Erro de Extração de Imagem',
+        )
+      }
+
+      return this.normalizeText(extractedTextFull)
+    } catch {
+      return ''
     }
-
-    return this.normalizeText(extractedTextFull)
   }
 
   private normalizeText(text: string) {

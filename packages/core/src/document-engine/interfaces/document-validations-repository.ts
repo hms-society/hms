@@ -43,6 +43,10 @@ export type RecordDocumentResendRequestInput = {
 
 export interface DocumentValidationsRepository {
   list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationDocument[]>
+  findDuplicateByHash(
+    hashSha256: string,
+    excludedDocumentFileId: string,
+  ): Promise<DocumentValidationDocument | undefined>
   findByFileId(documentFileId: string): Promise<DocumentValidationDocument | undefined>
   recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,

@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
-  DocumentFileExtractionCompletedEvent,
+  DocumentFileJsonOrganizationRequestedEvent,
   DocumentFileProcessingRequestedEvent,
 } from '@hms/core/document-engine/domain/events'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import type { ProcessDocumentFileWorkflow } from '@hms/core/document-engine/interfaces'
 import { eventType, type InngestFunction } from 'inngest'
 import { z } from 'zod'
@@ -49,22 +50,26 @@ export class ProcessDocumentFileJob extends InngestJob {
         )
 
         if (
-          !event.data.mimeType.startsWith('image/') ||
-          event.data.storagePath.startsWith('seed/')
+          event.data.mimeType.startsWith('image/') &&
+          !event.data.storagePath.startsWith('seed/') &&
+          result.suggestion?.suggestedStatus !== DocumentValidationStatus.Duplicate
         ) {
-          return result
+          const requestedEvent = new DocumentFileJsonOrganizationRequestedEvent({
+            batchId: event.data.batchId,
+            documentFileId: event.data.documentFileId,
+            storagePath: event.data.storagePath,
+            originalName: event.data.originalName,
+            mimeType: event.data.mimeType,
+            sizeBytes: event.data.sizeBytes,
+            hashSha256: result.metadata.hashSha256,
+            extractedTextFull: result.metadata.extractedTextFull,
+          })
+
+          await step.sendEvent('send-document-file-json-organization-requested', {
+            name: requestedEvent.name,
+            data: requestedEvent.payload,
+          })
         }
-
-        const completedEvent = new DocumentFileExtractionCompletedEvent({
-          batchId: event.data.batchId,
-          documentFileId: result.documentFileId,
-          metadata: result.metadata,
-        })
-
-        await step.sendEvent('send-document-file-extraction-completed', {
-          name: completedEvent.name,
-          data: completedEvent.payload,
-        })
 
         return result
       },

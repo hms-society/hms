@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, ne, sql } from 'drizzle-orm'
 import type {
   DocumentValidationDocument,
   DocumentValidationDuplicateMatch,
@@ -95,6 +95,45 @@ export class DrizzleDocumentValidationsRepository
       .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
       .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .where(eq(documentBatchFileModel.id, documentFileId))
+
+    if (!record) {
+      return undefined
+    }
+
+    return this.toDomain({
+      ...record.file,
+      batch: record.batch,
+      reviewerName: record.reviewerName,
+    })
+  }
+
+  async findDuplicateByHash(
+    hashSha256: string,
+    excludedDocumentFileId: string,
+  ): Promise<DocumentValidationDocument | undefined> {
+    const [record] = await this.database
+      .select({
+        file: documentBatchFileModel,
+        batch: documentBatchModel,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+      })
+      .from(documentBatchFileModel)
+      .innerJoin(
+        documentBatchModel,
+        eq(documentBatchFileModel.batchId, documentBatchModel.id),
+      )
+      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
+      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
+      .where(
+        and(
+          eq(documentBatchFileModel.hashSha256, hashSha256),
+          ne(documentBatchFileModel.id, excludedDocumentFileId),
+        ),
+      )
+      .orderBy(desc(documentBatchFileModel.createdAt))
+      .limit(1)
 
     if (!record) {
       return undefined

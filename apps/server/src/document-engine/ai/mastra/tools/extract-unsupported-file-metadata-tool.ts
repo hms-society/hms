@@ -2,6 +2,8 @@ import { createTool } from '@mastra/core/tools'
 import { Injectable } from '@nestjs/common'
 import { z } from 'zod'
 
+import { suggestionSchema } from '@/document-engine/ai/mastra/schemas'
+
 const inputSchema = z.object({
   batchId: z.string().uuid(),
   documentFileId: z.string().uuid(),
@@ -11,9 +13,11 @@ const inputSchema = z.object({
   sizeBytes: z.number().int().min(0),
   contentBase64: z.string(),
   hashSha256: z.string().length(64),
+  suggestion: suggestionSchema.optional(),
 })
 
 const outputSchema = z.object({
+  batchId: z.string().uuid(),
   documentFileId: z.string().uuid(),
   metadata: z.object({
     mimeType: z.string().min(1),
@@ -22,6 +26,7 @@ const outputSchema = z.object({
     textLength: z.number().int().min(0),
     extractedTextFull: z.string(),
   }),
+  suggestion: suggestionSchema.optional(),
 })
 
 @Injectable()
@@ -42,6 +47,7 @@ export class ExtractUnsupportedFileTool {
       outputSchema,
       strict: true,
       execute: async (input) => ({
+        batchId: input.batchId,
         documentFileId: input.documentFileId,
         metadata: {
           mimeType: input.mimeType,
@@ -50,6 +56,7 @@ export class ExtractUnsupportedFileTool {
           textLength: 0,
           extractedTextFull: '',
         },
+        suggestion: input.suggestion,
       }),
     })
   }

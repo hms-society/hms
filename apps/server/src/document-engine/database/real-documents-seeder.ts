@@ -80,10 +80,12 @@ export class RealDocumentsSeeder {
     }
 
     const localPath = 'src/document-engine/database/seed-assets'
-    const fileNames = await readdir(localPath)
+    const fileNames = (await readdir(localPath)).filter((fileName) =>
+      fileName.toLowerCase().endsWith('.pdf'),
+    )
 
     if (fileNames.length === 0) {
-      throw new AppError(`Nenhum arquivo encontrado em ${localPath}`)
+      throw new AppError(`Nenhum PDF encontrado em ${localPath}`)
     }
 
     const batches: any[] = []

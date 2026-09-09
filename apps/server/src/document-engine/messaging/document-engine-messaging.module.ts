@@ -3,9 +3,9 @@ import { Module } from '@nestjs/common'
 import { DocumentEngineAiModule } from '@/document-engine/ai/document-engine-ai.module'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import {
+  OrganizeDocumentFileJsonWithOllamaJob,
   ProcessDocumentFileJob,
   ProcessWhatsappBatchJob,
-  SuggestDocumentFileJob,
 } from '@/document-engine/messaging/inngest/jobs'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
@@ -25,31 +25,31 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
     CommunicationModule,
   ],
   providers: [
+    OrganizeDocumentFileJsonWithOllamaJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
-    SuggestDocumentFileJob,
     {
       provide: DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
       inject: [
+        OrganizeDocumentFileJsonWithOllamaJob,
         ProcessDocumentFileJob,
         ProcessWhatsappBatchJob,
-        SuggestDocumentFileJob,
       ],
       useFactory: (
+        organizeFileJsonWithOllamaJob: OrganizeDocumentFileJsonWithOllamaJob,
         processFileJob: ProcessDocumentFileJob,
         processWhatsappBatchJob: ProcessWhatsappBatchJob,
-        suggestFileJob: SuggestDocumentFileJob,
       ): InngestFunctionGroup => [
+        organizeFileJsonWithOllamaJob.function,
         processFileJob.function,
         processWhatsappBatchJob.function,
-        suggestFileJob.function,
       ],
     },
   ],
   exports: [
+    OrganizeDocumentFileJsonWithOllamaJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
-    SuggestDocumentFileJob,
     DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
   ],
 })

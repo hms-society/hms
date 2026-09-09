@@ -1,22 +1,20 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Injectable } from '@nestjs/common'
-import type {
-  ProcessDocumentFileWorkflow as IProcessDocumentFileWorkflow,
-} from '@hms/core/document-engine/interfaces'
+import type { ProcessDocumentFileWorkflow as IProcessDocumentFileWorkflow } from '@hms/core/document-engine/interfaces'
 import type {
   ProcessDocumentFileWorkflowInput,
   ProcessDocumentFileWorkflowResult,
 } from '@hms/core/document-engine/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
+import { inputSchema, outputSchema } from '@/document-engine/ai/mastra/schemas'
 import {
-  inputSchema,
-  outputSchema,
-} from '@/document-engine/ai/mastra/schemas'
-import {
+  ClassifyDocumentFileTool,
+  DetectDocumentDuplicateTool,
   ExtractImageTool,
   ExtractPdfTool,
   ExtractUnsupportedFileTool,
+  ListDocumentReferenceCandidatesTool,
   LoadFileTool,
   RecordMetadataTool,
 } from '@/document-engine/ai/mastra/tools'
@@ -32,12 +30,24 @@ export class ProcessDocumentFileWorkflow implements IProcessDocumentFileWorkflow
     private readonly extractPdfTool: ExtractPdfTool,
     private readonly extractImageTool: ExtractImageTool,
     private readonly extractUnsupportedFileTool: ExtractUnsupportedFileTool,
+    private readonly detectDocumentDuplicateTool: DetectDocumentDuplicateTool,
+    private readonly listReferenceCandidatesTool: ListDocumentReferenceCandidatesTool,
+    private readonly classifyDocumentFileTool: ClassifyDocumentFileTool,
     private readonly recordMetadataTool: RecordMetadataTool,
   ) {
     const loadFileStep = createStep(this.loadFileTool.function)
     const extractPdfStep = createStep(this.extractPdfTool.function)
     const extractImageStep = createStep(this.extractImageTool.function)
-    const extractUnsupportedFileStep = createStep(this.extractUnsupportedFileTool.function)
+    const extractUnsupportedFileStep = createStep(
+      this.extractUnsupportedFileTool.function,
+    )
+    const detectDocumentDuplicateStep = createStep(
+      this.detectDocumentDuplicateTool.function,
+    )
+    const listReferenceCandidatesStep = createStep(
+      this.listReferenceCandidatesTool.function,
+    )
+    const classifyDocumentFileStep = createStep(this.classifyDocumentFileTool.function)
     const recordMetadataStep = createStep(this.recordMetadataTool.function)
 
     this.workflow = createWorkflow({
@@ -46,6 +56,7 @@ export class ProcessDocumentFileWorkflow implements IProcessDocumentFileWorkflow
       outputSchema,
     })
       .then(loadFileStep)
+      .then(detectDocumentDuplicateStep)
       .branch([
         [
           async ({ inputData }) => inputData.mimeType === 'application/pdf',
@@ -74,6 +85,8 @@ export class ProcessDocumentFileWorkflow implements IProcessDocumentFileWorkflow
 
         return outputSchema.parse(result)
       })
+      .then(listReferenceCandidatesStep)
+      .then(classifyDocumentFileStep)
       .then(recordMetadataStep)
       .commit()
   }
