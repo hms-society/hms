@@ -24,6 +24,7 @@ import {
   RegisterClientController,
   SignInController,
   ListClientsController,
+  UpdateClientController,
 } from '@/identity/rest/controllers'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -52,6 +53,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     CancelCollaboratorInvitationController,
     RemoveCancelledCollaboratorController,
     UpdateCollaboratorController,
+    UpdateClientController,
   ],
   exports: [
     AuthModule,

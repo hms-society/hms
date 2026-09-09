@@ -1,4 +1,4 @@
-import type { DatetimeProvider, UseCase } from '../../shared/interfaces'
+import type { DatetimeProvider } from '../../shared/interfaces'
 import type { Formalization } from '../domain/entities'
 import {
   FormalizationNotFoundError,
@@ -11,7 +11,7 @@ import type {
   FormalizationsRepository,
   CloseFormalizationIntakeRequest,
 } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = CloseFormalizationIntakeRequest &
   FormalizationActor & {
@@ -19,21 +19,24 @@ type Request = CloseFormalizationIntakeRequest &
     readonly expectedFormalizationVersion: number
   }
 
-export class CloseFormalizationWithoutContractUseCase
-  implements UseCase<Request, Formalization>
-{
+export class CloseFormalizationWithoutContractUseCase extends FormalizationUseCase<
+  Request,
+  Formalization
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly intakeClosureService: FormalizationIntakeClosureService,
     private readonly datetimeProvider: DatetimeProvider,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<Formalization> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
     if (!formalization) throw new FormalizationNotFoundError()
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    this.assertAccess(formalization.assignedLawyerId, request)
     if (request.intakeId !== formalization.intakeId) {
       throw new FormalizationStateConflictError(
         'O Intake informado não pertence à formalização autorizada.',

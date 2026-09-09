@@ -7,6 +7,7 @@ import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { ClientCommunicationsTab } from './client-communications-tab'
 import { ClientDocumentsTab } from './client-documents-tab'
+import { ClientRegistrationDataTab } from './client-registration-data-tab'
 import {
   type ClientDetailsPageProps,
   useClientDetailsPage,
@@ -145,7 +146,9 @@ export const ClientDetailsPage = ({ clientId }: ClientDetailsPageProps) => {
           </TabsList>
         </div>
 
-        <TabsContent value='dados-cadastrais' className='mt-4' />
+        <TabsContent value='dados-cadastrais' className='mt-4'>
+          <ClientRegistrationDataTab clientId={clientId} initialData={client} />
+        </TabsContent>
         <TabsContent value='intakes' className='mt-4' />
         <TabsContent value='casos' className='mt-4' />
         <TabsContent value='comunicacoes' className='mt-4'>

@@ -11,7 +11,7 @@ export type ClientDetailsPageProps = {
 export function useClientDetailsPage({ clientId }: ClientDetailsPageProps) {
   const maskTaxId = useMaskTaxId()
   const maskPhone = useMaskPhone()
-  const [activeTab, setActiveTab] = useState('comunicacoes')
+  const [activeTab, setActiveTab] = useState('dados-cadastrais')
 
   const {
     clientDetails: clientData,

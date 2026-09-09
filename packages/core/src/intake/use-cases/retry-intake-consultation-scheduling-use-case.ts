@@ -12,7 +12,7 @@ import {
 } from '../domain/errors'
 import { IntakeConsultationSchedulingRequestedEvent } from '../domain/events'
 import { IntakeStatus } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type Request = {
   intakeId: string

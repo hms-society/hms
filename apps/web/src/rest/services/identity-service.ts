@@ -40,6 +40,10 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
       return restClient.post<ClientConsent>(`/clients/${clientId}/consents`, { type })
     },
 
+    updateClient(clientId, changes) {
+      return restClient.patch<ClientDetails>(`/clients/${clientId}`, changes)
+    },
+
     listClients(params) {
       const searchParams = new URLSearchParams()
       searchParams.append('page', params.page.toString())

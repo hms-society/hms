@@ -4,7 +4,7 @@ import {
   UserStatus,
   type CollaboratorListQuery,
 } from '../domain/structures'
-import type { CollaboratorsRepository } from '../interfaces'
+import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
 

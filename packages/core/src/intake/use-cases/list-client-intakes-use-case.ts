@@ -1,7 +1,7 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 
 import type { Intake } from '../domain/entities'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type Request = {
   clientId: string
