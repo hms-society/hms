@@ -33,6 +33,8 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
   const {
     activeTab,
     caseUuid,
+    caseDetails,
+    isLoading,
     checklistItems,
     completionPercentage,
     displayCaseId,
@@ -101,13 +103,13 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <div className='flex flex-wrap items-center justify-end gap-2'>
             <div className='mr-1 flex items-center'>
               <div className='flex -space-x-1.5'>
-                {TEAM_MEMBERS.map((member) => (
+                {caseDetails?.team?.map((member) => (
                   <Avatar
-                    key={member.initials}
+                    key={member.collaboratorId}
                     className='size-8 border-2 border-secondary'
                   >
-                    <AvatarFallback className={`${member.className} text-[12px]`}>
-                      {member.initials}
+                    <AvatarFallback className={`bg-teal-700 text-white text-[12px]`}>
+                      {member.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 ))}
@@ -223,7 +225,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             mandatoryItemsCount={mandatoryItemsCount}
             pendingItemsCount={pendingItemsCount}
             tasks={CASE_TASKS}
-            team={CASE_TEAM}
+            team={caseDetails?.team ?? []}
             timeline={CASE_TIMELINE}
             validatedItemsCount={validatedItemsCount}
             onOpenChecklist={handleOpenChecklistTab}

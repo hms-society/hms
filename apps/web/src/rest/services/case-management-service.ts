@@ -29,6 +29,10 @@ export const CaseManagementService = (
       return restClient.get<readonly LegalCaseSummary[]>('/cases/my')
     },
 
+    getLegalCaseDetails(caseId) {
+      return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
+    },
+
     reviewChecklistGate(caseId, request) {
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
     },

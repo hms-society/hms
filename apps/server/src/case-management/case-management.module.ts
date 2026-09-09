@@ -7,6 +7,7 @@ import {
   ListCaseChecklistController,
   ListMyLegalCasesController,
   ReviewCaseChecklistGateController,
+  GetLegalCaseDetailsController,
 } from '@/case-management/rest/controllers'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
@@ -19,6 +20,7 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ListCaseChecklistController,
     ListMyLegalCasesController,
     ReviewCaseChecklistGateController,
+    GetLegalCaseDetailsController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

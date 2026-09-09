@@ -32,6 +32,7 @@ export interface CaseManagementService {
   ): Promise<RestResponse<CaseChecklistItem>>
   listCaseChecklist(caseId: string): Promise<RestResponse<readonly CaseChecklistItem[]>>
   listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
+  getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
   reviewChecklistGate(
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
