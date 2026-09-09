@@ -79,7 +79,7 @@ export class UpdateDocumentAccessClassificationController {
         documentId,
         userId: req.identity?.user?.id as string,
         collaboratorId: req.identity?.collaborator?.collaboratorId as string,
-        collaboratorProfile: req.identity?.collaborator?.profile as string,
+        collaboratorProfile: req.identity?.collaborator?.profile as any,
         newClassification: body.classification,
       })
 
