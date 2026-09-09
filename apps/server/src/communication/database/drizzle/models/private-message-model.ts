@@ -1,12 +1,10 @@
 import { jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { clientModel } from '@/identity/database/drizzle/models/client-model'
+
 import { communicationDirectionModel } from './communication-model'
 
 export const privateMessageModel = pgTable('private_messages', {
   id: uuid('id').defaultRandom().primaryKey(),
-  clientId: uuid('client_id')
-    .notNull()
-    .references(() => clientModel.id, { onDelete: 'cascade' }),
+  clientId: uuid('client_id').notNull(),
   collaboratorId: uuid('collaborator_id').notNull(),
   intakeId: uuid('intake_id').notNull(),
   clientPhone: text('client_phone'),

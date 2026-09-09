@@ -16,3 +16,7 @@ coverage
 *.log
 tmp
 **/tmp
+
+# local secret files are mounted at runtime, never copied into images
+.secrets
+.secrets/**

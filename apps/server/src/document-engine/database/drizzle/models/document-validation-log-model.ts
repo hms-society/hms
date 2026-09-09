@@ -1,5 +1,5 @@
 import { index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { userModel } from '@/identity/database/drizzle/models'
+
 import { documentBatchFileModel } from './document-batch-file-model'
 import { documentStatusModel } from './document-status-model'
 
@@ -10,9 +10,7 @@ export const documentValidationLogModel = pgTable(
     documentFileId: uuid('document_file_id')
       .references(() => documentBatchFileModel.id, { onDelete: 'cascade' })
       .notNull(),
-    actorId: uuid('actor_id').references(() => userModel.id, {
-      onDelete: 'set null',
-    }),
+    actorId: uuid('actor_id'),
     action: text('action').notNull(),
     status: documentStatusModel('status'),
     decision: text('decision'),

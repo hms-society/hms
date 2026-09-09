@@ -36,6 +36,6 @@ import {
     UpdateIntakeController,
     CloseIntakeWithoutContractController,
   ],
-  exports: [IntakeMessagingModule],
+  exports: [IntakeDatabaseModule, IntakeMessagingModule],
 })
 export class IntakeModule {}

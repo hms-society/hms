@@ -1,5 +1,5 @@
 {
-  "id": "e3fe6fec-2124-4e23-a273-60d1b4797910",
+  "id": "bca53da3-3858-4f43-bfa2-55679d6ac91c",
   "prevId": "21de937a-8229-4a0c-aab6-7f5f0b9192dd",
   "version": "7",
   "dialect": "postgresql",
@@ -1994,14 +1994,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "classificacao_acesso": {
-          "name": "classificacao_acesso",
-          "type": "classificacao_acesso",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'INTERNO'"
-        },
         "current_version_id": {
           "name": "current_version_id",
           "type": "uuid",
@@ -2259,130 +2251,6 @@
           "columnsFrom": ["document_specification_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.auditoria_documentos": {
-      "name": "auditoria_documentos",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "documento_id": {
-          "name": "documento_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "usuario_responsavel_id": {
-          "name": "usuario_responsavel_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "valor_anterior": {
-          "name": "valor_anterior",
-          "type": "classificacao_acesso",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "valor_novo": {
-          "name": "valor_novo",
-          "type": "classificacao_acesso",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "auditoria_documentos_documento_id_documents_id_fk": {
-          "name": "auditoria_documentos_documento_id_documents_id_fk",
-          "tableFrom": "auditoria_documentos",
-          "tableTo": "documents",
-          "columnsFrom": ["documento_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.logs_acesso_externo": {
-      "name": "logs_acesso_externo",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "documento_id": {
-          "name": "documento_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ip_origem": {
-          "name": "ip_origem",
-          "type": "varchar(45)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token_utilizado": {
-          "name": "token_utilizado",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "motivo_negativa": {
-          "name": "motivo_negativa",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "data_hora": {
-          "name": "data_hora",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "logs_acesso_externo_documento_id_documents_id_fk": {
-          "name": "logs_acesso_externo_documento_id_documents_id_fk",
-          "tableFrom": "logs_acesso_externo",
-          "tableTo": "documents",
-          "columnsFrom": ["documento_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -3672,6 +3540,210 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.formalizations": {
+      "name": "formalizations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "intake_id": {
+          "name": "intake_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consultation_id": {
+          "name": "consultation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assigned_lawyer_id": {
+          "name": "assigned_lawyer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'in_progress'"
+        },
+        "contract_form_id": {
+          "name": "contract_form_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contract_form_snapshot": {
+          "name": "contract_form_snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contract_form_answers": {
+          "name": "contract_form_answers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "contract_form_state": {
+          "name": "contract_form_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'open'"
+        },
+        "contract_form_revision": {
+          "name": "contract_form_revision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "contract_form_closed_at": {
+          "name": "contract_form_closed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contract_form_closed_by_collaborator_id": {
+          "name": "contract_form_closed_by_collaborator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents_confirmed_at": {
+          "name": "documents_confirmed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents_confirmed_by_collaborator_id": {
+          "name": "documents_confirmed_by_collaborator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents_confirmed_revision": {
+          "name": "documents_confirmed_revision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_by_collaborator_id": {
+          "name": "cancelled_by_collaborator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "formalizations_intake_uq": {
+          "name": "formalizations_intake_uq",
+          "columns": [
+            {
+              "expression": "intake_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "formalizations_assigned_lawyer_idx": {
+          "name": "formalizations_assigned_lawyer_idx",
+          "columns": [
+            {
+              "expression": "assigned_lawyer_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "formalizations_status_check": {
+          "name": "formalizations_status_check",
+          "value": "\"formalizations\".\"status\" in ('in_progress', 'completed', 'cancelled')"
+        },
+        "formalizations_form_state_check": {
+          "name": "formalizations_form_state_check",
+          "value": "\"formalizations\".\"contract_form_state\" in ('open', 'closed')"
+        },
+        "formalizations_revision_check": {
+          "name": "formalizations_revision_check",
+          "value": "\"formalizations\".\"contract_form_revision\" >= 0 and \"formalizations\".\"version\" >= 1"
+        },
+        "formalizations_confirmation_check": {
+          "name": "formalizations_confirmation_check",
+          "value": "(\n        (\"formalizations\".\"documents_confirmed_at\" is null and \"formalizations\".\"documents_confirmed_by_collaborator_id\" is null and \"formalizations\".\"documents_confirmed_revision\" is null)\n        or\n        (\"formalizations\".\"documents_confirmed_at\" is not null and \"formalizations\".\"documents_confirmed_by_collaborator_id\" is not null and \"formalizations\".\"documents_confirmed_revision\" is not null)\n      )"
+        },
+        "formalizations_cancellation_check": {
+          "name": "formalizations_cancellation_check",
+          "value": "(\n        (\"formalizations\".\"status\" = 'cancelled' and \"formalizations\".\"cancelled_at\" is not null and \"formalizations\".\"cancelled_by_collaborator_id\" is not null)\n        or\n        (\"formalizations\".\"status\" <> 'cancelled' and \"formalizations\".\"cancelled_at\" is null and \"formalizations\".\"cancelled_by_collaborator_id\" is null)\n      )"
+        }
+      },
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -3773,11 +3845,6 @@
       "name": "user_type",
       "schema": "public",
       "values": ["internal", "external_client", "external_third_party", "external_lawyer"]
-    },
-    "public.classificacao_acesso": {
-      "name": "classificacao_acesso",
-      "schema": "public",
-      "values": ["INTERNO", "CLIENTE", "RESTRITO", "CONFIDENCIAL", "PARCEIRO_LIBERADO"]
     },
     "public.communication_channel": {
       "name": "communication_channel",

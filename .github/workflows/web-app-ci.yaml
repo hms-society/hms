@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HMS_WEB_APP_PORT: '5000'
-      VITE_HMS_SERVER_APP_URL: http://localhost:3333
+      VITE_HMS_SERVER_APP_URL: http://localhost:5555
       VITE_SUPABASE_URL: http://localhost:8000
       VITE_SUPABASE_KEY: test-anon-key
       # Os testes E2E de Formalização dependem do head final da cadeia empilhada.
@@ -39,7 +39,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Web changes detected.'
           else

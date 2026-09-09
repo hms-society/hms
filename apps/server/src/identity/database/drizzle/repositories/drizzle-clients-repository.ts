@@ -6,7 +6,6 @@ import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientModel } from '@/identity/database/drizzle/models'
 import { DrizzleClientMapper } from '@/identity/database/drizzle/mappers'
-import { intakeModel } from '@/intake/database'
 import { type SQL, and, desc, eq, or, ilike, sql } from 'drizzle-orm'
 
 @Injectable()
@@ -106,15 +105,9 @@ export class DrizzleClientsRepository
     }
 
     const records = await this.database
-      .select({
-        client: clientModel,
-        intakeCount: sql<number>`count(${intakeModel.id})::int`,
-        latestOrigin: sql<string>`(array_agg(${intakeModel.origin} ORDER BY ${intakeModel.createdAt} DESC))[1]`,
-      })
+      .select()
       .from(clientModel)
-      .leftJoin(intakeModel, eq(clientModel.id, intakeModel.clientId))
       .where(whereClause)
-      .groupBy(clientModel.id)
       .orderBy(desc(clientModel.createdAt))
       .limit(limit)
       .offset(offset)
@@ -126,9 +119,9 @@ export class DrizzleClientsRepository
 
     return {
       data: records.map((record) => ({
-        client: this.clientMapper.toDomain(record.client),
-        intakeCount: record.intakeCount,
-        latestOrigin: record.latestOrigin,
+        client: this.clientMapper.toDomain(record),
+        intakeCount: 0,
+        latestOrigin: null,
       })),
       total: totalCountResult?.count ?? 0,
     }

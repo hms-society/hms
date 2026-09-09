@@ -8,7 +8,7 @@ This document is the entry point for the rules under `documentation/rules`. Read
 it before starting repository work, then load only the rule documents that match
 the task's paths and architectural impact.
 
-For feature SDD, also read [`sdd-rules.md`](sdd-rules.md). It defines the
+For feature SDD, also read [`../sdd.md`](../sdd.md). It defines the
 canonical authority preflight, artifact ownership, statuses, workflow transitions,
 agent roles, living-evidence contract, and publication/closure lifecycle. This
 router still owns selection of the task-specific Rule Pack.
@@ -48,10 +48,11 @@ and surface the discrepancy before silently copying the implementation.
 | [`web-app-routing-rules.md`](web-app-routing-rules.md) | Creating, changing, renaming, or reviewing web application routes, route constants, route middleware, search validation, navigation paths, or generated route metadata. | `apps/web/src/routes/**`, `apps/web/src/constants/routes.ts`, `apps/web/src/middlewares/**`, `apps/web/src/routeTree.gen.ts` |
 | [`widget-testing-rules.md`](widget-testing-rules.md) | Creating, changing, or reviewing tests for React widgets, layouts, pages, application hooks, navigation behavior, or their mocks. | `apps/web/src/**/*.test.ts`, `apps/web/src/**/*.test.tsx`, colocated web `tests/` directories |
 | [`core-package-rules.md`](core-package-rules.md) | Changing shared domain entities, structures, errors, events, interfaces, constants, or use cases. Also read it when an app change requires a new or changed core contract. | `packages/core/src/**`, `packages/core/package.json` exports |
-| [`validation-package-rules.md`](validation-package-rules.md) | Creating, changing, moving, exporting, testing, or consuming reusable Zod schemas, including form, REST, route-search, environment, and event validation. | `packages/validation/**`, imports from `@hms/validation/**`, reusable schemas in apps |
+| [`validation-package-rules.md`](validation-package-rules.md) | Changing shared Zod schemas or validation package configuration. | `packages/validation/**` |
 | [`use-case-testing-rules.md`](use-case-testing-rules.md) | Creating or changing core use cases, their unit tests, domain fakers used by those tests, or mocked use-case dependencies. | `packages/core/src/**/use-cases/**`, `packages/core/src/**/domain/**/fakers/**` |
 | [`rest-layer-rules.md`](rest-layer-rules.md) | Adding or changing HTTP routes, NestJS controllers, route decorators, request-body mapping, global REST errors, `.rest` examples, core REST contracts, or web module services that consume those routes. | `apps/server/src/**/rest/**`, `apps/server/src/**/decorators/**`, `apps/server/rest-client/**`, `apps/web/src/rest/services/**`, REST interfaces in `packages/core` |
 | [`controllers-testing-rules.md`](controllers-testing-rules.md) | Creating or changing server controller tests, REST fixtures, HTTP assertions, or test application wiring for database-backed routes. | `apps/server/src/**/rest/controllers/tests/**`, `apps/server/src/**/fixtures/**`, `apps/server/src/shared/rest/tests/**` |
+| [`jobs-testing-rules.md`](jobs-testing-rules.md) | Creating or changing Inngest job tests, module-fixture job composition, Dockerized job infrastructure, job business-rule coverage, or the dedicated Inngest Vitest/CI suite. | `apps/server/src/**/messaging/inngest/jobs/tests/**`, `apps/server/src/shared/messaging/inngest/inngest-fixture.ts`, `apps/server/vitest.inngest.config.mts`, server CI `test:inngest` steps |
 | [`database-layer-rules.md`](database-layer-rules.md) | Changing Drizzle models, persistence types, mappers, repositories, repository tokens, database modules, migrations, or seeders. Also read it when a controller or use case change requires persistence work. | `apps/server/src/**/database/**`, `apps/server/src/shared/database/**`, `apps/server/drizzle.config.ts` |
 | [`provision-layer-rules.md`](provision-layer-rules.md) | Creating or changing server providers, web provision adapters, provider contracts, environment access, time access, provider registration, or provider mocks in use-case tests. | `apps/server/src/shared/provision/**`, `apps/web/src/provision/**`, shared provider interfaces in `packages/core`, tests mocking those providers |
 | [`server-app-layer-rules.md`](server-app-layer-rules.md) | Creating or changing feature-owned server provision, messaging, or AI directories, Nest layer modules, feature providers, jobs, or their registration in a feature root module. | `apps/server/src/<module>/provision/**`, `apps/server/src/<module>/messaging/**`, `apps/server/src/<module>/ai/**`, `apps/server/src/<module>/<module>.module.ts` |
@@ -76,7 +77,8 @@ actual scope:
 | Change a use case only | Core Package + Use Case Testing |
 | Add or change a shared provider | Provision Layer + Core Package; add Use Case Testing when use-case tests consume it |
 | Add a feature provider | Server App Layer; add Provision Layer when the change also affects a shared provider or core provider contract |
-| Add or change an event-driven job | Messaging Layer + Server App Layer; add Core Package when its domain event or interface changes |
+| Add or change an event-driven job | Messaging Layer + Server App Layer + Job Testing; add Core Package when its domain event or interface changes |
+| Change a Dockerized job integration test | Messaging Layer + Job Testing; add Database Layer or Provision Layer when persistence or external-provider behavior changes |
 | Add or change an AI workflow | AI Layer + Server App Layer + Core Package; add Provision Layer when model environment resolution changes |
 | Change a database-backed controller test | REST Layer + Controller Testing + Database Layer |
 | Create a commit | Commit Rules, plus the implementation rules already selected for validating the changed scope |
