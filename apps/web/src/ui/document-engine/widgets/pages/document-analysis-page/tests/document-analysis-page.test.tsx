@@ -210,7 +210,6 @@ function getDocumentAnalysisController(
     documentView: {
       id: document.id,
       fileName: document.fileName,
-      confidence: 'Alta confiança',
       type: 'comprovante_residencia',
       fileSize: '1 KB',
       receivedFrom: 'Mariana Costa Silva',

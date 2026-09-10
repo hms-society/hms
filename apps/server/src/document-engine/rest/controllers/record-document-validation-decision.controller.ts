@@ -1,4 +1,5 @@
 import { Body, Inject, Param, ParseUUIDPipe, Patch } from '@nestjs/common'
+import type { DocumentValidationExtractedField } from '@hms/core/document-engine/domain/entities'
 import type { DocumentValidationDecision } from '@hms/core/document-engine/domain/structures'
 import type {
   CaseChecklistUpdateProvider,
@@ -19,6 +20,7 @@ type RequestBody = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 @DocumentValidationController()

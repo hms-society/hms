@@ -1,4 +1,7 @@
-import type { DocumentValidationDocument } from '../domain/entities'
+import type {
+  DocumentValidationDocument,
+  DocumentValidationExtractedField,
+} from '../domain/entities'
 import type {
   DocumentValidationDecision,
   DocumentValidationStatus,
@@ -32,6 +35,7 @@ export type RecordDocumentValidationDecisionInput = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export type RecordDocumentResendRequestInput = {

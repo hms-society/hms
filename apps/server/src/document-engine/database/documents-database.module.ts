@@ -17,7 +17,6 @@ import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/documen
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 import { DrizzleDocumentValidationLogsRepository } from './drizzle/repositories/drizzle-document-validation-logs-repository'
 import { DrizzleDocumentValidationsRepository } from './drizzle/repositories/drizzle-document-validations-repository'
-import { DocumentsSeeder } from './documents-seeder'
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
@@ -81,7 +80,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
       },
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
-    DocumentsSeeder,
     RealDocumentsSeeder,
   ],
   exports: [
@@ -91,7 +89,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DOCUMENT_ENGINE.documentValidationLogs,
     CreateDocumentBatchUseCase,
     ListTriageDocumentBatchesUseCase,
-    DocumentsSeeder,
     RealDocumentsSeeder,
   ],
 })

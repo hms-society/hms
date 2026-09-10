@@ -36,6 +36,7 @@ export type DocumentValidationHumanCorrection = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
   message?: string
 }
 

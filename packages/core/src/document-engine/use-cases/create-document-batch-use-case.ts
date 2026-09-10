@@ -1,6 +1,7 @@
 import type { DocumentBatch, DocumentBatchFile } from '../domain/entities/document-batch'
 import { DocumentBatchChannel } from '../domain/structures/document-batch-channel'
 import { DocumentBatchStatus } from '../domain/structures/document-batch-status'
+import { ClientNotFoundError } from '../../identity/domain/errors'
 import type { ClientsRepository } from '../../identity/interfaces/clients-repository'
 import type { Broker, DatetimeProvider } from '../../shared/interfaces'
 import { DocumentFileProcessingRequestedEvent } from '../domain/events'
@@ -32,8 +33,14 @@ export class CreateDocumentBatchUseCase {
     let resolvedClientId = request.clientId
 
     if (request.channel === DocumentBatchChannel.InternalUpload) {
+      if (request.clientId) {
+        const client = await this.clientsRepository.findById(request.clientId)
+
+        if (!client) throw new ClientNotFoundError()
+      }
+
       status = DocumentBatchStatus.Identified
-      inTriageBox = false
+      inTriageBox = true
     } else if (request.channel === DocumentBatchChannel.WhatsApp) {
       const clients = await this.clientsRepository.findByPhone(request.sender)
 

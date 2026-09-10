@@ -31,7 +31,6 @@ function renderPanel(onOpenDocument = vi.fn()) {
         form={form}
         currentDecision='duplicate'
         isSubmitting={false}
-        confidence='Alta confiança'
         document={DocumentValidationDocumentFaker.fake({
           duplicateMatch: {
             documentFileId: 'original-file-1',

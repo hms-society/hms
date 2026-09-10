@@ -1,5 +1,6 @@
 import type {
   DocumentValidationDocument,
+  DocumentValidationExtractedField,
   DocumentValidationLog,
 } from '../domain/entities'
 import type {
@@ -19,6 +20,7 @@ export type RecordDocumentValidationDecisionRequest = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export type RequestDocumentResendRequest = {

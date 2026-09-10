@@ -8,7 +8,10 @@ import {
   DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../domain/structures'
-import type { DocumentValidationDocument } from '../domain/entities'
+import type {
+  DocumentValidationDocument,
+  DocumentValidationExtractedField,
+} from '../domain/entities'
 import { AppError } from '../../shared/domain/errors'
 
 export type RecordDocumentValidationDecisionRequest = {
@@ -19,6 +22,7 @@ export type RecordDocumentValidationDecisionRequest = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export class RecordDocumentValidationDecisionUseCase {
@@ -140,6 +144,10 @@ export class RecordDocumentValidationDecisionUseCase {
       metadata.originalDocumentId = request.originalDocumentId
     }
 
+    if (request.extractedFields) {
+      metadata.extractedFields = request.extractedFields
+    }
+
     return metadata
   }
 
@@ -252,6 +260,7 @@ export class RecordDocumentValidationDecisionUseCase {
         checklistRequirementId: request.checklistRequirementId,
         originalDocumentId: request.originalDocumentId,
         reason: request.reason,
+        extractedFields: request.extractedFields,
       },
     }
   }

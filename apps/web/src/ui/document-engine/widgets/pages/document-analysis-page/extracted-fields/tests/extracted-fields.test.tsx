@@ -13,8 +13,9 @@ const useExtractedFieldsMock = vi.mocked(useExtractedFields)
 describe('ExtractedFields', () => {
   beforeEach(() => {
     useExtractedFieldsMock.mockReturnValue({
-      extractedCount: 1,
+      extractedCount: 3,
       getFieldIcon: vi.fn(() => 'file-text' as const),
+      getFieldKey: vi.fn((field) => `${field.label}:${field.value}`),
     })
   })
 
@@ -23,24 +24,28 @@ describe('ExtractedFields', () => {
     vi.clearAllMocks()
   })
 
-  it('shows the extraction count and fallback for missing values', () => {
+  it('shows every extracted field and fallback for missing values', () => {
     render(
       <ExtractedFields
         title='Campos extraídos'
         fields={[
-          { label: 'Titular', value: 'Mariana Costa Silva' },
+          { label: 'Nome', value: 'Carlos Eduardo Ferreira', confidence: 0.9 },
+          { label: 'Cargo', value: 'Analista de Sistemas' },
+          { label: 'Cargo', value: 'Departamento Jurídico' },
           { label: 'CPF', value: '', isMissing: true },
         ]}
       />,
     )
 
     expect(screen.getByText('Campos extraídos')).toBeDefined()
-    expect(screen.getByText('1 de 2')).toBeDefined()
-    expect((screen.getByLabelText('Titular') as HTMLInputElement).value).toBe(
-      'Mariana Costa Silva',
-    )
-    expect((screen.getByLabelText('CPF') as HTMLInputElement).value).toBe(
-      'Não identificado',
-    )
+    expect(screen.getByText('3 de 4')).toBeDefined()
+    expect(screen.getByText('Nome')).toBeDefined()
+    expect(screen.getByText('Carlos Eduardo Ferreira')).toBeDefined()
+    expect(screen.getAllByText('Cargo')).toHaveLength(2)
+    expect(screen.getByText('Analista de Sistemas')).toBeDefined()
+    expect(screen.getByText('Departamento Jurídico')).toBeDefined()
+    expect(screen.getByText('CPF')).toBeDefined()
+    expect(screen.getByText('Não identificado')).toBeDefined()
+    expect(screen.queryByText('90%')).toBeNull()
   })
 })

@@ -6,7 +6,6 @@ export type AnalysisFormPanelProps = {
   form: UseFormReturn<DocumentReviewFormData>
   currentDecision: string
   isSubmitting: boolean
-  confidence: string
   document: DocumentValidationDocument
   onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>
   onRequestResend: () => void

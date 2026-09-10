@@ -6,7 +6,7 @@ import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ChecklistLinkFields } from '../checklist-link-fields'
-import { ExtractedFields } from '../extracted-fields'
+import { EditableExtractedFields } from '../editable-extracted-fields'
 import { IllegibleDecisionState } from '../illegible-decision-state'
 import {
   useAnalysisFormPanel,
@@ -19,7 +19,6 @@ export const AnalysisFormPanel = ({
   form,
   currentDecision,
   isSubmitting,
-  confidence,
   document,
   onSubmit,
   onRequestResend,
@@ -34,17 +33,10 @@ export const AnalysisFormPanel = ({
     <aside className='flex flex-col bg-card'>
       <form onSubmit={onSubmit} className='flex h-full flex-col' noValidate>
         <div className='flex flex-1 flex-col gap-6 p-6'>
-          <div className='flex items-center justify-between'>
+          <div>
             <h2 className='font-sans text-sm font-semibold text-foreground'>
               Resultado da validação
             </h2>
-            <Badge
-              variant='secondary'
-              className='gap-1 bg-[#E1F5F6] text-[#0F5C61] px-2 py-0.5 text-[10px] font-semibold border-0'
-            >
-              <Icon name='scan' className='size-3' />
-              {confidence}
-            </Badge>
           </div>
 
           <Field data-invalid={Boolean(form.formState.errors.decision)}>
@@ -79,22 +71,19 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'validate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA identificou o documento esperado e encontrou todos os campos
-                obrigatórios.
+                A classificação automática encontrou o vínculo e os dados necessários para
+                revisão.
               </p>
               <ChecklistLinkFields form={form} document={document} />
-              <ExtractedFields
-                title='Campos extraídos'
-                fields={document.extractedFields}
-              />
+              <EditableExtractedFields title='Campos extraídos' form={form} />
             </div>
           )}
 
           {currentDecision === 'not_linked' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA analisou o arquivo, mas não encontrou um caso com confiança
-                suficiente.
+                O arquivo foi processado, mas não foi encontrado um vínculo seguro de caso
+                ou checklist.
               </p>
               <div className='flex items-start gap-3 rounded-lg bg-highlight p-3'>
                 <Icon name='help-circle' className='mt-0.5 size-4 text-primary' />
@@ -103,10 +92,7 @@ export const AnalysisFormPanel = ({
                 </span>
               </div>
               <ChecklistLinkFields form={form} document={document} isChecklistDisabled />
-              <ExtractedFields
-                title='Dados identificados pela IA'
-                fields={document.extractedFields}
-              />
+              <EditableExtractedFields title='Dados extraídos' form={form} />
             </div>
           )}
 
@@ -118,10 +104,7 @@ export const AnalysisFormPanel = ({
                 Faltam um ou mais campos obrigatórios antes da validação final.
               </p>
               <ChecklistLinkFields form={form} document={document} />
-              <ExtractedFields
-                title='Campos extraídos'
-                fields={document.extractedFields}
-              />
+              <EditableExtractedFields title='Campos extraídos' form={form} />
               <Field data-invalid={Boolean(form.formState.errors.reason)}>
                 <label
                   htmlFor='reason'
@@ -143,7 +126,7 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'duplicate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA encontrou um arquivo com o mesmo hash SHA-256. Revise a
+                Foi encontrado um arquivo com o mesmo hash SHA-256. Revise a
                 correspondência antes de confirmar.
               </p>
 

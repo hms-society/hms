@@ -1,6 +1,5 @@
 @baseUrl = http://localhost:3333
 @seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
-@clientId = replace-with-client-uuid
 
 ### Sign in as seeded admin
 # @name signInAsSeededAdmin
@@ -13,9 +12,18 @@ Accept: application/json
   "password": "{{seedPassword}}"
 }
 
-### Upload one image document for AI extraction
-# Sends a single image so only one Inngest document-processing run is created.
-# @prompt clientId Enter the client UUID that should receive this single-image batch
+### Lookup Vinicius Lopes Machado client
+# @name lookupViniciusClient
+POST {{baseUrl}}/clients/lookup
+Content-Type: application/json
+Accept: application/json
+
+{
+  "phone": "5511987654321"
+}
+
+### Upload documento de identificação image for AI extraction
+# Sends one image and creates one document batch, so only one Inngest run starts.
 POST {{baseUrl}}/document-batches/internal-upload
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: multipart/form-data; boundary=boundary
@@ -23,7 +31,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="clientId"
 
-{{clientId}}
+{{lookupViniciusClient.response.body.$.client.id}}
 --boundary
 Content-Disposition: form-data; name="files"; filename="teste_documento_id.png"
 Content-Type: image/png
@@ -32,8 +40,7 @@ Content-Type: image/png
 --boundary--
 
 ### Upload ficha cadastral image for AI extraction
-# Sends a single image so only one Inngest document-processing run is created.
-# @prompt clientId Enter the client UUID that should receive this single-image batch
+# Sends one image and creates one document batch, so only one Inngest run starts.
 POST {{baseUrl}}/document-batches/internal-upload
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: multipart/form-data; boundary=boundary
@@ -41,7 +48,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="clientId"
 
-{{clientId}}
+{{lookupViniciusClient.response.body.$.client.id}}
 --boundary
 Content-Disposition: form-data; name="files"; filename="teste_ficha_cadastral.png"
 Content-Type: image/png
@@ -50,8 +57,7 @@ Content-Type: image/png
 --boundary--
 
 ### Upload recibo image for AI extraction
-# Sends a single image so only one Inngest document-processing run is created.
-# @prompt clientId Enter the client UUID that should receive this single-image batch
+# Sends one image and creates one document batch, so only one Inngest run starts.
 POST {{baseUrl}}/document-batches/internal-upload
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: multipart/form-data; boundary=boundary
@@ -59,7 +65,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="clientId"
 
-{{clientId}}
+{{lookupViniciusClient.response.body.$.client.id}}
 --boundary
 Content-Disposition: form-data; name="files"; filename="teste_recibo.png"
 Content-Type: image/png

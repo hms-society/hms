@@ -8,6 +8,7 @@ import {
   HttpStatus,
   BadRequestException,
   Body,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import {
@@ -72,7 +73,7 @@ export class InternalUploadController {
   })
   async handle(
     @UploadedFiles() rawFiles: Array<MulterFile>,
-    @Body('clientId') clientId: string,
+    @Body('clientId', new ParseUUIDPipe({ version: '4' })) clientId: string,
     @CurrentUser() authUser: AuthUser,
   ) {
     if (!clientId) {

@@ -48,7 +48,7 @@ describe('CreateDocumentBatchUseCase', () => {
     )
   })
 
-  it('should identify the batch and bypass triage when channel is InternalUpload', async () => {
+  it('should identify the batch and keep it visible in triage when channel is InternalUpload', async () => {
     const result = await useCase.execute({
       channel: DocumentBatchChannel.InternalUpload,
       sender: 'internal-user-id',
@@ -57,7 +57,7 @@ describe('CreateDocumentBatchUseCase', () => {
     })
 
     expect(result.status).toBe(DocumentBatchStatus.Identified)
-    expect(result.inTriageBox).toBe(false)
+    expect(result.inTriageBox).toBe(true)
     expect(result.readableId).toBe('LOTE-20260807-0001')
     expect(clientsRepository.findByPhone).not.toHaveBeenCalled()
   })

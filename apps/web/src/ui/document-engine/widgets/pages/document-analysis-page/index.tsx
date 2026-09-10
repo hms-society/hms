@@ -162,7 +162,6 @@ export const DocumentAnalysisPage = ({
                 form={form}
                 currentDecision={currentDecision}
                 isSubmitting={isSubmitting}
-                confidence={documentView.confidence}
                 document={document}
                 onSubmit={onSubmit}
                 onRequestResend={handleRequestResend}

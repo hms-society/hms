@@ -16,7 +16,6 @@ import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 export type AnalysisDocumentView = {
   id: string
   fileName: string
-  confidence: string
   type: string
   fileSize: string
   receivedFrom: string
@@ -34,7 +33,6 @@ export type AnalysisDocumentView = {
 const FALLBACK_DOCUMENT: AnalysisDocumentView = {
   id: '',
   fileName: 'Carregando documento...',
-  confidence: 'Sem sugestão disponível',
   type: '',
   fileSize: '0 KB',
   receivedFrom: 'Carregando',
@@ -69,7 +67,6 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     return {
       id: validationDocument.id,
       fileName: validationDocument.fileName,
-      confidence: getConfidenceLabel(validationDocument),
       type: getStringSuggestion(validationDocument, 'documentTypeId') ?? '',
       fileSize: formatFileSize(validationDocument.sizeBytes),
       receivedFrom: getSenderName(validationDocument),
@@ -139,22 +136,6 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     }
   }
 
-  function getConfidenceLabel(validationDocument: DocumentValidationDocument) {
-    const label = getStringSuggestion(validationDocument, 'confidenceLabel')
-
-    if (label) return label
-
-    if (validationDocument.aiConfidence === undefined) {
-      return 'Sem sugestão disponível'
-    }
-    if (validationDocument.aiConfidence >= 90) {
-      return 'Sugerido pela IA - Confiança alta'
-    }
-    if (validationDocument.aiConfidence >= 60) return 'Sugerido pela IA'
-
-    return 'Baixa confiança'
-  }
-
   function getStringSuggestion(
     validationDocument: DocumentValidationDocument | undefined,
     key: string,
@@ -216,6 +197,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
         document?.duplicateMatch?.documentFileId ??
         document?.humanCorrection?.originalDocumentId ??
         '',
+      extractedFields:
+        document?.humanCorrection?.extractedFields ?? document?.extractedFields ?? [],
     },
   })
 

@@ -177,6 +177,7 @@ export class DrizzleDocumentValidationsRepository
       checklistRequirementId: input.checklistRequirementId,
       reason: input.reason,
       originalDocumentId: input.originalDocumentId,
+      extractedFields: input.extractedFields,
     }
 
     await this.database
@@ -184,6 +185,7 @@ export class DrizzleDocumentValidationsRepository
       .set({
         status: input.status,
         humanCorrection,
+        extractedFields: input.extractedFields,
         reviewedBy: input.reviewedBy,
         reviewedAt: new Date(),
         caseId: input.caseId,
