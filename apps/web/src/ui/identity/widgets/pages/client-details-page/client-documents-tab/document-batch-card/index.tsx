@@ -10,7 +10,8 @@ import {
 export type { DocumentBatchCardProps } from './use-document-batch-card'
 
 export const DocumentBatchCard = ({ batch }: DocumentBatchCardProps) => {
-  const { handleToggleExpanded, handleViewFile, isExpanded } = useDocumentBatchCard()
+  const { handleToggleExpanded, handleViewFile, isExpanded, getFileStatus } =
+    useDocumentBatchCard()
 
   return (
     <Card className='mb-4 flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm'>
@@ -55,40 +56,42 @@ export const DocumentBatchCard = ({ batch }: DocumentBatchCardProps) => {
       {isExpanded && (
         <CardContent className='flex flex-col p-0'>
           {batch.files && batch.files.length > 0 ? (
-            batch.files.map((file: any) => (
-              <div
-                key={file.id}
-                className='flex items-center justify-between border-b border-border px-5 py-4 last:border-0'
-              >
-                <div className='flex items-center gap-4'>
-                  <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
-                    <Icon name='file-text' className='h-5 w-5' />
+            batch.files.map((file) => {
+              const status = getFileStatus(file)
+
+              return (
+                <div
+                  key={file.id}
+                  className='flex items-center justify-between border-b border-border px-5 py-4 last:border-0'
+                >
+                  <div className='flex items-center gap-4'>
+                    <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
+                      <Icon name='file-text' className='h-5 w-5' />
+                    </div>
+                    <div className='flex flex-col'>
+                      <span className='text-sm font-medium text-foreground'>
+                        {file.originalName}
+                      </span>
+                      <span className='text-xs text-muted-foreground'>
+                        {file.mimeType} • {(file.sizeBytes / 1024).toFixed(2)} KB
+                      </span>
+                    </div>
                   </div>
-                  <div className='flex flex-col'>
-                    <span className='text-sm font-medium text-foreground'>
-                      {file.originalName}
-                    </span>
-                    <span className='text-xs text-muted-foreground'>
-                      {file.mimeType} • {(file.sizeBytes / 1024).toFixed(2)} KB
-                    </span>
+                  <div className='flex items-center gap-6'>
+                    <Badge variant={status.variant}>{status.label}</Badge>
+                    <Button
+                      variant='ghost'
+                      size='icon-sm'
+                      className='text-muted-foreground'
+                      aria-label={`Visualizar ${file.originalName}`}
+                      onClick={() => handleViewFile(file.id)}
+                    >
+                      <Icon name='eye' className='h-4 w-4' />
+                    </Button>
                   </div>
                 </div>
-                <div className='flex items-center gap-6'>
-                  <Badge className='border-none bg-green-100 font-medium text-green-700 shadow-none hover:bg-green-100'>
-                    Recebido
-                  </Badge>
-                  <Button
-                    variant='ghost'
-                    size='icon-sm'
-                    className='text-muted-foreground'
-                    aria-label={`Visualizar ${file.originalName}`}
-                    onClick={() => handleViewFile(file.id)}
-                  >
-                    <Icon name='eye' className='h-4 w-4' />
-                  </Button>
-                </div>
-              </div>
-            ))
+              )
+            })
           ) : (
             <div className='px-5 py-4 text-center text-xs text-muted-foreground'>
               Nenhum arquivo processado neste lote.

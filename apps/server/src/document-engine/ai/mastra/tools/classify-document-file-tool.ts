@@ -37,6 +37,13 @@ export class ClassifyDocumentFileTool {
           return input as z.infer<typeof outputSchema>
         }
 
+        if (
+          input.suggestion?.suggestedStatus ===
+          DocumentValidationStatus.ProcessingFailure
+        ) {
+          return input as z.infer<typeof outputSchema>
+        }
+
         return {
           ...input,
           suggestion: this.classify(input),

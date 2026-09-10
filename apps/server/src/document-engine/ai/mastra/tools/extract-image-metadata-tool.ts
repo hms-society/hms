@@ -6,6 +6,7 @@ import { z } from 'zod'
 
 import { DocumentImageAnalyzerAgent } from '@/document-engine/ai/mastra/agents'
 import { suggestionSchema } from '@/document-engine/ai/mastra/schemas'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const inputSchema = z.object({
   batchId: z.string().uuid(),
@@ -38,7 +39,10 @@ export class ExtractImageTool {
     typeof createTool<'extract-image-metadata', typeof inputSchema, typeof outputSchema>
   >
 
-  constructor(private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent) {
+  constructor(
+    private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent,
+    private readonly envProvider: EnvProvider,
+  ) {
     this.function = createTool({
       id: 'extract-image-metadata',
       description: 'Extract text from an image document with a local vision model.',
@@ -61,10 +65,24 @@ export class ExtractImageTool {
           }
         }
 
-        const extractedTextFull = await this.extractText(
-          input.contentBase64,
-          input.mimeType,
-        )
+        const extraction = await this.extractText(input.contentBase64, input.mimeType)
+
+        if (!extraction.success) {
+          return {
+            batchId: input.batchId,
+            documentFileId: input.documentFileId,
+            metadata: {
+              mimeType: input.mimeType,
+              sizeBytes: input.sizeBytes,
+              hashSha256: input.hashSha256,
+              textLength: 0,
+              extractedTextFull: '',
+            },
+            suggestion: this.buildProcessingFailureSuggestion(extraction.reason),
+          }
+        }
+
+        const extractedTextFull = extraction.text
 
         return {
           batchId: input.batchId,
@@ -84,22 +102,24 @@ export class ExtractImageTool {
 
   private async extractText(contentBase64: string, mimeType: string) {
     try {
-      const response = await this.imageAnalyzerAgent.generate([
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Transcribe only the readable text from this image. Return plain text only.',
-            },
-            {
-              type: 'image',
-              image: contentBase64,
-              mimeType,
-            },
-          ],
-        },
-      ])
+      const response = await this.withTemporaryAiTimeout(
+        this.imageAnalyzerAgent.generate([
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Transcribe only the readable text from this image. Return plain text only.',
+              },
+              {
+                type: 'image',
+                image: contentBase64,
+                mimeType,
+              },
+            ],
+          },
+        ]),
+      )
 
       const extractedTextFull = response.text
 
@@ -110,10 +130,65 @@ export class ExtractImageTool {
         )
       }
 
-      return this.normalizeText(extractedTextFull)
-    } catch {
-      return ''
+      return {
+        success: true as const,
+        text: this.normalizeText(extractedTextFull),
+      }
+    } catch (error) {
+      return {
+        success: false as const,
+        reason: this.normalizeErrorReason(error),
+      }
     }
+  }
+
+  private buildProcessingFailureSuggestion(reason: string) {
+    return {
+      suggestedStatus: DocumentValidationStatus.ProcessingFailure,
+      confidence: 0,
+      confidenceLabel: 'Falha no processamento automático',
+      extractedFields: [],
+      missingFields: [],
+      evidence: [],
+      failureReason: reason,
+      failureInstruction:
+        'Verifique se o modelo local de visão está disponível e tente processar o documento novamente.',
+    }
+  }
+
+  private async withTemporaryAiTimeout<Result>(operation: Promise<Result>) {
+    const timeoutMs = this.envProvider.get('OLLAMA_REQUEST_TIMEOUT_MS')
+    let timeout: ReturnType<typeof setTimeout>
+
+    try {
+      return await Promise.race([
+        operation,
+        new Promise<Result>((_, reject) => {
+          timeout = setTimeout(
+            () =>
+              reject(
+                new AppError(
+                  `Tempo limite de ${timeoutMs}ms excedido na chamada de IA local.`,
+                  'Timeout de IA Local',
+                ),
+              ),
+            timeoutMs,
+          )
+        }),
+      ])
+    } finally {
+      clearTimeout(timeout!)
+    }
+  }
+
+  private normalizeErrorReason(error: unknown) {
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return `A IA retornou erro durante a extração da imagem: ${error.message
+        .trim()
+        .slice(0, 160)}`
+    }
+
+    return 'A IA retornou erro durante a extração da imagem.'
   }
 
   private normalizeText(text: string) {

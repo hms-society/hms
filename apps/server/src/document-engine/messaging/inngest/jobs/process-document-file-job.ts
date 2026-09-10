@@ -50,9 +50,11 @@ export class ProcessDocumentFileJob extends InngestJob {
         )
 
         if (
-          event.data.mimeType.startsWith('image/') &&
-          !event.data.storagePath.startsWith('seed/') &&
-          result.suggestion?.suggestedStatus !== DocumentValidationStatus.Duplicate
+          this.shouldRequestJsonOrganization({
+            mimeType: event.data.mimeType,
+            storagePath: event.data.storagePath,
+            suggestedStatus: result.suggestion?.suggestedStatus,
+          })
         ) {
           const requestedEvent = new DocumentFileJsonOrganizationRequestedEvent({
             batchId: event.data.batchId,
@@ -74,5 +76,22 @@ export class ProcessDocumentFileJob extends InngestJob {
         return result
       },
     )
+  }
+
+  private shouldRequestJsonOrganization(input: {
+    mimeType: string
+    storagePath: string
+    suggestedStatus?: DocumentValidationStatus
+  }) {
+    return (
+      this.supportsTextJsonOrganization(input.mimeType) &&
+      !input.storagePath.startsWith('seed/') &&
+      input.suggestedStatus !== DocumentValidationStatus.Duplicate &&
+      input.suggestedStatus !== DocumentValidationStatus.ProcessingFailure
+    )
+  }
+
+  private supportsTextJsonOrganization(mimeType: string) {
+    return mimeType.startsWith('image/') || mimeType === 'application/pdf'
   }
 }

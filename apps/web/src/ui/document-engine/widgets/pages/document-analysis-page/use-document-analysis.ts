@@ -11,6 +11,7 @@ import {
 import { useDocumentValidationDocumentQuery } from '@/ui/document-engine/hooks/use-document-validation-document-query'
 import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/hooks/use-record-document-validation-decision-action'
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
+import { useReprocessDocumentFileAction } from '@/ui/document-engine/hooks/use-reprocess-document-file-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 export type AnalysisDocumentView = {
@@ -58,6 +59,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   const { recordDecision, isRecordingDecision } =
     useRecordDocumentValidationDecisionAction(fileId)
   const { requestResend, isRequestingResend } = useRequestDocumentResendAction(fileId)
+  const { reprocessDocument, isReprocessingDocument } =
+    useReprocessDocumentFileAction(fileId)
 
   function toAnalysisDocumentView(
     validationDocument: DocumentValidationDocument,
@@ -105,6 +108,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   function getStatusLabel(status: DocumentValidationDocument['status']) {
     const labels: Record<DocumentValidationDocument['status'], string> = {
       awaiting_validation: 'Aguardando validação',
+      processing: 'Em processamento',
       validated: 'Válido',
       not_linked: 'Não vinculado',
       illegible: 'Ilegível',
@@ -121,6 +125,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   function getStatusStyles(status: string) {
     switch (status) {
       case 'Falha no processamento':
+      case 'Em processamento':
       case 'Incompleto':
       case 'Reenvio solicitado':
         return 'bg-[#FFF3E0] text-[#7C4700]'
@@ -230,6 +235,10 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     setIsResendModalOpen(false)
   }
 
+  async function handleReprocessDocument() {
+    await reprocessDocument()
+  }
+
   function handleOpenDocument(documentFileId: string) {
     const navigationOptions = fromCaseId
       ? {
@@ -238,7 +247,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
         }
       : { params: { fileId: documentFileId } }
 
-    void navigateTo('documentViewer', navigationOptions)
+    void navigateTo('documentAnalysis', navigationOptions)
   }
 
   return {
@@ -247,12 +256,13 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     document,
     isLoading: isLoadingDocument,
     error: documentError,
-    isSubmitting: isRecordingDecision || isRequestingResend,
+    isSubmitting: isRecordingDecision || isRequestingResend || isReprocessingDocument,
     isResendModalOpen,
     onSubmit,
     handleRequestResend,
     handleCloseResendModal,
     handleConfirmResend,
+    handleReprocessDocument,
     handleOpenDocument,
     documentView: viewDocument,
   }

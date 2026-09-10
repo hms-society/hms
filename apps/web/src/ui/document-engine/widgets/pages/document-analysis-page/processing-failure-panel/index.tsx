@@ -4,13 +4,15 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 export type ProcessingFailurePanelProps = {
   failureInstruction?: string
   failureReason?: string
-  onRequestResend: () => void
+  isReprocessing?: boolean
+  onReprocess: () => void
 }
 
 export const ProcessingFailurePanel = ({
   failureInstruction,
   failureReason,
-  onRequestResend,
+  isReprocessing = false,
+  onReprocess,
 }: ProcessingFailurePanelProps) => (
   <aside className='flex flex-col bg-card'>
     <div className='flex flex-1 flex-col gap-6 p-6'>
@@ -58,10 +60,14 @@ export const ProcessingFailurePanel = ({
         type='button'
         variant='brand'
         className='h-11 gap-2 rounded-pill px-6 font-sans text-sm font-medium'
-        onClick={onRequestResend}
+        disabled={isReprocessing}
+        onClick={onReprocess}
       >
-        <Icon name='send' className='size-4' />
-        Solicitar reenvio
+        <Icon
+          name='refresh-cw'
+          className={`size-4 ${isReprocessing ? 'animate-spin' : ''}`}
+        />
+        Reprocessar documento
       </Button>
     </footer>
   </aside>

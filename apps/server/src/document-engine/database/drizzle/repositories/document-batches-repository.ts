@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import type {
+  CreateDocumentBatchFileRecord,
   CreateDocumentBatchRecord,
   DocumentBatchesRepository,
   PaginatedTriageBatches,
@@ -10,9 +11,11 @@ import type {
   DocumentBatch,
   DocumentBatchFile,
 } from '@hms/core/document-engine/domain/entities'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { documentBatchModel, documentBatchFileModel } from '../models'
 import { DrizzleDocumentBatchMapper } from '../mappers/drizzle-document-batch-mapper'
-import { eq, desc, inArray, count } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, inArray, lt } from 'drizzle-orm'
+import { AppError } from '@hms/core/shared/domain/errors'
 
 @Injectable()
 export class DrizzleDocumentBatchesRepository
@@ -44,7 +47,10 @@ export class DrizzleDocumentBatchesRepository
         .returning()
 
       if (!createdBatch) {
-        throw new Error('Failed to create document batch')
+        throw new AppError(
+          'Não foi possível criar o lote documental.',
+          'Erro de Lote Documental',
+        )
       }
 
       let createdFiles: (typeof documentBatchFileModel.$inferSelect)[] = []
@@ -68,6 +74,47 @@ export class DrizzleDocumentBatchesRepository
     })
   }
 
+  async addFiles(
+    batchId: string,
+    files: CreateDocumentBatchFileRecord[],
+  ): Promise<DocumentBatch> {
+    if (files.length > 0) {
+      await this.database.insert(documentBatchFileModel).values(
+        files.map((file) => ({
+          ...file,
+          batchId,
+        })),
+      )
+    }
+
+    return this.findRequiredBatchById(batchId)
+  }
+
+  async findDailyByClient(
+    clientId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<DocumentBatch | undefined> {
+    const [batch] = await this.database
+      .select()
+      .from(documentBatchModel)
+      .where(
+        and(
+          eq(documentBatchModel.clientId, clientId),
+          gte(documentBatchModel.createdAt, startDate),
+          lt(documentBatchModel.createdAt, endDate),
+        ),
+      )
+      .orderBy(asc(documentBatchModel.createdAt))
+      .limit(1)
+
+    if (!batch) {
+      return undefined
+    }
+
+    return this.findRequiredBatchById(batch.id)
+  }
+
   async findById(clientId: string): Promise<DocumentBatch[]> {
     const batches = await this.database
       .select()
@@ -83,10 +130,16 @@ export class DrizzleDocumentBatchesRepository
       .from(documentBatchFileModel)
       .where(inArray(documentBatchFileModel.batchId, batchIds))
 
-    const records = batches.map((batch) => ({
-      ...batch,
-      files: files.filter((f) => f.batchId === batch.id),
-    }))
+    const records = batches
+      .map((batch) => ({
+        ...batch,
+        files: files.filter(
+          (f) =>
+            f.batchId === batch.id &&
+            f.status !== DocumentValidationStatus.Duplicate,
+        ),
+      }))
+      .filter((batch) => batch.files.length > 0)
 
     return records.map((record) => this.mapper.toDomain(record as any))
   }
@@ -172,5 +225,30 @@ export class DrizzleDocumentBatchesRepository
       sizeBytes: record.sizeBytes,
       createdAt: record.createdAt,
     }
+  }
+
+  private async findRequiredBatchById(batchId: string) {
+    const [batch] = await this.database
+      .select()
+      .from(documentBatchModel)
+      .where(eq(documentBatchModel.id, batchId))
+
+    if (!batch) {
+      throw new AppError(
+        'O lote documental não foi encontrado após a atualização.',
+        'Erro de Lote Documental',
+      )
+    }
+
+    const files = await this.database
+      .select()
+      .from(documentBatchFileModel)
+      .where(eq(documentBatchFileModel.batchId, batchId))
+      .orderBy(asc(documentBatchFileModel.createdAt))
+
+    return this.mapper.toDomain({
+      ...batch,
+      files,
+    } as any)
   }
 }

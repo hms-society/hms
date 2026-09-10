@@ -168,6 +168,18 @@ export class DrizzleDocumentValidationsRepository
     return this.findRequiredByFileId(input.documentFileId)
   }
 
+  async recordProcessing(documentFileId: string): Promise<DocumentValidationDocument> {
+    await this.database
+      .update(documentBatchFileModel)
+      .set({
+        status: DocumentValidationStatus.Processing,
+        aiConfidence: 0,
+      })
+      .where(eq(documentBatchFileModel.id, documentFileId))
+
+    return this.findRequiredByFileId(documentFileId)
+  }
+
   async recordDecision(
     input: RecordDocumentValidationDecisionInput,
   ): Promise<DocumentValidationDocument> {

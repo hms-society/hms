@@ -28,6 +28,15 @@ export type PaginatedTriageBatches = {
 
 export interface DocumentBatchesRepository {
   add(batch: CreateDocumentBatchRecord): Promise<DocumentBatch>
+  addFiles(
+    batchId: string,
+    files: CreateDocumentBatchFileRecord[],
+  ): Promise<DocumentBatch>
+  findDailyByClient(
+    clientId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<DocumentBatch | undefined>
   findById(clientId: string): Promise<DocumentBatch[]>
   findTriageBatches(params?: {
     page?: number

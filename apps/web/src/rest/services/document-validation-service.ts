@@ -47,6 +47,13 @@ export const DocumentValidationService = (
       )
     },
 
+    reprocess(documentFileId) {
+      return restClient.post<DocumentValidationDocument>(
+        `/document-validation/documents/${documentFileId}/reprocess`,
+        {},
+      )
+    },
+
     requestResend(documentFileId, request) {
       return restClient.post<DocumentValidationDocument>(
         `/document-validation/documents/${documentFileId}/resend-request`,

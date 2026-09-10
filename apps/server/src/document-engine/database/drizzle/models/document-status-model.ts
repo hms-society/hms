@@ -1,6 +1,7 @@
 import { pgEnum } from 'drizzle-orm/pg-core'
 
 export const documentStatusModel = pgEnum('document_status', [
+  'processing',
   'awaiting_validation',
   'validated',
   'not_linked',

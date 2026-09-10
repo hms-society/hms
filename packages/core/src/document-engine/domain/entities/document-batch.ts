@@ -3,6 +3,7 @@ import type {
   DocumentBatchSender,
   DocumentBatchStatus,
   DocumentBatchChannel,
+  DocumentValidationStatus,
 } from '../structures'
 import type { Entity } from '../../../shared/domain/entities/entity'
 
@@ -12,6 +13,7 @@ export type DocumentBatchFile = Entity & {
   originalName: string
   mimeType: string
   sizeBytes: number
+  status?: DocumentValidationStatus
   createdAt: Date
 }
 

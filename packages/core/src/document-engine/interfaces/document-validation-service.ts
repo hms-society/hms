@@ -38,6 +38,7 @@ export interface DocumentValidationService {
     documentFileId: string,
     request: RecordDocumentValidationDecisionRequest,
   ): Promise<RestResponse<DocumentValidationDocument>>
+  reprocess(documentFileId: string): Promise<RestResponse<DocumentValidationDocument>>
   requestResend(
     documentFileId: string,
     request: RequestDocumentResendRequest,

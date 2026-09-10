@@ -39,6 +39,23 @@ Content-Type: application/pdf
 < ../../src/document-engine/database/seed-assets/procuracao.pdf
 --boundary--
 
+### Upload comprovante de endereço simulado for AI extraction
+# Sends one PDF and creates one document batch, so only one Inngest run starts.
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="comprovante_endereco.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/comprovante_endereco.pdf
+--boundary--
+
 ### List document batches in triage
 GET {{baseUrl}}/document-batches/triage?page=1&limit=10
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

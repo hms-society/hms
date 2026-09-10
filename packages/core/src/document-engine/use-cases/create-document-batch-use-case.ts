@@ -1,6 +1,7 @@
 import type { DocumentBatch, DocumentBatchFile } from '../domain/entities/document-batch'
 import { DocumentBatchChannel } from '../domain/structures/document-batch-channel'
 import { DocumentBatchStatus } from '../domain/structures/document-batch-status'
+import { DocumentValidationStatus } from '../domain/structures/document-validation-status'
 import { ClientNotFoundError } from '../../identity/domain/errors'
 import type { ClientsRepository } from '../../identity/interfaces/clients-repository'
 import type { Broker, DatetimeProvider } from '../../shared/interfaces'
@@ -60,6 +61,34 @@ export class CreateDocumentBatchUseCase {
     const day = String(now.getUTCDate()).padStart(2, '0')
     const dateString = `${year}-${month}-${day}`
     const dateStringNoDashes = `${year}${month}${day}`
+    const startOfDay = new Date(Date.UTC(year, now.getUTCMonth(), now.getUTCDate()))
+    const endOfDay = new Date(
+      Date.UTC(year, now.getUTCMonth(), now.getUTCDate() + 1),
+    )
+
+    const files = request.files.map((file) => ({
+      ...file,
+      status: DocumentValidationStatus.Processing,
+    }))
+
+    if (resolvedClientId && !request.readableId) {
+      const dailyBatch = await this.documentBatchesRepository.findDailyByClient(
+        resolvedClientId,
+        startOfDay,
+        endOfDay,
+      )
+
+      if (dailyBatch) {
+        const batch = await this.documentBatchesRepository.addFiles(
+          dailyBatch.id,
+          files,
+        )
+
+        await this.publishProcessingEvents(batch, files)
+
+        return batch
+      }
+    }
 
     const count = await this.dailyCountersRepository.incrementAndGet('LOTE', dateString)
     const sequence = String(count).padStart(4, '0')
@@ -75,11 +104,23 @@ export class CreateDocumentBatchUseCase {
       clientId: resolvedClientId,
       intakeId: request.intakeId,
       createdBy: request.createdBy,
-      files: request.files,
+      files,
     })
 
+    await this.publishProcessingEvents(batch, files)
+
+    return batch
+  }
+
+  private async publishProcessingEvents(
+    batch: DocumentBatch,
+    createdFiles: Omit<DocumentBatchFile, 'id' | 'batchId' | 'createdAt'>[],
+  ) {
+    const storagePaths = new Set(createdFiles.map((file) => file.storagePath))
+    const files = batch.files?.filter((file) => storagePaths.has(file.storagePath)) ?? []
+
     await Promise.all(
-      (batch.files ?? []).map((file) =>
+      files.map((file) =>
         this.broker.publish(
           new DocumentFileProcessingRequestedEvent({
             batchId: batch.id,
@@ -92,7 +133,5 @@ export class CreateDocumentBatchUseCase {
         ),
       ),
     )
-
-    return batch
   }
 }

@@ -1,4 +1,5 @@
 export const DocumentValidationStatus = {
+  Processing: 'processing',
   AwaitingValidation: 'awaiting_validation',
   Valid: 'validated',
   NotLinked: 'not_linked',

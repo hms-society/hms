@@ -2,7 +2,10 @@ import { useMemo, useState } from 'react'
 import { isSameDay, isWithinInterval, startOfDay, endOfDay, format } from 'date-fns'
 import type { DateRange } from 'react-day-picker'
 import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
-import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
+import {
+  DocumentBatchChannel,
+  type DocumentValidationStatus,
+} from '@hms/core/document-engine/domain/structures'
 
 import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
 import type { IconName } from '@/ui/shared/widgets/components/icon'
@@ -70,6 +73,13 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   }
 
   function getStatusStyle(status: string) {
+    if (status === 'Em processamento') {
+      return {
+        badgeClasses: 'bg-[#E1F5F6] text-[#0F5C61]',
+        dotClasses: 'bg-[#0FA0AA]',
+      }
+    }
+
     if (status === 'Validado') {
       return {
         badgeClasses: 'bg-[#E8F5E9] text-[#1B5E20]',
@@ -127,11 +137,6 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
 
   function batchToInboxDocuments(batch: DocumentBatch): InboxDocument[] {
     const receivedAt = new Date(batch.createdAt)
-    const statusLabel =
-      batch.status === 'pending_identification' || batch.status === 'received'
-        ? 'Aguardando validação'
-        : 'Pendente'
-    const statusStyle = getStatusStyle(statusLabel)
     const channel = batch.channel ?? DocumentBatchChannel.WhatsApp
 
     const senderString =
@@ -142,26 +147,57 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
           : batch.sender.email
 
     if (batch.files && batch.files.length > 0) {
-      return batch.files.map((file) => ({
-        id: file.id,
-        fileName: file.originalName,
-        fileSize: formatFileSize(file.sizeBytes),
-        receivedFromIcon: getChannelIcon(channel),
-        receivedFrom: senderString,
-        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
-        caseId: batch.readableId ?? 'Sem vínculo seguro',
-        caseDesc: batch.clientId
-          ? 'Titular pré-identificado'
-          : 'Escolha manual necessária',
-        receivedDate: formatReceivedDate(receivedAt),
-        receivedTime: format(receivedAt, 'HH:mm'),
-        status: statusLabel,
-        badgeClasses: statusStyle.badgeClasses,
-        dotClasses: statusStyle.dotClasses,
-      }))
+      return batch.files.map((file) => {
+        const statusLabel = getFileStatusLabel(file.status, batch.status)
+        const statusStyle = getStatusStyle(statusLabel)
+
+        return {
+          id: file.id,
+          fileName: file.originalName,
+          fileSize: formatFileSize(file.sizeBytes),
+          receivedFromIcon: getChannelIcon(channel),
+          receivedFrom: senderString,
+          contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
+          caseId: batch.readableId ?? 'Sem vínculo seguro',
+          caseDesc: batch.clientId
+            ? 'Titular pré-identificado'
+            : 'Escolha manual necessária',
+          receivedDate: formatReceivedDate(receivedAt),
+          receivedTime: format(receivedAt, 'HH:mm'),
+          status: statusLabel,
+          badgeClasses: statusStyle.badgeClasses,
+          dotClasses: statusStyle.dotClasses,
+        }
+      })
     }
 
     return []
+  }
+
+  function getFileStatusLabel(
+    fileStatus: DocumentValidationStatus | undefined,
+    batchStatus: DocumentBatch['status'],
+  ) {
+    if (fileStatus) {
+      const labels: Record<DocumentValidationStatus, string> = {
+        processing: 'Em processamento',
+        awaiting_validation: 'Aguardando validação',
+        validated: 'Validado',
+        not_linked: 'Não vinculado',
+        illegible: 'Ilegível',
+        incomplete: 'Incompleto',
+        duplicate: 'Duplicado',
+        not_corresponding: 'Não correspondente',
+        processing_failure: 'Falha no processamento',
+        resend_requested: 'Reenvio solicitado',
+      }
+
+      return labels[fileStatus]
+    }
+
+    return batchStatus === 'pending_identification' || batchStatus === 'received'
+      ? 'Aguardando validação'
+      : 'Pendente'
   }
 
   const documents = batches.flatMap(batchToInboxDocuments)

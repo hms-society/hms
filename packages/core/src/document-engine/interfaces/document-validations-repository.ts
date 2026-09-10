@@ -55,6 +55,7 @@ export interface DocumentValidationsRepository {
   recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
   ): Promise<DocumentValidationDocument>
+  recordProcessing(documentFileId: string): Promise<DocumentValidationDocument>
   recordDecision(
     input: RecordDocumentValidationDecisionInput,
   ): Promise<DocumentValidationDocument>

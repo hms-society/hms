@@ -55,7 +55,9 @@ export const AnalysisFormPanel = ({
                   </NativeSelectOption>
                   <NativeSelectOption value='illegible'>Ilegível</NativeSelectOption>
                   <NativeSelectOption value='incomplete'>Incompleto</NativeSelectOption>
-                  <NativeSelectOption value='duplicate'>Duplicado</NativeSelectOption>
+                  <NativeSelectOption value='duplicate' disabled={!document.duplicateMatch}>
+                    Duplicado
+                  </NativeSelectOption>
                   <NativeSelectOption value='mismatch'>
                     Não correspondente
                   </NativeSelectOption>
@@ -71,8 +73,8 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'validate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A classificação automática encontrou o vínculo e os dados necessários para
-                revisão.
+                Revise o vínculo, ajuste os dados extraídos quando necessário e confirme
+                somente se o documento estiver apto para validação.
               </p>
               <ChecklistLinkFields form={form} document={document} />
               <EditableExtractedFields title='Campos extraídos' form={form} />
@@ -126,8 +128,8 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'duplicate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                Foi encontrado um arquivo com o mesmo hash SHA-256. Revise a
-                correspondência antes de confirmar.
+                Foi encontrado um arquivo igual já recebido. Revise a
+                correspondência antes de confirmar a duplicidade.
               </p>
 
               <input type='hidden' {...form.register('originalDocumentId')} />
@@ -184,23 +186,14 @@ export const AnalysisFormPanel = ({
                     </div>
                   </div>
 
-                  <div className='grid grid-cols-1 gap-3 font-sans text-xs sm:grid-cols-2'>
-                    <div className='flex flex-col gap-0.5'>
-                      <span className='text-muted-foreground'>Hash SHA-256</span>
-                      <span className='font-medium text-foreground'>
-                        {document.duplicateMatch?.hashSha256 ?? 'Não informado'}
-                      </span>
-                    </div>
-                    <div className='flex flex-col gap-0.5 text-left sm:text-right'>
-                      <span className='text-foreground'>
-                        {document.duplicateMatch?.caseLabel ?? 'Caso não informado'} ·{' '}
-                        {document.duplicateMatch?.checklistItemLabel ??
-                          'Item não informado'}
-                      </span>
-                      <span className='text-muted-foreground'>
-                        {document.duplicateMatch?.hashSha256 ?? 'Hash não informado'}
-                      </span>
-                    </div>
+                  <div className='flex flex-col gap-1 rounded-md bg-muted/50 p-3 font-sans text-xs'>
+                    <span className='font-medium text-foreground'>
+                      {document.duplicateMatch?.caseLabel ?? 'Caso não informado'}
+                    </span>
+                    <span className='text-muted-foreground'>
+                      {document.duplicateMatch?.checklistItemLabel ??
+                        'Item do checklist não informado'}
+                    </span>
                   </div>
 
                   <Button
@@ -256,6 +249,37 @@ export const AnalysisFormPanel = ({
                   id='mismatchReason'
                   className='mt-1 min-h-20 resize-none rounded-md bg-card font-sans text-sm'
                   placeholder='Descreva o motivo da não correspondência.'
+                  {...form.register('reason')}
+                />
+                <FieldError>{form.formState.errors.reason?.message}</FieldError>
+              </Field>
+            </div>
+          )}
+
+          {currentDecision === 'escalate' && (
+            <div className='flex flex-col gap-5'>
+              <p className='font-sans text-xs text-muted-foreground'>
+                Use esta decisão quando a análise depender de conferência jurídica antes
+                da validação operacional.
+              </p>
+              <div className='flex items-start gap-3 rounded-lg bg-highlight p-3'>
+                <Icon name='alert-circle' className='mt-0.5 size-4 text-primary' />
+                <span className='font-sans text-xs font-medium text-foreground'>
+                  Informe o motivo para encaminhar o documento a um advogado.
+                </span>
+              </div>
+              <EditableExtractedFields title='Dados extraídos' form={form} />
+              <Field data-invalid={Boolean(form.formState.errors.reason)}>
+                <label
+                  htmlFor='escalateReason'
+                  className='font-sans text-xs font-medium text-foreground'
+                >
+                  Motivo do acionamento
+                </label>
+                <Textarea
+                  id='escalateReason'
+                  className='mt-1 min-h-20 resize-none rounded-md bg-card font-sans text-sm'
+                  placeholder='Ex.: documento exige análise jurídica antes da validação.'
                   {...form.register('reason')}
                 />
                 <FieldError>{form.formState.errors.reason?.message}</FieldError>

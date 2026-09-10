@@ -85,12 +85,12 @@ describe('useDocumentAnalysis', () => {
     })
   })
 
-  it('opens the original document in the viewer', () => {
+  it('opens the original document in the analysis page', () => {
     const { result } = renderHook(() => useDocumentAnalysis({ fileId: document.id }))
 
     act(() => result.current.handleOpenDocument('original-file-1'))
 
-    expect(navigateTo).toHaveBeenCalledWith('documentViewer', {
+    expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'original-file-1' },
     })
   })
@@ -102,7 +102,7 @@ describe('useDocumentAnalysis', () => {
 
     act(() => result.current.handleOpenDocument('original-file-1'))
 
-    expect(navigateTo).toHaveBeenCalledWith('documentViewer', {
+    expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'original-file-1' },
       search: { fromCaseId: 'case-1' },
     })
