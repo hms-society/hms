@@ -24,5 +24,9 @@ export interface CaseChecklistItemsRepository {
   markAsValidatedByDocument(
     params: MarkChecklistItemValidatedParams,
   ): Promise<CaseChecklistItem | undefined>
+  replaceForCase(
+    caseId: string,
+    checklistItems: readonly Omit<CaseChecklistItemCreation, 'caseId'>[],
+  ): Promise<readonly CaseChecklistItem[]>
   removeAll(): Promise<void>
 }

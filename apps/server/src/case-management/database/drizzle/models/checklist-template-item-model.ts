@@ -32,9 +32,7 @@ export const checklistTemplateItemModel = pgTable(
     updatedBy: uuid('updated_by'),
   },
   (table) => [
-    index('checklist_template_items_template_id_idx').on(
-      table.checklistTemplateId,
-    ),
+    index('checklist_template_items_template_id_idx').on(table.checklistTemplateId),
     check(
       'checklist_template_items_title_not_blank_check',
       sql`char_length(btrim(${table.title})) > 0`,
@@ -43,9 +41,6 @@ export const checklistTemplateItemModel = pgTable(
       'checklist_template_items_document_type_not_blank_check',
       sql`char_length(btrim(${table.documentType})) > 0`,
     ),
-    check(
-      'checklist_template_items_position_check',
-      sql`${table.position} >= 0`,
-    ),
+    check('checklist_template_items_position_check', sql`${table.position} >= 0`),
   ],
 )

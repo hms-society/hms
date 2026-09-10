@@ -1,5 +1,7 @@
 export * from './add-case-checklist-complementary-item-use-case'
+export * from './list-checklist-templates-use-case'
 export * from './list-case-checklist-use-case'
 export * from './list-my-legal-cases-use-case'
 export * from './mark-case-checklist-item-validated-use-case'
+export * from './replace-checklist-template-use-case'
 export * from './review-case-checklist-gate-use-case'

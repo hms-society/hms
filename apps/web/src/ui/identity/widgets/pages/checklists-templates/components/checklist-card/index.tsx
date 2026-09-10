@@ -6,10 +6,7 @@ import { AddDocumentButton } from './add-document-button'
 import { DocumentsTable } from './documents-table'
 import { ChecklistFooter } from './checklist-footer'
 import { AddDocumentDialog } from '../add-document-dialog'
-import type {
-  ChecklistDocument,
-  DocumentFileType,
-} from '../../types'
+import type { ChecklistDocument, DocumentFileType } from '../../types'
 
 type ChecklistCardProps = {
   areaName: string
@@ -17,14 +14,11 @@ type ChecklistCardProps = {
   search: string
   onSearchChange: (value: string) => void
   onToggleRequired: (id: string) => void
-  onChangeType: (
-    id: string,
-    type: DocumentFileType,
-  ) => void
+  onChangeType: (id: string, type: DocumentFileType) => void
   onDelete: (id: string) => void
   onAddDocument: (
     name: string,
-    type: DocumentFileType,
+    types: readonly DocumentFileType[],
     required: boolean,
   ) => void
 }
@@ -51,14 +45,9 @@ export function ChecklistCard({
             </h2>
 
             <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
-              <ChecklistSearch
-                value={search}
-                onChange={onSearchChange}
-              />
+              <ChecklistSearch value={search} onChange={onSearchChange} />
 
-              <AddDocumentButton
-                onClick={() => setDialogOpen(true)}
-              />
+              <AddDocumentButton onClick={() => setDialogOpen(true)} />
             </div>
           </div>
 
@@ -88,11 +77,7 @@ export function ChecklistCard({
               Tente alterar sua busca ou adicione um novo documento.
             </p>
 
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => setDialogOpen(true)}
-            >
+            <Button type='button' variant='outline' onClick={() => setDialogOpen(true)}>
               Adicionar Documento
             </Button>
           </div>

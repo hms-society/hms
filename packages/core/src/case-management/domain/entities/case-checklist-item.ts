@@ -4,6 +4,7 @@ import type { CaseChecklistItemStatus } from '../structures'
 export type CaseChecklistItem = Entity & {
   caseId: string
   templateItemKey: string
+  checklistTemplateName?: string
   title: string
   isRequired: boolean
   status: CaseChecklistItemStatus

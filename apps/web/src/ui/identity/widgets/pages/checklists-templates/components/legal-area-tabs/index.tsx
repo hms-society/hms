@@ -6,14 +6,10 @@ type LegalAreaTabsProps = {
   onChange: (areaId: string) => void
 }
 
-export function LegalAreaTabs({
-  areas,
-  activeAreaId,
-  onChange,
-}: LegalAreaTabsProps) {
+export function LegalAreaTabs({ areas, activeAreaId, onChange }: LegalAreaTabsProps) {
   return (
     <nav
-      className='flex items-center gap-1 overflow-x-auto border-b border-border'
+      className='flex items-center justify-center gap-1 overflow-x-auto border-b border-border'
       aria-label='Áreas do direito'
     >
       {areas.map((area) => {

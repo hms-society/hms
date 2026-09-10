@@ -4,11 +4,15 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 import {
   DrizzleCaseChecklistItemMapper,
   DrizzleCaseMemberMapper,
+  DrizzleChecklistTemplateItemMapper,
+  DrizzleChecklistTemplateMapper,
   DrizzleLegalCaseMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseChecklistItemsRepository,
   DrizzleCaseMembersRepository,
+  DrizzleChecklistTemplateItemsRepository,
+  DrizzleChecklistTemplatesRepository,
   DrizzleLegalCasesRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
@@ -19,9 +23,13 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
   providers: [
     DrizzleCaseChecklistItemMapper,
     DrizzleCaseMemberMapper,
+    DrizzleChecklistTemplateItemMapper,
+    DrizzleChecklistTemplateMapper,
     DrizzleLegalCaseMapper,
     DrizzleCaseChecklistItemsRepository,
     DrizzleCaseMembersRepository,
+    DrizzleChecklistTemplateItemsRepository,
+    DrizzleChecklistTemplatesRepository,
     DrizzleLegalCasesRepository,
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
@@ -32,6 +40,14 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       useExisting: DrizzleCaseMembersRepository,
     },
     {
+      provide: CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
+      useExisting: DrizzleChecklistTemplateItemsRepository,
+    },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
+      useExisting: DrizzleChecklistTemplatesRepository,
+    },
+    {
       provide: CASE_MANAGEMENT_REPOSITORIES.legalCases,
       useExisting: DrizzleLegalCasesRepository,
     },
@@ -40,6 +56,8 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
   exports: [
     CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
     CASE_MANAGEMENT_REPOSITORIES.caseMembers,
+    CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
+    CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
     CaseManagementSeeder,
   ],

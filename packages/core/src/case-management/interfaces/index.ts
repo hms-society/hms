@@ -1,4 +1,6 @@
 export * from './case-checklist-items-repository'
 export * from './case-management-service'
 export * from './case-members-repository'
+export * from './checklist-template-items-repository'
+export * from './checklist-templates-repository'
 export * from './legal-cases-repository'

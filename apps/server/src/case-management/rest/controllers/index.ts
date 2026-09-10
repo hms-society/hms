@@ -1,4 +1,6 @@
 export { AddCaseChecklistComplementaryItemController } from './add-case-checklist-complementary-item.controller'
+export { ListChecklistTemplatesController } from './list-checklist-templates.controller'
 export { ListCaseChecklistController } from './list-case-checklist.controller'
 export { ListMyLegalCasesController } from './list-my-legal-cases.controller'
+export { ReplaceChecklistTemplateController } from './replace-checklist-template.controller'
 export { ReviewCaseChecklistGateController } from './review-case-checklist-gate.controller'

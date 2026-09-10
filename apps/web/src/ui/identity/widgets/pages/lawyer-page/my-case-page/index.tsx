@@ -32,6 +32,9 @@ export type CasoDetalheChecklistPageProps = {
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
   const {
     activeTab,
+    caseClientName,
+    caseLegalArea,
+    caseTitle,
     caseUuid,
     checklistItems,
     completionPercentage,
@@ -70,7 +73,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <div className='flex min-w-0 flex-col gap-1.5'>
             <div className='flex flex-wrap items-center gap-2'>
               <h1 className='font-serif text-2xl font-semibold text-foreground'>
-                Aposentadoria por Tempo de Contribuição
+                {caseTitle}
               </h1>
               <Badge variant='attention' className='h-6 rounded-full px-3 text-[12px]'>
                 <span className='size-1.5 rounded-full bg-brand-accent' />
@@ -85,11 +88,11 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               </span>
               <span className='flex items-center gap-1.5'>
                 <Icon name='scale' className='size-3.5' />
-                Direito Previdenciário
+                {caseLegalArea}
               </span>
               <span className='flex items-center gap-1.5'>
                 <Icon name='user' className='size-3.5' />
-                Antônio Carvalho
+                {caseClientName}
               </span>
               <span className='flex items-center gap-1.5'>
                 <Icon name='alert-circle' className='size-3.5' />

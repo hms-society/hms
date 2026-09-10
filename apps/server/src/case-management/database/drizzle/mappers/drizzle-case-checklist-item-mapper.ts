@@ -2,12 +2,17 @@ import type { CaseChecklistItem } from '@hms/core/case-management/domain/entitie
 
 import type { DrizzleCaseChecklistItem } from '@/case-management/database/drizzle/types'
 
+type DrizzleCaseChecklistItemRecord = DrizzleCaseChecklistItem & {
+  checklistTemplateName?: string | null
+}
+
 export class DrizzleCaseChecklistItemMapper {
-  toDomain(record: DrizzleCaseChecklistItem): CaseChecklistItem {
+  toDomain(record: DrizzleCaseChecklistItemRecord): CaseChecklistItem {
     return {
       id: record.id,
       caseId: record.caseId,
       templateItemKey: record.templateItemKey,
+      checklistTemplateName: record.checklistTemplateName ?? undefined,
       title: record.title,
       isRequired: record.isRequired,
       status: record.status,

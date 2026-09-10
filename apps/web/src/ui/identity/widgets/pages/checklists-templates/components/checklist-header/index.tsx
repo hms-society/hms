@@ -3,9 +3,10 @@ import { Button } from '@/ui/shadcn/button'
 
 type ChecklistHeaderProps = {
   onSave: () => void
+  isSaving: boolean
 }
 
-export function ChecklistHeader({ onSave }: ChecklistHeaderProps) {
+export function ChecklistHeader({ onSave, isSaving }: ChecklistHeaderProps) {
   return (
     <header className='flex flex-col gap-1 md:flex-row md:items-start md:justify-between'>
       <div className='flex flex-col gap-1'>
@@ -14,8 +15,8 @@ export function ChecklistHeader({ onSave }: ChecklistHeaderProps) {
         </h1>
 
         <p className='max-w-[720px] text-[15px] leading-5 text-muted-foreground'>
-          Defina os documentos obrigatórios que serão instanciados
-          automaticamente na abertura de novos casos por área do direito.
+          Defina os documentos obrigatórios que serão instanciados automaticamente na
+          abertura de novos casos por área do direito.
         </p>
       </div>
 
@@ -23,9 +24,10 @@ export function ChecklistHeader({ onSave }: ChecklistHeaderProps) {
         type='button'
         variant='brand'
         className='mt-1 rounded-pill px-5'
+        disabled={isSaving}
         onClick={onSave}
       >
-        Salvar Template de Checklist
+        {isSaving ? 'Salvando...' : 'Salvar Template de Checklist'}
         <Check className='size-4' />
       </Button>
     </header>

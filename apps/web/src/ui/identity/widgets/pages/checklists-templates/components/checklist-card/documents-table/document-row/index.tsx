@@ -1,13 +1,14 @@
 import { GripVertical, Trash2 } from 'lucide-react'
+import { ChecklistDocumentType } from '@hms/core/case-management/domain/structures'
 import { Button } from '@/ui/shadcn/button'
-import { Switch } from '@/ui/shadcn/switch'
+import { Checkbox } from '@/ui/shadcn/checkbox'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/shadcn/select'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/ui/shadcn/dropdown-menu'
+import { Switch } from '@/ui/shadcn/switch'
 import type { ChecklistDocument, DocumentFileType } from '../../../../types'
 
 type DocumentRowProps = {
@@ -38,27 +39,37 @@ export function DocumentRow({
       </td>
 
       <td className='px-3 py-3'>
-        <span className='text-[14px] text-foreground'>
-          {document.name}
-        </span>
+        <span className='text-[14px] text-foreground'>{document.name}</span>
       </td>
 
-      <td className='w-[120px] px-3 py-3'>
-        <Select
-          value={document.type}
-          onValueChange={(value) =>
-            onChangeType(document.id, value as DocumentFileType)
-          }
-        >
-          <SelectTrigger className='h-9 w-[108px] text-[13px]'>
-            <SelectValue />
-          </SelectTrigger>
+      <td className='w-[160px] px-3 py-3'>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type='button'
+              variant='outline'
+              className='h-9 w-[148px] justify-start px-3 text-[13px] font-normal'
+            >
+              {formatDocumentTypes(document.types)}
+            </Button>
+          </DropdownMenuTrigger>
 
-          <SelectContent>
-            <SelectItem value='PDF'>PDF</SelectItem>
-            <SelectItem value='ANY'>Qualquer</SelectItem>
-          </SelectContent>
-        </Select>
+          <DropdownMenuContent align='start' className='w-44'>
+            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onSelect={(event) => {
+                  event.preventDefault()
+                  onChangeType(document.id, option.value)
+                }}
+                className='gap-2'
+              >
+                <Checkbox checked={document.types.includes(option.value)} />
+                {option.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </td>
 
       <td className='w-[165px] px-3 py-3'>
@@ -94,4 +105,26 @@ export function DocumentRow({
       </td>
     </tr>
   )
+}
+
+const DOCUMENT_TYPE_OPTIONS: readonly {
+  value: DocumentFileType
+  label: string
+}[] = [
+  { value: ChecklistDocumentType.Pdf, label: 'PDF' },
+  { value: ChecklistDocumentType.Docx, label: 'DOCX' },
+  { value: ChecklistDocumentType.Image, label: 'Imagem' },
+  { value: ChecklistDocumentType.Any, label: 'Qualquer' },
+]
+
+function formatDocumentTypes(types: readonly DocumentFileType[]) {
+  if (types.length === 0) {
+    return 'Selecione'
+  }
+
+  if (types.includes(ChecklistDocumentType.Any)) {
+    return 'Qualquer'
+  }
+
+  return types.join(', ')
 }

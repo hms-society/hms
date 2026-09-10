@@ -4,57 +4,7 @@ import type {
   CaseTask,
   CaseTeamMember,
   CaseTimelineItem,
-  ChecklistItem,
 } from './types'
-
-export const MOCK_CHECKLIST: ChecklistItem[] = [
-  {
-    id: '1',
-    title: 'Procuração Assinada',
-    status: 'validado',
-    documentName: 'procuracao_assinada.pdf - validado por João Pedro - hoje 09:12',
-  },
-  {
-    id: '2',
-    title: 'Documento de Identificação Oficial',
-    status: 'solicitado',
-    pendencies: 1,
-    subtitle: 'Pendência ativa - aguardando cliente há 2 dias',
-  },
-  {
-    id: '3',
-    title: 'Comprovante de Vínculo',
-    status: 'solicitado',
-    pendencies: 1,
-    subtitle: 'Pendência ativa - aguardando cliente há 2 dias',
-  },
-  {
-    id: '4',
-    title: 'Comprovante de Residência',
-    status: 'solicitado',
-    pendencies: 1,
-    subtitle: 'Pendência ativa - aguardando cliente há 2 dias',
-  },
-  {
-    id: '5',
-    title: 'CTPS (Carteira de Trabalho)',
-    status: 'solicitado',
-    pendencies: 1,
-    subtitle: 'Pendência ativa - aguardando cliente há 2 dias',
-  },
-  {
-    id: '6',
-    title: 'Certidão de Tempo de Contribuição',
-    status: 'nao_solicitado',
-    subtitle: 'Ainda não solicitado ao cliente',
-  },
-  {
-    id: '7',
-    title: 'Laudos Médicos/Periciais',
-    status: 'nao_solicitado',
-    subtitle: 'Ainda não solicitado ao cliente',
-  },
-]
 
 export const MOCK_ACTIVITIES: ActivityItem[] = [
   {

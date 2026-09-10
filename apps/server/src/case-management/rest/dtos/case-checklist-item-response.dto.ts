@@ -10,6 +10,9 @@ export class CaseChecklistItemResponseDto {
   @ApiProperty()
   templateItemKey!: string
 
+  @ApiPropertyOptional()
+  checklistTemplateName?: string
+
   @ApiProperty()
   title!: string
 
