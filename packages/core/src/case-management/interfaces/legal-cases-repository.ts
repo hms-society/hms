@@ -1,4 +1,9 @@
-import type { LegalCase, LegalCaseCreation, LegalCaseSummary, CaseMemberCreation } from '../domain/entities'
+import type {
+  LegalCase,
+  LegalCaseCreation,
+  LegalCaseSummary,
+  CaseMemberCreation,
+} from '../domain/entities'
 import type { CaseChecklistGate, LegalCaseStatus } from '../domain/structures'
 
 export type ReviewChecklistGateRepositoryParams = {

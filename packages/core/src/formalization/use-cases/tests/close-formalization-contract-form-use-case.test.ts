@@ -149,10 +149,12 @@ describe('Close Formalization Contract Form Use Case', () => {
     ).resolves.toBe(closed)
 
     const changes = repository.replace.mock.calls[0]?.[0].changes
-    expect(changes).toEqual(expect.objectContaining({
-      contractFormRevision: 2,
-      contractFormState: 'closed',
-    }))
+    expect(changes).toEqual(
+      expect.objectContaining({
+        contractFormRevision: 2,
+        contractFormState: 'closed',
+      }),
+    )
     expect(changes).not.toHaveProperty('documentsConfirmedAt')
   })
 })

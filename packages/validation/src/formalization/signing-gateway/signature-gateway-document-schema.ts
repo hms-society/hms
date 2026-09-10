@@ -7,6 +7,4 @@ export const signatureGatewayDocumentSchema = z.strictObject({
   pageCount: z.number().int().positive().optional(),
 })
 
-export type SignatureGatewayDocumentDto = z.infer<
-  typeof signatureGatewayDocumentSchema
->
+export type SignatureGatewayDocumentDto = z.infer<typeof signatureGatewayDocumentSchema>

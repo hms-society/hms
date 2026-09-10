@@ -1,1 +1,4 @@
-export type VerifySignatureOtpCommand = { readonly challengeId: string; readonly code: string }
+export type VerifySignatureOtpCommand = {
+  readonly challengeId: string
+  readonly code: string
+}

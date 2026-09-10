@@ -9,7 +9,10 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
 
 type Request = {
-  readonly query?: Pick<CollaboratorListQuery, 'page' | 'limit' | 'search' | 'profile' | 'jobTitle'>
+  readonly query?: Pick<
+    CollaboratorListQuery,
+    'page' | 'limit' | 'search' | 'profile' | 'jobTitle'
+  >
 }
 
 export class ListActiveCollaboratorsUseCase

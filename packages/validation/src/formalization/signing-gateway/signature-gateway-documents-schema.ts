@@ -10,6 +10,4 @@ export const signatureGatewayDocumentsSchema = z
   })
   .strict()
 
-export type SignatureGatewayDocumentsDto = z.infer<
-  typeof signatureGatewayDocumentsSchema
->
+export type SignatureGatewayDocumentsDto = z.infer<typeof signatureGatewayDocumentsSchema>

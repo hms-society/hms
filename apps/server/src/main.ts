@@ -34,7 +34,13 @@ async function bootstrap() {
 
   const webAppUrl = envProvider.get('HMS_WEB_APP_URL')
   const allowedOrigins = Array.from(
-    new Set([webAppUrl, 'http://localhost:3000', 'http://localhost:3100', 'http://127.0.0.1:3100', 'http://127.0.0.1:3000']),
+    new Set([
+      webAppUrl,
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'http://127.0.0.1:3100',
+      'http://127.0.0.1:3000',
+    ]),
   )
 
   app.enableCors({

@@ -109,7 +109,21 @@ export function CreateCasePage() {
       return
     }
 
-    createCase(data, {
+    const payload = {
+      ...data,
+      team:
+        data.team.length === 0 && currentCollaborator
+          ? [
+              {
+                collaboratorId: currentCollaborator.id,
+                role: 'lead_lawyer' as const,
+                permission: 'execução' as const,
+              },
+            ]
+          : data.team,
+    }
+
+    createCase(payload, {
       onSuccess: () => {
         toast.success('Caso criado com sucesso!')
         navigate({ to: ROUTES.lawyerCases as any })

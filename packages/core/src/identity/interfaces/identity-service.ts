@@ -38,7 +38,10 @@ export interface IdentityService {
     query: Pick<CollaboratorListQuery, 'page' | 'limit' | 'pageSize' | 'search'>,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   listActiveCollaborators(
-    query: Pick<CollaboratorListQuery, 'page' | 'limit' | 'pageSize' | 'search' | 'profile' | 'jobTitle'>,
+    query: Pick<
+      CollaboratorListQuery,
+      'page' | 'limit' | 'pageSize' | 'search' | 'profile' | 'jobTitle'
+    >,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   getCollaborator(collaboratorId: string): Promise<RestResponse<CollaboratorSummary>>
   listCollaboratorJobTitles(): Promise<RestResponse<readonly string[]>>

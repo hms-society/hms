@@ -164,7 +164,10 @@ export function AddTeamMemberDialog({
               <Label className='text-[13px] font-semibold text-muted-foreground'>
                 Cargo <span className='text-destructive'>*</span>
               </Label>
-              <Select value={role} onValueChange={(val) => setRole(val as TeamMember['role'])}>
+              <Select
+                value={role}
+                onValueChange={(val) => setRole(val as TeamMember['role'])}
+              >
                 <SelectTrigger className='h-10 rounded-lg shadow-sm'>
                   <SelectValue placeholder='Selecione o cargo...' />
                 </SelectTrigger>
@@ -185,7 +188,10 @@ export function AddTeamMemberDialog({
               <Label className='text-[13px] font-semibold text-muted-foreground'>
                 Nível de Permissão <span className='text-destructive'>*</span>
               </Label>
-              <Select value={permission} onValueChange={(val) => setPermission(val as TeamMember['permission'])}>
+              <Select
+                value={permission}
+                onValueChange={(val) => setPermission(val as TeamMember['permission'])}
+              >
                 <SelectTrigger className='h-10 rounded-lg shadow-sm'>
                   <SelectValue placeholder='Selecione a permissão...' />
                 </SelectTrigger>

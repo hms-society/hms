@@ -192,10 +192,7 @@ export class RecordDocumentValidationDecisionUseCase {
     request: RecordDocumentValidationDecisionRequest,
     document: DocumentValidationDocument,
   ) {
-    if (
-      request.checklistRequirementId &&
-      this.isUuid(request.checklistRequirementId)
-    ) {
+    if (request.checklistRequirementId && this.isUuid(request.checklistRequirementId)) {
       return request.checklistRequirementId
     }
 

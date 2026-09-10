@@ -25,10 +25,14 @@ export class CreateLegalCaseUseCase {
   ) {}
 
   async execute(params: CreateLegalCaseUseCaseParams): Promise<LegalCase> {
-    const { title, intakeId, legalAreaId, legalTopicId, description, team, actorId } = params
+    const { title, intakeId, legalAreaId, legalTopicId, description, team, actorId } =
+      params
 
     if (!title || !intakeId || !legalAreaId || !legalTopicId) {
-      throw new AppError('Parâmetros obrigatórios ausentes para criação de caso', 'Requisição Inválida')
+      throw new AppError(
+        'Parâmetros obrigatórios ausentes para criação de caso',
+        'Requisição Inválida',
+      )
     }
 
     const intake = await this.intakesRepository.findById(intakeId)
@@ -67,25 +71,34 @@ export class CreateLegalCaseUseCase {
             isPrimary: false,
             assignedAt: openedAt,
             assignedBy: actorId,
-          }))
+          })),
         ],
       })
     } catch (error: any) {
       const errorMsg = [
-        error.message, 
-        error.cause?.message, 
-        error.cause?.constraint_name, 
-        error.constraint_name
-      ].join(' ');
+        error.message,
+        error.cause?.message,
+        error.cause?.constraint_name,
+        error.constraint_name,
+      ].join(' ')
 
       if (errorMsg.includes('cases_intake_id_uidx')) {
-        throw new AppError('Esta triagem (Intake) já foi utilizada em outro caso jurídico.', 'Conflito de Triagem')
+        throw new AppError(
+          'Esta triagem (Intake) já foi utilizada em outro caso jurídico.',
+          'Conflito de Triagem',
+        )
       }
       if (errorMsg.includes('case_members_case_collaborator_uidx')) {
-        throw new AppError('Um mesmo colaborador não pode ser adicionado mais de uma vez à equipe do caso.', 'Conflito de Equipe')
+        throw new AppError(
+          'Um mesmo colaborador não pode ser adicionado mais de uma vez à equipe do caso.',
+          'Conflito de Equipe',
+        )
       }
       if (errorMsg.includes('cases_public_code_uidx')) {
-        throw new AppError('Houve um conflito na geração do código do caso. Tente novamente.', 'Conflito de Código')
+        throw new AppError(
+          'Houve um conflito na geração do código do caso. Tente novamente.',
+          'Conflito de Código',
+        )
       }
 
       throw error
