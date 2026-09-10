@@ -115,7 +115,7 @@ export function CreateCasePage() {
         data.team.length === 0 && currentCollaborator
           ? [
               {
-                collaboratorId: currentCollaborator.id,
+                collaboratorId: currentCollaborator.collaboratorId,
                 role: 'lead_lawyer' as const,
                 permission: 'execução' as const,
               },
