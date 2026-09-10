@@ -29,7 +29,7 @@ export function useCollaboratorsQuery(query: CollaboratorListQuery = {}) {
   const { identityService } = useRestContext()
 
   async function fetchCollaborators() {
-    const response = await identityService.listActiveCollaborators(query)
+    const response = await identityService.listCollaborators(query)
 
     if (response.isFailure) response.throwError()
 
