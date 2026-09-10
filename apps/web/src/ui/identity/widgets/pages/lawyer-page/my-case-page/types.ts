@@ -36,10 +36,13 @@ export type CaseTimelineItem = {
 }
 
 export type CaseTeamMember = {
-  initials: string
+  collaboratorId?: string
+  initials?: string
   name: string
   role: string
-  className: string
+  className?: string
+  permission?: string
+  isPrimary?: boolean
 }
 
 export type CaseStage = {

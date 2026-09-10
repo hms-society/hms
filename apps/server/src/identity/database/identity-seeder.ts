@@ -31,12 +31,17 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
     phone: '5511999999999',
   }),
   ClientFaker.fake({
+    email: 'kauandominguesdesouza@gmail.com',
+    name: 'Kauan Domingues de Souza',
+    phone: '5519971659516',
+  }),
+  ClientFaker.fake({
     email: 'vinicius.lopes.machado@hms.test',
     name: 'Vinicius Lopes Machado',
     phone: '5511987654321',
     taxId: { type: 'cpf', value: '12345678909' },
   }),
-  ...ClientFaker.fakeMany(9),
+  ...ClientFaker.fakeMany(8),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
 const DEFAULT_USERS: UserSeed[] = [
@@ -289,12 +294,17 @@ export class IdentitySeeder {
         id: clientUser?.id,
       },
       ClientFaker.fake({
+        email: 'kauandominguesdesouza@gmail.com',
+        name: 'Kauan Domingues de Souza',
+        phone: '5519971659516',
+      }),
+      ClientFaker.fake({
         email: 'vinicius.lopes.machado@hms.test',
         name: 'Vinicius Lopes Machado',
         phone: '5511987654321',
         taxId: { type: 'cpf', value: '12345678909' },
       }),
-      ...ClientFaker.fakeMany(9),
+      ...ClientFaker.fakeMany(8),
     ].map(({ id, createdAt, updatedAt, ...client }) => ({
       ...client,
       id,

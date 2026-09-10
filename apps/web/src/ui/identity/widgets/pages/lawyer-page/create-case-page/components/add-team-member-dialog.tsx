@@ -39,8 +39,8 @@ export function AddTeamMemberDialog({
   onAdd,
 }: AddTeamMemberDialogProps) {
   const [collaboratorId, setCollaboratorId] = useState('')
-  const [role, setRole] = useState('')
-  const [permission, setPermission] = useState('')
+  const [role, setRole] = useState<TeamMember['role'] | ''>('')
+  const [permission, setPermission] = useState<TeamMember['permission'] | ''>('')
   const [collabOpen, setCollabOpen] = useState(false)
   const [collabSearch, setCollabSearch] = useState('')
   const { collaboratorsPage, isLoadingCollaborators } = useCollaboratorsQuery({
@@ -164,7 +164,7 @@ export function AddTeamMemberDialog({
               <Label className='text-[13px] font-semibold text-muted-foreground'>
                 Cargo <span className='text-destructive'>*</span>
               </Label>
-              <Select value={role} onValueChange={setRole}>
+              <Select value={role} onValueChange={(val) => setRole(val as TeamMember['role'])}>
                 <SelectTrigger className='h-10 rounded-lg shadow-sm'>
                   <SelectValue placeholder='Selecione o cargo...' />
                 </SelectTrigger>
@@ -185,7 +185,7 @@ export function AddTeamMemberDialog({
               <Label className='text-[13px] font-semibold text-muted-foreground'>
                 Nível de Permissão <span className='text-destructive'>*</span>
               </Label>
-              <Select value={permission} onValueChange={setPermission}>
+              <Select value={permission} onValueChange={(val) => setPermission(val as TeamMember['permission'])}>
                 <SelectTrigger className='h-10 rounded-lg shadow-sm'>
                   <SelectValue placeholder='Selecione a permissão...' />
                 </SelectTrigger>

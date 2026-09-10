@@ -1,13 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eventType, type InngestFunction } from 'inngest'
-import { like } from 'drizzle-orm'
+import { eq, desc, like } from 'drizzle-orm'
 import { z } from 'zod'
 
+import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
+import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models'
+import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
 import { integracaoEvento } from '@/shared/database/drizzle/schema/integracao-evento'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
+import { encrypt } from '@/shared/utils/crypto'
+import { IntakeStatus } from '@hms/core/intake/domain/structures'
 
 const whatsappEventReceived = eventType('whatsapp/event.received', {
   schema: z.record(z.string(), z.unknown()),
@@ -22,6 +27,9 @@ type WhatsappMedia = {
 type WhatsappMessage = {
   type?: unknown
   from?: unknown
+  text?: {
+    body?: unknown
+  }
   document?: WhatsappMedia
   image?: WhatsappMedia
 }
@@ -69,53 +77,108 @@ export class ProcessWhatsappEventJob extends InngestJob {
           }> = []
 
           for (const message of messages) {
-            if (message.type !== 'document' && message.type !== 'image') {
-              continue
-            }
-
-            const media = message.type === 'document' ? message.document : message.image
             const sender = message.from
-
-            if (
-              typeof media?.id !== 'string' ||
-              typeof media.mime_type !== 'string' ||
-              typeof sender !== 'string'
-            ) {
+            if (typeof sender !== 'string') {
               continue
             }
 
-            const matchingClients = await database
-              .select()
-              .from(clientModel)
-              .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-              .limit(2)
+            // Process text messages
+            if (message.type === 'text') {
+              const textBody =
+                typeof message.text?.body === 'string' ? message.text.body : undefined
 
-            const clientId =
-              matchingClients.length === 1 ? matchingClients[0].id : undefined
+              if (!textBody) {
+                continue
+              }
 
-            const [evento] = await database
-              .insert(integracaoEvento)
-              .values({
-                provedor: 'whatsapp',
-                payload: message,
-                status: 'recebido',
+              const matchingClients = await database
+                .select()
+                .from(clientModel)
+                .where(like(clientModel.phone, `%${sender.slice(-8)}`))
+                .limit(2)
+
+              const clientId =
+                matchingClients.length === 1 ? matchingClients[0].id : undefined
+
+              if (clientId) {
+                // 1. Save summary entry in communications table (for Central de Comunicação)
+                await database.insert(communicationModel).values({
+                  clientId,
+                  authorId: null,
+                  channel: 'whatsapp',
+                  direction: 'inbound',
+                  content: 'Mensagem de texto recebida via WhatsApp',
+                })
+
+                // 2. Search active intake to save encrypted private message for the lawyer
+                const activeIntakes = await database
+                  .select()
+                  .from(intakeModel)
+                  .where(eq(intakeModel.clientId, clientId))
+                  .orderBy(desc(intakeModel.createdAt))
+
+                const activeIntake =
+                  activeIntakes.find(
+                    (intake) => intake.status !== IntakeStatus.ClosedWithoutContract,
+                  ) || activeIntakes[0]
+
+                if (activeIntake?.responsibleId) {
+                  await database.insert(privateMessageModel).values({
+                    clientId,
+                    collaboratorId: activeIntake.responsibleId,
+                    intakeId: activeIntake.id,
+                    clientPhone: sender,
+                    direction: 'inbound',
+                    content: encrypt(textBody),
+                    fileIds: [],
+                  })
+                }
+              }
+
+              continue
+            }
+
+            // Process document / image media
+            if (message.type === 'document' || message.type === 'image') {
+              const media = message.type === 'document' ? message.document : message.image
+
+              if (typeof media?.id !== 'string' || typeof media.mime_type !== 'string') {
+                continue
+              }
+
+              const matchingClients = await database
+                .select()
+                .from(clientModel)
+                .where(like(clientModel.phone, `%${sender.slice(-8)}`))
+                .limit(2)
+
+              const clientId =
+                matchingClients.length === 1 ? matchingClients[0].id : undefined
+
+              const [evento] = await database
+                .insert(integracaoEvento)
+                .values({
+                  provedor: 'whatsapp',
+                  payload: message,
+                  status: 'recebido',
+                })
+                .returning()
+
+              events.push({
+                name: 'documents/whatsapp.batch.received',
+                data: {
+                  eventoId: evento.id,
+                  sender,
+                  clientId,
+                  mediaId: media.id,
+                  mimeType: media.mime_type,
+                  originalName:
+                    typeof media.filename === 'string'
+                      ? media.filename
+                      : `${media.id}.${media.mime_type.split('/')[1]}`,
+                },
               })
-              .returning()
-
-            events.push({
-              name: 'documents/whatsapp.batch.received',
-              data: {
-                eventoId: evento.id,
-                sender,
-                clientId,
-                mediaId: media.id,
-                mimeType: media.mime_type,
-                originalName:
-                  typeof media.filename === 'string'
-                    ? media.filename
-                    : `${media.id}.${media.mime_type.split('/')[1]}`,
-              },
-            })
+            }
           }
 
           return events
