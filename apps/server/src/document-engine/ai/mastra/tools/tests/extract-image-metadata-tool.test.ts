@@ -3,8 +3,7 @@ import { DocumentValidationStatus } from '@hms/core/document-engine/domain/struc
 
 import { ExtractImageTool } from '../extract-image-metadata-tool'
 
-const HASH_SHA_256 =
-  'a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3'
+const HASH_SHA_256 = 'a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3'
 
 describe('Extract Image Metadata Tool', () => {
   it('returns processing failure when the image agent fails', async () => {

@@ -44,15 +44,11 @@ describe('useAnalysisFormPanel', () => {
     )
 
     expect(result.current.isDuplicateAlreadyConfirmed).toBe(true)
-    expect(result.current.savedDecisionNotice?.title).toBe(
-      'Duplicidade já confirmada',
-    )
+    expect(result.current.savedDecisionNotice?.title).toBe('Duplicidade já confirmada')
     expect(result.current.savedDecisionNotice?.description).toContain(
       'Registrado por Atendente HMS',
     )
-    expect(result.current.savedDecisionNotice?.description).not.toContain(
-      'reviewer-id-1',
-    )
+    expect(result.current.savedDecisionNotice?.description).not.toContain('reviewer-id-1')
   })
 
   it('keeps saved not linked decisions editable', () => {
@@ -70,9 +66,7 @@ describe('useAnalysisFormPanel', () => {
     )
 
     expect(result.current.isDuplicateAlreadyConfirmed).toBe(false)
-    expect(result.current.savedDecisionNotice?.title).toBe(
-      'Decisão salva: não vinculado',
-    )
+    expect(result.current.savedDecisionNotice?.title).toBe('Decisão salva: não vinculado')
     expect(result.current.savedDecisionNotice?.description).toContain(
       'Registrado por Advogado de desenvolvimento',
     )

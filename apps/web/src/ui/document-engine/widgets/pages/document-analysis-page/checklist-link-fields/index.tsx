@@ -51,10 +51,7 @@ export const ChecklistLinkFields = ({
       </div>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
         <Field>
-          <label
-            htmlFor='caseId'
-            className='font-sans text-xs text-muted-foreground'
-          >
+          <label htmlFor='caseId' className='font-sans text-xs text-muted-foreground'>
             Caso
           </label>
           <Select

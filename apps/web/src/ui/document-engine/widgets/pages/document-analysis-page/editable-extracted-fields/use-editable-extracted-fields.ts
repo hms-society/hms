@@ -7,9 +7,7 @@ export type EditableExtractedFieldsProps = {
   title: string
 }
 
-export function useEditableExtractedFields({
-  form,
-}: EditableExtractedFieldsProps) {
+export function useEditableExtractedFields({ form }: EditableExtractedFieldsProps) {
   const { fields, replace } = useFieldArray({
     control: form.control,
     name: 'extractedFields',

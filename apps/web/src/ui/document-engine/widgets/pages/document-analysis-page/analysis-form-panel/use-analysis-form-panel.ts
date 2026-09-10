@@ -31,10 +31,7 @@ export function useAnalysisFormPanel({
     document.status === 'duplicate' &&
     document.reviewedAt !== undefined
 
-  const savedDecisionNotice = getSavedDecisionNotice(
-    currentDecision,
-    document,
-  )
+  const savedDecisionNotice = getSavedDecisionNotice(currentDecision, document)
 
   function handleOpenDuplicateDocument(documentFileId: string) {
     form.setValue('originalDocumentId', documentFileId, {
@@ -57,8 +54,7 @@ function getSavedDecisionNotice(
 ): SavedDecisionNotice | null {
   if (document.reviewedAt === undefined) return null
 
-  const reviewerName =
-    document.reviewedByName?.trim() || 'responsável não identificado'
+  const reviewerName = document.reviewedByName?.trim() || 'responsável não identificado'
   const reviewedAt = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',

@@ -15,10 +15,7 @@ export function useChecklistLinkFields({ document, form }: ChecklistLinkFieldsPr
   const { caseManagementService } = useRestContext()
   const caseId = form.watch('caseId')
   const checklistRequirementId = form.watch('checklistRequirementId')
-  const {
-    data: caseOptions = [],
-    isLoading: isLoadingCases,
-  } = useQuery({
+  const { data: caseOptions = [], isLoading: isLoadingCases } = useQuery({
     queryKey: ['case-management', 'my-cases'],
     queryFn: async () => {
       const response = await caseManagementService.listMyCases()
@@ -28,10 +25,7 @@ export function useChecklistLinkFields({ document, form }: ChecklistLinkFieldsPr
       return response.body
     },
   })
-  const {
-    data: checklistOptions = [],
-    isLoading: isLoadingChecklist,
-  } = useQuery({
+  const { data: checklistOptions = [], isLoading: isLoadingChecklist } = useQuery({
     queryKey: ['case-management', 'cases', caseId, 'checklist'],
     queryFn: async () => {
       const response = await caseManagementService.listCaseChecklist(caseId ?? '')

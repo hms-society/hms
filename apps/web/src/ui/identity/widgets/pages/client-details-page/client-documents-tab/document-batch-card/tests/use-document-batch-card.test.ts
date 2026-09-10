@@ -50,9 +50,7 @@ describe('useDocumentBatchCard', () => {
       result.current.getFileStatus(createFile(DocumentValidationStatus.Duplicate)),
     ).toMatchObject({ label: 'Duplicado' })
     expect(
-      result.current.getFileStatus(
-        createFile(DocumentValidationStatus.NotCorresponding),
-      ),
+      result.current.getFileStatus(createFile(DocumentValidationStatus.NotCorresponding)),
     ).toMatchObject({ label: 'Não correspondente' })
     expect(
       result.current.getFileStatus(
@@ -60,9 +58,7 @@ describe('useDocumentBatchCard', () => {
       ),
     ).toMatchObject({ label: 'Falha no processamento' })
     expect(
-      result.current.getFileStatus(
-        createFile(DocumentValidationStatus.ResendRequested),
-      ),
+      result.current.getFileStatus(createFile(DocumentValidationStatus.ResendRequested)),
     ).toMatchObject({ label: 'Reenvio solicitado' })
   })
 

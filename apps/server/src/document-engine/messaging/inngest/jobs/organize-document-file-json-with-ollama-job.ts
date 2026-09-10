@@ -3,7 +3,6 @@ import type { DocumentValidationDocument } from '@hms/core/document-engine/domai
 import { DocumentFileJsonOrganizationRequestedEvent } from '@hms/core/document-engine/domain/events'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
-import { AppError } from '@hms/core/shared/domain/errors'
 import { eventType, type InngestFunction } from 'inngest'
 
 import { DocumentJsonOrganizerAgent } from '@/document-engine/ai/mastra/agents'
@@ -14,7 +13,6 @@ import { documentFileJsonOrganizationRequestedSchema } from '@/document-engine/m
 import type { DocumentJsonOrganizationResult } from '@/document-engine/messaging/inngest/structures'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
-import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const documentFileJsonOrganizationRequested = eventType(
   DocumentFileJsonOrganizationRequestedEvent._NAME,
@@ -29,7 +27,6 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
   constructor(
     inngest: InngestClient,
     private readonly documentJsonOrganizerAgent: DocumentJsonOrganizerAgent,
-    private readonly envProvider: EnvProvider,
     @Inject(DOCUMENT_ENGINE.documentValidations)
     private readonly validationsRepository: DocumentValidationsRepository,
   ) {
@@ -44,8 +41,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       async ({ event, step }) => {
         const currentDocument = await step.run(
           'load-document-file-current-analysis',
-          async () =>
-            this.validationsRepository.findByFileId(event.data.documentFileId),
+          async () => this.validationsRepository.findByFileId(event.data.documentFileId),
         )
 
         if (
@@ -101,10 +97,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
             event.data.documentFileId,
           )
 
-          if (
-            !latestDocument ||
-            this.shouldSkipSuccessfulOrganization(latestDocument)
-          ) {
+          if (!latestDocument || this.shouldSkipSuccessfulOrganization(latestDocument)) {
             return {
               skipped: true,
               reason: 'analysis_already_completed',
@@ -155,16 +148,14 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
     extractedTextFull: string
   }): Promise<DocumentJsonOrganizationResult> {
     try {
-      const response = await this.withTemporaryAiTimeout(
-        this.documentJsonOrganizerAgent.generate([
-          {
-            role: 'user',
-            content: buildDocumentJsonOrganizationPrompt(
-              this.compactText(input.extractedTextFull),
-            ),
-          },
-        ]),
-      )
+      const response = await this.documentJsonOrganizerAgent.generate([
+        {
+          role: 'user',
+          content: buildDocumentJsonOrganizationPrompt(
+            this.compactText(input.extractedTextFull),
+          ),
+        },
+      ])
       const text = response.text
 
       if (typeof text !== 'string' || text.trim().length === 0) {
@@ -274,31 +265,6 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       0,
       160,
     )}`
-  }
-
-  private async withTemporaryAiTimeout<Result>(operation: Promise<Result>) {
-    const timeoutMs = this.envProvider.get('OLLAMA_REQUEST_TIMEOUT_MS')
-    let timeout: ReturnType<typeof setTimeout>
-
-    try {
-      return await Promise.race([
-        operation,
-        new Promise<Result>((_, reject) => {
-          timeout = setTimeout(
-            () =>
-              reject(
-                new AppError(
-                  `Tempo limite de ${timeoutMs}ms excedido na chamada de IA local.`,
-                  'Timeout de IA Local',
-                ),
-              ),
-            timeoutMs,
-          )
-        }),
-      ])
-    } finally {
-      clearTimeout(timeout!)
-    }
   }
 
   private extractJson(text: string) {

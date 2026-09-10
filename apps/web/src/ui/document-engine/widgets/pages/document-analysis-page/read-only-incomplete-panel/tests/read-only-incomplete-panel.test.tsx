@@ -26,9 +26,7 @@ describe('ReadOnlyIncompletePanel', () => {
     expect(screen.getByText('Reenvio solicitado por Atendente HMS')).toBeDefined()
     expect(screen.getByText(/Registro feito em/)).toBeDefined()
     expect(screen.getByText(/Enviado para Mariana Costa Silva/)).toBeDefined()
-    expect(
-      screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/),
-    ).toBeNull()
+    expect(screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/)).toBeNull()
     expect(screen.getByText('Data de emissão')).toBeDefined()
     expect(screen.getAllByText('Somente leitura')).toHaveLength(2)
   })

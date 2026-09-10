@@ -6,7 +6,6 @@ import { z } from 'zod'
 
 import { DocumentImageAnalyzerAgent } from '@/document-engine/ai/mastra/agents'
 import { suggestionSchema } from '@/document-engine/ai/mastra/schemas'
-import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const inputSchema = z.object({
   batchId: z.string().uuid(),
@@ -39,10 +38,7 @@ export class ExtractImageTool {
     typeof createTool<'extract-image-metadata', typeof inputSchema, typeof outputSchema>
   >
 
-  constructor(
-    private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent,
-    private readonly envProvider: EnvProvider,
-  ) {
+  constructor(private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent) {
     this.function = createTool({
       id: 'extract-image-metadata',
       description: 'Extract text from an image document with a local vision model.',
@@ -102,24 +98,22 @@ export class ExtractImageTool {
 
   private async extractText(contentBase64: string, mimeType: string) {
     try {
-      const response = await this.withTemporaryAiTimeout(
-        this.imageAnalyzerAgent.generate([
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Transcribe only the readable text from this image. Return plain text only.',
-              },
-              {
-                type: 'image',
-                image: contentBase64,
-                mimeType,
-              },
-            ],
-          },
-        ]),
-      )
+      const response = await this.imageAnalyzerAgent.generate([
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Transcribe only the readable text from this image. Return plain text only.',
+            },
+            {
+              type: 'image',
+              image: contentBase64,
+              mimeType,
+            },
+          ],
+        },
+      ])
 
       const extractedTextFull = response.text
 
@@ -153,31 +147,6 @@ export class ExtractImageTool {
       failureReason: reason,
       failureInstruction:
         'Verifique se o modelo local de visão está disponível e tente processar o documento novamente.',
-    }
-  }
-
-  private async withTemporaryAiTimeout<Result>(operation: Promise<Result>) {
-    const timeoutMs = this.envProvider.get('OLLAMA_REQUEST_TIMEOUT_MS')
-    let timeout: ReturnType<typeof setTimeout>
-
-    try {
-      return await Promise.race([
-        operation,
-        new Promise<Result>((_, reject) => {
-          timeout = setTimeout(
-            () =>
-              reject(
-                new AppError(
-                  `Tempo limite de ${timeoutMs}ms excedido na chamada de IA local.`,
-                  'Timeout de IA Local',
-                ),
-              ),
-            timeoutMs,
-          )
-        }),
-      ])
-    } finally {
-      clearTimeout(timeout!)
     }
   }
 

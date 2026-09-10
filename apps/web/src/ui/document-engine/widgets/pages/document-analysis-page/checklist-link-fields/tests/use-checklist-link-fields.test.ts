@@ -49,17 +49,18 @@ describe('useChecklistLinkFields', () => {
       return undefined
     })
 
-    const { result } = renderHook(() =>
-      useChecklistLinkFields({
-        document: DocumentValidationDocumentFaker.fake({
-          checklistLink: {
-            caseLabel: 'Caso 0089',
-            checklistItemLabel: 'Comprovante de residência',
-          },
+    const { result } = renderHook(
+      () =>
+        useChecklistLinkFields({
+          document: DocumentValidationDocumentFaker.fake({
+            checklistLink: {
+              caseLabel: 'Caso 0089',
+              checklistItemLabel: 'Comprovante de residência',
+            },
+          }),
+          form: { setValue: vi.fn(), watch } as never,
+          isChecklistDisabled: true,
         }),
-        form: { setValue: vi.fn(), watch } as never,
-        isChecklistDisabled: true,
-      }),
       { wrapper: createWrapper() },
     )
 

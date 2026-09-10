@@ -135,8 +135,7 @@ export class DrizzleDocumentBatchesRepository
         ...batch,
         files: files.filter(
           (f) =>
-            f.batchId === batch.id &&
-            f.status !== DocumentValidationStatus.Duplicate,
+            f.batchId === batch.id && f.status !== DocumentValidationStatus.Duplicate,
         ),
       }))
       .filter((batch) => batch.files.length > 0)

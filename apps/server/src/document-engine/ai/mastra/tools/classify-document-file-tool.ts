@@ -38,8 +38,7 @@ export class ClassifyDocumentFileTool {
         }
 
         if (
-          input.suggestion?.suggestedStatus ===
-          DocumentValidationStatus.ProcessingFailure
+          input.suggestion?.suggestedStatus === DocumentValidationStatus.ProcessingFailure
         ) {
           return input as z.infer<typeof outputSchema>
         }

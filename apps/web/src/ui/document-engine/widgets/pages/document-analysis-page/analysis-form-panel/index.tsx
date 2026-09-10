@@ -61,7 +61,10 @@ export const AnalysisFormPanel = ({
                   </NativeSelectOption>
                   <NativeSelectOption value='illegible'>Ilegível</NativeSelectOption>
                   <NativeSelectOption value='incomplete'>Incompleto</NativeSelectOption>
-                  <NativeSelectOption value='duplicate' disabled={!document.duplicateMatch}>
+                  <NativeSelectOption
+                    value='duplicate'
+                    disabled={!document.duplicateMatch}
+                  >
                     Duplicado
                   </NativeSelectOption>
                   <NativeSelectOption value='mismatch'>
@@ -151,8 +154,8 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'duplicate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                Foi encontrado um arquivo igual já recebido. Revise a
-                correspondência antes de confirmar a duplicidade.
+                Foi encontrado um arquivo igual já recebido. Revise a correspondência
+                antes de confirmar a duplicidade.
               </p>
 
               <input type='hidden' {...form.register('originalDocumentId')} />
@@ -346,7 +349,7 @@ export const AnalysisFormPanel = ({
                 ? 'Confirmar validação'
                 : currentDecision === 'duplicate'
                   ? 'Confirmar como duplicado'
-                : 'Salvar decisão'}
+                  : 'Salvar decisão'}
           </Button>
         </footer>
       </form>

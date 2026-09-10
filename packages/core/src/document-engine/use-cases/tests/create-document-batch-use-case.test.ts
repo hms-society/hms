@@ -124,6 +124,7 @@ describe('CreateDocumentBatchUseCase', () => {
   it('should publish one processing event for each created file', async () => {
     const fixedDate = new Date('2026-08-07T12:00:00.000Z')
 
+    clientsRepository.findById.mockResolvedValue({ id: 'client-123' } as any)
     documentBatchesRepository.add.mockResolvedValue({
       id: 'batch-123',
       readableId: 'LOTE-20260807-0001',

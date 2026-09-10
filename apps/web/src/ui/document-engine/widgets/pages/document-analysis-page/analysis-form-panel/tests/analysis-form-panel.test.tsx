@@ -122,9 +122,11 @@ describe('AnalysisFormPanel', () => {
     })
 
     expect(
-      (screen.getByRole('button', {
-        name: 'Duplicidade já confirmada',
-      }) as HTMLButtonElement).disabled,
+      (
+        screen.getByRole('button', {
+          name: 'Duplicidade já confirmada',
+        }) as HTMLButtonElement
+      ).disabled,
     ).toBe(true)
   })
 

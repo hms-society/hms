@@ -68,9 +68,11 @@ describe('ChecklistLinkFields', () => {
       'Caso 0089',
     )
     expect(
-      (screen.getByRole('combobox', {
-        name: 'Item do checklist',
-      }) as HTMLButtonElement).disabled,
+      (
+        screen.getByRole('combobox', {
+          name: 'Item do checklist',
+        }) as HTMLButtonElement
+      ).disabled,
     ).toBe(true)
 
     expect(screen.getByText('Não vinculado')).toBeDefined()

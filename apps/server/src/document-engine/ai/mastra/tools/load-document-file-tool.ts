@@ -27,15 +27,20 @@ export class LoadFileTool {
     typeof createTool<'load-document-file', typeof inputSchema, typeof outputSchema>
   >
 
-  constructor(@Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider) {
+  constructor(
+    @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
+  ) {
     this.function = createTool({
       id: 'load-document-file',
-      description: 'Load a document file from storage and capture deterministic metadata.',
+      description:
+        'Load a document file from storage and capture deterministic metadata.',
       inputSchema,
       outputSchema,
       strict: true,
       execute: async (input) => {
-        const content = Buffer.from(await this.storageProvider.download(input.storagePath))
+        const content = Buffer.from(
+          await this.storageProvider.download(input.storagePath),
+        )
 
         return {
           ...input,
