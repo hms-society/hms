@@ -32,13 +32,14 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^(packages/core/|packages/validation/)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(packages/core/|packages/validation/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Core/Validation changes detected.'
           else
             echo 'relevant=false' >> "$GITHUB_OUTPUT"
             echo 'No Core/Validation changes detected; this check is not applicable.'
           fi
+          echo "Scope comparison: origin/${{ github.base_ref }}...HEAD"
 
       - name: Setup pnpm
         if: steps.scope.outputs.relevant == 'true'
@@ -56,6 +57,10 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm install --frozen-lockfile
+
+      - name: Architecture checks
+        if: steps.scope.outputs.relevant == 'true'
+        run: pnpm --filter @hms/core --filter @hms/validation check:architecture
 
       - name: Lint
         if: steps.scope.outputs.relevant == 'true'

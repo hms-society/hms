@@ -1,6 +1,12 @@
 name: Check PR Size
 
 on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
   workflow_dispatch:
 
 jobs:
@@ -15,11 +21,14 @@ jobs:
       - name: Calculate PR additions
         id: calculate-additions
         run: |
+          BASE_REF="${{ github.base_ref }}"
+          TARGET_BRANCH="${BASE_REF:-${{ github.event.repository.default_branch }}}"
+
           # Garantir que a branch base está disponível para comparação
-          git fetch origin ${{ github.base_ref }}
+          git fetch origin "$TARGET_BRANCH"
           
           # Considera apenas arquivos TypeScript.
-          ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD \
+          ADDITIONS=$(git diff --numstat "origin/$TARGET_BRANCH...HEAD" \
             | awk -F '\t' '
                 $3 ~ /\.(ts|tsx|mts|cts)$/ { add += $1 }
                 END { print add }

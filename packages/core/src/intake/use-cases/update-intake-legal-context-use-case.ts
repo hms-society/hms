@@ -7,7 +7,7 @@ import {
   InvalidIntakeUpdateError,
 } from '../domain/errors'
 import { IntakeStatus } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 export type UpdateIntakeLegalContextRequest = {
   readonly intakeId: string

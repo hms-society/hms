@@ -11,7 +11,7 @@ import {
   type IntakeConsultationSchedulingOutcome as IntakeConsultationSchedulingOutcomeValue,
   IntakeStatus,
 } from '../domain/structures'
-import type { IntakesRepository } from '../interfaces'
+import type { IntakesRepository } from '../interfaces/intakes-repository'
 
 type Request = {
   intakeId: string

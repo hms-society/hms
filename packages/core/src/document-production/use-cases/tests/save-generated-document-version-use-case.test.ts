@@ -211,4 +211,37 @@ describe('Save Generated Document Version Use Case', () => {
     ).rejects.toBeInstanceOf(DocumentGenerationConflictError)
     expect(documentFileExporter.export).not.toHaveBeenCalled()
   })
+
+  it('removes the stored file when version persistence fails', async () => {
+    const generation = DocumentGenerationFaker.fake({ status: 'running' })
+    const bytes = new Uint8Array([1, 2])
+    const storedFile: File = {
+      id: 'stored-file-id',
+      filePath: 'stored/path',
+      fileName: 'document.docx',
+      contentType: 'application/docx',
+      sizeInBytes: bytes.byteLength,
+      createdAt: new Date('2026-08-11T12:00:00.000Z'),
+    }
+    const persistenceError = new Error('version persistence failed')
+    generationsRepository.findById.mockResolvedValue(generation)
+    versionsRepository.findByDocumentGenerationId.mockResolvedValue(undefined)
+    versionsRepository.findLatestByDocumentId.mockResolvedValue(undefined)
+    documentFileExporter.export.mockResolvedValue({
+      content: bytes,
+      contentType: 'application/docx',
+      extension: 'docx',
+    })
+    fileStorageProvider.save.mockResolvedValue(storedFile)
+    versionsRepository.add.mockRejectedValue(persistenceError)
+
+    await expect(
+      useCase.execute({
+        documentGenerationId: generation.id,
+        content: { type: 'doc' },
+        pendingMarkers: [],
+      }),
+    ).rejects.toBe(persistenceError)
+    expect(fileStorageProvider.remove).toHaveBeenCalledWith(storedFile.id)
+  })
 })

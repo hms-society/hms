@@ -1,4 +1,3 @@
-import type { UseCase } from '../../shared/interfaces'
 import type { DynamicForm } from '../../shared/domain/entities'
 import type { Formalization } from '../domain/entities'
 import {
@@ -10,7 +9,7 @@ import {
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
 import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
-import { FormalizationActorAuthorization } from './formalization-actor-authorization'
+import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -18,21 +17,25 @@ type Request = FormalizationActor & {
   readonly dynamicFormId: string
 }
 
-export class ReplaceFormalizationContractFormUseCase
-  implements UseCase<Request, Formalization>
-{
+export class ReplaceFormalizationContractFormUseCase extends FormalizationUseCase<
+  Request,
+  Formalization
+> {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly sourceReader: FormalizationSourceReader,
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(request: Request): Promise<Formalization> {
     const formalization = await this.formalizationsRepository.findById(
       request.formalizationId,
     )
+
     if (!formalization) throw new FormalizationNotFoundError()
 
-    FormalizationActorAuthorization.assertAccess(formalization.assignedLawyerId, request)
+    this.assertAccess(formalization.assignedLawyerId, request)
 
     if (
       formalization.status !== FormalizationStatus.InProgress ||

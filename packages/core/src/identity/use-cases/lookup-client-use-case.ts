@@ -5,7 +5,8 @@ import {
   InvalidClientDataError,
 } from '../domain/errors'
 import type { TaxId } from '../domain/structures'
-import type { ClientConsentsRepository, ClientsRepository } from '../interfaces'
+import type { ClientConsentsRepository } from '../interfaces/client-consents-repository'
+import type { ClientsRepository } from '../interfaces/clients-repository'
 import type { UseCase } from '#shared/interfaces/use-case'
 
 export type LookupClientRequest = {

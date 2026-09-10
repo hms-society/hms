@@ -14,16 +14,15 @@
     "./formalization": "./src/formalization/index.ts"
   },
   "scripts": {
+    "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
     "lint": "biome lint src",
-    "check-types": "tsc --noEmit",
-    "test": "vitest run"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@hms/core": "workspace:^",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "typescript": "5.9.2",
-    "vitest": "^4.1.9"
+    "typescript": "5.9.2"
   }
 }
