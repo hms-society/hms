@@ -76,6 +76,4 @@ export const signatureGatewayContextSchema = z.discriminatedUnion('step', [
   }),
 ])
 
-export type SignatureGatewayContextDto = z.infer<
-  typeof signatureGatewayContextSchema
->
+export type SignatureGatewayContextDto = z.infer<typeof signatureGatewayContextSchema>

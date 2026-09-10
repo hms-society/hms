@@ -6,4 +6,5 @@ export const caseMemberRoleModel = pgEnum('case_member_role', [
   CaseMemberRole.Lawyer,
   CaseMemberRole.Paralegal,
   CaseMemberRole.Supervisor,
+  CaseMemberRole.Intern,
 ])

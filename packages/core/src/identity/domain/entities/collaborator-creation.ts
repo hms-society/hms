@@ -12,7 +12,7 @@ type LegalCollaboratorCreation = {
   readonly userId: string
   readonly professionalName: string
   readonly jobTitle?: string
-  readonly profile: 'lawyer' | 'paralegal' | 'supervisor'
+  readonly profile: 'lawyer' | 'paralegal' | 'supervisor' | 'intern'
   readonly legalExpertises: readonly [LegalExpertise, ...LegalExpertise[]]
 }
 

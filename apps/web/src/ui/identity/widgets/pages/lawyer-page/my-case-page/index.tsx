@@ -13,14 +13,7 @@ import {
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 
-import {
-  CASE_STAGES,
-  CASE_TASKS,
-  CASE_TEAM,
-  CASE_TIMELINE,
-  MOCK_ACTIVITIES,
-  TEAM_MEMBERS,
-} from './case-page-data'
+import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
 import { useMyCasePage } from './use-my-case-page'
@@ -33,6 +26,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
   const {
     activeTab,
     caseUuid,
+    caseDetails,
     checklistItems,
     completionPercentage,
     displayCaseId,
@@ -101,13 +95,13 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <div className='flex flex-wrap items-center justify-end gap-2'>
             <div className='mr-1 flex items-center'>
               <div className='flex -space-x-1.5'>
-                {TEAM_MEMBERS.map((member) => (
+                {caseDetails?.team?.map((member) => (
                   <Avatar
-                    key={member.initials}
+                    key={member.collaboratorId}
                     className='size-8 border-2 border-secondary'
                   >
-                    <AvatarFallback className={`${member.className} text-[12px]`}>
-                      {member.initials}
+                    <AvatarFallback className='bg-teal-700 text-white text-[12px]'>
+                      {member.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 ))}
@@ -223,7 +217,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             mandatoryItemsCount={mandatoryItemsCount}
             pendingItemsCount={pendingItemsCount}
             tasks={CASE_TASKS}
-            team={CASE_TEAM}
+            team={
+              caseDetails?.team?.map((member) => ({
+                collaboratorId: member.collaboratorId,
+                name: member.name,
+                role: member.role,
+                initials: member.name.substring(0, 2).toUpperCase(),
+                className: 'bg-primary text-primary-foreground',
+              })) ?? []
+            }
             timeline={CASE_TIMELINE}
             validatedItemsCount={validatedItemsCount}
             onOpenChecklist={handleOpenChecklistTab}

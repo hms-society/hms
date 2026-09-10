@@ -21,6 +21,8 @@ import {
   DrizzleCollaboratorsRepository,
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
+import { IntakeDatabaseModule } from '@/intake/database'
+import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { IdentityModule } from '@/identity/identity.module'
 import {
@@ -33,6 +35,7 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 type RegisteredCollaborator = {
   collaboratorId: string
   professionalName: string
+  profile: string
   clientId: string
   clientName: string
   legalAreaId: string
@@ -52,6 +55,7 @@ export class CaseManagementModuleFixture {
     private readonly clientsRepository: DrizzleClientsRepository,
     private readonly legalAreasRepository: DrizzleLegalAreasRepository,
     private readonly legalTopicsRepository: DrizzleLegalTopicsRepository,
+    private readonly intakesRepository: DrizzleIntakesRepository,
     readonly authUser: AuthUser,
     private readonly currentCollaborator: { value?: RegisteredCollaborator },
   ) {}
@@ -68,7 +72,12 @@ export class CaseManagementModuleFixture {
     const currentCollaborator: { value?: RegisteredCollaborator } = {}
     const restFixture = await RestFixture.register(
       {
-        imports: [IdentityModule, LegalCatalogModule, CaseManagementDatabaseModule],
+        imports: [
+          IdentityModule,
+          LegalCatalogModule,
+          CaseManagementDatabaseModule,
+          IntakeDatabaseModule,
+        ],
         controllers: controller ? [controller] : [],
       },
       (builder) =>
@@ -103,7 +112,7 @@ export class CaseManagementModuleFixture {
                 professionalName:
                   collaborator?.professionalName ?? 'Case Management Fixture',
                 email: authUser.email ?? 'case-management.fixture@hms.test',
-                profile: 'lawyer',
+                profile: collaborator?.profile ?? 'lawyer',
                 status: 'active',
               }
               return true
@@ -121,12 +130,17 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleClientsRepository),
       restFixture.get(DrizzleLegalAreasRepository),
       restFixture.get(DrizzleLegalTopicsRepository),
+      restFixture.get(DrizzleIntakesRepository),
       authUser,
       currentCollaborator,
     )
   }
 
-  async registerCollaborator(): Promise<RegisteredCollaborator> {
+  async registerCollaborator(
+    overrides: {
+      profile?: 'lawyer' | 'admin' | 'attendant' | 'supervisor' | 'paralegal' | 'intern'
+    } = {},
+  ): Promise<RegisteredCollaborator> {
     const [legalArea] = await this.legalAreasRepository.addMany([
       { name: 'Cível', active: true },
     ])
@@ -158,7 +172,7 @@ export class CaseManagementModuleFixture {
       userId: user.id,
       professionalName: 'Advogado de desenvolvimento',
       jobTitle: 'Advogado',
-      profile: 'lawyer',
+      profile: (overrides.profile ?? 'lawyer') as any,
       legalExpertises: [
         {
           legalAreaId: legalArea.id,
@@ -171,6 +185,7 @@ export class CaseManagementModuleFixture {
     const registeredCollaborator = {
       collaboratorId: collaborator.id,
       professionalName: collaborator.professionalName,
+      profile: collaborator.profile,
       clientId: client.id,
       clientName:
         client.type === 'natural' ? client.name : (client.tradeName ?? client.legalName),
@@ -181,6 +196,23 @@ export class CaseManagementModuleFixture {
     }
     this.currentCollaborator.value = registeredCollaborator
     return registeredCollaborator
+  }
+
+  async registerIntake(clientId: string) {
+    const [intake] = await this.intakesRepository.addMany([
+      {
+        clientId,
+        responsibleId: this.authUser.id,
+        status: 'registered',
+        contactChannel: 'whatsapp',
+        origin: 'direct',
+        createdBy: this.authUser.id,
+        updatedBy: this.authUser.id,
+        urgency: 'normal',
+      },
+    ])
+    if (!intake) throw new Error('Intake fixture was not created')
+    return intake
   }
 
   async registerLegalCase(overrides: Partial<LegalCaseCreation> = {}) {
@@ -218,6 +250,7 @@ export class CaseManagementModuleFixture {
       members.map((member) => ({
         assignedAt: new Date('2026-08-25T12:00:00.000Z'),
         assignedBy: this.authUser.id,
+        permission: 'visualização',
         ...member,
       })),
     )

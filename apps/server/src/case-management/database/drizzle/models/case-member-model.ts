@@ -6,6 +6,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  varchar,
 } from 'drizzle-orm/pg-core'
 
 import { caseMemberRoleModel } from '@/case-management/database/drizzle/models/case-member-role-model'
@@ -20,6 +21,7 @@ export const caseMemberModel = pgTable(
       .references(() => legalCaseModel.id, { onDelete: 'cascade' }),
     collaboratorId: uuid('collaborator_id').notNull(),
     role: caseMemberRoleModel('role').notNull(),
+    permission: varchar('permission', { length: 50 }).default('visualização').notNull(),
     isPrimary: boolean('is_primary').default(false).notNull(),
     assignedAt: timestamp('assigned_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
