@@ -12,7 +12,8 @@ import type {
 } from '../domain/structures'
 import type { CollaboratorUpdate } from '../domain/entities'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
-import type { LookupClientRequest, RegisterClientRequest } from '../use-cases'
+import type { LookupClientRequest } from '../use-cases/lookup-client-use-case'
+import type { RegisterClientRequest } from '../use-cases/register-client-use-case'
 
 export interface IdentityService {
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>
@@ -34,7 +35,13 @@ export interface IdentityService {
     query: CollaboratorListQuery,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   listLawyers(
-    query: Pick<CollaboratorListQuery, 'page' | 'limit' | 'search'>,
+    query: Pick<CollaboratorListQuery, 'page' | 'limit' | 'pageSize' | 'search'>,
+  ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
+  listActiveCollaborators(
+    query: Pick<
+      CollaboratorListQuery,
+      'page' | 'limit' | 'pageSize' | 'search' | 'profile' | 'jobTitle'
+    >,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   getCollaborator(collaboratorId: string): Promise<RestResponse<CollaboratorSummary>>
   listCollaboratorJobTitles(): Promise<RestResponse<readonly string[]>>

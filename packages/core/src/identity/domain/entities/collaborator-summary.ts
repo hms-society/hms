@@ -17,7 +17,7 @@ type AdministrativeCollaboratorSummary = CollaboratorSummaryBase & {
 }
 
 type LegalCollaboratorSummary = CollaboratorSummaryBase & {
-  readonly profile: 'lawyer' | 'paralegal' | 'supervisor'
+  readonly profile: 'lawyer' | 'paralegal' | 'supervisor' | 'intern'
   readonly legalExpertises: readonly CollaboratorLegalExpertiseProjection[]
 }
 

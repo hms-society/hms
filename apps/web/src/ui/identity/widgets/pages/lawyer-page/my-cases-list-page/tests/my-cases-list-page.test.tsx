@@ -7,6 +7,9 @@ import { useMyCasesListPage } from '../use-my-cases-list-page'
 
 vi.mock('../use-my-cases-list-page', () => ({
   useMyCasesListPage: vi.fn(),
+  STATUS_LABELS: {
+    contracted: 'Contratado',
+  },
 }))
 
 vi.mock('@/ui/shared/widgets/components/anchor', () => ({
@@ -35,7 +38,7 @@ describe('LawyerCasesListPage', () => {
           clientName: 'Antônio Carvalho',
           publicCode: 'CASO-20260703-0089',
           legalArea: 'Direito Previdenciário',
-          status: 'Em formação',
+          status: 'Documentação',
           priority: 'Normal',
           nextAction: 'Aprovar solicitação assistida de documentos',
           updatedAt: 'Hoje, 09:42',
@@ -76,7 +79,7 @@ describe('LawyerCasesListPage', () => {
     })
     expect(caseLink.getAttribute('href')).toBe('/advogado/meus-casos/case-1')
     expect(screen.getByText('Antônio Carvalho')).toBeDefined()
-    expect(screen.getByText('Em formação')).toBeDefined()
+    expect(screen.getByText('Documentação')).toBeDefined()
   })
 
   it('delegates search changes to the page controller', () => {

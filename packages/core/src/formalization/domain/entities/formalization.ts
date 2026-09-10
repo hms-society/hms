@@ -3,7 +3,11 @@ import type {
   DynamicFormSnapshot,
 } from '../../../shared/domain/structures'
 import type { Entity } from '../../../shared/domain/entities/entity'
-import type { FormalizationContractFormState, FormalizationSignatureRequestStatus, FormalizationStatus } from '../structures'
+import type {
+  FormalizationContractFormState,
+  FormalizationSignatureRequestStatus,
+  FormalizationStatus,
+} from '../structures'
 
 export type Formalization = Entity & {
   intakeId: string

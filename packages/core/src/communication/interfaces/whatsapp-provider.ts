@@ -5,5 +5,6 @@ export interface WhatsappProvider {
   sendAutomaticMessage(
     params: SendWhatsappMessageParams,
   ): Promise<SendWhatsappMessageResult>
+  sendTextMessage(phone: string, message: string): Promise<SendWhatsappMessageResult>
   downloadMedia(mediaId: string): Promise<{ buffer: Uint8Array; mimeType: string }>
 }

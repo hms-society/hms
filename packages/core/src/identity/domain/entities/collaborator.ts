@@ -15,7 +15,7 @@ type AdministrativeCollaborator = CollaboratorBase & {
 }
 
 type LegalCollaborator = CollaboratorBase & {
-  profile: 'lawyer' | 'paralegal' | 'supervisor'
+  profile: 'lawyer' | 'paralegal' | 'supervisor' | 'intern'
   legalExpertises: [LegalExpertise, ...LegalExpertise[]]
 }
 
