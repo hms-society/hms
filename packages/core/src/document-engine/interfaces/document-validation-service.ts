@@ -17,6 +17,7 @@ export type ListDocumentValidationsQuery = {
 export type RecordDocumentValidationDecisionRequest = {
   decision: DocumentValidationDecision
   documentTypeId?: string
+  caseId?: string
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string

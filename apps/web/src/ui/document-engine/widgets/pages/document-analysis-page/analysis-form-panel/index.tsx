@@ -24,8 +24,14 @@ export const AnalysisFormPanel = ({
   onRequestResend,
   onOpenDocument,
 }: AnalysisFormPanelProps) => {
-  const { handleOpenDuplicateDocument } = useAnalysisFormPanel({
+  const {
+    isDuplicateAlreadyConfirmed,
+    savedDecisionNotice,
+    handleOpenDuplicateDocument,
+  } = useAnalysisFormPanel({
     form,
+    currentDecision,
+    document,
     onOpenDocument,
   })
 
@@ -70,6 +76,23 @@ export const AnalysisFormPanel = ({
             <FieldError>{form.formState.errors.decision?.message}</FieldError>
           </Field>
 
+          {savedDecisionNotice && (
+            <div
+              className='flex items-start gap-3 rounded-lg border border-primary/20 bg-highlight p-3'
+              role='status'
+            >
+              <Icon name='info' className='mt-0.5 size-4 shrink-0 text-primary' />
+              <div className='flex flex-col gap-1'>
+                <span className='font-sans text-xs font-semibold text-foreground'>
+                  {savedDecisionNotice.title}
+                </span>
+                <span className='font-sans text-xs text-muted-foreground'>
+                  {savedDecisionNotice.description}
+                </span>
+              </div>
+            </div>
+          )}
+
           {currentDecision === 'validate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
@@ -93,7 +116,7 @@ export const AnalysisFormPanel = ({
                   Sem sugestão segura de caso. Selecione o vínculo manualmente.
                 </span>
               </div>
-              <ChecklistLinkFields form={form} document={document} isChecklistDisabled />
+              <ChecklistLinkFields form={form} document={document} />
               <EditableExtractedFields title='Dados extraídos' form={form} />
             </div>
           )}
@@ -306,19 +329,23 @@ export const AnalysisFormPanel = ({
             type='submit'
             variant='brand'
             className='rounded-pill font-sans text-sm font-medium gap-2 h-11 px-6'
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDuplicateAlreadyConfirmed}
           >
             {isSubmitting ? (
               <Icon name='refresh-cw' className='size-4 animate-spin' />
+            ) : isDuplicateAlreadyConfirmed ? (
+              <Icon name='check' className='size-4' />
             ) : currentDecision === 'validate' ? (
               <Icon name='check' className='size-4' />
             ) : (
               <Icon name='download' className='size-4' />
             )}
-            {currentDecision === 'validate'
-              ? 'Confirmar validação'
-              : currentDecision === 'duplicate'
-                ? 'Confirmar como duplicado'
+            {isDuplicateAlreadyConfirmed
+              ? 'Duplicidade já confirmada'
+              : currentDecision === 'validate'
+                ? 'Confirmar validação'
+                : currentDecision === 'duplicate'
+                  ? 'Confirmar como duplicado'
                 : 'Salvar decisão'}
           </Button>
         </footer>

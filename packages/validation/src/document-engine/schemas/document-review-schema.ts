@@ -14,6 +14,7 @@ export const documentReview = z
       'escalate',
     ]),
     documentTypeId: z.string().optional(),
+    caseId: z.string().optional(),
     checklistRequirementId: z.string().optional(),
     reason: z.string().optional(),
     originalDocumentId: z.string().optional(),

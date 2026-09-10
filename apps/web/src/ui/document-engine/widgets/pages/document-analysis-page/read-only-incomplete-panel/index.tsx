@@ -12,6 +12,13 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
   const senderName =
     document.extractedFields.find((field) => field.label === 'Titular')?.value ??
     document.sender
+  const reviewedBy = document.reviewedByName?.trim() || 'responsável não identificado'
+  const reviewedAt = document.reviewedAt
+    ? new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(document.reviewedAt))
+    : 'data não registrada'
   const decisionLabel =
     document.status === 'resend_requested' ? 'Reenvio solicitado' : 'Incompleto'
 
@@ -47,10 +54,11 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
             </div>
             <div className='flex flex-1 flex-col'>
               <span className='font-sans text-sm font-semibold text-[#1B5E20]'>
-                Reenvio solicitado
+                {decisionLabel} por {reviewedBy}
               </span>
               <span className='mt-0.5 font-sans text-xs text-[#1B5E20]/70'>
-                Enviado para {senderName} por {document.sender}.
+                Registro feito em {reviewedAt}. Enviado para {senderName} por{' '}
+                {document.sender}.
               </span>
             </div>
             <Icon name='check' className='size-4 text-[#1B5E20]' />

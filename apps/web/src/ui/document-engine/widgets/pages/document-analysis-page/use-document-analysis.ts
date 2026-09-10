@@ -193,6 +193,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
       decision: mapStatusToDecision(viewDocument.status),
       documentTypeId:
         getStringSuggestion(document, 'documentTypeId') || viewDocument.type || '',
+      caseId:
+        document?.checklistLink?.caseId ?? getStringSuggestion(document, 'caseId') ?? '',
       checklistRequirementId:
         document?.checklistLink?.checklistItemId ??
         getStringSuggestion(document, 'checklistItemId') ??

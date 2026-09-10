@@ -56,23 +56,6 @@ Content-Type: image/png
 < ../../src/document-engine/database/seed-assets/teste_ficha_cadastral.png
 --boundary--
 
-### Upload recibo image for AI extraction
-# Sends one image and creates one document batch, so only one Inngest run starts.
-POST {{baseUrl}}/document-batches/internal-upload
-Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
-Content-Type: multipart/form-data; boundary=boundary
-
---boundary
-Content-Disposition: form-data; name="clientId"
-
-{{lookupViniciusClient.response.body.$.client.id}}
---boundary
-Content-Disposition: form-data; name="files"; filename="teste_recibo.png"
-Content-Type: image/png
-
-< ../../src/document-engine/database/seed-assets/teste_recibo.png
---boundary--
-
 ### List document batches in triage
 GET {{baseUrl}}/document-batches/triage?page=1&limit=10
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

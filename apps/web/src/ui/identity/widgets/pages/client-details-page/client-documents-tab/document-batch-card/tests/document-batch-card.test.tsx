@@ -52,6 +52,7 @@ describe('DocumentBatchCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expandir lote' }))
 
     expect(screen.getByText('documento.pdf')).toBeTruthy()
+    expect(screen.getByText('Aguardando validação')).toBeTruthy()
     expect(
       screen.getByRole('button', { name: 'Recolher lote' }).getAttribute('aria-expanded'),
     ).toBe('true')

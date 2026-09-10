@@ -17,6 +17,7 @@ import { DocumentValidationController } from '../decorators/document-validation-
 type RequestBody = {
   decision: DocumentValidationDecision
   documentTypeId?: string
+  caseId?: string
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string

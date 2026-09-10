@@ -2,7 +2,14 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
-import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
+import { Input } from '@/ui/shadcn/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
 import { TableSurface } from '@/ui/shared/widgets/components/table-surface'
 import {
   Table,
@@ -35,12 +42,14 @@ export const DocumentInboxPage = ({ caseId }: DocumentInboxPageProps) => {
     paginatedData,
     dateRange,
     setDateRange,
-    clientFilter,
-    setClientFilter,
+    senderFilter,
+    setSenderFilter,
+    fileTypeFilter,
+    setFileTypeFilter,
     statusFilter,
     setStatusFilter,
     uniqueStatuses,
-    uniqueClients,
+    documentTypeOptions,
     error,
     isFetching,
     handlePageChange,
@@ -82,33 +91,56 @@ export const DocumentInboxPage = ({ caseId }: DocumentInboxPageProps) => {
             Filtros:
           </span>
 
-          <NativeSelect
-            size='sm'
-            className='w-60 bg-card font-sans text-sm'
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+          <Select
+            value={statusFilter || 'all'}
+            onValueChange={(value) => setStatusFilter(value === 'all' ? '' : value)}
           >
-            <NativeSelectOption value=''>Todos os status</NativeSelectOption>
-            {uniqueStatuses.map((status) => (
-              <NativeSelectOption key={status} value={status}>
-                {status}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+            <SelectTrigger
+              size='sm'
+              className='w-60 bg-card font-sans text-sm'
+              aria-label='Filtrar por status'
+            >
+              <SelectValue placeholder='Todos os status' />
+            </SelectTrigger>
+            <SelectContent align='start' position='popper'>
+              <SelectItem value='all'>Todos os status</SelectItem>
+              {uniqueStatuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <NativeSelect
-            size='sm'
-            className='w-60 bg-card font-sans text-sm'
-            value={clientFilter}
-            onChange={(event) => setClientFilter(event.target.value)}
+          <Input
+            type='search'
+            className='h-9 w-64 bg-card font-sans text-sm'
+            placeholder='Digite o remetente'
+            aria-label='Filtrar por remetente'
+            value={senderFilter}
+            onChange={(event) => setSenderFilter(event.target.value)}
+          />
+
+          <Select
+            value={fileTypeFilter || 'all'}
+            onValueChange={(value) => setFileTypeFilter(value === 'all' ? '' : value)}
           >
-            <NativeSelectOption value=''>Todos os clientes</NativeSelectOption>
-            {uniqueClients.map((client) => (
-              <NativeSelectOption key={client} value={client}>
-                {client}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+            <SelectTrigger
+              size='sm'
+              className='w-52 bg-card font-sans text-sm'
+              aria-label='Filtrar por tipo de documento'
+            >
+              <SelectValue placeholder='Tipos de documento' />
+            </SelectTrigger>
+            <SelectContent align='start' position='popper'>
+              <SelectItem value='all'>Tipos de documento</SelectItem>
+              {documentTypeOptions.map((fileType) => (
+                <SelectItem key={fileType} value={fileType}>
+                  {fileType}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Popover>
             <PopoverTrigger asChild>
@@ -241,8 +273,7 @@ export const DocumentInboxPage = ({ caseId }: DocumentInboxPageProps) => {
                             {doc.fileName}
                           </span>
                           <span className='font-sans text-xs text-muted-foreground'>
-                            {doc.fileName.split('.').pop()?.toUpperCase()} •{' '}
-                            {doc.fileSize}
+                            {doc.fileType} • {doc.fileSize}
                           </span>
                         </div>
                       </div>
