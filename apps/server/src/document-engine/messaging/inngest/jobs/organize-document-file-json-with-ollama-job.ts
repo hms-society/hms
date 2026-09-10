@@ -5,12 +5,11 @@ import type { DocumentValidationsRepository } from '@hms/core/document-engine/in
 import { eventType, type InngestFunction } from 'inngest'
 
 import { DocumentJsonOrganizerAgent } from '@/document-engine/ai/mastra/agents'
-import {
-  documentJsonOrganizationSchema,
-  type DocumentJsonOrganization,
-} from '@/document-engine/ai/mastra/schemas'
+import { buildDocumentJsonOrganizationPrompt } from '@/document-engine/ai/mastra/prompts'
+import { documentJsonOrganizationSchema } from '@/document-engine/ai/mastra/schemas'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
-import { documentFileJsonOrganizationRequestedSchema } from '@/document-engine/messaging/inngest/schemas/document-file-json-organization-requested-schema'
+import { documentFileJsonOrganizationRequestedSchema } from '@/document-engine/messaging/inngest/schemas'
+import type { DocumentJsonOrganizationResult } from '@/document-engine/messaging/inngest/structures'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
@@ -18,16 +17,6 @@ const documentFileJsonOrganizationRequested = eventType(
   DocumentFileJsonOrganizationRequestedEvent._NAME,
   { schema: documentFileJsonOrganizationRequestedSchema },
 )
-
-type OllamaSuggestionResult =
-  | {
-      captured: true
-      suggestion: DocumentJsonOrganization
-    }
-  | {
-      captured: false
-      reason: string
-    }
 
 @Injectable()
 export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
@@ -104,7 +93,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
             caseId: currentDocument.checklistLink?.caseId,
             checklistItemId: currentDocument.checklistLink?.checklistItemId,
             aiSuggestion: {
-              ...this.omitLegacyAiFlags(currentDocument.aiSuggestion),
+              ...this.getPreservedSuggestionContext(currentDocument.aiSuggestion),
               suggestedStatus: status,
               confidenceLabel: 'Organizado pelo Ollama',
               evidence: suggestion.evidence,
@@ -126,35 +115,14 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
 
   private async generateSuggestion(input: {
     extractedTextFull: string
-  }): Promise<OllamaSuggestionResult> {
+  }): Promise<DocumentJsonOrganizationResult> {
     try {
       const response = await this.documentJsonOrganizerAgent.generate([
         {
           role: 'user',
-          content: `Organize this OCR text into JSON fields.
-
-Return exactly this JSON shape:
-{
-  "confidence": 0.45,
-  "extractedFields": [
-    { "label": "field label", "value": "visible value", "confidence": 0.8 }
-  ],
-  "evidence": [
-    { "field": "field label", "sourceText": "short visible snippet" }
-  ]
-}
-
-Rules:
-- Do not classify the document.
-- Do not return documentTypeId or documentTypeLabel.
-- Do not invent missing fields.
-- Split compound OCR text into the clearest labeled fields.
-- Keep labels in Portuguese when the OCR text is Portuguese.
-- Return confidence between 0 and 1.
-- Return JSON only.
-
-OCR text:
-${this.compactText(input.extractedTextFull)}`,
+          content: buildDocumentJsonOrganizationPrompt(
+            this.compactText(input.extractedTextFull),
+          ),
         },
       ])
       const text = response.text
@@ -224,18 +192,29 @@ ${this.compactText(input.extractedTextFull)}`,
     return text.replace(/\s+/g, ' ').trim().slice(0, 3000)
   }
 
-  private omitLegacyAiFlags(aiSuggestion?: Record<string, unknown>) {
+  private getPreservedSuggestionContext(aiSuggestion?: Record<string, unknown>) {
     if (!aiSuggestion) {
       return undefined
     }
 
-    const {
-      documentTypeId: _documentTypeId,
-      documentTypeLabel: _documentTypeLabel,
-      geminiJsonOrganizationCaptured: _gemini,
-      ...sanitized
-    } = aiSuggestion
+    const preservedContext: Record<string, unknown> = {}
 
-    return sanitized
+    for (const key of [
+      'caseId',
+      'caseLabel',
+      'checklistItemId',
+      'checklistItemLabel',
+      'failureReason',
+      'failureInstruction',
+      'metadataCaptured',
+    ]) {
+      const value = aiSuggestion[key]
+
+      if (value !== undefined) {
+        preservedContext[key] = value
+      }
+    }
+
+    return preservedContext
   }
 }

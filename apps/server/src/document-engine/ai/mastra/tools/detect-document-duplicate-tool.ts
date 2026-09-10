@@ -3,21 +3,14 @@ import { Inject, Injectable } from '@nestjs/common'
 import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
-import { z } from 'zod'
 
-import { outputSchema as workflowOutputSchema } from '@/document-engine/ai/mastra/schemas'
+import {
+  loadedDocumentFileSchema,
+  outputSchema as workflowOutputSchema,
+} from '@/document-engine/ai/mastra/schemas'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 
-const inputSchema = z.object({
-  batchId: z.string().uuid(),
-  documentFileId: z.string().uuid(),
-  storagePath: z.string().min(1),
-  originalName: z.string().min(1),
-  mimeType: z.string().min(1),
-  sizeBytes: z.number().int().min(0),
-  contentBase64: z.string(),
-  hashSha256: z.string().length(64),
-})
+const inputSchema = loadedDocumentFileSchema
 const outputSchema = inputSchema.extend({
   suggestion: workflowOutputSchema.shape.suggestion,
 })

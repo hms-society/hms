@@ -17,6 +17,4 @@ export const documentJsonOrganizationSchema = z.object({
   ),
 })
 
-export type DocumentJsonOrganization = z.infer<
-  typeof documentJsonOrganizationSchema
->
+export type DocumentJsonOrganization = z.infer<typeof documentJsonOrganizationSchema>
