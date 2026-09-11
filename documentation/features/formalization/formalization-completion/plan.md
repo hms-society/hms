@@ -7,16 +7,16 @@ evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-145
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
-updated_at: 2026-09-10
+updated_at: 2026-09-11
 ---
 
 ## Execution status
 
-- **Spec:** [`./spec.md`](./spec.md), revision `6`, `in_progress`.
+- **Spec:** [`./spec.md`](./spec.md), revision `6`, `completed`.
 - **Rationale:** Plan-backed execution is required for the cross-package domain/validation/server/web work, owner-boundary transactions, generated migration artifacts, provider/job changes, design-backed browser validation and durable recovery state.
 - **Current phase:** `F6` — complete.
-- **Next action:** Commit the intentionally scoped candidate, publish the required ready PR set, and wait for every applicable CI workflow before closing the Spec.
-- **Active blockers:** No implementation or acceptance blocker remains. The structural gate passes all 239 declared paths; the ready-to-send and confirmed browser states were freshly validated on isolated services; the application schema in `postgres` was recreated from the full migration journal and seeded; Supabase `auth` and `storage` schemas were preserved; and `hms-bucket` is the canonical storage bucket with the seeded Formalization files. The 99% screenshot is a documented controlled response fixture because the seeded two-document aggregate cannot naturally render 99%. The repository worktree still contains unrelated user-owned changes that must remain outside the delivery commits, and the publication branch must satisfy the repository PR-size/dependency-chain policy.
+- **Next action:** None; the delivery PR set is published and every applicable CI workflow passed.
+- **Active blockers:** None. The structural gate passes all 239 declared paths; the ready-to-send and confirmed browser states were freshly validated on isolated services; the application schema in `postgres` was recreated from the full migration journal and seeded; Supabase `auth` and `storage` schemas were preserved; `hms-bucket` is the canonical storage bucket with the seeded Formalization files; and all applicable CI workflows passed on PRs 144–146. The 99% screenshot is a documented controlled response fixture because the seeded two-document aggregate cannot naturally render 99%. The repository worktree still contains unrelated user-owned changes that remain outside the delivery commits.
 - **Builders:** `builder_core`, `builder_validation`, `builder_server` and `builder_web` completed their owned phases; `builder_core` was resumed for the resend-envelope correction and `builder_web` was resumed for the final tracking-panel accessibility correction. Their regression evidence is green.
 - **Coordination:** Orchestrator owns the three generated Drizzle outputs, `documentation/modules.md`, structural-gate execution, final integration and Evaluation. No package installation, root configuration or lockfile change is authorized by this Spec.
 
@@ -31,7 +31,7 @@ updated_at: 2026-09-10
 | 3 | `builder_web` | F4 | Implement Web REST adapters, routes, pages, widgets and tests | F2 Core + F2 Validation | `builder_server` | `completed` | Web generation/code/architecture/types/unit/focused-route suites pass; widget trees match the Spec and design references with keyboard, narrow viewport, console/network and screenshot evidence |
 | 4 | Orchestrator | F5 | Generate artifacts, align documentation and integrate the candidate | F3/F4 implementation integrated; model-backed exits blocked on generated schema | — | `completed` | Generated migration/snapshot/journal are inspected with model changes; `documentation/modules.md` is aligned; all 239 Spec paths are integrated and the structural gate has a current passing Evaluation row |
 | 5 | `reviewer` | F6 | Perform the single integrated read-only review | F5 passing structural gate | Orchestrator integrated sensors/manual validation | `completed` | Same reviewer rechecked the corrected Inngest fixture, found no implementation regression, and identified only incomplete Server coverage evidence |
-| 5 | Orchestrator | F6 | Complete integrated validation and hand off | F5; reviewer complete | `completed` | Structural gate, integrated sensors, reviewer recheck and current runtime/visual evidence are recorded; Evaluation is `ready` and publication remains owned by `conclude-spec` |
+| 5 | Orchestrator | F6 | Complete integrated validation and hand off | F5; reviewer complete | `completed` | Structural gate, integrated sensors, reviewer recheck, current runtime/visual evidence and the final PR CI quality gate are recorded; Evaluation and Spec are closed. |
 
 ### F1 — Core domain contracts and exports
 

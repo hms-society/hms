@@ -3,18 +3,18 @@ feature: "formalization/formalization-completion"
 spec: ./spec.md
 plan: ./plan.md
 spec_revision: 6
-status: ready
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713
 jira_tickets:
   - SCRUM-145
-updated_at: 2026-09-10
+updated_at: 2026-09-11
 ---
 
 # Evaluation
 
 Evaluation of Spec revision `6` against the current implementation.
 
-Current result: `ready`; the full Core, Validation, Server, Inngest and Web evidence is green, the authenticated provider-backed browser captures are current, and the signed terminal state renders `2 de 2`/`100%`. The structural path classifications were reconciled against the selected `HEAD` baseline and the current gate passes all `239` declared paths.
+Current result: `completed`; the full Core, Validation, Server, Inngest and Web evidence is green, the authenticated provider-backed browser captures are current, and the signed terminal state renders `2 de 2`/`100%`. The structural path classifications were reconciled against the selected `HEAD` baseline and the current gate passes all `239` declared paths. The final CI quality gate passed on all three ready delivery PRs.
 
 ## Acceptance matrix
 
@@ -157,6 +157,7 @@ Current result: `ready`; the full Core, Validation, Server, Inngest and Web evid
 | `FND-025` | implementation/contract | Aggregate progress remained at 0% while every document card showed `Assinado` | `EV-CORE-PROGRESS`; `AC-01`, `AC-02`, `AC-12` | resolved | The aggregate counted only `confirmed` documents, while the document cards correctly treated fully submitted signatures as signed during asynchronous PDF preservation. Progress now counts both `submitted` and `confirmed`; contracting readiness still requires `confirmed` documents and signed artifacts. |
 | `FND-026` | implementation/UI | Main-page configuration badge showed `Pronto para envio` after signature request confirmation | `EV-WEB-CONFIRMED-STATUS`; `EV-VIS-CONFIRMED-STATUS` | resolved | The summary now receives the current signature-request status and gives `confirmed` precedence over `ready_for_sending`, rendering the success badge `Confirmado`. |
 | `FND-027` | structural/conformance/tooling | Final Spec-path reconciliation and staged test whitespace | `PATH-01`; `EV-WEB-SIGNATORY-AVATAR` | resolved | Four Web paths were correctly classified as `Create` because they are absent from the selected `HEAD` baseline; the existing panel entry remains `Modify`. The staged Formalization REST test was refreshed to the single-newline EOF, and both worktree and index diff checks pass. |
+| `FND-028` | CI/architecture/fixtures | Final PR CI quality gate | `CI-01`–`CI-03`; `EV-SERVER`; `EV-WEB` | resolved | CI exposed cross-module persistence imports, direct Web data access from Identity widgets, a missing Nest module import for the PDF-freeze provider, and test fixtures that did not carry the contracted timestamp or current migration filename. Public module boundaries and invariant-aware fixtures were corrected; all affected CI workflows passed. |
 
 ## Lessons learned
 
@@ -180,6 +181,7 @@ Current result: `ready`; the full Core, Validation, Server, Inngest and Web evid
 | Aggregate signature progress must reflect completed signer submissions before asynchronous signed-PDF preservation confirms the document, while contracting readiness remains artifact-backed. | `FND-025` | No authority change; the corrected behavior is now explicit in the `completedDocuments` response contract and regression coverage. |
 | Main-page signature status must come from the current request when available; configuration readiness alone must not mask a confirmed request. | `FND-026` | No authority change; the corrected precedence is now explicit in the Spec and summary-hook regression coverage. |
 | Candidate path classifications must describe the selected baseline, and closure checks must cover both worktree and index whitespace. | `FND-027` | No authority change; the structural checker and `documentation/tooling.md` already define these closure requirements. |
+| Public Nest providers and test fixtures must follow the same ownership and persistence invariants as production paths; CI architecture and integration failures are signals to repair the boundary, not to add dependency-cruiser exceptions. | `FND-028` | No authority change; `documentation/modules.md`, `documentation/rules/server-app-layer-rules.md`, `documentation/rules/database-layer-rules.md` and the existing CI gates already prescribe public module imports, owner-local access and invariant-valid fixtures. |
 
 ## PR CI quality gate
 
@@ -188,12 +190,15 @@ is not SDD current-commit metadata. Retain failed and superseded-head runs as hi
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | Applicable PR workflows | — | pending | — |
+| `CI-01` | PR #144 — Core, Server, Web and size workflows | `0e5e72c46a6c16d6b5541a38dfa5f105bd10a569` | passed | [Core](https://github.com/hms-society/hms/actions/runs/34603492386), [Server](https://github.com/hms-society/hms/actions/runs/34603492340), [Web](https://github.com/hms-society/hms/actions/runs/34603492395), [size](https://github.com/hms-society/hms/actions/runs/34603492406) |
+| `CI-02` | PR #145 — Core, Server, Web and size workflows | `5f8fb67fe0e1670619e736ac7707699540dc7b14` | passed | [Core](https://github.com/hms-society/hms/actions/runs/34603508867), [Server](https://github.com/hms-society/hms/actions/runs/34603508872), [Web](https://github.com/hms-society/hms/actions/runs/34603508922), [size](https://github.com/hms-society/hms/actions/runs/34603509009) |
+| `CI-03` | PR #146 — Core, Server, Web and size workflows | `422e9287abacfbf2cd0ca740e3c0bd2837bfb9a1` | passed | [Core](https://github.com/hms-society/hms/actions/runs/34603527207), [Server](https://github.com/hms-society/hms/actions/runs/34603527198), [Web](https://github.com/hms-society/hms/actions/runs/34603527250), [size](https://github.com/hms-society/hms/actions/runs/34603527200) |
 
 ## History
 
 | Date/Time | Event |
 | --- | --- |
+| `2026-09-11 10:35` | Final CI quality gate passed on PRs 144, 145 and 146 at the recorded head SHAs; Server architecture/test/Inngest/Docker, Core, Web and size checks are green. CI-identified ownership and fixture corrections were applied before this gate. Evaluation and Spec are closed at revision 6. |
 | `2026-09-08 18:25` | Evaluation created for Spec revision `5`; authority, Docker/Auth/Server preflight, seed resolution, baseline conformance and `builder_core` activation recorded before feature edits. |
 | `2026-09-08 18:43` | Orchestrator verified the `builder_core` handoff and reran the Core test suite; FND-002 and FND-003 opened, affected evidence invalidated, and the same Builder is resumed. |
 | `2026-09-08 19:00` | `builder_core` completed F1/F2-T1; Orchestrator reran architecture, types and 640 Core tests, resolved FND-002/FND-003, and activated `builder_validation` for F2-T2. |
