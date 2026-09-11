@@ -44,13 +44,11 @@ import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-red
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
 import { Route as AdvogadoMeusCasosIndexRouteImport } from './routes/advogado/meus-casos/index'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
+import { Route as AdvogadoMeusCasosNovoCasoRouteImport } from './routes/advogado/meus-casos/novo-caso'
 import { Route as ChecklistsTemplatesIndexRouteImport } from './routes/checklists/templates/index'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConfiguracoesAreasTiposDemandaIndexRouteImport } from './routes/configuracoes/areas-tipos-demanda/index'
-import { Route as AdvogadoMeusCasosNovoCasoRouteImport } from './routes/advogado/meus-casos/novo-caso'
-import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
-import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
@@ -237,20 +235,18 @@ const AdvogadoMeusCasosCaseIdRoute = AdvogadoMeusCasosCaseIdRouteImport.update({
   path: '/meus-casos/$caseId',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
-const ChecklistsTemplatesIndexRoute =
-  ChecklistsTemplatesIndexRouteImport.update({
-    id: '/checklists/templates/',
-    path: '/checklists/templates',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-
 const AdvogadoMeusCasosNovoCasoRoute =
   AdvogadoMeusCasosNovoCasoRouteImport.update({
     id: '/meus-casos/novo-caso',
     path: '/meus-casos/novo-caso',
     getParentRoute: () => AdvogadoRouteRoute,
   } as any)
-
+const ChecklistsTemplatesIndexRoute =
+  ChecklistsTemplatesIndexRouteImport.update({
+    id: '/checklists/templates/',
+    path: '/checklists/templates/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -852,18 +848,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoMeusCasosCaseIdRouteImport
       parentRoute: typeof AdvogadoRouteRoute
     }
-    '/checklists/templates/': {
-      id: '/checklists/templates/'
-      path: '/checklists/templates'
-      fullPath: '/checklists/templates/'
-      preLoaderRoute: typeof ChecklistsTemplatesIndexRouteImport
-      parentRoute: typeof rootRouteImport
     '/advogado/meus-casos/novo-caso': {
       id: '/advogado/meus-casos/novo-caso'
       path: '/meus-casos/novo-caso'
       fullPath: '/advogado/meus-casos/novo-caso'
       preLoaderRoute: typeof AdvogadoMeusCasosNovoCasoRouteImport
       parentRoute: typeof AdvogadoRouteRoute
+    }
+    '/checklists/templates/': {
+      id: '/checklists/templates/'
+      path: '/checklists/templates'
+      fullPath: '/checklists/templates/'
+      preLoaderRoute: typeof ChecklistsTemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
@@ -1081,5 +1078,4 @@ declare module '@tanstack/react-start' {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
   }
-}
 }

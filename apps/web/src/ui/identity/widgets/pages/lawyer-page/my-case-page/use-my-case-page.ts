@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 import { useCaseChecklist } from './hooks/use-case-checklist'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export type UseMyCasePageParams = {
   caseId?: string
@@ -14,7 +12,6 @@ export type UseMyCasePageParams = {
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   const { caseManagementService } = useRestContext()
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
-  const { caseManagementService } = useRestContext()
 
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
@@ -38,7 +35,6 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     },
   })
   const legalCase = legalCases.find((caseItem) => caseItem.id === caseUuid)
-  const displayCaseId = legalCase?.publicCode ?? 'CASO-20260703-0089'
   const caseTitle = legalCase?.title ?? 'Aposentadoria por Tempo de Contribuição'
   const caseLegalArea = legalCase?.legalArea ?? 'Área jurídica do checklist'
   const caseClientName = legalCase?.clientName ?? 'Antônio Carvalho'
