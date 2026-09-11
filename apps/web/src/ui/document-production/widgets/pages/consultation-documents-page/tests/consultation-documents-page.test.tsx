@@ -265,7 +265,7 @@ describe('ConsultationDocumentsPage', () => {
     expect(screen.getAllByText('Aprovado')).not.toHaveLength(0)
     expect(screen.getAllByText('Em revisão')).not.toHaveLength(0)
     expect(screen.getAllByText('Rejeitado')).not.toHaveLength(0)
-    expect(screen.getAllByText('Vigente')).not.toHaveLength(0)
+    expect(screen.getAllByText(/Vigente · Versão/)).not.toHaveLength(0)
     expect(screen.getByRole('button', { name: 'Gerar documento' })).toBeDefined()
     expect(screen.getByText('Falha na geração')).toBeDefined()
     expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeDefined()

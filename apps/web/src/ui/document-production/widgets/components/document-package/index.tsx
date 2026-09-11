@@ -21,6 +21,7 @@ export type DocumentPackageProps = {
   isConfirmed?: boolean
   isConfirming?: boolean
   isReopening?: boolean
+  isReopenDisabled?: boolean
   isConfirmationEligible?: boolean
   onSelect?: () => void
   onConfirm?: () => Promise<unknown>
@@ -49,6 +50,7 @@ export const DocumentPackage = ({
   isConfirmed = false,
   isConfirming = false,
   isReopening = false,
+  isReopenDisabled = false,
   isConfirmationEligible = false,
   onSelect,
   onConfirm,
@@ -91,8 +93,13 @@ export const DocumentPackage = ({
               type='button'
               variant='outline'
               size='sm'
-              disabled={isReopening}
+              disabled={isReopening || isReopenDisabled}
               onClick={() => void onReopen()}
+              title={
+                isReopenDisabled
+                  ? 'Não é possível editar o pacote enquanto o envio de assinaturas estiver ativo.'
+                  : undefined
+              }
             >
               <Icon name='pencil' />
               {isReopening ? 'Reabrindo...' : 'Editar pacote'}

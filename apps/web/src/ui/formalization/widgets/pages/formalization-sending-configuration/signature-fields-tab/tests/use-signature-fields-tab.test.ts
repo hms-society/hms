@@ -136,12 +136,18 @@ describe('useSignatureFieldsTab', () => {
     expect(result.current.zoom).toBe(1)
   })
 
-  it('keeps field editing read-only while previews are preparing', () => {
+  it('keeps the fields editor interactive while previews are preparing', () => {
     const preparingConfiguration = {
       ...configuration,
       status: 'preparing_configuration',
       documents: configuration.documents.map((document) =>
-        document.documentId === 'document-1' ? { ...document, fields: [] } : document,
+        document.documentId === 'document-1'
+          ? {
+              ...document,
+              fields: [],
+              preview: { ...document.preview, state: 'pending' },
+            }
+          : document,
       ),
     } as FormalizationSignatureConfiguration
     const { result } = renderHook(() =>
@@ -151,9 +157,9 @@ describe('useSignatureFieldsTab', () => {
       }),
     )
 
-    expect(result.current.isReadOnly).toBe(true)
-    act(() => result.current.addField())
-    expect(result.current.fields).toHaveLength(0)
+    expect(result.current.isReadOnly).toBe(false)
+    act(() => result.current.selectDocument('document-2'))
+    expect(result.current.documentId).toBe('document-2')
   })
 
   it('persists the active document field snapshot with the expected version', async () => {

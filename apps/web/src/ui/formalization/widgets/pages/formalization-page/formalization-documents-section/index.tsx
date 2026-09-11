@@ -33,6 +33,7 @@ export const FormalizationDocumentsSection = (
     initialAreaId,
     initialTopicId,
     isConfirmationDialogOpen,
+    isReopenDisabled,
     isReadOnly,
     isSelectionOpen,
     items,
@@ -62,18 +63,21 @@ export const FormalizationDocumentsSection = (
         isReadOnly={isReadOnly}
         isConfirmed={production.isPackageConfirmed}
         isReopening={production.isReopeningPackage}
+        isReopenDisabled={isReopenDisabled}
         isConfirming={production.confirmMutation.isPending}
         isConfirmationEligible={production.isConfirmationEligible}
         onSelect={() => handleOpenChange(true)}
         onConfirm={!production.isPackageConfirmed ? handleConfirmRequest : undefined}
-        onReopen={production.isPackageConfirmed ? handleReopen : undefined}
+        onReopen={
+          production.isPackageConfirmed && !props.isTerminal ? handleReopen : undefined
+        }
         onRetry={handleRetry}
         onGenerateDocument={handleGenerateDocument}
         onCancelDocumentGeneration={handleCancelDocumentGeneration}
         isCancellingDocument={production.isCancellingDocument}
         onRefreshDocument={handleRefreshDocument}
         renderAction={(action, item: DocumentPackageItem) => {
-          const versionId = item.latestVersion?.id
+          const versionId = (item.currentVersion ?? item.latestVersion)?.id
           if (!versionId) return null
           const isReviewAction = action === 'review'
           return (

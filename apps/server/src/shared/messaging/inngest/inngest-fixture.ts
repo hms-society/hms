@@ -6,6 +6,7 @@ import type { EventPayload, InngestFunction } from 'inngest'
 import { serve } from 'inngest/node'
 import {
   GenericContainer,
+  getContainerRuntimeClient,
   type StartedTestContainer,
   TestContainers,
   Wait,
@@ -67,6 +68,37 @@ type InvokeResponse = {
   }
 }
 
+class InngestContainer extends GenericContainer {
+  private createdContainerId: string | undefined
+
+  protected override async containerCreated(containerId: string) {
+    this.createdContainerId = containerId
+  }
+
+  async cleanupAfterStartFailure() {
+    if (!this.createdContainerId) return
+
+    try {
+      const client = await getContainerRuntimeClient()
+      const container = client.container.getById(this.createdContainerId)
+
+      try {
+        await client.container.stop(container, { timeout: 0 })
+      } catch {
+        // A container that never reached running state can still be removed below.
+      }
+
+      try {
+        await client.container.remove(container, { removeVolumes: true })
+      } catch {
+        // The original startup error is more useful than a best-effort cleanup error.
+      }
+    } catch {
+      // Preserve the original startup error if Docker is unavailable during cleanup.
+    }
+  }
+}
+
 export class InngestFixture {
   private readonly timeoutMs: number
   private endpointServer: Server | undefined
@@ -104,18 +136,7 @@ export class InngestFixture {
 
       await TestContainers.exposeHostPorts(endpointPort)
 
-      this.container = await new GenericContainer(INNGEST_IMAGE)
-        .withCommand([
-          'inngest',
-          'dev',
-          '--no-discovery',
-          '-u',
-          `http://host.testcontainers.internal:${endpointPort}${INNGEST_SERVE_PATH}`,
-        ])
-        .withExposedPorts(INNGEST_PORT)
-        .withWaitStrategy(Wait.forHttp('/dev', INNGEST_PORT).forStatusCode(200))
-        .withStartupTimeout(this.timeoutMs)
-        .start()
+      this.container = await this.startInngestContainer(endpointPort)
 
       this.inngestBaseUrl = `http://${this.container.getHost()}:${this.container.getMappedPort(INNGEST_PORT)}`
       this.inngestClient = this.createInngestClient(this.inngestBaseUrl)
@@ -269,6 +290,46 @@ export class InngestFixture {
     } as EnvProvider
 
     return new InngestClient(envProvider)
+  }
+
+  private async startInngestContainer(endpointPort: number) {
+    const maxAttempts = 3
+    let lastError: unknown
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const container = new InngestContainer(INNGEST_IMAGE)
+        .withCommand([
+          'inngest',
+          'dev',
+          '--no-discovery',
+          '-u',
+          `http://host.testcontainers.internal:${endpointPort}${INNGEST_SERVE_PATH}`,
+        ])
+        .withExposedPorts(INNGEST_PORT)
+        .withWaitStrategy(Wait.forHttp('/dev', INNGEST_PORT).forStatusCode(200))
+        .withStartupTimeout(this.timeoutMs)
+
+      try {
+        return await container.start()
+      } catch (error) {
+        lastError = error
+        await container.cleanupAfterStartFailure()
+
+        if (!this.isPortBindingTimeout(error) || attempt === maxAttempts) {
+          throw error
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, attempt * 500))
+      }
+    }
+
+    throw lastError ?? new Error('The Inngest container could not be started.')
+  }
+
+  private isPortBindingTimeout(error: unknown) {
+    return String(error).includes(
+      'while waiting for container ports to be bound to the host',
+    )
   }
 
   private async syncFunctions(endpointPort: number) {

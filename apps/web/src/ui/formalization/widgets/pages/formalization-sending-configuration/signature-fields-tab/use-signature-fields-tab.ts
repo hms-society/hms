@@ -86,8 +86,7 @@ export function useSignatureFieldsTab({
   const persistLatestRef = useRef<() => Promise<void>>(() => Promise.resolve())
   const [viewerWidth, setViewerWidth] = useState(480)
   const [zoom, setZoom] = useState(1)
-  const isReadOnly =
-    !configuration.editable || configuration.status === 'preparing_configuration'
+  const isReadOnly = !configuration.editable
 
   const availableSignatories = useMemo(
     () =>

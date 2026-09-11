@@ -102,7 +102,7 @@ export const FormalizationDocumentReviewPage = (
           review.setRejectionReason('')
           review.setIsRejectOpen(true)
         }}
-        onSelectCurrent={() => review.setIsCurrentOpen(true)}
+        onSelectCurrent={() => review.handleRequestCurrent(props.documentVersionId)}
         onRegenerate={() => {
           review.setRegenerationInstructions('')
           review.setIsRegenerateOpen(true)
@@ -131,6 +131,10 @@ export const FormalizationDocumentReviewPage = (
         title={viewModel.title}
         items={review.history}
         onOpenChange={review.setIsHistoryOpen}
+        onSelectCurrent={
+          review.isReadOnly || review.isDirty ? undefined : review.handleRequestCurrent
+        }
+        isSelectingCurrent={review.isSelectingCurrent}
         onSelect={(versionId) => {
           if (versionId === props.documentVersionId) {
             review.setIsHistoryOpen(false)

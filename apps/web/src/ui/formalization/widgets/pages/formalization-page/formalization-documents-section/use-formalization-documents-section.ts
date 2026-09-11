@@ -17,6 +17,7 @@ export type FormalizationDocumentsSectionProps = {
     legalTopicId?: string | null
   }
   isTerminal: boolean
+  isSignatureSendingLocked?: boolean
   production: FormalizationDocumentProductionController
 }
 
@@ -25,6 +26,7 @@ export function useFormalizationDocumentsSection({
   formalization,
   intake,
   isTerminal,
+  isSignatureSendingLocked = false,
   production,
 }: FormalizationDocumentsSectionProps) {
   const { navigateTo } = useNavigation()
@@ -109,6 +111,7 @@ export function useFormalizationDocumentsSection({
     initialAreaId: formalization.legalAreaId ?? intake.legalAreaId ?? undefined,
     initialTopicId: formalization.legalTopicId ?? intake.legalTopicId ?? undefined,
     isConfirmationDialogOpen,
+    isReopenDisabled: isSignatureSendingLocked,
     isReadOnly,
     isSelectionOpen,
     items,

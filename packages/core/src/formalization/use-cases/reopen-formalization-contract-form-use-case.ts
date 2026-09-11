@@ -6,7 +6,11 @@ import {
 } from '../domain/errors'
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationsRepository } from '../interfaces'
+import { FormalizationSignatureRequestStatus } from '../domain/structures'
+import type {
+  FormalizationSignatureRequestsRepository,
+  FormalizationsRepository,
+} from '../interfaces'
 import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
@@ -18,7 +22,10 @@ export class ReopenFormalizationContractFormUseCase extends FormalizationUseCase
   Request,
   Formalization
 > {
-  constructor(private readonly formalizationsRepository: FormalizationsRepository) {
+  constructor(
+    private readonly formalizationsRepository: FormalizationsRepository,
+    private readonly requestsRepository: FormalizationSignatureRequestsRepository,
+  ) {
     super()
   }
 
@@ -35,6 +42,19 @@ export class ReopenFormalizationContractFormUseCase extends FormalizationUseCase
     if (formalization.contractFormState === FormalizationContractFormState.Open) {
       return formalization
     }
+
+    const signatureRequest = await this.requestsRepository.findLatestByFormalizationId(
+      formalization.id,
+    )
+    if (
+      signatureRequest &&
+      signatureRequest.status !== FormalizationSignatureRequestStatus.cancelled
+    ) {
+      throw new FormalizationStateConflictError(
+        'Cancele o envio de assinaturas antes de reabrir o formulário.',
+      )
+    }
+
     const reopened = await this.formalizationsRepository.replace({
       formalizationId: formalization.id,
       expectedVersion: request.expectedVersion,

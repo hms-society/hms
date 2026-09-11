@@ -78,6 +78,9 @@ async function bootstrap() {
         seedPassword,
       )
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+    const draftFormalizationClient = identitySeed.clients.find(
+      ({ id }) => id !== client?.id,
+    )
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
     const attendant = identitySeed.collaborators.find(
       ({ profile }) => profile === 'attendant',
@@ -86,7 +89,7 @@ async function bootstrap() {
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
 
-    if (!client || !lawyer || !attendant || !actor) {
+    if (!client || !draftFormalizationClient || !lawyer || !attendant || !actor) {
       throw new AppError('Document Production seed identities could not be resolved')
     }
 
@@ -120,6 +123,11 @@ async function bootstrap() {
       clientId: client.id,
       assignedLawyerId: lawyer.id,
     })
+    const draftSchedulingSeed = await app.get(SchedulingSeeder).runAppointment({
+      intakeId: intakeSeed.draftFormalizationIntake.id,
+      clientId: draftFormalizationClient.id,
+      scheduleId: schedulingSeed.schedule.id,
+    })
     const consultationSeed = await app.get(ConsultationSeeder).run({
       intakeId: intakeSeed.documentProductionIntake.id,
       appointmentId: schedulingSeed.appointment.id,
@@ -132,6 +140,19 @@ async function bootstrap() {
 
     if (!consultationSeed.consultation) {
       throw new AppError('The document-production Consultation could not be seeded')
+    }
+    const draftConsultationSeed = await app.get(ConsultationSeeder).run({
+      consultationId: '00000000-0000-4000-8000-000000000102',
+      intakeId: intakeSeed.draftFormalizationIntake.id,
+      appointmentId: draftSchedulingSeed.appointment.id,
+      clientId: draftFormalizationClient.id,
+      assignedLawyerId: lawyer.id,
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+      dynamicForm: consultationDynamicForm,
+    })
+    if (!draftConsultationSeed.consultation) {
+      throw new AppError('The draft Formalization Consultation could not be seeded')
     }
 
     const formalizationForm = dynamicForms.find(
@@ -148,12 +169,22 @@ async function bootstrap() {
       assignedLawyer: lawyer,
       contractForm: formalizationForm,
     })
+    await app.get(FormalizationSeeder).run({
+      formalizationId: '00000000-0000-4000-8000-000000000702',
+      seedMode: 'financial-form-draft',
+      intake: intakeSeed.draftFormalizationIntake,
+      consultation: draftConsultationSeed.consultation,
+      client: draftFormalizationClient,
+      assignedLawyer: lawyer,
+      contractForm: formalizationForm,
+    })
 
     await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
       formalizationId: formalization.id,
+      formalizationContractFormRevision: formalization.contractFormRevision,
       requestedByCollaboratorId: lawyer.id,
     })
 

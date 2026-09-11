@@ -26,8 +26,7 @@ export const CloseWithoutContractAction = (props: CloseWithoutContractActionProp
     <>
       <div className='flex justify-end'>
         <Button
-          variant='ghost'
-          className='text-muted-foreground'
+          variant='destructive'
           onClick={() => handleOpenChange(true)}
           disabled={!isEnabled}
         >

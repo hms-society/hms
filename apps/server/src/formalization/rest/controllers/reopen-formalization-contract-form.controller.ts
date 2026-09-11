@@ -4,7 +4,10 @@ import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import { reopenFormalizationContractFormSchema } from '@hms/validation/formalization'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReopenFormalizationContractFormUseCase } from '@hms/core/formalization/use-cases'
-import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
+import type {
+  FormalizationSignatureRequestsRepository,
+  FormalizationsRepository,
+} from '@hms/core/formalization/interfaces'
 
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
@@ -22,8 +25,13 @@ export class ReopenFormalizationContractFormController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
   ) {
-    this.useCase = new ReopenFormalizationContractFormUseCase(formalizationsRepository)
+    this.useCase = new ReopenFormalizationContractFormUseCase(
+      formalizationsRepository,
+      requestsRepository,
+    )
   }
 
   @Patch(':formalizationId/contract-form/reopen')

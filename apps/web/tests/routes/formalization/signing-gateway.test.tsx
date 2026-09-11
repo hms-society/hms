@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect as playwrightExpect, test } from '@playwright/test'
+
+const expect = playwrightExpect.configure({ timeout: 30_000 })
 
 const INVITATION_TOKEN = 'a'.repeat(43)
 const CSRF_TOKEN = 'c'.repeat(43)

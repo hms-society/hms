@@ -23,7 +23,26 @@ export class SupabaseFileStorageProvider implements FileStorageProvider {
   ) {}
 
   async save(input: SaveFileInput): Promise<File> {
-    await this.storageProvider.upload(input.filePath, input.content, input.contentType)
+    const existing = await this.storedFilesRepository.findByFilePath(input.filePath)
+    if (existing) {
+      await this.assertExistingFile(existing, input)
+      return existing
+    }
+
+    try {
+      await this.storageProvider.upload(input.filePath, input.content, input.contentType)
+    } catch (error) {
+      const recovered = await this.storedFilesRepository.findByFilePath(input.filePath)
+      if (recovered) {
+        await this.assertExistingFile(recovered, input)
+        return recovered
+      }
+
+      if (!input.reuseExisting) throw error
+
+      const existingContent = await this.storageProvider.download(input.filePath)
+      if (existingContent.byteLength !== input.sizeInBytes) throw error
+    }
 
     const file: File = {
       id: randomUUID(),
@@ -37,6 +56,12 @@ export class SupabaseFileStorageProvider implements FileStorageProvider {
     try {
       return await this.storedFilesRepository.add(file)
     } catch (error) {
+      const recovered = await this.storedFilesRepository.findByFilePath(input.filePath)
+      if (recovered) {
+        await this.assertExistingFile(recovered, input)
+        return recovered
+      }
+
       await this.removeUploadedObject(input.filePath)
       throw error
     }
@@ -70,6 +95,37 @@ export class SupabaseFileStorageProvider implements FileStorageProvider {
       await this.storageProvider.remove(filePath)
     } catch {
       // The next cleanup pass can safely retry the idempotent object removal.
+    }
+  }
+
+  private async assertExistingFile(existing: File, input: SaveFileInput): Promise<void> {
+    if (
+      existing.contentType !== input.contentType ||
+      existing.sizeInBytes !== input.sizeInBytes
+    ) {
+      throw new AppError(
+        'Já existe um arquivo diferente no caminho solicitado.',
+        'Conflito no Armazenamento de Documentos',
+      )
+    }
+
+    if (input.reuseExisting) return
+
+    const content = await this.storageProvider.download(existing.filePath)
+    if (content.byteLength !== input.content.byteLength) {
+      throw new AppError(
+        'O arquivo existente não corresponde ao conteúdo solicitado.',
+        'Conflito no Armazenamento de Documentos',
+      )
+    }
+
+    for (let index = 0; index < content.length; index += 1) {
+      if (content[index] !== input.content[index]) {
+        throw new AppError(
+          'O arquivo existente não corresponde ao conteúdo solicitado.',
+          'Conflito no Armazenamento de Documentos',
+        )
+      }
     }
   }
 }

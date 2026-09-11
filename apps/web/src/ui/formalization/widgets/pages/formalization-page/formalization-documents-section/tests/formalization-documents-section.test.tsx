@@ -85,6 +85,7 @@ function fakeHook(overrides: Partial<Controller> = {}): Controller {
     initialAreaId: undefined,
     initialTopicId: undefined,
     isConfirmationDialogOpen: false,
+    isReopenDisabled: false,
     isReadOnly: false,
     isSelectionOpen: false,
     items: [],
@@ -134,6 +135,34 @@ describe('FormalizationDocumentsSection', () => {
     expect(handleOpenChange).toHaveBeenCalledWith(true)
   })
 
+  it('shows package editing while the confirmed formalization is still open', () => {
+    const production = createProduction()
+    production.isPackageConfirmed = true
+    useFormalizationDocumentsSectionMock.mockReturnValue(fakeHook({ isReadOnly: true }))
+
+    render(
+      <FormalizationDocumentsSection
+        {...props}
+        isTerminal={false}
+        production={production}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toBeDefined()
+  })
+
+  it('hides package editing after the formalization is completed or cancelled', () => {
+    const production = createProduction()
+    production.isPackageConfirmed = true
+    useFormalizationDocumentsSectionMock.mockReturnValue(fakeHook({ isReadOnly: true }))
+
+    render(
+      <FormalizationDocumentsSection {...props} isTerminal production={production} />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Editar pacote' })).toBeNull()
+  })
+
   it('does not render when the contract form is not closed', () => {
     useFormalizationDocumentsSectionMock.mockReturnValue(
       fakeHook({ shouldRender: false }),
@@ -144,5 +173,54 @@ describe('FormalizationDocumentsSection', () => {
     expect(
       screen.queryByRole('heading', { name: 'Documentos da formalização' }),
     ).toBeNull()
+  })
+
+  it('allows reopening a confirmed package while the formalization is open', () => {
+    const production = createProduction()
+    production.isPackageConfirmed = true
+    useFormalizationDocumentsSectionMock.mockReturnValue(fakeHook({ isReadOnly: true }))
+
+    render(
+      <FormalizationDocumentsSection
+        {...props}
+        isTerminal={false}
+        production={production}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toBeDefined()
+  })
+
+  it('hides package reopening after the formalization reaches a terminal state', () => {
+    const production = createProduction()
+    production.isPackageConfirmed = true
+    useFormalizationDocumentsSectionMock.mockReturnValue(fakeHook({ isReadOnly: true }))
+
+    render(
+      <FormalizationDocumentsSection {...props} isTerminal production={production} />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Editar pacote' })).toBeNull()
+  })
+
+  it('disables package reopening while signature sending is active', () => {
+    const production = createProduction()
+    production.isPackageConfirmed = true
+    useFormalizationDocumentsSectionMock.mockReturnValue(
+      fakeHook({ isReadOnly: true, isReopenDisabled: true }),
+    )
+
+    render(
+      <FormalizationDocumentsSection
+        {...props}
+        isTerminal={false}
+        production={production}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toHaveProperty(
+      'disabled',
+      true,
+    )
   })
 })

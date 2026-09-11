@@ -18,6 +18,8 @@ export const FormalizationSendingConfigurationSummary = (
   const { isForbidden, isLoading, metrics, statusLabel } =
     useFormalizationSendingConfigurationSummary(props)
   const isReady = configuration?.status === 'ready_for_sending'
+  const isSignatureConfirmed = props.signatureStatus === 'confirmed'
+  const isConfiguring = configuration?.status === 'configuring'
   const isUnavailable = isForbidden || isLoading
 
   return (
@@ -28,7 +30,9 @@ export const FormalizationSendingConfigurationSummary = (
             <Icon name='send' className='size-5 text-primary' />
             Configuração do envio
           </h2>
-          <Badge variant={isReady ? 'success' : 'attention'}>{statusLabel}</Badge>
+          <Badge variant={isReady || isSignatureConfirmed ? 'success' : 'attention'}>
+            {statusLabel}
+          </Badge>
         </div>
         <p className='max-w-3xl text-sm text-muted-foreground'>
           Revise signatários, documentos, atribuições, canais e campos antes do envio.
@@ -85,16 +89,18 @@ export const FormalizationSendingConfigurationSummary = (
                 </div>
               ))}
             </div>
-            <div className='rounded-xl border border-border p-4'>
-              <h3 className='font-medium'>
-                {isReady ? 'Pronto para revisar' : 'Configuração em andamento'}
-              </h3>
-              <p className='mt-1 text-sm text-muted-foreground'>
-                {isReady
-                  ? 'A configuração está pronta para a revisão final antes do envio.'
-                  : 'Abra a configuração para concluir os dados necessários para o envio.'}
-              </p>
-            </div>
+            {(isReady || isConfiguring) && (
+              <div className='rounded-xl border border-border p-4'>
+                <h3 className='font-medium'>
+                  {isReady ? 'Pronto para revisar' : 'Configuração em andamento'}
+                </h3>
+                <p className='mt-1 text-sm text-muted-foreground'>
+                  {isReady
+                    ? 'A configuração está pronta para a revisão final antes do envio.'
+                    : 'Abra a configuração para concluir os dados necessários para o envio.'}
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <div className='rounded-xl bg-muted/50 p-5'>

@@ -61,6 +61,7 @@ function makeDependencies(): Dependencies {
       documentVersionId: 'version-1',
       name: 'Contract',
       reviewStatus: 'approved',
+      documentSpecificationId: 'specification-1',
       fileId: 'file-1',
     },
   ])

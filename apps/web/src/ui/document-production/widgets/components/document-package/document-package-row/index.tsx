@@ -30,7 +30,12 @@ export const DocumentPackageRow = (props: DocumentPackageRowProps) => {
                 {item.title}
               </h2>
               <DocumentStatusChip status={item.status} label={item.statusLabel} />
-              {item.isCurrent && <DocumentStatusChip status='current' />}
+              {item.isCurrent && item.currentVersion && (
+                <DocumentStatusChip
+                  status='current'
+                  label={`Vigente · Versão ${item.currentVersion.versionNumber}`}
+                />
+              )}
             </div>
           </div>
         </div>

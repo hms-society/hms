@@ -72,6 +72,7 @@ describe('List Intakes Controller [GET /intakes]', () => {
         clientId: client.id,
         responsibleId: responsible.id,
         status: IntakeListStatus.Contracted,
+        contractedAt: new Date('2026-09-08T12:00:00.000Z'),
         demandNotes: 'Contrato residencial para análise',
       },
       {

@@ -46,6 +46,7 @@ export const ConsultationDocumentReviewPage = (
     handleConfirmRegenerate,
     handleConfirmReject,
     handleConfirmSave,
+    handleRequestCurrent,
     handleContentChange,
     handleLocateMarker,
     handleRemoveAllPendingMarkers,
@@ -65,6 +66,7 @@ export const ConsultationDocumentReviewPage = (
     isError,
     isForbidden,
     isHistoryOpen,
+    isDirty,
     isLoading,
     isMarkerNotFoundOpen,
     isNotFound,
@@ -150,7 +152,7 @@ export const ConsultationDocumentReviewPage = (
         onSave={handleRequestSave}
         onApprove={handleApprove}
         onReject={handleReject}
-        onSelectCurrent={() => setIsCurrentOpen(true)}
+        onSelectCurrent={() => handleRequestCurrent(props.documentVersionId)}
         onRegenerate={handleRequestRegenerate}
         onCancelGeneration={() => void handleCancelGeneration()}
         onViewRejectionReason={handleViewRejectionReason}
@@ -177,6 +179,8 @@ export const ConsultationDocumentReviewPage = (
         title={title}
         items={history}
         onOpenChange={setIsHistoryOpen}
+        onSelectCurrent={isDirty ? undefined : handleRequestCurrent}
+        isSelectingCurrent={isSelectingCurrent}
         onSelect={handleVersionNavigation}
       />
       <RejectDocumentVersionDialog

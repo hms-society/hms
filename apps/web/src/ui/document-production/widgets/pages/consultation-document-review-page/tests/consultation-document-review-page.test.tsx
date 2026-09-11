@@ -68,6 +68,7 @@ const useSelectCurrentConsultationDocumentVersionActionMock = vi.mocked(
 )
 const useNavigationMock = vi.mocked(useNavigation)
 const saveManualVersionMock = vi.fn()
+const selectCurrentVersionMock = vi.fn()
 
 const content = {
   type: 'doc' as const,
@@ -199,7 +200,7 @@ describe('ConsultationDocumentReviewPage', () => {
       isSaveManualVersionConflict: false,
     })
     useSelectCurrentConsultationDocumentVersionActionMock.mockReturnValue({
-      selectCurrentVersion: vi.fn().mockResolvedValue({ body: {} }),
+      selectCurrentVersion: selectCurrentVersionMock.mockResolvedValue({ body: {} }),
       selectedCurrentDocument: undefined,
       selectCurrentVersionError: null,
       isSelectingCurrentVersion: false,
@@ -307,6 +308,74 @@ describe('ConsultationDocumentReviewPage', () => {
         documentVersionId: 'version-1',
       },
     })
+  })
+
+  it('allows selecting an approved non-current version from the history', async () => {
+    const approvedCurrentCandidate = createVersion({ status: 'approved' })
+    useConsultationDocumentVersionQueryMock.mockReturnValue({
+      documentVersion: approvedCurrentCandidate,
+      documentVersionError: null,
+      isLoadingDocumentVersion: false,
+      isFetchingDocumentVersion: false,
+      isSuccess: true,
+      refetch: vi.fn().mockResolvedValue(undefined),
+    })
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createQueryResult({
+        data: [
+          createListItem({
+            currentVersionId: 'version-1',
+            versions: [
+              {
+                id: 'version-2',
+                versionNumber: 2,
+                source: 'ai' as const,
+                status: 'approved' as const,
+                pendingMarkersCount: 0,
+                createdByCollaboratorId: 'collaborator-1',
+                createdAt: '2026-08-13T12:00:00.000Z',
+              },
+              {
+                id: 'version-1',
+                versionNumber: 1,
+                source: 'manual' as const,
+                status: 'approved' as const,
+                pendingMarkersCount: 0,
+                createdByCollaboratorId: 'collaborator-1',
+                createdAt: '2026-08-12T12:00:00.000Z',
+              },
+            ],
+          }),
+        ],
+      }) as never,
+    )
+
+    renderPage()
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Ver versões' })).toBeDefined(),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Ver versões' }))
+
+    const historyDialog = await screen.findByRole('dialog', {
+      name: 'Histórico de versões',
+    })
+    fireEvent.click(within(historyDialog).getByRole('button', { name: 'Tornar vigente' }))
+
+    const confirmationDialog = await screen.findByRole('alertdialog', {
+      name: 'Tornar versão vigente?',
+    })
+    fireEvent.click(
+      within(confirmationDialog).getByRole('button', { name: 'Tornar vigente' }),
+    )
+
+    await waitFor(() =>
+      expect(selectCurrentVersionMock).toHaveBeenCalledWith({
+        consultationId: 'consultation-1',
+        documentId: 'document-1',
+        documentVersionId: 'version-2',
+      }),
+    )
   })
 
   it('shows only the current-version action for a non-current approved version', async () => {

@@ -207,6 +207,7 @@ function makeDependencies() {
       documentVersionId: versionId,
       name: versionId === 'version-1' ? 'First' : 'Second',
       reviewStatus: 'approved',
+      documentSpecificationId: 'specification-1',
       fileId: versionId,
     }),
   )

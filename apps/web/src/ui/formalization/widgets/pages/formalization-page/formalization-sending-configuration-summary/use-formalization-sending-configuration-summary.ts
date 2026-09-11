@@ -1,16 +1,21 @@
-import type { FormalizationSignatureConfiguration } from '@hms/core/formalization/domain/structures'
+import type {
+  FormalizationSignatureConfiguration,
+  FormalizationSignatureRequestStatus,
+} from '@hms/core/formalization/domain/structures'
 
 import type { FormalizationSignatureConfigurationController } from '@/ui/formalization/hooks/use-formalization-signature-configuration-action'
 
 export type FormalizationSendingConfigurationSummaryProps = {
   formalizationId: string
   isPackageConfirmed: boolean
+  signatureStatus?: FormalizationSignatureRequestStatus
   configuration: FormalizationSignatureConfiguration | undefined
   controller: FormalizationSignatureConfigurationController
 }
 
 export function useFormalizationSendingConfigurationSummary({
   isPackageConfirmed,
+  signatureStatus,
   configuration,
   controller,
 }: FormalizationSendingConfigurationSummaryProps) {
@@ -18,6 +23,7 @@ export function useFormalizationSendingConfigurationSummary({
     (controller.configurationError as { statusCode?: number } | null)?.statusCode === 403
 
   function getStatusLabel() {
+    if (signatureStatus === 'confirmed') return 'Confirmado'
     if (!isPackageConfirmed) return 'Aguardando confirmação do pacote'
     if (controller.isConfigurationError && !configuration) {
       return isForbidden ? 'Acesso restrito' : 'Erro'

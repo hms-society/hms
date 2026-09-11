@@ -30,6 +30,7 @@ import type {
   DocumentsRepository,
   DocumentSpecificationsRepository,
   DocumentVersionsRepository,
+  FrozenDocumentPdfsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
@@ -44,6 +45,7 @@ export type DocumentProductionSeedReferences = {
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
   readonly formalizationId?: string
+  readonly formalizationContractFormRevision?: number
   readonly requestedByCollaboratorId?: string
 }
 
@@ -53,6 +55,10 @@ type DocumentTemplateSeed = {
   readonly description: string
   readonly paragraphs: readonly string[]
   readonly variables: readonly DocumentTemplateVariable[]
+}
+
+type ClearableFrozenDocumentPdfsRepository = FrozenDocumentPdfsRepository & {
+  removeAll(): Promise<void>
 }
 
 const DOCUMENT_TEMPLATES = [
@@ -203,6 +209,8 @@ export class DocumentProductionSeeder {
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.frozenPdfs)
+    private readonly frozenPdfsRepository: ClearableFrozenDocumentPdfsRepository,
     @Inject(STORED_FILES_REPOSITORY)
     private readonly storedFilesRepository: StoredFilesRepository,
     @Inject(PROVISION_PROVIDERS.storage)
@@ -212,6 +220,7 @@ export class DocumentProductionSeeder {
   async clear() {
     await this.clearFormalizationSeedFiles()
     await this.packageDocumentsRepository.removeAll()
+    await this.frozenPdfsRepository.removeAll()
     await this.versionsRepository.removeAll()
     await this.generationsRepository.removeAll()
     await this.documentPackagesRepository.removeAll()
@@ -220,6 +229,16 @@ export class DocumentProductionSeeder {
   }
 
   async run(references: DocumentProductionSeedReferences) {
+    if (
+      references.formalizationId &&
+      references.formalizationContractFormRevision === undefined
+    ) {
+      throw new AppError(
+        'The Formalization document seed requires the current form revision.',
+        'Seed Error',
+      )
+    }
+
     const area = references.legalAreas.find(({ name }) => name === 'Cível')
     const topic = references.legalTopics.find(
       ({ legalAreaId, name }) => legalAreaId === area?.id && name === 'Contratos',
@@ -334,11 +353,23 @@ export class DocumentProductionSeeder {
         ? await this.seedApprovedDocumentVersions({
             documents: formalizationFixture.formalizationDocuments,
             specifications: formalizationFixture.formalizationSpecifications,
-            source: { type: 'formalization', id: references.formalizationId, data: {} },
+            source: {
+              type: 'formalization',
+              id: references.formalizationId,
+              data: {
+                formalization: {
+                  id: references.formalizationId,
+                  contractFormRevision: references.formalizationContractFormRevision,
+                },
+              },
+            },
             requestedByCollaboratorId: references.requestedByCollaboratorId,
             generationIds: SEEDED_FORMALIZATION_GENERATION_IDS,
             versionIds: SEEDED_FORMALIZATION_VERSION_IDS,
-            fileIds: await this.seedFormalizationFiles(),
+            fileIds: await this.seedFormalizationFiles({
+              documents: formalizationFixture.formalizationDocuments,
+              generationIds: SEEDED_FORMALIZATION_GENERATION_IDS,
+            }),
           })
         : { generations: [], versions: [] }
 
@@ -468,21 +499,38 @@ export class DocumentProductionSeeder {
     }
   }
 
-  private async seedFormalizationFiles(): Promise<readonly string[]> {
+  private async seedFormalizationFiles({
+    documents,
+    generationIds,
+  }: {
+    readonly documents: readonly { id: string }[]
+    readonly generationIds: readonly string[]
+  }): Promise<readonly string[]> {
     const fileSeeds = [
       {
         id: SEEDED_FORMALIZATION_FILE_IDS[0],
+        documentId: documents[0]?.id,
+        generationId: generationIds[0],
         fileName: 'contrato-de-formalizacao.docx',
       },
       {
         id: SEEDED_FORMALIZATION_FILE_IDS[1],
+        documentId: documents[1]?.id,
+        generationId: generationIds[1],
         fileName: 'termo-de-honorarios.docx',
       },
     ] as const
 
     return Promise.all(
-      fileSeeds.map(async ({ id, fileName }) => {
-        const filePath = `seed/formalization/${fileName}`
+      fileSeeds.map(async ({ id, documentId, generationId, fileName }) => {
+        if (!documentId || !generationId) {
+          throw new AppError(
+            'The seeded formalization file references could not be resolved.',
+            'Seed Error',
+          )
+        }
+
+        const filePath = `document-production/documents/${documentId}/generations/${generationId}/${fileName}`
         const content = new Uint8Array(
           await readFile(join('src/document-production/database/seed-assets', fileName)),
         )

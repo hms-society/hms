@@ -10,7 +10,7 @@ import {
 import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { describe, expect, it, vi } from 'vitest'
 
-import { SaveGeneratedDocumentVersionTool } from './save-generated-document-version-tool'
+import { SaveGeneratedDocumentVersionTool } from '../save-generated-document-version-tool'
 
 const generationId = '00000000-0000-4000-8000-000000000001'
 const documentId = '00000000-0000-4000-8000-000000000002'
@@ -98,13 +98,12 @@ function createTool() {
     datetimeProvider,
   )
 
-  return { tool: tool.function, versionsRepository, fileStorageProvider, generation }
+  return { tool: tool.function, versionsRepository, fileStorageProvider }
 }
 
 describe('Save Generated Document Version Tool', () => {
   it('uses durable file storage and completes the generated version', async () => {
     const { tool, versionsRepository, fileStorageProvider } = createTool()
-
     const result = await tool.execute(createInput(), { requestContext: {} })
 
     expect(result).toMatchObject({

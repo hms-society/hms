@@ -12,7 +12,7 @@ function createDocument(overrides: Record<string, unknown> = {}) {
 }
 
 describe('useDocumentPackage', () => {
-  it('maps the latest version and preserves current-version state', () => {
+  it('uses the current version for the package while preserving the latest version', () => {
     const { result } = renderHook(() =>
       useDocumentPackage({
         documents: [
@@ -29,8 +29,9 @@ describe('useDocumentPackage', () => {
 
     expect(result.current[0]).toMatchObject({
       latestVersion: { id: 'version-2' },
-      status: 'in_review',
-      isCurrent: false,
+      currentVersion: { id: 'version-1' },
+      status: 'approved',
+      isCurrent: true,
     })
   })
 

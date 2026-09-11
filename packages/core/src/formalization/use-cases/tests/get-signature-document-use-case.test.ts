@@ -107,6 +107,7 @@ function makeDependencies(): Dependencies {
     documentVersionId: 'source-version-1',
     name: 'Contrato imutável',
     reviewStatus: 'approved',
+    documentSpecificationId: 'specification-1',
     fileId: 'source-file-1',
   })
   return dependencies

@@ -14,6 +14,7 @@ import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation
 const DOCUMENT_PRODUCTION_CONSULTATION_ID = '00000000-0000-4000-8000-000000000101'
 
 export type ConsultationSeedReferences = {
+  readonly consultationId?: string
   readonly intakeId: string
   readonly appointmentId: string
   readonly clientId: string
@@ -40,7 +41,7 @@ export class ConsultationSeeder {
 
   async run(references: ConsultationSeedReferences) {
     const consultation = ConsultationFaker.fake({
-      id: DOCUMENT_PRODUCTION_CONSULTATION_ID,
+      id: references.consultationId ?? DOCUMENT_PRODUCTION_CONSULTATION_ID,
       intakeId: references.intakeId,
       appointmentId: references.appointmentId,
       clientId: references.clientId,

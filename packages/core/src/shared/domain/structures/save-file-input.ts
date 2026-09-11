@@ -4,4 +4,5 @@ export type SaveFileInput = {
   readonly contentType: string
   readonly sizeInBytes: number
   readonly content: Uint8Array
+  readonly reuseExisting?: boolean
 }

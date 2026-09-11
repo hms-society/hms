@@ -1,4 +1,5 @@
-import { FormalizationUseCase } from './formalization-use-case'
+import type { Broker, DatetimeProvider } from '../../shared/interfaces'
+import { FormalizationSignaturePreviewUseCase } from './formalization-signature-preview-use-case'
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import { DocumentVersionNotApprovedError } from '../../document-production/domain/errors'
 import type {
@@ -12,7 +13,11 @@ import {
   FormalizationStateConflictError,
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationsRepository } from '../interfaces'
+import type {
+  FormalizationDocumentConfirmationTransaction,
+  FormalizationSignatureConfigurationRepository,
+  FormalizationsRepository,
+} from '../interfaces'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -20,7 +25,7 @@ type Request = FormalizationActor & {
   readonly versionId: string
 }
 
-export class SelectCurrentFormalizationDocumentVersionUseCase extends FormalizationUseCase<
+export class SelectCurrentFormalizationDocumentVersionUseCase extends FormalizationSignaturePreviewUseCase<
   Request,
   DocumentVersion
 > {
@@ -30,6 +35,10 @@ export class SelectCurrentFormalizationDocumentVersionUseCase extends Formalizat
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly documentsRepository: DocumentsRepository,
     private readonly versionsRepository: DocumentVersionsRepository,
+    private readonly confirmationTransaction: FormalizationDocumentConfirmationTransaction,
+    private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
+    private readonly broker: Broker,
+    private readonly datetimeProvider: DatetimeProvider,
   ) {
     super()
   }
@@ -74,6 +83,20 @@ export class SelectCurrentFormalizationDocumentVersionUseCase extends Formalizat
     })
     if (!selected)
       throw new FormalizationStateConflictError('O documento não foi encontrado.')
+
+    const now = this.datetimeProvider.now()
+    const synchronization = await this.confirmationTransaction.synchronizeCurrent({
+      formalizationId: formalization.id,
+      occurredAt: now,
+    })
+    await this.publishPendingPreviewBatch(
+      formalization.id,
+      synchronization.pendingPreviewIds,
+      now,
+      this.configurationRepository,
+      this.broker,
+    )
+
     return version
   }
 }

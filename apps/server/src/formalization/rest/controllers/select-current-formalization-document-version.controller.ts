@@ -3,8 +3,13 @@ import { ApiBearerAuth } from '@nestjs/swagger'
 import { z } from 'zod'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import type { Broker, DatetimeProvider } from '@hms/core/shared/interfaces'
 import { SelectCurrentFormalizationDocumentVersionUseCase } from '@hms/core/formalization/use-cases'
-import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
+import type {
+  FormalizationDocumentConfirmationTransaction,
+  FormalizationsRepository,
+  FormalizationSignatureConfigurationRepository,
+} from '@hms/core/formalization/interfaces'
 import type {
   DocumentPackagesRepository,
   DocumentVersionsRepository,
@@ -13,11 +18,14 @@ import type {
 } from '@hms/core/document-production/interfaces'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationDocumentVersionResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 const selectCurrentVersionSchema = z.object({ versionId: z.uuid() }).strict()
 class SelectCurrentBody extends createZodDto(selectCurrentVersionSchema) {}
@@ -39,6 +47,12 @@ export class SelectCurrentFormalizationDocumentVersionController {
     documentsRepository: DocumentsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
     versionsRepository: DocumentVersionsRepository,
+    @Inject(FORMALIZATION_PROVIDERS.documentConfirmationTransaction)
+    confirmationTransaction: FormalizationDocumentConfirmationTransaction,
+    @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
+    configurationRepository: FormalizationSignatureConfigurationRepository,
+    @Inject(InngestBroker) broker: Broker,
+    @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
   ) {
     this.useCase = new SelectCurrentFormalizationDocumentVersionUseCase(
       formalizationsRepository,
@@ -46,6 +60,10 @@ export class SelectCurrentFormalizationDocumentVersionController {
       packageDocumentsRepository,
       documentsRepository,
       versionsRepository,
+      confirmationTransaction,
+      configurationRepository,
+      broker,
+      datetimeProvider,
     )
   }
 

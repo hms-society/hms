@@ -16,6 +16,12 @@ export type SchedulingSeedReferences = {
   readonly assignedLawyerId: string
 }
 
+export type SchedulingAppointmentSeedReferences = {
+  readonly intakeId: string
+  readonly clientId: string
+  readonly scheduleId: string
+}
+
 @Injectable()
 export class SchedulingSeeder {
   constructor(
@@ -67,5 +73,18 @@ export class SchedulingSeeder {
     const [createdAppointment] = await this.appointmentsRepository.addMany([appointment])
 
     return { schedule: createdSchedule, appointment: createdAppointment }
+  }
+
+  async runAppointment(references: SchedulingAppointmentSeedReferences) {
+    const appointment = AppointmentFaker.fake({
+      intakeId: references.intakeId,
+      scheduleId: references.scheduleId,
+      clientId: references.clientId,
+      startsAt: new Date('2030-01-15T13:00:00.000Z'),
+      endsAt: new Date('2030-01-15T13:45:00.000Z'),
+    })
+    const [createdAppointment] = await this.appointmentsRepository.addMany([appointment])
+
+    return { appointment: createdAppointment }
   }
 }

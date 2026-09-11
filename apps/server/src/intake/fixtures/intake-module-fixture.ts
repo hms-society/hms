@@ -238,6 +238,10 @@ export class IntakeModuleFixture {
     const closedAt = isClosedWithoutContract
       ? (draft.closedAt ?? draft.createdAt)
       : undefined
+    const contractedAt =
+      draft.status === IntakeStatus.Contracted
+        ? (draft.contractedAt ?? draft.createdAt)
+        : undefined
 
     return {
       clientId: draft.clientId,
@@ -251,6 +255,7 @@ export class IntakeModuleFixture {
       urgency: draft.urgency,
       demandNotes: draft.demandNotes,
       status: draft.status,
+      contractedAt,
       closureReason,
       closureNotes,
       closedAt,

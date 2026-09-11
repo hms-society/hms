@@ -70,6 +70,48 @@ export class DrizzleFormalizationDocumentConfirmationTransaction
     return this.execute(input, false)
   }
 
+  synchronizeCurrent(input: {
+    readonly formalizationId: string
+    readonly occurredAt: Date
+  }) {
+    return this.drizzleClient.requireDatabase().transaction(async (transaction) => {
+      const formalizationsRepository =
+        this.formalizationsRepository.withDatabase(transaction)
+      const formalization = await formalizationsRepository.findById(input.formalizationId)
+
+      if (!formalization) throw new FormalizationNotFoundError()
+
+      const documentPackage = await this.documentPackagesRepository.findByContext({
+        type: 'formalization',
+        formalizationId: input.formalizationId,
+      })
+      if (!documentPackage) {
+        throw new FormalizationStateConflictError(
+          'A formalização não possui um pacote documental.',
+        )
+      }
+
+      const existingSignatories = await transaction
+        .select({ id: formalizationSignatoryModel.id })
+        .from(formalizationSignatoryModel)
+        .where(eq(formalizationSignatoryModel.formalizationId, input.formalizationId))
+
+      if (existingSignatories.length === 0) {
+        return { formalization, pendingPreviewIds: [] }
+      }
+
+      const currentDocuments = await this.loadCurrentDocuments(documentPackage.id)
+      const pendingPreviewIds = await this.synchronizeCurrentPreviews(
+        transaction,
+        input.formalizationId,
+        currentDocuments,
+        input.occurredAt,
+      )
+
+      return { formalization, pendingPreviewIds }
+    })
+  }
+
   reopen(input: {
     readonly formalizationId: string
     readonly expectedVersion: number
@@ -213,102 +255,119 @@ export class DrizzleFormalizationDocumentConfirmationTransaction
         ])
       }
 
-      const currentKeys = new Set(
-        currentDocuments.map(
-          ({ documentId, documentVersionId }) => `${documentId}:${documentVersionId}`,
-        ),
+      const pendingPreviewIds = await this.synchronizeCurrentPreviews(
+        transaction,
+        input.formalizationId,
+        currentDocuments,
+        input.occurredAt,
       )
-      const existingPreviews = await transaction
-        .select()
-        .from(formalizationSignaturePreviewModel)
-        .where(
-          eq(formalizationSignaturePreviewModel.formalizationId, input.formalizationId),
-        )
-
-      for (const preview of existingPreviews) {
-        const isCurrent = currentKeys.has(
-          `${preview.documentId}:${preview.documentVersionId}`,
-        )
-        if (isCurrent || preview.state === 'cleanup_pending') continue
-
-        if (preview.fileId) {
-          await transaction
-            .update(formalizationSignaturePreviewModel)
-            .set({
-              state: 'cleanup_pending',
-              updatedAt: input.occurredAt,
-              attemptToken: null,
-              processingStartedAt: null,
-              leaseExpiresAt: null,
-            })
-            .where(eq(formalizationSignaturePreviewModel.id, preview.id))
-        } else {
-          await transaction
-            .delete(formalizationSignatureFieldModel)
-            .where(eq(formalizationSignatureFieldModel.previewId, preview.id))
-          await transaction
-            .delete(formalizationSignaturePreviewModel)
-            .where(eq(formalizationSignaturePreviewModel.id, preview.id))
-        }
-      }
-
-      const currentPreviewRows = await transaction
-        .select()
-        .from(formalizationSignaturePreviewModel)
-        .where(
-          and(
-            eq(formalizationSignaturePreviewModel.formalizationId, input.formalizationId),
-            inArray(
-              formalizationSignaturePreviewModel.documentVersionId,
-              currentDocuments.map(({ documentVersionId }) => documentVersionId),
-            ),
-            not(eq(formalizationSignaturePreviewModel.state, 'stale')),
-            not(eq(formalizationSignaturePreviewModel.state, 'cleanup_pending')),
-          ),
-        )
-
-      const currentPreviewKeys = new Set(
-        currentPreviewRows.map(
-          ({ documentId, documentVersionId }) => `${documentId}:${documentVersionId}`,
-        ),
-      )
-      const newPreviews = currentDocuments.filter(
-        ({ documentId, documentVersionId }) =>
-          !currentPreviewKeys.has(`${documentId}:${documentVersionId}`),
-      )
-
-      if (newPreviews.length > 0) {
-        await transaction.insert(formalizationSignaturePreviewModel).values(
-          newPreviews.map(({ documentId, documentVersionId }) => ({
-            id: randomUUID(),
-            formalizationId: input.formalizationId,
-            documentId,
-            documentVersionId,
-            pages: [],
-            state: 'pending' as const,
-            attemptsCount: 0,
-            attemptToken: randomUUID(),
-            createdAt: input.occurredAt,
-            updatedAt: input.occurredAt,
-          })),
-        )
-      }
-
-      const pendingRows = await transaction
-        .select({ id: formalizationSignaturePreviewModel.id })
-        .from(formalizationSignaturePreviewModel)
-        .where(
-          and(
-            eq(formalizationSignaturePreviewModel.formalizationId, input.formalizationId),
-            eq(formalizationSignaturePreviewModel.state, 'pending'),
-          ),
-        )
 
       return {
         formalization,
-        pendingPreviewIds: pendingRows.map(({ id }) => id),
+        pendingPreviewIds,
       }
     })
+  }
+
+  private async synchronizeCurrentPreviews(
+    transaction: DrizzleDatabaseExecutor,
+    formalizationId: string,
+    currentDocuments: ReadonlyArray<{
+      readonly documentId: string
+      readonly documentVersionId: string
+    }>,
+    occurredAt: Date,
+  ) {
+    const currentKeys = new Set(
+      currentDocuments.map(
+        ({ documentId, documentVersionId }) => `${documentId}:${documentVersionId}`,
+      ),
+    )
+    const existingPreviews = await transaction
+      .select()
+      .from(formalizationSignaturePreviewModel)
+      .where(eq(formalizationSignaturePreviewModel.formalizationId, formalizationId))
+
+    for (const preview of existingPreviews) {
+      const isCurrent = currentKeys.has(
+        `${preview.documentId}:${preview.documentVersionId}`,
+      )
+      if (isCurrent || preview.state === 'cleanup_pending') continue
+
+      if (preview.fileId) {
+        await transaction
+          .update(formalizationSignaturePreviewModel)
+          .set({
+            state: 'cleanup_pending',
+            updatedAt: occurredAt,
+            attemptToken: null,
+            processingStartedAt: null,
+            leaseExpiresAt: null,
+          })
+          .where(eq(formalizationSignaturePreviewModel.id, preview.id))
+      } else {
+        await transaction
+          .delete(formalizationSignatureFieldModel)
+          .where(eq(formalizationSignatureFieldModel.previewId, preview.id))
+        await transaction
+          .delete(formalizationSignaturePreviewModel)
+          .where(eq(formalizationSignaturePreviewModel.id, preview.id))
+      }
+    }
+
+    const currentPreviewRows = await transaction
+      .select()
+      .from(formalizationSignaturePreviewModel)
+      .where(
+        and(
+          eq(formalizationSignaturePreviewModel.formalizationId, formalizationId),
+          inArray(
+            formalizationSignaturePreviewModel.documentVersionId,
+            currentDocuments.map(({ documentVersionId }) => documentVersionId),
+          ),
+          not(eq(formalizationSignaturePreviewModel.state, 'stale')),
+          not(eq(formalizationSignaturePreviewModel.state, 'cleanup_pending')),
+        ),
+      )
+
+    const currentPreviewKeys = new Set(
+      currentPreviewRows.map(
+        ({ documentId, documentVersionId }) => `${documentId}:${documentVersionId}`,
+      ),
+    )
+    const newPreviews = currentDocuments.filter(
+      ({ documentId, documentVersionId }) =>
+        !currentPreviewKeys.has(`${documentId}:${documentVersionId}`),
+    )
+
+    if (newPreviews.length > 0) {
+      await transaction.insert(formalizationSignaturePreviewModel).values(
+        newPreviews.map(({ documentId, documentVersionId }) => ({
+          id: randomUUID(),
+          formalizationId,
+          documentId,
+          documentVersionId,
+          pages: [],
+          state: 'pending' as const,
+          attemptsCount: 0,
+          attemptToken: randomUUID(),
+          createdAt: occurredAt,
+          updatedAt: occurredAt,
+        })),
+      )
+    }
+
+    const pendingRows = await transaction
+      .select({ id: formalizationSignaturePreviewModel.id })
+      .from(formalizationSignaturePreviewModel)
+      .where(
+        and(
+          eq(formalizationSignaturePreviewModel.formalizationId, formalizationId),
+          eq(formalizationSignaturePreviewModel.state, 'pending'),
+        ),
+      )
+
+    return pendingRows.map(({ id }) => id)
   }
 
   private async loadCurrentDocuments(documentPackageId: string) {

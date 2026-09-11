@@ -167,7 +167,7 @@ describe('useConsultationDocumentsPage', () => {
     } as never)
   })
 
-  it('derives the status from the highest version number without mutating history', () => {
+  it('derives the package status from the current version without mutating history', () => {
     const olderApprovedVersion = createVersion({
       id: 'version-1',
       versionNumber: 1,
@@ -195,10 +195,15 @@ describe('useConsultationDocumentsPage', () => {
     )
 
     expect(result.current.documents[0]).toMatchObject({
-      status: 'in_review',
-      statusLabel: 'Em revisão',
+      status: 'approved',
       latestVersion: newestReviewVersion,
-      isCurrent: false,
+      currentVersion: olderApprovedVersion,
+      isCurrent: true,
+      latestVersionRouteParams: {
+        consultationId: 'consultation-1',
+        documentId: 'document-1',
+        documentVersionId: 'version-1',
+      },
     })
     expect(documents[0]?.versions).toEqual([newestReviewVersion, olderApprovedVersion])
   })

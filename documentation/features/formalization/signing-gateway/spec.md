@@ -3318,8 +3318,7 @@ Run focused tests while building, then the complete affected-package gate:
     pnpm --filter @hms/validation lint
     pnpm --filter @hms/validation check-types
     pnpm --filter @hms/validation check:architecture
-    pnpm --filter server test
-    pnpm --filter server test:inngest
+    pnpm --filter server test:integration
     pnpm --filter server check:code
     pnpm --filter server check:types
     pnpm --filter server check:architecture
@@ -3891,8 +3890,8 @@ not appear here.
 | `apps/server/src/shared/rest/filters/global-error-handler.ts` | Modify |
 | `apps/server/src/shared/rest/signing-gateway-headers.ts` | Create |
 | `apps/server/tsconfig.build.json` | Modify |
-| `apps/server/vitest.config.mts` | Modify |
-| `apps/server/vitest.inngest.config.mts` | Create |
+| `apps/server/vitest.config.mts` | Remove |
+| `apps/server/vitest.integration.config.mts` | Create |
 | `apps/web/.dependency-cruiser.mjs` | Modify |
 | `apps/web/dependency-cruiser-config.mjs` | Create |
 | `apps/web/.env.example` | Modify |
@@ -4690,8 +4689,8 @@ not appear here.
 | `scripts/check-spec-implementation.mjs` | Create |
 | `scripts/generate-documenso-certificate.mjs` | Create |
 | `scripts/seed-documenso.mjs` | Create |
-| `scripts/start-ngrok.js` | Modify |
-| `scripts/sync-agents.sh` | Modify |
+| `scripts/start-ngrok.mjs` | Modify |
+| `scripts/sync-agents.mjs` | Modify |
 | `scripts/tests/check-spec-implementation.test.mjs` | Create |
 | `skills-lock.json` | Modify |
 | `supabase/config.toml` | Modify |

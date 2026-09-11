@@ -83,6 +83,7 @@ export function useFormalizationDocumentReviewPage(
   const [rejectionReason, setRejectionReason] = useState('')
   const [regenerationInstructions, setRegenerationInstructions] = useState('')
   const [actionError, setActionError] = useState<string>()
+  const [currentVersionIdToSelect, setCurrentVersionIdToSelect] = useState<string>()
 
   const version = documentVersionQuery.documentVersion
   const document = useMemo(
@@ -156,6 +157,13 @@ export function useFormalizationDocumentReviewPage(
     })
   }
 
+  function handleRequestCurrent(versionId: string) {
+    setActionError(undefined)
+    setCurrentVersionIdToSelect(versionId)
+    setIsHistoryOpen(false)
+    setIsCurrentOpen(true)
+  }
+
   function handleRetry() {
     return Promise.all([
       formalizationQuery.refetch(),
@@ -213,14 +221,19 @@ export function useFormalizationDocumentReviewPage(
       setActionError('Documento indisponível.')
       return
     }
+    const versionId = currentVersionIdToSelect ?? version.id
     setActionError(undefined)
     try {
       await selectCurrentVersion({
         documentId: document.id,
-        versionId: version.id,
+        versionId,
       })
       setIsCurrentOpen(false)
+      setCurrentVersionIdToSelect(undefined)
       await documentsQuery.refetch()
+      if (versionId !== props.documentVersionId) {
+        await handleVersionNavigation(versionId)
+      }
     } catch (error) {
       setActionError(
         error instanceof Error
@@ -264,6 +277,7 @@ export function useFormalizationDocumentReviewPage(
     handleConfirmSave,
     handleReview,
     handleConfirmCurrent,
+    handleRequestCurrent,
     handleConfirmRegenerate,
     history,
     isApproveOpen,

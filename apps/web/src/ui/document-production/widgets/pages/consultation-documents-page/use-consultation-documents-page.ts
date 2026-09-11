@@ -85,16 +85,20 @@ export function useConsultationDocumentsPage({
   })
   const documents = useMemo<readonly ConsultationDocumentViewModel[]>(
     () =>
-      packageDocuments.map((document) => ({
-        ...document,
-        latestVersionRouteParams: document.latestVersion
-          ? {
-              consultationId,
-              documentId: document.id,
-              documentVersionId: document.latestVersion.id,
-            }
-          : undefined,
-      })),
+      packageDocuments.map((document) => {
+        const packageVersion = document.currentVersion ?? document.latestVersion
+
+        return {
+          ...document,
+          latestVersionRouteParams: packageVersion
+            ? {
+                consultationId,
+                documentId: document.id,
+                documentVersionId: packageVersion.id,
+              }
+            : undefined,
+        }
+      }),
     [packageDocuments, consultationId],
   )
 

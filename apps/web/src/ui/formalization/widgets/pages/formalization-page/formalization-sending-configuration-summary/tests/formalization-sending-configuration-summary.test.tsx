@@ -100,6 +100,24 @@ describe('FormalizationSendingConfigurationSummary', () => {
     ).toBe('/formalizacoes/formalization-1/configuracao-envio')
   })
 
+  it('renders a success badge when the signature request is confirmed', () => {
+    useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
+      createHookController({ statusLabel: 'Confirmado' }),
+    )
+
+    render(
+      <FormalizationSendingConfigurationSummary
+        formalizationId='formalization-1'
+        isPackageConfirmed
+        signatureStatus='confirmed'
+        configuration={configuration}
+        controller={createConfigurationController()}
+      />,
+    )
+
+    expect(screen.getByText('Confirmado')).not.toBeNull()
+  })
+
   it('keeps access locked until the package is confirmed', () => {
     useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
       createHookController({ statusLabel: 'Aguardando confirmação do pacote' }),
@@ -118,5 +136,31 @@ describe('FormalizationSendingConfigurationSummary', () => {
       screen.getByText('Confirme o pacote de documentos para configurar o envio'),
     ).not.toBeNull()
     expect(screen.getByRole('link', { name: 'Configuração do envio' })).not.toBeNull()
+  })
+
+  it('shows the in-progress card only for the configuring status', () => {
+    render(
+      <FormalizationSendingConfigurationSummary
+        formalizationId='formalization-1'
+        isPackageConfirmed
+        configuration={{ ...configuration, status: 'configuring' }}
+        controller={createConfigurationController()}
+      />,
+    )
+
+    expect(screen.getByText('Configuração em andamento')).not.toBeNull()
+  })
+
+  it('hides the in-progress card after configuration is no longer active', () => {
+    render(
+      <FormalizationSendingConfigurationSummary
+        formalizationId='formalization-1'
+        isPackageConfirmed
+        configuration={{ ...configuration, status: 'read_only' }}
+        controller={createConfigurationController()}
+      />,
+    )
+
+    expect(screen.queryByText('Configuração em andamento')).toBeNull()
   })
 })

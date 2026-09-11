@@ -27,6 +27,8 @@ export type DocumentVersionHistoryDialogProps = {
   items: readonly DocumentVersionHistoryItem[]
   onOpenChange: (open: boolean) => void
   onSelect: (versionId: string) => void
+  onSelectCurrent?: (versionId: string) => void
+  isSelectingCurrent?: boolean
 }
 
 export const DocumentVersionHistoryDialog = ({
@@ -35,6 +37,8 @@ export const DocumentVersionHistoryDialog = ({
   items,
   onOpenChange,
   onSelect,
+  onSelectCurrent,
+  isSelectingCurrent = false,
 }: DocumentVersionHistoryDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
@@ -86,16 +90,31 @@ export const DocumentVersionHistoryDialog = ({
                 </p>
               )}
             </div>
-            <Button
-              type='button'
-              size='sm'
-              variant='outline'
-              className='shrink-0 items-center gap-1.5 rounded-full border-primary px-5 text-primary leading-none'
-              onClick={() => onSelect(item.id)}
-            >
-              <Icon name='eye' className='size-3.5 translate-y-px' />
-              <span>Visualizar</span>
-            </Button>
+            <div className='flex shrink-0 flex-wrap justify-end gap-2'>
+              {item.status === 'approved' && !item.isCurrent && onSelectCurrent && (
+                <Button
+                  type='button'
+                  size='sm'
+                  variant='default'
+                  className='items-center gap-1.5 rounded-full px-4 leading-none'
+                  disabled={isSelectingCurrent}
+                  onClick={() => onSelectCurrent(item.id)}
+                >
+                  <Icon name='shield-check' className='size-3.5 translate-y-px' />
+                  <span>{isSelectingCurrent ? 'Atualizando…' : 'Tornar vigente'}</span>
+                </Button>
+              )}
+              <Button
+                type='button'
+                size='sm'
+                variant='outline'
+                className='items-center gap-1.5 rounded-full border-primary px-5 text-primary leading-none'
+                onClick={() => onSelect(item.id)}
+              >
+                <Icon name='eye' className='size-3.5 translate-y-px' />
+                <span>Visualizar</span>
+              </Button>
+            </div>
           </li>
         ))}
       </ul>

@@ -1,26 +1,22 @@
-import type { Broker, IdProvider } from '../../shared/interfaces'
+import type { IdProvider } from '../../shared/interfaces'
 import type {
   FormalizationSignatureField,
   FormalizationSignatory,
   FormalizationSignatoryDocument,
 } from '../domain/entities'
-import { FormalizationSignaturePreviewBatchGenerationRequestedEvent } from '../domain/events'
 import { FormalizationSignatureAssignmentError } from '../domain/errors'
 import type {
   FormalizationSignatureConfiguration,
   FormalizationSignatureFieldView,
   FormalizationSignatureSourceDocument,
 } from '../domain/structures'
-import type {
-  FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
-} from '../interfaces'
-import { FormalizationUseCase } from './formalization-use-case'
+import type { FormalizationSignatureSourceReader } from '../interfaces'
+import { FormalizationSignaturePreviewUseCase } from './formalization-signature-preview-use-case'
 
 export abstract class FormalizationSignatureConfigurationUseCase<
   Request,
   Response = void,
-> extends FormalizationUseCase<Request, Response> {
+> extends FormalizationSignaturePreviewUseCase<Request, Response> {
   protected async buildSignaturePersistenceState(
     configuration: FormalizationSignatureConfiguration,
     formalizationId: string,
@@ -159,35 +155,5 @@ export abstract class FormalizationSignatureConfigurationUseCase<
       )
     }
     return document
-  }
-
-  protected async publishPendingPreviewBatch(
-    formalizationId: string,
-    previewIds: readonly string[],
-    scheduledAt: Date,
-    configurationRepository: FormalizationSignatureConfigurationRepository,
-    broker: Broker,
-  ): Promise<void> {
-    const items: Array<{
-      readonly previewId: string
-      readonly attemptToken: string
-    }> = []
-    for (const previewId of previewIds) {
-      const claim = await configurationRepository.schedulePendingPreview(
-        previewId,
-        scheduledAt,
-      )
-      if (claim)
-        items.push({ previewId: claim.previewId, attemptToken: claim.attemptToken })
-    }
-    if (items.length === 0) return
-
-    await broker.publish(
-      new FormalizationSignaturePreviewBatchGenerationRequestedEvent({
-        formalizationId,
-        items,
-        occurredAt: scheduledAt.toISOString(),
-      }),
-    )
   }
 }

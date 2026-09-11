@@ -18,6 +18,10 @@ export interface FormalizationDocumentConfirmationTransaction {
     readonly actorId: string
     readonly occurredAt: Date
   }): Promise<FormalizationDocumentConfirmationResult>
+  synchronizeCurrent(input: {
+    readonly formalizationId: string
+    readonly occurredAt: Date
+  }): Promise<FormalizationDocumentConfirmationResult>
   reopen(input: {
     readonly formalizationId: string
     readonly expectedVersion: number

@@ -19,6 +19,7 @@ import {
 import type { FormalizationSignatureGatewayTransaction } from '@hms/core/formalization/interfaces'
 
 const SEEDED_FORMALIZATION_ID = '00000000-0000-4000-8000-000000000701'
+const SEEDED_DRAFT_FORMALIZATION_ID = '00000000-0000-4000-8000-000000000702'
 const SEEDED_CONFIRMATION_DATE = new Date('2026-08-20T15:15:00.000Z')
 
 export type FormalizationSeedReferences = {
@@ -27,6 +28,8 @@ export type FormalizationSeedReferences = {
   readonly client: Client
   readonly assignedLawyer: Collaborator
   readonly contractForm: DynamicForm
+  readonly formalizationId?: string
+  readonly seedMode?: 'confirmed' | 'financial-form-draft'
 }
 
 @Injectable()
@@ -46,8 +49,11 @@ export class FormalizationSeeder {
   }
 
   async run(references: FormalizationSeedReferences) {
+    const isFinancialFormDraft = references.seedMode === 'financial-form-draft'
     const seeded = fakeFormalization({
-      id: SEEDED_FORMALIZATION_ID,
+      id:
+        references.formalizationId ??
+        (isFinancialFormDraft ? SEEDED_DRAFT_FORMALIZATION_ID : SEEDED_FORMALIZATION_ID),
       intakeId: references.intake.id,
       clientId: references.client.id,
       consultationId: references.consultation.id,
@@ -61,21 +67,25 @@ export class FormalizationSeeder {
         description: references.contractForm.description,
         fields: references.contractForm.fields,
       },
-      contractFormAnswers: this.createConfirmedFormAnswers(references.contractForm),
-      contractFormState: 'closed',
+      contractFormAnswers: this.createFilledFormAnswers(references.contractForm),
+      contractFormState: isFinancialFormDraft ? 'open' : 'closed',
       contractFormRevision: 1,
-      contractFormClosedAt: SEEDED_CONFIRMATION_DATE,
-      contractFormClosedByCollaboratorId: references.assignedLawyer.id,
-      documentsConfirmedAt: SEEDED_CONFIRMATION_DATE,
-      documentsConfirmedByCollaboratorId: references.assignedLawyer.id,
-      documentsConfirmedRevision: 1,
+      ...(isFinancialFormDraft
+        ? {}
+        : {
+            contractFormClosedAt: SEEDED_CONFIRMATION_DATE,
+            contractFormClosedByCollaboratorId: references.assignedLawyer.id,
+            documentsConfirmedAt: SEEDED_CONFIRMATION_DATE,
+            documentsConfirmedByCollaboratorId: references.assignedLawyer.id,
+            documentsConfirmedRevision: 1,
+          }),
       version: 1,
     })
     const { createdAt: _createdAt, updatedAt: _updatedAt, ...creation } = seeded
     return this.formalizationsRepository.addOrGet(creation as FormalizationCreation)
   }
 
-  private createConfirmedFormAnswers(form: DynamicForm): DynamicFormAnswer[] {
+  private createFilledFormAnswers(form: DynamicForm): DynamicFormAnswer[] {
     return form.fields.map((field) => ({
       fieldId: field.id,
       value: this.getConfirmedAnswerValue(field.key),

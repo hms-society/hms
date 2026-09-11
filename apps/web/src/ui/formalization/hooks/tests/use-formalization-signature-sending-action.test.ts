@@ -48,7 +48,10 @@ const review: FormalizationSignatureSendingReviewResponse = {
   },
 }
 
-const status: FormalizationSignatureSendingStatusResponse = {
+const status = {
+  formalizationId: 'formalization-1',
+  formalizationStatus: 'in_progress' as const,
+  formalizationVersion: 4,
   requestId: 'request-1',
   status: 'sending',
   version: 2,
@@ -57,7 +60,7 @@ const status: FormalizationSignatureSendingStatusResponse = {
   failedDocuments: 0,
   canCancel: true,
   canRetry: false,
-}
+} as unknown as FormalizationSignatureSendingStatusResponse
 
 type QueryResult<Body> = {
   readonly data: Body | undefined
@@ -91,7 +94,7 @@ function getRefetchInterval<Body>(queryCallIndex: number) {
 
 describe('useFormalizationSignatureSending', () => {
   let reviewData: FormalizationSignatureSendingReviewResponse | undefined
-  let statusData: FormalizationSignatureSendingStatusResponse | undefined
+  let statusData: FormalizationSignatureSendingStatusResponse | null | undefined
   const reviewRefetch = vi.fn().mockResolvedValue(undefined)
   const statusRefetch = vi.fn().mockResolvedValue(undefined)
   const queryClientMock = {
@@ -122,7 +125,7 @@ describe('useFormalizationSignatureSending', () => {
         isFetching: false,
         isLoading: false,
         refetch: statusRefetch,
-      } satisfies QueryResult<FormalizationSignatureSendingStatusResponse>
+      } satisfies QueryResult<FormalizationSignatureSendingStatusResponse | null>
     })
     useMutationMock.mockReturnValue({
       error: null,
@@ -131,7 +134,8 @@ describe('useFormalizationSignatureSending', () => {
     })
   })
 
-  it('only enables status polling when the review contains a current request', () => {
+  it('enables status polling independently of the full review projection', () => {
+    reviewData = undefined
     renderHook(() => useFormalizationSignatureSending('formalization-1'))
 
     expect(useQueryMock).toHaveBeenNthCalledWith(
@@ -141,6 +145,34 @@ describe('useFormalizationSignatureSending', () => {
         queryKey: getFormalizationSignatureSendingStatusQueryKey('formalization-1'),
       }),
     )
+  })
+
+  it('keeps an explicit null status projection absent without treating it as an error', () => {
+    reviewData = undefined
+    statusData = null
+
+    const { result } = renderHook(() =>
+      useFormalizationSignatureSending('formalization-1'),
+    )
+
+    expect(result.current.status).toBeNull()
+    expect(useQueryMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ enabled: true }),
+    )
+  })
+
+  it('hydrates cancellation pending state from the persisted status projection', () => {
+    statusData = {
+      ...status,
+      cancellationRequestedAt: new Date('2026-09-01T10:00:00.000Z'),
+    }
+
+    const { result } = renderHook(() =>
+      useFormalizationSignatureSending('formalization-1'),
+    )
+
+    expect(result.current.isCancellationPending).toBe(true)
   })
 
   it('polls the review while a signature request is non-terminal', () => {
@@ -234,7 +266,7 @@ describe('useFormalizationSignatureSending', () => {
     expect(refetchInterval({ state: { data: reviewData } })).toBe(false)
   })
 
-  it('stops cancellation polling when the review has no current request', async () => {
+  it('keeps status polling when the full review has no current request', async () => {
     reviewData = { ...review, currentRequest: undefined }
     const { result } = renderHook(() =>
       useFormalizationSignatureSending('formalization-1'),
@@ -255,7 +287,7 @@ describe('useFormalizationSignatureSending', () => {
       getRefetchInterval<FormalizationSignatureSendingStatusResponse>(
         useQueryMock.mock.calls.length - 1,
       )
-    expect(refetchInterval({ state: { data: statusData } })).toBe(false)
+    expect(refetchInterval({ state: { data: statusData ?? undefined } })).toBe(3_000)
   })
 
   it('keeps cancellation pending without fabricating review or status data', async () => {

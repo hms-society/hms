@@ -167,6 +167,26 @@ describe('SignatureFieldsTab', () => {
     expect(screen.queryByText('Pronto')).toBeNull()
   })
 
+  it('explains when the selected document preview is still being prepared', () => {
+    useSignatureFieldsTabMock.mockReturnValue({
+      ...fakeHook(),
+      canViewPreview: false,
+      preview: { previewId: 'preview-1', state: 'pending', pageCount: 1, pages: [] },
+    })
+
+    render(<SignatureFieldsTab expectedVersion={4} configuration={configuration} />)
+
+    expect(
+      screen.getByText(
+        'A prévia deste documento está sendo preparada. O editor será habilitado assim que o PDF estiver disponível.',
+      ),
+    ).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Adicionar campo' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+  })
+
   it('displays configured fields as progress against assigned signatories', () => {
     const progressConfiguration = {
       ...configuration,

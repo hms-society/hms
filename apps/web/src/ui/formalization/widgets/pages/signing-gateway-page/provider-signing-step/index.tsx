@@ -1,12 +1,10 @@
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent, CardHeader } from '@/ui/shadcn/card'
-import { useProviderSigningStep } from './use-provider-signing-step'
 
 export type { ProviderSigningStepProps } from './use-provider-signing-step'
 import type { ProviderSigningStepProps } from './use-provider-signing-step'
 
 export const ProviderSigningStep = (props: ProviderSigningStepProps) => {
-  const { handleUnavailable, handleSubmitted } = useProviderSigningStep(props)
   return (
     <main className='flex min-h-screen items-center justify-center bg-background p-4 text-foreground sm:p-6'>
       <Card className='w-full max-w-lg border border-border shadow-sm'>
@@ -17,12 +15,6 @@ export const ProviderSigningStep = (props: ProviderSigningStepProps) => {
           <p>O documento está pronto para assinatura.</p>
           <Button asChild>
             <a href={props.proxyPath}>Continuar no documento</a>
-          </Button>
-          <Button variant='outline' onClick={handleSubmitted}>
-            Já assinei
-          </Button>
-          <Button variant='ghost' onClick={handleUnavailable}>
-            Não foi possível assinar
           </Button>
         </CardContent>
       </Card>

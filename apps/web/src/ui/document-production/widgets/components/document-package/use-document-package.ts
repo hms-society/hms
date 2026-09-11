@@ -19,6 +19,7 @@ export type DocumentPackageViewModel<T extends DocumentPackageSourceItem> =
   DocumentPackageItem & {
     document: T
     latestVersion?: T['versions'][number]
+    currentVersion?: T['versions'][number]
   }
 
 function getStatusLabel(status: DocumentPackageStatus) {
@@ -34,6 +35,12 @@ function getLatestVersion<T extends DocumentPackageSourceItem>(document: T) {
   return [...document.versions].sort(
     (left, right) => right.versionNumber - left.versionNumber,
   )[0]
+}
+
+function getCurrentVersion<T extends DocumentPackageSourceItem>(document: T) {
+  return document.currentVersionId
+    ? document.versions.find((version) => version.id === document.currentVersionId)
+    : undefined
 }
 
 function getDocumentStatus(
@@ -73,12 +80,14 @@ export function useDocumentPackage<T extends DocumentPackageSourceItem>({
     () =>
       documents.map((document) => {
         const latestVersion = getLatestVersion(document)
+        const currentVersion = getCurrentVersion(document)
+        const displayedVersion = currentVersion ?? latestVersion
         const isOptimisticallyGenerating =
           pendingDocumentIds.has(document.id) && !cancelledDocumentIds.has(document.id)
         const isGenerationStopped =
           cancelledDocumentIds.has(document.id) || timedOutDocumentIds.has(document.id)
         const status = getDocumentStatus(
-          latestVersion,
+          displayedVersion,
           document.generationStatus,
           isOptimisticallyGenerating,
           isGenerationStopped,
@@ -89,11 +98,10 @@ export function useDocumentPackage<T extends DocumentPackageSourceItem>({
           id: document.id,
           title: document.title,
           latestVersion,
+          currentVersion,
           status,
           statusLabel: getStatusLabel(status),
-          isCurrent: Boolean(
-            latestVersion && latestVersion.id === document.currentVersionId,
-          ),
+          isCurrent: Boolean(currentVersion),
           isGenerating: status === 'generating',
           isTimedOut:
             timedOutDocumentIds.has(document.id) &&

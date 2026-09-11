@@ -31,6 +31,7 @@ describe('Replace Formalization Signatory Documents Use Case', () => {
         documentVersionId: 'version-id',
         name: 'Contrato',
         reviewStatus: 'approved',
+        documentSpecificationId: 'specification-1',
         fileId: 'file-id',
       },
     ])

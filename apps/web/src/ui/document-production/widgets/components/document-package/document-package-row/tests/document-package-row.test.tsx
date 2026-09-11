@@ -6,6 +6,7 @@ const item = {
   id: 'document-1',
   title: 'Procuração',
   latestVersion: { id: 'version-1', versionNumber: 1, status: 'approved' as const },
+  currentVersion: { id: 'version-1', versionNumber: 1, status: 'approved' as const },
   status: 'approved' as const,
   statusLabel: 'Aprovado',
   isCurrent: true,
@@ -26,6 +27,7 @@ describe('DocumentPackageRow', () => {
 
     expect(screen.getByRole('heading', { name: 'Procuração' })).toBeDefined()
     expect(screen.getByText('Aprovado')).toBeDefined()
+    expect(screen.getByText('Vigente · Versão 1')).toBeDefined()
     expect(screen.getByRole('button', { name: 'Visualizar' })).toBeDefined()
   })
 })

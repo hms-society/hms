@@ -58,6 +58,7 @@ describe('Reset Formalization Signature Configuration Use Case', () => {
         documentVersionId: 'version-id',
         name: 'Contrato',
         reviewStatus: 'approved',
+        documentSpecificationId: 'specification-1',
         fileId: 'file-id',
       },
     ])

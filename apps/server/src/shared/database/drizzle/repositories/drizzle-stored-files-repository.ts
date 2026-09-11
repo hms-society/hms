@@ -44,6 +44,16 @@ export class DrizzleStoredFilesRepository
     return record ? this.mapper.toDomain(record) : null
   }
 
+  async findByFilePath(filePath: string): Promise<File | null> {
+    const [record] = await this.database
+      .select()
+      .from(storedFileModel)
+      .where(eq(storedFileModel.filePath, filePath))
+      .limit(1)
+
+    return record ? this.mapper.toDomain(record) : null
+  }
+
   async remove(fileId: string): Promise<void> {
     await this.database.delete(storedFileModel).where(eq(storedFileModel.id, fileId))
   }

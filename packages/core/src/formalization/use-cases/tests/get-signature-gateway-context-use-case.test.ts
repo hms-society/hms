@@ -112,6 +112,7 @@ function makeDependencies(): Dependencies {
     documentVersionId: 'source-version-1',
     name: 'Contrato imutável',
     reviewStatus: 'approved',
+    documentSpecificationId: 'specification-1',
     fileId: 'source-file-1',
   })
   dependencies.protocolsRepository.findByRecipientAndRequest.mockResolvedValue(
@@ -237,6 +238,7 @@ describe('Get Signature Gateway Context Use Case', () => {
         documentVersionId: versionId,
         name: versionId,
         reviewStatus: 'approved',
+        documentSpecificationId: 'specification-1',
         fileId: `${versionId}-file`,
       }),
     )

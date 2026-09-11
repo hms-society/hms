@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 
+import { DocumentProductionModule } from '@/document-production/document-production.module'
 import { FormalizationDatabaseModule } from '@/formalization/database/formalization-database.module'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 import {
@@ -24,6 +25,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
 
 @Module({
   imports: [
+    DocumentProductionModule,
     FormalizationDatabaseModule,
     FormalizationProvisionModule,
     SharedMessagingModule,

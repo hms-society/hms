@@ -12,6 +12,7 @@ export type DocumentPackageItem = {
   id: string
   title: string
   latestVersion?: DocumentPackageVersion
+  currentVersion?: DocumentPackageVersion
   status: DocumentPackageStatus
   statusLabel: string
   isCurrent: boolean

@@ -96,7 +96,8 @@ export const ConsultationDocumentsPage = ({
         isCancellingDocument={isCancellingDocument}
         onRefreshDocument={handleRefresh}
         renderAction={(action, item) => {
-          if (!item.latestVersion) return null
+          const version = item.currentVersion ?? item.latestVersion
+          if (!version) return null
           return (
             <Button asChild variant={action === 'review' ? 'brand' : 'ghost'} size='sm'>
               <Anchor
@@ -104,7 +105,7 @@ export const ConsultationDocumentsPage = ({
                 params={{
                   consultationId,
                   documentId: item.id,
-                  documentVersionId: item.latestVersion.id,
+                  documentVersionId: version.id,
                 }}
               >
                 <Icon name={action === 'review' ? 'pencil' : 'eye'} />

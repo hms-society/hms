@@ -15,6 +15,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReopenFormalizationDocumentPackageUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationDocumentConfirmationTransaction,
+  FormalizationSignatureRequestsRepository,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 
@@ -44,12 +45,15 @@ export class ReopenFormalizationDocumentPackageController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
+    requestsRepository: FormalizationSignatureRequestsRepository,
     @Inject(FORMALIZATION_PROVIDERS.documentConfirmationTransaction)
     confirmationTransaction: FormalizationDocumentConfirmationTransaction,
     datetimeProvider: DatetimeProvider,
   ) {
     this.useCase = new ReopenFormalizationDocumentPackageUseCase(
       formalizationsRepository,
+      requestsRepository,
       confirmationTransaction,
       datetimeProvider,
     )

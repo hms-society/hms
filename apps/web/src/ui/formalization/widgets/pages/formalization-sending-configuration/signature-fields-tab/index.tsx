@@ -473,6 +473,18 @@ export const SignatureFieldsTab = (props: SignatureFieldsTabProps) => {
                 A prévia deste documento ainda está sendo preparada.
               </div>
             )}
+            {(preview?.state === 'pending' || preview?.state === 'processing') && (
+              <div
+                role='status'
+                aria-live='polite'
+                className='rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground'
+              >
+                {preview.state === 'processing'
+                  ? 'A prévia deste documento está sendo gerada.'
+                  : 'A prévia deste documento está sendo preparada.'}{' '}
+                O editor será habilitado assim que o PDF estiver disponível.
+              </div>
+            )}
             {preview?.state === 'failed' && (
               <div
                 role='alert'

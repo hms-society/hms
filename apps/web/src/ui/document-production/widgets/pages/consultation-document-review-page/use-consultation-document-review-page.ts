@@ -193,6 +193,7 @@ export function useConsultationDocumentReviewPage({
   const [regenerationInstructions, setRegenerationInstructions] = useState('')
   const [isApproveOpen, setIsApproveOpen] = useState(false)
   const [isCurrentOpen, setIsCurrentOpen] = useState(false)
+  const [currentVersionIdToSelect, setCurrentVersionIdToSelect] = useState<string>()
   const [isRejectionReasonOpen, setIsRejectionReasonOpen] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [highlightedTerms, setHighlightedTerms] = useState<readonly string[]>([])
@@ -292,6 +293,13 @@ export function useConsultationDocumentReviewPage({
     }
     setIsHistoryOpen(false)
     void navigateToVersion(nextVersionId)
+  }
+
+  function handleRequestCurrent(nextVersionId: string) {
+    setActionError(undefined)
+    setCurrentVersionIdToSelect(nextVersionId)
+    setIsHistoryOpen(false)
+    setIsCurrentOpen(true)
   }
 
   function handleContentChange(nextContent: DocumentTemplateContent) {
@@ -399,19 +407,26 @@ export function useConsultationDocumentReviewPage({
   }
 
   async function handleConfirmCurrent() {
+    const nextVersionId = currentVersionIdToSelect ?? documentVersionId
     setActionError(undefined)
     try {
       const result = await currentAction.selectCurrentVersion({
         consultationId,
         documentId,
-        documentVersionId,
+        documentVersionId: nextVersionId,
       })
       setIsCurrentOpen(false)
+      setCurrentVersionIdToSelect(undefined)
       if (result.isConflict) {
         await Promise.all([documentsQuery.refetch(), versionQuery.refetch()])
         setActionError(
           'Conflito: a vigência já foi alterada. Os dados foram atualizados.',
         )
+        return
+      }
+      await documentsQuery.refetch()
+      if (nextVersionId !== documentVersionId) {
+        await navigateToVersion(nextVersionId)
       }
     } catch {
       setActionError('Não foi possível tornar esta versão vigente. Tente novamente.')
@@ -531,6 +546,7 @@ export function useConsultationDocumentReviewPage({
     handleRetry,
     handleStartEditing,
     handleVersionNavigation,
+    handleRequestCurrent,
     handleViewRejectionReason,
     highlightedTerms,
     isApproveOpen,

@@ -31,4 +31,25 @@ describe('useFormalizationSendingConfigurationSummary', () => {
       { label: 'Atribuições', value: '1' },
     ])
   })
+
+  it('shows the confirmed signature status over the configuration status', () => {
+    const { result } = renderHook(() =>
+      useFormalizationSendingConfigurationSummary({
+        formalizationId: 'formalization-1',
+        isPackageConfirmed: true,
+        signatureStatus: 'confirmed',
+        configuration: {
+          status: 'ready_for_sending',
+          signatories: [],
+          documents: [],
+          readiness: { assignmentCount: 0 },
+        } as unknown as FormalizationSignatureConfiguration,
+        controller: {
+          isConfigurationError: false,
+        } as unknown as FormalizationSignatureConfigurationController,
+      }),
+    )
+
+    expect(result.current.statusLabel).toBe('Confirmado')
+  })
 })

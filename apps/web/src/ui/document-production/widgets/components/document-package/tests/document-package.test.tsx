@@ -59,4 +59,42 @@ describe('DocumentPackage', () => {
       true,
     )
   })
+
+  it('allows an explicit package reopen action while preserving read-only contents', () => {
+    render(
+      <DocumentPackage
+        title='Documentos'
+        description='Descrição'
+        summary='1 documento'
+        items={[item]}
+        isConfirmed
+        isReadOnly
+        onReopen={vi.fn()}
+        renderAction={() => <button type='button'>Visualizar</button>}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Visualizar' })).toBeDefined()
+  })
+
+  it('disables package reopening while signature sending is active', () => {
+    render(
+      <DocumentPackage
+        title='Documentos'
+        description='Descrição'
+        summary='1 documento'
+        items={[item]}
+        isConfirmed
+        isReadOnly
+        isReopenDisabled
+        onReopen={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar pacote' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+  })
 })

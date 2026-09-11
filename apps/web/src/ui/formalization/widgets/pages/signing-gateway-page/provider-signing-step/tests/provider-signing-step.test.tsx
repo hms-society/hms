@@ -25,5 +25,7 @@ describe('ProviderSigningStep', () => {
     expect(
       screen.getByRole('link', { name: 'Continuar no documento' }).getAttribute('href'),
     ).toBe('/assinaturas/provedor/session-1')
+    expect(screen.queryByRole('button', { name: 'Já assinei' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Não foi possível assinar' })).toBeNull()
   })
 })

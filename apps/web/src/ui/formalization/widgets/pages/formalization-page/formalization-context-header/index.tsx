@@ -4,7 +4,7 @@ import { Badge } from '@/ui/shadcn/badge'
 import { Card, CardContent } from '@/ui/shadcn/card'
 
 export function FormalizationContextHeader({ data }: { data: FormalizationDetails }) {
-  const { formalization, intake, client, consultation, assignedLawyer } = data
+  const { formalization, client, consultation, assignedLawyer } = data
   const clientName = 'name' in client ? client.name : client.legalName
   const status =
     formalization.status === 'in_progress' ? 'Em andamento' : 'Somente leitura'
@@ -19,9 +19,6 @@ export function FormalizationContextHeader({ data }: { data: FormalizationDetail
           <h1 className='mt-1 truncate font-serif text-3xl font-semibold tracking-tight text-brand'>
             {clientName}
           </h1>
-          <p className='mt-1 text-sm text-muted-foreground'>
-            Intake #{intake.sequenceNumber} · Consulta vinculada
-          </p>
         </div>
         <div>
           <p className='text-xs text-muted-foreground'>Advogado responsável</p>
@@ -36,9 +33,6 @@ export function FormalizationContextHeader({ data }: { data: FormalizationDetail
           >
             {status}
           </Badge>
-          <span className='text-xs text-muted-foreground'>
-            Versão do agregado {formalization.version}
-          </span>
         </div>
       </CardContent>
     </Card>

@@ -41,6 +41,25 @@ type PendingGeneration = {
   readonly startedAt: number
 }
 
+type FormalizationDocumentConfirmationCandidate = {
+  readonly isCurrent: boolean
+  readonly status: string
+  readonly document: {
+    readonly isFresh: boolean
+  }
+}
+
+export function isFormalizationDocumentConfirmationEligible(
+  documents: readonly FormalizationDocumentConfirmationCandidate[],
+): boolean {
+  return (
+    documents.length > 0 &&
+    documents.every(
+      (item) => item.isCurrent && item.document.isFresh && item.status === 'approved',
+    )
+  )
+}
+
 export function useFormalizationDocumentsQuery(
   formalizationId: string,
   isAvailable = true,
@@ -349,13 +368,7 @@ export function useFormalizationDocumentProduction(
     reopenMutation,
     reopenPackage: reopenMutation.mutateAsync,
     isReopeningPackage: reopenMutation.isPending,
-    isConfirmationEligible:
-      documents.length > 0 &&
-      documents.every(
-        (item) =>
-          item.document.isFresh &&
-          (item.status === 'approved' || item.status === 'rejected'),
-      ),
+    isConfirmationEligible: isFormalizationDocumentConfirmationEligible(documents),
   }
 }
 
