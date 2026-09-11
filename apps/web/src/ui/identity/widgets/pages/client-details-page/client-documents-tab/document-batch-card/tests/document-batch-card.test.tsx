@@ -1,4 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
+import {
+  DocumentBatchChannel,
+  DocumentBatchStatus,
+  DocumentValidationStatus,
+} from '@hms/core/document-engine/domain/structures'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DocumentBatchCard } from '../index'
@@ -9,17 +15,24 @@ vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: () => ({ navigateTo: navigateToMock }),
 }))
 
-const batch = {
+const batch: DocumentBatch = {
   id: 'batch-1',
   readableId: 'LOTE-0001',
-  channel: 'whatsapp',
-  createdAt: '2026-08-10T12:00:00.000Z',
+  status: DocumentBatchStatus.Received,
+  channel: DocumentBatchChannel.WhatsApp,
+  sender: 'cliente@email.com',
+  createdAt: new Date('2026-08-10T12:00:00.000Z'),
+  updatedAt: new Date('2026-08-10T12:00:00.000Z'),
   files: [
     {
       id: 'file-1',
+      batchId: 'batch-1',
+      storagePath: 'internal/documento.pdf',
       originalName: 'documento.pdf',
       mimeType: 'application/pdf',
       sizeBytes: 2048,
+      status: DocumentValidationStatus.AwaitingValidation,
+      createdAt: new Date('2026-08-10T12:00:00.000Z'),
     },
   ],
 }
@@ -39,6 +52,7 @@ describe('DocumentBatchCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expandir lote' }))
 
     expect(screen.getByText('documento.pdf')).toBeTruthy()
+    expect(screen.getByText('Aguardando validação')).toBeTruthy()
     expect(
       screen.getByRole('button', { name: 'Recolher lote' }).getAttribute('aria-expanded'),
     ).toBe('true')

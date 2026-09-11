@@ -8,7 +8,10 @@ import {
   DocumentValidationLogAction,
   DocumentValidationStatus,
 } from '../domain/structures'
-import type { DocumentValidationDocument } from '../domain/entities'
+import type {
+  DocumentValidationDocument,
+  DocumentValidationExtractedField,
+} from '../domain/entities'
 import { AppError } from '../../shared/domain/errors'
 
 export type RecordDocumentValidationDecisionRequest = {
@@ -16,9 +19,11 @@ export type RecordDocumentValidationDecisionRequest = {
   reviewedBy: string
   decision: DocumentValidationDecision
   documentTypeId?: string
+  caseId?: string
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export class RecordDocumentValidationDecisionUseCase {
@@ -43,6 +48,10 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
+    if (this.isDuplicateDecisionAlreadyRecorded(currentDocument, request)) {
+      return currentDocument
+    }
+
     const checklistRequirementId = this.resolveChecklistRequirementId(
       request,
       currentDocument,
@@ -54,7 +63,7 @@ export class RecordDocumentValidationDecisionUseCase {
 
     const updatedDocument = await this.documentValidationsRepository.recordDecision({
       ...decisionRequest,
-      caseId: currentDocument.checklistLink?.caseId,
+      caseId: this.resolveCaseId(decisionRequest, currentDocument),
       status,
     })
 
@@ -132,12 +141,20 @@ export class RecordDocumentValidationDecisionUseCase {
       metadata.documentTypeId = request.documentTypeId
     }
 
+    if (request.caseId) {
+      metadata.caseId = request.caseId
+    }
+
     if (request.checklistRequirementId) {
       metadata.checklistRequirementId = request.checklistRequirementId
     }
 
     if (request.originalDocumentId) {
       metadata.originalDocumentId = request.originalDocumentId
+    }
+
+    if (request.extractedFields) {
+      metadata.extractedFields = request.extractedFields
     }
 
     return metadata
@@ -206,6 +223,32 @@ export class RecordDocumentValidationDecisionUseCase {
     return request.checklistRequirementId
   }
 
+  private resolveCaseId(
+    request: RecordDocumentValidationDecisionRequest,
+    document: DocumentValidationDocument,
+  ) {
+    if (request.caseId && this.isUuid(request.caseId)) {
+      return request.caseId
+    }
+
+    if (document.checklistLink?.caseId && this.isUuid(document.checklistLink.caseId)) {
+      return document.checklistLink.caseId
+    }
+
+    return undefined
+  }
+
+  private isDuplicateDecisionAlreadyRecorded(
+    document: DocumentValidationDocument,
+    request: RecordDocumentValidationDecisionRequest,
+  ) {
+    return (
+      document.status === DocumentValidationStatus.Duplicate &&
+      request.decision === DocumentValidationDecision.Duplicate &&
+      document.reviewedAt !== undefined
+    )
+  }
+
   private isUuid(value: string) {
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -249,6 +292,7 @@ export class RecordDocumentValidationDecisionUseCase {
         checklistRequirementId: request.checklistRequirementId,
         originalDocumentId: request.originalDocumentId,
         reason: request.reason,
+        extractedFields: request.extractedFields,
       },
     }
   }

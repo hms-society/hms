@@ -20,6 +20,7 @@ export class DrizzleDocumentBatchMapper {
         originalName: file.originalName,
         mimeType: file.mimeType,
         sizeBytes: file.sizeBytes,
+        status: file.status ?? undefined,
         createdAt: file.createdAt,
       })),
       createdAt: record.createdAt,

@@ -17,4 +17,17 @@ describe('useExtractedFields', () => {
     expect(result.current.getFieldIcon('Titular')).toBe('user')
     expect(result.current.getFieldIcon('Campo novo')).toBe('file-text')
   })
+
+  it('creates distinct keys for repeated fields', () => {
+    const repeatedFields = [
+      { label: 'Cargo', value: 'Analista de Sistemas' },
+      { label: 'Cargo', value: 'Analista de Sistemas' },
+    ]
+
+    const { result } = renderHook(() => useExtractedFields(repeatedFields))
+
+    expect(result.current.getFieldKey(repeatedFields[0])).not.toBe(
+      result.current.getFieldKey(repeatedFields[1]),
+    )
+  })
 })

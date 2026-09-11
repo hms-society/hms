@@ -11,12 +11,12 @@ import {
 import { useDocumentValidationDocumentQuery } from '@/ui/document-engine/hooks/use-document-validation-document-query'
 import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/hooks/use-record-document-validation-decision-action'
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
+import { useReprocessDocumentFileAction } from '@/ui/document-engine/hooks/use-reprocess-document-file-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 export type AnalysisDocumentView = {
   id: string
   fileName: string
-  confidence: string
   type: string
   fileSize: string
   receivedFrom: string
@@ -34,7 +34,6 @@ export type AnalysisDocumentView = {
 const FALLBACK_DOCUMENT: AnalysisDocumentView = {
   id: '',
   fileName: 'Carregando documento...',
-  confidence: 'Sem sugestão disponível',
   type: '',
   fileSize: '0 KB',
   receivedFrom: 'Carregando',
@@ -60,6 +59,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   const { recordDecision, isRecordingDecision } =
     useRecordDocumentValidationDecisionAction(fileId)
   const { requestResend, isRequestingResend } = useRequestDocumentResendAction(fileId)
+  const { reprocessDocument, isReprocessingDocument } =
+    useReprocessDocumentFileAction(fileId)
 
   function toAnalysisDocumentView(
     validationDocument: DocumentValidationDocument,
@@ -69,7 +70,6 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     return {
       id: validationDocument.id,
       fileName: validationDocument.fileName,
-      confidence: getConfidenceLabel(validationDocument),
       type: getStringSuggestion(validationDocument, 'documentTypeId') ?? '',
       fileSize: formatFileSize(validationDocument.sizeBytes),
       receivedFrom: getSenderName(validationDocument),
@@ -108,6 +108,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   function getStatusLabel(status: DocumentValidationDocument['status']) {
     const labels: Record<DocumentValidationDocument['status'], string> = {
       awaiting_validation: 'Aguardando validação',
+      processing: 'Em processamento',
       validated: 'Válido',
       not_linked: 'Não vinculado',
       illegible: 'Ilegível',
@@ -124,6 +125,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   function getStatusStyles(status: string) {
     switch (status) {
       case 'Falha no processamento':
+      case 'Em processamento':
       case 'Incompleto':
       case 'Reenvio solicitado':
         return 'bg-[#FFF3E0] text-[#7C4700]'
@@ -137,22 +139,6 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
       default:
         return 'bg-[#E1F5F6] text-[#0F5C61]'
     }
-  }
-
-  function getConfidenceLabel(validationDocument: DocumentValidationDocument) {
-    const label = getStringSuggestion(validationDocument, 'confidenceLabel')
-
-    if (label) return label
-
-    if (validationDocument.aiConfidence === undefined) {
-      return 'Sem sugestão disponível'
-    }
-    if (validationDocument.aiConfidence >= 90) {
-      return 'Sugerido pela IA - Confiança alta'
-    }
-    if (validationDocument.aiConfidence >= 60) return 'Sugerido pela IA'
-
-    return 'Baixa confiança'
   }
 
   function getStringSuggestion(
@@ -207,6 +193,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
       decision: mapStatusToDecision(viewDocument.status),
       documentTypeId:
         getStringSuggestion(document, 'documentTypeId') || viewDocument.type || '',
+      caseId:
+        document?.checklistLink?.caseId ?? getStringSuggestion(document, 'caseId') ?? '',
       checklistRequirementId:
         document?.checklistLink?.checklistItemId ??
         getStringSuggestion(document, 'checklistItemId') ??
@@ -216,6 +204,8 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
         document?.duplicateMatch?.documentFileId ??
         document?.humanCorrection?.originalDocumentId ??
         '',
+      extractedFields:
+        document?.humanCorrection?.extractedFields ?? document?.extractedFields ?? [],
     },
   })
 
@@ -247,6 +237,10 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     setIsResendModalOpen(false)
   }
 
+  async function handleReprocessDocument() {
+    await reprocessDocument()
+  }
+
   function handleOpenDocument(documentFileId: string) {
     const navigationOptions = fromCaseId
       ? {
@@ -255,7 +249,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
         }
       : { params: { fileId: documentFileId } }
 
-    void navigateTo('documentViewer', navigationOptions)
+    void navigateTo('documentAnalysis', navigationOptions)
   }
 
   return {
@@ -264,12 +258,13 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
     document,
     isLoading: isLoadingDocument,
     error: documentError,
-    isSubmitting: isRecordingDecision || isRequestingResend,
+    isSubmitting: isRecordingDecision || isRequestingResend || isReprocessingDocument,
     isResendModalOpen,
     onSubmit,
     handleRequestResend,
     handleCloseResendModal,
     handleConfirmResend,
+    handleReprocessDocument,
     handleOpenDocument,
     documentView: viewDocument,
   }

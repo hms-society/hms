@@ -1,6 +1,12 @@
 import { Badge } from '@/ui/shadcn/badge'
 import { Field } from '@/ui/shadcn/field'
-import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 import {
@@ -15,8 +21,17 @@ export const ChecklistLinkFields = ({
   form,
   isChecklistDisabled = false,
 }: ChecklistLinkFieldsProps) => {
-  const { caseLabel, checklistItemLabel, checklistRequirementId, documentTypeId } =
-    useChecklistLinkFields({ document, form, isChecklistDisabled })
+  const {
+    caseId,
+    caseOptions,
+    checklistItemLabel,
+    checklistOptions,
+    checklistRequirementId,
+    handleCaseSelect,
+    handleChecklistSelect,
+    isLoadingCases,
+    isLoadingChecklist,
+  } = useChecklistLinkFields({ document, form, isChecklistDisabled })
 
   return (
     <div className='flex flex-col gap-3'>
@@ -36,24 +51,38 @@ export const ChecklistLinkFields = ({
       </div>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
         <Field>
-          <label
-            htmlFor='documentTypeId'
-            className='font-sans text-xs text-muted-foreground'
-          >
+          <label htmlFor='caseId' className='font-sans text-xs text-muted-foreground'>
             Caso
           </label>
-          <NativeSelect
-            id='documentTypeId'
-            className='h-11 w-full font-sans text-sm'
-            {...form.register('documentTypeId')}
+          <Select
+            value={caseId || undefined}
+            onValueChange={handleCaseSelect}
+            disabled={isLoadingCases}
           >
-            <NativeSelectOption value=''>Selecionar caso</NativeSelectOption>
-            {documentTypeId && (
-              <NativeSelectOption value={documentTypeId}>
-                {caseLabel || documentTypeId}
-              </NativeSelectOption>
-            )}
-          </NativeSelect>
+            <SelectTrigger
+              id='caseId'
+              className='h-12 w-full rounded-xl border-border bg-card px-4 font-sans text-sm font-medium shadow-sm hover:border-primary/50 hover:bg-highlight/30 focus:ring-primary/20'
+            >
+              <SelectValue
+                placeholder={isLoadingCases ? 'Carregando casos...' : 'Selecionar caso'}
+              />
+            </SelectTrigger>
+            <SelectContent
+              position='popper'
+              align='start'
+              className='max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-border bg-card p-1.5 shadow-lg ring-0'
+            >
+              {caseOptions.map((caseOption) => (
+                <SelectItem
+                  key={caseOption.id}
+                  value={caseOption.id}
+                  className='min-h-10 rounded-lg px-3 py-2 font-sans text-sm text-foreground focus:bg-highlight focus:text-foreground data-[state=checked]:bg-highlight data-[state=checked]:font-semibold data-[state=checked]:text-primary'
+                >
+                  {caseOption.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
         <Field>
           <label
@@ -62,19 +91,52 @@ export const ChecklistLinkFields = ({
           >
             Item do checklist
           </label>
-          <NativeSelect
-            id='checklistRequirementId'
-            className='h-11 w-full font-sans text-sm'
-            disabled={isChecklistDisabled}
-            {...form.register('checklistRequirementId')}
+          <Select
+            value={checklistRequirementId || undefined}
+            onValueChange={handleChecklistSelect}
+            disabled={isChecklistDisabled || !caseId || isLoadingChecklist}
           >
-            <NativeSelectOption value=''>Selecione o caso primeiro</NativeSelectOption>
-            {checklistRequirementId && (
-              <NativeSelectOption value={checklistRequirementId}>
-                {checklistItemLabel || checklistRequirementId}
-              </NativeSelectOption>
-            )}
-          </NativeSelect>
+            <SelectTrigger
+              id='checklistRequirementId'
+              className='h-12 w-full rounded-xl border-border bg-card px-4 font-sans text-sm font-medium shadow-sm hover:border-primary/50 hover:bg-highlight/30 focus:ring-primary/20 disabled:bg-muted/40'
+            >
+              <SelectValue
+                placeholder={
+                  !caseId
+                    ? 'Selecione o caso primeiro'
+                    : isLoadingChecklist
+                      ? 'Carregando checklist...'
+                      : 'Selecionar item'
+                }
+              />
+            </SelectTrigger>
+            <SelectContent
+              position='popper'
+              align='start'
+              className='max-h-72 min-w-[var(--radix-select-trigger-width)] rounded-xl border border-border bg-card p-1.5 shadow-lg ring-0'
+            >
+              {checklistOptions.map((checklistItem) => (
+                <SelectItem
+                  key={checklistItem.id}
+                  value={checklistItem.id}
+                  className='min-h-10 rounded-lg px-3 py-2 font-sans text-sm text-foreground focus:bg-highlight focus:text-foreground data-[state=checked]:bg-highlight data-[state=checked]:font-semibold data-[state=checked]:text-primary'
+                >
+                  {checklistItem.title}
+                </SelectItem>
+              ))}
+              {checklistRequirementId &&
+                checklistOptions.every(
+                  (checklistItem) => checklistItem.id !== checklistRequirementId,
+                ) && (
+                  <SelectItem
+                    value={checklistRequirementId}
+                    className='min-h-10 rounded-lg px-3 py-2 font-sans text-sm text-foreground focus:bg-highlight focus:text-foreground data-[state=checked]:bg-highlight data-[state=checked]:font-semibold data-[state=checked]:text-primary'
+                  >
+                    {checklistItemLabel || checklistRequirementId}
+                  </SelectItem>
+                )}
+            </SelectContent>
+          </Select>
         </Field>
       </div>
     </div>

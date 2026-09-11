@@ -7,6 +7,7 @@ import { DocumentValidationStatus } from '@hms/core/document-engine/domain/struc
 import { useDocumentValidationDocumentQuery } from '@/ui/document-engine/hooks/use-document-validation-document-query'
 import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/hooks/use-record-document-validation-decision-action'
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
+import { useReprocessDocumentFileAction } from '@/ui/document-engine/hooks/use-reprocess-document-file-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 import { useDocumentAnalysis } from '../use-document-analysis'
@@ -26,6 +27,10 @@ vi.mock('@/ui/document-engine/hooks/use-request-document-resend-action', () => (
   useRequestDocumentResendAction: vi.fn(),
 }))
 
+vi.mock('@/ui/document-engine/hooks/use-reprocess-document-file-action', () => ({
+  useReprocessDocumentFileAction: vi.fn(),
+}))
+
 vi.mock('@/ui/shared/hooks/use-navigation', () => ({
   useNavigation: vi.fn(),
 }))
@@ -37,6 +42,7 @@ const useRecordDocumentValidationDecisionActionMock = vi.mocked(
   useRecordDocumentValidationDecisionAction,
 )
 const useRequestDocumentResendActionMock = vi.mocked(useRequestDocumentResendAction)
+const useReprocessDocumentFileActionMock = vi.mocked(useReprocessDocumentFileAction)
 const useNavigationMock = vi.mocked(useNavigation)
 
 describe('useDocumentAnalysis', () => {
@@ -69,6 +75,11 @@ describe('useDocumentAnalysis', () => {
       requestResendError: null,
       isRequestingResend: false,
     })
+    useReprocessDocumentFileActionMock.mockReturnValue({
+      reprocessDocument: vi.fn(),
+      reprocessDocumentError: null,
+      isReprocessingDocument: false,
+    })
     useNavigationMock.mockReturnValue({
       navigateTo,
       navigateCollaboratorsSearch: vi.fn(),
@@ -85,12 +96,12 @@ describe('useDocumentAnalysis', () => {
     })
   })
 
-  it('opens the original document in the viewer', () => {
+  it('opens the original document in the analysis page', () => {
     const { result } = renderHook(() => useDocumentAnalysis({ fileId: document.id }))
 
     act(() => result.current.handleOpenDocument('original-file-1'))
 
-    expect(navigateTo).toHaveBeenCalledWith('documentViewer', {
+    expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'original-file-1' },
     })
   })
@@ -102,7 +113,7 @@ describe('useDocumentAnalysis', () => {
 
     act(() => result.current.handleOpenDocument('original-file-1'))
 
-    expect(navigateTo).toHaveBeenCalledWith('documentViewer', {
+    expect(navigateTo).toHaveBeenCalledWith('documentAnalysis', {
       params: { fileId: 'original-file-1' },
       search: { fromCaseId: 'case-1' },
     })

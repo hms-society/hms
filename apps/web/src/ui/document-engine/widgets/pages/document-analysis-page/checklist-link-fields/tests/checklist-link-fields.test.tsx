@@ -18,9 +18,17 @@ describe('ChecklistLinkFields', () => {
   beforeEach(() => {
     useChecklistLinkFieldsMock.mockReturnValue({
       caseLabel: 'Caso 0089',
+      caseId: 'case-1',
+      caseOptions: [{ id: 'case-1', title: 'Caso 0089' }] as never,
       checklistItemLabel: 'Comprovante de residência',
+      checklistOptions: [
+        { id: 'checklist-item-1', title: 'Comprovante de residência' },
+      ] as never,
       checklistRequirementId: 'checklist-item-1',
-      documentTypeId: 'document-type-1',
+      handleCaseSelect: vi.fn(),
+      handleChecklistSelect: vi.fn(),
+      isLoadingCases: false,
+      isLoadingChecklist: false,
     })
   })
 
@@ -34,6 +42,7 @@ describe('ChecklistLinkFields', () => {
       const form = useForm<DocumentReviewFormData>({
         defaultValues: {
           decision: 'not_linked',
+          caseId: 'case-1',
           documentTypeId: 'document-type-1',
           checklistRequirementId: 'checklist-item-1',
         },
@@ -55,11 +64,15 @@ describe('ChecklistLinkFields', () => {
 
     render(<TestFields />)
 
-    expect((screen.getByLabelText('Caso') as HTMLSelectElement).value).toBe(
-      'document-type-1',
+    expect(screen.getByRole('combobox', { name: 'Caso' }).textContent).toContain(
+      'Caso 0089',
     )
     expect(
-      (screen.getByLabelText('Item do checklist') as HTMLSelectElement).disabled,
+      (
+        screen.getByRole('combobox', {
+          name: 'Item do checklist',
+        }) as HTMLButtonElement
+      ).disabled,
     ).toBe(true)
 
     expect(screen.getByText('Não vinculado')).toBeDefined()

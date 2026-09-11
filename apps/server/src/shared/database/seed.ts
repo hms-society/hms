@@ -5,7 +5,6 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
-import { DocumentsSeeder } from '@/document-engine/database/documents-seeder'
 import { RealDocumentsSeeder } from '@/document-engine/database/real-documents-seeder'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
@@ -52,7 +51,6 @@ async function bootstrap() {
     await app.get(SchedulingSeeder).clear()
     await app.get(IntakeSeeder).clear()
     await app.get(RealDocumentsSeeder).clear()
-    await app.get(DocumentsSeeder).clear()
     await app.get(DynamicFormsSeeder).clear()
 
     const checklistTemplateItemsRepository = app.get<ChecklistTemplateItemsRepository>(
@@ -181,8 +179,6 @@ async function bootstrap() {
     })
 
     await app.get(CommunicationSeeder).run()
-    await app.get(RealDocumentsSeeder).run()
-    await app.get(DocumentsSeeder).run()
 
     LOGGER.log(
       JSON.stringify({

@@ -1,0 +1,62 @@
+@baseUrl = http://localhost:3333
+@seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
+
+### Sign in as seeded admin
+# @name signInAsSeededAdmin
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Lookup Vinicius Lopes Machado client
+# @name lookupViniciusClient
+POST {{baseUrl}}/clients/lookup
+Content-Type: application/json
+Accept: application/json
+
+{
+  "phone": "5511987654321"
+}
+
+### Upload documento de identificação image for AI extraction
+# Sends one image and creates one document batch, so only one Inngest run starts.
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="teste_documento_id.png"
+Content-Type: image/png
+
+< ../../src/document-engine/database/seed-assets/teste_documento_id.png
+--boundary--
+
+### Upload ficha cadastral image for AI extraction
+# Sends one image and creates one document batch, so only one Inngest run starts.
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="teste_ficha_cadastral.png"
+Content-Type: image/png
+
+< ../../src/document-engine/database/seed-assets/teste_ficha_cadastral.png
+--boundary--
+
+### List document batches in triage
+GET {{baseUrl}}/document-batches/triage?page=1&limit=10
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json

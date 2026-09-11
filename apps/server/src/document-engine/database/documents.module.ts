@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { CommunicationModule } from '@/shared/communication/communication.module'
+import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
 import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
@@ -15,6 +16,7 @@ import { GetDocumentValidationController } from '../rest/controllers/get-documen
 import { ListDocumentValidationsController } from '../rest/controllers/list-document-validations.controller'
 import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
+import { ReprocessDocumentFileController } from '../rest/controllers/reprocess-document-file.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
 
 import { ListTriageDocumentBatchesController } from '../rest/controllers/list-triage-document-batches.controller'
@@ -25,6 +27,7 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
     ProvisionModule,
     IdentityModule,
     CommunicationModule,
+    SharedMessagingModule,
     DocumentEngineMessagingModule,
     DocumentEngineProvisionModule,
   ],
@@ -37,6 +40,7 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
     ListDocumentValidationsController,
     ListDocumentValidationLogsController,
     RecordDocumentValidationDecisionController,
+    ReprocessDocumentFileController,
     RequestDocumentResendController,
   ],
   providers: [

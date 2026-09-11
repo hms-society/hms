@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, ne, sql } from 'drizzle-orm'
 import type {
   DocumentValidationDocument,
   DocumentValidationDuplicateMatch,
@@ -107,6 +107,45 @@ export class DrizzleDocumentValidationsRepository
     })
   }
 
+  async findDuplicateByHash(
+    hashSha256: string,
+    excludedDocumentFileId: string,
+  ): Promise<DocumentValidationDocument | undefined> {
+    const [record] = await this.database
+      .select({
+        file: documentBatchFileModel,
+        batch: documentBatchModel,
+        reviewerName: sql<
+          string | null
+        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+      })
+      .from(documentBatchFileModel)
+      .innerJoin(
+        documentBatchModel,
+        eq(documentBatchFileModel.batchId, documentBatchModel.id),
+      )
+      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
+      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
+      .where(
+        and(
+          eq(documentBatchFileModel.hashSha256, hashSha256),
+          ne(documentBatchFileModel.id, excludedDocumentFileId),
+        ),
+      )
+      .orderBy(desc(documentBatchFileModel.createdAt))
+      .limit(1)
+
+    if (!record) {
+      return undefined
+    }
+
+    return this.toDomain({
+      ...record.file,
+      batch: record.batch,
+      reviewerName: record.reviewerName,
+    })
+  }
+
   async recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
   ): Promise<DocumentValidationDocument> {
@@ -114,6 +153,7 @@ export class DrizzleDocumentValidationsRepository
       .update(documentBatchFileModel)
       .set({
         status: input.status,
+        hashSha256: input.hashSha256,
         aiConfidence: input.aiConfidence,
         aiSuggestion: input.aiSuggestion,
         extractedFields: input.extractedFields,
@@ -128,6 +168,18 @@ export class DrizzleDocumentValidationsRepository
     return this.findRequiredByFileId(input.documentFileId)
   }
 
+  async recordProcessing(documentFileId: string): Promise<DocumentValidationDocument> {
+    await this.database
+      .update(documentBatchFileModel)
+      .set({
+        status: DocumentValidationStatus.Processing,
+        aiConfidence: 0,
+      })
+      .where(eq(documentBatchFileModel.id, documentFileId))
+
+    return this.findRequiredByFileId(documentFileId)
+  }
+
   async recordDecision(
     input: RecordDocumentValidationDecisionInput,
   ): Promise<DocumentValidationDocument> {
@@ -137,6 +189,7 @@ export class DrizzleDocumentValidationsRepository
       checklistRequirementId: input.checklistRequirementId,
       reason: input.reason,
       originalDocumentId: input.originalDocumentId,
+      extractedFields: input.extractedFields,
     }
 
     await this.database
@@ -144,6 +197,7 @@ export class DrizzleDocumentValidationsRepository
       .set({
         status: input.status,
         humanCorrection,
+        extractedFields: input.extractedFields,
         reviewedBy: input.reviewedBy,
         reviewedAt: new Date(),
         caseId: input.caseId,

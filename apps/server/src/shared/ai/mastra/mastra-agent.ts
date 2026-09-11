@@ -9,6 +9,7 @@ type Config<AgentId extends string> = {
   readonly name: string
   readonly instructions: string
   readonly model: string
+  readonly localModelEnvKey?: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL'
 }
 
 export abstract class MastraAgent<
@@ -19,18 +20,19 @@ export abstract class MastraAgent<
 
     super({
       ...agentConfig,
-      model: MastraAgent.resolveModel(model, envProvider),
+      model: MastraAgent.resolveModel(model, envProvider, config.localModelEnvKey),
     })
   }
 
   private static resolveModel(
     openRouterModel: string,
     envProvider: EnvProvider,
+    localModelEnvKey: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL' = 'OLLAMA_AI_MODEL',
   ): OpenAICompatibleConfig {
     if (envProvider.get('HMS_SERVER_APP_MODE') === 'dev') {
       return {
         providerId: 'ollama',
-        modelId: envProvider.get('OLLAMA_AI_MODEL'),
+        modelId: envProvider.get(localModelEnvKey),
         url: 'http://localhost:11434/v1',
         apiKey: 'ollama',
       }

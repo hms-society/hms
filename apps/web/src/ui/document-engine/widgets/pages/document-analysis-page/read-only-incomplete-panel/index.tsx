@@ -1,27 +1,24 @@
 import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
 
 import { Badge } from '@/ui/shadcn/badge'
-import { Icon, type IconName } from '@/ui/shared/widgets/components/icon'
+import { Icon } from '@/ui/shared/widgets/components/icon'
+import { ExtractedFields } from '../extracted-fields'
 
 export type ReadOnlyIncompletePanelProps = {
   document: DocumentValidationDocument
 }
 
-const FIELD_ICONS: Record<string, IconName> = {
-  Titular: 'user',
-  CPF: 'credit-card',
-  Endereço: 'map-pin',
-  CEP: 'map',
-  'Data de emissão': 'calendar',
-}
-
 export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelProps) => {
-  const extractedCount = document.extractedFields.filter(
-    (field) => !field.isMissing && field.value,
-  ).length
   const senderName =
     document.extractedFields.find((field) => field.label === 'Titular')?.value ??
     document.sender
+  const reviewedBy = document.reviewedByName?.trim() || 'responsável não identificado'
+  const reviewedAt = document.reviewedAt
+    ? new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(document.reviewedAt))
+    : 'data não registrada'
   const decisionLabel =
     document.status === 'resend_requested' ? 'Reenvio solicitado' : 'Incompleto'
 
@@ -57,10 +54,11 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
             </div>
             <div className='flex flex-1 flex-col'>
               <span className='font-sans text-sm font-semibold text-[#1B5E20]'>
-                Reenvio solicitado
+                {decisionLabel} por {reviewedBy}
               </span>
               <span className='mt-0.5 font-sans text-xs text-[#1B5E20]/70'>
-                Enviado para {senderName} por {document.sender}.
+                Registro feito em {reviewedAt}. Enviado para {senderName} por{' '}
+                {document.sender}.
               </span>
             </div>
             <Icon name='check' className='size-4 text-[#1B5E20]' />
@@ -97,34 +95,13 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
         </div>
 
         <div className='flex flex-col gap-3'>
-          <div className='flex items-center justify-between'>
-            <h2 className='font-sans text-sm font-semibold text-foreground'>
-              Campos extraídos
-            </h2>
-            <div className='flex items-center gap-3'>
-              <span className='flex items-center gap-1 font-sans text-[10px] text-muted-foreground'>
-                <Icon name='lock' className='size-3' /> Somente leitura
-              </span>
-              <Badge variant='outline' className='px-1.5 py-0 text-[10px]'>
-                {extractedCount} de {document.extractedFields.length}
-              </Badge>
-            </div>
+          <div className='flex flex-col gap-2'>
+            <span className='flex items-center gap-1 self-end font-sans text-[10px] text-muted-foreground'>
+              <Icon name='lock' className='size-3' /> Somente leitura
+            </span>
+            <ExtractedFields title='Campos extraídos' fields={document.extractedFields} />
           </div>
           <div className='flex flex-col gap-3'>
-            {document.extractedFields.map((field) => (
-              <div key={field.label} className='flex flex-col gap-1.5'>
-                <span className='font-sans text-xs text-muted-foreground'>
-                  {field.label}
-                </span>
-                <div className='flex h-10 items-center gap-2 rounded-md border border-border bg-muted/30 px-3 font-sans text-sm text-foreground'>
-                  <Icon
-                    name={FIELD_ICONS[field.label] ?? 'file-text'}
-                    className='size-4 text-muted-foreground'
-                  />
-                  {field.value || 'Não identificado'}
-                </div>
-              </div>
-            ))}
             {document.missingFields.length > 0 && (
               <div className='flex items-start gap-3 rounded-md border border-[#FDECC8] bg-[#FFF8EB] p-3'>
                 <Icon name='alert-triangle' className='mt-0.5 size-4 text-[#E6A23C]' />
