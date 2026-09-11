@@ -64,4 +64,5 @@ export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Paralegal]: PARALEGAL_SIDEBAR_ITEMS,
   [CollaboratorProfile.Supervisor]: LAWYER_SIDEBAR_ITEMS,
   [CollaboratorProfile.Client]: CLIENT_SIDEBAR_ITEMS,
+  [CollaboratorProfile.Intern]: [],
 }

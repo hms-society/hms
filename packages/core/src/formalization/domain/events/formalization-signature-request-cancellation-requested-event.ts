@@ -10,7 +10,10 @@ export class FormalizationSignatureRequestCancellationRequestedEvent extends Eve
   static readonly _NAME = 'formalization.signature-request-cancellation-requested.v1'
 
   constructor(
-    payload: Omit<FormalizationSignatureRequestCancellationRequestedEvent['payload'], 'version'>,
+    payload: Omit<
+      FormalizationSignatureRequestCancellationRequestedEvent['payload'],
+      'version'
+    >,
   ) {
     super(FormalizationSignatureRequestCancellationRequestedEvent._NAME, {
       version: 1,

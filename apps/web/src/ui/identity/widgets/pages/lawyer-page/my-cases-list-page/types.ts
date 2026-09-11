@@ -1,7 +1,7 @@
 import type { IconName } from '@/ui/shared/widgets/components/icon'
 
 export type LawyerCaseStatus =
-  | 'Em formação'
+  | 'Documentação'
   | 'Em andamento'
   | 'Aguardando cliente'
   | 'Em produção jurídica'

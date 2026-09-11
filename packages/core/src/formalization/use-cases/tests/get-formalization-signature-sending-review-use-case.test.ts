@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { fakeFormalization } from '../../domain/entities/fakers/formalization-faker'
 import { fakeFormalizationSignatureRequest } from '../../domain/entities/fakers/formalization-signature-request-faker'
+import { fakeFormalizationSignatureRequestDocument } from '../../domain/entities/fakers/formalization-signature-request-document-faker'
 import type {
+  FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureDocumentMetadataReader,
   FormalizationSignatureRequestsRepository,
@@ -18,6 +20,7 @@ function makeDependencies() {
     sourceReader: mock<FormalizationSignatureSourceReader>(),
     metadataReader: mock<FormalizationSignatureDocumentMetadataReader>(),
     requestsRepository: mock<FormalizationSignatureRequestsRepository>(),
+    documentsRepository: mock<FormalizationSignatureRequestDocumentsRepository>(),
   }
 }
 
@@ -60,14 +63,20 @@ describe('Get Formalization Signature Sending Review Use Case', () => {
       sha256: 'a'.repeat(64),
       byteCount: 100,
     })
-    const confirmedRequest = fakeFormalizationSignatureRequest({
+    const currentRequest = fakeFormalizationSignatureRequest({
       formalizationId: formalization.id,
-      status: 'confirmed',
+      status: 'sent',
       version: 4,
     })
     dependencies.requestsRepository.findLatestByFormalizationId.mockResolvedValue(
-      confirmedRequest,
+      currentRequest,
     )
+    dependencies.documentsRepository.listByRequestId.mockResolvedValue([
+      fakeFormalizationSignatureRequestDocument({
+        requestId: currentRequest.id,
+        status: 'sent',
+      }),
+    ])
 
     await expect(
       new GetFormalizationSignatureSendingReviewUseCase(dependencies).execute({
@@ -79,10 +88,12 @@ describe('Get Formalization Signature Sending Review Use Case', () => {
       ready: true,
       formalizationId: formalization.id,
       currentRequest: {
-        id: confirmedRequest.id,
-        status: 'confirmed',
+        id: currentRequest.id,
+        status: 'sent',
         version: 4,
-        signatureConfigurationVersion: confirmedRequest.signatureConfigurationVersion,
+        signatureConfigurationVersion: currentRequest.signatureConfigurationVersion,
+        openDocuments: 1,
+        totalDocuments: 1,
       },
     })
   })

@@ -2,7 +2,9 @@ import type { FormalizationSignatureProvisioningAttempt } from '../domain/entiti
 import type { FormalizationSignatureProvisioningAttemptChanges } from '../domain/structures'
 export interface FormalizationSignatureProvisioningAttemptsRepository {
   add(attempt: FormalizationSignatureProvisioningAttempt): Promise<void>
-  findByRequestId(requestId: string): Promise<FormalizationSignatureProvisioningAttempt | null>
+  findByRequestId(
+    requestId: string,
+  ): Promise<FormalizationSignatureProvisioningAttempt | null>
   findPending(
     now: Date,
     limit: number,

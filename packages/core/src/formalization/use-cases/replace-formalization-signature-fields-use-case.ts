@@ -54,6 +54,7 @@ export class ReplaceFormalizationSignatureFieldsUseCase extends FormalizationSig
     )
 
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     const document = this.findSignatureDocument(configuration, request.documentId)
     if (!document.preview || document.preview.previewId !== request.previewId) {
       throw new FormalizationSignaturePreviewNotReadyError()

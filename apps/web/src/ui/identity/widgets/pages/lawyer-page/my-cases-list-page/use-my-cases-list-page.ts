@@ -6,7 +6,7 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type { LawyerCaseViewItem } from './types'
 
 const STATUS_STYLES = {
-  'Em formação': 'bg-accent text-accent-foreground hover:bg-accent',
+  Documentação: 'bg-accent text-accent-foreground hover:bg-accent',
   'Em andamento': 'bg-highlight text-highlight-foreground hover:bg-highlight',
   'Aguardando cliente': 'bg-highlight text-highlight-foreground hover:bg-highlight',
   'Em produção jurídica': 'bg-secondary text-secondary-foreground hover:bg-secondary',
@@ -15,8 +15,8 @@ const STATUS_STYLES = {
   Encerrado: 'bg-muted text-muted-foreground hover:bg-muted',
 } as const
 
-const STATUS_LABELS = {
-  [LegalCaseStatus.Documentation]: 'Em formação',
+export const STATUS_LABELS = {
+  [LegalCaseStatus.Documentation]: 'Documentação',
   [LegalCaseStatus.ReadyForLegalProduction]: 'Em andamento',
   [LegalCaseStatus.LegalProduction]: 'Em produção jurídica',
   [LegalCaseStatus.ProtocolDelivery]: 'Protocolo e entrega',
@@ -45,8 +45,6 @@ export function useMyCasesListPage() {
   const visibleCases = useMemo(() => {
     return (data ?? [])
       .filter((caseItem) => {
-        const statusLabel = STATUS_LABELS[caseItem.status] ?? 'Em formação'
-
         const normalizedSearch = search.trim().toLowerCase()
         const matchesSearch =
           normalizedSearch.length === 0 ||
@@ -58,13 +56,13 @@ export function useMyCasesListPage() {
             caseItem.legalTopic,
           ].some((value) => value.toLowerCase().includes(normalizedSearch))
 
-        const matchesStatus = status === 'todos' || statusLabel === status
+        const matchesStatus = status === 'todos' || caseItem.status === status
         const matchesArea = area === 'todas' || caseItem.legalArea === area
 
         return matchesSearch && matchesStatus && matchesArea
       })
       .map((caseItem): LawyerCaseViewItem => {
-        const statusLabel = STATUS_LABELS[caseItem.status] ?? 'Em formação'
+        const statusLabel = STATUS_LABELS[caseItem.status] ?? 'Documentação'
 
         return {
           id: caseItem.id,

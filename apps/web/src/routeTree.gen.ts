@@ -15,7 +15,6 @@ import { Route as AgendaRouteRouteImport } from './routes/agenda/route'
 import { Route as AtendimentoRouteRouteImport } from './routes/atendimento/route'
 import { Route as ClienteRouteRouteImport } from './routes/cliente/route'
 import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
-import { Route as FormalizacoesRouteRouteImport } from './routes/formalizacoes/route'
 import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
@@ -32,7 +31,6 @@ import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colabor
 import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
-import { Route as FormalizacoesFormalizationIdRouteRouteImport } from './routes/formalizacoes/$formalizationId/route'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
@@ -46,15 +44,12 @@ import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-red
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
 import { Route as AdvogadoMeusCasosIndexRouteImport } from './routes/advogado/meus-casos/index'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
-import { Route as AssinaturasAcessoIndexRouteImport } from './routes/assinaturas/acesso/index'
+import { Route as AdvogadoMeusCasosNovoCasoRouteImport } from './routes/advogado/meus-casos/novo-caso'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
-import { Route as FormalizacoesFormalizationIdIndexRouteImport } from './routes/formalizacoes/$formalizationId/index'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
-import { Route as FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport } from './routes/formalizacoes/$formalizationId/configuracao-envio/index'
-import { Route as FormalizacoesFormalizationIdDocumentosDocumentVersionIdRouteImport } from './routes/formalizacoes/$formalizationId/documentos/$documentVersionId'
 import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
@@ -86,11 +81,6 @@ const ClienteRouteRoute = ClienteRouteRouteImport.update({
 const ConsultasRouteRoute = ConsultasRouteRouteImport.update({
   id: '/consultas',
   path: '/consultas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FormalizacoesRouteRoute = FormalizacoesRouteRouteImport.update({
-  id: '/formalizacoes',
-  path: '/formalizacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntakesRouteRoute = IntakesRouteRouteImport.update({
@@ -175,12 +165,6 @@ const ConviteIndexRoute = ConviteIndexRouteImport.update({
   path: '/convite/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FormalizacoesFormalizationIdRouteRoute =
-  FormalizacoesFormalizationIdRouteRouteImport.update({
-    id: '/$formalizationId',
-    path: '/$formalizationId',
-    getParentRoute: () => FormalizacoesRouteRoute,
-  } as any)
 const HomeIndexRoute = HomeIndexRouteImport.update({
   id: '/home/',
   path: '/home/',
@@ -249,11 +233,12 @@ const AdvogadoMeusCasosCaseIdRoute = AdvogadoMeusCasosCaseIdRouteImport.update({
   path: '/meus-casos/$caseId',
   getParentRoute: () => AdvogadoRouteRoute,
 } as any)
-const AssinaturasAcessoIndexRoute = AssinaturasAcessoIndexRouteImport.update({
-  id: '/assinaturas/acesso/',
-  path: '/assinaturas/acesso/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AdvogadoMeusCasosNovoCasoRoute =
+  AdvogadoMeusCasosNovoCasoRouteImport.update({
+    id: '/meus-casos/novo-caso',
+    path: '/meus-casos/novo-caso',
+    getParentRoute: () => AdvogadoRouteRoute,
+  } as any)
 const ClienteMeusCasosIndexRoute = ClienteMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -276,29 +261,11 @@ const ConsultasConsultationIdFichaAtendimentoRoute =
     path: '/ficha-atendimento',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
-const FormalizacoesFormalizationIdIndexRoute =
-  FormalizacoesFormalizationIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => FormalizacoesFormalizationIdRouteRoute,
-  } as any)
 const ConsultasConsultationIdDocumentosIndexRoute =
   ConsultasConsultationIdDocumentosIndexRouteImport.update({
     id: '/documentos/',
     path: '/documentos/',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
-  } as any)
-const FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute =
-  FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport.update({
-    id: '/configuracao-envio/',
-    path: '/configuracao-envio/',
-    getParentRoute: () => FormalizacoesFormalizationIdRouteRoute,
-  } as any)
-const FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute =
-  FormalizacoesFormalizationIdDocumentosDocumentVersionIdRouteImport.update({
-    id: '/documentos/$documentVersionId',
-    path: '/documentos/$documentVersionId',
-    getParentRoute: () => FormalizacoesFormalizationIdRouteRoute,
   } as any)
 const AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute =
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport.update({
@@ -322,10 +289,8 @@ export interface FileRoutesByFullPath {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
-  '/formalizacoes': typeof FormalizacoesRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
-  '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -352,16 +317,13 @@ export interface FileRoutesByFullPath {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
-  '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
-  '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
-  '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/formalizacoes/$formalizationId/configuracao-envio/': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
@@ -370,7 +332,6 @@ export interface FileRoutesByTo {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
-  '/formalizacoes': typeof FormalizacoesRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -397,16 +358,13 @@ export interface FileRoutesByTo {
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos': typeof AdvogadoMeusCasosIndexRoute
-  '/assinaturas/acesso': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
-  '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdIndexRoute
-  '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/formalizacoes/$formalizationId/configuracao-envio': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
@@ -418,10 +376,8 @@ export interface FileRoutesById {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/consultas': typeof ConsultasRouteRouteWithChildren
-  '/formalizacoes': typeof FormalizacoesRouteRouteWithChildren
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
-  '/formalizacoes/$formalizationId': typeof FormalizacoesFormalizationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
@@ -448,16 +404,13 @@ export interface FileRoutesById {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
-  '/assinaturas/acesso/': typeof AssinaturasAcessoIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
-  '/formalizacoes/$formalizationId/': typeof FormalizacoesFormalizationIdIndexRoute
-  '/formalizacoes/$formalizationId/documentos/$documentVersionId': typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
-  '/formalizacoes/$formalizationId/configuracao-envio/': typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
   '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
 }
@@ -470,10 +423,8 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/cliente'
     | '/consultas'
-    | '/formalizacoes'
     | '/intakes'
     | '/consultas/$consultationId'
-    | '/formalizacoes/$formalizationId'
     | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -500,16 +451,13 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos/'
-    | '/assinaturas/acesso/'
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
-    | '/formalizacoes/$formalizationId/'
-    | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos/'
-    | '/formalizacoes/$formalizationId/configuracao-envio/'
     | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesByTo: FileRoutesByTo
@@ -518,7 +466,6 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/cliente'
-    | '/formalizacoes'
     | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -545,16 +492,13 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos'
-    | '/assinaturas/acesso'
     | '/cliente/meus-casos'
     | '/consultas/$consultationId'
-    | '/formalizacoes/$formalizationId'
-    | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos'
-    | '/formalizacoes/$formalizationId/configuracao-envio'
     | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   id:
@@ -565,10 +509,8 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/cliente'
     | '/consultas'
-    | '/formalizacoes'
     | '/intakes'
     | '/consultas/$consultationId'
-    | '/formalizacoes/$formalizationId'
     | '/advogado/comunicacao'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
@@ -595,16 +537,13 @@ export interface FileRouteTypes {
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
     | '/advogado/meus-casos/$caseId'
+    | '/advogado/meus-casos/novo-caso'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
     | '/advogado/meus-casos/'
-    | '/assinaturas/acesso/'
     | '/cliente/meus-casos/'
     | '/consultas/$consultationId/'
-    | '/formalizacoes/$formalizationId/'
-    | '/formalizacoes/$formalizationId/documentos/$documentVersionId'
     | '/consultas/$consultationId/documentos/'
-    | '/formalizacoes/$formalizationId/configuracao-envio/'
     | '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
   fileRoutesById: FileRoutesById
@@ -616,7 +555,6 @@ export interface RootRouteChildren {
   AtendimentoRouteRoute: typeof AtendimentoRouteRouteWithChildren
   ClienteRouteRoute: typeof ClienteRouteRouteWithChildren
   ConsultasRouteRoute: typeof ConsultasRouteRouteWithChildren
-  FormalizacoesRouteRoute: typeof FormalizacoesRouteRouteWithChildren
   IntakesRouteRoute: typeof IntakesRouteRouteWithChildren
   CaixaDeDocumentosFileIdRoute: typeof CaixaDeDocumentosFileIdRoute
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
@@ -633,7 +571,6 @@ export interface RootRouteChildren {
   ModelosDeDocumentosIndexRoute: typeof ModelosDeDocumentosIndexRoute
   PedirRedefinirSenhaIndexRoute: typeof PedirRedefinirSenhaIndexRoute
   RedefinirSenhaIndexRoute: typeof RedefinirSenhaIndexRoute
-  AssinaturasAcessoIndexRoute: typeof AssinaturasAcessoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -678,13 +615,6 @@ declare module '@tanstack/react-router' {
       path: '/consultas'
       fullPath: '/consultas'
       preLoaderRoute: typeof ConsultasRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/formalizacoes': {
-      id: '/formalizacoes'
-      path: '/formalizacoes'
-      fullPath: '/formalizacoes'
-      preLoaderRoute: typeof FormalizacoesRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intakes': {
@@ -799,13 +729,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConviteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/formalizacoes/$formalizationId': {
-      id: '/formalizacoes/$formalizationId'
-      path: '/$formalizationId'
-      fullPath: '/formalizacoes/$formalizationId'
-      preLoaderRoute: typeof FormalizacoesFormalizationIdRouteRouteImport
-      parentRoute: typeof FormalizacoesRouteRoute
-    }
     '/home/': {
       id: '/home/'
       path: '/home'
@@ -897,12 +820,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvogadoMeusCasosCaseIdRouteImport
       parentRoute: typeof AdvogadoRouteRoute
     }
-    '/assinaturas/acesso/': {
-      id: '/assinaturas/acesso/'
-      path: '/assinaturas/acesso'
-      fullPath: '/assinaturas/acesso/'
-      preLoaderRoute: typeof AssinaturasAcessoIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/advogado/meus-casos/novo-caso': {
+      id: '/advogado/meus-casos/novo-caso'
+      path: '/meus-casos/novo-caso'
+      fullPath: '/advogado/meus-casos/novo-caso'
+      preLoaderRoute: typeof AdvogadoMeusCasosNovoCasoRouteImport
+      parentRoute: typeof AdvogadoRouteRoute
     }
     '/cliente/meus-casos/': {
       id: '/cliente/meus-casos/'
@@ -932,33 +855,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdFichaAtendimentoRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
-    '/formalizacoes/$formalizationId/': {
-      id: '/formalizacoes/$formalizationId/'
-      path: '/'
-      fullPath: '/formalizacoes/$formalizationId/'
-      preLoaderRoute: typeof FormalizacoesFormalizationIdIndexRouteImport
-      parentRoute: typeof FormalizacoesFormalizationIdRouteRoute
-    }
     '/consultas/$consultationId/documentos/': {
       id: '/consultas/$consultationId/documentos/'
       path: '/documentos'
       fullPath: '/consultas/$consultationId/documentos/'
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
-    }
-    '/formalizacoes/$formalizationId/configuracao-envio/': {
-      id: '/formalizacoes/$formalizationId/configuracao-envio/'
-      path: '/configuracao-envio'
-      fullPath: '/formalizacoes/$formalizationId/configuracao-envio/'
-      preLoaderRoute: typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRouteImport
-      parentRoute: typeof FormalizacoesFormalizationIdRouteRoute
-    }
-    '/formalizacoes/$formalizationId/documentos/$documentVersionId': {
-      id: '/formalizacoes/$formalizationId/documentos/$documentVersionId'
-      path: '/documentos/$documentVersionId'
-      fullPath: '/formalizacoes/$formalizationId/documentos/$documentVersionId'
-      preLoaderRoute: typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRouteImport
-      parentRoute: typeof FormalizacoesFormalizationIdRouteRoute
     }
     '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': {
       id: '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
@@ -980,6 +882,7 @@ declare module '@tanstack/react-router' {
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
   AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRoute
+  AdvogadoMeusCasosNovoCasoRoute: typeof AdvogadoMeusCasosNovoCasoRoute
   AdvogadoMeusCasosIndexRoute: typeof AdvogadoMeusCasosIndexRoute
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
 }
@@ -987,6 +890,7 @@ interface AdvogadoRouteRouteChildren {
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
   AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRoute,
+  AdvogadoMeusCasosNovoCasoRoute: AdvogadoMeusCasosNovoCasoRoute,
   AdvogadoMeusCasosIndexRoute: AdvogadoMeusCasosIndexRoute,
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute:
     AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute,
@@ -1077,39 +981,6 @@ const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(
   ConsultasRouteRouteChildren,
 )
 
-interface FormalizacoesFormalizationIdRouteRouteChildren {
-  FormalizacoesFormalizationIdIndexRoute: typeof FormalizacoesFormalizationIdIndexRoute
-  FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute: typeof FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute
-  FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute: typeof FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute
-}
-
-const FormalizacoesFormalizationIdRouteRouteChildren: FormalizacoesFormalizationIdRouteRouteChildren =
-  {
-    FormalizacoesFormalizationIdIndexRoute:
-      FormalizacoesFormalizationIdIndexRoute,
-    FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute:
-      FormalizacoesFormalizationIdDocumentosDocumentVersionIdRoute,
-    FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute:
-      FormalizacoesFormalizationIdConfiguracaoEnvioIndexRoute,
-  }
-
-const FormalizacoesFormalizationIdRouteRouteWithChildren =
-  FormalizacoesFormalizationIdRouteRoute._addFileChildren(
-    FormalizacoesFormalizationIdRouteRouteChildren,
-  )
-
-interface FormalizacoesRouteRouteChildren {
-  FormalizacoesFormalizationIdRouteRoute: typeof FormalizacoesFormalizationIdRouteRouteWithChildren
-}
-
-const FormalizacoesRouteRouteChildren: FormalizacoesRouteRouteChildren = {
-  FormalizacoesFormalizationIdRouteRoute:
-    FormalizacoesFormalizationIdRouteRouteWithChildren,
-}
-
-const FormalizacoesRouteRouteWithChildren =
-  FormalizacoesRouteRoute._addFileChildren(FormalizacoesRouteRouteChildren)
-
 interface IntakesRouteRouteChildren {
   IntakesIntakeIdRoute: typeof IntakesIntakeIdRoute
   IntakesNovoRoute: typeof IntakesNovoRoute
@@ -1133,7 +1004,6 @@ const rootRouteChildren: RootRouteChildren = {
   AtendimentoRouteRoute: AtendimentoRouteRouteWithChildren,
   ClienteRouteRoute: ClienteRouteRouteWithChildren,
   ConsultasRouteRoute: ConsultasRouteRouteWithChildren,
-  FormalizacoesRouteRoute: FormalizacoesRouteRouteWithChildren,
   IntakesRouteRoute: IntakesRouteRouteWithChildren,
   CaixaDeDocumentosFileIdRoute: CaixaDeDocumentosFileIdRoute,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
@@ -1151,8 +1021,16 @@ const rootRouteChildren: RootRouteChildren = {
   ModelosDeDocumentosIndexRoute: ModelosDeDocumentosIndexRoute,
   PedirRedefinirSenhaIndexRoute: PedirRedefinirSenhaIndexRoute,
   RedefinirSenhaIndexRoute: RedefinirSenhaIndexRoute,
-  AssinaturasAcessoIndexRoute: AssinaturasAcessoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

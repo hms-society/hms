@@ -10,7 +10,10 @@ export class FormalizationSignatureRequestProvisioningRequestedEvent extends Eve
   static readonly _NAME = 'formalization.signature-request-provisioning-requested.v1'
 
   constructor(
-    payload: Omit<FormalizationSignatureRequestProvisioningRequestedEvent['payload'], 'version'>,
+    payload: Omit<
+      FormalizationSignatureRequestProvisioningRequestedEvent['payload'],
+      'version'
+    >,
   ) {
     super(FormalizationSignatureRequestProvisioningRequestedEvent._NAME, {
       version: 1,

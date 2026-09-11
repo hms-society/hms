@@ -225,16 +225,16 @@ export const OverviewTab = ({
             </Button>
           </div>
           <div className='flex flex-col gap-2'>
-            {team.map((member, index) => (
+            {team.map((member: any) => (
               <div
-                key={member.initials}
+                key={member.collaboratorId}
                 className={`flex items-center gap-3 rounded-md p-2 ${
-                  index === 0 ? 'bg-highlight' : ''
+                  member.isPrimary ? 'bg-highlight' : ''
                 }`}
               >
                 <Avatar className='size-9'>
-                  <AvatarFallback className={`${member.className} text-[12px]`}>
-                    {member.initials}
+                  <AvatarFallback className='bg-teal-700 text-white text-[12px]'>
+                    {member.name?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className='min-w-0 flex-1'>
@@ -242,10 +242,23 @@ export const OverviewTab = ({
                     {member.name}
                   </p>
                   <p className='truncate text-[14px] text-muted-foreground'>
-                    {member.role}
+                    {member.role === 'lead_lawyer'
+                      ? 'Advogado Principal'
+                      : member.role === 'lawyer'
+                        ? 'Advogado'
+                        : member.role === 'paralegal'
+                          ? 'Paralegal'
+                          : member.role === 'supervisor'
+                            ? 'Supervisor'
+                            : member.role === 'intern'
+                              ? 'Estagiário'
+                              : member.role}{' '}
+                    {member.permission
+                      ? `- ${member.permission.charAt(0).toUpperCase() + member.permission.slice(1)}`
+                      : ''}
                   </p>
                 </div>
-                {index === 0 && (
+                {member.isPrimary && (
                   <Icon name='shield-check' className='size-3.5 text-primary' />
                 )}
               </div>

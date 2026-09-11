@@ -57,4 +57,36 @@ describe('Replace Formalization Signatory Documents Use Case', () => {
       expect.objectContaining({ expectedFormalizationVersion: formalization.version }),
     )
   })
+
+  it('rejects edits after the signature configuration becomes immutable', async () => {
+    const formalization = makeFormalization()
+    const configuration = makeConfiguration({
+      formalizationId: formalization.id,
+      editable: false,
+    })
+    const formalizationsRepository = mock<FormalizationsRepository>()
+    const repository = mock<FormalizationSignatureConfigurationRepository>()
+    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const datetimeProvider = mock<DatetimeProvider>()
+    const idProvider = mock<IdProvider>()
+    formalizationsRepository.findById.mockResolvedValue(formalization)
+    repository.findByFormalizationId.mockResolvedValue(configuration)
+
+    await expect(
+      new ReplaceFormalizationSignatoryDocumentsUseCase(
+        formalizationsRepository,
+        repository,
+        sourceReader,
+        datetimeProvider,
+        idProvider,
+      ).execute({
+        formalizationId: formalization.id,
+        actorId: formalization.assignedLawyerId,
+        signatoryId: 'signatory-id',
+        documentIds: ['document-id'],
+        expectedVersion: formalization.version,
+      }),
+    ).rejects.toThrow('não pode ser alterada após o envio')
+    expect(repository.replaceConfiguration).not.toHaveBeenCalled()
+  })
 })

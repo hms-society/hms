@@ -7,7 +7,10 @@ import {
   FormalizationStateConflictError,
 } from '../domain/errors'
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
-import type { FormalizationActor } from '../domain/structures'
+import type {
+  FormalizationActor,
+  FormalizationSignatureConfiguration,
+} from '../domain/structures'
 
 export abstract class FormalizationUseCase<Request, Response = void>
   implements UseCase<Request, Response>
@@ -41,5 +44,15 @@ export abstract class FormalizationUseCase<Request, Response = void>
       )
     }
     this.assertFormClosed(formalization)
+  }
+
+  protected assertConfigurationEditable(
+    configuration: Pick<FormalizationSignatureConfiguration, 'editable'>,
+  ): void {
+    if (!configuration.editable) {
+      throw new FormalizationStateConflictError(
+        'A configuração de assinatura não pode ser alterada após o envio.',
+      )
+    }
   }
 }

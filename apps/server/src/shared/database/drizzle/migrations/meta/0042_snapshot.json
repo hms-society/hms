@@ -1,9 +1,166 @@
 {
-  "id": "75c929b1-c774-46f7-88fc-0e7c13b5876c",
-  "prevId": "25a3f1f4-9983-4244-8f70-c1518bc12c33",
+  "id": "36dd32b3-1960-4439-a767-8368a410fea6",
+  "prevId": "e3fe6fec-2124-4e23-a273-60d1b4797910",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.case_checklist_items": {
+      "name": "case_checklist_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_item_key": {
+          "name": "template_item_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_required": {
+          "name": "is_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "status": {
+          "name": "status",
+          "type": "case_checklist_item_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "document_file_id": {
+          "name": "document_file_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_file_name": {
+          "name": "document_file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validated_at": {
+          "name": "validated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validated_by": {
+          "name": "validated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "case_checklist_items_case_template_key_uidx": {
+          "name": "case_checklist_items_case_template_key_uidx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "template_item_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_checklist_items_case_status_idx": {
+          "name": "case_checklist_items_case_status_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_checklist_items_case_id_cases_id_fk": {
+          "name": "case_checklist_items_case_id_cases_id_fk",
+          "tableFrom": "case_checklist_items",
+          "tableTo": "cases",
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "case_checklist_items_template_key_not_blank_check": {
+          "name": "case_checklist_items_template_key_not_blank_check",
+          "value": "char_length(btrim(\"case_checklist_items\".\"template_item_key\")) > 0"
+        },
+        "case_checklist_items_title_not_blank_check": {
+          "name": "case_checklist_items_title_not_blank_check",
+          "value": "char_length(btrim(\"case_checklist_items\".\"title\")) > 0"
+        },
+        "case_checklist_items_validated_document_check": {
+          "name": "case_checklist_items_validated_document_check",
+          "value": "\"case_checklist_items\".\"status\" <> 'validated' OR (\"case_checklist_items\".\"document_file_id\" IS NOT NULL AND \"case_checklist_items\".\"validated_at\" IS NOT NULL AND \"case_checklist_items\".\"validated_by\" IS NOT NULL)"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.case_members": {
       "name": "case_members",
       "schema": "",
@@ -33,6 +190,13 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "permission": {
+          "name": "permission",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'visualização'"
         },
         "is_primary": {
           "name": "is_primary",
@@ -195,6 +359,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "legal_case_status",
@@ -203,19 +373,61 @@
           "notNull": true,
           "default": "'documentation'"
         },
+        "checklist_completed_at": {
+          "name": "checklist_completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_completed_by": {
+          "name": "checklist_completed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decision": {
+          "name": "checklist_gate_decision",
+          "type": "case_checklist_gate_decision",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decided_at": {
+          "name": "checklist_gate_decided_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_decided_by": {
+          "name": "checklist_gate_decided_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checklist_gate_remarks": {
+          "name": "checklist_gate_remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dossier_gate_homologated_at": {
+          "name": "dossier_gate_homologated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dossier_gate_homologated_by": {
+          "name": "dossier_gate_homologated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "opened_at": {
           "name": "opened_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -305,10 +517,6 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "cases_version_positive_check": {
-          "name": "cases_version_positive_check",
-          "value": "\"cases\".\"version\" > 0"
-        },
         "cases_public_code_format_check": {
           "name": "cases_public_code_format_check",
           "value": "\"cases\".\"public_code\" ~ '^CASO-[0-9]{8}-[0-9]{4}$'"
@@ -320,6 +528,10 @@
         "cases_title_not_blank_check": {
           "name": "cases_title_not_blank_check",
           "value": "char_length(btrim(\"cases\".\"title\")) > 0"
+        },
+        "cases_checklist_reason_remarks_check": {
+          "name": "cases_checklist_reason_remarks_check",
+          "value": "\"cases\".\"checklist_gate_decision\" NOT IN ('approved_with_exception', 'blocked_insufficient', 'rejected_on_merit') OR (\"cases\".\"checklist_gate_remarks\" IS NOT NULL AND char_length(btrim(\"cases\".\"checklist_gate_remarks\")) > 0)"
         },
         "cases_updated_after_created_check": {
           "name": "cases_updated_after_created_check",
@@ -1994,6 +2206,14 @@
           "primaryKey": false,
           "notNull": true
         },
+        "classificacao_acesso": {
+          "name": "classificacao_acesso",
+          "type": "classificacao_acesso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INTERNO'"
+        },
         "current_version_id": {
           "name": "current_version_id",
           "type": "uuid",
@@ -2260,6 +2480,130 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.auditoria_documentos": {
+      "name": "auditoria_documentos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "documento_id": {
+          "name": "documento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_responsavel_id": {
+          "name": "usuario_responsavel_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_anterior": {
+          "name": "valor_anterior",
+          "type": "classificacao_acesso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_novo": {
+          "name": "valor_novo",
+          "type": "classificacao_acesso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "auditoria_documentos_documento_id_documents_id_fk": {
+          "name": "auditoria_documentos_documento_id_documents_id_fk",
+          "tableFrom": "auditoria_documentos",
+          "tableTo": "documents",
+          "columnsFrom": ["documento_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.logs_acesso_externo": {
+      "name": "logs_acesso_externo",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "documento_id": {
+          "name": "documento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_origem": {
+          "name": "ip_origem",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_utilizado": {
+          "name": "token_utilizado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_negativa": {
+          "name": "motivo_negativa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_hora": {
+          "name": "data_hora",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "logs_acesso_externo_documento_id_documents_id_fk": {
+          "name": "logs_acesso_externo_documento_id_documents_id_fk",
+          "tableFrom": "logs_acesso_externo",
+          "tableTo": "documents",
+          "columnsFrom": ["documento_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.communications": {
       "name": "communications",
       "schema": "",
@@ -2312,7 +2656,26 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "communications_client_id_clients_id_fk": {
+          "name": "communications_client_id_clients_id_fk",
+          "tableFrom": "communications",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "communications_author_id_users_id_fk": {
+          "name": "communications_author_id_users_id_fk",
+          "tableFrom": "communications",
+          "tableTo": "users",
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -2383,7 +2746,17 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "private_messages_client_id_clients_id_fk": {
+          "name": "private_messages_client_id_clients_id_fk",
+          "tableFrom": "private_messages",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -2852,78 +3225,6 @@
       },
       "isRLSEnabled": false
     },
-    "public.stored_files": {
-      "name": "stored_files",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "file_path": {
-          "name": "file_path",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "file_name": {
-          "name": "file_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content_type": {
-          "name": "content_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "size_in_bytes": {
-          "name": "size_in_bytes",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "stored_files_file_path_uq": {
-          "name": "stored_files_file_path_uq",
-          "columns": [
-            {
-              "expression": "file_path",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "stored_files_positive_size_ck": {
-          "name": "stored_files_positive_size_ck",
-          "value": "\"stored_files\".\"size_in_bytes\" > 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "public.blocked_periods": {
       "name": "blocked_periods",
       "schema": "",
@@ -3222,7 +3523,35 @@
           "with": {}
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "document_batches_client_id_clients_id_fk": {
+          "name": "document_batches_client_id_clients_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "document_batches_intake_id_intakes_id_fk": {
+          "name": "document_batches_intake_id_intakes_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "intakes",
+          "columnsFrom": ["intake_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "document_batches_created_by_users_id_fk": {
+          "name": "document_batches_created_by_users_id_fk",
+          "tableFrom": "document_batches",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "document_batches_readable_id_unique": {
@@ -3383,6 +3712,15 @@
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "document_batch_files_reviewed_by_users_id_fk": {
+          "name": "document_batch_files_reviewed_by_users_id_fk",
+          "tableFrom": "document_batch_files",
+          "tableTo": "users",
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3530,4622 +3868,12 @@
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.formalizations": {
-      "name": "formalizations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
         },
-        "intake_id": {
-          "name": "intake_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "client_id": {
-          "name": "client_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "consultation_id": {
-          "name": "consultation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "assigned_lawyer_id": {
-          "name": "assigned_lawyer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "legal_area_id": {
-          "name": "legal_area_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "legal_topic_id": {
-          "name": "legal_topic_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'in_progress'"
-        },
-        "contract_form_id": {
-          "name": "contract_form_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "contract_form_snapshot": {
-          "name": "contract_form_snapshot",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "contract_form_answers": {
-          "name": "contract_form_answers",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "contract_form_state": {
-          "name": "contract_form_state",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'open'"
-        },
-        "contract_form_revision": {
-          "name": "contract_form_revision",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "contract_form_closed_at": {
-          "name": "contract_form_closed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contract_form_closed_by_collaborator_id": {
-          "name": "contract_form_closed_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "documents_confirmed_at": {
-          "name": "documents_confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "documents_confirmed_by_collaborator_id": {
-          "name": "documents_confirmed_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "documents_confirmed_revision": {
-          "name": "documents_confirmed_revision",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signature_request_id": {
-          "name": "signature_request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signature_status": {
-          "name": "signature_status",
-          "type": "formalization_signature_request_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signature_submitted_at": {
-          "name": "signature_submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signature_confirmed_at": {
-          "name": "signature_confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signature_terminal_at": {
-          "name": "signature_terminal_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancelled_at": {
-          "name": "cancelled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancelled_by_collaborator_id": {
-          "name": "cancelled_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "formalizations_intake_uq": {
-          "name": "formalizations_intake_uq",
-          "columns": [
-            {
-              "expression": "intake_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalizations_assigned_lawyer_idx": {
-          "name": "formalizations_assigned_lawyer_idx",
-          "columns": [
-            {
-              "expression": "assigned_lawyer_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalizations_status_check": {
-          "name": "formalizations_status_check",
-          "value": "\"formalizations\".\"status\" in ('in_progress', 'completed', 'cancelled')"
-        },
-        "formalizations_form_state_check": {
-          "name": "formalizations_form_state_check",
-          "value": "\"formalizations\".\"contract_form_state\" in ('open', 'closed')"
-        },
-        "formalizations_revision_check": {
-          "name": "formalizations_revision_check",
-          "value": "\"formalizations\".\"contract_form_revision\" >= 0 and \"formalizations\".\"version\" >= 1"
-        },
-        "formalizations_confirmation_check": {
-          "name": "formalizations_confirmation_check",
-          "value": "(\n        (\"formalizations\".\"documents_confirmed_at\" is null and \"formalizations\".\"documents_confirmed_by_collaborator_id\" is null and \"formalizations\".\"documents_confirmed_revision\" is null)\n        or\n        (\"formalizations\".\"documents_confirmed_at\" is not null and \"formalizations\".\"documents_confirmed_by_collaborator_id\" is not null and \"formalizations\".\"documents_confirmed_revision\" is not null)\n      )"
-        },
-        "formalizations_cancellation_check": {
-          "name": "formalizations_cancellation_check",
-          "value": "(\n        (\"formalizations\".\"status\" = 'cancelled' and \"formalizations\".\"cancelled_at\" is not null and \"formalizations\".\"cancelled_by_collaborator_id\" is not null)\n        or\n        (\"formalizations\".\"status\" <> 'cancelled' and \"formalizations\".\"cancelled_at\" is null and \"formalizations\".\"cancelled_by_collaborator_id\" is null)\n      )"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signatories": {
-      "name": "formalization_signatories",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "person_id": {
-          "name": "person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "formalization_signatory_role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position": {
-          "name": "position",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "selected_channels": {
-          "name": "selected_channels",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "created_by_collaborator_id": {
-          "name": "created_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_by_collaborator_id": {
-          "name": "updated_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "formalization_signatories_owner_position_uq": {
-          "name": "formalization_signatories_owner_position_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "position",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signatories_owner_person_uq": {
-          "name": "formalization_signatories_owner_person_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signatories_default_client_uq": {
-          "name": "formalization_signatories_default_client_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signatories\".\"role\" = 'client'",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signatories_default_lawyer_uq": {
-          "name": "formalization_signatories_default_lawyer_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signatories\".\"role\" = 'responsible_lawyer'",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "formalization_signatories_formalization_id_formalizations_id_fk": {
-          "name": "formalization_signatories_formalization_id_formalizations_id_fk",
-          "tableFrom": "formalization_signatories",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "formalization_signatories_owner_id_uq": {
-          "name": "formalization_signatories_owner_id_uq",
-          "nullsNotDistinct": false,
-          "columns": ["formalization_id", "id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signatories_positive_position_ck": {
-          "name": "formalization_signatories_positive_position_ck",
-          "value": "\"formalization_signatories\".\"position\" >= 1"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signatory_documents": {
-      "name": "formalization_signatory_documents",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signatory_id": {
-          "name": "signatory_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "document_version_id": {
-          "name": "document_version_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by_collaborator_id": {
-          "name": "created_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "formalization_signatory_documents_pair_uq": {
-          "name": "formalization_signatory_documents_pair_uq",
-          "columns": [
-            {
-              "expression": "signatory_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signatory_documents_owner_document_idx": {
-          "name": "formalization_signatory_documents_owner_document_idx",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "formalization_signatory_documents_formalization_id_formalizations_id_fk": {
-          "name": "formalization_signatory_documents_formalization_id_formalizations_id_fk",
-          "tableFrom": "formalization_signatory_documents",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "formalization_signatory_documents_signatory_id_formalization_signatories_id_fk": {
-          "name": "formalization_signatory_documents_signatory_id_formalization_signatories_id_fk",
-          "tableFrom": "formalization_signatory_documents",
-          "tableTo": "formalization_signatories",
-          "columnsFrom": ["signatory_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "formalization_signatory_documents_owner_signatory_fk": {
-          "name": "formalization_signatory_documents_owner_signatory_fk",
-          "tableFrom": "formalization_signatory_documents",
-          "tableTo": "formalization_signatories",
-          "columnsFrom": ["formalization_id", "signatory_id"],
-          "columnsTo": ["formalization_id", "id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_previews": {
-      "name": "formalization_signature_previews",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "document_version_id": {
-          "name": "document_version_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "file_id": {
-          "name": "file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "content_checksum_sha256": {
-          "name": "content_checksum_sha256",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pdf_checksum_sha256": {
-          "name": "pdf_checksum_sha256",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "converter_version": {
-          "name": "converter_version",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "page_count": {
-          "name": "page_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pages": {
-          "name": "pages",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "byte_size": {
-          "name": "byte_size",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "state": {
-          "name": "state",
-          "type": "formalization_signature_preview_state",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "attempts_count": {
-          "name": "attempts_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "attempt_token": {
-          "name": "attempt_token",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "processing_started_at": {
-          "name": "processing_started_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "lease_expires_at": {
-          "name": "lease_expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "failure_code": {
-          "name": "failure_code",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "formalization_signature_previews_current_key_uq": {
-          "name": "formalization_signature_previews_current_key_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "document_version_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_previews\".\"state\" in ('pending', 'processing', 'ready', 'failed')",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_previews_work_idx": {
-          "name": "formalization_signature_previews_work_idx",
-          "columns": [
-            {
-              "expression": "state",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "lease_expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_previews_cleanup_idx": {
-          "name": "formalization_signature_previews_cleanup_idx",
-          "columns": [
-            {
-              "expression": "state",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_preview_formalization_fk": {
-          "name": "fs_sig_preview_formalization_fk",
-          "tableFrom": "formalization_signature_previews",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fs_sig_preview_file_fk": {
-          "name": "fs_sig_preview_file_fk",
-          "tableFrom": "formalization_signature_previews",
-          "tableTo": "stored_files",
-          "columnsFrom": ["file_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_previews_attempts_count_ck": {
-          "name": "formalization_signature_previews_attempts_count_ck",
-          "value": "\"formalization_signature_previews\".\"attempts_count\" >= 0"
-        },
-        "formalization_signature_previews_lifecycle_ck": {
-          "name": "formalization_signature_previews_lifecycle_ck",
-          "value": "(\n        (\"formalization_signature_previews\".\"state\" = 'pending' and \"formalization_signature_previews\".\"attempt_token\" is not null and \"formalization_signature_previews\".\"file_id\" is null and \"formalization_signature_previews\".\"processing_started_at\" is null and \"formalization_signature_previews\".\"lease_expires_at\" is null)\n        or\n        (\"formalization_signature_previews\".\"state\" = 'processing' and \"formalization_signature_previews\".\"attempt_token\" is not null and \"formalization_signature_previews\".\"processing_started_at\" is not null and \"formalization_signature_previews\".\"lease_expires_at\" is not null and \"formalization_signature_previews\".\"file_id\" is null)\n        or\n        (\"formalization_signature_previews\".\"state\" = 'failed' and \"formalization_signature_previews\".\"failure_code\" is not null and \"formalization_signature_previews\".\"file_id\" is null and \"formalization_signature_previews\".\"processing_started_at\" is null and \"formalization_signature_previews\".\"lease_expires_at\" is null)\n        or\n        (\"formalization_signature_previews\".\"state\" in ('ready', 'stale', 'cleanup_pending') and \"formalization_signature_previews\".\"file_id\" is not null and \"formalization_signature_previews\".\"content_checksum_sha256\" is not null and \"formalization_signature_previews\".\"pdf_checksum_sha256\" is not null and \"formalization_signature_previews\".\"converter_version\" is not null and \"formalization_signature_previews\".\"page_count\" is not null and \"formalization_signature_previews\".\"page_count\" >= 1 and \"formalization_signature_previews\".\"byte_size\" is not null and \"formalization_signature_previews\".\"byte_size\" > 0 and \"formalization_signature_previews\".\"attempt_token\" is null and \"formalization_signature_previews\".\"processing_started_at\" is null and \"formalization_signature_previews\".\"lease_expires_at\" is null)\n      )"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_fields": {
-      "name": "formalization_signature_fields",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signatory_document_id": {
-          "name": "signatory_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "preview_id": {
-          "name": "preview_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "formalization_signature_field_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'signature'"
-        },
-        "page": {
-          "name": "page",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position_x": {
-          "name": "position_x",
-          "type": "numeric(7, 4)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position_y": {
-          "name": "position_y",
-          "type": "numeric(7, 4)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "width": {
-          "name": "width",
-          "type": "numeric(7, 4)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "height": {
-          "name": "height",
-          "type": "numeric(7, 4)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by_collaborator_id": {
-          "name": "created_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_by_collaborator_id": {
-          "name": "updated_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "formalization_signature_fields_assignment_idx": {
-          "name": "formalization_signature_fields_assignment_idx",
-          "columns": [
-            {
-              "expression": "signatory_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "preview_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_field_formalization_fk": {
-          "name": "fs_sig_field_formalization_fk",
-          "tableFrom": "formalization_signature_fields",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fs_sig_field_signatory_doc_fk": {
-          "name": "fs_sig_field_signatory_doc_fk",
-          "tableFrom": "formalization_signature_fields",
-          "tableTo": "formalization_signatory_documents",
-          "columnsFrom": ["signatory_document_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fs_sig_field_preview_fk": {
-          "name": "fs_sig_field_preview_fk",
-          "tableFrom": "formalization_signature_fields",
-          "tableTo": "formalization_signature_previews",
-          "columnsFrom": ["preview_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_fields_geometry_ck": {
-          "name": "formalization_signature_fields_geometry_ck",
-          "value": "\"formalization_signature_fields\".\"page\" >= 1 and \"formalization_signature_fields\".\"position_x\" >= 0 and \"formalization_signature_fields\".\"position_y\" >= 0 and \"formalization_signature_fields\".\"width\" > 0 and \"formalization_signature_fields\".\"height\" > 0 and \"formalization_signature_fields\".\"position_x\" + \"formalization_signature_fields\".\"width\" <= 100 and \"formalization_signature_fields\".\"position_y\" + \"formalization_signature_fields\".\"height\" <= 100"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_snapshots": {
-      "name": "formalization_signature_snapshots",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "formalization_version": {
-          "name": "formalization_version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signature_configuration_version": {
-          "name": "signature_configuration_version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_hash": {
-          "name": "snapshot_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_snapshots_hash_uq": {
-          "name": "formalization_signature_snapshots_hash_uq",
-          "columns": [
-            {
-              "expression": "snapshot_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_snapshots_version_uq": {
-          "name": "formalization_signature_snapshots_version_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "signature_configuration_version",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_snapshot_formalization_fk": {
-          "name": "fs_snapshot_formalization_fk",
-          "tableFrom": "formalization_signature_snapshots",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_snapshots_versions_ck": {
-          "name": "formalization_signature_snapshots_versions_ck",
-          "value": "\"formalization_signature_snapshots\".\"formalization_version\" > 0 and \"formalization_signature_snapshots\".\"signature_configuration_version\" > 0"
-        },
-        "formalization_signature_snapshots_hash_ck": {
-          "name": "formalization_signature_snapshots_hash_ck",
-          "value": "octet_length(\"formalization_signature_snapshots\".\"snapshot_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_requests": {
-      "name": "formalization_signature_requests",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "formalization_id": {
-          "name": "formalization_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signature_configuration_version": {
-          "name": "signature_configuration_version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_id": {
-          "name": "snapshot_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "confirmation_key_hash": {
-          "name": "confirmation_key_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_request_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confirmed_at": {
-          "name": "confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terminal_at": {
-          "name": "terminal_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancellation_requested_at": {
-          "name": "cancellation_requested_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "formalization_signature_requests_confirmation_key_uq": {
-          "name": "formalization_signature_requests_confirmation_key_uq",
-          "columns": [
-            {
-              "expression": "confirmation_key_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_requests_formalization_version_uq": {
-          "name": "formalization_signature_requests_formalization_version_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "signature_configuration_version",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_requests_current_formalization_uq": {
-          "name": "formalization_signature_requests_current_formalization_uq",
-          "columns": [
-            {
-              "expression": "formalization_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_requests\".\"status\" not in ('confirmed','rejected','cancelled','expired','failed')",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_requests_status_idx": {
-          "name": "formalization_signature_requests_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_req_formalization_fk": {
-          "name": "fs_req_formalization_fk",
-          "tableFrom": "formalization_signature_requests",
-          "tableTo": "formalizations",
-          "columnsFrom": ["formalization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_req_snapshot_fk": {
-          "name": "fs_req_snapshot_fk",
-          "tableFrom": "formalization_signature_requests",
-          "tableTo": "formalization_signature_snapshots",
-          "columnsFrom": ["snapshot_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "fs_req_snapshot_uq": {
-          "name": "fs_req_snapshot_uq",
-          "nullsNotDistinct": false,
-          "columns": ["snapshot_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_requests_versions_ck": {
-          "name": "formalization_signature_requests_versions_ck",
-          "value": "\"formalization_signature_requests\".\"signature_configuration_version\" > 0 and \"formalization_signature_requests\".\"version\" > 0"
-        },
-        "formalization_signature_requests_confirmation_key_ck": {
-          "name": "formalization_signature_requests_confirmation_key_ck",
-          "value": "octet_length(\"formalization_signature_requests\".\"confirmation_key_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_request_documents": {
-      "name": "formalization_signature_request_documents",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_document_id": {
-          "name": "source_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_document_version_id": {
-          "name": "source_document_version_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signature_preview_id": {
-          "name": "signature_preview_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unsigned_private_file_id": {
-          "name": "unsigned_private_file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unsigned_sha256": {
-          "name": "unsigned_sha256",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "byte_count": {
-          "name": "byte_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "page_count": {
-          "name": "page_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position": {
-          "name": "position",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_request_document_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "provisioned_at": {
-          "name": "provisioned_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confirmed_at": {
-          "name": "confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terminal_at": {
-          "name": "terminal_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_request_documents_source_version_uq": {
-          "name": "formalization_signature_request_documents_source_version_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "source_document_version_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_request_documents_position_uq": {
-          "name": "formalization_signature_request_documents_position_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "position",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_request_documents_status_idx": {
-          "name": "formalization_signature_request_documents_status_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_req_doc_req_fk": {
-          "name": "fs_req_doc_req_fk",
-          "tableFrom": "formalization_signature_request_documents",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_request_documents_hash_ck": {
-          "name": "formalization_signature_request_documents_hash_ck",
-          "value": "octet_length(\"formalization_signature_request_documents\".\"unsigned_sha256\") = 32"
-        },
-        "formalization_signature_request_documents_values_ck": {
-          "name": "formalization_signature_request_documents_values_ck",
-          "value": "\"formalization_signature_request_documents\".\"byte_count\" > 0 and \"formalization_signature_request_documents\".\"page_count\" > 0 and \"formalization_signature_request_documents\".\"position\" >= 0 and \"formalization_signature_request_documents\".\"version\" > 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_recipients": {
-      "name": "formalization_signature_recipients",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signatory_id": {
-          "name": "signatory_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "person_id": {
-          "name": "person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_kind": {
-          "name": "actor_kind",
-          "type": "formalization_signature_recipient_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "display_name_snapshot": {
-          "name": "display_name_snapshot",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "delivery_channel": {
-          "name": "delivery_channel",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_recipient_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "submission_observation_id": {
-          "name": "submission_observation_id",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "invited_at": {
-          "name": "invited_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confirmed_at": {
-          "name": "confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terminal_at": {
-          "name": "terminal_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_recipients_request_signatory_uq": {
-          "name": "formalization_signature_recipients_request_signatory_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "signatory_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_recipients_request_id_uq": {
-          "name": "formalization_signature_recipients_request_id_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_recipients_submission_observation_uq": {
-          "name": "formalization_signature_recipients_submission_observation_uq",
-          "columns": [
-            {
-              "expression": "submission_observation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_recipients\".\"submission_observation_id\" is not null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_recipients_request_status_idx": {
-          "name": "formalization_signature_recipients_request_status_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_recipients_person_status_idx": {
-          "name": "formalization_signature_recipients_person_status_idx",
-          "columns": [
-            {
-              "expression": "person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_recipient_req_fk": {
-          "name": "fs_recipient_req_fk",
-          "tableFrom": "formalization_signature_recipients",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_recipient_signatory_fk": {
-          "name": "fs_recipient_signatory_fk",
-          "tableFrom": "formalization_signature_recipients",
-          "tableTo": "formalization_signatories",
-          "columnsFrom": ["signatory_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_recipients_channel_ck": {
-          "name": "formalization_signature_recipients_channel_ck",
-          "value": "\"formalization_signature_recipients\".\"delivery_channel\" = 'email'"
-        },
-        "formalization_signature_recipients_version_ck": {
-          "name": "formalization_signature_recipients_version_ck",
-          "value": "\"formalization_signature_recipients\".\"version\" > 0"
-        },
-        "formalization_signature_recipients_submission_observation_ck": {
-          "name": "formalization_signature_recipients_submission_observation_ck",
-          "value": "\"formalization_signature_recipients\".\"submission_observation_id\" is null or octet_length(\"formalization_signature_recipients\".\"submission_observation_id\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_recipient_documents": {
-      "name": "formalization_signature_recipient_documents",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_document_id": {
-          "name": "request_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_rec_doc_recipient_document_uq": {
-          "name": "fs_sig_rec_doc_recipient_document_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "request_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_rec_doc_request_recipient_idx": {
-          "name": "fs_sig_rec_doc_request_recipient_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_rec_doc_document_recipient_idx": {
-          "name": "fs_sig_rec_doc_document_recipient_idx",
-          "columns": [
-            {
-              "expression": "request_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_rec_doc_request_fk": {
-          "name": "fs_sig_rec_doc_request_fk",
-          "tableFrom": "formalization_signature_recipient_documents",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_rec_doc_recipient_fk": {
-          "name": "fs_sig_rec_doc_recipient_fk",
-          "tableFrom": "formalization_signature_recipient_documents",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_rec_doc_document_fk": {
-          "name": "fs_sig_rec_doc_document_fk",
-          "tableFrom": "formalization_signature_recipient_documents",
-          "tableTo": "formalization_signature_request_documents",
-          "columnsFrom": ["request_document_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_invitations": {
-      "name": "formalization_signature_invitations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "generation": {
-          "name": "generation",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_invitation_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "delivery_status": {
-          "name": "delivery_status",
-          "type": "formalization_signature_delivery_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "communication_message_id": {
-          "name": "communication_message_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "delivered_at": {
-          "name": "delivered_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "consumed_at": {
-          "name": "consumed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revoked_at": {
-          "name": "revoked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revocation_reason": {
-          "name": "revocation_reason",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_invitations_token_hash_uq": {
-          "name": "formalization_signature_invitations_token_hash_uq",
-          "columns": [
-            {
-              "expression": "token_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_invitations_recipient_generation_uq": {
-          "name": "formalization_signature_invitations_recipient_generation_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "generation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_invitations_active_recipient_uq": {
-          "name": "formalization_signature_invitations_active_recipient_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_invitations\".\"status\" = 'active'",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_invitations_request_status_idx": {
-          "name": "formalization_signature_invitations_request_status_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_invitations_delivery_idx": {
-          "name": "formalization_signature_invitations_delivery_idx",
-          "columns": [
-            {
-              "expression": "delivery_status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_invitations_expiry_idx": {
-          "name": "formalization_signature_invitations_expiry_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_invitation_req_fk": {
-          "name": "fs_invitation_req_fk",
-          "tableFrom": "formalization_signature_invitations",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_invitation_recipient_fk": {
-          "name": "fs_invitation_recipient_fk",
-          "tableFrom": "formalization_signature_invitations",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_invitations_generation_ck": {
-          "name": "formalization_signature_invitations_generation_ck",
-          "value": "\"formalization_signature_invitations\".\"generation\" > 0"
-        },
-        "formalization_signature_invitations_token_hash_ck": {
-          "name": "formalization_signature_invitations_token_hash_ck",
-          "value": "octet_length(\"formalization_signature_invitations\".\"token_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_invitation_send_attempts": {
-      "name": "formalization_signature_invitation_send_attempts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "encrypted_payload": {
-          "name": "encrypted_payload",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cipher_key_id": {
-          "name": "cipher_key_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_delivery_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "communication_message_id": {
-          "name": "communication_message_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "next_attempt_at": {
-          "name": "next_attempt_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "delivered_at": {
-          "name": "delivered_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_invitation_send_attempts_work_idx": {
-          "name": "formalization_signature_invitation_send_attempts_work_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "next_attempt_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_inv_send_inv_fk": {
-          "name": "fs_inv_send_inv_fk",
-          "tableFrom": "formalization_signature_invitation_send_attempts",
-          "tableTo": "formalization_signature_invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "fs_inv_send_inv_uq": {
-          "name": "fs_inv_send_inv_uq",
-          "nullsNotDistinct": false,
-          "columns": ["invitation_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_invitation_send_attempts_attempts_ck": {
-          "name": "formalization_signature_invitation_send_attempts_attempts_ck",
-          "value": "\"formalization_signature_invitation_send_attempts\".\"attempts\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_provider_resources": {
-      "name": "formalization_signature_provider_resources",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider": {
-          "name": "provider",
-          "type": "formalization_signature_provider",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_contract_version": {
-          "name": "provider_contract_version",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_envelope_id": {
-          "name": "provider_envelope_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_external_id": {
-          "name": "provider_external_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "idempotency_key": {
-          "name": "idempotency_key",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "last_reconciled_at": {
-          "name": "last_reconciled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_provider_resource_request_uq": {
-          "name": "fs_sig_provider_resource_request_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_provider_resource_request_id_uq": {
-          "name": "fs_sig_provider_resource_request_id_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_resources_envelope_uq": {
-          "name": "formalization_signature_provider_resources_envelope_uq",
-          "columns": [
-            {
-              "expression": "provider_envelope_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_resources_external_uq": {
-          "name": "formalization_signature_provider_resources_external_uq",
-          "columns": [
-            {
-              "expression": "provider_external_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_resources_idempotency_uq": {
-          "name": "formalization_signature_provider_resources_idempotency_uq",
-          "columns": [
-            {
-              "expression": "idempotency_key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_provider_resource_request_fk": {
-          "name": "fs_sig_provider_resource_request_fk",
-          "tableFrom": "formalization_signature_provider_resources",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_provider_resources_ids_ck": {
-          "name": "formalization_signature_provider_resources_ids_ck",
-          "value": "\"formalization_signature_provider_resources\".\"provider_envelope_id\" <> '' and \"formalization_signature_provider_resources\".\"provider_external_id\" <> '' and \"formalization_signature_provider_resources\".\"idempotency_key\" <> ''"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_provider_recipient_resources": {
-      "name": "formalization_signature_provider_recipient_resources",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_resource_id": {
-          "name": "provider_resource_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_recipient_id": {
-          "name": "provider_recipient_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "encrypted_signing_credential": {
-          "name": "encrypted_signing_credential",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cipher_key_id": {
-          "name": "cipher_key_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "last_reconciled_at": {
-          "name": "last_reconciled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_prr_recipient_uq": {
-          "name": "fs_sig_prr_recipient_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_recipient_resources_provider_id_uq": {
-          "name": "formalization_signature_provider_recipient_resources_provider_id_uq",
-          "columns": [
-            {
-              "expression": "provider_recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_recipient_resources_pair_uq": {
-          "name": "formalization_signature_provider_recipient_resources_pair_uq",
-          "columns": [
-            {
-              "expression": "provider_resource_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "provider_recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provider_recipient_resources_recipient_idx": {
-          "name": "formalization_signature_provider_recipient_resources_recipient_idx",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_prr_provider_resource_fk": {
-          "name": "fs_sig_prr_provider_resource_fk",
-          "tableFrom": "formalization_signature_provider_recipient_resources",
-          "tableTo": "formalization_signature_provider_resources",
-          "columnsFrom": ["provider_resource_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_prr_recipient_fk": {
-          "name": "fs_sig_prr_recipient_fk",
-          "tableFrom": "formalization_signature_provider_recipient_resources",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_provider_recipient_resources_ids_ck": {
-          "name": "formalization_signature_provider_recipient_resources_ids_ck",
-          "value": "\"formalization_signature_provider_recipient_resources\".\"provider_recipient_id\" <> ''"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_provider_document_resources": {
-      "name": "formalization_signature_provider_document_resources",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_resource_id": {
-          "name": "provider_resource_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_document_id": {
-          "name": "request_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_envelope_item_id": {
-          "name": "provider_envelope_item_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_pdr_request_document_uq": {
-          "name": "fs_sig_pdr_request_document_uq",
-          "columns": [
-            {
-              "expression": "request_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_pdr_envelope_item_uq": {
-          "name": "fs_sig_pdr_envelope_item_uq",
-          "columns": [
-            {
-              "expression": "provider_envelope_item_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_pdr_resource_item_uq": {
-          "name": "fs_sig_pdr_resource_item_uq",
-          "columns": [
-            {
-              "expression": "provider_resource_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "provider_envelope_item_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_pdr_request_fk": {
-          "name": "fs_sig_pdr_request_fk",
-          "tableFrom": "formalization_signature_provider_document_resources",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_pdr_resource_fk": {
-          "name": "fs_sig_pdr_resource_fk",
-          "tableFrom": "formalization_signature_provider_document_resources",
-          "tableTo": "formalization_signature_provider_resources",
-          "columnsFrom": ["provider_resource_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_pdr_document_fk": {
-          "name": "fs_sig_pdr_document_fk",
-          "tableFrom": "formalization_signature_provider_document_resources",
-          "tableTo": "formalization_signature_request_documents",
-          "columnsFrom": ["request_document_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_provisioning_attempts": {
-      "name": "formalization_signature_provisioning_attempts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "attempt_token": {
-          "name": "attempt_token",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_provisioning_attempt_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "lease_expires_at": {
-          "name": "lease_expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "next_attempt_at": {
-          "name": "next_attempt_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_failure_code": {
-          "name": "last_failure_code",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_prov_attempt_request_uq": {
-          "name": "fs_sig_prov_attempt_request_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provisioning_attempts_work_idx": {
-          "name": "formalization_signature_provisioning_attempts_work_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "next_attempt_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_provisioning_attempts_lease_idx": {
-          "name": "formalization_signature_provisioning_attempts_lease_idx",
-          "columns": [
-            {
-              "expression": "lease_expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_prov_attempt_request_fk": {
-          "name": "fs_sig_prov_attempt_request_fk",
-          "tableFrom": "formalization_signature_provisioning_attempts",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_provisioning_attempts_attempts_ck": {
-          "name": "formalization_signature_provisioning_attempts_attempts_ck",
-          "value": "\"formalization_signature_provisioning_attempts\".\"attempts\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_cancellation_attempts": {
-      "name": "formalization_signature_cancellation_attempts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "attempt_token": {
-          "name": "attempt_token",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_cancellation_attempt_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "requested_by": {
-          "name": "requested_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "requested_at": {
-          "name": "requested_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lease_expires_at": {
-          "name": "lease_expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "next_attempt_at": {
-          "name": "next_attempt_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_failure_code": {
-          "name": "last_failure_code",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_cancel_attempt_request_uq": {
-          "name": "fs_sig_cancel_attempt_request_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_cancellation_attempts_work_idx": {
-          "name": "formalization_signature_cancellation_attempts_work_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "next_attempt_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_cancellation_attempts_lease_idx": {
-          "name": "formalization_signature_cancellation_attempts_lease_idx",
-          "columns": [
-            {
-              "expression": "lease_expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_cancel_attempt_request_fk": {
-          "name": "fs_sig_cancel_attempt_request_fk",
-          "tableFrom": "formalization_signature_cancellation_attempts",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_cancellation_attempts_attempts_ck": {
-          "name": "formalization_signature_cancellation_attempts_attempts_ck",
-          "value": "\"formalization_signature_cancellation_attempts\".\"attempts\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_otp_guards": {
-      "name": "formalization_signature_otp_guards",
-      "schema": "",
-      "columns": {
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "failed_attempts": {
-          "name": "failed_attempts",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "rolling_window_started_at": {
-          "name": "rolling_window_started_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sends_in_window": {
-          "name": "sends_in_window",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "last_sent_at": {
-          "name": "last_sent_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "locked_until": {
-          "name": "locked_until",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "fs_otp_guard_inv_fk": {
-          "name": "fs_otp_guard_inv_fk",
-          "tableFrom": "formalization_signature_otp_guards",
-          "tableTo": "formalization_signature_invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_otp_guards_failed_attempts_ck": {
-          "name": "formalization_signature_otp_guards_failed_attempts_ck",
-          "value": "\"formalization_signature_otp_guards\".\"failed_attempts\" between 0 and 5"
-        },
-        "formalization_signature_otp_guards_sends_ck": {
-          "name": "formalization_signature_otp_guards_sends_ck",
-          "value": "\"formalization_signature_otp_guards\".\"sends_in_window\" >= 0"
-        },
-        "formalization_signature_otp_guards_version_ck": {
-          "name": "formalization_signature_otp_guards_version_ck",
-          "value": "\"formalization_signature_otp_guards\".\"version\" > 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_otp_challenges": {
-      "name": "formalization_signature_otp_challenges",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "generation": {
-          "name": "generation",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "code_mac": {
-          "name": "code_mac",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "channel_choice_id": {
-          "name": "channel_choice_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "destination_fingerprint": {
-          "name": "destination_fingerprint",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_otp_challenge_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "failed_attempts": {
-          "name": "failed_attempts",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "issued_at": {
-          "name": "issued_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "consumed_at": {
-          "name": "consumed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "formalization_signature_otp_challenges_invitation_generation_uq": {
-          "name": "formalization_signature_otp_challenges_invitation_generation_uq",
-          "columns": [
-            {
-              "expression": "invitation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "generation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_otp_challenges_current_invitation_uq": {
-          "name": "formalization_signature_otp_challenges_current_invitation_uq",
-          "columns": [
-            {
-              "expression": "invitation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_otp_challenges\".\"status\" in ('pending_delivery','active')",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_otp_challenges_invitation_status_idx": {
-          "name": "formalization_signature_otp_challenges_invitation_status_idx",
-          "columns": [
-            {
-              "expression": "invitation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_otp_challenge_inv_fk": {
-          "name": "fs_otp_challenge_inv_fk",
-          "tableFrom": "formalization_signature_otp_challenges",
-          "tableTo": "formalization_signature_invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_otp_challenges_generation_ck": {
-          "name": "formalization_signature_otp_challenges_generation_ck",
-          "value": "\"formalization_signature_otp_challenges\".\"generation\" > 0"
-        },
-        "formalization_signature_otp_challenges_code_mac_ck": {
-          "name": "formalization_signature_otp_challenges_code_mac_ck",
-          "value": "octet_length(\"formalization_signature_otp_challenges\".\"code_mac\") = 32"
-        },
-        "formalization_signature_otp_challenges_destination_ck": {
-          "name": "formalization_signature_otp_challenges_destination_ck",
-          "value": "octet_length(\"formalization_signature_otp_challenges\".\"destination_fingerprint\") = 32"
-        },
-        "formalization_signature_otp_challenges_failed_attempts_ck": {
-          "name": "formalization_signature_otp_challenges_failed_attempts_ck",
-          "value": "\"formalization_signature_otp_challenges\".\"failed_attempts\" between 0 and 5"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_otp_send_attempts": {
-      "name": "formalization_signature_otp_send_attempts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "challenge_id": {
-          "name": "challenge_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "encrypted_payload": {
-          "name": "encrypted_payload",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cipher_key_id": {
-          "name": "cipher_key_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_delivery_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_message_id": {
-          "name": "provider_message_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "next_attempt_at": {
-          "name": "next_attempt_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "delivered_at": {
-          "name": "delivered_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_otp_send_attempts_work_idx": {
-          "name": "formalization_signature_otp_send_attempts_work_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "next_attempt_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_otp_send_challenge_fk": {
-          "name": "fs_otp_send_challenge_fk",
-          "tableFrom": "formalization_signature_otp_send_attempts",
-          "tableTo": "formalization_signature_otp_challenges",
-          "columnsFrom": ["challenge_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "fs_otp_send_challenge_uq": {
-          "name": "fs_otp_send_challenge_uq",
-          "nullsNotDistinct": false,
-          "columns": ["challenge_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_otp_send_attempts_attempts_ck": {
-          "name": "formalization_signature_otp_send_attempts_attempts_ck",
-          "value": "\"formalization_signature_otp_send_attempts\".\"attempts\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_otp_rate_reservations": {
-      "name": "formalization_signature_otp_rate_reservations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_ip_hash": {
-          "name": "source_ip_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reserved_at": {
-          "name": "reserved_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_otp_rate_reservations_invitation_idx": {
-          "name": "formalization_signature_otp_rate_reservations_invitation_idx",
-          "columns": [
-            {
-              "expression": "invitation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "reserved_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_otp_rate_reservations_source_ip_idx": {
-          "name": "formalization_signature_otp_rate_reservations_source_ip_idx",
-          "columns": [
-            {
-              "expression": "source_ip_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "reserved_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_otp_rate_inv_fk": {
-          "name": "fs_otp_rate_inv_fk",
-          "tableFrom": "formalization_signature_otp_rate_reservations",
-          "tableTo": "formalization_signature_invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_otp_rate_reservations_source_ip_ck": {
-          "name": "formalization_signature_otp_rate_reservations_source_ip_ck",
-          "value": "octet_length(\"formalization_signature_otp_rate_reservations\".\"source_ip_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_gateway_sessions": {
-      "name": "formalization_signature_gateway_sessions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_id": {
-          "name": "snapshot_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "formalization_signature_session_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "device_secret_hash": {
-          "name": "device_secret_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "csrf_hash": {
-          "name": "csrf_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_access_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "issued_at": {
-          "name": "issued_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "revoked_at": {
-          "name": "revoked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revocation_reason": {
-          "name": "revocation_reason",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        }
-      },
-      "indexes": {
-        "formalization_signature_gateway_sessions_token_hash_uq": {
-          "name": "formalization_signature_gateway_sessions_token_hash_uq",
-          "columns": [
-            {
-              "expression": "token_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_gateway_sessions_active_device_uq": {
-          "name": "formalization_signature_gateway_sessions_active_device_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "device_secret_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_gateway_sessions\".\"status\" = 'active' and \"formalization_signature_gateway_sessions\".\"kind\" = 'authenticated'",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_gateway_sessions_recipient_status_idx": {
-          "name": "formalization_signature_gateway_sessions_recipient_status_idx",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_gateway_sessions_expiry_idx": {
-          "name": "formalization_signature_gateway_sessions_expiry_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_gateway_request_fk": {
-          "name": "fs_sig_gateway_request_fk",
-          "tableFrom": "formalization_signature_gateway_sessions",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_gateway_recipient_fk": {
-          "name": "fs_sig_gateway_recipient_fk",
-          "tableFrom": "formalization_signature_gateway_sessions",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_gateway_snapshot_fk": {
-          "name": "fs_sig_gateway_snapshot_fk",
-          "tableFrom": "formalization_signature_gateway_sessions",
-          "tableTo": "formalization_signature_snapshots",
-          "columnsFrom": ["snapshot_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_gateway_sessions_hashes_ck": {
-          "name": "formalization_signature_gateway_sessions_hashes_ck",
-          "value": "octet_length(\"formalization_signature_gateway_sessions\".\"token_hash\") = 32 and octet_length(\"formalization_signature_gateway_sessions\".\"device_secret_hash\") = 32 and octet_length(\"formalization_signature_gateway_sessions\".\"csrf_hash\") = 32"
-        },
-        "formalization_signature_gateway_sessions_version_ck": {
-          "name": "formalization_signature_gateway_sessions_version_ck",
-          "value": "\"formalization_signature_gateway_sessions\".\"version\" > 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_document_acknowledgements": {
-      "name": "formalization_signature_document_acknowledgements",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_document_id": {
-          "name": "request_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_id": {
-          "name": "snapshot_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "session_id": {
-          "name": "session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "acknowledged_at": {
-          "name": "acknowledged_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_ip_hash": {
-          "name": "source_ip_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_agent_hash": {
-          "name": "user_agent_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "fs_sig_ack_recipient_document_snapshot_uq": {
-          "name": "fs_sig_ack_recipient_document_snapshot_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "request_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "snapshot_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "fs_sig_ack_recipient_snapshot_idx": {
-          "name": "fs_sig_ack_recipient_snapshot_idx",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "snapshot_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_ack_request_fk": {
-          "name": "fs_sig_ack_request_fk",
-          "tableFrom": "formalization_signature_document_acknowledgements",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_ack_document_fk": {
-          "name": "fs_sig_ack_document_fk",
-          "tableFrom": "formalization_signature_document_acknowledgements",
-          "tableTo": "formalization_signature_request_documents",
-          "columnsFrom": ["request_document_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_ack_recipient_fk": {
-          "name": "fs_sig_ack_recipient_fk",
-          "tableFrom": "formalization_signature_document_acknowledgements",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_ack_snapshot_fk": {
-          "name": "fs_sig_ack_snapshot_fk",
-          "tableFrom": "formalization_signature_document_acknowledgements",
-          "tableTo": "formalization_signature_snapshots",
-          "columnsFrom": ["snapshot_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_ack_session_fk": {
-          "name": "fs_sig_ack_session_fk",
-          "tableFrom": "formalization_signature_document_acknowledgements",
-          "tableTo": "formalization_signature_gateway_sessions",
-          "columnsFrom": ["session_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "fs_sig_ack_source_ip_hash_ck": {
-          "name": "fs_sig_ack_source_ip_hash_ck",
-          "value": "\"formalization_signature_document_acknowledgements\".\"source_ip_hash\" is null or octet_length(\"formalization_signature_document_acknowledgements\".\"source_ip_hash\") = 32"
-        },
-        "fs_sig_ack_user_agent_hash_ck": {
-          "name": "fs_sig_ack_user_agent_hash_ck",
-          "value": "\"formalization_signature_document_acknowledgements\".\"user_agent_hash\" is null or octet_length(\"formalization_signature_document_acknowledgements\".\"user_agent_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_proxy_bindings": {
-      "name": "formalization_signature_proxy_bindings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "session_id": {
-          "name": "session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "alias_hash": {
-          "name": "alias_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "encrypted_provider_credential": {
-          "name": "encrypted_provider_credential",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cipher_key_id": {
-          "name": "cipher_key_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_contract_version": {
-          "name": "provider_contract_version",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_access_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "revoked_at": {
-          "name": "revoked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revocation_reason": {
-          "name": "revocation_reason",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "formalization_signature_proxy_bindings_alias_hash_uq": {
-          "name": "formalization_signature_proxy_bindings_alias_hash_uq",
-          "columns": [
-            {
-              "expression": "alias_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_proxy_bindings_recipient_status_idx": {
-          "name": "formalization_signature_proxy_bindings_recipient_status_idx",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_proxy_bindings_expiry_idx": {
-          "name": "formalization_signature_proxy_bindings_expiry_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_proxy_session_fk": {
-          "name": "fs_sig_proxy_session_fk",
-          "tableFrom": "formalization_signature_proxy_bindings",
-          "tableTo": "formalization_signature_gateway_sessions",
-          "columnsFrom": ["session_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fs_sig_proxy_request_fk": {
-          "name": "fs_sig_proxy_request_fk",
-          "tableFrom": "formalization_signature_proxy_bindings",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_proxy_recipient_fk": {
-          "name": "fs_sig_proxy_recipient_fk",
-          "tableFrom": "formalization_signature_proxy_bindings",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_proxy_bindings_alias_hash_ck": {
-          "name": "formalization_signature_proxy_bindings_alias_hash_ck",
-          "value": "octet_length(\"formalization_signature_proxy_bindings\".\"alias_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_webhook_receipts": {
-      "name": "formalization_signature_webhook_receipts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "dedupe_key": {
-          "name": "dedupe_key",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "hint_kind": {
-          "name": "hint_kind",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "encrypted_hint": {
-          "name": "encrypted_hint",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cipher_key_id": {
-          "name": "cipher_key_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "formalization_signature_webhook_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "received_at": {
-          "name": "received_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "claim_token": {
-          "name": "claim_token",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "lease_until": {
-          "name": "lease_until",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "next_attempt_at": {
-          "name": "next_attempt_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "processed_at": {
-          "name": "processed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "formalization_signature_webhook_receipts_dedupe_uq": {
-          "name": "formalization_signature_webhook_receipts_dedupe_uq",
-          "columns": [
-            {
-              "expression": "dedupe_key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_webhook_receipts_work_idx": {
-          "name": "formalization_signature_webhook_receipts_work_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "next_attempt_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_webhook_receipts_lease_idx": {
-          "name": "formalization_signature_webhook_receipts_lease_idx",
-          "columns": [
-            {
-              "expression": "lease_until",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_webhook_receipts_dedupe_ck": {
-          "name": "formalization_signature_webhook_receipts_dedupe_ck",
-          "value": "octet_length(\"formalization_signature_webhook_receipts\".\"dedupe_key\") = 32"
-        },
-        "formalization_signature_webhook_receipts_attempts_ck": {
-          "name": "formalization_signature_webhook_receipts_attempts_ck",
-          "value": "\"formalization_signature_webhook_receipts\".\"attempts\" >= 0"
-        },
-        "formalization_signature_webhook_receipts_hint_kind_ck": {
-          "name": "formalization_signature_webhook_receipts_hint_kind_ck",
-          "value": "\"formalization_signature_webhook_receipts\".\"hint_kind\" in ('observation', 'reconciliation_only')"
-        },
-        "formalization_signature_webhook_receipts_claim_ck": {
-          "name": "formalization_signature_webhook_receipts_claim_ck",
-          "value": "(\"formalization_signature_webhook_receipts\".\"status\" = 'processing' and \"formalization_signature_webhook_receipts\".\"claim_token\" is not null and \"formalization_signature_webhook_receipts\".\"lease_until\" is not null) or (\"formalization_signature_webhook_receipts\".\"status\" <> 'processing' and \"formalization_signature_webhook_receipts\".\"claim_token\" is null and \"formalization_signature_webhook_receipts\".\"lease_until\" is null)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_artifacts": {
-      "name": "formalization_signature_artifacts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_document_id": {
-          "name": "request_document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "kind": {
-          "name": "kind",
-          "type": "formalization_signature_artifact_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "private_file_id": {
-          "name": "private_file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sha256": {
-          "name": "sha256",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "byte_count": {
-          "name": "byte_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "media_type": {
-          "name": "media_type",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_reference": {
-          "name": "provider_reference",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "preserved_at": {
-          "name": "preserved_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_artifacts_document_kind_uq": {
-          "name": "formalization_signature_artifacts_document_kind_uq",
-          "columns": [
-            {
-              "expression": "request_document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "kind",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_artifacts\".\"request_document_id\" is not null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_artifacts_request_kind_uq": {
-          "name": "formalization_signature_artifacts_request_kind_uq",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "kind",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"formalization_signature_artifacts\".\"request_document_id\" is null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_artifact_request_fk": {
-          "name": "fs_sig_artifact_request_fk",
-          "tableFrom": "formalization_signature_artifacts",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_artifact_req_doc_fk": {
-          "name": "fs_sig_artifact_req_doc_fk",
-          "tableFrom": "formalization_signature_artifacts",
-          "tableTo": "formalization_signature_request_documents",
-          "columnsFrom": ["request_document_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_artifacts_sha256_ck": {
-          "name": "formalization_signature_artifacts_sha256_ck",
-          "value": "octet_length(\"formalization_signature_artifacts\".\"sha256\") = 32"
-        },
-        "formalization_signature_artifacts_byte_count_ck": {
-          "name": "formalization_signature_artifacts_byte_count_ck",
-          "value": "\"formalization_signature_artifacts\".\"byte_count\" > 0"
-        },
-        "formalization_signature_artifacts_scope_ck": {
-          "name": "formalization_signature_artifacts_scope_ck",
-          "value": "(\"formalization_signature_artifacts\".\"kind\" = 'signed_pdf' and \"formalization_signature_artifacts\".\"request_document_id\" is not null) or (\"formalization_signature_artifacts\".\"kind\" <> 'signed_pdf' and \"formalization_signature_artifacts\".\"request_document_id\" is null)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_protocols": {
-      "name": "formalization_signature_protocols",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "number": {
-          "name": "number",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "artifact_set_hash": {
-          "name": "artifact_set_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "confirmed_at": {
-          "name": "confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "formalization_signature_protocols_number_uq": {
-          "name": "formalization_signature_protocols_number_uq",
-          "columns": [
-            {
-              "expression": "number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_protocols_recipient_request_uq": {
-          "name": "formalization_signature_protocols_recipient_request_uq",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_protocol_request_fk": {
-          "name": "fs_sig_protocol_request_fk",
-          "tableFrom": "formalization_signature_protocols",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fs_sig_protocol_recipient_fk": {
-          "name": "fs_sig_protocol_recipient_fk",
-          "tableFrom": "formalization_signature_protocols",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "formalization_signature_protocols_hash_ck": {
-          "name": "formalization_signature_protocols_hash_ck",
-          "value": "octet_length(\"formalization_signature_protocols\".\"artifact_set_hash\") = 32"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.formalization_signature_audit_entries": {
-      "name": "formalization_signature_audit_entries",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recipient_id": {
-          "name": "recipient_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "invitation_id": {
-          "name": "invitation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "session_id": {
-          "name": "session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "action": {
-          "name": "action",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_kind": {
-          "name": "actor_kind",
-          "type": "formalization_signature_recipient_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "actor_reference": {
-          "name": "actor_reference",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "occurred_at": {
-          "name": "occurred_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "correlation_id": {
-          "name": "correlation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_ip_hash": {
-          "name": "source_ip_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_agent_hash": {
-          "name": "user_agent_hash",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        }
-      },
-      "indexes": {
-        "formalization_signature_audit_entries_request_idx": {
-          "name": "formalization_signature_audit_entries_request_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "occurred_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_audit_entries_recipient_idx": {
-          "name": "formalization_signature_audit_entries_recipient_idx",
-          "columns": [
-            {
-              "expression": "recipient_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "occurred_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "formalization_signature_audit_entries_correlation_idx": {
-          "name": "formalization_signature_audit_entries_correlation_idx",
-          "columns": [
-            {
-              "expression": "correlation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "fs_sig_audit_request_fk": {
-          "name": "fs_sig_audit_request_fk",
-          "tableFrom": "formalization_signature_audit_entries",
-          "tableTo": "formalization_signature_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "fs_sig_audit_recipient_fk": {
-          "name": "fs_sig_audit_recipient_fk",
-          "tableFrom": "formalization_signature_audit_entries",
-          "tableTo": "formalization_signature_recipients",
-          "columnsFrom": ["recipient_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "fs_sig_audit_invitation_fk": {
-          "name": "fs_sig_audit_invitation_fk",
-          "tableFrom": "formalization_signature_audit_entries",
-          "tableTo": "formalization_signature_invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "fs_sig_audit_session_fk": {
-          "name": "fs_sig_audit_session_fk",
-          "tableFrom": "formalization_signature_audit_entries",
-          "tableTo": "formalization_signature_gateway_sessions",
-          "columnsFrom": ["session_id"],
+        "document_validation_logs_actor_id_users_id_fk": {
+          "name": "document_validation_logs_actor_id_users_id_fk",
+          "tableFrom": "document_validation_logs",
+          "tableTo": "users",
+          "columnsFrom": ["actor_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
@@ -8154,34 +3882,37 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {
-        "formalization_signature_audit_entries_source_ip_hash_ck": {
-          "name": "formalization_signature_audit_entries_source_ip_hash_ck",
-          "value": "\"formalization_signature_audit_entries\".\"source_ip_hash\" is null or octet_length(\"formalization_signature_audit_entries\".\"source_ip_hash\") = 32"
-        },
-        "formalization_signature_audit_entries_user_agent_hash_ck": {
-          "name": "formalization_signature_audit_entries_user_agent_hash_ck",
-          "value": "\"formalization_signature_audit_entries\".\"user_agent_hash\" is null or octet_length(\"formalization_signature_audit_entries\".\"user_agent_hash\") = 32"
-        },
-        "formalization_signature_audit_entries_metadata_ck": {
-          "name": "formalization_signature_audit_entries_metadata_ck",
-          "value": "jsonb_typeof(\"formalization_signature_audit_entries\".\"metadata\") = 'object'"
-        }
-      },
+      "checkConstraints": {},
       "isRLSEnabled": false
     }
   },
   "enums": {
+    "public.case_checklist_gate_decision": {
+      "name": "case_checklist_gate_decision",
+      "schema": "public",
+      "values": [
+        "approved",
+        "approved_with_exception",
+        "blocked_insufficient",
+        "rejected_on_merit"
+      ]
+    },
+    "public.case_checklist_item_status": {
+      "name": "case_checklist_item_status",
+      "schema": "public",
+      "values": ["pending", "validated"]
+    },
     "public.case_member_role": {
       "name": "case_member_role",
       "schema": "public",
-      "values": ["lead_lawyer", "lawyer", "paralegal", "supervisor"]
+      "values": ["lead_lawyer", "lawyer", "paralegal", "supervisor", "intern"]
     },
     "public.legal_case_status": {
       "name": "legal_case_status",
       "schema": "public",
       "values": [
         "documentation",
+        "ready_for_legal_production",
         "legal_production",
         "protocol_delivery",
         "execution",
@@ -8239,7 +3970,15 @@
     "public.collaborator_profile": {
       "name": "collaborator_profile",
       "schema": "public",
-      "values": ["admin", "attendant", "lawyer", "paralegal", "supervisor", "client"]
+      "values": [
+        "admin",
+        "attendant",
+        "lawyer",
+        "paralegal",
+        "supervisor",
+        "client",
+        "intern"
+      ]
     },
     "public.consent_type": {
       "name": "consent_type",
@@ -8271,15 +4010,20 @@
       "schema": "public",
       "values": ["internal", "external_client", "external_third_party", "external_lawyer"]
     },
-    "public.communication_direction": {
-      "name": "communication_direction",
+    "public.classificacao_acesso": {
+      "name": "classificacao_acesso",
       "schema": "public",
-      "values": ["inbound", "outbound"]
+      "values": ["INTERNO", "CLIENTE", "RESTRITO", "CONFIDENCIAL", "PARCEIRO_LIBERADO"]
     },
     "public.communication_channel": {
       "name": "communication_channel",
       "schema": "public",
       "values": ["whatsapp", "email", "phone"]
+    },
+    "public.communication_direction": {
+      "name": "communication_direction",
+      "schema": "public",
+      "values": ["inbound", "outbound"]
     },
     "public.document_batch_status": {
       "name": "document_batch_status",
@@ -8314,143 +4058,6 @@
         "processing_failure",
         "resend_requested"
       ]
-    },
-    "public.formalization_signatory_role": {
-      "name": "formalization_signatory_role",
-      "schema": "public",
-      "values": ["client", "responsible_lawyer", "additional_collaborator"]
-    },
-    "public.formalization_signature_preview_state": {
-      "name": "formalization_signature_preview_state",
-      "schema": "public",
-      "values": ["pending", "processing", "ready", "failed", "stale", "cleanup_pending"]
-    },
-    "public.formalization_signature_field_type": {
-      "name": "formalization_signature_field_type",
-      "schema": "public",
-      "values": ["signature"]
-    },
-    "public.formalization_signature_request_status": {
-      "name": "formalization_signature_request_status",
-      "schema": "public",
-      "values": [
-        "provisioning",
-        "sending",
-        "sent",
-        "in_progress",
-        "partially_submitted",
-        "submitted",
-        "reconciliation_required",
-        "confirmed",
-        "rejected",
-        "cancelled",
-        "expired",
-        "failed"
-      ]
-    },
-    "public.formalization_signature_request_document_status": {
-      "name": "formalization_signature_request_document_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "provisioned",
-        "delivery_pending",
-        "sent",
-        "submitted",
-        "reconciliation_required",
-        "confirmed",
-        "rejected",
-        "cancelled",
-        "expired",
-        "failed"
-      ]
-    },
-    "public.formalization_signature_recipient_kind": {
-      "name": "formalization_signature_recipient_kind",
-      "schema": "public",
-      "values": ["client", "collaborator"]
-    },
-    "public.formalization_signature_recipient_status": {
-      "name": "formalization_signature_recipient_status",
-      "schema": "public",
-      "values": [
-        "invited",
-        "authenticating",
-        "locked",
-        "authenticated",
-        "reading",
-        "signing",
-        "submitted",
-        "reconciliation_required",
-        "confirmed",
-        "rejected",
-        "cancelled",
-        "expired"
-      ]
-    },
-    "public.formalization_signature_invitation_status": {
-      "name": "formalization_signature_invitation_status",
-      "schema": "public",
-      "values": ["active", "consumed", "revoked", "expired"]
-    },
-    "public.formalization_signature_delivery_status": {
-      "name": "formalization_signature_delivery_status",
-      "schema": "public",
-      "values": ["pending", "delivered", "failed"]
-    },
-    "public.formalization_signature_provider": {
-      "name": "formalization_signature_provider",
-      "schema": "public",
-      "values": ["documenso"]
-    },
-    "public.formalization_signature_provisioning_attempt_status": {
-      "name": "formalization_signature_provisioning_attempt_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "provisioned",
-        "reconciliation_required",
-        "failed"
-      ]
-    },
-    "public.formalization_signature_cancellation_attempt_status": {
-      "name": "formalization_signature_cancellation_attempt_status",
-      "schema": "public",
-      "values": ["pending", "processing", "cancelled", "failed"]
-    },
-    "public.formalization_signature_otp_challenge_status": {
-      "name": "formalization_signature_otp_challenge_status",
-      "schema": "public",
-      "values": [
-        "pending_delivery",
-        "active",
-        "consumed",
-        "superseded",
-        "expired",
-        "delivery_failed"
-      ]
-    },
-    "public.formalization_signature_session_kind": {
-      "name": "formalization_signature_session_kind",
-      "schema": "public",
-      "values": ["flow", "authenticated", "result"]
-    },
-    "public.formalization_signature_access_status": {
-      "name": "formalization_signature_access_status",
-      "schema": "public",
-      "values": ["active", "revoked", "expired"]
-    },
-    "public.formalization_signature_artifact_kind": {
-      "name": "formalization_signature_artifact_kind",
-      "schema": "public",
-      "values": ["signed_pdf", "provider_certificate", "provider_evidence"]
-    },
-    "public.formalization_signature_webhook_status": {
-      "name": "formalization_signature_webhook_status",
-      "schema": "public",
-      "values": ["pending", "processing", "processed", "failed"]
     }
   },
   "schemas": {},

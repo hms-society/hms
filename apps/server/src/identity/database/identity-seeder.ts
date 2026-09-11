@@ -33,12 +33,17 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
     phone: '5511999999999',
   }),
   ClientFaker.fake({
+    email: 'kauandominguesdesouza@gmail.com',
+    name: 'Kauan Domingues de Souza',
+    phone: '5519971659516',
+  }),
+  ClientFaker.fake({
     email: 'vinicius.lopes.machado@hms.test',
     name: 'Vinicius Lopes Machado',
     phone: '5511987654321',
     taxId: { type: 'cpf', value: '12345678909' },
   }),
-  ...ClientFaker.fakeMany(9),
+  ...ClientFaker.fakeMany(8),
 ].map(({ id, createdAt, updatedAt, ...client }) => client)
 
 const DEFAULT_USERS: UserSeed[] = [
@@ -78,6 +83,10 @@ const DEFAULT_USERS: UserSeed[] = [
     email: 'client@hms.br',
     status: 'active',
   },
+  {
+    email: 'estagiario@hmsadvogados.com.br',
+    status: 'active',
+  },
 ]
 
 type AdministrativeCollaboratorCreation = Extract<
@@ -88,7 +97,7 @@ type LegalCollaboratorSeed = {
   email: string
   professionalName: string
   jobTitle?: string
-  profile: 'lawyer' | 'paralegal' | 'supervisor'
+  profile: 'lawyer' | 'paralegal' | 'supervisor' | 'intern'
 }
 
 const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
@@ -143,6 +152,12 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     professionalName: 'Beatriz Oliveira',
     jobTitle: 'Supervisora Jurídica',
     profile: 'supervisor',
+  },
+  {
+    email: 'estagiario@hmsadvogados.com.br',
+    professionalName: 'Estagiário de Teste',
+    jobTitle: 'Estagiário',
+    profile: 'intern',
   },
 ]
 
@@ -283,12 +298,17 @@ export class IdentitySeeder {
         id: clientUser?.id,
       },
       ClientFaker.fake({
+        email: 'kauandominguesdesouza@gmail.com',
+        name: 'Kauan Domingues de Souza',
+        phone: '5519971659516',
+      }),
+      ClientFaker.fake({
         email: 'vinicius.lopes.machado@hms.test',
         name: 'Vinicius Lopes Machado',
         phone: '5511987654321',
         taxId: { type: 'cpf', value: '12345678909' },
       }),
-      ...ClientFaker.fakeMany(9),
+      ...ClientFaker.fakeMany(8),
     ].map(({ id, createdAt, updatedAt, ...client }) => ({
       ...client,
       id,

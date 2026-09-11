@@ -38,4 +38,25 @@ describe('Reopen Formalization Document Package Use Case', () => {
       occurredAt: TEST_NOW,
     })
   })
+
+  it('rejects reopening a cancelled Formalization', async () => {
+    const formalization = makeFormalization({ status: 'cancelled' })
+    const repository = mock<FormalizationsRepository>()
+    const confirmationTransaction = mock<FormalizationDocumentConfirmationTransaction>()
+    const datetimeProvider = mock<DatetimeProvider>()
+    repository.findById.mockResolvedValue(formalization)
+
+    await expect(
+      new ReopenFormalizationDocumentPackageUseCase(
+        repository,
+        confirmationTransaction,
+        datetimeProvider,
+      ).execute({
+        formalizationId: formalization.id,
+        actorId: formalization.assignedLawyerId,
+        expectedVersion: formalization.version,
+      }),
+    ).rejects.toThrow('somente leitura')
+    expect(confirmationTransaction.reopen).not.toHaveBeenCalled()
+  })
 })

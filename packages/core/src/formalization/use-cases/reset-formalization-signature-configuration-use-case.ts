@@ -54,6 +54,7 @@ export class ResetFormalizationSignatureConfigurationUseCase extends Formalizati
       formalization.id,
     )
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
+    this.assertConfigurationEditable(configuration)
     const nextConfiguration: FormalizationSignatureConfiguration = {
       ...configuration,
       signatories: configuration.signatories

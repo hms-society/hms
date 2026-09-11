@@ -8,9 +8,7 @@ export class FormalizationSignaturePreviewGenerationRequestedEvent extends Event
 }> {
   static readonly _NAME = 'formalization/signature-preview.generation-requested'
 
-  constructor(
-    payload: FormalizationSignaturePreviewGenerationRequestedEvent['payload'],
-  ) {
+  constructor(payload: FormalizationSignaturePreviewGenerationRequestedEvent['payload']) {
     super(FormalizationSignaturePreviewGenerationRequestedEvent._NAME, payload)
   }
 }

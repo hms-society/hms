@@ -10,6 +10,7 @@ import {
   GetCurrentCollaboratorController,
   LookupClientController,
   ListCollaboratorsController,
+  ListActiveCollaboratorsController,
   ListLawyersController,
   ListCollaboratorJobTitlesController,
   GetCollaboratorController,
@@ -22,6 +23,8 @@ import {
   UpdateCollaboratorController,
   RegisterClientController,
   SignInController,
+  ListClientsController,
+  UpdateClientController,
 } from '@/identity/rest/controllers'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -35,10 +38,12 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     RegisterClientController,
     GrantClientConsentController,
     SignInController,
+    ListClientsController,
     RegisterCollaboratorController,
     CompleteSignInController,
     GetCurrentCollaboratorController,
     ListCollaboratorsController,
+    ListActiveCollaboratorsController,
     ListLawyersController,
     ListCollaboratorJobTitlesController,
     GetCollaboratorController,
@@ -48,6 +53,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     CancelCollaboratorInvitationController,
     RemoveCancelledCollaboratorController,
     UpdateCollaboratorController,
+    UpdateClientController,
   ],
   exports: [
     AuthModule,
