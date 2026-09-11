@@ -2,18 +2,17 @@ import { Module } from '@nestjs/common'
 
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { IdentityCollaboratorsDatabaseModule } from '@/identity/database/identity-collaborators-database.module'
 import { IdentityUsersDatabaseModule } from '@/identity/database/identity-users-database.module'
 import {
   DrizzleClientConsentMapper,
   DrizzleClientMapper,
-  DrizzleCollaboratorMapper,
   DrizzleCollaboratorRegistrationAttemptMapper,
 } from '@/identity/database/drizzle/mappers'
 import {
   DrizzleClientConsentsRepository,
   DrizzleClientsRepository,
   DrizzleCollaboratorRegistrationAttemptsRepository,
-  DrizzleCollaboratorsRepository,
   DrizzleIdentityTransaction,
 } from '@/identity/database/drizzle/repositories'
 import {
@@ -24,15 +23,18 @@ import { IdentitySeeder } from '@/identity/database/identity-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 
 @Module({
-  imports: [SharedDatabaseModule, IdentityUsersDatabaseModule, LegalCatalogModule],
+  imports: [
+    SharedDatabaseModule,
+    IdentityUsersDatabaseModule,
+    IdentityCollaboratorsDatabaseModule,
+    LegalCatalogModule,
+  ],
   providers: [
     DrizzleClientMapper,
     DrizzleClientConsentMapper,
-    DrizzleCollaboratorMapper,
     DrizzleCollaboratorRegistrationAttemptMapper,
     DrizzleClientsRepository,
     DrizzleClientConsentsRepository,
-    DrizzleCollaboratorsRepository,
     DrizzleCollaboratorRegistrationAttemptsRepository,
     DrizzleIdentityTransaction,
     DrizzleIntakeClientsRepository,
@@ -44,10 +46,6 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     {
       provide: IDENTITY_REPOSITORIES.clientConsents,
       useExisting: DrizzleClientConsentsRepository,
-    },
-    {
-      provide: IDENTITY_REPOSITORIES.collaborators,
-      useExisting: DrizzleCollaboratorsRepository,
     },
     {
       provide: IDENTITY_REPOSITORIES.registrationAttempts,
@@ -69,9 +67,9 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
   ],
   exports: [
     IdentityUsersDatabaseModule,
+    IdentityCollaboratorsDatabaseModule,
     IDENTITY_REPOSITORIES.clients,
     IDENTITY_REPOSITORIES.clientConsents,
-    IDENTITY_REPOSITORIES.collaborators,
     IDENTITY_REPOSITORIES.registrationAttempts,
     IDENTITY_REPOSITORIES.transaction,
     IDENTITY_REPOSITORIES.intakeClients,

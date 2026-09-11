@@ -1,2 +1,5 @@
+export * from './legal-area-input.dto'
 export * from './legal-area-response.dto'
+export * from './legal-area-with-topics-response.dto'
+export * from './legal-topic-input.dto'
 export * from './legal-topic-response.dto'

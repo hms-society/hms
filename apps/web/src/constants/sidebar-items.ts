@@ -56,6 +56,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
     { label: 'Clientes', route: 'clients', icon: 'users' },
+    { label: 'Áreas e Demandas', route: 'legalCatalogAdmin', icon: 'scale' },
     { label: 'Documentos', route: 'documentSpecifications', icon: 'file-text' },
     { label: 'Checklists', route: 'checklistTemplates', icon: 'list-checks' },
     { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
