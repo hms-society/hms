@@ -251,6 +251,7 @@ export class IntakeModuleFixture {
       urgency: draft.urgency,
       demandNotes: draft.demandNotes,
       status: draft.status,
+      contractedAt: draft.contractedAt,
       closureReason,
       closureNotes,
       closedAt,
