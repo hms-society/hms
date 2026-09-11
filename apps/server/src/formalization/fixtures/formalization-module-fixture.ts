@@ -2,11 +2,13 @@ import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import type { TestingModuleBuilder } from '@nestjs/testing'
 import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
 import type {
-  DocumentPdfConverter,
   FormalizationSignatureConfigurationRepository,
-  FormalizationDocumentPdfInspector,
   FormalizationSignatureSourceReader,
 } from '@hms/core/formalization/interfaces'
+import type {
+  DocumentPdfConverter,
+  DocumentPdfInspector,
+} from '@hms/core/document-production/interfaces'
 import { fakeFormalization } from '@hms/core/formalization/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type {
@@ -18,6 +20,7 @@ import type { EventPayload, InngestFunction } from 'inngest'
 import { vi, type Mock, type Mocked } from 'vitest'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { DOCUMENT_PRODUCTION_PROVIDERS } from '@/document-production/constants/document-production-providers'
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
 import { formalizationSignaturePreviewModel } from '@/formalization/database/drizzle/models'
 import { FormalizationModule } from '@/formalization/formalization.module'
@@ -50,7 +53,7 @@ type FormalizationRestContext = {
   readonly broker: Broker & { publish: Mock }
   readonly collaboratorId: string
   readonly converter: Mocked<DocumentPdfConverter>
-  readonly inspector: Mocked<FormalizationDocumentPdfInspector>
+  readonly inspector: Mocked<DocumentPdfInspector>
   readonly restFixture: RestFixture
   readonly sourceReader: Mocked<FormalizationSignatureSourceReader>
   readonly storageFixture?: SupabaseStorageFixture
@@ -75,7 +78,7 @@ export class FormalizationModuleFixture {
     readonly datetimeProvider: DatetimeProvider,
     readonly sourceReader: Mocked<FormalizationSignatureSourceReader>,
     readonly converter: Mocked<DocumentPdfConverter>,
-    readonly inspector: Mocked<FormalizationDocumentPdfInspector>,
+    readonly inspector: Mocked<DocumentPdfInspector>,
     private readonly storageFixture: SupabaseStorageFixture | undefined,
   ) {}
 
@@ -310,7 +313,7 @@ export class FormalizationModuleFixture {
         converterVersion: 'fixture-converter',
       }),
     }
-    const inspector: Mocked<FormalizationDocumentPdfInspector> = {
+    const inspector: Mocked<DocumentPdfInspector> = {
       inspect: vi.fn().mockResolvedValue({
         pageCount: 1,
         pages: [{ page: 1, width: 595, height: 842 }],
@@ -350,9 +353,9 @@ export class FormalizationModuleFixture {
             .useValue(broker)
             .overrideProvider(FORMALIZATION_PROVIDERS.signatureSourceReader)
             .useValue(sourceReader)
-            .overrideProvider(FORMALIZATION_PROVIDERS.documentPdfConverter)
+            .overrideProvider(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfConverter)
             .useValue(converter)
-            .overrideProvider(FORMALIZATION_PROVIDERS.documentPdfInspector)
+            .overrideProvider(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfInspector)
             .useValue(inspector)
             .overrideGuard(AuthGuard)
             .useValue({

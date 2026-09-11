@@ -63,6 +63,7 @@ import {
 import { DrizzleFormalizationSignatureGatewayTransaction } from '@/formalization/database/formalization-signature-gateway-transaction'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
+import { DrizzleFormalizationSignatureInvitationResendTransaction } from '@/formalization/database/formalization-signature-invitation-resend-transaction'
 
 @Module({
   imports: [SharedDatabaseModule, FormalizationProvisionModule],
@@ -118,6 +119,7 @@ import { FormalizationProvisionModule } from '@/formalization/provision/formaliz
     DrizzleFormalizationSignatureProviderDocumentResourcesRepository,
     DrizzleFormalizationSignatureDocumentAcknowledgementsRepository,
     DrizzleFormalizationSignatureGatewayTransaction,
+    DrizzleFormalizationSignatureInvitationResendTransaction,
     FormalizationSeeder,
     {
       provide: FORMALIZATION_REPOSITORIES.formalizations,
@@ -223,6 +225,10 @@ import { FormalizationProvisionModule } from '@/formalization/provision/formaliz
       provide: FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction,
       useExisting: DrizzleFormalizationSignatureGatewayTransaction,
     },
+    {
+      provide: FORMALIZATION_DATABASE_OPERATIONS.invitationResendTransaction,
+      useExisting: DrizzleFormalizationSignatureInvitationResendTransaction,
+    },
   ],
   exports: [
     FORMALIZATION_REPOSITORIES.formalizations,
@@ -252,6 +258,7 @@ import { FormalizationProvisionModule } from '@/formalization/provision/formaliz
     FORMALIZATION_REPOSITORIES.signatureArtifacts,
     FORMALIZATION_REPOSITORIES.signatureProtocols,
     FORMALIZATION_REPOSITORIES.signatureAuditWriter,
+    FORMALIZATION_DATABASE_OPERATIONS.invitationResendTransaction,
   ],
 })
 export class FormalizationDatabaseModule {}

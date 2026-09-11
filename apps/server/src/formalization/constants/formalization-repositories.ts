@@ -51,4 +51,7 @@ export const FORMALIZATION_DATABASE_OPERATIONS = {
   signatureGatewayTransaction: Symbol(
     'FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction',
   ),
+  invitationResendTransaction: Symbol(
+    'FORMALIZATION_DATABASE_OPERATIONS.invitationResendTransaction',
+  ),
 } as const

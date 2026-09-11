@@ -1,4 +1,9 @@
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
+import {
+  UnauthorizedException,
+  type ExecutionContext,
+  type INestApplication,
+  type Type,
+} from '@nestjs/common'
 import type {
   CaseChecklistItemCreation,
   CaseMemberCreation,
@@ -57,6 +62,7 @@ export class CaseManagementModuleFixture {
     private readonly legalTopicsRepository: DrizzleLegalTopicsRepository,
     private readonly intakesRepository: DrizzleIntakesRepository,
     readonly authUser: AuthUser,
+    private readonly authentication: { user?: AuthUser },
     private readonly currentCollaborator: { value?: RegisteredCollaborator },
   ) {}
 
@@ -69,6 +75,8 @@ export class CaseManagementModuleFixture {
       id: '91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30',
       email: 'case-management.fixture@hms.test',
     }
+    const authentication: { user?: AuthUser } = {}
+    const requiresAuthorization = controller?.name === 'GetLegalCaseByIntakeController'
     const currentCollaborator: { value?: RegisteredCollaborator } = {}
     const restFixture = await RestFixture.register(
       {
@@ -88,9 +96,14 @@ export class CaseManagementModuleFixture {
               const request = context.switchToHttp().getRequest<{
                 auth?: { accessToken: string; user: AuthUser }
                 user?: AuthUser
+                headers?: { authorization?: string }
               }>()
-              request.user = authUser
-              request.auth = { accessToken: 'fixture-access-token', user: authUser }
+              if (requiresAuthorization && !request.headers?.authorization) {
+                throw new UnauthorizedException('Authentication token is required')
+              }
+              const user = authentication.user ?? authUser
+              request.user = user
+              request.auth = { accessToken: 'fixture-access-token', user }
               return true
             },
           })
@@ -132,8 +145,25 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleLegalTopicsRepository),
       restFixture.get(DrizzleIntakesRepository),
       authUser,
+      authentication,
       currentCollaborator,
     )
+  }
+
+  authenticate() {
+    this.authentication.user = {
+      id: 'a1f9d3e7-8b2c-4d6e-9f10-223344556677',
+      email: 'case.fixture@hms.test',
+    }
+    return 'Bearer fixture-access-token'
+  }
+
+  seedLegalCase(input: LegalCaseCreation) {
+    return this.legalCasesRepository.addMany([input])
+  }
+
+  seedCaseMember(input: CaseMemberCreation) {
+    return this.caseMembersRepository.addMany([input])
   }
 
   async registerCollaborator(

@@ -1,9 +1,10 @@
 import { Inject, Optional } from '@nestjs/common'
-import { PgTransaction } from 'drizzle-orm/pg-core'
+import {
+  DrizzleClient,
+  type DrizzleDatabaseExecutor,
+} from '@/shared/database/drizzle/drizzle-client'
 
-import { DrizzleClient, type Database } from '@/shared/database/drizzle/drizzle-client'
-
-export type DrizzleDatabaseExecutor = Database | PgTransaction<any, any, any>
+export type { DrizzleDatabaseExecutor } from '@/shared/database/drizzle/drizzle-client'
 
 export abstract class DrizzleRepository {
   constructor(
@@ -12,6 +13,6 @@ export abstract class DrizzleRepository {
   ) {}
 
   protected get database(): DrizzleDatabaseExecutor {
-    return this.databaseOverride ?? this.drizzleClient.requireDatabase()
+    return this.databaseOverride ?? this.drizzleClient.requireExecutor()
   }
 }

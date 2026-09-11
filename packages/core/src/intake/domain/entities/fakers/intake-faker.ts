@@ -18,6 +18,7 @@ export class IntakeFaker {
       status === IntakeStatus.ClosedWithoutContract
         ? IntakeClosureReasonFaker.fake()
         : undefined
+    const contractedAt = status === IntakeStatus.Contracted ? createdAt : undefined
 
     return {
       id: faker.string.uuid(),
@@ -33,6 +34,7 @@ export class IntakeFaker {
       urgency: IntakeUrgencyFaker.fake(),
       demandNotes: faker.lorem.sentence(),
       status,
+      contractedAt,
       closureReason,
       closureNotes:
         closureReason === IntakeClosureReason.Other ? faker.lorem.sentence() : undefined,

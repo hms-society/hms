@@ -20,6 +20,7 @@ export const intakeSchema = z.object({
   urgency: intakeUrgencySchema,
   demandNotes: z.string().optional(),
   status: intakeStatusSchema,
+  contractedAt: z.iso.datetime().optional(),
   closureReason: intakeClosureReasonSchema.optional(),
   closureNotes: z.string().optional(),
   closedAt: z.iso.datetime().optional(),

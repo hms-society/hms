@@ -7,6 +7,9 @@ export interface FormalizationSignatureInvitationsRepository {
   findActiveByRecipientId(
     recipientId: string,
   ): Promise<FormalizationSignatureInvitation | null>
+  findLatestByRecipientId(
+    recipientId: string,
+  ): Promise<FormalizationSignatureInvitation | null>
   findConsumedByRecipientAndRequest(input: {
     recipientId: string
     requestId: string

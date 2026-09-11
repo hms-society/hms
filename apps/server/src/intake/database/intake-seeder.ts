@@ -53,6 +53,25 @@ export class IntakeSeeder {
         'The client needs representation to review and negotiate a residential lease agreement.',
       status: IntakeStatus.InFormalization,
     })
+    const draftFormalizationClientId = references.clientIds.find(
+      (clientId) => clientId !== references.documentProductionClientId,
+    )
+    if (!draftFormalizationClientId) {
+      throw new AppError('A second Formalization seed client is required.', 'Seed Error')
+    }
+    const draftFormalizationIntake = this.createIntake({
+      clientId: draftFormalizationClientId,
+      responsibleId: references.responsibleId,
+      createdBy: references.actorId,
+      updatedBy: references.actorId,
+      origin: 'direct',
+      contactChannel: 'email',
+      legalAreaId: references.legalAreaId,
+      legalTopicId: references.legalTopicId,
+      urgency: 'normal',
+      demandNotes: 'Cliente aguarda o preenchimento das condições financeiras.',
+      status: IntakeStatus.InFormalization,
+    })
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
       .flatMap((clientId, index) => {
@@ -113,7 +132,11 @@ export class IntakeSeeder {
         ]
       })
 
-    const intakes = await this.seed([documentProductionIntake, ...additionalIntakes])
+    const intakes = await this.seed([
+      documentProductionIntake,
+      draftFormalizationIntake,
+      ...additionalIntakes,
+    ])
     const createdDocumentProductionIntake = intakes.find(
       ({ clientId, status }) =>
         clientId === references.documentProductionClientId &&
@@ -126,15 +149,31 @@ export class IntakeSeeder {
         'Seed Error',
       )
     }
+    const createdDraftFormalizationIntake = intakes.find(
+      ({ clientId, status }) =>
+        clientId === draftFormalizationClientId &&
+        status === IntakeStatus.InFormalization,
+    )
+    if (!createdDraftFormalizationIntake) {
+      throw new AppError(
+        'The draft Formalization Intake could not be seeded.',
+        'Seed Error',
+      )
+    }
 
     return {
       intakes,
       documentProductionIntake: createdDocumentProductionIntake,
       formalizationIntake: createdDocumentProductionIntake,
+      draftFormalizationIntake: createdDraftFormalizationIntake,
     }
   }
 
   private createIntake(overrides: Partial<Intake>): IntakeCreation {
+    const contractedAt =
+      overrides.status === IntakeStatus.Contracted
+        ? (overrides.contractedAt ?? new Date('2026-01-01T12:00:00.000Z'))
+        : undefined
     const {
       id: _id,
       sequenceNumber: _sequenceNumber,
@@ -147,6 +186,7 @@ export class IntakeSeeder {
       closureNotes: undefined,
       closedAt: undefined,
       ...overrides,
+      contractedAt,
     })
 
     return creation

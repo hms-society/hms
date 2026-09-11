@@ -1,7 +1,5 @@
 export const FORMALIZATION_PROVIDERS = {
   signatureSourceReader: Symbol('FORMALIZATION_PROVIDERS.signatureSourceReader'),
-  documentPdfConverter: Symbol('FORMALIZATION_PROVIDERS.documentPdfConverter'),
-  documentPdfInspector: Symbol('FORMALIZATION_PROVIDERS.documentPdfInspector'),
   documentMetadataReader: Symbol('FORMALIZATION_PROVIDERS.documentMetadataReader'),
   signatureSecretHasher: Symbol('FORMALIZATION_PROVIDERS.signatureSecretHasher'),
   signatureSecretVerifier: Symbol('FORMALIZATION_PROVIDERS.signatureSecretVerifier'),
@@ -18,4 +16,5 @@ export const FORMALIZATION_PROVIDERS = {
   documentConfirmationTransaction: Symbol(
     'FORMALIZATION_PROVIDERS.documentConfirmationTransaction',
   ),
+  contractingTransaction: Symbol('FORMALIZATION_PROVIDERS.contractingTransaction'),
 } as const

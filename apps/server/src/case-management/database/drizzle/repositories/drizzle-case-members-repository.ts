@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { and, asc, eq } from 'drizzle-orm'
 import type { CaseMembersRepository } from '@hms/core/case-management/interfaces'
 
 import { DrizzleCaseMemberMapper } from '@/case-management/database/drizzle/mappers'
@@ -36,5 +37,15 @@ export class DrizzleCaseMembersRepository
 
   async removeAll(): Promise<void> {
     await this.database.delete(caseMemberModel)
+  }
+
+  async findPrimaryByCaseId(caseId: string) {
+    const [member] = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(and(eq(caseMemberModel.caseId, caseId), eq(caseMemberModel.isPrimary, true)))
+      .orderBy(asc(caseMemberModel.assignedAt))
+      .limit(1)
+    return member ? this.caseMemberMapper.toDomain(member) : undefined
   }
 }

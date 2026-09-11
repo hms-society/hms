@@ -9,6 +9,7 @@ import {
   DrizzleDocumentSpecificationMapper,
   DrizzleDocumentVersionMapper,
   DrizzlePackageDocumentMapper,
+  DrizzleFrozenDocumentPdfMapper,
 } from '@/document-production/database/drizzle/mappers'
 import {
   DrizzleDocumentGenerationsRepository,
@@ -17,6 +18,7 @@ import {
   DrizzleDocumentSpecificationsRepository,
   DrizzleDocumentVersionsRepository,
   DrizzlePackageDocumentsRepository,
+  DrizzleFrozenDocumentPdfsRepository,
 } from '@/document-production/database/drizzle/repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -36,6 +38,8 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DrizzleDocumentSpecificationsRepository,
     DrizzleDocumentVersionsRepository,
     DrizzlePackageDocumentsRepository,
+    DrizzleFrozenDocumentPdfMapper,
+    DrizzleFrozenDocumentPdfsRepository,
     DocumentProductionSeeder,
     {
       provide: DOCUMENT_PRODUCTION_REPOSITORIES.generations,
@@ -61,6 +65,10 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
       provide: DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments,
       useExisting: DrizzlePackageDocumentsRepository,
     },
+    {
+      provide: DOCUMENT_PRODUCTION_REPOSITORIES.frozenPdfs,
+      useExisting: DrizzleFrozenDocumentPdfsRepository,
+    },
   ],
   exports: [
     DOCUMENT_PRODUCTION_REPOSITORIES.generations,
@@ -69,6 +77,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DOCUMENT_PRODUCTION_REPOSITORIES.documents,
     DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages,
     DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments,
+    DOCUMENT_PRODUCTION_REPOSITORIES.frozenPdfs,
     DocumentProductionSeeder,
   ],
 })

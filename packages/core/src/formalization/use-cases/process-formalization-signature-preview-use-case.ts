@@ -4,13 +4,12 @@ import type {
   UseCase,
 } from '../../shared/interfaces'
 import type { FormalizationSignaturePreview } from '../domain/entities'
+import type { DocumentPdfFreezeService } from '../../document-production/interfaces'
 import {
   FormalizationSignatureDocumentVersionFileUnavailableError,
   FormalizationSignaturePreviewClaimConflictError,
 } from '../domain/errors'
 import type {
-  DocumentPdfConverter,
-  FormalizationDocumentPdfInspector,
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureSourceReader,
 } from '../interfaces'
@@ -27,9 +26,6 @@ type Response = {
   readonly state: 'ready'
 }
 
-const DOCX_CONTENT_TYPE =
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document' as const
-
 export class ProcessFormalizationSignaturePreviewUseCase
   implements UseCase<Request, Response>
 {
@@ -37,8 +33,7 @@ export class ProcessFormalizationSignaturePreviewUseCase
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
     private readonly sourceReader: FormalizationSignatureSourceReader,
     private readonly fileStorageProvider: FileStorageProvider,
-    private readonly documentPdfConverter: DocumentPdfConverter,
-    private readonly documentPdfInspector: FormalizationDocumentPdfInspector,
+    private readonly documentPdfFreezeService: DocumentPdfFreezeService,
     private readonly datetimeProvider: DatetimeProvider,
   ) {}
 
@@ -46,12 +41,12 @@ export class ProcessFormalizationSignaturePreviewUseCase
     const configuration = await this.configurationRepository.findByFormalizationId(
       request.formalizationId,
     )
-
     const previewView = configuration?.documents
       .map(({ preview }) => preview)
       .find((item) => item?.previewId === request.previewId)
     if (!configuration || !previewView)
       throw new FormalizationSignaturePreviewClaimConflictError()
+
     const document = configuration.documents.find(
       ({ preview }) => preview?.previewId === request.previewId,
     )
@@ -74,50 +69,43 @@ export class ProcessFormalizationSignaturePreviewUseCase
     if (
       !sourceDocument ||
       sourceDocument.documentId !== document.documentId ||
-      sourceDocument.documentVersionId !== document.documentVersionId
+      sourceDocument.documentVersionId !== document.documentVersionId ||
+      !sourceDocument.documentSpecificationId
     ) {
       throw new FormalizationSignatureDocumentVersionFileUnavailableError()
     }
-    const storedSource = await this.fileStorageProvider.get(sourceDocument.fileId)
-    if (!storedSource || storedSource.file.contentType !== DOCX_CONTENT_TYPE) {
+
+    const frozen = await this.documentPdfFreezeService.freeze({
+      documentId: document.documentId,
+      documentVersionId: document.documentVersionId,
+      documentSpecificationId: sourceDocument.documentSpecificationId,
+      traceId: request.traceId ?? request.previewId,
+    })
+    const storedPdf = await this.fileStorageProvider.get(frozen.pdfFileId)
+    if (storedPdf?.file.contentType !== 'application/pdf') {
       throw new FormalizationSignatureDocumentVersionFileUnavailableError()
     }
 
-    const sourceContent = storedSource.content.slice()
-    const conversion = await this.documentPdfConverter.convert({
-      fileName: storedSource.file.fileName,
-      contentType: DOCX_CONTENT_TYPE,
-      content: sourceContent,
-      traceId: request.traceId ?? request.previewId,
-    })
-    // pdfjs may transfer/detach the ArrayBuffer it receives. Keep the bytes
-    // persisted and checksummed independent from the inspection lifecycle.
-    const inspection = await this.documentPdfInspector.inspect(conversion.content.slice())
-    const [contentChecksumSha256, pdfChecksumSha256] = await Promise.all([
-      sha256(sourceContent),
-      sha256(conversion.content),
-    ])
-    const fileName = `formalization-${request.formalizationId}-${document.documentId}-${document.documentVersionId}-${request.previewId}.pdf`
     const file = await this.fileStorageProvider.save({
       filePath: `formalization/${request.formalizationId}/signature-previews/${document.documentId}/${document.documentVersionId}/${request.previewId}.pdf`,
-      fileName,
-      contentType: conversion.contentType,
-      sizeInBytes: conversion.content.byteLength,
-      content: conversion.content,
+      fileName: `formalization-${request.formalizationId}-${document.documentId}-${document.documentVersionId}-${request.previewId}.pdf`,
+      contentType: 'application/pdf',
+      sizeInBytes: storedPdf.content.byteLength,
+      content: storedPdf.content.slice(),
+      reuseExisting: true,
     })
-
     const preview: FormalizationSignaturePreview = {
       id: request.previewId,
       formalizationId: request.formalizationId,
       documentId: document.documentId,
       documentVersionId: document.documentVersionId,
       fileId: file.id,
-      contentChecksumSha256,
-      pdfChecksumSha256,
-      converterVersion: conversion.converterVersion,
-      pageCount: inspection.pageCount,
-      pages: inspection.pages,
-      byteSize: conversion.content.byteLength,
+      contentChecksumSha256: frozen.sourceSha256,
+      pdfChecksumSha256: frozen.pdfSha256,
+      converterVersion: frozen.converterVersion,
+      pageCount: frozen.pageCount,
+      pages: frozen.pages,
+      byteSize: frozen.byteSize,
       state: 'ready',
       attemptsCount: 1,
       createdAt: now,
@@ -134,14 +122,4 @@ export class ProcessFormalizationSignaturePreviewUseCase
     }
     return { previewId: request.previewId, state: 'ready' }
   }
-}
-
-async function sha256(content: Uint8Array): Promise<string> {
-  const digest = await globalThis.crypto.subtle.digest(
-    'SHA-256',
-    Uint8Array.from(content),
-  )
-  return Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, '0'),
-  ).join('')
 }

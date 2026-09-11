@@ -43,6 +43,23 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
     expect(response.status).toBe(400)
   })
 
+  it('returns null when a Formalization has no signature request yet', async () => {
+    const formalizationId = fixture.idProvider.generate()
+    await fixture.formalizationsRepository.addOrGet(
+      fakeFormalization({
+        id: formalizationId,
+        assignedLawyerId: fixture.collaboratorId,
+      }),
+    )
+
+    const response = await request(fixture.app.getHttpServer()).get(
+      `/formalizations/${formalizationId}/signature-sending/status`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.body).toBeNull()
+  })
+
   it('returns the completed state of the latest confirmed request', async () => {
     const { formalizationId, requestId } = await seedSignatureRequest(
       'confirmed',
@@ -54,7 +71,10 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
     )
 
     expect(response.status).toBe(200)
-    expect(response.body).toEqual({
+    expect(response.body).toMatchObject({
+      formalizationId,
+      formalizationStatus: 'in_progress',
+      formalizationVersion: 1,
       requestId,
       status: 'confirmed',
       version: 1,
@@ -63,7 +83,11 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
       failedDocuments: 0,
       canCancel: false,
       canRetry: false,
+      canConfirmContracting: false,
+      viewerMode: 'operator',
+      permissions: { canOperate: true, canViewDocumentContent: false },
     })
+    expect(response.body.documents).toHaveLength(1)
   })
 
   it('returns the status of an active request', async () => {
@@ -74,7 +98,10 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
     )
 
     expect(response.status).toBe(200)
-    expect(response.body).toEqual({
+    expect(response.body).toMatchObject({
+      formalizationId,
+      formalizationStatus: 'in_progress',
+      formalizationVersion: 1,
       requestId,
       status: 'sent',
       version: 1,
@@ -83,7 +110,11 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
       failedDocuments: 0,
       canCancel: true,
       canRetry: false,
+      canConfirmContracting: false,
+      viewerMode: 'operator',
+      permissions: { canOperate: true, canViewDocumentContent: false },
     })
+    expect(response.body.documents).toHaveLength(1)
   })
 
   async function seedSignatureRequest(

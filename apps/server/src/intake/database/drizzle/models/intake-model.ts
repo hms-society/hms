@@ -35,6 +35,7 @@ export const intakeModel = pgTable(
     closureReason: intakeClosureReasonModel('closure_reason'),
     closureNotes: text('closure_notes'),
     closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
+    contractedAt: timestamp('contracted_at', { withTimezone: true, mode: 'date' }),
     version: integer('version').default(1).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
@@ -69,6 +70,18 @@ export const intakeModel = pgTable(
           AND ${table.closedAt} IS NULL
         )
       )`,
+    ),
+    check(
+      'intakes_contracted_state_check',
+      sql`(
+        (${table.status} = 'contracted' and ${table.contractedAt} is not null)
+        or
+        (${table.status} <> 'contracted' and ${table.contractedAt} is null)
+      )`,
+    ),
+    check(
+      'intakes_terminal_state_exclusivity_check',
+      sql`${table.status} <> 'contracted' or (${table.closureReason} is null and ${table.closureNotes} is null and ${table.closedAt} is null)`,
     ),
   ],
 )

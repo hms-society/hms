@@ -24,6 +24,9 @@ export class DrizzleFormalizationMapper {
       signatureSubmittedAt: record.signatureSubmittedAt ?? undefined,
       signatureConfirmedAt: record.signatureConfirmedAt ?? undefined,
       signatureTerminalAt: record.signatureTerminalAt ?? undefined,
+      completedAt: record.completedAt ?? undefined,
+      completedByCollaboratorId: record.completedByCollaboratorId ?? undefined,
+      contractingConfirmationKey: record.contractingConfirmationKey ?? undefined,
     }
   }
 }
