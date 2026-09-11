@@ -1,4 +1,6 @@
 export * from './case-checklist-item'
 export * from './case-member'
+export * from './checklist-template'
+export * from './checklist-template-item'
 export * from './legal-case'
 export * from './legal-case-summary'

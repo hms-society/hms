@@ -37,6 +37,8 @@ export const ROUTES = {
   documentSpecifications: '/modelos-de-documentos',
   newDocumentSpecification: '/modelos-de-documentos/novo',
   documentSpecification: '/modelos-de-documentos/$documentSpecificationId',
+  legalCatalogAdmin: '/configuracoes/areas-tipos-demanda',
+  checklistTemplates: '/checklists/templates',
   consultationDocuments: '/consultas/$consultationId/documentos',
   consultationAttendanceForm: '/consultas/$consultationId/ficha-atendimento',
   consultationDocumentVersion:

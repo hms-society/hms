@@ -1,3 +1,5 @@
 export * from './drizzle-case-checklist-items-repository'
 export * from './drizzle-case-members-repository'
+export * from './drizzle-checklist-template-items-repository'
+export * from './drizzle-checklist-templates-repository'
 export * from './drizzle-legal-cases-repository'

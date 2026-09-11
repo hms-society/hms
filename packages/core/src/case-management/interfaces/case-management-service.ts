@@ -1,5 +1,13 @@
-import type { CaseChecklistItem, LegalCase, LegalCaseSummary } from '../domain/entities'
-import type { CaseChecklistGateDecision } from '../domain/structures'
+import type {
+  CaseChecklistItem,
+  ChecklistTemplate,
+  LegalCase,
+  LegalCaseSummary,
+} from '../domain/entities'
+import type {
+  CaseChecklistGateDecision,
+  ChecklistDocumentType,
+} from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
 
 export type ReviewCaseChecklistGateRequest = {
@@ -10,6 +18,19 @@ export type ReviewCaseChecklistGateRequest = {
 export type AddCaseChecklistComplementaryItemRequest = {
   templateItemKey: string
   title: string
+}
+
+export type ReplaceChecklistTemplateRequest = {
+  checklistTemplateId?: string
+  legalAreaId: string
+  name: string
+  isActive: boolean
+  items: readonly {
+    title: string
+    documentTypes: readonly ChecklistDocumentType[]
+    isRequired: boolean
+    position: number
+  }[]
 }
 
 export type CreateLegalCaseRequest = {
@@ -26,13 +47,24 @@ export type CreateLegalCaseRequest = {
 
 export interface CaseManagementService {
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
+
   addComplementaryChecklistItem(
     caseId: string,
     request: AddCaseChecklistComplementaryItemRequest,
   ): Promise<RestResponse<CaseChecklistItem>>
+
   listCaseChecklist(caseId: string): Promise<RestResponse<readonly CaseChecklistItem[]>>
+
+  listChecklistTemplates(): Promise<RestResponse<readonly ChecklistTemplate[]>>
+
   listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
+
+  replaceChecklistTemplate(
+    request: ReplaceChecklistTemplateRequest,
+  ): Promise<RestResponse<ChecklistTemplate>>
+
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
+
   reviewChecklistGate(
     caseId: string,
     request: ReviewCaseChecklistGateRequest,

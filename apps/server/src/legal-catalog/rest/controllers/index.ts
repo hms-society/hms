@@ -1,2 +1,7 @@
+export * from './create-legal-area.controller'
+export * from './create-legal-topic.controller'
+export * from './list-admin-legal-areas.controller'
 export * from './list-legal-areas.controller'
 export * from './list-legal-topics.controller'
+export * from './update-legal-area.controller'
+export * from './update-legal-topic.controller'

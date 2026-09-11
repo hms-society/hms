@@ -1,5 +1,6 @@
 @url = {{BASE_URL}}/legal-catalog
 @legalAreaId = replace-with-legal-area-uuid
+@legalTopicId = replace-with-legal-topic-uuid
 
 ### List active legal areas
 GET {{url}}/areas
@@ -10,3 +11,49 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/areas/{{legalAreaId}}/topics
 Content-Type: application/json
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### List admin legal areas and demand types
+GET {{url}}/admin/areas
+Content-Type: application/json
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Create legal area
+POST {{url}}/admin/areas
+Content-Type: application/json
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+{
+  "name": "Empresarial",
+  "active": true
+}
+
+### Update legal area
+PATCH {{url}}/admin/areas/{{legalAreaId}}
+Content-Type: application/json
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+{
+  "name": "Direito Empresarial",
+  "active": true
+}
+
+### Create demand type
+POST {{url}}/admin/topics
+Content-Type: application/json
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+{
+  "legalAreaId": "{{legalAreaId}}",
+  "name": "Contratos empresariais",
+  "active": true
+}
+
+### Update demand type
+PATCH {{url}}/admin/topics/{{legalTopicId}}
+Content-Type: application/json
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+{
+  "name": "Contratos empresariais",
+  "active": false
+}

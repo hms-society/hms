@@ -62,9 +62,7 @@ export class CreateDocumentBatchUseCase {
     const dateString = `${year}-${month}-${day}`
     const dateStringNoDashes = `${year}${month}${day}`
     const startOfDay = new Date(Date.UTC(year, now.getUTCMonth(), now.getUTCDate()))
-    const endOfDay = new Date(
-      Date.UTC(year, now.getUTCMonth(), now.getUTCDate() + 1),
-    )
+    const endOfDay = new Date(Date.UTC(year, now.getUTCMonth(), now.getUTCDate() + 1))
 
     const files = request.files.map((file) => ({
       ...file,
@@ -79,10 +77,7 @@ export class CreateDocumentBatchUseCase {
       )
 
       if (dailyBatch) {
-        const batch = await this.documentBatchesRepository.addFiles(
-          dailyBatch.id,
-          files,
-        )
+        const batch = await this.documentBatchesRepository.addFiles(dailyBatch.id, files)
 
         await this.publishProcessingEvents(batch, files)
 

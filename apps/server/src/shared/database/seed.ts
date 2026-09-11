@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
+import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { ConsultationSeeder } from '@/consultation/database/consultation-seeder'
@@ -17,6 +18,10 @@ import { SeedModule } from '@/shared/database/seed.module'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
+import type {
+  ChecklistTemplateItemsRepository,
+  ChecklistTemplatesRepository,
+} from '@hms/core/case-management/interfaces'
 
 const LOGGER = new Logger('DatabaseSeed')
 
@@ -26,6 +31,7 @@ async function bootstrap() {
   try {
     const envProvider = app.get(EnvProvider)
     const mode = envProvider.get('HMS_SERVER_APP_MODE')
+
     if (mode !== 'dev' && mode !== 'stg') {
       throw new AppError(
         'Database seed is only allowed when HMS_SERVER_APP_MODE=dev or stg',
@@ -33,6 +39,7 @@ async function bootstrap() {
     }
 
     const seedPassword = envProvider.get('HMS_USER_SEED_PASSWORD')
+
     if (!seedPassword) {
       throw new AppError('HMS_USER_SEED_PASSWORD is required when seeding dev or staging')
     }
@@ -46,13 +53,27 @@ async function bootstrap() {
     await app.get(RealDocumentsSeeder).clear()
     await app.get(DynamicFormsSeeder).clear()
 
+    const checklistTemplateItemsRepository = app.get<ChecklistTemplateItemsRepository>(
+      CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
+    )
+
+    const checklistTemplatesRepository = app.get<ChecklistTemplatesRepository>(
+      CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
+    )
+
+    await checklistTemplateItemsRepository.removeAll()
+    await checklistTemplatesRepository.removeAll()
+
     const authAdministrationProvider = app.get(IDENTITY_PROVIDERS.authAdministration)
+
     await app.get(IdentitySeeder).clear(authAdministrationProvider)
     await app.get(LegalCatalogSeeder).clear()
 
     const legalCatalog = await app.get(LegalCatalogSeeder).run()
+
     const dynamicFormSeeds = createDynamicFormSeeds(legalCatalog)
     const dynamicForms = await app.get(DynamicFormsSeeder).run(dynamicFormSeeds)
+
     const legalArea = legalCatalog.areas.find((area) => area.name === 'Cível')
     const legalTopic = legalCatalog.topics.find(
       (topic) => topic.legalAreaId === legalArea?.id && topic.name === 'Contratos',
@@ -65,30 +86,33 @@ async function bootstrap() {
     const consultationDynamicForm = dynamicForms.find(
       ({ name }) => name === 'Triagem Cível',
     )
+
     if (!consultationDynamicForm) {
       throw new AppError('Default consultation dynamic form could not be seeded')
     }
 
-    const identitySeed = await app
-      .get(IdentitySeeder)
-      .run(
-        authAdministrationProvider,
-        { legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] },
-        seedPassword,
-      )
-    const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
-    const validationScenarioClient = identitySeed.clients.find(
-      ({ email }) => email === 'vinicius.lopes.machado@hms.test',
+    const identitySeed = await app.get(IdentitySeeder).run(
+      authAdministrationProvider,
+      {
+        legalAreaId: legalArea.id,
+        legalTopicIds: [legalTopic.id],
+      },
+      seedPassword,
     )
+
+    const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
+
     const attendant = identitySeed.collaborators.find(
       ({ profile }) => profile === 'attendant',
     )
+
     const actor = identitySeed.users.find(
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
 
-    if (!client || !validationScenarioClient || !lawyer || !attendant || !actor) {
+    if (!client || !lawyer || !attendant || !actor) {
       throw new AppError('Document Production seed identities could not be resolved')
     }
 
@@ -104,9 +128,11 @@ async function bootstrap() {
     const lawyerIds = identitySeed.collaborators
       .filter(({ profile }) => profile === 'lawyer')
       .map(({ id }) => id)
+
     const paralegalIds = identitySeed.collaborators
       .filter(({ profile }) => profile === 'paralegal')
       .map(({ id }) => id)
+
     const supervisorIds = identitySeed.collaborators
       .filter(({ profile }) => profile === 'supervisor')
       .map(({ id }) => id)
@@ -123,7 +149,6 @@ async function bootstrap() {
       supervisorIds,
       internIds,
       actorId: actor.id,
-      validationScenarioClientId: validationScenarioClient.id,
     })
 
     const schedulingSeed = await app.get(SchedulingSeeder).run({
@@ -131,6 +156,7 @@ async function bootstrap() {
       clientId: client.id,
       assignedLawyerId: lawyer.id,
     })
+
     const consultationSeed = await app.get(ConsultationSeeder).run({
       intakeId: intakeSeed.documentProductionIntake.id,
       appointmentId: schedulingSeed.appointment.id,

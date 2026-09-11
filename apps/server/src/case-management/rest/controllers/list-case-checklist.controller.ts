@@ -2,6 +2,8 @@ import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestj
 import { ApiResponse } from '@nestjs/swagger'
 import type {
   CaseChecklistItemsRepository,
+  ChecklistTemplateItemsRepository,
+  ChecklistTemplatesRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
 import { ListCaseChecklistUseCase } from '@hms/core/case-management/use-cases'
@@ -24,10 +26,16 @@ export class ListCaseChecklistController {
     legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     caseChecklistItemsRepository: CaseChecklistItemsRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplates)
+    checklistTemplatesRepository: ChecklistTemplatesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems)
+    checklistTemplateItemsRepository: ChecklistTemplateItemsRepository,
   ) {
     this.useCase = new ListCaseChecklistUseCase(
       legalCasesRepository,
       caseChecklistItemsRepository,
+      checklistTemplatesRepository,
+      checklistTemplateItemsRepository,
     )
   }
 

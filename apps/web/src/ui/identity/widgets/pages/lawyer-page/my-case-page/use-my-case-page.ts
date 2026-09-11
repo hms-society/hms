@@ -10,8 +10,8 @@ export type UseMyCasePageParams = {
 }
 
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
-  const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
   const { caseManagementService } = useRestContext()
+  const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
 
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
@@ -24,6 +24,20 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   })
 
   const [activeTab, setActiveTab] = useState('visao-geral')
+  const { data: legalCases = [] } = useQuery({
+    queryKey: ['case-management', 'my-cases'],
+    queryFn: async () => {
+      const response = await caseManagementService.listMyCases()
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+  })
+  const legalCase = legalCases.find((caseItem) => caseItem.id === caseUuid)
+  const caseTitle = legalCase?.title ?? 'Aposentadoria por Tempo de Contribuição'
+  const caseLegalArea = legalCase?.legalArea ?? 'Área jurídica do checklist'
+  const caseClientName = legalCase?.clientName ?? 'Antônio Carvalho'
   const {
     checklistItems,
     completionPercentage,
@@ -38,6 +52,9 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
 
   return {
     activeTab,
+    caseClientName,
+    caseLegalArea,
+    caseTitle,
     caseUuid,
     caseDetails: caseQuery.data,
     isLoading: caseQuery.isLoading,

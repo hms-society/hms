@@ -1,6 +1,7 @@
 import type { CaseManagementService as CaseManagementRestService } from '@hms/core/case-management/interfaces'
 import type {
   CaseChecklistItem,
+  ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
 } from '@hms/core/case-management/domain/entities'
@@ -25,8 +26,16 @@ export const CaseManagementService = (
       return restClient.get<readonly CaseChecklistItem[]>(`/cases/${caseId}/checklist`)
     },
 
+    listChecklistTemplates() {
+      return restClient.get<readonly ChecklistTemplate[]>('/cases/checklist-templates')
+    },
+
     listMyCases() {
       return restClient.get<readonly LegalCaseSummary[]>('/cases/my')
+    },
+
+    replaceChecklistTemplate(request) {
+      return restClient.put<ChecklistTemplate>('/cases/checklist-templates', request)
     },
 
     getLegalCaseDetails(caseId) {

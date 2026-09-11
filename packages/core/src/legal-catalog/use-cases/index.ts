@@ -1,2 +1,7 @@
+export * from './create-legal-area-use-case'
+export * from './create-legal-topic-use-case'
+export * from './list-admin-legal-areas-use-case'
 export * from './list-legal-areas-use-case'
 export * from './list-legal-topics-use-case'
+export * from './update-legal-area-use-case'
+export * from './update-legal-topic-use-case'

@@ -3,9 +3,11 @@ import { Module } from '@nestjs/common'
 import { CaseManagementDatabaseModule } from '@/case-management/database'
 import {
   AddCaseChecklistComplementaryItemController,
+  ListChecklistTemplatesController,
   CreateLegalCaseController,
   ListCaseChecklistController,
   ListMyLegalCasesController,
+  ReplaceChecklistTemplateController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
 } from '@/case-management/rest/controllers'
@@ -16,9 +18,11 @@ import { IntakeDatabaseModule } from '@/intake/database'
   imports: [IdentityModule, CaseManagementDatabaseModule, IntakeDatabaseModule],
   controllers: [
     AddCaseChecklistComplementaryItemController,
+    ListChecklistTemplatesController,
     CreateLegalCaseController,
     ListCaseChecklistController,
     ListMyLegalCasesController,
+    ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     GetLegalCaseDetailsController,
   ],

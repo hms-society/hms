@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { CaseChecklistItemStatus } from '@hms/core/case-management/domain/structures'
 import type { CaseChecklistItemsRepository } from '@hms/core/case-management/interfaces'
-import { and, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DrizzleCaseChecklistItemMapper } from '@/case-management/database/drizzle/mappers'
-import { caseChecklistItemModel } from '@/case-management/database/drizzle/models'
+import {
+  caseChecklistItemModel,
+  checklistTemplateItemModel,
+  checklistTemplateModel,
+} from '@/case-management/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -38,9 +42,32 @@ export class DrizzleCaseChecklistItemsRepository
     caseId: string,
   ): ReturnType<CaseChecklistItemsRepository['listByCaseId']> {
     const items = await this.database
-      .select()
+      .select({
+        id: caseChecklistItemModel.id,
+        caseId: caseChecklistItemModel.caseId,
+        templateItemKey: caseChecklistItemModel.templateItemKey,
+        title: caseChecklistItemModel.title,
+        isRequired: caseChecklistItemModel.isRequired,
+        status: caseChecklistItemModel.status,
+        documentFileId: caseChecklistItemModel.documentFileId,
+        documentFileName: caseChecklistItemModel.documentFileName,
+        validatedAt: caseChecklistItemModel.validatedAt,
+        validatedBy: caseChecklistItemModel.validatedBy,
+        createdAt: caseChecklistItemModel.createdAt,
+        updatedAt: caseChecklistItemModel.updatedAt,
+        checklistTemplateName: checklistTemplateModel.name,
+      })
       .from(caseChecklistItemModel)
+      .leftJoin(
+        checklistTemplateItemModel,
+        sql`${caseChecklistItemModel.templateItemKey} = ${checklistTemplateItemModel.id}::text`,
+      )
+      .leftJoin(
+        checklistTemplateModel,
+        eq(checklistTemplateModel.id, checklistTemplateItemModel.checklistTemplateId),
+      )
       .where(eq(caseChecklistItemModel.caseId, caseId))
+      .orderBy(asc(caseChecklistItemModel.createdAt))
 
     return items.map((item) => this.mapper.toDomain(item))
   }
@@ -106,6 +133,54 @@ export class DrizzleCaseChecklistItemsRepository
       .limit(1)
 
     return Boolean(pendingItem)
+  }
+
+  async replaceForCase(
+    caseId: string,
+    checklistItems: Parameters<CaseChecklistItemsRepository['replaceForCase']>[1],
+  ): ReturnType<CaseChecklistItemsRepository['replaceForCase']> {
+    const currentItems = await this.database
+      .select()
+      .from(caseChecklistItemModel)
+      .where(eq(caseChecklistItemModel.caseId, caseId))
+      .orderBy(asc(caseChecklistItemModel.createdAt))
+
+    for (const [index, item] of checklistItems.entries()) {
+      const currentItem = currentItems[index]
+
+      if (!currentItem) {
+        await this.database.insert(caseChecklistItemModel).values({
+          caseId,
+          ...item,
+        })
+        continue
+      }
+
+      await this.database
+        .update(caseChecklistItemModel)
+        .set({
+          templateItemKey: item.templateItemKey,
+          title: item.title,
+          isRequired: item.isRequired,
+          status: CaseChecklistItemStatus.Pending,
+          documentFileId: null,
+          documentFileName: null,
+          validatedAt: null,
+          validatedBy: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(caseChecklistItemModel.id, currentItem.id))
+    }
+
+    const extraItemIds = currentItems.slice(checklistItems.length).map((item) => item.id)
+
+    if (extraItemIds.length > 0) {
+      await this.database
+        .delete(caseChecklistItemModel)
+        .where(inArray(caseChecklistItemModel.id, extraItemIds))
+    }
+
+    return this.listByCaseId(caseId)
   }
 
   async removeAll(): Promise<void> {
