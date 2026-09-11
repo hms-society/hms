@@ -12,7 +12,7 @@ export function IntakeDetailsPage({ intakeId }: { intakeId: string }) {
 
   if (page.intakeQuery.isError || !page.content) {
     return (
-      <main className='mx-auto w-full max-w-5xl' aria-labelledby='intake-details-title'>
+      <main className='w-full' aria-labelledby='intake-details-title'>
         <Button asChild variant='link' className='mb-6 h-auto px-0 text-brand'>
           <Anchor route='intakes'>
             <Icon name='arrow-left' /> Voltar para Intakes

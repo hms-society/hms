@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { DynamicFormAnswerValue } from '@hms/core/shared/domain'
+import { FormalizationSignatureRequestStatus } from '@hms/core/formalization/domain/structures'
 
 import {
   useCloseFormalizationWithoutContractAction,
@@ -9,6 +10,7 @@ import { useFormalizationQuery } from '@/ui/formalization/hooks/use-formalizatio
 import { useSaveFormalizationContractFormAction } from '@/ui/formalization/hooks/use-save-formalization-contract-form-action'
 import { useFormalizationDocumentProduction } from '@/ui/formalization/hooks/use-formalization-document-production-action'
 import { useFormalizationSignatureConfiguration } from '@/ui/formalization/hooks/use-formalization-signature-configuration-action'
+import { useFormalizationSignatureSending } from '@/ui/formalization/hooks/use-formalization-signature-sending-action'
 
 export function useFormalizationPage(formalizationId: string) {
   const query = useFormalizationQuery(formalizationId)
@@ -27,6 +29,16 @@ export function useFormalizationPage(formalizationId: string) {
   const signatureConfiguration = useFormalizationSignatureConfiguration(
     formalizationId,
     documentProduction.isPackageConfirmed,
+  )
+  const signatureSending = useFormalizationSignatureSending(formalizationId, true)
+  const signatureRequestStatus =
+    signatureSending.status?.status ?? signatureSending.review?.currentRequest?.status
+  const isSignatureSendingLocked = Boolean(
+    signatureSending.isLoadingReview ||
+      signatureSending.isLoadingStatus ||
+      signatureSending.isCancellationPending ||
+      (signatureRequestStatus &&
+        signatureRequestStatus !== FormalizationSignatureRequestStatus.cancelled),
   )
   const initialAnswers = useMemo(
     () =>
@@ -91,6 +103,8 @@ export function useFormalizationPage(formalizationId: string) {
     setAnswer,
     documentProduction,
     signatureConfiguration,
+    signatureSending,
+    isSignatureSendingLocked,
     closeWithoutContract,
     isFormSelectionOpen,
     setIsFormSelectionOpen,
