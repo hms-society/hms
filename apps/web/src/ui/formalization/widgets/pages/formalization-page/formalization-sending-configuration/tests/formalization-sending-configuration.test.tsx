@@ -870,6 +870,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
       expect(cancelSending).toHaveBeenCalledWith({
         expectedRequestVersion: 2,
         expectedFormalizationVersion: 9,
+        reason: 'Cancelamento solicitado pelo operador.',
       })
     })
   })
