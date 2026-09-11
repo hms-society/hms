@@ -1,6 +1,6 @@
 ---
 title: Conclusão da Formalização e acompanhamento de assinaturas
-status: in_progress
+status: completed
 revision: 6
 source:
   type: jira-ticket
@@ -17,7 +17,7 @@ scope:
   - apps/web/tests
   - documentation/modules.md
   - documentation/features/formalization/formalization-completion
-last_updated_at: 2026-09-10
+last_updated_at: 2026-09-11
 ---
 
 # 1. Context and scope
