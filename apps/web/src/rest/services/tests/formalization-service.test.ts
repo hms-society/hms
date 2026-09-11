@@ -221,6 +221,17 @@ describe('FormalizationService', () => {
     await service.cancelSignatureSending('formalization-1', {
       expectedRequestVersion: 2,
       expectedFormalizationVersion: 5,
+      reason: 'Resend necessário',
+    })
+    await service.resendSignatureInvitation('formalization-1', 'recipient-1', {
+      expectedRecipientVersion: 3,
+      expectedInvitationGeneration: 1,
+    })
+    await service.confirmContracting('formalization-1', {
+      expectedFormalizationVersion: 6,
+      expectedIntakeVersion: 7,
+      expectedRequestVersion: 8,
+      confirmationKey: 'confirmation-key',
     })
 
     expect(restClient.get).toHaveBeenNthCalledWith(
@@ -239,7 +250,26 @@ describe('FormalizationService', () => {
     expect(restClient.post).toHaveBeenNthCalledWith(
       2,
       '/formalizations/formalization-1/signature-sending/cancel',
-      { expectedRequestVersion: 2, expectedFormalizationVersion: 5 },
+      {
+        expectedRequestVersion: 2,
+        expectedFormalizationVersion: 5,
+        reason: 'Resend necessário',
+      },
+    )
+    expect(restClient.post).toHaveBeenNthCalledWith(
+      3,
+      '/formalizations/formalization-1/signature-sending/recipients/recipient-1/resend',
+      { expectedRecipientVersion: 3, expectedInvitationGeneration: 1 },
+    )
+    expect(restClient.post).toHaveBeenNthCalledWith(
+      4,
+      '/formalizations/formalization-1/contracting/confirm',
+      {
+        expectedFormalizationVersion: 6,
+        expectedIntakeVersion: 7,
+        expectedRequestVersion: 8,
+        confirmationKey: 'confirmation-key',
+      },
     )
   })
 })

@@ -3,15 +3,14 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createCaseSchema, type CreateCaseData } from '@hms/validation/case-management'
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
-import { useIntakesQuery } from '@/ui/intake/widgets/pages/intakes-page/use-intakes-query'
-import { useCreateCaseMutation } from './use-create-case-mutation'
+import { useIntakesQuery } from '@/ui/intake/hooks/use-intakes-query'
+import { useCreateCaseAction } from '@/ui/case-management/hooks/use-create-case-action'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { ROUTES } from '@/constants/routes'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { useQuery } from '@tanstack/react-query'
-import { useLegalAreasQuery } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-areas-query'
-import { useLegalTopicsQuery } from '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-topics-query'
+import { useIntakeQuery } from '@/ui/intake/hooks/use-intake-query'
+import { useLegalAreasQuery } from '@/ui/intake/hooks/use-legal-areas-query'
+import { useLegalTopicsQuery } from '@/ui/intake/hooks/use-legal-topics-query'
 import { Button } from '@/ui/shadcn/button'
 import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
@@ -52,7 +51,7 @@ export function CreateCasePage() {
   })
 
   const navigate = useNavigate()
-  const { mutate: createCase, isPending: isCreatingCase } = useCreateCaseMutation()
+  const { mutate: createCase, isPending: isCreatingCase } = useCreateCaseAction()
 
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
@@ -70,22 +69,12 @@ export function CreateCasePage() {
   })
   const intakes = intakesQuery.data?.items ?? []
 
-  const { intakeService } = useRestContext()
-
   const { legalAreas } = useLegalAreasQuery()
   const selectedLegalAreaId = form.watch('legalAreaId')
   const { legalTopics } = useLegalTopicsQuery(selectedLegalAreaId)
   const selectedIntakeId = form.watch('intakeId')
 
-  const { data: selectedIntakeDetails } = useQuery({
-    queryKey: ['intake', selectedIntakeId],
-    queryFn: async () => {
-      const res = await intakeService.getIntake(selectedIntakeId as string)
-      if (res.isFailure) throw new Error('Falha ao buscar triagem')
-      return res.body
-    },
-    enabled: !!selectedIntakeId,
-  })
+  const { data: selectedIntakeDetails } = useIntakeQuery(selectedIntakeId)
 
   useEffect(() => {
     if (selectedIntakeDetails) {
