@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { FormalizationDatabaseModule } from '@/formalization/database/formalization-database.module'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
+import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import {
   GenerateFormalizationSignaturePreviewJob,
   GenerateFormalizationSignaturePreviewsInBatchJob,
@@ -26,6 +27,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
   imports: [
     FormalizationDatabaseModule,
     FormalizationProvisionModule,
+    DocumentProductionProvisionModule,
     SharedMessagingModule,
     ProvisionModule,
   ],
