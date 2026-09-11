@@ -73,5 +73,6 @@ export function useRestContextProvider(): RestContextValue {
       signingGatewayClient,
       signingGatewayCsrfStore,
     ),
+    caseManagementService: CaseManagementService(restClient),
   }
 }
