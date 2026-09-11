@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { IntakeProvisionModule } from '@/intake/provision/intake-provision.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { IntakeMessagingModule } from '@/intake/messaging/intake-messaging.module'
@@ -21,6 +22,7 @@ import {
   imports: [
     IdentityModule,
     IntakeDatabaseModule,
+    IntakeProvisionModule,
     IntakeMessagingModule,
     ProvisionModule,
     SharedMessagingModule,
@@ -36,6 +38,6 @@ import {
     UpdateIntakeController,
     CloseIntakeWithoutContractController,
   ],
-  exports: [IntakeDatabaseModule, IntakeMessagingModule],
+  exports: [IntakeDatabaseModule, IntakeProvisionModule, IntakeMessagingModule],
 })
 export class IntakeModule {}

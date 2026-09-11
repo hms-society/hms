@@ -8,6 +8,7 @@ import {
   fakeFormalizationSignatureSnapshot,
 } from '@hms/core/formalization/domain/entities/fakers'
 import type {
+  FormalizationSignatureCancellationAttemptsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureSnapshotsRepository,
@@ -21,6 +22,7 @@ describe('Cancel Formalization Signature Sending Controller [POST /formalization
   let requestsRepository: FormalizationSignatureRequestsRepository
   let requestDocumentsRepository: FormalizationSignatureRequestDocumentsRepository
   let snapshotsRepository: FormalizationSignatureSnapshotsRepository
+  let cancellationsRepository: FormalizationSignatureCancellationAttemptsRepository
 
   beforeAll(async () => {
     fixture = await FormalizationModuleFixture.register()
@@ -29,6 +31,9 @@ describe('Cancel Formalization Signature Sending Controller [POST /formalization
       FORMALIZATION_REPOSITORIES.signatureRequestDocuments,
     )
     snapshotsRepository = fixture.app.get(FORMALIZATION_REPOSITORIES.signatureSnapshots)
+    cancellationsRepository = fixture.app.get(
+      FORMALIZATION_REPOSITORIES.signatureCancellationAttempts,
+    )
   })
 
   beforeEach(async () => fixture.resetDatabase())
@@ -58,7 +63,11 @@ describe('Cancel Formalization Signature Sending Controller [POST /formalization
 
     const response = await request(fixture.app.getHttpServer())
       .post(`/formalizations/${formalizationId}/signature-sending/cancel`)
-      .send({ expectedRequestVersion: 1, expectedFormalizationVersion: 1 })
+      .send({
+        expectedRequestVersion: 1,
+        expectedFormalizationVersion: 1,
+        reason: 'Cliente solicitou o cancelamento.',
+      })
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual({
@@ -69,6 +78,13 @@ describe('Cancel Formalization Signature Sending Controller [POST /formalization
     await expect(requestsRepository.findById(requestId)).resolves.toMatchObject({
       status: 'sent',
       cancellationRequestedAt: expect.any(Date),
+    })
+    await expect(
+      cancellationsRepository.findByRequestId(requestId),
+    ).resolves.toMatchObject({
+      requestId,
+      reason: 'Cliente solicitou o cancelamento.',
+      status: 'pending',
     })
   })
 

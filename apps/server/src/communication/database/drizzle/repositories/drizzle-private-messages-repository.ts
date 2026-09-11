@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -22,6 +22,18 @@ export class DrizzlePrivateMessagesRepository
       .limit(1)
 
     return record ? DrizzlePrivateMessageMapper.toDomain(record) : undefined
+  }
+
+  async findByClientId(
+    clientId: string,
+  ): ReturnType<PrivateMessagesRepository['findByClientId']> {
+    const records = await this.database
+      .select()
+      .from(privateMessageModel)
+      .where(eq(privateMessageModel.clientId, clientId))
+      .orderBy(desc(privateMessageModel.createdAt))
+
+    return records.map(DrizzlePrivateMessageMapper.toDomain)
   }
 
   async findByIntakeId(

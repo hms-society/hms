@@ -200,7 +200,8 @@ export class FormalizationSignatureSourceReader
     const documentsById = new Map(documents.map((document) => [document.id, document]))
     const versionsById = new Map(versions.map((version) => [version.id, version]))
 
-    return packageDocuments.flatMap(({ documentId }) => {
+    return packageDocuments.flatMap((packageDocument) => {
+      const { documentId } = packageDocument
       const document = documentsById.get(documentId)
       const documentVersions = versions.filter(
         (version) => version.documentId === documentId,
@@ -220,6 +221,7 @@ export class FormalizationSignatureSourceReader
         {
           documentId: document.id,
           documentVersionId: version.id,
+          documentSpecificationId: packageDocument.documentSpecificationId,
           name: document.title,
           reviewStatus: version.status,
           fileId: version.fileId,

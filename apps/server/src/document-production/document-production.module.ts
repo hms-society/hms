@@ -5,6 +5,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import { DocumentProductionMessagingModule } from '@/document-production/messaging/document-production-messaging.module'
+import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import {
   CreateDocumentSpecificationController,
   DeleteDocumentSpecificationController,
@@ -22,6 +23,7 @@ import {
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
     DocumentProductionMessagingModule,
+    DocumentProductionProvisionModule,
   ],
   controllers: [
     CreateDocumentSpecificationController,
@@ -32,6 +34,10 @@ import {
     UpdateDocumentSpecificationTemplateController,
     UpdateDocumentAccessClassificationController,
   ],
-  exports: [DocumentProductionDatabaseModule, DocumentProductionMessagingModule],
+  exports: [
+    DocumentProductionDatabaseModule,
+    DocumentProductionMessagingModule,
+    DocumentProductionProvisionModule,
+  ],
 })
 export class DocumentProductionModule {}

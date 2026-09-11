@@ -29,4 +29,5 @@ export interface LegalCasesRepository {
     params: ReviewChecklistGateRepositoryParams,
   ): Promise<LegalCase | undefined>
   removeAll(): Promise<void>
+  findByIntakeId(intakeId: string): Promise<LegalCase | undefined>
 }

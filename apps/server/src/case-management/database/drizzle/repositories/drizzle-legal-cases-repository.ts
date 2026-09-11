@@ -127,6 +127,18 @@ export class DrizzleLegalCasesRepository
     return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
   }
 
+  async findByIntakeId(
+    intakeId: string,
+  ): ReturnType<LegalCasesRepository['findByIntakeId']> {
+    const [legalCase] = await this.database
+      .select()
+      .from(legalCaseModel)
+      .where(eq(legalCaseModel.intakeId, intakeId))
+      .limit(1)
+
+    return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
+  }
+
   async getCaseDetails(
     caseId: string,
   ): ReturnType<LegalCasesRepository['getCaseDetails']> {

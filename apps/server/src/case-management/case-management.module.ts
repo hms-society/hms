@@ -8,12 +8,13 @@ import {
   ListMyLegalCasesController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
+  GetLegalCaseByIntakeController,
 } from '@/case-management/rest/controllers'
 import { IdentityModule } from '@/identity/identity.module'
-import { IntakeDatabaseModule } from '@/intake/database'
+import { IntakeModule } from '@/intake/intake.module'
 
 @Module({
-  imports: [IdentityModule, CaseManagementDatabaseModule, IntakeDatabaseModule],
+  imports: [IdentityModule, CaseManagementDatabaseModule, IntakeModule],
   controllers: [
     AddCaseChecklistComplementaryItemController,
     CreateLegalCaseController,
@@ -21,6 +22,7 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ListMyLegalCasesController,
     ReviewCaseChecklistGateController,
     GetLegalCaseDetailsController,
+    GetLegalCaseByIntakeController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

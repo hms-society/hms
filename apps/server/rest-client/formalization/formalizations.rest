@@ -185,3 +185,48 @@ Content-Type: application/json
   "reason": "client_withdrew",
   "notes": ""
 }
+
+### Read formalization completion by Intake
+GET {{baseUrl}}/formalizations/by-intake/{{intakeId}}/completion
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Read signature sending status
+GET {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/status
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### List formalization documents
+GET {{baseUrl}}/formalizations/{{formalizationId}}/documents
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Resend a recipient invitation
+POST {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/recipients/{{signatoryId}}/resend
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedRecipientVersion": 1,
+  "expectedInvitationGeneration": 1
+}
+
+### Cancel signature sending
+POST {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/cancel
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedRequestVersion": 1,
+  "expectedFormalizationVersion": 10,
+  "reason": "Solicitação cancelada pelo cliente"
+}
+
+### Confirm Formalization contracting
+POST {{baseUrl}}/formalizations/{{formalizationId}}/contracting/confirm
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "expectedFormalizationVersion": 10,
+  "expectedIntakeVersion": 2,
+  "expectedRequestVersion": 3,
+  "confirmationKey": "00000000-0000-4000-8000-000000000999"
+}

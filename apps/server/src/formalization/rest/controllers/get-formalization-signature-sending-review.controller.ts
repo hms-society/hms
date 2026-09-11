@@ -8,6 +8,7 @@ import { GetFormalizationSignatureSendingReviewUseCase } from '@hms/core/formali
 import type {
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureSourceReader,
   FormalizationsRepository,
@@ -41,6 +42,8 @@ export class GetFormalizationSignatureSendingReviewController {
     sourceReader: FormalizationSignatureSourceReader,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
     requestsRepository: FormalizationSignatureRequestsRepository,
+    @Inject(FORMALIZATION_REPOSITORIES.signatureRequestDocuments)
+    documentsRepository: FormalizationSignatureRequestDocumentsRepository,
     @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
     metadataReader: FormalizationSignatureDocumentMetadataReader,
   ) {
@@ -50,6 +53,7 @@ export class GetFormalizationSignatureSendingReviewController {
       sourceReader,
       metadataReader,
       requestsRepository,
+      documentsRepository,
     })
   }
 

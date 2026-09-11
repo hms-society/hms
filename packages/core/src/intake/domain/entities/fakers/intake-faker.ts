@@ -13,11 +13,18 @@ import { IntakeClosureReason, IntakeStatus } from '../../structures'
 export class IntakeFaker {
   static fake(overrides: Partial<Intake> = {}): Intake {
     const createdAt = faker.date.past()
-    const status = IntakeStatusFaker.fake()
+    const status = overrides.status ?? IntakeStatusFaker.fake()
     const closureReason =
-      status === IntakeStatus.ClosedWithoutContract
+      overrides.closureReason ??
+      (status === IntakeStatus.ClosedWithoutContract
         ? IntakeClosureReasonFaker.fake()
-        : undefined
+        : undefined)
+    const contractedAt =
+      'contractedAt' in overrides
+        ? overrides.contractedAt
+        : status === IntakeStatus.Contracted
+          ? createdAt
+          : undefined
 
     return {
       id: faker.string.uuid(),
@@ -33,6 +40,7 @@ export class IntakeFaker {
       urgency: IntakeUrgencyFaker.fake(),
       demandNotes: faker.lorem.sentence(),
       status,
+      contractedAt,
       closureReason,
       closureNotes:
         closureReason === IntakeClosureReason.Other ? faker.lorem.sentence() : undefined,

@@ -39,7 +39,6 @@ class CancelFormalizationSignatureSendingBody extends createZodDto(
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class CancelFormalizationSignatureSendingController {
-  private readonly formalizationsRepository: FormalizationsRepository
   private readonly requestsRepository: FormalizationSignatureRequestsRepository
   private readonly useCase: CancelFormalizationSignatureSendingUseCase
 
@@ -64,10 +63,10 @@ export class CancelFormalizationSignatureSendingController {
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
     @Inject(InngestBroker) broker: Broker,
   ) {
-    this.formalizationsRepository = formalizationsRepository
     this.requestsRepository = requestsRepository
     this.useCase = new CancelFormalizationSignatureSendingUseCase({
       requestsRepository,
+      formalizationsRepository,
       recipientsRepository,
       cancellationsRepository,
       invitationsRepository,
@@ -108,17 +107,8 @@ export class CancelFormalizationSignatureSendingController {
     actorProfile: CollaboratorProfile
     expectedRequestVersion: number
     expectedFormalizationVersion: number
+    reason: string
   }) {
-    const formalization = await this.formalizationsRepository.findById(
-      input.formalizationId,
-    )
-    if (
-      !formalization ||
-      (formalization.assignedLawyerId !== input.actorId && input.actorProfile !== 'admin')
-    ) {
-      throw new FormalizationSignatureRequestConflictError()
-    }
-
     const request = await this.requestsRepository.findCurrentByFormalizationId(
       input.formalizationId,
     )
@@ -126,9 +116,12 @@ export class CancelFormalizationSignatureSendingController {
 
     return this.useCase.execute({
       requestId: request.id,
+      formalizationId: input.formalizationId,
       actorId: input.actorId,
+      actorProfile: input.actorProfile,
       expectedRequestVersion: input.expectedRequestVersion,
       expectedFormalizationVersion: input.expectedFormalizationVersion,
+      reason: input.reason,
     })
   }
 }

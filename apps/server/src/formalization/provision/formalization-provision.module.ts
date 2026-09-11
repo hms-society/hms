@@ -10,15 +10,14 @@ import {
   FormalizationSignatureOtpMacProvider,
   FormalizationSensitivePayloadCipherProvider,
   FormalizationSignatureDocumentContentReader,
-  GotenbergDocumentPdfConverterProvider,
-  PdfJsFormalizationDocumentPdfInspectorProvider,
   DocumensoSignatureProvider,
 } from '@/formalization/provision'
 import { IdentityModule } from '@/identity/identity.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { IntakeModule } from '@/intake/intake.module'
 
 @Module({
-  imports: [DocumentProductionModule, IdentityModule, ProvisionModule],
+  imports: [DocumentProductionModule, IntakeModule, IdentityModule, ProvisionModule],
   providers: [
     FormalizationSignatureSourceReader,
     FormalizationSignatureSecretHasher,
@@ -27,8 +26,6 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     FormalizationSignatureOtpMacProvider,
     FormalizationSensitivePayloadCipherProvider,
     FormalizationSignatureDocumentContentReader,
-    GotenbergDocumentPdfConverterProvider,
-    PdfJsFormalizationDocumentPdfInspectorProvider,
     DocumensoSignatureProvider,
     {
       provide: FORMALIZATION_PROVIDERS.signatureProvider,
@@ -41,14 +38,6 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     {
       provide: FORMALIZATION_PROVIDERS.signatureSourceReader,
       useExisting: FormalizationSignatureSourceReader,
-    },
-    {
-      provide: FORMALIZATION_PROVIDERS.documentPdfConverter,
-      useExisting: GotenbergDocumentPdfConverterProvider,
-    },
-    {
-      provide: FORMALIZATION_PROVIDERS.documentPdfInspector,
-      useExisting: PdfJsFormalizationDocumentPdfInspectorProvider,
     },
     {
       provide: FORMALIZATION_PROVIDERS.signatureSecretHasher,
@@ -73,8 +62,6 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
   ],
   exports: [
     FORMALIZATION_PROVIDERS.signatureSourceReader,
-    FORMALIZATION_PROVIDERS.documentPdfConverter,
-    FORMALIZATION_PROVIDERS.documentPdfInspector,
     FORMALIZATION_PROVIDERS.signatureSecretHasher,
     FORMALIZATION_PROVIDERS.signatureSecretVerifier,
     FORMALIZATION_PROVIDERS.signatureOtpMacProvider,

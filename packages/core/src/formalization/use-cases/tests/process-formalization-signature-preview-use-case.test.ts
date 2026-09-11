@@ -3,11 +3,10 @@ import { mock } from 'vitest-mock-extended'
 import type { File } from '../../../shared/domain/entities'
 import type { FileStorageProvider, DatetimeProvider } from '../../../shared/interfaces'
 import type {
-  DocumentPdfConverter,
-  FormalizationDocumentPdfInspector,
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureSourceReader,
 } from '../../interfaces'
+import type { DocumentPdfFreezeService } from '../../../document-production/interfaces'
 import { ProcessFormalizationSignaturePreviewUseCase } from '../process-formalization-signature-preview-use-case'
 import {
   makeConfiguration,
@@ -30,8 +29,7 @@ describe('Process Formalization Signature Preview Use Case', () => {
     const repository = mock<FormalizationSignatureConfigurationRepository>()
     const sourceReader = mock<FormalizationSignatureSourceReader>()
     const storage = mock<FileStorageProvider>()
-    const converter = mock<DocumentPdfConverter>()
-    const inspector = mock<FormalizationDocumentPdfInspector>()
+    const freezeService = mock<DocumentPdfFreezeService>()
     const datetimeProvider = mock<DatetimeProvider>()
     const sourceFile: File = {
       id: 'source-file',
@@ -51,22 +49,30 @@ describe('Process Formalization Signature Preview Use Case', () => {
     sourceReader.findDocumentVersion.mockResolvedValue({
       documentId: 'document-id',
       documentVersionId: 'version-id',
+      documentSpecificationId: 'specification-id',
       name: 'Contrato',
       reviewStatus: 'approved',
       fileId: sourceFile.id,
     })
-    storage.get.mockResolvedValue({
-      file: sourceFile,
-      content: new Uint8Array([1, 2, 3]),
-    })
-    converter.convert.mockResolvedValue({
+    const pdfFile: File = {
+      ...sourceFile,
+      id: 'frozen-pdf',
+      fileName: 'frozen.pdf',
       contentType: 'application/pdf',
+      sizeInBytes: 4,
+    }
+    storage.get.mockResolvedValue({
+      file: pdfFile,
       content: new Uint8Array([37, 80, 68, 70]),
-      converterVersion: 'v1',
     })
-    inspector.inspect.mockImplementation(async (content) => {
-      structuredClone(content, { transfer: [content.buffer] })
-      return { pageCount: 1, pages: [{ page: 1, width: 612, height: 792 }] }
+    freezeService.freeze.mockResolvedValue({
+      id: 'frozen-id', documentId: 'document-id', documentVersionId: 'version-id',
+      documentVersionNumber: 1, documentSpecificationId: 'specification-id', source: 'manual',
+      sourceFileId: sourceFile.id, pdfFileId: pdfFile.id, sourceSha256: 'a'.repeat(64),
+      pdfSha256: 'b'.repeat(64), converterVersion: 'v1', pageCount: 1,
+      pages: [{ page: 1, width: 612, height: 792 }], byteSize: 4,
+      approvedByCollaboratorId: 'reviewer', approvedAt: TEST_NOW, frozenAt: TEST_NOW,
+      createdAt: TEST_NOW,
     })
     storage.save.mockResolvedValue({
       ...sourceFile,
@@ -82,8 +88,7 @@ describe('Process Formalization Signature Preview Use Case', () => {
         repository,
         sourceReader,
         storage,
-        converter,
-        inspector,
+        freezeService,
         datetimeProvider,
       ).execute({
         formalizationId: formalization.id,

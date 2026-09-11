@@ -1,10 +1,8 @@
 import type {
-  FormalizationDocumentPdfConversion,
-  FormalizationDocumentPdfConversionResult,
-} from '../domain/structures'
+  DocumentPdfConversion,
+  DocumentPdfConversionResult,
+} from '../../document-production/domain/structures'
 
 export interface DocumentPdfConverter {
-  convert(
-    input: FormalizationDocumentPdfConversion,
-  ): Promise<FormalizationDocumentPdfConversionResult>
+  convert(input: DocumentPdfConversion): Promise<DocumentPdfConversionResult>
 }

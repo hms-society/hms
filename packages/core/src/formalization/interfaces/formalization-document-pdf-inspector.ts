@@ -1,5 +1,5 @@
-import type { FormalizationDocumentPdfInspection } from '../domain/structures'
+import type { DocumentPdfInspection } from '../../document-production/domain/structures'
 
 export interface FormalizationDocumentPdfInspector {
-  inspect(content: Uint8Array): Promise<FormalizationDocumentPdfInspection>
+  inspect(content: Uint8Array): Promise<DocumentPdfInspection>
 }

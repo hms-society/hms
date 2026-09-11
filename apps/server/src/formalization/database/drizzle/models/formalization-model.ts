@@ -62,6 +62,9 @@ export const formalizationModel = pgTable(
       withTimezone: true,
       mode: 'date',
     }),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
+    completedByCollaboratorId: uuid('completed_by_collaborator_id'),
+    contractingConfirmationKey: uuid('contracting_confirmation_key'),
     cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'date' }),
     cancelledByCollaboratorId: uuid('cancelled_by_collaborator_id'),
     version: integer('version').notNull().default(1),
@@ -74,6 +77,9 @@ export const formalizationModel = pgTable(
   },
   (table) => [
     uniqueIndex('formalizations_intake_uq').on(table.intakeId),
+    uniqueIndex('formalizations_contracting_confirmation_key_uq')
+      .on(table.contractingConfirmationKey)
+      .where(sql`${table.contractingConfirmationKey} is not null`),
     index('formalizations_assigned_lawyer_idx').on(table.assignedLawyerId, table.status),
     check(
       'formalizations_status_check',
@@ -101,6 +107,14 @@ export const formalizationModel = pgTable(
         (${table.status} = 'cancelled' and ${table.cancelledAt} is not null and ${table.cancelledByCollaboratorId} is not null)
         or
         (${table.status} <> 'cancelled' and ${table.cancelledAt} is null and ${table.cancelledByCollaboratorId} is null)
+      )`,
+    ),
+    check(
+      'formalizations_completion_check',
+      sql`(
+        (${table.status} = 'completed' and ${table.completedAt} is not null and ${table.completedByCollaboratorId} is not null and ${table.contractingConfirmationKey} is not null)
+        or
+        (${table.status} <> 'completed' and ${table.completedAt} is null and ${table.completedByCollaboratorId} is null and ${table.contractingConfirmationKey} is null)
       )`,
     ),
   ],

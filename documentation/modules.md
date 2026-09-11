@@ -1,8 +1,8 @@
 # Responsabilidades dos Módulos
 
 Cada módulo é responsável por um conjunto claro de atribuições. Nenhum módulo
-invade o escopo de outro. Eles se comunicam por meio de eventos e referências
-compartilhadas.
+invade o escopo de outro. Eles se comunicam por meio de eventos, fronteiras
+públicas do módulo proprietário e referências compartilhadas.
 
 ---
 
@@ -22,7 +22,7 @@ Requisito de produto: [PRD — Módulo de Intake](https://plataformahms.atlassia
   dados apenas no fluxo temporário de criação para correção e nova tentativa.
 - Reflete a realização da consulta e registra a decisão de viabilidade.
 - Controla a passagem para formalização e reflete a contratação como desfecho
-  terminal.
+  terminal, registrando a data de contratação definida pelo servidor.
 - Permite e registra o encerramento sem contratação durante a jornada ativa.
 - Disponibiliza o histórico de Intakes por cliente.
 - Publica eventos relevantes para os demais módulos sem alterar seus dados
@@ -113,6 +113,9 @@ Requisito de produto: [PRD — Módulo de Produção Documental](https://platafo
   a consulta, formalização ou caso decide quando sua etapa pode avançar.
 - Preserva versões geradas por IA e versões decorrentes de edição manual como
   registros imutáveis.
+- Congela uma versão aprovada e vigente como PDF imutável para integrações
+  externas, preservando SHA-256, data de congelamento, autor da aprovação,
+  modelo de origem e número da versão.
 - Permite várias versões aprovadas, mantendo no máximo uma versão vigente por
   documento; aprovar ou rejeitar uma versão não apaga as anteriores.
 - Trata geração, revisão, aprovação, rejeição e falha como estados das versões e
@@ -199,7 +202,7 @@ Requisito de produto: [PRD — Módulo de Consulta](https://plataformahms.atlass
 ## Formalização
 
 Coordena os documentos contratuais, os signatários, as solicitações de assinatura
-e a transição entre o Intake viável e a abertura do Caso.
+e a transição entre o Intake viável e a contratação confirmada.
 
 Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/24051713).
 
@@ -232,16 +235,38 @@ Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.
 - Preserva PDFs assinados, evidências e registros de envio, reenvio e cancelamento
   sem depender do armazenamento permanente do provedor.
 - Habilita a confirmação da contratação somente depois que todos os documentos
-  estão assinados e solicita a abertura idempotente do Caso.
-- Muda para `Concluída` e sinaliza o Intake como `Contratado` somente depois da
-  abertura bem-sucedida do Caso; em caso de falha, permanece `Em andamento` e
-  permite nova tentativa sem duplicar o Caso.
+  estão assinados.
+- Muda para `Concluída` e sinaliza o Intake como `Contratado`, com a mesma data
+  autoritativa do servidor, por meio da fronteira pública de contratação mantida
+  pelo próprio Intake e dentro de uma operação atômica e idempotente que não
+  cria, solicita nem exige um Caso. A Formalização não importa tabelas,
+  repositórios ou mapeadores internos do Intake.
+- Disponibiliza o acompanhamento de assinaturas em modo somente leitura para
+  colaboradores ativos e elegíveis já vinculados como signatários e para
+  administradores, sem ampliar o acesso às condições comerciais ou ao conteúdo
+  documental.
 - Muda para `Cancelada` quando o Intake é encerrado sem contratação, cancela as
   solicitações ainda abertas e preserva todo o histórico produzido.
 
 A Formalização não edita o conteúdo dos documentos, não mantém o cadastro oficial
 de pessoas ou consentimentos, não envia mensagens diretamente pelos canais, não
 define a equipe do Caso e não administra o andamento jurídico após a contratação.
+
+---
+
+## Gestão de Casos
+
+Mantém os Casos jurídicos criados por fluxos próprios depois da contratação,
+sem converter o Intake ou a Formalização em Caso.
+
+- Cria um Caso somente por comando explícito do fluxo proprietário; a
+  contratação não dispara criação implícita.
+- Mantém identificador público, estado, área, tema, equipe, permissões e
+  andamento jurídico do Caso.
+- Disponibiliza uma fronteira pública de leitura para localizar o Caso
+  relacionado a um Intake e retornar apenas o resumo autorizado.
+- Não permite que Intake ou Formalização acessem diretamente seus repositórios
+  ou alterem seu ciclo de vida.
 
 ---
 
