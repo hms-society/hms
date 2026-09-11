@@ -1,15 +1,6 @@
-import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/ui/shadcn/breadcrumb'
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 
@@ -47,27 +38,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
   } = useMyCasePage({ caseId })
 
   return (
-    <div className='flex w-full flex-col gap-5 pb-10 font-sans'>
-      <Breadcrumb className='text-[14px]'>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Anchor route='home'>Início</Anchor>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Anchor route='lawyerCases'>Meus casos</Anchor>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{displayCaseId}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
+    <div className='flex w-full flex-col gap-5 pb-10 font-sans mt-5'>
       <section className='rounded-lg border border-border bg-secondary px-5 py-4 shadow-xs'>
         <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
           <div className='flex min-w-0 flex-col gap-1.5'>
