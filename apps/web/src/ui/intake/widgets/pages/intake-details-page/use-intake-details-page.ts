@@ -28,6 +28,8 @@ export type IntakeDetailsContentController = {
   onClosureNotesChange: (notes: string) => void
   onConfirmClosure: () => void
   onStartFormalization: () => void
+  onRetryFormalization: () => void
+  onRetryCase: () => void
 }
 
 export function useIntakeDetailsPage(intakeId: string) {
@@ -85,6 +87,8 @@ export function useIntakeDetailsPage(intakeId: string) {
       onConfirmClosure: handleConfirmClosure,
       onStartFormalization: () =>
         startFormalizationMutation.mutate(intakeQuery.data.intake.id),
+      onRetryFormalization: () => void intakeQuery.refetch(),
+      onRetryCase: () => void intakeQuery.refetch(),
     } satisfies IntakeDetailsContentController,
   }
 }

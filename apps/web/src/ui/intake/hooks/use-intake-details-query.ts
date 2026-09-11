@@ -6,6 +6,8 @@ import type {
 import type { LegalArea, LegalTopic } from '@hms/core/legal-catalog/domain/entities'
 import type { Intake } from '@hms/core/intake/domain/entities'
 import type { RestResponse } from '@hms/core/shared/responses/rest-response'
+import type { FormalizationCompletionSummary } from '@hms/core/formalization/domain/structures'
+import type { LegalCaseSummary } from '@hms/core/case-management/domain/structures'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
@@ -17,11 +19,23 @@ export type IntakeDetailsData = {
   legalTopic?: LegalTopic
   previousIntakes: readonly Intake[]
   consultationId?: string
+  formalizationCompletion?: FormalizationCompletionSummary
+  legalCase?: LegalCaseSummary
+  caseLegalArea?: LegalArea
+  casePrimaryLawyer?: CollaboratorSummary
+  formalizationCompletionUnavailable: boolean
+  legalCaseUnavailable: boolean
 }
 
 export function useIntakeDetailsQuery(intakeId: string) {
-  const { identityService, intakeService, legalCatalogService, consultationService } =
-    useRestContext()
+  const {
+    caseManagementService,
+    formalizationService,
+    identityService,
+    intakeService,
+    legalCatalogService,
+    consultationService,
+  } = useRestContext()
 
   return useQuery({
     queryKey: ['intakes', 'detail', intakeId],
@@ -57,6 +71,26 @@ export function useIntakeDetailsQuery(intakeId: string) {
         : undefined
       const legalTopic = topics?.find((topic) => topic.id === intake.legalTopicId)
 
+      const [completionProjection, caseProjection] = await Promise.all([
+        getOptionalProjection<FormalizationCompletionSummary | null>(
+          formalizationService?.getCompletionByIntake(intake.id),
+        ),
+        getOptionalProjection<LegalCaseSummary | null>(
+          caseManagementService?.getByIntakeId(intake.id),
+        ),
+      ])
+
+      const [caseLegalArea, casePrimaryLawyer] = await Promise.all([
+        Promise.resolve(
+          legalAreas?.find((area) => area.id === caseProjection.value?.legalAreaId),
+        ),
+        caseProjection.value?.primaryLawyerId
+          ? getOptionalBody<CollaboratorSummary>(
+              identityService.getCollaborator(caseProjection.value.primaryLawyerId),
+            )
+          : Promise.resolve(undefined),
+      ])
+
       return {
         intake,
         client,
@@ -65,9 +99,30 @@ export function useIntakeDetailsQuery(intakeId: string) {
         legalTopic,
         previousIntakes,
         consultationId: consultation?.id,
+        formalizationCompletion: completionProjection.value ?? undefined,
+        legalCase: caseProjection.value ?? undefined,
+        caseLegalArea,
+        casePrimaryLawyer,
+        formalizationCompletionUnavailable: completionProjection.unavailable,
+        legalCaseUnavailable: caseProjection.unavailable,
       } satisfies IntakeDetailsData
     },
   })
+}
+
+async function getOptionalProjection<Body>(
+  request: Promise<RestResponse<Body>> | undefined,
+): Promise<{ value: Body | undefined; unavailable: boolean }> {
+  if (!request) return { value: undefined, unavailable: true }
+
+  try {
+    const response = await request
+    if (response.isFailure) return { value: undefined, unavailable: true }
+
+    return { value: response.body, unavailable: false }
+  } catch {
+    return { value: undefined, unavailable: true }
+  }
 }
 
 async function getOptionalBody<Body>(

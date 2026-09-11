@@ -8,6 +8,7 @@ import { CloseWithoutContractAction } from './close-without-contract-action'
 import { FormalizationDocumentsSection } from './formalization-documents-section'
 import { FormalizationContextHeader } from './formalization-context-header'
 import { FormalizationSendingConfigurationSummary } from './formalization-sending-configuration-summary'
+import { ConfirmContractingAction } from './confirm-contracting-action'
 import {
   FormalizationLoadingPanel,
   FormalizationStatePanel,
@@ -53,7 +54,7 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
         fields={fields}
         answers={page.effectiveAnswers}
         isClosed={formalization.contractFormState === 'closed'}
-        isReadOnly={isTerminal}
+        isReadOnly={isTerminal || page.isSignatureSendingLocked}
         error={formError}
         isPending={
           page.actions.saveDraft.isPending ||
@@ -88,14 +89,28 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
         formalization={formalization}
         intake={data.intake}
         isTerminal={isTerminal}
+        isSignatureSendingLocked={page.isSignatureSendingLocked}
         production={page.documentProduction}
       />
       {page.documentProduction.isPackageConfirmed && (
         <FormalizationSendingConfigurationSummary
           formalizationId={formalizationId}
           isPackageConfirmed
+          signatureStatus={page.signatureSending.status?.status}
           configuration={page.signatureConfiguration.configuration}
           controller={page.signatureConfiguration}
+        />
+      )}
+      {page.documentProduction.isPackageConfirmed && (
+        <ConfirmContractingAction
+          intakeVersion={data.intake.version}
+          status={page.signatureSending.status ?? null}
+          isLoading={
+            page.signatureSending.isLoadingReview || page.signatureSending.isLoadingStatus
+          }
+          isPending={page.signatureSending.isConfirmingContracting}
+          error={page.signatureSending.confirmContractingError}
+          onConfirm={page.signatureSending.confirmContracting}
         />
       )}
       <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end'>
@@ -103,18 +118,6 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
           isEnabled={formalization.status === 'in_progress'}
           mutation={page.closeWithoutContract}
         />
-        <div className='flex justify-end'>
-          <Button
-            variant='secondary'
-            disabled
-            aria-describedby='formalization-contract-confirmation-help'
-          >
-            Confirmar contratação
-          </Button>
-          <span id='formalization-contract-confirmation-help' className='sr-only'>
-            A confirmação da contratação ficará disponível em uma etapa futura.
-          </span>
-        </div>
       </div>
     </main>
   )
