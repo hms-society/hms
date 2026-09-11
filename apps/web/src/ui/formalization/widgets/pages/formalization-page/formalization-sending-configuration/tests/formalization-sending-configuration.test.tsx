@@ -89,6 +89,17 @@ function createSendingController(
   } as FormalizationSignatureSendingController
 }
 
+const statusDefaults = {
+  formalizationId: 'formalization-1',
+  formalizationStatus: 'in_progress' as const,
+  formalizationVersion: 2,
+  progressPercentage: 0,
+  canConfirmContracting: false,
+  viewerMode: 'operator' as const,
+  permissions: { canOperate: true, canViewDocumentContent: true },
+  documents: [],
+}
+
 const configuration = {
   formalizationId: 'formalization-1',
   version: 2,
@@ -773,6 +784,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
             },
           },
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'confirmed',
             version: 5,
@@ -838,6 +850,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
             },
           },
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'sending',
             version: 2,
@@ -895,6 +908,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
             },
           },
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'sending',
             version: 2,
@@ -948,6 +962,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
             },
           },
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'sending',
             version: 2,
@@ -1008,6 +1023,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
             },
           },
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'cancelled',
             version: 3,
@@ -1117,6 +1133,7 @@ describe('FormalizationSendingConfigurationPanel', () => {
         sending={createSendingController({
           review: cancelledReview,
           status: {
+            ...statusDefaults,
             requestId: 'request-1',
             status: 'cancelled',
             version: 3,
