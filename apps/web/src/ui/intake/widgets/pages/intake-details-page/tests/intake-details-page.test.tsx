@@ -104,6 +104,8 @@ function createDetails(status: Intake['status'] = baseIntake.status): IntakeDeta
     legalTopic: { id: 'topic-1', name: 'Contratos' } as never,
     previousIntakes: [],
     consultationId: 'consultation-1',
+    formalizationCompletionUnavailable: false,
+    legalCaseUnavailable: false,
   }
 }
 

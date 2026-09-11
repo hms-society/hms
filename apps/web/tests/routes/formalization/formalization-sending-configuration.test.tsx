@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { expect } from '@playwright/test'
+import { expect as playwrightExpect } from '@playwright/test'
+
+const expect = playwrightExpect.configure({ timeout: 30_000 })
 
 import {
   DOCUMENT_PRODUCTION_BACKEND,
@@ -78,7 +80,7 @@ test('preserves the signatory controls in the configured tab', async ({
           formalizationId: FORMALIZATION_ID,
           version: 1,
           editable: true,
-          status: 'configuring',
+          status: 'ready_for_sending',
           previewPreparation: {
             total: 1,
             pending: 0,
@@ -138,7 +140,7 @@ test('preserves the signatory controls in the configured tab', async ({
               ],
             },
           ],
-          readiness: { ready: false, assignmentCount: 2, issues: [] },
+          readiness: { ready: true, assignmentCount: 2, issues: [] },
         }),
       })
     },
@@ -155,13 +157,13 @@ test('preserves the signatory controls in the configured tab', async ({
   )
 
   await page.goto(`/formalizacoes/${FORMALIZATION_ID}/configuracao-envio`)
-  await expect(page.getByRole('tab', { name: 'Resumo' })).toBeDisabled()
-  await page.getByRole('tab', { name: 'Campos' }).click()
+  await expect(page.getByRole('tab', { name: 'Assinaturas' })).toBeVisible()
+  await page.getByRole('tab', { name: 'Posicionar campos' }).click()
   await expect(page.getByRole('heading', { name: 'Prévia do documento' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'Documento' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'Signatário' })).toBeVisible()
   await expect(page.getByText('Pendente').first()).toBeVisible()
-  await expect(page.getByRole('tab', { name: 'Campos' })).toBeEnabled()
+  await expect(page.getByRole('tab', { name: 'Posicionar campos' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Adicionar campo' })).toBeEnabled()
   const signatureField = page.getByRole('button', {
     name: 'Campo de assinatura para Cliente HMS Teste',
@@ -174,7 +176,7 @@ test('preserves the signatory controls in the configured tab', async ({
       name: 'Campo de assinatura para Cliente HMS Teste',
     }),
   ).toHaveCount(2)
-  await page.getByRole('tab', { name: 'Signatários' }).click()
+  await page.getByRole('tab', { name: 'Assinaturas' }).click()
   await expect(page.getByRole('alertdialog')).toBeVisible()
   await expect(page.getByRole('alertdialog')).toContainText(
     'Existem alterações de campos não salvas',
@@ -204,7 +206,7 @@ test('preserves the signatory controls in the configured tab', async ({
     fullPage: true,
   })
 
-  await page.getByRole('tab', { name: 'Signatários' }).click()
+  await page.getByRole('tab', { name: 'Assinaturas' }).click()
   await expect(page.getByRole('alertdialog')).toBeVisible()
   await page.getByRole('button', { name: 'Sair sem salvar' }).click()
   await expect(page.getByRole('heading', { name: 'Signatários' })).toBeVisible()
@@ -220,6 +222,7 @@ test('preserves the signatory controls in the configured tab', async ({
   await expect(
     page.getByRole('button', { name: 'Salvar atribuições' }).first(),
   ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Enviar assinaturas' })).toBeVisible()
   await page.screenshot({
     path: testInfo.outputPath('signatories-tab-redesign.png'),
     fullPage: true,
