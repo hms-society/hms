@@ -13,6 +13,7 @@ import {
 import { FormalizationDatabaseModule } from '@/formalization/database/formalization-database.module'
 import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 import { IdentityModule } from '@/identity/identity.module'
+import { IntakeModule } from '@/intake/intake.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -25,6 +26,7 @@ export const COMMUNICATION_INNGEST_FUNCTIONS = Symbol('COMMUNICATION_INNGEST_FUN
     FormalizationDatabaseModule,
     FormalizationProvisionModule,
     IdentityModule,
+    IntakeModule,
     ProvisionModule,
     SharedDatabaseModule,
     SharedMessagingModule,

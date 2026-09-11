@@ -38,6 +38,10 @@ export class ClientsWithIntakesRepository implements ClientsRepository {
     return this.clientsRepository.findByPhone(...args)
   }
 
+  findByPhoneSuffix(...args: Parameters<ClientsRepository['findByPhoneSuffix']>) {
+    return this.clientsRepository.findByPhoneSuffix(...args)
+  }
+
   replace(...args: Parameters<ClientsRepository['replace']>) {
     return this.clientsRepository.replace(...args)
   }
