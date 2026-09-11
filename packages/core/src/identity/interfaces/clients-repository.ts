@@ -8,6 +8,7 @@ export interface ClientsRepository {
   findById(clientId: string): Promise<Client | undefined>
   findByTaxId(taxId: TaxId): Promise<Client | undefined>
   findByPhone(phone: string): Promise<Client[]>
+  findByPhoneSuffix(phoneSuffix: string): Promise<Client[]>
   replace(
     clientId: string,
     changes: ClientUpdate,

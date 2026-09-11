@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Inject,
   UseGuards,
   UsePipes,
   Req,
@@ -11,22 +12,32 @@ import {
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import { ZodValidationPipe } from 'nestjs-zod'
+import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
+import type {
+  ClientsRepository,
+  CollaboratorsRepository,
+} from '@hms/core/identity/interfaces'
+import type { IntakesRepository } from '@hms/core/intake/interfaces'
+
+import { COMMUNICATION_REPOSITORIES } from '@/communication/constants/communication-repositories'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { AuthGuard } from '@/identity/guards'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { SendCommunicationDto } from '../dtos/send-communication.dto'
-import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
-import { clientModel } from '@/identity/database/drizzle/models/client-model'
-import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
-import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
-import { eq, desc } from 'drizzle-orm'
-import { encrypt } from '@/shared/utils/crypto'
 
 @Controller('communications')
 @UseGuards(AuthGuard)
 export class SendCommunicationController {
   constructor(
-    private readonly drizzleClient: DrizzleClient,
+    @Inject(COMMUNICATION_REPOSITORIES.privateMessages)
+    private readonly privateMessagesRepository: PrivateMessagesRepository,
+    @Inject(IDENTITY_REPOSITORIES.clients)
+    private readonly clientsRepository: ClientsRepository,
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
+    private readonly collaboratorsRepository: CollaboratorsRepository,
+    @Inject(INTAKE_REPOSITORIES.intakes)
+    private readonly intakesRepository: IntakesRepository,
     private readonly whatsappProvider: WhatsappProvider,
   ) {}
 
@@ -41,38 +52,15 @@ export class SendCommunicationController {
   })
   @UsePipes(ZodValidationPipe)
   async handle(@Body() body: SendCommunicationDto, @Req() req: any) {
-    const db = this.drizzleClient.requireDatabase()
-
-    const [client] = await db
-      .select({
-        id: clientModel.id,
-        phone: clientModel.phone,
-      })
-      .from(clientModel)
-      .where(eq(clientModel.id, body.clientId))
-      .limit(1)
+    const client = await this.clientsRepository.findById(body.clientId)
 
     if (!client) {
       throw new NotFoundException('Client not found')
     }
 
-    const [collaborator] = await db
-      .select({
-        id: collaboratorModel.id,
-        professionalName: collaboratorModel.professionalName,
-      })
-      .from(collaboratorModel)
-      .where(eq(collaboratorModel.userId, req.user.id))
-      .limit(1)
+    const collaborator = await this.collaboratorsRepository.findByUserId(req.user.id)
 
-    const [intake] = await db
-      .select({
-        id: intakeModel.id,
-      })
-      .from(intakeModel)
-      .where(eq(intakeModel.clientId, body.clientId))
-      .orderBy(desc(intakeModel.createdAt))
-      .limit(1)
+    const [intake] = await this.intakesRepository.findByClientId(body.clientId)
 
     let externalId: string | undefined
 
@@ -87,23 +75,21 @@ export class SendCommunicationController {
       externalId = result.externalMessageId
     }
 
-    const [record] = await db
-      .insert(privateMessageModel)
-      .values({
-        clientId: body.clientId,
-        collaboratorId: collaborator?.id || req.user.id,
-        intakeId: intake?.id || body.clientId,
-        clientPhone: client.phone,
-        direction: 'outbound',
-        content: encrypt(body.content),
-      })
-      .returning()
+    const record = await this.privateMessagesRepository.add({
+      clientId: body.clientId,
+      collaboratorId: collaborator?.id || req.user.id,
+      intakeId: intake?.id || body.clientId,
+      clientPhone: client.phone,
+      direction: 'outgoing',
+      content: body.content,
+      fileIds: [],
+    })
 
     return {
       id: record.id,
       channel: body.channel,
-      direction: record.direction,
-      content: body.content,
+      direction: 'outbound',
+      content: record.content ?? body.content,
       createdAt: record.createdAt.toISOString(),
       author: collaborator?.professionalName || req.user.email || 'Advogado',
       externalId,
