@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parseDocumentSpecificationsSearch } from './index'
+
+import { parseDocumentSpecificationsSearch } from '../index'
 
 describe('document specifications route search validation', () => {
   it('drops invalid legal catalog ids while preserving valid UUIDs', () => {

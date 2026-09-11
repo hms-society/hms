@@ -1,10 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { WhatsappWebhookController } from './whatsapp-webhook.controller'
-import { EnvProvider } from '../provision/env/env-provider'
-import { InngestClient } from '../messaging/inngest/inngest-client'
-import type { Request, Response } from 'express'
 import { ForbiddenException, HttpStatus } from '@nestjs/common'
 import { createHmac } from 'node:crypto'
+import type { Request, Response } from 'express'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { InngestClient } from '../../messaging/inngest/inngest-client'
+import { EnvProvider } from '../../provision/env/env-provider'
+import { WhatsappWebhookController } from '../whatsapp-webhook.controller'
 
 describe('WhatsappWebhookController', () => {
   let controller: WhatsappWebhookController
@@ -70,18 +71,14 @@ describe('WhatsappWebhookController', () => {
   describe('handleWebhook (POST)', () => {
     it('should successfully process a valid payload with correct signature', async () => {
       const payload = { object: 'whatsapp_business_account', entry: [] }
-      const payloadString = JSON.stringify(payload)
-      const rawBody = Buffer.from(payloadString)
-
+      const rawBody = Buffer.from(JSON.stringify(payload))
       const expectedHash = createHmac('sha256', 'secret-456')
         .update(rawBody)
         .digest('hex')
       const signature = `sha256=${expectedHash}`
 
       const mockRequest = {
-        headers: {
-          'x-hub-signature-256': signature,
-        },
+        headers: { 'x-hub-signature-256': signature },
         rawBody,
         body: payload,
       } as unknown as Request
@@ -90,10 +87,7 @@ describe('WhatsappWebhookController', () => {
 
       expect(result).toEqual({ status: 'success' })
       expect(mockInngestSend).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'whatsapp/event.received',
-          data: payload,
-        }),
+        expect.objectContaining({ name: 'whatsapp/event.received', data: payload }),
       )
     })
 
@@ -110,12 +104,9 @@ describe('WhatsappWebhookController', () => {
     })
 
     it('should throw ForbiddenException if signature does not match', async () => {
-      const rawBody = Buffer.from('some payload')
       const mockRequest = {
-        headers: {
-          'x-hub-signature-256': 'sha256=invalidsignaturehere',
-        },
-        rawBody,
+        headers: { 'x-hub-signature-256': 'sha256=invalidsignaturehere' },
+        rawBody: Buffer.from('some payload'),
         body: {},
       } as unknown as Request
 

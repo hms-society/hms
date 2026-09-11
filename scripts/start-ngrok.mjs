@@ -1,10 +1,13 @@
-const { spawn } = require('node:child_process')
-const fs = require('node:fs')
-const path = require('node:path')
+import { spawn } from 'node:child_process'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const scriptsDirectory = dirname(fileURLToPath(import.meta.url))
 
 function loadEnvFile(filePath) {
-  if (!fs.existsSync(filePath)) return {}
-  const content = fs.readFileSync(filePath, 'utf8')
+  if (!existsSync(filePath)) return {}
+  const content = readFileSync(filePath, 'utf8')
   const env = {}
   for (const line of content.split('\n')) {
     const trimmed = line.trim()
@@ -25,8 +28,8 @@ function loadEnvFile(filePath) {
   return env
 }
 
-const rootEnv = loadEnvFile(path.join(__dirname, '..', '.env'))
-const serverEnv = loadEnvFile(path.join(__dirname, '..', 'apps', 'server', '.env'))
+const rootEnv = loadEnvFile(join(scriptsDirectory, '..', '.env'))
+const serverEnv = loadEnvFile(join(scriptsDirectory, '..', 'apps', 'server', '.env'))
 
 const env = { ...rootEnv, ...serverEnv, ...process.env }
 

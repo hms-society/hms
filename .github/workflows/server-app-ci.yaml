@@ -80,13 +80,9 @@ jobs:
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter server check:types
 
-      - name: Test
+      - name: Integration tests
         if: steps.scope.outputs.relevant == 'true'
-        run: pnpm --filter server test
-
-      - name: Inngest job integration tests
-        if: steps.scope.outputs.relevant == 'true'
-        run: pnpm --filter server test:inngest
+        run: pnpm --filter server test:integration
 
       - name: Build
         if: steps.scope.outputs.relevant == 'true'

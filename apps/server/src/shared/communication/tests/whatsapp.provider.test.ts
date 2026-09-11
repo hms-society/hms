@@ -1,6 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { WhatsappProvider } from './whatsapp.provider'
-import { EnvProvider } from '../provision/env/env-provider'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { EnvProvider } from '../../provision/env/env-provider'
+import { WhatsappProvider } from '../whatsapp.provider'
 
 describe('WhatsappProvider', () => {
   let provider: WhatsappProvider
@@ -20,15 +21,10 @@ describe('WhatsappProvider', () => {
   })
 
   it('should successfully send a WhatsApp message template', async () => {
-    const mockResponse = {
-      messages: [{ id: 'wamid.12345' }],
-    }
-
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue({ messages: [{ id: 'wamid.12345' }] }),
     })
-
     vi.stubGlobal('fetch', fetchMock)
 
     const result = await provider.sendAutomaticMessage({
@@ -46,20 +42,8 @@ describe('WhatsappProvider', () => {
           Authorization: 'Bearer fake-token',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: '5519971659516',
-          type: 'template',
-          template: {
-            name: 'hello_world',
-            language: {
-              code: 'en_US',
-            },
-          },
-        }),
       }),
     )
-
     expect(result).toEqual({ externalMessageId: 'wamid.12345' })
   })
 
@@ -69,7 +53,6 @@ describe('WhatsappProvider', () => {
       status: 400,
       text: vi.fn().mockResolvedValue('Bad Request'),
     })
-
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(

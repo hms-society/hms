@@ -57,6 +57,8 @@ dist
 .context/
 .serena/
 .opencode/
+.obsidian/
+.codegraph/
 opencode.json
 .mcp.json
 prompt.md
@@ -65,7 +67,6 @@ CLAUDE.md
 GEMINI.md
 AGENTS.local.md
 .playwright-cli
-.obsidian/
 
 # MCP's
 .playwright-mcp

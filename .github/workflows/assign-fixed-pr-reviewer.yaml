@@ -1,0 +1,141 @@
+name: Assign fixed PR reviewer
+
+on:
+  workflow_run:
+    workflows:
+      - Core Package CI
+      - Server App CI
+      - Web App CI
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: assign-fixed-pr-reviewer-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
+
+jobs:
+  assign-reviewer:
+    name: Request KauanQuinzote
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Wait for all CI workflows
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          expected_workflows=(
+            'Core Package CI'
+            'Server App CI'
+            'Web App CI'
+          )
+
+          for attempt in $(seq 1 180); do
+            runs="$(gh api "repos/$REPOSITORY/actions/runs?head_sha=$HEAD_SHA&event=pull_request&per_page=100")"
+            all_succeeded=true
+            waiting_for_workflow=false
+
+            for workflow_name in "${expected_workflows[@]}"; do
+              workflow_run="$(jq --compact-output \
+                --arg workflow_name "$workflow_name" \
+                '[.workflow_runs[] | select(.name == $workflow_name)] |
+                 sort_by([.created_at, (.run_attempt // 0)]) | last // empty' \
+                <<< "$runs")"
+
+              if [ -z "$workflow_run" ]; then
+                echo "$workflow_name: waiting for workflow run"
+                all_succeeded=false
+                waiting_for_workflow=true
+                continue
+              fi
+
+              status="$(jq --raw-output '.status' <<< "$workflow_run")"
+              conclusion="$(jq --raw-output '.conclusion // ""' <<< "$workflow_run")"
+
+              if [ "$status" != 'completed' ]; then
+                echo "$workflow_name: $status"
+                all_succeeded=false
+                waiting_for_workflow=true
+                continue
+              fi
+
+              if [ "$conclusion" != 'success' ]; then
+                echo "$workflow_name: $conclusion; reviewer will not be requested."
+                exit 0
+              fi
+
+              echo "$workflow_name: success"
+            done
+
+            if [ "$all_succeeded" = 'true' ]; then
+              exit 0
+            fi
+
+            if [ "$waiting_for_workflow" = 'true' ]; then
+              echo "Waiting for all HMS CI workflows (attempt $attempt/180)."
+              sleep 10
+            fi
+          done
+
+          echo 'Timed out waiting for all HMS CI workflows.'
+          exit 1
+
+      - name: Request KauanQuinzote as the only reviewer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          pull_requests="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "repos/$REPOSITORY/commits/$HEAD_SHA/pulls" \
+            --jq '.[] | select(.state == "open") | .number')"
+
+          if [ -z "$pull_requests" ]; then
+            echo "No pull request found for $HEAD_SHA; nothing to update."
+            exit 0
+          fi
+
+          while IFS= read -r pr_number; do
+            [ -n "$pr_number" ] || continue
+
+            requested="$(gh api "repos/$REPOSITORY/pulls/$pr_number/requested_reviewers")"
+            users="$(jq -c '[.users[].login]' <<< "$requested")"
+            teams="$(jq -c '[.teams[].slug]' <<< "$requested")"
+
+            if [ "$(jq 'length' <<< "$users")" -gt 0 ] || [ "$(jq 'length' <<< "$teams")" -gt 0 ]; then
+              jq -n \
+                --argjson reviewers "$users" \
+                --argjson team_reviewers "$teams" \
+                '{reviewers: $reviewers, team_reviewers: $team_reviewers}' |
+                gh api \
+                  --method DELETE \
+                  "repos/$REPOSITORY/pulls/$pr_number/requested_reviewers" \
+                  --input -
+            fi
+
+            jq -n \
+              '{reviewers: ["KauanQuinzote"], team_reviewers: []}' |
+              gh api \
+                --method POST \
+                "repos/$REPOSITORY/pulls/$pr_number/requested_reviewers" \
+                --input -
+
+            echo "Requested KauanQuinzote as the only reviewer for PR #$pr_number."
+          done <<< "$pull_requests"

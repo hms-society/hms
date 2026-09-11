@@ -52,11 +52,8 @@ to browse the Scalar REST API reference generated from the NestJS controllers.
 ## Run tests
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
+# all Server tests, including REST controllers, Inngest jobs and external services
+$ pnpm run test:integration
 
 # test coverage
 $ pnpm run test:coverage
