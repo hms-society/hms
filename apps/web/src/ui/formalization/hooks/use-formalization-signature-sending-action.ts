@@ -87,6 +87,13 @@ export function useFormalizationSignatureSending(
     enabled: Boolean(formalizationId) && enabled,
     retry: false,
     refetchInterval: (query) => {
+      if (
+        reviewQuery.data !== undefined &&
+        reviewQuery.data.currentRequest === undefined
+      ) {
+        return false
+      }
+
       return getSignatureSendingPollInterval(
         query.state.data?.status ?? reviewQuery.data?.currentRequest?.status,
         isCancellationPendingLocally ||

@@ -89,14 +89,12 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
         formalization={formalization}
         intake={data.intake}
         isTerminal={isTerminal}
-        isSignatureSendingLocked={page.isSignatureSendingLocked}
         production={page.documentProduction}
       />
       {page.documentProduction.isPackageConfirmed && (
         <FormalizationSendingConfigurationSummary
           formalizationId={formalizationId}
           isPackageConfirmed
-          signatureStatus={page.signatureSending.status?.status}
           configuration={page.signatureConfiguration.configuration}
           controller={page.signatureConfiguration}
         />
