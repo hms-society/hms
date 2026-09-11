@@ -187,6 +187,12 @@ Implementations belong in the application adapter layer, under
 - contain no business decisions, authentication state, caching, or persistence
   logic.
 
+Web REST services do not receive dedicated test files. Their methods are thin
+transport adapters; verify their observable HTTP method, path, query/body,
+response mapping, and failure propagation through the consuming widget, route,
+or browser integration boundary. Do not create `apps/web/src/rest/services/tests/`
+or any `*.test.ts`/`*.test.tsx` file under `apps/web/src/rest/services`.
+
 Use a factory so the transport dependency can be replaced in tests or configured
 at the application boundary:
 

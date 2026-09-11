@@ -6,7 +6,6 @@ description: >
 
 <!-- Auto-generated from documentation/prompts/create-pr-prompt.md -->
 
-
 # Create or Update Pull Requests
 
 Publish an HMS delivery through one or more coherent, size-compliant GitHub pull requests.

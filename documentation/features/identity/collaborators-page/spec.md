@@ -570,7 +570,7 @@ publicadas: reenvio para `invited` e inativação para `active`/`invited`.
    externas que o serviço local não consegue produzir deterministicamente.
 8. testes de serviço REST, hooks e widgets no web app.
 9. `pnpm --filter web generate-routes` antes dos checks do web app.
-10. `pnpm --filter server test:e2e` quando o ambiente de integração estiver
+10. `pnpm --filter server test:integration` quando o ambiente de integração estiver
     disponível.
 
 ## Navegador

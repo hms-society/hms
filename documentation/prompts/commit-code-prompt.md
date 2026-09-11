@@ -135,7 +135,7 @@ pnpm --filter web test
 
 pnpm --filter server lint
 pnpm --filter server check-types
-pnpm --filter server test
+pnpm --filter server test:integration
 
 pnpm --filter @hms/core lint
 pnpm --filter @hms/core check-types

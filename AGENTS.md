@@ -1,12 +1,14 @@
-Guidance for AI coding agents working in this repository (HMS).
+# HMS Agent Guide
 
-## MCP availability and usage
+Guidance for AI coding agents working in this repository.
+
+## MCPs and CLI tools
 
 The development environment provides the following MCP servers. Use them when
 the task matches their purpose; do not invoke them for repository work that can
 be completed reliably from the local source and tooling alone.
 
-### Playwright CLI
+### Playwright CLI: browser validation
 
 Use the repository's Playwright CLI/test runner to validate browser behavior in
 `apps/web`, especially after UI, route, authentication, form, or REST
@@ -52,6 +54,36 @@ transport as sufficient evidence. Use this sequence:
    For the current seed, the administrator is
    `admin@hmsadvogados.com.br`; never assume a credential without checking the
    source and `HMS_USER_SEED_PASSWORD` first.
+
+   The Identity seed creates these accounts. On a fresh seed, newly created
+   accounts use the same `HMS_USER_SEED_PASSWORD` value; resolve it from the
+   local environment, normally `apps/server/.env`, and never copy the value
+   into source, documentation, screenshots, or logs. If an Auth user already
+   exists, confirm its current password through the local environment instead
+   of assuming the seed reran it.
+
+   | Account | Seeded identity | Browser-validation purpose |
+   | --- | --- | --- |
+   | `admin@hmsadvogados.com.br` | administrator (`admin`) | Operator path; may read and operate the Formalization. |
+   | `attendant@hmsadvogados.com.br` | attendant (`attendant`) | Active administrative collaborator; use as the forbidden/ineligible collaborator for Formalization access checks. |
+   | `lawyer@hmsadvogados.com.br` | lawyer (`lawyer`) | Default assigned lawyer and linked legal-recipient path in the standard seed. |
+   | `paralegal@hmsadvogados.com.br` | paralegal (`paralegal`) | Eligible legal collaborator; use for an unlinked-collaborator comparison unless the fixture explicitly assigns it. |
+   | `lawyer.contracts@hmsadvogados.com.br` | contracts lawyer (`lawyer`) | Additional eligible lawyer; not the default assigned lawyer. |
+   | `paralegal.documents@hmsadvogados.com.br` | documents paralegal (`paralegal`) | Additional eligible paralegal; not the default assigned collaborator. |
+   | `client@hms.br` | client user (no collaborator row) | Client-account check only; `/auth/complete-sign-in` is expected to reject it because the current HMS shell requires a collaborator. |
+
+   For role validation, start a fresh browser context for each account, open
+   `/login`, fill the email and the password resolved from
+   `HMS_USER_SEED_PASSWORD`, and submit **Entrar na plataforma**. For the six
+   collaborator accounts, wait for `/home`, verify authenticated content and a
+   successful `/auth/complete-sign-in` response, then navigate to the protected
+   route. Use `admin@hmsadvogados.com.br` for the operator path,
+   `lawyer@hmsadvogados.com.br` for the default linked legal-recipient path,
+   `paralegal@hmsadvogados.com.br` for an unlinked eligible collaborator, and
+   `attendant@hmsadvogados.com.br` for an active ineligible collaborator. After
+   each account switch, log out and create a fresh context; do not reuse cookies
+   or refresh tokens. Record the expected collaborator-completion rejection for
+   `client@hms.br` instead of treating it as a successful collaborator login.
 4. Run the CLI test or flow against `/login`, locate fields by accessible role or
    label, submit, and wait for the authenticated destination. Verify both the URL
    and authenticated content before testing a protected route.
@@ -89,7 +121,7 @@ Common recovery checks:
   after the run and leave shared Docker services unchanged unless the task
   explicitly requests teardown.
 
-### Inngest Dev MCP (`inngest-dev`)
+### Inngest Dev MCP: asynchronous jobs
 
 Use the configured local MCP at `http://localhost:9288/mcp` when investigating
 or verifying asynchronous Inngest behavior during local development. This is
@@ -111,7 +143,24 @@ and verify the expected effects through the owning application boundary.
 Classify MCP connection or discovery failures separately from application or
 job failures.
 
-### Context7 (`mcp__context7__*`)
+### CodeGraph MCP: code navigation
+
+In repositories indexed by CodeGraph (when a `.codegraph/` directory exists at
+the repository root), use CodeGraph before `rg`, `find`, or broad file reads
+when you need to understand or locate code. Skip it when the repository is not
+indexed.
+
+- **MCP tool**: use `codegraph_explore` when available. It returns relevant
+  symbols, verbatim source, and call paths, including dynamic-dispatch hops
+  that text search may miss. Include a file or symbol name when you need its
+  current line-numbered source.
+- **CLI fallback**: run `codegraph explore "<symbol names or question>"` when
+  the MCP tool is unavailable.
+
+Treat CodeGraph output as repository evidence: confirm the relevant paths and
+behavior before changing code, and use normal repository tests for validation.
+
+### Context7 MCP: current documentation
 
 Use Context7 when implementation depends on current documentation for a library,
 framework, SDK, API, CLI, or cloud service. Resolve the library identifier with
@@ -120,7 +169,7 @@ with `mcp__context7__query_docs`. Prefer Context7 over relying on memory or
 outdated examples, and do not use it as a substitute for reading repository
 source or local project rules.
 
-### Atlassian HMS (`mcp__codex_apps__atlassian_hms_*`)
+### Atlassian HMS MCP: internal product knowledge
 
 Use the Atlassian HMS MCP for internal Jira and Confluence knowledge, especially
 PRDs, product requirements, architecture decisions, and related delivery
@@ -148,15 +197,19 @@ explicitly requests that external change. If the MCP is unavailable or access is
 denied, report the limitation and continue with local sources when they are
 enough; do not present an inferred summary as the canonical PRD.
 
-### Pencil (`mcp__pencil__*`)
+### Pencil MCP: design files and visual validation
 
 Use Pencil for `.pen` files, Pencil node inspection or editing, design-system
 work, and design-to-code or visual validation tasks tied to Pencil designs.
 Before any other Pencil operation, call
 `mcp__pencil__get_editor_state` with `include_schema: true` when the current
-editor schema is not already known. `.pen` files are encrypted: never read or
-search them with shell commands, `Read`, or `Grep`; use only the Pencil MCP
-tools. Use the Pencil design skill when the task involves Pencil workflows.
+editor state and schema are not already known. `.pen` files are encrypted
+design documents: never read, search, or modify them with shell commands,
+`Read`, or `Grep`; use only the Pencil MCP tools. When implementing a Pencil
+design, read `documentation/design.md` and the applicable UI rules first, map
+Pencil values to the repository’s existing design tokens, and validate the
+rendered result in the repository’s configured browser workflow. Use the Pencil
+design skill whenever a task involves a Pencil workflow.
 
 ## Required reading
 
@@ -164,7 +217,7 @@ Before writing or changing code, read the documents below. They are the source o
 truth for how this project is meant to look, run, and be organized — do not infer
 these from the code alone.
 
-### 0. [`AGENTS.local.md`](AGENTS.local.md) — read before any task
+### Always: [`AGENTS.local.md`](AGENTS.local.md)
 
 This file contains repository-local instructions that may vary by workspace or
 execution context.
@@ -175,7 +228,7 @@ execution context.
   resolve them before starting the task. If the file does not exist or is empty,
   continue with the instructions below.
 
-### 1. [`documentation/rules/rules.md`](documentation/rules/rules.md) — read before selecting task rules
+### Always: [`documentation/rules/rules.md`](documentation/rules/rules.md)
 
 This file is the router for repository-specific implementation and testing rules.
 It applies the **dynamic context discovery** pattern so agents load rules according
@@ -188,7 +241,7 @@ to both the paths touched and the architectural behavior affected.
   whenever the task expands into another layer. Do not load every rule by default
   and do not rely only on keywords from the request.
 
-### 2. [`documentation/design.md`](documentation/design.md) — read before any UI work
+### UI work: [`documentation/design.md`](documentation/design.md)
 
 The design system for `apps/web`. Defines the full token set (colors in OKLCH,
 typography, spacing, radius, shadows) and the rationale behind them.
@@ -199,7 +252,7 @@ typography, spacing, radius, shadows) and the rationale behind them.
   family, body uses the sans family. Respect light/dark behavior. Cross-check your
   output against the documented contrast/accessibility notes.
 
-### 3. [`documentation/infrastructure.md`](documentation/infrastructure.md) — read before adding deps or wiring tech
+### Dependencies and integrations: [`documentation/infrastructure.md`](documentation/infrastructure.md)
 
 The approved technology stack across front-end, back-end, database, auth, testing,
 and tooling, with the reason each tool was chosen.
@@ -212,7 +265,7 @@ and tooling, with the reason each tool was chosen.
   library for a concern the stack already covers. If a genuinely new tool is
   needed, flag it rather than introducing it silently.
 
-### 4. [`documentation/modules.md`](documentation/modules.md) — read before any domain/feature work
+### Domain and feature work: [`documentation/modules.md`](documentation/modules.md)
 
 The bounded modules of the system (Identity, Document Engine, Case Management, and others) and the
 exact responsibilities each one owns.
@@ -224,7 +277,7 @@ exact responsibilities each one owns.
   shared references. Mirror this boundary in both `packages/core` (domain) and the
   app layers (`apps/server`, `apps/web`).
 
-### 5. [`documentation/tooling.md`](documentation/tooling.md) — read before running commands or changing config
+### Commands and configuration: [`documentation/tooling.md`](documentation/tooling.md)
 
 The developer tooling: package manager (pnpm), monorepo orchestration (Turborepo),
 linting/formatting (BiomeJS), testing (Vitest), database (drizzle-kit), git hooks,
@@ -238,6 +291,8 @@ and helper scripts.
 
 ## Workflow expectations
 
+### Before implementation
+
 - Always read `AGENTS.local.md` and the rules router first. Read the dynamically
   selected rule documents and the relevant documents above **before** starting,
   not after.
@@ -246,6 +301,9 @@ and helper scripts.
   scope, then review and integrate their results before concluding the task.
 - Re-run dynamic context discovery when implementation reaches files or behavior
   outside the initial scope.
+
+### During implementation
+
 - When a change spans UI + a new dependency + domain logic, read all of the
   applicable documents.
 - If code and documentation disagree, treat the documentation as intent and surface
@@ -253,6 +311,9 @@ and helper scripts.
 - Whenever implementation work reveals or introduces a business-rule change,
   update the corresponding PRD before concluding the task, and keep the code,
   design, and repository documentation aligned with that decision.
+
+### When repository guidance is incomplete
+
 - When dynamic context discovery identifies a recurring path, layer, or behavior
   that is not mapped by `documentation/rules/rules.md`, ask the user whether the
   convention should be codified as a rule under `documentation/rules/` before
@@ -266,3 +327,14 @@ and helper scripts.
   broad pattern like `.env*`. Prefer `git ls-files --others --ignored
   --exclude-standard -- '.env*'` or an equivalent approach that excludes tracked
   files.
+
+<!-- CODEGRAPH_START -->
+## CodeGraph
+
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
+
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
+
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+<!-- CODEGRAPH_END -->

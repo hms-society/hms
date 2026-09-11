@@ -169,6 +169,11 @@ For realtime hooks, the hook that owns a Supabase subscription must cover event
 mapping and cleanup. A higher-level hook consuming it mocks that application hook
 instead of mocking Supabase directly.
 
+Feature action/query hooks may have existing colocated tests, but they are not a
+separate required ownership boundary for new work. New transport coverage belongs
+to the REST adapter consumer and new user-visible behavior belongs to the owning
+widget or route. REST service tests remain forbidden by the REST wiring rules.
+
 ## Hook mock names mirror the hook
 
 Create the typed mock with `vi.mocked` and name it by appending `Mock` to the hook

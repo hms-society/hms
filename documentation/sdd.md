@@ -378,5 +378,5 @@ authorization.
 | Create or update the delivery PR | [`create-pr-prompt.md`](prompts/create-pr-prompt.md) |
 | Resolve later PR comments | [`resolve-pr-pendencies.md`](prompts/resolve-pr-pendencies.md) |
 
-Files under `documentation/prompts/` are canonical. `scripts/sync-commands.sh` synchronizes
+Files under `documentation/prompts/` are canonical. `scripts/sync-commands.mjs` synchronizes
 their generated command and skill representations.

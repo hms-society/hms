@@ -905,12 +905,29 @@ the path table. Contract enough child widgets to keep each behavior-owning bound
 independently understandable and testable; do not hide an internal component inside its
 parent row when repository Rules require it to be its own widget.
 
+Before finalizing the hierarchy, perform an explicit decomposition pass over every changed
+Page, Layout and Component. Split a region into a child widget when it owns a focused
+interaction or state machine, is a repeated item/group, has an independent loading/error/
+recovery surface, or forms a semantically testable card, summary, dialog or action. Keep a
+region in its parent when extraction would only rename passive markup without creating a
+meaningful behavior or presentation boundary. Re-run this pass recursively for each new child;
+do not stop at one nesting level when a repeated child has its own interaction contract.
+
+Assign each state value, error and callback to the smallest widget that has enough identity
+to render or act on it correctly. Do not pass an unscoped mutation error through repeated
+groups or rows when only a selected-item dialog can associate that failure with its target.
+Parent widgets coordinate selection and child composition; focused children own their local
+form, confirmation, submission, recovery and accessible feedback lifecycle.
+
 In addition to the relationship table, include one literal repository-relative tree for
 each changed UI surface. Expand every widget directory to its exact required files—entry,
 colocated hook, component test and hook test—and list route, feature query/action hooks,
 service/context files, constants and generated route artifacts individually. Do not use a
 wildcard, directory-only row, “same files for each widget”, marker shorthand or a collapsed
 `components/*` entry as the tree. The tree and the affected-path map must agree one-for-one.
+Visually nest every child under its actual parent in the tree, including children of children,
+so implementation ownership is readable without reconstructing paths from the affected-file
+table.
 
 Then map every affected UI path exactly once:
 
@@ -959,6 +976,10 @@ Audit the completed UI contract for:
 - generated route artifacts tied to their authoritative route input and generation command;
 - every widget has its repository-named component and hook tests, while standalone
   query/action hooks do not acquire invented dedicated test files;
+- every meaningful nested card, summary, repeated group/row, dialog and focused action passed
+  the recursive decomposition test, without extracting presentation-only fragments;
+- errors, pending state and callbacks are scoped to a target identity at the smallest owning
+  widget and are not broadcast ambiguously across repeated children;
 - tests owned by the smallest boundary that can prove behavior, with composed behavior
   exercised at the owning parent widget when appropriate.
 
@@ -1159,6 +1180,13 @@ interpretive:
   synchronized coverage for every controller route;
 - verify every widget tree contains `index.tsx`, its colocated hook, a component test named
   after the widget directory and its hook test; reject `tests/index.test.tsx`;
+- count affected Web paths, literal Web-tree leaves and affected Web tests; require exact
+  affected-path/tree parity, require every affected test path in both validation tables, and
+  report the counts to the Spec Reviewer and in the author handoff;
+- recursively audit parent/child decomposition and state ownership, including selected-item
+  error targeting, before declaring the widget tree complete;
+- keep standalone feature query/action hooks in the tree and affected-path map but do not add
+  dedicated tests for them unless the current repository Rules explicitly require those tests;
 - declare allowed paths, prohibited paths, owning layer/module, generated-file treatment and
   the Builder validation exits;
 - map every supplied design screenshot and every required supplemental state to an exact

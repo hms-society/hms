@@ -217,29 +217,29 @@ seeders, or real repositories rather than arbitrary SQL.
 Do not reset the Inngest Dev Server between cases in the same file. A completed
 run is the synchronization boundary before database reset.
 
-## Keep the Dockerized suite separate and CI-enforced
+## Keep the Dockerized suite inside the Server integration gate
 
 Job integration tests run through:
 
 ```bash
-pnpm --filter server test:inngest
+pnpm --filter server test:integration
 ```
 
-`apps/server/vitest.inngest.config.mts` includes only tests under
-`src/**/messaging/inngest/jobs/tests/**/*.test.ts`, disables file parallelism,
-and provides sufficient hook and test timeouts for cold container startup. The
-default server Vitest configuration excludes the same directory.
+`apps/server/vitest.integration.config.mts` includes every Server test under
+`src/**/*.test.ts`, including REST controllers and Inngest jobs. It disables
+file parallelism and provides sufficient hook and test timeouts for cold
+container startup.
 
-Server CI must run `test:inngest` on a Docker-capable runner. Local absence of
-Docker may prevent execution, but it must not turn the CI job into an optional or
-silently skipped check.
+Server CI must run `test:integration` on a Docker-capable runner. Local absence
+of Docker may prevent execution, but it must not turn the CI job into an
+optional or silently skipped check.
 
 Static validation remains required:
 
 ```bash
 pnpm --filter server check:types
 pnpm --filter server check:architecture
-pnpm --filter server exec vitest list --config vitest.inngest.config.mts
+pnpm --filter server exec vitest list --config vitest.integration.config.mts
 ```
 
 Test discovery proves only that files load and are selected. It does not replace

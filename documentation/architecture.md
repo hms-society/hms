@@ -274,16 +274,6 @@ api.seudominio.com
 - **Documenso self-hosted (pinned runtime):** provider privado acessado somente pelo
   adaptador Server; o Signing Gateway não expõe a URL do provedor ao navegador.
 
-### Infra
-
-- **Turborepo**
-- **Docker Compose local único**
-- **Coolify**
-- **Traefik integrado**
-- **Hostinger VPS**
-- **Cloudflare DNS/Proxy/WAF**
-- **Mailpit local**
-
 ---
 
 ### ✍️ Gateway de Assinatura Eletrônica

@@ -44,7 +44,9 @@ Configured in `turbo.json`. Root scripts fan out to every workspace:
 | `pnpm dev`           | `turbo run dev` (persistent, no cache)|
 | `pnpm lint`          | `turbo run lint`                      |
 | `pnpm check:architecture` | `turbo run check:architecture`   |
-| `pnpm test`          | `turbo run test`                      |
+| `pnpm check:complexity` | CodeMultiVitals against the committed baseline |
+| `pnpm check:test-integrity` | repository test-boundary policy gate |
+| `pnpm test`          | `turbo run test` (Core and Web; Server uses `test:integration`) |
 | `pnpm check-types`   | `turbo run check-types`               |
 | `pnpm format`        | `biome format --write .`              |
 | `pnpm check`         | `biome check --write .`               |
@@ -91,6 +93,28 @@ The application workspaces keep code and type validation as separate checks:
 The shared packages currently retain their package-specific `lint` and
 `check-types` scripts.
 
+## Test integrity boundary
+
+The repository-wide test-integrity gate is:
+
+```bash
+pnpm check:test-integrity
+```
+
+It reads `test-integrity.config.mjs` and allows only the documented test
+boundaries: Core use cases; server REST controllers, Inngest jobs, migrations,
+feature providers, AI boundaries, guards, and shared communication adapters; web
+middleware, route parser helpers, widgets, existing feature hooks, contexts, and
+Playwright route suites. Tests must use `.test.ts` or `.test.tsx`, and colocated
+tests must live in a `tests/` directory. A test path outside that matrix fails the
+gate. Direct tests under `apps/web/src/rest/services` are explicitly forbidden;
+service mapping is verified through the consuming boundary.
+
+The gate also reports changed test files and resolves the local
+`origin/develop` baseline for traceability. It does not judge test quality or
+compare assertion counts, since legitimate feature corrections may replace or
+consolidate cases.
+
 ## Dependency architecture — Dependency Cruiser
 
 Dependency Cruiser validates the import graph independently in `apps/web`,
@@ -120,6 +144,38 @@ not depend on applications, Server modules do not reach into another module's
 database implementation, and Web widgets consume feature query/action hooks
 instead of TanStack Query or REST infrastructure directly. The command is part
 of `pnpm validate` and must pass without ignored known violations.
+
+## Complexity — CodeMultiVitals
+
+CodeMultiVitals is the repository's complexity regression gate. It analyzes
+production TypeScript in the Server, Web, Core, and Validation workspaces while
+excluding tests and generated TanStack Router output. The thresholds live in
+`.code-multivitals.json` and cover cyclomatic complexity, cognitive complexity,
+function length, nesting depth, and Halstead volume.
+
+Run the complete gate with:
+
+```bash
+pnpm check:complexity
+```
+
+The command compares the current report with `.code-multivitals-baseline.json`.
+Existing violations are accepted as known debt; a new violation or a worsened
+metric fails the command. During focused development, a single workspace can be
+checked with `pnpm check:complexity -- --scope apps/server`, using one of the
+documented scopes `apps/server`, `apps/web`, `packages/core`, or
+`packages/validation`.
+
+When an intentional change alters the accepted complexity debt, regenerate the
+shared baseline explicitly and review the resulting diff:
+
+```bash
+pnpm update:complexity-baseline
+```
+
+Baseline updates must run without `--scope`, because the file is shared by all
+workspaces. The baseline is a comparison artifact, not a reason to weaken the
+thresholds or to exclude newly added production code.
 
 ## Spec implementation structural path gate
 
@@ -160,22 +216,21 @@ the consuming core and application boundaries.
 
 - `apps/web`: `pnpm --filter web test` (`vitest run`)
 - `apps/server`:
-  - `pnpm --filter server test` — unit and REST integration tests
+  - `pnpm --filter server test:integration` — all Server tests, including REST controllers, external services, and Inngest jobs
   - `pnpm --filter server test:watch` — watch mode
   - `pnpm --filter server test:coverage` — coverage
-  - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
-  - `pnpm --filter server test:inngest` — runs the opt-in Dockerized Inngest integration test
 
-The Dockerized Inngest suite uses each feature's module fixture for both Nest
-controllers and Inngest jobs. For a job test, the module fixture composes
+The Server integration command selects every `src/**/*.test.ts` file, including
+REST controller tests and the Dockerized Inngest suite. It uses each feature's
+module fixture for both Nest controllers and Inngest jobs. For a job test, the module fixture composes
 `InngestFixture`, starts an isolated Inngest Dev Server with Testcontainers,
 injects the real container-backed `InngestClient` into Nest, and owns all startup
 and cleanup. Jobs that exercise file storage also start an isolated Supabase
 Storage API, its metadata database, and a local gateway through Testcontainers;
 the production storage adapters remain active while external infrastructure is
 kept disposable and CI-owned. The suite is colocated under each module's
-`messaging/inngest/jobs/tests` directory, excluded from the default server test
-command, and run separately in server CI.
+`messaging/inngest/jobs/tests` directory and run through `test:integration` in
+server CI.
 - `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
 - `pnpm test` runs the test task across all test-enabled workspaces through Turborepo.
 
@@ -275,15 +330,15 @@ Bring it up with `docker compose up`.
 
 ## Helper scripts (`scripts/`)
 
-- `install-skills.sh` — installs the agent skills used in this repo
-  (`frontend-design`, `caveman-commit`) via `npx skills add`.
-- `generate-supabase-keys.sh` — generates local `ANON_KEY` and
+- `install-skills.mjs` — installs the agent skills used in this repo
+  (`frontend-design`) via `npx skills add`.
+- `generate-supabase-keys.mjs` — generates local `ANON_KEY` and
   `SUPABASE_SERVICE_ROLE_KEY` values signed with the `JWT_SECRET` from `.env`.
-- `sync-commands.sh` — turns canonical prompts in `documentation/prompts/*.md`
+- `sync-commands.mjs` — turns canonical prompts in `documentation/prompts/*.md`
   into slash-command files (`.cursor/commands`, `.claude/commands`,
   `.opencode/commands`) and generated Codex skills under `.codex/skills`, removing
   stale managed artifacts when a workflow is retired.
-- `sync-agents.sh` — generates Codex, Claude, and OpenCode role configuration from
+- `sync-agents.mjs` — generates Codex, Claude, and OpenCode role configuration from
   `documentation/agents/*-agent.md`; the Implementation Reviewer is read-only, while Builders
   receive workspace-write access without subagent creation. Spec research remains in the
   Orchestrator and has no generated Searcher role.

@@ -124,3 +124,8 @@ datetimeProvider.now.mockReturnValue(now)
 ```
 
 Domain fakers are reserved for entities and structures.
+
+When a server-owned provider has behavior that cannot be proven at a consuming
+boundary, its focused test belongs in the owning module's `provision/tests/`
+directory and uses the `.test.ts` suffix. Web REST service adapters are not
+providers and do not receive such tests.

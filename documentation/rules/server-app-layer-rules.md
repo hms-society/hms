@@ -68,3 +68,7 @@ exported messaging module when collecting jobs for the shared Inngest endpoint.
 
 Creating a feature messaging module must not create another Inngest controller or
 endpoint. HTTP serving remains centralized in the shared messaging infrastructure.
+
+Feature-owned provider tests belong under the provider's `provision/tests/`
+directory, and feature-owned AI tests belong below the AI boundary's `tests/`
+directory. Both use `.test.ts`; no direct web REST service test is permitted.

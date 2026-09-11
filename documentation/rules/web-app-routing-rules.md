@@ -216,6 +216,10 @@ Route behavior is tested with Playwright under:
 apps/web/tests/routes/
 ```
 
+Pure route-parser or search-validation helpers may use a focused Vitest test in
+the route's own `tests/` directory. These tests must not replace the Playwright
+route suite and must use the `.test.ts` suffix.
+
 Organize route suites by bounded module, then name the file after the feature or
 route behavior:
 

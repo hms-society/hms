@@ -247,7 +247,7 @@ status: open
     concurrent duplicate requests with one persisted Client, and stable error payloads.
   - **Layer:** `test`
   - **Workspace:** `server`
-  - **Validation:** `pnpm --filter server test` passes with the real database fixture.
+  - **Validation:** `pnpm --filter server test:integration` passes with the real database fixture.
 
 - [x] **T3.2v** — Smoke-validate the changed registration route with `curl` against the
   running local Server and database (`docker compose up`, then
@@ -273,7 +273,7 @@ status: open
     in technical errors.
   - **Layer:** `test`
   - **Workspace:** `server`
-  - **Validation:** `pnpm --filter server test` passes.
+  - **Validation:** `pnpm --filter server test:integration` passes.
 
 - [x] **T3.3v** — Smoke-validate `POST /clients/lookup` with `curl` against the running
   local Server/database.
@@ -312,7 +312,7 @@ status: open
     different types.
   - **Layer:** `test`
   - **Workspace:** `server`
-  - **Validation:** `pnpm --filter server test` passes with one isolated database
+  - **Validation:** `pnpm --filter server test:integration` passes with one isolated database
     lifecycle owned by `RestFixture`.
 
 - [x] **T3.5** — Export/register the grant controller through
@@ -324,7 +324,7 @@ status: open
   - **Layer:** `rest`
   - **Workspace:** `server`
   - **Validation:** `pnpm --filter server lint`,
-    `pnpm --filter server check-types`, and `pnpm --filter server test` pass.
+    `pnpm --filter server check-types`, and `pnpm --filter server test:integration` pass.
 
 - [x] **T3.4v** — Smoke-validate the new consent route with `curl` against the running
   local Server/database.
@@ -588,7 +588,7 @@ status: open
     `pnpm --filter @hms/core test`,
     `pnpm --filter server lint`,
     `pnpm --filter server check-types`,
-    `pnpm --filter server test`,
+    `pnpm --filter server test:integration`,
     `pnpm --filter web lint`,
     `pnpm --filter web check-types`, and
     `pnpm --filter web test`.

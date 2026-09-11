@@ -168,6 +168,9 @@ contracts. Database behavior is validated indirectly through the server integrat
 tests for controllers or complete application flows that consume the repository.
 Do not expose a concrete repository through a fixture solely to test it directly.
 
+Migration compatibility tests are an allowed exception and belong under
+`apps/server/src/**/database/drizzle/migrations/tests/*.test.ts`.
+
 ## Repository injection uses module tokens
 
 Each module must declare its repository tokens under
