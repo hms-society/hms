@@ -218,6 +218,30 @@ describe('Record Document Validation Decision Use Case', () => {
     expect(documentValidationLogsRepository.add).not.toHaveBeenCalled()
   })
 
+  it('does not record the duplicate decision again after it has already been reviewed', async () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      status: DocumentValidationStatus.Duplicate,
+      reviewedAt: new Date('2026-09-10T12:00:00.000Z'),
+      duplicateMatch: {
+        documentFileId: '00000000-0000-4000-8000-000000000703',
+        fileName: 'documento-original.pdf',
+        receivedAt: new Date('2026-09-09T12:00:00.000Z'),
+      },
+    })
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+
+    const result = await useCase.execute({
+      documentFileId: document.id,
+      reviewedBy: 'reviewer-id',
+      decision: DocumentValidationDecision.Duplicate,
+      originalDocumentId: '00000000-0000-4000-8000-000000000703',
+    })
+
+    expect(result).toEqual(document)
+    expect(documentValidationsRepository.recordDecision).not.toHaveBeenCalled()
+    expect(documentValidationLogsRepository.add).not.toHaveBeenCalled()
+  })
+
   it('records an AI correction log when the human decision changes the suggested status', async () => {
     const currentDocument = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,

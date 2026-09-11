@@ -1,0 +1,70 @@
+@baseUrl = http://localhost:3333
+@inngestUrl = http://localhost:8288
+@inngestEventKey = NO_EVENT_KEY_SET
+@seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
+
+# Documento de imagem com texto OCR preservado em document_batch_files.
+# Para trocar o alvo, use:
+# select
+#   id,
+#   batch_id,
+#   storage_path,
+#   original_name,
+#   mime_type,
+#   size_bytes,
+#   hash_sha256,
+#   ai_suggestion->'metadata'->>'extractedTextFull' as extracted_text_full,
+#   status,
+#   ai_suggestion
+# from document_batch_files
+# where mime_type like 'image/%'
+#   and hash_sha256 is not null
+#   and coalesce(ai_suggestion->'metadata'->>'extractedTextFull','') <> ''
+# order by created_at desc
+# limit 1;
+@batchId = 017aa4af-6e82-4bec-90d7-20009546787e
+@documentFileId = 45fedd09-d2f8-405a-8f21-15e489039863
+@storagePath = internal/02d1a7ea-0d36-4c77-8c6d-ee6d6087da68/1788987401373-teste_documento_id.png
+@originalName = teste_documento_id.png
+@mimeType = image/png
+@sizeBytes = 28263
+@hashSha256 = a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3
+@extractedTextFull = DOCUMENTO DE IDENTIFICAÇÃO FUNCIONAL (TESTE) FOTO Nome: Carlos Eduardo Ferreira Matrícula: MF-208734 Cargo: Analista de Sistemas Departamento: Tecnologia da Informação Admissão: 02/05/2018 Validade: 31/12/2027 Código de barras (simulado):
+
+### Trigger Ollama JSON organization run directly in Inngest
+# This bypasses the main image OCR workflow. The file must already exist in storage.
+# In local dev without INNGEST_EVENT_KEY, the SDK sends events through NO_EVENT_KEY_SET.
+POST {{inngestUrl}}/e/{{inngestEventKey}}
+Content-Type: application/json
+
+[
+  {
+    "name": "document-engine/document-file.json-organization-requested",
+    "data": {
+      "batchId": "{{batchId}}",
+      "documentFileId": "{{documentFileId}}",
+      "storagePath": "{{storagePath}}",
+      "originalName": "{{originalName}}",
+      "mimeType": "{{mimeType}}",
+      "sizeBytes": {{sizeBytes}},
+      "hashSha256": "{{hashSha256}}",
+      "extractedTextFull": "{{extractedTextFull}}"
+    }
+  }
+]
+
+### Sign in as seeded admin
+# @name signInAsSeededAdmin
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Check document after Ollama run
+GET {{baseUrl}}/document-validation/documents/{{documentFileId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json

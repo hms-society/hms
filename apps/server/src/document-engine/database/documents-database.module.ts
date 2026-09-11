@@ -6,6 +6,8 @@ import {
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 
@@ -15,11 +17,15 @@ import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/documen
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 import { DrizzleDocumentValidationLogsRepository } from './drizzle/repositories/drizzle-document-validation-logs-repository'
 import { DrizzleDocumentValidationsRepository } from './drizzle/repositories/drizzle-document-validations-repository'
-import { DocumentsSeeder } from './documents-seeder'
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
-  imports: [SharedDatabaseModule, ProvisionModule, IdentityDatabaseModule],
+  imports: [
+    SharedDatabaseModule,
+    SharedMessagingModule,
+    ProvisionModule,
+    IdentityDatabaseModule,
+  ],
   providers: [
     DrizzleDocumentBatchMapper,
     DrizzleDailyCountersRepository,
@@ -49,12 +55,14 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
         dailyCountersRepo: any,
         clientsRepo: any,
         datetimeProvider: DatetimeProvider,
+        broker: InngestBroker,
       ) => {
         return new CreateDocumentBatchUseCase(
           documentBatchesRepo,
           dailyCountersRepo,
           clientsRepo,
           datetimeProvider,
+          broker,
         )
       },
       inject: [
@@ -62,6 +70,7 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
         DOCUMENT_ENGINE.dailyCounters,
         IDENTITY_REPOSITORIES.clients,
         DatetimeProvider,
+        InngestBroker,
       ],
     },
     {
@@ -71,7 +80,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
       },
       inject: [DOCUMENT_ENGINE.documentBatches],
     },
-    DocumentsSeeder,
     RealDocumentsSeeder,
   ],
   exports: [
@@ -81,7 +89,6 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DOCUMENT_ENGINE.documentValidationLogs,
     CreateDocumentBatchUseCase,
     ListTriageDocumentBatchesUseCase,
-    DocumentsSeeder,
     RealDocumentsSeeder,
   ],
 })

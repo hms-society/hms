@@ -13,10 +13,22 @@ export const documentReview = z
       'mismatch',
       'escalate',
     ]),
-    documentTypeId: z.string().min(1, 'O tipo documental é obrigatório.'),
+    documentTypeId: z.string().optional(),
+    caseId: z.string().optional(),
     checklistRequirementId: z.string().optional(),
     reason: z.string().optional(),
     originalDocumentId: z.string().optional(),
+    extractedFields: z
+      .array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+          confidence: z.number().min(0).max(1).optional(),
+          isRequired: z.boolean().optional(),
+          isMissing: z.boolean().optional(),
+        }),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -27,6 +39,14 @@ export const documentReview = z
         code: z.ZodIssueCode.custom,
         message: 'O motivo é obrigatório para justificar esta decisão.',
         path: ['reason'],
+      })
+    }
+
+    if (data.decision === 'validate' && !data.documentTypeId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'O tipo documental é obrigatório.',
+        path: ['documentTypeId'],
       })
     }
 

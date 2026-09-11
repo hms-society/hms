@@ -1,5 +1,6 @@
 import type {
   DocumentValidationDocument,
+  DocumentValidationExtractedField,
   DocumentValidationLog,
 } from '../domain/entities'
 import type {
@@ -16,9 +17,11 @@ export type ListDocumentValidationsQuery = {
 export type RecordDocumentValidationDecisionRequest = {
   decision: DocumentValidationDecision
   documentTypeId?: string
+  caseId?: string
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export type RequestDocumentResendRequest = {
@@ -36,6 +39,7 @@ export interface DocumentValidationService {
     documentFileId: string,
     request: RecordDocumentValidationDecisionRequest,
   ): Promise<RestResponse<DocumentValidationDocument>>
+  reprocess(documentFileId: string): Promise<RestResponse<DocumentValidationDocument>>
   requestResend(
     documentFileId: string,
     request: RequestDocumentResendRequest,

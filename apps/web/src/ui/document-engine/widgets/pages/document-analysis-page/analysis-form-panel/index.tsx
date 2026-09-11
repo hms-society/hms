@@ -6,7 +6,7 @@ import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ChecklistLinkFields } from '../checklist-link-fields'
-import { ExtractedFields } from '../extracted-fields'
+import { EditableExtractedFields } from '../editable-extracted-fields'
 import { IllegibleDecisionState } from '../illegible-decision-state'
 import {
   useAnalysisFormPanel,
@@ -19,14 +19,19 @@ export const AnalysisFormPanel = ({
   form,
   currentDecision,
   isSubmitting,
-  confidence,
   document,
   onSubmit,
   onRequestResend,
   onOpenDocument,
 }: AnalysisFormPanelProps) => {
-  const { handleOpenDuplicateDocument } = useAnalysisFormPanel({
+  const {
+    isDuplicateAlreadyConfirmed,
+    savedDecisionNotice,
+    handleOpenDuplicateDocument,
+  } = useAnalysisFormPanel({
     form,
+    currentDecision,
+    document,
     onOpenDocument,
   })
 
@@ -34,17 +39,10 @@ export const AnalysisFormPanel = ({
     <aside className='flex flex-col bg-card'>
       <form onSubmit={onSubmit} className='flex h-full flex-col' noValidate>
         <div className='flex flex-1 flex-col gap-6 p-6'>
-          <div className='flex items-center justify-between'>
+          <div>
             <h2 className='font-sans text-sm font-semibold text-foreground'>
               Resultado da validação
             </h2>
-            <Badge
-              variant='secondary'
-              className='gap-1 bg-[#E1F5F6] text-[#0F5C61] px-2 py-0.5 text-[10px] font-semibold border-0'
-            >
-              <Icon name='scan' className='size-3' />
-              {confidence}
-            </Badge>
           </div>
 
           <Field data-invalid={Boolean(form.formState.errors.decision)}>
@@ -63,7 +61,12 @@ export const AnalysisFormPanel = ({
                   </NativeSelectOption>
                   <NativeSelectOption value='illegible'>Ilegível</NativeSelectOption>
                   <NativeSelectOption value='incomplete'>Incompleto</NativeSelectOption>
-                  <NativeSelectOption value='duplicate'>Duplicado</NativeSelectOption>
+                  <NativeSelectOption
+                    value='duplicate'
+                    disabled={!document.duplicateMatch}
+                  >
+                    Duplicado
+                  </NativeSelectOption>
                   <NativeSelectOption value='mismatch'>
                     Não correspondente
                   </NativeSelectOption>
@@ -76,25 +79,39 @@ export const AnalysisFormPanel = ({
             <FieldError>{form.formState.errors.decision?.message}</FieldError>
           </Field>
 
+          {savedDecisionNotice && (
+            <div
+              className='flex items-start gap-3 rounded-lg border border-primary/20 bg-highlight p-3'
+              role='status'
+            >
+              <Icon name='info' className='mt-0.5 size-4 shrink-0 text-primary' />
+              <div className='flex flex-col gap-1'>
+                <span className='font-sans text-xs font-semibold text-foreground'>
+                  {savedDecisionNotice.title}
+                </span>
+                <span className='font-sans text-xs text-muted-foreground'>
+                  {savedDecisionNotice.description}
+                </span>
+              </div>
+            </div>
+          )}
+
           {currentDecision === 'validate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA identificou o documento esperado e encontrou todos os campos
-                obrigatórios.
+                Revise o vínculo, ajuste os dados extraídos quando necessário e confirme
+                somente se o documento estiver apto para validação.
               </p>
               <ChecklistLinkFields form={form} document={document} />
-              <ExtractedFields
-                title='Campos extraídos'
-                fields={document.extractedFields}
-              />
+              <EditableExtractedFields title='Campos extraídos' form={form} />
             </div>
           )}
 
           {currentDecision === 'not_linked' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA analisou o arquivo, mas não encontrou um caso com confiança
-                suficiente.
+                O arquivo foi processado, mas não foi encontrado um vínculo seguro de caso
+                ou checklist.
               </p>
               <div className='flex items-start gap-3 rounded-lg bg-highlight p-3'>
                 <Icon name='help-circle' className='mt-0.5 size-4 text-primary' />
@@ -102,11 +119,8 @@ export const AnalysisFormPanel = ({
                   Sem sugestão segura de caso. Selecione o vínculo manualmente.
                 </span>
               </div>
-              <ChecklistLinkFields form={form} document={document} isChecklistDisabled />
-              <ExtractedFields
-                title='Dados identificados pela IA'
-                fields={document.extractedFields}
-              />
+              <ChecklistLinkFields form={form} document={document} />
+              <EditableExtractedFields title='Dados extraídos' form={form} />
             </div>
           )}
 
@@ -118,10 +132,7 @@ export const AnalysisFormPanel = ({
                 Faltam um ou mais campos obrigatórios antes da validação final.
               </p>
               <ChecklistLinkFields form={form} document={document} />
-              <ExtractedFields
-                title='Campos extraídos'
-                fields={document.extractedFields}
-              />
+              <EditableExtractedFields title='Campos extraídos' form={form} />
               <Field data-invalid={Boolean(form.formState.errors.reason)}>
                 <label
                   htmlFor='reason'
@@ -143,8 +154,8 @@ export const AnalysisFormPanel = ({
           {currentDecision === 'duplicate' && (
             <div className='flex flex-col gap-5'>
               <p className='font-sans text-xs text-muted-foreground'>
-                A IA encontrou um arquivo com o mesmo hash SHA-256. Revise a
-                correspondência antes de confirmar.
+                Foi encontrado um arquivo igual já recebido. Revise a correspondência
+                antes de confirmar a duplicidade.
               </p>
 
               <input type='hidden' {...form.register('originalDocumentId')} />
@@ -201,23 +212,14 @@ export const AnalysisFormPanel = ({
                     </div>
                   </div>
 
-                  <div className='grid grid-cols-1 gap-3 font-sans text-xs sm:grid-cols-2'>
-                    <div className='flex flex-col gap-0.5'>
-                      <span className='text-muted-foreground'>Hash SHA-256</span>
-                      <span className='font-medium text-foreground'>
-                        {document.duplicateMatch?.hashSha256 ?? 'Não informado'}
-                      </span>
-                    </div>
-                    <div className='flex flex-col gap-0.5 text-left sm:text-right'>
-                      <span className='text-foreground'>
-                        {document.duplicateMatch?.caseLabel ?? 'Caso não informado'} ·{' '}
-                        {document.duplicateMatch?.checklistItemLabel ??
-                          'Item não informado'}
-                      </span>
-                      <span className='text-muted-foreground'>
-                        {document.duplicateMatch?.hashSha256 ?? 'Hash não informado'}
-                      </span>
-                    </div>
+                  <div className='flex flex-col gap-1 rounded-md bg-muted/50 p-3 font-sans text-xs'>
+                    <span className='font-medium text-foreground'>
+                      {document.duplicateMatch?.caseLabel ?? 'Caso não informado'}
+                    </span>
+                    <span className='text-muted-foreground'>
+                      {document.duplicateMatch?.checklistItemLabel ??
+                        'Item do checklist não informado'}
+                    </span>
                   </div>
 
                   <Button
@@ -279,6 +281,37 @@ export const AnalysisFormPanel = ({
               </Field>
             </div>
           )}
+
+          {currentDecision === 'escalate' && (
+            <div className='flex flex-col gap-5'>
+              <p className='font-sans text-xs text-muted-foreground'>
+                Use esta decisão quando a análise depender de conferência jurídica antes
+                da validação operacional.
+              </p>
+              <div className='flex items-start gap-3 rounded-lg bg-highlight p-3'>
+                <Icon name='alert-circle' className='mt-0.5 size-4 text-primary' />
+                <span className='font-sans text-xs font-medium text-foreground'>
+                  Informe o motivo para encaminhar o documento a um advogado.
+                </span>
+              </div>
+              <EditableExtractedFields title='Dados extraídos' form={form} />
+              <Field data-invalid={Boolean(form.formState.errors.reason)}>
+                <label
+                  htmlFor='escalateReason'
+                  className='font-sans text-xs font-medium text-foreground'
+                >
+                  Motivo do acionamento
+                </label>
+                <Textarea
+                  id='escalateReason'
+                  className='mt-1 min-h-20 resize-none rounded-md bg-card font-sans text-sm'
+                  placeholder='Ex.: documento exige análise jurídica antes da validação.'
+                  {...form.register('reason')}
+                />
+                <FieldError>{form.formState.errors.reason?.message}</FieldError>
+              </Field>
+            </div>
+          )}
         </div>
 
         <footer className='mt-auto flex items-center justify-end gap-3 border-t border-border bg-card p-5'>
@@ -299,20 +332,24 @@ export const AnalysisFormPanel = ({
             type='submit'
             variant='brand'
             className='rounded-pill font-sans text-sm font-medium gap-2 h-11 px-6'
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDuplicateAlreadyConfirmed}
           >
             {isSubmitting ? (
               <Icon name='refresh-cw' className='size-4 animate-spin' />
+            ) : isDuplicateAlreadyConfirmed ? (
+              <Icon name='check' className='size-4' />
             ) : currentDecision === 'validate' ? (
               <Icon name='check' className='size-4' />
             ) : (
               <Icon name='download' className='size-4' />
             )}
-            {currentDecision === 'validate'
-              ? 'Confirmar validação'
-              : currentDecision === 'duplicate'
-                ? 'Confirmar como duplicado'
-                : 'Salvar decisão'}
+            {isDuplicateAlreadyConfirmed
+              ? 'Duplicidade já confirmada'
+              : currentDecision === 'validate'
+                ? 'Confirmar validação'
+                : currentDecision === 'duplicate'
+                  ? 'Confirmar como duplicado'
+                  : 'Salvar decisão'}
           </Button>
         </footer>
       </form>

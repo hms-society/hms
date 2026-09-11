@@ -17,11 +17,11 @@ function NativeSelect({ className, size = 'default', ...props }: NativeSelectPro
       <select
         data-slot='native-select'
         data-size={size}
-        className='h-11 w-full min-w-0 appearance-none rounded-lg border border-input bg-transparent py-1 pr-8 pl-2.5 text-sm transition-colors outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-100 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=sm]:h-9 data-[size=sm]:rounded-[min(var(--radius-md),10px)] data-[size=sm]:py-0.5 dark:bg-input/30 dark:hover:bg-input/50 dark:disabled:bg-transparent dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40'
+        className='h-11 w-full min-w-0 appearance-none rounded-lg border border-border bg-card py-1 pr-10 pl-3 font-sans text-sm font-medium text-foreground shadow-xs transition-[border-color,box-shadow,background-color] outline-none select-none selection:bg-primary selection:text-primary-foreground hover:border-primary/45 hover:bg-highlight/40 focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-border disabled:bg-muted/50 disabled:text-muted-foreground disabled:opacity-100 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=sm]:h-9 data-[size=sm]:rounded-[min(var(--radius-md),10px)] data-[size=sm]:py-0.5 data-[size=sm]:pr-9 data-[size=sm]:pl-3 dark:bg-input/30 dark:hover:bg-input/50 dark:disabled:bg-muted/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40'
         {...props}
       />
       <ChevronDownIcon
-        className='pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground select-none'
+        className='pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 rounded-full text-primary opacity-80 transition-transform group-focus-within/native-select:rotate-180 group-data-[size=sm]/native-select:right-2.5 group-data-[size=sm]/native-select:size-3.5'
         aria-hidden='true'
         data-slot='native-select-icon'
       />

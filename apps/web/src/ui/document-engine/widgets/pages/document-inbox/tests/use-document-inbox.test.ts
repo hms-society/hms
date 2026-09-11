@@ -46,12 +46,21 @@ describe('useDocumentInbox', () => {
               storagePath: 'batches/cnh.pdf',
               createdAt: new Date(),
             },
+            {
+              id: 'file-2',
+              batchId: 'batch-1',
+              originalName: 'documento-id.png',
+              mimeType: 'image/png',
+              sizeBytes: 51200,
+              storagePath: 'batches/documento-id.png',
+              createdAt: new Date(),
+            },
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ],
-      total: 1,
+      total: 2,
       page: 1,
       limit: 6,
       batchesError: null,
@@ -71,11 +80,43 @@ describe('useDocumentInbox', () => {
       page: 1,
       limit: 6,
     })
-    expect(result.current.totalItems).toBe(1)
+    expect(result.current.totalItems).toBe(2)
     expect(result.current.paginatedData[0]).toMatchObject({
       fileName: 'cnh.pdf',
+      fileType: 'PDF',
       status: 'Aguardando validação',
       receivedFrom: '5511999998888',
+    })
+  })
+
+  it('filters documents by sender text', () => {
+    const { result } = renderHook(() => useDocumentInbox())
+
+    act(() => {
+      result.current.setSenderFilter('remetente inexistente')
+    })
+    act(() => {
+      result.current.handleApplyFilters()
+    })
+
+    expect(result.current.totalItems).toBe(0)
+    expect(result.current.paginatedData).toEqual([])
+  })
+
+  it('filters documents by file type', () => {
+    const { result } = renderHook(() => useDocumentInbox())
+
+    act(() => {
+      result.current.setFileTypeFilter('PNG')
+    })
+    act(() => {
+      result.current.handleApplyFilters()
+    })
+
+    expect(result.current.totalItems).toBe(1)
+    expect(result.current.paginatedData[0]).toMatchObject({
+      fileName: 'documento-id.png',
+      fileType: 'PNG',
     })
   })
 

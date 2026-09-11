@@ -1,4 +1,7 @@
-import type { DocumentValidationDocument } from '../domain/entities'
+import type {
+  DocumentValidationDocument,
+  DocumentValidationExtractedField,
+} from '../domain/entities'
 import type {
   DocumentValidationDecision,
   DocumentValidationStatus,
@@ -12,6 +15,7 @@ export type ListDocumentValidationsFilters = {
 export type RecordDocumentValidationAnalysisInput = {
   documentFileId: string
   status: DocumentValidationStatus
+  hashSha256?: string
   aiConfidence?: number
   aiSuggestion?: Record<string, unknown>
   extractedFields: Record<string, unknown>[]
@@ -31,6 +35,7 @@ export type RecordDocumentValidationDecisionInput = {
   checklistRequirementId?: string
   reason?: string
   originalDocumentId?: string
+  extractedFields?: DocumentValidationExtractedField[]
 }
 
 export type RecordDocumentResendRequestInput = {
@@ -42,10 +47,15 @@ export type RecordDocumentResendRequestInput = {
 
 export interface DocumentValidationsRepository {
   list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationDocument[]>
+  findDuplicateByHash(
+    hashSha256: string,
+    excludedDocumentFileId: string,
+  ): Promise<DocumentValidationDocument | undefined>
   findByFileId(documentFileId: string): Promise<DocumentValidationDocument | undefined>
   recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
   ): Promise<DocumentValidationDocument>
+  recordProcessing(documentFileId: string): Promise<DocumentValidationDocument>
   recordDecision(
     input: RecordDocumentValidationDecisionInput,
   ): Promise<DocumentValidationDocument>

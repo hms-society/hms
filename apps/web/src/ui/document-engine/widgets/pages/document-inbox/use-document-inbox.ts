@@ -2,7 +2,10 @@ import { useMemo, useState } from 'react'
 import { isSameDay, isWithinInterval, startOfDay, endOfDay, format } from 'date-fns'
 import type { DateRange } from 'react-day-picker'
 import type { DocumentBatch } from '@hms/core/document-engine/domain/entities'
-import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
+import {
+  DocumentBatchChannel,
+  type DocumentValidationStatus,
+} from '@hms/core/document-engine/domain/structures'
 
 import { useDocumentBatchesTriageQuery } from '@/ui/document-engine/hooks/use-document-batches-triage-query'
 import type { IconName } from '@/ui/shared/widgets/components/icon'
@@ -11,6 +14,7 @@ import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 type InboxDocument = {
   id: string
   fileName: string
+  fileType: string
   fileSize: string
   receivedFromIcon: IconName
   receivedFrom: string
@@ -25,6 +29,7 @@ type InboxDocument = {
 }
 
 const ITEMS_PER_PAGE = 6
+const DOCUMENT_TYPE_OPTIONS = ['PDF', 'PNG', 'DOCX'] as const
 
 export type UseDocumentInboxParams = {
   caseId?: string
@@ -40,8 +45,10 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   const [appliedDateRange, setAppliedDateRange] = useState<DateRange | undefined>()
   const [statusFilter, setStatusFilter] = useState('')
   const [appliedStatusFilter, setAppliedStatusFilter] = useState('')
-  const [clientFilter, setClientFilter] = useState('')
-  const [appliedClientFilter, setAppliedClientFilter] = useState('')
+  const [senderFilter, setSenderFilter] = useState('')
+  const [appliedSenderFilter, setAppliedSenderFilter] = useState('')
+  const [fileTypeFilter, setFileTypeFilter] = useState('')
+  const [appliedFileTypeFilter, setAppliedFileTypeFilter] = useState('')
 
   function parseDateString(dateStr: string) {
     const today = new Date()
@@ -69,7 +76,33 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
     return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
+  function getFileType(fileName: string, mimeType: string) {
+    const extension = fileName.split('.').pop()?.toUpperCase()
+
+    if (mimeType === 'application/pdf' || extension === 'PDF') return 'PDF'
+    if (mimeType === 'image/png' || extension === 'PNG') return 'PNG'
+
+    if (
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType === 'application/msword' ||
+      extension === 'DOCX' ||
+      extension === 'DOC'
+    ) {
+      return 'DOCX'
+    }
+
+    return extension ?? 'ARQUIVO'
+  }
+
   function getStatusStyle(status: string) {
+    if (status === 'Em processamento') {
+      return {
+        badgeClasses: 'bg-[#E1F5F6] text-[#0F5C61]',
+        dotClasses: 'bg-[#0FA0AA]',
+      }
+    }
+
     if (status === 'Validado') {
       return {
         badgeClasses: 'bg-[#E8F5E9] text-[#1B5E20]',
@@ -127,11 +160,6 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
 
   function batchToInboxDocuments(batch: DocumentBatch): InboxDocument[] {
     const receivedAt = new Date(batch.createdAt)
-    const statusLabel =
-      batch.status === 'pending_identification' || batch.status === 'received'
-        ? 'Aguardando validação'
-        : 'Pendente'
-    const statusStyle = getStatusStyle(statusLabel)
     const channel = batch.channel ?? DocumentBatchChannel.WhatsApp
 
     const senderString =
@@ -142,26 +170,58 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
           : batch.sender.email
 
     if (batch.files && batch.files.length > 0) {
-      return batch.files.map((file) => ({
-        id: file.id,
-        fileName: file.originalName,
-        fileSize: formatFileSize(file.sizeBytes),
-        receivedFromIcon: getChannelIcon(channel),
-        receivedFrom: senderString,
-        contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
-        caseId: batch.readableId ?? 'Sem vínculo seguro',
-        caseDesc: batch.clientId
-          ? 'Titular pré-identificado'
-          : 'Escolha manual necessária',
-        receivedDate: formatReceivedDate(receivedAt),
-        receivedTime: format(receivedAt, 'HH:mm'),
-        status: statusLabel,
-        badgeClasses: statusStyle.badgeClasses,
-        dotClasses: statusStyle.dotClasses,
-      }))
+      return batch.files.map((file) => {
+        const statusLabel = getFileStatusLabel(file.status, batch.status)
+        const statusStyle = getStatusStyle(statusLabel)
+
+        return {
+          id: file.id,
+          fileName: file.originalName,
+          fileType: getFileType(file.originalName, file.mimeType),
+          fileSize: formatFileSize(file.sizeBytes),
+          receivedFromIcon: getChannelIcon(channel),
+          receivedFrom: senderString,
+          contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
+          caseId: batch.readableId ?? 'Sem vínculo seguro',
+          caseDesc: batch.clientId
+            ? 'Titular pré-identificado'
+            : 'Escolha manual necessária',
+          receivedDate: formatReceivedDate(receivedAt),
+          receivedTime: format(receivedAt, 'HH:mm'),
+          status: statusLabel,
+          badgeClasses: statusStyle.badgeClasses,
+          dotClasses: statusStyle.dotClasses,
+        }
+      })
     }
 
     return []
+  }
+
+  function getFileStatusLabel(
+    fileStatus: DocumentValidationStatus | undefined,
+    batchStatus: DocumentBatch['status'],
+  ) {
+    if (fileStatus) {
+      const labels: Record<DocumentValidationStatus, string> = {
+        processing: 'Em processamento',
+        awaiting_validation: 'Aguardando validação',
+        validated: 'Validado',
+        not_linked: 'Não vinculado',
+        illegible: 'Ilegível',
+        incomplete: 'Incompleto',
+        duplicate: 'Duplicado',
+        not_corresponding: 'Não correspondente',
+        processing_failure: 'Falha no processamento',
+        resend_requested: 'Reenvio solicitado',
+      }
+
+      return labels[fileStatus]
+    }
+
+    return batchStatus === 'pending_identification' || batchStatus === 'received'
+      ? 'Aguardando validação'
+      : 'Pendente'
   }
 
   const documents = batches.flatMap(batchToInboxDocuments)
@@ -170,16 +230,21 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
     () => Array.from(new Set(documents.map((item) => item.status))),
     [documents],
   )
-  const uniqueClients = useMemo(
-    () => Array.from(new Set(documents.map((item) => item.receivedFrom))),
-    [documents],
-  )
+  const documentTypeOptions = DOCUMENT_TYPE_OPTIONS
 
   const filteredData = documents.filter((item) => {
     if (appliedStatusFilter && item.status !== appliedStatusFilter) {
       return false
     }
-    if (appliedClientFilter && item.receivedFrom !== appliedClientFilter) {
+    if (
+      appliedSenderFilter &&
+      !`${item.receivedFrom} ${item.contactInfo}`
+        .toLowerCase()
+        .includes(appliedSenderFilter.toLowerCase())
+    ) {
+      return false
+    }
+    if (appliedFileTypeFilter && item.fileType !== appliedFileTypeFilter) {
       return false
     }
 
@@ -202,7 +267,10 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   })
 
   const hasClientFilter = Boolean(
-    appliedStatusFilter || appliedClientFilter || appliedDateRange?.from,
+    appliedStatusFilter ||
+      appliedSenderFilter ||
+      appliedFileTypeFilter ||
+      appliedDateRange?.from,
   )
   const totalItems = hasClientFilter
     ? filteredData.length
@@ -224,7 +292,8 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   function handleApplyFilters() {
     setAppliedDateRange(dateRange)
     setAppliedStatusFilter(statusFilter)
-    setAppliedClientFilter(clientFilter)
+    setAppliedSenderFilter(senderFilter.trim())
+    setAppliedFileTypeFilter(fileTypeFilter)
     setCurrentPage(1)
   }
 
@@ -233,8 +302,10 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
     setAppliedDateRange(undefined)
     setStatusFilter('')
     setAppliedStatusFilter('')
-    setClientFilter('')
-    setAppliedClientFilter('')
+    setSenderFilter('')
+    setAppliedSenderFilter('')
+    setFileTypeFilter('')
+    setAppliedFileTypeFilter('')
     setCurrentPage(1)
   }
 
@@ -255,10 +326,12 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
     setDateRange,
     statusFilter,
     setStatusFilter,
-    clientFilter,
-    setClientFilter,
+    senderFilter,
+    setSenderFilter,
+    fileTypeFilter,
+    setFileTypeFilter,
     uniqueStatuses,
-    uniqueClients,
+    documentTypeOptions,
     error: batchesError,
     isFetching: isFetchingBatches,
     handlePageChange,

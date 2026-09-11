@@ -31,11 +31,13 @@ export const DocumentAnalysisPage = ({
     handleCloseResendModal,
     handleConfirmResend,
     handleOpenDocument,
+    handleReprocessDocument,
     document,
     documentView,
   } = useDocumentAnalysis({ fileId, fromCaseId })
 
   const documentStatus = documentView.status
+  const isProcessing = documentStatus === 'Em processamento'
   const isProcessingFailure = documentStatus === 'Falha no processamento'
   const isResendRequested = documentStatus === 'Reenvio solicitado'
   const isValidated = documentStatus === 'Válido'
@@ -126,6 +128,9 @@ export const DocumentAnalysisPage = ({
               {documentStatus === 'Aguardando validação' && (
                 <Icon name='clock' className='size-3.5' />
               )}
+              {documentStatus === 'Em processamento' && (
+                <Icon name='refresh-cw' className='size-3.5 animate-spin' />
+              )}
               {documentStatus === 'Incompleto' && (
                 <Icon name='file-minus' className='size-3.5' />
               )}
@@ -147,11 +152,27 @@ export const DocumentAnalysisPage = ({
               duplicity={documentView.duplicity}
             />
 
-            {isProcessingFailure ? (
+            {isProcessing ? (
+              <aside className='flex flex-col bg-card'>
+                <div className='flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center'>
+                  <Icon name='refresh-cw' className='size-6 animate-spin text-primary' />
+                  <div className='flex flex-col gap-1'>
+                    <h2 className='font-sans text-sm font-semibold text-foreground'>
+                      Documento em processamento
+                    </h2>
+                    <p className='font-sans text-xs text-muted-foreground'>
+                      A IA está analisando o arquivo. A página será atualizada quando o
+                      resultado estiver disponível.
+                    </p>
+                  </div>
+                </div>
+              </aside>
+            ) : isProcessingFailure ? (
               <ProcessingFailurePanel
                 failureInstruction={documentView.failureInstruction}
                 failureReason={documentView.failureReason}
-                onRequestResend={handleRequestResend}
+                isReprocessing={isSubmitting}
+                onReprocess={handleReprocessDocument}
               />
             ) : isResendRequested ? (
               <ReadOnlyIncompletePanel document={document} />
@@ -162,7 +183,6 @@ export const DocumentAnalysisPage = ({
                 form={form}
                 currentDecision={currentDecision}
                 isSubmitting={isSubmitting}
-                confidence={documentView.confidence}
                 document={document}
                 onSubmit={onSubmit}
                 onRequestResend={handleRequestResend}
