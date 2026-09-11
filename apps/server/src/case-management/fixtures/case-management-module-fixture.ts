@@ -70,6 +70,10 @@ export class CaseManagementModuleFixture {
     return this.restFixture.app
   }
 
+  get collaboratorId(): string {
+    return this.authUser.id
+  }
+
   static async register(controller?: Type<unknown>) {
     const authUser: AuthUser = {
       id: '91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30',
