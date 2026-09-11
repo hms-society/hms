@@ -22,6 +22,7 @@ export type CaseManagementSeedReferences = {
   lawyerIds: readonly string[]
   paralegalIds: readonly string[]
   supervisorIds: readonly string[]
+  internIds: readonly string[]
   actorId: string
 }
 
@@ -59,6 +60,7 @@ export class CaseManagementSeeder {
         lawyerIds: references.lawyerIds,
         paralegalIds: references.paralegalIds,
         supervisorIds: references.supervisorIds,
+        internIds: references.internIds,
       }),
     )
 
@@ -99,12 +101,14 @@ export class CaseManagementSeeder {
     lawyerIds,
     paralegalIds,
     supervisorIds,
+    internIds,
   }: {
     actorId: string
     legalCases: readonly LegalCase[]
     lawyerIds: readonly string[]
     paralegalIds: readonly string[]
     supervisorIds: readonly string[]
+    internIds: readonly string[]
   }): CaseMemberCreation[] {
     if (lawyerIds.length === 0) {
       throw new AppError('At least one lawyer is required to seed case teams')
@@ -124,6 +128,7 @@ export class CaseManagementSeeder {
           collaboratorId: leadLawyerId,
           role: CaseMemberRole.LeadLawyer,
           isPrimary: true,
+          permission: 'edição',
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
         },
@@ -132,6 +137,7 @@ export class CaseManagementSeeder {
           collaboratorId,
           role: CaseMemberRole.Lawyer,
           isPrimary: false,
+          permission: 'edição',
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
         })),
@@ -140,6 +146,7 @@ export class CaseManagementSeeder {
           collaboratorId,
           role: CaseMemberRole.Paralegal,
           isPrimary: false,
+          permission: 'edição',
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
         })),
@@ -149,10 +156,20 @@ export class CaseManagementSeeder {
             collaboratorId,
             role: CaseMemberRole.Supervisor,
             isPrimary: false,
+            permission: 'visualização',
             assignedAt: legalCase.openedAt,
             assignedBy: actorId,
           }),
         ),
+        ...this.pickCollaboratorIds(internIds, caseIndex, 1).map((collaboratorId) => ({
+          caseId: legalCase.id,
+          collaboratorId,
+          role: CaseMemberRole.Intern,
+          isPrimary: false,
+          permission: 'visualização',
+          assignedAt: legalCase.openedAt,
+          assignedBy: actorId,
+        })),
       ] satisfies CaseMemberCreation[]
 
       return teamMembers

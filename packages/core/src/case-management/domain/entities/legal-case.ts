@@ -8,6 +8,7 @@ export type LegalCase = Entity & {
   legalAreaId: string
   legalTopicId: string
   title: string
+  description?: string | null
   status: LegalCaseStatus
   checklistCompletedAt?: Date
   checklistCompletedBy?: string

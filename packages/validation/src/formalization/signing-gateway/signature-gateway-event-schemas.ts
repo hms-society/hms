@@ -10,13 +10,14 @@ const isoDatetimeSchema = z.string().datetime({ offset: true })
 const versionSchema = z.literal(1)
 const outcomeSchema = z.enum(['delivered', 'failed'])
 
-export const formalizationSignatureRequestProvisioningRequestedEventSchema = z.strictObject({
-  version: versionSchema,
-  requestId: uuidSchema,
-  provisioningAttemptId: uuidSchema,
-  occurredAt: isoDatetimeSchema,
-  correlationId: uuidSchema,
-})
+export const formalizationSignatureRequestProvisioningRequestedEventSchema =
+  z.strictObject({
+    version: versionSchema,
+    requestId: uuidSchema,
+    provisioningAttemptId: uuidSchema,
+    occurredAt: isoDatetimeSchema,
+    correlationId: uuidSchema,
+  })
 
 export const formalizationSignatureInvitationReadyEventSchema = z.strictObject({
   version: versionSchema,
@@ -40,13 +41,14 @@ export const communicationSignatureInvitationDeliveredEventSchema = z.strictObje
   outcome: outcomeSchema,
 })
 
-export const formalizationSignatureRequestCancellationRequestedEventSchema = z.strictObject({
-  version: versionSchema,
-  requestId: uuidSchema,
-  cancellationAttemptId: uuidSchema,
-  occurredAt: isoDatetimeSchema,
-  correlationId: uuidSchema,
-})
+export const formalizationSignatureRequestCancellationRequestedEventSchema =
+  z.strictObject({
+    version: versionSchema,
+    requestId: uuidSchema,
+    cancellationAttemptId: uuidSchema,
+    occurredAt: isoDatetimeSchema,
+    correlationId: uuidSchema,
+  })
 
 export const formalizationSignatureOtpDeliveryRequestedEventSchema = z.strictObject({
   version: versionSchema,

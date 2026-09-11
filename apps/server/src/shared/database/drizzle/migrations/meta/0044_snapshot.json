@@ -195,6 +195,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "permission": {
+          "name": "permission",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'visualização'"
+        },
         "is_primary": {
           "name": "is_primary",
           "type": "boolean",
@@ -359,6 +366,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -4252,12 +4265,7 @@
     "public.case_member_role": {
       "name": "case_member_role",
       "schema": "public",
-      "values": [
-        "lead_lawyer",
-        "lawyer",
-        "paralegal",
-        "supervisor"
-      ]
+      "values": ["lead_lawyer", "lawyer", "paralegal", "supervisor", "intern"]
     },
     "public.legal_case_status": {
       "name": "legal_case_status",
@@ -4346,7 +4354,8 @@
         "lawyer",
         "paralegal",
         "supervisor",
-        "client"
+        "client",
+        "intern"
       ]
     },
     "public.consent_type": {

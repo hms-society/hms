@@ -67,6 +67,20 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
       )
     },
 
+    listActiveCollaborators(query) {
+      const searchParams = new URLSearchParams()
+      searchParams.set('page', String(query.page ?? 1))
+      searchParams.set('limit', String(query.limit ?? query.pageSize ?? 50))
+
+      if (query.search) searchParams.set('search', query.search)
+      if (query.profile) searchParams.set('profile', query.profile)
+      if (query.jobTitle) searchParams.set('jobTitle', query.jobTitle)
+
+      return restClient.get<PaginationResponse<CollaboratorSummary>>(
+        `/collaborators/active-collaborators?${searchParams.toString()}`,
+      )
+    },
+
     listLawyers(query) {
       const searchParams = new URLSearchParams()
       searchParams.set('page', String(query.page ?? 1))

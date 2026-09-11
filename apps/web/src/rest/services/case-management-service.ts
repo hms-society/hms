@@ -11,6 +11,10 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
+    createLegalCase(request) {
+      return restClient.post<LegalCase>('/cases', request)
+    },
+
     addComplementaryChecklistItem(caseId, request) {
       return restClient.post<CaseChecklistItem>(
         `/cases/${caseId}/checklist/items`,
@@ -32,6 +36,10 @@ export const CaseManagementService = (
 
     replaceChecklistTemplate(request) {
       return restClient.put<ChecklistTemplate>('/cases/checklist-templates', request)
+    },
+    
+    getLegalCaseDetails(caseId) {
+      return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
     },
 
     reviewChecklistGate(caseId, request) {
