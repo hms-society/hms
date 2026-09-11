@@ -18,9 +18,7 @@ export class ReprocessDocumentFileUseCase {
   ) {}
 
   async execute(request: ReprocessDocumentFileRequest) {
-    const file = await this.documentBatchesRepository.findFileById(
-      request.documentFileId,
-    )
+    const file = await this.documentBatchesRepository.findFileById(request.documentFileId)
 
     if (!file) {
       throw new AppError(

@@ -46,22 +46,16 @@ export type CreateLegalCaseRequest = {
 }
 
 export interface CaseManagementService {
-  createLegalCase(
-    request: CreateLegalCaseRequest,
-  ): Promise<RestResponse<LegalCase>>
+  createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
 
   addComplementaryChecklistItem(
     caseId: string,
     request: AddCaseChecklistComplementaryItemRequest,
   ): Promise<RestResponse<CaseChecklistItem>>
 
-  listCaseChecklist(
-    caseId: string,
-  ): Promise<RestResponse<readonly CaseChecklistItem[]>>
+  listCaseChecklist(caseId: string): Promise<RestResponse<readonly CaseChecklistItem[]>>
 
-  listChecklistTemplates(): Promise<
-    RestResponse<readonly ChecklistTemplate[]>
-  >
+  listChecklistTemplates(): Promise<RestResponse<readonly ChecklistTemplate[]>>
 
   listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
 
@@ -69,9 +63,7 @@ export interface CaseManagementService {
     request: ReplaceChecklistTemplateRequest,
   ): Promise<RestResponse<ChecklistTemplate>>
 
-  getLegalCaseDetails(
-    caseId: string,
-  ): Promise<RestResponse<LegalCaseSummary>>
+  getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
 
   reviewChecklistGate(
     caseId: string,
