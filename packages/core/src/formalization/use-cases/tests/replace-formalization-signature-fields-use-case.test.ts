@@ -70,6 +70,7 @@ describe('Replace Formalization Signature Fields Use Case', () => {
       {
         documentId: 'document-id',
         documentVersionId: 'version-id',
+        documentSpecificationId: 'specification-id',
         name: 'Contrato',
         reviewStatus: 'approved',
         fileId: 'file-id',

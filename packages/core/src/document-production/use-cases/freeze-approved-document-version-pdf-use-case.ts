@@ -121,7 +121,6 @@ export class FreezeApprovedDocumentVersionPdfUseCase
       contentType: 'application/pdf',
       sizeInBytes: pdfContent.byteLength,
       content: pdfContent,
-      reuseExisting: true,
     })
 
     let frozen: FrozenDocumentPdf | undefined

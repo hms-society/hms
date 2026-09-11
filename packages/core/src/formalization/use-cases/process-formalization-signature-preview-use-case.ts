@@ -92,7 +92,6 @@ export class ProcessFormalizationSignaturePreviewUseCase
       contentType: 'application/pdf',
       sizeInBytes: storedPdf.content.byteLength,
       content: storedPdf.content.slice(),
-      reuseExisting: true,
     })
     const preview: FormalizationSignaturePreview = {
       id: request.previewId,

@@ -38,6 +38,10 @@ export class ClientsWithIntakesRepository implements ClientsRepository {
     return this.clientsRepository.findByPhone(...args)
   }
 
+  replace(...args: Parameters<ClientsRepository['replace']>) {
+    return this.clientsRepository.replace(...args)
+  }
+
   async findAll(...args: Parameters<ClientsRepository['findAll']>) {
     const result = await this.clientsRepository.findAll(...args)
     const data = await Promise.all(

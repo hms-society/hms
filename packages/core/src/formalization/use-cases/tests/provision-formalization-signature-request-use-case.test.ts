@@ -205,6 +205,7 @@ function makeDependencies() {
     async (_formalizationId, versionId) => ({
       documentId: versionId === 'version-1' ? 'source-1' : 'source-2',
       documentVersionId: versionId,
+      documentSpecificationId: 'specification-id',
       name: versionId === 'version-1' ? 'First' : 'Second',
       reviewStatus: 'approved',
       fileId: versionId,
