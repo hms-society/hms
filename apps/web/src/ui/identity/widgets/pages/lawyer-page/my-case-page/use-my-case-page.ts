@@ -1,7 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useLegalCaseDetailsQuery } from '@/ui/case-management/hooks/use-legal-case-details-query'
 
 import { useCaseChecklist } from './hooks/use-case-checklist'
 
@@ -11,17 +10,7 @@ export type UseMyCasePageParams = {
 
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
-  const { caseManagementService } = useRestContext()
-
-  const caseQuery = useQuery({
-    queryKey: ['case-details', caseUuid],
-    queryFn: async () => {
-      const res = await caseManagementService.getLegalCaseDetails(caseUuid)
-      if (res.isFailure) throw new Error('Falha ao buscar detalhes do caso')
-      return res.body
-    },
-    enabled: !!caseUuid,
-  })
+  const caseQuery = useLegalCaseDetailsQuery(caseUuid)
 
   const [activeTab, setActiveTab] = useState('visao-geral')
   const {

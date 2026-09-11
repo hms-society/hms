@@ -49,14 +49,22 @@ const review: FormalizationSignatureSendingReviewResponse = {
 }
 
 const status: FormalizationSignatureSendingStatusResponse = {
+  formalizationId: 'formalization-1',
+  formalizationStatus: 'in_progress',
+  formalizationVersion: 9,
   requestId: 'request-1',
   status: 'sending',
   version: 2,
   totalDocuments: 2,
   completedDocuments: 0,
   failedDocuments: 0,
+  progressPercentage: 0,
   canCancel: true,
   canRetry: false,
+  canConfirmContracting: false,
+  viewerMode: 'operator',
+  permissions: { canOperate: true, canViewDocumentContent: true },
+  documents: [],
 }
 
 type QueryResult<Body> = {
