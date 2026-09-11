@@ -1,0 +1,9 @@
+@baseUrl = http://localhost:5555
+@intakeId = 00000000-0000-4000-8000-000000000101
+
+### Read the public Case summary for an Intake
+GET {{baseUrl}}/cases/by-intake/{{intakeId}}
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Accept: application/json
+
+# Expected response: 200 with a public summary or null; no private Case fields.

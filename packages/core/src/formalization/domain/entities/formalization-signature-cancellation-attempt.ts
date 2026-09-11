@@ -6,6 +6,7 @@ export type FormalizationSignatureCancellationAttempt = Entity & {
   status: 'pending' | 'processing' | 'cancelled' | 'failed'
   attempts: number
   requestedBy: string
+  reason: string
   requestedAt: Date
   leaseExpiresAt?: Date
   nextAttemptAt?: Date

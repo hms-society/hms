@@ -1,15 +1,23 @@
 import { FormalizationSignaturePreviewGenerationRequestedEvent } from '@hms/core/formalization/domain'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { DOCUMENT_PRODUCTION_PROVIDERS } from '@/document-production/constants/document-production-providers'
 import { FormalizationModuleFixture } from '@/formalization/fixtures/formalization-module-fixture'
 import { GenerateFormalizationSignaturePreviewJob } from '@/formalization/messaging/inngest/jobs/generate-formalization-signature-preview-job'
 
 describe('Generate Formalization Signature Preview Job', () => {
   let fixture: FormalizationModuleFixture
+  const documentPdfFreezeService: { freeze: ReturnType<typeof vi.fn> } = {
+    freeze: vi.fn(),
+  }
 
   beforeAll(async () => {
     fixture = await FormalizationModuleFixture.register({
       inngestJob: GenerateFormalizationSignaturePreviewJob,
+      configure: (builder) =>
+        builder
+          .overrideProvider(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfFreezeService)
+          .useValue(documentPdfFreezeService),
     })
   })
 
@@ -20,6 +28,7 @@ describe('Generate Formalization Signature Preview Job', () => {
   beforeEach(async () => {
     await fixture.resetDatabase()
     vi.clearAllMocks()
+    documentPdfFreezeService.freeze.mockReset()
     fixture.sourceReader.listCurrentDocuments.mockResolvedValue([])
     fixture.sourceReader.findDocumentVersion.mockResolvedValue(null)
   })
@@ -33,7 +42,7 @@ describe('Generate Formalization Signature Preview Job', () => {
     })
   })
 
-  it('converts and persists a ready preview through the real module integrations', async () => {
+  it('freezes and persists a ready preview through the real module integrations', async () => {
     const preview = await fixture.seedPendingSignaturePreview()
     const sourceContent = new Uint8Array([80, 75, 3, 4])
     const sourceFilePath = `formalization/${preview.formalizationId}/source.docx`
@@ -48,10 +57,39 @@ describe('Generate Formalization Signature Preview Job', () => {
     const sourceDocument = {
       documentId: preview.documentId,
       documentVersionId: preview.documentVersionId,
+      documentSpecificationId: '00000000-0000-4000-8000-000000000801',
       name: 'Contract fixture',
       reviewStatus: 'approved',
       fileId: sourceFile.id,
     }
+    const frozenPdf = await fixture.fileStorageProvider.save({
+      filePath: `formalization/${preview.formalizationId}/frozen/${preview.documentVersionId}.pdf`,
+      fileName: 'frozen.pdf',
+      contentType: 'application/pdf',
+      sizeInBytes: 4,
+      content: new Uint8Array([37, 80, 68, 70]),
+    })
+    documentPdfFreezeService.freeze.mockResolvedValue({
+      documentId: preview.documentId,
+      documentVersionId: preview.documentVersionId,
+      documentSpecificationId: sourceDocument.documentSpecificationId,
+      sourceDocumentVersionId: preview.documentVersionId,
+      source: 'consultation',
+      sourceFileId: sourceFile.id,
+      pdfFileId: frozenPdf.id,
+      sourceSha256: 'a'.repeat(64),
+      pdfSha256: 'b'.repeat(64),
+      converterVersion: 'fixture-freezer',
+      pageCount: 1,
+      pages: [{ page: 1, width: 595, height: 842 }],
+      byteSize: 4,
+      id: fixture.idProvider.generate(),
+      documentVersionNumber: 1,
+      approvedByCollaboratorId: fixture.collaboratorId,
+      approvedAt: fixture.datetimeProvider.now(),
+      frozenAt: fixture.datetimeProvider.now(),
+      createdAt: fixture.datetimeProvider.now(),
+    })
     fixture.sourceReader.listCurrentDocuments.mockResolvedValue([sourceDocument])
     fixture.sourceReader.findDocumentVersion.mockResolvedValue(sourceDocument)
     const event = new FormalizationSignaturePreviewGenerationRequestedEvent({
@@ -67,15 +105,13 @@ describe('Generate Formalization Signature Preview Job', () => {
     })
 
     expect(run.status.toLowerCase()).toBe('completed')
-    expect(fixture.converter.convert).toHaveBeenCalledWith(
+    expect(documentPdfFreezeService.freeze).toHaveBeenCalledWith(
       expect.objectContaining({
-        fileName: 'source.docx',
-        content: sourceContent,
+        documentId: preview.documentId,
+        documentVersionId: preview.documentVersionId,
+        documentSpecificationId: sourceDocument.documentSpecificationId,
         traceId: preview.previewId,
       }),
-    )
-    expect(fixture.inspector.inspect).toHaveBeenCalledWith(
-      new Uint8Array([37, 80, 68, 70]),
     )
 
     const configuration =
@@ -125,7 +161,7 @@ describe('Generate Formalization Signature Preview Job', () => {
 
     expect(run.status.toLowerCase()).toBe('failed')
     expect(fixture.sourceReader.findDocumentVersion).not.toHaveBeenCalled()
-    expect(fixture.converter.convert).not.toHaveBeenCalled()
+    expect(documentPdfFreezeService.freeze).not.toHaveBeenCalled()
     const configuration =
       await fixture.signatureConfigurationRepository.findByFormalizationId(
         preview.formalizationId,
@@ -148,7 +184,7 @@ describe('Generate Formalization Signature Preview Job', () => {
     const run = await fixture.runInngest({ name: event.name, data: event.payload })
 
     expect(run.status.toLowerCase()).toBe('failed')
-    expect(fixture.converter.convert).not.toHaveBeenCalled()
+    expect(documentPdfFreezeService.freeze).not.toHaveBeenCalled()
     const configuration =
       await fixture.signatureConfigurationRepository.findByFormalizationId(
         preview.formalizationId,

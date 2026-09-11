@@ -14,9 +14,10 @@ import {
   ServerFormalizationIntakeLifecycleService,
   ServerFormalizationSourceReader,
   DocumensoWebhookNormalizer,
+  FormalizationContractingProvider,
 } from '@/formalization/provision'
 import { IdentityModule } from '@/identity/identity.module'
-import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
+import { IntakeModule } from '@/intake/intake.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -71,13 +72,16 @@ import {
   CloseSigningResultController,
   SigningGatewayWebhookController,
   SigningGatewayProxyController,
+  GetFormalizationCompletionByIntakeController,
+  ResendFormalizationSignatureInvitationController,
+  ConfirmFormalizationContractingController,
 } from '@/formalization/rest/controllers'
 import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/guards/optional-signing-gateway-collaborator.guard'
 
 @Module({
   imports: [
     IdentityModule,
-    IntakeDatabaseModule,
+    IntakeModule,
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
     DocumentProductionProvisionModule,
@@ -137,6 +141,9 @@ import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/gu
     CloseSigningResultController,
     SigningGatewayWebhookController,
     SigningGatewayProxyController,
+    GetFormalizationCompletionByIntakeController,
+    ResendFormalizationSignatureInvitationController,
+    ConfirmFormalizationContractingController,
   ],
   providers: [
     OptionalSigningGatewayCollaboratorGuard,
@@ -159,6 +166,11 @@ import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/gu
     ServerFormalizationSourceReader,
     ServerFormalizationIntakeLifecycleService,
     ServerFormalizationIntakeClosureService,
+    FormalizationContractingProvider,
+    {
+      provide: FORMALIZATION_PROVIDERS.contractingTransaction,
+      useExisting: FormalizationContractingProvider,
+    },
   ],
   exports: [FormalizationMessagingModule],
 })

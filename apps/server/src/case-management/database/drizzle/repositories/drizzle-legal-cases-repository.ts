@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { eq } from 'drizzle-orm'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
@@ -34,5 +35,14 @@ export class DrizzleLegalCasesRepository
 
   async removeAll(): Promise<void> {
     await this.database.delete(legalCaseModel)
+  }
+
+  async findByIntakeId(intakeId: string) {
+    const [legalCase] = await this.database
+      .select()
+      .from(legalCaseModel)
+      .where(eq(legalCaseModel.intakeId, intakeId))
+      .limit(1)
+    return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
   }
 }

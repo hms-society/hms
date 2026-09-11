@@ -29,6 +29,7 @@ export const formalizationSignatureCancellationAttemptModel = pgTable(
     leaseExpiresAt: timestamp('lease_expires_at', { withTimezone: true, mode: 'date' }),
     nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true, mode: 'date' }),
     lastFailureCode: varchar('last_failure_code', { length: 128 }),
+    reason: varchar('reason', { length: 500 }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull(),
   },
   (table) => [
@@ -48,6 +49,10 @@ export const formalizationSignatureCancellationAttemptModel = pgTable(
     check(
       'formalization_signature_cancellation_attempts_attempts_ck',
       sql`${table.attempts} >= 0`,
+    ),
+    check(
+      'formalization_signature_cancellation_attempts_reason_ck',
+      sql`char_length(btrim(${table.reason})) between 1 and 500`,
     ),
   ],
 )

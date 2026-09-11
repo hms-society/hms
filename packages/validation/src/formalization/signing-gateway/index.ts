@@ -1,7 +1,22 @@
 export * from './acknowledge-signature-document-schema'
 export * from './documenso-webhook-schema'
 export * from './exchange-signature-invitation-schema'
-export * from './formalization-signature-sending-schema'
+export {
+  cancelFormalizationSignatureSendingSchema,
+  confirmFormalizationSignatureSendingSchema,
+  formalizationSignatureSendingReviewSchema,
+  formalizationSignatureSendingStatusSchema,
+  resendFormalizationSignatureInvitationResultSchema,
+  resendFormalizationSignatureInvitationSchema,
+} from './formalization-signature-sending-schema'
+export type {
+  CancelFormalizationSignatureSendingInput,
+  ConfirmFormalizationSignatureSendingInput,
+  FormalizationSignatureSendingReviewDto,
+  FormalizationSignatureSendingStatusDto,
+  ResendFormalizationSignatureInvitationInput,
+  ResendFormalizationSignatureInvitationResultDto,
+} from './formalization-signature-sending-schema'
 export * from './request-signature-otp-schema'
 export * from './signature-gateway-context-schema'
 export * from './signature-gateway-channels-schema'

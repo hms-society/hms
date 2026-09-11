@@ -53,6 +53,19 @@ export class DrizzleFormalizationSignatureInvitationsRepository
       ),
     )
   }
+  async findLatestByRecipientId(recipientId: string) {
+    const [row] = await this.database
+      .select()
+      .from(formalizationSignatureInvitationModel)
+      .where(eq(formalizationSignatureInvitationModel.recipientId, recipientId))
+      .orderBy(
+        desc(formalizationSignatureInvitationModel.generation),
+        desc(formalizationSignatureInvitationModel.createdAt),
+        desc(formalizationSignatureInvitationModel.id),
+      )
+      .limit(1)
+    return row ? this.mapper.toDomain(row) : null
+  }
   async findConsumedByRecipientAndRequest(input: {
     recipientId: string
     requestId: string

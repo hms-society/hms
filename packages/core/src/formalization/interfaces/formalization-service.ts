@@ -11,6 +11,11 @@ import type {
   FormalizationSignatureSendingReviewResponse,
   FormalizationSignatureSendingCancellationResponse,
   FormalizationSignatureSendingStatusResponse,
+  FormalizationCompletionSummary,
+  FormalizationContractingResult,
+  ResendFormalizationSignatureInvitationCommand,
+  ResendFormalizationSignatureInvitationResult,
+  ConfirmFormalizationContractingCommand,
   ConfirmFormalizationSignatureSendingCommand,
   CancelFormalizationSignatureSendingCommand,
 } from '../domain/structures'
@@ -103,11 +108,23 @@ export interface FormalizationService {
   ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse>>
   getSignatureSendingStatus(
     formalizationId: string,
-  ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse>>
+  ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse | null>>
+  getCompletionByIntake(
+    intakeId: string,
+  ): Promise<RestResponse<FormalizationCompletionSummary | null>>
+  resendSignatureInvitation(
+    formalizationId: string,
+    recipientId: string,
+    input: ResendFormalizationSignatureInvitationCommand,
+  ): Promise<RestResponse<ResendFormalizationSignatureInvitationResult>>
   cancelSignatureSending(
     formalizationId: string,
     input: CancelFormalizationSignatureSendingCommand,
   ): Promise<RestResponse<FormalizationSignatureSendingCancellationResponse>>
+  confirmContracting(
+    formalizationId: string,
+    input: ConfirmFormalizationContractingCommand,
+  ): Promise<RestResponse<FormalizationContractingResult>>
   initializeSignatureConfiguration(
     formalizationId: string,
     expectedVersion: number,

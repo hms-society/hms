@@ -19,6 +19,13 @@ export function fakeFormalization(overrides: Partial<Formalization> = {}): Forma
     version: 1,
     createdAt: now,
     updatedAt: now,
+    ...(overrides.status === 'completed'
+      ? {
+          completedAt: now,
+          completedByCollaboratorId: faker.string.uuid(),
+          contractingConfirmationKey: faker.string.uuid(),
+        }
+      : {}),
     ...overrides,
   }
 }

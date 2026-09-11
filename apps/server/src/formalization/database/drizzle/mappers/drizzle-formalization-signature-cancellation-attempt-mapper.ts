@@ -8,6 +8,7 @@ export class DrizzleFormalizationSignatureCancellationAttemptMapper {
     return {
       ...record,
       status: record.status as FormalizationSignatureCancellationAttempt['status'],
+      reason: record.reason,
       leaseExpiresAt: record.leaseExpiresAt ?? undefined,
       nextAttemptAt: record.nextAttemptAt ?? undefined,
       lastFailureCode: record.lastFailureCode ?? undefined,

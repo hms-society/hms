@@ -20,6 +20,7 @@ export type Intake = Entity & {
   urgency: IntakeUrgency
   demandNotes?: string
   status: IntakeStatus
+  contractedAt?: Date
   closureReason?: IntakeClosureReason
   closureNotes?: string
   closedAt?: Date
@@ -41,6 +42,7 @@ export type IntakeUpdate = Partial<
       | 'closureNotes'
       | 'closureReason'
       | 'closedAt'
+      | 'contractedAt'
       | 'contactChannel'
       | 'demandNotes'
       | 'legalAreaId'
