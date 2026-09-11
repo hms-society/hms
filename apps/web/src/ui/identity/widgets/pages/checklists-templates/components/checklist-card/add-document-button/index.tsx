@@ -5,9 +5,7 @@ type AddDocumentButtonProps = {
   onClick: () => void
 }
 
-export function AddDocumentButton({
-  onClick,
-}: AddDocumentButtonProps) {
+export function AddDocumentButton({ onClick }: AddDocumentButtonProps) {
   return (
     <Button
       type='button'

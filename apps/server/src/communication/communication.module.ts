@@ -8,7 +8,6 @@ import { SendCommunicationController } from '@/communication/rest/controllers/se
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { COMMUNICATION_REPOSITORIES } from '@/communication/constants/communication-repositories'
 import { DrizzlePrivateMessagesRepository } from '@/communication/database/drizzle/repositories/drizzle-private-messages-repository'
-import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { CommunicationModule as SharedCommunicationModule } from '@/shared/communication/communication.module'

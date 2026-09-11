@@ -11,11 +11,7 @@ import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
 import { Button } from '@/ui/shadcn/button'
 import { Checkbox } from '@/ui/shadcn/checkbox'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/ui/shadcn/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 import type { DocumentFileType } from '../../types'
 
 type AddDocumentDialogProps = {
@@ -24,11 +20,7 @@ type AddDocumentDialogProps = {
   onAdd: (name: string, types: readonly DocumentFileType[], required: boolean) => void
 }
 
-export function AddDocumentDialog({
-  open,
-  onOpenChange,
-  onAdd,
-}: AddDocumentDialogProps) {
+export function AddDocumentDialog({ open, onOpenChange, onAdd }: AddDocumentDialogProps) {
   const [name, setName] = useState('')
   const [types, setTypes] = useState<readonly DocumentFileType[]>([])
   const [required, setRequired] = useState(true)

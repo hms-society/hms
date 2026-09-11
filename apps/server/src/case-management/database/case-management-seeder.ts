@@ -183,12 +183,9 @@ export class CaseManagementSeeder {
   ): string[] {
     if (collaboratorIds.length === 0) return []
 
-    return Array.from(
-      { length: Math.min(count, collaboratorIds.length) },
-      (_, index) => {
-        return collaboratorIds[(seedIndex + index) % collaboratorIds.length]
-      },
-    )
+    return Array.from({ length: Math.min(count, collaboratorIds.length) }, (_, index) => {
+      return collaboratorIds[(seedIndex + index) % collaboratorIds.length]
+    })
   }
 
   private getTitleByIndex(index: number): string {

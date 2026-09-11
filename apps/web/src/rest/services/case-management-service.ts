@@ -37,7 +37,7 @@ export const CaseManagementService = (
     replaceChecklistTemplate(request) {
       return restClient.put<ChecklistTemplate>('/cases/checklist-templates', request)
     },
-    
+
     getLegalCaseDetails(caseId) {
       return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
     },

@@ -19,7 +19,6 @@ export const ChecklistItemDetailHeader = ({
 }: ChecklistItemDetailHeaderProps) => (
   <section className='rounded-lg border border-border bg-card px-5 py-4 shadow-xs mt-5'>
     <div className='flex flex-col gap-4'>
-
       <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
         <div className='flex min-w-0 flex-col gap-2'>
           <div className='flex flex-wrap items-center gap-2'>

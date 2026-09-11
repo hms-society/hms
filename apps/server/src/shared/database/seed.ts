@@ -55,10 +55,9 @@ async function bootstrap() {
     await app.get(DocumentsSeeder).clear()
     await app.get(DynamicFormsSeeder).clear()
 
-    const checklistTemplateItemsRepository =
-      app.get<ChecklistTemplateItemsRepository>(
-        CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
-      )
+    const checklistTemplateItemsRepository = app.get<ChecklistTemplateItemsRepository>(
+      CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
+    )
 
     const checklistTemplatesRepository = app.get<ChecklistTemplatesRepository>(
       CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
@@ -103,13 +102,9 @@ async function bootstrap() {
       seedPassword,
     )
 
-    const client = identitySeed.clients.find(
-      ({ email }) => email === 'client@hms.br',
-    )
+    const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
 
-    const lawyer = identitySeed.collaborators.find(
-      ({ profile }) => profile === 'lawyer',
-    )
+    const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
 
     const attendant = identitySeed.collaborators.find(
       ({ profile }) => profile === 'attendant',
