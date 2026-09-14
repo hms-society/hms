@@ -12,9 +12,10 @@ import { TableSurface } from '@/ui/shared/widgets/components/table-surface'
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
+  PaginationLink,
   PaginationNext,
-  PaginationPages,
   PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import { useDynamicFormsTable } from './use-dynamic-forms-table'
@@ -24,7 +25,14 @@ import { DynamicFormActions } from '../dynamic-form-actions'
 export type { DynamicFormsTableProps } from './types'
 
 export const DynamicFormsTable = (props: DynamicFormsTableProps) => {
-  const { visibleItems, getTopicSummary, handlePageChange } = useDynamicFormsTable(props)
+  const {
+    visibleItems,
+    pageNumbers,
+    showLeadingEllipsis,
+    showTrailingEllipsis,
+    getTopicSummary,
+    handlePageChange,
+  } = useDynamicFormsTable(props)
   const startItem = props.total === 0 ? 0 : (props.page - 1) * props.pageSize + 1
   const endItem = Math.min(props.page * props.pageSize, props.total)
   const isPreviousDisabled = props.isPending || props.page <= 1
@@ -153,28 +161,52 @@ export const DynamicFormsTable = (props: DynamicFormsTableProps) => {
             <PaginationPrevious
               href='#'
               aria-label='Anterior'
-              disabled={isPreviousDisabled}
-              size='icon-sm'
+              aria-disabled={isPreviousDisabled || undefined}
+              tabIndex={isPreviousDisabled ? -1 : undefined}
+              className={
+                isPreviousDisabled ? 'pointer-events-none opacity-50' : undefined
+              }
               onClick={(event) => {
                 event.preventDefault()
-                handlePageChange(props.page - 1)
+                if (!isPreviousDisabled) handlePageChange(props.page - 1)
               }}
             />
           </PaginationItem>
-          <PaginationPages
-            page={props.page}
-            totalPages={props.pageCount}
-            onPage={handlePageChange}
-          />
+          {showLeadingEllipsis && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+          {pageNumbers.map((pageNumber) => (
+            <PaginationItem key={pageNumber}>
+              <PaginationLink
+                href='#'
+                aria-label={`Página ${pageNumber}`}
+                isActive={props.page === pageNumber}
+                onClick={(event) => {
+                  event.preventDefault()
+                  handlePageChange(pageNumber)
+                }}
+              >
+                {pageNumber}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          {showTrailingEllipsis && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
           <PaginationItem>
             <PaginationNext
               href='#'
               aria-label='Próxima'
-              disabled={isNextDisabled}
-              size='icon-sm'
+              aria-disabled={isNextDisabled || undefined}
+              tabIndex={isNextDisabled ? -1 : undefined}
+              className={isNextDisabled ? 'pointer-events-none opacity-50' : undefined}
               onClick={(event) => {
                 event.preventDefault()
-                handlePageChange(props.page + 1)
+                if (!isNextDisabled) handlePageChange(props.page + 1)
               }}
             />
           </PaginationItem>

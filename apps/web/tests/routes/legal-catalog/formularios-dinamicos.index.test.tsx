@@ -1,10 +1,9 @@
 import { expect } from '@playwright/test'
 
-import { adminTest as test } from '../../fixtures/auth-fixture'
+import { test } from '../../fixtures/auth-fixture'
 import { ROUTES } from '../../../src/constants/routes'
-import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
 
-const BACKEND = HMS_SERVER_APP_TEST_URL
+const BACKEND = 'http://hms-api.test'
 const FORM_ID = '11111111-1111-4111-8111-111111111111'
 
 const form = {

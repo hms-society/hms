@@ -1,13 +1,14 @@
 import { expect } from '@playwright/test'
 
-import { adminTest as test } from '../../fixtures/auth-fixture'
+import { test } from '../../fixtures/auth-fixture'
 import { ROUTES } from '../../../src/constants/routes'
-import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
+
+const BACKEND_URL = 'http://hms-api.test'
 
 test('renders the protected new dynamic form placeholder and returns to the list', async ({
   page,
 }) => {
-  await page.route(`${HMS_SERVER_APP_TEST_URL}/collaborators/me`, (route) =>
+  await page.route(`${BACKEND_URL}/collaborators/me`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
