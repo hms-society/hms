@@ -17,9 +17,11 @@ updated_at: 2026-09-14
   contract, Server persistence and REST boundaries, Web surface, migration risk, module
   composition, real integration tests and authenticated browser validation.
 - **Current phase:** `F5` — structural gate and integrated validation.
-- **Next action:** Invoke `conclude-spec` for scoped publication and final PR CI quality gates.
-- **Active blockers:** None in implementation or validation. Readiness still depends on the same
-  Reviewer’s current PASS and the final delivery publication gate. The current branch is the
+- **Next action:** Resolve FND-025 in the Core slice, repoint dependent PR heads, then rerun the
+  final PR CI quality gate.
+- **Active blockers:** FND-025 blocks delivery: the clean PR Core slice references unrelated
+  Formalization provider modules supplied only by the dirty working tree. Readiness still
+  depends on the same Reviewer’s PASS and the final delivery publication gate. The current branch is the
   canonical delivery line; unrelated worktree changes remain outside scoped commits and no
   `origin/develop` merge is planned.
 - **Builders:** `builder_core` owns Core + Validation contracts; `builder_server` owns Server;
@@ -159,10 +161,13 @@ updated_at: 2026-09-14
   fixed widths with responsive columns, added a 1440×900 bounds regression and refreshed the
   catalog capture. Focused Web route/unit/code/type checks passed. The same Reviewer re-audited
   the corrected candidate and returned PASS with no findings.
+  The first published Core slice then failed clean-PR type-check because its Formalization
+  export edits depended on unrelated uncommitted provider-renaming files; `FND-025` routes the
+  isolation correction through the Core owner.
 - **Rules:** `documentation/sdd.md`; full Spec Rule Pack; `documentation/agents/implementation-reviewer-agent.md`.
 - **Exit:** The affected desktop/narrow browser and visual evidence is refreshed; the same Reviewer
   returned PASS with all findings resolved; every phase/task is complete; Evaluation is `ready`.
-  Route to `conclude-spec`.
+  Route to `conclude-spec` after the final PR CI gate passes.
 
 ## Validation and handoff
 
