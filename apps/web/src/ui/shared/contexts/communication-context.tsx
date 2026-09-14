@@ -8,9 +8,12 @@ import {
 } from 'react'
 import { useClientsQuery } from '@/ui/identity/hooks/use-clients-query'
 
+import { playNotificationBeep } from '@/ui/shared/utils/audio-notifier'
+
 type CommunicationContextType = {
   unreadChatIds: string[]
   initializeUnreadChats: (ids: string[]) => void
+  addUnreadChat: (clientId: string) => void
   markAsRead: (clientId: string) => void
   hasUnread: boolean
 }
@@ -44,6 +47,14 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     })
   }, [])
 
+  const addUnreadChat = useCallback((clientId: string) => {
+    setUnreadChatIds((prev) => {
+      if (prev.includes(clientId)) return prev
+      playNotificationBeep()
+      return [...prev, clientId]
+    })
+  }, [])
+
   const markAsRead = useCallback((clientId: string) => {
     setUnreadChatIds((prev) => {
       if (!prev.includes(clientId)) return prev
@@ -58,6 +69,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       value={{
         unreadChatIds,
         initializeUnreadChats,
+        addUnreadChat,
         markAsRead,
         hasUnread,
       }}

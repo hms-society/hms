@@ -12,6 +12,7 @@ export type ChatMessage = {
   direction: 'inbound' | 'outbound'
   channel: 'whatsapp' | 'email' | 'phone'
   createdAt: string
+  rawCreatedAt?: string
   sender: string
 }
 

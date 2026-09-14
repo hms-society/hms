@@ -22,6 +22,7 @@ export const envSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().default(''),
   WHATSAPP_APP_SECRET: z.string().default(''),
+  WHATSAPP_START_WINDOW_TEMPLATE_NAME: z.string().default('inicio_atendimento_ola'),
   NGROK_DOMAIN: z.string().optional(),
   SUPABASE_STORAGE_BUCKET: z.preprocess(
     (value) => (value === '' ? undefined : value),

@@ -77,6 +77,20 @@ describe('CreateDocumentBatchUseCase', () => {
     expect(clientsRepository.findByPhone).toHaveBeenCalledWith('5511999999999')
   })
 
+  it('should identify the batch and link to the client when request.clientId is provided for WhatsApp channel', async () => {
+    const result = await useCase.execute({
+      channel: DocumentBatchChannel.WhatsApp,
+      sender: '5511999999999',
+      clientId: 'client-pre-identified',
+      files: [],
+    })
+
+    expect(result.status).toBe(DocumentBatchStatus.Identified)
+    expect(result.inTriageBox).toBe(false)
+    expect(result.clientId).toBe('client-pre-identified')
+    expect(clientsRepository.findByPhone).not.toHaveBeenCalled()
+  })
+
   it('should send the batch to triage when WhatsApp sender matches zero clients', async () => {
     clientsRepository.findByPhone.mockResolvedValue([])
 

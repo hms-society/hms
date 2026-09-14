@@ -43,15 +43,21 @@ export class CreateDocumentBatchUseCase {
       status = DocumentBatchStatus.Identified
       inTriageBox = true
     } else if (request.channel === DocumentBatchChannel.WhatsApp) {
-      const clients = await this.clientsRepository.findByPhone(request.sender)
-
-      if (clients && clients.length === 1) {
+      if (request.clientId) {
         status = DocumentBatchStatus.Identified
         inTriageBox = false
-        resolvedClientId = clients[0].id
+        resolvedClientId = request.clientId
       } else {
-        status = DocumentBatchStatus.PendingIdentification
-        inTriageBox = true
+        const clients = await this.clientsRepository.findByPhone(request.sender)
+
+        if (clients && clients.length === 1) {
+          status = DocumentBatchStatus.Identified
+          inTriageBox = false
+          resolvedClientId = clients[0].id
+        } else {
+          status = DocumentBatchStatus.PendingIdentification
+          inTriageBox = true
+        }
       }
     }
 

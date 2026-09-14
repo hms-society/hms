@@ -14,6 +14,8 @@ export type SendCommunicationPayload = {
   clientId: string
   content: string
   channel: 'whatsapp' | 'email' | 'phone'
+  type?: 'text' | 'template' | 'audio'
+  templateName?: string
 }
 
 export function CommunicationService(client: RestClient) {

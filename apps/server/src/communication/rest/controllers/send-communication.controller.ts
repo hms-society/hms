@@ -22,12 +22,15 @@ import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
 import { eq, desc } from 'drizzle-orm'
 import { encrypt } from '@/shared/utils/crypto'
 
+import { EnvProvider } from '@/shared/provision/env/env-provider'
+
 @Controller('communications')
 @UseGuards(AuthGuard)
 export class SendCommunicationController {
   constructor(
     private readonly drizzleClient: DrizzleClient,
     private readonly whatsappProvider: WhatsappProvider,
+    private readonly envProvider: EnvProvider,
   ) {}
 
   @Post('send')
@@ -80,11 +83,23 @@ export class SendCommunicationController {
       if (!client.phone) {
         throw new BadRequestException('Client has no phone number registered')
       }
-      const result = await this.whatsappProvider.sendTextMessage(
-        client.phone,
-        body.content,
-      )
-      externalId = result.externalMessageId
+      if (body.type === 'template') {
+        const templateName =
+          body.templateName ||
+          this.envProvider.get('WHATSAPP_START_WINDOW_TEMPLATE_NAME') ||
+          'inicio_atendimento_ola'
+        const result = await this.whatsappProvider.sendTemplateMessage(
+          client.phone,
+          templateName,
+        )
+        externalId = result.externalMessageId
+      } else {
+        const result = await this.whatsappProvider.sendTextMessage(
+          client.phone,
+          body.content,
+        )
+        externalId = result.externalMessageId
+      }
     }
 
     const [record] = await db

@@ -155,6 +155,44 @@ export class ProcessWhatsappEventJob extends InngestJob {
               const clientId =
                 matchingClients.length === 1 ? matchingClients[0].id : undefined
 
+              const originalName =
+                typeof media.filename === 'string'
+                  ? media.filename
+                  : `${media.id}.${media.mime_type.split('/')[1] || 'bin'}`
+
+              if (clientId) {
+                await database.insert(communicationModel).values({
+                  clientId,
+                  authorId: null,
+                  channel: 'whatsapp',
+                  direction: 'inbound',
+                  content: `Documento recebido via WhatsApp: ${originalName}`,
+                })
+
+                const activeIntakes = await database
+                  .select()
+                  .from(intakeModel)
+                  .where(eq(intakeModel.clientId, clientId))
+                  .orderBy(desc(intakeModel.createdAt))
+
+                const activeIntake =
+                  activeIntakes.find(
+                    (intake) => intake.status !== IntakeStatus.ClosedWithoutContract,
+                  ) || activeIntakes[0]
+
+                if (activeIntake?.responsibleId) {
+                  await database.insert(privateMessageModel).values({
+                    clientId,
+                    collaboratorId: activeIntake.responsibleId,
+                    intakeId: activeIntake.id,
+                    clientPhone: sender,
+                    direction: 'inbound',
+                    content: encrypt(`[Documento Recebido] ${originalName}`),
+                    fileIds: [],
+                  })
+                }
+              }
+
               const [evento] = await database
                 .insert(integracaoEvento)
                 .values({
@@ -172,10 +210,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
                   clientId,
                   mediaId: media.id,
                   mimeType: media.mime_type,
-                  originalName:
-                    typeof media.filename === 'string'
-                      ? media.filename
-                      : `${media.id}.${media.mime_type.split('/')[1]}`,
+                  originalName,
                 },
               })
             }

@@ -122,6 +122,57 @@ export class WhatsappProvider implements IWhatsappProvider {
     }
   }
 
+  async sendTemplateMessage(
+    phone: string,
+    templateName: string,
+    languageCode = 'pt_BR',
+  ): Promise<SendWhatsappMessageResult> {
+    const token = this.envProvider.get('WHATSAPP_API_TOKEN')
+    const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
+
+    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: phone,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: {
+            code: languageCode,
+          },
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(
+        `Failed to send WhatsApp template message: ${response.status} - ${errorText}`,
+      )
+    }
+
+    const responseData = (await response.json()) as {
+      messages?: Array<{ id: string }>
+    }
+
+    const externalMessageId = responseData.messages?.[0]?.id
+
+    if (!externalMessageId) {
+      throw new Error('Meta Cloud API response did not contain a message ID')
+    }
+
+    return {
+      externalMessageId,
+    }
+  }
+
   async downloadMedia(
     mediaId: string,
   ): Promise<{ buffer: Uint8Array; mimeType: string }> {
