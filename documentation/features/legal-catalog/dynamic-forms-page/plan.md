@@ -17,10 +17,11 @@ updated_at: 2026-09-14
   contract, Server persistence and REST boundaries, Web surface, migration risk, module
   composition, real integration tests and authenticated browser validation.
 - **Current phase:** `F5` — structural gate and integrated validation.
-- **Next action:** Resolve FND-025 in the Core slice, repoint dependent PR heads, then rerun the
-  final PR CI quality gate.
-- **Active blockers:** FND-025 blocks delivery: the clean PR Core slice references unrelated
-  Formalization provider modules supplied only by the dirty working tree. Readiness still
+- **Next action:** Resolve FND-026 in the Server and Web slices, repoint dependent PR heads, then
+  rerun the final PR CI quality gate.
+- **Active blockers:** FND-026 blocks delivery: the clean PR Server/Web slices reference
+  unrelated Formalization, pagination and browser-fixture changes supplied only by the dirty
+  working tree. Readiness still
   depends on the same Reviewer’s PASS and the final delivery publication gate. The current branch is the
   canonical delivery line; unrelated worktree changes remain outside scoped commits and no
   `origin/develop` merge is planned.
@@ -149,7 +150,7 @@ updated_at: 2026-09-14
 
 #### F5-T2 — Single integrated Implementation Reviewer and correction loop
 
-- **Status/owner:** `completed` — Orchestrator + `reviewer` + `builder_fix_core`/`builder_fix_server`/`builder_fix_web`
+- **Status/owner:** `in_progress` — Orchestrator + `reviewer` + `builder_fix_core`/`builder_fix_server`/`builder_fix_web`/`builder_fix_server_ci`/`builder_fix_web_ci`
 - **Depends/parallel:** F5-T1 PATH-01 pass; may run alongside integrated sensors after the gate.
 - **Paths:** Read-only review of all integrated Spec paths and current Evaluation evidence.
 - **Contract:** Complete Spec revision 19 conformance, cross-Builder contracts, missing states/tests, design and evidence freshness.
@@ -164,6 +165,11 @@ updated_at: 2026-09-14
   The first published Core slice then failed clean-PR type-check because its Formalization
   export edits depended on unrelated uncommitted provider-renaming files; `FND-025` routes the
   isolation correction through the Core owner.
+  The corrected Core then passed, while the dependent clean Server/Web checks exposed the same
+  dirty-tree dependency pattern in Formalization providers, pagination primitives and auth
+  fixtures; `FND-026` routes both corrections through their owning Builders. The current
+  Implementation Reviewer PASS remains the implementation verdict, pending the clean-slice CI
+  rerun and a final re-audit if the isolation patches alter feature behavior.
 - **Rules:** `documentation/sdd.md`; full Spec Rule Pack; `documentation/agents/implementation-reviewer-agent.md`.
 - **Exit:** The affected desktop/narrow browser and visual evidence is refreshed; the same Reviewer
   returned PASS with all findings resolved; every phase/task is complete; Evaluation is `ready`.

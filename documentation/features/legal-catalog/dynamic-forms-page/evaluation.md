@@ -17,9 +17,10 @@ Evaluation of Spec revision `19` against the current implementation.
 Current result: `in_progress`; the single Implementation Reviewer returned PASS for revision 19
 after the Core/Server contract corrections, the affected Formalization fixture correction and
 the Web responsive-table correction were applied on the canonical branch. The final PR gate
-exposed FND-025: the Core slice exports unrelated `*-provider` Formalization modules that are
-available only in the dirty working tree, while the canonical base contains the `*-reader`
-modules. The Core correction and dependent PR head refresh are active. No merge with
+resolved FND-025 in Core but exposed FND-026: the Server and Web slices still reference
+uncommitted Formalization, pagination and browser-fixture changes that are absent from the
+canonical base. The Server/Web isolation corrections and dependent PR head refresh are active.
+No merge with
 `origin/develop` is required by the canonical-branch decision; the exact 164 declared paths
 will be isolated for delivery while unrelated worktree changes remain outside the scoped
 commits.
@@ -42,6 +43,8 @@ are recorded below before their edits begin.
 | --- | --- | --- | --- | --- | --- |
 | `builder_fix_core` | `01a0a064-1ffb-7061-9ef2-03f5caf7c940` | `19` | `packages/core/src/legal-catalog/**`, related Core tests | Spec/Plan/Evaluation, Rules, Server, Web, commits and PRs | Restore the exact administration repository contract and update Core tests |
 | `builder_fix_server` | `01a0a064-2be9-7952-81b8-119604a9fa0c` | `19` | `apps/server/src/legal-catalog/**` repository implementation and its tests | Spec/Plan/Evaluation, Rules, Core, Validation, Web, commits and PRs | Translate normalized-name races through the required domain error contract |
+| `builder_fix_server_ci` | `01a0a10a-86a1-79a3-adca-0dc6c310616e` | `19` | Feature-owned `apps/server/**` paths in PR #149 | Spec/Plan/Evaluation, Rules, Core, Validation, Web, commits and PRs | Isolate the Server slice from unrelated Formalization provider-renaming changes and restore canonical reader compatibility |
+| `builder_fix_web_ci` | `01a0a10a-8e92-7143-80a4-c46d8025ce47` | `19` | Feature-owned `apps/web/**` paths in PR #150 | Spec/Plan/Evaluation, Rules, Core, Validation, Server, commits and PRs | Isolate the Web slice from unrelated pagination and browser-fixture changes while preserving the feature route contract |
 
 ## Acceptance matrix
 
@@ -175,7 +178,8 @@ are recorded below before their edits begin.
 | `FND-022` | review/high | Implementation Reviewer revision 19: stale integrity/screenshot references | `EV-10`; `EV-31`; `EV-37`; `FND-009` | `resolved` | The current integrity result is reconciled as passing, and a fresh retained `/tmp/dynamic-forms-admin.png` capture was created at the current route and visually inspected. |
 | `FND-023` | implementation/blocking | Server correction integration: availability-change controller scenario returned HTTP 500 | `EV-22`; `EV-26`; `AC-07`; `MV-06` | `resolved` | The isolated availability suite passed 3/3 immediately afterward and the complete six-suite rerun passed 6/6 files and 21/21 tests. The initial 500 was transient test-environment contention; no code defect remained and the successful rerun is the accepted evidence. |
 | `FND-024` | review/high | Implementation Reviewer revision 19 re-audit: the 1440×900 catalog table hides the `Ações`/`Editar` inventory behind horizontal scrolling | `EV-13`; `EV-31`; `EV-37`; `EV-39`; `AC-02`; `FR-02` | `resolved` | `builder_fix_web` replaced the fixed 81rem desktop widths with responsive percentage columns, retained contained horizontal scrolling below XL and the 320px card layout, and added the 1440×900 bounds regression. Focused route/unit/code/type checks pass and the refreshed catalog capture shows `Ações`/`Editar` within the viewport. |
-| `FND-025` | delivery/blocking | PR #148 Core Package CI: the Core feature commit exports four unrelated Formalization `*-provider` modules absent from the canonical base | `EV-40`; PR #148 | `open` | Route to the owning Core correction builder. Restore the canonical base `*-reader` exports while retaining the Dynamic Forms usage-provider contract, amend the Core slice, repoint dependent slices and rerun every affected PR CI workflow on the new heads. |
+| `FND-025` | delivery/blocking | PR #148 Core Package CI: the Core feature commit exports four unrelated Formalization `*-provider` modules absent from the canonical base | `EV-40`; `EV-42`; PR #148 | `resolved` | `builder_fix_core` restored the canonical base `*-reader` exports while retaining the Dynamic Forms usage-provider contract. The corrected Core slice passed its current Core, Server and Web package checks; the dependent Server/Web failures are tracked separately as `FND-026`. |
+| `FND-026` | delivery/blocking | PR #149/#150 clean type-checks: Server and Web slices depend on unrelated uncommitted Formalization/pagination/browser-fixture changes | `EV-41`; PR #149; PR #150 | `open` | Route to the owning Server and Web correction builders. Make both slices self-contained against the corrected Core/base refs without importing unrelated working-tree changes, then repoint both dependent PRs and rerun the final gate on the new heads. |
 
 ## Lessons learned
 
@@ -199,6 +203,8 @@ is not SDD current-commit metadata. -->
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
 | `EV-40` | PR CI | `7093c7668bdb4bd53b4da5b7908a8eaec58cb400` | `failure` — Core type-check cannot resolve `formalization-source-provider`, `formalization-signature-source-provider`, `formalization-signature-document-metadata-provider` or `formalization-signature-document-content-provider` in the clean PR tree; the Review workflow failed while waiting for this Core run. | [PR #148 Core Package CI](https://github.com/hms-society/hms/actions/runs/34875589461); [PR #148 Review pull request](https://github.com/hms-society/hms/actions/runs/34875589480) |
+| `EV-41` | PR CI | `6808bdb725c43430406de67611bbcce758f33aa8` / `e936285e1cf1d84480d0c57cd1d0408e8cff440e` | `failure` — clean Server type-check cannot resolve unrelated Formalization provider symbols/modules; clean Web type-check cannot resolve `PaginationPages`, the new `disabled` pagination prop, `adminTest` or `hms-server-app-url`. Dependent runs are invalidated and will be replaced after the isolation correction. | [PR #149 Server App CI](https://github.com/hms-society/hms/actions/runs/34876524933); [PR #150 Web App CI](https://github.com/hms-society/hms/actions/runs/34876526230) |
+| `EV-42` | PR CI | `984ee8f41057b8b0491e48d8c1bcb364dcdca7f5` | `passed` — corrected Core slice restores canonical Formalization reader exports while retaining the Dynamic Forms usage-provider contract; current Core, Server and Web package checks completed successfully. | [PR #148 Core Package CI](https://github.com/hms-society/hms/actions/runs/34876525095); [PR #148 Server App CI](https://github.com/hms-society/hms/actions/runs/34876525103); [PR #148 Web App CI](https://github.com/hms-society/hms/actions/runs/34876525049) |
 
 ## History
 
