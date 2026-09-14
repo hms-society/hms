@@ -1,13 +1,12 @@
 export const FORMALIZATION_PROVIDERS = {
-  sourceProvider: Symbol('FORMALIZATION_PROVIDERS.sourceProvider'),
-  signatureSourceProvider: Symbol('FORMALIZATION_PROVIDERS.signatureSourceProvider'),
-  documentMetadataProvider: Symbol('FORMALIZATION_PROVIDERS.documentMetadataProvider'),
+  signatureSourceReader: Symbol('FORMALIZATION_PROVIDERS.signatureSourceReader'),
+  documentMetadataReader: Symbol('FORMALIZATION_PROVIDERS.documentMetadataReader'),
   signatureSecretHasher: Symbol('FORMALIZATION_PROVIDERS.signatureSecretHasher'),
   signatureSecretVerifier: Symbol('FORMALIZATION_PROVIDERS.signatureSecretVerifier'),
   signatureOtpMacProvider: Symbol('FORMALIZATION_PROVIDERS.signatureOtpMacProvider'),
   sensitivePayloadCipher: Symbol('FORMALIZATION_PROVIDERS.sensitivePayloadCipher'),
-  signatureDocumentContentProvider: Symbol(
-    'FORMALIZATION_PROVIDERS.signatureDocumentContentProvider',
+  signatureDocumentContentReader: Symbol(
+    'FORMALIZATION_PROVIDERS.signatureDocumentContentReader',
   ),
   signatureProvider: Symbol('FORMALIZATION_PROVIDERS.signatureProvider'),
   signatureSecretGenerator: Symbol('FORMALIZATION_PROVIDERS.signatureSecretGenerator'),
