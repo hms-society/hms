@@ -3,7 +3,7 @@ feature: "legal-catalog/dynamic-forms-page"
 spec: ./spec.md
 plan: ./plan.md
 spec_revision: 19
-status: ready
+status: in_progress
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2654209/PRD+M+dulo+de+Cat+logo+Jur+dico
 jira_tickets:
   - SCRUM-141
@@ -14,14 +14,15 @@ updated_at: 2026-09-14
 
 Evaluation of Spec revision `19` against the current implementation.
 
-Current result: `ready`; the single Implementation Reviewer returned PASS for revision 19 after
-the Core/Server contract corrections, the affected Formalization fixture correction and the Web
-responsive-table correction were applied on the canonical branch. The current
-Core/Validation/Server/Web evidence is green, the new concurrent duplicate-conflict regression
-and full Server coverage run pass, and the refreshed 1440×900 catalog capture exposes
-`Ações`/`Editar`. No merge with `origin/develop` is required by the canonical-branch decision;
-the exact 164 declared paths will be isolated for delivery while unrelated worktree changes
-remain outside the scoped commits.
+Current result: `in_progress`; the single Implementation Reviewer returned PASS for revision 19
+after the Core/Server contract corrections, the affected Formalization fixture correction and
+the Web responsive-table correction were applied on the canonical branch. The final PR gate
+exposed FND-025: the Core slice exports unrelated `*-provider` Formalization modules that are
+available only in the dirty working tree, while the canonical base contains the `*-reader`
+modules. The Core correction and dependent PR head refresh are active. No merge with
+`origin/develop` is required by the canonical-branch decision; the exact 164 declared paths
+will be isolated for delivery while unrelated worktree changes remain outside the scoped
+commits.
 
 ## Execution assignments
 
@@ -174,6 +175,7 @@ are recorded below before their edits begin.
 | `FND-022` | review/high | Implementation Reviewer revision 19: stale integrity/screenshot references | `EV-10`; `EV-31`; `EV-37`; `FND-009` | `resolved` | The current integrity result is reconciled as passing, and a fresh retained `/tmp/dynamic-forms-admin.png` capture was created at the current route and visually inspected. |
 | `FND-023` | implementation/blocking | Server correction integration: availability-change controller scenario returned HTTP 500 | `EV-22`; `EV-26`; `AC-07`; `MV-06` | `resolved` | The isolated availability suite passed 3/3 immediately afterward and the complete six-suite rerun passed 6/6 files and 21/21 tests. The initial 500 was transient test-environment contention; no code defect remained and the successful rerun is the accepted evidence. |
 | `FND-024` | review/high | Implementation Reviewer revision 19 re-audit: the 1440×900 catalog table hides the `Ações`/`Editar` inventory behind horizontal scrolling | `EV-13`; `EV-31`; `EV-37`; `EV-39`; `AC-02`; `FR-02` | `resolved` | `builder_fix_web` replaced the fixed 81rem desktop widths with responsive percentage columns, retained contained horizontal scrolling below XL and the 320px card layout, and added the 1440×900 bounds regression. Focused route/unit/code/type checks pass and the refreshed catalog capture shows `Ações`/`Editar` within the viewport. |
+| `FND-025` | delivery/blocking | PR #148 Core Package CI: the Core feature commit exports four unrelated Formalization `*-provider` modules absent from the canonical base | `EV-40`; PR #148 | `open` | Route to the owning Core correction builder. Restore the canonical base `*-reader` exports while retaining the Dynamic Forms usage-provider contract, amend the Core slice, repoint dependent slices and rerun every affected PR CI workflow on the new heads. |
 
 ## Lessons learned
 
@@ -196,6 +198,7 @@ is not SDD current-commit metadata. -->
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
+| `EV-40` | PR CI | `7093c7668bdb4bd53b4da5b7908a8eaec58cb400` | `failure` — Core type-check cannot resolve `formalization-source-provider`, `formalization-signature-source-provider`, `formalization-signature-document-metadata-provider` or `formalization-signature-document-content-provider` in the clean PR tree; the Review workflow failed while waiting for this Core run. | [PR #148 Core Package CI](https://github.com/hms-society/hms/actions/runs/34875589461); [PR #148 Review pull request](https://github.com/hms-society/hms/actions/runs/34875589480) |
 
 ## History
 
