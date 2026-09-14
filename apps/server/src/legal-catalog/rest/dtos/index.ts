@@ -1,2 +1,7 @@
 export * from './legal-area-response.dto'
 export * from './legal-topic-response.dto'
+export * from './dynamic-form-administration-response.dto'
+export * from './dynamic-form-list-item-response.dto'
+export * from './dynamic-form-list-response.dto'
+export * from './dynamic-form-name-conflict-response.dto'
+export * from './dynamic-form-usage-impact-response.dto'

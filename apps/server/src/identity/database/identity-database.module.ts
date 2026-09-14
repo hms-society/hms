@@ -21,10 +21,14 @@ import {
   DrizzleIntakeResponsiblesRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
-import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { LegalCatalogDatabaseModule } from '@/legal-catalog/database/legal-catalog-database.module'
 
 @Module({
-  imports: [SharedDatabaseModule, IdentityUsersDatabaseModule, LegalCatalogModule],
+  imports: [
+    SharedDatabaseModule,
+    IdentityUsersDatabaseModule,
+    LegalCatalogDatabaseModule,
+  ],
   providers: [
     DrizzleClientMapper,
     DrizzleClientConsentMapper,
@@ -73,6 +77,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
   ],
   exports: [
     IdentityUsersDatabaseModule,
+    LegalCatalogDatabaseModule,
     IDENTITY_REPOSITORIES.clients,
     IDENTITY_REPOSITORIES.clientList,
     IDENTITY_REPOSITORIES.clientConsents,

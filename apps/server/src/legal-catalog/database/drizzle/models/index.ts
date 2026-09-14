@@ -1,2 +1,6 @@
 export * from './legal-area-model'
 export * from './legal-topic-model'
+export * from './dynamic-form-model'
+export * from './dynamic-form-legal-topic-model'
+export * from './dynamic-form-administration-audit-model'
+export * from './dynamic-form-duplicate-operation-model'
