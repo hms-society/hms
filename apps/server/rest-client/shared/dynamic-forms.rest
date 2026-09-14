@@ -1,6 +1,7 @@
 # Preconditions
-# Run `pnpm seed`, start the API on http://localhost:5555, and use the legal
-# catalog REST client to obtain the area/topic IDs for the context filter.
+# Run `pnpm --filter server db:seed`, start the API on http://localhost:5555,
+# and use the legal catalog REST client to obtain the area/topic IDs for the
+# context filter. The endpoint is backed by canonical Legal Catalog persistence.
 
 @url = {{BASE_URL}}/dynamic-forms
 
@@ -28,5 +29,10 @@ Accept: application/json
 
 ### Filter dynamic forms by legal context
 GET {{url}}?legalAreaId=replace-with-legal-area-uuid&legalTopicId=replace-with-legal-topic-uuid
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Filter formalization-compatible forms
+GET {{url}}?contextType=formalization
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json

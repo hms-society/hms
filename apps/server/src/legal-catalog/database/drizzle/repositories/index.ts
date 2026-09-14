@@ -1,3 +1,7 @@
 export * from './drizzle-legal-expertise-catalog-provider'
 export * from './drizzle-legal-areas-repository'
 export * from './drizzle-legal-topics-repository'
+export * from './drizzle-dynamic-form-administration-repository'
+export * from './drizzle-dynamic-form-administration-audit-repository'
+export * from './drizzle-dynamic-form-duplicate-operations-repository'
+export * from './drizzle-legal-catalog-database'

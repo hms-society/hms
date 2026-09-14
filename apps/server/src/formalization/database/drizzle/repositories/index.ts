@@ -1,4 +1,5 @@
 export * from './drizzle-formalizations-repository'
+export * from './drizzle-formalization-dynamic-form-usage-provider'
 export * from './drizzle-formalization-signature-configuration-repository'
 export * from './drizzle-formalization-signature-snapshots-repository'
 export * from './drizzle-formalization-signature-requests-repository'

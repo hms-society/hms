@@ -1,1 +1,1 @@
-export * from './dynamic-form-mapper'
+export * from './stored-file-mapper'

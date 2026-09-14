@@ -13,6 +13,10 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@hms/core/shared/domain/errors'
+import {
+  DynamicFormNameConflictError,
+  IdempotencyKeyConflictError,
+} from '@hms/core/legal-catalog/domain/errors'
 import { FormalizationContractFormValidationError } from '@hms/core/formalization/domain/errors'
 
 export type ErrorResponse = {
@@ -21,6 +25,8 @@ export type ErrorResponse = {
   readonly message: string
   readonly timestamp: string
   readonly path: string
+  readonly code?: string
+  readonly metadata?: Record<string, unknown>
   readonly issues?: readonly { path: string; message: string }[]
 }
 
@@ -104,6 +110,21 @@ export class GlobalErrorHandler implements ExceptionFilter {
               path: issue.path,
               message: issue.message,
             })),
+          }
+        : {}),
+      ...(exception instanceof DynamicFormNameConflictError
+        ? {
+            code: 'DYNAMIC_FORM_NAME_CONFLICT',
+            metadata: { existingDynamicFormId: exception.existingDynamicFormId },
+          }
+        : {}),
+      ...(exception instanceof IdempotencyKeyConflictError
+        ? {
+            code: 'IDEMPOTENCY_KEY_CONFLICT',
+            metadata: {
+              operationKey: exception.operationKey,
+              originalSourceDynamicFormId: exception.originalSourceDynamicFormId,
+            },
           }
         : {}),
     }

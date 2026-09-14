@@ -35,6 +35,7 @@ import {
 } from '@/formalization/database/drizzle/mappers'
 import {
   DrizzleFormalizationsRepository,
+  DrizzleFormalizationDynamicFormUsageProvider,
   DrizzleFormalizationSignatureArtifactsRepository,
   DrizzleFormalizationSignatureAuditWriter,
   DrizzleFormalizationSignatureCancellationAttemptsRepository,
@@ -55,23 +56,21 @@ import {
   DrizzleFormalizationSignatureRequestsRepository,
   DrizzleFormalizationSignatureSnapshotsRepository,
   DrizzleFormalizationSignatureWebhookReceiptsRepository,
-  DrizzleFormalizationSignatureConfigurationRepository,
   DrizzleFormalizationSignatureRecipientDocumentsRepository,
   DrizzleFormalizationSignatureProviderDocumentResourcesRepository,
   DrizzleFormalizationSignatureDocumentAcknowledgementsRepository,
 } from '@/formalization/database/drizzle/repositories'
 import { DrizzleFormalizationSignatureGatewayTransaction } from '@/formalization/database/formalization-signature-gateway-transaction'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
-import { FormalizationProvisionModule } from '@/formalization/provision/formalization-provision.module'
 import { DrizzleFormalizationSignatureInvitationResendTransaction } from '@/formalization/database/formalization-signature-invitation-resend-transaction'
 
 @Module({
-  imports: [SharedDatabaseModule, FormalizationProvisionModule],
+  imports: [SharedDatabaseModule],
   providers: [
     DrizzleFormalizationMapper,
     DrizzleFormalizationsRepository,
+    DrizzleFormalizationDynamicFormUsageProvider,
     DrizzleFormalizationSignatureMapper,
-    DrizzleFormalizationSignatureConfigurationRepository,
     DrizzleFormalizationSignatureSnapshotMapper,
     DrizzleFormalizationSignatureRequestMapper,
     DrizzleFormalizationSignatureRequestDocumentMapper,
@@ -126,8 +125,8 @@ import { DrizzleFormalizationSignatureInvitationResendTransaction } from '@/form
       useExisting: DrizzleFormalizationsRepository,
     },
     {
-      provide: FORMALIZATION_PROVIDERS.signatureConfigurationRepository,
-      useExisting: DrizzleFormalizationSignatureConfigurationRepository,
+      provide: FORMALIZATION_PROVIDERS.dynamicFormUsage,
+      useExisting: DrizzleFormalizationDynamicFormUsageProvider,
     },
     {
       provide: FORMALIZATION_REPOSITORIES.signatureSnapshots,
@@ -232,8 +231,8 @@ import { DrizzleFormalizationSignatureInvitationResendTransaction } from '@/form
   ],
   exports: [
     FORMALIZATION_REPOSITORIES.formalizations,
+    FORMALIZATION_PROVIDERS.dynamicFormUsage,
     FormalizationSeeder,
-    FORMALIZATION_PROVIDERS.signatureConfigurationRepository,
     FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction,
     FORMALIZATION_REPOSITORIES.signatureSnapshots,
     FORMALIZATION_REPOSITORIES.signatureRequests,

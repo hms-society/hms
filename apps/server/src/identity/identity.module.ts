@@ -23,11 +23,10 @@ import {
   RegisterClientController,
   SignInController,
 } from '@/identity/rest/controllers'
-import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 
 @Module({
-  imports: [AuthModule, IdentityDatabaseModule, LegalCatalogModule, ProvisionModule],
+  imports: [AuthModule, IdentityDatabaseModule, ProvisionModule],
   providers: [ActiveAdminGuard, ActiveCollaboratorGuard],
   controllers: [
     GetClientController,
