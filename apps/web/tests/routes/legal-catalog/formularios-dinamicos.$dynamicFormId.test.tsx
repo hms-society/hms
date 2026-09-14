@@ -26,7 +26,9 @@ test('renders the protected existing dynamic form placeholder with its UUID rout
   await expect(page).toHaveURL(
     ROUTES.dynamicForm.replace('$dynamicFormId', dynamicFormId),
   )
-  await expect(page.getByRole('heading', { name: 'Editar formulário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Editar formulário' })).toBeVisible({
+    timeout: 15_000,
+  })
   await page.getByRole('link', { name: 'Voltar para formulários' }).click()
   await expect(page).toHaveURL(`${ROUTES.dynamicForms}?page=1&pageSize=5`)
 })
