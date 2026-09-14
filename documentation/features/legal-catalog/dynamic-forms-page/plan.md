@@ -17,12 +17,10 @@ updated_at: 2026-09-14
   contract, Server persistence and REST boundaries, Web surface, migration risk, module
   composition, real integration tests and authenticated browser validation.
 - **Current phase:** `F5` — structural gate and integrated validation.
-- **Next action:** Resolve FND-026 in the Server and Web slices, repoint dependent PR heads, then
-  rerun the final PR CI quality gate.
-- **Active blockers:** FND-026 blocks delivery: the clean PR Server/Web slices reference
-  unrelated Formalization, pagination and browser-fixture changes supplied only by the dirty
-  working tree. Readiness still
-  depends on the same Reviewer’s PASS and the final delivery publication gate. The current branch is the
+- **Next action:** Re-audit FND-027 on the published Web head, complete the Web PR CI gate, then
+  invoke `conclude-spec` if no blocking finding remains.
+- **Active blockers:** FND-027 remains open pending the same Reviewer’s re-audit and the final
+  Web PR CI gate. The current branch is the
   canonical delivery line; unrelated worktree changes remain outside scoped commits and no
   `origin/develop` merge is planned.
 - **Builders:** `builder_core` owns Core + Validation contracts; `builder_server` owns Server;
@@ -150,7 +148,7 @@ updated_at: 2026-09-14
 
 #### F5-T2 — Single integrated Implementation Reviewer and correction loop
 
-- **Status/owner:** `in_progress` — Orchestrator + `reviewer` + `builder_fix_core`/`builder_fix_server`/`builder_fix_web`/`builder_fix_server_ci`/`builder_fix_web_ci`
+- **Status/owner:** `in_progress` — Orchestrator + `reviewer` + `builder_fix_core`/`builder_fix_server`/`builder_fix_web`/`builder_fix_server_ci`/`builder_fix_web_ci`/`builder_fix_web_mobile`
 - **Depends/parallel:** F5-T1 PATH-01 pass; may run alongside integrated sensors after the gate.
 - **Paths:** Read-only review of all integrated Spec paths and current Evaluation evidence.
 - **Contract:** Complete Spec revision 19 conformance, cross-Builder contracts, missing states/tests, design and evidence freshness.
@@ -167,9 +165,10 @@ updated_at: 2026-09-14
   isolation correction through the Core owner.
   The corrected Core then passed, while the dependent clean Server/Web checks exposed the same
   dirty-tree dependency pattern in Formalization providers, pagination primitives and auth
-  fixtures; `FND-026` routes both corrections through their owning Builders. The current
-  Implementation Reviewer PASS remains the implementation verdict, pending the clean-slice CI
-  rerun and a final re-audit if the isolation patches alter feature behavior.
+  fixtures; `FND-026` was resolved by the published clean-slice corrections. The same Reviewer’s
+  next re-audit opened `FND-027` because mobile cards lacked the explicit `Editar` operation;
+  the Orchestrator-local Web correction now adds that action and a 320px keyboard assertion, and
+  the focused checks pass. The final Web PR CI gate and same-Reviewer re-audit remain pending.
 - **Rules:** `documentation/sdd.md`; full Spec Rule Pack; `documentation/agents/implementation-reviewer-agent.md`.
 - **Exit:** The affected desktop/narrow browser and visual evidence is refreshed; the same Reviewer
   returned PASS with all findings resolved; every phase/task is complete; Evaluation is `ready`.

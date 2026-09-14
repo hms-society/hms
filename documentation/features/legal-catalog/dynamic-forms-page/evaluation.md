@@ -14,12 +14,11 @@ updated_at: 2026-09-14
 
 Evaluation of Spec revision `19` against the current implementation.
 
-Current result: `in_progress`; the single Implementation Reviewer returned PASS for revision 19
-after the Core/Server contract corrections, the affected Formalization fixture correction and
-the Web responsive-table correction were applied on the canonical branch. The final PR gate
-resolved FND-025 in Core but exposed FND-026: the Server and Web slices still reference
-uncommitted Formalization, pagination and browser-fixture changes that are absent from the
-canonical base. The Server/Web isolation corrections and dependent PR head refresh are active.
+Current result: `in_progress`; the current canonical branch has resolved the Core/Server contract
+findings, the affected Formalization fixture correction, the Web responsive-table correction and
+the clean-slice dependency finding FND-026. The latest Implementation Reviewer re-audit opened
+FND-027 because the mobile card branch did not expose the required explicit `Editar` action;
+the Web correction is now published and awaits the same reviewer's re-audit and final PR gate.
 No merge with
 `origin/develop` is required by the canonical-branch decision; the exact 164 declared paths
 will be isolated for delivery while unrelated worktree changes remain outside the scoped
@@ -45,13 +44,14 @@ are recorded below before their edits begin.
 | `builder_fix_server` | `01a0a064-2be9-7952-81b8-119604a9fa0c` | `19` | `apps/server/src/legal-catalog/**` repository implementation and its tests | Spec/Plan/Evaluation, Rules, Core, Validation, Web, commits and PRs | Translate normalized-name races through the required domain error contract |
 | `builder_fix_server_ci` | `01a0a10a-86a1-79a3-adca-0dc6c310616e` | `19` | Feature-owned `apps/server/**` paths in PR #149 | Spec/Plan/Evaluation, Rules, Core, Validation, Web, commits and PRs | Isolate the Server slice from unrelated Formalization provider-renaming changes and restore canonical reader compatibility |
 | `builder_fix_web_ci` | `01a0a10a-8e92-7143-80a4-c46d8025ce47` | `19` | Feature-owned `apps/web/**` paths in PR #150 | Spec/Plan/Evaluation, Rules, Core, Validation, Server, commits and PRs | Isolate the Web slice from unrelated pagination and browser-fixture changes while preserving the feature route contract |
+| `builder_fix_web_mobile` | `orchestrator-local` | `19` | Feature-owned dynamic-form table and its route test | Spec/Plan/Evaluation, Rules, Core, Validation, Server, commits and PRs | Expose `Editar` on 320px mobile cards and prove keyboard activation reaches the existing detail route |
 
 ## Acceptance matrix
 
 | Criterion | Evidence | Status |
 | --- | --- | --- |
 | `AC-01` | `EV-01`; `MV-01` | `passed` |
-| `AC-02` | `EV-02`; `EV-13` | `passed_with_authorized_difference` |
+| `AC-02` | `EV-02`; `EV-13`; `EV-44` | `passed_with_authorized_difference` |
 | `AC-03` | `EV-03`; `MV-02` | `passed` |
 | `AC-04` | `EV-04`; `MV-03`; `EV-14` | `passed` |
 | `AC-05` | `EV-05`; `MV-04`; `EV-14` | `passed` |
@@ -59,7 +59,7 @@ are recorded below before their edits begin.
 | `AC-07` | `EV-07`; `MV-06`; `EV-16` | `passed` |
 | `AC-08` | `EV-08`; `MV-07`; `EV-17` | `passed_with_automated_replay` |
 | `AC-09` | `EV-09`; `MV-09` | `passed` |
-| `AC-10` | `EV-10`; `MV-10` | `passed` |
+| `AC-10` | `EV-10`; `MV-10`; `EV-44` | `passed` |
 | `AC-11` | `EV-11`; `MV-11` | `passed` |
 
 ## Automated and runtime evidence
@@ -100,6 +100,8 @@ are recorded below before their edits begin.
 | `EV-37` | runtime/visual | Web | Narrow keyboard/focus pass and exact-viewport captures | At 320×800, menu roving focus reached `Duplicar formulário`, Escape returned to the row trigger, duplicate/availability/delete dialog Escape returned to each originating trigger, and document overflow was false. The refreshed 1440×900 catalog capture now keeps `Ações`/`Editar` visible; current captures also include catalog/error/duplicate/availability/delete/menu/new/detail plus light/dark dialog states at their manifest viewports. | `passed` |
 | `EV-38` | automated | Web | Focus-restoration correction and regression checks | The controller focus-restoration fix passed the two affected widget/controller suites (2 files/3 tests); targeted Biome validation passed for the changed action/page-controller files. | `passed` |
 | `EV-39` | automated/visual | Web | FND-024 responsive table correction, focused route regression and refreshed 1440×900 capture | Responsive percentage columns passed `pnpm --filter web check:code`, `pnpm --filter web check:types`, the Legal Catalog unit suite (12 files/19 tests) and the focused route suite (3/3); the 1440×900 action-header/edit-button bounds are within the viewport and `/tmp/dynamic-forms-admin.png` was visually inspected. | `passed` |
+| `EV-43` | review | Web | Implementation Reviewer re-audit of canonical head `fa76bdbb383d58c3161f3333876d2ac28042bf98` | Reviewer found the mobile card branch exposed only overflow actions; the required explicit `Editar` action was absent at 320px. The finding is recorded as `FND-027`; no clean Web PR gate was established at that head. | `open` |
+| `EV-44` | automated/runtime | Web | Mobile edit correction at head `a3c79802c2805aa90658c951c69f877d77491e96` | The mobile card now uses the existing `onEdit` navigation contract. Clean-slice type-check passed, the Legal Catalog unit suite passed 12 files/19 tests, and the focused 320px Playwright flow passed 1/1 with focus plus keyboard `Enter` reaching the existing detail route. | `passed` |
 
 ## Structural path gate
 
@@ -119,7 +121,7 @@ are recorded below before their edits begin.
 | `MV-06` | Toggle availability in both directions and replay target status | `AC-07` | Effective transition updates row and creates one audit; no-op creates none. | Real admin toggled `Entrevista Previdenciária` unavailable then available; each transition showed success feedback and the filtered row state updated. No-op/audit replay behavior is covered by Core/Server integration evidence. | `passed` |
 | `MV-07` | Delete used form and repeat deletion | `AC-08` | First delete/audit succeeds; replay is successful without duplicate audit or historical mutation. | Real delete confirmation displayed irreversible/history-preservation copy and live impacts; the automated migration/database replay scenario verified one audit and preserved historical records across repeated deletion. | `passed_with_automated_replay` |
 | `MV-09` | Fail one read, retry, then submit a pending mutation | `AC-09` | Retry is available; submission disables while pending; focus/context and live success/error feedback remain. | Playwright forced one read failure and observed the retry state, then recovered on the real request. A four-second availability response hold kept the dialog open with `Salvando…` and disabled confirmation; success feedback followed. | `passed` |
-| `MV-10` | Keyboard-only operation at 320×800 through filters, table/actions and dialogs | `AC-10` | All controls operate, focus returns, and no page-level horizontal overflow occurs. | At 320×800, row/menu navigation and all three dialog Escape paths returned focus to the originating row action; `scrollWidth === clientWidth` and no page overflow were observed. | `passed` |
+| `MV-10` | Keyboard-only operation at 320×800 through filters, table/actions and dialogs | `AC-10` | All controls operate, focus returns, and no page-level horizontal overflow occurs. | At 320×800, the visible `Editar` control received focus and `Enter` reached the existing detail route; row/menu navigation and all three dialog Escape paths returned focus to the originating row action; `scrollWidth === clientWidth` and no page overflow were observed. | `passed` |
 | `MV-11` | Existing consumer flow after unavailable/deleted definitions | `AC-11` | `/dynamic-forms` remains shape-compatible and returns only available definitions. | Real authenticated REST calls returned 200 with the legacy response shape, 5 legal and 2 formalization available definitions, and excluded unavailable/deleted catalog entries. | `passed` |
 
 ## Visual evidence
@@ -179,7 +181,8 @@ are recorded below before their edits begin.
 | `FND-023` | implementation/blocking | Server correction integration: availability-change controller scenario returned HTTP 500 | `EV-22`; `EV-26`; `AC-07`; `MV-06` | `resolved` | The isolated availability suite passed 3/3 immediately afterward and the complete six-suite rerun passed 6/6 files and 21/21 tests. The initial 500 was transient test-environment contention; no code defect remained and the successful rerun is the accepted evidence. |
 | `FND-024` | review/high | Implementation Reviewer revision 19 re-audit: the 1440×900 catalog table hides the `Ações`/`Editar` inventory behind horizontal scrolling | `EV-13`; `EV-31`; `EV-37`; `EV-39`; `AC-02`; `FR-02` | `resolved` | `builder_fix_web` replaced the fixed 81rem desktop widths with responsive percentage columns, retained contained horizontal scrolling below XL and the 320px card layout, and added the 1440×900 bounds regression. Focused route/unit/code/type checks pass and the refreshed catalog capture shows `Ações`/`Editar` within the viewport. |
 | `FND-025` | delivery/blocking | PR #148 Core Package CI: the Core feature commit exports four unrelated Formalization `*-provider` modules absent from the canonical base | `EV-40`; `EV-42`; PR #148 | `resolved` | `builder_fix_core` restored the canonical base `*-reader` exports while retaining the Dynamic Forms usage-provider contract. The corrected Core slice passed its current Core, Server and Web package checks; the dependent Server/Web failures are tracked separately as `FND-026`. |
-| `FND-026` | delivery/blocking | PR #149/#150 clean type-checks: Server and Web slices depend on unrelated uncommitted Formalization/pagination/browser-fixture changes | `EV-41`; PR #149; PR #150 | `open` | Route to the owning Server and Web correction builders. Make both slices self-contained against the corrected Core/base refs without importing unrelated working-tree changes, then repoint both dependent PRs and rerun the final gate on the new heads. |
+| `FND-026` | delivery/blocking | PR #149/#150 clean type-checks: Server and Web slices depend on unrelated uncommitted Formalization/pagination/browser-fixture changes | `EV-41`; `EV-42`; PR #149; PR #150 | `resolved` | The Core, Server and Web slice corrections removed the dirty-tree dependencies. Current dependent heads are published; Core and Server CI passed, and the Web head passed its type/code/unit checks before the final Web workflow completed. |
+| `FND-027` | review/high | Implementation Reviewer re-audit: mobile dynamic-form cards omit the required explicit `Editar` action | `EV-43`; `EV-44`; `MV-10`; `AC-02`; `FR-02`; `AC-10` | `open` | Added the existing `onEdit` action to the mobile card and a 320px keyboard/browser assertion. Re-audit the same reviewer at Web head `a3c79802` and refresh the final PR gate. |
 
 ## Lessons learned
 
