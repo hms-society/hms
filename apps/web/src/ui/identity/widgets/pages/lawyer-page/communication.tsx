@@ -13,7 +13,7 @@ import { ChatViewPanel } from './chat-view-panel'
 import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export const LawyerCommunicationPage = () => {
-  const { unreadChatIds, markAsRead } = useCommunication()
+  const { unreadChatIds, markAsRead, setActiveClientId } = useCommunication()
   const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -41,12 +41,13 @@ export const LawyerCommunicationPage = () => {
     }
   }, [clients, selectedId])
 
-  // Mark selected client's chat as read
+  // Mark selected client's chat as read and set active client ID
   useEffect(() => {
     if (selectedId) {
+      setActiveClientId(selectedId)
       markAsRead(selectedId)
     }
-  }, [selectedId, markAsRead])
+  }, [selectedId, markAsRead, setActiveClientId])
 
   // Fetch communications for the selected client
   const { data: realMessages } = useClientCommunicationsQuery(selectedId)

@@ -21,6 +21,7 @@ export function useClientsQuery({ page, limit, search }: UseClientsQueryProps) {
       if (response.isFailure) response.throwError()
       return response.body
     },
+    refetchInterval: 10000,
   })
 
   return { clientsPage, clientsPageError, isLoadingClients }
