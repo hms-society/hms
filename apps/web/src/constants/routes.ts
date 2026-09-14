@@ -44,6 +44,9 @@ export const ROUTES = {
   formalizationSendingConfiguration: '/formalizacoes/$formalizationId/configuracao-envio',
   formalizationDocumentVersion:
     '/formalizacoes/$formalizationId/documentos/$documentVersionId',
+  dynamicForms: '/formularios-dinamicos',
+  newDynamicForm: '/formularios-dinamicos/novo',
+  dynamicForm: '/formularios-dinamicos/$dynamicFormId',
 } as const
 
 export type RouteName = keyof typeof ROUTES
@@ -88,4 +91,8 @@ export function buildFormalizationDocumentVersionPath(params: {
   return ROUTES.formalizationDocumentVersion
     .replace('$formalizationId', params.formalizationId)
     .replace('$documentVersionId', params.documentVersionId)
+}
+
+export function buildDynamicFormPath(dynamicFormId: string): string {
+  return ROUTES.dynamicForm.replace('$dynamicFormId', dynamicFormId)
 }

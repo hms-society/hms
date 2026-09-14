@@ -101,7 +101,7 @@ are recorded below before their edits begin.
 
 | ID | Command | Base ref | Base SHA | Counts | Result | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `PATH-01` | `pnpm check:spec-implementation -- documentation/features/legal-catalog/dynamic-forms-page/spec.md --base HEAD --json` | `HEAD` | `575e5b4fe79d44b7343f44786003ffbbe4e077be` | `declared 164; passed 164; failed 0; changed 358; unrelated 194` | Current rerun passed all declared paths against the intentionally selected canonical current branch. The 194 unrelated worktree paths remain outside the scoped delivery and will not be staged. | `passed` |
+| `PATH-01` | `node scripts/check-spec-implementation.mjs documentation/features/legal-catalog/dynamic-forms-page/spec.md --base codex/dynamic-forms-page-base --json` | `codex/dynamic-forms-page-base` | `575e5b4fe79d44b7343f44786003ffbbe4e077be` | `declared 164; passed 164; failed 0; changed 358; unrelated 194` | Final closure rerun passed all declared paths against the explicit canonical base ref. The 194 unrelated worktree paths remain outside the scoped delivery and were not staged. | `passed` |
 
 ## Manual evidence
 

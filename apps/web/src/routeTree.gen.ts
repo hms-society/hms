@@ -34,6 +34,9 @@ import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as FormalizacoesFormalizationIdRouteRouteImport } from './routes/formalizacoes/$formalizationId/route'
+import { Route as FormulariosDinamicosIndexRouteImport } from './routes/formularios-dinamicos/index'
+import { Route as FormulariosDinamicosDynamicFormIdRouteImport } from './routes/formularios-dinamicos/$dynamicFormId'
+import { Route as FormulariosDinamicosNovoRouteImport } from './routes/formularios-dinamicos/novo'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as IntakesIndexRouteImport } from './routes/intakes/index'
 import { Route as IntakesIntakeIdRouteImport } from './routes/intakes/$intakeId'
@@ -184,6 +187,24 @@ const FormalizacoesFormalizationIdRouteRoute =
     path: '/$formalizationId',
     getParentRoute: () => FormalizacoesRouteRoute,
   } as any)
+const FormulariosDinamicosIndexRoute =
+  FormulariosDinamicosIndexRouteImport.update({
+    id: '/formularios-dinamicos/',
+    path: '/formularios-dinamicos/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormulariosDinamicosDynamicFormIdRoute =
+  FormulariosDinamicosDynamicFormIdRouteImport.update({
+    id: '/formularios-dinamicos/$dynamicFormId',
+    path: '/formularios-dinamicos/$dynamicFormId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormulariosDinamicosNovoRoute =
+  FormulariosDinamicosNovoRouteImport.update({
+    id: '/formularios-dinamicos/novo',
+    path: '/formularios-dinamicos/novo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HomeIndexRoute = HomeIndexRouteImport.update({
   id: '/home/',
   path: '/home/',
@@ -322,6 +343,8 @@ export interface FileRoutesByFullPath {
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/formularios-dinamicos/$dynamicFormId': typeof FormulariosDinamicosDynamicFormIdRoute
+  '/formularios-dinamicos/novo': typeof FormulariosDinamicosNovoRoute
   '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
@@ -333,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/consultas/': typeof ConsultasIndexRoute
   '/convite/': typeof ConviteIndexRoute
+  '/formularios-dinamicos/': typeof FormulariosDinamicosIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -365,6 +389,8 @@ export interface FileRoutesByTo {
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/formularios-dinamicos/$dynamicFormId': typeof FormulariosDinamicosDynamicFormIdRoute
+  '/formularios-dinamicos/novo': typeof FormulariosDinamicosNovoRoute
   '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
@@ -376,6 +402,7 @@ export interface FileRoutesByTo {
   '/colaboradores': typeof ColaboradoresIndexRoute
   '/consultas': typeof ConsultasIndexRoute
   '/convite': typeof ConviteIndexRoute
+  '/formularios-dinamicos': typeof FormulariosDinamicosIndexRoute
   '/home': typeof HomeIndexRoute
   '/intakes': typeof IntakesIndexRoute
   '/login': typeof LoginIndexRoute
@@ -414,6 +441,8 @@ export interface FileRoutesById {
   '/cliente/privacidade': typeof ClientePrivacidadeRoute
   '/clientes/$clienteId': typeof ClientesClienteIdRoute
   '/colaboradores/$colaboradorId': typeof ColaboradoresColaboradorIdRoute
+  '/formularios-dinamicos/$dynamicFormId': typeof FormulariosDinamicosDynamicFormIdRoute
+  '/formularios-dinamicos/novo': typeof FormulariosDinamicosNovoRoute
   '/intakes/$intakeId': typeof IntakesIntakeIdRoute
   '/intakes/novo': typeof IntakesNovoRoute
   '/lotes-documentos/$fileId': typeof LotesDocumentosFileIdRoute
@@ -425,6 +454,7 @@ export interface FileRoutesById {
   '/colaboradores/': typeof ColaboradoresIndexRoute
   '/consultas/': typeof ConsultasIndexRoute
   '/convite/': typeof ConviteIndexRoute
+  '/formularios-dinamicos/': typeof FormulariosDinamicosIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -464,6 +494,8 @@ export interface FileRouteTypes {
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/formularios-dinamicos/$dynamicFormId'
+    | '/formularios-dinamicos/novo'
     | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
@@ -475,6 +507,7 @@ export interface FileRouteTypes {
     | '/colaboradores/'
     | '/consultas/'
     | '/convite/'
+    | '/formularios-dinamicos/'
     | '/home/'
     | '/intakes/'
     | '/login/'
@@ -507,6 +540,8 @@ export interface FileRouteTypes {
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/formularios-dinamicos/$dynamicFormId'
+    | '/formularios-dinamicos/novo'
     | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
@@ -518,6 +553,7 @@ export interface FileRouteTypes {
     | '/colaboradores'
     | '/consultas'
     | '/convite'
+    | '/formularios-dinamicos'
     | '/home'
     | '/intakes'
     | '/login'
@@ -555,6 +591,8 @@ export interface FileRouteTypes {
     | '/cliente/privacidade'
     | '/clientes/$clienteId'
     | '/colaboradores/$colaboradorId'
+    | '/formularios-dinamicos/$dynamicFormId'
+    | '/formularios-dinamicos/novo'
     | '/intakes/$intakeId'
     | '/intakes/novo'
     | '/lotes-documentos/$fileId'
@@ -566,6 +604,7 @@ export interface FileRouteTypes {
     | '/colaboradores/'
     | '/consultas/'
     | '/convite/'
+    | '/formularios-dinamicos/'
     | '/home/'
     | '/intakes/'
     | '/login/'
@@ -596,6 +635,8 @@ export interface RootRouteChildren {
   CaixaDeDocumentosFileIdRoute: typeof CaixaDeDocumentosFileIdRoute
   ClientesClienteIdRoute: typeof ClientesClienteIdRoute
   ColaboradoresColaboradorIdRoute: typeof ColaboradoresColaboradorIdRoute
+  FormulariosDinamicosDynamicFormIdRoute: typeof FormulariosDinamicosDynamicFormIdRoute
+  FormulariosDinamicosNovoRoute: typeof FormulariosDinamicosNovoRoute
   LotesDocumentosFileIdRoute: typeof LotesDocumentosFileIdRoute
   ModelosDeDocumentosDocumentSpecificationIdRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   ModelosDeDocumentosNovoRoute: typeof ModelosDeDocumentosNovoRoute
@@ -603,6 +644,7 @@ export interface RootRouteChildren {
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
   ConviteIndexRoute: typeof ConviteIndexRoute
+  FormulariosDinamicosIndexRoute: typeof FormulariosDinamicosIndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   ModelosDeDocumentosIndexRoute: typeof ModelosDeDocumentosIndexRoute
@@ -787,6 +829,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/formalizacoes/$formalizationId'
       preLoaderRoute: typeof FormalizacoesFormalizationIdRouteRouteImport
       parentRoute: typeof FormalizacoesRouteRoute
+    }
+    '/formularios-dinamicos/': {
+      id: '/formularios-dinamicos/'
+      path: '/formularios-dinamicos'
+      fullPath: '/formularios-dinamicos/'
+      preLoaderRoute: typeof FormulariosDinamicosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/formularios-dinamicos/$dynamicFormId': {
+      id: '/formularios-dinamicos/$dynamicFormId'
+      path: '/formularios-dinamicos/$dynamicFormId'
+      fullPath: '/formularios-dinamicos/$dynamicFormId'
+      preLoaderRoute: typeof FormulariosDinamicosDynamicFormIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/formularios-dinamicos/novo': {
+      id: '/formularios-dinamicos/novo'
+      path: '/formularios-dinamicos/novo'
+      fullPath: '/formularios-dinamicos/novo'
+      preLoaderRoute: typeof FormulariosDinamicosNovoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/home/': {
       id: '/home/'
@@ -1094,6 +1157,9 @@ const rootRouteChildren: RootRouteChildren = {
   CaixaDeDocumentosFileIdRoute: CaixaDeDocumentosFileIdRoute,
   ClientesClienteIdRoute: ClientesClienteIdRoute,
   ColaboradoresColaboradorIdRoute: ColaboradoresColaboradorIdRoute,
+  FormulariosDinamicosDynamicFormIdRoute:
+    FormulariosDinamicosDynamicFormIdRoute,
+  FormulariosDinamicosNovoRoute: FormulariosDinamicosNovoRoute,
   LotesDocumentosFileIdRoute: LotesDocumentosFileIdRoute,
   ModelosDeDocumentosDocumentSpecificationIdRoute:
     ModelosDeDocumentosDocumentSpecificationIdRoute,
@@ -1102,6 +1168,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
   ConviteIndexRoute: ConviteIndexRoute,
+  FormulariosDinamicosIndexRoute: FormulariosDinamicosIndexRoute,
   HomeIndexRoute: HomeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   ModelosDeDocumentosIndexRoute: ModelosDeDocumentosIndexRoute,

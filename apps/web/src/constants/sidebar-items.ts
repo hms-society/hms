@@ -58,6 +58,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Clientes', route: 'clients', icon: 'users' },
     { label: 'Documentos', route: 'documentSpecifications', icon: 'file-text' },
     { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
+    { label: 'Formulários', route: 'dynamicForms', icon: 'list-checks' },
   ],
   [CollaboratorProfile.Attendant]: ATTENDANT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Lawyer]: LAWYER_SIDEBAR_ITEMS,
