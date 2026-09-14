@@ -17,10 +17,11 @@ updated_at: 2026-09-14
   contract, Server persistence and REST boundaries, Web surface, migration risk, module
   composition, real integration tests and authenticated browser validation.
 - **Current phase:** `F5` — structural gate and integrated validation.
-- **Next action:** Re-audit FND-027 on the published Web head, complete the Web PR CI gate, then
-  invoke `conclude-spec` if no blocking finding remains.
-- **Active blockers:** FND-027 remains open pending the same Reviewer’s re-audit and the final
-  Web PR CI gate. The current branch is the
+- **Next action:** Route the independent Formalization baseline failure for resolution outside
+  this feature, then rerun the final Web PR CI gate and invoke `conclude-spec` if it passes.
+- **Active blockers:** FND-028 blocks the required Web PR CI gate: the unchanged Formalization
+  route test fails outside the Dynamic Forms diff. FND-027 is resolved by the same Reviewer’s PASS.
+  The current branch is the
   canonical delivery line; unrelated worktree changes remain outside scoped commits and no
   `origin/develop` merge is planned.
 - **Builders:** `builder_core` owns Core + Validation contracts; `builder_server` owns Server;
@@ -168,7 +169,9 @@ updated_at: 2026-09-14
   fixtures; `FND-026` was resolved by the published clean-slice corrections. The same Reviewer’s
   next re-audit opened `FND-027` because mobile cards lacked the explicit `Editar` operation;
   the Orchestrator-local Web correction now adds that action and a 320px keyboard assertion, and
-  the focused checks pass. The final Web PR CI gate and same-Reviewer re-audit remain pending.
+  the focused checks pass. The same Reviewer re-audited the correction and returned PASS; the
+  final Web PR CI gate remains blocked by the independent Formalization baseline failure recorded
+  as FND-028.
 - **Rules:** `documentation/sdd.md`; full Spec Rule Pack; `documentation/agents/implementation-reviewer-agent.md`.
 - **Exit:** The affected desktop/narrow browser and visual evidence is refreshed; the same Reviewer
   returned PASS with all findings resolved; every phase/task is complete; Evaluation is `ready`.
