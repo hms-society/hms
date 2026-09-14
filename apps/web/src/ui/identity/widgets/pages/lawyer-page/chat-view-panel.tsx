@@ -28,11 +28,12 @@ export const ChatViewPanel = ({
 }: ChatViewPanelProps) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll trigger on chat/message change
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
     }
-  }, [])
+  }, [activeChat.id, activeChat.messages.length])
 
   const lastMsg = activeChat.messages[activeChat.messages.length - 1]
   const parseDate = (val?: unknown) => {
@@ -100,7 +101,10 @@ export const ChatViewPanel = ({
         <MessageGroup>
           {activeChat.messages.map((msg) => {
             const isOutbound = msg.direction === 'outbound'
-            const isDocumentMsg = msg.content.startsWith('[Documento Recebido]')
+            const isDocumentMsg =
+              msg.isDocument ||
+              (msg.direction === 'inbound' &&
+                msg.content.startsWith('[Documento Recebido]'))
             const docName = isDocumentMsg
               ? msg.content.replace('[Documento Recebido]', '').trim()
               : ''

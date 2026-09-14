@@ -103,7 +103,7 @@ WHATSAPP_START_WINDOW_TEMPLATE_NAME: z.string().default('inicio_atendimento_ola'
 ```
 
 ### Atualização do DTO:
-Atualizar `SendCommunicationDto` ([send-communication.dto.ts](file:///home/kauan/Documentos/HMS/hms/apps/server/src/communication/rest/dtos/send-communication.dto.ts)):
+Atualizar `SendCommunicationDto` ([send-communication.dto.ts](../../../../apps/server/src/communication/rest/dtos/send-communication.dto.ts)):
 ```typescript
 export const sendCommunicationSchema = z.object({
   clientId: z.string().uuid(),
@@ -115,16 +115,16 @@ export const sendCommunicationSchema = z.object({
 ```
 
 ### Atualização do Controller & Provider:
-- No [whatsapp.provider.ts](file:///home/kauan/Documentos/HMS/hms/apps/server/src/shared/communication/whatsapp.provider.ts), garantir método `sendTemplateMessage(phone: string, templateName: string)` que realiza chamada `POST` na API do Graph da Meta com `type: 'template'`.
-- No [send-communication.controller.ts](file:///home/kauan/Documentos/HMS/hms/apps/server/src/communication/rest/controllers/send-communication.controller.ts), se `body.type === 'template'`, invocar o disparo do template via `whatsappProvider` e persistir a mensagem em `private_messages`.
+- No [whatsapp.provider.ts](../../../../apps/server/src/shared/communication/whatsapp.provider.ts), garantir método `sendTemplateMessage(phone: string, templateName: string)` que realiza chamada `POST` na API do Graph da Meta com `type: 'template'`.
+- No [send-communication.controller.ts](../../../../apps/server/src/communication/rest/controllers/send-communication.controller.ts), se `body.type === 'template'`, invocar o disparo do template via `whatsappProvider` e persistir a mensagem em `private_messages`.
 
 ---
 
 ## 2. Web App (`apps/web`)
 
 ### Atualização do Serviço e Componente UI:
-- Atualizar [communication-service.ts](file:///home/kauan/Documentos/HMS/hms/apps/web/src/rest/services/communication-service.ts) para enviar `type` e `templateName` quando fornecidos.
-- No `ChatViewPanel` ([chat-view-panel.tsx](file:///home/kauan/Documentos/HMS/hms/apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx)):
+- Atualizar [communication-service.ts](../../../../apps/web/src/rest/services/communication-service.ts) para enviar `type` e `templateName` quando fornecidos.
+- No `ChatViewPanel` ([chat-view-panel.tsx](../../../../apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx)):
   - Calcular:
     ```typescript
     const lastMsg = activeChat.messages[activeChat.messages.length - 1]

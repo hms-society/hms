@@ -126,7 +126,6 @@ export const LawyerCommunicationPage = () => {
         content: 'Olá. Podemos conversar sobre o caso?',
         channel: 'whatsapp',
         type: 'template',
-        templateName: 'inicio_atendimento_ola',
       },
       {
         onSuccess: () => {

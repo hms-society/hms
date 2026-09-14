@@ -6,7 +6,7 @@ export interface WhatsappProvider {
     params: SendWhatsappMessageParams,
   ): Promise<SendWhatsappMessageResult>
   sendTextMessage(phone: string, message: string): Promise<SendWhatsappMessageResult>
-  sendTemplateMessage?(
+  sendTemplateMessage(
     phone: string,
     templateName: string,
     languageCode?: string,

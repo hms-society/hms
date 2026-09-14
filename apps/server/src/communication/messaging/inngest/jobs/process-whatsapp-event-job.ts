@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eventType, type InngestFunction } from 'inngest'
-import { eq, desc, like } from 'drizzle-orm'
+import { eq, desc, like, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
@@ -25,6 +25,7 @@ type WhatsappMedia = {
 }
 
 type WhatsappMessage = {
+  id?: unknown
   type?: unknown
   from?: unknown
   text?: {
@@ -82,6 +83,25 @@ export class ProcessWhatsappEventJob extends InngestJob {
               continue
             }
 
+            // Deduplication check by Meta message ID (wamid)
+            if (typeof message.id === 'string' && message.id.length > 0) {
+              const [existing] = await database
+                .select({ id: integracaoEvento.id })
+                .from(integracaoEvento)
+                .where(
+                  and(
+                    eq(integracaoEvento.provedor, 'whatsapp'),
+                    sql`${integracaoEvento.payload}->>'id' = ${message.id}`,
+                  ),
+                )
+                .limit(1)
+
+              if (existing) {
+                // Skip already processed event
+                continue
+              }
+            }
+
             // Process text messages
             if (message.type === 'text') {
               const textBody =
@@ -134,6 +154,12 @@ export class ProcessWhatsappEventJob extends InngestJob {
                   })
                 }
               }
+
+              await database.insert(integracaoEvento).values({
+                provedor: 'whatsapp',
+                payload: message,
+                status: 'recebido',
+              })
 
               continue
             }

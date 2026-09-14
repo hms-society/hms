@@ -14,6 +14,7 @@ export type ChatMessage = {
   createdAt: string
   rawCreatedAt?: string
   sender: string
+  isDocument?: boolean
 }
 
 export type ClientConversation = {

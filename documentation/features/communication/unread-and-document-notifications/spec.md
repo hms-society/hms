@@ -38,12 +38,12 @@ Além disso, para acompanhar atendimentos em tempo real, a plataforma precisa si
 ## Incluído
 
 - **Servidor (`apps/server`)**:
-  - Atualizar o job [process-whatsapp-event-job.ts](file:///home/kauan/Documentos/HMS/hms/apps/server/src/communication/messaging/inngest/jobs/process-whatsapp-event-job.ts) para que, ao receber um arquivo (`message.type === 'document' || 'image'`), registre uma entrada em `private_messages` formatada como `"[Documento Recebido] <nome_do_arquivo>"`.
+  - Atualizar o job [process-whatsapp-event-job.ts](../../../../apps/server/src/communication/messaging/inngest/jobs/process-whatsapp-event-job.ts) para que, ao receber um arquivo (`message.type === 'document' || 'image'`), registre uma entrada em `private_messages` formatada como `"[Documento Recebido] <nome_do_arquivo>"`.
 - **Web App (`apps/web`)**:
   - **Utilitário Sonoro**: Criar `playNotificationBeep()` em `audio-notifier.ts` utilizando Web Audio API (onda senoidal em 800Hz / 150ms).
-  - **Contexto de Comunicação**: Evoluir o [communication-context.tsx](file:///home/kauan/Documentos/HMS/hms/apps/web/src/ui/shared/contexts/communication-context.tsx) com polling leve (10s) para detectar mensagens não lidas por cliente, gerenciar `unreadChatIds`, acionar o beep sonoro quando novas mensagens chegarem e permitir a limpeza via `markAsRead(clientId)`.
-  - **Sidebar**: Garantir a exibição da notificação vermelha no item de menu de Comunicação em [sidebar/index.tsx](file:///home/kauan/Documentos/HMS/hms/apps/web/src/ui/shared/widgets/layouts/app-layout/sidebar/index.tsx).
-  - **Chat do Advogado**: No [chat-view-panel.tsx](file:///home/kauan/Documentos/HMS/hms/apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx), identificar mensagens iniciadas com `[Documento Recebido]` e renderizar um Card especial com ícone de documento, o nome do arquivo e o informativo "Documento atribuído ao cliente na Caixa de Docs".
+  - **Contexto de Comunicação**: Evoluir o [communication-context.tsx](../../../../apps/web/src/ui/shared/contexts/communication-context.tsx) com polling leve (10s) para detectar mensagens não lidas por cliente, gerenciar `unreadChatIds`, acionar o beep sonoro quando novas mensagens chegarem e permitir a limpeza via `markAsRead(clientId)`.
+  - **Sidebar**: Garantir a exibição da notificação vermelha no item de menu de Comunicação em [sidebar/index.tsx](../../../../apps/web/src/ui/shared/widgets/layouts/app-layout/sidebar/index.tsx).
+  - **Chat do Advogado**: No [chat-view-panel.tsx](../../../../apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx), identificar mensagens iniciadas com `[Documento Recebido]` e renderizar um Card especial com ícone de documento, o nome do arquivo e o informativo "Documento atribuído ao cliente na Caixa de Docs".
 - **Validação e Testes**:
   - Testes unitários para o utilitário de áudio e atualizações de contexto.
   - Teste de widget cobrindo a renderização do balão especial de documento no `ChatViewPanel`.
@@ -127,7 +127,7 @@ export function playNotificationBeep() {
 
 ## 2. Servidor (`process-whatsapp-event-job.ts`)
 
-No job [process-whatsapp-event-job.ts](file:///home/kauan/Documentos/HMS/hms/apps/server/src/communication/messaging/inngest/jobs/process-whatsapp-event-job.ts#L140-L180), para mensagens de tipo `document` ou `image`:
+No job [process-whatsapp-event-job.ts](../../../../apps/server/src/communication/messaging/inngest/jobs/process-whatsapp-event-job.ts), para mensagens de tipo `document` ou `image`:
 ```typescript
 if (clientId && activeIntake?.responsibleId) {
   const fileName = typeof media.filename === 'string' ? media.filename : 'documento'
@@ -145,7 +145,7 @@ if (clientId && activeIntake?.responsibleId) {
 
 ## 3. Renderização de Balão no Chat (`chat-view-panel.tsx`)
 
-No [chat-view-panel.tsx](file:///home/kauan/Documentos/HMS/hms/apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx), testar se `msg.content.startsWith('[Documento Recebido]')`:
+No [chat-view-panel.tsx](../../../../apps/web/src/ui/identity/widgets/pages/lawyer-page/chat-view-panel.tsx), testar se `msg.content.startsWith('[Documento Recebido]')`:
 ```tsx
 {msg.content.startsWith('[Documento Recebido]') ? (
   <div className="flex items-center gap-3 p-3 bg-muted/40 rounded-lg border border-border/60">

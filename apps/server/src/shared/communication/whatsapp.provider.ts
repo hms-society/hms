@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EnvProvider } from '../provision/env/env-provider'
+import { AppError } from '@hms/core/shared/domain/errors'
 import type {
   WhatsappProvider as IWhatsappProvider,
   SendWhatsappMessageParams,
@@ -55,8 +56,13 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
-        `Failed to send WhatsApp message: ${response.status} - ${errorText}`,
+      console.error(
+        `[WhatsappProvider] Meta Cloud API error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.',
+        'WhatsappProviderError',
       )
     }
 
@@ -102,8 +108,13 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
-        `Failed to send WhatsApp text message: ${response.status} - ${errorText}`,
+      console.error(
+        `[WhatsappProvider] Meta Cloud API text error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao enviar mensagem de texto via WhatsApp.',
+        'WhatsappProviderError',
       )
     }
 
@@ -114,7 +125,10 @@ export class WhatsappProvider implements IWhatsappProvider {
     const externalMessageId = responseData.messages?.[0]?.id
 
     if (!externalMessageId) {
-      throw new Error('Meta Cloud API response did not contain a message ID')
+      throw new AppError(
+        'Resposta da API do WhatsApp não retornou identificador de mensagem.',
+        'WhatsappProviderError',
+      )
     }
 
     return {
@@ -153,8 +167,13 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
-        `Failed to send WhatsApp template message: ${response.status} - ${errorText}`,
+      console.error(
+        `[WhatsappProvider] Meta Cloud API template error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao enviar template via WhatsApp.',
+        'WhatsappProviderError',
       )
     }
 
