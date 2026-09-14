@@ -2,6 +2,8 @@ import type {
   CancelFormalizationSignatureSendingCommand,
   ConfirmFormalizationSignatureSendingCommand,
   FormalizationSignatureRequestStatus,
+  ConfirmFormalizationContractingCommand,
+  ResendFormalizationSignatureInvitationCommand,
 } from '@hms/core/formalization/domain/structures'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -66,7 +68,7 @@ export function useFormalizationSignatureSending(
 ) {
   const { formalizationService } = useRestContext()
   const queryClient = useQueryClient()
-  const [isCancellationPending, setIsCancellationPending] = useState(false)
+  const [isCancellationPendingLocally, setIsCancellationPendingLocally] = useState(false)
   const reviewQuery = useQuery({
     queryKey: getFormalizationSignatureSendingReviewQueryKey(formalizationId),
     enabled: Boolean(formalizationId) && enabled,
@@ -74,7 +76,7 @@ export function useFormalizationSignatureSending(
     refetchInterval: (query) =>
       getSignatureSendingPollInterval(
         query.state.data?.currentRequest?.status,
-        isCancellationPending,
+        isCancellationPendingLocally,
       ),
     queryFn: async () =>
       readResponse(await formalizationService.getSignatureSendingReview(formalizationId)),
@@ -82,15 +84,20 @@ export function useFormalizationSignatureSending(
 
   const statusQuery = useQuery({
     queryKey: getFormalizationSignatureSendingStatusQueryKey(formalizationId),
-    enabled:
-      Boolean(formalizationId) && enabled && Boolean(reviewQuery.data?.currentRequest),
+    enabled: Boolean(formalizationId) && enabled,
     retry: false,
     refetchInterval: (query) => {
-      if (!reviewQuery.data?.currentRequest) return false
+      if (
+        reviewQuery.data !== undefined &&
+        reviewQuery.data.currentRequest === undefined
+      ) {
+        return false
+      }
 
       return getSignatureSendingPollInterval(
-        query.state.data?.status ?? reviewQuery.data.currentRequest.status,
-        isCancellationPending,
+        query.state.data?.status ?? reviewQuery.data?.currentRequest?.status,
+        isCancellationPendingLocally ||
+          Boolean(query.state.data?.cancellationRequestedAt),
       )
     },
     queryFn: async () =>
@@ -126,17 +133,23 @@ export function useFormalizationSignatureSending(
     reviewQuery.data !== undefined && reviewQuery.data.currentRequest === undefined
   const currentRequestStatus = reviewQuery.data?.currentRequest?.status
   const observedRequestStatus = currentRequestStatus ?? statusQuery.data?.status
+  const isCancellationPendingFromStatus = Boolean(
+    statusQuery.data?.cancellationRequestedAt &&
+      !TERMINAL_REQUEST_STATUSES.has(statusQuery.data.status),
+  )
+  const isCancellationPending =
+    isCancellationPendingLocally || isCancellationPendingFromStatus
 
   useEffect(() => {
-    if (!isCancellationPending) return
+    if (!isCancellationPendingLocally) return
 
     if (
       reviewHasNoCurrentRequest ||
       (observedRequestStatus && TERMINAL_REQUEST_STATUSES.has(observedRequestStatus))
     ) {
-      setIsCancellationPending(false)
+      setIsCancellationPendingLocally(false)
     }
-  }, [isCancellationPending, observedRequestStatus, reviewHasNoCurrentRequest])
+  }, [isCancellationPendingLocally, observedRequestStatus, reviewHasNoCurrentRequest])
 
   const confirmMutation = useMutation({
     mutationFn: async (input: ConfirmFormalizationSignatureSendingCommand) =>
@@ -160,11 +173,38 @@ export function useFormalizationSignatureSending(
           ? refreshed.review.currentRequest
           : reviewQuery.data?.currentRequest
       const status = currentRequest?.status ?? refreshed.status?.status
-      setIsCancellationPending(
+      setIsCancellationPendingLocally(
         response.cancellationPending &&
           (!reviewWasLoaded || Boolean(currentRequest)) &&
           (!status || !TERMINAL_REQUEST_STATUSES.has(status)),
       )
+    },
+  })
+
+  const resendMutation = useMutation({
+    mutationFn: async ({
+      recipientId,
+      input,
+    }: {
+      readonly recipientId: string
+      readonly input: ResendFormalizationSignatureInvitationCommand
+    }) =>
+      readResponse(
+        await formalizationService.resendSignatureInvitation(
+          formalizationId,
+          recipientId,
+          input,
+        ),
+      ),
+    onSuccess: invalidateSendingQueries,
+  })
+
+  const contractingMutation = useMutation({
+    mutationFn: async (input: ConfirmFormalizationContractingCommand) =>
+      readResponse(await formalizationService.confirmContracting(formalizationId, input)),
+    onSuccess: async () => {
+      await invalidateSendingQueries()
+      await queryClient.invalidateQueries({ queryKey: ['intakes'] })
     },
   })
 
@@ -179,10 +219,16 @@ export function useFormalizationSignatureSending(
     isConfirming: confirmMutation.isPending,
     isCancelling: cancelMutation.isPending,
     isCancellationPending,
+    isResending: resendMutation.isPending,
+    resendError: resendMutation.error,
+    resendInvitation: resendMutation.mutateAsync,
     confirmError: confirmMutation.error,
     cancelError: cancelMutation.error,
     confirmSending: confirmMutation.mutateAsync,
     cancelSending: cancelMutation.mutateAsync,
+    confirmContracting: contractingMutation.mutateAsync,
+    isConfirmingContracting: contractingMutation.isPending,
+    confirmContractingError: contractingMutation.error,
     refetchReview: reviewQuery.refetch,
     refetchStatus: statusQuery.refetch,
   }

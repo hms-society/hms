@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AppError } from '@hms/core/shared/domain/errors'
+import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
 import { RestContext, RestContextProvider } from '../index'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
@@ -75,5 +76,17 @@ describe('RestContext', () => {
     expect(restClient.post).toHaveBeenCalledWith(
       '/formalizations/by-intake/intake-1/start',
     )
+  })
+
+  it('registers the Case projection service with the same authenticated client', async () => {
+    const { result } = renderHook(() => useRestContext(), {
+      wrapper: ({ children }) => <RestContextProvider>{children}</RestContextProvider>,
+    })
+
+    restClient.get.mockResolvedValue(new RestResponse({ body: null }))
+
+    await result.current.caseManagementService.getByIntakeId('intake-1')
+
+    expect(restClient.get).toHaveBeenCalledWith('/cases/by-intake/intake-1')
   })
 })

@@ -14,6 +14,8 @@ import type { IntakeDetailsContentController } from '../use-intake-details-page'
 import type { IntakeDetailsData } from '@/ui/intake/hooks/use-intake-details-query'
 import { IntakeEditDialog } from '../intake-edit-dialog'
 import { ConfirmConsultationClosureDialog } from '@/ui/intake/widgets/components/confirm-consultation-closure-dialog'
+import { ContractedOutcomeSection } from './contracted-outcome-section'
+import { useIntakeDetailsContent } from './use-intake-details-content'
 const statusLabels: Record<Intake['status'], string> = {
   registered: 'Registrado',
   consultation_scheduling: 'Agendando consulta',
@@ -86,9 +88,11 @@ export function IntakeDetailsContent({
   onClosureNotesChange,
   onConfirmClosure,
   onStartFormalization,
+  onRetryFormalization,
+  onRetryCase,
 }: IntakeDetailsContentController) {
   const { intake } = data
-  const clientName = getClientName(data.client?.client)
+  const { clientName } = useIntakeDetailsContent(data, responsibleName)
   const timelineEvents = buildTimelineEvents(intake, responsibleName)
 
   return (
@@ -209,7 +213,19 @@ export function IntakeDetailsContent({
         />
       )}
 
-      {intake.status === 'contracted' && <ContractedCard intake={intake} />}
+      {intake.status === 'contracted' && (
+        <ContractedOutcomeSection
+          intake={intake}
+          formalization={data.formalizationCompletion}
+          legalCase={data.legalCase}
+          legalAreaName={data.caseLegalArea?.name}
+          primaryLawyerName={data.casePrimaryLawyer?.professionalName}
+          isFormalizationUnavailable={data.formalizationCompletionUnavailable}
+          isCaseUnavailable={data.legalCaseUnavailable}
+          onRetryFormalization={onRetryFormalization}
+          onRetryCase={onRetryCase}
+        />
+      )}
       {intake.status === 'closed_without_contract' && <ClosedCard intake={intake} />}
 
       {actionError && (
@@ -498,27 +514,6 @@ function FormalizationCard({
           >
             {isPending ? 'Abrindo...' : 'Abrir formalização'} <Icon name='pencil' />
           </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function ContractedCard({ intake }: { intake: Intake }) {
-  return (
-    <Card className='border border-emerald-200 bg-emerald-50/60 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/20'>
-      <CardContent className='flex items-start gap-3 p-5 sm:p-6'>
-        <Icon name='check-circle-2' className='mt-0.5 size-5 shrink-0 text-emerald-600' />
-        <div>
-          <p className='text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-300'>
-            Desfecho
-          </p>
-          <h2 className='mt-1 text-lg font-semibold text-emerald-950 dark:text-emerald-100'>
-            Contratado
-          </h2>
-          <p className='mt-1 text-sm text-emerald-800/80 dark:text-emerald-200/80'>
-            Este Intake foi concluído em {formatDateTime(intake.updatedAt)}.
-          </p>
         </div>
       </CardContent>
     </Card>
