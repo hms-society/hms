@@ -159,6 +159,14 @@ test('restores row-menu focus and exposes authoritative duplicate conflict metad
   )
 
   await page.goto(ROUTES.dynamicForms)
+  const editButton = page.getByRole('button', { name: 'Editar' })
+  await editButton.focus()
+  await expect(editButton).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(ROUTES.dynamicForm.replace('$dynamicFormId', FORM_ID))
+  await expect(page.getByRole('heading', { name: 'Editar formulário' })).toBeVisible()
+
+  await page.goto(ROUTES.dynamicForms)
   const actions = page.getByRole('button', { name: 'Ações de Triagem inicial' })
   await actions.click()
   await page.keyboard.press('Escape')

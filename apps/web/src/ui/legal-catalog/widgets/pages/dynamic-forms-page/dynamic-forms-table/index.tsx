@@ -54,12 +54,21 @@ export const DynamicFormsTable = (props: DynamicFormsTableProps) => {
                       {item.description ?? 'Sem descrição'}
                     </p>
                   </div>
-                  <DynamicFormActions
-                    form={item}
-                    onDuplicate={props.onDuplicate}
-                    onChangeAvailability={props.onChangeAvailability}
-                    onDelete={props.onDelete}
-                  />
+                  <div className='flex shrink-0 items-center gap-2'>
+                    <Button
+                      variant='brand'
+                      size='sm'
+                      onClick={() => props.onEdit(item.id)}
+                    >
+                      Editar
+                    </Button>
+                    <DynamicFormActions
+                      form={item}
+                      onDuplicate={props.onDuplicate}
+                      onChangeAvailability={props.onChangeAvailability}
+                      onDelete={props.onDelete}
+                    />
+                  </div>
                 </div>
                 <dl className='grid grid-cols-2 gap-3 text-sm'>
                   <div>
