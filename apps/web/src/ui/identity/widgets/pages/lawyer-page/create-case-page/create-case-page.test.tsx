@@ -21,7 +21,7 @@ vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
   }),
 }))
 
-vi.mock('@/ui/intake/widgets/pages/intakes-page/use-intakes-query', () => ({
+vi.mock('@/ui/intake/hooks/use-intakes-query', () => ({
   useIntakesQuery: () => ({
     data: {
       items: [
@@ -36,30 +36,24 @@ vi.mock('@/ui/intake/widgets/pages/intakes-page/use-intakes-query', () => ({
   }),
 }))
 
-vi.mock('./use-create-case-mutation', () => ({
-  useCreateCaseMutation: () => ({
+vi.mock('@/ui/case-management/hooks/use-create-case-action', () => ({
+  useCreateCaseAction: () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
 }))
 
-vi.mock(
-  '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-areas-query',
-  () => ({
-    useLegalAreasQuery: () => ({
-      legalAreas: [{ id: 'area-1', name: 'Cível' }],
-    }),
+vi.mock('@/ui/intake/hooks/use-legal-areas-query', () => ({
+  useLegalAreasQuery: () => ({
+    legalAreas: [{ id: 'area-1', name: 'Cível' }],
   }),
-)
+}))
 
-vi.mock(
-  '@/ui/intake/widgets/pages/new-intake-page/demand-step/use-legal-topics-query',
-  () => ({
-    useLegalTopicsQuery: () => ({
-      legalTopics: [{ id: 'topic-1', name: 'Contratos' }],
-    }),
+vi.mock('@/ui/intake/hooks/use-legal-topics-query', () => ({
+  useLegalTopicsQuery: () => ({
+    legalTopics: [{ id: 'topic-1', name: 'Contratos' }],
   }),
-)
+}))
 
 vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
   useRestContext: () => ({
@@ -71,6 +65,10 @@ vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
 
 vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: null }),
+}))
+
+vi.mock('@/ui/intake/hooks/use-intake-query', () => ({
+  useIntakeQuery: () => ({ data: null }),
 }))
 
 // Mock the components that use radix-ui primitives which can cause act warnings in JSDOM if not fully mocked or interacted properly

@@ -457,6 +457,7 @@ export const FormalizationSendingConfigurationPanel = ({
                           void sendingController.cancelSending({
                             expectedRequestVersion,
                             expectedFormalizationVersion: expectedVersion,
+                            reason: 'Cancelamento solicitado pelo operador.',
                           })
                         }}
                       >

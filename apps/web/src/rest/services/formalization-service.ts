@@ -9,6 +9,10 @@ import type {
   FormalizationSignatureConfiguration,
   FormalizationSignatureSendingReviewResponse,
   FormalizationSignatureSendingStatusResponse,
+  FormalizationCompletionSummary,
+  FormalizationContractingResult,
+  ResendFormalizationSignatureInvitationResult,
+  ConfirmFormalizationContractingCommand,
 } from '@hms/core/formalization/domain/structures'
 import type { RestClient } from '@hms/core/shared/interfaces'
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
@@ -50,6 +54,118 @@ function getContentType(headers: Record<string, string>): string | undefined {
   )?.[1]
 
   return header?.split(';', 1)[0]?.trim().toLowerCase()
+}
+
+function mapDate(value: Date | string | undefined): Date | undefined {
+  return value === undefined ? undefined : toDate(value)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isDateLike(value: unknown): value is Date | string {
+  return value instanceof Date || typeof value === 'string'
+}
+
+function isSignatureSendingStatusProjection(
+  value: unknown,
+): value is FormalizationSignatureSendingStatusResponse {
+  return (
+    isRecord(value) &&
+    typeof value.formalizationId === 'string' &&
+    typeof value.formalizationVersion === 'number' &&
+    typeof value.requestId === 'string' &&
+    typeof value.status === 'string' &&
+    typeof value.version === 'number' &&
+    typeof value.totalDocuments === 'number' &&
+    typeof value.completedDocuments === 'number' &&
+    typeof value.failedDocuments === 'number' &&
+    typeof value.progressPercentage === 'number' &&
+    typeof value.canCancel === 'boolean' &&
+    typeof value.canRetry === 'boolean' &&
+    typeof value.canConfirmContracting === 'boolean' &&
+    (value.viewerMode === 'operator' || value.viewerMode === 'tracking_only') &&
+    isRecord(value.permissions) &&
+    typeof value.permissions.canOperate === 'boolean' &&
+    typeof value.permissions.canViewDocumentContent === 'boolean' &&
+    Array.isArray(value.documents)
+  )
+}
+
+function isCompletionProjection(value: unknown): value is FormalizationCompletionSummary {
+  return (
+    isRecord(value) &&
+    typeof value.formalizationId === 'string' &&
+    typeof value.intakeId === 'string' &&
+    value.status === 'completed' &&
+    isDateLike(value.completedAt) &&
+    typeof value.signatureRequestId === 'string' &&
+    value.signatureStatus === 'confirmed'
+  )
+}
+
+function emptyProjectionResponse<Body>(response: RestResponse<Body>) {
+  return new RestResponse<null>({
+    body: null,
+    statusCode: response.statusCode,
+    headers: response.headers,
+  })
+}
+
+function mapSignatureSendingStatus(
+  response: RestResponse<FormalizationSignatureSendingStatusResponse | null>,
+): RestResponse<FormalizationSignatureSendingStatusResponse | null> {
+  if (!response.isSuccessful || response.isFailure || response.body === null) {
+    return response
+  }
+
+  const status = response.body
+  if (!isSignatureSendingStatusProjection(status))
+    return emptyProjectionResponse(response)
+
+  return new RestResponse({
+    body: {
+      ...status,
+      completedAt: mapDate(status.completedAt),
+      sentAt: mapDate(status.sentAt),
+      submittedAt: mapDate(status.submittedAt),
+      confirmedAt: mapDate(status.confirmedAt),
+      terminalAt: mapDate(status.terminalAt),
+      cancellationRequestedAt: mapDate(status.cancellationRequestedAt),
+      documents: (status.documents ?? []).map((document) => ({
+        ...document,
+        submittedAt: mapDate(document.submittedAt),
+        confirmedAt: mapDate(document.confirmedAt),
+        terminalAt: mapDate(document.terminalAt),
+        signatories: (document.signatories ?? []).map((signatory) => ({
+          ...signatory,
+          invitedAt: mapDate(signatory.invitedAt),
+          submittedAt: mapDate(signatory.submittedAt),
+          confirmedAt: mapDate(signatory.confirmedAt),
+          terminalAt: mapDate(signatory.terminalAt),
+        })),
+      })),
+    },
+    statusCode: response.statusCode,
+    headers: response.headers,
+  })
+}
+
+function mapCompletionResponse(
+  response: RestResponse<FormalizationCompletionSummary | null>,
+): RestResponse<FormalizationCompletionSummary | null> {
+  if (!response.isSuccessful || response.isFailure || response.body === null) {
+    return response
+  }
+
+  if (!isCompletionProjection(response.body)) return emptyProjectionResponse(response)
+
+  return new RestResponse({
+    body: { ...response.body, completedAt: toDate(response.body.completedAt) },
+    statusCode: response.statusCode,
+    headers: response.headers,
+  })
 }
 
 export const FormalizationService = (
@@ -187,8 +303,25 @@ export const FormalizationService = (
   },
 
   getSignatureSendingStatus(formalizationId) {
-    return restClient.get<FormalizationSignatureSendingStatusResponse>(
-      `/formalizations/${formalizationId}/signature-sending/status`,
+    return restClient
+      .get<FormalizationSignatureSendingStatusResponse | null>(
+        `/formalizations/${formalizationId}/signature-sending/status`,
+      )
+      .then(mapSignatureSendingStatus)
+  },
+
+  getCompletionByIntake(intakeId) {
+    return restClient
+      .get<FormalizationCompletionSummary | null>(
+        `/formalizations/by-intake/${intakeId}/completion`,
+      )
+      .then(mapCompletionResponse)
+  },
+
+  resendSignatureInvitation(formalizationId, recipientId, input) {
+    return restClient.post<ResendFormalizationSignatureInvitationResult>(
+      `/formalizations/${formalizationId}/signature-sending/recipients/${recipientId}/resend`,
+      input,
     )
   },
 
@@ -198,6 +331,13 @@ export const FormalizationService = (
   ) {
     return restClient.post<FormalizationSignatureSendingCancellationResponse>(
       `/formalizations/${formalizationId}/signature-sending/cancel`,
+      input,
+    )
+  },
+
+  confirmContracting(formalizationId, input: ConfirmFormalizationContractingCommand) {
+    return restClient.post<FormalizationContractingResult>(
+      `/formalizations/${formalizationId}/contracting/confirm`,
       input,
     )
   },
