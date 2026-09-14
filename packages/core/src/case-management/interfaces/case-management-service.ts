@@ -1,6 +1,7 @@
 import type { CaseChecklistItem, LegalCase, LegalCaseSummary } from '../domain/entities'
 import type { CaseChecklistGateDecision } from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
+import type { LegalCaseSummary as LegalCaseCompletionSummary } from '../domain/structures'
 
 export type ReviewCaseChecklistGateRequest = {
   decision: CaseChecklistGateDecision
@@ -37,4 +38,7 @@ export interface CaseManagementService {
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
+  getByIntakeId(
+    intakeId: string,
+  ): Promise<RestResponse<LegalCaseCompletionSummary | null>>
 }

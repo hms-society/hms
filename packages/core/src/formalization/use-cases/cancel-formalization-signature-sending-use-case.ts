@@ -7,7 +7,12 @@ import type {
 import type { FormalizationSignatureCancellationAttempt } from '../domain/entities'
 import { FormalizationSignatureRequestCancellationRequestedEvent } from '../domain/events/formalization-signature-request-cancellation-requested-event'
 import { FormalizationSignatureRequestStatus } from '../domain/structures'
-import { FormalizationSignatureRequestConflictError } from '../domain/errors'
+import {
+  FormalizationNotFoundError,
+  FormalizationSignatureRequestConflictError,
+  FormalizationSignatureSendingForbiddenError,
+} from '../domain/errors'
+import { CollaboratorProfile } from '../../identity/domain/structures'
 import type {
   FormalizationSignatureCancellationAttemptsRepository,
   FormalizationSignatureGatewaySessionsRepository,
@@ -16,13 +21,17 @@ import type {
   FormalizationSignatureProxyBindingsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
+  FormalizationsRepository,
 } from '../interfaces'
 
 type Request = {
   readonly requestId: string
+  readonly formalizationId?: string
   readonly actorId: string
+  readonly actorProfile?: CollaboratorProfile
   readonly expectedRequestVersion: number
   readonly expectedFormalizationVersion: number
+  readonly reason: string
 }
 
 type Response = {
@@ -33,6 +42,7 @@ type Response = {
 
 type Dependencies = {
   readonly requestsRepository: FormalizationSignatureRequestsRepository
+  readonly formalizationsRepository?: FormalizationsRepository
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
   readonly cancellationsRepository: FormalizationSignatureCancellationAttemptsRepository
   readonly invitationsRepository: FormalizationSignatureInvitationsRepository
@@ -57,6 +67,23 @@ export class CancelFormalizationSignatureSendingUseCase
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
+    const reason = request.reason.trim()
+    if (!reason || reason.length > 500)
+      throw new FormalizationSignatureRequestConflictError(
+        'O motivo do cancelamento deve ter entre 1 e 500 caracteres.',
+      )
+    if (this.dependencies.formalizationsRepository && request.formalizationId) {
+      const formalization = await this.dependencies.formalizationsRepository.findById(
+        request.formalizationId,
+      )
+      if (!formalization) throw new FormalizationNotFoundError()
+      if (
+        formalization.assignedLawyerId !== request.actorId &&
+        request.actorProfile !== CollaboratorProfile.Admin
+      ) {
+        throw new FormalizationSignatureSendingForbiddenError()
+      }
+    }
     const signatureRequest = await this.dependencies.requestsRepository.findById(
       request.requestId,
     )
@@ -100,6 +127,7 @@ export class CancelFormalizationSignatureSendingUseCase
       status: 'pending',
       attempts: 0,
       requestedBy: request.actorId,
+      reason: request.reason.trim(),
       requestedAt: now,
       updatedAt: now,
     }

@@ -316,6 +316,48 @@
       "when": 1788993061771,
       "tag": "0044_violet_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1789123439187,
+      "tag": "0038_sharp_captain_flint",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1789123439188,
+      "tag": "0039_pink_spacker_dave",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1789123439189,
+      "tag": "0040_formalization_signature_configuration",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1789123439190,
+      "tag": "0041_worried_texas_twister",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1789123439191,
+      "tag": "0042_blushing_sinister_six",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1789123439193,
+      "tag": "0045_formalization_completion",
+      "breakpoints": true
     }
   ]
 }

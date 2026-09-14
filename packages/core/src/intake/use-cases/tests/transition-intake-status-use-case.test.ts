@@ -54,4 +54,20 @@ describe('Transition Intake Status Use Case', () => {
       }),
     ).rejects.toBeInstanceOf(InvalidIntakeTransitionError)
   })
+
+  it('rejects direct contracting from the generic transition command', async () => {
+    const currentIntake = IntakeFaker.fake({ status: IntakeStatus.InFormalization })
+    repository.findById.mockResolvedValue(currentIntake)
+    const useCase = new TransitionIntakeStatusUseCase(repository)
+
+    await expect(
+      useCase.execute({
+        intakeId: currentIntake.id,
+        expectedVersion: currentIntake.version,
+        status: IntakeStatus.Contracted,
+        updatedBy: currentIntake.updatedBy,
+      }),
+    ).rejects.toBeInstanceOf(InvalidIntakeTransitionError)
+    expect(repository.replace).not.toHaveBeenCalled()
+  })
 })

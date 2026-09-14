@@ -93,3 +93,9 @@ Content-Type: application/json
   "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
   "remarks": "Pendências documentais impedem o avanço para produção jurídica."
 }
+
+### Read the public Case summary for an Intake
+# @prompt intakeId Enter the intake ID to inspect
+GET {{url}}/by-intake/{{intakeId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json

@@ -23,7 +23,6 @@ const transitions: Partial<Record<IntakeStatusValue, IntakeStatusValue>> = {
   [IntakeStatus.ConsultationScheduled]: IntakeStatus.ConsultationCompleted,
   [IntakeStatus.ConsultationCompleted]: IntakeStatus.ViabilityRegistered,
   [IntakeStatus.ViabilityRegistered]: IntakeStatus.InFormalization,
-  [IntakeStatus.InFormalization]: IntakeStatus.Contracted,
 }
 
 export class TransitionIntakeStatusUseCase implements UseCase<Request, Intake> {

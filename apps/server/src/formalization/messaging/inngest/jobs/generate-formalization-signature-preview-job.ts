@@ -1,17 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
-  FormalizationDocumentPdfConversionError,
-  FormalizationDocumentPdfInspectionError,
   FormalizationSignatureDocumentVersionFileUnavailableError,
   FormalizationSignaturePreviewClaimConflictError,
 } from '@hms/core/formalization/domain/errors'
+import {
+  DocumentPdfConversionError,
+  DocumentPdfInspectionError,
+} from '@hms/core/document-production/domain/errors'
 import { FormalizationSignaturePreviewGenerationRequestedEvent } from '@hms/core/formalization/domain'
 import type {
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureSourceReader,
-  DocumentPdfConverter,
-  FormalizationDocumentPdfInspector,
 } from '@hms/core/formalization/interfaces'
+import type { DocumentPdfFreezeService } from '@hms/core/document-production/interfaces'
 import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { ProcessFormalizationSignaturePreviewUseCase } from '@hms/core/formalization/use-cases'
 import { FailFormalizationSignaturePreviewUseCase } from '@hms/core/formalization/use-cases'
@@ -19,6 +20,7 @@ import { formalizationSignaturePreviewEventSchema } from '@hms/validation/formal
 import { eventType, type InngestFunction, NonRetriableError } from 'inngest'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
+import { DOCUMENT_PRODUCTION_PROVIDERS } from '@/document-production/constants/document-production-providers'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
@@ -44,10 +46,8 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
     sourceReader: FormalizationSignatureSourceReader,
     @Inject(PROVISION_PROVIDERS.fileStorage)
     fileStorageProvider: FileStorageProvider,
-    @Inject(FORMALIZATION_PROVIDERS.documentPdfConverter)
-    documentPdfConverter: DocumentPdfConverter,
-    @Inject(FORMALIZATION_PROVIDERS.documentPdfInspector)
-    documentPdfInspector: FormalizationDocumentPdfInspector,
+    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfFreezeService)
+    documentPdfFreezeService: DocumentPdfFreezeService,
     datetimeProvider: DatetimeProvider,
   ) {
     super(inngest)
@@ -56,8 +56,7 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
       configurationRepository,
       sourceReader,
       fileStorageProvider,
-      documentPdfConverter,
-      documentPdfInspector,
+      documentPdfFreezeService,
       datetimeProvider,
     )
     const failPreview = new FailFormalizationSignaturePreviewUseCase(
@@ -114,10 +113,10 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
     if (error.message === 'O arquivo da versão do documento não está disponível.') {
       return 'document_version_file_unavailable' as const
     }
-    if (error instanceof FormalizationDocumentPdfInspectionError) {
+    if (error instanceof DocumentPdfInspectionError) {
       return 'invalid_pdf' as const
     }
-    if (error instanceof FormalizationDocumentPdfConversionError) {
+    if (error instanceof DocumentPdfConversionError) {
       return error.retryable
         ? ('conversion_unavailable' as const)
         : ('conversion_rejected' as const)
@@ -129,8 +128,8 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
     return (
       error instanceof FormalizationSignaturePreviewClaimConflictError ||
       error instanceof FormalizationSignatureDocumentVersionFileUnavailableError ||
-      error instanceof FormalizationDocumentPdfInspectionError ||
-      (error instanceof FormalizationDocumentPdfConversionError && !error.retryable)
+      error instanceof DocumentPdfInspectionError ||
+      (error instanceof DocumentPdfConversionError && !error.retryable)
     )
   }
 }

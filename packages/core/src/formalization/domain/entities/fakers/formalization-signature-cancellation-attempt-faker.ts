@@ -10,6 +10,7 @@ export function fakeFormalizationSignatureCancellationAttempt(
     requestId: faker.string.uuid(),
     attemptToken: faker.string.uuid(),
     status: 'pending',
+    reason: 'Solicitação de cancelamento',
     attempts: 0,
     requestedBy: faker.string.uuid(),
     requestedAt: now,

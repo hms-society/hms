@@ -5,6 +5,7 @@ import type {
 
 export interface PrivateMessagesRepository {
   findById(privateMessageId: string): Promise<PrivateMessage | undefined>
+  findByClientId(clientId: string): Promise<PrivateMessage[]>
   findByIntakeId(intakeId: string): Promise<PrivateMessage[]>
   add(input: PrivateMessageCreation): Promise<PrivateMessage>
   addMany(inputs: PrivateMessageCreation[]): Promise<PrivateMessage[]>

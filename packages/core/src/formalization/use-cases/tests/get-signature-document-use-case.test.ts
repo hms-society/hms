@@ -105,6 +105,7 @@ function makeDependencies(): Dependencies {
   dependencies.sourceReader.findDocumentVersion.mockResolvedValue({
     documentId: 'source-document-1',
     documentVersionId: 'source-version-1',
+    documentSpecificationId: 'source-specification-1',
     name: 'Contrato imutável',
     reviewStatus: 'approved',
     fileId: 'source-file-1',

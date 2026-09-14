@@ -1,4 +1,4 @@
-export type FormalizationDocumentPdfConversion = {
+export type DocumentPdfConversion = {
   readonly fileName: string
   readonly contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   readonly content: Uint8Array

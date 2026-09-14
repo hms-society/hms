@@ -11,7 +11,8 @@
     "./consultation": "./src/consultation/index.ts",
     "./document-production": "./src/document-production/index.ts",
     "./document-engine": "./src/document-engine/index.ts",
-    "./formalization": "./src/formalization/index.ts"
+    "./formalization": "./src/formalization/index.ts",
+    "./case-management": "./src/case-management/index.ts"
   },
   "scripts": {
     "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",

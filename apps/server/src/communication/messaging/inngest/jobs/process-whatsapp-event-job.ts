@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eventType, type InngestFunction } from 'inngest'
-import { eq, desc, like } from 'drizzle-orm'
 import { z } from 'zod'
 
+import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
-import { clientModel } from '@/identity/database/drizzle/models'
-import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { integracaoEvento } from '@/shared/database/drizzle/schema/integracao-evento'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
@@ -52,6 +53,10 @@ export class ProcessWhatsappEventJob extends InngestJob {
     inngest: InngestClient,
     @Inject(DrizzleClient)
     private readonly drizzleClient: DrizzleClient,
+    @Inject(IDENTITY_REPOSITORIES.clients)
+    private readonly clientsRepository: ClientsRepository,
+    @Inject(INTAKE_REPOSITORIES.intakes)
+    private readonly intakesRepository: IntakesRepository,
   ) {
     super(inngest)
 
@@ -91,11 +96,9 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 continue
               }
 
-              const matchingClients = await database
-                .select()
-                .from(clientModel)
-                .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-                .limit(2)
+              const matchingClients = await this.clientsRepository.findByPhoneSuffix(
+                sender.slice(-8),
+              )
 
               const clientId =
                 matchingClients.length === 1 ? matchingClients[0].id : undefined
@@ -111,11 +114,8 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 })
 
                 // 2. Search active intake to save encrypted private message for the lawyer
-                const activeIntakes = await database
-                  .select()
-                  .from(intakeModel)
-                  .where(eq(intakeModel.clientId, clientId))
-                  .orderBy(desc(intakeModel.createdAt))
+                const activeIntakes =
+                  await this.intakesRepository.findByClientId(clientId)
 
                 const activeIntake =
                   activeIntakes.find(
@@ -146,11 +146,9 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 continue
               }
 
-              const matchingClients = await database
-                .select()
-                .from(clientModel)
-                .where(like(clientModel.phone, `%${sender.slice(-8)}`))
-                .limit(2)
+              const matchingClients = await this.clientsRepository.findByPhoneSuffix(
+                sender.slice(-8),
+              )
 
               const clientId =
                 matchingClients.length === 1 ? matchingClients[0].id : undefined

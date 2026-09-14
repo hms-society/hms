@@ -11,6 +11,7 @@ export class DrizzleIntakeMapper {
       closureReason: drizzleIntake.closureReason ?? undefined,
       closureNotes: drizzleIntake.closureNotes ?? undefined,
       closedAt: drizzleIntake.closedAt ?? undefined,
+      contractedAt: drizzleIntake.contractedAt ?? undefined,
     }
   }
 }

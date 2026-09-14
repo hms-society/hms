@@ -80,6 +80,16 @@ export class DrizzleClientsRepository
     return clients.map((client) => this.clientMapper.toDomain(client))
   }
 
+  async findByPhoneSuffix(phoneSuffix: string): Promise<Client[]> {
+    const clients = await this.database
+      .select()
+      .from(clientModel)
+      .where(sql`${clientModel.phone} like ${`%${phoneSuffix}`}`)
+      .orderBy(desc(clientModel.createdAt))
+
+    return clients.map((client) => this.clientMapper.toDomain(client))
+  }
+
   async findAll({
     page,
     limit,
