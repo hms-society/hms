@@ -39,6 +39,26 @@ design, infrastructure, and tooling documents.
 If implementation and documentation disagree, treat the documentation as intent
 and surface the discrepancy before silently copying the implementation.
 
+## Layer ownership baseline
+
+The repository uses explicit dependency direction across the domain, contract,
+application and UI layers:
+
+| Layer | Owns | Boundary rule |
+| --- | --- | --- |
+| Core (`packages/core`) | Domain entities, structures, errors, use cases and interfaces | Must remain framework- and infrastructure-independent; it must not import applications or `packages/validation`. |
+| Validation (`packages/validation`) | Zod transport/input schemas and inferred schema types | Describes input contracts only; it is test-free and must not contain domain behavior or application workflows. |
+| Server (`apps/server`) | Nest composition, REST adapters, persistence, migrations and infrastructure providers | Translates HTTP and persistence at application boundaries; Drizzle types and tables must not leak into Core or Web. |
+| Web (`apps/web`) | Routes, middleware, REST adapters, widgets and controller hooks | Consumes public contracts and owns presentation/orchestration state; it must not duplicate domain decisions or access server internals. |
+| Consumer modules | Their own records, snapshots and provider implementations | Communicate across module boundaries through Core-owned ports and public references, never through another module's tables or repositories. |
+
+Test ownership follows the same direction: Core use cases own unit tests, the
+Validation package owns no test files, Server controllers own real HTTP/database
+integration tests one file per controller, Web widgets own component/controller-
+hook test pairs, and each Web route owns its route integration test. Dedicated
+provider implementations are verified through their consuming boundaries and do
+not belong to the test allowlist.
+
 ## Rule routing table
 
 | Rule | Read when | Common path signals |

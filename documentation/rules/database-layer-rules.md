@@ -6,6 +6,12 @@ description: Organization and implementation rules for module-owned database lay
 
 These rules apply to database code under `apps/server/src`.
 
+The database layer is Server-owned infrastructure. It implements Core repository
+contracts and module-owned persistence, but it must not redefine domain entities,
+leak Drizzle row types into Core or Web, or become a cross-module communication
+shortcut. Business behavior is observed through Core use cases and real Server
+controller/application flows rather than through direct repository tests.
+
 ## Database code belongs to the owning module
 
 Each module must own its persistence implementation under:
@@ -168,8 +174,9 @@ contracts. Database behavior is validated indirectly through the server integrat
 tests for controllers or complete application flows that consume the repository.
 Do not expose a concrete repository through a fixture solely to test it directly.
 
-Migration compatibility tests are an allowed exception and belong under
-`apps/server/src/**/database/drizzle/migrations/tests/*.test.ts`.
+Migration compatibility is verified through approved controller or complete
+application integration boundaries; migration-specific test files are outside
+the repository test allowlist.
 
 ## Repository injection uses module tokens
 

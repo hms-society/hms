@@ -101,14 +101,13 @@ The repository-wide test-integrity gate is:
 pnpm check:test-integrity
 ```
 
-It reads `test-integrity.config.mjs` and allows only the documented test
-boundaries: Core use cases; server REST controllers, Inngest jobs, migrations,
-feature providers, AI boundaries, guards, and shared communication adapters; web
-middleware, route parser helpers, widgets, existing feature hooks, contexts, and
-Playwright route suites. Tests must use `.test.ts` or `.test.tsx`, and colocated
-tests must live in a `tests/` directory. A test path outside that matrix fails the
-gate. Direct tests under `apps/web/src/rest/services` are explicitly forbidden;
-service mapping is verified through the consuming boundary.
+It reads `test-integrity.config.mjs`, whose nine `allowedTestPatterns` entries are
+the complete ownership policy: Core use cases; server REST controllers and
+Inngest jobs; Web widgets and contexts; and Playwright route suites. Tests must
+use `.test.ts` or `.test.tsx`, and colocated tests must live in a `tests/`
+directory. Any test path outside that allowlist fails the gate. Provider and Web
+REST service behavior is verified through consuming boundaries instead of direct
+adapter tests.
 
 The gate also reports changed test files and resolves the local
 `origin/develop` baseline for traceability. It does not judge test quality or

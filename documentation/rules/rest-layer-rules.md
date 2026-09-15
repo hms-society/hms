@@ -7,6 +7,16 @@ description: REST controller, route grouping, dependency wiring, and REST client
 These rules apply to NestJS controllers under `apps/server/src` and their matching
 files under `apps/server/rest-client`.
 
+## REST is an application boundary
+
+REST code translates HTTP input and output at the Server boundary. Controllers
+may assemble route, query and body data, invoke a Core use case, and map its
+result or named errors to the HTTP contract. They must not contain domain
+decisions, access Drizzle tables directly, reach into another module's
+repositories, or duplicate Web authorization and business rules. Web services
+remain thin consumers of the Core REST contract and must not reimplement the
+server use case.
+
 ## Grouped routes use a module decorator
 
 Every route group must have a decorator in the owning module's `decorators`
@@ -124,6 +134,27 @@ handle() {
 Keep the documented statuses synchronized with the global REST error handler and
 the use case behavior. Responses without a body may omit `type`; all other
 successful and error responses must describe their payload explicitly.
+
+## Each DTO owns one file
+
+Every exported DTO class must be declared in its own file under the owning REST
+module's `dtos/` directory. The filename must mirror the DTO class in kebab-case
+and end with `.dto.ts`; do not group multiple response or nested DTO classes in a
+single file. The DTO barrel may re-export each class, but it must not contain DTO
+declarations.
+
+For example:
+
+```text
+apps/server/src/<module>/rest/dtos/
+├── <resource>-response.dto.ts
+├── <resource>-list-item-response.dto.ts
+└── <resource>-list-response.dto.ts
+```
+
+When one DTO references another, import the referenced DTO from its dedicated
+file. This keeps Swagger metadata, response ownership, and controller imports
+discoverable at the file boundary.
 
 ## Routes reflect resource ownership
 

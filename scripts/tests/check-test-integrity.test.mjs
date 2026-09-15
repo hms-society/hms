@@ -27,8 +27,7 @@ async function fixture(
   await writeFile(
     path.join(root, 'test-integrity.config.mjs'),
     `export default ${JSON.stringify({
-      allowedTestPatterns: ['apps/example/src/**/tests/*.test.ts'],
-      forbiddenTestPatterns: ['apps/example/src/forbidden/**/*.test.ts'],
+      allowedTestPatterns: ['apps/example/src/**/controllers/tests/*.test.ts'],
     })}\n`,
   )
   await writeFile(path.join(root, testPath), testContent)
@@ -38,7 +37,7 @@ async function fixture(
 }
 
 test('passes for a documented test boundary', async () => {
-  const root = await fixture('apps/example/src/value/tests/value.test.ts')
+  const root = await fixture('apps/example/src/controllers/tests/value.test.ts')
   try {
     const { stdout } = await execFileAsync(
       process.execPath,
@@ -51,7 +50,7 @@ test('passes for a documented test boundary', async () => {
   }
 })
 
-test('rejects a service test path even when it has a test suffix', async () => {
+test('rejects a path outside the documented allowlist even when it has a test suffix', async () => {
   const root = await fixture('apps/example/src/forbidden/service.test.ts')
   try {
     await assert.rejects(
@@ -59,7 +58,30 @@ test('rejects a service test path even when it has a test suffix', async () => {
         cwd: root,
       }),
       (error) => {
-        assert.match(error.stdout, /direct test path is forbidden/)
+        assert.match(
+          error.stdout,
+          /test path is not one of the documented test boundaries/,
+        )
+        return true
+      },
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+test('rejects a provider test path outside the documented allowlist', async () => {
+  const root = await fixture('apps/example/src/provision/tests/provider.test.ts')
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, [SCRIPT_PATH, '--json', '--base', 'main'], {
+        cwd: root,
+      }),
+      (error) => {
+        assert.match(
+          error.stdout,
+          /test path is not one of the documented test boundaries/,
+        )
         return true
       },
     )

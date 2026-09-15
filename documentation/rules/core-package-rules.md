@@ -6,6 +6,17 @@ description: Source organization rules for the shared core domain package.
 
 These rules apply to TypeScript source files under `packages/core`.
 
+## Core is the domain boundary
+
+Core owns domain entities, structures, errors, use cases, events and interfaces.
+It must remain independent of NestJS, Drizzle, HTTP, React, Web application
+adapters and `packages/validation`. Application layers implement Core interfaces;
+they must not move infrastructure or transport concerns into the Core package.
+
+Cross-module behavior must be expressed through Core-owned ports or public
+references. A Core module must not import another module's database tables,
+repositories or application services merely to answer a domain question.
+
 ## Type imports use explicit declarations
 
 When a Core source file consumes a type from another module, import it explicitly

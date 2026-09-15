@@ -6,6 +6,12 @@ description: Integration-testing rules for NestJS controllers and database-backe
 
 These rules apply to controller tests under `apps/server/src`.
 
+Controller tests belong to the Server REST boundary. They are not unit tests for
+Core use cases, repository tests, or Web widget/controller-hook tests. Core
+behavior is covered by use-case tests; persistence is observed indirectly through
+the real Server HTTP path; Web interaction behavior is covered by the widget and
+route testing rules.
+
 ## Controller tests are integration tests
 
 Test controllers through their HTTP routes with a NestJS test application and

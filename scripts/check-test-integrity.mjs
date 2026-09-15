@@ -38,7 +38,7 @@ function parseArguments(argumentsList) {
 
 function printHelp() {
   console.log('Usage: pnpm check:test-integrity -- [--base <git-ref>] [--json]')
-  console.log('Checks test naming, ownership paths, and forbidden service tests.')
+  console.log('Checks test naming and ownership paths against the allowlist.')
 }
 
 async function runGit(argumentsList, cwd) {
@@ -134,10 +134,6 @@ async function checkTestPaths(testPaths, policy) {
       errors.push(`${testPath}: tests must use the .test.ts or .test.tsx suffix`)
       continue
     }
-    if (matchesAnyPattern(testPath, policy.forbiddenTestPatterns ?? [])) {
-      errors.push(`${testPath}: direct test path is forbidden by policy`)
-      continue
-    }
     if (!matchesAnyPattern(testPath, policy.allowedTestPatterns ?? [])) {
       errors.push(`${testPath}: test path is not one of the documented test boundaries`)
     }
@@ -191,9 +187,7 @@ function printResult(result, shouldPrintJson) {
   console.log(`Tracked test files: ${result.trackedTestFiles}`)
   console.log(`Changed test files: ${result.changedTestFiles}`)
   for (const error of result.errors) console.error(`ERROR: ${error}`)
-  console.log(
-    'Boundary: only documented test paths are allowed; web REST services have no direct tests.',
-  )
+  console.log('Boundary: only documented test paths are allowed.')
 }
 
 try {

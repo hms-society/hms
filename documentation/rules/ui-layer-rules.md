@@ -7,6 +7,12 @@ description: Architecture and implementation rules for the web UI, shared widget
 These rules apply to `apps/web/src` and define how application UI, shared widgets,
 hooks, routes, environment configuration, and REST adapters are organized.
 
+The Web layer is an application presentation boundary. It consumes public Core
+contracts through REST adapters and owns route, query, overlay and interaction
+state. It must not import Server persistence or Nest internals, implement Core
+business decisions, or use widgets as a replacement for route middleware and
+server authorization.
+
 ## UI code follows feature and shared boundaries
 
 Feature-owned UI belongs under:

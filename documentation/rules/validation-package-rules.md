@@ -7,6 +7,12 @@ description: Rules for the shared Zod validation package and its type-check-only
 `packages/validation` owns shared Zod schemas that describe transport and input
 shapes. It is a contract package, not a behavior-owning application boundary.
 
+Validation sits at the transport-contract boundary. It may consume canonical
+domain constants from Core when defining closed values, but Core must never
+depend on Validation. Server and Web boundaries parse or structurally map these
+schemas into their owning Core requests; schemas must not become a substitute for
+Core entities, use cases or application authorization.
+
 ## Keep the package test-free
 
 Do not create or retain test files, a `test` script, or a `test:coverage` script

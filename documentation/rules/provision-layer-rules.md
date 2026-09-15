@@ -125,7 +125,19 @@ datetimeProvider.now.mockReturnValue(now)
 
 Domain fakers are reserved for entities and structures.
 
-When a server-owned provider has behavior that cannot be proven at a consuming
-boundary, its focused test belongs in the owning module's `provision/tests/`
-directory and uses the `.test.ts` suffix. Web REST service adapters are not
-providers and do not receive such tests.
+Provider implementations do not receive dedicated tests. Prove their behavior
+through the owning use case, controller, or other consuming boundary. Provider
+test files are outside the repository test allowlist. Web REST service adapters
+are not providers and do not receive dedicated tests.
+
+When a capability composes providers from multiple feature modules, place the
+composition provider under `apps/server/src/shared` and register it in the existing
+`SharedModule`. The shared module may inject feature-exported provider tokens, but
+source providers and their persistence access remain owned by their respective
+feature modules.
+
+Do not introduce or retain legacy `Reader` names for provider contracts or
+implementations. Use `Provider` in the contract/class/file/token/property names;
+`read*` method names are allowed when they describe the operation itself. A
+provider composed from multiple feature modules belongs in `SharedModule`, while
+single-feature adapters remain registered by the owning feature provision module.

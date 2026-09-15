@@ -7,6 +7,13 @@ description: NestJS layer-module boundaries for feature-owned provision, messagi
 These rules apply to technical layers owned by feature modules under
 `apps/server/src/<module>`.
 
+The Server application layer composes Core contracts with infrastructure. Feature
+modules may register adapters, providers and technical submodules, but they must
+not move business rules into Nest modules or bypass Core interfaces. Cross-module
+dependencies are assembled through exported ports/providers and public module
+contracts; a feature module must not reach into another feature's database or
+private application implementation.
+
 ## Technical layer directories own Nest modules
 
 A feature-owned `provision`, `messaging`, or `ai` directory must expose its own NestJS
@@ -69,6 +76,20 @@ exported messaging module when collecting jobs for the shared Inngest endpoint.
 Creating a feature messaging module must not create another Inngest controller or
 endpoint. HTTP serving remains centralized in the shared messaging infrastructure.
 
-Feature-owned provider tests belong under the provider's `provision/tests/`
-directory, and feature-owned AI tests belong below the AI boundary's `tests/`
-directory. Both use `.test.ts`; no direct web REST service test is permitted.
+Feature-owned provider and AI behavior is verified at its owning consuming boundary
+rather than through dedicated `provision/tests/` or AI test files; those paths are
+outside the repository allowlist.
+
+Cross-feature composition belongs in the existing shared module. The shared module
+may consume exported provider tokens from feature modules, but it must not import
+feature-private repositories, models, or concrete adapters. Feature modules must
+consume shared composition tokens rather than importing one another's database
+modules to assemble cross-module behavior.
+
+Legacy `Reader` contracts and classes are not permitted as names for application
+adapters. Rename them to the capability-specific `Provider` form, including the
+contract, implementation file, Nest token, injected dependency property, and
+barrel export. A provider that aggregates data from multiple feature modules is
+owned and registered by the existing `SharedModule`; a provider that only adapts
+one feature's own persistence or a shared infrastructure capability remains in
+that feature's provision layer.

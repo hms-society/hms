@@ -155,9 +155,9 @@ workflow: ExampleWorkflow
 Agents and tools remain internal providers unless another explicitly documented
 module boundary requires a public contract.
 
-Focused AI schema, tool, or workflow tests belong in a `tests/` directory below
-the AI boundary and use the `.test.ts` suffix. They verify the public schema or
-tool contract; provider behavior remains covered at its owning provision or
+Dedicated AI schema, tool, or workflow test files are outside the repository test
+allowlist. Verify AI behavior through the approved consuming use-case, controller,
+job, or widget boundaries; provider behavior remains covered at its owning
 consumer boundary.
 
 ## Source context comes from the originating module

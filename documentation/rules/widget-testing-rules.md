@@ -9,6 +9,12 @@ integration tests under `apps/web/tests`. They define which UI boundaries receiv
 tests, how those tests are named, how dependencies are mocked, and the minimum
 evidence required before a widget is considered covered.
 
+Widget test ownership is separate from Server controller ownership. A Web widget
+receives one component test and one colocated controller-hook test; a protected
+route receives its own browser integration test. These tests prove presentation,
+interaction, navigation and consumer-visible recovery behavior, not Nest
+controller internals or database persistence.
+
 ## Separate widget tests from hook tests
 
 Every widget has two complementary test boundaries:
