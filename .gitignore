@@ -65,9 +65,11 @@ CLAUDE.md
 GEMINI.md
 AGENTS.local.md
 .obsidian/
+.codegraph/
 
-# MCP's
+# MCP's and CLI's
 .playwright-mcp
+.playwright-cli
 
 # env files
 .env
@@ -75,3 +77,6 @@ AGENTS.local.md
 .env.testing
 .env.staging
 .env.production
+
+# Secrets
+.secrets

@@ -85,6 +85,18 @@ const DEFAULT_USERS: UserSeed[] = [
     email: 'estagiario@hmsadvogados.com.br',
     status: 'active',
   },
+  {
+    email: 'gildarcio.advogado@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel.advogado@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia.advogado@hmsadvogados.com.br',
+    status: 'active',
+  },
 ]
 
 type AdministrativeCollaboratorCreation = Extract<
@@ -156,6 +168,24 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     professionalName: 'Estagiário de Teste',
     jobTitle: 'Estagiário',
     profile: 'intern',
+  },
+  {
+    email: 'gildarcio.advogado@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'samuel.advogado@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'sofia.advogado@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
   },
 ]
 
