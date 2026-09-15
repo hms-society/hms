@@ -121,7 +121,9 @@ describe('WhatsappProvider', () => {
         text: 'Consulta marcada',
         idempotencyKey: 'idemp-1',
       }),
-    ).rejects.toThrow('Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.')
+    ).rejects.toThrow(
+      'Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.',
+    )
   })
 
   it('should successfully download WhatsApp media', async () => {
