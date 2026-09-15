@@ -19,10 +19,10 @@ import type { FormalizationActor, FormalizationSignatureConfiguration } from '..
 import { FormalizationSignatureRequestStatus, FormalizationSignatureStatus } from '../domain/structures'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
   SignatureSecretHasher,
 } from '../interfaces'
@@ -44,14 +44,14 @@ type Response = {
 type Dependencies = {
   readonly formalizationsRepository: FormalizationsRepository
   readonly configurationRepository: FormalizationSignatureConfigurationRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly requestsRepository: FormalizationSignatureRequestsRepository
   readonly transaction: FormalizationSignatureGatewayTransaction
   readonly idProvider: IdProvider
   readonly datetimeProvider: DatetimeProvider
   readonly broker: Broker
   readonly hasher: SignatureSecretHasher
-  readonly metadataReader: FormalizationSignatureDocumentMetadataReader
+  readonly metadataProvider: FormalizationSignatureDocumentMetadataProvider
 }
 
 export class ConfirmFormalizationSignatureSendingUseCase implements UseCase<Request, Response> {
@@ -84,7 +84,7 @@ export class ConfirmFormalizationSignatureSendingUseCase implements UseCase<Requ
     )
     this.assertReady(configuration)
 
-    const sourceDocuments = await this.dependencies.sourceReader.listCurrentDocuments(
+    const sourceDocuments = await this.dependencies.sourceProvider.listCurrentDocuments(
       formalization.id,
     )
     if (
@@ -103,7 +103,7 @@ export class ConfirmFormalizationSignatureSendingUseCase implements UseCase<Requ
 
     const metadata = await Promise.all(
       configuration.documents.map((document) =>
-        this.dependencies.metadataReader.findMetadata({
+        this.dependencies.metadataProvider.findMetadata({
           formalizationId: formalization.id,
           previewId: document.preview?.previewId ?? '',
         }),

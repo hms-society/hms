@@ -10,7 +10,7 @@ import type {
 } from '../../../document-production/interfaces'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { ReplaceFormalizationDocumentSelectionUseCase } from '../replace-formalization-document-selection-use-case'
@@ -23,7 +23,7 @@ describe('Replace Formalization Document Selection Use Case', () => {
     await expect(
       new ReplaceFormalizationDocumentSelectionUseCase(
         repository,
-        mock<FormalizationSourceReader>(),
+        mock<FormalizationSourceProvider>(),
         mock<DocumentSpecificationsRepository>(),
         mock<DocumentPackagesRepository>(),
         mock<PackageDocumentsRepository>(),
@@ -50,7 +50,7 @@ describe('Replace Formalization Document Selection Use Case', () => {
     await expect(
       new ReplaceFormalizationDocumentSelectionUseCase(
         repository,
-        mock<FormalizationSourceReader>(),
+        mock<FormalizationSourceProvider>(),
         mock<DocumentSpecificationsRepository>(),
         mock<DocumentPackagesRepository>(),
         mock<PackageDocumentsRepository>(),

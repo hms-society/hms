@@ -7,9 +7,9 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { GetFormalizationSignatureSendingReviewUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 import { Inject } from '@nestjs/common'
@@ -37,18 +37,18 @@ export class GetFormalizationSignatureSendingReviewController {
     formalizationsRepository: FormalizationsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     configurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
     requestsRepository: FormalizationSignatureRequestsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
-    metadataReader: FormalizationSignatureDocumentMetadataReader,
+    @Inject(FORMALIZATION_PROVIDERS.documentMetadataProvider)
+    metadataProvider: FormalizationSignatureDocumentMetadataProvider,
   ) {
     this.useCase = new GetFormalizationSignatureSendingReviewUseCase({
       formalizationsRepository,
       configurationRepository,
-      sourceReader,
-      metadataReader,
+      sourceProvider,
+      metadataProvider,
       requestsRepository,
     })
   }

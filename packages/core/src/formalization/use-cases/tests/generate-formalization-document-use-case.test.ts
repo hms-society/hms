@@ -9,7 +9,7 @@ import type {
 } from '../../../document-production/interfaces'
 import type { Broker, DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { GenerateFormalizationDocumentUseCase } from '../generate-formalization-document-use-case'
@@ -22,7 +22,7 @@ describe('Generate Formalization Document Use Case', () => {
     await expect(
       new GenerateFormalizationDocumentUseCase(
         repository,
-        mock<FormalizationSourceReader>(),
+        mock<FormalizationSourceProvider>(),
         mock<DocumentPackagesRepository>(),
         mock<PackageDocumentsRepository>(),
         mock<DocumentSpecificationsRepository>(),
@@ -49,7 +49,7 @@ describe('Generate Formalization Document Use Case', () => {
     await expect(
       new GenerateFormalizationDocumentUseCase(
         repository,
-        mock<FormalizationSourceReader>(),
+        mock<FormalizationSourceProvider>(),
         mock<DocumentPackagesRepository>(),
         mock<PackageDocumentsRepository>(),
         mock<DocumentSpecificationsRepository>(),

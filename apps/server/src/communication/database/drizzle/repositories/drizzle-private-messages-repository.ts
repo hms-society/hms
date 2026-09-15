@@ -1,17 +1,28 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
+import type { CryptoProvider } from '@hms/core/shared/interfaces'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
 import { privateMessageModel } from '../models/private-message-model'
 import { DrizzlePrivateMessageMapper } from '../mappers/drizzle-private-message-mapper'
-import { encrypt } from '@/shared/utils/crypto'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 @Injectable()
 export class DrizzlePrivateMessagesRepository
   extends DrizzleRepository
   implements PrivateMessagesRepository
 {
+  constructor(
+    @Inject(DrizzleClient) drizzleClient: DrizzleClient,
+    private readonly mapper: DrizzlePrivateMessageMapper,
+    @Inject(PROVISION_PROVIDERS.crypto)
+    private readonly cryptoProvider: CryptoProvider,
+  ) {
+    super(drizzleClient)
+  }
+
   async findById(
     privateMessageId: string,
   ): ReturnType<PrivateMessagesRepository['findById']> {
@@ -21,7 +32,7 @@ export class DrizzlePrivateMessagesRepository
       .where(eq(privateMessageModel.id, privateMessageId))
       .limit(1)
 
-    return record ? DrizzlePrivateMessageMapper.toDomain(record) : undefined
+    return record ? this.mapper.toDomain(record) : undefined
   }
 
   async findByIntakeId(
@@ -32,7 +43,7 @@ export class DrizzlePrivateMessagesRepository
       .from(privateMessageModel)
       .where(eq(privateMessageModel.intakeId, intakeId))
 
-    return records.map(DrizzlePrivateMessageMapper.toDomain)
+    return records.map((record) => this.mapper.toDomain(record))
   }
 
   async add(
@@ -46,7 +57,7 @@ export class DrizzlePrivateMessagesRepository
         intakeId: input.intakeId,
         clientPhone: input.clientPhone,
         direction: input.direction === 'incoming' ? 'inbound' : 'outbound',
-        content: input.content ? encrypt(input.content) : null,
+        content: input.content ? this.cryptoProvider.encrypt(input.content) : null,
         fileIds: input.fileIds,
       })
       .returning()
@@ -55,7 +66,7 @@ export class DrizzlePrivateMessagesRepository
       throw new Error('Private message was not created')
     }
 
-    return DrizzlePrivateMessageMapper.toDomain(record)
+    return this.mapper.toDomain(record)
   }
 
   async addMany(
@@ -71,7 +82,7 @@ export class DrizzlePrivateMessagesRepository
       direction: (input.direction === 'incoming' ? 'inbound' : 'outbound') as
         | 'inbound'
         | 'outbound',
-      content: input.content ? encrypt(input.content) : null,
+      content: input.content ? this.cryptoProvider.encrypt(input.content) : null,
       fileIds: input.fileIds,
     }))
 
@@ -80,7 +91,7 @@ export class DrizzlePrivateMessagesRepository
       .values(values)
       .returning()
 
-    return records.map(DrizzlePrivateMessageMapper.toDomain)
+    return records.map((record) => this.mapper.toDomain(record))
   }
 
   async remove(privateMessageId: string): Promise<void> {

@@ -7,9 +7,9 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ConfirmFormalizationSignatureSendingUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationSignatureGatewayTransaction,
   FormalizationsRepository,
   SignatureSecretHasher,
@@ -44,8 +44,8 @@ export class ConfirmFormalizationSignatureSendingController {
     formalizationsRepository: FormalizationsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     configurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRequests)
     requestsRepository: FormalizationSignatureRequestsRepository,
     @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
@@ -54,20 +54,20 @@ export class ConfirmFormalizationSignatureSendingController {
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
     @Inject(InngestBroker) broker: Broker,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
-    @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
-    metadataReader: FormalizationSignatureDocumentMetadataReader,
+    @Inject(FORMALIZATION_PROVIDERS.documentMetadataProvider)
+    metadataProvider: FormalizationSignatureDocumentMetadataProvider,
   ) {
     this.useCase = new ConfirmFormalizationSignatureSendingUseCase({
       formalizationsRepository,
       configurationRepository,
-      sourceReader,
+      sourceProvider,
       requestsRepository,
       transaction,
       idProvider,
       datetimeProvider,
       broker,
       hasher,
-      metadataReader,
+      metadataProvider,
     })
   }
 

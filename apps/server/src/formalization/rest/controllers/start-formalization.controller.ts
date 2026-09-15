@@ -16,19 +16,19 @@ import {
 import type {
   FormalizationIntakeLifecycleService,
   FormalizationsRepository,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
 } from '@hms/core/formalization/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
-import {
-  ServerFormalizationIntakeLifecycleService,
-  ServerFormalizationSourceReader,
-} from '@/formalization/provision'
+import { ServerFormalizationIntakeLifecycleService } from '@/formalization/provision'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 
 @FormalizationsController()
@@ -41,19 +41,22 @@ export class StartFormalizationController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader)
-    sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
     @Inject(ServerFormalizationIntakeLifecycleService)
     intakeLifecycleService: FormalizationIntakeLifecycleService,
     idProvider: IdProvider,
   ) {
     this.startUseCase = new StartFormalizationUseCase(
       formalizationsRepository,
-      sourceReader,
+      sourceProvider,
       intakeLifecycleService,
       idProvider,
     )
-    this.getUseCase = new GetFormalizationUseCase(formalizationsRepository, sourceReader)
+    this.getUseCase = new GetFormalizationUseCase(
+      formalizationsRepository,
+      sourceProvider,
+    )
   }
 
   @Post('by-intake/:intakeId/start')

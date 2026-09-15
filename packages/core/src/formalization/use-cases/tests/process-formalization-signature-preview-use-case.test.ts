@@ -4,7 +4,7 @@ import type { File } from '../../../shared/domain/entities'
 import type { FileStorageProvider, DatetimeProvider } from '../../../shared/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '../../interfaces'
 import type { DocumentPdfFreezeService } from '../../../document-production/interfaces'
 import { ProcessFormalizationSignaturePreviewUseCase } from '../process-formalization-signature-preview-use-case'
@@ -27,7 +27,7 @@ describe('Process Formalization Signature Preview Use Case', () => {
       ],
     })
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const storage = mock<FileStorageProvider>()
     const freezeService = mock<DocumentPdfFreezeService>()
     const datetimeProvider = mock<DatetimeProvider>()
@@ -46,7 +46,7 @@ describe('Process Formalization Signature Preview Use Case', () => {
       attemptToken: 'attempt-token',
       leaseExpiresAt: new Date(TEST_NOW.getTime() + 1000),
     })
-    sourceReader.findDocumentVersion.mockResolvedValue({
+    sourceProvider.findDocumentVersion.mockResolvedValue({
       documentId: 'document-id',
       documentVersionId: 'version-id',
       documentSpecificationId: 'specification-id',
@@ -86,7 +86,7 @@ describe('Process Formalization Signature Preview Use Case', () => {
     await expect(
       new ProcessFormalizationSignaturePreviewUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         storage,
         freezeService,
         datetimeProvider,

@@ -17,7 +17,7 @@ import {
   FormalizationStateConflictError,
 } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
+import type { FormalizationSourceProvider, FormalizationsRepository } from '../interfaces'
 import { FormalizationUseCase } from './formalization-use-case'
 import { GetFormalizationDocumentSelectionUseCase } from './get-formalization-document-selection-use-case'
 
@@ -34,7 +34,7 @@ export class ReplaceFormalizationDocumentSelectionUseCase extends FormalizationU
 
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    sourceReader: FormalizationSourceReader,
+    sourceProvider: FormalizationSourceProvider,
     private readonly specificationsRepository: DocumentSpecificationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
@@ -46,7 +46,7 @@ export class ReplaceFormalizationDocumentSelectionUseCase extends FormalizationU
     super()
     this.getSelectionUseCase = new GetFormalizationDocumentSelectionUseCase(
       formalizationsRepository,
-      sourceReader,
+      sourceProvider,
       specificationsRepository,
       documentPackagesRepository,
       packageDocumentsRepository,

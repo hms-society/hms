@@ -29,8 +29,8 @@ describe('Generate Formalization Signature Preview Job', () => {
     await fixture.resetDatabase()
     vi.clearAllMocks()
     documentPdfFreezeService.freeze.mockReset()
-    fixture.sourceReader.listCurrentDocuments.mockResolvedValue([])
-    fixture.sourceReader.findDocumentVersion.mockResolvedValue(null)
+    fixture.sourceProvider.listCurrentDocuments.mockResolvedValue([])
+    fixture.sourceProvider.findDocumentVersion.mockResolvedValue(null)
   })
 
   it('registers bounded retry and conversion concurrency settings', () => {
@@ -90,8 +90,8 @@ describe('Generate Formalization Signature Preview Job', () => {
       frozenAt: fixture.datetimeProvider.now(),
       createdAt: fixture.datetimeProvider.now(),
     })
-    fixture.sourceReader.listCurrentDocuments.mockResolvedValue([sourceDocument])
-    fixture.sourceReader.findDocumentVersion.mockResolvedValue(sourceDocument)
+    fixture.sourceProvider.listCurrentDocuments.mockResolvedValue([sourceDocument])
+    fixture.sourceProvider.findDocumentVersion.mockResolvedValue(sourceDocument)
     const event = new FormalizationSignaturePreviewGenerationRequestedEvent({
       formalizationId: preview.formalizationId,
       previewId: preview.previewId,
@@ -160,7 +160,7 @@ describe('Generate Formalization Signature Preview Job', () => {
     const run = await fixture.runInngest({ name: event.name, data: event.payload })
 
     expect(run.status.toLowerCase()).toBe('failed')
-    expect(fixture.sourceReader.findDocumentVersion).not.toHaveBeenCalled()
+    expect(fixture.sourceProvider.findDocumentVersion).not.toHaveBeenCalled()
     expect(documentPdfFreezeService.freeze).not.toHaveBeenCalled()
     const configuration =
       await fixture.signatureConfigurationRepository.findByFormalizationId(

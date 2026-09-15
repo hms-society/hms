@@ -41,7 +41,7 @@ import { AuthGuard } from '@/identity/guards'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
-import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { LegalCatalogDatabaseModule } from '@/legal-catalog/database/legal-catalog-database.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
@@ -83,7 +83,7 @@ export class ConsultationModuleFixture {
       {
         imports: [
           IdentityModule,
-          LegalCatalogModule,
+          LegalCatalogDatabaseModule,
           IntakeDatabaseModule,
           SchedulingDatabaseModule,
           ConsultationDatabaseModule,

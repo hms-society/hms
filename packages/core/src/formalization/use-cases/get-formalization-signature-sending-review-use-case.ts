@@ -1,9 +1,9 @@
 import type {
   FormalizationsRepository,
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '../interfaces'
 import type { FormalizationSignatureSendingReview } from '../domain/structures/formalization-signature-sending-review'
 import type { FormalizationSignatureSendingIssue } from '../domain/structures/formalization-signature-sending-issue'
@@ -28,8 +28,8 @@ type Response = FormalizationSignatureSendingReview
 type Dependencies = {
   readonly formalizationsRepository: FormalizationsRepository
   readonly configurationRepository: FormalizationSignatureConfigurationRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
-  readonly metadataReader: FormalizationSignatureDocumentMetadataReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
+  readonly metadataProvider: FormalizationSignatureDocumentMetadataProvider
   readonly requestsRepository: FormalizationSignatureRequestsRepository
 }
 
@@ -71,7 +71,7 @@ export class GetFormalizationSignatureSendingReviewUseCase
     const documentMetadata = configuration
       ? await Promise.all(
           configuration.documents.map((document) =>
-            this.dependencies.metadataReader.findMetadata({
+            this.dependencies.metadataProvider.findMetadata({
               formalizationId: formalization.id,
               previewId: document.preview?.previewId ?? '',
             }),

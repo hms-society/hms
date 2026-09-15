@@ -10,7 +10,7 @@ import {
 import { FormalizationSignaturePreviewGenerationRequestedEvent } from '@hms/core/formalization/domain'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '@hms/core/formalization/interfaces'
 import type { DocumentPdfFreezeService } from '@hms/core/document-production/interfaces'
 import type { FileStorageProvider } from '@hms/core/shared/interfaces'
@@ -42,8 +42,8 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
     inngest: InngestClient,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     configurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(PROVISION_PROVIDERS.fileStorage)
     fileStorageProvider: FileStorageProvider,
     @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfFreezeService)
@@ -54,7 +54,7 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
 
     const processPreview = new ProcessFormalizationSignaturePreviewUseCase(
       configurationRepository,
-      sourceReader,
+      sourceProvider,
       fileStorageProvider,
       documentPdfFreezeService,
       datetimeProvider,

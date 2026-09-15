@@ -6,7 +6,7 @@ import type {
   FormalizationSignatureAuthenticationChannels,
 } from '../domain/structures'
 
-export interface FormalizationSignatureSourceReader {
+export interface FormalizationSignatureSourceProvider {
   findPerson(personId: string): Promise<FormalizationSignatureSourcePerson | null>
   listEligibleCandidates(input: {
     readonly formalizationId: string

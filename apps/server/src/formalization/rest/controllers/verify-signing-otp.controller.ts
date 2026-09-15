@@ -26,7 +26,7 @@ import type {
   FormalizationSignatureGatewayTransaction,
   SignatureSecretVerifier,
   SignatureSecretHasher,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureProtocolsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
@@ -81,8 +81,8 @@ export class VerifySigningOtpController extends SigningGatewayController {
     acknowledgementsRepository: FormalizationSignatureDocumentAcknowledgementsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureProxyBindings)
     bindingsRepository: FormalizationSignatureProxyBindingsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretGenerator) secretGenerator: {
       generate(): string
     },
@@ -111,7 +111,7 @@ export class VerifySigningOtpController extends SigningGatewayController {
       assignmentsRepository,
       acknowledgementsRepository,
       bindingsRepository,
-      sourceReader,
+      sourceProvider,
       hasher,
       secretGenerator,
       datetimeProvider,

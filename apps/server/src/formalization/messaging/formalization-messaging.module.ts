@@ -18,7 +18,8 @@ import {
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import type { InngestFunctionGroup } from '@/shared/messaging/inngest/inngest-options'
 import { ProvisionModule } from '@/shared/provision/provision.module'
-import { FormalizationSignatureDocumentMetadataReader } from '@/formalization/provision'
+import { SharedModule } from '@/shared/shared.module'
+import { FormalizationSignatureDocumentMetadataProvider } from '@/formalization/provision'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 
 export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUNCTIONS')
@@ -29,6 +30,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
     FormalizationDatabaseModule,
     FormalizationProvisionModule,
     SharedMessagingModule,
+    SharedModule,
     ProvisionModule,
   ],
   providers: [
@@ -42,10 +44,10 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
     ReconcileFormalizationSignatureDeliveriesJob,
     ReconcileFormalizationSignatureRequestJob,
     ReconcileFormalizationSignatureRequestsJob,
-    FormalizationSignatureDocumentMetadataReader,
+    FormalizationSignatureDocumentMetadataProvider,
     {
-      provide: FORMALIZATION_PROVIDERS.documentMetadataReader,
-      useExisting: FormalizationSignatureDocumentMetadataReader,
+      provide: FORMALIZATION_PROVIDERS.documentMetadataProvider,
+      useExisting: FormalizationSignatureDocumentMetadataProvider,
     },
     {
       provide: FORMALIZATION_INNGEST_FUNCTIONS,
@@ -98,7 +100,7 @@ export const FORMALIZATION_INNGEST_FUNCTIONS = Symbol('FORMALIZATION_INNGEST_FUN
     ReconcileFormalizationSignatureRequestJob,
     ReconcileFormalizationSignatureRequestsJob,
     FORMALIZATION_INNGEST_FUNCTIONS,
-    FORMALIZATION_PROVIDERS.documentMetadataReader,
+    FORMALIZATION_PROVIDERS.documentMetadataProvider,
   ],
 })
 export class FormalizationMessagingModule {}

@@ -19,7 +19,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../interfaces'
 import {
@@ -78,7 +78,7 @@ type Dependencies = {
   readonly protocolsRepository: FormalizationSignatureProtocolsRepository
   readonly assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository
   readonly bindingsRepository: FormalizationSignatureProxyBindingsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly hasher: SignatureSecretHasher
   readonly secretGenerator: SecretGenerator
   readonly datetimeProvider: DatetimeProvider
@@ -164,7 +164,7 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     )
       return this.unavailable('access_unavailable', csrfToken)
 
-    const source = await this.dependencies.sourceReader.findAuthenticationSource(
+    const source = await this.dependencies.sourceProvider.findAuthenticationSource(
       recipient.personId,
     )
     if (!this.isLiveIdentity(recipient, source, request.actorId))
@@ -238,7 +238,7 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     if (!FLOW_RECIPIENT_STATUSES.has(recipient.status))
       return this.unavailable('access_unavailable', csrfToken)
 
-    const source = await this.dependencies.sourceReader.findAuthenticationSource(
+    const source = await this.dependencies.sourceProvider.findAuthenticationSource(
       recipient.personId,
     )
     if (!source?.active || source.personId !== recipient.personId)
@@ -410,7 +410,7 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       [...documents]
         .sort((left, right) => left.position - right.position)
         .map(async (document) => {
-          const sourceDocument = await this.dependencies.sourceReader.findDocumentVersion(
+          const sourceDocument = await this.dependencies.sourceProvider.findDocumentVersion(
             signatureRequest.formalizationId,
             document.sourceDocumentVersionId,
           )

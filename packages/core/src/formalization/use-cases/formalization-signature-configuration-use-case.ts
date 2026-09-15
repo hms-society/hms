@@ -10,7 +10,7 @@ import type {
   FormalizationSignatureFieldView,
   FormalizationSignatureSourceDocument,
 } from '../domain/structures'
-import type { FormalizationSignatureSourceReader } from '../interfaces'
+import type { FormalizationSignatureSourceProvider } from '../interfaces'
 import { FormalizationSignaturePreviewUseCase } from './formalization-signature-preview-use-case'
 
 export abstract class FormalizationSignatureConfigurationUseCase<
@@ -22,14 +22,14 @@ export abstract class FormalizationSignatureConfigurationUseCase<
     formalizationId: string,
     actorId: string,
     occurredAt: Date,
-    sourceReader: FormalizationSignatureSourceReader,
+    sourceProvider: FormalizationSignatureSourceProvider,
     idProvider: IdProvider,
   ): Promise<{
     readonly signatories: readonly FormalizationSignatory[]
     readonly assignments: readonly FormalizationSignatoryDocument[]
     readonly fields: readonly FormalizationSignatureField[]
   }> {
-    const sourceDocuments = await sourceReader.listCurrentDocuments(formalizationId)
+    const sourceDocuments = await sourceProvider.listCurrentDocuments(formalizationId)
     const sourceDocumentsById = new Map(
       sourceDocuments.map((document) => [document.documentId, document]),
     )

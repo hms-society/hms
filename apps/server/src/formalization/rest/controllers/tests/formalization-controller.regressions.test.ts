@@ -27,7 +27,7 @@ import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositorie
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import { DYNAMIC_FORMS_REPOSITORIES } from '@/shared/constants/dynamic-forms-repositories'
-import { ServerFormalizationSourceReader } from '@/formalization/provision'
+import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
 
 describe('Formalization controllers', () => {
   let fixture: FormalizationModuleFixture
@@ -110,7 +110,7 @@ describe('Formalization controllers', () => {
     }
 
     vi.spyOn(
-      fixture.app.get(ServerFormalizationSourceReader),
+      fixture.app.get(FORMALIZATION_PROVIDERS.sourceProvider),
       'findStartSource',
     ).mockResolvedValue(source)
 
@@ -199,7 +199,7 @@ describe('Formalization controllers', () => {
     await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
     await fixture.formalizationsRepository.addOrGet(formalization)
     vi.spyOn(
-      fixture.app.get(ServerFormalizationSourceReader),
+      fixture.app.get(FORMALIZATION_PROVIDERS.sourceProvider),
       'findContext',
     ).mockResolvedValue({
       intake,
@@ -259,7 +259,7 @@ describe('Formalization controllers', () => {
     await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
     await fixture.formalizationsRepository.addOrGet(formalization)
     vi.spyOn(
-      fixture.app.get(ServerFormalizationSourceReader),
+      fixture.app.get(FORMALIZATION_PROVIDERS.sourceProvider),
       'findContext',
     ).mockResolvedValue({
       intake,
@@ -306,7 +306,7 @@ describe('Formalization controllers', () => {
     await fixture.app.get(INTAKE_REPOSITORIES.intakes).add(intake)
     await fixture.formalizationsRepository.addOrGet(formalization)
     vi.spyOn(
-      fixture.app.get(ServerFormalizationSourceReader),
+      fixture.app.get(FORMALIZATION_PROVIDERS.sourceProvider),
       'findContext',
     ).mockResolvedValue({
       intake,
@@ -403,8 +403,8 @@ describe('Formalization controllers', () => {
     const persistedVersion = await fixture.app
       .get(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
       .findById(version.id)
-    const sourceReader = fixture.app.get(ServerFormalizationSourceReader)
-    vi.spyOn(sourceReader, 'findContext').mockResolvedValue({
+    const sourceProvider = fixture.app.get(FORMALIZATION_PROVIDERS.sourceProvider)
+    vi.spyOn(sourceProvider, 'findContext').mockResolvedValue({
       intake: IntakeFaker.fake({ id: formalization.intakeId }),
       consultation: consultationFor(formalization),
       client,

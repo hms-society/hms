@@ -18,7 +18,7 @@ import type {
   FormalizationSignatureOtpSendAttemptsRepository,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureOtpMacProvider,
   SignatureSecretHasher,
@@ -48,7 +48,7 @@ type Dependencies = {
   readonly sessionsRepository: FormalizationSignatureGatewaySessionsRepository
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
   readonly invitationsRepository: FormalizationSignatureInvitationsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly challengesRepository: FormalizationSignatureOtpChallengesRepository
   readonly guardsRepository: FormalizationSignatureOtpGuardsRepository
   readonly reservationsRepository: FormalizationSignatureOtpRateReservationsRepository
@@ -95,7 +95,7 @@ export class RequestSignatureOtpUseCase implements UseCase<Request, Response> {
     )
       throw new SignatureSessionInvalidError()
     const channels =
-      await this.dependencies.sourceReader.listConsentedAuthenticationChannels(
+      await this.dependencies.sourceProvider.listConsentedAuthenticationChannels(
         recipient.personId,
       )
     if (channels.length !== 1) throw new SignatureConsentMissingError()

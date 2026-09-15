@@ -14,9 +14,9 @@ import type {
 import { FormalizationSignatureInvitationReadyEvent } from '../domain/events/formalization-signature-invitation-ready-event'
 import { SignatureProviderUnavailableError } from '../domain/errors'
 import type {
-  FormalizationSignatureDocumentContentReader,
+  FormalizationSignatureDocumentContentProvider,
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureInvitationsRepository,
   FormalizationSignatureInvitationSendAttemptsRepository,
@@ -28,7 +28,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationSignatureSnapshotsRepository,
   SensitivePayloadCipherProvider,
   SignatureProvider,
@@ -56,10 +56,10 @@ type Dependencies = {
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
   readonly recipientDocumentsRepository: FormalizationSignatureRecipientDocumentsRepository
   readonly configurationRepository: FormalizationSignatureConfigurationRepository
-  readonly metadataReader: FormalizationSignatureDocumentMetadataReader
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly metadataProvider: FormalizationSignatureDocumentMetadataProvider
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly snapshotsRepository: FormalizationSignatureSnapshotsRepository
-  readonly contentReader: FormalizationSignatureDocumentContentReader
+  readonly contentProvider: FormalizationSignatureDocumentContentProvider
   readonly providerResourcesRepository: FormalizationSignatureProviderResourcesRepository
   readonly providerDocumentResourcesRepository: FormalizationSignatureProviderDocumentResourcesRepository
   readonly providerRecipientResourcesRepository: FormalizationSignatureProviderRecipientResourcesRepository
@@ -174,11 +174,11 @@ export class ProvisionFormalizationSignatureRequestUseCase
       throw new SignatureProviderUnavailableError()
     const providerDocuments = await Promise.all(
       documents.map(async (document) => {
-        const bytes = await this.dependencies.contentReader.readContent(
+        const bytes = await this.dependencies.contentProvider.readContent(
           document.unsignedPrivateFileId,
         )
         if (!bytes) throw new SignatureProviderUnavailableError()
-        const source = await this.dependencies.sourceReader.findDocumentVersion(
+        const source = await this.dependencies.sourceProvider.findDocumentVersion(
           signatureRequest.formalizationId,
           document.sourceDocumentVersionId,
         )

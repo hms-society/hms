@@ -14,7 +14,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { RemoveFormalizationSignatoryUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 
@@ -48,15 +48,15 @@ export class RemoveFormalizationSignatoryController {
     formalizationsRepository: FormalizationsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    signatureSourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    signatureSourceProvider: FormalizationSignatureSourceProvider,
     datetimeProvider: DatetimeProvider,
     idProvider: IdProvider,
   ) {
     this.useCase = new RemoveFormalizationSignatoryUseCase(
       formalizationsRepository,
       signatureConfigurationRepository,
-      signatureSourceReader,
+      signatureSourceProvider,
       datetimeProvider,
       idProvider,
     )

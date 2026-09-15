@@ -12,7 +12,6 @@ import { FormalizationMessagingModule } from '@/formalization/messaging/formaliz
 import {
   ServerFormalizationIntakeClosureService,
   ServerFormalizationIntakeLifecycleService,
-  ServerFormalizationSourceReader,
   DocumensoWebhookNormalizer,
   FormalizationContractingProvider,
 } from '@/formalization/provision'
@@ -20,6 +19,7 @@ import { IdentityModule } from '@/identity/identity.module'
 import { IntakeModule } from '@/intake/intake.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { SharedModule } from '@/shared/shared.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
@@ -90,6 +90,7 @@ import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/gu
     FormalizationMessagingModule,
     SharedDatabaseModule,
     SharedMessagingModule,
+    SharedModule,
     ProvisionModule,
   ],
   controllers: [
@@ -163,7 +164,6 @@ import { OptionalSigningGatewayCollaboratorGuard } from '@/formalization/rest/gu
       provide: FORMALIZATION_PROVIDERS.documentConfirmationTransaction,
       useExisting: DrizzleFormalizationDocumentConfirmationTransaction,
     },
-    ServerFormalizationSourceReader,
     ServerFormalizationIntakeLifecycleService,
     ServerFormalizationIntakeClosureService,
     FormalizationContractingProvider,

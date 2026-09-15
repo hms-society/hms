@@ -3,7 +3,7 @@ import type { FormalizationContext } from './formalization-context'
 import type { FormalizationStartSource } from './formalization-start-source'
 import type { DynamicForm } from '../../shared/domain/entities'
 
-export interface FormalizationSourceReader {
+export interface FormalizationSourceProvider {
   findStartSource(intakeId: string): Promise<FormalizationStartSource | undefined>
   findContractForm(
     formalization: Formalization,

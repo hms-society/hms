@@ -48,7 +48,7 @@ describe('Resend Formalization Signature Invitation Controller [POST /formalizat
   beforeEach(async () => {
     await fixture.resetDatabase()
     fixture.broker.publish.mockClear()
-    fixture.sourceReader.findPerson.mockReset()
+    fixture.sourceProvider.findPerson.mockReset()
   })
 
   afterAll(async () => fixture?.close())
@@ -65,7 +65,7 @@ describe('Resend Formalization Signature Invitation Controller [POST /formalizat
 
   it('creates the next invitation and publishes its post-commit delivery event', async () => {
     const seeded = await seedResendScenario()
-    fixture.sourceReader.findPerson.mockResolvedValue({
+    fixture.sourceProvider.findPerson.mockResolvedValue({
       personId: seeded.personId,
       name: 'Signatário de teste',
       email: 'f@hms.test',
@@ -104,7 +104,7 @@ describe('Resend Formalization Signature Invitation Controller [POST /formalizat
 
   it('rejects a resend when the requested invitation generation is stale', async () => {
     const seeded = await seedResendScenario()
-    fixture.sourceReader.findPerson.mockResolvedValue({
+    fixture.sourceProvider.findPerson.mockResolvedValue({
       personId: seeded.personId,
       name: 'Signatário de teste',
       email: 'f@hms.test',

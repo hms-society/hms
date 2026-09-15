@@ -11,7 +11,7 @@ import {
 } from '../domain/errors'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '../interfaces'
 
 type Request = {
@@ -31,7 +31,7 @@ export class ProcessFormalizationSignaturePreviewUseCase
 {
   constructor(
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
     private readonly fileStorageProvider: FileStorageProvider,
     private readonly documentPdfFreezeService: DocumentPdfFreezeService,
     private readonly datetimeProvider: DatetimeProvider,
@@ -62,7 +62,7 @@ export class ProcessFormalizationSignaturePreviewUseCase
     })
     if (!claim) throw new FormalizationSignaturePreviewClaimConflictError()
 
-    const sourceDocument = await this.sourceReader.findDocumentVersion(
+    const sourceDocument = await this.sourceProvider.findDocumentVersion(
       request.formalizationId,
       document.documentVersionId,
     )

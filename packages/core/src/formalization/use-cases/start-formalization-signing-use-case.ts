@@ -11,7 +11,7 @@ import type {
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureProxyBindingsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureProvider,
   SignatureSecretHasher,
 } from '../interfaces'
@@ -47,7 +47,7 @@ type Dependencies = {
   readonly bindingsRepository: FormalizationSignatureProxyBindingsRepository
   readonly transaction: FormalizationSignatureGatewayTransaction
   readonly provider: SignatureProvider
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly datetimeProvider: DatetimeProvider
   readonly idProvider: IdProvider
   readonly secretGenerator: SecretGenerator
@@ -92,7 +92,7 @@ export class StartFormalizationSigningUseCase implements UseCase<Request, Respon
       !['reading', 'signing'].includes(signatureRecipient.status)
     )
       throw new SignatureSessionInvalidError()
-    const recipient = await this.dependencies.sourceReader.findAuthenticationSource(
+    const recipient = await this.dependencies.sourceProvider.findAuthenticationSource(
       signatureRecipient.personId,
     )
     if (

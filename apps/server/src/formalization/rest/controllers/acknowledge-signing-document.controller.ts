@@ -20,7 +20,7 @@ import type {
   FormalizationSignatureDocumentAcknowledgementsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationSignatureGatewayTransaction,
   SignatureSecretHasher,
 } from '@hms/core/formalization/interfaces'
@@ -56,8 +56,8 @@ export class AcknowledgeSigningDocumentController extends SigningGatewayControll
     assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRecipients)
     recipientsRepository: FormalizationSignatureRecipientsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
     transaction: FormalizationSignatureGatewayTransaction,
     @Inject(ServerIdProvider) idProvider: IdProvider,
@@ -72,7 +72,7 @@ export class AcknowledgeSigningDocumentController extends SigningGatewayControll
       acknowledgementsRepository,
       assignmentsRepository,
       recipientsRepository,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider,
       datetimeProvider,

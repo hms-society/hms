@@ -9,15 +9,15 @@ import {
 } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationIntakeClosureService,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
 import {
-  ServerFormalizationIntakeClosureService,
-  ServerFormalizationSourceReader,
-} from '@/formalization/provision'
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
+import { ServerFormalizationIntakeClosureService } from '@/formalization/provision'
 import { FormalizationsController } from '@/formalization/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
@@ -38,13 +38,16 @@ export class CloseFormalizationWithoutContractController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader)
-    sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
     @Inject(ServerFormalizationIntakeClosureService)
     intakeClosureService: FormalizationIntakeClosureService,
     datetimeProvider: DatetimeProvider,
   ) {
-    this.getUseCase = new GetFormalizationUseCase(formalizationsRepository, sourceReader)
+    this.getUseCase = new GetFormalizationUseCase(
+      formalizationsRepository,
+      sourceProvider,
+    )
     this.closeUseCase = new CloseFormalizationWithoutContractUseCase(
       formalizationsRepository,
       intakeClosureService,

@@ -1,10 +1,18 @@
+import { Inject, Injectable } from '@nestjs/common'
 import type { PrivateMessage } from '@hms/core/communication/domain/entities'
+import type { CryptoProvider } from '@hms/core/shared/interfaces'
 import type { DrizzlePrivateMessage } from '../types/entities/drizzle-private-message'
 
-import { decrypt } from '@/shared/utils/crypto'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
+@Injectable()
 export class DrizzlePrivateMessageMapper {
-  static toDomain(record: DrizzlePrivateMessage): PrivateMessage {
+  constructor(
+    @Inject(PROVISION_PROVIDERS.crypto)
+    private readonly cryptoProvider: CryptoProvider,
+  ) {}
+
+  toDomain(record: DrizzlePrivateMessage): PrivateMessage {
     return {
       id: record.id,
       clientId: record.clientId,
@@ -12,7 +20,7 @@ export class DrizzlePrivateMessageMapper {
       intakeId: record.intakeId,
       clientPhone: record.clientPhone ?? undefined,
       direction: record.direction === 'inbound' ? 'incoming' : 'outgoing',
-      content: record.content ? decrypt(record.content) : undefined,
+      content: record.content ? this.cryptoProvider.decrypt(record.content) : undefined,
       fileIds: record.fileIds,
       createdAt: record.createdAt,
     }

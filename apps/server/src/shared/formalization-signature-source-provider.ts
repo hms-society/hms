@@ -20,7 +20,7 @@ import type {
   FormalizationSignatureSourceDocument,
   FormalizationSignatureSourcePerson,
 } from '@hms/core/formalization/domain/structures'
-import type { FormalizationSignatureSourceReader as FormalizationSignatureSourceReaderContract } from '@hms/core/formalization/interfaces'
+import type { FormalizationSignatureSourceProvider as FormalizationSignatureSourceProviderContract } from '@hms/core/formalization/interfaces'
 import type { CommunicationChannel } from '@hms/core/communication/domain/structures'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -29,8 +29,8 @@ import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositorie
 const ELIGIBLE_PROFILES = ['lawyer', 'paralegal', 'supervisor'] as const
 
 @Injectable()
-export class FormalizationSignatureSourceReader
-  implements FormalizationSignatureSourceReaderContract
+export class FormalizationSignatureSourceProvider
+  implements FormalizationSignatureSourceProviderContract
 {
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)

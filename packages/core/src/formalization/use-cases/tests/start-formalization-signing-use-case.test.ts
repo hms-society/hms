@@ -16,7 +16,7 @@ import type {
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureProvider,
   SignatureSecretHasher,
 } from '../../interfaces'
@@ -38,7 +38,7 @@ function makeDependencies() {
   const bindings = mock<FormalizationSignatureProxyBindingsRepository>()
   const provider = mock<SignatureProvider>()
   const transaction = mock<FormalizationSignatureGatewayTransaction>()
-  const sourceReader = mock<FormalizationSignatureSourceReader>()
+  const sourceProvider = mock<FormalizationSignatureSourceProvider>()
   const hasher = mock<SignatureSecretHasher>()
   const datetimeProvider = mock<DatetimeProvider>()
   datetimeProvider.now.mockReturnValue(NOW)
@@ -76,7 +76,7 @@ function makeDependencies() {
     createdAt: new Date(),
     updatedAt: new Date(),
   })
-  sourceReader.findAuthenticationSource.mockResolvedValue({
+  sourceProvider.findAuthenticationSource.mockResolvedValue({
     personId: 'person-1',
     actorKind: 'client',
     active: true,
@@ -165,7 +165,7 @@ function makeDependencies() {
     bindings,
     provider,
     transaction,
-    sourceReader,
+    sourceProvider,
     hasher,
     datetimeProvider,
   }
@@ -184,7 +184,7 @@ function createUseCase(dependencies: ReturnType<typeof makeDependencies>) {
     bindingsRepository: dependencies.bindings,
     transaction: dependencies.transaction,
     provider: dependencies.provider,
-    sourceReader: dependencies.sourceReader,
+    sourceProvider: dependencies.sourceProvider,
     datetimeProvider: dependencies.datetimeProvider,
     hasher: dependencies.hasher,
     idProvider: { generate: () => 'binding-1' } as IdProvider,
@@ -283,9 +283,9 @@ describe('Start Formalization Signing Use Case', () => {
     if (recipient !== undefined)
       dependencies.recipients.findById.mockResolvedValueOnce(recipient)
     if (label === 'inactive identity')
-      dependencies.sourceReader.findAuthenticationSource.mockResolvedValueOnce(null)
+      dependencies.sourceProvider.findAuthenticationSource.mockResolvedValueOnce(null)
     if (label === 'kind-mismatched identity')
-      dependencies.sourceReader.findAuthenticationSource.mockResolvedValueOnce({
+      dependencies.sourceProvider.findAuthenticationSource.mockResolvedValueOnce({
         personId: 'person-1',
         actorKind: 'collaborator',
         active: true,
@@ -318,7 +318,7 @@ describe('Start Formalization Signing Use Case', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValueOnce({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValueOnce({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -672,7 +672,7 @@ describe('Start Formalization Signing Use Case', () => {
     [
       'stale identity',
       (dependencies: ReturnType<typeof makeDependencies>) => {
-        dependencies.sourceReader.findAuthenticationSource.mockResolvedValueOnce({
+        dependencies.sourceProvider.findAuthenticationSource.mockResolvedValueOnce({
           personId: 'person-1',
           actorKind: 'client',
           active: false,

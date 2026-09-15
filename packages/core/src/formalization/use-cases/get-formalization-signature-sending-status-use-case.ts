@@ -29,7 +29,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '../interfaces'
 
 type Request = FormalizationActor & { readonly formalizationId: string }
@@ -44,7 +44,7 @@ type Dependencies = {
   readonly invitationsRepository?: FormalizationSignatureInvitationsRepository
   readonly artifactsRepository?: FormalizationSignatureArtifactsRepository
   readonly protocolsRepository?: FormalizationSignatureProtocolsRepository
-  readonly sourceReader?: FormalizationSignatureSourceReader
+  readonly sourceProvider?: FormalizationSignatureSourceProvider
 }
 
 const terminalStatuses = new Set<FormalizationSignatureRequestStatus>([
@@ -100,8 +100,8 @@ export class GetFormalizationSignatureSendingStatusUseCase
         recipient.personId === request.actorId && recipient.actorKind === 'collaborator',
     )
     const linkedPerson =
-      linkedRecipient && this.dependencies.sourceReader
-        ? await this.dependencies.sourceReader.findPerson(linkedRecipient.personId)
+      linkedRecipient && this.dependencies.sourceProvider
+        ? await this.dependencies.sourceProvider.findPerson(linkedRecipient.personId)
         : undefined
     const canTrackAsLinkedRecipient = Boolean(
       linkedRecipient &&
@@ -264,7 +264,7 @@ export class GetFormalizationSignatureSendingStatusUseCase
     readonly formalizationId: string
     readonly viewerMode: 'operator' | 'tracking_only'
   }): Promise<FormalizationSignatureTrackingDocument> {
-    const title = await this.dependencies.sourceReader?.findDocumentVersion(
+    const title = await this.dependencies.sourceProvider?.findDocumentVersion(
       input.formalizationId,
       input.document.sourceDocumentVersionId,
     )

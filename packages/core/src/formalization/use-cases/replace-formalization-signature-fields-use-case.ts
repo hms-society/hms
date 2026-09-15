@@ -14,7 +14,7 @@ import {
 } from '../domain/errors'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../interfaces'
 import { FormalizationSignatureConfigurationUseCase } from './formalization-signature-configuration-use-case'
@@ -34,7 +34,7 @@ export class ReplaceFormalizationSignatureFieldsUseCase extends FormalizationSig
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
   ) {
@@ -115,7 +115,7 @@ export class ReplaceFormalizationSignatureFieldsUseCase extends FormalizationSig
       formalization.id,
       request.actorId,
       now,
-      this.sourceReader,
+      this.sourceProvider,
       this.idProvider,
     )
 

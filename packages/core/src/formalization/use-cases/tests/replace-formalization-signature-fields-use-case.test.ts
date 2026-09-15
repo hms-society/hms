@@ -3,7 +3,7 @@ import { mock } from 'vitest-mock-extended'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { ReplaceFormalizationSignatureFieldsUseCase } from '../replace-formalization-signature-fields-use-case'
@@ -22,12 +22,12 @@ describe('Replace Formalization Signature Fields Use Case', () => {
     repository.findByFormalizationId.mockResolvedValue(
       makeConfiguration({ formalizationId: formalization.id }),
     )
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     await expect(
       new ReplaceFormalizationSignatureFieldsUseCase(
         formalizationsRepository,
         repository,
-        sourceReader,
+        sourceProvider,
         mock<DatetimeProvider>(),
         mock<IdProvider>(),
       ).execute({
@@ -63,10 +63,10 @@ describe('Replace Formalization Signature Fields Use Case', () => {
     })
     const formalizationsRepository = mock<FormalizationsRepository>()
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     repository.findByFormalizationId.mockResolvedValue(configuration)
-    sourceReader.listCurrentDocuments.mockResolvedValue([
+    sourceProvider.listCurrentDocuments.mockResolvedValue([
       {
         documentId: 'document-id',
         documentVersionId: 'version-id',
@@ -81,7 +81,7 @@ describe('Replace Formalization Signature Fields Use Case', () => {
       new ReplaceFormalizationSignatureFieldsUseCase(
         formalizationsRepository,
         repository,
-        sourceReader,
+        sourceProvider,
         mock<DatetimeProvider>({ now: () => TEST_NOW }),
         mock<IdProvider>({ generate: () => 'assignment-id' }),
       ).execute({

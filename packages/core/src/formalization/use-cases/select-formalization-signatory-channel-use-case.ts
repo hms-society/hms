@@ -12,7 +12,7 @@ import {
 } from '../domain/errors'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../interfaces'
 import { FormalizationSignatureConfigurationUseCase } from './formalization-signature-configuration-use-case'
@@ -32,7 +32,7 @@ export class SelectFormalizationSignatoryChannelUseCase extends FormalizationSig
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
   ) {
@@ -53,7 +53,7 @@ export class SelectFormalizationSignatoryChannelUseCase extends FormalizationSig
 
     if (!configuration) throw new FormalizationSignatureNotInitializedError()
     const signatory = this.findSignatureSignatory(configuration, request.signatoryId)
-    const person = await this.sourceReader.findPerson(signatory.personId)
+    const person = await this.sourceProvider.findPerson(signatory.personId)
     const availableChannels = person?.availableChannels ?? signatory.availableChannels
     if (!availableChannels.includes(request.channel)) {
       throw new FormalizationSignatureChannelUnavailableError()
@@ -78,7 +78,7 @@ export class SelectFormalizationSignatoryChannelUseCase extends FormalizationSig
       formalization.id,
       request.actorId,
       now,
-      this.sourceReader,
+      this.sourceProvider,
       this.idProvider,
     )
 

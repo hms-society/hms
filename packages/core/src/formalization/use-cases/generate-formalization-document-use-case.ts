@@ -17,7 +17,7 @@ import {
 import type {
   FormalizationContext,
   FormalizationsRepository,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
 } from '../interfaces'
 import type { FormalizationActor } from '../domain/structures'
 import { FormalizationUseCase } from './formalization-use-case'
@@ -39,7 +39,7 @@ export class GenerateFormalizationDocumentUseCase extends FormalizationUseCase<
 > {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    private readonly sourceReader: FormalizationSourceReader,
+    private readonly sourceProvider: FormalizationSourceProvider,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly specificationsRepository: DocumentSpecificationsRepository,
@@ -94,7 +94,7 @@ export class GenerateFormalizationDocumentUseCase extends FormalizationUseCase<
       throw new FormalizationStateConflictError(
         'O modelo do documento não foi encontrado.',
       )
-    const context = await this.sourceReader.findContext(formalization)
+    const context = await this.sourceProvider.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
     const source = this.buildSource(formalization, context)
     if (

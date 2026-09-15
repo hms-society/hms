@@ -15,7 +15,7 @@ import type {
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../../interfaces'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
@@ -35,7 +35,7 @@ function makeAcknowledgementFixture(
     mock<FormalizationSignatureDocumentAcknowledgementsRepository>()
   const assignments = mock<FormalizationSignatureRecipientDocumentsRepository>()
   const recipients = mock<FormalizationSignatureRecipientsRepository>()
-  const sourceReader = mock<FormalizationSignatureSourceReader>()
+  const sourceProvider = mock<FormalizationSignatureSourceProvider>()
   const transaction = mock<FormalizationSignatureGatewayTransaction>()
   const hasher = mock<SignatureSecretHasher>()
   hasher.hash.mockImplementation((value) => `${value}-hash`)
@@ -79,7 +79,7 @@ function makeAcknowledgementFixture(
     createdAt: new Date(),
     updatedAt: new Date(),
   })
-  sourceReader.findAuthenticationSource.mockResolvedValue({
+  sourceProvider.findAuthenticationSource.mockResolvedValue({
     personId: 'person-1',
     actorKind: 'client',
     active: true,
@@ -102,7 +102,7 @@ function makeAcknowledgementFixture(
       acknowledgementsRepository: acknowledgements,
       recipientsRepository: recipients,
       assignmentsRepository: assignments,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider: { generate: () => 'ack-1' } as IdProvider,
       datetimeProvider: { now: () => new Date('2026-09-03') } as DatetimeProvider,
@@ -114,7 +114,7 @@ function makeAcknowledgementFixture(
     acknowledgements,
     assignments,
     recipients,
-    sourceReader,
+    sourceProvider,
     transaction,
   }
 }
@@ -363,13 +363,13 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
     [
       'inactive identity',
       (fixture: ReturnType<typeof makeAcknowledgementFixture>): void => {
-        fixture.sourceReader.findAuthenticationSource.mockResolvedValueOnce(null)
+        fixture.sourceProvider.findAuthenticationSource.mockResolvedValueOnce(null)
       },
     ],
     [
       'kind-mismatched identity',
       (fixture: ReturnType<typeof makeAcknowledgementFixture>): void => {
-        fixture.sourceReader.findAuthenticationSource.mockResolvedValueOnce({
+        fixture.sourceProvider.findAuthenticationSource.mockResolvedValueOnce({
           personId: 'person-1',
           actorKind: 'collaborator',
           active: true,
@@ -405,7 +405,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
         status: 'reading',
       }),
     })
-    fixture.sourceReader.findAuthenticationSource.mockResolvedValueOnce({
+    fixture.sourceProvider.findAuthenticationSource.mockResolvedValueOnce({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -629,7 +629,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       mock<FormalizationSignatureDocumentAcknowledgementsRepository>()
     const assignments = mock<FormalizationSignatureRecipientDocumentsRepository>()
     const recipients = mock<FormalizationSignatureRecipientsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const transaction = mock<FormalizationSignatureGatewayTransaction>()
     const hasher = mock<SignatureSecretHasher>()
     hasher.hash.mockImplementation((value) => `${value}-hash`)
@@ -673,7 +673,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    sourceReader.findAuthenticationSource.mockResolvedValue({
+    sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'person-1',
       actorKind: 'client',
       active: true,
@@ -696,7 +696,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       acknowledgementsRepository: acknowledgements,
       recipientsRepository: recipients,
       assignmentsRepository: assignments,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider: { generate: () => 'ack-1' } as IdProvider,
       datetimeProvider: {
@@ -736,7 +736,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       mock<FormalizationSignatureDocumentAcknowledgementsRepository>()
     const assignments = mock<FormalizationSignatureRecipientDocumentsRepository>()
     const recipients = mock<FormalizationSignatureRecipientsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const transaction = mock<FormalizationSignatureGatewayTransaction>()
     const hasher = mock<SignatureSecretHasher>()
     hasher.hash.mockImplementation((value) => `${value}-hash`)
@@ -780,7 +780,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    sourceReader.findAuthenticationSource.mockResolvedValue({
+    sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'person-1',
       actorKind: 'client',
       active: true,
@@ -812,7 +812,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       acknowledgementsRepository: acknowledgements,
       recipientsRepository: recipients,
       assignmentsRepository: assignments,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider: { generate: () => 'unused' } as IdProvider,
       datetimeProvider: {
@@ -841,7 +841,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       mock<FormalizationSignatureDocumentAcknowledgementsRepository>()
     const assignments = mock<FormalizationSignatureRecipientDocumentsRepository>()
     const recipients = mock<FormalizationSignatureRecipientsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const transaction = mock<FormalizationSignatureGatewayTransaction>()
     const hasher = mock<SignatureSecretHasher>()
     hasher.hash.mockImplementation((value) => `${value}-hash`)
@@ -878,7 +878,7 @@ describe('AcknowledgeSignatureDocumentUseCase', () => {
       acknowledgementsRepository: acknowledgements,
       recipientsRepository: recipients,
       assignmentsRepository: assignments,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider: { generate: () => 'unused' } as IdProvider,
       datetimeProvider: { now: () => new Date() } as DatetimeProvider,

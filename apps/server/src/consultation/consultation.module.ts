@@ -25,7 +25,7 @@ import { DocumentProductionDatabaseModule } from '@/document-production/database
 import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
-import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { LegalCatalogDatabaseModule } from '@/legal-catalog/database/legal-catalog-database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -34,7 +34,7 @@ import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-datab
 @Module({
   imports: [
     IdentityModule,
-    LegalCatalogModule,
+    LegalCatalogDatabaseModule,
     IntakeDatabaseModule,
     SchedulingDatabaseModule,
     ConsultationDatabaseModule,

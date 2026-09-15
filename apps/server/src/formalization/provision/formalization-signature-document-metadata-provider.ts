@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
-import type { FormalizationSignatureDocumentMetadataReader as FormalizationSignatureDocumentMetadataReaderPort } from '@hms/core/formalization/interfaces'
+import type { FormalizationSignatureDocumentMetadataProvider as FormalizationSignatureDocumentMetadataProviderPort } from '@hms/core/formalization/interfaces'
 import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
@@ -8,8 +8,8 @@ import type { FormalizationSignatureConfigurationRepository } from '@hms/core/fo
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 @Injectable()
-export class FormalizationSignatureDocumentMetadataReader
-  implements FormalizationSignatureDocumentMetadataReaderPort
+export class FormalizationSignatureDocumentMetadataProvider
+  implements FormalizationSignatureDocumentMetadataProviderPort
 {
   constructor(
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)

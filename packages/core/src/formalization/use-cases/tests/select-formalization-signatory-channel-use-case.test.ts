@@ -3,7 +3,7 @@ import { mock } from 'vitest-mock-extended'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { SelectFormalizationSignatoryChannelUseCase } from '../select-formalization-signatory-channel-use-case'
@@ -19,19 +19,19 @@ describe('Select Formalization Signatory Channel Use Case', () => {
     const formalization = makeFormalization()
     const formalizationsRepository = mock<FormalizationsRepository>()
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const datetimeProvider = mock<DatetimeProvider>()
     const idProvider = mock<IdProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     repository.findByFormalizationId.mockResolvedValue(
       makeConfiguration({ formalizationId: formalization.id }),
     )
-    sourceReader.findPerson.mockResolvedValue({
+    sourceProvider.findPerson.mockResolvedValue({
       personId: 'person-id',
       name: 'Cliente',
       availableChannels: ['whatsapp'],
     })
-    sourceReader.listCurrentDocuments.mockResolvedValue([])
+    sourceProvider.listCurrentDocuments.mockResolvedValue([])
     datetimeProvider.now.mockReturnValue(TEST_NOW)
     repository.replaceConfiguration.mockResolvedValue(
       makeConfiguration({ formalizationId: formalization.id }),
@@ -41,7 +41,7 @@ describe('Select Formalization Signatory Channel Use Case', () => {
       new SelectFormalizationSignatoryChannelUseCase(
         formalizationsRepository,
         repository,
-        sourceReader,
+        sourceProvider,
         datetimeProvider,
         idProvider,
       ).execute({
@@ -60,7 +60,7 @@ describe('Select Formalization Signatory Channel Use Case', () => {
     const formalization = makeFormalization()
     const formalizationsRepository = mock<FormalizationsRepository>()
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const datetimeProvider = mock<DatetimeProvider>()
     const idProvider = mock<IdProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
@@ -75,12 +75,12 @@ describe('Select Formalization Signatory Channel Use Case', () => {
         ],
       }),
     )
-    sourceReader.findPerson.mockResolvedValue({
+    sourceProvider.findPerson.mockResolvedValue({
       personId: 'person-id',
       name: 'Cliente',
       availableChannels: ['email', 'whatsapp'],
     })
-    sourceReader.listCurrentDocuments.mockResolvedValue([])
+    sourceProvider.listCurrentDocuments.mockResolvedValue([])
     datetimeProvider.now.mockReturnValue(TEST_NOW)
     repository.replaceConfiguration.mockResolvedValue(
       makeConfiguration({ formalizationId: formalization.id }),
@@ -89,7 +89,7 @@ describe('Select Formalization Signatory Channel Use Case', () => {
     const useCase = new SelectFormalizationSignatoryChannelUseCase(
       formalizationsRepository,
       repository,
-      sourceReader,
+      sourceProvider,
       datetimeProvider,
       idProvider,
     )

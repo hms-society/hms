@@ -13,7 +13,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 import { Inject } from '@nestjs/common'
@@ -49,8 +49,8 @@ export class GetFormalizationSignatureSendingStatusController {
     artifactsRepository: FormalizationSignatureArtifactsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureProtocols)
     protocolsRepository: FormalizationSignatureProtocolsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
   ) {
     this.useCase = new GetFormalizationSignatureSendingStatusUseCase({
       formalizationsRepository,
@@ -62,7 +62,7 @@ export class GetFormalizationSignatureSendingStatusController {
       invitationsRepository,
       artifactsRepository,
       protocolsRepository,
-      sourceReader,
+      sourceProvider,
     })
   }
 

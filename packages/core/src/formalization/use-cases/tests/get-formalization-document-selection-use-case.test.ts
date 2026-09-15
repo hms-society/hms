@@ -9,7 +9,7 @@ import type {
   PackageDocumentsRepository,
 } from '../../../document-production/interfaces'
 import type {
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { GetFormalizationDocumentSelectionUseCase } from '../get-formalization-document-selection-use-case'
@@ -17,7 +17,7 @@ import { GetFormalizationDocumentSelectionUseCase } from '../get-formalization-d
 describe('Get Formalization Document Selection Use Case', () => {
   let formalization: Formalization
   let repository: MockProxy<FormalizationsRepository>
-  let sourceReader: MockProxy<FormalizationSourceReader>
+  let sourceProvider: MockProxy<FormalizationSourceProvider>
   let specificationsRepository: MockProxy<DocumentSpecificationsRepository>
   let packagesRepository: MockProxy<DocumentPackagesRepository>
   let packageDocumentsRepository: MockProxy<PackageDocumentsRepository>
@@ -29,7 +29,7 @@ describe('Get Formalization Document Selection Use Case', () => {
       contractFormRevision: 1,
     })
     repository = mock<FormalizationsRepository>()
-    sourceReader = mock<FormalizationSourceReader>()
+    sourceProvider = mock<FormalizationSourceProvider>()
     specificationsRepository = mock<DocumentSpecificationsRepository>()
     packagesRepository = mock<DocumentPackagesRepository>()
     packageDocumentsRepository = mock<PackageDocumentsRepository>()
@@ -38,7 +38,7 @@ describe('Get Formalization Document Selection Use Case', () => {
 
   it('returns an empty definition-driven selection when no package exists', async () => {
     repository.findById.mockResolvedValue(formalization)
-    sourceReader.findContext.mockResolvedValue({ intake: {} } as never)
+    sourceProvider.findContext.mockResolvedValue({ intake: {} } as never)
     specificationsRepository.list.mockResolvedValue({
       items: [],
       page: 1,
@@ -52,7 +52,7 @@ describe('Get Formalization Document Selection Use Case', () => {
     await expect(
       new GetFormalizationDocumentSelectionUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         specificationsRepository,
         packagesRepository,
         packageDocumentsRepository,

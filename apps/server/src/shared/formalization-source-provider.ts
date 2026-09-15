@@ -20,7 +20,7 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { DYNAMIC_FORMS_REPOSITORIES } from '@/shared/constants/dynamic-forms-repositories'
 
 @Injectable()
-export class ServerFormalizationSourceReader {
+export class FormalizationSourceProvider {
   constructor(
     @Inject(INTAKE_REPOSITORIES.intakes)
     private readonly intakesRepository: IntakesRepository,

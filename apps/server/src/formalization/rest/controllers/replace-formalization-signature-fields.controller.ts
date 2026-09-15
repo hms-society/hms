@@ -16,7 +16,7 @@ import { ReplaceFormalizationSignatureFieldsUseCase } from '@hms/core/formalizat
 import type {
   FormalizationsRepository,
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '@hms/core/formalization/interfaces'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
@@ -48,15 +48,15 @@ export class ReplaceFormalizationSignatureFieldsController {
     formalizationsRepository: FormalizationsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    signatureSourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    signatureSourceProvider: FormalizationSignatureSourceProvider,
     datetimeProvider: DatetimeProvider,
     idProvider: IdProvider,
   ) {
     this.useCase = new ReplaceFormalizationSignatureFieldsUseCase(
       formalizationsRepository,
       signatureConfigurationRepository,
-      signatureSourceReader,
+      signatureSourceProvider,
       datetimeProvider,
       idProvider,
     )

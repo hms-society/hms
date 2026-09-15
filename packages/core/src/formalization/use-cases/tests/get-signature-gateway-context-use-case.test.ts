@@ -17,7 +17,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../../interfaces'
 import { GetSignatureGatewayContextUseCase } from '../get-signature-gateway-context-use-case'
@@ -33,7 +33,7 @@ type Dependencies = {
   protocolsRepository: MockProxy<FormalizationSignatureProtocolsRepository>
   assignmentsRepository: MockProxy<FormalizationSignatureRecipientDocumentsRepository>
   bindingsRepository: MockProxy<FormalizationSignatureProxyBindingsRepository>
-  sourceReader: MockProxy<FormalizationSignatureSourceReader>
+  sourceProvider: MockProxy<FormalizationSignatureSourceProvider>
   hasher: MockProxy<SignatureSecretHasher>
   secretGenerator: MockProxy<{ generate(): string }>
   datetimeProvider: MockProxy<DatetimeProvider>
@@ -50,7 +50,7 @@ function makeDependencies(): Dependencies {
     protocolsRepository: mock<FormalizationSignatureProtocolsRepository>(),
     assignmentsRepository: mock<FormalizationSignatureRecipientDocumentsRepository>(),
     bindingsRepository: mock<FormalizationSignatureProxyBindingsRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
     hasher: mock<SignatureSecretHasher>(),
     secretGenerator: mock<{ generate(): string }>(),
     datetimeProvider: mock<DatetimeProvider>(),
@@ -101,13 +101,13 @@ function makeDependencies(): Dependencies {
       position: 1,
     }),
   ])
-  dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+  dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
     personId: 'person-1',
     actorKind: 'client',
     active: true,
     channels: [{ id: 'channel-1', kind: 'email', maskedDestination: 'p***@example.com' }],
   })
-  dependencies.sourceReader.findDocumentVersion.mockResolvedValue({
+  dependencies.sourceProvider.findDocumentVersion.mockResolvedValue({
     documentId: 'source-document-1',
     documentVersionId: 'source-version-1',
     name: 'Contrato imutável',
@@ -232,7 +232,7 @@ describe('Get Signature Gateway Context Use Case', () => {
         status: 'provisioned',
       }),
     ])
-    dependencies.sourceReader.findDocumentVersion.mockImplementation(
+    dependencies.sourceProvider.findDocumentVersion.mockImplementation(
       async (_formalizationId, versionId) => ({
         documentId: versionId.replace('version', 'document'),
         documentVersionId: versionId,
@@ -516,7 +516,7 @@ describe('Get Signature Gateway Context Use Case', () => {
         status: 'invited',
       }),
     )
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -561,7 +561,7 @@ describe('Get Signature Gateway Context Use Case', () => {
         status: 'signing',
       }),
     )
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -678,7 +678,7 @@ describe('Get Signature Gateway Context Use Case', () => {
         status: 'reading',
       }),
     )
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -703,7 +703,7 @@ describe('Get Signature Gateway Context Use Case', () => {
       }),
     ).resolves.toMatchObject({ step: 'reading', csrfToken: 'fresh-csrf' })
 
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: false,

@@ -10,7 +10,7 @@ import { FormalizationContractFormState, FormalizationStatus } from '../domain/s
 import type { FormalizationActor } from '../domain/structures'
 import type {
   FormalizationIntakeLifecycleService,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../interfaces'
 import { FormalizationUseCase } from './formalization-use-case'
@@ -25,7 +25,7 @@ export class StartFormalizationUseCase extends FormalizationUseCase<
 > {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    private readonly sourceReader: FormalizationSourceReader,
+    private readonly sourceProvider: FormalizationSourceProvider,
     private readonly intakeLifecycleService: FormalizationIntakeLifecycleService,
     private readonly idProvider: IdProvider,
   ) {
@@ -33,7 +33,7 @@ export class StartFormalizationUseCase extends FormalizationUseCase<
   }
 
   async execute(request: Request): Promise<Formalization> {
-    const source = await this.sourceReader.findStartSource(request.intakeId)
+    const source = await this.sourceProvider.findStartSource(request.intakeId)
 
     if (!source) throw new FormalizationIneligibleError()
     if (

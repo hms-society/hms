@@ -4,9 +4,9 @@ import { fakeFormalization } from '../../domain/entities/fakers/formalization-fa
 import { fakeFormalizationSignatureRequest } from '../../domain/entities/fakers/formalization-signature-request-faker'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { GetFormalizationSignatureSendingReviewUseCase } from '../get-formalization-signature-sending-review-use-case'
@@ -15,8 +15,8 @@ function makeDependencies() {
   return {
     formalizationsRepository: mock<FormalizationsRepository>(),
     configurationRepository: mock<FormalizationSignatureConfigurationRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
-    metadataReader: mock<FormalizationSignatureDocumentMetadataReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
+    metadataProvider: mock<FormalizationSignatureDocumentMetadataProvider>(),
     requestsRepository: mock<FormalizationSignatureRequestsRepository>(),
   }
 }
@@ -55,7 +55,7 @@ describe('Get Formalization Signature Sending Review Use Case', () => {
       ],
       readiness: { ready: true, assignmentCount: 0, issues: [] },
     })
-    dependencies.metadataReader.findMetadata.mockResolvedValue({
+    dependencies.metadataProvider.findMetadata.mockResolvedValue({
       privateFileId: 'private-file-1',
       sha256: 'a'.repeat(64),
       byteCount: 100,

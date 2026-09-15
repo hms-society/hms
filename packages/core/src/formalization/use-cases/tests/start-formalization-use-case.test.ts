@@ -6,7 +6,7 @@ import { IntakeStatus } from '../../../intake/domain/structures'
 import { fakeFormalization } from '../../domain/entities/fakers'
 import type {
   FormalizationIntakeLifecycleService,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationStartSource,
   FormalizationsRepository,
 } from '../../interfaces'
@@ -14,13 +14,13 @@ import { StartFormalizationUseCase } from '../start-formalization-use-case'
 
 describe('Start Formalization Use Case', () => {
   let repository: MockProxy<FormalizationsRepository>
-  let sourceReader: MockProxy<FormalizationSourceReader>
+  let sourceProvider: MockProxy<FormalizationSourceProvider>
   let lifecycle: MockProxy<FormalizationIntakeLifecycleService>
   let idProvider: MockProxy<IdProvider>
 
   beforeEach(() => {
     repository = mock<FormalizationsRepository>()
-    sourceReader = mock<FormalizationSourceReader>()
+    sourceProvider = mock<FormalizationSourceProvider>()
     lifecycle = mock<FormalizationIntakeLifecycleService>()
     idProvider = mock<IdProvider>()
   })
@@ -44,7 +44,7 @@ describe('Start Formalization Use Case', () => {
         fields: [],
       },
     } as unknown as FormalizationStartSource
-    sourceReader.findStartSource.mockResolvedValue(source)
+    sourceProvider.findStartSource.mockResolvedValue(source)
     repository.findByIntakeId.mockResolvedValue(undefined)
     lifecycle.startFormalization.mockResolvedValue(formalization)
     idProvider.generate.mockReturnValue(formalization.id)
@@ -52,7 +52,7 @@ describe('Start Formalization Use Case', () => {
     await expect(
       new StartFormalizationUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         lifecycle,
         idProvider,
       ).execute({
@@ -88,7 +88,7 @@ describe('Start Formalization Use Case', () => {
       assignedLawyer: { id: formalization.assignedLawyerId, profile: 'lawyer' },
       contractForm: { id: formalization.contractFormId, name: 'Condições', fields: [] },
     } as unknown as FormalizationStartSource
-    sourceReader.findStartSource.mockResolvedValue(source)
+    sourceProvider.findStartSource.mockResolvedValue(source)
     repository.findByIntakeId.mockResolvedValue(undefined)
     lifecycle.startFormalization.mockResolvedValue(formalization)
     idProvider.generate.mockReturnValue(formalization.id)
@@ -96,7 +96,7 @@ describe('Start Formalization Use Case', () => {
     await expect(
       new StartFormalizationUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         lifecycle,
         idProvider,
       ).execute({
@@ -132,12 +132,12 @@ describe('Start Formalization Use Case', () => {
       assignedLawyer: { id: formalization.assignedLawyerId, profile: 'lawyer' },
       contractForm: { id: formalization.contractFormId, name: 'Condições', fields: [] },
     } as unknown as FormalizationStartSource
-    sourceReader.findStartSource.mockResolvedValue(source)
+    sourceProvider.findStartSource.mockResolvedValue(source)
 
     await expect(
       new StartFormalizationUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         lifecycle,
         idProvider,
       ).execute({
@@ -164,13 +164,13 @@ describe('Start Formalization Use Case', () => {
       assignedLawyer: { id: formalization.assignedLawyerId, profile: 'lawyer' },
       contractForm: { id: formalization.contractFormId, name: 'Condições', fields: [] },
     } as unknown as FormalizationStartSource
-    sourceReader.findStartSource.mockResolvedValue(source)
+    sourceProvider.findStartSource.mockResolvedValue(source)
     repository.findByIntakeId.mockResolvedValue(formalization)
 
     await expect(
       new StartFormalizationUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         lifecycle,
         idProvider,
       ).execute({
@@ -196,7 +196,7 @@ describe('Start Formalization Use Case', () => {
       contractForm: { id: formalization.contractFormId, name: 'Condições', fields: [] },
     } as unknown as FormalizationStartSource
     const conflict = new Error('Intake version conflict')
-    sourceReader.findStartSource.mockResolvedValue(source)
+    sourceProvider.findStartSource.mockResolvedValue(source)
     repository.findByIntakeId.mockResolvedValue(undefined)
     lifecycle.startFormalization.mockRejectedValue(conflict)
     idProvider.generate.mockReturnValue(formalization.id)
@@ -204,7 +204,7 @@ describe('Start Formalization Use Case', () => {
     await expect(
       new StartFormalizationUseCase(
         repository,
-        sourceReader,
+        sourceProvider,
         lifecycle,
         idProvider,
       ).execute({

@@ -14,7 +14,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../../interfaces'
 import { GetSignatureDocumentUseCase } from '../get-signature-document-use-case'
@@ -27,7 +27,7 @@ type Dependencies = {
   requestsRepository: MockProxy<FormalizationSignatureRequestsRepository>
   recipientsRepository: MockProxy<FormalizationSignatureRecipientsRepository>
   assignmentsRepository: MockProxy<FormalizationSignatureRecipientDocumentsRepository>
-  sourceReader: MockProxy<FormalizationSignatureSourceReader>
+  sourceProvider: MockProxy<FormalizationSignatureSourceProvider>
   hasher: MockProxy<SignatureSecretHasher>
   datetimeProvider: MockProxy<DatetimeProvider>
 }
@@ -39,7 +39,7 @@ function makeDependencies(): Dependencies {
     requestsRepository: mock<FormalizationSignatureRequestsRepository>(),
     recipientsRepository: mock<FormalizationSignatureRecipientsRepository>(),
     assignmentsRepository: mock<FormalizationSignatureRecipientDocumentsRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
     hasher: mock<SignatureSecretHasher>(),
     datetimeProvider: mock<DatetimeProvider>(),
   }
@@ -96,13 +96,13 @@ function makeDependencies(): Dependencies {
       pageCount: 2,
     }),
   )
-  dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+  dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
     personId: 'person-1',
     actorKind: 'client',
     active: true,
     channels: [],
   })
-  dependencies.sourceReader.findDocumentVersion.mockResolvedValue({
+  dependencies.sourceProvider.findDocumentVersion.mockResolvedValue({
     documentId: 'source-document-1',
     documentVersionId: 'source-version-1',
     name: 'Contrato imutável',
@@ -275,7 +275,7 @@ describe('Get Signature Document Use Case', () => {
         status: 'reading',
       }),
     )
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,
@@ -307,10 +307,10 @@ describe('Get Signature Document Use Case', () => {
       },
     ]
     for (const source of sources) {
-      dependencies.sourceReader.findAuthenticationSource.mockResolvedValue(source)
+      dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue(source)
       await expect(execute(dependencies, 'collaborator-1')).rejects.toThrow()
     }
-    dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+    dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
       personId: 'collaborator-1',
       actorKind: 'collaborator',
       active: true,

@@ -24,7 +24,7 @@ import type {
   FormalizationSignatureProviderRecipientResourcesRepository,
   FormalizationSignatureGatewayTransaction,
   SignatureProvider,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '@hms/core/formalization/interfaces'
 import type { DatetimeProvider, IdProvider } from '@hms/core/shared/interfaces'
@@ -68,8 +68,8 @@ export class StartSigningController extends SigningGatewayController {
     @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
     transaction: FormalizationSignatureGatewayTransaction,
     @Inject(FORMALIZATION_PROVIDERS.signatureProvider) provider: SignatureProvider,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(ServerIdProvider) idProvider: IdProvider,
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretGenerator) secretGenerator: {
@@ -90,7 +90,7 @@ export class StartSigningController extends SigningGatewayController {
       providerRecipientResourcesRepository,
       transaction,
       provider,
-      sourceReader,
+      sourceProvider,
       idProvider,
       datetimeProvider,
       secretGenerator,

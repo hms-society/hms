@@ -11,7 +11,7 @@ import {
 } from '../domain/errors'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../interfaces'
 import { FormalizationSignatureConfigurationUseCase } from './formalization-signature-configuration-use-case'
@@ -30,7 +30,7 @@ export class ReplaceFormalizationSignatoryDocumentsUseCase extends Formalization
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
   ) {
@@ -57,7 +57,7 @@ export class ReplaceFormalizationSignatoryDocumentsUseCase extends Formalization
         'Um documento não pode ser atribuído duas vezes ao mesmo signatário.',
       )
     }
-    const sourceDocuments = await this.sourceReader.listCurrentDocuments(formalization.id)
+    const sourceDocuments = await this.sourceProvider.listCurrentDocuments(formalization.id)
     const sourceDocumentIds = new Set(sourceDocuments.map(({ documentId }) => documentId))
     if (request.documentIds.some((documentId) => !sourceDocumentIds.has(documentId))) {
       throw new FormalizationSignatureAssignmentError(
@@ -88,7 +88,7 @@ export class ReplaceFormalizationSignatoryDocumentsUseCase extends Formalization
       formalization.id,
       request.actorId,
       now,
-      this.sourceReader,
+      this.sourceProvider,
       this.idProvider,
     )
 

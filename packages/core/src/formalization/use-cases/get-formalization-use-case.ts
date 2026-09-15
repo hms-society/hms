@@ -1,7 +1,7 @@
 import type { FormalizationDetails } from '../domain/entities'
 import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
+import type { FormalizationSourceProvider, FormalizationsRepository } from '../interfaces'
 import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
@@ -14,7 +14,7 @@ export class GetFormalizationUseCase extends FormalizationUseCase<
 > {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    private readonly sourceReader: FormalizationSourceReader,
+    private readonly sourceProvider: FormalizationSourceProvider,
   ) {
     super()
   }
@@ -26,7 +26,7 @@ export class GetFormalizationUseCase extends FormalizationUseCase<
 
     if (!formalization) throw new FormalizationNotFoundError()
     this.assertAccess(formalization.assignedLawyerId, request)
-    const context = await this.sourceReader.findContext(formalization)
+    const context = await this.sourceProvider.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
 
     return {

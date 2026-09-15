@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1).url(),
+  DB_ENCRYPTION_KEY: z.string().optional(),
   HMS_SERVER_APP_PORT: z.coerce.number().int().positive().max(65535),
   HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'stg']),
   HMS_WEB_APP_URL: z.string(),

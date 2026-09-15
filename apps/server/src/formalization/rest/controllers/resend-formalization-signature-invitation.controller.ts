@@ -12,7 +12,7 @@ import type {
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureSecretHasher,
 } from '@hms/core/formalization/interfaces'
@@ -58,8 +58,8 @@ export class ResendFormalizationSignatureInvitationController {
     sessionsRepository: FormalizationSignatureGatewaySessionsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureProxyBindings)
     bindingsRepository: FormalizationSignatureProxyBindingsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_PROVIDERS.sensitivePayloadCipher)
     cipher: SensitivePayloadCipherProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
@@ -79,7 +79,7 @@ export class ResendFormalizationSignatureInvitationController {
       invitationsRepository,
       sessionsRepository,
       bindingsRepository,
-      sourceReader,
+      sourceProvider,
       transaction,
       cipher,
       hasher,

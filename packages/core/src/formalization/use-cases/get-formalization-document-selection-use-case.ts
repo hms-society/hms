@@ -12,7 +12,7 @@ import { FormalizationUseCase } from './formalization-use-case'
 import type { FormalizationDocumentSelection } from '../domain/structures'
 import { FormalizationNotFoundError } from '../domain/errors'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
+import type { FormalizationSourceProvider, FormalizationsRepository } from '../interfaces'
 
 type Request = FormalizationActor & {
   readonly formalizationId: string
@@ -24,7 +24,7 @@ export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCa
 > {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    private readonly sourceReader: FormalizationSourceReader,
+    private readonly sourceProvider: FormalizationSourceProvider,
     private readonly specificationsRepository: DocumentSpecificationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
@@ -41,7 +41,7 @@ export class GetFormalizationDocumentSelectionUseCase extends FormalizationUseCa
     if (!formalization) throw new FormalizationNotFoundError()
     this.assertAccess(formalization.assignedLawyerId, request)
     this.assertFormClosed(formalization)
-    const context = await this.sourceReader.findContext(formalization)
+    const context = await this.sourceProvider.findContext(formalization)
     if (!context) throw new FormalizationNotFoundError()
 
     const specifications = await this.specificationsRepository.list({

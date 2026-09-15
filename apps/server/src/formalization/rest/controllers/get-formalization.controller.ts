@@ -3,12 +3,14 @@ import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { GetFormalizationUseCase } from '@hms/core/formalization/use-cases'
 import type {
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
-import { ServerFormalizationSourceReader } from '@/formalization/provision'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -25,9 +27,10 @@ export class GetFormalizationController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader) sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
   ) {
-    this.useCase = new GetFormalizationUseCase(formalizationsRepository, sourceReader)
+    this.useCase = new GetFormalizationUseCase(formalizationsRepository, sourceProvider)
   }
 
   @Get(':formalizationId')

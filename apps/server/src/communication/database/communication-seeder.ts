@@ -1,10 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
+import type { CryptoProvider } from '@hms/core/shared/interfaces'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
-import { encrypt } from '@/shared/utils/crypto'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 type CommunicationSeedInput = {
   readonly authorId: string
@@ -19,7 +20,11 @@ type CommunicationSeedInput = {
 
 @Injectable()
 export class CommunicationSeeder {
-  constructor(@Inject(DrizzleClient) private readonly drizzleClient: DrizzleClient) {}
+  constructor(
+    @Inject(DrizzleClient) private readonly drizzleClient: DrizzleClient,
+    @Inject(PROVISION_PROVIDERS.crypto)
+    private readonly cryptoProvider: CryptoProvider,
+  ) {}
 
   async clear() {
     const db = this.drizzleClient.requireDatabase()
@@ -79,7 +84,7 @@ export class CommunicationSeeder {
             direction,
             content: isFileMessage
               ? null
-              : encrypt(faker.lorem.sentences({ min: 1, max: 3 })),
+              : this.cryptoProvider.encrypt(faker.lorem.sentences({ min: 1, max: 3 })),
             fileIds: isFileMessage ? [faker.string.uuid()] : [],
             createdAt: faker.date.between({
               from: intake.createdAt,

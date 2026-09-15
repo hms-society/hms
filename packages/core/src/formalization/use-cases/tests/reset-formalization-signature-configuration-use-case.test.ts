@@ -3,7 +3,7 @@ import { mock } from 'vitest-mock-extended'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { ResetFormalizationSignatureConfigurationUseCase } from '../reset-formalization-signature-configuration-use-case'
@@ -23,7 +23,7 @@ describe('Reset Formalization Signature Configuration Use Case', () => {
       new ResetFormalizationSignatureConfigurationUseCase(
         formalizationsRepository,
         mock<FormalizationSignatureConfigurationRepository>(),
-        mock<FormalizationSignatureSourceReader>(),
+        mock<FormalizationSignatureSourceProvider>(),
         mock<DatetimeProvider>(),
         mock<IdProvider>(),
       ).execute({
@@ -49,10 +49,10 @@ describe('Reset Formalization Signature Configuration Use Case', () => {
     })
     const formalizationsRepository = mock<FormalizationsRepository>()
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     repository.findByFormalizationId.mockResolvedValue(configuration)
-    sourceReader.listCurrentDocuments.mockResolvedValue([
+    sourceProvider.listCurrentDocuments.mockResolvedValue([
       {
         documentId: 'document-id',
         documentVersionId: 'version-id',
@@ -69,7 +69,7 @@ describe('Reset Formalization Signature Configuration Use Case', () => {
       new ResetFormalizationSignatureConfigurationUseCase(
         formalizationsRepository,
         repository,
-        sourceReader,
+        sourceProvider,
         datetimeProvider,
         mock<IdProvider>(),
       ).execute({

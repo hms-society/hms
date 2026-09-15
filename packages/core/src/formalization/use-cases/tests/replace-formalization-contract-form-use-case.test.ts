@@ -4,18 +4,18 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import type { DynamicForm } from '../../../shared/domain/entities'
 import { fakeFormalization } from '../../domain/entities/fakers'
 import type {
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { ReplaceFormalizationContractFormUseCase } from '../replace-formalization-contract-form-use-case'
 
 describe('Replace Formalization Contract Form Use Case', () => {
   let repository: MockProxy<FormalizationsRepository>
-  let sourceReader: MockProxy<FormalizationSourceReader>
+  let sourceProvider: MockProxy<FormalizationSourceProvider>
 
   beforeEach(() => {
     repository = mock<FormalizationsRepository>()
-    sourceReader = mock<FormalizationSourceReader>()
+    sourceProvider = mock<FormalizationSourceProvider>()
   })
 
   it('persists a new snapshot and clears answers while the form is open', async () => {
@@ -32,11 +32,11 @@ describe('Replace Formalization Contract Form Use Case', () => {
       version: current.version + 1,
     })
     repository.findById.mockResolvedValue(current)
-    sourceReader.findContractForm.mockResolvedValue(form)
+    sourceProvider.findContractForm.mockResolvedValue(form)
     repository.replace.mockResolvedValue(updated)
 
     await expect(
-      new ReplaceFormalizationContractFormUseCase(repository, sourceReader).execute({
+      new ReplaceFormalizationContractFormUseCase(repository, sourceProvider).execute({
         formalizationId: current.id,
         actorId: current.assignedLawyerId,
         expectedVersion: current.version,
@@ -59,10 +59,10 @@ describe('Replace Formalization Contract Form Use Case', () => {
   it('rejects a form that is not available in the Intake context', async () => {
     const current = fakeFormalization()
     repository.findById.mockResolvedValue(current)
-    sourceReader.findContractForm.mockResolvedValue(undefined)
+    sourceProvider.findContractForm.mockResolvedValue(undefined)
 
     await expect(
-      new ReplaceFormalizationContractFormUseCase(repository, sourceReader).execute({
+      new ReplaceFormalizationContractFormUseCase(repository, sourceProvider).execute({
         formalizationId: current.id,
         actorId: current.assignedLawyerId,
         expectedVersion: current.version,

@@ -12,7 +12,7 @@ import type {
 } from '../../interfaces'
 import { GetFormalizationSignatureSendingStatusUseCase } from '../get-formalization-signature-sending-status-use-case'
 import { FormalizationSignatureSendingForbiddenError } from '../../domain/errors'
-import type { FormalizationSignatureSourceReader } from '../../interfaces'
+import type { FormalizationSignatureSourceProvider } from '../../interfaces'
 
 describe('Get Formalization Signature Sending Status Use Case', () => {
   it('returns document progress and retry/cancel capabilities', async () => {
@@ -107,13 +107,13 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
     const formalizationsRepository = mock<FormalizationsRepository>()
     const requestsRepository = mock<FormalizationSignatureRequestsRepository>()
     const documentsRepository = mock<FormalizationSignatureRequestDocumentsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const recipients = mock<FormalizationSignatureRecipientsRepository>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     requestsRepository.findLatestByFormalizationId.mockResolvedValue(signatureRequest)
     recipients.listByRequestId.mockResolvedValue([recipient])
     documentsRepository.listByRequestId.mockResolvedValue([])
-    sourceReader.findPerson.mockResolvedValue({
+    sourceProvider.findPerson.mockResolvedValue({
       personId: recipient.personId,
       name: recipient.displayNameSnapshot,
       profile: 'lawyer',
@@ -126,7 +126,7 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
         requestsRepository,
         documentsRepository,
         recipientsRepository: recipients,
-        sourceReader,
+        sourceProvider,
       }).execute({
         formalizationId: formalization.id,
         actorId: recipient.personId,
@@ -148,7 +148,7 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
     const requestsRepository = mock<FormalizationSignatureRequestsRepository>()
     const documentsRepository = mock<FormalizationSignatureRequestDocumentsRepository>()
     const recipientsRepository = mock<FormalizationSignatureRecipientsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     requestsRepository.findLatestByFormalizationId.mockResolvedValue(signatureRequest)
     recipientsRepository.listByRequestId.mockResolvedValue([])
@@ -158,7 +158,7 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
         requestsRepository,
         documentsRepository,
         recipientsRepository,
-        sourceReader,
+        sourceProvider,
       }).execute({ formalizationId: formalization.id, actorId: 'unlinked' }),
     ).rejects.toBeInstanceOf(FormalizationSignatureSendingForbiddenError)
   })
@@ -177,11 +177,11 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
     const requestsRepository = mock<FormalizationSignatureRequestsRepository>()
     const documentsRepository = mock<FormalizationSignatureRequestDocumentsRepository>()
     const recipientsRepository = mock<FormalizationSignatureRecipientsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     requestsRepository.findLatestByFormalizationId.mockResolvedValue(signatureRequest)
     recipientsRepository.listByRequestId.mockResolvedValue([recipient])
-    sourceReader.findPerson.mockResolvedValue({
+    sourceProvider.findPerson.mockResolvedValue({
       personId: recipient.personId,
       name: recipient.displayNameSnapshot,
       profile: 'attendant',
@@ -194,7 +194,7 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
         requestsRepository,
         documentsRepository,
         recipientsRepository,
-        sourceReader,
+        sourceProvider,
       }).execute({
         formalizationId: formalization.id,
         actorId: recipient.personId,

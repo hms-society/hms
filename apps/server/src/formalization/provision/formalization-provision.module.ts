@@ -5,13 +5,12 @@ import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization
 import { DrizzleFormalizationSignatureMapper } from '@/formalization/database/drizzle/mappers'
 import { DrizzleFormalizationSignatureConfigurationRepository } from '@/formalization/database/drizzle/repositories'
 import {
-  FormalizationSignatureSourceReader,
   FormalizationSignatureSecretHasher,
   FormalizationSignatureSecretVerifier,
   FormalizationSignatureSecretGenerator,
   FormalizationSignatureOtpMacProvider,
   FormalizationSensitivePayloadCipherProvider,
-  FormalizationSignatureDocumentContentReader,
+  FormalizationSignatureDocumentContentProvider,
   DocumensoSignatureProvider,
 } from '@/formalization/provision'
 import { IdentityModule } from '@/identity/identity.module'
@@ -28,13 +27,12 @@ import { IntakeModule } from '@/intake/intake.module'
     SharedDatabaseModule,
   ],
   providers: [
-    FormalizationSignatureSourceReader,
     FormalizationSignatureSecretHasher,
     FormalizationSignatureSecretVerifier,
     FormalizationSignatureSecretGenerator,
     FormalizationSignatureOtpMacProvider,
     FormalizationSensitivePayloadCipherProvider,
-    FormalizationSignatureDocumentContentReader,
+    FormalizationSignatureDocumentContentProvider,
     DocumensoSignatureProvider,
     DrizzleFormalizationSignatureMapper,
     DrizzleFormalizationSignatureConfigurationRepository,
@@ -45,10 +43,6 @@ import { IntakeModule } from '@/intake/intake.module'
     {
       provide: FORMALIZATION_PROVIDERS.signatureSecretGenerator,
       useExisting: FormalizationSignatureSecretGenerator,
-    },
-    {
-      provide: FORMALIZATION_PROVIDERS.signatureSourceReader,
-      useExisting: FormalizationSignatureSourceReader,
     },
     {
       provide: FORMALIZATION_PROVIDERS.signatureSecretHasher,
@@ -67,8 +61,8 @@ import { IntakeModule } from '@/intake/intake.module'
       useExisting: FormalizationSensitivePayloadCipherProvider,
     },
     {
-      provide: FORMALIZATION_PROVIDERS.signatureDocumentContentReader,
-      useExisting: FormalizationSignatureDocumentContentReader,
+      provide: FORMALIZATION_PROVIDERS.signatureDocumentContentProvider,
+      useExisting: FormalizationSignatureDocumentContentProvider,
     },
     {
       provide: FORMALIZATION_PROVIDERS.signatureConfigurationRepository,
@@ -76,12 +70,11 @@ import { IntakeModule } from '@/intake/intake.module'
     },
   ],
   exports: [
-    FORMALIZATION_PROVIDERS.signatureSourceReader,
     FORMALIZATION_PROVIDERS.signatureSecretHasher,
     FORMALIZATION_PROVIDERS.signatureSecretVerifier,
     FORMALIZATION_PROVIDERS.signatureOtpMacProvider,
     FORMALIZATION_PROVIDERS.sensitivePayloadCipher,
-    FORMALIZATION_PROVIDERS.signatureDocumentContentReader,
+    FORMALIZATION_PROVIDERS.signatureDocumentContentProvider,
     FORMALIZATION_PROVIDERS.signatureProvider,
     FORMALIZATION_PROVIDERS.signatureSecretGenerator,
     FORMALIZATION_PROVIDERS.signatureConfigurationRepository,

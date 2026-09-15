@@ -12,7 +12,7 @@ import type {
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../interfaces'
 import {
@@ -54,7 +54,7 @@ type Dependencies = {
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
   readonly requestsRepository: FormalizationSignatureRequestsRepository
   readonly assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly transaction: FormalizationSignatureGatewayTransaction
   readonly idProvider: IdProvider
   readonly datetimeProvider: DatetimeProvider
@@ -120,7 +120,7 @@ export class EstablishCollaboratorSigningSessionUseCase
     )
       throw new SignatureSessionInvalidError()
 
-    const source = await this.dependencies.sourceReader.findAuthenticationSource(
+    const source = await this.dependencies.sourceProvider.findAuthenticationSource(
       request.actorId,
     )
     if (!this.isEligibleCollaborator(source, recipient))

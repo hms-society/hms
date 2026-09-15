@@ -15,7 +15,7 @@ import type {
   FormalizationSignatureProxyBindingsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
   SensitivePayloadCipherProvider,
   SignatureSecretHasher,
@@ -31,7 +31,7 @@ describe('Resend Formalization Signature Invitation Use Case', () => {
     const invitationsRepository = mock<FormalizationSignatureInvitationsRepository>()
     const sessionsRepository = mock<FormalizationSignatureGatewaySessionsRepository>()
     const bindingsRepository = mock<FormalizationSignatureProxyBindingsRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const transaction = mock<FormalizationSignatureInvitationResendTransaction>()
     const cipher = mock<SensitivePayloadCipherProvider>()
     const hasher = mock<SignatureSecretHasher>()
@@ -51,7 +51,7 @@ describe('Resend Formalization Signature Invitation Use Case', () => {
       invitationsRepository,
       sessionsRepository,
       bindingsRepository,
-      sourceReader,
+      sourceProvider,
       transaction,
       cipher,
       hasher,
@@ -68,7 +68,7 @@ describe('Resend Formalization Signature Invitation Use Case', () => {
       invitationsRepository,
       sessionsRepository,
       bindingsRepository,
-      sourceReader,
+      sourceProvider,
       transaction,
       broker,
       cipher,
@@ -103,7 +103,7 @@ describe('Resend Formalization Signature Invitation Use Case', () => {
     state.requestsRepository.findCurrentByFormalizationId.mockResolvedValue(request)
     state.recipientsRepository.findById.mockResolvedValue(recipient)
     state.invitationsRepository.findLatestByRecipientId.mockResolvedValue(previous)
-    state.sourceReader.findPerson.mockResolvedValue({
+    state.sourceProvider.findPerson.mockResolvedValue({
       personId: recipient.personId,
       name: recipient.displayNameSnapshot,
       email: 'a@example.com',
@@ -197,7 +197,7 @@ describe('Resend Formalization Signature Invitation Use Case', () => {
     state.requestsRepository.findCurrentByFormalizationId.mockResolvedValue(request)
     state.recipientsRepository.findById.mockResolvedValue(recipient)
     state.invitationsRepository.findLatestByRecipientId.mockResolvedValue(invitation)
-    state.sourceReader.findPerson.mockResolvedValue({
+    state.sourceProvider.findPerson.mockResolvedValue({
       personId: recipient.personId,
       name: recipient.displayNameSnapshot,
       availableChannels: [],

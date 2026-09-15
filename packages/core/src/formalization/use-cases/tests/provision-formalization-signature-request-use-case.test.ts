@@ -7,8 +7,8 @@ import {
 } from '../../domain/entities/fakers'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentContentReader,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentContentProvider,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureInvitationSendAttemptsRepository,
   FormalizationSignatureInvitationsRepository,
@@ -21,7 +21,7 @@ import type {
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureSnapshotsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureProvider,
   SignatureSecretHasher,
@@ -38,9 +38,9 @@ function makeDependencies() {
     mock<FormalizationSignatureRecipientDocumentsRepository>()
   const configurationRepository = mock<FormalizationSignatureConfigurationRepository>()
   const snapshotsRepository = mock<FormalizationSignatureSnapshotsRepository>()
-  const metadataReader = mock<FormalizationSignatureDocumentMetadataReader>()
-  const sourceReader = mock<FormalizationSignatureSourceReader>()
-  const contentReader = mock<FormalizationSignatureDocumentContentReader>()
+  const metadataProvider = mock<FormalizationSignatureDocumentMetadataProvider>()
+  const sourceProvider = mock<FormalizationSignatureSourceProvider>()
+  const contentProvider = mock<FormalizationSignatureDocumentContentProvider>()
   const providerResourcesRepository =
     mock<FormalizationSignatureProviderResourcesRepository>()
   const providerDocumentResourcesRepository =
@@ -198,10 +198,10 @@ function makeDependencies() {
     createdAt: new Date(),
   })
   providerResourcesRepository.findByRequestId.mockResolvedValue(null)
-  contentReader.readContent.mockImplementation(
+  contentProvider.readContent.mockImplementation(
     async (fileId) => new Uint8Array(fileId === 'file-1' ? [1] : [2]),
   )
-  sourceReader.findDocumentVersion.mockImplementation(
+  sourceProvider.findDocumentVersion.mockImplementation(
     async (_formalizationId, versionId) => ({
       documentId: versionId === 'version-1' ? 'source-1' : 'source-2',
       documentVersionId: versionId,
@@ -242,9 +242,9 @@ function makeDependencies() {
     recipientDocumentsRepository,
     configurationRepository,
     snapshotsRepository,
-    metadataReader,
-    sourceReader,
-    contentReader,
+    metadataProvider,
+    sourceProvider,
+    contentProvider,
     providerResourcesRepository,
     providerDocumentResourcesRepository,
     providerRecipientResourcesRepository,

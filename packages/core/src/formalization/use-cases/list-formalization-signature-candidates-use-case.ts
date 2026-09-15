@@ -7,7 +7,7 @@ import { FormalizationNotFoundError } from '../domain/errors'
 import type {
   FormalizationsRepository,
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '../interfaces'
 
 type Request = FormalizationActor & {
@@ -24,7 +24,7 @@ export class ListFormalizationSignatureCandidatesUseCase extends FormalizationUs
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
   ) {
     super()
   }
@@ -43,7 +43,7 @@ export class ListFormalizationSignatureCandidatesUseCase extends FormalizationUs
     const excludedPersonIds =
       configuration?.signatories.map(({ personId }) => personId) ?? []
 
-    return this.sourceReader.listEligibleCandidates({
+    return this.sourceProvider.listEligibleCandidates({
       formalizationId: formalization.id,
       page: request.page ?? 1,
       limit: request.limit ?? 20,

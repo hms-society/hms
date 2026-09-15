@@ -7,9 +7,9 @@ import type {
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
-  FormalizationSignatureDocumentContentReader,
+  FormalizationSignatureDocumentContentProvider,
 } from '@hms/core/formalization/interfaces'
 import type { DatetimeProvider } from '@hms/core/shared/interfaces'
 import { GetSignatureDocumentUseCase } from '@hms/core/formalization/use-cases'
@@ -37,12 +37,12 @@ export class GetSigningDocumentContentController extends SigningGatewayControlle
     recipientsRepository: FormalizationSignatureRecipientsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRecipientDocuments)
     assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
-    @Inject(FORMALIZATION_PROVIDERS.signatureDocumentContentReader)
-    private readonly contentReader: FormalizationSignatureDocumentContentReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureDocumentContentProvider)
+    private readonly contentProvider: FormalizationSignatureDocumentContentProvider,
   ) {
     super()
     this.useCase = new GetSignatureDocumentUseCase({
@@ -51,7 +51,7 @@ export class GetSigningDocumentContentController extends SigningGatewayControlle
       requestsRepository,
       recipientsRepository,
       assignmentsRepository,
-      sourceReader,
+      sourceProvider,
       hasher,
       datetimeProvider,
     })
@@ -69,7 +69,7 @@ export class GetSigningDocumentContentController extends SigningGatewayControlle
       requestDocumentId,
       ...this.getGatewayActor(request),
     })
-    const content = await this.contentReader.readContent(document.privateFileId)
+    const content = await this.contentProvider.readContent(document.privateFileId)
     if (!content) throw new Error('The signing document is unavailable.')
     response
       .setHeader('Cache-Control', 'private, no-store')

@@ -4,7 +4,7 @@ import type { Request } from 'express'
 import { ListSignatureAuthenticationChannelsUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationSignatureGatewaySessionsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '@hms/core/formalization/interfaces'
 import { SigningGatewayController as SigningGatewayRoute } from '@/formalization/decorators'
@@ -18,14 +18,14 @@ export class ListSigningAuthenticationChannelsController extends SigningGatewayC
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.signatureGatewaySessions)
     sessionsRepository: FormalizationSignatureGatewaySessionsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
   ) {
     super()
     this.useCase = new ListSignatureAuthenticationChannelsUseCase({
       sessionsRepository,
-      sourceReader,
+      sourceProvider,
       hasher,
     })
   }

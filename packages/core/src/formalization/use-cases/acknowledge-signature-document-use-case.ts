@@ -8,7 +8,7 @@ import type {
   FormalizationSignatureDocumentAcknowledgementsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../interfaces'
 import {
@@ -41,7 +41,7 @@ type Dependencies = {
   readonly acknowledgementsRepository: FormalizationSignatureDocumentAcknowledgementsRepository
   readonly assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly transaction: FormalizationSignatureGatewayTransaction
   readonly idProvider: IdProvider
   readonly datetimeProvider: DatetimeProvider
@@ -98,7 +98,7 @@ export class AcknowledgeSignatureDocumentUseCase implements UseCase<Request, Res
       ['confirmed', 'rejected', 'cancelled', 'expired'].includes(recipient.status)
     )
       throw new SignatureSessionInvalidError()
-    const eligibility = await this.dependencies.sourceReader.findAuthenticationSource(
+    const eligibility = await this.dependencies.sourceProvider.findAuthenticationSource(
       recipient.personId,
     )
     if (

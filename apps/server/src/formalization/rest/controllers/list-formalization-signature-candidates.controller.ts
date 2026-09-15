@@ -6,7 +6,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ListFormalizationSignatureCandidatesUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '@hms/core/formalization/interfaces'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
@@ -32,13 +32,13 @@ export class ListFormalizationSignatureCandidatesController {
     formalizationsRepository: FormalizationsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     signatureConfigurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    signatureSourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    signatureSourceProvider: FormalizationSignatureSourceProvider,
   ) {
     this.useCase = new ListFormalizationSignatureCandidatesUseCase(
       formalizationsRepository,
       signatureConfigurationRepository,
-      signatureSourceReader,
+      signatureSourceProvider,
     )
   }
 

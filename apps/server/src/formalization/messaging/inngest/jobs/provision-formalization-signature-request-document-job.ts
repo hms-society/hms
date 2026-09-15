@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { FormalizationSignatureRequestProvisioningRequestedEvent } from '@hms/core/formalization/domain'
 import { FormalizationSignatureProvisioningFailedError } from '@hms/core/formalization/domain/errors'
 import type {
-  FormalizationSignatureDocumentContentReader,
+  FormalizationSignatureDocumentContentProvider,
   FormalizationSignatureConfigurationRepository,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureInvitationSendAttemptsRepository,
@@ -17,8 +17,8 @@ import type {
   FormalizationSignatureRequestsRepository,
   FormalizationsRepository,
   FormalizationSignatureSnapshotsRepository,
-  FormalizationSignatureDocumentMetadataReader,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureDocumentMetadataProvider,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureProvider,
   SignatureSecretHasher,
@@ -75,14 +75,14 @@ export class ProvisionFormalizationSignatureRequestDocumentJob extends InngestJo
     @Inject(FORMALIZATION_REPOSITORIES.signatureInvitationSendAttempts)
     invitationSendAttemptsRepository: FormalizationSignatureInvitationSendAttemptsRepository,
     @Inject(FORMALIZATION_PROVIDERS.signatureProvider) provider: SignatureProvider,
-    @Inject(FORMALIZATION_PROVIDERS.signatureDocumentContentReader)
-    contentReader: FormalizationSignatureDocumentContentReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureDocumentContentProvider)
+    contentProvider: FormalizationSignatureDocumentContentProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     configurationRepository: FormalizationSignatureConfigurationRepository,
-    @Inject(FORMALIZATION_PROVIDERS.documentMetadataReader)
-    metadataReader: FormalizationSignatureDocumentMetadataReader,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.documentMetadataProvider)
+    metadataProvider: FormalizationSignatureDocumentMetadataProvider,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_PROVIDERS.sensitivePayloadCipher)
     cipher: SensitivePayloadCipherProvider,
     @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
@@ -108,10 +108,10 @@ export class ProvisionFormalizationSignatureRequestDocumentJob extends InngestJo
       invitationsRepository,
       invitationSendAttemptsRepository,
       provider,
-      contentReader,
+      contentProvider,
       configurationRepository,
-      metadataReader,
-      sourceReader,
+      metadataProvider,
+      sourceProvider,
       cipher,
       transaction,
       idProvider,

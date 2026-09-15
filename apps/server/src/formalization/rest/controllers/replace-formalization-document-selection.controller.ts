@@ -6,7 +6,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReplaceFormalizationDocumentSelectionUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationsRepository,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
 } from '@hms/core/formalization/interfaces'
 import type {
   DocumentPackagesRepository,
@@ -16,9 +16,11 @@ import type {
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
-import { ServerFormalizationSourceReader } from '@/formalization/provision'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationDocumentSelectionResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -40,8 +42,8 @@ export class ReplaceFormalizationDocumentSelectionController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader)
-    sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
     specificationsRepository: DocumentSpecificationsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
@@ -57,7 +59,7 @@ export class ReplaceFormalizationDocumentSelectionController {
   ) {
     this.useCase = new ReplaceFormalizationDocumentSelectionUseCase(
       formalizationsRepository,
-      sourceReader,
+      sourceProvider,
       specificationsRepository,
       documentPackagesRepository,
       packageDocumentsRepository,

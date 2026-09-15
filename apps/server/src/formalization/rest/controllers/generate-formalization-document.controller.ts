@@ -14,7 +14,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { GenerateFormalizationDocumentUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationsRepository,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
 } from '@hms/core/formalization/interfaces'
 import type {
   DocumentGenerationsRepository,
@@ -23,9 +23,11 @@ import type {
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
-import { ServerFormalizationSourceReader } from '@/formalization/provision'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationDocumentGenerationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -46,8 +48,8 @@ export class GenerateFormalizationDocumentController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader)
-    sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages)
     documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
@@ -62,7 +64,7 @@ export class GenerateFormalizationDocumentController {
   ) {
     this.useCase = new GenerateFormalizationDocumentUseCase(
       formalizationsRepository,
-      sourceReader,
+      sourceProvider,
       documentPackagesRepository,
       packageDocumentsRepository,
       specificationsRepository,

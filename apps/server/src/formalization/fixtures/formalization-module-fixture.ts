@@ -3,7 +3,7 @@ import type { TestingModuleBuilder } from '@nestjs/testing'
 import type { FormalizationsRepository } from '@hms/core/formalization/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
 } from '@hms/core/formalization/interfaces'
 import type {
   DocumentPdfConverter,
@@ -55,7 +55,7 @@ type FormalizationRestContext = {
   readonly converter: Mocked<DocumentPdfConverter>
   readonly inspector: Mocked<DocumentPdfInspector>
   readonly restFixture: RestFixture
-  readonly sourceReader: Mocked<FormalizationSignatureSourceReader>
+  readonly sourceProvider: Mocked<FormalizationSignatureSourceProvider>
   readonly storageFixture?: SupabaseStorageFixture
 }
 
@@ -76,7 +76,7 @@ export class FormalizationModuleFixture {
     readonly broker: Broker & { publish: Mock },
     readonly idProvider: IdProvider,
     readonly datetimeProvider: DatetimeProvider,
-    readonly sourceReader: Mocked<FormalizationSignatureSourceReader>,
+    readonly sourceProvider: Mocked<FormalizationSignatureSourceProvider>,
     readonly converter: Mocked<DocumentPdfConverter>,
     readonly inspector: Mocked<DocumentPdfInspector>,
     private readonly storageFixture: SupabaseStorageFixture | undefined,
@@ -261,7 +261,7 @@ export class FormalizationModuleFixture {
       context.broker,
       context.restFixture.get(IdProvider),
       context.restFixture.get(DatetimeProvider),
-      context.sourceReader,
+      context.sourceProvider,
       context.converter,
       context.inspector,
       context.storageFixture,
@@ -292,7 +292,7 @@ export class FormalizationModuleFixture {
       email: 'formalization.fixture@hms.test',
     }
     const broker: Broker & { publish: Mock } = { publish: vi.fn() }
-    const sourceReader: Mocked<FormalizationSignatureSourceReader> = {
+    const sourceProvider: Mocked<FormalizationSignatureSourceProvider> = {
       findPerson: vi.fn().mockResolvedValue(null),
       listEligibleCandidates: vi.fn().mockResolvedValue({
         items: [],
@@ -351,8 +351,8 @@ export class FormalizationModuleFixture {
           return configuredBuilder
             .overrideProvider(InngestBroker)
             .useValue(broker)
-            .overrideProvider(FORMALIZATION_PROVIDERS.signatureSourceReader)
-            .useValue(sourceReader)
+            .overrideProvider(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+            .useValue(sourceProvider)
             .overrideProvider(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfConverter)
             .useValue(converter)
             .overrideProvider(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfInspector)
@@ -396,7 +396,7 @@ export class FormalizationModuleFixture {
       converter,
       inspector,
       restFixture,
-      sourceReader,
+      sourceProvider,
       storageFixture,
     }
   }

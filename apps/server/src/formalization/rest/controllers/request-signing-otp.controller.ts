@@ -8,7 +8,7 @@ import type {
   FormalizationSignatureGatewaySessionsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureInvitationsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationSignatureOtpChallengesRepository,
   FormalizationSignatureOtpGuardsRepository,
   FormalizationSignatureOtpRateReservationsRepository,
@@ -43,8 +43,8 @@ export class RequestSigningOtpController extends SigningGatewayController {
     recipientsRepository: FormalizationSignatureRecipientsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureInvitations)
     invitationsRepository: FormalizationSignatureInvitationsRepository,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_REPOSITORIES.signatureOtpChallenges)
     challengesRepository: FormalizationSignatureOtpChallengesRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureOtpGuards)
@@ -73,7 +73,7 @@ export class RequestSigningOtpController extends SigningGatewayController {
       sessionsRepository,
       recipientsRepository,
       invitationsRepository,
-      sourceReader,
+      sourceProvider,
       challengesRepository,
       guardsRepository,
       reservationsRepository,

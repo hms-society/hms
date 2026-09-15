@@ -30,7 +30,7 @@ import type {
   FormalizationSignatureProxyBindingsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureSecretHasher,
 } from '../interfaces'
@@ -49,7 +49,7 @@ type Dependencies = {
   readonly invitationsRepository: FormalizationSignatureInvitationsRepository
   readonly sessionsRepository: FormalizationSignatureGatewaySessionsRepository
   readonly bindingsRepository: FormalizationSignatureProxyBindingsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly transaction: FormalizationSignatureInvitationResendTransaction
   readonly cipher: SensitivePayloadCipherProvider
   readonly hasher: SignatureSecretHasher
@@ -111,7 +111,7 @@ export class ResendFormalizationSignatureInvitationUseCase
     ) {
       throw new FormalizationSignatureRequestConflictError()
     }
-    const person = await this.dependencies.sourceReader.findPerson(recipient.personId)
+    const person = await this.dependencies.sourceProvider.findPerson(recipient.personId)
     if (!person?.availableChannels.includes(recipient.deliveryChannel)) {
       throw new FormalizationSignatureChannelUnavailableError()
     }

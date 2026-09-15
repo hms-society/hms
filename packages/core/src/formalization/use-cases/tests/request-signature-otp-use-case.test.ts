@@ -15,7 +15,7 @@ import type {
   FormalizationSignatureOtpSendAttemptsRepository,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SensitivePayloadCipherProvider,
   SignatureOtpMacProvider,
   SignatureSecretHasher,
@@ -28,7 +28,7 @@ type Dependencies = {
   sessionsRepository: MockProxy<FormalizationSignatureGatewaySessionsRepository>
   recipientsRepository: MockProxy<FormalizationSignatureRecipientsRepository>
   invitationsRepository: MockProxy<FormalizationSignatureInvitationsRepository>
-  sourceReader: MockProxy<FormalizationSignatureSourceReader>
+  sourceProvider: MockProxy<FormalizationSignatureSourceProvider>
   challengesRepository: MockProxy<FormalizationSignatureOtpChallengesRepository>
   guardsRepository: MockProxy<FormalizationSignatureOtpGuardsRepository>
   reservationsRepository: MockProxy<FormalizationSignatureOtpRateReservationsRepository>
@@ -47,7 +47,7 @@ function makeDependencies(): Dependencies {
     sessionsRepository: mock<FormalizationSignatureGatewaySessionsRepository>(),
     recipientsRepository: mock<FormalizationSignatureRecipientsRepository>(),
     invitationsRepository: mock<FormalizationSignatureInvitationsRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
     challengesRepository: mock<FormalizationSignatureOtpChallengesRepository>(),
     guardsRepository: mock<FormalizationSignatureOtpGuardsRepository>(),
     reservationsRepository: mock<FormalizationSignatureOtpRateReservationsRepository>(),
@@ -81,7 +81,7 @@ function makeDependencies(): Dependencies {
       generation: 1,
     }),
   )
-  dependencies.sourceReader.listConsentedAuthenticationChannels.mockResolvedValue([
+  dependencies.sourceProvider.listConsentedAuthenticationChannels.mockResolvedValue([
     { id: 'email-choice', kind: 'email', maskedDestination: 'a***@example.com' },
   ])
   dependencies.challengesRepository.findCurrentByInvitationId.mockResolvedValue(null)
@@ -149,7 +149,7 @@ describe('Request Signature Otp Use Case', () => {
       dependencies.invitationsRepository.findConsumedByRecipientAndRequest,
     ).toHaveBeenCalledWith({ recipientId: 'recipient-1', requestId: 'request-1' })
     expect(
-      dependencies.sourceReader.listConsentedAuthenticationChannels,
+      dependencies.sourceProvider.listConsentedAuthenticationChannels,
     ).toHaveBeenCalledWith('person-1')
     expect(dependencies.guardsRepository.findByInvitationId).toHaveBeenCalledWith(
       'invitation-1',
@@ -370,7 +370,7 @@ describe('Request Signature Otp Use Case', () => {
       dependencies.invitationsRepository.findConsumedByRecipientAndRequest,
     ).not.toHaveBeenCalled()
     expect(
-      dependencies.sourceReader.listConsentedAuthenticationChannels,
+      dependencies.sourceProvider.listConsentedAuthenticationChannels,
     ).not.toHaveBeenCalled()
     expect(dependencies.transaction.issueOtp).not.toHaveBeenCalled()
   })

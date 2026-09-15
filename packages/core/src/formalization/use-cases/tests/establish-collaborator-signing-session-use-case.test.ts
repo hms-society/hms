@@ -14,7 +14,7 @@ import type {
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureRecipientsRepository,
   FormalizationSignatureRequestsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../../interfaces'
 import { EstablishCollaboratorSigningSessionUseCase } from '../establish-collaborator-signing-session-use-case'
@@ -27,7 +27,7 @@ type Dependencies = {
   recipientsRepository: MockProxy<FormalizationSignatureRecipientsRepository>
   requestsRepository: MockProxy<FormalizationSignatureRequestsRepository>
   assignmentsRepository: MockProxy<FormalizationSignatureRecipientDocumentsRepository>
-  sourceReader: MockProxy<FormalizationSignatureSourceReader>
+  sourceProvider: MockProxy<FormalizationSignatureSourceProvider>
   transaction: MockProxy<FormalizationSignatureGatewayTransaction>
   idProvider: MockProxy<IdProvider>
   datetimeProvider: MockProxy<DatetimeProvider>
@@ -41,7 +41,7 @@ function makeDependencies(): Dependencies {
     recipientsRepository: mock<FormalizationSignatureRecipientsRepository>(),
     requestsRepository: mock<FormalizationSignatureRequestsRepository>(),
     assignmentsRepository: mock<FormalizationSignatureRecipientDocumentsRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
     transaction: mock<FormalizationSignatureGatewayTransaction>(),
     idProvider: mock<IdProvider>(),
     datetimeProvider: mock<DatetimeProvider>(),
@@ -100,7 +100,7 @@ function makeDependencies(): Dependencies {
       createdAt: NOW,
     },
   ])
-  dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+  dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
     personId: 'collaborator-1',
     actorKind: 'collaborator',
     active: true,
@@ -287,7 +287,7 @@ describe('Establish Collaborator Signing Session Use Case', () => {
   }) => {
     const dependencies = makeDependencies()
     if (active !== undefined || actorKind || collaboratorRole === undefined)
-      dependencies.sourceReader.findAuthenticationSource.mockResolvedValue({
+      dependencies.sourceProvider.findAuthenticationSource.mockResolvedValue({
         personId: 'collaborator-1',
         actorKind: actorKind ?? 'collaborator',
         active: active ?? true,

@@ -22,7 +22,7 @@ import type {
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureGatewayTransaction,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
   FormalizationSignatureRequestDocumentsRepository,
   FormalizationSignatureProtocolsRepository,
@@ -64,8 +64,8 @@ export class EstablishCollaboratorSigningSessionController extends SigningGatewa
     @Inject(ServerIdProvider) idProvider: IdProvider,
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
     @Inject(FORMALIZATION_PROVIDERS.signatureSecretHasher) hasher: SignatureSecretHasher,
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    sourceReader: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    sourceProvider: FormalizationSignatureSourceProvider,
     @Inject(FORMALIZATION_REPOSITORIES.signatureRequestDocuments)
     documentsRepository: FormalizationSignatureRequestDocumentsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureProtocols)
@@ -85,7 +85,7 @@ export class EstablishCollaboratorSigningSessionController extends SigningGatewa
       recipientsRepository,
       requestsRepository,
       assignmentsRepository,
-      sourceReader,
+      sourceProvider,
       transaction,
       idProvider,
       datetimeProvider,
@@ -100,7 +100,7 @@ export class EstablishCollaboratorSigningSessionController extends SigningGatewa
       assignmentsRepository,
       acknowledgementsRepository,
       bindingsRepository,
-      sourceReader,
+      sourceProvider,
       hasher,
       secretGenerator,
       datetimeProvider,

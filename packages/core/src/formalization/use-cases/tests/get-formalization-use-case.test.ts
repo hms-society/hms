@@ -4,18 +4,18 @@ import { CollaboratorProfile } from '../../../identity/domain/structures'
 import { fakeFormalization } from '../../domain/entities/fakers'
 import type {
   FormalizationContext,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { GetFormalizationUseCase } from '../get-formalization-use-case'
 
 describe('Get Formalization Use Case', () => {
   let repository: MockProxy<FormalizationsRepository>
-  let sourceReader: MockProxy<FormalizationSourceReader>
+  let sourceProvider: MockProxy<FormalizationSourceProvider>
 
   beforeEach(() => {
     repository = mock<FormalizationsRepository>()
-    sourceReader = mock<FormalizationSourceReader>()
+    sourceProvider = mock<FormalizationSourceProvider>()
   })
 
   it('returns the aggregate and server-owned context for its assigned lawyer', async () => {
@@ -27,10 +27,10 @@ describe('Get Formalization Use Case', () => {
       assignedLawyer: { id: formalization.assignedLawyerId },
     } as unknown as FormalizationContext
     repository.findById.mockResolvedValue(formalization)
-    sourceReader.findContext.mockResolvedValue(context)
+    sourceProvider.findContext.mockResolvedValue(context)
 
     await expect(
-      new GetFormalizationUseCase(repository, sourceReader).execute({
+      new GetFormalizationUseCase(repository, sourceProvider).execute({
         formalizationId: formalization.id,
         actorId: formalization.assignedLawyerId,
       }),
@@ -46,10 +46,10 @@ describe('Get Formalization Use Case', () => {
       assignedLawyer: { id: formalization.assignedLawyerId },
     } as unknown as FormalizationContext
     repository.findById.mockResolvedValue(formalization)
-    sourceReader.findContext.mockResolvedValue(context)
+    sourceProvider.findContext.mockResolvedValue(context)
 
     await expect(
-      new GetFormalizationUseCase(repository, sourceReader).execute({
+      new GetFormalizationUseCase(repository, sourceProvider).execute({
         formalizationId: formalization.id,
         actorId: 'admin-collaborator',
         actorProfile: CollaboratorProfile.Admin,

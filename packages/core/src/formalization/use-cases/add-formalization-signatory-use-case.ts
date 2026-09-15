@@ -14,7 +14,7 @@ import {
 } from '../domain/errors'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../interfaces'
 import { FormalizationSignatureConfigurationUseCase } from './formalization-signature-configuration-use-case'
@@ -32,7 +32,7 @@ export class AddFormalizationSignatoryUseCase extends FormalizationSignatureConf
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
     private readonly configurationRepository: FormalizationSignatureConfigurationRepository,
-    private readonly sourceReader: FormalizationSignatureSourceReader,
+    private readonly sourceProvider: FormalizationSignatureSourceProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
   ) {
@@ -56,7 +56,7 @@ export class AddFormalizationSignatoryUseCase extends FormalizationSignatureConf
     if (configuration.signatories.some(({ personId }) => personId === request.personId)) {
       throw new FormalizationSignatoryDuplicateError()
     }
-    const person = await this.sourceReader.findPerson(request.personId)
+    const person = await this.sourceProvider.findPerson(request.personId)
     if (
       !person ||
       (person.profile !== CollaboratorProfile.Lawyer &&
@@ -93,7 +93,7 @@ export class AddFormalizationSignatoryUseCase extends FormalizationSignatureConf
       formalization.id,
       request.actorId,
       now,
-      this.sourceReader,
+      this.sourceProvider,
       this.idProvider,
     )
 

@@ -6,15 +6,17 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ReplaceFormalizationContractFormUseCase } from '@hms/core/formalization/use-cases'
 import type {
   FormalizationsRepository,
-  FormalizationSourceReader,
+  FormalizationSourceProvider,
 } from '@hms/core/formalization/interfaces'
 
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import {
+  FORMALIZATION_PROVIDERS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants'
 import { FormalizationsController } from '@/formalization/decorators'
 import { FormalizationResponseDto } from '@/formalization/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
-import { ServerFormalizationSourceReader } from '@/formalization/provision'
 
 class ReplaceBody extends createZodDto(replaceFormalizationContractFormSchema) {}
 
@@ -27,12 +29,12 @@ export class ReplaceFormalizationContractFormController {
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.formalizations)
     formalizationsRepository: FormalizationsRepository,
-    @Inject(ServerFormalizationSourceReader)
-    sourceReader: FormalizationSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.sourceProvider)
+    sourceProvider: FormalizationSourceProvider,
   ) {
     this.useCase = new ReplaceFormalizationContractFormUseCase(
       formalizationsRepository,
-      sourceReader,
+      sourceProvider,
     )
   }
 

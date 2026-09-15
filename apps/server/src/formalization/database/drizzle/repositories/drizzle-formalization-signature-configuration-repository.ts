@@ -11,7 +11,7 @@ import type {
   FormalizationSignaturePreviewCleanupCandidate,
 } from '@hms/core/formalization/domain/structures'
 import type { FormalizationSignatureConfigurationRepository } from '@hms/core/formalization/interfaces'
-import type { FormalizationSignatureSourceReader } from '@hms/core/formalization/interfaces'
+import type { FormalizationSignatureSourceProvider } from '@hms/core/formalization/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { and, asc, eq, inArray, lte, notInArray, or, sql } from 'drizzle-orm'
 
@@ -52,8 +52,8 @@ export class DrizzleFormalizationSignatureConfigurationRepository
     drizzle: DrizzleClient,
     private readonly mapper: DrizzleFormalizationSignatureMapper,
     @Optional()
-    @Inject(FORMALIZATION_PROVIDERS.signatureSourceReader)
-    private readonly sourceReader?: FormalizationSignatureSourceReader,
+    @Inject(FORMALIZATION_PROVIDERS.signatureSourceProvider)
+    private readonly sourceProvider?: FormalizationSignatureSourceProvider,
     @Optional() databaseOverride?: DrizzleDatabaseExecutor,
   ) {
     super(drizzle, databaseOverride)
@@ -63,7 +63,7 @@ export class DrizzleFormalizationSignatureConfigurationRepository
     return new DrizzleFormalizationSignatureConfigurationRepository(
       this.drizzleClient,
       this.mapper,
-      this.sourceReader,
+      this.sourceProvider,
       database,
     )
   }
@@ -576,15 +576,15 @@ export class DrizzleFormalizationSignatureConfigurationRepository
   private async enrichConfiguration(
     configuration: FormalizationSignatureConfiguration,
   ): Promise<FormalizationSignatureConfiguration> {
-    if (!this.sourceReader) return configuration
+    if (!this.sourceProvider) return configuration
 
     const [people, documents] = await Promise.all([
       Promise.all(
         configuration.signatories.map((signatory) =>
-          this.sourceReader?.findPerson(signatory.personId),
+          this.sourceProvider?.findPerson(signatory.personId),
         ),
       ),
-      this.sourceReader.listCurrentDocuments(configuration.formalizationId),
+      this.sourceProvider.listCurrentDocuments(configuration.formalizationId),
     ])
     const peopleById = new Map(
       people.flatMap((person) => (person ? [[person.personId, person] as const] : [])),

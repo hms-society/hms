@@ -5,11 +5,11 @@ import { fakeFormalization } from '../../domain/entities/fakers'
 import type { FormalizationSignatureConfiguration } from '../../domain/structures'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureDocumentMetadataReader,
+  FormalizationSignatureDocumentMetadataProvider,
   FormalizationSignatureGatewayTransaction,
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureSnapshotsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
   SignatureSecretHasher,
 } from '../../interfaces'
@@ -20,7 +20,7 @@ const NOW = new Date('2026-01-01T12:00:00.000Z')
 type Dependencies = {
   formalizationsRepository: MockProxy<FormalizationsRepository>
   configurationRepository: MockProxy<FormalizationSignatureConfigurationRepository>
-  sourceReader: MockProxy<FormalizationSignatureSourceReader>
+  sourceProvider: MockProxy<FormalizationSignatureSourceProvider>
   requestsRepository: MockProxy<FormalizationSignatureRequestsRepository>
   snapshotsRepository: MockProxy<FormalizationSignatureSnapshotsRepository>
   transaction: MockProxy<FormalizationSignatureGatewayTransaction>
@@ -28,14 +28,14 @@ type Dependencies = {
   datetimeProvider: MockProxy<DatetimeProvider>
   broker: MockProxy<Broker>
   hasher: MockProxy<SignatureSecretHasher>
-  metadataReader: MockProxy<FormalizationSignatureDocumentMetadataReader>
+  metadataProvider: MockProxy<FormalizationSignatureDocumentMetadataProvider>
 }
 
 function makeDependencies(): Dependencies {
   const dependencies = {
     formalizationsRepository: mock<FormalizationsRepository>(),
     configurationRepository: mock<FormalizationSignatureConfigurationRepository>(),
-    sourceReader: mock<FormalizationSignatureSourceReader>(),
+    sourceProvider: mock<FormalizationSignatureSourceProvider>(),
     requestsRepository: mock<FormalizationSignatureRequestsRepository>(),
     snapshotsRepository: mock<FormalizationSignatureSnapshotsRepository>(),
     transaction: mock<FormalizationSignatureGatewayTransaction>(),
@@ -43,7 +43,7 @@ function makeDependencies(): Dependencies {
     datetimeProvider: mock<DatetimeProvider>(),
     broker: mock<Broker>(),
     hasher: mock<SignatureSecretHasher>(),
-    metadataReader: mock<FormalizationSignatureDocumentMetadataReader>(),
+    metadataProvider: mock<FormalizationSignatureDocumentMetadataProvider>(),
   }
   const formalization = fakeFormalization({
     id: 'formalization-1',
@@ -55,7 +55,7 @@ function makeDependencies(): Dependencies {
   dependencies.configurationRepository.findByFormalizationId.mockResolvedValue(
     makeConfiguration(),
   )
-  dependencies.sourceReader.listCurrentDocuments.mockResolvedValue([
+  dependencies.sourceProvider.listCurrentDocuments.mockResolvedValue([
     {
       documentId: 'document-1',
       documentVersionId: 'version-1',
@@ -65,7 +65,7 @@ function makeDependencies(): Dependencies {
       fileId: 'file-1',
     },
   ])
-  dependencies.metadataReader.findMetadata.mockResolvedValue({
+  dependencies.metadataProvider.findMetadata.mockResolvedValue({
     privateFileId: 'private-file-1',
     sha256: 'a'.repeat(64),
     byteCount: 100,
@@ -153,7 +153,7 @@ describe('Confirm Formalization Signature Sending Use Case', () => {
         requestId: transactionInput.request.id,
       }),
     })
-    expect(dependencies.metadataReader.findMetadata).toHaveBeenCalledWith({
+    expect(dependencies.metadataProvider.findMetadata).toHaveBeenCalledWith({
       formalizationId: 'formalization-1',
       previewId: 'preview-1',
     })

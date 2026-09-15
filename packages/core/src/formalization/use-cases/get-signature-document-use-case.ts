@@ -11,7 +11,7 @@ import type {
   FormalizationSignatureRequestsRepository,
   FormalizationSignatureRecipientDocumentsRepository,
   FormalizationSignatureRecipientsRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   SignatureSecretHasher,
 } from '../interfaces'
 import {
@@ -48,7 +48,7 @@ type Dependencies = {
   readonly requestsRepository: FormalizationSignatureRequestsRepository
   readonly recipientsRepository: FormalizationSignatureRecipientsRepository
   readonly assignmentsRepository: FormalizationSignatureRecipientDocumentsRepository
-  readonly sourceReader: FormalizationSignatureSourceReader
+  readonly sourceProvider: FormalizationSignatureSourceProvider
   readonly hasher: SignatureSecretHasher
   readonly datetimeProvider: DatetimeProvider
 }
@@ -87,7 +87,7 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     )
       throw new SignatureDocumentUnavailableError()
 
-    const source = await this.dependencies.sourceReader.findAuthenticationSource(
+    const source = await this.dependencies.sourceProvider.findAuthenticationSource(
       recipient.personId,
     )
     if (!this.isLiveIdentity(recipient, source, request.actorId))
@@ -101,7 +101,7 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     if (!this.isReadableDocument(document, signatureRequest))
       throw new SignatureDocumentUnavailableError()
 
-    const sourceDocument = await this.dependencies.sourceReader.findDocumentVersion(
+    const sourceDocument = await this.dependencies.sourceProvider.findDocumentVersion(
       signatureRequest.formalizationId,
       document.sourceDocumentVersionId,
     )

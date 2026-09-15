@@ -8,7 +8,7 @@ import {
 } from '../domain/errors'
 import { FormalizationContractFormState, FormalizationStatus } from '../domain/structures'
 import type { FormalizationActor } from '../domain/structures'
-import type { FormalizationSourceReader, FormalizationsRepository } from '../interfaces'
+import type { FormalizationSourceProvider, FormalizationsRepository } from '../interfaces'
 import { FormalizationUseCase } from './formalization-use-case'
 
 type Request = FormalizationActor & {
@@ -23,7 +23,7 @@ export class ReplaceFormalizationContractFormUseCase extends FormalizationUseCas
 > {
   constructor(
     private readonly formalizationsRepository: FormalizationsRepository,
-    private readonly sourceReader: FormalizationSourceReader,
+    private readonly sourceProvider: FormalizationSourceProvider,
   ) {
     super()
   }
@@ -47,7 +47,7 @@ export class ReplaceFormalizationContractFormUseCase extends FormalizationUseCas
       )
     }
 
-    const form = await this.sourceReader.findContractForm(
+    const form = await this.sourceProvider.findContractForm(
       formalization,
       request.dynamicFormId,
     )

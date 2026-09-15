@@ -1,4 +1,5 @@
 export * from './broker'
+export * from './crypto-provider'
 export * from './event-outbox'
 export * from './file-storage-provider'
 export * from './id-provider'

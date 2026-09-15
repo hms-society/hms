@@ -3,7 +3,7 @@ import { mock } from 'vitest-mock-extended'
 import type { DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import type {
   FormalizationSignatureConfigurationRepository,
-  FormalizationSignatureSourceReader,
+  FormalizationSignatureSourceProvider,
   FormalizationsRepository,
 } from '../../interfaces'
 import { RemoveFormalizationSignatoryUseCase } from '../remove-formalization-signatory-use-case'
@@ -27,7 +27,7 @@ describe('Remove Formalization Signatory Use Case', () => {
       new RemoveFormalizationSignatoryUseCase(
         formalizationsRepository,
         repository,
-        mock<FormalizationSignatureSourceReader>(),
+        mock<FormalizationSignatureSourceProvider>(),
         mock<DatetimeProvider>(),
         mock<IdProvider>(),
       ).execute({
@@ -55,12 +55,12 @@ describe('Remove Formalization Signatory Use Case', () => {
     })
     const formalizationsRepository = mock<FormalizationsRepository>()
     const repository = mock<FormalizationSignatureConfigurationRepository>()
-    const sourceReader = mock<FormalizationSignatureSourceReader>()
+    const sourceProvider = mock<FormalizationSignatureSourceProvider>()
     const datetimeProvider = mock<DatetimeProvider>()
     const idProvider = mock<IdProvider>()
     formalizationsRepository.findById.mockResolvedValue(formalization)
     repository.findByFormalizationId.mockResolvedValue(configuration)
-    sourceReader.listCurrentDocuments.mockResolvedValue([])
+    sourceProvider.listCurrentDocuments.mockResolvedValue([])
     datetimeProvider.now.mockReturnValue(TEST_NOW)
     repository.replaceConfiguration.mockResolvedValue(
       makeConfiguration({ formalizationId: formalization.id }),
@@ -69,7 +69,7 @@ describe('Remove Formalization Signatory Use Case', () => {
       new RemoveFormalizationSignatoryUseCase(
         formalizationsRepository,
         repository,
-        sourceReader,
+        sourceProvider,
         datetimeProvider,
         idProvider,
       ).execute({
