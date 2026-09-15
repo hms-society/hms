@@ -104,6 +104,26 @@ including the file speculatively.
 
 ## Branch and PR preparation
 
+### Branch-prefix inheritance (mandatory)
+
+Every delivery branch must inherit the prefix of its actual PR base branch. Resolve the base
+branch from the PR/base ref or the declared slice dependency, strip an optional remote prefix
+such as `origin/`, and take the first path component including its trailing slash as the branch
+prefix. If the base branch has no slash, the derived branch has no prefix.
+
+Examples:
+
+- base `feat/dynamic-forms-page` → `feat/dynamic-forms-page-core`,
+  `feat/dynamic-forms-page-server`, `feat/dynamic-forms-page-web`;
+- base `codex/dynamic-forms-page-base` → `codex/dynamic-forms-page-core`;
+- base `develop` → `dynamic-forms-page` or `dynamic-forms-page-core`, without adding `codex/`.
+
+This rule is based on the base branch, never on the agent, tool, workspace or historical default.
+Do not introduce `codex/` unless the actual base branch already has the `codex/` prefix. Before
+creating or updating a PR, verify that every new or existing delivery head uses the inherited
+prefix; if an existing branch does not, stop and report the mismatch instead of silently
+renaming it or publishing a branch with the wrong prefix.
+
 1. Inspect status and staged/unstaged changes. Preserve unrelated or user-owned work.
 2. Fetch the real integration branch without changing the worktree and inspect open and closed
    PRs for the delivery, for example:

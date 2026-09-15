@@ -75,6 +75,13 @@ reserved for the post-authoring Spec Reviewer, implementation, and integrated-re
 defined by SDD. The Spec Reviewer is not a research lane and is activated only after the draft
 and the Orchestrator's own integrity checks are complete.
 
+When the repository contains a `.codegraph/` index, use CodeGraph as the first codebase-search
+and navigation tool before `rg`, `find`, broad file listings or exploratory file reads. Prefer
+`codegraph_explore` when the MCP operation is available; otherwise use the repository CLI fallback
+`codegraph explore "<symbols or question>"`. Use `rg` only for targeted follow-up verification,
+exact-text checks or when CodeGraph cannot answer the query. Treat CodeGraph output as navigation
+evidence and still verify consequential declarations and paths before encoding them in the Spec.
+
 Identify independent research lanes from real ownership and technical boundaries, then cover
 them in one Orchestrator context. Batch independent read-only commands when practical, but keep
 authority loading, evidence verification, cross-boundary synthesis, ambiguity detection and
@@ -124,6 +131,58 @@ material frontier decision is open. After the frontier is empty, obtain explicit
 that the user and Orchestrator share the same understanding before authoring the Spec. Record
 resolved decisions and accepted assumptions in the prescribed Contract sections, never as an
 interview transcript.
+
+#### Exhaustive questionnaire mode
+
+When the user asks to decide, question or approve **every technical decision**, make the grilling
+protocol exhaustive rather than collapsing several decisions into a generic architecture choice.
+Research first, then continue dependency-ordered rounds until every consequential
+implementation-shaping alternative is settled. Cover each applicable branch below:
+
+- owning module, application, layer, declaration and composition boundary;
+- technology, protocol, dependency and provider/client abstraction;
+- API route, method, authentication, authorization lifetime, payload, serialization, validation,
+  versioning and compatibility;
+- source of truth, transaction/commit boundary, persistence model, migration generation,
+  indexing, tenancy and historical-value behavior;
+- synchronous/asynchronous flow, publication timing, delivery guarantee, idempotency,
+  deduplication, ordering, concurrency, buffering, backpressure and capacity limits;
+- connection/subscription lifecycle, retries, timeouts, heartbeat, reconnect, offline/hidden
+  behavior, replay and cleanup;
+- multi-process, multi-tab, multi-device or multi-tenant coordination and degraded fallbacks;
+- UI state ownership, component/widget boundaries, interaction semantics, exact copy/timing,
+  focus, keyboard, announcement, responsive behavior, stacking and design-reference gaps;
+- error translation, user-visible failure behavior, observability, privacy and secret handling;
+- automated test ownership, indirect versus direct boundaries, manual fixtures/services,
+  viewports, screenshots and evidence targets.
+
+Ask about exact operational values when they affect the Contract—for example duration, retry
+schedule, heartbeat interval, connection cap, queue size, viewport or concurrency limit. Continue from
+broad prerequisites to their dependent concrete choices: selecting SSE, for example, may unlock
+route, authentication, payload, heartbeat, reconnection, authorization-lifetime, backpressure
+and browser-ownership decisions.
+
+Exhaustive does not mean asking the user to restate repository facts or approve conventions with
+only one legal answer. Resolve those directly from authority and include them in the final shared
+understanding. Do not ask about incidental implementation syntax or algorithms that cannot alter
+observable behavior, architecture, ownership, operability, security, validation or the Builder's
+contract.
+
+Before declaring the frontier empty in exhaustive mode:
+
+1. replay the decision ledger against every affected runtime boundary and Rule-selected layer;
+2. inspect the chosen combination for newly exposed decisions and contradictions;
+3. state any authority correction or design artifact required before authoring;
+4. present one consolidated shared-understanding summary containing the resolved product,
+   technical, design and validation decisions; and
+5. request explicit confirmation. A typo-tolerant unambiguous confirmation such as `confirmed`
+   or `comfirmed` passes this final gate.
+
+Do not create or modify the Spec before that confirmation. After confirmation, apply approved
+authority changes first, create the artifacts, run integrity checks and the applicable independent
+Spec review. If authoring or review exposes a genuinely material unasked choice, return to the
+questionnaire with the next question number; otherwise resolve repository-fixed compatibility
+corrections directly and resume the same Reviewer.
 
 | Area | Clarify when unresolved |
 | --- | --- |
@@ -919,8 +978,11 @@ groups or rows when only a selected-item dialog can associate that failure with 
 Parent widgets coordinate selection and child composition; focused children own their local
 form, confirmation, submission, recovery and accessible feedback lifecycle.
 
-In addition to the relationship table, include one literal repository-relative tree for
-each changed UI surface. Expand every widget directory to its exact required files—entry,
+In addition to the relationship table, add an explicit `Expected widget tree` subsection
+for each changed UI surface and include one literal repository-relative fenced tree there.
+This subsection is mandatory even when the affected-path table already lists every file;
+the table is the machine-readable change contract, while the tree is the human-readable
+composition and ownership contract. Expand every widget directory to its exact required files—entry,
 colocated hook, component test and hook test—and list route, feature query/action hooks,
 service/context files, constants and generated route artifacts individually. Do not use a
 wildcard, directory-only row, “same files for each widget”, marker shorthand or a collapsed
@@ -928,6 +990,13 @@ wildcard, directory-only row, “same files for each widget”, marker shorthand
 Visually nest every child under its actual parent in the tree, including children of children,
 so implementation ownership is readable without reconstructing paths from the affected-file
 table.
+
+Before a Spec can become `open`, compare the `Expected widget tree` leaf paths with the UI
+affected-path rows in both directions. Fail the integrity gate when any UI path exists only in
+one representation, when a widget omits `index.tsx`, `use-<widget>.ts`, its basename-matched
+component test or its hook test, or when visual nesting contradicts the widget hierarchy table.
+Report the widget count, tree-leaf count, affected UI path count and UI test count to the Spec
+Reviewer.
 
 Then map every affected UI path exactly once:
 
