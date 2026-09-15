@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test'
 
-export const BACKEND_URL = 'http://hms-api.test'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
+
+export const BACKEND_URL = HMS_SERVER_APP_TEST_URL
 export const COLLABORATOR_ID = 'collaborator-id'
 
 type CollaboratorStatus = 'active' | 'invited' | 'disabled'

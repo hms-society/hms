@@ -28,6 +28,14 @@ import { Input } from '@/ui/shadcn/input'
 import { NativeSelect, NativeSelectOption } from '@/ui/shadcn/native-select'
 import { Skeleton } from '@/ui/shadcn/skeleton'
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPages,
+  PaginationPrevious,
+} from '@/ui/shadcn/pagination'
+import {
   Table,
   TableBody,
   TableCell,
@@ -795,38 +803,42 @@ function IntakesPagination({
   totalPages: number
   onPage: (page: number) => void
 }) {
-  if (totalPages <= 1) return null
+  if (total === 0) return null
+
+  const startItem = (page - 1) * pageSize + 1
+  const endItem = Math.min(page * pageSize, total)
 
   return (
-    <nav
-      aria-label='Paginação de Intakes'
-      className='flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-3 sm:flex-row sm:items-center sm:justify-between'
-    >
+    <Pagination aria-label='Paginação de Intakes' className='justify-between gap-3'>
       <span className='text-xs text-muted-foreground'>
-        Exibindo {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de {total}{' '}
-        Intakes
+        Exibindo {startItem}–{endItem} de {total}
       </span>
-      <div className='flex gap-2'>
-        <Button
-          type='button'
-          variant='outline'
-          size='sm'
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-        >
-          <Icon name='chevron-left' /> Anterior
-        </Button>
-        <Button
-          type='button'
-          variant='outline'
-          size='sm'
-          disabled={page >= totalPages}
-          onClick={() => onPage(page + 1)}
-        >
-          Próxima <Icon name='chevron-right' />
-        </Button>
-      </div>
-    </nav>
+      <PaginationContent className='gap-1'>
+        <PaginationItem>
+          <PaginationPrevious
+            href='#'
+            aria-label='Página anterior'
+            disabled={page <= 1}
+            onClick={(event) => {
+              event.preventDefault()
+              onPage(page - 1)
+            }}
+          />
+        </PaginationItem>
+        <PaginationPages page={page} totalPages={totalPages} onPage={onPage} />
+        <PaginationItem>
+          <PaginationNext
+            href='#'
+            aria-label='Próxima página'
+            disabled={page >= totalPages}
+            onClick={(event) => {
+              event.preventDefault()
+              onPage(page + 1)
+            }}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   )
 }
 

@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
 
 const CLIENT_ID = '1aca4870-15a9-41f2-a23d-b4f7e2a9c8b0'
-const BACKEND_URL = 'http://hms-api.test'
+const BACKEND_URL = HMS_SERVER_APP_TEST_URL
 
 test.describe('Página de Cliente', () => {
   test.beforeEach(async ({ page }) => {

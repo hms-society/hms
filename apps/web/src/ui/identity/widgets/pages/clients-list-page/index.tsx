@@ -6,8 +6,8 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
+  PaginationPages,
   PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import {
@@ -35,6 +35,7 @@ export const ClientsListPage = () => {
     handleClientRegisterDialogOpenChange,
     handleClientSelect,
     handleClientSelected,
+    handlePageChange,
     handleNextPage,
     handleOriginChange,
     handlePreviousPage,
@@ -220,34 +221,30 @@ export const ClientsListPage = () => {
 
       <div className='flex items-center justify-between pt-2'>
         <p className='text-sm text-muted-foreground'>
-          Exibindo {clients.length > 0 ? (page - 1) * limit + 1 : 0}-
-          {(page - 1) * limit + clients.length} de {total}
+          Exibindo {clients.length > 0 ? (page - 1) * limit + 1 : 0}–
+          {Math.min(page * limit, total)} de {total}
         </p>
-        <Pagination className='w-auto mx-0'>
-          <PaginationContent>
+        <Pagination className='w-auto !mx-0'>
+          <PaginationContent className='gap-1'>
             <PaginationItem>
               <PaginationPrevious
                 href='#'
                 onClick={handlePreviousPage}
-                text=''
-                className={`size-9 p-0 border border-border/60 bg-card text-muted-foreground hover:bg-muted ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                aria-label='Página anterior'
+                disabled={page === 1}
               />
             </PaginationItem>
-            <PaginationItem>
-              <PaginationLink
-                href='#'
-                isActive
-                className='size-9 border border-[#387F75] bg-[#387F75]/10 text-[#387F75] hover:bg-[#387F75]/20'
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
+            <PaginationPages
+              page={page}
+              totalPages={totalPages}
+              onPage={handlePageChange}
+            />
             <PaginationItem>
               <PaginationNext
                 href='#'
                 onClick={handleNextPage}
-                text=''
-                className={`size-9 p-0 border border-border/60 bg-card text-muted-foreground hover:bg-muted ${page === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                aria-label='Próxima página'
+                disabled={page === totalPages}
               />
             </PaginationItem>
           </PaginationContent>

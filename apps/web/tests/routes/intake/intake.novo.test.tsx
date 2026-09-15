@@ -3,8 +3,9 @@ import { expect, test as playwrightTest, type Page } from '@playwright/test'
 import { test } from '../../fixtures/auth-fixture'
 
 import { ROUTES } from '../../../src/constants/routes'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
 
-const BACKEND_URL = 'http://hms-api.test'
+const BACKEND_URL = HMS_SERVER_APP_TEST_URL
 const LEGAL_AREA_ID = '47dfd634-75e9-41e4-a47e-05114f923bd0'
 const LEGAL_TOPIC_ID = '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d'
 const CLIENT_ID = '09ee728b-80f6-4234-899c-ca40c75c841f'

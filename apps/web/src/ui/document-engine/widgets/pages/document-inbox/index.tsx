@@ -16,7 +16,9 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
+  PaginationNext,
+  PaginationPages,
+  PaginationPrevious,
 } from '@/ui/shadcn/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 import { Calendar } from '@/ui/shadcn/calendar'
@@ -319,104 +321,36 @@ export const DocumentInboxPage = () => {
           {totalItems > 0 && (
             <div className='flex w-full items-center border-t border-border bg-card px-6 py-4'>
               <span className='font-sans text-sm text-muted-foreground'>
-                Exibindo {startItem}–{endItem} de {totalItems} documentos
+                Exibindo {startItem}–{endItem} de {totalItems}
               </span>
               <Pagination className='!ml-auto !mr-0 !w-auto !justify-end'>
-                <PaginationContent>
+                <PaginationContent className='gap-1'>
                   <PaginationItem>
-                    <PaginationLink
+                    <PaginationPrevious
                       href='#'
+                      aria-label='Página anterior'
+                      disabled={currentPage === 1}
                       onClick={(e) => {
                         e.preventDefault()
                         handlePageChange(currentPage - 1)
                       }}
-                      className={`flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] ${
-                        currentPage === 1 ? 'pointer-events-none opacity-50' : ''
-                      }`}
-                    >
-                      <Icon name='chevron-left' className='size-4' />
-                    </PaginationLink>
+                    />
                   </PaginationItem>
-                  {totalPages <= 5 ? (
-                    Array.from({ length: totalPages }).map((_, i) => {
-                      const page = i + 1
-
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href='#'
-                            isActive={currentPage === page}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handlePageChange(page)
-                            }}
-                            className='flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] data-[active=true]:bg-[#3D757B] data-[active=true]:text-white'
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    })
-                  ) : (
-                    <>
-                      {currentPage > 3 && (
-                        <PaginationItem>
-                          <span className='flex size-8 items-center justify-center text-[#3D757B]'>
-                            ...
-                          </span>
-                        </PaginationItem>
-                      )}
-
-                      {Array.from({ length: 5 }, (_, i) => {
-                        let page: number
-
-                        if (currentPage <= 3) {
-                          page = i + 1
-                        } else if (currentPage >= totalPages - 2) {
-                          page = totalPages - 4 + i
-                        } else {
-                          page = currentPage - 2 + i
-                        }
-
-                        return (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              href='#'
-                              isActive={currentPage === page}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                handlePageChange(page)
-                              }}
-                              className='flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] data-[active=true]:bg-[#3D757B] data-[active=true]:text-white'
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        )
-                      })}
-
-                      {currentPage < totalPages - 2 && (
-                        <PaginationItem>
-                          <span className='flex size-8 items-center justify-center text-[#3D757B]'>
-                            ...
-                          </span>
-                        </PaginationItem>
-                      )}
-                    </>
-                  )}
+                  <PaginationPages
+                    page={currentPage}
+                    totalPages={totalPages}
+                    onPage={handlePageChange}
+                  />
                   <PaginationItem>
-                    <PaginationLink
+                    <PaginationNext
                       href='#'
+                      aria-label='Próxima página'
+                      disabled={currentPage === totalPages}
                       onClick={(e) => {
                         e.preventDefault()
                         handlePageChange(currentPage + 1)
                       }}
-                      className={`flex size-8 items-center justify-center rounded-md border border-[#3D757B] p-0 text-[#3D757B] hover:bg-[#DCE9EA] hover:text-[#3D757B] ${
-                        currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
-                      }`}
-                    >
-                      <Icon name='chevron-right' className='size-4' />
-                    </PaginationLink>
+                    />
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>

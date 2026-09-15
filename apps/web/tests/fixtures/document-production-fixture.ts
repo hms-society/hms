@@ -1,7 +1,9 @@
 import { test as base } from '@playwright/test'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 
-export const DOCUMENT_PRODUCTION_BACKEND = 'http://hms-api.test'
+import { HMS_SERVER_APP_TEST_URL } from '../routes/constants/hms-server-app-url'
+
+export const DOCUMENT_PRODUCTION_BACKEND = HMS_SERVER_APP_TEST_URL
 export const CONSULTATION_ID = 'consultation-1'
 export const CONSULTATION_DOCUMENT_ID = 'document-1'
 export const CONSULTATION_DOCUMENT_VERSION_ID = 'version-1'
@@ -364,19 +366,22 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
           })
         },
       )
-      await page.route('http://hms-api.test/auth/complete-sign-in', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            collaboratorId: 'admin',
-            professionalName: 'Admin',
-            email: AUTHENTICATED_USER.email,
-            profile: 'admin',
-            status: 'active',
-          }),
-        })
-      })
+      await page.route(
+        `${HMS_SERVER_APP_TEST_URL}/auth/complete-sign-in`,
+        async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              collaboratorId: 'admin',
+              professionalName: 'Admin',
+              email: AUTHENTICATED_USER.email,
+              profile: 'admin',
+              status: 'active',
+            }),
+          })
+        },
+      )
       await page.goto('/login')
       await page.getByLabel('Email:').fill(AUTHENTICATED_USER.email)
       await page.getByRole('textbox', { name: 'Senha' }).fill('123456')

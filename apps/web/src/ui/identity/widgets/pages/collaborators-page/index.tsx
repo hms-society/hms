@@ -29,6 +29,14 @@ import {
 } from '@/ui/shadcn/dropdown-menu'
 import { Input } from '@/ui/shadcn/input'
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPages,
+  PaginationPrevious,
+} from '@/ui/shadcn/pagination'
+import {
   Table,
   TableBody,
   TableCell,
@@ -353,34 +361,48 @@ export function CollaboratorsPage({
                 </TableBody>
               </Table>
             </div>
-            <footer className='flex flex-col gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between'>
+            <footer className='flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground'>
               <span>
-                {collaboratorsPage.total} colaborador
-                {collaboratorsPage.total === 1 ? '' : 'es'}
+                Exibindo{' '}
+                {collaboratorsPage.total === 0
+                  ? 0
+                  : (page - 1) * collaboratorsPage.pageSize + 1}
+                –{Math.min(page * collaboratorsPage.pageSize, collaboratorsPage.total)} de{' '}
+                {collaboratorsPage.total}
               </span>
-              <div className='flex items-center gap-2'>
-                <Button
-                  variant='outline'
-                  size='icon-sm'
-                  aria-label='Página anterior'
-                  disabled={page <= 1}
-                  onClick={() => handleUpdateSearch({ page: page - 1 })}
-                >
-                  <Icon name='chevron-left' />
-                </Button>
-                <span>
-                  Página {page} de {Math.max(totalPages, 1)}
-                </span>
-                <Button
-                  variant='outline'
-                  size='icon-sm'
-                  aria-label='Próxima página'
-                  disabled={page >= totalPages}
-                  onClick={() => handleUpdateSearch({ page: page + 1 })}
-                >
-                  <Icon name='chevron-right' />
-                </Button>
-              </div>
+              <Pagination className='w-auto !mx-0'>
+                <PaginationContent className='gap-1'>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href='#'
+                      aria-label='Página anterior'
+                      disabled={page <= 1}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        void handleUpdateSearch({ page: page - 1 })
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationPages
+                    page={page}
+                    totalPages={totalPages}
+                    onPage={(nextPage) => {
+                      void handleUpdateSearch({ page: nextPage })
+                    }}
+                  />
+                  <PaginationItem>
+                    <PaginationNext
+                      href='#'
+                      aria-label='Próxima página'
+                      disabled={page >= totalPages}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        void handleUpdateSearch({ page: page + 1 })
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </footer>
           </>
         ) : (

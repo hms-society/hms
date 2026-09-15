@@ -2,8 +2,9 @@ import { expect, test as playwrightTest } from '@playwright/test'
 
 import { test } from '../../fixtures/auth-fixture'
 import { ROUTES } from '../../../src/constants/routes'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
 
-const BACKEND_URL = 'http://hms-api.test'
+const BACKEND_URL = HMS_SERVER_APP_TEST_URL
 
 const intakePage = {
   items: [

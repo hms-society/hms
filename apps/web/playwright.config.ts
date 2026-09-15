@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 import { loadEnv } from 'vite'
 
+import { HMS_SERVER_APP_TEST_URL } from './tests/routes/constants/hms-server-app-url'
+
 const env = { ...loadEnv('test', process.cwd(), ''), ...process.env }
 const webAppPort = Number(env.HMS_WEB_APP_PORT)
 
@@ -35,7 +37,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       HMS_WEB_APP_PORT: String(webAppPort),
-      VITE_HMS_SERVER_APP_URL: 'http://hms-api.test',
+      VITE_HMS_SERVER_APP_URL: HMS_SERVER_APP_TEST_URL,
       VITE_SUPABASE_URL: 'http://supabase.test',
       VITE_SUPABASE_KEY: 'playwright-anon-key',
     },

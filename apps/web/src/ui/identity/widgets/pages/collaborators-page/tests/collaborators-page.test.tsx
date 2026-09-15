@@ -212,7 +212,9 @@ describe('CollaboratorsPage', () => {
       target: { value: 'Maria' },
     })
     screen.getByRole('button', { name: /limpar/i }).click()
-    screen.getByRole('button', { name: 'Próxima página' }).click()
+    expect(screen.getByRole('link', { name: 'Página 1' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Página 2' })).toBeTruthy()
+    screen.getByRole('link', { name: 'Próxima página' }).click()
 
     expect(handleUpdateSearch).toHaveBeenCalledWith({ search: 'Maria' })
     expect(handleClearFilters).toHaveBeenCalledOnce()

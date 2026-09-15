@@ -166898,7 +166898,7 @@
                       "children": [
                         {
                           "type": "frame",
-                          "id": "hBa3h",
+                          "id": "YUtSs",
                           "name": "Cabeçalho",
                           "width": "fill_container",
                           "height": 38,
@@ -166915,16 +166915,16 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "OQWof",
-                              "name": "Célula CONFIGURAÇÃO",
+                              "id": "UQId4",
+                              "name": "Célula FORMULÁRIO",
                               "width": 230,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "pdx6j",
-                                  "name": "Rótulo",
+                                  "id": "R1M4o",
+                                  "name": "Rótulo FORMULÁRIO",
                                   "fill": "$muted-foreground",
                                   "content": "FORMULÁRIO",
                                   "fontFamily": "$font-sans",
@@ -166936,16 +166936,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "R1Z3td",
-                              "name": "Célula ESCOPO",
+                              "id": "vx2H4",
+                              "name": "Célula ETAPA",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "Bd1Ug",
-                                  "name": "Rótulo",
+                                  "id": "wW39Z",
+                                  "name": "Rótulo ETAPA",
                                   "fill": "$muted-foreground",
                                   "content": "ETAPA",
                                   "fontFamily": "$font-sans",
@@ -166957,28 +166957,59 @@
                             },
                             {
                               "type": "frame",
-                              "id": "UgkLa",
-                              "name": "Célula CLASSIFICAÇÃO",
+                              "id": "IQX89",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "PR83S",
-                                  "name": "Rótulo",
-                                  "fill": "$muted-foreground",
-                                  "content": "CLASSIFICAÇÃO",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 10,
-                                  "fontWeight": "700",
-                                  "letterSpacing": 0.35
+                                  "type": "frame",
+                                  "id": "eeEwR",
+                                  "name": "Célula ÁREA JURÍDICA",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "WYRIX",
+                                      "name": "Rótulo ÁREA JURÍDICA",
+                                      "fill": "$muted-foreground",
+                                      "content": "ÁREA JURÍDICA",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 10,
+                                      "fontWeight": "700",
+                                      "letterSpacing": 0.35
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "bIY4E",
+                                  "name": "Célula TEMAS",
+                                  "width": "fill_container",
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "CH9GI",
+                                      "name": "Rótulo TEMAS",
+                                      "fill": "$muted-foreground",
+                                      "content": "TEMAS",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 10,
+                                      "fontWeight": "700",
+                                      "letterSpacing": 0.35
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "l67qOr",
+                              "id": "mTMSM",
                               "name": "Célula CAMPOS",
                               "width": 74,
                               "height": "fill_container",
@@ -166986,8 +167017,8 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "lz8kt",
-                                  "name": "Rótulo",
+                                  "id": "SWvhn",
+                                  "name": "Rótulo CAMPOS",
                                   "fill": "$muted-foreground",
                                   "content": "CAMPOS",
                                   "fontFamily": "$font-sans",
@@ -166999,7 +167030,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "Rw24m",
+                              "id": "XYkeV",
                               "name": "Célula ESTADO",
                               "width": 112,
                               "height": "fill_container",
@@ -167007,8 +167038,8 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "QtOnp",
-                                  "name": "Rótulo",
+                                  "id": "P2FrA",
+                                  "name": "Rótulo ESTADO",
                                   "fill": "$muted-foreground",
                                   "content": "ESTADO",
                                   "fontFamily": "$font-sans",
@@ -167020,16 +167051,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "T9CBWK",
+                              "id": "KSVSh",
                               "name": "Célula AÇÕES",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "D000LW",
-                                  "name": "Rótulo",
+                                  "id": "QGMhG",
+                                  "name": "Rótulo AÇÕES",
                                   "fill": "$muted-foreground",
                                   "content": "AÇÕES",
                                   "fontFamily": "$font-sans",
@@ -167043,7 +167074,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "LLBZW",
+                          "id": "UnPDJ",
                           "name": "Linha Dados trabalhistas",
                           "width": "fill_container",
                           "height": 64,
@@ -167060,8 +167091,8 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "k30ZtK",
-                              "name": "Célula Configuração",
+                              "id": "FR5QR",
+                              "name": "Célula Formulário",
                               "width": 230,
                               "height": "fill_container",
                               "layout": "vertical",
@@ -167070,7 +167101,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "fWVsM",
+                                  "id": "eD9eI",
                                   "name": "Nome",
                                   "fill": "$foreground",
                                   "content": "Dados trabalhistas",
@@ -167080,7 +167111,7 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tgcJF",
+                                  "id": "VSOqF",
                                   "name": "Descrição",
                                   "fill": "$muted-foreground",
                                   "content": "Complemento geral da área",
@@ -167092,16 +167123,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "W8dR8X",
-                              "name": "Célula Escopo",
+                              "id": "vR8vi",
+                              "name": "Célula Etapa",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "HqDn2",
-                                  "name": "Chip Área",
+                                  "id": "F3R9lm",
+                                  "name": "Etapa Consulta",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
                                   "padding": [
@@ -167112,8 +167143,8 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "w3P2CO",
-                                      "name": "Label",
+                                      "id": "QNniH",
+                                      "name": "Rótulo da etapa",
                                       "fill": "$highlight-foreground",
                                       "content": "Consulta",
                                       "fontFamily": "$font-sans",
@@ -167126,29 +167157,61 @@
                             },
                             {
                               "type": "frame",
-                              "id": "Kn48J",
-                              "name": "Célula Classificação",
+                              "id": "Fbtzp",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "a07n0",
-                                  "name": "Classificação",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
+                                  "type": "frame",
+                                  "id": "heswR",
+                                  "name": "Célula Área jurídica",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "iQ7G9",
+                                      "name": "Área jurídica",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Trabalhista",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "m6vth",
+                                  "name": "Célula Temas",
                                   "width": "fill_container",
-                                  "content": "Trabalhista › 3 temas",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "i5why",
+                                      "name": "Temas",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Verbas rescisórias +2",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "urIAT",
+                              "id": "AyFx9",
                               "name": "Célula Campos",
                               "width": 74,
                               "height": "fill_container",
@@ -167156,7 +167219,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "P3bNu",
+                                  "id": "S2GKRK",
                                   "name": "Campos",
                                   "fill": "$foreground",
                                   "content": "8",
@@ -167168,7 +167231,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "CX7ye",
+                              "id": "mef6X",
                               "name": "Célula Estado",
                               "width": 112,
                               "height": "fill_container",
@@ -167176,7 +167239,7 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "sydjw",
+                                  "id": "wmU2a",
                                   "name": "Estado Disponível",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
@@ -167189,16 +167252,16 @@
                                   "children": [
                                     {
                                       "type": "ellipse",
-                                      "id": "hgXna",
-                                      "name": "Indicador",
+                                      "id": "xDIHo",
+                                      "name": "Indicador de estado",
                                       "fill": "$highlight-foreground",
                                       "width": 6,
                                       "height": 6
                                     },
                                     {
                                       "type": "text",
-                                      "id": "GoWCy",
-                                      "name": "Label",
+                                      "id": "B8P3l",
+                                      "name": "Rótulo do estado",
                                       "fill": "$highlight-foreground",
                                       "content": "Disponível",
                                       "fontFamily": "$font-sans",
@@ -167211,16 +167274,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "sQV5q",
+                              "id": "o68KM",
                               "name": "Célula Ações",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "gap": 6,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "npUQb",
+                                  "id": "QcLKL",
                                   "name": "Editar",
                                   "height": 32,
                                   "fill": "$card",
@@ -167236,8 +167299,8 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "dgOI5",
-                                      "name": "Editar",
+                                      "id": "P8lZT0",
+                                      "name": "Ícone editar",
                                       "width": 14,
                                       "height": 14,
                                       "icon": "pencil",
@@ -167246,8 +167309,8 @@
                                     },
                                     {
                                       "type": "text",
-                                      "id": "adVO6",
-                                      "name": "Label",
+                                      "id": "aUBT8",
+                                      "name": "Rótulo editar",
                                       "fill": "$primary",
                                       "content": "Editar",
                                       "fontFamily": "$font-sans",
@@ -167258,8 +167321,8 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "YPKJ4",
-                                  "name": "Duplicar",
+                                  "id": "H7xGC",
+                                  "name": "Mais ações",
                                   "width": 30,
                                   "height": 30,
                                   "cornerRadius": 8,
@@ -167268,33 +167331,11 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "zfV17",
-                                      "name": "Duplicar",
+                                      "id": "B4k11t",
+                                      "name": "Abrir menu de ações",
                                       "width": 14,
                                       "height": 14,
-                                      "icon": "copy",
-                                      "library": "lucide",
-                                      "fill": "$muted-foreground"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "HPRMi",
-                                  "name": "Indisponibilizar",
-                                  "width": 30,
-                                  "height": 30,
-                                  "cornerRadius": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "qEsVi",
-                                      "name": "Indisponibilizar",
-                                      "width": 14,
-                                      "height": 14,
-                                      "icon": "trash-2",
+                                      "icon": "ellipsis",
                                       "library": "lucide",
                                       "fill": "$muted-foreground"
                                     }
@@ -167306,7 +167347,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "cl23w",
+                          "id": "DaeGr",
                           "name": "Linha Verbas rescisórias",
                           "width": "fill_container",
                           "height": 64,
@@ -167323,8 +167364,8 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "Lngsr",
-                              "name": "Célula Configuração",
+                              "id": "gBJ7E",
+                              "name": "Célula Formulário",
                               "width": 230,
                               "height": "fill_container",
                               "layout": "vertical",
@@ -167333,7 +167374,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "DKsDt",
+                                  "id": "RHKrr",
                                   "name": "Nome",
                                   "fill": "$foreground",
                                   "content": "Verbas rescisórias",
@@ -167343,7 +167384,7 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "ieDO2",
+                                  "id": "j33OQ",
                                   "name": "Descrição",
                                   "fill": "$muted-foreground",
                                   "content": "Perguntas para cálculo e desligamento",
@@ -167355,17 +167396,17 @@
                             },
                             {
                               "type": "frame",
-                              "id": "OJmBg",
-                              "name": "Célula Escopo",
+                              "id": "K07mfs",
+                              "name": "Célula Etapa",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "T3Jwfe",
-                                  "name": "Chip Tema",
-                                  "fill": "$accent",
+                                  "id": "jq3iD",
+                                  "name": "Etapa Consulta",
+                                  "fill": "$highlight",
                                   "cornerRadius": 12,
                                   "padding": [
                                     4,
@@ -167375,9 +167416,9 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "q8k0i",
-                                      "name": "Label",
-                                      "fill": "$accent-foreground",
+                                      "id": "CBzCf",
+                                      "name": "Rótulo da etapa",
+                                      "fill": "$highlight-foreground",
                                       "content": "Consulta",
                                       "fontFamily": "$font-sans",
                                       "fontSize": 10,
@@ -167389,29 +167430,61 @@
                             },
                             {
                               "type": "frame",
-                              "id": "tC9Ac",
-                              "name": "Célula Classificação",
+                              "id": "ZFVqx",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "vAuZ9",
-                                  "name": "Classificação",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
+                                  "type": "frame",
+                                  "id": "AoftE",
+                                  "name": "Célula Área jurídica",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "QAmRy",
+                                      "name": "Área jurídica",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Trabalhista",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "P6yZXL",
+                                  "name": "Célula Temas",
                                   "width": "fill_container",
-                                  "content": "Trabalhista › Verbas rescisórias +1",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "e1Bbq",
+                                      "name": "Temas",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Verbas rescisórias +1",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "h5Pmf",
+                              "id": "PfWOm",
                               "name": "Célula Campos",
                               "width": 74,
                               "height": "fill_container",
@@ -167419,7 +167492,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "UoKXo",
+                                  "id": "RQJ8Q",
                                   "name": "Campos",
                                   "fill": "$foreground",
                                   "content": "12",
@@ -167431,7 +167504,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "ckqre",
+                              "id": "Xbie8",
                               "name": "Célula Estado",
                               "width": 112,
                               "height": "fill_container",
@@ -167439,7 +167512,7 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "URMgQ",
+                                  "id": "RH5O1",
                                   "name": "Estado Disponível",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
@@ -167452,16 +167525,16 @@
                                   "children": [
                                     {
                                       "type": "ellipse",
-                                      "id": "ri6hr",
-                                      "name": "Indicador",
+                                      "id": "hiE1Z",
+                                      "name": "Indicador de estado",
                                       "fill": "$highlight-foreground",
                                       "width": 6,
                                       "height": 6
                                     },
                                     {
                                       "type": "text",
-                                      "id": "o4TRIP",
-                                      "name": "Label",
+                                      "id": "uWgt9",
+                                      "name": "Rótulo do estado",
                                       "fill": "$highlight-foreground",
                                       "content": "Disponível",
                                       "fontFamily": "$font-sans",
@@ -167474,16 +167547,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "qgQxg",
+                              "id": "jD5ud",
                               "name": "Célula Ações",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "gap": 6,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "FPOs6",
+                                  "id": "Dk4l2",
                                   "name": "Editar",
                                   "height": 32,
                                   "fill": "$card",
@@ -167499,8 +167572,8 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "d1j8lW",
-                                      "name": "Editar",
+                                      "id": "n4kzx",
+                                      "name": "Ícone editar",
                                       "width": 14,
                                       "height": 14,
                                       "icon": "pencil",
@@ -167509,8 +167582,8 @@
                                     },
                                     {
                                       "type": "text",
-                                      "id": "Mdinz",
-                                      "name": "Label",
+                                      "id": "NsM8X",
+                                      "name": "Rótulo editar",
                                       "fill": "$primary",
                                       "content": "Editar",
                                       "fontFamily": "$font-sans",
@@ -167521,8 +167594,8 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "uGJs2",
-                                  "name": "Duplicar",
+                                  "id": "zuRsL",
+                                  "name": "Mais ações",
                                   "width": 30,
                                   "height": 30,
                                   "cornerRadius": 8,
@@ -167531,33 +167604,11 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "gDPhm",
-                                      "name": "Duplicar",
+                                      "id": "FZM7e",
+                                      "name": "Abrir menu de ações",
                                       "width": 14,
                                       "height": 14,
-                                      "icon": "copy",
-                                      "library": "lucide",
-                                      "fill": "$muted-foreground"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "HTkTg",
-                                  "name": "Indisponibilizar",
-                                  "width": 30,
-                                  "height": 30,
-                                  "cornerRadius": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "T3ffwD",
-                                      "name": "Indisponibilizar",
-                                      "width": 14,
-                                      "height": 14,
-                                      "icon": "trash-2",
+                                      "icon": "ellipsis",
                                       "library": "lucide",
                                       "fill": "$muted-foreground"
                                     }
@@ -167569,8 +167620,8 @@
                         },
                         {
                           "type": "frame",
-                          "id": "ZIqDY",
-                          "name": "Linha Acidente de trabalho",
+                          "id": "lVmGx",
+                          "name": "Linha Condições comerciais",
                           "width": "fill_container",
                           "height": 64,
                           "fill": "$card",
@@ -167586,8 +167637,8 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "s7ymn",
-                              "name": "Célula Configuração",
+                              "id": "Wn0Wh",
+                              "name": "Célula Formulário",
                               "width": 230,
                               "height": "fill_container",
                               "layout": "vertical",
@@ -167596,7 +167647,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "hygeD",
+                                  "id": "MpO0P",
                                   "name": "Nome",
                                   "fill": "$foreground",
                                   "content": "Condições comerciais",
@@ -167606,7 +167657,7 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "SLgr5",
+                                  "id": "SeLtN",
                                   "name": "Descrição",
                                   "fill": "$muted-foreground",
                                   "content": "Honorários, pagamento e vigência",
@@ -167618,16 +167669,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "QA3Hi",
-                              "name": "Célula Escopo",
+                              "id": "uMaUR",
+                              "name": "Célula Etapa",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "BxytO",
-                                  "name": "Chip Tema",
+                                  "id": "AwlR2",
+                                  "name": "Etapa Formalização",
                                   "fill": "$accent",
                                   "cornerRadius": 12,
                                   "padding": [
@@ -167638,8 +167689,8 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "p378e",
-                                      "name": "Label",
+                                      "id": "aSWMC",
+                                      "name": "Rótulo da etapa",
                                       "fill": "$accent-foreground",
                                       "content": "Formalização",
                                       "fontFamily": "$font-sans",
@@ -167652,29 +167703,61 @@
                             },
                             {
                               "type": "frame",
-                              "id": "c2YPVs",
-                              "name": "Célula Classificação",
+                              "id": "Lm3yU",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "ICHrM",
-                                  "name": "Classificação",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
+                                  "type": "frame",
+                                  "id": "Z0OFPw",
+                                  "name": "Célula Área jurídica",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "pZrH4",
+                                      "name": "Área jurídica",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Cível",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "EdYOY",
+                                  "name": "Célula Temas",
                                   "width": "fill_container",
-                                  "content": "Cível › Contratos +2",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "hzIQ8",
+                                      "name": "Temas",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Contratos +2",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "H8Wuv",
+                              "id": "l5TcIh",
                               "name": "Célula Campos",
                               "width": 74,
                               "height": "fill_container",
@@ -167682,7 +167765,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "H8Pel",
+                                  "id": "VPqCU",
                                   "name": "Campos",
                                   "fill": "$foreground",
                                   "content": "8",
@@ -167694,7 +167777,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "Kvxg8",
+                              "id": "KMMWi",
                               "name": "Célula Estado",
                               "width": 112,
                               "height": "fill_container",
@@ -167702,7 +167785,7 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "IspvL",
+                                  "id": "g5lVOA",
                                   "name": "Estado Disponível",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
@@ -167715,16 +167798,16 @@
                                   "children": [
                                     {
                                       "type": "ellipse",
-                                      "id": "HVj5x",
-                                      "name": "Indicador",
+                                      "id": "SvrtM",
+                                      "name": "Indicador de estado",
                                       "fill": "$highlight-foreground",
                                       "width": 6,
                                       "height": 6
                                     },
                                     {
                                       "type": "text",
-                                      "id": "SwzfT",
-                                      "name": "Label",
+                                      "id": "w3Q8q7",
+                                      "name": "Rótulo do estado",
                                       "fill": "$highlight-foreground",
                                       "content": "Disponível",
                                       "fontFamily": "$font-sans",
@@ -167737,16 +167820,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "oddzZ",
+                              "id": "XnkwR",
                               "name": "Célula Ações",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "gap": 6,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "qDyRz",
+                                  "id": "y7Fi6u",
                                   "name": "Editar",
                                   "height": 32,
                                   "fill": "$card",
@@ -167762,8 +167845,8 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "R24muD",
-                                      "name": "Editar",
+                                      "id": "cJeOf",
+                                      "name": "Ícone editar",
                                       "width": 14,
                                       "height": 14,
                                       "icon": "pencil",
@@ -167772,8 +167855,8 @@
                                     },
                                     {
                                       "type": "text",
-                                      "id": "IuDTj",
-                                      "name": "Label",
+                                      "id": "NYXVu",
+                                      "name": "Rótulo editar",
                                       "fill": "$primary",
                                       "content": "Editar",
                                       "fontFamily": "$font-sans",
@@ -167784,8 +167867,8 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "kBcw1",
-                                  "name": "Duplicar",
+                                  "id": "tMcDa",
+                                  "name": "Mais ações",
                                   "width": 30,
                                   "height": 30,
                                   "cornerRadius": 8,
@@ -167794,33 +167877,11 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "KkPyh",
-                                      "name": "Duplicar",
+                                      "id": "m3CvA",
+                                      "name": "Abrir menu de ações",
                                       "width": 14,
                                       "height": 14,
-                                      "icon": "copy",
-                                      "library": "lucide",
-                                      "fill": "$muted-foreground"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "Yqt0t",
-                                  "name": "Indisponibilizar",
-                                  "width": 30,
-                                  "height": 30,
-                                  "cornerRadius": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "qWYoA",
-                                      "name": "Indisponibilizar",
-                                      "width": 14,
-                                      "height": 14,
-                                      "icon": "trash-2",
+                                      "icon": "ellipsis",
                                       "library": "lucide",
                                       "fill": "$muted-foreground"
                                     }
@@ -167832,7 +167893,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "Gc9IR",
+                          "id": "aQBoF",
                           "name": "Linha Dados previdenciários",
                           "width": "fill_container",
                           "height": 64,
@@ -167849,8 +167910,8 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "FUqaA",
-                              "name": "Célula Configuração",
+                              "id": "iNAxn",
+                              "name": "Célula Formulário",
                               "width": 230,
                               "height": "fill_container",
                               "layout": "vertical",
@@ -167859,7 +167920,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "j6mZN",
+                                  "id": "wg0nn",
                                   "name": "Nome",
                                   "fill": "$foreground",
                                   "content": "Dados previdenciários",
@@ -167869,7 +167930,7 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "Ds4Ix",
+                                  "id": "l77ngU",
                                   "name": "Descrição",
                                   "fill": "$muted-foreground",
                                   "content": "Complemento geral da área",
@@ -167881,16 +167942,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "r74K9o",
-                              "name": "Célula Escopo",
+                              "id": "S9O59M",
+                              "name": "Célula Etapa",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "w5XE8",
-                                  "name": "Chip Área",
+                                  "id": "HYab0",
+                                  "name": "Etapa Consulta",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
                                   "padding": [
@@ -167901,8 +167962,8 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "KRP9v",
-                                      "name": "Label",
+                                      "id": "nLACs",
+                                      "name": "Rótulo da etapa",
                                       "fill": "$highlight-foreground",
                                       "content": "Consulta",
                                       "fontFamily": "$font-sans",
@@ -167915,29 +167976,61 @@
                             },
                             {
                               "type": "frame",
-                              "id": "zyr4P",
-                              "name": "Célula Classificação",
+                              "id": "P8jxDQ",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "ynA2J",
-                                  "name": "Classificação",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
+                                  "type": "frame",
+                                  "id": "O4evx",
+                                  "name": "Célula Área jurídica",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "Jx9lx",
+                                      "name": "Área jurídica",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Previdenciário",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "s5tjD",
+                                  "name": "Célula Temas",
                                   "width": "fill_container",
-                                  "content": "Previdenciário › 2 temas",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "P85esh",
+                                      "name": "Temas",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Aposentadoria por tempo +1",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "u6yF7",
+                              "id": "DVx5d",
                               "name": "Célula Campos",
                               "width": 74,
                               "height": "fill_container",
@@ -167945,7 +168038,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "Y500pN",
+                                  "id": "qET0H",
                                   "name": "Campos",
                                   "fill": "$foreground",
                                   "content": "7",
@@ -167957,7 +168050,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "So3u2",
+                              "id": "S5fHQN",
                               "name": "Célula Estado",
                               "width": 112,
                               "height": "fill_container",
@@ -167965,7 +168058,7 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "k4tSVG",
+                                  "id": "T1cWa",
                                   "name": "Estado Disponível",
                                   "fill": "$highlight",
                                   "cornerRadius": 12,
@@ -167978,16 +168071,16 @@
                                   "children": [
                                     {
                                       "type": "ellipse",
-                                      "id": "m8jXGu",
-                                      "name": "Indicador",
+                                      "id": "f94GG",
+                                      "name": "Indicador de estado",
                                       "fill": "$highlight-foreground",
                                       "width": 6,
                                       "height": 6
                                     },
                                     {
                                       "type": "text",
-                                      "id": "nmVd8",
-                                      "name": "Label",
+                                      "id": "OI1H7",
+                                      "name": "Rótulo do estado",
                                       "fill": "$highlight-foreground",
                                       "content": "Disponível",
                                       "fontFamily": "$font-sans",
@@ -168000,16 +168093,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "sEs9s",
+                              "id": "E7TyRu",
                               "name": "Célula Ações",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "gap": 6,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "IuSa6",
+                                  "id": "O2Wpg5",
                                   "name": "Editar",
                                   "height": 32,
                                   "fill": "$card",
@@ -168025,8 +168118,8 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "ZPdFg",
-                                      "name": "Editar",
+                                      "id": "AUvkP",
+                                      "name": "Ícone editar",
                                       "width": 14,
                                       "height": 14,
                                       "icon": "pencil",
@@ -168035,8 +168128,8 @@
                                     },
                                     {
                                       "type": "text",
-                                      "id": "nvPAO",
-                                      "name": "Label",
+                                      "id": "Jb7HM",
+                                      "name": "Rótulo editar",
                                       "fill": "$primary",
                                       "content": "Editar",
                                       "fontFamily": "$font-sans",
@@ -168047,8 +168140,8 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "ApCIr",
-                                  "name": "Duplicar",
+                                  "id": "U8Pbm",
+                                  "name": "Mais ações",
                                   "width": 30,
                                   "height": 30,
                                   "cornerRadius": 8,
@@ -168057,33 +168150,11 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "eGmU7",
-                                      "name": "Duplicar",
+                                      "id": "VghXY",
+                                      "name": "Abrir menu de ações",
                                       "width": 14,
                                       "height": 14,
-                                      "icon": "copy",
-                                      "library": "lucide",
-                                      "fill": "$muted-foreground"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "TIPg9",
-                                  "name": "Indisponibilizar",
-                                  "width": 30,
-                                  "height": 30,
-                                  "cornerRadius": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "c4jDy",
-                                      "name": "Indisponibilizar",
-                                      "width": 14,
-                                      "height": 14,
-                                      "icon": "trash-2",
+                                      "icon": "ellipsis",
                                       "library": "lucide",
                                       "fill": "$muted-foreground"
                                     }
@@ -168095,7 +168166,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "C0tP7p",
+                          "id": "R8sZpO",
                           "name": "Linha Aposentadoria por tempo",
                           "width": "fill_container",
                           "height": 64,
@@ -168112,8 +168183,8 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "kdSSR",
-                              "name": "Célula Configuração",
+                              "id": "GzBrq",
+                              "name": "Célula Formulário",
                               "width": 230,
                               "height": "fill_container",
                               "layout": "vertical",
@@ -168122,7 +168193,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "PpQ1D",
+                                  "id": "zcczR",
                                   "name": "Nome",
                                   "fill": "$foreground",
                                   "content": "Aposentadoria por tempo",
@@ -168132,7 +168203,7 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "X2xSLB",
+                                  "id": "pAZgk",
                                   "name": "Descrição",
                                   "fill": "$muted-foreground",
                                   "content": "Histórico contributivo e períodos",
@@ -168144,17 +168215,17 @@
                             },
                             {
                               "type": "frame",
-                              "id": "CA4Vm",
-                              "name": "Célula Escopo",
+                              "id": "S9wWJ",
+                              "name": "Célula Etapa",
                               "width": 100,
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "YByum",
-                                  "name": "Chip Tema",
-                                  "fill": "$accent",
+                                  "id": "tAtsw",
+                                  "name": "Etapa Consulta",
+                                  "fill": "$highlight",
                                   "cornerRadius": 12,
                                   "padding": [
                                     4,
@@ -168164,9 +168235,9 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "TptZW",
-                                      "name": "Label",
-                                      "fill": "$accent-foreground",
+                                      "id": "pgvpX",
+                                      "name": "Rótulo da etapa",
+                                      "fill": "$highlight-foreground",
                                       "content": "Consulta",
                                       "fontFamily": "$font-sans",
                                       "fontSize": 10,
@@ -168178,29 +168249,61 @@
                             },
                             {
                               "type": "frame",
-                              "id": "s27XvC",
-                              "name": "Célula Classificação",
+                              "id": "S6XXr",
+                              "name": "Classificação jurídica",
                               "width": "fill_container",
                               "height": "fill_container",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "DSiQK",
-                                  "name": "Classificação",
-                                  "fill": "$foreground",
-                                  "textGrowth": "fixed-width",
+                                  "type": "frame",
+                                  "id": "WVsP1",
+                                  "name": "Célula Área jurídica",
+                                  "width": 140,
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "GT2NE",
+                                      "name": "Área jurídica",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Previdenciário",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "PwZqL",
+                                  "name": "Célula Temas",
                                   "width": "fill_container",
-                                  "content": "Previdenciário › Aposentadoria por tempo",
-                                  "fontFamily": "$font-sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "height": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "EOAl6",
+                                      "name": "Temas",
+                                      "fill": "$foreground",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Aposentadoria por tempo",
+                                      "fontFamily": "$font-sans",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "qoeTL",
+                              "id": "ptri7",
                               "name": "Célula Campos",
                               "width": 74,
                               "height": "fill_container",
@@ -168208,7 +168311,7 @@
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "V3Xo2s",
+                                  "id": "Tyopy",
                                   "name": "Campos",
                                   "fill": "$foreground",
                                   "content": "11",
@@ -168220,7 +168323,7 @@
                             },
                             {
                               "type": "frame",
-                              "id": "G7sr7",
+                              "id": "j0B8yv",
                               "name": "Célula Estado",
                               "width": 112,
                               "height": "fill_container",
@@ -168228,7 +168331,7 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "v6uGtV",
+                                  "id": "a9CQJd",
                                   "name": "Estado Indisponível",
                                   "fill": "$muted",
                                   "cornerRadius": 12,
@@ -168241,16 +168344,16 @@
                                   "children": [
                                     {
                                       "type": "ellipse",
-                                      "id": "csDDm",
-                                      "name": "Indicador",
+                                      "id": "dSAeh",
+                                      "name": "Indicador de estado",
                                       "fill": "$muted-foreground",
                                       "width": 6,
                                       "height": 6
                                     },
                                     {
                                       "type": "text",
-                                      "id": "jnvjT",
-                                      "name": "Label",
+                                      "id": "n8kQZ",
+                                      "name": "Rótulo do estado",
                                       "fill": "$muted-foreground",
                                       "content": "Indisponível",
                                       "fontFamily": "$font-sans",
@@ -168263,16 +168366,16 @@
                             },
                             {
                               "type": "frame",
-                              "id": "JQm00",
+                              "id": "skkD5",
                               "name": "Célula Ações",
-                              "width": 180,
+                              "width": 120,
                               "height": "fill_container",
                               "gap": 6,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "Gg2u6",
+                                  "id": "eZL1x",
                                   "name": "Editar",
                                   "height": 32,
                                   "fill": "$card",
@@ -168288,8 +168391,8 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "y51DMJ",
-                                      "name": "Editar",
+                                      "id": "HeKMH",
+                                      "name": "Ícone editar",
                                       "width": 14,
                                       "height": 14,
                                       "icon": "pencil",
@@ -168298,8 +168401,8 @@
                                     },
                                     {
                                       "type": "text",
-                                      "id": "aZR2T",
-                                      "name": "Label",
+                                      "id": "FcHK8",
+                                      "name": "Rótulo editar",
                                       "fill": "$primary",
                                       "content": "Editar",
                                       "fontFamily": "$font-sans",
@@ -168310,8 +168413,8 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "MeNll",
-                                  "name": "Duplicar",
+                                  "id": "Rzfmi",
+                                  "name": "Mais ações",
                                   "width": 30,
                                   "height": 30,
                                   "cornerRadius": 8,
@@ -168320,33 +168423,11 @@
                                   "children": [
                                     {
                                       "type": "icon",
-                                      "id": "AB7xN",
-                                      "name": "Duplicar",
+                                      "id": "GtNRt",
+                                      "name": "Abrir menu de ações",
                                       "width": 14,
                                       "height": 14,
-                                      "icon": "copy",
-                                      "library": "lucide",
-                                      "fill": "$muted-foreground"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "w7vDZO",
-                                  "name": "Indisponibilizar",
-                                  "width": 30,
-                                  "height": 30,
-                                  "cornerRadius": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "nndl1",
-                                      "name": "Indisponibilizar",
-                                      "width": 14,
-                                      "height": 14,
-                                      "icon": "trash-2",
+                                      "icon": "ellipsis",
                                       "library": "lucide",
                                       "fill": "$muted-foreground"
                                     }
@@ -216616,7 +216697,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Esta ação remove permanentemente o formulário.",
+                  "content": "Esta ação é irreversível, mas não altera respostas históricas.",
                   "fontFamily": "$font-sans",
                   "fontSize": 11,
                   "fontWeight": "normal"
@@ -216689,10 +216770,10 @@
                     {
                       "type": "icon",
                       "id": "EfgUh",
-                      "name": "Símbolo encerrar",
+                      "name": "Símbolo excluir",
                       "width": 17,
                       "height": 17,
-                      "icon": "archive",
+                      "icon": "trash-2",
                       "library": "lucide",
                       "fill": "$destructive"
                     }
@@ -216723,7 +216804,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Ele não poderá ser recuperado nem usado em novas consultas.",
+                      "content": "Ele sairá do catálogo e não poderá ser selecionado em novas consultas ou formalizações.",
                       "lineHeight": 1.45,
                       "fontFamily": "$font-sans",
                       "fontSize": 11,
@@ -216764,7 +216845,7 @@
                   "fill": "$secondary-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Disponível somente porque o formulário nunca foi usado. Caso contrário, indisponibilize-o.",
+                  "content": "Usado em 18 consultas e 4 formalizações, incluindo 5 usos em andamento. Respostas e estruturas históricas serão preservadas.",
                   "lineHeight": 1.4,
                   "fontFamily": "$font-sans",
                   "fontSize": 10,
@@ -216853,10 +216934,10 @@
                 {
                   "type": "icon",
                   "id": "ZIryP",
-                  "name": "Icon",
+                  "name": "Ícone excluir",
                   "width": 12,
                   "height": 12,
-                  "icon": "archive",
+                  "icon": "trash-2",
                   "library": "lucide",
                   "fill": "$destructive-foreground"
                 },
@@ -224207,6 +224288,104 @@
           ]
         }
       ]
+    },
+    {
+      "id": "tErvw",
+      "type": "ref",
+      "ref": "k2aLOn",
+      "name": "Administrador - Formulários Dinâmicos: Menu de Ações Disponível",
+      "x": -12842,
+      "y": 2747,
+      "descendants": {
+        "EpUMl": {
+          "name": "Duplicar formulário"
+        },
+        "mjunB": {
+          "name": "Ícone duplicar",
+          "icon": "copy"
+        },
+        "l3xiok": {
+          "name": "Rótulo duplicar",
+          "content": "Duplicar formulário"
+        },
+        "TsgQB": {
+          "name": "Indisponibilizar formulário"
+        },
+        "q4ZjR": {
+          "name": "Ícone indisponibilizar",
+          "icon": "archive-x"
+        },
+        "l7ec7j": {
+          "name": "Rótulo indisponibilizar",
+          "content": "Indisponibilizar"
+        },
+        "Bwdn5": {
+          "name": "Separador"
+        },
+        "WlU4g": {
+          "name": "Linha separadora"
+        },
+        "Lc0ln": {
+          "name": "Excluir formulário"
+        },
+        "CQb3g": {
+          "name": "Ícone excluir",
+          "icon": "trash-2"
+        },
+        "L0hSK": {
+          "name": "Rótulo excluir",
+          "content": "Excluir formulário"
+        }
+      }
+    },
+    {
+      "id": "iu2Vg",
+      "type": "ref",
+      "ref": "k2aLOn",
+      "name": "Administrador - Formulários Dinâmicos: Menu de Ações Indisponível",
+      "x": -12581,
+      "y": 2747,
+      "descendants": {
+        "EpUMl": {
+          "name": "Duplicar formulário"
+        },
+        "mjunB": {
+          "name": "Ícone duplicar",
+          "icon": "copy"
+        },
+        "l3xiok": {
+          "name": "Rótulo duplicar",
+          "content": "Duplicar formulário"
+        },
+        "TsgQB": {
+          "name": "Disponibilizar formulário"
+        },
+        "q4ZjR": {
+          "name": "Ícone disponibilizar",
+          "icon": "archive-restore"
+        },
+        "l7ec7j": {
+          "name": "Rótulo disponibilizar",
+          "content": "Tornar disponível"
+        },
+        "Bwdn5": {
+          "name": "Separador"
+        },
+        "WlU4g": {
+          "name": "Linha separadora"
+        },
+        "Lc0ln": {
+          "name": "Excluir formulário"
+        },
+        "CQb3g": {
+          "name": "Ícone excluir",
+          "icon": "trash-2"
+        },
+        "L0hSK": {
+          "name": "Rótulo excluir",
+          "content": "Excluir formulário"
+        }
+      }
     }
   ],
   "variables": {

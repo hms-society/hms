@@ -25,6 +25,7 @@ function fakeHook(
     handleClientRegisterDialogOpenChange: vi.fn(),
     handleClientSelect: vi.fn(),
     handleClientSelected: vi.fn(),
+    handlePageChange: vi.fn(),
     handleNextPage: vi.fn(),
     handleOriginChange: vi.fn(),
     handleOpenClientRegisterDialog: vi.fn(),
@@ -67,7 +68,7 @@ describe('ClientsListPage', () => {
     render(<ClientsListPage />)
 
     expect(screen.getByText('Nenhum cliente encontrado.')).toBeTruthy()
-    expect(screen.getByText('Exibindo 0-0 de 0')).toBeTruthy()
+    expect(screen.getByText('Exibindo 0–0 de 0')).toBeTruthy()
   })
 
   it('renders client data and delegates row and search interactions', () => {
@@ -138,8 +139,10 @@ describe('ClientsListPage', () => {
 
     render(<ClientsListPage />)
 
-    fireEvent.click(screen.getByRole('link', { name: /previous/i }))
-    fireEvent.click(screen.getByRole('link', { name: /next/i }))
+    expect(screen.getByRole('link', { name: 'Página 1' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Página 2' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('link', { name: 'Página anterior' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Próxima página' }))
 
     expect(handlePreviousPage).toHaveBeenCalledTimes(1)
     expect(handleNextPage).toHaveBeenCalledTimes(1)

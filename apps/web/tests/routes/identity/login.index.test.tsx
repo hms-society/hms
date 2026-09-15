@@ -3,8 +3,9 @@ import { expect, test as playwrightTest, type Page } from '@playwright/test'
 import { test as authenticatedTest } from '../../fixtures/auth-fixture'
 
 import { ROUTES } from '../../../src/constants/routes'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
 
-const BACKEND_URL = 'http://hms-api.test'
+const BACKEND_URL = HMS_SERVER_APP_TEST_URL
 const SUPABASE_USER = {
   id: 'login-user-id',
   email: 'admin@hmsadvogados.com.br',
@@ -109,7 +110,9 @@ playwrightTest(
   'returns a collaborator to the Signing Gateway after sign-in',
   async ({ page }) => {
     await mockSuccessfulAuthentication(page)
-    await page.goto(`${ROUTES.login}?returnTo=${encodeURIComponent(ROUTES.signingGateway)}`)
+    await page.goto(
+      `${ROUTES.login}?returnTo=${encodeURIComponent(ROUTES.signingGateway)}`,
+    )
 
     await page.getByLabel('Email:').fill(SUPABASE_USER.email)
     await page.getByRole('textbox', { name: 'Senha' }).fill('123456')

@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
-export const DOCUMENT_PRODUCTION_BACKEND = 'http://hms-api.test'
+import { HMS_SERVER_APP_TEST_URL } from '../constants/hms-server-app-url'
+
+export const DOCUMENT_PRODUCTION_BACKEND = HMS_SERVER_APP_TEST_URL
 
 export async function mockDocumentSpecificationRoutes(page: Page) {
   await page.route(`${DOCUMENT_PRODUCTION_BACKEND}/**`, async (route) => {

@@ -81,12 +81,16 @@ export function useClientsListPage() {
 
   function handlePreviousPage(event: MouseEvent) {
     event.preventDefault()
-    if (page > 1) setPage((currentPage) => currentPage - 1)
+    handlePageChange(page - 1)
   }
 
   function handleNextPage(event: MouseEvent) {
     event.preventDefault()
-    if (page < totalPages) setPage((currentPage) => currentPage + 1)
+    handlePageChange(page + 1)
+  }
+
+  function handlePageChange(nextPage: number) {
+    if (nextPage >= 1 && nextPage <= totalPages) setPage(nextPage)
   }
 
   function handleSearchChange(value: string) {
@@ -149,6 +153,7 @@ export function useClientsListPage() {
     handleClientSelect,
     handleClientSelected,
     handleNextPage,
+    handlePageChange,
     handleOriginChange,
     handleOpenClientRegisterDialog,
     handlePreviousPage,
