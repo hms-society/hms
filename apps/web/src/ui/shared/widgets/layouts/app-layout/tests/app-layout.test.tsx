@@ -46,6 +46,14 @@ vi.mock('@/ui/identity/hooks/use-clients-query', () => ({
   })),
 }))
 
+vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
+  useRestContext: vi.fn(() => ({
+    communicationService: {
+      listClientCommunications: vi.fn().mockResolvedValue([]),
+    },
+  })),
+}))
+
 const useAppLayoutMock = vi.mocked(useAppLayout)
 const useSignOutMock = vi.mocked(useSignOutAction)
 

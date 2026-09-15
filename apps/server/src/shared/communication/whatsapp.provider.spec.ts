@@ -121,7 +121,7 @@ describe('WhatsappProvider', () => {
         text: 'Consulta marcada',
         idempotencyKey: 'idemp-1',
       }),
-    ).rejects.toThrow('Failed to send WhatsApp message: 400 - Bad Request')
+    ).rejects.toThrow('Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.')
   })
 
   it('should successfully download WhatsApp media', async () => {
