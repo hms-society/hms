@@ -3,23 +3,24 @@ feature: "legal-catalog/dynamic-forms-page"
 spec: ./spec.md
 plan: ./plan.md
 spec_revision: 19
-status: in_progress
+status: completed
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2654209/PRD+M+dulo+de+Cat+logo+Jur+dico
 jira_tickets:
   - SCRUM-141
-updated_at: 2026-09-14
+updated_at: 2026-09-15
 ---
 
 # Evaluation
 
 Evaluation of Spec revision `19` against the current implementation.
 
-Current result: `in_progress`; the current canonical branch has resolved the Core/Server contract
+Current result: `completed`; the current canonical branch has resolved the Core/Server contract
 findings, the affected Formalization fixture correction, the Web responsive-table correction, the
 clean-slice dependency finding FND-026 and the mobile-card finding FND-027. The same
-Implementation Reviewer returned PASS for the corrected Web head. The final PR gate is blocked by
-the independently failing Formalization route test in Web CI, which is outside the feature diff
-and has reproduced across the prior Web heads.
+Implementation Reviewer returned PASS for the corrected Web head. The final PR gate now passes on
+the current Core, Server and Web delivery heads. The prior Formalization route failure was traced
+to a shared test fixture that did not persist the generated document's current-version pointer;
+the fixture correction is test-only and does not change product behavior.
 No merge with
 `origin/develop` is required by the canonical-branch decision; the exact 164 declared paths
 will be isolated for delivery while unrelated worktree changes remain outside the scoped
@@ -153,7 +154,7 @@ are recorded below before their edits begin.
 | Rule Pack | `documentation/rules/ui-layer-rules.md` | `passed` | UI layering, responsive geometry and focus behavior passed. |
 | Rule Pack | `documentation/rules/web-app-routing-rules.md` | `passed` | Protected list/new/detail routes and generated tree checks passed. |
 | Rule Pack | `documentation/rules/widget-testing-rules.md` | `passed` | Widget/controller-hook pairs and focused regression tests passed. |
-| SDD | `documentation/sdd.md` | `passed` | Spec revision 19 remains in progress after the shared cross-module composition correction; Plan-backed execution selected. |
+| SDD | `documentation/sdd.md` | `passed` | Spec revision 19 completed after the shared cross-module composition correction and final PR CI gate. |
 
 ## Findings
 
@@ -186,7 +187,7 @@ are recorded below before their edits begin.
 | `FND-025` | delivery/blocking | PR #148 Core Package CI: the Core feature commit exports four unrelated Formalization `*-provider` modules absent from the canonical base | `EV-40`; `EV-42`; PR #148 | `resolved` | `builder_fix_core` restored the canonical base `*-reader` exports while retaining the Dynamic Forms usage-provider contract. The corrected Core slice passed its current Core, Server and Web package checks; the dependent Server/Web failures are tracked separately as `FND-026`. |
 | `FND-026` | delivery/blocking | PR #149/#150 clean type-checks: Server and Web slices depend on unrelated uncommitted Formalization/pagination/browser-fixture changes | `EV-41`; `EV-42`; PR #149; PR #150 | `resolved` | The Core, Server and Web slice corrections removed the dirty-tree dependencies. Current dependent heads are published; Core and Server CI passed, and the Web head passed its type/code/unit checks before the final Web workflow completed. |
 | `FND-027` | review/high | Implementation Reviewer re-audit: mobile dynamic-form cards omit the required explicit `Editar` action | `EV-43`; `EV-44`; `EV-46`; `MV-10`; `AC-02`; `FR-02`; `AC-10` | `resolved` | Added the existing `onEdit` action to the mobile card and a 320px keyboard/browser assertion. The same reviewer re-audited Web head `a3c79802` and returned PASS with no findings. |
-| `FND-028` | delivery/blocking baseline | PR #150 Web App CI: unrelated Formalization route test remains disabled and fails the full Web gate | `EV-45`; PR #150 | `open` | The failure is outside the Dynamic Forms diff and reproduced at Web heads `8f6097ad`, `7d769762` and `a3c79802`; no feature-scoped correction is authorized or indicated. Keep this Spec `in_progress` and route the independent Formalization baseline failure separately. |
+| `FND-028` | delivery/blocking baseline | PR #150 Web App CI: Formalization route test could not enable package confirmation after generated-document review | `EV-45`; `EV-49`; PR #150 | `resolved` | The shared document-production fixture completed generation without setting `currentVersionId`, leaving the reviewed document ineligible for confirmation. The fixture now records the generated version as current; the focused Formalization test passed 1/1 and the current Web PR gate passed all route, build and image stages. |
 
 ## Lessons learned
 
@@ -203,6 +204,7 @@ are recorded below before their edits begin.
 | Desktop table inventory must be validated against the actual viewport width, not only against horizontal-scroll reachability. | `FND-024` | No authority change; the Spec and design manifest already require the action inventory to be visible in the 1440×900 populated state. |
 | Responsive action inventories must include every required primary operation in both desktop and mobile render branches, with a narrow keyboard assertion for each branch. | `FND-027` | No authority change; this is already required by FR-02/AC-02/AC-10 and the existing UI/widget testing rules; the feature-local correction and evidence now make the obligation executable. |
 | Full PR gates must distinguish an unchanged baseline failure outside the feature diff from feature evidence, while still treating the required check as a delivery blocker. | `FND-028` | No authority change; `documentation/sdd.md` and `conclude-spec` already require exact-scope classification and prohibit declaring delivery complete with a failed required check. |
+| Generated document fixtures must persist the current-version pointer when generation completes so review-dependent flows can reach their enabled state. | `FND-028` | No authority change; this was a fixture-specific correction for an existing Formalization test and does not alter product behavior or repository policy. |
 
 ## PR CI quality gate
 
@@ -215,6 +217,15 @@ is not SDD current-commit metadata. -->
 | `EV-41` | PR CI | `6808bdb725c43430406de67611bbcce758f33aa8` / `e936285e1cf1d84480d0c57cd1d0408e8cff440e` | `failure` — clean Server type-check cannot resolve unrelated Formalization provider symbols/modules; clean Web type-check cannot resolve `PaginationPages`, the new `disabled` pagination prop, `adminTest` or `hms-server-app-url`. Dependent runs are invalidated and will be replaced after the isolation correction. | [PR #149 Server App CI](https://github.com/hms-society/hms/actions/runs/34876524933); [PR #150 Web App CI](https://github.com/hms-society/hms/actions/runs/34876526230) |
 | `EV-42` | PR CI | `984ee8f41057b8b0491e48d8c1bcb364dcdca7f5` | `passed` — corrected Core slice restores canonical Formalization reader exports while retaining the Dynamic Forms usage-provider contract; current Core, Server and Web package checks completed successfully. | [PR #148 Core Package CI](https://github.com/hms-society/hms/actions/runs/34876525095); [PR #148 Server App CI](https://github.com/hms-society/hms/actions/runs/34876525103); [PR #148 Web App CI](https://github.com/hms-society/hms/actions/runs/34876525049) |
 | `EV-45` | PR CI | `a3c79802c2805aa90658c951c69f877d77491e96` | `blocked_baseline` — Core, Server, Web code/types/unit stages passed, but Web route integration failed 61/62 on the unchanged Formalization test `apps/web/tests/routes/formalization/formalization.index.test.tsx:160`, with `Confirmar pacote` disabled. The same failure was reproduced on prior Web heads; no Dynamic Forms test failed. | [PR #150 Web App CI](https://github.com/hms-society/hms/actions/runs/34885127228) |
+| `EV-47` | PR CI | `65175f2ff09788f3e4d757359b23979abdc3b8cf` | `passed` — Core package checks completed successfully for PR #148. | [PR #148 Core Package CI](https://github.com/hms-society/hms/actions/runs/34878808492) |
+| `EV-50` | PR CI | `65175f2ff09788f3e4d757359b23979abdc3b8cf` | `passed` — Server app checks completed successfully for the dependent PR #148 head. | [PR #148 Server App CI](https://github.com/hms-society/hms/actions/runs/34878808589) |
+| `EV-51` | PR CI | `65175f2ff09788f3e4d757359b23979abdc3b8cf` | `passed` — Web app checks completed successfully for the dependent PR #148 head. | [PR #148 Web App CI](https://github.com/hms-society/hms/actions/runs/34878808538) |
+| `EV-48` | PR CI | `7078558c633aec0ccd3e28e128bd67bf6ded0a23` | `passed` — Server app checks completed successfully for PR #149. | [PR #149 Server App CI](https://github.com/hms-society/hms/actions/runs/34878887983) |
+| `EV-52` | PR CI | `7078558c633aec0ccd3e28e128bd67bf6ded0a23` | `passed` — Core package checks completed successfully for the dependent PR #149 head. | [PR #149 Core Package CI](https://github.com/hms-society/hms/actions/runs/34878888043) |
+| `EV-53` | PR CI | `7078558c633aec0ccd3e28e128bd67bf6ded0a23` | `passed` — Web app checks completed successfully for the dependent PR #149 head. | [PR #149 Web App CI](https://github.com/hms-society/hms/actions/runs/34878888009) |
+| `EV-49` | PR CI | `58e2912446eb99122e60be6a1b6d7f0e2ccb9918` | `passed` — Core, code, type, unit, route integration, production build and Docker image stages completed successfully for PR #150. | [PR #150 Web App CI](https://github.com/hms-society/hms/actions/runs/34957658832) |
+| `EV-54` | PR CI | `58e2912446eb99122e60be6a1b6d7f0e2ccb9918` | `passed` — Core package checks completed successfully for the current PR #150 head. | [PR #150 Core Package CI](https://github.com/hms-society/hms/actions/runs/34957658805) |
+| `EV-55` | PR CI | `58e2912446eb99122e60be6a1b6d7f0e2ccb9918` | `passed` — Server app checks completed successfully for the current PR #150 head. | [PR #150 Server App CI](https://github.com/hms-society/hms/actions/runs/34957658802) |
 
 ## History
 
@@ -235,3 +246,4 @@ is not SDD current-commit metadata. -->
 | `2026-09-14` | The current Implementation Reviewer re-audit resolved `FND-018`–`FND-023` but opened `FND-024`: at 1440×900 the dynamic-form table initially hides `Ações`/`Editar` behind horizontal scrolling. Web correction and visual refresh are routed before the next reviewer re-audit. |
 | `2026-09-14` | The same Implementation Reviewer re-audited the corrected canonical candidate, consumed PATH-01 164/164, confirmed the refreshed 1440×900 catalog capture and returned `PASS` with no findings. Evaluation is ready for `conclude-spec`. |
 | `2026-09-14` | The same Implementation Reviewer re-audited Web head `a3c79802` after the mobile-card correction and returned PASS with no findings. Core and Server CI plus Web architecture/code/types/unit stages passed; the final Web route gate reproduced the unrelated Formalization baseline failure (`FND-028`), so conclusion remains blocked without changing the canonical branch or the unrelated test. |
+| `2026-09-15` | The Web CI failure was corrected in `apps/web/tests/fixtures/document-production-fixture.ts` by persisting `currentVersionId` after generation. The focused Formalization test passed 1/1; current PR heads for Core, Server and Web passed their applicable CI gates. FND-028 is resolved and the Spec is completed without merging or deploying. |
