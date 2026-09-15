@@ -57,6 +57,7 @@ dist
 .context/
 .serena/
 .opencode/
+.codegraph/
 opencode.json
 .mcp.json
 prompt.md
@@ -69,9 +70,15 @@ AGENTS.local.md
 # MCP's
 .playwright-mcp
 
+# CLI's
+.playwright-cli
+
 # env files
 .env
 .env.development
 .env.testing
 .env.staging
 .env.production
+
+# Secrets
+.secrets
