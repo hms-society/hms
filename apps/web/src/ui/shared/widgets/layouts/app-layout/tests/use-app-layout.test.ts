@@ -60,6 +60,9 @@ describe('useAppLayout', () => {
     expect(result.current.sidebarItems).not.toContainEqual(
       expect.objectContaining({ label: 'Comunicação' }),
     )
+    expect(result.current.sidebarItems).not.toContainEqual(
+      expect.objectContaining({ route: 'dynamicForms' }),
+    )
   })
 
   it('shows the collaborators entry only for an administrator', () => {
@@ -89,6 +92,9 @@ describe('useAppLayout', () => {
     )
     expect(result.current.sidebarItems).toContainEqual(
       expect.objectContaining({ route: 'documentInbox', label: 'Caixa de Documentos' }),
+    )
+    expect(result.current.sidebarItems).toContainEqual(
+      expect.objectContaining({ route: 'dynamicForms', label: 'Formulários' }),
     )
   })
 
