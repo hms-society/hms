@@ -1,4 +1,5 @@
 export * from './close-formalization-intake-request'
+export * from './formalization-dynamic-form-usage-provider'
 export * from './close-formalization-request'
 export * from './close-formalization-without-contract-request'
 export * from './formalization-context'

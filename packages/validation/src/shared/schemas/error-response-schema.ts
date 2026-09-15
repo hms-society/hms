@@ -6,4 +6,6 @@ export const errorResponseSchema = z.object({
   message: z.string(),
   timestamp: z.iso.datetime(),
   path: z.string(),
+  code: z.string().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
