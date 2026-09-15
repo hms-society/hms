@@ -1,10 +1,61 @@
 @url = {{BASE_URL}}/legal-catalog
 @legalAreaId = replace-with-legal-area-uuid
+@dynamicFormId = replace-with-dynamic-form-uuid
+@operationKey = replace-with-operation-uuid
+
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
 
 ### List active legal areas
 GET {{url}}/areas
 Content-Type: application/json
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### List dynamic forms for administration
+GET {{url}}/dynamic-forms?page=1&pageSize=5
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
+### Find a dynamic-form name conflict
+GET {{url}}/dynamic-form-name-conflicts?name=Triagem%20C%C3%ADvel
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
+### Duplicate a dynamic form
+POST {{url}}/dynamic-forms/{{dynamicFormId}}/duplicates
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Nova ficha dinâmica",
+  "operationKey": "{{operationKey}}"
+}
+
+### Get dynamic-form usage impact
+GET {{url}}/dynamic-forms/{{dynamicFormId}}/impact
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
+### Change dynamic-form availability
+PATCH {{url}}/dynamic-forms/{{dynamicFormId}}/availability
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "status": "unavailable"
+}
+
+### Delete a dynamic form
+DELETE {{url}}/dynamic-forms/{{dynamicFormId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 
 ### List active topics for a legal area
 GET {{url}}/areas/{{legalAreaId}}/topics

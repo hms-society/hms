@@ -17,4 +17,5 @@ export const FORMALIZATION_PROVIDERS = {
     'FORMALIZATION_PROVIDERS.documentConfirmationTransaction',
   ),
   contractingTransaction: Symbol('FORMALIZATION_PROVIDERS.contractingTransaction'),
+  dynamicFormUsage: Symbol('FORMALIZATION_PROVIDERS.dynamicFormUsage'),
 } as const

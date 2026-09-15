@@ -25,6 +25,7 @@ import { FormalizationModuleFixture } from '@/formalization/fixtures'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
+import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import { DYNAMIC_FORMS_REPOSITORIES } from '@/shared/constants/dynamic-forms-repositories'
 import { ServerFormalizationSourceReader } from '@/formalization/provision'
 
@@ -484,8 +485,24 @@ describe('Formalization controllers', () => {
   })
 
   it('replaces the contract form using the persisted legal context', async () => {
-    const legalAreaId = '00000000-0000-4000-8000-000000000921'
-    const legalTopicId = '00000000-0000-4000-8000-000000000922'
+    const [legalArea] = await fixture.app
+      .get(LEGAL_CATALOG_REPOSITORIES.areas)
+      .addMany([{ name: 'Área da fixture', active: true }])
+    if (!legalArea) throw new Error('Test legal area was not created')
+
+    const [legalTopic] = await fixture.app
+      .get(LEGAL_CATALOG_REPOSITORIES.topics)
+      .addMany([
+        {
+          legalAreaId: legalArea.id,
+          name: 'Tópico da fixture',
+          active: true,
+        },
+      ])
+    if (!legalTopic) throw new Error('Test legal topic was not created')
+
+    const legalAreaId = legalArea.id
+    const legalTopicId = legalTopic.id
     const intake = IntakeFaker.fake({
       id: '00000000-0000-4000-8000-000000000923',
       status: IntakeStatus.InFormalization,
