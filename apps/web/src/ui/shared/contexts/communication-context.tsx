@@ -103,7 +103,9 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
               const inboundCount = msgs.filter(
                 (m: any) => m.direction === 'inbound',
               ).length
-              return { clientId: c.id, inboundCount }
+              const lastMsg = msgs[0]
+              const isLastMessageInbound = lastMsg?.direction === 'inbound'
+              return { clientId: c.id, inboundCount, isLastMessageInbound }
             } catch (_err) {
               return null
             }
@@ -114,13 +116,13 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
 
         for (const res of results) {
           if (!res) continue
-          const { clientId, inboundCount } = res
+          const { clientId, inboundCount, isLastMessageInbound } = res
           const prevCount = lastInboundCountMap.current[clientId]
 
           if (prevCount === undefined) {
-            // Carga inicial: registra a contagem inicial e marca como unread se houver inbound sem tocar o beep
+            // Carga inicial: se a última mensagem da conversa for do cliente (não respondida), exibe badge sem som
             lastInboundCountMap.current[clientId] = inboundCount
-            if (inboundCount > 0 && clientId !== activeClientId) {
+            if (isLastMessageInbound && clientId !== activeClientId) {
               setUnreadChatIds((prev) =>
                 prev.includes(clientId) ? prev : [...prev, clientId],
               )
