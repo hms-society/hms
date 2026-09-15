@@ -86,15 +86,39 @@ const DEFAULT_USERS: UserSeed[] = [
     status: 'active',
   },
   {
-    email: 'gildarcio.advogado@hmsadvogados.com.br',
+    email: 'gildarcio@hmsadvogados.com.br',
     status: 'active',
   },
   {
-    email: 'samuel.advogado@hmsadvogados.com.br',
+    email: 'samuel@hmsadvogados.com.br',
     status: 'active',
   },
   {
-    email: 'sofia.advogado@hmsadvogados.com.br',
+    email: 'sofia@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'gildarcio.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'gildarcio.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia.admin@hmsadvogados.com.br',
     status: 'active',
   },
 ]
@@ -125,6 +149,52 @@ const DEFAULT_ATTENDANT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   jobTitle: 'Atendente',
   profile: 'attendant',
 }
+
+type AdministrativeCollaboratorSeed = Omit<
+  AdministrativeCollaboratorCreation,
+  'userId'
+> & {
+  email: string
+}
+
+const DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS: AdministrativeCollaboratorSeed[] = [
+  {
+    email: 'gildarcio.attendant@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'gildarcio.admin@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+  {
+    email: 'samuel.attendant@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'samuel.admin@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+  {
+    email: 'sofia.attendant@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'sofia.admin@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+]
 
 const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
   {
@@ -170,19 +240,19 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     profile: 'intern',
   },
   {
-    email: 'gildarcio.advogado@hmsadvogados.com.br',
+    email: 'gildarcio@hmsadvogados.com.br',
     professionalName: 'Gildárcio',
     jobTitle: 'Estagiário',
     profile: 'lawyer',
   },
   {
-    email: 'samuel.advogado@hmsadvogados.com.br',
+    email: 'samuel@hmsadvogados.com.br',
     professionalName: 'Samuel',
     jobTitle: 'Estagiário',
     profile: 'lawyer',
   },
   {
-    email: 'sofia.advogado@hmsadvogados.com.br',
+    email: 'sofia@hmsadvogados.com.br',
     professionalName: 'Sofia',
     jobTitle: 'Estagiário',
     profile: 'lawyer',
@@ -294,6 +364,23 @@ export class IdentitySeeder {
       ...DEFAULT_ATTENDANT,
     })
 
+    const personAdministrativeCollaborators = await Promise.all(
+      DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS.map(
+        async ({ email, ...collaborator }) => {
+          const user = seededUsers.find((seededUser) => seededUser.email === email)
+
+          if (!user) {
+            throw new AppError(`Seed user for ${email} was not created`)
+          }
+
+          return this.collaboratorsRepository.add({
+            userId: user.id,
+            ...collaborator,
+          })
+        },
+      ),
+    )
+
     const legalCollaborators = await Promise.all(
       DEFAULT_LEGAL_COLLABORATORS.map(async ({ email, ...collaborator }) => {
         const user = seededUsers.find((seededUser) => seededUser.email === email)
@@ -313,6 +400,7 @@ export class IdentitySeeder {
     if (
       !administratorCreated ||
       !attendantCreated ||
+      personAdministrativeCollaborators.includes(undefined) ||
       legalCollaborators.includes(undefined)
     ) {
       throw new AppError('Default seed collaborators were not created')
@@ -346,6 +434,7 @@ export class IdentitySeeder {
       collaborators: [
         administratorCreated,
         attendantCreated,
+        ...personAdministrativeCollaborators,
         ...legalCollaborators,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>
