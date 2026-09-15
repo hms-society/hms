@@ -610,7 +610,12 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
             createdAt: version.createdAt,
           })
         }
-        if (document) Object.assign(document, { generationStatus: 'completed' })
+        if (document) {
+          Object.assign(document, {
+            generationStatus: 'completed',
+            currentVersionId: version.id,
+          })
+        }
         await route.fulfill({
           status: 202,
           contentType: 'application/json',
