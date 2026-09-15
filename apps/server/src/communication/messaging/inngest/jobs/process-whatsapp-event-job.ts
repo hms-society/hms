@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eventType, type InngestFunction } from 'inngest'
-import { eq, desc, like } from 'drizzle-orm'
+import { eq, desc, like, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { communicationModel } from '@/communication/database/drizzle/models/communication-model'
@@ -25,6 +25,7 @@ type WhatsappMedia = {
 }
 
 type WhatsappMessage = {
+  id?: unknown
   type?: unknown
   from?: unknown
   text?: {
@@ -82,6 +83,25 @@ export class ProcessWhatsappEventJob extends InngestJob {
               continue
             }
 
+            // Deduplication check by Meta message ID (wamid)
+            if (typeof message.id === 'string' && message.id.length > 0) {
+              const [existing] = await database
+                .select({ id: integracaoEvento.id })
+                .from(integracaoEvento)
+                .where(
+                  and(
+                    eq(integracaoEvento.provedor, 'whatsapp'),
+                    sql`${integracaoEvento.payload}->>'id' = ${message.id}`,
+                  ),
+                )
+                .limit(1)
+
+              if (existing) {
+                // Skip already processed event
+                continue
+              }
+            }
+
             // Process text messages
             if (message.type === 'text') {
               const textBody =
@@ -135,6 +155,12 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 }
               }
 
+              await database.insert(integracaoEvento).values({
+                provedor: 'whatsapp',
+                payload: message,
+                status: 'recebido',
+              })
+
               continue
             }
 
@@ -155,6 +181,44 @@ export class ProcessWhatsappEventJob extends InngestJob {
               const clientId =
                 matchingClients.length === 1 ? matchingClients[0].id : undefined
 
+              const originalName =
+                typeof media.filename === 'string'
+                  ? media.filename
+                  : `${media.id}.${media.mime_type.split('/')[1] || 'bin'}`
+
+              if (clientId) {
+                await database.insert(communicationModel).values({
+                  clientId,
+                  authorId: null,
+                  channel: 'whatsapp',
+                  direction: 'inbound',
+                  content: `Documento recebido via WhatsApp: ${originalName}`,
+                })
+
+                const activeIntakes = await database
+                  .select()
+                  .from(intakeModel)
+                  .where(eq(intakeModel.clientId, clientId))
+                  .orderBy(desc(intakeModel.createdAt))
+
+                const activeIntake =
+                  activeIntakes.find(
+                    (intake) => intake.status !== IntakeStatus.ClosedWithoutContract,
+                  ) || activeIntakes[0]
+
+                if (activeIntake?.responsibleId) {
+                  await database.insert(privateMessageModel).values({
+                    clientId,
+                    collaboratorId: activeIntake.responsibleId,
+                    intakeId: activeIntake.id,
+                    clientPhone: sender,
+                    direction: 'inbound',
+                    content: encrypt(`[Documento Recebido] ${originalName}`),
+                    fileIds: [],
+                  })
+                }
+              }
+
               const [evento] = await database
                 .insert(integracaoEvento)
                 .values({
@@ -172,10 +236,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
                   clientId,
                   mediaId: media.id,
                   mimeType: media.mime_type,
-                  originalName:
-                    typeof media.filename === 'string'
-                      ? media.filename
-                      : `${media.id}.${media.mime_type.split('/')[1]}`,
+                  originalName,
                 },
               })
             }

@@ -18,9 +18,12 @@ import { SendCommunicationDto } from '../dtos/send-communication.dto'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
+import { clientConsentModel } from '@/identity/database/drizzle/models/client-consent-model'
 import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { encrypt } from '@/shared/utils/crypto'
+
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 @Controller('communications')
 @UseGuards(AuthGuard)
@@ -28,6 +31,7 @@ export class SendCommunicationController {
   constructor(
     private readonly drizzleClient: DrizzleClient,
     private readonly whatsappProvider: WhatsappProvider,
+    private readonly envProvider: EnvProvider,
   ) {}
 
   @Post('send')
@@ -41,6 +45,12 @@ export class SendCommunicationController {
   })
   @UsePipes(ZodValidationPipe)
   async handle(@Body() body: SendCommunicationDto, @Req() req: any) {
+    if (body.type === 'template' && body.channel !== 'whatsapp') {
+      throw new BadRequestException(
+        'Template messages are only supported for the WhatsApp channel',
+      )
+    }
+
     const db = this.drizzleClient.requireDatabase()
 
     const [client] = await db
@@ -80,12 +90,46 @@ export class SendCommunicationController {
       if (!client.phone) {
         throw new BadRequestException('Client has no phone number registered')
       }
-      const result = await this.whatsappProvider.sendTextMessage(
-        client.phone,
-        body.content,
-      )
-      externalId = result.externalMessageId
+
+      const [consent] = await db
+        .select()
+        .from(clientConsentModel)
+        .where(
+          and(
+            eq(clientConsentModel.clientId, body.clientId),
+            eq(clientConsentModel.type, 'whatsapp_communication'),
+            isNull(clientConsentModel.revokedAt),
+          ),
+        )
+        .limit(1)
+
+      if (!consent) {
+        throw new BadRequestException(
+          'Client does not have active WhatsApp communication consent',
+        )
+      }
+
+      if (body.type === 'template') {
+        const templateName =
+          body.templateName ||
+          this.envProvider.get('WHATSAPP_START_WINDOW_TEMPLATE_NAME') ||
+          'inicio_atendimento_ola'
+        const result = await this.whatsappProvider.sendTemplateMessage(
+          client.phone,
+          templateName,
+        )
+        externalId = result.externalMessageId
+      } else {
+        const result = await this.whatsappProvider.sendTextMessage(
+          client.phone,
+          body.content,
+        )
+        externalId = result.externalMessageId
+      }
     }
+
+    const contentToSave =
+      body.type === 'template' ? 'Olá. Podemos conversar sobre o caso?' : body.content
 
     const [record] = await db
       .insert(privateMessageModel)
@@ -95,7 +139,7 @@ export class SendCommunicationController {
         intakeId: intake?.id || body.clientId,
         clientPhone: client.phone,
         direction: 'outbound',
-        content: encrypt(body.content),
+        content: encrypt(contentToSave),
       })
       .returning()
 
@@ -103,7 +147,7 @@ export class SendCommunicationController {
       id: record.id,
       channel: body.channel,
       direction: record.direction,
-      content: body.content,
+      content: contentToSave,
       createdAt: record.createdAt.toISOString(),
       author: collaborator?.professionalName || req.user.email || 'Advogado',
       externalId,

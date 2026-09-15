@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EnvProvider } from '../provision/env/env-provider'
+import { AppError } from '@hms/core/shared/domain/errors'
 import type {
   WhatsappProvider as IWhatsappProvider,
   SendWhatsappMessageParams,
@@ -55,8 +56,13 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
-        `Failed to send WhatsApp message: ${response.status} - ${errorText}`,
+      console.error(
+        `[WhatsappProvider] Meta Cloud API error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.',
+        'WhatsappProviderError',
       )
     }
 
@@ -102,8 +108,72 @@ export class WhatsappProvider implements IWhatsappProvider {
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
-        `Failed to send WhatsApp text message: ${response.status} - ${errorText}`,
+      console.error(
+        `[WhatsappProvider] Meta Cloud API text error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao enviar mensagem de texto via WhatsApp.',
+        'WhatsappProviderError',
+      )
+    }
+
+    const responseData = (await response.json()) as {
+      messages?: Array<{ id: string }>
+    }
+
+    const externalMessageId = responseData.messages?.[0]?.id
+
+    if (!externalMessageId) {
+      throw new AppError(
+        'Resposta da API do WhatsApp não retornou identificador de mensagem.',
+        'WhatsappProviderError',
+      )
+    }
+
+    return {
+      externalMessageId,
+    }
+  }
+
+  async sendTemplateMessage(
+    phone: string,
+    templateName: string,
+    languageCode = 'pt_BR',
+  ): Promise<SendWhatsappMessageResult> {
+    const token = this.envProvider.get('WHATSAPP_API_TOKEN')
+    const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
+
+    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: phone,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: {
+            code: languageCode,
+          },
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(
+        `[WhatsappProvider] Meta Cloud API template error (${response.status}):`,
+        errorText,
+      )
+      throw new AppError(
+        'Falha ao enviar template via WhatsApp.',
+        'WhatsappProviderError',
       )
     }
 

@@ -63,6 +63,48 @@ describe('WhatsappProvider', () => {
     expect(result).toEqual({ externalMessageId: 'wamid.12345' })
   })
 
+  it('should successfully send a WhatsApp template by name using sendTemplateMessage', async () => {
+    const mockResponse = {
+      messages: [{ id: 'wamid.99999' }],
+    }
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(mockResponse),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await provider.sendTemplateMessage(
+      '5519971659516',
+      'inicio_atendimento_ola',
+    )
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://graph.facebook.com/v25.0/fake-phone-id/messages',
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer fake-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: '5519971659516',
+          type: 'template',
+          template: {
+            name: 'inicio_atendimento_ola',
+            language: {
+              code: 'pt_BR',
+            },
+          },
+        }),
+      }),
+    )
+
+    expect(result).toEqual({ externalMessageId: 'wamid.99999' })
+  })
+
   it('should throw an error when fetch fails', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
@@ -79,7 +121,9 @@ describe('WhatsappProvider', () => {
         text: 'Consulta marcada',
         idempotencyKey: 'idemp-1',
       }),
-    ).rejects.toThrow('Failed to send WhatsApp message: 400 - Bad Request')
+    ).rejects.toThrow(
+      'Falha ao comunicar com o serviço do WhatsApp. Tente novamente mais tarde.',
+    )
   })
 
   it('should successfully download WhatsApp media', async () => {

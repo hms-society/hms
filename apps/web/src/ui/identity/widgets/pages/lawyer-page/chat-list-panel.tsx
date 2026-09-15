@@ -12,7 +12,9 @@ export type ChatMessage = {
   direction: 'inbound' | 'outbound'
   channel: 'whatsapp' | 'email' | 'phone'
   createdAt: string
+  rawCreatedAt?: string
   sender: string
+  isDocument?: boolean
 }
 
 export type ClientConversation = {

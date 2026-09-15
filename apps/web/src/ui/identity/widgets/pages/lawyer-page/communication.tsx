@@ -13,7 +13,7 @@ import { ChatViewPanel } from './chat-view-panel'
 import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export const LawyerCommunicationPage = () => {
-  const { unreadChatIds, markAsRead } = useCommunication()
+  const { unreadChatIds, markAsRead, setActiveClientId } = useCommunication()
   const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -41,12 +41,13 @@ export const LawyerCommunicationPage = () => {
     }
   }, [clients, selectedId])
 
-  // Mark selected client's chat as read
+  // Mark selected client's chat as read and set active client ID
   useEffect(() => {
     if (selectedId) {
+      setActiveClientId(selectedId)
       markAsRead(selectedId)
     }
-  }, [selectedId, markAsRead])
+  }, [selectedId, markAsRead, setActiveClientId])
 
   // Fetch communications for the selected client
   const { data: realMessages } = useClientCommunicationsQuery(selectedId)
@@ -85,6 +86,7 @@ export const LawyerCommunicationPage = () => {
                   hour: '2-digit',
                   minute: '2-digit',
                 }),
+                rawCreatedAt: msg.createdAt,
                 sender: msg.author || 'Cliente',
               }))
             : []),
@@ -110,6 +112,27 @@ export const LawyerCommunicationPage = () => {
         onError: (error: any) => {
           setMessageText(textToSend)
           toast.error(error?.message || 'Falha ao entregar a mensagem.')
+        },
+      },
+    )
+  }
+
+  const handleStartWindowTemplate = () => {
+    if (!selectedId || sendCommunicationMutation.isPending) return
+
+    sendCommunicationMutation.mutate(
+      {
+        clientId: selectedId,
+        content: 'Olá. Podemos conversar sobre o caso?',
+        channel: 'whatsapp',
+        type: 'template',
+      },
+      {
+        onSuccess: () => {
+          toast.success('Janela de conversa iniciada com sucesso!')
+        },
+        onError: (error: any) => {
+          toast.error(error?.message || 'Falha ao enviar mensagem de abertura.')
         },
       },
     )
@@ -172,6 +195,8 @@ export const LawyerCommunicationPage = () => {
                 messageText={messageText}
                 onMessageChange={setMessageText}
                 onSendMessage={handleSendMessage}
+                onSendStartWindowTemplate={handleStartWindowTemplate}
+                isSendingTemplate={sendCommunicationMutation.isPending}
               />
             ) : (
               <div className='lg:col-span-2 flex items-center justify-center border border-dashed rounded-xl p-8 bg-muted/5 text-muted-foreground'>
