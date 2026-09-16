@@ -396,5 +396,5 @@ exit 0
         run: |
           set -euo pipefail
           echo "Adicionando label hermes-reviewed à PR #$PR_NUMBER..."
-          gh pr edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "hermes-reviewed" || true
+gh pr edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "hermes-reviewed"
 
