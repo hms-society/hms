@@ -72,10 +72,10 @@ export function useClientCaseDrawer({
 
   const totalChecklistItems = checklistItems.length
   const validatedItemsCount = checklistItems.filter(
-    (item) => item.status === 'validated' || item.status === 'approved',
+    (item) => item.status === 'validated',
   ).length
   const pendingItemsCount = checklistItems.filter(
-    (item) => item.status === 'pending' || item.status === 'under_review',
+    (item) => item.status === 'pending',
   ).length
   const completionPercentage =
     totalChecklistItems > 0

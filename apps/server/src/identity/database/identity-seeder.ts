@@ -38,7 +38,7 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
   ClientFaker.fake({
     email: 'vinicius.lopes.machado@hms.test',
     name: 'Vinicius Lopes Machado',
-    phone: '5511987654321',
+    phone: '5512988442775',
     taxId: { type: 'cpf', value: '12345678909' },
   }),
   ...ClientFaker.fakeMany(8),
@@ -406,27 +406,11 @@ export class IdentitySeeder {
       throw new AppError('Default seed collaborators were not created')
     }
 
-    const clientsToSeed = [
-      {
-        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
-        id: clientUser?.id,
-      },
-      ClientFaker.fake({
-        email: 'kauandominguesdesouza@gmail.com',
-        name: 'Kauan Domingues de Souza',
-        phone: '5519971659516',
-      }),
-      ClientFaker.fake({
-        email: 'vinicius.lopes.machado@hms.test',
-        name: 'Vinicius Lopes Machado',
-        phone: '5511987654321',
-        taxId: { type: 'cpf', value: '12345678909' },
-      }),
-      ...ClientFaker.fakeMany(8),
-    ].map(({ id, createdAt, updatedAt, ...client }) => ({
-      ...client,
-      id,
-    })) satisfies ClientCreation[]
+    const clientsToSeed = DEFAULT_CLIENTS.map((client) =>
+      client.email === 'client@hms.br'
+        ? { ...client, id: clientUser.id }
+        : client,
+    )
     const clients = await this.seed(clientsToSeed)
 
     return {
