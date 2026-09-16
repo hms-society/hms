@@ -10,6 +10,7 @@ import {
   type ClientConversation,
 } from './chat-list-panel'
 import { ChatViewPanel } from './chat-view-panel'
+import { ClientCaseDrawer } from './client-case-drawer'
 import { useCommunication } from '@/ui/shared/contexts/communication-context'
 
 export const LawyerCommunicationPage = () => {
@@ -17,6 +18,7 @@ export const LawyerCommunicationPage = () => {
   const [selectedId, setSelectedId] = useState<string>('')
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isCaseDrawerOpen, setIsCaseDrawerOpen] = useState(false)
   const [localMessages, _setLocalMessages] = useState<Record<string, ChatMessage[]>>({})
 
   const sendCommunicationMutation = useSendCommunicationMutation()
@@ -197,6 +199,7 @@ export const LawyerCommunicationPage = () => {
                 onSendMessage={handleSendMessage}
                 onSendStartWindowTemplate={handleStartWindowTemplate}
                 isSendingTemplate={sendCommunicationMutation.isPending}
+                onOpenCaseDrawer={() => setIsCaseDrawerOpen(true)}
               />
             ) : (
               <div className='lg:col-span-2 flex items-center justify-center border border-dashed rounded-xl p-8 bg-muted/5 text-muted-foreground'>
@@ -206,6 +209,13 @@ export const LawyerCommunicationPage = () => {
           </>
         )}
       </div>
+
+      <ClientCaseDrawer
+        clientId={activeClient?.id}
+        clientName={activeClient?.name || activeClient?.legalName}
+        open={isCaseDrawerOpen}
+        onOpenChange={setIsCaseDrawerOpen}
+      />
     </div>
   )
 }
