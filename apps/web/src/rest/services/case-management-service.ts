@@ -5,6 +5,7 @@ import type {
   LegalCase,
   LegalCaseSummary,
   Pending,
+  AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
@@ -18,6 +19,10 @@ export const CaseManagementService = (
 
     listCasePendings(caseId) {
       return restClient.get<readonly Pending[]>(`/cases/${caseId}/pendencies`)
+    },
+
+    getPendingMessage(pendingId) {
+      return restClient.get<AssistedMessage>(`/cases/pendencies/${pendingId}/message`)
     },
 
     createPending(caseId, request) {

@@ -4,6 +4,7 @@ import type {
   LegalCase,
   LegalCaseSummary,
   Pending,
+  AssistedMessage,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
@@ -80,6 +81,8 @@ export interface CaseManagementService {
   ): Promise<RestResponse<LegalCase>>
 
   listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
+
+  getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
 
   createPending(
     caseId: string,

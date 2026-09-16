@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { CaseChecklistItem } from '@hms/core/case-management/domain/entities'
+import type { Pending } from '@hms/core/case-management/domain/entities'
 import type {
   DocumentValidationDocument,
   DocumentValidationLog,
 } from '@hms/core/document-engine/domain/entities'
-import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
 import { useDocumentValidationDocumentQuery } from '@/ui/document-engine/hooks/use-document-validation-document-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -47,8 +47,12 @@ export type ChecklistItemMetric = {
 }
 
 export type ChecklistItemPending = {
+  body: string
   description: string
+  documentFileName?: string
   id: string
+  reason: Pending['reason']
+  status: string
   title: string
 }
 
@@ -74,6 +78,31 @@ export function useChecklistItemDetailPage({
     enabled: Boolean(caseId),
   })
   const checklistItem = checklistItems.find((item) => item.id === checklistItemId)
+  const { data: casePendings = [], error: pendingsError } = useQuery({
+    queryKey: ['case-management', 'cases', caseId, 'pendencies'],
+    queryFn: async () => {
+      const response = await caseManagementService.listCasePendings(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    enabled: Boolean(caseId),
+  })
+  const itemPendings = casePendings.filter(
+    (pending) => pending.checklistItemId === checklistItemId && !pending.cancelledAt,
+  )
+  const { data: pendingMessages = [], error: pendingMessagesError } = useQuery({
+    queryKey: ['case-management', 'pendencies', checklistItemId, 'messages'],
+    queryFn: async () => {
+      return Promise.all(
+        itemPendings.map(async (pending) => {
+          const response = await caseManagementService.getPendingMessage(pending.id)
+          if (response.isFailure) response.throwError()
+          return { message: response.body, pending }
+        }),
+      )
+    },
+    enabled: itemPendings.length > 0,
+  })
   const documentFileId = checklistItem?.documentFileId ?? ''
   const { document, documentError, isLoadingDocument } =
     useDocumentValidationDocumentQuery(documentFileId)
@@ -97,6 +126,7 @@ export function useChecklistItemDetailPage({
     checklistItem,
     document,
     documentLogs,
+    pendings: pendingMessages,
     itemIndex: checklistItem
       ? checklistItems.findIndex((item) => item.id === checklistItem.id)
       : -1,
@@ -105,7 +135,8 @@ export function useChecklistItemDetailPage({
   const isLoading =
     isLoadingChecklist ||
     Boolean(documentFileId && (isLoadingDocument || isLoadingDocumentLogs))
-  const error = checklistError ?? documentError ?? documentLogsError
+  const error =
+    checklistError ?? documentError ?? documentLogsError ?? pendingsError ?? pendingMessagesError
 
   function handleBackToCase() {
     void navigateTo('lawyerCaseDetails', { params: { caseId } })
@@ -137,6 +168,7 @@ function getChecklistItemDetailView({
   checklistItem,
   document,
   documentLogs,
+  pendings,
   itemIndex,
   totalItemsCount,
 }: {
@@ -144,6 +176,7 @@ function getChecklistItemDetailView({
   checklistItem?: CaseChecklistItem
   document?: DocumentValidationDocument
   documentLogs: DocumentValidationLog[]
+  pendings: readonly { pending: Pending; message: { body: string; status: string } }[]
   itemIndex: number
   totalItemsCount: number
 }): ChecklistItemDetailView {
@@ -159,7 +192,15 @@ function getChecklistItemDetailView({
     isValidated,
   })
   const statusLabel = documentStatusView.label
-  const pendingItems = getPendingItems({ checklistItem, document })
+  const pendingItems = pendings.map(({ pending, message }) => ({
+    body: message.body,
+    description: pending.details ?? getPendingReasonLabel(pending.reason),
+    documentFileName: pending.documentFileName,
+    id: pending.id,
+    reason: pending.reason,
+    status: message.status,
+    title: getPendingReasonLabel(pending.reason),
+  }))
   const extractedFields =
     document?.extractedFields.map((field) => ({
       label: field.label,
@@ -200,6 +241,18 @@ function getChecklistItemDetailView({
   }
 }
 
+function getPendingReasonLabel(reason: Pending['reason']) {
+  const labels: Record<Pending['reason'], string> = {
+    duplicate: 'Documento duplicado',
+    illegible: 'Ilegível',
+    incomplete: 'Documento incompleto',
+    missing: 'Documento não recebido',
+    not_corresponding: 'Não correspondente',
+  }
+
+  return labels[reason]
+}
+
 function getEmptyChecklistItemDetailView(caseId: string): ChecklistItemDetailView {
   return {
     auditMetrics: [
@@ -217,38 +270,6 @@ function getEmptyChecklistItemDetailView(caseId: string): ChecklistItemDetailVie
     statusLabel: 'Item não encontrado',
     statusVariant: 'secondary',
   }
-}
-
-function getPendingItems({
-  checklistItem,
-  document,
-}: {
-  checklistItem: CaseChecklistItem
-  document?: DocumentValidationDocument
-}): ChecklistItemPending[] {
-  if (checklistItem.status === 'validated') return []
-
-  if (document?.status === DocumentValidationStatus.ResendRequested) return []
-
-  if (!checklistItem.documentFileId) {
-    return [
-      {
-        description: 'Nenhum arquivo foi recebido para este item do checklist.',
-        id: 'document-not-received',
-        title: 'Documento não recebido',
-      },
-    ]
-  }
-
-  if (document?.missingFields.length) {
-    return document.missingFields.map((field) => ({
-      description: `Campo obrigatório não identificado no documento recebido: ${field}.`,
-      id: field,
-      title: field,
-    }))
-  }
-
-  return []
 }
 
 function getReviewerDisplayName({

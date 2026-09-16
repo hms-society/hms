@@ -111,6 +111,24 @@ const PendingCard = ({ index, pendingItem }: PendingCardProps) => (
         <p className='rounded-md bg-muted/60 p-3 text-xs text-muted-foreground'>
           {pendingItem.description}
         </p>
+        {pendingItem.documentFileName && (
+          <p className='text-xs text-muted-foreground'>
+            Documento: <span className='font-medium'>{pendingItem.documentFileName}</span>
+          </p>
+        )}
+        <div className='flex flex-col gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3'>
+          <div className='flex items-center justify-between gap-2'>
+            <span className='text-[11px] font-semibold uppercase tracking-wide text-muted-foreground'>
+              Mensagem assistida
+            </span>
+            <Badge variant='attention' className='h-5 rounded-full px-2 text-[10px]'>
+              {pendingItem.status === 'awaiting_approval'
+                ? 'Aguardando aprovação'
+                : pendingItem.status}
+            </Badge>
+          </div>
+          <p className='text-sm italic text-foreground'>{pendingItem.body}</p>
+        </div>
       </div>
     </div>
   </article>
