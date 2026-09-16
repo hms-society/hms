@@ -1,4 +1,4 @@
-import type { DynamicFormField } from '@hms/core/shared/domain'
+import type { DynamicFormDefinitionField } from '@hms/core/legal-catalog/domain/entities'
 import { sql } from 'drizzle-orm'
 import {
   check,
@@ -8,6 +8,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  integer,
 } from 'drizzle-orm/pg-core'
 
 import { legalAreaModel } from '@/legal-catalog/database/drizzle/models/legal-area-model'
@@ -24,7 +25,8 @@ export const dynamicFormModel = pgTable(
     legalAreaId: uuid('legal_area_id')
       .notNull()
       .references(() => legalAreaModel.id, { onDelete: 'restrict' }),
-    fields: jsonb('fields').$type<DynamicFormField[]>().notNull(),
+    fields: jsonb('fields').$type<DynamicFormDefinitionField[]>().notNull(),
+    version: integer('version').default(1).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
@@ -48,5 +50,6 @@ export const dynamicFormModel = pgTable(
       'dynamic_forms_stage_check',
       sql`${table.stage} in ('consultation', 'formalization')`,
     ),
+    check('dynamic_forms_version_check', sql`${table.version} >= 1`),
   ],
 )

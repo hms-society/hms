@@ -12,7 +12,7 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type {
   DynamicFormAdministrationAuditRepository,
   DynamicFormAdministrationRepository,
-  DynamicFormDuplicateOperationsRepository,
+  DynamicFormOperationsRepository,
   LegalCatalogDatabase,
 } from '@hms/core/legal-catalog/interfaces'
 import { DuplicateDynamicFormUseCase } from '@hms/core/legal-catalog/use-cases'
@@ -43,8 +43,8 @@ export class DuplicateDynamicFormController {
   constructor(
     @Inject(LEGAL_CATALOG_REPOSITORIES.dynamicForms)
     administrationRepository: DynamicFormAdministrationRepository,
-    @Inject(LEGAL_CATALOG_REPOSITORIES.dynamicFormDuplicateOperations)
-    duplicateOperationsRepository: DynamicFormDuplicateOperationsRepository,
+    @Inject(LEGAL_CATALOG_REPOSITORIES.dynamicFormOperations)
+    operationsRepository: DynamicFormOperationsRepository,
     @Inject(LEGAL_CATALOG_REPOSITORIES.dynamicFormAdministrationAudit)
     auditRepository: DynamicFormAdministrationAuditRepository,
     @Inject(LEGAL_CATALOG_DATABASE) database: LegalCatalogDatabase,
@@ -53,7 +53,7 @@ export class DuplicateDynamicFormController {
   ) {
     this.useCase = new DuplicateDynamicFormUseCase(
       administrationRepository,
-      duplicateOperationsRepository,
+      operationsRepository,
       auditRepository,
       database,
       idProvider,

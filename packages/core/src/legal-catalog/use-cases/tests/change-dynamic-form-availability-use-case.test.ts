@@ -21,6 +21,7 @@ const form: DynamicForm = {
   legalAreaId: 'area-id',
   legalTopicIds: ['topic-id'],
   fields: [],
+  version: 1,
   createdAt: now,
   updatedAt: now,
 }

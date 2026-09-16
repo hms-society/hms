@@ -34,6 +34,7 @@ export class DynamicFormMapper {
         .sort((left, right) => left.position - right.position)
         .map(({ legalTopicId }) => legalTopicId),
       fields: record.fields,
+      version: record.version,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     }

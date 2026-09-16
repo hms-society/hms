@@ -4,6 +4,7 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import type { DynamicForm, DynamicFormCreation } from '@hms/core/shared/domain'
 import type { DynamicFormsRepository } from '@hms/core/shared/interfaces'
 import type { DynamicForm as CanonicalDynamicForm } from '@hms/core/legal-catalog/domain/entities'
+import type { DynamicFormDefinitionField } from '@hms/core/legal-catalog/domain/entities'
 import type { DynamicFormAdministrationRepository } from '@hms/core/legal-catalog/interfaces'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -80,9 +81,28 @@ export class DrizzleDynamicFormsRepository
       legalTopicIds: legalTopicIds.filter(
         (legalTopicId): legalTopicId is string => typeof legalTopicId === 'string',
       ),
-      fields: [...form.fields],
+      fields: form.fields.map((field, position) =>
+        this.toCanonicalField(field, position),
+      ),
+      version: 1,
       createdAt: now,
       updatedAt: now,
+    }
+  }
+
+  private toCanonicalField(
+    field: DynamicForm['fields'][number],
+    position: number,
+  ): DynamicFormDefinitionField {
+    return {
+      ...field,
+      id: randomUUID(),
+      position,
+      options: field.options?.map((option, optionPosition) => ({
+        ...option,
+        id: randomUUID(),
+        position: optionPosition,
+      })),
     }
   }
 

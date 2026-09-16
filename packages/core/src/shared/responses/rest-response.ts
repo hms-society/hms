@@ -69,6 +69,10 @@ export class RestResponse<Body = unknown> {
     return this._errorMessage
   }
 
+  get failureBody(): unknown {
+    return this.isFailure ? this._body : null
+  }
+
   get isRedirecting() {
     return (
       this.statusCode >= HTTP_STATUS_CODE.multipleChoices &&

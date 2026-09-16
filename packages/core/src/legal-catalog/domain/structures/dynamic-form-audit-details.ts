@@ -18,3 +18,18 @@ export type DynamicFormAuditDetails =
       deletedFormName: string
       previousStatus: DynamicFormStatus
     }
+  | {
+      action: 'created'
+      version: 1
+      formName: string
+      fieldIds: string[]
+    }
+  | {
+      action: 'updated'
+      previousVersion: number
+      nextVersion: number
+      addedFieldIds: string[]
+      changedFieldIds: string[]
+      removedFieldIds: string[]
+      reorderedFieldIds: string[]
+    }

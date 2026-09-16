@@ -11,6 +11,7 @@ export class DynamicFormAdministrationResponseDto {
   @ApiProperty({ type: [String], format: 'uuid' }) legalTopicIds!: string[]
   @ApiProperty({ type: 'array', items: { type: 'object' } })
   fields!: DynamicForm['fields']
+  @ApiProperty({ minimum: 1 }) version!: number
   @ApiProperty({ format: 'date-time' }) createdAt!: Date
   @ApiProperty({ format: 'date-time' }) updatedAt!: Date
 

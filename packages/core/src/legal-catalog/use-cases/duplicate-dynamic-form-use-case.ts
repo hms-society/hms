@@ -8,12 +8,12 @@ import {
   DynamicFormNotFoundError,
   IdempotencyKeyConflictError,
 } from '../domain/errors'
-import type { DuplicateDynamicFormOperation } from '../domain/structures/duplicate-dynamic-form-operation'
 import type { DuplicateDynamicFormRequest } from '../domain/structures/duplicate-dynamic-form-request'
 import type { DynamicFormAdministrationAuditEntry } from '../domain/entities/dynamic-form-administration-audit-entry'
+import type { DynamicFormOperation } from '../domain/structures/dynamic-form-operation'
 import type { DynamicFormAdministrationAuditRepository } from '../interfaces/dynamic-form-administration-audit-repository'
 import type { DynamicFormAdministrationRepository } from '../interfaces/dynamic-form-administration-repository'
-import type { DynamicFormDuplicateOperationsRepository } from '../interfaces/dynamic-form-duplicate-operations-repository'
+import type { DynamicFormOperationsRepository } from '../interfaces/dynamic-form-operations-repository'
 import type { LegalCatalogDatabase } from '../interfaces/legal-catalog-database'
 
 export class DuplicateDynamicFormUseCase
@@ -21,7 +21,7 @@ export class DuplicateDynamicFormUseCase
 {
   constructor(
     private readonly dynamicFormAdministrationRepository: DynamicFormAdministrationRepository,
-    private readonly dynamicFormDuplicateOperationsRepository: DynamicFormDuplicateOperationsRepository,
+    private readonly dynamicFormOperationsRepository: DynamicFormOperationsRepository,
     private readonly dynamicFormAdministrationAuditRepository: DynamicFormAdministrationAuditRepository,
     private readonly legalCatalogDatabase: LegalCatalogDatabase,
     private readonly idProvider: IdProvider,
@@ -32,7 +32,7 @@ export class DuplicateDynamicFormUseCase
     return this.legalCatalogDatabase.transaction(async () => {
       const normalizedName = request.name.trim().toLocaleLowerCase('pt-BR')
       const previousOperation =
-        await this.dynamicFormDuplicateOperationsRepository.findByOperationKey(
+        await this.dynamicFormOperationsRepository.findByOperationKey(
           request.operationKey,
         )
 
@@ -59,10 +59,18 @@ export class DuplicateDynamicFormUseCase
         name: request.name.trim(),
         normalizedName,
         status: 'unavailable',
-        fields: source.fields.map((field) => ({
+        fields: source.fields.map((field, position) => ({
           ...field,
+          id: this.idProvider.generate(),
+          position,
           ...(field.options
-            ? { options: field.options.map((option) => ({ ...option })) }
+            ? {
+                options: field.options.map((option, optionPosition) => ({
+                  ...option,
+                  id: this.idProvider.generate(),
+                  position: optionPosition,
+                })),
+              }
             : {}),
           ...(field.validation
             ? {
@@ -76,20 +84,27 @@ export class DuplicateDynamicFormUseCase
             : {}),
         })),
         legalTopicIds: [...source.legalTopicIds],
+        version: 1,
         createdAt: now,
         updatedAt: now,
       }
 
-      const operation: DuplicateDynamicFormOperation = {
+      const operation: DynamicFormOperation = {
         operationKey: request.operationKey,
-        sourceDynamicFormId: request.dynamicFormId,
-        requestedNormalizedName: normalizedName,
+        action: 'duplicated',
         actorCollaboratorId: request.actorCollaboratorId,
+        targetDynamicFormId: duplicatedForm.id,
+        expectedVersion: null,
+        canonicalRequest: {
+          kind: 'duplicated',
+          sourceDynamicFormId: request.dynamicFormId,
+          normalizedName,
+        },
         result: duplicatedForm,
         completedAt: now,
       }
       const storedOperation =
-        await this.dynamicFormDuplicateOperationsRepository.addOrGet(operation)
+        await this.dynamicFormOperationsRepository.addOrGet(operation)
 
       if (storedOperation.result.id !== duplicatedForm.id) {
         this.assertReplayIdentity(storedOperation, request, normalizedName)
@@ -119,18 +134,21 @@ export class DuplicateDynamicFormUseCase
   }
 
   private assertReplayIdentity(
-    operation: DuplicateDynamicFormOperation,
+    operation: DynamicFormOperation,
     request: DuplicateDynamicFormRequest,
     normalizedName: string,
   ): void {
     if (
-      operation.sourceDynamicFormId !== request.dynamicFormId ||
-      operation.requestedNormalizedName !== normalizedName ||
+      operation.action !== 'duplicated' ||
+      operation.canonicalRequest.kind !== 'duplicated' ||
+      operation.canonicalRequest.sourceDynamicFormId !== request.dynamicFormId ||
+      operation.canonicalRequest.normalizedName !== normalizedName ||
       operation.actorCollaboratorId !== request.actorCollaboratorId
     ) {
       throw new IdempotencyKeyConflictError(
         request.operationKey,
-        operation.sourceDynamicFormId,
+        operation.action,
+        operation.targetDynamicFormId,
       )
     }
   }

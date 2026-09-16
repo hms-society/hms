@@ -139,7 +139,10 @@ describe('Validate Dynamic Form Answers Use Case', () => {
     expect(result.issues).toEqual(
       expect.arrayContaining([
         { path: 'field:number', message: 'Informe um valor menor ou igual a 4.' },
-        { path: 'field:unknown', message: 'O campo informado não pertence à definição do formulário.' },
+        {
+          path: 'field:unknown',
+          message: 'O campo informado não pertence à definição do formulário.',
+        },
         { path: 'field:required', message: 'Este campo é obrigatório.' },
       ]),
     )
@@ -197,5 +200,30 @@ describe('Validate Dynamic Form Answers Use Case', () => {
         answers: [],
       }),
     ).rejects.toBeInstanceOf(InvalidDynamicFormDefinitionError)
+  })
+
+  it('keeps answer validation compatible with canonical editor metadata', async () => {
+    const canonicalField = {
+      id: 'selection',
+      key: 'selection',
+      label: 'Seleção',
+      type: 'multiple_selection' as const,
+      position: 0,
+      required: false,
+      defaultValue: ['company'],
+      options: [{ id: 'option-id', value: 'company', label: 'Empresa', position: 0 }],
+    }
+    const snapshot = fakeDynamicFormSnapshot({ fields: [canonicalField] })
+
+    await expect(
+      new ValidateDynamicFormAnswersUseCase().execute({
+        snapshot,
+        mode: DynamicFormAnswerValidationMode.Draft,
+        answers: [{ fieldId: 'selection', value: ['company'] }],
+      }),
+    ).resolves.toEqual({
+      answers: [{ fieldId: 'selection', value: ['company'] }],
+      issues: [],
+    })
   })
 })

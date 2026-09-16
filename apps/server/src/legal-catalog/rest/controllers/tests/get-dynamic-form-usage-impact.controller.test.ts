@@ -15,7 +15,7 @@ describe('Get Dynamic Form Usage Impact Controller [GET /legal-catalog/dynamic-f
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture.close())
 
-  it('returns live consultation and formalization totals', async () => {
+  it('returns live formalization totals', async () => {
     await fixture.registerAdmin()
     const form = await fixture.seedDynamicForm()
 
@@ -25,7 +25,6 @@ describe('Get Dynamic Form Usage Impact Controller [GET /legal-catalog/dynamic-f
       .expect(200)
 
     expect(response.body).toEqual({
-      consultation: { total: 0, inProgress: 0 },
       formalization: { total: 0, inProgress: 0 },
     })
   })

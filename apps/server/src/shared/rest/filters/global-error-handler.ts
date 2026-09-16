@@ -14,10 +14,13 @@ import {
   NotFoundError,
 } from '@hms/core/shared/domain/errors'
 import {
+  DynamicFormDefinitionValidationError,
   DynamicFormNameConflictError,
+  DynamicFormVersionConflictError,
   IdempotencyKeyConflictError,
 } from '@hms/core/legal-catalog/domain/errors'
 import { FormalizationContractFormValidationError } from '@hms/core/formalization/domain/errors'
+import { ZodValidationException } from 'nestjs-zod'
 
 export type ErrorResponse = {
   readonly statusCode: number
@@ -48,6 +51,18 @@ export class GlobalErrorHandler implements ExceptionFilter {
     const timestamp = new Date().toISOString()
 
     if (exception instanceof HttpException) {
+      if (exception instanceof ZodValidationException) {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          title: 'BAD_REQUEST',
+          message: 'Validation failed',
+          timestamp,
+          path,
+          code: 'ZOD_VALIDATION_ERROR',
+          issues: this.getZodIssues(exception),
+        }
+      }
+
       const statusCode = exception.getStatus()
       const exceptionResponse = exception.getResponse()
 
@@ -112,6 +127,25 @@ export class GlobalErrorHandler implements ExceptionFilter {
             })),
           }
         : {}),
+      ...(exception instanceof DynamicFormDefinitionValidationError
+        ? {
+            code: 'DYNAMIC_FORM_DEFINITION_INVALID',
+            issues: exception.issues.map((issue) => ({
+              path: issue.path,
+              message: issue.message,
+            })),
+          }
+        : {}),
+      ...(exception instanceof DynamicFormVersionConflictError
+        ? {
+            code: 'DYNAMIC_FORM_VERSION_CONFLICT',
+            metadata: {
+              dynamicFormId: exception.dynamicFormId,
+              expectedVersion: exception.expectedVersion,
+              currentVersion: exception.currentVersion,
+            },
+          }
+        : {}),
       ...(exception instanceof DynamicFormNameConflictError
         ? {
             code: 'DYNAMIC_FORM_NAME_CONFLICT',
@@ -123,7 +157,8 @@ export class GlobalErrorHandler implements ExceptionFilter {
             code: 'IDEMPOTENCY_KEY_CONFLICT',
             metadata: {
               operationKey: exception.operationKey,
-              originalSourceDynamicFormId: exception.originalSourceDynamicFormId,
+              originalAction: exception.originalAction,
+              originalTargetDynamicFormId: exception.originalTargetDynamicFormId,
             },
           }
         : {}),
@@ -149,6 +184,20 @@ export class GlobalErrorHandler implements ExceptionFilter {
     if (typeof message === 'string') return message
 
     return fallback
+  }
+
+  private getZodIssues(exception: ZodValidationException) {
+    const error = exception.getZodError()
+    if (!this.isRecord(error) || !Array.isArray(error.issues)) return []
+
+    return error.issues.flatMap((issue) => {
+      if (!this.isRecord(issue) || typeof issue.message !== 'string') return []
+
+      const issuePath = Array.isArray(issue.path)
+        ? issue.path.map((segment) => String(segment)).join('.')
+        : ''
+      return [{ path: issuePath, message: issue.message }]
+    })
   }
 
   private isAppError(exception: unknown): exception is AppError {
