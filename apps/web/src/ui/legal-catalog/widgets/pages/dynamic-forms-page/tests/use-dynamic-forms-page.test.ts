@@ -8,7 +8,6 @@ import {
   useChangeDynamicFormAvailabilityAction,
   useDeleteDynamicFormAction,
   useDuplicateDynamicFormAction,
-  useDynamicFormUsageImpactQuery,
   useDynamicFormsAdministrationQuery,
 } from '@/ui/legal-catalog/hooks'
 import { useDynamicFormsPage } from '../use-dynamic-forms-page'
@@ -23,7 +22,6 @@ vi.mock('@/ui/legal-catalog/hooks', () => ({
   useChangeDynamicFormAvailabilityAction: vi.fn(),
   useDeleteDynamicFormAction: vi.fn(),
   useDuplicateDynamicFormAction: vi.fn(),
-  useDynamicFormUsageImpactQuery: vi.fn(),
   useDynamicFormsAdministrationQuery: vi.fn(),
 }))
 
@@ -34,7 +32,6 @@ const useChangeDynamicFormAvailabilityActionMock = vi.mocked(
 )
 const useDeleteDynamicFormActionMock = vi.mocked(useDeleteDynamicFormAction)
 const useDuplicateDynamicFormActionMock = vi.mocked(useDuplicateDynamicFormAction)
-const useDynamicFormUsageImpactQueryMock = vi.mocked(useDynamicFormUsageImpactQuery)
 const useDynamicFormsAdministrationQueryMock = vi.mocked(
   useDynamicFormsAdministrationQuery,
 )
@@ -57,10 +54,6 @@ describe('useDynamicFormsPage', () => {
       isError: false,
       isFetching: false,
       refetch: vi.fn(),
-    } as never)
-    useDynamicFormUsageImpactQueryMock.mockReturnValue({
-      data: null,
-      isPending: false,
     } as never)
     useDuplicateDynamicFormActionMock.mockReturnValue({
       duplicateDynamicForm: vi.fn(),
@@ -115,14 +108,6 @@ describe('useDynamicFormsPage', () => {
       isPending: false,
       isError: false,
       isFetching: false,
-      refetch: vi.fn(),
-    } as never)
-    useDynamicFormUsageImpactQueryMock.mockReturnValue({
-      data: {
-        consultation: { total: 1, inProgress: 1 },
-        formalization: { total: 0, inProgress: 0 },
-      },
-      isPending: false,
       refetch: vi.fn(),
     } as never)
     useDuplicateDynamicFormActionMock.mockReturnValue({

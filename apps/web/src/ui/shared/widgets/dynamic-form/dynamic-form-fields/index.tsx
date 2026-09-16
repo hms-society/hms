@@ -17,6 +17,7 @@ export type DynamicFormFieldsSectionProps = {
   errors: Readonly<Record<string, string>>
   onChange: (fieldId: string, value: DynamicFormAnswerValue) => void
   isReadOnly?: boolean
+  showDescriptions?: boolean
 }
 
 export const DynamicFormFieldsSection = ({
@@ -25,11 +26,12 @@ export const DynamicFormFieldsSection = ({
   errors,
   onChange,
   isReadOnly = false,
+  showDescriptions = true,
 }: DynamicFormFieldsSectionProps) => {
   if (fields.length === 0) return null
 
   return (
-    <div className='grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2'>
+    <div className='grid grid-cols-1 gap-y-5'>
       {fields.map((field) => {
         const error = errors[`field:${field.id}`]
         const value = answers[field.id]
@@ -42,7 +44,7 @@ export const DynamicFormFieldsSection = ({
             {field.type === 'boolean' ? (
               <label
                 htmlFor={fieldId}
-                className='flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-input bg-background px-3 text-sm text-foreground transition-colors hover:bg-muted/30'
+                className='flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-input bg-transparent px-3 text-sm text-foreground transition-colors hover:bg-muted/30'
               >
                 <Checkbox
                   id={fieldId}
@@ -54,17 +56,17 @@ export const DynamicFormFieldsSection = ({
                 />
                 <span>
                   {field.label}
-                  {required && <span className='ml-1 text-destructive'>*</span>}
+                  {required && <span className='ml-1 text-destructive'> *</span>}
                 </span>
               </label>
             ) : (
               <label htmlFor={fieldId} className='text-sm font-medium text-foreground'>
                 {field.label}
-                {required && <span className='ml-1 text-destructive'>*</span>}
+                {required && <span className='ml-1 text-destructive'> *</span>}
               </label>
             )}
 
-            {field.description && (
+            {showDescriptions && field.description && (
               <p className='text-xs text-muted-foreground'>{field.description}</p>
             )}
 

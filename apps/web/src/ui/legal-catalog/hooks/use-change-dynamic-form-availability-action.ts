@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { DYNAMIC_FORMS_ADMINISTRATION_QUERY_KEY } from './use-dynamic-forms-administration-query'
+import { getDynamicFormForAdministrationQueryKey } from './use-dynamic-form-for-administration-query'
 
 export const useChangeDynamicFormAvailabilityAction = () => {
   const { legalCatalogService } = useRestContext()
@@ -24,6 +25,9 @@ export const useChangeDynamicFormAvailabilityAction = () => {
     onSuccess: async (response) => {
       await queryClient.invalidateQueries({
         queryKey: DYNAMIC_FORMS_ADMINISTRATION_QUERY_KEY,
+      })
+      await queryClient.invalidateQueries({
+        queryKey: getDynamicFormForAdministrationQueryKey(response.id),
       })
       return response
     },

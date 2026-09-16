@@ -29,8 +29,6 @@ describe('DynamicFormsPage', () => {
       searchParams: { search: '', stage: '', status: '', page: 1, pageSize: 5 },
       hasFilters: false,
       overlay: { kind: 'closed' },
-      impact: null,
-      isImpactPending: false,
       duplicateError: null,
       availabilityError: null,
       deleteError: null,

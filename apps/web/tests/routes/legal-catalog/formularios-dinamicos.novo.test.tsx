@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 
-import { test } from '../../fixtures/auth-fixture'
+import { adminTest as test } from '../../fixtures/auth-fixture'
 import { ROUTES } from '../../../src/constants/routes'
 
 const BACKEND_URL = 'http://hms-api.test'

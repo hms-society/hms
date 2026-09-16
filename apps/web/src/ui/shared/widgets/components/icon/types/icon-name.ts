@@ -58,6 +58,7 @@ export type IconName =
   | 'pilcrow'
   | 'quote'
   | 'list-ordered'
+  | 'grip-vertical'
   | 'strikethrough'
   | 'align-left'
   | 'align-center'

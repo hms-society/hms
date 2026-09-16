@@ -29,10 +29,6 @@ export const DynamicFormsPage = () => {
     searchParams,
     hasFilters,
     overlay,
-    impact,
-    isImpactPending,
-    isImpactError,
-    retryImpact,
     duplicateError,
     duplicateConflict,
     availabilityError,
@@ -201,25 +197,17 @@ export const DynamicFormsPage = () => {
       <AvailabilityDynamicFormDialog
         form={overlay.kind === 'availability' ? overlay.form : null}
         open={overlay.kind === 'availability'}
-        impact={overlay.kind === 'availability' ? impact : null}
-        isImpactPending={overlay.kind === 'availability' && isImpactPending}
-        isImpactError={overlay.kind === 'availability' && isImpactError}
         isMutationPending={availabilityAction.isPending}
         errorMessage={availabilityError}
         onOpenChange={closeOverlay}
-        onRetryImpact={retryImpact}
         onConfirm={handleAvailability}
       />
       <DeleteDynamicFormDialog
         form={overlay.kind === 'delete' ? overlay.form : null}
         open={overlay.kind === 'delete'}
-        impact={overlay.kind === 'delete' ? impact : null}
-        isImpactPending={overlay.kind === 'delete' && isImpactPending}
-        isImpactError={overlay.kind === 'delete' && isImpactError}
         isMutationPending={deleteAction.isPending}
         errorMessage={deleteError}
         onOpenChange={closeOverlay}
-        onRetryImpact={retryImpact}
         onConfirm={handleDelete}
       />
     </main>
