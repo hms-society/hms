@@ -365,7 +365,7 @@ jobs:
             case "$status" in
               completed)
                 echo 'Hermes published the final conclusion through Composio.'
-                break
+exit 0
                 ;;
               failed|cancelled)
                 jq '{run_id, status, error, output}' <<< "$run"
