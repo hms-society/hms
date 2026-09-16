@@ -7,10 +7,10 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 const CHECKLIST_TEMPLATES_QUERY_KEY = ['case-management', 'checklist-templates'] as const
 const LEGAL_AREAS_QUERY_KEY = ['legal-catalog', 'areas'] as const
 
-export function useChecklistsTemplates() {
+export function useChecklistsTemplates(initialAreaId?: string) {
   const { caseManagementService, legalCatalogService } = useRestContext()
   const queryClient = useQueryClient()
-  const [activeAreaId, setActiveAreaId] = useState('')
+  const [activeAreaId, setActiveAreaId] = useState(initialAreaId ?? '')
   const [documentsByArea, setDocumentsByArea] = useState<
     Record<string, ChecklistDocument[]>
   >({})
@@ -94,11 +94,20 @@ export function useChecklistsTemplates() {
 
   useEffect(
     function selectFirstLegalArea() {
-      if (activeAreaId || areas.length === 0) return
+      if (areas.length === 0 || areas.some((area) => area.id === activeAreaId)) return
 
       setActiveAreaId(areas[0].id)
     },
     [activeAreaId, areas],
+  )
+
+  useEffect(
+    function selectInitialLegalArea() {
+      if (initialAreaId && areas.some((area) => area.id === initialAreaId)) {
+        setActiveAreaId(initialAreaId)
+      }
+    },
+    [areas, initialAreaId],
   )
 
   useEffect(

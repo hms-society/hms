@@ -3,6 +3,7 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  Pending,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
@@ -45,6 +46,14 @@ export type CreateLegalCaseRequest = {
   }>
 }
 
+export type CreatePendingRequest = {
+  checklistItemId: string
+  documentFileId?: string
+  documentFileName?: string
+  reason: import('../domain/structures').PendingReason
+  details?: string
+}
+
 export interface CaseManagementService {
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
 
@@ -69,4 +78,11 @@ export interface CaseManagementService {
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
+
+  listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
+
+  createPending(
+    caseId: string,
+    request: CreatePendingRequest,
+  ): Promise<RestResponse<Pending>>
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { LegalCase } from '@hms/core/case-management/domain/entities'
 import {
@@ -72,6 +72,21 @@ export function useChecklistDossierTab({
   const { navigateTo } = useNavigation()
   const queryClient = useQueryClient()
   const { currentCollaborator } = useCurrentCollaboratorQuery()
+  const pendingsQuery = useQuery({
+    queryKey: ['case-management', 'cases', caseId, 'pendencies'],
+    queryFn: async () => {
+      const response = await caseManagementService.listCasePendings(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+  })
+  const pendingCountByChecklistItemId = new Map<string, number>()
+  for (const pending of pendingsQuery.data ?? []) {
+    pendingCountByChecklistItemId.set(
+      pending.checklistItemId,
+      (pendingCountByChecklistItemId.get(pending.checklistItemId) ?? 0) + 1,
+    )
+  }
   const reviewerName =
     currentCollaborator?.professionalName?.trim() || 'Colaborador autenticado'
   const [actionFeedback, setActionFeedback] = useState<string | null>(null)
@@ -282,6 +297,8 @@ export function useChecklistDossierTab({
     checklistGateLabel,
     checklistGateRemarks,
     checklistItems: displayChecklistItems,
+    pendingCountByChecklistItemId,
+    pendings: pendingsQuery.data ?? [],
     complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,

@@ -5,11 +5,18 @@ import type {
   LegalCaseCreation,
 } from '@hms/core/case-management/domain/entities'
 import {
+  ChecklistDocumentType,
   CaseMemberRole,
   LegalCaseStatus,
 } from '@hms/core/case-management/domain/structures'
 import type {
+  CaseChecklistItemCreation,
+} from '@hms/core/case-management/domain/entities'
+import type {
   CaseMembersRepository,
+  CaseChecklistItemsRepository,
+  ChecklistTemplateItemsRepository,
+  ChecklistTemplatesRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
 import type { Intake } from '@hms/core/intake/domain/entities'
@@ -24,6 +31,7 @@ export type CaseManagementSeedReferences = {
   supervisorIds: readonly string[]
   internIds: readonly string[]
   actorId: string
+  legalAreaId: string
 }
 
 @Injectable()
@@ -33,9 +41,16 @@ export class CaseManagementSeeder {
     private readonly legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
     private readonly caseMembersRepository: CaseMembersRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
+    private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplates)
+    private readonly checklistTemplatesRepository: ChecklistTemplatesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems)
+    private readonly checklistTemplateItemsRepository: ChecklistTemplateItemsRepository,
   ) {}
 
   async clear() {
+    await this.caseChecklistItemsRepository.removeAll()
     await this.caseMembersRepository.removeAll()
     await this.legalCasesRepository.removeAll()
   }
@@ -49,8 +64,46 @@ export class CaseManagementSeeder {
       throw new AppError('Case management seed requirements are not met')
     }
 
+    const checklistTemplate = await this.checklistTemplatesRepository.add({
+      legalAreaId: references.legalAreaId,
+      name: 'Checklist padrão de documentos',
+      isActive: true,
+      updatedBy: references.actorId,
+    })
+
+    const checklistTemplateItems = await this.checklistTemplateItemsRepository.addMany([
+      {
+        checklistTemplateId: checklistTemplate.id,
+        title: 'Documento de identificação oficial',
+        documentTypes: [ChecklistDocumentType.Pdf, ChecklistDocumentType.Image],
+        isRequired: true,
+        position: 1,
+        updatedBy: references.actorId,
+      },
+      {
+        checklistTemplateId: checklistTemplate.id,
+        title: 'Comprovante de residência',
+        documentTypes: [ChecklistDocumentType.Pdf, ChecklistDocumentType.Image],
+        isRequired: true,
+        position: 2,
+        updatedBy: references.actorId,
+      },
+      {
+        checklistTemplateId: checklistTemplate.id,
+        title: 'Procuração assinada',
+        documentTypes: [ChecklistDocumentType.Pdf],
+        isRequired: true,
+        position: 3,
+        updatedBy: references.actorId,
+      },
+    ])
+
     const legalCases = await this.legalCasesRepository.addMany(
       this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
+    )
+
+    const checklistItems = await this.caseChecklistItemsRepository.addMany(
+      this.createChecklistItemSeeds(legalCases, checklistTemplateItems),
     )
 
     const caseMembers = await this.caseMembersRepository.addMany(
@@ -67,7 +120,24 @@ export class CaseManagementSeeder {
     return {
       legalCases,
       caseMembers,
+      checklistTemplate,
+      checklistTemplateItems,
+      checklistItems,
     }
+  }
+
+  private createChecklistItemSeeds(
+    legalCases: readonly LegalCase[],
+    templateItems: readonly { id: string; title: string; isRequired: boolean }[],
+  ): CaseChecklistItemCreation[] {
+    return legalCases.flatMap((legalCase) =>
+      templateItems.map((templateItem) => ({
+        caseId: legalCase.id,
+        templateItemKey: templateItem.id,
+        title: templateItem.title,
+        isRequired: templateItem.isRequired,
+      })),
+    )
   }
 
   private createLegalCaseSeeds(

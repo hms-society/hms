@@ -25,6 +25,8 @@ const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
   },
   { label: 'Minha Agenda', route: 'lawyerSchedule', icon: 'calendar' },
   { label: 'Clientes', route: 'clients', icon: 'users' },
+  { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
+
 ]
 
 const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [

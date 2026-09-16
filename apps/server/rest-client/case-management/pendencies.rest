@@ -1,0 +1,87 @@
+@BASE_URL = http://localhost:3333
+@url = {{BASE_URL}}/cases
+
+# Preconditions
+# 1. Start the API on http://localhost:3333.
+# 2. Execute the sign-in request below and provide HMS_USER_SEED_PASSWORD.
+# 3. Use a seeded case ID and checklist item ID when prompted.
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### Confirm the authenticated collaborator
+# @name getCurrentCollaborator
+GET {{BASE_URL}}/collaborators/me
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### List pendencies for a case
+# @name listCasePendencies
+# @prompt caseId Enter the case ID to inspect
+GET {{url}}/{{caseId}}/pendencies
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### List the checklist for the case that will receive the pending
+# @name listChecklistForPending
+# @prompt caseId Enter the case ID to update
+GET {{url}}/{{caseId}}/checklist
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Create a deterministic assisted message for an illegible document
+# @name createIllegiblePending
+# @prompt checklistItemId Enter the checklist item ID returned by the previous request
+POST {{url}}/{{listChecklistForPending.response.body.$[0].caseId}}/pendencies
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "checklistItemId": "{{checklistItemId}}",
+  "documentFileName": "Documento de identificação",
+  "reason": "illegible",
+  "details": "O arquivo não permite a leitura das informações." 
+}
+
+### Get the assisted message generated for the created pending
+# @name getPendingMessage
+GET {{url}}/pendencies/{{createIllegiblePending.response.body.$.pending.id}}/message
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Edit the assisted message before approval
+PATCH {{url}}/pendencies/{{createIllegiblePending.response.body.$.pending.id}}/message
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "subject": "Novo envio necessário: Documento de identificação",
+  "body": "Olá! Precisamos que você envie um novo arquivo legível do documento de identificação.",
+  "sendingInstructions": "Revise o texto e aprove a mensagem antes do envio."
+}
+
+### Approve the assisted message
+POST {{url}}/pendencies/{{createIllegiblePending.response.body.$.pending.id}}/message/approve
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Cancel a pending caused by an incorrect automated classification
+POST {{url}}/pendencies/{{createIllegiblePending.response.body.$.pending.id}}/cancel
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "errorReason": "A classificação automática estava incorreta; o documento está legível."
+}

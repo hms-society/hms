@@ -4,6 +4,7 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  Pending,
 } from '@hms/core/case-management/domain/entities'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
@@ -11,8 +12,16 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
-    createLegalCase(request) {
+  createLegalCase(request) {
       return restClient.post<LegalCase>('/cases', request)
+  },
+
+    listCasePendings(caseId) {
+      return restClient.get<readonly Pending[]>(`/cases/${caseId}/pendencies`)
+    },
+
+    createPending(caseId, request) {
+      return restClient.post<Pending>(`/cases/${caseId}/pendencies`, request)
     },
 
     addComplementaryChecklistItem(caseId, request) {
