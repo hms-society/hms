@@ -7,10 +7,14 @@ on:
     types:
       - opened
       - ready_for_review
+      - synchronize
+      - reopened
 
 permissions:
   actions: read
   contents: read
+  pull-requests: write
+  issues: write
 
 concurrency:
   group: hermes-code-review-${{ github.event.pull_request.number }}
@@ -26,6 +30,21 @@ jobs:
     timeout-minutes: 90
 
     steps:
+      - name: Check if already reviewed by Hermes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          labels="$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json labels --jq '.labels[].name')"
+          if grep -q '^hermes-reviewed$' <<< "$labels"; then
+            echo "Pull Request #$PR_NUMBER já foi revisada pelo Hermes (label hermes-reviewed presente). Ignorando."
+            exit 0
+          fi
+
       - name: Checkout trusted base without PR code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -346,7 +365,7 @@ jobs:
             case "$status" in
               completed)
                 echo 'Hermes published the final conclusion through Composio.'
-                exit 0
+                break
                 ;;
               failed|cancelled)
                 jq '{run_id, status, error, output}' <<< "$run"
@@ -366,3 +385,16 @@ jobs:
 
           echo 'Hermes conclusion timed out.'
           exit 1
+
+      - name: Mark PR as reviewed by Hermes
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          echo "Adicionando label hermes-reviewed à PR #$PR_NUMBER..."
+          gh pr edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "hermes-reviewed" || true
+
