@@ -80,6 +80,7 @@
       "!documentation/HMS Memory",
       "!**/playwright-report",
       "!**/test-results",
+      "!**/coverage",
       "!volumes"
     ]
   },
