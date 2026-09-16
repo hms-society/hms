@@ -323,41 +323,6 @@
       "when": 1789506343901,
       "tag": "0045_dynamic_form_editor",
       "breakpoints": true
-    },
-    {
-      "idx": 46,
-      "version": "7",
-      "when": 1789566782653,
-      "tag": "0046_repair_formalization_completion_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 47,
-      "version": "7",
-      "when": 1789566782654,
-      "tag": "0047_repair_formalization_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 48,
-      "version": "7",
-      "when": 1789566782655,
-      "tag": "0048_repair_document_storage_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 49,
-      "version": "7",
-      "when": 1789566782656,
-      "tag": "0049_repair_formalization_signature_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 50,
-      "version": "7",
-      "when": 1789566782657,
-      "tag": "0050_repair_case_version_schema",
-      "breakpoints": true
     }
   ]
 }
