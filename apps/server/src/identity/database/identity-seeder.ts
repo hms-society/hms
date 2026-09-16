@@ -407,9 +407,7 @@ export class IdentitySeeder {
     }
 
     const clientsToSeed = DEFAULT_CLIENTS.map((client) =>
-      client.email === 'client@hms.br'
-        ? { ...client, id: clientUser.id }
-        : client,
+      client.email === 'client@hms.br' ? { ...client, id: clientUser.id } : client,
     )
     const clients = await this.seed(clientsToSeed)
 
