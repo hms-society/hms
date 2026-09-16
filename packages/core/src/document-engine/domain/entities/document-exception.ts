@@ -2,7 +2,7 @@ import { DocumentExceptionStatus, DocumentExceptionType } from '../structures'
 
 export type DocumentException = {
   id: string
-  documentId: string
+  documentId?: string | null
   caseId: string
   type: DocumentExceptionType
   status: DocumentExceptionStatus

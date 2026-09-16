@@ -8,7 +8,7 @@ import type { DocumentExceptionAuditLogsRepository } from '../interfaces/documen
 import type { DocumentExceptionsRepository } from '../interfaces/document-exceptions-repository'
 
 export type RequestDocumentExceptionUseCaseParams = {
-  documentId: string
+  documentId?: string | null
   caseId: string
   type: string
   justification: string
@@ -25,7 +25,7 @@ export class RequestDocumentExceptionUseCase {
   async execute(params: RequestDocumentExceptionUseCaseParams): Promise<DocumentException> {
     const { documentId, caseId, type, justification, deadlineDate, actorId } = params
 
-    if (!documentId || !caseId || !type || !justification) {
+    if (!caseId || !type || !justification) {
       throw new AppError(
         'Parâmetros obrigatórios ausentes para solicitar exceção',
         'Requisição Inválida',

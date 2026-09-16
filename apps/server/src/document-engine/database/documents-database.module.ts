@@ -12,11 +12,14 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
+import { DOCUMENT_ENGINE_REPOSITORIES } from '../rest/controllers/request-document-exception.controller'
 import { DrizzleDocumentBatchMapper } from './drizzle/mappers/drizzle-document-batch-mapper'
 import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/document-batches-repository'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 import { DrizzleDocumentValidationLogsRepository } from './drizzle/repositories/drizzle-document-validation-logs-repository'
 import { DrizzleDocumentValidationsRepository } from './drizzle/repositories/drizzle-document-validations-repository'
+import { DrizzleDocumentExceptionsRepository } from './drizzle/repositories/drizzle-document-exceptions-repository'
+import { DrizzleDocumentExceptionAuditLogsRepository } from './drizzle/repositories/drizzle-document-exception-audit-logs-repository'
 import { RealDocumentsSeeder } from './real-documents-seeder'
 
 @Module({
@@ -32,6 +35,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DrizzleDocumentBatchesRepository,
     DrizzleDocumentValidationsRepository,
     DrizzleDocumentValidationLogsRepository,
+    DrizzleDocumentExceptionsRepository,
+    DrizzleDocumentExceptionAuditLogsRepository,
     {
       provide: DOCUMENT_ENGINE.dailyCounters,
       useExisting: DrizzleDailyCountersRepository,
@@ -47,6 +52,14 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     {
       provide: DOCUMENT_ENGINE.documentValidationLogs,
       useExisting: DrizzleDocumentValidationLogsRepository,
+    },
+    {
+      provide: DOCUMENT_ENGINE_REPOSITORIES.documentExceptions,
+      useExisting: DrizzleDocumentExceptionsRepository,
+    },
+    {
+      provide: DOCUMENT_ENGINE_REPOSITORIES.auditLogs,
+      useExisting: DrizzleDocumentExceptionAuditLogsRepository,
     },
     {
       provide: CreateDocumentBatchUseCase,
@@ -87,6 +100,8 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
     DOCUMENT_ENGINE.documentBatches,
     DOCUMENT_ENGINE.documentValidations,
     DOCUMENT_ENGINE.documentValidationLogs,
+    DOCUMENT_ENGINE_REPOSITORIES.documentExceptions,
+    DOCUMENT_ENGINE_REPOSITORIES.auditLogs,
     CreateDocumentBatchUseCase,
     ListTriageDocumentBatchesUseCase,
     RealDocumentsSeeder,

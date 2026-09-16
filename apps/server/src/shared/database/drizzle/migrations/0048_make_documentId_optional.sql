@@ -1,0 +1,1 @@
+ALTER TABLE "document_exceptions" ALTER COLUMN "document_id" DROP NOT NULL;

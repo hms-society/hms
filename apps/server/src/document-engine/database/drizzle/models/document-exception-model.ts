@@ -9,7 +9,7 @@ export const documentExceptionModel = pgTable(
   'document_exceptions',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    documentId: uuid('document_id').notNull(),
+    documentId: uuid('document_id'),
     caseId: uuid('case_id').notNull(),
     type: text('type').$type<DocumentExceptionType>().notNull(),
     status: text('status').$type<DocumentExceptionStatus>().notNull(),

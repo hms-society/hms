@@ -122,8 +122,7 @@ describe('RequestDocumentExceptionUseCase', () => {
   it('deve lançar erro se parâmetros obrigatórios estiverem ausentes', async () => {
     await expect(
       useCase.execute({
-        documentId: '',
-        caseId: 'case-789',
+        caseId: '',
         type: DocumentExceptionType.ACEITE_PROVISORIO,
         justification: 'Alguma justificativa',
         actorId: 'user-001',

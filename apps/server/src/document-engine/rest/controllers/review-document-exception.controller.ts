@@ -1,4 +1,4 @@
-import { Body, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
+import { Body, Controller, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { ReviewDocumentExceptionUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
@@ -14,6 +14,7 @@ export class ReviewDocumentExceptionDto {
 
 @ApiTags('Document Exceptions')
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
+@Controller()
 export class ReviewDocumentExceptionController {
   private readonly reviewDocumentExceptionUseCase: ReviewDocumentExceptionUseCase
 

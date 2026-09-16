@@ -1,4 +1,4 @@
-import { Body, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
+import { Body, Controller, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { RequestDocumentExceptionUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
@@ -13,7 +13,6 @@ export const DOCUMENT_ENGINE_REPOSITORIES = {
 }
 
 export class RequestDocumentExceptionDto {
-  caseId!: string
   type!: string
   justification!: string
   deadlineDate?: Date
@@ -21,6 +20,7 @@ export class RequestDocumentExceptionDto {
 
 @ApiTags('Document Exceptions')
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
+@Controller()
 export class RequestDocumentExceptionController {
   private readonly requestDocumentExceptionUseCase: RequestDocumentExceptionUseCase
 
@@ -36,12 +36,12 @@ export class RequestDocumentExceptionController {
     )
   }
 
-  @Post('/api/documents/:documentId/exceptions')
+  @Post('/api/cases/:caseId/document-exceptions')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Request a new document exception' })
+  @ApiOperation({ summary: 'Request a new document exception for a case' })
   @ApiResponse({ status: 201, description: 'Exception requested successfully.' })
   async handle(
-    @Param('documentId') documentId: string,
+    @Param('caseId') caseId: string,
     @Body() body: RequestDocumentExceptionDto,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<DocumentException> {
@@ -51,8 +51,7 @@ export class RequestDocumentExceptionController {
     }
 
     return this.requestDocumentExceptionUseCase.execute({
-      documentId,
-      caseId: body.caseId,
+      caseId,
       type: body.type,
       justification: body.justification,
       deadlineDate: body.deadlineDate,
