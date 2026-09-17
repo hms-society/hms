@@ -27,8 +27,7 @@ describe('Cancel Formalization Signature Sending Use Case', () => {
     const useCase = new CancelFormalizationSignatureSendingUseCase({
       requestsRepository: requests,
       recipientsRepository: mock<FormalizationSignatureRecipientsRepository>(),
-      cancellationsRepository:
-        mock<FormalizationSignatureCancellationAttemptsRepository>(),
+      cancellationsRepository: mock<FormalizationSignatureCancellationAttemptsRepository>(),
       invitationsRepository: mock<FormalizationSignatureInvitationsRepository>(),
       sessionsRepository: mock<FormalizationSignatureGatewaySessionsRepository>(),
       bindingsRepository: mock<FormalizationSignatureProxyBindingsRepository>(),
@@ -62,7 +61,8 @@ describe('Cancel Formalization Signature Sending Use Case', () => {
     const useCase = new CancelFormalizationSignatureSendingUseCase({
       requestsRepository: requests,
       recipientsRepository: mock<FormalizationSignatureRecipientsRepository>(),
-      cancellationsRepository: mock<FormalizationSignatureCancellationAttemptsRepository>(),
+      cancellationsRepository:
+        mock<FormalizationSignatureCancellationAttemptsRepository>(),
       invitationsRepository: mock<FormalizationSignatureInvitationsRepository>(),
       sessionsRepository: mock<FormalizationSignatureGatewaySessionsRepository>(),
       bindingsRepository: mock<FormalizationSignatureProxyBindingsRepository>(),
