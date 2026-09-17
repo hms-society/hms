@@ -168,6 +168,7 @@ export class LegalCatalogControllerTestFixture {
           required: true,
         },
       ],
+      version: 1,
       createdAt: now,
       updatedAt: now,
       ...overrides,

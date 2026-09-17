@@ -2,7 +2,6 @@ import type { DynamicFormUsageImpact } from '@hms/core/legal-catalog/domain/stru
 import { ApiProperty } from '@nestjs/swagger'
 
 export class DynamicFormUsageImpactResponseDto {
-  @ApiProperty({ type: Object }) consultation!: DynamicFormUsageImpact['consultation']
   @ApiProperty({ type: Object }) formalization!: DynamicFormUsageImpact['formalization']
 
   static fromDomain(input: DynamicFormUsageImpact): DynamicFormUsageImpactResponseDto {

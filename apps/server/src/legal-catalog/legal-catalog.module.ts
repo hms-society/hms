@@ -11,10 +11,14 @@ import {
   DeleteDynamicFormController,
   DuplicateDynamicFormController,
   FindDynamicFormNameConflictController,
+  GetDynamicFormFieldUsageImpactController,
+  GetDynamicFormForAdministrationController,
   GetDynamicFormUsageImpactController,
+  CreateDynamicFormController,
   ListDynamicFormsForAdministrationController,
   ListLegalAreasController,
   ListLegalTopicsController,
+  UpdateDynamicFormController,
 } from '@/legal-catalog/rest/controllers'
 
 @Module({
@@ -31,7 +35,11 @@ import {
     ListDynamicFormsForAdministrationController,
     FindDynamicFormNameConflictController,
     DuplicateDynamicFormController,
+    GetDynamicFormForAdministrationController,
+    CreateDynamicFormController,
+    UpdateDynamicFormController,
     GetDynamicFormUsageImpactController,
+    GetDynamicFormFieldUsageImpactController,
     ChangeDynamicFormAvailabilityController,
     DeleteDynamicFormController,
   ],

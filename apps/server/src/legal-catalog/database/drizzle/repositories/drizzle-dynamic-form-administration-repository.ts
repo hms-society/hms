@@ -6,19 +6,23 @@ import type {
 } from '@hms/core/legal-catalog/domain/structures'
 import { DynamicFormNameConflictError } from '@hms/core/legal-catalog/domain/errors'
 import type { DynamicFormAdministrationRepository } from '@hms/core/legal-catalog/interfaces'
-import { and, asc, countDistinct, eq, ilike, inArray, type SQL } from 'drizzle-orm'
+import { and, asc, countDistinct, eq, ilike, inArray, sql, type SQL } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import {
   dynamicFormAdministrationAuditModel,
-  dynamicFormDuplicateOperationModel,
   dynamicFormLegalTopicModel,
   dynamicFormModel,
+  dynamicFormOperationModel,
   legalAreaModel,
   legalTopicModel,
 } from '@/legal-catalog/database/drizzle/models'
 import { DynamicFormMapper } from '@/legal-catalog/database/drizzle/mappers'
+
+type DynamicFormReplacement = Parameters<
+  DynamicFormAdministrationRepository['replace']
+>[1]
 
 @Injectable()
 export class DrizzleDynamicFormAdministrationRepository
@@ -159,6 +163,7 @@ export class DrizzleDynamicFormAdministrationRepository
         stage: form.stage,
         legalAreaId: form.legalAreaId,
         fields: form.fields,
+        version: form.version,
         createdAt: form.createdAt,
         updatedAt: form.updatedAt,
       })
@@ -195,6 +200,7 @@ export class DrizzleDynamicFormAdministrationRepository
         stage: form.stage,
         legalAreaId: form.legalAreaId,
         fields: form.fields,
+        version: form.version,
         createdAt: form.createdAt,
         updatedAt: form.updatedAt,
       })),
@@ -210,6 +216,29 @@ export class DrizzleDynamicFormAdministrationRepository
     if (topicRows.length > 0) {
       await this.database.insert(dynamicFormLegalTopicModel).values(topicRows)
     }
+  }
+
+  async replace(
+    dynamicFormId: string,
+    changes: DynamicFormReplacement,
+    expectedVersion: number,
+  ) {
+    const current = await this.findForReplacement(dynamicFormId)
+
+    if (!current) return { kind: 'not_found' as const }
+    if (current.version !== expectedVersion) {
+      return { kind: 'version_conflict' as const, currentVersion: current.version }
+    }
+
+    if (await this.isReplacementUnchanged(dynamicFormId, current, changes)) {
+      return this.readReplacementResult(dynamicFormId, 'unchanged')
+    }
+
+    const updated = await this.updateDefinition(dynamicFormId, changes, expectedVersion)
+    if (!updated) return this.readReplacementConflict(dynamicFormId)
+
+    await this.replaceTopics(dynamicFormId, changes.legalTopicIds)
+    return this.readReplacementResult(dynamicFormId, 'updated')
   }
 
   async changeStatus(input: {
@@ -247,8 +276,110 @@ export class DrizzleDynamicFormAdministrationRepository
 
   async removeAll(): Promise<void> {
     await this.database.delete(dynamicFormAdministrationAuditModel)
-    await this.database.delete(dynamicFormDuplicateOperationModel)
+    await this.database.delete(dynamicFormOperationModel)
     await this.database.delete(dynamicFormModel)
+  }
+
+  private async findForReplacement(dynamicFormId: string) {
+    const [current] = await this.database
+      .select()
+      .from(dynamicFormModel)
+      .where(eq(dynamicFormModel.id, dynamicFormId))
+      .for('update')
+
+    return current
+  }
+
+  private async isReplacementUnchanged(
+    dynamicFormId: string,
+    current: typeof dynamicFormModel.$inferSelect,
+    changes: DynamicFormReplacement,
+  ) {
+    return (
+      current.name === changes.name &&
+      current.normalizedName === changes.normalizedName &&
+      current.description === changes.description &&
+      current.stage === changes.stage &&
+      current.legalAreaId === changes.legalAreaId &&
+      JSON.stringify(current.fields) === JSON.stringify(changes.fields) &&
+      (await this.hasSameTopics(dynamicFormId, changes.legalTopicIds))
+    )
+  }
+
+  private async updateDefinition(
+    dynamicFormId: string,
+    changes: DynamicFormReplacement,
+    expectedVersion: number,
+  ) {
+    const [updated] = await this.database
+      .update(dynamicFormModel)
+      .set({
+        name: changes.name,
+        normalizedName: changes.normalizedName,
+        description: changes.description,
+        stage: changes.stage,
+        legalAreaId: changes.legalAreaId,
+        fields: changes.fields,
+        updatedAt: changes.updatedAt,
+        version: sql`${dynamicFormModel.version} + 1`,
+      })
+      .where(
+        and(
+          eq(dynamicFormModel.id, dynamicFormId),
+          eq(dynamicFormModel.version, expectedVersion),
+        ),
+      )
+      .returning({ id: dynamicFormModel.id })
+
+    return updated
+  }
+
+  private async readReplacementConflict(dynamicFormId: string) {
+    const [latest] = await this.database
+      .select({ version: dynamicFormModel.version })
+      .from(dynamicFormModel)
+      .where(eq(dynamicFormModel.id, dynamicFormId))
+
+    return latest
+      ? { kind: 'version_conflict' as const, currentVersion: latest.version }
+      : { kind: 'not_found' as const }
+  }
+
+  private async replaceTopics(dynamicFormId: string, legalTopicIds: string[]) {
+    await this.database
+      .delete(dynamicFormLegalTopicModel)
+      .where(eq(dynamicFormLegalTopicModel.dynamicFormId, dynamicFormId))
+
+    if (legalTopicIds.length === 0) return
+
+    await this.database.insert(dynamicFormLegalTopicModel).values(
+      legalTopicIds.map((legalTopicId, position) => ({
+        dynamicFormId,
+        legalTopicId,
+        position,
+      })),
+    )
+  }
+
+  private async readReplacementResult(
+    dynamicFormId: string,
+    kind: 'unchanged' | 'updated',
+  ) {
+    const form = await this.findById(dynamicFormId)
+    return form ? { kind, form } : { kind: 'not_found' as const }
+  }
+
+  private async hasSameTopics(dynamicFormId: string, legalTopicIds: string[]) {
+    const rows = await this.database
+      .select({ legalTopicId: dynamicFormLegalTopicModel.legalTopicId })
+      .from(dynamicFormLegalTopicModel)
+      .where(eq(dynamicFormLegalTopicModel.dynamicFormId, dynamicFormId))
+      .orderBy(asc(dynamicFormLegalTopicModel.position))
+
+    return (
+      rows.length === legalTopicIds.length &&
+      rows.every((row, index) => row.legalTopicId === legalTopicIds[index])
+    )
   }
 
   private buildFilters(query: DynamicFormListQuery): SQL | undefined {

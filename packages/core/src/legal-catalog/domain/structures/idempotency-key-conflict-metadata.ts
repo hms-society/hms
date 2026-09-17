@@ -1,4 +1,5 @@
 export type IdempotencyKeyConflictMetadata = {
   operationKey: string
-  originalSourceDynamicFormId: string
+  originalAction: 'duplicated' | 'created' | 'updated'
+  originalTargetDynamicFormId: string
 }

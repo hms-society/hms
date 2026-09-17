@@ -32,7 +32,7 @@ export const dynamicFormAdministrationAuditModel = pgTable(
     ),
     check(
       'dynamic_form_admin_audit_action_check',
-      sql`${table.action} in ('duplicated', 'availability_changed', 'deleted')`,
+      sql`${table.action} in ('duplicated', 'availability_changed', 'deleted', 'created', 'updated')`,
     ),
   ],
 )

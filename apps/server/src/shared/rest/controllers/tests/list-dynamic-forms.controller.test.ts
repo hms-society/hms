@@ -5,14 +5,10 @@ import type { DynamicFormsRepository } from '@hms/core/shared/interfaces'
 
 import { ListDynamicFormsController } from '@/shared/rest/controllers'
 
-describe('ListDynamicFormsController', () => {
+describe('List Dynamic Forms Controller [GET /dynamic-forms]', () => {
   it('returns available forms filtered by the legal context', async () => {
     const form = makeForm()
-    const repository: DynamicFormsRepository = {
-      list: async () => [form],
-      addMany: async () => [],
-      removeAll: async () => undefined,
-    }
+    const repository = makeRepository([form, makeUnavailableForm()])
     const controller = new ListDynamicFormsController(repository)
 
     const response = await controller.handle({
@@ -24,6 +20,14 @@ describe('ListDynamicFormsController', () => {
     expect(response[0]).toMatchObject({ id: form.id, name: form.name })
   })
 })
+
+function makeRepository(forms: DynamicForm[]): DynamicFormsRepository {
+  return {
+    list: async () => forms,
+    addMany: async () => [],
+    removeAll: async () => undefined,
+  }
+}
 
 function makeForm(): DynamicForm {
   return {
@@ -42,5 +46,13 @@ function makeForm(): DynamicForm {
     fields: [],
     createdAt: new Date('2026-08-18T00:00:00.000Z'),
     updatedAt: new Date('2026-08-18T00:00:00.000Z'),
+  }
+}
+
+function makeUnavailableForm(): DynamicForm {
+  return {
+    ...makeForm(),
+    id: 'form-civil-unavailable',
+    status: 'unavailable',
   }
 }

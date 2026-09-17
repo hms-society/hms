@@ -1,6 +1,7 @@
 @url = {{BASE_URL}}/legal-catalog
 @legalAreaId = replace-with-legal-area-uuid
 @dynamicFormId = replace-with-dynamic-form-uuid
+@fieldId = replace-with-field-uuid
 @operationKey = replace-with-operation-uuid
 
 ### Sign in as the seeded administrator
@@ -24,6 +25,56 @@ GET {{url}}/dynamic-forms?page=1&pageSize=5
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Accept: application/json
 
+### Get dynamic form editor details
+GET {{url}}/dynamic-forms/{{dynamicFormId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
+### Create a dynamic form definition
+POST {{url}}/dynamic-forms
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Nova ficha de consulta",
+  "description": "Ficha para organizar a demanda inicial.",
+  "stage": "consultation",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicIds": ["replace-with-legal-topic-uuid"],
+  "fields": [
+    {
+      "label": "Resumo da demanda",
+      "type": "long_text",
+      "required": true,
+      "placeholder": "Descreva o contexto principal"
+    }
+  ],
+  "operationKey": "{{operationKey}}"
+}
+
+### Update a dynamic form definition
+PUT {{url}}/dynamic-forms/{{dynamicFormId}}
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Ficha de consulta atualizada",
+  "description": "Descrição atualizada.",
+  "stage": "consultation",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicIds": ["replace-with-legal-topic-uuid"],
+  "fields": [
+    {
+      "fieldId": "{{fieldId}}",
+      "label": "Resumo atualizado",
+      "type": "long_text",
+      "required": true
+    }
+  ],
+  "expectedVersion": 1,
+  "operationKey": "replace-with-update-operation-uuid"
+}
+
 ### Find a dynamic-form name conflict
 GET {{url}}/dynamic-form-name-conflicts?name=Triagem%20C%C3%ADvel
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
@@ -41,6 +92,11 @@ Content-Type: application/json
 
 ### Get dynamic-form usage impact
 GET {{url}}/dynamic-forms/{{dynamicFormId}}/impact
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
+### Get dynamic-form field usage impact
+GET {{url}}/dynamic-forms/{{dynamicFormId}}/fields/{{fieldId}}/impact
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Accept: application/json
 

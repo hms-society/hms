@@ -2,4 +2,8 @@ import type { DynamicFormUsageCount } from '../../legal-catalog/domain/structure
 
 export interface FormalizationDynamicFormUsageProvider {
   countByDynamicFormId(id: string): Promise<DynamicFormUsageCount>
+  countByDynamicFormFieldId(input: {
+    dynamicFormId: string
+    fieldId: string
+  }): Promise<DynamicFormUsageCount>
 }

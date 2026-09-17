@@ -14,7 +14,7 @@ import {
   DrizzleLegalTopicsRepository,
   DrizzleDynamicFormAdministrationAuditRepository,
   DrizzleDynamicFormAdministrationRepository,
-  DrizzleDynamicFormDuplicateOperationsRepository,
+  DrizzleDynamicFormOperationsRepository,
   DrizzleLegalCatalogDatabase,
   DynamicFormMapper,
 } from '@/legal-catalog/database/drizzle'
@@ -31,7 +31,7 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
     DynamicFormMapper,
     DrizzleDynamicFormAdministrationRepository,
     DrizzleDynamicFormAdministrationAuditRepository,
-    DrizzleDynamicFormDuplicateOperationsRepository,
+    DrizzleDynamicFormOperationsRepository,
     DrizzleLegalCatalogDatabase,
     {
       provide: LEGAL_CATALOG_REPOSITORIES.areas,
@@ -50,8 +50,8 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
       useExisting: DrizzleDynamicFormAdministrationRepository,
     },
     {
-      provide: LEGAL_CATALOG_REPOSITORIES.dynamicFormDuplicateOperations,
-      useExisting: DrizzleDynamicFormDuplicateOperationsRepository,
+      provide: LEGAL_CATALOG_REPOSITORIES.dynamicFormOperations,
+      useExisting: DrizzleDynamicFormOperationsRepository,
     },
     {
       provide: LEGAL_CATALOG_REPOSITORIES.dynamicFormAdministrationAudit,
@@ -68,7 +68,7 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
     LEGAL_CATALOG_REPOSITORIES.topics,
     LEGAL_CATALOG_PROVIDERS.legalExpertiseCatalog,
     LEGAL_CATALOG_REPOSITORIES.dynamicForms,
-    LEGAL_CATALOG_REPOSITORIES.dynamicFormDuplicateOperations,
+    LEGAL_CATALOG_REPOSITORIES.dynamicFormOperations,
     LEGAL_CATALOG_REPOSITORIES.dynamicFormAdministrationAudit,
     LEGAL_CATALOG_DATABASE,
     LegalCatalogSeeder,

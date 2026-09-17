@@ -22,6 +22,7 @@ describe('Get Dynamic Form Usage Impact Use Case', () => {
     legalAreaId: 'area-id',
     legalTopicIds: [],
     fields: [],
+    version: 1,
     createdAt: new Date('2026-09-11T12:00:00.000Z'),
     updatedAt: new Date('2026-09-11T12:00:00.000Z'),
   }
@@ -33,7 +34,6 @@ describe('Get Dynamic Form Usage Impact Use Case', () => {
 
   it('returns the live impact supplied by the usage provider', async () => {
     const impact: DynamicFormUsageImpact = {
-      consultation: { total: 4, inProgress: 1 },
       formalization: { total: 2, inProgress: 2 },
     }
     repository.findById.mockResolvedValue(form)
@@ -49,9 +49,9 @@ describe('Get Dynamic Form Usage Impact Use Case', () => {
     repository.findById.mockResolvedValue(null)
     const useCase = new GetDynamicFormUsageImpactUseCase(repository, provider)
 
-    await expect(useCase.execute({ dynamicFormId: 'missing-form-id' })).rejects.toBeInstanceOf(
-      DynamicFormNotFoundError,
-    )
+    await expect(
+      useCase.execute({ dynamicFormId: 'missing-form-id' }),
+    ).rejects.toBeInstanceOf(DynamicFormNotFoundError)
     expect(provider.getImpact).not.toHaveBeenCalled()
   })
 })

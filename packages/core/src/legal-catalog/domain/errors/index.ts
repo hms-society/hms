@@ -1,3 +1,6 @@
+export * from './dynamic-form-definition-validation-error'
+export * from './dynamic-form-field-not-found-error'
 export * from './dynamic-form-name-conflict-error'
 export * from './dynamic-form-not-found-error'
+export * from './dynamic-form-version-conflict-error'
 export * from './idempotency-key-conflict-error'

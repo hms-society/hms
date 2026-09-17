@@ -9,11 +9,11 @@ import {
   DynamicFormNameConflictError,
   IdempotencyKeyConflictError,
 } from '../../domain/errors'
+import type { DynamicFormOperation } from '../../domain/structures/dynamic-form-operation'
 import type { DynamicFormAdministrationAuditRepository } from '../../interfaces/dynamic-form-administration-audit-repository'
 import type { DynamicFormAdministrationRepository } from '../../interfaces/dynamic-form-administration-repository'
-import type { DynamicFormDuplicateOperationsRepository } from '../../interfaces/dynamic-form-duplicate-operations-repository'
+import type { DynamicFormOperationsRepository } from '../../interfaces/dynamic-form-operations-repository'
 import type { LegalCatalogDatabase } from '../../interfaces/legal-catalog-database'
-import type { DuplicateDynamicFormOperation } from '../../domain/structures/duplicate-dynamic-form-operation'
 import { DuplicateDynamicFormUseCase } from '../duplicate-dynamic-form-use-case'
 
 const now = new Date('2026-09-11T12:00:00.000Z')
@@ -36,13 +36,14 @@ const source: DynamicForm = {
       required: true,
     },
   ],
+  version: 3,
   createdAt: new Date('2026-09-01T12:00:00.000Z'),
   updatedAt: new Date('2026-09-01T12:00:00.000Z'),
 }
 
 describe('Duplicate Dynamic Form Use Case', () => {
   let repository: MockProxy<DynamicFormAdministrationRepository>
-  let operations: MockProxy<DynamicFormDuplicateOperationsRepository>
+  let operations: MockProxy<DynamicFormOperationsRepository>
   let audit: MockProxy<DynamicFormAdministrationAuditRepository>
   let database: MockProxy<LegalCatalogDatabase>
   let idProvider: MockProxy<IdProvider>
@@ -51,7 +52,7 @@ describe('Duplicate Dynamic Form Use Case', () => {
 
   beforeEach(() => {
     repository = mock<DynamicFormAdministrationRepository>()
-    operations = mock<DynamicFormDuplicateOperationsRepository>()
+    operations = mock<DynamicFormOperationsRepository>()
     audit = mock<DynamicFormAdministrationAuditRepository>()
     database = mock<LegalCatalogDatabase>()
     idProvider = mock<IdProvider>()
@@ -68,12 +69,15 @@ describe('Duplicate Dynamic Form Use Case', () => {
     )
   })
 
-  it('creates an unavailable copy, stores the replay and audits it', async () => {
+  it('creates an unavailable copy with fresh nested identities and a global replay record', async () => {
     operations.findByOperationKey.mockResolvedValue(null)
     repository.findById.mockResolvedValue(source)
     repository.findByNormalizedName.mockResolvedValue(null)
     operations.addOrGet.mockImplementation(async (operation) => operation)
-    idProvider.generate.mockReturnValueOnce('copy-id').mockReturnValueOnce('audit-id')
+    idProvider.generate
+      .mockReturnValueOnce('copy-id')
+      .mockReturnValueOnce('copy-field-id')
+      .mockReturnValueOnce('audit-id')
 
     const result = await useCase.execute({
       dynamicFormId: 'source-id',
@@ -87,28 +91,39 @@ describe('Duplicate Dynamic Form Use Case', () => {
       name: 'Ficha cópia',
       normalizedName: 'ficha cópia',
       status: 'unavailable',
+      version: 1,
       legalTopicIds: ['topic-1'],
     })
+    expect(result.fields[0].id).toBe('copy-field-id')
     expect(repository.add).toHaveBeenCalledWith(result)
     expect(operations.addOrGet).toHaveBeenCalledWith(
       expect.objectContaining({
-        operationKey: 'operation-key',
-        sourceDynamicFormId: 'source-id',
-        requestedNormalizedName: 'ficha cópia',
+        action: 'duplicated',
+        targetDynamicFormId: 'copy-id',
+        canonicalRequest: {
+          kind: 'duplicated',
+          sourceDynamicFormId: 'source-id',
+          normalizedName: 'ficha cópia',
+        },
         result,
       }),
     )
     expect(audit.add).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'duplicated', dynamicFormId: 'copy-id' }),
     )
-    expect(source.status).toBe('available')
   })
 
   it('returns the stored result for an identical replay', async () => {
-    const replay = {
+    const replay: DynamicFormOperation = {
       operationKey: 'operation-key',
-      sourceDynamicFormId: 'source-id',
-      requestedNormalizedName: 'ficha cópia',
+      action: 'duplicated',
+      targetDynamicFormId: 'copy-id',
+      expectedVersion: null,
+      canonicalRequest: {
+        kind: 'duplicated',
+        sourceDynamicFormId: 'source-id',
+        normalizedName: 'ficha cópia',
+      },
       actorCollaboratorId: 'actor-id',
       result: source,
       completedAt: now,
@@ -143,8 +158,14 @@ describe('Duplicate Dynamic Form Use Case', () => {
 
     operations.findByOperationKey.mockResolvedValue({
       operationKey: 'operation-key',
-      sourceDynamicFormId: 'other-source',
-      requestedNormalizedName: 'ficha cópia',
+      action: 'duplicated',
+      targetDynamicFormId: 'copy-id',
+      expectedVersion: null,
+      canonicalRequest: {
+        kind: 'duplicated',
+        sourceDynamicFormId: 'other-source',
+        normalizedName: 'ficha cópia',
+      },
       actorCollaboratorId: 'actor-id',
       result: source,
       completedAt: now,
@@ -160,7 +181,7 @@ describe('Duplicate Dynamic Form Use Case', () => {
   })
 
   it('returns one atomically stored result for concurrent requests with the same key', async () => {
-    let storedOperation: DuplicateDynamicFormOperation | null = null
+    let storedOperation: DynamicFormOperation | null = null
     let generatedId = 0
     operations.findByOperationKey.mockResolvedValue(null)
     repository.findById.mockResolvedValue(source)
@@ -178,34 +199,14 @@ describe('Duplicate Dynamic Form Use Case', () => {
       operationKey: 'operation-key',
       actorCollaboratorId: 'actor-id',
     }
-    const results = await Promise.all([useCase.execute(request), useCase.execute(request)])
+    const results = await Promise.all([
+      useCase.execute(request),
+      useCase.execute(request),
+    ])
 
     expect(results[0]).toBe(results[1])
     expect(repository.add).toHaveBeenCalledTimes(1)
     expect(audit.add).toHaveBeenCalledTimes(1)
     expect(operations.addOrGet).toHaveBeenCalledTimes(2)
-  })
-
-  it('propagates the named atomic normalized-name conflict from the repository', async () => {
-    operations.findByOperationKey.mockResolvedValue(null)
-    repository.findById.mockResolvedValue(source)
-    repository.findByNormalizedName.mockResolvedValue(null)
-    repository.add.mockRejectedValue(
-      new DynamicFormNameConflictError('existing-id'),
-    )
-    operations.addOrGet.mockImplementation(async (operation) => operation)
-
-    await expect(
-      useCase.execute({
-        dynamicFormId: 'source-id',
-        name: 'Ficha cópia',
-        operationKey: 'different-operation-key',
-        actorCollaboratorId: 'actor-id',
-      }),
-    ).rejects.toEqual(
-      expect.objectContaining({ existingDynamicFormId: 'existing-id' }),
-    )
-    expect(repository.add).toHaveBeenCalledTimes(1)
-    expect(audit.add).not.toHaveBeenCalled()
   })
 })

@@ -1,5 +1,7 @@
 export * from './dynamic-form'
 export * from './dynamic-form-administration-audit-entry'
+export * from './dynamic-form-definition-field'
+export * from './dynamic-form-definition-option'
 export * from './legal-area'
 export * from './legal-area-creation'
 export * from './legal-topic'
