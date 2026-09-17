@@ -25,6 +25,7 @@ export const DocumentEngineService = (client: RestClient) => {
     requestException: async (
       caseId: string,
       payload: {
+        documentId: string
         type: string
         justification: string
         deadlineDate?: Date
@@ -38,5 +39,9 @@ export const DocumentEngineService = (client: RestClient) => {
     rejectException: async (exceptionId: string, payload: { justification: string }) => {
       return client.post<DocumentException>(`/documents/exceptions/${exceptionId}/reject`, payload)
     },
+    listCaseExceptions: async (caseId: string) => {
+      return client.get<DocumentException[]>(`/cases/${caseId}/document-exceptions`)
+    },
+
   }
 }

@@ -12,6 +12,7 @@ import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-col
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { useCaseChecklist } from '../hooks/use-case-checklist'
+import { useRequestDocumentExceptionAction } from '@/ui/document-engine/hooks/use-request-document-exception-action'
 import type { ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
@@ -78,6 +79,9 @@ export function useChecklistDossierTab({
   const [checklistItems, setChecklistItems] = useState(checklist)
   const [complementaryItems, setComplementaryItems] = useState<string[]>([])
   const [remarks, setRemarks] = useState('')
+  const [isExceptionModalOpen, setIsExceptionModalOpen] = useState(false)
+
+  const { requestException, isRequestingException } = useRequestDocumentExceptionAction(caseId)
   const [pendingDecision, setPendingDecision] =
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)
@@ -219,9 +223,7 @@ export function useChecklistDossierTab({
   }
 
   function handleRequestDocumentException() {
-    setActionFeedback(
-      'Solicitação de exceção documental registrada para análise de perfil autorizado.',
-    )
+    setIsExceptionModalOpen(true)
   }
 
   function handleApproveChecklist() {
@@ -302,6 +304,8 @@ export function useChecklistDossierTab({
     handleValidateChecklistItem,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
+    isExceptionModalOpen,
+    isRequestingException,
     isReviewDisabled,
     isReviewingChecklistGate:
       mutation.isPending || addComplementaryItemMutation.isPending,
@@ -309,6 +313,8 @@ export function useChecklistDossierTab({
     pendingItemsCount,
     reasonError,
     remarks,
+    requestException,
+    setIsExceptionModalOpen,
     validatedItemsCount,
   }
 }

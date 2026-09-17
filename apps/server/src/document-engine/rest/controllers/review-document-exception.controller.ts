@@ -30,7 +30,7 @@ export class ReviewDocumentExceptionController {
     )
   }
 
-  @Post('/api/documents/exceptions/:id/approve')
+  @Post('/documents/exceptions/:id/approve')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Approve a document exception' })
   @ApiResponse({ status: 200, description: 'Exception approved successfully.' })
@@ -49,7 +49,7 @@ export class ReviewDocumentExceptionController {
     })
   }
 
-  @Post('/api/documents/exceptions/:id/reject')
+  @Post('/documents/exceptions/:id/reject')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Reject a document exception' })
   @ApiResponse({ status: 200, description: 'Exception rejected successfully.' })

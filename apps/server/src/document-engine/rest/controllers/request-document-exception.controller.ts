@@ -13,9 +13,10 @@ export const DOCUMENT_ENGINE_REPOSITORIES = {
 }
 
 export class RequestDocumentExceptionDto {
+  documentId?: string
   type!: string
   justification!: string
-  deadlineDate?: Date
+  deadlineDate?: string
 }
 
 @ApiTags('Document Exceptions')
@@ -36,7 +37,7 @@ export class RequestDocumentExceptionController {
     )
   }
 
-  @Post('/api/cases/:caseId/document-exceptions')
+  @Post('/cases/:caseId/document-exceptions')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Request a new document exception for a case' })
   @ApiResponse({ status: 201, description: 'Exception requested successfully.' })
@@ -45,16 +46,20 @@ export class RequestDocumentExceptionController {
     @Body() body: RequestDocumentExceptionDto,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<DocumentException> {
+    
+
     const allowedProfiles = ['lawyer', 'paralegal', 'supervisor']
     if (!allowedProfiles.includes(collaborator.profile)) {
       throw new ForbiddenException('You do not have permission to request exceptions.')
     }
 
+    console.log('Profile allowed. Executing Use Case...')
     return this.requestDocumentExceptionUseCase.execute({
       caseId,
+      documentId: body.documentId,
       type: body.type,
       justification: body.justification,
-      deadlineDate: body.deadlineDate,
+      deadlineDate: body.deadlineDate ? new Date(body.deadlineDate) : undefined,
       actorId: collaborator.collaboratorId,
     })
   }

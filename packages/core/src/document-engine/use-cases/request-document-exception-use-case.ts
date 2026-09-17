@@ -45,7 +45,6 @@ export class RequestDocumentExceptionUseCase {
         'Requisição Inválida',
       )
     }
-
     const exception = await this.documentExceptionsRepository.create({
       documentId,
       caseId,
@@ -62,7 +61,7 @@ export class RequestDocumentExceptionUseCase {
       userId: actorId,
       metadata: { justification, deadlineDate },
     })
-
+   
     return exception
   }
 }

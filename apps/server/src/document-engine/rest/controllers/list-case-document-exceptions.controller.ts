@@ -24,7 +24,7 @@ export class ListCaseDocumentExceptionsController {
     )
   }
 
-  @Get('/api/cases/:caseId/document-exceptions')
+  @Get('/cases/:caseId/document-exceptions')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all document exceptions for a case' })
   @ApiResponse({ status: 200, description: 'Exceptions returned successfully.' })

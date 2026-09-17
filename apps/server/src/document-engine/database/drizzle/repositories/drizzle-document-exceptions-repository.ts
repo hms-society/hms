@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 import { eq, and } from 'drizzle-orm'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -15,7 +15,7 @@ import { documentExceptionModel } from '../models/document-exception-model'
 
 @Injectable()
 export class DrizzleDocumentExceptionsRepository extends DrizzleRepository implements DocumentExceptionsRepository {
-  constructor(drizzle: DrizzleClient) {
+  constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
     super(drizzle)
   }
 
@@ -88,7 +88,7 @@ export class DrizzleDocumentExceptionsRepository extends DrizzleRepository imple
       where: and(
         eq(documentExceptionModel.type, DocumentExceptionType.ACEITE_PROVISORIO),
         eq(documentExceptionModel.status, DocumentExceptionStatus.PENDING),
-        // In a real app we'd compare deadlineDate with current date, but doing it in memory for simplicity or using drizzle sql.
+      
       ),
     })
     

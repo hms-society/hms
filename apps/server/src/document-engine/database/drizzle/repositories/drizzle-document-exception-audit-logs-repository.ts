@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
@@ -12,11 +12,11 @@ import { documentExceptionAuditLogModel } from '../models/document-exception-aud
 
 @Injectable()
 export class DrizzleDocumentExceptionAuditLogsRepository extends DrizzleRepository implements DocumentExceptionAuditLogsRepository {
-  constructor(drizzle: DrizzleClient) {
+  constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
     super(drizzle)
   }
 
-  async create(data: CreateDocumentExceptionAuditLogData): Promise<void> {
+    async create(data: CreateDocumentExceptionAuditLogData): Promise<void> {
     await this.database
       .insert(documentExceptionAuditLogModel)
       .values({
@@ -25,5 +25,6 @@ export class DrizzleDocumentExceptionAuditLogsRepository extends DrizzleReposito
         userId: data.userId,
         metadata: data.metadata,
       })
+      .execute() 
   }
 }
