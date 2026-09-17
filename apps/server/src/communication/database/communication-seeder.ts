@@ -71,6 +71,9 @@ export class CommunicationSeeder {
       const lawyerId = input.lawyerId
       const mockPrivateMessages = input.intakes.flatMap((intake) => {
         const totalMessages = faker.number.int({ min: 3, max: 10 })
+        const now = new Date()
+        const from = new Date(Math.min(intake.createdAt.getTime(), now.getTime()))
+        const to = new Date(Math.max(intake.createdAt.getTime(), now.getTime()))
 
         const privateMessages = Array.from({ length: totalMessages }, () => {
           const direction = faker.helpers.arrayElement(['inbound', 'outbound'] as const)
@@ -87,8 +90,8 @@ export class CommunicationSeeder {
               : this.cryptoProvider.encrypt(faker.lorem.sentences({ min: 1, max: 3 })),
             fileIds: isFileMessage ? [faker.string.uuid()] : [],
             createdAt: faker.date.between({
-              from: intake.createdAt,
-              to: new Date(),
+              from,
+              to,
             }),
           }
         })
