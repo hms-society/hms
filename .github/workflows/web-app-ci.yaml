@@ -37,9 +37,9 @@ jobs:
         id: scope
         shell: bash
         run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          git fetch origin "${{ github.base_ref }}"
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|\.github/workflows/web-app-ci\.yaml$|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Web changes detected.'
           else

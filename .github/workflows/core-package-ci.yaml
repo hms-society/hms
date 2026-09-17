@@ -30,9 +30,9 @@ jobs:
         id: scope
         shell: bash
         run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          git fetch origin "${{ github.base_ref }}"
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^(packages/core/|packages/validation/|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(packages/core/|packages/validation/|\.github/workflows/core-package-ci\.yaml$|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Core/Validation changes detected.'
           else
