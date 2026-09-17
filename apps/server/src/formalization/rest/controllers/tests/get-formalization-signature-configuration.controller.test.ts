@@ -1,5 +1,6 @@
 import request from 'supertest'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { fakeFormalization } from '@hms/core/formalization/domain/entities/fakers'
 
 import { FormalizationModuleFixture } from '@/formalization/fixtures'
 
@@ -10,6 +11,8 @@ describe('Get Formalization Signature Configuration Controller [GET /formalizati
     fixture = await FormalizationModuleFixture.register()
   })
 
+  beforeEach(async () => fixture.resetDatabase())
+
   afterAll(async () => fixture?.close())
 
   it('rejects an invalid Formalization identifier at the HTTP boundary', async () => {
@@ -18,5 +21,34 @@ describe('Get Formalization Signature Configuration Controller [GET /formalizati
     )
 
     expect(response.status).toBe(400)
+  })
+
+  it('returns the locked configuration when no signature configuration exists', async () => {
+    const formalizationId = fixture.idProvider.generate()
+    await fixture.formalizationsRepository.addOrGet(
+      fakeFormalization({
+        id: formalizationId,
+        assignedLawyerId: fixture.collaboratorId,
+      }),
+    )
+
+    const response = await request(fixture.app.getHttpServer()).get(
+      `/formalizations/${formalizationId}/signature-configuration`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.body).toMatchObject({
+      formalizationId,
+      version: 1,
+      editable: false,
+      status: 'locked',
+      signatories: [],
+      documents: [],
+      readiness: {
+        ready: false,
+        assignmentCount: 0,
+        issues: [{ path: 'configuration', code: 'package_unconfirmed' }],
+      },
+    })
   })
 })
