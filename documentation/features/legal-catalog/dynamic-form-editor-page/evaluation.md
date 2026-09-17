@@ -14,7 +14,7 @@ updated_at: 2026-09-16
 
 Evaluation of Spec revision `7` against the current implementation.
 
-Current result: `in_progress`; Spec revision 7 incorporates the approved product amendment making all nine field types available in both stages, the clarification that usage impact counts Formalização records only, the explicit Web composition leaves and the compatibility corrections implemented by the current branch. The numeric editor, pt-BR error mapping, field-type color states, Formalização-only field-impact flow, focused current Server integration, stale-version conflict handling and admin/attendant route authorization are covered by current automated and real-browser evidence. The selected stacked baseline is `origin/feat/dynamic-forms-page`; its structural gate passes 220/220. The delivery is split into a Core/Validation/Server slice, a Web foundation slice and a dependent Web UI slice to satisfy the repository PR-size gate while keeping each branch compilable. Exact Pencil visual acceptance and the complete MV-01–MV-05 matrix remain open; the repository-wide coverage/integration runs still carry inherited failures recorded below.
+Current result: `in_progress`; Spec revision 7 incorporates the approved product amendment making all nine field types available in both stages, the clarification that usage impact counts Formalização records only, the explicit Web composition leaves and the compatibility corrections implemented by the current branch. The numeric editor, pt-BR error mapping, field-type color states, Formalização-only field-impact flow, focused current Server integration, stale-version conflict handling and admin/attendant route authorization are covered by current automated and real-browser evidence. The selected stacked baseline is `origin/feat/dynamic-forms-page`; its structural gate passes 220/220. The delivery is split into a Core/Validation/Server slice, a Web foundation slice and a dependent Web UI slice to satisfy the repository PR-size gate while keeping each branch compilable. Exact Pencil visual acceptance and the complete MV-01–MV-05 matrix remain open. The final CI gate is not green: Web App CI fails in the unchanged Identity pagination test `colaboradores.index` (61/62 tests passed); this remains an inherited, out-of-scope failure recorded as FND-032.
 
 ## Acceptance matrix
 
@@ -200,6 +200,7 @@ Current result: `in_progress`; Spec revision 7 incorporates the approved product
 | `FND-029` | `environment` | Current Testcontainers migration setup was contaminated by an existing foreign-key constraint | `EV-SERVER-IMPACT-ENV-2026-09-16` | `resolved` | `0049_repair_formalization_signature_schema.sql` now checks the effective PostgreSQL constraint name with `left(..., 63)`. The focused current Testcontainers controller run passes 8/8 tests. |
 | `FND-030` | `publication` | The Web foundation PR changed protected routes to import editor widgets that were intentionally placed in its dependent UI PR | `CI-PR156-WEB` | `resolved` | Moved the route composition change into the dependent UI slice, leaving the foundation independently type-checkable. The UI slice retains the route-to-editor composition over the foundation branch. |
 | `FND-031` | `publication` | The first backend delivery commit included local repair-migration journal entries without their untracked SQL files | `CI-PR155-SERVER` | `resolved` | Removed only the 0046–0050 repair entries from the tracked journal, retaining the canonical 0045 editor migration. The repair SQLs remain uncommitted user-local files and are excluded from the delivery. |
+| `FND-032` | `environment` | Web App CI fails in the unchanged Identity pagination test `colaboradores.index` while the feature diff has no Identity paths | `CI-PR156-WEB`, `CI-PR157-WEB` | `accepted_non_blocking` | The failing assertion is `getByText('Página 2 de 2')`; the same Web integration run passed 61/62 tests and the feature diff contains no Identity changes. It is retained as an inherited baseline failure and prevents a green final CI gate without expanding scope. |
 
 ## Lessons learned
 
@@ -218,7 +219,15 @@ is not SDD current-commit metadata. Retain failed and superseded-head runs as hi
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | `<applicable workflow>` | `<sha>` | `pending` | `<run URL when available>` |
+| `CI-01` | Web App CI | `ef221ca9e0f45eea0bf9c1b7aeb5ee40ccb7389e` | `passed` | https://github.com/hms-society/hms/actions/runs/35159408094 |
+| `CI-02` | Core Package CI | `ef221ca9e0f45eea0bf9c1b7aeb5ee40ccb7389e` | `passed` | https://github.com/hms-society/hms/actions/runs/35159408103 |
+| `CI-03` | Server App CI | `ef221ca9e0f45eea0bf9c1b7aeb5ee40ccb7389e` | `pending` | https://github.com/hms-society/hms/actions/runs/35159408149 |
+| `CI-04` | Core Package CI | `c46e382a4aedba3db41f8e4668c2bcbb6cebdb12` | `passed` | https://github.com/hms-society/hms/actions/runs/35159337654 |
+| `CI-05` | Web App CI | `c46e382a4aedba3db41f8e4668c2bcbb6cebdb12` | `failed` | https://github.com/hms-society/hms/actions/runs/35159337708 |
+| `CI-06` | Server App CI | `c46e382a4aedba3db41f8e4668c2bcbb6cebdb12` | `pending` | https://github.com/hms-society/hms/actions/runs/35159337637 |
+| `CI-07` | Core Package CI | `6748390e92fe9a29577e73d76bd4d4ade9430942` | `passed` | https://github.com/hms-society/hms/actions/runs/35159351544 |
+| `CI-08` | Server App CI | `6748390e92fe9a29577e73d76bd4d4ade9430942` | `passed` | https://github.com/hms-society/hms/actions/runs/35159351547 |
+| `CI-09` | Web App CI | `6748390e92fe9a29577e73d76bd4d4ade9430942` | `failed` | https://github.com/hms-society/hms/actions/runs/35159351539 |
 
 ## History
 
