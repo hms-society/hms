@@ -13,6 +13,7 @@ export type CreateDocumentExceptionData = {
 export type UpdateDocumentExceptionStatusData = {
   status: string
   reviewedBy: string
+  rejectionJustification?: string | null
 }
 
 export interface DocumentExceptionsRepository {

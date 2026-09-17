@@ -1,6 +1,6 @@
 {
-  "id": "c65f696a-e565-4808-957f-0389d9e06079",
-  "prevId": "ec19c774-1ee1-4ab1-a7ab-9b1330dc4bf6",
+  "id": "a9f5aa24-d7f2-45b6-9fbf-e3bcc6b06f35",
+  "prevId": "c65f696a-e565-4808-957f-0389d9e06079",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -4324,6 +4324,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "rejection_justification": {
+          "name": "rejection_justification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "deadline_date": {
           "name": "deadline_date",

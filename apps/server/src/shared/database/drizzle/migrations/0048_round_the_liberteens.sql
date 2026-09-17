@@ -1,0 +1,1 @@
+ALTER TABLE "document_exceptions" ADD COLUMN "rejection_justification" text;

@@ -14,6 +14,7 @@ export const documentExceptionModel = pgTable(
     type: text('type').$type<DocumentExceptionType>().notNull(),
     status: text('status').$type<DocumentExceptionStatus>().notNull(),
     justification: text('justification').notNull(),
+    rejectionJustification: text('rejection_justification'),
     deadlineDate: timestamp('deadline_date', { withTimezone: true }),
     createdBy: uuid('created_by').notNull(),
     reviewedBy: uuid('reviewed_by'),

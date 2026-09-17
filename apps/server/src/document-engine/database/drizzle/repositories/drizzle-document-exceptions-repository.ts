@@ -64,6 +64,7 @@ export class DrizzleDocumentExceptionsRepository extends DrizzleRepository imple
       .set({
         status: data.status as any,
         reviewedBy: data.reviewedBy,
+        ...(data.rejectionJustification !== undefined ? { rejectionJustification: data.rejectionJustification } : {}),
         updatedAt: new Date(),
       })
       .where(eq(documentExceptionModel.id, id))
@@ -106,6 +107,7 @@ export class DrizzleDocumentExceptionsRepository extends DrizzleRepository imple
       type: row.type,
       status: row.status,
       justification: row.justification,
+      rejectionJustification: row.rejectionJustification,
       deadlineDate: row.deadlineDate,
       createdBy: row.createdBy,
       reviewedBy: row.reviewedBy,

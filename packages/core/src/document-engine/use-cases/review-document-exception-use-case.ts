@@ -50,6 +50,7 @@ export class ReviewDocumentExceptionUseCase {
       {
         status: newStatus,
         reviewedBy: actorId,
+        ...(action === 'REJECT' && justification ? { rejectionJustification: justification } : {}),
       },
     )
 

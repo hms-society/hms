@@ -7,6 +7,7 @@ export type DocumentException = {
   type: DocumentExceptionType
   status: DocumentExceptionStatus
   justification: string
+  rejectionJustification?: string | null
   deadlineDate?: Date | null
   createdBy: string
   reviewedBy?: string | null
