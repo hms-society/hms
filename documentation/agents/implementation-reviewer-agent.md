@@ -39,7 +39,8 @@ platform agent type.
 - Rule Pack, Architecture, and module authorities;
 - integrated diff, changed paths, and required final tree;
 - affected `FR-*`, `AC-*`, and integration contracts;
-- design manifest and saved references when UI is affected;
+- design handoff and saved references when UI is affected (or the active Spec's legacy
+  manifest when it predates the handoff convention);
 - current Evaluation evidence index and known stale evidence;
 - current passing structural path gate row, including the exact command, selected base ref,
   resolved base SHA, reported counts, and result;

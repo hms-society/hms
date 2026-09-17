@@ -24,7 +24,7 @@ current Spec, its Rule Pack, Architecture, Modules, and Tooling. Confirm:
 
 - the Spec is `open` and its revision is current;
 - the Technical and Validation Contracts contain enough detail to schedule work;
-- every required design manifest/reference exists;
+- every required design handoff/reference exists;
 - every supplied design screenshot has a completed visual inventory, and all required
   supplemental-screenshot suggestions are captured or explicitly accepted as documented
   assumptions;
@@ -221,7 +221,7 @@ Include only applicable rows. For design-backed UI, schedule every supplied scre
 required supplemental state at its exact viewport and record an independent comparison row for
 each. Do not create a dedicated visual-reference test or use one generic capture as evidence for
 multiple states/viewports. Recommended supplemental screenshots may be deferred only when the
-manifest records the decision and no acceptance gap remains. Builders use saved references;
+handoff records the decision and no acceptance gap remains. Builders use saved references;
 the Orchestrator reopens Pencil through MCP when the Design Contract changes, a reference must
 be refreshed, or the final comparison requires confirmation against the canonical node.
 

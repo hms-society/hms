@@ -46,7 +46,8 @@ agent type or a separate user-facing workflow.
   `Generate`, or `Remove` classifications;
 - affected declarations, producer-consumer relationships, exports, registrations, generated
   artifacts, migrations, and validation commands;
-- design manifest and saved references when UI is affected;
+- design handoff and saved references when UI is affected (or a legacy manifest when the
+  assigned active Spec predates the handoff convention);
 - accepted assumptions, exclusions, prohibited paths, and known risks.
 
 Do not require a Plan, implementation diff, Evaluation, test result, or runtime evidence. Those
@@ -67,7 +68,7 @@ artifacts do not exist yet or belong to later workflows.
 4. Trace every cross-layer producer → contract → consumer relationship. Identify missing
    adapters, callers, serializers, transactions, tenant boundaries, side-effect timing, test
    ownership, or generated artifacts.
-5. Audit UI widget/hook ownership, route constants, route generation, design-manifest mapping,
+5. Audit UI widget/hook ownership, route constants, route generation, design-handoff mapping,
    responsive/accessibility states, and consumer-owned test boundaries when applicable.
 6. Audit Domain Entity/Structure schemas, use-case shape and tests, interface implementers,
    reusable validation ownership, REST operations and matching `.rest` route-group examples,
