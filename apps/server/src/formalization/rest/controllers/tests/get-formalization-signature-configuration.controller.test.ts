@@ -41,13 +41,13 @@ describe('Get Formalization Signature Configuration Controller [GET /formalizati
       formalizationId,
       version: 1,
       editable: false,
-      status: 'locked',
+      status: 'initialization_required',
       signatories: [],
       documents: [],
       readiness: {
         ready: false,
         assignmentCount: 0,
-        issues: [{ path: 'configuration', code: 'package_unconfirmed' }],
+        issues: [{ path: 'configuration', code: 'initialization_required' }],
       },
     })
   })
