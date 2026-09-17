@@ -16,6 +16,7 @@ type ChatViewPanelProps = {
   onSendMessage: (e: React.FormEvent) => void
   onSendStartWindowTemplate?: () => void
   isSendingTemplate?: boolean
+  onOpenCaseDrawer?: () => void
 }
 
 export const ChatViewPanel = ({
@@ -25,6 +26,7 @@ export const ChatViewPanel = ({
   onSendMessage,
   onSendStartWindowTemplate,
   isSendingTemplate = false,
+  onOpenCaseDrawer,
 }: ChatViewPanelProps) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -85,7 +87,13 @@ export const ChatViewPanel = ({
         </div>
 
         <div className='flex items-center gap-2'>
-          <Button variant='secondary' size='sm' className='h-9 gap-1.5 text-xs'>
+          <Button
+            id='view-client-case-button'
+            variant='secondary'
+            size='sm'
+            onClick={onOpenCaseDrawer}
+            className='h-9 gap-1.5 text-xs cursor-pointer'
+          >
             <Icon name='file-text' className='size-4' />
             Ver Caso
           </Button>
