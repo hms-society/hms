@@ -44,7 +44,10 @@ test('preserves the final list URL and query contract for an administrator', asy
   await expect(page).toHaveURL(expectedUrl)
   await expect(page.getByRole('heading', { name: 'Colaboradores' })).toBeVisible()
   await expect(page.getByText('Maria Oliveira 2')).toBeVisible()
-  await expect(page.getByText('Página 2 de 2')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Página 2', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
 
   const listRequest = await listRequestPromise
   const requestUrl = new URL(listRequest.url())
