@@ -17,6 +17,7 @@ export type CreateDocumentBatchRequest = {
   intakeId?: string
   createdBy?: string
   readableId?: string
+  skipProcessing?: boolean
 }
 
 export class CreateDocumentBatchUseCase {
@@ -72,7 +73,9 @@ export class CreateDocumentBatchUseCase {
 
     const files = request.files.map((file) => ({
       ...file,
-      status: DocumentValidationStatus.Processing,
+      status: request.skipProcessing
+        ? DocumentValidationStatus.AwaitingValidation
+        : DocumentValidationStatus.Processing,
     }))
 
     if (resolvedClientId && !request.readableId) {
@@ -85,7 +88,7 @@ export class CreateDocumentBatchUseCase {
       if (dailyBatch) {
         const batch = await this.documentBatchesRepository.addFiles(dailyBatch.id, files)
 
-        await this.publishProcessingEvents(batch, files)
+        if (!request.skipProcessing) await this.publishProcessingEvents(batch, files)
 
         return batch
       }
@@ -108,7 +111,7 @@ export class CreateDocumentBatchUseCase {
       files,
     })
 
-    await this.publishProcessingEvents(batch, files)
+    if (!request.skipProcessing) await this.publishProcessingEvents(batch, files)
 
     return batch
   }

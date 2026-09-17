@@ -1,5 +1,18 @@
+import { useEffect, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { Button } from '@/ui/shadcn/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/shadcn/dialog'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import type {
   ChecklistItemDetailView,
   ChecklistItemPending,
@@ -96,7 +109,52 @@ type PendingCardProps = {
 }
 
 const PendingCard = ({ index, pendingItem }: PendingCardProps) => (
-  <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
+  <PendingCardContent index={index} pendingItem={pendingItem} />
+)
+
+const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
+  const { caseManagementService } = useRestContext()
+  const queryClient = useQueryClient()
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [subject, setSubject] = useState(pendingItem.subject)
+  const [body, setBody] = useState(pendingItem.body)
+  useEffect(() => {
+    setSubject(pendingItem.subject)
+    setBody(pendingItem.body)
+  }, [pendingItem.body, pendingItem.subject])
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      const response = await caseManagementService.editPendingMessage(pendingItem.id, {
+        subject,
+        body,
+      })
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: async () => {
+      setIsEditOpen(false)
+      await queryClient.invalidateQueries({
+        queryKey: ['case-management', 'pendencies', pendingItem.id],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['case-management', 'pendencies', pendingItem.id.split('-')[0], 'messages'],
+      })
+    },
+  })
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const response = await caseManagementService.approvePendingMessage(pendingItem.id)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['case-management'] })
+    },
+  })
+
+  return (
+    <>
+      <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
     <div className='flex items-start gap-3'>
       <div className='flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-xs font-semibold text-destructive'>
         {index}
@@ -128,8 +186,59 @@ const PendingCard = ({ index, pendingItem }: PendingCardProps) => (
             </Badge>
           </div>
           <p className='text-sm italic text-foreground'>{pendingItem.body}</p>
+          <div className='flex flex-wrap gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              size='xs'
+              className='rounded-full'
+              onClick={() => setIsEditOpen(true)}
+              disabled={pendingItem.status !== 'awaiting_approval'}
+            >
+              <Icon name='pencil' className='size-3' />
+              Editar
+            </Button>
+            <Button
+              type='button'
+              variant='brand'
+              size='xs'
+              className='rounded-full'
+              onClick={() => approveMutation.mutate()}
+              disabled={pendingItem.status !== 'awaiting_approval' || approveMutation.isPending}
+            >
+              <Icon name='send' className='size-3' />
+              {approveMutation.isPending ? 'Aprovando...' : 'Aprovar e enviar'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
-  </article>
-)
+      </article>
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar mensagem assistida</DialogTitle>
+            <DialogDescription>
+              Revise a mensagem antes de aprovar e enviar ao cliente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='flex flex-col gap-4'>
+            <label className='flex flex-col gap-1 text-sm font-medium'>
+              Assunto
+              <input className='rounded-md border bg-background px-3 py-2' value={subject} onChange={(event) => setSubject(event.target.value)} />
+            </label>
+            <label className='flex flex-col gap-1 text-sm font-medium'>
+              Mensagem
+              <textarea className='min-h-32 rounded-md border bg-background px-3 py-2' value={body} onChange={(event) => setBody(event.target.value)} />
+            </label>
+          </div>
+          <DialogFooter showCloseButton>
+            <Button type='button' variant='brand' onClick={() => editMutation.mutate()} disabled={editMutation.isPending || !subject.trim() || !body.trim()}>
+              {editMutation.isPending ? 'Salvando...' : 'Salvar alterações'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}

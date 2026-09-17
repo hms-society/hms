@@ -14,7 +14,7 @@ export interface PendingsRepository {
   cancel(pendingId: string, cancelledBy: string): Promise<Pending | undefined>
   updateMessage(
     pendingId: string,
-    changes: Pick<AssistedMessage, 'subject' | 'body' | 'sendingInstructions'>,
+    changes: Pick<AssistedMessage, 'subject' | 'body'>,
   ): Promise<AssistedMessage | undefined>
   findMessageByPendingId(pendingId: string): Promise<AssistedMessage | undefined>
   approveMessage(

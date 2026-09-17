@@ -10,6 +10,7 @@ type Request = {
   documentFileName?: string
   reason: PendingReason
   details?: string
+  clientName?: string
   responsibleId: string
 }
 
@@ -36,7 +37,6 @@ export class CreatePendingUseCase
         checklistItemId: request.checklistItemId,
         subject: message.subject,
         body: message.body,
-        sendingInstructions: message.sendingInstructions,
         status: AssistedMessageStatus.AwaitingApproval,
       },
     })
@@ -46,8 +46,10 @@ export class CreatePendingUseCase
 export function createAssistedMessage(request: Pick<
   Request,
   'reason' | 'documentFileName' | 'details'
+  | 'clientName'
 >) {
   const documentName = request.documentFileName ?? 'documento solicitado'
+  const clientName = request.clientName?.trim() || 'cliente'
   const reasonCopy = {
     [PendingReason.Missing]: `Ainda não recebemos o documento ${documentName}.`,
     [PendingReason.Illegible]: `O documento ${documentName} recebido está ilegível.`,
@@ -58,8 +60,6 @@ export function createAssistedMessage(request: Pick<
 
   return {
     subject: `Novo envio necessário: ${documentName}`,
-    body: `${reasonCopy} ${request.details ?? 'Por favor, envie uma nova versão para continuidade do atendimento.'}`,
-    sendingInstructions:
-      'Revise o texto, confirme os documentos solicitados e aprove a mensagem antes do envio ao cliente.',
+    body: `Olá, ${clientName}. ${reasonCopy} ${request.details ?? 'Por favor, envie uma nova versão para continuidade do atendimento.'}`,
   }
 }

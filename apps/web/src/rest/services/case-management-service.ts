@@ -25,6 +25,20 @@ export const CaseManagementService = (
       return restClient.get<AssistedMessage>(`/cases/pendencies/${pendingId}/message`)
     },
 
+    editPendingMessage(pendingId, request) {
+      return restClient.patch<AssistedMessage>(
+        `/cases/pendencies/${pendingId}/message`,
+        request,
+      )
+    },
+
+    approvePendingMessage(pendingId) {
+      return restClient.post<AssistedMessage>(
+        `/cases/pendencies/${pendingId}/message/approve`,
+        {},
+      )
+    },
+
     createPending(caseId, request) {
       return restClient.post<Pending>(`/cases/${caseId}/pendencies`, request)
     },

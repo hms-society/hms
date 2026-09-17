@@ -1,6 +1,7 @@
 export const AssistedMessageStatus = {
   AwaitingApproval: 'awaiting_approval',
   Approved: 'approved',
+  Sent: 'sent',
   Cancelled: 'cancelled',
 } as const
 

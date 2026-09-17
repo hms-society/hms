@@ -50,7 +50,8 @@ export class DrizzlePendingsRepository extends DrizzleRepository implements Pend
   }
 
   async approveMessage(pendingId: string, approvedBy: string) {
-    const [message] = await this.database.update(assistedMessageModel).set({ status: AssistedMessageStatus.Approved, approvedAt: new Date(), approvedBy, updatedAt: new Date() }).where(eq(assistedMessageModel.pendingId, pendingId)).returning()
+    const now = new Date()
+    const [message] = await this.database.update(assistedMessageModel).set({ status: AssistedMessageStatus.Sent, approvedAt: now, approvedBy, sentAt: now, updatedAt: now }).where(eq(assistedMessageModel.pendingId, pendingId)).returning()
     return message ? toMessage(message) : undefined
   }
 
@@ -83,5 +84,6 @@ function toMessage(record: typeof assistedMessageModel.$inferSelect): AssistedMe
     status: record.status as AssistedMessage['status'],
     approvedAt: record.approvedAt ?? undefined,
     approvedBy: record.approvedBy ?? undefined,
+    sentAt: record.sentAt ?? undefined,
   }
 }

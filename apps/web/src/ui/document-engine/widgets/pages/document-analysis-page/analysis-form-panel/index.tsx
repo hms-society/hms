@@ -328,29 +328,31 @@ export const AnalysisFormPanel = ({
             </Button>
           )}
 
-          <Button
-            type='submit'
-            variant='brand'
-            className='rounded-pill font-sans text-sm font-medium gap-2 h-11 px-6'
-            disabled={isSubmitting || isDuplicateAlreadyConfirmed}
-          >
-            {isSubmitting ? (
-              <Icon name='refresh-cw' className='size-4 animate-spin' />
-            ) : isDuplicateAlreadyConfirmed ? (
-              <Icon name='check' className='size-4' />
-            ) : currentDecision === 'validate' ? (
-              <Icon name='check' className='size-4' />
-            ) : (
-              <Icon name='download' className='size-4' />
-            )}
-            {isDuplicateAlreadyConfirmed
-              ? 'Duplicidade já confirmada'
-              : currentDecision === 'validate'
-                ? 'Confirmar validação'
-                : currentDecision === 'duplicate'
-                  ? 'Confirmar como duplicado'
-                  : 'Salvar decisão'}
-          </Button>
+          {currentDecision !== 'not_linked' && (
+            <Button
+              type='submit'
+              variant='brand'
+              className='rounded-pill font-sans text-sm font-medium gap-2 h-11 px-6'
+              disabled={isSubmitting || isDuplicateAlreadyConfirmed}
+            >
+              {isSubmitting ? (
+                <Icon name='refresh-cw' className='size-4 animate-spin' />
+              ) : isDuplicateAlreadyConfirmed ? (
+                <Icon name='check' className='size-4' />
+              ) : currentDecision === 'validate' ? (
+                <Icon name='check' className='size-4' />
+              ) : (
+                <Icon name='download' className='size-4' />
+              )}
+              {isDuplicateAlreadyConfirmed
+                ? 'Duplicidade já confirmada'
+                : currentDecision === 'validate'
+                  ? 'Confirmar validação'
+                  : currentDecision === 'duplicate'
+                    ? 'Confirmar como duplicado'
+                    : 'Salvar decisão'}
+            </Button>
+          )}
         </footer>
       </form>
     </aside>

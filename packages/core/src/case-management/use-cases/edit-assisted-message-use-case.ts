@@ -6,7 +6,6 @@ export type EditAssistedMessageRequest = {
   pendingId: string
   subject: string
   body: string
-  sendingInstructions: string
 }
 
 export class EditAssistedMessageUseCase
@@ -18,7 +17,6 @@ export class EditAssistedMessageUseCase
     const message = await this.pendingsRepository.updateMessage(request.pendingId, {
       subject: request.subject.trim(),
       body: request.body.trim(),
-      sendingInstructions: request.sendingInstructions.trim(),
     })
 
     if (!message) throw new Error('Mensagem assistida não encontrada.')

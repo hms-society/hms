@@ -58,12 +58,13 @@ export class RecordDocumentValidationDecisionUseCase {
     )
     const decisionRequest = {
       ...request,
+      caseId: this.resolveCaseId(request, currentDocument),
       checklistRequirementId,
     }
 
     const updatedDocument = await this.documentValidationsRepository.recordDecision({
       ...decisionRequest,
-      caseId: this.resolveCaseId(decisionRequest, currentDocument),
+      caseId: decisionRequest.caseId,
       status,
     })
 
@@ -93,9 +94,9 @@ export class RecordDocumentValidationDecisionUseCase {
       })
     }
 
-    const checklistItemId = this.getChecklistItemIdToUpdate(decisionRequest, status)
+    const checklistItemId = this.getChecklistItemId(decisionRequest)
 
-    if (checklistItemId) {
+    if (checklistItemId && status === DocumentValidationStatus.Valid) {
       await this.tryLinkValidatedDocumentToChecklist({
         checklistItemId,
         documentFileId: request.documentFileId,
@@ -103,7 +104,46 @@ export class RecordDocumentValidationDecisionUseCase {
       })
     }
 
+    if (checklistItemId && decisionRequest.caseId && status !== DocumentValidationStatus.Valid) {
+      const pendingReason = this.getPendingReason(request.decision)
+
+      if (pendingReason) {
+        await this.caseChecklistUpdateProvider?.linkPendingDocumentToChecklist({
+          checklistItemId,
+          documentFileId: request.documentFileId,
+          documentFileName: currentDocument.fileName,
+        })
+
+        await this.caseChecklistUpdateProvider?.createDocumentPending({
+          caseId: decisionRequest.caseId,
+          checklistItemId,
+          documentFileId: request.documentFileId,
+          documentFileName: currentDocument.fileName,
+          reason: pendingReason,
+          details: request.reason,
+          responsibleId: request.reviewedBy,
+        })
+      }
+    }
+
     return updatedDocument
+  }
+
+  private getPendingReason(
+    decision: DocumentValidationDecision,
+  ):
+    | 'missing'
+    | 'illegible'
+    | 'incomplete'
+    | 'duplicate'
+    | 'not_corresponding'
+    | undefined {
+    if (decision === DocumentValidationDecision.Illegible) return 'illegible'
+    if (decision === DocumentValidationDecision.Incomplete) return 'incomplete'
+    if (decision === DocumentValidationDecision.Duplicate) return 'duplicate'
+    if (decision === DocumentValidationDecision.Mismatch) return 'not_corresponding'
+    if (decision === DocumentValidationDecision.NotLinked) return 'missing'
+    return undefined
   }
 
   private validateRequest(request: RecordDocumentValidationDecisionRequest) {
@@ -194,11 +234,7 @@ export class RecordDocumentValidationDecisionUseCase {
     return Boolean(document.aiSuggestion && Object.keys(document.aiSuggestion).length > 0)
   }
 
-  private getChecklistItemIdToUpdate(
-    request: RecordDocumentValidationDecisionRequest,
-    status: DocumentValidationStatus,
-  ) {
-    if (status !== DocumentValidationStatus.Valid) return undefined
+  private getChecklistItemId(request: RecordDocumentValidationDecisionRequest) {
     if (!request.checklistRequirementId) return undefined
     if (!this.isUuid(request.checklistRequirementId)) return undefined
 

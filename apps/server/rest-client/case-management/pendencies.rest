@@ -49,6 +49,7 @@ Accept: application/json
 {
   "checklistItemId": "{{checklistItemId}}",
   "documentFileName": "Documento de identificação",
+  "clientName": "Antônio",
   "reason": "illegible",
   "details": "O arquivo não permite a leitura das informações." 
 }
@@ -67,8 +68,7 @@ Accept: application/json
 
 {
   "subject": "Novo envio necessário: Documento de identificação",
-  "body": "Olá! Precisamos que você envie um novo arquivo legível do documento de identificação.",
-  "sendingInstructions": "Revise o texto e aprove a mensagem antes do envio."
+  "body": "Olá! Precisamos que você envie um novo arquivo legível do documento de identificação."
 }
 
 ### Approve the assisted message

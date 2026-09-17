@@ -13,15 +13,15 @@ export const assistedMessageModel = pgTable(
     checklistItemId: uuid('checklist_item_id').references(() => caseChecklistItemModel.id, { onDelete: 'cascade' }).notNull(),
     subject: text('subject').notNull(),
     body: text('body').notNull(),
-    sendingInstructions: text('sending_instructions').notNull(),
     status: text('status').default('awaiting_approval').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
     approvedAt: timestamp('approved_at', { withTimezone: true, mode: 'date' }),
     approvedBy: uuid('approved_by'),
+    sentAt: timestamp('sent_at', { withTimezone: true, mode: 'date' }),
   },
   (table) => [
     index('assisted_messages_case_id_idx').on(table.caseId),
-    check('assisted_messages_status_check', sql`${table.status} in ('awaiting_approval', 'approved', 'cancelled')`),
+    check('assisted_messages_status_check', sql`${table.status} in ('awaiting_approval', 'approved', 'sent', 'cancelled')`),
   ],
 )

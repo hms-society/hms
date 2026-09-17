@@ -84,6 +84,13 @@ export interface CaseManagementService {
 
   getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
 
+  editPendingMessage(
+    pendingId: string,
+    request: Pick<AssistedMessage, 'subject' | 'body'>,
+  ): Promise<RestResponse<AssistedMessage>>
+
+  approvePendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
+
   createPending(
     caseId: string,
     request: CreatePendingRequest,

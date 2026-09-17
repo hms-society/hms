@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import type { CaseChecklistItem } from '@hms/core/case-management/domain/entities'
 import type { Pending } from '@hms/core/case-management/domain/entities'
+import { createAssistedMessage } from '@hms/core/case-management/use-cases'
+import { PendingReason } from '@hms/core/case-management/domain/structures'
 import type {
   DocumentValidationDocument,
   DocumentValidationLog,
@@ -51,7 +53,9 @@ export type ChecklistItemPending = {
   description: string
   documentFileName?: string
   id: string
+  messageId?: string
   reason: Pending['reason']
+  subject: string
   status: string
   title: string
 }
@@ -82,6 +86,15 @@ export function useChecklistItemDetailPage({
     queryKey: ['case-management', 'cases', caseId, 'pendencies'],
     queryFn: async () => {
       const response = await caseManagementService.listCasePendings(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    enabled: Boolean(caseId),
+  })
+  const { data: legalCase } = useQuery({
+    queryKey: ['case-management', 'cases', caseId],
+    queryFn: async () => {
+      const response = await caseManagementService.getLegalCaseDetails(caseId)
       if (response.isFailure) response.throwError()
       return response.body
     },
@@ -127,6 +140,7 @@ export function useChecklistItemDetailPage({
     document,
     documentLogs,
     pendings: pendingMessages,
+    clientName: legalCase?.clientName,
     itemIndex: checklistItem
       ? checklistItems.findIndex((item) => item.id === checklistItem.id)
       : -1,
@@ -169,6 +183,7 @@ function getChecklistItemDetailView({
   document,
   documentLogs,
   pendings,
+  clientName,
   itemIndex,
   totalItemsCount,
 }: {
@@ -176,7 +191,16 @@ function getChecklistItemDetailView({
   checklistItem?: CaseChecklistItem
   document?: DocumentValidationDocument
   documentLogs: DocumentValidationLog[]
-  pendings: readonly { pending: Pending; message: { body: string; status: string } }[]
+  pendings: readonly {
+    pending: Pending
+    message: {
+      body: string
+      id?: string
+      status?: string
+      subject: string
+    }
+  }[]
+  clientName?: string
   itemIndex: number
   totalItemsCount: number
 }): ChecklistItemDetailView {
@@ -192,13 +216,34 @@ function getChecklistItemDetailView({
     isValidated,
   })
   const statusLabel = documentStatusView.label
-  const pendingItems = pendings.map(({ pending, message }) => ({
+  const activePendings = pendings.length > 0 || hasDocument
+    ? pendings
+    : [{
+        pending: {
+          id: `missing-document-${checklistItem.id}`,
+          caseId: checklistItem.caseId,
+          checklistItemId: checklistItem.id,
+          reason: PendingReason.Missing,
+          details: undefined,
+          documentFileName: undefined,
+          responsibleId: 'system',
+          createdAt: checklistItem.createdAt,
+        } satisfies Pending,
+        message: createAssistedMessage({
+          reason: PendingReason.Missing,
+          documentFileName: checklistItem.title,
+          clientName,
+        }),
+      }]
+  const pendingItems = activePendings.map(({ pending, message }) => ({
     body: message.body,
     description: pending.details ?? getPendingReasonLabel(pending.reason),
     documentFileName: pending.documentFileName,
     id: pending.id,
+    messageId: 'id' in message ? message.id : undefined,
     reason: pending.reason,
-    status: message.status,
+    subject: message.subject,
+    status: 'status' in message ? message.status ?? 'awaiting_approval' : 'awaiting_approval',
     title: getPendingReasonLabel(pending.reason),
   }))
   const extractedFields =

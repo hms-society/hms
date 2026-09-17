@@ -7,10 +7,10 @@ export type AssistedMessage = Entity & {
   checklistItemId: string
   subject: string
   body: string
-  sendingInstructions: string
   status: AssistedMessageStatus
   createdAt: Date
   updatedAt: Date
   approvedAt?: Date
   approvedBy?: string
+  sentAt?: Date
 }
