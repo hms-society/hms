@@ -1,4 +1,4 @@
-import { AppError } from '#shared/domain/errors'
+import { AppError, BadRequestError } from '#shared/domain/errors'
 import type { DocumentException } from '../domain/entities/document-exception'
 import {
   DocumentExceptionStatus,
@@ -26,24 +26,18 @@ export class RequestDocumentExceptionUseCase {
     const { documentId, caseId, type, justification, deadlineDate, actorId } = params
 
     if (!caseId || !type || !justification) {
-      throw new AppError(
-        'Parâmetros obrigatórios ausentes para solicitar exceção',
-        'Requisição Inválida',
-      )
+      throw new BadRequestError('Parâmetros obrigatórios ausentes para solicitar exceção')
     }
 
     if (
       type !== DocumentExceptionType.DISPENSA_DEFINITIVA &&
       type !== DocumentExceptionType.ACEITE_PROVISORIO
     ) {
-      throw new AppError('Tipo de exceção inválido', 'Requisição Inválida')
+      throw new BadRequestError('Tipo de exceção inválido')
     }
 
     if (type === DocumentExceptionType.ACEITE_PROVISORIO && !deadlineDate) {
-      throw new AppError(
-        'Data limite é obrigatória para Aceite Provisório',
-        'Requisição Inválida',
-      )
+      throw new BadRequestError('Data limite é obrigatória para Aceite Provisório')
     }
     const exception = await this.documentExceptionsRepository.create({
       documentId,

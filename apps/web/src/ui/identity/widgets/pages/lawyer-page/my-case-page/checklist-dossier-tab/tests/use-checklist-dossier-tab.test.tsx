@@ -466,9 +466,7 @@ describe('useChecklistDossierTab', () => {
     ])
 
     act(() => result.current.handleRequestDocumentException())
-    expect(result.current.actionFeedback).toBe(
-      'Solicitação de exceção documental registrada para análise de perfil autorizado.',
-    )
+    expect(result.current.isExceptionModalOpen).toBe(true)
   })
 
   it('does not submit checklist reviews while the case detail uses mock data', async () => {
