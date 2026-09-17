@@ -80,7 +80,7 @@ export const useDuplicateDynamicFormAction = () => {
 }
 
 function getFailureMetadata(response: unknown) {
-  const body = (response as { _body?: unknown })._body
+  const body = (response as { failureBody?: unknown }).failureBody
   if (!body || typeof body !== 'object') return null
   const metadata = (body as { metadata?: unknown }).metadata
   return metadata && typeof metadata === 'object'

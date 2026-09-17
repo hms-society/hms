@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  GripVertical,
   History,
   IdCard,
   Inbox,
@@ -173,6 +174,7 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   pilcrow: Pilcrow,
   quote: Quote,
   'list-ordered': ListOrdered,
+  'grip-vertical': GripVertical,
   strikethrough: Strikethrough,
 
   'align-left': AlignLeft,

@@ -11,7 +11,6 @@ import {
   useChangeDynamicFormAvailabilityAction,
   useDeleteDynamicFormAction,
   useDuplicateDynamicFormAction,
-  useDynamicFormUsageImpactQuery,
   useDynamicFormsAdministrationQuery,
 } from '@/ui/legal-catalog/hooks'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -59,12 +58,6 @@ export function useDynamicFormsPage() {
   )
 
   const formsQuery = useDynamicFormsAdministrationQuery(query)
-  const impactQuery = useDynamicFormUsageImpactQuery(
-    overlay.kind === 'closed' || overlay.kind === 'duplicate'
-      ? undefined
-      : overlay.form.id,
-    overlay.kind === 'availability' || overlay.kind === 'delete',
-  )
   const duplicateAction = useDuplicateDynamicFormAction()
   const availabilityAction = useChangeDynamicFormAvailabilityAction()
   const deleteAction = useDeleteDynamicFormAction()
@@ -176,10 +169,6 @@ export function useDynamicFormsPage() {
     }
   }
 
-  function retryImpact() {
-    return impactQuery.refetch()
-  }
-
   function handleEdit(dynamicFormId: string) {
     void navigateTo('dynamicForm', { params: { dynamicFormId } })
   }
@@ -199,10 +188,6 @@ export function useDynamicFormsPage() {
     searchParams,
     hasFilters,
     overlay,
-    impact: impactQuery.data ?? null,
-    isImpactPending: impactQuery.isPending || impactQuery.isFetching,
-    isImpactError: impactQuery.isError,
-    retryImpact,
     duplicateError,
     duplicateConflict: duplicateAction.conflict,
     availabilityError,
