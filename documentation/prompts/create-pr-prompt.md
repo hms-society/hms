@@ -175,7 +175,8 @@ implementation directly in the PR workflow.
 For design-backed UI, use the saved Spec design bundle—not live Pencil—and include an independent
 comparison for every supplied screenshot and every required supplemental screenshot:
 
-- route/state and exact saved reference path or source node ID from `design/manifest.md`;
+- route/state and exact saved reference path or source node ID from `design/handoff.md` (or
+  the active Spec's legacy manifest);
 - target viewport;
 - repository Playwright CLI manual result;
 - implementation screenshot/comparison path;

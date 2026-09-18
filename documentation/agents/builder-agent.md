@@ -43,7 +43,8 @@ create a hierarchy between Builders.
 3. Verify that the solution respects the current Contract.
 4. Implement only the assigned scope.
 5. When the Spec has a Design Contract:
-   - read `documentation/design.md`, the UI Rules, `design/manifest.md`, and every
+   - read `documentation/design.md`, the UI Rules, `design/handoff.md` (or the active
+     Spec's legacy `design/manifest.md`), and every
      applicable reference screenshot;
    - use the Spec visual inventory as an executable checklist; do not omit inventoried
      elements or introduce inferred behavior without an FR/AC or recorded decision;

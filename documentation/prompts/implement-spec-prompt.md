@@ -179,6 +179,53 @@ record exact paths, commands, results and evidence identifiers.
 Do not overwrite prior evidence. Evaluation uses only `in_progress`, `ready` and `completed`;
 actual results, findings and lessons learned remain in the evidence ledger rather than metadata.
 
+## Design authority and visual gate
+
+For any UI or design-backed change, run this gate before editing feature source and again before
+marking the affected work complete. It is mandatory even for a small maintenance change.
+
+### Design authority preflight
+
+Before the first visual edit:
+
+1. resolve the exact feature root from the user request, current Spec/Plan, route/component paths
+   and repository tree. Record the selected `documentation/features/<domain>/<feature>/` path;
+2. resolve the canonical design authority:
+   - use `design/handoff.md` for new design-backed feature bundles;
+   - use a legacy `design/manifest.md` only when the active Spec predates the handoff convention;
+   - never substitute a similarly named neighboring feature's design artifact;
+3. read the handoff/manifest and every supplied reference needed by the affected surface. Record
+   the reference inventory: surface/state, exact viewport, implementation path, reference path or
+   node and any approved supplemental state;
+4. freeze the scope fence: record allowed implementation paths and explicitly excluded adjacent
+   pages/surfaces. If the requested path and design authority disagree, stop and resolve the
+   authority before editing;
+5. materialize the result in `evaluation.md` as an `EV-*` preflight/runtime row and, when a
+   mismatch or ambiguity exists, an `FND-*` row. No feature source edit starts while this record
+   is missing or unresolved.
+
+### Visual implementation gate
+
+For each affected visual surface:
+
+1. capture or identify a baseline before editing and use the exact reference viewport/state;
+2. implement the smallest composition slice, then compare it with the reference before moving
+   to the next slice. At minimum inspect structure/order, navigation and heading hierarchy,
+   surfaces/cards, action placement, typography/tokens, states, responsive behavior and
+   keyboard/focus affordances;
+3. treat any material discrepancy as an automatic in-contract correction: mark affected `EV-*`
+   rows `stale`, record an `FND-*`, fix the responsible scope, and recapture/reinspect;
+4. before readiness, verify `git diff --name-only` against the scope fence and confirm no adjacent
+   page or similarly named feature was changed accidentally;
+5. a passing unit or route test cannot close this gate. Readiness requires fresh exact-viewport
+   screenshots, direct comparison notes, classified console/network evidence and the relevant
+   `evaluation.md` rows on the current candidate.
+
+The gate passes only when the selected authority, scope fence, current reference comparisons and
+responsive/accessibility checks are recorded in Evaluation. If no design reference exists, record
+`not_applicable` for the visual-reference portion and still run the scope and
+responsive/accessibility checks applicable to the UI change.
+
 When a colocated Evaluation already exists, read it before activating the Builder. Treat its
 open findings, failed attempts, command corrections, service prerequisites and visual notes as
 implementation inputs for the current revision. Historical or completed evidence is context,
@@ -516,7 +563,10 @@ sensor passed. The next action is correction and rerun, not a user permission re
 
 When a Design Contract exists:
 
-- read `design/manifest.md` and every saved reference before coding;
+- run `Design authority and visual gate` before this section and keep its authority, scope and
+  comparison records current through every correction;
+- read `design/handoff.md` and every saved reference before coding, or the active Spec's
+  legacy manifest when it predates the handoff convention;
 - confirm every supplied screenshot has a visual inventory and every supplemental-screenshot
   suggestion has a recorded decision;
 - use saved references during implementation and reopen Pencil through MCP when the Design
@@ -527,7 +577,7 @@ When a Design Contract exists:
 - do not create a dedicated visual-reference integration test;
 - capture and compare every supplied design screenshot and every required supplemental state at
   its exact viewport, using an existing behavioral scenario or a manual Playwright CLI run;
-  supplemental screenshots marked recommended may be deferred only when the manifest records
+  supplemental screenshots marked recommended may be deferred only when the handoff records
   the decision and the state is not an acceptance gap;
 - capture every design-backed state at its exact viewport into ignored Playwright/browser
   output or a CI artifact, and record the comparison details plus the
@@ -536,7 +586,7 @@ When a Design Contract exists:
 
 If an approved implementation change intentionally introduces a visual element absent from
 the references, treat it as a Design Contract amendment. Clarify only unresolved placement or
-scope, update the Spec and manifest/reference artifact, recapture affected screenshots and
+scope, update the Spec and handoff/reference artifact, recapture affected screenshots and
 rerun invalidated validation.
 
 ## Living evidence
@@ -607,6 +657,8 @@ subagent while the Orchestrator runs the applicable integrated sensors:
 5. execute every applicable `MV-*` with the Playwright CLI;
 6. inspect every AC, manual scenario and supplied/supplemental screenshot with exact
    viewport/state, console/network, accessibility, DOM/layout and persistence evidence;
+   confirm the `Design authority and visual gate` is passing on the current candidate and
+   recapture any affected visual evidence made stale by the latest correction;
 7. when `reviewer` applies, verify and classify every finding;
 8. record commands, captures, results, review findings and resolutions in Evaluation.
 

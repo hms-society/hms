@@ -80,7 +80,7 @@ documentation/features/<domain>/<feature>/
 ├── plan.md                         # optional
 ├── evaluation.md                   # created at implementation kickoff
 └── design/                         # for design-backed UI
-    ├── manifest.md
+    ├── handoff.md
     └── <reference screenshots>.png
 ```
 
@@ -95,7 +95,7 @@ documentation/features/<domain>/<feature>/changes/<change-name>/
 | `spec.md` | Product, design, technical, and validation Contracts. | Attempts or actual test results. |
 | `plan.md` | Waves, dependencies, stable Builder ownership, status, blockers, and next action. | Duplicate product or technical Contracts. |
 | `evaluation.md` | Commands, runtime/manual/visual validation results, findings, history, and PR CI. | Product or architecture authority. |
-| `design/manifest.md` | Reference inventory, Pencil node, state, viewport, implementation surface, and comparison requirement. | Implementation-generated proof. |
+| `design/handoff.md` | Offline implementation contract: reference inventory; Pencil node/state/viewport; screenshot-to-surface mapping; HMS token, component, layout, icon, theme, responsive and accessibility recipes; allowed deviations; and AC/MV comparison requirements. | Implementation-generated proof; repository-wide design tokens or Rules; shared component behavior; product/technical scope owned by the Spec; or actual results owned by Evaluation. |
 
 Implementation screenshots are transient validation aids, not SDD deliverables. Do not
 create feature-local `evidence/` directories, commit implementation screenshots, or make
@@ -103,6 +103,12 @@ stored visual files a requirement for closing a Spec. Capture a screenshot only 
 helps inspect a live or CI run, then record the visual observation and validation result in
 `evaluation.md` without retaining the image in the feature artifacts. Design reference
 images under `design/` remain authoritative inputs and are not implementation evidence.
+
+Existing `design/manifest.md` artifacts remain valid immutable or active legacy handoffs. Do
+not bulk-rename historical feature bundles. A new design-backed Spec uses `design/handoff.md`;
+when a legacy design-backed Spec is materially amended, migrate its manifest to `handoff.md`
+only when the design contract is already being refreshed, update every live reference, and
+preserve revision history.
 
 ## Artifact statuses
 
@@ -223,7 +229,7 @@ deterministic integrity checks, activate exactly one read-only
   security, concurrency, provider, migration, design, or validation risk makes independent
   review useful;
 - provide the exact draft revision, source/mode, authorities, Rule Pack, relevant paths and
-  declarations, change classifications, design manifest, assumptions, exclusions, validation
+  declarations, change classifications, design handoff, assumptions, exclusions, validation
   commands, and known risks;
 - do not create Reviewers per application, package, layer, Rule, screenshot, or research lane;
 - do not provide a Plan, implementation diff, Evaluation, test result, or runtime evidence as a
@@ -247,8 +253,13 @@ For UI backed by Pencil or supplied screenshots, the Spec creator:
 2. visually inventories every relevant frame and asks about uncontracted behavior;
 3. identifies missing states or viewports and classifies supplemental references;
 4. saves one reference image per required state under the feature-local `design/` directory;
-5. writes `design/manifest.md` with node, state, viewport, implementation surface, and AC/MV mapping;
-6. verifies every saved image exists, is non-empty, has the expected dimensions, and was visually inspected.
+5. writes `design/handoff.md` as a self-contained offline implementation contract with node,
+   state, viewport, screenshot, implementation-surface and AC/MV mappings plus exact
+   Pencil-to-HMS token/component/layout/icon/theme/responsive/accessibility recipes and
+   documented semantic fallbacks or allowed deviations;
+6. verifies every saved image exists, is non-empty, has the expected dimensions, and was
+   visually inspected, and verifies that a Builder without Pencil access can select the exact
+   shared primitives, variants and semantic tokens from the handoff without inventing values.
 
 The Spec stays `draft` if a required reference cannot be captured or a design-derived product
 ambiguity is unresolved. Builders use the saved bundle. Reopen Pencil when the Design Contract
