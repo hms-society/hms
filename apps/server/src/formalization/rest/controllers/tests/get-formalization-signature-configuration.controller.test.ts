@@ -51,4 +51,84 @@ describe('Get Formalization Signature Configuration Controller [GET /formalizati
       },
     })
   })
+
+  it('returns source identity and available channels for signatories', async () => {
+    const formalizationId = fixture.idProvider.generate()
+    const preview = await fixture.seedPendingSignaturePreview({ formalizationId })
+    const signatoryId = fixture.idProvider.generate()
+    const personId = fixture.idProvider.generate()
+    const assignmentId = fixture.idProvider.generate()
+    const occurredAt = fixture.datetimeProvider.now()
+
+    fixture.sourceProvider.findPerson.mockResolvedValue({
+      personId,
+      name: 'Cliente da formalização',
+      type: 'natural',
+      email: 'cliente@example.com',
+      availableChannels: ['email'],
+    })
+    fixture.sourceProvider.listCurrentDocuments.mockResolvedValue([
+      {
+        documentId: preview.documentId,
+        documentVersionId: preview.documentVersionId,
+        documentSpecificationId: fixture.idProvider.generate(),
+        name: 'Contrato principal',
+        reviewStatus: 'approved',
+        fileId: fixture.idProvider.generate(),
+      },
+    ])
+
+    await fixture.signatureConfigurationRepository.replaceConfiguration({
+      formalizationId,
+      expectedFormalizationVersion: 1,
+      actorId: fixture.collaboratorId,
+      occurredAt,
+      signatories: [
+        {
+          id: signatoryId,
+          formalizationId,
+          role: 'client',
+          personId,
+          position: 1,
+          selectedChannels: ['email'],
+          createdByCollaboratorId: fixture.collaboratorId,
+          createdAt: occurredAt,
+          updatedByCollaboratorId: fixture.collaboratorId,
+          updatedAt: occurredAt,
+        },
+      ],
+      assignments: [
+        {
+          id: assignmentId,
+          formalizationId,
+          signatoryId,
+          documentId: preview.documentId,
+          documentVersionId: preview.documentVersionId,
+          createdByCollaboratorId: fixture.collaboratorId,
+          createdAt: occurredAt,
+        },
+      ],
+      fields: [],
+    })
+
+    const response = await request(fixture.app.getHttpServer()).get(
+      `/formalizations/${formalizationId}/signature-configuration`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.body.signatories).toEqual([
+      expect.objectContaining({
+        signatoryId,
+        personId,
+        name: 'Cliente da formalização',
+        availableChannels: ['email'],
+      }),
+    ])
+    expect(response.body.documents).toEqual([
+      expect.objectContaining({
+        documentId: preview.documentId,
+        name: 'Contrato principal',
+      }),
+    ])
+  })
 })

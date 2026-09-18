@@ -16,6 +16,7 @@ import {
 import { IdentityModule } from '@/identity/identity.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { SharedModule } from '@/shared/shared.module'
 import { IntakeModule } from '@/intake/intake.module'
 
 @Module({
@@ -25,6 +26,7 @@ import { IntakeModule } from '@/intake/intake.module'
     IdentityModule,
     ProvisionModule,
     SharedDatabaseModule,
+    SharedModule,
   ],
   providers: [
     FormalizationSignatureSecretHasher,
