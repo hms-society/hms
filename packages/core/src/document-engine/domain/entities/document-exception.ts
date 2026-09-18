@@ -1,4 +1,4 @@
-import { DocumentExceptionStatus, DocumentExceptionType } from '../structures'
+import type { DocumentExceptionStatus, DocumentExceptionType } from '../structures'
 
 export type DocumentException = {
   id: string

@@ -81,7 +81,8 @@ export function useChecklistDossierTab({
   const [remarks, setRemarks] = useState('')
   const [isExceptionModalOpen, setIsExceptionModalOpen] = useState(false)
 
-  const { requestException, isRequestingException } = useRequestDocumentExceptionAction(caseId)
+  const { requestException, isRequestingException } =
+    useRequestDocumentExceptionAction(caseId)
   const [pendingDecision, setPendingDecision] =
     useState<CaseChecklistGateDecisionValue | null>(null)
   const [reasonError, setReasonError] = useState<string | null>(null)

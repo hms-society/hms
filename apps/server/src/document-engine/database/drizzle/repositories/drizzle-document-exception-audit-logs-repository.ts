@@ -11,12 +11,15 @@ import type {
 import { documentExceptionAuditLogModel } from '../models/document-exception-audit-log-model'
 
 @Injectable()
-export class DrizzleDocumentExceptionAuditLogsRepository extends DrizzleRepository implements DocumentExceptionAuditLogsRepository {
+export class DrizzleDocumentExceptionAuditLogsRepository
+  extends DrizzleRepository
+  implements DocumentExceptionAuditLogsRepository
+{
   constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
     super(drizzle)
   }
 
-    async create(data: CreateDocumentExceptionAuditLogData): Promise<void> {
+  async create(data: CreateDocumentExceptionAuditLogData): Promise<void> {
     await this.database
       .insert(documentExceptionAuditLogModel)
       .values({
@@ -25,6 +28,6 @@ export class DrizzleDocumentExceptionAuditLogsRepository extends DrizzleReposito
         userId: data.userId,
         metadata: data.metadata,
       })
-      .execute() 
+      .execute()
   }
 }

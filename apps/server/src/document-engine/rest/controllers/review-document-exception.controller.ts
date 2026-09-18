@@ -1,8 +1,19 @@
-import { Body, Controller, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Inject,
+  Param,
+  Post,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { ReviewDocumentExceptionUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
-import type { DocumentExceptionsRepository, DocumentExceptionAuditLogsRepository } from '@hms/core/document-engine/interfaces'
+import type {
+  DocumentExceptionsRepository,
+  DocumentExceptionAuditLogsRepository,
+} from '@hms/core/document-engine/interfaces'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { CurrentCollaborator } from '@/identity/decorators'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'

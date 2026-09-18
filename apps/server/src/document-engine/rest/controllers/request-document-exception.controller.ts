@@ -1,8 +1,19 @@
-import { Body, Controller, Inject, Param, Post, UseGuards, ForbiddenException } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Inject,
+  Param,
+  Post,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { RequestDocumentExceptionUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
-import type { DocumentExceptionsRepository, DocumentExceptionAuditLogsRepository } from '@hms/core/document-engine/interfaces'
+import type {
+  DocumentExceptionsRepository,
+  DocumentExceptionAuditLogsRepository,
+} from '@hms/core/document-engine/interfaces'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { CurrentCollaborator } from '@/identity/decorators'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
@@ -46,8 +57,6 @@ export class RequestDocumentExceptionController {
     @Body() body: RequestDocumentExceptionDto,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<DocumentException> {
-    
-
     const allowedProfiles = ['lawyer', 'paralegal', 'supervisor']
     if (!allowedProfiles.includes(collaborator.profile)) {
       throw new ForbiddenException('You do not have permission to request exceptions.')

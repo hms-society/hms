@@ -17,7 +17,9 @@ export class ReviewDocumentExceptionUseCase {
     private readonly auditLogsRepository: DocumentExceptionAuditLogsRepository,
   ) {}
 
-  async execute(params: ReviewDocumentExceptionUseCaseParams): Promise<DocumentException> {
+  async execute(
+    params: ReviewDocumentExceptionUseCaseParams,
+  ): Promise<DocumentException> {
     const { documentExceptionId, action, justification, actorId } = params
 
     if (!documentExceptionId || !action || !actorId) {
@@ -27,7 +29,8 @@ export class ReviewDocumentExceptionUseCase {
       )
     }
 
-    const exception = await this.documentExceptionsRepository.findById(documentExceptionId)
+    const exception =
+      await this.documentExceptionsRepository.findById(documentExceptionId)
 
     if (!exception) {
       throw new AppError('Exceção documental não encontrada', 'Não Encontrado')
@@ -50,7 +53,9 @@ export class ReviewDocumentExceptionUseCase {
       {
         status: newStatus,
         reviewedBy: actorId,
-        ...(action === 'REJECT' && justification ? { rejectionJustification: justification } : {}),
+        ...(action === 'REJECT' && justification
+          ? { rejectionJustification: justification }
+          : {}),
       },
     )
 

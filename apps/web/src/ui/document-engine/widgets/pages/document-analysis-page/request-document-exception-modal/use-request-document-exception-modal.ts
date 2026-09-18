@@ -25,10 +25,7 @@ export const useRequestDocumentExceptionModal = ({
   const isAceiteProvisorio = type === 'ACEITE_PROVISORIO'
 
   const isSubmitDisabled =
-    !documentId ||
-    !type ||
-    !justification.trim() ||
-    (isAceiteProvisorio && !deadlineDate)
+    !documentId || !type || !justification.trim() || (isAceiteProvisorio && !deadlineDate)
 
   const handleSubmit = async () => {
     if (isSubmitDisabled) return

@@ -20,9 +20,8 @@ describe('Request Document Exception Controller [POST /cases/:caseId/document-ex
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       RequestDocumentExceptionController,
       userId,
-      (builder) => builder
-        .overrideGuard(ActiveCollaboratorGuard)
-        .useValue({
+      (builder) =>
+        builder.overrideGuard(ActiveCollaboratorGuard).useValue({
           canActivate(context: any) {
             const req = context.switchToHttp().getRequest()
             req.collaborator = {
@@ -33,7 +32,7 @@ describe('Request Document Exception Controller [POST /cases/:caseId/document-ex
             }
             return true
           },
-        })
+        }),
     )
   })
 
@@ -69,12 +68,12 @@ describe('Request Document Exception Controller [POST /cases/:caseId/document-ex
         type: 'ACEITE_PROVISORIO',
         status: 'PENDING',
         justification: 'Falta assinar',
-      })
+      }),
     )
 
     const db = (fixture as any).drizzleClient.requireDatabase()
     const result = await db.execute(
-      `SELECT * FROM document_exceptions WHERE id = '${response.body.id}'`
+      `SELECT * FROM document_exceptions WHERE id = '${response.body.id}'`,
     )
     expect(result).toHaveLength(1)
     expect(result[0].status).toBe('PENDING')
@@ -90,7 +89,7 @@ describe('Request Document Exception Controller [POST /cases/:caseId/document-ex
         type: 'ACEITE_PROVISORIO',
         justification: 'Falta assinar',
       })
-      
+
     expect(response.status).toBe(400)
   })
 })

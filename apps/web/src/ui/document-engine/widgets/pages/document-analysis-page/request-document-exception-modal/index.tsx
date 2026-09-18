@@ -18,11 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/shadcn/select'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/ui/shadcn/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 import { Calendar } from '@/ui/shadcn/calendar'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
@@ -41,9 +37,7 @@ export type RequestDocumentExceptionModalProps = {
   checklistItems?: { id: string; title: string }[]
 }
 
-const RequiredMark = () => (
-  <span className='ml-1 text-red-500'>*</span>
-)
+const RequiredMark = () => <span className='ml-1 text-red-500'>*</span>
 
 export const RequestDocumentExceptionModal = ({
   isOpen,
@@ -85,7 +79,8 @@ export const RequestDocumentExceptionModal = ({
         <div className='flex flex-col gap-4 px-5 py-4'>
           <div className='flex flex-col gap-2'>
             <span className='font-sans text-sm font-semibold text-foreground'>
-              Documento<RequiredMark />
+              Documento
+              <RequiredMark />
             </span>
             <Select value={documentId} onValueChange={setDocumentId}>
               <SelectTrigger className='h-10 rounded-xl border-border bg-white font-sans text-sm'>
@@ -102,19 +97,16 @@ export const RequestDocumentExceptionModal = ({
           </div>
           <div className='flex flex-col gap-2'>
             <span className='font-sans text-sm font-semibold text-foreground'>
-              Tipo de exceção<RequiredMark />
+              Tipo de exceção
+              <RequiredMark />
             </span>
             <Select value={type} onValueChange={setType}>
               <SelectTrigger className='h-10 rounded-xl border-border bg-white font-sans text-sm'>
                 <SelectValue placeholder='Selecione o tipo de exceção' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='ACEITE_PROVISORIO'>
-                  Aceite provisório
-                </SelectItem>
-                <SelectItem value='DISPENSA_DEFINITIVA'>
-                  Dispensa definitiva
-                </SelectItem>
+                <SelectItem value='ACEITE_PROVISORIO'>Aceite provisório</SelectItem>
+                <SelectItem value='DISPENSA_DEFINITIVA'>Dispensa definitiva</SelectItem>
               </SelectContent>
             </Select>
 
@@ -132,7 +124,8 @@ export const RequestDocumentExceptionModal = ({
           {isAceiteProvisorio && (
             <div className='flex flex-col gap-2'>
               <span className='font-sans text-sm font-semibold text-foreground'>
-                Data limite<RequiredMark />
+                Data limite
+                <RequiredMark />
               </span>
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
@@ -163,7 +156,8 @@ export const RequestDocumentExceptionModal = ({
           )}
           <div className='flex flex-col gap-2'>
             <span className='font-sans text-sm font-semibold text-foreground'>
-              Justificativa<RequiredMark />
+              Justificativa
+              <RequiredMark />
             </span>
             <Textarea
               className='min-h-[100px] resize-none rounded-xl bg-white p-3 font-sans text-sm text-foreground focus-visible:ring-1 focus-visible:ring-brand'

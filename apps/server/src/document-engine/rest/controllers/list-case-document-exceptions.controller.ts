@@ -1,4 +1,11 @@
-import { Controller, Get, Inject, Param, UseGuards, ForbiddenException } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Inject,
+  Param,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { GetCaseDocumentExceptionsUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'

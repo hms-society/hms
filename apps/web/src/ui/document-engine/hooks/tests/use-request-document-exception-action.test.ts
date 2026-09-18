@@ -42,9 +42,8 @@ describe('Use Request Document Exception Action', () => {
     } as any)
   })
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children)
-  )
 
   it('solicita uma exceção com sucesso e invalida os queries', async () => {
     mockRequestException.mockResolvedValue({
@@ -81,7 +80,9 @@ describe('Use Request Document Exception Action', () => {
       queryKey: ['document-engine', 'case', 'case-123', 'document-exceptions'],
     })
 
-    expect(toast.success).toHaveBeenCalledWith('Solicitação de exceção encaminhada com sucesso.')
+    expect(toast.success).toHaveBeenCalledWith(
+      'Solicitação de exceção encaminhada com sucesso.',
+    )
   })
 
   it('exibe toast de erro quando a API falha', async () => {
@@ -92,13 +93,17 @@ describe('Use Request Document Exception Action', () => {
     })
 
     await act(async () => {
-      await result.current.requestException({
-        documentId: 'doc-456',
-        type: 'DISPENSA_DEFINITIVA',
-        justification: 'Erro',
-      }).catch(() => {})
+      await result.current
+        .requestException({
+          documentId: 'doc-456',
+          type: 'DISPENSA_DEFINITIVA',
+          justification: 'Erro',
+        })
+        .catch(() => {})
     })
 
-    expect(toast.error).toHaveBeenCalledWith('Ocorreu um erro ao solicitar a exceção documental.')
+    expect(toast.error).toHaveBeenCalledWith(
+      'Ocorreu um erro ao solicitar a exceção documental.',
+    )
   })
 })

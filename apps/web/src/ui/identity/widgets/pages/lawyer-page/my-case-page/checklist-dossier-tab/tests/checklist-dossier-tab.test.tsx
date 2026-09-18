@@ -17,11 +17,17 @@ vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
 }))
 
 vi.mock('@/ui/document-engine/hooks/use-approve-document-exception-action', () => ({
-  useApproveDocumentExceptionAction: vi.fn(() => ({ approveException: vi.fn(), isApprovingException: false })),
+  useApproveDocumentExceptionAction: vi.fn(() => ({
+    approveException: vi.fn(),
+    isApprovingException: false,
+  })),
 }))
 
 vi.mock('@/ui/document-engine/hooks/use-reject-document-exception-action', () => ({
-  useRejectDocumentExceptionAction: vi.fn(() => ({ rejectException: vi.fn(), isRejectingException: false })),
+  useRejectDocumentExceptionAction: vi.fn(() => ({
+    rejectException: vi.fn(),
+    isRejectingException: false,
+  })),
 }))
 
 const useChecklistDossierTabMock = vi.mocked(useChecklistDossierTab)

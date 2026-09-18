@@ -4,8 +4,14 @@ import { type InngestFunction } from 'inngest'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { DOCUMENT_ENGINE_REPOSITORIES } from '@/document-engine/rest/controllers/request-document-exception.controller'
-import type { DocumentExceptionsRepository, DocumentExceptionAuditLogsRepository } from '@hms/core/document-engine/interfaces'
-import { DocumentExceptionStatus, DocumentExceptionType } from '@hms/core/document-engine/domain/structures'
+import type {
+  DocumentExceptionsRepository,
+  DocumentExceptionAuditLogsRepository,
+} from '@hms/core/document-engine/interfaces'
+import {
+  DocumentExceptionStatus,
+  DocumentExceptionType,
+} from '@hms/core/document-engine/domain/structures'
 
 @Injectable()
 export class ExpireProvisionalAcceptancesJob extends InngestJob {
@@ -29,13 +35,14 @@ export class ExpireProvisionalAcceptancesJob extends InngestJob {
       },
       async ({ step }) => {
         const expiredCount = await step.run('expire-acceptances', async () => {
-          const expiredExceptions = await this.documentExceptionsRepository.findExpiredProvisionalAcceptances()
+          const expiredExceptions =
+            await this.documentExceptionsRepository.findExpiredProvisionalAcceptances()
           let count = 0
 
           for (const exception of expiredExceptions) {
             await this.documentExceptionsRepository.updateStatus(exception.id, {
               status: DocumentExceptionStatus.EXPIRED,
-              reviewedBy: 'SYSTEM', 
+              reviewedBy: 'SYSTEM',
             })
 
             await this.auditLogsRepository.create({
@@ -43,7 +50,7 @@ export class ExpireProvisionalAcceptancesJob extends InngestJob {
               action: 'EXPIRED',
               userId: 'SYSTEM',
             })
-            
+
             count++
           }
 

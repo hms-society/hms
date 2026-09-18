@@ -7,9 +7,13 @@ export type GetCaseDocumentExceptionsUseCaseParams = {
 }
 
 export class GetCaseDocumentExceptionsUseCase {
-  constructor(private readonly documentExceptionsRepository: DocumentExceptionsRepository) {}
+  constructor(
+    private readonly documentExceptionsRepository: DocumentExceptionsRepository,
+  ) {}
 
-  async execute(params: GetCaseDocumentExceptionsUseCaseParams): Promise<DocumentException[]> {
+  async execute(
+    params: GetCaseDocumentExceptionsUseCaseParams,
+  ): Promise<DocumentException[]> {
     const { caseId } = params
 
     if (!caseId) {

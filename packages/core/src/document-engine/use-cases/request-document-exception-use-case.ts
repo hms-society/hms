@@ -1,9 +1,6 @@
 import { AppError, BadRequestError } from '#shared/domain/errors'
 import type { DocumentException } from '../domain/entities/document-exception'
-import {
-  DocumentExceptionStatus,
-  DocumentExceptionType,
-} from '../domain/structures'
+import { DocumentExceptionStatus, DocumentExceptionType } from '../domain/structures'
 import type { DocumentExceptionAuditLogsRepository } from '../interfaces/document-exception-audit-logs-repository'
 import type { DocumentExceptionsRepository } from '../interfaces/document-exceptions-repository'
 
@@ -22,7 +19,9 @@ export class RequestDocumentExceptionUseCase {
     private readonly auditLogsRepository: DocumentExceptionAuditLogsRepository,
   ) {}
 
-  async execute(params: RequestDocumentExceptionUseCaseParams): Promise<DocumentException> {
+  async execute(
+    params: RequestDocumentExceptionUseCaseParams,
+  ): Promise<DocumentException> {
     const { documentId, caseId, type, justification, deadlineDate, actorId } = params
 
     if (!caseId || !type || !justification) {
@@ -45,7 +44,8 @@ export class RequestDocumentExceptionUseCase {
       type,
       status: DocumentExceptionStatus.PENDING,
       justification,
-      deadlineDate: type === DocumentExceptionType.ACEITE_PROVISORIO ? deadlineDate : null,
+      deadlineDate:
+        type === DocumentExceptionType.ACEITE_PROVISORIO ? deadlineDate : null,
       createdBy: actorId,
     })
 
@@ -55,7 +55,7 @@ export class RequestDocumentExceptionUseCase {
       userId: actorId,
       metadata: { justification, deadlineDate },
     })
-   
+
     return exception
   }
 }

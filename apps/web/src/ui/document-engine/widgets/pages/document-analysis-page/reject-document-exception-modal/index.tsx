@@ -26,13 +26,8 @@ export const RejectDocumentExceptionModal = ({
   onSubmit,
   isLoading = false,
 }: RejectDocumentExceptionModalProps) => {
-  const {
-    justification,
-    setJustification,
-    isSubmitDisabled,
-    handleSubmit,
-    handleClose,
-  } = useRejectDocumentExceptionModal({ onSubmit, onClose })
+  const { justification, setJustification, isSubmitDisabled, handleSubmit, handleClose } =
+    useRejectDocumentExceptionModal({ onSubmit, onClose })
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -50,7 +45,8 @@ export const RejectDocumentExceptionModal = ({
         <div className='flex flex-col gap-4 px-5 py-4'>
           <div className='flex flex-col gap-2'>
             <span className='font-sans text-sm font-semibold text-foreground'>
-              Justificativa<RequiredMark />
+              Justificativa
+              <RequiredMark />
             </span>
             <Textarea
               value={justification}

@@ -1,7 +1,13 @@
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/ui/shadcn/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/ui/shadcn/dialog'
 
 import {
   getChecklistActionIcon,
@@ -81,17 +87,19 @@ export const ChecklistDossierTab = ({
     checklist,
     isReviewDisabled,
   })
-  
+
   const { exceptions } = useListCaseDocumentExceptionsQuery(caseId)
-  
+
   const { currentCollaborator } = useCurrentCollaboratorQuery()
-  const { approveException, isApprovingException } = useApproveDocumentExceptionAction(caseId)
-  const { rejectException, isRejectingException } = useRejectDocumentExceptionAction(caseId)
-  
+  const { approveException, isApprovingException } =
+    useApproveDocumentExceptionAction(caseId)
+  const { rejectException, isRejectingException } =
+    useRejectDocumentExceptionAction(caseId)
+
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
   const [exceptionToReject, setExceptionToReject] = useState<string | null>(null)
   const [justificationToView, setJustificationToView] = useState<string | null>(null)
-  
+
   const handleOpenRejectModal = (exceptionId: string) => {
     setExceptionToReject(exceptionId)
     setIsRejectModalOpen(true)
@@ -102,7 +110,7 @@ export const ChecklistDossierTab = ({
     await rejectException({ exceptionId: exceptionToReject, justification })
     setExceptionToReject(null)
   }
-  
+
   const progressPercentage =
     mandatoryItemsCount > 0
       ? Math.round((validatedItemsCount / mandatoryItemsCount) * 100)
@@ -488,10 +496,15 @@ export const ChecklistDossierTab = ({
             {exceptions.map((exc) => {
               const doc = checklistItems.find((item) => item.id === exc.documentId)
               const docName = doc ? doc.title : 'Documento não identificado'
-              
-              let statusLabel = exc.status === 'APPROVED' ? 'Aprovado' : exc.status === 'REJECTED' ? 'Reprovado' : 'Pendente'
+
+              let statusLabel =
+                exc.status === 'APPROVED'
+                  ? 'Aprovado'
+                  : exc.status === 'REJECTED'
+                    ? 'Reprovado'
+                    : 'Pendente'
               let statusClass = 'text-muted-foreground bg-muted/20'
-              
+
               if (exc.deadlineDate) {
                 const isExpired = isPast(new Date(exc.deadlineDate))
                 if (isExpired) {
@@ -504,8 +517,8 @@ export const ChecklistDossierTab = ({
               }
 
               return (
-                <div 
-                  key={exc.id} 
+                <div
+                  key={exc.id}
                   className={`flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2.5 text-[14px] ${exc.status === 'REJECTED' && exc.rejectionJustification ? 'cursor-pointer hover:border-red-300 bg-red-50' : 'bg-background'}`}
                   onClick={() => {
                     if (exc.status === 'REJECTED' && exc.rejectionJustification) {
@@ -516,38 +529,43 @@ export const ChecklistDossierTab = ({
                   <div className='flex flex-col'>
                     <span className='font-semibold text-foreground'>{docName}</span>
                     <span className='text-xs text-muted-foreground'>
-                      {exc.type === 'ACEITE_PROVISORIO' ? 'Aceite provisório' : 'Dispensa definitiva'}
+                      {exc.type === 'ACEITE_PROVISORIO'
+                        ? 'Aceite provisório'
+                        : 'Dispensa definitiva'}
                     </span>
                   </div>
                   <div className='flex items-center gap-3'>
-                    {exc.status === 'PENDING' && currentCollaborator?.profile === 'supervisor' && (
-                      <div className='flex items-center gap-2'>
-                        <Button
-                          variant='ghost'
-                          size='xs'
-                          className='h-7 rounded-full bg-destructive/10 text-destructive font-semibold px-3'
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleOpenRejectModal(exc.id)
-                          }}
-                        >
-                          Recusar
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='xs'
-                          className='h-7 rounded-full bg-green-600/10 text-green-700 font-semibold px-3'
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            approveException(exc.id)
-                          }}
-                          disabled={isApprovingException}
-                        >
-                          Aprovar
-                        </Button>
-                      </div>
-                    )}
-                    <Badge variant='outline' className={statusClass}>{statusLabel}</Badge>
+                    {exc.status === 'PENDING' &&
+                      currentCollaborator?.profile === 'supervisor' && (
+                        <div className='flex items-center gap-2'>
+                          <Button
+                            variant='ghost'
+                            size='xs'
+                            className='h-7 rounded-full bg-destructive/10 text-destructive font-semibold px-3'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenRejectModal(exc.id)
+                            }}
+                          >
+                            Recusar
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='xs'
+                            className='h-7 rounded-full bg-green-600/10 text-green-700 font-semibold px-3'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              approveException(exc.id)
+                            }}
+                            disabled={isApprovingException}
+                          >
+                            Aprovar
+                          </Button>
+                        </div>
+                      )}
+                    <Badge variant='outline' className={statusClass}>
+                      {statusLabel}
+                    </Badge>
                   </div>
                 </div>
               )
@@ -606,7 +624,10 @@ export const ChecklistDossierTab = ({
         isLoading={isRejectingException}
         onSubmit={handleConfirmReject}
       />
-      <Dialog open={!!justificationToView} onOpenChange={(open) => !open && setJustificationToView(null)}>
+      <Dialog
+        open={!!justificationToView}
+        onOpenChange={(open) => !open && setJustificationToView(null)}
+      >
         <DialogContent className='sm:max-w-[420px]'>
           <DialogHeader>
             <DialogTitle>Motivo da Recusa</DialogTitle>
@@ -615,7 +636,13 @@ export const ChecklistDossierTab = ({
             </DialogDescription>
           </DialogHeader>
           <div className='flex justify-end mt-4'>
-            <Button variant='outline' className='rounded-full' onClick={() => setJustificationToView(null)}>Fechar</Button>
+            <Button
+              variant='outline'
+              className='rounded-full'
+              onClick={() => setJustificationToView(null)}
+            >
+              Fechar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

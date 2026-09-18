@@ -22,7 +22,7 @@ describe('GetCaseDocumentExceptionsUseCase', () => {
       reviewedBy: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    }
+    },
   ]
 
   beforeEach(() => {
@@ -46,6 +46,8 @@ describe('GetCaseDocumentExceptionsUseCase', () => {
   })
 
   it('deve lançar erro se caseId não for informado', async () => {
-    await expect(useCase.execute({ caseId: '' })).rejects.toThrow('O ID do caso é obrigatório')
+    await expect(useCase.execute({ caseId: '' })).rejects.toThrow(
+      'O ID do caso é obrigatório',
+    )
   })
 })

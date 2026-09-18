@@ -4,7 +4,10 @@ import { eq, and } from 'drizzle-orm'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
-import { DocumentExceptionStatus, DocumentExceptionType } from '@hms/core/document-engine/domain/structures'
+import {
+  DocumentExceptionStatus,
+  DocumentExceptionType,
+} from '@hms/core/document-engine/domain/structures'
 import type {
   CreateDocumentExceptionData,
   DocumentExceptionsRepository,
@@ -14,7 +17,10 @@ import type {
 import { documentExceptionModel } from '../models/document-exception-model'
 
 @Injectable()
-export class DrizzleDocumentExceptionsRepository extends DrizzleRepository implements DocumentExceptionsRepository {
+export class DrizzleDocumentExceptionsRepository
+  extends DrizzleRepository
+  implements DocumentExceptionsRepository
+{
   constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
     super(drizzle)
   }
@@ -64,7 +70,9 @@ export class DrizzleDocumentExceptionsRepository extends DrizzleRepository imple
       .set({
         status: data.status as any,
         reviewedBy: data.reviewedBy,
-        ...(data.rejectionJustification !== undefined ? { rejectionJustification: data.rejectionJustification } : {}),
+        ...(data.rejectionJustification !== undefined
+          ? { rejectionJustification: data.rejectionJustification }
+          : {}),
         updatedAt: new Date(),
       })
       .where(eq(documentExceptionModel.id, id))
@@ -89,10 +97,9 @@ export class DrizzleDocumentExceptionsRepository extends DrizzleRepository imple
       where: and(
         eq(documentExceptionModel.type, DocumentExceptionType.ACEITE_PROVISORIO),
         eq(documentExceptionModel.status, DocumentExceptionStatus.PENDING),
-      
       ),
     })
-    
+
     const now = new Date()
     return results
       .filter((r) => r.deadlineDate && r.deadlineDate < now)

@@ -11,8 +11,16 @@ export const useRejectDocumentExceptionAction = (caseId: string) => {
     isPending: isRejectingException,
     mutateAsync: rejectException,
   } = useMutation({
-    mutationFn: async ({ exceptionId, justification }: { exceptionId: string, justification: string }) => {
-      const response = await documentService.rejectException(exceptionId, { justification })
+    mutationFn: async ({
+      exceptionId,
+      justification,
+    }: {
+      exceptionId: string
+      justification: string
+    }) => {
+      const response = await documentService.rejectException(exceptionId, {
+        justification,
+      })
       if (response.isFailure) response.throwError()
       return response.body
     },

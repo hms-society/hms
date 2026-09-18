@@ -20,7 +20,10 @@ export interface DocumentExceptionsRepository {
   create(data: CreateDocumentExceptionData): Promise<DocumentException>
   findById(id: string): Promise<DocumentException | null>
   findByCaseId(caseId: string): Promise<DocumentException[]>
-  updateStatus(id: string, data: UpdateDocumentExceptionStatusData): Promise<DocumentException>
+  updateStatus(
+    id: string,
+    data: UpdateDocumentExceptionStatusData,
+  ): Promise<DocumentException>
   hasExpiredExceptionsForCase(caseId: string): Promise<boolean>
   findExpiredProvisionalAcceptances(): Promise<DocumentException[]>
 }

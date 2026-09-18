@@ -31,17 +31,25 @@ export const DocumentEngineService = (client: RestClient) => {
         deadlineDate?: Date
       },
     ) => {
-      return client.post<DocumentException>(`/cases/${caseId}/document-exceptions`, payload)
+      return client.post<DocumentException>(
+        `/cases/${caseId}/document-exceptions`,
+        payload,
+      )
     },
     approveException: async (exceptionId: string) => {
-      return client.post<DocumentException>(`/documents/exceptions/${exceptionId}/approve`, {})
+      return client.post<DocumentException>(
+        `/documents/exceptions/${exceptionId}/approve`,
+        {},
+      )
     },
     rejectException: async (exceptionId: string, payload: { justification: string }) => {
-      return client.post<DocumentException>(`/documents/exceptions/${exceptionId}/reject`, payload)
+      return client.post<DocumentException>(
+        `/documents/exceptions/${exceptionId}/reject`,
+        payload,
+      )
     },
     listCaseExceptions: async (caseId: string) => {
       return client.get<DocumentException[]>(`/cases/${caseId}/document-exceptions`)
     },
-
   }
 }
