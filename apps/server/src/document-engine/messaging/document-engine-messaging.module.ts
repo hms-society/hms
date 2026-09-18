@@ -6,6 +6,7 @@ import {
   OrganizeDocumentFileJsonWithOllamaJob,
   ProcessDocumentFileJob,
   ProcessWhatsappBatchJob,
+  ExpireProvisionalAcceptancesJob,
 } from '@/document-engine/messaging/inngest/jobs'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
@@ -28,21 +29,25 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
     OrganizeDocumentFileJsonWithOllamaJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
+    ExpireProvisionalAcceptancesJob,
     {
       provide: DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
       inject: [
         OrganizeDocumentFileJsonWithOllamaJob,
         ProcessDocumentFileJob,
         ProcessWhatsappBatchJob,
+        ExpireProvisionalAcceptancesJob,
       ],
       useFactory: (
         organizeFileJsonWithOllamaJob: OrganizeDocumentFileJsonWithOllamaJob,
         processFileJob: ProcessDocumentFileJob,
         processWhatsappBatchJob: ProcessWhatsappBatchJob,
+        expireProvisionalAcceptancesJob: ExpireProvisionalAcceptancesJob,
       ): InngestFunctionGroup => [
         organizeFileJsonWithOllamaJob.function,
         processFileJob.function,
         processWhatsappBatchJob.function,
+        expireProvisionalAcceptancesJob.function,
       ],
     },
   ],
@@ -50,6 +55,7 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
     OrganizeDocumentFileJsonWithOllamaJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
+    ExpireProvisionalAcceptancesJob,
     DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
   ],
 })

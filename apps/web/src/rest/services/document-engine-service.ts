@@ -2,6 +2,7 @@ import type { RestClient } from '@hms/core/shared/interfaces'
 import type {
   DocumentBatch,
   DocumentBatchFile,
+  DocumentException,
 } from '@hms/core/document-engine/domain/entities'
 import type { PaginatedTriageBatches } from '@hms/core/document-engine/interfaces'
 
@@ -20,6 +21,35 @@ export const DocumentEngineService = (client: RestClient) => {
     },
     getDocumentFile: async (fileId: string) => {
       return client.get<DocumentBatchFile>(`/documents/files/${fileId}`)
+    },
+    requestException: async (
+      caseId: string,
+      payload: {
+        documentId: string
+        type: string
+        justification: string
+        deadlineDate?: Date
+      },
+    ) => {
+      return client.post<DocumentException>(
+        `/cases/${caseId}/document-exceptions`,
+        payload,
+      )
+    },
+    approveException: async (exceptionId: string) => {
+      return client.post<DocumentException>(
+        `/documents/exceptions/${exceptionId}/approve`,
+        {},
+      )
+    },
+    rejectException: async (exceptionId: string, payload: { justification: string }) => {
+      return client.post<DocumentException>(
+        `/documents/exceptions/${exceptionId}/reject`,
+        payload,
+      )
+    },
+    listCaseExceptions: async (caseId: string) => {
+      return client.get<DocumentException[]>(`/cases/${caseId}/document-exceptions`)
     },
   }
 }
