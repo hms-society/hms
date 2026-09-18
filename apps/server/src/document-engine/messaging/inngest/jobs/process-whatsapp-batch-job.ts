@@ -53,10 +53,15 @@ export class ProcessWhatsappBatchJob extends InngestJob {
             typeof data.mimeType === 'string' ? data.mimeType : 'application/octet-stream'
           const mediaId = typeof data.mediaId === 'string' ? data.mediaId : undefined
           let sizeBytes = typeof data.sizeBytes === 'number' ? data.sizeBytes : 1024
+          const safeName = originalName
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9.-]/g, '_')
+
           const storagePath =
             typeof data.storagePath === 'string'
               ? data.storagePath
-              : `whatsapp/${data.eventoId ?? mediaId ?? 'media'}/${originalName}`
+              : `whatsapp/${data.eventoId ?? mediaId ?? 'media'}/${safeName}`
 
           if (mediaId && this.whatsappProvider && this.storageProvider) {
             try {
