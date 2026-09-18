@@ -517,9 +517,20 @@ export const ChecklistDossierTab = ({
               }
 
               return (
+                // biome-ignore lint/a11y/useSemanticElements: this container may have nested buttons when PENDING, so we cannot use a native button
                 <div
                   key={exc.id}
                   className={`flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2.5 text-[14px] ${exc.status === 'REJECTED' && exc.rejectionJustification ? 'cursor-pointer hover:border-red-300 bg-red-50' : 'bg-background'}`}
+                  role='button'
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (exc.status === 'REJECTED' && exc.rejectionJustification) {
+                        e.preventDefault()
+                        setJustificationToView(exc.rejectionJustification)
+                      }
+                    }
+                  }}
                   onClick={() => {
                     if (exc.status === 'REJECTED' && exc.rejectionJustification) {
                       setJustificationToView(exc.rejectionJustification)
