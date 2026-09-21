@@ -48,7 +48,11 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
-    if (this.isDuplicateDecisionAlreadyRecorded(currentDocument, request)) {
+    if (
+      this.isDuplicateDecisionAlreadyRecorded(currentDocument, request) &&
+      !request.caseId &&
+      !request.checklistRequirementId
+    ) {
       return currentDocument
     }
 
@@ -95,11 +99,23 @@ export class RecordDocumentValidationDecisionUseCase {
     }
 
     const checklistItemId = this.getChecklistItemId(decisionRequest)
+    const caseId = this.resolveCaseId(decisionRequest, currentDocument)
+    const clientId = currentDocument.clientId
 
-    if (checklistItemId && status === DocumentValidationStatus.Valid) {
+    if (checklistItemId && (!caseId || !clientId)) {
+      throw new AppError(
+        'Não foi possível identificar o cliente e o caso do item do checklist.',
+        'Vínculo do checklist inválido',
+      )
+    }
+
+    if (checklistItemId && caseId && clientId && status === DocumentValidationStatus.Valid) {
       await this.tryLinkValidatedDocumentToChecklist({
+        caseId,
+        clientId,
         checklistItemId,
         documentFileId: request.documentFileId,
+        documentFileName: currentDocument.fileName,
         validatedBy: request.reviewedBy,
       })
     }
@@ -293,15 +309,14 @@ export class RecordDocumentValidationDecisionUseCase {
   }
 
   private async tryLinkValidatedDocumentToChecklist(request: {
+    caseId: string
+    clientId: string
     checklistItemId: string
     documentFileId: string
+    documentFileName: string
     validatedBy: string
   }) {
-    try {
-      await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)
-    } catch {
-      return
-    }
+    await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)
   }
 
   private buildAiCorrectionMetadata(

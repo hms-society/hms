@@ -128,11 +128,6 @@ export const AnalysisFormPanel = ({
 
           {currentDecision === 'incomplete' && (
             <div className='flex flex-col gap-5'>
-              <p className='font-sans text-xs text-muted-foreground'>
-                Faltam um ou mais campos obrigatórios antes da validação final.
-              </p>
-              <ChecklistLinkFields form={form} document={document} />
-              <EditableExtractedFields title='Campos extraídos' form={form} />
               <Field data-invalid={Boolean(form.formState.errors.reason)}>
                 <label
                   htmlFor='reason'
@@ -263,7 +258,6 @@ export const AnalysisFormPanel = ({
                 O arquivo não corresponde ao documento esperado para este item do
                 checklist.
               </p>
-              <ChecklistLinkFields form={form} document={document} />
               <Field data-invalid={Boolean(form.formState.errors.reason)}>
                 <label
                   htmlFor='mismatchReason'
@@ -294,7 +288,6 @@ export const AnalysisFormPanel = ({
                   Informe o motivo para encaminhar o documento a um advogado.
                 </span>
               </div>
-              <EditableExtractedFields title='Dados extraídos' form={form} />
               <Field data-invalid={Boolean(form.formState.errors.reason)}>
                 <label
                   htmlFor='escalateReason'

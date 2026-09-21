@@ -63,11 +63,14 @@ export interface CaseManagementService {
     request: AddCaseChecklistComplementaryItemRequest,
   ): Promise<RestResponse<CaseChecklistItem>>
 
-  listCaseChecklist(caseId: string): Promise<RestResponse<readonly CaseChecklistItem[]>>
+  listCaseChecklist(
+    caseId: string,
+    clientId?: string,
+  ): Promise<RestResponse<readonly CaseChecklistItem[]>>
 
   listChecklistTemplates(): Promise<RestResponse<readonly ChecklistTemplate[]>>
 
-  listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
+  listMyCases(clientId?: string): Promise<RestResponse<readonly LegalCaseSummary[]>>
 
   replaceChecklistTemplate(
     request: ReplaceChecklistTemplateRequest,

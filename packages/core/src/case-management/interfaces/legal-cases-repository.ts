@@ -24,7 +24,10 @@ export interface LegalCasesRepository {
   completeChecklist(caseId: string, completedBy: string): Promise<LegalCase | undefined>
   findById(caseId: string): Promise<LegalCase | undefined>
   getCaseDetails(caseId: string): Promise<LegalCaseSummary | undefined>
-  listByTeamMember(collaboratorId: string): Promise<readonly LegalCaseSummary[]>
+  listByTeamMember(
+    collaboratorId: string,
+    clientId?: string,
+  ): Promise<readonly LegalCaseSummary[]>
   reviewChecklistGate(
     params: ReviewChecklistGateRepositoryParams,
   ): Promise<LegalCase | undefined>

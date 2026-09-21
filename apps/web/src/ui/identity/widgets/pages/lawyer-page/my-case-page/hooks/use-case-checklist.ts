@@ -87,10 +87,13 @@ function mapPersistedChecklistItem(
   const validatedAt = item.validatedAt
     ? ` em ${formatChecklistGateDecisionDate(item.validatedAt)}`
     : ''
-  const documentLabel = item.documentFileName ?? item.documentFileId
   const document = documents.find((currentDocument) => {
-    return currentDocument.id === item.documentFileId
+    return (
+      currentDocument.id === item.documentFileId ||
+      currentDocument.checklistLink?.checklistItemId === item.id
+    )
   })
+  const documentLabel = item.documentFileName ?? item.documentFileId ?? document?.fileName
   const documentStatusView = getChecklistDocumentStatusView({
     document,
     hasDocument: Boolean(documentLabel),
@@ -105,7 +108,7 @@ function mapPersistedChecklistItem(
 
   return {
     id: item.id,
-    documentFileId: item.documentFileId,
+    documentFileId: item.documentFileId ?? document?.id,
     documentName,
     isRequired: item.isRequired,
     status: documentStatusView.isValidated ? 'validado' : 'solicitado',

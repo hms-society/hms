@@ -12,6 +12,7 @@ import type {
 type Request = {
   caseId: string
   collaboratorId: string
+  clientId?: string
 }
 
 export class ListCaseChecklistUseCase
@@ -25,21 +26,27 @@ export class ListCaseChecklistUseCase
   ) {}
 
   async execute(request: Request): Promise<readonly CaseChecklistItem[]> {
-    const assignedCases = await this.legalCasesRepository.listByTeamMember(
-      request.collaboratorId,
-    )
-    const canAccessChecklist = assignedCases.some(
-      (assignedCase) => assignedCase.id === request.caseId,
-    )
-
-    if (!canAccessChecklist) {
-      throw new LegalCaseNotFoundError()
-    }
-
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
 
     if (!legalCase) {
       throw new LegalCaseNotFoundError()
+    }
+
+    if (request.clientId) {
+      if (legalCase.clientId !== request.clientId) {
+        throw new LegalCaseNotFoundError()
+      }
+    } else {
+      const assignedCases = await this.legalCasesRepository.listByTeamMember(
+        request.collaboratorId,
+      )
+      const canAccessChecklist = assignedCases.some(
+        (assignedCase) => assignedCase.id === request.caseId,
+      )
+
+      if (!canAccessChecklist) {
+        throw new LegalCaseNotFoundError()
+      }
     }
 
     const checklistItems = await this.caseChecklistItemsRepository.listByCaseId(
@@ -61,11 +68,35 @@ export class ListCaseChecklistUseCase
       return checklistItems
     }
 
-    if (
-      checklistItems.length > 0 &&
-      (!canReplaceChecklist(checklistItems) ||
-        hasSameTemplateItems(checklistItems, templateItems))
-    ) {
+    if (checklistItems.length > 0 && !canReplaceChecklist(checklistItems)) {
+      const existingTemplateKeys = new Set(
+        checklistItems.map((checklistItem) => checklistItem.templateItemKey),
+      )
+      const existingTitles = new Set(
+        checklistItems.map((checklistItem) => checklistItem.title.trim().toLowerCase()),
+      )
+      const missingTemplateItems = templateItems.filter((templateItem) => {
+        return (
+          !existingTemplateKeys.has(templateItem.id) &&
+          !existingTitles.has(templateItem.title.trim().toLowerCase())
+        )
+      })
+
+      if (missingTemplateItems.length === 0) return checklistItems
+
+      await this.caseChecklistItemsRepository.addMany(
+        missingTemplateItems.map((templateItem) => ({
+          caseId: request.caseId,
+          templateItemKey: templateItem.id,
+          title: templateItem.title,
+          isRequired: templateItem.isRequired,
+        })),
+      )
+
+      return this.caseChecklistItemsRepository.listByCaseId(request.caseId)
+    }
+
+    if (hasSameTemplateItems(checklistItems, templateItems)) {
       return checklistItems
     }
 

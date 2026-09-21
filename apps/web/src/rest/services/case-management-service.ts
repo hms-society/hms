@@ -50,16 +50,20 @@ export const CaseManagementService = (
       )
     },
 
-    listCaseChecklist(caseId) {
-      return restClient.get<readonly CaseChecklistItem[]>(`/cases/${caseId}/checklist`)
+    listCaseChecklist(caseId, clientId) {
+      const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+      return restClient.get<readonly CaseChecklistItem[]>(
+        `/cases/${caseId}/checklist${query}`,
+      )
     },
 
     listChecklistTemplates() {
       return restClient.get<readonly ChecklistTemplate[]>('/cases/checklist-templates')
     },
 
-    listMyCases() {
-      return restClient.get<readonly LegalCaseSummary[]>('/cases/my')
+    listMyCases(clientId) {
+      const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+      return restClient.get<readonly LegalCaseSummary[]>(`/cases/my${query}`)
     },
 
     replaceChecklistTemplate(request) {

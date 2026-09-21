@@ -1,6 +1,9 @@
 export type LinkValidatedDocumentToChecklistRequest = {
+  caseId: string
+  clientId: string
   checklistItemId: string
   documentFileId: string
+  documentFileName: string
   validatedBy: string
 }
 

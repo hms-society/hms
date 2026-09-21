@@ -5,8 +5,10 @@ import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
 
 type Request = {
+  caseId: string
   checklistItemId: string
   documentFileId: string
+  documentFileName: string
   validatedBy: string
 }
 
@@ -21,8 +23,10 @@ export class MarkCaseChecklistItemValidatedUseCase
   async execute(request: Request): Promise<CaseChecklistItem> {
     const checklistItem =
       await this.caseChecklistItemsRepository.markAsValidatedByDocument({
+        caseId: request.caseId,
         checklistItemId: request.checklistItemId,
         documentFileId: request.documentFileId,
+        documentFileName: request.documentFileName,
         validatedBy: request.validatedBy,
       })
 

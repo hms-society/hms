@@ -16,19 +16,25 @@ export function useChecklistLinkFields({ document, form }: ChecklistLinkFieldsPr
   const caseId = form.watch('caseId')
   const checklistRequirementId = form.watch('checklistRequirementId')
   const { data: caseOptions = [], isLoading: isLoadingCases } = useQuery({
-    queryKey: ['case-management', 'my-cases'],
+    queryKey: ['case-management', 'my-cases', document.clientId],
     queryFn: async () => {
-      const response = await caseManagementService.listMyCases()
+      if (!document.clientId) return []
+
+      const response = await caseManagementService.listMyCases(document.clientId)
 
       if (response.isFailure) response.throwError()
 
       return response.body
     },
+    enabled: Boolean(document.clientId),
   })
   const { data: checklistOptions = [], isLoading: isLoadingChecklist } = useQuery({
-    queryKey: ['case-management', 'cases', caseId, 'checklist'],
+    queryKey: ['case-management', 'cases', caseId, 'checklist', document.clientId],
     queryFn: async () => {
-      const response = await caseManagementService.listCaseChecklist(caseId ?? '')
+      const response = await caseManagementService.listCaseChecklist(
+        caseId ?? '',
+        document.clientId,
+      )
 
       if (response.isFailure) response.throwError()
 
@@ -40,7 +46,9 @@ export function useChecklistLinkFields({ document, form }: ChecklistLinkFieldsPr
   const selectedChecklistItem = checklistOptions.find(
     (checklistItem) => checklistItem.id === checklistRequirementId,
   )
-  const caseLabel = selectedCase?.title ?? document.checklistLink?.caseLabel ?? caseId
+  const caseLabel = selectedCase
+    ? `${selectedCase.title} · ${selectedCase.publicCode}`
+    : (document.checklistLink?.caseLabel ?? caseId)
   const checklistItemLabel =
     selectedChecklistItem?.title ??
     document.checklistLink?.checklistItemLabel ??
@@ -75,5 +83,6 @@ export function useChecklistLinkFields({ document, form }: ChecklistLinkFieldsPr
     handleChecklistSelect,
     isLoadingCases,
     isLoadingChecklist,
+    hasDocumentClient: Boolean(document.clientId),
   }
 }

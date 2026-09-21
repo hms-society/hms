@@ -212,12 +212,6 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   const currentDecision = form.watch('decision')
 
   const onSubmit = form.handleSubmit(async (data) => {
-    console.log('[document-validation] confirm validation submit', {
-      documentFileId: fileId,
-      documentStatus: document?.status,
-      checklistLink: document?.checklistLink,
-      payload: data,
-    })
     await recordDecision(data)
   })
 
