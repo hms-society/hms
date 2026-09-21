@@ -4,7 +4,10 @@ import type {
   LegalCasesRepository,
   PendingsRepository,
 } from '@hms/core/case-management/interfaces'
-import { CreatePendingUseCase, MarkCaseChecklistItemValidatedUseCase } from '@hms/core/case-management/use-cases'
+import {
+  CreatePendingUseCase,
+  MarkCaseChecklistItemValidatedUseCase,
+} from '@hms/core/case-management/use-cases'
 import type {
   CaseChecklistUpdateProvider as CaseChecklistUpdateProviderContract,
   LinkValidatedDocumentToChecklistRequest,
@@ -60,7 +63,9 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
     await this.caseChecklistItemsRepository.linkPendingDocument(request)
   }
 
-  async createDocumentPending(request: Parameters<CaseChecklistUpdateProviderContract['createDocumentPending']>[0]) {
+  async createDocumentPending(
+    request: Parameters<CaseChecklistUpdateProviderContract['createDocumentPending']>[0],
+  ) {
     await this.createPendingUseCase.execute(request)
   }
 }

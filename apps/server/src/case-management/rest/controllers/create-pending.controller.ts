@@ -1,4 +1,12 @@
-import { Body, HttpStatus, Inject, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  HttpStatus,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import { CreatePendingUseCase } from '@hms/core/case-management/use-cases'
 import type { PendingsRepository } from '@hms/core/case-management/interfaces'
@@ -18,18 +26,27 @@ class CreatePendingRequestBody extends createZodDto(createPendingSchema) {}
 export class CreatePendingController {
   private readonly useCase: CreatePendingUseCase
 
-  constructor(@Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository) {
+  constructor(
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository,
+  ) {
     this.useCase = new CreatePendingUseCase(repository)
   }
 
   @Post(':caseId/pendencies')
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'The pending document and assisted message were created.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'The pending document and assisted message were created.',
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: ErrorResponseDto })
   handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Body() body: CreatePendingRequestBody,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.useCase.execute({ ...body, caseId, responsibleId: collaborator.collaboratorId })
+    return this.useCase.execute({
+      ...body,
+      caseId,
+      responsibleId: collaborator.collaboratorId,
+    })
   }
 }

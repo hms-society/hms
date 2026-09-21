@@ -226,9 +226,7 @@ export class DrizzleLegalCasesRepository
       .leftJoin(caseMemberModel, eq(caseMemberModel.caseId, legalCaseModel.id))
       .where(
         and(
-          clientId
-            ? undefined
-            : eq(caseMemberModel.collaboratorId, collaboratorId),
+          clientId ? undefined : eq(caseMemberModel.collaboratorId, collaboratorId),
           clientId ? eq(legalCaseModel.clientId, clientId) : undefined,
         ),
       )

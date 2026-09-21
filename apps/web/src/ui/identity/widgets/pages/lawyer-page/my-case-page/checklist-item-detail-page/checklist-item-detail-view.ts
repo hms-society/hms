@@ -10,9 +10,7 @@ import { getChecklistDocumentStatusView } from '../checklist-document-status'
 import {
   getChecklistItemHistoryEvents,
 } from './checklist-item-history-events'
-import type {
-  ChecklistItemDetailView,
-} from './use-checklist-item-detail-page'
+import type { ChecklistItemDetailView } from './checklist-item-detail-types'
 
 type PendingWithMessage = {
   pending: Pending

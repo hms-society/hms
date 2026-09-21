@@ -14,12 +14,17 @@ class EditMessageBody extends createZodDto(editAssistedMessageSchema) {}
 export class EditPendingMessageController {
   private readonly useCase: EditAssistedMessageUseCase
 
-  constructor(@Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository) {
+  constructor(
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository,
+  ) {
     this.useCase = new EditAssistedMessageUseCase(repository)
   }
 
   @Patch('pendencies/:pendingId/message')
-  handle(@Param('pendingId', new ParseUUIDPipe()) pendingId: string, @Body() body: EditMessageBody) {
+  handle(
+    @Param('pendingId', new ParseUUIDPipe()) pendingId: string,
+    @Body() body: EditMessageBody,
+  ) {
     return this.useCase.execute({ ...body, pendingId })
   }
 }

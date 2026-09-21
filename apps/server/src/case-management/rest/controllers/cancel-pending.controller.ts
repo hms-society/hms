@@ -13,9 +13,21 @@ class CancelBody extends createZodDto(cancelPendingSchema) {}
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class CancelPendingController {
   private readonly useCase: CancelPendingUseCase
-  constructor(@Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository) { this.useCase = new CancelPendingUseCase(repository) }
+  constructor(
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository,
+  ) {
+    this.useCase = new CancelPendingUseCase(repository)
+  }
   @Post('pendencies/:pendingId/cancel')
-  handle(@Param('pendingId', new ParseUUIDPipe()) pendingId: string, @Body() body: CancelBody, @CurrentCollaborator() collaborator: CollaboratorSummary) {
-    return this.useCase.execute({ ...body, pendingId, cancelledBy: collaborator.collaboratorId })
+  handle(
+    @Param('pendingId', new ParseUUIDPipe()) pendingId: string,
+    @Body() body: CancelBody,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
+    return this.useCase.execute({
+      ...body,
+      pendingId,
+      cancelledBy: collaborator.collaboratorId,
+    })
   }
 }

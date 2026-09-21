@@ -65,7 +65,9 @@ export class ListCaseChecklistController {
   })
   handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
-    @Query('clientId', new ParseUUIDPipe({ optional: true })) clientId: string | undefined,
+    @Query('clientId', new ParseUUIDPipe({ optional: true })) clientId:
+      | string
+      | undefined,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
     return this.useCase.execute({

@@ -9,9 +9,7 @@ import {
   CaseMemberRole,
   LegalCaseStatus,
 } from '@hms/core/case-management/domain/structures'
-import type {
-  CaseChecklistItemCreation,
-} from '@hms/core/case-management/domain/entities'
+import type { CaseChecklistItemCreation } from '@hms/core/case-management/domain/entities'
 import type {
   CaseMembersRepository,
   CaseChecklistItemsRepository,

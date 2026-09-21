@@ -11,9 +11,16 @@ import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ApprovePendingMessageController {
   private readonly useCase: ApproveAssistedMessageUseCase
-  constructor(@Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository) { this.useCase = new ApproveAssistedMessageUseCase(repository) }
+  constructor(
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository,
+  ) {
+    this.useCase = new ApproveAssistedMessageUseCase(repository)
+  }
   @Post('pendencies/:pendingId/message/approve')
-  handle(@Param('pendingId', new ParseUUIDPipe()) pendingId: string, @CurrentCollaborator() collaborator: CollaboratorSummary) {
+  handle(
+    @Param('pendingId', new ParseUUIDPipe()) pendingId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
     return this.useCase.execute({ pendingId, approvedBy: collaborator.collaboratorId })
   }
 }

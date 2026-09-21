@@ -8,50 +8,94 @@ import {
   pendingAiErrorModel,
   pendingModel,
 } from '@/case-management/database/drizzle/models'
-import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
 @Injectable()
-export class DrizzlePendingsRepository extends DrizzleRepository implements PendingsRepository {
-  async createWithMessage({ pending, message }: Parameters<PendingsRepository['createWithMessage']>[0]) {
+export class DrizzlePendingsRepository
+  extends DrizzleRepository
+  implements PendingsRepository
+{
+  async createWithMessage({
+    pending,
+    message,
+  }: Parameters<PendingsRepository['createWithMessage']>[0]) {
     return this.database.transaction(async (transaction) => {
-      const [createdPending] = await transaction.insert(pendingModel).values(pending).returning()
+      const [createdPending] = await transaction
+        .insert(pendingModel)
+        .values(pending)
+        .returning()
       if (!createdPending) throw new Error('Não foi possível criar a pendência.')
-      const [createdMessage] = await transaction.insert(assistedMessageModel).values({ ...message, pendingId: createdPending.id }).returning()
+      const [createdMessage] = await transaction
+        .insert(assistedMessageModel)
+        .values({ ...message, pendingId: createdPending.id })
+        .returning()
       if (!createdMessage) throw new Error('Não foi possível criar a mensagem assistida.')
       return { pending: toPending(createdPending), message: toMessage(createdMessage) }
     })
   }
 
   async listByCaseId(caseId: string) {
-    const pendings = await this.database.select().from(pendingModel).where(eq(pendingModel.caseId, caseId))
+    const pendings = await this.database
+      .select()
+      .from(pendingModel)
+      .where(eq(pendingModel.caseId, caseId))
     return pendings.map(toPending)
   }
 
   async findById(pendingId: string) {
-    const [pending] = await this.database.select().from(pendingModel).where(eq(pendingModel.id, pendingId))
+    const [pending] = await this.database
+      .select()
+      .from(pendingModel)
+      .where(eq(pendingModel.id, pendingId))
     return pending ? toPending(pending) : undefined
   }
 
   async cancel(pendingId: string, cancelledBy: string) {
-    const [pending] = await this.database.update(pendingModel).set({ cancelledAt: new Date(), cancelledBy }).where(eq(pendingModel.id, pendingId)).returning()
-    await this.database.update(assistedMessageModel).set({ status: AssistedMessageStatus.Cancelled, updatedAt: new Date() }).where(eq(assistedMessageModel.pendingId, pendingId))
+    const [pending] = await this.database
+      .update(pendingModel)
+      .set({ cancelledAt: new Date(), cancelledBy })
+      .where(eq(pendingModel.id, pendingId))
+      .returning()
+    await this.database
+      .update(assistedMessageModel)
+      .set({ status: AssistedMessageStatus.Cancelled, updatedAt: new Date() })
+      .where(eq(assistedMessageModel.pendingId, pendingId))
     return pending ? toPending(pending) : undefined
   }
 
-  async updateMessage(pendingId: string, changes: Parameters<PendingsRepository['updateMessage']>[1]) {
-    const [message] = await this.database.update(assistedMessageModel).set({ ...changes, updatedAt: new Date() }).where(eq(assistedMessageModel.pendingId, pendingId)).returning()
+  async updateMessage(
+    pendingId: string,
+    changes: Parameters<PendingsRepository['updateMessage']>[1],
+  ) {
+    const [message] = await this.database
+      .update(assistedMessageModel)
+      .set({ ...changes, updatedAt: new Date() })
+      .where(eq(assistedMessageModel.pendingId, pendingId))
+      .returning()
     return message ? toMessage(message) : undefined
   }
 
   async findMessageByPendingId(pendingId: string) {
-    const [message] = await this.database.select().from(assistedMessageModel).where(eq(assistedMessageModel.pendingId, pendingId))
+    const [message] = await this.database
+      .select()
+      .from(assistedMessageModel)
+      .where(eq(assistedMessageModel.pendingId, pendingId))
     return message ? toMessage(message) : undefined
   }
 
   async approveMessage(pendingId: string, approvedBy: string) {
     const now = new Date()
-    const [message] = await this.database.update(assistedMessageModel).set({ status: AssistedMessageStatus.Sent, approvedAt: now, approvedBy, sentAt: now, updatedAt: now }).where(eq(assistedMessageModel.pendingId, pendingId)).returning()
+    const [message] = await this.database
+      .update(assistedMessageModel)
+      .set({
+        status: AssistedMessageStatus.Sent,
+        approvedAt: now,
+        approvedBy,
+        sentAt: now,
+        updatedAt: now,
+      })
+      .where(eq(assistedMessageModel.pendingId, pendingId))
+      .returning()
     return message ? toMessage(message) : undefined
   }
 

@@ -12,7 +12,9 @@ import { PendingResponseDto } from '@/case-management/rest/dtos'
 export class ListCasePendingsController {
   private readonly useCase: ListCasePendingsUseCase
 
-  constructor(@Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository) {
+  constructor(
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings) repository: PendingsRepository,
+  ) {
     this.useCase = new ListCasePendingsUseCase(repository)
   }
 
