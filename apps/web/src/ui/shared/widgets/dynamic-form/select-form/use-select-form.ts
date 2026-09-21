@@ -65,21 +65,6 @@ export function useSelectForm({
   })
   const forms = dynamicForms.map((form) => toFormOption(form, areas, topics, contextType))
 
-  useEffect(
-    function preserveSelectedFormForContext() {
-      if (!isOpen || !forms.length) return
-
-      setSelectedId((current) =>
-        forms.some((form) => form.id === current)
-          ? current
-          : forms.some((form) => form.id === initialSelectedFormId)
-            ? (initialSelectedFormId ?? '')
-            : '',
-      )
-    },
-    [isOpen, forms, initialSelectedFormId],
-  )
-
   function handleAreaChange(areaId: string) {
     setSelectedArea(areaId)
     setSelectedTheme('')

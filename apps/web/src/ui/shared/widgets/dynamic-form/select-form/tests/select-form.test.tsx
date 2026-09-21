@@ -33,12 +33,14 @@ const forms = [
 ]
 
 function renderDialog(onSelect = vi.fn(), initialSelectedFormId?: string) {
+  const onClose = vi.fn()
   return {
+    onClose,
     onSelect,
     ...render(
       <SelectFormDialog
         isOpen
-        onClose={vi.fn()}
+        onClose={onClose}
         onSelect={onSelect}
         initialSelectedFormId={initialSelectedFormId}
       />,
@@ -92,5 +94,21 @@ describe('SelectFormDialog', () => {
     expect(firstForm.getAttribute('aria-pressed')).toBe('false')
     expect(currentForm.getAttribute('aria-pressed')).toBe('true')
     expect((confirmButton as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('confirms the form selected after opening', async () => {
+    const onSelect = vi.fn()
+    const { onClose } = renderDialog(onSelect, forms[0].id)
+
+    const replacementForm = await screen.findByRole('button', { name: /Triagem Cível/ })
+    fireEvent.click(replacementForm)
+    fireEvent.click(screen.getByRole('button', { name: 'Usar ficha dinâmica' }))
+
+    await waitFor(() => {
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: forms[1].id, title: 'Triagem Cível' }),
+      )
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 })

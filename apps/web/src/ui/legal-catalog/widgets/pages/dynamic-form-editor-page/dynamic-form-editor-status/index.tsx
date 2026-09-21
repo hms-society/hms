@@ -2,29 +2,14 @@ import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent, CardHeader } from '@/ui/shadcn/card'
-import type { DynamicFormEditorPageController } from './use-dynamic-form-editor-page'
-import type { DynamicFormEditorPageProps } from './types'
+import type { DynamicFormEditorStatusProps } from './types'
+import { useDynamicFormEditorStatus } from './use-dynamic-form-editor-status'
 
-export type DynamicFormEditorStatusKind = 'invalid-id' | 'loading' | 'not-found' | 'error'
+export const DynamicFormEditorStatus = (props: DynamicFormEditorStatusProps) => {
+  const { status, onRetry } = useDynamicFormEditorStatus(props)
 
-export function getDynamicFormEditorStatus(
-  props: DynamicFormEditorPageProps,
-  controller: DynamicFormEditorPageController,
-): DynamicFormEditorStatusKind | null {
-  if (props.mode === 'edit' && props.isValidId === false) return 'invalid-id'
-  if (controller.isLoading) return 'loading'
-  if (controller.isNotFound) return 'not-found'
-  if (props.mode === 'edit' && controller.detailQuery.isError) return 'error'
-  return null
-}
+  if (!status) return props.children
 
-export function DynamicFormEditorStatus({
-  status,
-  onRetry,
-}: {
-  status: DynamicFormEditorStatusKind
-  onRetry: () => void
-}) {
   if (status === 'loading')
     return (
       <main className='flex w-full flex-col gap-6 p-4 sm:p-8'>
@@ -69,3 +54,6 @@ export function DynamicFormEditorStatus({
     </main>
   )
 }
+
+export type { DynamicFormEditorStatusKind, DynamicFormEditorStatusProps } from './types'
+export { getDynamicFormEditorStatus } from './use-dynamic-form-editor-status'
