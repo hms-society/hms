@@ -156,8 +156,10 @@ gh pr create \
 
 PR titles and descriptions are written in PT-BR. The title must be short, use a
 noun phrase, and contain no branch or Conventional Commit prefix. The body must
-describe the objective, changelog, validation, and related issues according to
-[`prompts/create-pr-prompt.md`](prompts/create-pr-prompt.md).
+follow the exact sections defined in [`.github/pull_request_template.md`](../.github/pull_request_template.md)
+and [`prompts/create-pr-prompt.md`](prompts/create-pr-prompt.md) (Objetivo, Tickets Jira,
+Rastreabilidade, Módulos Afetados, Regras de Negócio, Testes Manuais com passos reprodutíveis,
+Validação Automatizada e Limitações Conhecidas).
 
 After creating or updating the PR, request automated review:
 

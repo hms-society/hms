@@ -1,8 +1,17 @@
-## 📝 Descrição das Alterações
-Descreva brevemente o que foi feito, o propósito deste Pull Request e quais problemas ele resolve.
+## 🎯 Objetivo
+Descreva brevemente o problema resolvido, o propósito deste Pull Request, o resultado esperado e exclusões explícitas de escopo.
+
+## 🎫 Tickets Jira Relacionados
+Liste as chaves e links dos tickets do Jira relacionados a este PR (ex: `SCRUM-123`), ou coloque `Nenhum`.
+
+## 📜 Rastreabilidade de PRD e Spec
+- **URL do PRD (Confluence):** 
+- **Spec SDD:** 
+- **Plano / Revisão:** 
+- **Critérios cobertos:** (ex: `RF-01`, `CA-02`)
 
 ## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
-Marque os módulos e **liste os caminhos completos (no menor nível possível)** de todos os arquivos ou pastas específicas que foram criados ou alterados:
+Marque os módulos e liste os caminhos completos dos arquivos ou pastas específicas criadas ou alteradas:
 - [ ] `apps/web` (Frontend / Interface)
   *Arquivos alterados:* 
   - 
@@ -12,21 +21,43 @@ Marque os módulos e **liste os caminhos completos (no menor nível possível)**
 - [ ] `packages/core` (Regras de Domínio)
   *Arquivos alterados:* 
   - 
-- [ ] `supabase` (Banco de dados / Migrations / Seeders)
+- [ ] `supabase` (Banco de Dados / Migrations / Seeders)
   *Arquivos alterados:* 
   - 
 
-## ⚠️ Alinhamento com Codeowners / Autores Original dos Módulos (Obrigatório)
-Se o PR altera arquivos existentes, liste os **Codeowners / Autores originais** de cada caminho de arquivo modificado (identifique-os no histórico do Git/Git Blame):
-- [ ] Identifiquei os autores originais dos arquivos alterados:
-  * *Caminho do arquivo* -> *Autor/Codeowner:* __________________________________
-- [ ] Eu alinhei/conversei com os criadores/autores antes de realizar e submeter estas alterações.
-  - *Com quem você alinhou e detalhes do alinhamento:* __________________________________
+## 💼 Alterações em Regras de Negócio
+Descreva se houve mudanças de comportamento, validação, autorização ou workflow (comportamento anterior vs. novo comportamento e razões). Caso não haja, declare: `Nenhuma — não há alteração de comportamento, validação, autorização ou workflow.`
 
-## 🧪 Checklist de Qualidade e Validação
-Marque as opções abaixo após realizá-las localmente em sua máquina (todas são obrigatórias para aceitação do PR):
-- [ ] Executei `pnpm test` e todos os testes passaram com sucesso.
-- [ ] Executei `pnpm check-types` e garanti que não há erros de tipagem no compilador TypeScript.
-- [ ] Executei `pnpm check` (Biome) e o código está devidamente formatado e sem alertas de qualidade/linter.
-- [ ] Validei as alterações manualmente no navegador/Postman para garantir o funcionamento correto.
-- [ ] Garanti que estas modificações **não quebram** fluxos ou páginas existentes de outros desenvolvedores.
+## 🧪 Testes Manuais
+Detalhe os cenários de testes manuais realizados para validação deste PR:
+
+### ⚙️ Pré-requisitos e Ambiente
+- Serviços/containers necessários (ex: DB/Auth saudáveis)
+- Usuários ou dados de seed utilizados (ex: `admin@hmsadvogados.com.br`)
+- Rota ou entrypoint inicial
+
+### 📝 Passos para Reprodução
+1. 
+2. 
+3. 
+
+### ✅ Resultado Esperado
+- Comportamento esperado em caso de sucesso
+- Comportamento em fluxos de erro ou exceção (se aplicável)
+
+### 📱 Responsividade e Acessibilidade (se UI)
+- Viewports testados e suporte a navegação por teclado
+
+## ⚡ Validação Automatizada e Qualidade
+Marque as verificações executadas e aprovadas localmente antes do envio:
+- [ ] `pnpm test` (Testes automatizados passando sem falhas)
+- [ ] `pnpm check-types` (Sem erros de tipagem no TypeScript)
+- [ ] `pnpm check` (Código formatado e sem alertas pelo Biome)
+
+### 📊 Comandos Executados e Resultados
+```bash
+# Cole aqui os comandos executados e o resumo dos resultados
+```
+
+## ⚠️ Limitações Conhecidas
+Liste lacunas temporárias, pendências conhecidas não bloqueantes ou limitações do ambiente, ou declare `Nenhuma`.
