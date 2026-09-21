@@ -58,7 +58,7 @@ const EMPTY_REGISTRATION: RegistrationForm = {
     zipCode: '',
   },
   consents: {
-    whatsapp_communication: false,
+    whatsapp_communication: true,
     email_communication: false,
     third_party_sharing: false,
   },

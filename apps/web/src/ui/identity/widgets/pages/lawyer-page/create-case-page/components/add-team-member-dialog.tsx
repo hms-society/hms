@@ -19,7 +19,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 import { Input } from '@/ui/shadcn/input'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import { useCollaboratorsQuery } from '@/ui/identity/hooks/use-collaborators-query'
+import { useActiveCollaboratorsQuery } from '@/ui/identity/hooks/use-active-collaborators-query'
 export type TeamMember = {
   collaboratorId: string
   name: string
@@ -43,7 +43,7 @@ export function AddTeamMemberDialog({
   const [permission, setPermission] = useState<TeamMember['permission'] | ''>('')
   const [collabOpen, setCollabOpen] = useState(false)
   const [collabSearch, setCollabSearch] = useState('')
-  const { collaboratorsPage, isLoadingCollaborators } = useCollaboratorsQuery({
+  const { collaboratorsPage, isLoadingCollaborators } = useActiveCollaboratorsQuery({
     pageSize: 50,
     search: collabSearch,
   })

@@ -38,7 +38,7 @@ const DEFAULT_CLIENTS: ClientCreation[] = [
   ClientFaker.fake({
     email: 'vinicius.lopes.machado@hms.test',
     name: 'Vinicius Lopes Machado',
-    phone: '5511987654321',
+    phone: '5512988442775',
     taxId: { type: 'cpf', value: '12345678909' },
   }),
   ...ClientFaker.fakeMany(8),
@@ -85,6 +85,42 @@ const DEFAULT_USERS: UserSeed[] = [
     email: 'estagiario@hmsadvogados.com.br',
     status: 'active',
   },
+  {
+    email: 'gildarcio@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'gildarcio.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'gildarcio.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'samuel.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'sofia.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
 ]
 
 type AdministrativeCollaboratorCreation = Extract<
@@ -113,6 +149,52 @@ const DEFAULT_ATTENDANT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
   jobTitle: 'Atendente',
   profile: 'attendant',
 }
+
+type AdministrativeCollaboratorSeed = Omit<
+  AdministrativeCollaboratorCreation,
+  'userId'
+> & {
+  email: string
+}
+
+const DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS: AdministrativeCollaboratorSeed[] = [
+  {
+    email: 'gildarcio.attendant@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'gildarcio.admin@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+  {
+    email: 'samuel.attendant@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'samuel.admin@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+  {
+    email: 'sofia.attendant@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'sofia.admin@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
+]
 
 const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
   {
@@ -156,6 +238,24 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     professionalName: 'Estagiário de Teste',
     jobTitle: 'Estagiário',
     profile: 'intern',
+  },
+  {
+    email: 'gildarcio@hmsadvogados.com.br',
+    professionalName: 'Gildárcio',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'samuel@hmsadvogados.com.br',
+    professionalName: 'Samuel',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'sofia@hmsadvogados.com.br',
+    professionalName: 'Sofia',
+    jobTitle: 'Estagiário',
+    profile: 'lawyer',
   },
 ]
 
@@ -264,6 +364,23 @@ export class IdentitySeeder {
       ...DEFAULT_ATTENDANT,
     })
 
+    const personAdministrativeCollaborators = await Promise.all(
+      DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS.map(
+        async ({ email, ...collaborator }) => {
+          const user = seededUsers.find((seededUser) => seededUser.email === email)
+
+          if (!user) {
+            throw new AppError(`Seed user for ${email} was not created`)
+          }
+
+          return this.collaboratorsRepository.add({
+            userId: user.id,
+            ...collaborator,
+          })
+        },
+      ),
+    )
+
     const legalCollaborators = await Promise.all(
       DEFAULT_LEGAL_COLLABORATORS.map(async ({ email, ...collaborator }) => {
         const user = seededUsers.find((seededUser) => seededUser.email === email)
@@ -283,32 +400,15 @@ export class IdentitySeeder {
     if (
       !administratorCreated ||
       !attendantCreated ||
+      personAdministrativeCollaborators.includes(undefined) ||
       legalCollaborators.includes(undefined)
     ) {
       throw new AppError('Default seed collaborators were not created')
     }
 
-    const clientsToSeed = [
-      {
-        ...ClientFaker.fake({ email: 'client@hms.br', name: 'Cliente HMS Teste' }),
-        id: clientUser?.id,
-      },
-      ClientFaker.fake({
-        email: 'kauandominguesdesouza@gmail.com',
-        name: 'Kauan Domingues de Souza',
-        phone: '5519971659516',
-      }),
-      ClientFaker.fake({
-        email: 'vinicius.lopes.machado@hms.test',
-        name: 'Vinicius Lopes Machado',
-        phone: '5511987654321',
-        taxId: { type: 'cpf', value: '12345678909' },
-      }),
-      ...ClientFaker.fakeMany(8),
-    ].map(({ id, createdAt, updatedAt, ...client }) => ({
-      ...client,
-      id,
-    })) satisfies ClientCreation[]
+    const clientsToSeed = DEFAULT_CLIENTS.map((client) =>
+      client.email === 'client@hms.br' ? { ...client, id: clientUser.id } : client,
+    )
     const clients = await this.seed(clientsToSeed)
 
     return {
@@ -316,6 +416,7 @@ export class IdentitySeeder {
       collaborators: [
         administratorCreated,
         attendantCreated,
+        ...personAdministrativeCollaborators,
         ...legalCollaborators,
       ].filter(
         (collaborator): collaborator is NonNullable<typeof collaborator> =>

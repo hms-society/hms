@@ -1,6 +1,13 @@
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/ui/shadcn/dialog'
 
 import {
   getChecklistActionIcon,
@@ -10,8 +17,17 @@ import {
   getChecklistRowClasses,
 } from '../checklist-style'
 import type { ActivityItem, ChecklistItem } from '../types'
+import { isPast, format } from 'date-fns'
+import { useState } from 'react'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
+
 import { DecisionReasonDialog } from './decision-reason-dialog'
 import { useChecklistDossierTab } from './use-checklist-dossier-tab'
+import { RequestDocumentExceptionModal } from '@/ui/document-engine/widgets/pages/document-analysis-page/request-document-exception-modal'
+import { RejectDocumentExceptionModal } from '@/ui/document-engine/widgets/pages/document-analysis-page/reject-document-exception-modal'
+import { useListCaseDocumentExceptionsQuery } from '@/ui/document-engine/hooks/use-list-case-document-exceptions-query'
+import { useApproveDocumentExceptionAction } from '@/ui/document-engine/hooks/use-approve-document-exception-action'
+import { useRejectDocumentExceptionAction } from '@/ui/document-engine/hooks/use-reject-document-exception-action'
 
 export type ChecklistDossierTabProps = {
   activities: ActivityItem[]
@@ -56,18 +72,46 @@ export const ChecklistDossierTab = ({
     handleValidateChecklistItem,
     isDecisionReasonDialogOpen,
     isChecklistComplete,
+    isExceptionModalOpen,
+    isRequestingException,
     isReviewDisabled: isChecklistReviewDisabled,
     isReviewingChecklistGate,
     mandatoryItemsCount,
     pendingItemsCount,
     reasonError,
     remarks,
+    requestException,
+    setIsExceptionModalOpen,
     validatedItemsCount,
   } = useChecklistDossierTab({
     caseId,
     checklist,
     isReviewDisabled,
   })
+
+  const { exceptions } = useListCaseDocumentExceptionsQuery(caseId)
+
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
+  const { approveException, isApprovingException } =
+    useApproveDocumentExceptionAction(caseId)
+  const { rejectException, isRejectingException } =
+    useRejectDocumentExceptionAction(caseId)
+
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
+  const [exceptionToReject, setExceptionToReject] = useState<string | null>(null)
+  const [justificationToView, setJustificationToView] = useState<string | null>(null)
+
+  const handleOpenRejectModal = (exceptionId: string) => {
+    setExceptionToReject(exceptionId)
+    setIsRejectModalOpen(true)
+  }
+
+  const handleConfirmReject = async (justification: string) => {
+    if (!exceptionToReject) return
+    await rejectException({ exceptionId: exceptionToReject, justification })
+    setExceptionToReject(null)
+  }
+
   const progressPercentage =
     mandatoryItemsCount > 0
       ? Math.round((validatedItemsCount / mandatoryItemsCount) * 100)
@@ -452,10 +496,103 @@ export const ChecklistDossierTab = ({
         <h2 className='font-serif text-lg font-semibold text-foreground'>
           Exceções Documentais
         </h2>
-        <div className='flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-[14px] text-muted-foreground'>
-          <Icon name='shield-check' className='size-3.5 text-primary' />
-          Nenhuma exceção ativa neste caso.
-        </div>
+        {exceptions.length === 0 ? (
+          <div className='flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-[14px] text-muted-foreground'>
+            <Icon name='shield-check' className='size-3.5 text-primary' />
+            Nenhuma exceção ativa neste caso.
+          </div>
+        ) : (
+          <div className='flex flex-col gap-2'>
+            {exceptions.map((exc) => {
+              const doc = checklistItems.find((item) => item.id === exc.documentId)
+              const docName = doc ? doc.title : 'Documento não identificado'
+
+              let statusLabel =
+                exc.status === 'APPROVED'
+                  ? 'Aprovado'
+                  : exc.status === 'REJECTED'
+                    ? 'Reprovado'
+                    : 'Pendente'
+              let statusClass = 'text-muted-foreground bg-muted/20'
+
+              if (exc.deadlineDate) {
+                const isExpired = isPast(new Date(exc.deadlineDate))
+                if (isExpired) {
+                  statusLabel = 'Expirado'
+                  statusClass = 'text-destructive border-destructive/20 bg-destructive/10'
+                } else {
+                  statusLabel = `No prazo até ${format(new Date(exc.deadlineDate), 'dd/MM/yyyy')}`
+                  statusClass = 'text-primary border-primary/20 bg-primary/10'
+                }
+              }
+
+              return (
+                // biome-ignore lint/a11y/useSemanticElements: this container may have nested buttons when PENDING, so we cannot use a native button
+                <div
+                  key={exc.id}
+                  className={`flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2.5 text-[14px] ${exc.status === 'REJECTED' && exc.rejectionJustification ? 'cursor-pointer hover:border-red-300 bg-red-50' : 'bg-background'}`}
+                  role='button'
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (exc.status === 'REJECTED' && exc.rejectionJustification) {
+                        e.preventDefault()
+                        setJustificationToView(exc.rejectionJustification)
+                      }
+                    }
+                  }}
+                  onClick={() => {
+                    if (exc.status === 'REJECTED' && exc.rejectionJustification) {
+                      setJustificationToView(exc.rejectionJustification)
+                    }
+                  }}
+                >
+                  <div className='flex flex-col'>
+                    <span className='font-semibold text-foreground'>{docName}</span>
+                    <span className='text-xs text-muted-foreground'>
+                      {exc.type === 'ACEITE_PROVISORIO'
+                        ? 'Aceite provisório'
+                        : 'Dispensa definitiva'}
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    {exc.status === 'PENDING' &&
+                      currentCollaborator?.profile === 'supervisor' && (
+                        <div className='flex items-center gap-2'>
+                          <Button
+                            variant='ghost'
+                            size='xs'
+                            className='h-7 rounded-full bg-destructive/10 text-destructive font-semibold px-3'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenRejectModal(exc.id)
+                            }}
+                          >
+                            Recusar
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='xs'
+                            className='h-7 rounded-full bg-green-600/10 text-green-700 font-semibold px-3'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              approveException(exc.id)
+                            }}
+                            disabled={isApprovingException}
+                          >
+                            Aprovar
+                          </Button>
+                        </div>
+                      )}
+                    <Badge variant='outline' className={statusClass}>
+                      {statusLabel}
+                    </Badge>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
         <p className='text-[14px] text-muted-foreground'>
           Quando um documento não puder ser obtido, solicite exceção com justificativa. A
           aprovação é de outro perfil autorizado — o solicitante não aprova a própria
@@ -494,6 +631,42 @@ export const ChecklistDossierTab = ({
           ))}
         </div>
       </section>
+
+      <RequestDocumentExceptionModal
+        isOpen={isExceptionModalOpen}
+        onClose={() => setIsExceptionModalOpen(false)}
+        isLoading={isRequestingException}
+        onSubmit={requestException}
+        checklistItems={checklistItems}
+      />
+      <RejectDocumentExceptionModal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        isLoading={isRejectingException}
+        onSubmit={handleConfirmReject}
+      />
+      <Dialog
+        open={!!justificationToView}
+        onOpenChange={(open) => !open && setJustificationToView(null)}
+      >
+        <DialogContent className='sm:max-w-[420px]'>
+          <DialogHeader>
+            <DialogTitle>Motivo da Recusa</DialogTitle>
+            <DialogDescription className='mt-2 whitespace-pre-wrap text-[14px] text-foreground'>
+              {justificationToView}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='flex justify-end mt-4'>
+            <Button
+              variant='outline'
+              className='rounded-full'
+              onClick={() => setJustificationToView(null)}
+            >
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

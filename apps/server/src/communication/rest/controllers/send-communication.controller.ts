@@ -18,9 +18,8 @@ import { SendCommunicationDto } from '../dtos/send-communication.dto'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { clientModel } from '@/identity/database/drizzle/models/client-model'
 import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
-import { clientConsentModel } from '@/identity/database/drizzle/models/client-consent-model'
 import { intakeModel } from '@/intake/database/drizzle/models/intake-model'
-import { eq, desc, and, isNull } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import { encrypt } from '@/shared/utils/crypto'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
@@ -91,24 +90,6 @@ export class SendCommunicationController {
         throw new BadRequestException('Client has no phone number registered')
       }
 
-      const [consent] = await db
-        .select()
-        .from(clientConsentModel)
-        .where(
-          and(
-            eq(clientConsentModel.clientId, body.clientId),
-            eq(clientConsentModel.type, 'whatsapp_communication'),
-            isNull(clientConsentModel.revokedAt),
-          ),
-        )
-        .limit(1)
-
-      if (!consent) {
-        throw new BadRequestException(
-          'Client does not have active WhatsApp communication consent',
-        )
-      }
-
       if (body.type === 'template') {
         const templateName =
           body.templateName ||
@@ -129,7 +110,9 @@ export class SendCommunicationController {
     }
 
     const contentToSave =
-      body.type === 'template' ? 'Olá. Podemos conversar sobre o caso?' : body.content
+      body.type === 'template'
+        ? 'Olá! Gostaria de falar sobre o seu caso. Podemos conversar?'
+        : body.content
 
     const [record] = await db
       .insert(privateMessageModel)

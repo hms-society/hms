@@ -41,7 +41,7 @@ Implementar a regra de controle da janela de conversa de 24 horas no módulo de 
   - Parametrizar a variável de ambiente `WHATSAPP_START_WINDOW_TEMPLATE_NAME` no `EnvProvider` (com fallback para `'inicio_atendimento_ola'`).
   - Atualizar o DTO `SendCommunicationDto` para aceitar envio do tipo `template` (`type?: 'text' | 'template'`, `templateName?: string`).
   - Atualizar `WhatsappProvider.sendTextMessage` / `sendTemplateMessage` para suportar disparos de templates registrados na Meta API.
-  - Atualizar o `SendCommunicationController` para tratar mensagens de template, persistindo o texto oficial do template ("Olá. Podemos conversar sobre o caso?") na tabela `private_messages`.
+  - Atualizar o `SendCommunicationController` para tratar mensagens de template, persistindo o texto oficial do template ("Olá! Gostaria de falar sobre o seu caso. Podemos conversar?") na tabela `private_messages`.
 - **Web (`apps/web`)**:
   - Atualizar o `CommunicationService` e os hooks de comunicação para enviar payloads com tipo `template`.
   - Calcular o estado da janela (`isWindowClosed`) no `ChatViewPanel` verificando se a última mensagem (seja `inbound` ou `outbound`) possui timestamp há mais de 24 horas ou se a conversa não possui mensagens.
@@ -73,7 +73,7 @@ Quando a janela de conversa estiver **fechada**, a área inferior do `ChatViewPa
 ### RF-03 — Envio do Template e Reabertura da Janela
 Ao clicar no botão **"Iniciar janela de conversa"**:
 - O sistema deve enviar o template `inicio_atendimento_ola` (ou o valor definido em `WHATSAPP_START_WINDOW_TEMPLATE_NAME`) para o telefone do cliente via Meta Graph API.
-- Deve gravar uma mensagem no histórico (`private_messages`) com o conteúdo do template ("Olá. Podemos conversar sobre o caso?"), `direction: 'outbound'` e o timestamp atual.
+- Deve gravar uma mensagem no histórico (`private_messages`) com o conteúdo do template ("Olá! Gostaria de falar sobre o seu caso. Podemos conversar?"), `direction: 'outbound'` e o timestamp atual.
 - O envio do template atualiza o estado do chat, fazendo com que `isWindowClosed` passe a ser `false` e a caixa de texto livre volte a ficar visível e habilitada.
 
 ### RF-04 — Atualização da Janela via Mensagens Inbound

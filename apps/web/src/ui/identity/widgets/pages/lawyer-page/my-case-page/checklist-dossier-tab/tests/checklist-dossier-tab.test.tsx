@@ -8,6 +8,28 @@ vi.mock('../use-checklist-dossier-tab', () => ({
   useChecklistDossierTab: vi.fn(),
 }))
 
+vi.mock('@/ui/document-engine/hooks/use-list-case-document-exceptions-query', () => ({
+  useListCaseDocumentExceptionsQuery: vi.fn(() => ({ exceptions: [] })),
+}))
+
+vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
+  useCurrentCollaboratorQuery: vi.fn(() => ({ currentCollaborator: null })),
+}))
+
+vi.mock('@/ui/document-engine/hooks/use-approve-document-exception-action', () => ({
+  useApproveDocumentExceptionAction: vi.fn(() => ({
+    approveException: vi.fn(),
+    isApprovingException: false,
+  })),
+}))
+
+vi.mock('@/ui/document-engine/hooks/use-reject-document-exception-action', () => ({
+  useRejectDocumentExceptionAction: vi.fn(() => ({
+    rejectException: vi.fn(),
+    isRejectingException: false,
+  })),
+}))
+
 const useChecklistDossierTabMock = vi.mocked(useChecklistDossierTab)
 
 function createController(
@@ -49,12 +71,16 @@ function createController(
     handleValidateChecklistItem: vi.fn(),
     isDecisionReasonDialogOpen: false,
     isChecklistComplete: false,
+    isExceptionModalOpen: false,
+    isRequestingException: false,
     isReviewDisabled: false,
     isReviewingChecklistGate: false,
     mandatoryItemsCount: 2,
     pendingItemsCount: 1,
     reasonError: null,
     remarks: '',
+    requestException: vi.fn(),
+    setIsExceptionModalOpen: vi.fn(),
     validatedItemsCount: 1,
     ...overrides,
   }
