@@ -351,6 +351,13 @@
       "when": 1789470002000,
       "tag": "0049_record_assisted_message_sent",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1789470003000,
+      "tag": "0050_document_exceptions",
+      "breakpoints": true
     }
   ]
 }
