@@ -54,7 +54,7 @@ Padronizar a segurança e robustez do servidor para mensagens do tipo `template`
 Requisições que especificarem `type: 'template'` devem ser obrigatoriamente vinculadas ao `channel: 'whatsapp'`. Qualquer tentativa de enviar template para outros canais deve falhar imediatamente com status HTTP 400.
 
 ### RF-02 — Resolução do Nome e Derivação do Conteúdo do Template
-Se `templateName` não for informado no corpo da requisição, o servidor deve utilizar o valor padrão configurado em `WHATSAPP_START_WINDOW_TEMPLATE_NAME`. O texto persistido em `private_messages` deve ser derivado e padronizado do lado do servidor (ex: `"Olá. Podemos conversar sobre o caso?"`).
+Se `templateName` não for informado no corpo da requisição, o servidor deve utilizar o valor padrão configurado em `WHATSAPP_START_WINDOW_TEMPLATE_NAME`. O texto persistido em `private_messages` deve ser derivado e padronizado do lado do servidor (ex: `"Olá! Gostaria de falar sobre o seu caso. Podemos conversar?"`).
 
 ### RF-03 — Envio via WhatsApp Independente de Consentimento Prévio
 O envio de mensagens ou templates via WhatsApp não exige consentimento registrado em `client_consents`. Basta que o cliente possua número de telefone cadastrado no seu perfil (`client.phone`). Se o cliente não possuir número de telefone cadastrado, retornar erro HTTP 400 Bad Request.

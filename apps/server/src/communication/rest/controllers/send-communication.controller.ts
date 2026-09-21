@@ -110,7 +110,9 @@ export class SendCommunicationController {
     }
 
     const contentToSave =
-      body.type === 'template' ? 'Olá. Podemos conversar sobre o caso?' : body.content
+      body.type === 'template'
+        ? 'Olá! Gostaria de falar sobre o seu caso. Podemos conversar?'
+        : body.content
 
     const [record] = await db
       .insert(privateMessageModel)
