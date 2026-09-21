@@ -10,7 +10,7 @@ describe('ProcessWhatsappBatchJob', () => {
 
   beforeEach(() => {
     mockInngest = {
-      createFunction: vi.fn((config, handler) => handler),
+      createFunction: vi.fn((_config, handler) => handler),
     }
 
     mockCreateDocumentBatchUseCase = {
@@ -66,7 +66,8 @@ describe('ProcessWhatsappBatchJob', () => {
         files: [
           expect.objectContaining({
             originalName: '_712020c3-PRD — Módulo de Agendamento-310726.pdf',
-            storagePath: 'whatsapp/evento-1/_712020c3-PRD___Modulo_de_Agendamento-310726.pdf',
+            storagePath:
+              'whatsapp/evento-1/_712020c3-PRD___Modulo_de_Agendamento-310726.pdf',
           }),
         ],
       }),
