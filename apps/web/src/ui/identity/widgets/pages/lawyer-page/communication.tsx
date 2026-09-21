@@ -125,7 +125,7 @@ export const LawyerCommunicationPage = () => {
     sendCommunicationMutation.mutate(
       {
         clientId: selectedId,
-        content: 'Olá. Podemos conversar sobre o caso?',
+        content: 'Olá! Gostaria de falar sobre o seu caso. Podemos conversar?',
         channel: 'whatsapp',
         type: 'template',
       },
