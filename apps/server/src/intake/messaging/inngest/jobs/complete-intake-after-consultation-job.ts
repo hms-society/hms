@@ -10,17 +10,20 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const consultationCompletedEvent = eventType(ConsultationCompletedEvent._NAME, {
-  schema: z.object({
-    consultationId: z.string().uuid(),
-    intakeId: z.string().uuid(),
-    completedBy: z.string().uuid(),
-    occurredAt: z.string().datetime(),
-  }),
-})
-
 @Injectable()
 export class CompleteIntakeAfterConsultationJob extends InngestJob {
+  static readonly CONSULTATION_COMPLETED_EVENT = eventType(
+    ConsultationCompletedEvent._NAME,
+    {
+      schema: z.object({
+        consultationId: z.string().uuid(),
+        intakeId: z.string().uuid(),
+        completedBy: z.string().uuid(),
+        occurredAt: z.string().datetime(),
+      }),
+    },
+  )
+
   static readonly ID = 'intake/complete-after-consultation'
   readonly function: InngestFunction.Like
 
@@ -36,7 +39,7 @@ export class CompleteIntakeAfterConsultationJob extends InngestJob {
       {
         id: CompleteIntakeAfterConsultationJob.ID,
         name: 'Complete Intake After Consultation',
-        triggers: [consultationCompletedEvent],
+        triggers: [CompleteIntakeAfterConsultationJob.CONSULTATION_COMPLETED_EVENT],
       },
       ({ event, step }) =>
         step.run('complete-intake-after-consultation', async () => {

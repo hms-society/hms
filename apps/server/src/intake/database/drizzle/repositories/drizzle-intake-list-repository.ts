@@ -26,15 +26,14 @@ import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { intakeModel } from '@/intake/database/drizzle/models'
 
-const DEFAULT_PAGE = 1
-const DEFAULT_PAGE_SIZE = 20
-const MAX_PAGE_SIZE = 100
-const SAO_PAULO_OFFSET = '-03:00'
-
-const PUBLIC_STATUSES = Object.values(IntakeListStatusValues)
-
 @Injectable()
 export class DrizzleIntakeListRepository extends DrizzleRepository {
+  static readonly DEFAULT_PAGE = 1
+  static readonly DEFAULT_PAGE_SIZE = 20
+  static readonly MAX_PAGE_SIZE = 100
+  static readonly SAO_PAULO_OFFSET = '-03:00'
+  static readonly PUBLIC_STATUSES = Object.values(IntakeListStatusValues)
+
   constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
     super(drizzle)
   }
@@ -152,7 +151,10 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
   }
 
   private addPublicStatusFilter(baseWhere: SQL | undefined): SQL {
-    const publicStatusCondition = inArray(intakeModel.status, PUBLIC_STATUSES)
+    const publicStatusCondition = inArray(
+      intakeModel.status,
+      DrizzleIntakeListRepository.PUBLIC_STATUSES,
+    )
     return baseWhere
       ? (and(baseWhere, publicStatusCondition) ?? publicStatusCondition)
       : publicStatusCondition
@@ -169,7 +171,7 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
       .groupBy(intakeModel.status)
 
     const byStatus = Object.fromEntries(
-      PUBLIC_STATUSES.map((status) => [status, 0]),
+      DrizzleIntakeListRepository.PUBLIC_STATUSES.map((status) => [status, 0]),
     ) as Record<IntakeListStatus, number>
     let all = 0
     let registered = 0
@@ -245,21 +247,22 @@ export class DrizzleIntakeListRepository extends DrizzleRepository {
     }
 
     const date = new Date(
-      `${value}T${boundary === 'start' ? '00:00:00.000' : '23:59:59.999'}${SAO_PAULO_OFFSET}`,
+      `${value}T${boundary === 'start' ? '00:00:00.000' : '23:59:59.999'}${DrizzleIntakeListRepository.SAO_PAULO_OFFSET}`,
     )
     return Number.isNaN(date.getTime()) ? undefined : date
   }
 
   private normalizePage(page?: number): number {
-    if (!Number.isFinite(page) || !page || page < 1) return DEFAULT_PAGE
+    if (!Number.isFinite(page) || !page || page < 1)
+      return DrizzleIntakeListRepository.DEFAULT_PAGE
     return Math.floor(page)
   }
 
   private normalizePageSize(pageSize?: number): number {
     if (!Number.isFinite(pageSize) || !pageSize || pageSize < 1) {
-      return DEFAULT_PAGE_SIZE
+      return DrizzleIntakeListRepository.DEFAULT_PAGE_SIZE
     }
 
-    return Math.min(MAX_PAGE_SIZE, Math.floor(pageSize))
+    return Math.min(DrizzleIntakeListRepository.MAX_PAGE_SIZE, Math.floor(pageSize))
   }
 }

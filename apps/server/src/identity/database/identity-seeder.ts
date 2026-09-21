@@ -26,46 +26,6 @@ type UserSeed = {
   status: UserCreation['status']
 }
 
-const DEFAULT_CLIENTS: ClientCreation[] = [
-  ClientFaker.fake({
-    email: 'client@hms.br',
-    name: 'Cliente HMS Teste',
-    phone: '5511999999999',
-  }),
-  ...ClientFaker.fakeMany(9),
-].map(({ id, createdAt, updatedAt, ...client }) => client)
-
-const DEFAULT_USERS: UserSeed[] = [
-  {
-    email: 'admin@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'attendant@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'lawyer@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'paralegal@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'lawyer.contracts@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'paralegal.documents@hmsadvogados.com.br',
-    status: 'active',
-  },
-  {
-    email: 'client@hms.br',
-    status: 'active',
-  },
-]
-
 type AdministrativeCollaboratorCreation = Extract<
   CollaboratorCreation,
   { legalExpertises?: never }
@@ -76,48 +36,87 @@ type LegalCollaboratorSeed = {
   profile: 'lawyer' | 'paralegal'
 }
 
-const DEFAULT_ADMINISTRATOR: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
-  profile: 'admin'
-} = {
-  professionalName: 'Administrador de desenvolvimento',
-  jobTitle: 'Administrador',
-  profile: 'admin',
-}
-
-const DEFAULT_ATTENDANT: Omit<AdministrativeCollaboratorCreation, 'userId'> & {
-  profile: 'attendant'
-} = {
-  professionalName: 'Atendente de desenvolvimento',
-  jobTitle: 'Atendente',
-  profile: 'attendant',
-}
-
-const DEFAULT_LAWYER: LegalCollaboratorSeed = {
-  professionalName: 'Advogado de desenvolvimento',
-  jobTitle: 'Advogado',
-  profile: 'lawyer',
-}
-
-const DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
-  professionalName: 'Paralegal de desenvolvimento',
-  jobTitle: 'Paralegal',
-  profile: 'paralegal',
-}
-
-const DEFAULT_CONTRACTS_LAWYER: LegalCollaboratorSeed = {
-  professionalName: 'Advogada de contratos',
-  jobTitle: 'Advogada especialista em contratos',
-  profile: 'lawyer',
-}
-
-const DEFAULT_DOCUMENTS_PARALEGAL: LegalCollaboratorSeed = {
-  professionalName: 'Paralegal documental',
-  jobTitle: 'Paralegal de documentos',
-  profile: 'paralegal',
-}
-
 @Injectable()
 export class IdentitySeeder {
+  static readonly DEFAULT_CLIENTS: ClientCreation[] = [
+    ClientFaker.fake({
+      email: 'client@hms.br',
+      name: 'Cliente HMS Teste',
+      phone: '5511999999999',
+    }),
+    ...ClientFaker.fakeMany(9),
+  ].map(({ id, createdAt, updatedAt, ...client }) => client)
+  static readonly DEFAULT_USERS: UserSeed[] = [
+    {
+      email: 'admin@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'attendant@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'lawyer@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'paralegal@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'lawyer.contracts@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'paralegal.documents@hmsadvogados.com.br',
+      status: 'active',
+    },
+    {
+      email: 'client@hms.br',
+      status: 'active',
+    },
+  ]
+  static readonly DEFAULT_ADMINISTRATOR: Omit<
+    AdministrativeCollaboratorCreation,
+    'userId'
+  > & {
+    profile: 'admin'
+  } = {
+    professionalName: 'Administrador de desenvolvimento',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  }
+  static readonly DEFAULT_ATTENDANT: Omit<
+    AdministrativeCollaboratorCreation,
+    'userId'
+  > & {
+    profile: 'attendant'
+  } = {
+    professionalName: 'Atendente de desenvolvimento',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  }
+  static readonly DEFAULT_LAWYER: LegalCollaboratorSeed = {
+    professionalName: 'Advogado de desenvolvimento',
+    jobTitle: 'Advogado',
+    profile: 'lawyer',
+  }
+  static readonly DEFAULT_PARALEGAL: LegalCollaboratorSeed = {
+    professionalName: 'Paralegal de desenvolvimento',
+    jobTitle: 'Paralegal',
+    profile: 'paralegal',
+  }
+  static readonly DEFAULT_CONTRACTS_LAWYER: LegalCollaboratorSeed = {
+    professionalName: 'Advogada de contratos',
+    jobTitle: 'Advogada especialista em contratos',
+    profile: 'lawyer',
+  }
+  static readonly DEFAULT_DOCUMENTS_PARALEGAL: LegalCollaboratorSeed = {
+    professionalName: 'Paralegal documental',
+    jobTitle: 'Paralegal de documentos',
+    profile: 'paralegal',
+  }
+
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)
     private readonly clientsRepository: ClientsRepository,
@@ -134,7 +133,7 @@ export class IdentitySeeder {
     private readonly authAdministrationProvider?: AuthAdministrationProvider,
   ) {}
 
-  seed(clients: ClientCreation[] = DEFAULT_CLIENTS) {
+  seed(clients: ClientCreation[] = IdentitySeeder.DEFAULT_CLIENTS) {
     return this.clientsRepository.addMany(clients)
   }
 
@@ -155,7 +154,7 @@ export class IdentitySeeder {
   }
 
   async seedUsers(
-    users: UserSeed[] = DEFAULT_USERS,
+    users: UserSeed[] = IdentitySeeder.DEFAULT_USERS,
     authAdministrationProvider: AuthAdministrationProvider | undefined = this
       .authAdministrationProvider,
     password?: string,
@@ -195,7 +194,7 @@ export class IdentitySeeder {
     }
 
     const seededUsers = await this.seedUsers(
-      DEFAULT_USERS,
+      IdentitySeeder.DEFAULT_USERS,
       authAdministrationProvider,
       seedPassword,
     )
@@ -233,35 +232,35 @@ export class IdentitySeeder {
 
     const administrator = {
       userId: adminUser.id,
-      ...DEFAULT_ADMINISTRATOR,
+      ...IdentitySeeder.DEFAULT_ADMINISTRATOR,
     } satisfies CollaboratorCreation
 
     const administratorCreated = await this.collaboratorsRepository.add(administrator)
 
     const attendantCreated = await this.collaboratorsRepository.add({
       userId: attendantUser.id,
-      ...DEFAULT_ATTENDANT,
+      ...IdentitySeeder.DEFAULT_ATTENDANT,
     })
 
     const lawyerCreated = await this.collaboratorsRepository.add({
       userId: lawyerUser.id,
-      ...DEFAULT_LAWYER,
+      ...IdentitySeeder.DEFAULT_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
     })
 
     const paralegalCreated = await this.collaboratorsRepository.add({
       userId: paralegalUser.id,
-      ...DEFAULT_PARALEGAL,
+      ...IdentitySeeder.DEFAULT_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
     })
     const contractsLawyerCreated = await this.collaboratorsRepository.add({
       userId: contractsLawyerUser.id,
-      ...DEFAULT_CONTRACTS_LAWYER,
+      ...IdentitySeeder.DEFAULT_CONTRACTS_LAWYER,
       legalExpertises: [lawyerLegalExpertise],
     })
     const documentsParalegalCreated = await this.collaboratorsRepository.add({
       userId: documentsParalegalUser.id,
-      ...DEFAULT_DOCUMENTS_PARALEGAL,
+      ...IdentitySeeder.DEFAULT_DOCUMENTS_PARALEGAL,
       legalExpertises: [lawyerLegalExpertise],
     })
 

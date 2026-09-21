@@ -103,6 +103,31 @@ const HEADER_HEIGHT = 64
 const EVENT_KEY = 'intake.created'
 ```
 
+Constants used exclusively by one class must be declared on that class as
+`static readonly` members instead of loose module-level declarations. Keep the
+uppercase snake-case naming and reference the constant through the declaring
+class so its ownership remains explicit in decorators, methods, and external
+consumers:
+
+```ts
+export class ReconcileDocumentsJob {
+  static readonly ID = 'documents/reconcile'
+  static readonly RECONCILIATION_LIMIT = 100
+
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: ReconcileDocumentsJob.ID,
+  })
+  execute() {
+    return this.useCase.execute({
+      limit: ReconcileDocumentsJob.RECONCILIATION_LIMIT,
+    })
+  }
+}
+```
+
+Keep a constant at module level only when it is shared by multiple declarations
+in that module or intentionally forms part of the module's functional API.
+
 Constants scoped inside a function may use a local name when their lifetime and
 meaning are limited to that render or invocation.
 

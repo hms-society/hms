@@ -18,27 +18,27 @@ import { IdProvider } from '@/shared/provision/id/id-provider'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const appointmentReservedEvent = eventType(AppointmentReservedEvent._NAME, {
-  schema: z.object({
-    appointmentId: z.string().uuid(),
-    intakeId: z.string().uuid(),
-    scheduleId: z.string().uuid(),
-    clientId: z.string().uuid(),
-    assignedLawyerId: z.string().uuid(),
-    legalAreaId: z.string().uuid().optional(),
-    legalTopicId: z.string().uuid().optional(),
-    demandNotes: z.string().optional(),
-    startsAt: z.string().datetime(),
-    endsAt: z.string().datetime(),
-    reservedAt: z.string().datetime(),
-    modality: z.enum(ConsultationModality),
-    channel: z.enum(ConsultationChannel).optional(),
-    requestedBy: z.string().uuid(),
-  }),
-})
-
 @Injectable()
 export class CreateConsultationFromAppointmentJob extends InngestJob {
+  static readonly APPOINTMENT_RESERVED_EVENT = eventType(AppointmentReservedEvent._NAME, {
+    schema: z.object({
+      appointmentId: z.string().uuid(),
+      intakeId: z.string().uuid(),
+      scheduleId: z.string().uuid(),
+      clientId: z.string().uuid(),
+      assignedLawyerId: z.string().uuid(),
+      legalAreaId: z.string().uuid().optional(),
+      legalTopicId: z.string().uuid().optional(),
+      demandNotes: z.string().optional(),
+      startsAt: z.string().datetime(),
+      endsAt: z.string().datetime(),
+      reservedAt: z.string().datetime(),
+      modality: z.enum(ConsultationModality),
+      channel: z.enum(ConsultationChannel).optional(),
+      requestedBy: z.string().uuid(),
+    }),
+  })
+
   readonly function: InngestFunction.Like
 
   constructor(
@@ -60,7 +60,7 @@ export class CreateConsultationFromAppointmentJob extends InngestJob {
       {
         id: 'consultation/create-from-appointment',
         name: 'Create Consultation From Appointment',
-        triggers: [appointmentReservedEvent],
+        triggers: [CreateConsultationFromAppointmentJob.APPOINTMENT_RESERVED_EVENT],
         onFailure: async ({ event, step }) => {
           const originalEvent = event.data.event
           const failedEvent = new IntakeConsultationSchedulingFailedEvent({

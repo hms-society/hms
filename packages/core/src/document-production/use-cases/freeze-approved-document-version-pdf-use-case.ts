@@ -42,12 +42,12 @@ type Dependencies = {
   readonly idProvider: IdProvider
 }
 
-const DOCX_CONTENT_TYPE =
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document' as const
-
 export class FreezeApprovedDocumentVersionPdfUseCase
   implements UseCase<Request, FrozenDocumentPdf>
 {
+  static readonly DOCX_CONTENT_TYPE =
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' as const
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<FrozenDocumentPdf> {
@@ -72,7 +72,11 @@ export class FreezeApprovedDocumentVersionPdfUseCase
     this.assertCurrentApproved(version, document.currentVersionId)
 
     const sourceFile = await this.dependencies.fileStorageProvider.get(version.fileId)
-    if (!sourceFile || sourceFile.file.contentType !== DOCX_CONTENT_TYPE) {
+    if (
+      !sourceFile ||
+      sourceFile.file.contentType !==
+        FreezeApprovedDocumentVersionPdfUseCase.DOCX_CONTENT_TYPE
+    ) {
       throw new DocumentVersionNotFreezableError('source_missing')
     }
 
@@ -82,7 +86,7 @@ export class FreezeApprovedDocumentVersionPdfUseCase
     try {
       conversion = await this.dependencies.converter.convert({
         fileName: sourceFile.file.fileName,
-        contentType: DOCX_CONTENT_TYPE,
+        contentType: FreezeApprovedDocumentVersionPdfUseCase.DOCX_CONTENT_TYPE,
         content: sourceContent.slice(),
         traceId: request.traceId,
       })

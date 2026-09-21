@@ -5,20 +5,19 @@ import { z } from 'zod'
 
 import { documentGenerationWorkflowOutputSchema } from '@/document-production/ai/mastra/schemas'
 
-const inputSchema = z.object({
-  'save-generated-document-version': documentGenerationWorkflowOutputSchema.optional(),
-  'fail-document-generation': documentGenerationWorkflowOutputSchema.optional(),
-})
-
-const outputSchema = documentGenerationWorkflowOutputSchema
-
 @Injectable()
 export class ResolveDocumentGenerationOutcomeTool {
+  static readonly INPUT_SCHEMA = z.object({
+    'save-generated-document-version': documentGenerationWorkflowOutputSchema.optional(),
+    'fail-document-generation': documentGenerationWorkflowOutputSchema.optional(),
+  })
+  static readonly OUTPUT_SCHEMA = documentGenerationWorkflowOutputSchema
+
   readonly function: ReturnType<
     typeof createTool<
       'resolve-document-generation-outcome',
-      typeof inputSchema,
-      typeof outputSchema
+      typeof ResolveDocumentGenerationOutcomeTool.INPUT_SCHEMA,
+      typeof ResolveDocumentGenerationOutcomeTool.OUTPUT_SCHEMA
     >
   >
 
@@ -26,8 +25,8 @@ export class ResolveDocumentGenerationOutcomeTool {
     this.function = createTool({
       id: 'resolve-document-generation-outcome',
       description: 'Resolve the final approved draft or understandable findings.',
-      inputSchema,
-      outputSchema,
+      inputSchema: ResolveDocumentGenerationOutcomeTool.INPUT_SCHEMA,
+      outputSchema: ResolveDocumentGenerationOutcomeTool.OUTPUT_SCHEMA,
       strict: true,
       execute: async (input) => {
         const approved = input['save-generated-document-version']

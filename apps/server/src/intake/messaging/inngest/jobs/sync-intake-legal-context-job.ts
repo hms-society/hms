@@ -10,22 +10,22 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const consultationLegalContextUpdatedEvent = eventType(
-  ConsultationLegalContextUpdatedEvent._NAME,
-  {
-    schema: z.object({
-      consultationId: z.string().uuid(),
-      intakeId: z.string().uuid(),
-      legalAreaId: z.string().uuid(),
-      legalTopicId: z.string().uuid(),
-      updatedBy: z.string().uuid(),
-      occurredAt: z.string().datetime(),
-    }),
-  },
-)
-
 @Injectable()
 export class SyncIntakeLegalContextJob extends InngestJob {
+  static readonly CONSULTATION_LEGAL_CONTEXT_UPDATED_EVENT = eventType(
+    ConsultationLegalContextUpdatedEvent._NAME,
+    {
+      schema: z.object({
+        consultationId: z.string().uuid(),
+        intakeId: z.string().uuid(),
+        legalAreaId: z.string().uuid(),
+        legalTopicId: z.string().uuid(),
+        updatedBy: z.string().uuid(),
+        occurredAt: z.string().datetime(),
+      }),
+    },
+  )
+
   static readonly ID = 'intake/sync-legal-context-from-consultation'
   readonly function: InngestFunction.Like
 
@@ -41,7 +41,7 @@ export class SyncIntakeLegalContextJob extends InngestJob {
       {
         id: SyncIntakeLegalContextJob.ID,
         name: 'Sync Intake Legal Context From Consultation',
-        triggers: [consultationLegalContextUpdatedEvent],
+        triggers: [SyncIntakeLegalContextJob.CONSULTATION_LEGAL_CONTEXT_UPDATED_EVENT],
       },
       ({ event, step }) =>
         step.run('sync-intake-legal-context', async () => {

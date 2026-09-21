@@ -12,13 +12,13 @@ type CollaboratorCreationOverrides = {
   readonly legalExpertises?: readonly LegalExpertise[]
 }
 
-const LEGAL_PROFILES: readonly CollaboratorProfile[] = [
-  'lawyer',
-  'paralegal',
-  'supervisor',
-]
-
 export class CollaboratorCreationFaker {
+  static readonly LEGAL_PROFILES: readonly CollaboratorProfile[] = [
+    'lawyer',
+    'paralegal',
+    'supervisor',
+  ]
+
   static fake(overrides: CollaboratorCreationOverrides = {}): CollaboratorCreation {
     const profile = overrides.profile ?? 'admin'
 
@@ -27,7 +27,7 @@ export class CollaboratorCreationFaker {
       professionalName: faker.person.fullName(),
       jobTitle: faker.person.jobTitle(),
       profile,
-      ...(LEGAL_PROFILES.includes(profile)
+      ...(CollaboratorCreationFaker.LEGAL_PROFILES.includes(profile)
         ? { legalExpertises: [LegalExpertiseFaker.fake()] }
         : {}),
       ...overrides,

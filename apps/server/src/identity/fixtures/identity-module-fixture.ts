@@ -38,19 +38,6 @@ import { IdProvider } from '@/shared/provision/id/id-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
-const idProvider = new IdProvider()
-const authAdministrationFixture: AuthAdministrationProvider = {
-  createUser: async (email) => ({ id: idProvider.generate(), email }),
-  removeUser: async () => undefined,
-  removeAllUsers: async () => undefined,
-  inviteUserByEmail: async (email) => ({ id: idProvider.generate(), email }),
-  resendInvitation: async (email) => ({ id: idProvider.generate(), email }),
-  findUserByEmail: async () => undefined,
-  setInvitationAttemptId: async () => undefined,
-  setUserBanned: async () => undefined,
-  revokeSession: async () => undefined,
-}
-
 type NaturalClientCreation = Extract<ClientCreation, { type: 'natural' }>
 type AdministrativeCollaboratorCreation = Extract<
   CollaboratorCreation,
@@ -58,6 +45,28 @@ type AdministrativeCollaboratorCreation = Extract<
 >
 
 export class IdentityModuleFixture {
+  static readonly ID_PROVIDER = new IdProvider()
+  static readonly AUTH_ADMINISTRATION_FIXTURE: AuthAdministrationProvider = {
+    createUser: async (email) => ({
+      id: IdentityModuleFixture.ID_PROVIDER.generate(),
+      email,
+    }),
+    removeUser: async () => undefined,
+    removeAllUsers: async () => undefined,
+    inviteUserByEmail: async (email) => ({
+      id: IdentityModuleFixture.ID_PROVIDER.generate(),
+      email,
+    }),
+    resendInvitation: async (email) => ({
+      id: IdentityModuleFixture.ID_PROVIDER.generate(),
+      email,
+    }),
+    findUserByEmail: async () => undefined,
+    setInvitationAttemptId: async () => undefined,
+    setUserBanned: async () => undefined,
+    revokeSession: async () => undefined,
+  }
+
   private constructor(
     private readonly restFixture: RestFixture,
     private readonly clientsRepository: DrizzleClientsRepository,
@@ -97,7 +106,7 @@ export class IdentityModuleFixture {
       (builder) =>
         builder
           .overrideProvider(IDENTITY_PROVIDERS.authAdministration)
-          .useValue(authAdministrationFixture)
+          .useValue(IdentityModuleFixture.AUTH_ADMINISTRATION_FIXTURE)
           .overrideGuard(AuthGuard)
           .useValue({
             canActivate: (context: ExecutionContext) => {

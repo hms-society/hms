@@ -56,13 +56,13 @@ type AuthResolution = {
   readonly authUserId?: string
 }
 
-const ADMINISTRATIVE_PROFILES = new Set(['admin', 'attendant'])
-const LEGAL_PROFILES = new Set(['lawyer', 'paralegal', 'supervisor'])
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
 export class RegisterCollaboratorUseCase
   implements UseCase<Request, CollaboratorSummary>
 {
+  static readonly ADMINISTRATIVE_PROFILES = new Set(['admin', 'attendant'])
+  static readonly LEGAL_PROFILES = new Set(['lawyer', 'paralegal', 'supervisor'])
+  static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly collaboratorsRepository: CollaboratorsRepository,
@@ -168,7 +168,7 @@ export class RegisterCollaboratorUseCase
     const professionalName = request.professionalName.trim()
     const jobTitle = request.jobTitle?.trim() || undefined
 
-    if (!EMAIL_PATTERN.test(email)) {
+    if (!RegisterCollaboratorUseCase.EMAIL_PATTERN.test(email)) {
       throw new InvalidClientDataError('E-mail institucional inválido.')
     }
 
@@ -177,15 +177,15 @@ export class RegisterCollaboratorUseCase
     }
 
     if (
-      !ADMINISTRATIVE_PROFILES.has(request.profile) &&
-      !LEGAL_PROFILES.has(request.profile)
+      !RegisterCollaboratorUseCase.ADMINISTRATIVE_PROFILES.has(request.profile) &&
+      !RegisterCollaboratorUseCase.LEGAL_PROFILES.has(request.profile)
     ) {
       throw new InvalidClientDataError('Perfil de colaborador inválido.')
     }
 
     const legalExpertises = this.normalizeLegalExpertises(request)
 
-    if (LEGAL_PROFILES.has(request.profile)) {
+    if (RegisterCollaboratorUseCase.LEGAL_PROFILES.has(request.profile)) {
       if (!legalExpertises || legalExpertises.length === 0) {
         throw new InvalidLegalExpertiseError()
       }
@@ -215,7 +215,7 @@ export class RegisterCollaboratorUseCase
   ): readonly [LegalExpertise, ...LegalExpertise[]] | undefined {
     const hasLegalExpertises = Object.hasOwn(request, 'legalExpertises')
 
-    if (ADMINISTRATIVE_PROFILES.has(request.profile)) {
+    if (RegisterCollaboratorUseCase.ADMINISTRATIVE_PROFILES.has(request.profile)) {
       if (hasLegalExpertises) throw new InvalidLegalExpertiseError()
       return undefined
     }

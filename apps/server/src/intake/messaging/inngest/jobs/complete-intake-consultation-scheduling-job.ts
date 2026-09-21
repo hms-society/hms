@@ -11,17 +11,17 @@ import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const consultationCreatedEvent = eventType(ConsultationCreatedEvent._NAME, {
-  schema: z.object({
-    consultationId: z.string().uuid(),
-    intakeId: z.string().uuid(),
-    requestedBy: z.string().uuid(),
-    occurredAt: z.string().datetime(),
-  }),
-})
-
 @Injectable()
 export class CompleteIntakeConsultationSchedulingJob extends InngestJob {
+  static readonly CONSULTATION_CREATED_EVENT = eventType(ConsultationCreatedEvent._NAME, {
+    schema: z.object({
+      consultationId: z.string().uuid(),
+      intakeId: z.string().uuid(),
+      requestedBy: z.string().uuid(),
+      occurredAt: z.string().datetime(),
+    }),
+  })
+
   static readonly ID = 'intake/complete-consultation-scheduling'
   readonly function: InngestFunction.Like
 
@@ -37,7 +37,7 @@ export class CompleteIntakeConsultationSchedulingJob extends InngestJob {
       {
         id: CompleteIntakeConsultationSchedulingJob.ID,
         name: 'Complete Intake Consultation Scheduling',
-        triggers: [consultationCreatedEvent],
+        triggers: [CompleteIntakeConsultationSchedulingJob.CONSULTATION_CREATED_EVENT],
       },
       ({ event, step }) =>
         step.run('complete-consultation-scheduling', async () => {

@@ -15,14 +15,14 @@ import {
 
 import { envSchema, type EnvProvider } from '@/shared/provision/env/env-provider'
 
-const STORAGE_API_IMAGE = 'supabase/storage-api:v1.60.4'
-const STORAGE_API_PORT = 5000
-const STORAGE_BUCKET = 'documents'
-const JWT_SECRET = 'inngest-storage-fixture-secret-at-least-32-characters'
-const STORAGE_DATABASE_URL =
-  'postgresql://postgres:postgres@storage-database:5432/storage'
-
 export class SupabaseStorageFixture {
+  static readonly STORAGE_API_IMAGE = 'supabase/storage-api:v1.60.4'
+  static readonly STORAGE_API_PORT = 5000
+  static readonly STORAGE_BUCKET = 'documents'
+  static readonly JWT_SECRET = 'inngest-storage-fixture-secret-at-least-32-characters'
+  static readonly STORAGE_DATABASE_URL =
+    'postgresql://postgres:postgres@storage-database:5432/storage'
+
   private network: StartedNetwork | undefined
   private databaseContainer: StartedPostgreSqlContainer | undefined
   private storageContainer: StartedTestContainer | undefined
@@ -56,7 +56,7 @@ export class SupabaseStorageFixture {
       ...process.env,
       SUPABASE_URL: this.gatewayUrl,
       SUPABASE_SERVICE_ROLE_KEY: this.serviceKey,
-      SUPABASE_STORAGE_BUCKET: STORAGE_BUCKET,
+      SUPABASE_STORAGE_BUCKET: SupabaseStorageFixture.STORAGE_BUCKET,
     })
 
     return {
@@ -107,15 +107,17 @@ export class SupabaseStorageFixture {
       .start()
     await this.prepareDatabase(this.databaseContainer.getConnectionUri())
     await this.migrateDatabase(serviceKey)
-    this.storageContainer = await new GenericContainer(STORAGE_API_IMAGE)
+    this.storageContainer = await new GenericContainer(
+      SupabaseStorageFixture.STORAGE_API_IMAGE,
+    )
       .withNetwork(this.network)
       .withNetworkAliases('storage-api')
       .withEnvironment({
         ANON_KEY: serviceKey,
         SERVICE_KEY: serviceKey,
-        PGRST_JWT_SECRET: JWT_SECRET,
-        AUTH_JWT_SECRET: JWT_SECRET,
-        DATABASE_URL: STORAGE_DATABASE_URL,
+        PGRST_JWT_SECRET: SupabaseStorageFixture.JWT_SECRET,
+        AUTH_JWT_SECRET: SupabaseStorageFixture.JWT_SECRET,
+        DATABASE_URL: SupabaseStorageFixture.STORAGE_DATABASE_URL,
         POSTGREST_URL: 'http://storage-postgrest:3000',
         FILE_SIZE_LIMIT: '52428800',
         STORAGE_BACKEND: 'file',
@@ -125,8 +127,12 @@ export class SupabaseStorageFixture {
         GLOBAL_S3_BUCKET: 'stub',
         ENABLE_IMAGE_TRANSFORMATION: 'false',
       })
-      .withExposedPorts(STORAGE_API_PORT)
-      .withWaitStrategy(Wait.forHttp('/status', STORAGE_API_PORT).forStatusCode(200))
+      .withExposedPorts(SupabaseStorageFixture.STORAGE_API_PORT)
+      .withWaitStrategy(
+        Wait.forHttp('/status', SupabaseStorageFixture.STORAGE_API_PORT).forStatusCode(
+          200,
+        ),
+      )
       .withStartupTimeout(120_000)
       .start()
     this.gatewayContainer = await new GenericContainer('nginx:1.27-alpine')
@@ -138,7 +144,7 @@ export class SupabaseStorageFixture {
           content: `server {
   listen 80;
   location /storage/v1/ {
-    proxy_pass http://storage-api:${STORAGE_API_PORT}/;
+    proxy_pass http://storage-api:${SupabaseStorageFixture.STORAGE_API_PORT}/;
   }
 }
 `,
@@ -150,7 +156,7 @@ export class SupabaseStorageFixture {
     const gatewayUrl = `http://${this.gatewayContainer.getHost()}:${this.gatewayContainer.getMappedPort(80)}`
     process.env.SUPABASE_URL = gatewayUrl
     process.env.SUPABASE_SERVICE_ROLE_KEY = serviceKey
-    process.env.SUPABASE_STORAGE_BUCKET = STORAGE_BUCKET
+    process.env.SUPABASE_STORAGE_BUCKET = SupabaseStorageFixture.STORAGE_BUCKET
     this.gatewayUrl = gatewayUrl
     this.serviceKey = serviceKey
 
@@ -170,7 +176,7 @@ export class SupabaseStorageFixture {
         exp: Math.floor(Date.now() / 1000) + 60 * 60,
       }),
     ).toString('base64url')
-    const signature = createHmac('sha256', JWT_SECRET)
+    const signature = createHmac('sha256', SupabaseStorageFixture.JWT_SECRET)
       .update(`${header}.${payload}`)
       .digest('base64url')
 
@@ -185,7 +191,11 @@ export class SupabaseStorageFixture {
         authorization: `Bearer ${serviceKey}`,
         'content-type': 'application/json',
       },
-      body: JSON.stringify({ id: STORAGE_BUCKET, name: STORAGE_BUCKET, public: false }),
+      body: JSON.stringify({
+        id: SupabaseStorageFixture.STORAGE_BUCKET,
+        name: SupabaseStorageFixture.STORAGE_BUCKET,
+        public: false,
+      }),
     })
 
     if (!response.ok) {
@@ -202,14 +212,14 @@ export class SupabaseStorageFixture {
     let output = ''
 
     try {
-      await new GenericContainer(STORAGE_API_IMAGE)
+      await new GenericContainer(SupabaseStorageFixture.STORAGE_API_IMAGE)
         .withNetwork(network)
         .withEnvironment({
           ANON_KEY: serviceKey,
-          AUTH_JWT_SECRET: JWT_SECRET,
-          DATABASE_URL: STORAGE_DATABASE_URL,
+          AUTH_JWT_SECRET: SupabaseStorageFixture.JWT_SECRET,
+          DATABASE_URL: SupabaseStorageFixture.STORAGE_DATABASE_URL,
           DB_INSTALL_ROLES: 'true',
-          PGRST_JWT_SECRET: JWT_SECRET,
+          PGRST_JWT_SECRET: SupabaseStorageFixture.JWT_SECRET,
           SERVICE_KEY: serviceKey,
         })
         .withCommand(['node', 'dist/scripts/migrate-call.js'])

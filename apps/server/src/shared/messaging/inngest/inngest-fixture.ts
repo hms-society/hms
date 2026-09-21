@@ -16,11 +16,6 @@ import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import type { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import type { EnvProvider } from '@/shared/provision/env/env-provider'
 
-const INNGEST_IMAGE = 'inngest/inngest:v1.36.0'
-const INNGEST_PORT = 8288
-const INNGEST_SERVE_PATH = '/api/inngest'
-const TERMINAL_RUN_STATUSES = new Set(['completed', 'failed', 'cancelled'])
-
 export type InngestRun = {
   readonly id: string
   readonly status: string
@@ -100,6 +95,11 @@ class InngestContainer extends GenericContainer {
 }
 
 export class InngestFixture {
+  static readonly INNGEST_IMAGE = 'inngest/inngest:v1.36.0'
+  static readonly INNGEST_PORT = 8288
+  static readonly INNGEST_SERVE_PATH = '/api/inngest'
+  static readonly TERMINAL_RUN_STATUSES = new Set(['completed', 'failed', 'cancelled'])
+
   private readonly timeoutMs: number
   private endpointServer: Server | undefined
   private endpointHandler: RequestListener | undefined
@@ -138,7 +138,7 @@ export class InngestFixture {
 
       this.container = await this.startInngestContainer(endpointPort)
 
-      this.inngestBaseUrl = `http://${this.container.getHost()}:${this.container.getMappedPort(INNGEST_PORT)}`
+      this.inngestBaseUrl = `http://${this.container.getHost()}:${this.container.getMappedPort(InngestFixture.INNGEST_PORT)}`
       this.inngestClient = this.createInngestClient(this.inngestBaseUrl)
 
       const job = await this.options.createJob(this.inngestClient)
@@ -156,7 +156,7 @@ export class InngestFixture {
         client: this.inngestClient,
         functions: [inngestFunction],
         serveOrigin: `http://host.testcontainers.internal:${endpointPort}`,
-        servePath: INNGEST_SERVE_PATH,
+        servePath: InngestFixture.INNGEST_SERVE_PATH,
       })
 
       await this.syncFunctions(endpointPort)
@@ -297,16 +297,18 @@ export class InngestFixture {
     let lastError: unknown
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const container = new InngestContainer(INNGEST_IMAGE)
+      const container = new InngestContainer(InngestFixture.INNGEST_IMAGE)
         .withCommand([
           'inngest',
           'dev',
           '--no-discovery',
           '-u',
-          `http://host.testcontainers.internal:${endpointPort}${INNGEST_SERVE_PATH}`,
+          `http://host.testcontainers.internal:${endpointPort}${InngestFixture.INNGEST_SERVE_PATH}`,
         ])
-        .withExposedPorts(INNGEST_PORT)
-        .withWaitStrategy(Wait.forHttp('/dev', INNGEST_PORT).forStatusCode(200))
+        .withExposedPorts(InngestFixture.INNGEST_PORT)
+        .withWaitStrategy(
+          Wait.forHttp('/dev', InngestFixture.INNGEST_PORT).forStatusCode(200),
+        )
         .withStartupTimeout(this.timeoutMs)
 
       try {
@@ -334,7 +336,7 @@ export class InngestFixture {
 
   private async syncFunctions(endpointPort: number) {
     const response = await fetch(
-      `http://127.0.0.1:${endpointPort}${INNGEST_SERVE_PATH}`,
+      `http://127.0.0.1:${endpointPort}${InngestFixture.INNGEST_SERVE_PATH}`,
       { method: 'PUT' },
     )
     const body = await response.text()
@@ -374,7 +376,7 @@ export class InngestFixture {
       )
 
       return response.data &&
-        TERMINAL_RUN_STATUSES.has(response.data.status.toLowerCase())
+        InngestFixture.TERMINAL_RUN_STATUSES.has(response.data.status.toLowerCase())
         ? this.normalizeRun(response.data)
         : undefined
     })

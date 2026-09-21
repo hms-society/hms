@@ -12,13 +12,13 @@ type Request = {
   readonly query?: DocumentSpecificationListQuery
 }
 
-const DEFAULT_PAGE = 1
-const DEFAULT_PAGE_SIZE = 20
-const MAX_PAGE_SIZE = 100
-
 export class ListDocumentSpecificationsUseCase
   implements UseCase<Request, PaginationResponse<DocumentSpecificationListItem>>
 {
+  static readonly DEFAULT_PAGE = 1
+  static readonly DEFAULT_PAGE_SIZE = 20
+  static readonly MAX_PAGE_SIZE = 100
+
   constructor(
     private readonly repository: DocumentSpecificationsRepository,
     private readonly legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
@@ -123,14 +123,16 @@ export class ListDocumentSpecificationsUseCase
   }
 
   private normalizePage(page?: number): number {
-    if (!Number.isFinite(page) || !page || page < 1) return DEFAULT_PAGE
+    if (!Number.isFinite(page) || !page || page < 1)
+      return ListDocumentSpecificationsUseCase.DEFAULT_PAGE
 
     return Math.floor(page)
   }
 
   private normalizePageSize(pageSize?: number): number {
-    if (!Number.isFinite(pageSize) || !pageSize || pageSize < 1) return DEFAULT_PAGE_SIZE
+    if (!Number.isFinite(pageSize) || !pageSize || pageSize < 1)
+      return ListDocumentSpecificationsUseCase.DEFAULT_PAGE_SIZE
 
-    return Math.min(MAX_PAGE_SIZE, Math.floor(pageSize))
+    return Math.min(ListDocumentSpecificationsUseCase.MAX_PAGE_SIZE, Math.floor(pageSize))
   }
 }

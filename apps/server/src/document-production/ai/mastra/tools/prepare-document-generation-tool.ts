@@ -13,19 +13,19 @@ import {
 } from '@/document-production/ai/mastra/schemas'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 
-const outputSchema = z.object({
-  documentGenerationId: z.string().uuid(),
-  instructions: z.string().trim().min(1).max(4000).optional(),
-  source: documentGenerationSourceSchema,
-})
-
 @Injectable()
 export class PrepareDocumentGenerationTool {
+  static readonly OUTPUT_SCHEMA = z.object({
+    documentGenerationId: z.string().uuid(),
+    instructions: z.string().trim().min(1).max(4000).optional(),
+    source: documentGenerationSourceSchema,
+  })
+
   readonly function: ReturnType<
     typeof createTool<
       'prepare-document-generation',
       typeof documentGenerationWorkflowInputSchema,
-      typeof outputSchema
+      typeof PrepareDocumentGenerationTool.OUTPUT_SCHEMA
     >
   >
 
@@ -45,7 +45,7 @@ export class PrepareDocumentGenerationTool {
       description:
         'Create a pending document generation with immutable source and template snapshots.',
       inputSchema: documentGenerationWorkflowInputSchema,
-      outputSchema,
+      outputSchema: PrepareDocumentGenerationTool.OUTPUT_SCHEMA,
       strict: true,
       execute: async (input) => {
         const generation = await useCase.execute(input)

@@ -11,12 +11,12 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 import { isValidSupabaseServerKey } from './is-valid-supabase-server-key'
 
-const INVITATION_ATTEMPT_METADATA_KEY = 'hmsInvitationAttemptId'
-const USERS_PAGE_SIZE = 1000
-const SUPABASE_LONG_TERM_BAN_DURATION = '876000h'
-
 @Injectable()
 export class SupabaseAuthAdministrationProvider implements AuthAdministrationProvider {
+  static readonly INVITATION_ATTEMPT_METADATA_KEY = 'hmsInvitationAttemptId'
+  static readonly USERS_PAGE_SIZE = 1000
+  static readonly SUPABASE_LONG_TERM_BAN_DURATION = '876000h'
+
   private readonly supabase: SupabaseClient
 
   constructor(@Inject(EnvProvider) private readonly envProvider: EnvProvider) {
@@ -84,7 +84,7 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     while (true) {
       const { data, error } = await this.supabase.auth.admin.listUsers({
         page,
-        perPage: USERS_PAGE_SIZE,
+        perPage: SupabaseAuthAdministrationProvider.USERS_PAGE_SIZE,
       })
 
       if (error) {
@@ -109,7 +109,7 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     while (true) {
       const { data, error } = await this.supabase.auth.admin.listUsers({
         page,
-        perPage: USERS_PAGE_SIZE,
+        perPage: SupabaseAuthAdministrationProvider.USERS_PAGE_SIZE,
       })
 
       if (error) {
@@ -145,7 +145,7 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
     const { error } = await this.supabase.auth.admin.updateUserById(userId, {
       app_metadata: {
         ...currentUser.user.app_metadata,
-        [INVITATION_ATTEMPT_METADATA_KEY]: attemptId,
+        [SupabaseAuthAdministrationProvider.INVITATION_ATTEMPT_METADATA_KEY]: attemptId,
       },
     })
 
@@ -159,7 +159,9 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
 
   async setUserBanned(userId: string, isBanned: boolean): Promise<void> {
     const { error } = await this.supabase.auth.admin.updateUserById(userId, {
-      ban_duration: isBanned ? SUPABASE_LONG_TERM_BAN_DURATION : 'none',
+      ban_duration: isBanned
+        ? SupabaseAuthAdministrationProvider.SUPABASE_LONG_TERM_BAN_DURATION
+        : 'none',
     })
 
     if (error) {
@@ -174,7 +176,10 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
   }
 
   private toAdministrationUser(user: User): AuthAdministrationUser {
-    const invitationAttemptId = user.app_metadata?.[INVITATION_ATTEMPT_METADATA_KEY]
+    const invitationAttemptId =
+      user.app_metadata?.[
+        SupabaseAuthAdministrationProvider.INVITATION_ATTEMPT_METADATA_KEY
+      ]
 
     return {
       authUserId: user.id,

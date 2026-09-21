@@ -11,8 +11,6 @@ import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
 
-const DOCUMENT_PRODUCTION_CONSULTATION_ID = '00000000-0000-4000-8000-000000000101'
-
 export type ConsultationSeedReferences = {
   readonly consultationId?: string
   readonly intakeId: string
@@ -26,6 +24,9 @@ export type ConsultationSeedReferences = {
 
 @Injectable()
 export class ConsultationSeeder {
+  static readonly DOCUMENT_PRODUCTION_CONSULTATION_ID =
+    '00000000-0000-4000-8000-000000000101'
+
   constructor(
     @Inject(CONSULTATION_REPOSITORIES.consultations)
     private readonly consultationsRepository: ConsultationsRepository,
@@ -41,7 +42,9 @@ export class ConsultationSeeder {
 
   async run(references: ConsultationSeedReferences) {
     const consultation = ConsultationFaker.fake({
-      id: references.consultationId ?? DOCUMENT_PRODUCTION_CONSULTATION_ID,
+      id:
+        references.consultationId ??
+        ConsultationSeeder.DOCUMENT_PRODUCTION_CONSULTATION_ID,
       intakeId: references.intakeId,
       appointmentId: references.appointmentId,
       clientId: references.clientId,

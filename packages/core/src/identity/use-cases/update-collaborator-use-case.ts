@@ -15,10 +15,10 @@ type Request = {
   readonly changes: Parameters<CollaboratorsRepository['replace']>[1]
 }
 
-const ADMINISTRATIVE_PROFILES = new Set(['admin', 'attendant'])
-const LEGAL_PROFILES = new Set(['lawyer', 'paralegal', 'supervisor'])
-
 export class UpdateCollaboratorUseCase implements UseCase<Request, CollaboratorSummary> {
+  static readonly ADMINISTRATIVE_PROFILES = new Set(['admin', 'attendant'])
+  static readonly LEGAL_PROFILES = new Set(['lawyer', 'paralegal', 'supervisor'])
+
   constructor(
     private readonly collaboratorsRepository: CollaboratorsRepository,
     private readonly authorizeAdminUseCase: UseCase<{ authUser: AuthUser }, void>,
@@ -60,15 +60,15 @@ export class UpdateCollaboratorUseCase implements UseCase<Request, CollaboratorS
     }
 
     if (
-      !ADMINISTRATIVE_PROFILES.has(changes.profile) &&
-      !LEGAL_PROFILES.has(changes.profile)
+      !UpdateCollaboratorUseCase.ADMINISTRATIVE_PROFILES.has(changes.profile) &&
+      !UpdateCollaboratorUseCase.LEGAL_PROFILES.has(changes.profile)
     ) {
       throw new InvalidClientDataError('Perfil de colaborador inválido.')
     }
 
     const legalExpertises = this.normalizeLegalExpertises(changes)
 
-    if (LEGAL_PROFILES.has(changes.profile)) {
+    if (UpdateCollaboratorUseCase.LEGAL_PROFILES.has(changes.profile)) {
       if (!legalExpertises || legalExpertises.length === 0) {
         throw new InvalidLegalExpertiseError()
       }
@@ -92,7 +92,7 @@ export class UpdateCollaboratorUseCase implements UseCase<Request, CollaboratorS
   ): Request['changes']['legalExpertises'] {
     const hasLegalExpertises = Object.hasOwn(changes, 'legalExpertises')
 
-    if (ADMINISTRATIVE_PROFILES.has(changes.profile)) {
+    if (UpdateCollaboratorUseCase.ADMINISTRATIVE_PROFILES.has(changes.profile)) {
       if (hasLegalExpertises) throw new InvalidLegalExpertiseError()
       return undefined
     }
