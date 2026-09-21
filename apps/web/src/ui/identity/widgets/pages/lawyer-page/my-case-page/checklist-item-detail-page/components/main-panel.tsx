@@ -27,51 +27,6 @@ export const ChecklistItemMainPanel = ({ itemView }: ChecklistItemMainPanelProps
 
   return (
     <main className='flex flex-col gap-4'>
-      <section
-        className={
-          hasPendingItems
-            ? 'rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs'
-            : 'rounded-lg border border-border bg-card p-4 shadow-xs'
-        }
-      >
-        <div className='flex items-start gap-3'>
-          <div
-            className={
-              hasPendingItems
-                ? 'flex size-8 shrink-0 items-center justify-center rounded-full bg-card text-amber-700'
-                : 'flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground'
-            }
-          >
-            <Icon
-              name={hasPendingItems ? 'alert-triangle' : 'check-circle-2'}
-              className='size-4'
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <h2
-              className={
-                hasPendingItems
-                  ? 'text-sm font-semibold text-amber-900'
-                  : 'text-sm font-semibold text-foreground'
-              }
-            >
-              {hasPendingItems ? 'Pendências do item' : 'Sem pendências ativas'}
-            </h2>
-            <p
-              className={
-                hasPendingItems
-                  ? 'text-xs text-amber-900/80'
-                  : 'text-xs text-muted-foreground'
-              }
-            >
-              {hasPendingItems
-                ? 'Revise os pontos abaixo antes de concluir a validação do item.'
-                : 'Nenhuma pendência específica foi registrada para este item.'}
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section className='flex flex-col gap-3'>
         <div className='flex items-center justify-between'>
           <h2 className='font-serif text-lg font-semibold text-foreground'>
@@ -166,9 +121,6 @@ const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
             Ativa
           </Badge>
         </div>
-        <p className='rounded-md bg-muted/60 p-3 text-xs text-muted-foreground'>
-          {pendingItem.description}
-        </p>
         {pendingItem.documentFileName && (
           <p className='text-xs text-muted-foreground'>
             Documento: <span className='font-medium'>{pendingItem.documentFileName}</span>
@@ -204,7 +156,10 @@ const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
               size='xs'
               className='rounded-full'
               onClick={() => approveMutation.mutate()}
-              disabled={pendingItem.status !== 'awaiting_approval' || approveMutation.isPending}
+              disabled={
+                pendingItem.status !== 'awaiting_approval' ||
+                approveMutation.isPending
+              }
             >
               <Icon name='send' className='size-3' />
               {approveMutation.isPending ? 'Aprovando...' : 'Aprovar e enviar'}

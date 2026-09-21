@@ -36,6 +36,7 @@ export type ChecklistItemDetailView = {
   pendingItems: ChecklistItemPending[]
   statusLabel: string
   statusVariant: 'attention' | 'secondary' | 'success'
+  templateName: string
 }
 
 export type ChecklistItemField = {
@@ -53,6 +54,7 @@ export type ChecklistItemPending = {
   description: string
   documentFileName?: string
   id: string
+  isPersisted?: boolean
   messageId?: string
   reason: Pending['reason']
   subject: string
@@ -141,6 +143,7 @@ export function useChecklistItemDetailPage({
     documentLogs,
     pendings: pendingMessages,
     clientName: legalCase?.clientName,
+    templateName: checklistItem?.checklistTemplateName ?? legalCase?.legalArea,
     itemIndex: checklistItem
       ? checklistItems.findIndex((item) => item.id === checklistItem.id)
       : -1,
@@ -184,6 +187,7 @@ function getChecklistItemDetailView({
   documentLogs,
   pendings,
   clientName,
+  templateName,
   itemIndex,
   totalItemsCount,
 }: {
@@ -201,6 +205,7 @@ function getChecklistItemDetailView({
     }
   }[]
   clientName?: string
+  templateName?: string
   itemIndex: number
   totalItemsCount: number
 }): ChecklistItemDetailView {
@@ -216,9 +221,36 @@ function getChecklistItemDetailView({
     isValidated,
   })
   const statusLabel = documentStatusView.label
-  const activePendings = pendings.length > 0 || hasDocument
+  const pendingReason = document ? getPendingReasonForDocument(document) : undefined
+  const documentForPending = document
+  const activePendings = pendings.length > 0
     ? pendings
-    : [{
+    : pendingReason && documentForPending
+      ? [{
+          pending: {
+            id: `document-pending-${checklistItem.id}`,
+            caseId: checklistItem.caseId,
+            checklistItemId: checklistItem.id,
+            reason: pendingReason,
+            details: documentForPending.humanCorrection?.reason,
+            documentFileId: checklistItem.documentFileId,
+            documentFileName:
+              checklistItem.documentFileName ?? documentForPending.fileName,
+            responsibleId: documentForPending.reviewedBy ?? 'system',
+            createdAt: documentForPending.reviewedAt ?? checklistItem.createdAt,
+          } satisfies Pending,
+          message: createAssistedMessage({
+            reason: pendingReason,
+            documentFileName:
+              checklistItem.documentFileName ?? documentForPending.fileName,
+            details: documentForPending.humanCorrection?.reason,
+            clientName,
+          }),
+          isPersisted: false,
+        }]
+      : hasDocument
+        ? []
+        : [{
         pending: {
           id: `missing-document-${checklistItem.id}`,
           caseId: checklistItem.caseId,
@@ -234,12 +266,16 @@ function getChecklistItemDetailView({
           documentFileName: checklistItem.title,
           clientName,
         }),
+        isPersisted: false,
       }]
   const pendingItems = activePendings.map(({ pending, message }) => ({
     body: message.body,
     description: pending.details ?? getPendingReasonLabel(pending.reason),
     documentFileName: pending.documentFileName,
     id: pending.id,
+    isPersisted:
+      !pending.id.startsWith('document-pending-') &&
+      !pending.id.startsWith('missing-document-'),
     messageId: 'id' in message ? message.id : undefined,
     reason: pending.reason,
     subject: message.subject,
@@ -283,7 +319,21 @@ function getChecklistItemDetailView({
     pendingItems,
     statusLabel,
     statusVariant: documentStatusView.variant,
+    templateName: templateName ?? 'Template não informado',
   }
+}
+
+function getPendingReasonForDocument(
+  document: DocumentValidationDocument,
+): Pending['reason'] | undefined {
+  const reasons: Partial<Record<DocumentValidationDocument['status'], Pending['reason']>> = {
+    illegible: PendingReason.Illegible,
+    incomplete: PendingReason.Incomplete,
+    duplicate: PendingReason.Duplicate,
+    not_corresponding: PendingReason.NotCorresponding,
+  }
+
+  return reasons[document.status]
 }
 
 function getPendingReasonLabel(reason: Pending['reason']) {
@@ -314,6 +364,7 @@ function getEmptyChecklistItemDetailView(caseId: string): ChecklistItemDetailVie
     pendingItems: [],
     statusLabel: 'Item não encontrado',
     statusVariant: 'secondary',
+    templateName: 'Template não informado',
   }
 }
 
