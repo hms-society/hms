@@ -19,16 +19,6 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
-const SIGNABLE_REQUEST_STATUSES = new Set(['sent', 'in_progress', 'partially_submitted'])
-const READABLE_RECIPIENT_STATUSES = new Set(['authenticated', 'reading', 'signing'])
-const READABLE_DOCUMENT_STATUSES = new Set([
-  'provisioned',
-  'delivery_pending',
-  'sent',
-  'submitted',
-  'reconciliation_required',
-])
-
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -54,6 +44,24 @@ type Dependencies = {
 }
 
 export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
+  static readonly SIGNABLE_REQUEST_STATUSES = new Set([
+    'sent',
+    'in_progress',
+    'partially_submitted',
+  ])
+  static readonly READABLE_RECIPIENT_STATUSES = new Set([
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+  static readonly READABLE_DOCUMENT_STATUSES = new Set([
+    'provisioned',
+    'delivery_pending',
+    'sent',
+    'submitted',
+    'reconciliation_required',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -80,10 +88,11 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     )
       throw new SignatureDocumentUnavailableError()
     if (
-      !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
-      !READABLE_RECIPIENT_STATUSES.has(recipient.status) ||
-      (recipient.actorKind === 'collaborator' &&
-        request.actorId !== recipient.personId)
+      !GetSignatureDocumentUseCase.SIGNABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      ) ||
+      !GetSignatureDocumentUseCase.READABLE_RECIPIENT_STATUSES.has(recipient.status) ||
+      (recipient.actorKind === 'collaborator' && request.actorId !== recipient.personId)
     )
       throw new SignatureDocumentUnavailableError()
 
@@ -181,7 +190,7 @@ export class GetSignatureDocumentUseCase implements UseCase<Request, Response> {
     return (
       !!document &&
       document.requestId === signatureRequest.id &&
-      READABLE_DOCUMENT_STATUSES.has(document.status) &&
+      GetSignatureDocumentUseCase.READABLE_DOCUMENT_STATUSES.has(document.status) &&
       !!document.unsignedPrivateFileId &&
       !!document.unsignedSha256 &&
       document.byteCount > 0 &&

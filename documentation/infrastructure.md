@@ -82,7 +82,11 @@
 * **Inngest Cloud:** Used in staging and production.
 * **Bounded work reconciliation:** A module may reconcile its own pending or
   lease-expired durable work when direct event loss would strand a user-visible
-  asynchronous state. This does not introduce a generic outbox or arbitrary event relay.
+  asynchronous state. Idle reconciliation scans run inside NestJS through
+  `@nestjs/schedule`; they publish canonical events only when work is found, while
+  Inngest remains responsible for durable execution, retries and fan-out of that
+  work. This avoids consuming Inngest executions for no-op schedule ticks and does
+  not introduce a generic outbox or arbitrary event relay.
 
 ### Document conversion
 

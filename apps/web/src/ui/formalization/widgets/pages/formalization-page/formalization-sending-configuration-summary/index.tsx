@@ -15,11 +15,16 @@ export const FormalizationSendingConfigurationSummary = (
   props: FormalizationSendingConfigurationSummaryProps,
 ) => {
   const { configuration, controller, isPackageConfirmed } = props
-  const { isForbidden, isLoading, metrics, statusLabel } =
-    useFormalizationSendingConfigurationSummary(props)
-  const isReady = configuration?.status === 'ready_for_sending'
-  const isSignatureConfirmed = props.signatureStatus === 'confirmed'
-  const isConfiguring = configuration?.status === 'configuring'
+  const {
+    badgeVariant,
+    description,
+    hasSignatureRequest,
+    isForbidden,
+    isLoading,
+    metrics,
+    statusLabel,
+    title,
+  } = useFormalizationSendingConfigurationSummary(props)
   const isUnavailable = isForbidden || isLoading
 
   return (
@@ -30,12 +35,12 @@ export const FormalizationSendingConfigurationSummary = (
             <Icon name='send' className='size-5 text-primary' />
             Configuração do envio
           </h2>
-          <Badge variant={isReady || isSignatureConfirmed ? 'success' : 'attention'}>
-            {statusLabel}
-          </Badge>
+          <Badge variant={badgeVariant}>{statusLabel}</Badge>
         </div>
         <p className='max-w-3xl text-sm text-muted-foreground'>
-          Revise signatários, documentos, atribuições, canais e campos antes do envio.
+          {hasSignatureRequest
+            ? 'Acompanhe os convites e o progresso das assinaturas.'
+            : 'Revise signatários, documentos, atribuições, canais e campos antes do envio.'}
         </p>
       </CardHeader>
       <CardContent className='space-y-5 px-5 pb-5 sm:px-6 sm:pb-6'>
@@ -89,16 +94,10 @@ export const FormalizationSendingConfigurationSummary = (
                 </div>
               ))}
             </div>
-            {(isReady || isConfiguring) && (
+            {title && description && (
               <div className='rounded-xl border border-border p-4'>
-                <h3 className='font-medium'>
-                  {isReady ? 'Pronto para revisar' : 'Configuração em andamento'}
-                </h3>
-                <p className='mt-1 text-sm text-muted-foreground'>
-                  {isReady
-                    ? 'A configuração está pronta para a revisão final antes do envio.'
-                    : 'Abra a configuração para concluir os dados necessários para o envio.'}
-                </p>
+                <h3 className='font-medium'>{title}</h3>
+                <p className='mt-1 text-sm text-muted-foreground'>{description}</p>
               </div>
             )}
           </>
@@ -121,7 +120,7 @@ export const FormalizationSendingConfigurationSummary = (
               params={{ formalizationId: props.formalizationId }}
             >
               <Icon name='arrow-right' className='size-4' />
-              Configuração do envio
+              {hasSignatureRequest ? 'Acompanhar assinaturas' : 'Configuração do envio'}
             </Anchor>
           </Button>
         </div>

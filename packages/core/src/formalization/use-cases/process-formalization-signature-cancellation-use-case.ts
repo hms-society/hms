@@ -28,17 +28,17 @@ type Dependencies = {
   readonly provider: SignatureProvider
 }
 
-const TERMINAL_REQUEST_STATUSES = new Set([
-  'confirmed',
-  'rejected',
-  'cancelled',
-  'expired',
-  'failed',
-])
-
 export class ProcessFormalizationSignatureCancellationUseCase
   implements UseCase<Request, Response>
 {
+  static readonly TERMINAL_REQUEST_STATUSES = new Set([
+    'confirmed',
+    'rejected',
+    'cancelled',
+    'expired',
+    'failed',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -69,7 +69,11 @@ export class ProcessFormalizationSignatureCancellationUseCase
       documents.some((document) => document.requestId !== signatureRequest.id)
     )
       return { outcome: 'retry_required' }
-    if (TERMINAL_REQUEST_STATUSES.has(signatureRequest.status)) {
+    if (
+      ProcessFormalizationSignatureCancellationUseCase.TERMINAL_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      )
+    ) {
       await this.completeAttempt(attempt.id, attempt.attempts, request.occurredAt)
       return { outcome: 'already_terminal' }
     }

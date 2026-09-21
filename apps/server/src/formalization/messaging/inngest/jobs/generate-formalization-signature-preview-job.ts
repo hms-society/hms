@@ -26,15 +26,15 @@ import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
-const previewEvent = eventType(
-  FormalizationSignaturePreviewGenerationRequestedEvent._NAME,
-  {
-    schema: formalizationSignaturePreviewEventSchema,
-  },
-)
-
 @Injectable()
 export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
+  static readonly PREVIEW_EVENT = eventType(
+    FormalizationSignaturePreviewGenerationRequestedEvent._NAME,
+    {
+      schema: formalizationSignaturePreviewEventSchema,
+    },
+  )
+
   static readonly ID = 'formalization/generate-signature-preview'
   readonly function: InngestFunction.Like
 
@@ -70,7 +70,7 @@ export class GenerateFormalizationSignaturePreviewJob extends InngestJob {
         concurrency: 2,
         retries: 3,
         timeouts: { finish: '2m' },
-        triggers: [previewEvent],
+        triggers: [GenerateFormalizationSignaturePreviewJob.PREVIEW_EVENT],
         onFailure: async ({ event, error }) => {
           const originalEvent = event.data.event
           await failPreview.execute({

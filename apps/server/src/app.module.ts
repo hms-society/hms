@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 
 import { CaseManagementModule } from '@/case-management/case-management.module'
 
@@ -35,6 +36,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     SharedModule,
     IdentityModule,
     LegalCatalogModule,

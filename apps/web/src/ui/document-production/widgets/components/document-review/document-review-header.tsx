@@ -19,28 +19,26 @@ export const DocumentReviewHeader = ({
   onPendingMarkers,
 }: DocumentReviewHeaderProps) => (
   <header className='flex flex-col gap-4'>
+    <Button
+      type='button'
+      variant='link'
+      className='h-auto w-fit px-0 text-primary'
+      onClick={onBack}
+    >
+      <Icon name='arrow-left' className='size-4' />
+      Voltar para documentos
+    </Button>
     <div className='flex flex-wrap items-center justify-between gap-4'>
-      <div className='flex min-w-0 items-center gap-3'>
-        <Button
-          type='button'
-          variant='outline'
-          size='sm'
-          aria-label='Voltar aos documentos'
-          onClick={onBack}
-        >
-          <Icon name='arrow-left' /> Documentos
-        </Button>
-        <div className='min-w-0 space-y-1'>
-          <div className='flex flex-wrap items-center gap-2'>
-            <h1 className='truncate font-serif text-2xl font-semibold'>
-              Revisar documento
-            </h1>
-            <Badge variant='outline'>Versão {viewModel.versionNumber}</Badge>
-          </div>
-          <p className='truncate text-sm font-medium text-muted-foreground'>
-            {viewModel.title}
-          </p>
+      <div className='min-w-0 space-y-1'>
+        <div className='flex flex-wrap items-center gap-2'>
+          <h1 className='truncate font-serif text-2xl font-semibold'>
+            Revisar documento
+          </h1>
+          <Badge variant='outline'>Versão {viewModel.versionNumber}</Badge>
         </div>
+        <p className='truncate text-sm font-medium text-muted-foreground'>
+          {viewModel.title}
+        </p>
       </div>
       <div className='flex flex-wrap items-center gap-3'>
         <Button type='button' variant='ghost' size='sm' onClick={onHistory}>

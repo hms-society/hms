@@ -4,6 +4,7 @@ import type {
   FormalizationSignatureSendingCancellationResponse,
   FormalizationSignatureSendingStatusResponse,
   FormalizationSignatureTrackingSignatory,
+  FormalizationSignatureDocumentContentKind,
   ResendFormalizationSignatureInvitationCommand,
   ResendFormalizationSignatureInvitationResult,
 } from '@hms/core/formalization/domain/structures'
@@ -25,6 +26,10 @@ export type SignatureTrackingPanelProps = {
   onCancel: (
     input: CancelFormalizationSignatureSendingCommand,
   ) => Promise<FormalizationSignatureSendingCancellationResponse>
+  onGetDocumentContent: (
+    requestDocumentId: string,
+    contentKind: FormalizationSignatureDocumentContentKind,
+  ) => Promise<Blob>
 }
 
 export function useSignatureTrackingPanel({

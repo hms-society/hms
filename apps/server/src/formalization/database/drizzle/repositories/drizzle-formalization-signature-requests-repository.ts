@@ -16,27 +16,26 @@ import {
   withNextSignatureVersion,
 } from './signature-repository-utils'
 
-const TERMINAL_SIGNATURE_REQUEST_STATUSES = [
-  'confirmed',
-  'rejected',
-  'cancelled',
-  'expired',
-  'failed',
-] as const
-
-const RECONCILABLE_SIGNATURE_REQUEST_STATUSES = [
-  'sent',
-  'in_progress',
-  'partially_submitted',
-  'submitted',
-  'reconciliation_required',
-] as const
-
 @Injectable()
 export class DrizzleFormalizationSignatureRequestsRepository
   extends DrizzleRepository
   implements FormalizationSignatureRequestsRepository
 {
+  static readonly TERMINAL_SIGNATURE_REQUEST_STATUSES = [
+    'confirmed',
+    'rejected',
+    'cancelled',
+    'expired',
+    'failed',
+  ] as const
+  static readonly RECONCILABLE_SIGNATURE_REQUEST_STATUSES = [
+    'sent',
+    'in_progress',
+    'partially_submitted',
+    'submitted',
+    'reconciliation_required',
+  ] as const
+
   constructor(
     drizzle: DrizzleClient,
     private readonly mapper: DrizzleFormalizationSignatureRequestMapper,
@@ -64,7 +63,7 @@ export class DrizzleFormalizationSignatureRequestsRepository
       .where(
         inArray(
           formalizationSignatureRequestModel.status,
-          RECONCILABLE_SIGNATURE_REQUEST_STATUSES,
+          DrizzleFormalizationSignatureRequestsRepository.RECONCILABLE_SIGNATURE_REQUEST_STATUSES,
         ),
       )
       .orderBy(
@@ -90,7 +89,7 @@ export class DrizzleFormalizationSignatureRequestsRepository
       and(
         eq(formalizationSignatureRequestModel.formalizationId, formalizationId),
         notInArray(formalizationSignatureRequestModel.status, [
-          ...TERMINAL_SIGNATURE_REQUEST_STATUSES,
+          ...DrizzleFormalizationSignatureRequestsRepository.TERMINAL_SIGNATURE_REQUEST_STATUSES,
         ]),
       ),
     )

@@ -104,6 +104,7 @@ function createSendingController(
     isLoadingReview: false,
     isFetchingReview: false,
     isLoadingStatus: false,
+    isFetchingStatus: false,
     isConfirming: false,
     isCancelling: false,
     isCancellationPending: false,
@@ -267,5 +268,30 @@ describe('FormalizationSendingConfigurationPanel', () => {
 
     expect(screen.getByRole('tab', { name: 'Assinaturas' })).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Cancelar envio' })).toBeNull()
+  })
+
+  it.each([
+    'provisioning',
+    'sending',
+    'sent',
+    'in_progress',
+  ] as const)('uses the existing in-progress state while the request is %s', (status) => {
+    renderPanel({
+      sending: createSendingController({
+        status: {
+          status,
+          formalizationVersion: 2,
+          totalDocuments: 0,
+          completedDocuments: 0,
+          failedDocuments: 0,
+          progressPercentage: 0,
+          canCancel: false,
+          documents: [],
+        } as never,
+      }),
+    })
+
+    expect(screen.getAllByText('Envio em andamento').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Enviando')).toBeNull()
   })
 })

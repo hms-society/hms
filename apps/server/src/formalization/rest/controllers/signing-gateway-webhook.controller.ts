@@ -12,18 +12,24 @@ import {
 import { timingSafeEqual } from 'node:crypto'
 import type { Request } from 'express'
 import { documensoWebhookSchema } from '@hms/validation/formalization'
+import { ProcessSignatureProviderWebhookUseCase } from '@hms/core/formalization/use-cases'
 import { ReceiveSignatureProviderWebhookUseCase } from '@hms/core/formalization/use-cases'
 import type {
+  FormalizationSignatureGatewayTransaction,
   FormalizationSignatureWebhookReceiptsRepository,
   SensitivePayloadCipherProvider,
 } from '@hms/core/formalization/interfaces'
-import type { DatetimeProvider, IdProvider } from '@hms/core/shared/interfaces'
+import type { Broker, DatetimeProvider, IdProvider } from '@hms/core/shared/interfaces'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import {
+  FORMALIZATION_DATABASE_OPERATIONS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants/formalization-repositories'
 import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IdProvider as ServerIdProvider } from '@/shared/provision/id/id-provider'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import {
   DocumensoWebhookNormalizer,
   UnprocessableDocumensoWebhookError,
@@ -32,21 +38,31 @@ import {
 @Controller('formalizations/signing-gateway/webhooks/documenso')
 export class SigningGatewayWebhookController {
   private readonly receiveWebhookUseCase: ReceiveSignatureProviderWebhookUseCase
+  private readonly processWebhookUseCase: ProcessSignatureProviderWebhookUseCase
 
   constructor(
     private readonly env: EnvProvider,
     private readonly normalizer: DocumensoWebhookNormalizer,
     @Inject(FORMALIZATION_REPOSITORIES.signatureWebhookReceipts)
     webhookReceiptsRepository: FormalizationSignatureWebhookReceiptsRepository,
+    @Inject(FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction)
+    transaction: FormalizationSignatureGatewayTransaction,
     @Inject(ServerIdProvider) idProvider: IdProvider,
     @Inject(ServerDatetimeProvider) datetimeProvider: DatetimeProvider,
     @Inject(FORMALIZATION_PROVIDERS.sensitivePayloadCipher)
     private readonly cipher: SensitivePayloadCipherProvider,
+    @Inject(InngestBroker) broker: Broker,
   ) {
     this.receiveWebhookUseCase = new ReceiveSignatureProviderWebhookUseCase({
       receiptsRepository: webhookReceiptsRepository,
       idProvider,
       datetimeProvider,
+    })
+    this.processWebhookUseCase = new ProcessSignatureProviderWebhookUseCase({
+      transaction,
+      cipher,
+      idProvider,
+      broker,
     })
   }
 
@@ -80,13 +96,20 @@ export class SigningGatewayWebhookController {
         purpose: 'webhook',
         contextId: normalized.dedupeKey,
       })
-      await this.receiveWebhookUseCase.execute({
+      const received = await this.receiveWebhookUseCase.execute({
         dedupeKey: normalized.dedupeKey,
         hintKind: normalized.hintKind,
         encryptedHint: encrypted.ciphertext,
         cipherKeyId: encrypted.keyId,
         receivedAt: normalized.receivedAt,
       })
+      const processed = await this.processWebhookUseCase.execute({
+        receiptId: received.receiptId,
+        occurredAt: normalized.receivedAt,
+      })
+      if (processed.outcome === 'retry_required') {
+        throw new Error('Signature provider webhook processing must be retried.')
+      }
     } catch (error) {
       if (!(error instanceof UnprocessableDocumensoWebhookError)) throw error
     }

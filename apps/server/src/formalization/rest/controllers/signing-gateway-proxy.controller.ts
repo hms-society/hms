@@ -23,25 +23,27 @@ import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { FORMALIZATION_DATABASE_OPERATIONS } from '@/formalization/constants/formalization-repositories'
 import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
-const hopByHopHeaders = new Set([
-  'connection',
-  'content-length',
-  'host',
-  'keep-alive',
-  'proxy-authenticate',
-  'proxy-authorization',
-  'te',
-  'trailer',
-  'transfer-encoding',
-  'upgrade',
-  'authorization',
-  'cookie',
-])
-const DOCUMENSO_PT_BR_LOCALE_COOKIE = 'lang=InB0LUJSIg=='
-const DOCUMENSO_SHARE_BUTTON_SELECTOR = 'button:has(svg.lucide-sparkles)'
-
 @Controller('assinaturas/provedor')
 export class SigningGatewayProxyController {
+  static readonly HOP_BY_HOP_HEADERS = new Set([
+    'connection',
+    'content-length',
+    'host',
+    'keep-alive',
+    'proxy-authenticate',
+    'proxy-authorization',
+    'te',
+    'trailer',
+    'transfer-encoding',
+    'upgrade',
+    'authorization',
+    'cookie',
+  ])
+  static readonly DOCUMENSO_PT_BR_LOCALE_COOKIE = 'lang=InB0LUJSIg=='
+  static readonly DOCUMENSO_SHARE_BUTTON_SELECTOR = 'button:has(svg.lucide-sparkles)'
+  static readonly DOCUMENSO_REJECT_ACTION_SELECTOR =
+    '[role="menuitem"]:has(svg[class*="ban"], svg[class*="circle-slash"]), [data-radix-collection-item]:has(svg[class*="ban"], svg[class*="circle-slash"]), button:has(svg[class*="ban"], svg[class*="circle-slash"])'
+
   private readonly recordSubmissionUseCase: RecordProviderSubmissionUseCase
   private readonly sessions: FormalizationSignatureGatewaySessionsRepository
   private readonly recipients: FormalizationSignatureRecipientsRepository
@@ -136,10 +138,14 @@ export class SigningGatewayProxyController {
     const upstream = `${this.env.get('DOCUMENSO_PRIVATE_BASE_URL').replace(/\/$/, '')}${this.upstreamPath(proxyTarget.pathname, providerToken, alias)}${this.upstreamSearch(proxyTarget.search, providerToken, alias)}`
     const headers = new Headers()
     for (const [name, value] of Object.entries(request.headers)) {
-      if (hopByHopHeaders.has(name.toLowerCase()) || typeof value !== 'string') continue
+      if (
+        SigningGatewayProxyController.HOP_BY_HOP_HEADERS.has(name.toLowerCase()) ||
+        typeof value !== 'string'
+      )
+        continue
       headers.set(name, value)
     }
-    headers.set('cookie', DOCUMENSO_PT_BR_LOCALE_COOKIE)
+    headers.set('cookie', SigningGatewayProxyController.DOCUMENSO_PT_BR_LOCALE_COOKIE)
     const body = ['GET', 'HEAD'].includes(request.method)
       ? undefined
       : this.requestBody(request, providerToken, alias)
@@ -158,15 +164,21 @@ export class SigningGatewayProxyController {
       upstreamResponse.headers.get('content-type') ?? 'application/octet-stream'
     const isCompletionHtml =
       contentType.includes('html') && this.isCompletionRoute(proxyTarget.pathname)
+    const isSigningHtml =
+      contentType.includes('html') && this.isSigningRoute(proxyTarget.pathname)
+    const shouldInjectActionSuppression = isCompletionHtml || isSigningHtml
     response.status(upstreamResponse.status)
     response.setHeader('Cache-Control', 'no-store')
     const contentSecurityPolicy = upstreamResponse.headers.get('content-security-policy')
-    const completionStyleNonce = isCompletionHtml
+    const actionSuppressionStyleNonce = shouldInjectActionSuppression
       ? (this.getStyleNonce(contentSecurityPolicy) ?? randomBytes(18).toString('base64'))
       : undefined
     response.setHeader(
       'Content-Security-Policy',
-      this.rewriteContentSecurityPolicy(contentSecurityPolicy, completionStyleNonce),
+      this.rewriteContentSecurityPolicy(
+        contentSecurityPolicy,
+        actionSuppressionStyleNonce,
+      ),
     )
     const location = upstreamResponse.headers.get('location')
     if (location)
@@ -178,11 +190,11 @@ export class SigningGatewayProxyController {
     ) {
       const text = await upstreamResponse.text()
       const rewrittenText = this.rewrite(text, providerToken, alias)
-      const responseText = isCompletionHtml
-        ? this.injectCompletionShareSuppression(
+      const responseText = shouldInjectActionSuppression
+        ? this.injectProviderActionSuppression(
             rewrittenText,
             proxyTarget.pathname,
-            completionStyleNonce,
+            actionSuppressionStyleNonce,
           )
         : rewrittenText
       response.type(contentType).send(responseText)
@@ -362,9 +374,14 @@ export class SigningGatewayProxyController {
           directive && !/^(frame-ancestors|form-action)(?:\s|$)/i.test(directive),
       )
     if (styleNonce) {
-      const styleIndex = directives.findIndex((directive) =>
-        /^style-src(?:\s|$)/i.test(directive),
+      let styleIndex = directives.findIndex((directive) =>
+        /^style-src-elem(?:\s|$)/i.test(directive),
       )
+      if (styleIndex < 0) {
+        styleIndex = directives.findIndex((directive) =>
+          /^style-src(?:\s|$)/i.test(directive),
+        )
+      }
       const nonceSource = `'nonce-${styleNonce}'`
       if (styleIndex >= 0) {
         directives[styleIndex] = directives[styleIndex]
@@ -384,17 +401,24 @@ export class SigningGatewayProxyController {
     return [...directives, "frame-ancestors 'none'", "form-action 'self'"].join('; ')
   }
 
-  private injectCompletionShareSuppression(
+  private injectProviderActionSuppression(
     value: string,
     pathname: string,
     styleNonce: string | undefined,
   ) {
-    if (!this.isCompletionRoute(pathname)) return value
+    const selectors = [
+      ...(this.isCompletionRoute(pathname)
+        ? [SigningGatewayProxyController.DOCUMENSO_SHARE_BUTTON_SELECTOR]
+        : []),
+      ...(this.isSigningRoute(pathname)
+        ? [SigningGatewayProxyController.DOCUMENSO_REJECT_ACTION_SELECTOR]
+        : []),
+    ]
+    if (!styleNonce || selectors.length === 0) return value
 
     const headMatch = value.match(/<head(?:\s[^>]*)?>/i)
     const headEndMatch = value.match(/<\/head\s*>/i)
     if (
-      !styleNonce ||
       !headMatch ||
       headMatch.index === undefined ||
       !headEndMatch ||
@@ -403,12 +427,16 @@ export class SigningGatewayProxyController {
     )
       return value
 
-    const style = `<style nonce="${styleNonce}">${DOCUMENSO_SHARE_BUTTON_SELECTOR}{display:none!important}</style>`
+    const style = `<style nonce="${styleNonce}">${selectors.map((selector) => `${selector}{display:none!important}`).join('')}</style>`
     return `${value.slice(0, headEndMatch.index)}${style}${value.slice(headEndMatch.index)}`
   }
 
   private isCompletionRoute(pathname: string) {
     return pathname === '/complete'
+  }
+
+  private isSigningRoute(pathname: string) {
+    return pathname === ''
   }
 
   private isCompletionStaticResource(pathname: string) {
@@ -428,10 +456,12 @@ export class SigningGatewayProxyController {
   }
 
   private getStyleNonce(contentSecurityPolicy: string | null) {
-    const styleDirective = contentSecurityPolicy
+    const directives = contentSecurityPolicy
       ?.split(';')
       .map((directive) => directive.trim())
-      .find((directive) => /^style-src(?:\s|$)/i.test(directive))
+    const styleDirective =
+      directives?.find((directive) => /^style-src-elem(?:\s|$)/i.test(directive)) ??
+      directives?.find((directive) => /^style-src(?:\s|$)/i.test(directive))
     const nonce = styleDirective?.match(/(?:^|\s)'nonce-([^']+)'(?:\s|$)/i)?.[1]
     if (!nonce || nonce.length > 128 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(nonce))
       return undefined

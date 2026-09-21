@@ -3,6 +3,7 @@ import {
   type ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common'
 
 import type { IdentityRequest } from '@/identity/context'
@@ -21,7 +22,14 @@ export class OptionalSigningGatewayCollaboratorGuard implements CanActivate {
       .getRequest<IdentityRequest & { headers: { authorization?: string } }>()
     if (!request.headers.authorization) return true
 
-    await this.authGuard.canActivate(context)
+    try {
+      await this.authGuard.canActivate(context)
+    } catch (error) {
+      // The signing invitation is authorized by its gateway cookies. An expired HMS
+      // session must not prevent the recipient from opening that public flow.
+      if (error instanceof UnauthorizedException) return true
+      throw error
+    }
     try {
       await this.activeCollaboratorGuard.canActivate(context)
     } catch (error) {

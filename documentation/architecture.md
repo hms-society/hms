@@ -77,11 +77,16 @@
 - **Inngest:** Orquestração de jobs, retries, workflows assíncronos e automações.
 - **Inngest Dev Server:** Ambiente local para testar workflows.
 - **Inngest Cloud:** Usado em staging e produção.
+- **Nest Scheduler:** Executa apenas varreduras periódicas limitadas dos ledgers
+  duráveis de trabalho pendente ou com lease expirada. Os jobs cron republicam
+  eventos canônicos quando encontram trabalho; não substituem os workflows do
+  Inngest nem executam efeitos externos diretamente.
 - **Ledger de trabalho limitado:** Fluxos assíncronos com estado visível ao usuário
   podem persistir seu próprio lifecycle e usar reconciliação periódica limitada para
-  republicar trabalho pendente ou com lease expirada. Isso não cria um outbox genérico;
-  a publicação principal continua direta e o fan-out continua sendo responsabilidade
-  do Inngest.
+  republicar trabalho pendente ou com lease expirada. As varreduras ociosas rodam no
+  NestJS por `@nestjs/schedule`, evitando consumir execuções do Inngest; isso não cria
+  um outbox genérico, a publicação principal continua direta e o fan-out continua
+  sendo responsabilidade do Inngest.
 
 ### 📄 Conversão de documentos
 
@@ -288,8 +293,10 @@ api.seudominio.com
   tentativas, recibos e referências de resultado ficam no PostgreSQL/Supabase;
   PDFs privados permanecem no Supabase Storage. O provider não é a fonte de
   verdade do estado do HMS.
-- **Eventos e reconciliação:** webhooks normalizados, jobs Inngest e reconciliação
-  periódica são idempotentes e preservam evidências de submissão, rejeição,
+- **Eventos e reconciliação:** webhooks normalizados e jobs Inngest processam os
+  eventos; jobs cron do NestJS varrem, em lotes limitados, previews, solicitações e
+  entregas pendentes ou expiradas e republicam somente o trabalho recuperável. Todas
+  as transições são idempotentes e preservam evidências de submissão, rejeição,
   cancelamento e resultado.
 - **Entrega:** convites e OTP usam os templates HTML estáticos em
   `volumes/communication/templates`, Resend em staging/produção e Mailpit local,

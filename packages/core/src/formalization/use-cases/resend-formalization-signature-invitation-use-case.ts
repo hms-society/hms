@@ -59,18 +59,18 @@ type Dependencies = {
   readonly broker: Broker
 }
 
-const resendableStatuses = new Set<FormalizationSignatureRecipientStatus>([
-  FormalizationSignatureRecipientStatus.invited,
-  FormalizationSignatureRecipientStatus.authenticating,
-  FormalizationSignatureRecipientStatus.locked,
-  FormalizationSignatureRecipientStatus.authenticated,
-  FormalizationSignatureRecipientStatus.reading,
-  FormalizationSignatureRecipientStatus.reconciliationRequired,
-])
-
 export class ResendFormalizationSignatureInvitationUseCase
   implements UseCase<Request, ResendFormalizationSignatureInvitationResult>
 {
+  static readonly RESENDABLE_STATUSES = new Set<FormalizationSignatureRecipientStatus>([
+    FormalizationSignatureRecipientStatus.invited,
+    FormalizationSignatureRecipientStatus.authenticating,
+    FormalizationSignatureRecipientStatus.locked,
+    FormalizationSignatureRecipientStatus.authenticated,
+    FormalizationSignatureRecipientStatus.reading,
+    FormalizationSignatureRecipientStatus.reconciliationRequired,
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<ResendFormalizationSignatureInvitationResult> {
@@ -97,7 +97,9 @@ export class ResendFormalizationSignatureInvitationUseCase
       !recipient ||
       recipient.requestId !== signatureRequest.id ||
       signatureRequest.formalizationId !== formalization.id ||
-      !resendableStatuses.has(recipient.status) ||
+      !ResendFormalizationSignatureInvitationUseCase.RESENDABLE_STATUSES.has(
+        recipient.status,
+      ) ||
       recipient.version !== request.expectedRecipientVersion
     ) {
       throw new FormalizationSignatureRequestConflictError()

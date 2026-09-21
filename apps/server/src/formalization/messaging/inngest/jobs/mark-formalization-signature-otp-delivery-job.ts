@@ -12,12 +12,15 @@ import type {
   FormalizationSignatureOtpSendAttemptsRepository,
 } from '@hms/core/formalization/interfaces'
 
-const otpDeliveredEvent = eventType(CommunicationSignatureOtpDeliveredEvent._NAME, {
-  schema: communicationSignatureOtpDeliveredEventSchema,
-})
-
 @Injectable()
 export class MarkFormalizationSignatureOtpDeliveryJob extends InngestJob {
+  static readonly OTP_DELIVERED_EVENT = eventType(
+    CommunicationSignatureOtpDeliveredEvent._NAME,
+    {
+      schema: communicationSignatureOtpDeliveredEventSchema,
+    },
+  )
+
   static readonly ID = 'formalization/mark-signature-otp-delivery'
   readonly function: InngestFunction.Like
 
@@ -38,7 +41,7 @@ export class MarkFormalizationSignatureOtpDeliveryJob extends InngestJob {
         id: MarkFormalizationSignatureOtpDeliveryJob.ID,
         name: 'Mark Formalization Signature OTP Delivery',
         retries: 5,
-        triggers: [otpDeliveredEvent],
+        triggers: [MarkFormalizationSignatureOtpDeliveryJob.OTP_DELIVERED_EVENT],
       },
       ({ event, step }) =>
         step.run('mark-formalization-signature-otp-delivery', () =>

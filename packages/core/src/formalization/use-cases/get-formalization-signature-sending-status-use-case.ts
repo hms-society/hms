@@ -47,32 +47,34 @@ type Dependencies = {
   readonly sourceProvider?: FormalizationSignatureSourceProvider
 }
 
-const terminalStatuses = new Set<FormalizationSignatureRequestStatus>([
-  FormalizationSignatureRequestStatus.confirmed,
-  FormalizationSignatureRequestStatus.rejected,
-  FormalizationSignatureRequestStatus.cancelled,
-  FormalizationSignatureRequestStatus.expired,
-])
-const retryableRequestStatuses = new Set<FormalizationSignatureRequestStatus>([
-  FormalizationSignatureRequestStatus.reconciliationRequired,
-  FormalizationSignatureRequestStatus.failed,
-])
-const retryableDocumentStatuses = new Set([
-  FormalizationSignatureRequestDocumentStatus.reconciliationRequired,
-  FormalizationSignatureRequestDocumentStatus.failed,
-]) as Set<FormalizationSignatureRequestDocumentStatus>
-const resendableRecipientStatuses = new Set<FormalizationSignatureRecipientStatus>([
-  FormalizationSignatureRecipientStatus.invited,
-  FormalizationSignatureRecipientStatus.authenticating,
-  FormalizationSignatureRecipientStatus.locked,
-  FormalizationSignatureRecipientStatus.authenticated,
-  FormalizationSignatureRecipientStatus.reading,
-  FormalizationSignatureRecipientStatus.reconciliationRequired,
-])
-
 export class GetFormalizationSignatureSendingStatusUseCase
   implements UseCase<Request, Response | null>
 {
+  static readonly TERMINAL_STATUSES = new Set<FormalizationSignatureRequestStatus>([
+    FormalizationSignatureRequestStatus.confirmed,
+    FormalizationSignatureRequestStatus.rejected,
+    FormalizationSignatureRequestStatus.cancelled,
+    FormalizationSignatureRequestStatus.expired,
+  ])
+  static readonly RETRYABLE_REQUEST_STATUSES =
+    new Set<FormalizationSignatureRequestStatus>([
+      FormalizationSignatureRequestStatus.reconciliationRequired,
+      FormalizationSignatureRequestStatus.failed,
+    ])
+  static readonly RETRYABLE_DOCUMENT_STATUSES = new Set([
+    FormalizationSignatureRequestDocumentStatus.reconciliationRequired,
+    FormalizationSignatureRequestDocumentStatus.failed,
+  ]) as Set<FormalizationSignatureRequestDocumentStatus>
+  static readonly RESENDABLE_RECIPIENT_STATUSES =
+    new Set<FormalizationSignatureRecipientStatus>([
+      FormalizationSignatureRecipientStatus.invited,
+      FormalizationSignatureRecipientStatus.authenticating,
+      FormalizationSignatureRecipientStatus.locked,
+      FormalizationSignatureRecipientStatus.authenticated,
+      FormalizationSignatureRecipientStatus.reading,
+      FormalizationSignatureRecipientStatus.reconciliationRequired,
+    ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response | null> {
@@ -164,7 +166,9 @@ export class GetFormalizationSignatureSendingStatusUseCase
         document.status === FormalizationSignatureRequestDocumentStatus.confirmed,
     ).length
     const failedDocuments = documents.filter((document) =>
-      retryableDocumentStatuses.has(document.status),
+      GetFormalizationSignatureSendingStatusUseCase.RETRYABLE_DOCUMENT_STATUSES.has(
+        document.status,
+      ),
     ).length
     const allRecipientsConfirmed =
       recipients.length > 0 &&
@@ -212,11 +216,16 @@ export class GetFormalizationSignatureSendingStatusUseCase
           : Math.round((completedDocuments / documents.length) * 100),
       canCancel:
         operator &&
-        !terminalStatuses.has(signatureRequest.status) &&
+        !GetFormalizationSignatureSendingStatusUseCase.TERMINAL_STATUSES.has(
+          signatureRequest.status,
+        ) &&
         !signatureRequest.cancellationRequestedAt,
       canRetry:
         operator &&
-        (retryableRequestStatuses.has(signatureRequest.status) || failedDocuments > 0),
+        (GetFormalizationSignatureSendingStatusUseCase.RETRYABLE_REQUEST_STATUSES.has(
+          signatureRequest.status,
+        ) ||
+          failedDocuments > 0),
       canConfirmContracting:
         operator &&
         formalization.status === 'in_progress' &&
@@ -227,7 +236,9 @@ export class GetFormalizationSignatureSendingStatusUseCase
       viewerMode,
       permissions: {
         canOperate: operator,
-        canViewDocumentContent: false,
+        canViewDocumentContent:
+          operator &&
+          signatureRequest.status === FormalizationSignatureRequestStatus.confirmed,
       },
       documents: trackingDocuments,
     }
@@ -326,7 +337,10 @@ export class GetFormalizationSignatureSendingStatusUseCase
       ...(recipient.terminalAt ? { terminalAt: recipient.terminalAt } : {}),
       ...(protocolNumber ? { protocolNumber } : {}),
       canResend:
-        viewerMode === 'operator' && resendableRecipientStatuses.has(recipient.status),
+        viewerMode === 'operator' &&
+        GetFormalizationSignatureSendingStatusUseCase.RESENDABLE_RECIPIENT_STATUSES.has(
+          recipient.status,
+        ),
     }
   }
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { DynamicFormAnswerValue, DynamicFormField } from '@hms/core/shared/domain'
 
 import { DynamicFormFieldsSection } from '@/ui/shared/widgets/dynamic-form/dynamic-form-fields'
+import { DynamicFormSelector } from '@/ui/shared/widgets/dynamic-form/dynamic-form-selector'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Card, CardContent } from '@/ui/shadcn/card'
@@ -10,7 +11,7 @@ import { CloseFormConfirmationDialog } from './close-form-confirmation-dialog'
 import { ReopenFormConfirmationDialog } from './reopen-form-confirmation-dialog'
 import { useCommercialConditionsCard } from './use-commercial-conditions-card'
 
-export function CommercialConditionsCard({
+export const CommercialConditionsCard = ({
   fields,
   answers,
   isClosed,
@@ -46,7 +47,7 @@ export function CommercialConditionsCard({
   formName: string
   onOpenSelect: () => void
   canReplace?: boolean
-}) {
+}) => {
   const form = useCommercialConditionsCard(fields, answers)
   const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false)
   const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false)
@@ -69,16 +70,6 @@ export function CommercialConditionsCard({
               </h2>
             </div>
             <div className='flex flex-wrap items-center gap-2'>
-              {canReplace && (
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={onOpenSelect}
-                  disabled={isPending}
-                >
-                  Trocar ficha
-                </Button>
-              )}
               <Badge variant={isClosed ? 'success' : 'info'}>
                 {isClosed ? 'Fechada' : 'Aberta'}
               </Badge>
@@ -95,6 +86,16 @@ export function CommercialConditionsCard({
               </Badge>
             </div>
           </div>
+          <DynamicFormSelector
+            selectedFormName={formName}
+            onOpenSelectModal={onOpenSelect}
+            isReadOnly={!canReplace || isReadOnly || isClosed || isPending}
+          />
+          {!canReplace && !isClosed && !isReadOnly && (
+            <p className='text-sm text-destructive'>
+              Reabra o pacote de documentos antes de substituir a ficha.
+            </p>
+          )}
           <DynamicFormFieldsSection
             fields={fields}
             answers={answers}

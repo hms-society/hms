@@ -213,8 +213,9 @@ Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.
 - Mantém uma única Formalização por Intake e exatamente um cliente no MVP.
 - Controla os estados agregados `Em andamento`, `Concluída` e `Cancelada`; os
   estados terminais permanecem somente leitura.
-- Referencia as versões vigentes e aprovadas mantidas pela Produção Documental e
-  confirma o conjunto de documentos antes da etapa de assinatura.
+- Referencia as versões vigentes com decisão de revisão Aprovada ou Rejeitada
+  mantidas pela Produção Documental, confirma o conjunto antes da assinatura e
+  mantém a mesma versão confirmada no pacote, na revisão e na configuração de envio.
 - Mantém o cliente como primeiro signatário e adiciona o advogado responsável por
   padrão, sem selecionar documentos automaticamente para qualquer signatário.
 - Permite adicionar e remover signatários colaboradores ativos com perfil
@@ -238,6 +239,9 @@ Requisito de produto: [PRD — Módulo de Formalização](https://plataformahms.
   solicitações abertas antes de liberar novamente a edição dos documentos.
 - Preserva PDFs assinados, evidências e registros de envio, reenvio e cancelamento
   sem depender do armazenamento permanente do provedor.
+- Depois da confirmação integral de cada documento e da preservação do artefato
+  assinado, permite ao operador autorizado consultar tanto o PDF original imutável
+  quanto o PDF assinado por acesso temporário e autorizado.
 - Habilita a confirmação da contratação somente depois que todos os documentos
   estão assinados.
 - Muda para `Concluída` e sinaliza o Intake como `Contratado`, com a mesma data

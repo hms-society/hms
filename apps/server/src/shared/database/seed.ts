@@ -128,6 +128,11 @@ async function bootstrap() {
       clientId: draftFormalizationClient.id,
       scheduleId: schedulingSeed.schedule.id,
     })
+    const completedSchedulingSeed = await app.get(SchedulingSeeder).runAppointment({
+      intakeId: intakeSeed.completedFormalizationIntake.id,
+      clientId: client.id,
+      scheduleId: schedulingSeed.schedule.id,
+    })
     const consultationSeed = await app.get(ConsultationSeeder).run({
       intakeId: intakeSeed.documentProductionIntake.id,
       appointmentId: schedulingSeed.appointment.id,
@@ -154,6 +159,19 @@ async function bootstrap() {
     if (!draftConsultationSeed.consultation) {
       throw new AppError('The draft Formalization Consultation could not be seeded')
     }
+    const completedConsultationSeed = await app.get(ConsultationSeeder).run({
+      consultationId: '00000000-0000-4000-8000-000000000103',
+      intakeId: intakeSeed.completedFormalizationIntake.id,
+      appointmentId: completedSchedulingSeed.appointment.id,
+      clientId: client.id,
+      assignedLawyerId: lawyer.id,
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+      dynamicForm: consultationDynamicForm,
+    })
+    if (!completedConsultationSeed.consultation) {
+      throw new AppError('The completed Formalization Consultation could not be seeded')
+    }
 
     const formalizationForm = dynamicForms.find(
       ({ name }) => name === 'Condições comerciais da formalização',
@@ -178,6 +196,14 @@ async function bootstrap() {
       assignedLawyer: lawyer,
       contractForm: formalizationForm,
     })
+    const completedFormalization = await app.get(FormalizationSeeder).run({
+      seedMode: 'completed',
+      intake: intakeSeed.completedFormalizationIntake,
+      consultation: completedConsultationSeed.consultation,
+      client,
+      assignedLawyer: lawyer,
+      contractForm: formalizationForm,
+    })
 
     await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
@@ -186,6 +212,23 @@ async function bootstrap() {
       formalizationId: formalization.id,
       formalizationContractFormRevision: formalization.contractFormRevision,
       requestedByCollaboratorId: lawyer.id,
+    })
+    const completedFormalizationDocuments = await app
+      .get(DocumentProductionSeeder)
+      .runCompletedFormalization({
+        legalAreas: legalCatalog.areas,
+        legalTopics: legalCatalog.topics,
+        formalizationId: completedFormalization.id,
+        formalizationContractFormRevision: completedFormalization.contractFormRevision,
+        requestedByCollaboratorId: lawyer.id,
+      })
+    await app.get(FormalizationSeeder).seedCompletedSignatures({
+      formalizationId: completedFormalization.id,
+      formalizationVersion: completedFormalization.version,
+      client,
+      assignedLawyer: lawyer,
+      documentVersions: completedFormalizationDocuments.formalizationVersions,
+      signaturePdfFileIds: completedFormalizationDocuments.signaturePdfFileIds,
     })
 
     await app.get(CommunicationSeeder).run({

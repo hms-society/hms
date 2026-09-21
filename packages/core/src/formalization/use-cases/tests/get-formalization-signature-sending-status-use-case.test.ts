@@ -306,7 +306,7 @@ describe('Get Formalization Signature Sending Status Use Case', () => {
       canRetry: false,
       canConfirmContracting: false,
       viewerMode: 'operator',
-      permissions: { canOperate: true, canViewDocumentContent: false },
+      permissions: { canOperate: true, canViewDocumentContent: true },
       documents: expect.arrayContaining([
         expect.objectContaining({
           status: 'confirmed',

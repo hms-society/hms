@@ -26,12 +26,12 @@ import type { CommunicationChannel } from '@hms/core/communication/domain/struct
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 
-const ELIGIBLE_PROFILES = ['lawyer', 'paralegal', 'supervisor'] as const
-
 @Injectable()
 export class FormalizationSignatureSourceProvider
   implements FormalizationSignatureSourceProviderContract
 {
+  static readonly ELIGIBLE_PROFILES = ['lawyer', 'paralegal', 'supervisor'] as const
+
   constructor(
     @Inject(IDENTITY_REPOSITORIES.clients)
     private readonly clientsRepository: ClientsRepository,
@@ -89,13 +89,13 @@ export class FormalizationSignatureSourceProvider
       page: input.page,
       limit: input.limit,
       search: input.search,
-      profiles: ELIGIBLE_PROFILES,
+      profiles: FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES,
     } as Parameters<CollaboratorsRepository['list']>[0])
     const excluded = new Set(input.excludedPersonIds)
     const items = result.items.flatMap((collaborator) => {
       if (
-        !ELIGIBLE_PROFILES.includes(
-          collaborator.profile as (typeof ELIGIBLE_PROFILES)[number],
+        !FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES.includes(
+          collaborator.profile as (typeof FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES)[number],
         )
       ) {
         return []
@@ -106,7 +106,8 @@ export class FormalizationSignatureSourceProvider
         {
           collaboratorId: collaborator.collaboratorId,
           name: collaborator.professionalName,
-          profile: collaborator.profile as (typeof ELIGIBLE_PROFILES)[number],
+          profile:
+            collaborator.profile as (typeof FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES)[number],
           email: collaborator.email,
           availableChannels: this.getAvailableChannels(collaborator.email),
         },
@@ -142,11 +143,12 @@ export class FormalizationSignatureSourceProvider
     const collaborator = await this.collaboratorsRepository.findSummaryById(personId)
     if (!collaborator) return null
 
-    const collaboratorRole = ELIGIBLE_PROFILES.includes(
-      collaborator.profile as (typeof ELIGIBLE_PROFILES)[number],
-    )
-      ? (collaborator.profile as (typeof ELIGIBLE_PROFILES)[number])
-      : undefined
+    const collaboratorRole =
+      FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES.includes(
+        collaborator.profile as (typeof FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES)[number],
+      )
+        ? (collaborator.profile as (typeof FormalizationSignatureSourceProvider.ELIGIBLE_PROFILES)[number])
+        : undefined
 
     if (collaborator.status !== 'active' || !collaboratorRole) return null
 

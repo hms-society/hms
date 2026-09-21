@@ -374,6 +374,10 @@ describe('useSigningGatewayPage', () => {
   it('fails closed when context cannot be restored', async () => {
     mocks.contextRefetch.mockRejectedValue(new Error('Session unavailable'))
     const { result } = renderHook(() => useSigningGatewayPage())
-    await waitFor(() => expect(result.current.step).toBe('unavailable'))
+    await waitFor(() => {
+      expect(result.current.step).toBe('unavailable')
+      if (result.current.step === 'unavailable')
+        expect(result.current.props.error).toBe('Session unavailable')
+    })
   })
 })

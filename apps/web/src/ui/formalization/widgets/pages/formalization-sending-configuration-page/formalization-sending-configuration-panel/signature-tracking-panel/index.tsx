@@ -46,7 +46,10 @@ export const SignatureTrackingPanel = (props: SignatureTrackingPanelProps) => {
             disabled={props.isRefreshing}
             onClick={() => void handleRefresh()}
           >
-            <Icon name='refresh-cw' className='size-4' />
+            <Icon
+              name='refresh-cw'
+              className={`size-4${props.isRefreshing ? ' animate-spin motion-reduce:animate-none' : ''}`}
+            />
             Atualizar
           </Button>
           {status.canCancel && (
@@ -96,6 +99,9 @@ export const SignatureTrackingPanel = (props: SignatureTrackingPanelProps) => {
             document={document}
             isResending={props.isResending}
             onRequestResend={handleRequestResend}
+            canViewDocuments={status.permissions.canViewDocumentContent}
+            isSignatureRequestConfirmed={status.status === 'confirmed'}
+            onGetDocumentContent={props.onGetDocumentContent}
           />
         ))}
       </div>

@@ -40,16 +40,16 @@ type Dependencies = {
   readonly hasher: SignatureSecretHasher
 }
 
-const RECOVERABLE_RECIPIENT_STATUSES = new Set([
-  'invited',
-  'authenticating',
-  'locked',
-  'authenticated',
-  'reading',
-  'signing',
-])
-
 export class ExchangeSignatureInvitationUseCase implements UseCase<Request, Response> {
+  static readonly RECOVERABLE_RECIPIENT_STATUSES = new Set([
+    'invited',
+    'authenticating',
+    'locked',
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
   async execute(request: Request): Promise<Response> {
     const invitation = await this.dependencies.invitationsRepository.findByTokenHash(
@@ -69,7 +69,9 @@ export class ExchangeSignatureInvitationUseCase implements UseCase<Request, Resp
       throw new SignatureSessionInvalidError()
     const recoverableInvitation =
       invitation.status === 'consumed' &&
-      RECOVERABLE_RECIPIENT_STATUSES.has(recipient.status)
+      ExchangeSignatureInvitationUseCase.RECOVERABLE_RECIPIENT_STATUSES.has(
+        recipient.status,
+      )
     if (invitation.status !== 'active' && !recoverableInvitation)
       throw new SignatureInvitationConsumedError()
     const flowToken = this.dependencies.secretGenerator.generate()

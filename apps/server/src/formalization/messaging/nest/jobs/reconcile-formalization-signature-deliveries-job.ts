@@ -1,8 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import {
-  ReconcileFormalizationSignatureInvitationDeliveriesUseCase,
-  ReconcileFormalizationSignatureOtpDeliveriesUseCase,
-} from '@hms/core/formalization/use-cases'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import type {
   FormalizationSignatureInvitationSendAttemptsRepository,
   FormalizationSignatureInvitationsRepository,
@@ -10,21 +7,24 @@ import type {
   FormalizationSignatureOtpSendAttemptsRepository,
   FormalizationSignatureRecipientsRepository,
 } from '@hms/core/formalization/interfaces'
-import { cron, type InngestFunction } from 'inngest'
+import {
+  ReconcileFormalizationSignatureInvitationDeliveriesUseCase,
+  ReconcileFormalizationSignatureOtpDeliveriesUseCase,
+} from '@hms/core/formalization/use-cases'
 
 import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
-import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
-import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 @Injectable()
-export class ReconcileFormalizationSignatureDeliveriesJob extends InngestJob {
+export class ReconcileFormalizationSignatureDeliveriesJob {
   static readonly ID = 'formalization/reconcile-signature-deliveries'
-  readonly function: InngestFunction.Like
+  static readonly RECONCILIATION_LIMIT = 100
+
+  private readonly reconcileInvitations: ReconcileFormalizationSignatureInvitationDeliveriesUseCase
+  private readonly reconcileOtp: ReconcileFormalizationSignatureOtpDeliveriesUseCase
 
   constructor(
-    inngest: InngestClient,
     @Inject(FORMALIZATION_REPOSITORIES.signatureInvitationSendAttempts)
     invitationAttemptsRepository: FormalizationSignatureInvitationSendAttemptsRepository,
     @Inject(FORMALIZATION_REPOSITORIES.signatureInvitations)
@@ -36,40 +36,39 @@ export class ReconcileFormalizationSignatureDeliveriesJob extends InngestJob {
     @Inject(FORMALIZATION_REPOSITORIES.signatureOtpChallenges)
     challengesRepository: FormalizationSignatureOtpChallengesRepository,
     broker: InngestBroker,
-    datetimeProvider: DatetimeProvider,
+    private readonly datetimeProvider: DatetimeProvider,
   ) {
-    super(inngest)
-    const reconcileInvitations =
+    this.reconcileInvitations =
       new ReconcileFormalizationSignatureInvitationDeliveriesUseCase({
         attemptsRepository: invitationAttemptsRepository,
         invitationsRepository,
         recipientsRepository,
         broker,
       })
-    const reconcileOtp = new ReconcileFormalizationSignatureOtpDeliveriesUseCase({
+    this.reconcileOtp = new ReconcileFormalizationSignatureOtpDeliveriesUseCase({
       attemptsRepository: otpAttemptsRepository,
       invitationsRepository,
       challengesRepository,
       broker,
     })
-    this.function = this.inngest.createFunction(
-      {
-        id: ReconcileFormalizationSignatureDeliveriesJob.ID,
-        name: 'Reconcile Formalization Signature Deliveries',
-        retries: 3,
-        triggers: [cron('* * * * *')],
-      },
-      ({ step }) =>
-        step.run('reconcile-formalization-signature-deliveries', async () => ({
-          invitations: await reconcileInvitations.execute({
-            occurredAt: datetimeProvider.now(),
-            limit: 100,
-          }),
-          otp: await reconcileOtp.execute({
-            occurredAt: datetimeProvider.now(),
-            limit: 100,
-          }),
-        })),
-    )
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: ReconcileFormalizationSignatureDeliveriesJob.ID,
+    waitForCompletion: true,
+  })
+  async execute() {
+    const occurredAt = this.datetimeProvider.now()
+
+    return {
+      invitations: await this.reconcileInvitations.execute({
+        occurredAt,
+        limit: ReconcileFormalizationSignatureDeliveriesJob.RECONCILIATION_LIMIT,
+      }),
+      otp: await this.reconcileOtp.execute({
+        occurredAt,
+        limit: ReconcileFormalizationSignatureDeliveriesJob.RECONCILIATION_LIMIT,
+      }),
+    }
   }
 }

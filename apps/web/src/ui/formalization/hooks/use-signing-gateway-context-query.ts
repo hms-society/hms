@@ -15,8 +15,9 @@ export const useSigningGatewayContextQuery = (enabled: boolean) => {
     setIsLoading(false)
 
     if (response.isFailure) {
-      setError(response.errorMessage)
-      return undefined
+      const cause = new Error(response.errorMessage)
+      setError(cause.message)
+      throw cause
     }
 
     setError(undefined)
@@ -25,7 +26,7 @@ export const useSigningGatewayContextQuery = (enabled: boolean) => {
   }, [signingGatewayService])
 
   useEffect(() => {
-    if (enabled) void refetch()
+    if (enabled) void refetch().catch(() => undefined)
   }, [enabled, refetch])
 
   return { data, error, isFetching: isLoading, isLoading, refetch }

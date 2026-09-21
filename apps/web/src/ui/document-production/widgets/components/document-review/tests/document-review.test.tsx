@@ -34,7 +34,7 @@ describe('DocumentReview', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Voltar aos documentos' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar para documentos' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ver versões' }))
     fireEvent.click(screen.getByRole('button', { name: 'Pendências (2)' }))
 

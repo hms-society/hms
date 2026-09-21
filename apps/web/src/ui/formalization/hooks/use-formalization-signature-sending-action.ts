@@ -4,6 +4,7 @@ import type {
   FormalizationSignatureRequestStatus,
   ConfirmFormalizationContractingCommand,
   ResendFormalizationSignatureInvitationCommand,
+  FormalizationSignatureDocumentContentKind,
 } from '@hms/core/formalization/domain/structures'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -201,6 +202,19 @@ export function useFormalizationSignatureSending(
     },
   })
 
+  async function getSignatureDocumentContent(
+    requestDocumentId: string,
+    contentKind: FormalizationSignatureDocumentContentKind,
+  ) {
+    return readResponse(
+      await formalizationService.getSignatureDocumentContent(
+        formalizationId,
+        requestDocumentId,
+        contentKind,
+      ),
+    )
+  }
+
   return {
     review: reviewQuery.data,
     status: statusQuery.data,
@@ -209,6 +223,7 @@ export function useFormalizationSignatureSending(
     isLoadingReview: reviewQuery.isLoading,
     isFetchingReview: reviewQuery.isFetching,
     isLoadingStatus: statusQuery.isLoading,
+    isFetchingStatus: statusQuery.isFetching,
     isConfirming: confirmMutation.isPending,
     isCancelling: cancelMutation.isPending,
     isCancellationPending,
@@ -222,6 +237,7 @@ export function useFormalizationSignatureSending(
     confirmContracting: contractingMutation.mutateAsync,
     isConfirmingContracting: contractingMutation.isPending,
     confirmContractingError: contractingMutation.error,
+    getSignatureDocumentContent,
     refetchReview: reviewQuery.refetch,
     refetchStatus: statusQuery.refetch,
   }

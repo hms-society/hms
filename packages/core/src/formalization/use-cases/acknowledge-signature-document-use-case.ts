@@ -17,8 +17,6 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
-const ACKNOWLEDGEABLE_REQUEST_STATUSES = new Set(['in_progress', 'partially_submitted'])
-
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -49,6 +47,11 @@ type Dependencies = {
 }
 
 export class AcknowledgeSignatureDocumentUseCase implements UseCase<Request, Response> {
+  static readonly ACKNOWLEDGEABLE_REQUEST_STATUSES = new Set([
+    'in_progress',
+    'partially_submitted',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
   async execute(request: Request): Promise<Response> {
     if (
@@ -81,7 +84,9 @@ export class AcknowledgeSignatureDocumentUseCase implements UseCase<Request, Res
       !document ||
       document.requestId !== session.requestId ||
       signatureRequest.version !== request.expectedRequestVersion ||
-      !ACKNOWLEDGEABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
+      !AcknowledgeSignatureDocumentUseCase.ACKNOWLEDGEABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      ) ||
       ['confirmed', 'rejected', 'cancelled', 'expired', 'failed'].includes(
         signatureRequest.status,
       )

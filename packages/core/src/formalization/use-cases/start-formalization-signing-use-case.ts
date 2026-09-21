@@ -24,8 +24,6 @@ import {
   SignatureProviderUnavailableError,
 } from '../domain/errors'
 
-const SIGNABLE_REQUEST_STATUSES = new Set(['in_progress', 'partially_submitted'])
-
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -55,6 +53,11 @@ type Dependencies = {
 }
 
 export class StartFormalizationSigningUseCase implements UseCase<Request, Response> {
+  static readonly SIGNABLE_REQUEST_STATUSES = new Set([
+    'in_progress',
+    'partially_submitted',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
   async execute(request: Request): Promise<Response> {
     const session = await this.dependencies.sessionsRepository.findByTokenHash(
@@ -76,7 +79,9 @@ export class StartFormalizationSigningUseCase implements UseCase<Request, Respon
       !signatureRequest ||
       signatureRequest.version !== request.expectedRequestVersion ||
       signatureRequest.snapshotId !== session.snapshotId ||
-      !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
+      !StartFormalizationSigningUseCase.SIGNABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      ) ||
       ['confirmed', 'rejected', 'cancelled', 'expired', 'failed'].includes(
         signatureRequest.status,
       )

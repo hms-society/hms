@@ -6,7 +6,7 @@ import {
   FormalizationLoadingPanel,
   FormalizationStatePanel,
 } from '@/ui/formalization/widgets/pages/formalization-page/formalization-state-panels'
-import { FormalizationSendingConfigurationPanel } from '@/ui/formalization/widgets/pages/formalization-sending-configuration'
+import { FormalizationSendingConfigurationPanel } from './formalization-sending-configuration-panel'
 import { useFormalizationSendingConfigurationPage } from './use-formalization-sending-configuration-page'
 
 export type FormalizationSendingConfigurationPageProps = {

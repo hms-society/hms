@@ -42,6 +42,7 @@ const props = {
   onRefresh: vi.fn().mockResolvedValue(undefined),
   onResend: vi.fn(),
   onCancel: vi.fn(),
+  onGetDocumentContent: vi.fn().mockResolvedValue(new Blob()),
 }
 
 describe('useSignatureTrackingPanel', () => {

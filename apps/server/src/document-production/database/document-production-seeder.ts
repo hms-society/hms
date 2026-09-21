@@ -49,6 +49,14 @@ export type DocumentProductionSeedReferences = {
   readonly requestedByCollaboratorId?: string
 }
 
+export type CompletedFormalizationDocumentSeedReferences = {
+  readonly legalAreas: readonly { id: string; name: string }[]
+  readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
+  readonly formalizationId: string
+  readonly formalizationContractFormRevision: number
+  readonly requestedByCollaboratorId: string
+}
+
 type DocumentTemplateSeed = {
   readonly documentId: string
   readonly name: string
@@ -61,141 +69,162 @@ type ClearableFrozenDocumentPdfsRepository = FrozenDocumentPdfsRepository & {
   removeAll(): Promise<void>
 }
 
-const DOCUMENT_TEMPLATES = [
-  {
-    documentId: '00000000-0000-4000-8000-000000000201',
-    name: 'Procuração',
-    description: 'Procuração para representação em negociação contratual.',
-    paragraphs: [
-      '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
-      'Os poderes ficam limitados à análise e à negociação do contrato relacionado ao atendimento descrito na consulta.',
-      'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
-    ],
-    variables: [
-      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
-      { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
-      { label: 'Área jurídica', technicalName: 'area_juridica' },
-      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
-    ],
-  },
-  {
-    documentId: '00000000-0000-4000-8000-000000000202',
-    name: 'Declaração de informações da consulta',
-    description: 'Síntese declaratória dos dados apresentados durante a consulta.',
-    paragraphs: [
-      'Declaro que as informações usadas neste documento correspondem aos dados apresentados na consulta.',
-      'Questão principal: {questao_juridica_principal}.',
-      'Orientação registrada: {orientacao_fornecida}.',
-    ],
-    variables: [
-      {
-        label: 'Questão jurídica principal',
-        technicalName: 'questao_juridica_principal',
-      },
-      { label: 'Orientação fornecida', technicalName: 'orientacao_fornecida' },
-    ],
-  },
-  {
-    documentId: '00000000-0000-4000-8000-000000000203',
-    name: 'Teste de revisão — Procuração inconsistente',
-    description:
-      'Cenário intencionalmente inconsistente para exercitar a revisão automática.',
-    paragraphs: [
-      '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
-      'O mandato é exclusivamente limitado à análise e à negociação do contrato de locação residencial descrito na consulta.',
-      'Sem prejuízo da limitação anterior, o procurador recebe poderes gerais, irrestritos e irrevogáveis para alienar, adquirir e onerar quaisquer bens do outorgante.',
-      'O objeto da representação é a compra e venda de imóvel comercial situado em {endereco_imovel_comercial}.',
-      'Fica expressamente declarado que a consulta não estabeleceu qualquer limitação aos poderes concedidos.',
-    ],
-    variables: [
-      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
-      { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
-      {
-        label: 'Endereço do imóvel comercial',
-        technicalName: 'endereco_imovel_comercial',
-      },
-    ],
-  },
-] as const satisfies readonly DocumentTemplateSeed[]
-
-const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
-const FORMALIZATION_DOCUMENT_PACKAGE_ID = '00000000-0000-4000-8000-000000000302'
-const FORMALIZATION_DOCUMENT_TEMPLATES = [
-  {
-    documentId: '00000000-0000-4000-8000-000000000204',
-    packageDocumentId: '00000000-0000-4000-8000-000000000604',
-    name: 'Contrato de formalização',
-    description: 'Documento de apoio para a formalização das condições comerciais.',
-    paragraphs: [
-      'As condições comerciais foram registradas a partir da formalização do atendimento.',
-      'Cliente: {cliente_nome}.',
-      'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
-    ],
-    variables: [
-      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
-      { label: 'Área jurídica', technicalName: 'area_juridica' },
-      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
-    ],
-  },
-  {
-    documentId: '00000000-0000-4000-8000-000000000205',
-    packageDocumentId: '00000000-0000-4000-8000-000000000605',
-    name: 'Termo de honorários',
-    description: 'Termo complementar com as condições de honorários da contratação.',
-    paragraphs: [
-      'Os honorários e as condições de pagamento foram registrados para este atendimento.',
-      'Cliente: {cliente_nome}.',
-      'Tema jurídico: {tema_juridico}.',
-    ],
-    variables: [
-      { label: 'Nome do cliente', technicalName: 'cliente_nome' },
-      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
-    ],
-  },
-] as const satisfies readonly (Omit<DocumentTemplateSeed, 'documentId'> & {
-  readonly documentId: string
-  readonly packageDocumentId: string
-})[]
-
-const SEEDED_GENERATION_IDS = [
-  '00000000-0000-4000-8000-000000000401',
-  '00000000-0000-4000-8000-000000000402',
-  '00000000-0000-4000-8000-000000000403',
-] as const
-
-const SEEDED_VERSION_IDS = [
-  '00000000-0000-4000-8000-000000000501',
-  '00000000-0000-4000-8000-000000000502',
-  '00000000-0000-4000-8000-000000000503',
-] as const
-
-const SEEDED_FILE_IDS = [
-  '00000000-0000-4000-8000-000000000601',
-  '00000000-0000-4000-8000-000000000602',
-  '00000000-0000-4000-8000-000000000603',
-] as const
-
-const SEEDED_FORMALIZATION_GENERATION_IDS = [
-  '00000000-0000-4000-8000-000000000404',
-  '00000000-0000-4000-8000-000000000405',
-] as const
-
-const SEEDED_FORMALIZATION_VERSION_IDS = [
-  '00000000-0000-4000-8000-000000000504',
-  '00000000-0000-4000-8000-000000000505',
-] as const
-
-const SEEDED_FORMALIZATION_FILE_IDS = [
-  '00000000-0000-4000-8000-000000000606',
-  '00000000-0000-4000-8000-000000000607',
-] as const
-
-const SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE = new Date(
-  '2026-08-20T15:20:00.000Z',
-)
-
 @Injectable()
 export class DocumentProductionSeeder {
+  static readonly DOCUMENT_TEMPLATES = [
+    {
+      documentId: '00000000-0000-4000-8000-000000000201',
+      name: 'Procuração',
+      description: 'Procuração para representação em negociação contratual.',
+      paragraphs: [
+        '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
+        'Os poderes ficam limitados à análise e à negociação do contrato relacionado ao atendimento descrito na consulta.',
+        'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
+      ],
+      variables: [
+        { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+        { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
+        { label: 'Área jurídica', technicalName: 'area_juridica' },
+        { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+      ],
+    },
+    {
+      documentId: '00000000-0000-4000-8000-000000000202',
+      name: 'Declaração de informações da consulta',
+      description: 'Síntese declaratória dos dados apresentados durante a consulta.',
+      paragraphs: [
+        'Declaro que as informações usadas neste documento correspondem aos dados apresentados na consulta.',
+        'Questão principal: {questao_juridica_principal}.',
+        'Orientação registrada: {orientacao_fornecida}.',
+      ],
+      variables: [
+        {
+          label: 'Questão jurídica principal',
+          technicalName: 'questao_juridica_principal',
+        },
+        { label: 'Orientação fornecida', technicalName: 'orientacao_fornecida' },
+      ],
+    },
+    {
+      documentId: '00000000-0000-4000-8000-000000000203',
+      name: 'Teste de revisão — Procuração inconsistente',
+      description:
+        'Cenário intencionalmente inconsistente para exercitar a revisão automática.',
+      paragraphs: [
+        '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
+        'O mandato é exclusivamente limitado à análise e à negociação do contrato de locação residencial descrito na consulta.',
+        'Sem prejuízo da limitação anterior, o procurador recebe poderes gerais, irrestritos e irrevogáveis para alienar, adquirir e onerar quaisquer bens do outorgante.',
+        'O objeto da representação é a compra e venda de imóvel comercial situado em {endereco_imovel_comercial}.',
+        'Fica expressamente declarado que a consulta não estabeleceu qualquer limitação aos poderes concedidos.',
+      ],
+      variables: [
+        { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+        { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
+        {
+          label: 'Endereço do imóvel comercial',
+          technicalName: 'endereco_imovel_comercial',
+        },
+      ],
+    },
+  ] as const satisfies readonly DocumentTemplateSeed[]
+  static readonly DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
+  static readonly FORMALIZATION_DOCUMENT_PACKAGE_ID =
+    '00000000-0000-4000-8000-000000000302'
+  static readonly FORMALIZATION_DOCUMENT_TEMPLATES = [
+    {
+      documentId: '00000000-0000-4000-8000-000000000204',
+      packageDocumentId: '00000000-0000-4000-8000-000000000604',
+      name: 'Contrato de formalização',
+      description: 'Documento de apoio para a formalização das condições comerciais.',
+      paragraphs: [
+        'As condições comerciais foram registradas a partir da formalização do atendimento.',
+        'Cliente: {cliente_nome}.',
+        'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
+      ],
+      variables: [
+        { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+        { label: 'Área jurídica', technicalName: 'area_juridica' },
+        { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+      ],
+    },
+    {
+      documentId: '00000000-0000-4000-8000-000000000205',
+      packageDocumentId: '00000000-0000-4000-8000-000000000605',
+      name: 'Termo de honorários',
+      description: 'Termo complementar com as condições de honorários da contratação.',
+      paragraphs: [
+        'Os honorários e as condições de pagamento foram registrados para este atendimento.',
+        'Cliente: {cliente_nome}.',
+        'Tema jurídico: {tema_juridico}.',
+      ],
+      variables: [
+        { label: 'Nome do cliente', technicalName: 'cliente_nome' },
+        { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+      ],
+    },
+  ] as const satisfies readonly (Omit<DocumentTemplateSeed, 'documentId'> & {
+    readonly documentId: string
+    readonly packageDocumentId: string
+  })[]
+  static readonly SEEDED_GENERATION_IDS = [
+    '00000000-0000-4000-8000-000000000401',
+    '00000000-0000-4000-8000-000000000402',
+    '00000000-0000-4000-8000-000000000403',
+  ] as const
+  static readonly SEEDED_VERSION_IDS = [
+    '00000000-0000-4000-8000-000000000501',
+    '00000000-0000-4000-8000-000000000502',
+    '00000000-0000-4000-8000-000000000503',
+  ] as const
+  static readonly SEEDED_FILE_IDS = [
+    '00000000-0000-4000-8000-000000000601',
+    '00000000-0000-4000-8000-000000000602',
+    '00000000-0000-4000-8000-000000000603',
+  ] as const
+  static readonly SEEDED_FORMALIZATION_GENERATION_IDS = [
+    '00000000-0000-4000-8000-000000000404',
+    '00000000-0000-4000-8000-000000000405',
+  ] as const
+  static readonly SEEDED_FORMALIZATION_VERSION_IDS = [
+    '00000000-0000-4000-8000-000000000504',
+    '00000000-0000-4000-8000-000000000505',
+  ] as const
+  static readonly SEEDED_FORMALIZATION_FILE_IDS = [
+    '00000000-0000-4000-8000-000000000606',
+    '00000000-0000-4000-8000-000000000607',
+  ] as const
+  static readonly COMPLETED_FORMALIZATION_DOCUMENT_TEMPLATES =
+    DocumentProductionSeeder.FORMALIZATION_DOCUMENT_TEMPLATES.map((template, index) => ({
+      ...template,
+      documentId: `00000000-0000-4000-8000-00000000020${index + 6}`,
+      packageDocumentId: `00000000-0000-4000-8000-00000000060${index + 8}`,
+    }))
+  static readonly COMPLETED_FORMALIZATION_DOCUMENT_PACKAGE_ID =
+    '00000000-0000-4000-8000-000000000303'
+  static readonly COMPLETED_FORMALIZATION_GENERATION_IDS = [
+    '00000000-0000-4000-8000-000000000406',
+    '00000000-0000-4000-8000-000000000407',
+  ] as const
+  static readonly COMPLETED_FORMALIZATION_VERSION_IDS = [
+    '00000000-0000-4000-8000-000000000506',
+    '00000000-0000-4000-8000-000000000507',
+  ] as const
+  static readonly COMPLETED_FORMALIZATION_FILE_IDS = [
+    '00000000-0000-4000-8000-000000000610',
+    '00000000-0000-4000-8000-000000000611',
+  ] as const
+  static readonly COMPLETED_FORMALIZATION_ORIGINAL_PDF_FILE_IDS = [
+    '00000000-0000-4000-8000-000000000612',
+    '00000000-0000-4000-8000-000000000613',
+  ] as const
+  static readonly COMPLETED_FORMALIZATION_SIGNED_PDF_FILE_IDS = [
+    '00000000-0000-4000-8000-000000000614',
+    '00000000-0000-4000-8000-000000000615',
+  ] as const
+  static readonly SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE = new Date(
+    '2026-08-20T15:20:00.000Z',
+  )
+
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     private readonly generationsRepository: DocumentGenerationsRepository,
@@ -228,6 +257,65 @@ export class DocumentProductionSeeder {
     await this.specificationsRepository.removeAll()
   }
 
+  async runCompletedFormalization(
+    references: CompletedFormalizationDocumentSeedReferences,
+  ) {
+    const { areaId, topicId } = this.resolveFormalizationLegalContext(references)
+    const fixture = await this.seedFormalizationFixture({
+      areaId,
+      topicId,
+      formalizationId: references.formalizationId,
+      documentTemplates:
+        DocumentProductionSeeder.COMPLETED_FORMALIZATION_DOCUMENT_TEMPLATES,
+      documentPackageId:
+        DocumentProductionSeeder.COMPLETED_FORMALIZATION_DOCUMENT_PACKAGE_ID,
+    })
+    const fileIds = await this.seedFormalizationFiles({
+      documents: fixture.formalizationDocuments,
+      generationIds: DocumentProductionSeeder.COMPLETED_FORMALIZATION_GENERATION_IDS,
+      fileIds: DocumentProductionSeeder.COMPLETED_FORMALIZATION_FILE_IDS,
+    })
+    const signaturePdfFileIds = await this.seedCompletedSignaturePdfFiles(
+      fixture.formalizationDocuments,
+    )
+    const generated = await this.seedApprovedDocumentVersions({
+      documents: fixture.formalizationDocuments,
+      specifications: fixture.formalizationSpecifications,
+      source: {
+        type: 'formalization',
+        id: references.formalizationId,
+        data: {
+          formalization: {
+            id: references.formalizationId,
+            contractFormRevision: references.formalizationContractFormRevision,
+          },
+        },
+      },
+      requestedByCollaboratorId: references.requestedByCollaboratorId,
+      generationIds: DocumentProductionSeeder.COMPLETED_FORMALIZATION_GENERATION_IDS,
+      versionIds: DocumentProductionSeeder.COMPLETED_FORMALIZATION_VERSION_IDS,
+      fileIds,
+    })
+    const confirmedPackage = await this.documentPackagesRepository.confirm(
+      fixture.formalizationPackage.id,
+      references.requestedByCollaboratorId,
+      DocumentProductionSeeder.SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+    )
+    if (!confirmedPackage) {
+      throw new AppError(
+        'The completed Formalization document package could not be confirmed.',
+        'Seed Error',
+      )
+    }
+
+    return {
+      ...fixture,
+      formalizationGenerations: generated.generations,
+      formalizationVersions: generated.versions,
+      signaturePdfFileIds,
+    }
+  }
+
   async run(references: DocumentProductionSeedReferences) {
     if (
       references.formalizationId &&
@@ -251,7 +339,7 @@ export class DocumentProductionSeeder {
     }
 
     const specificationCreations: DocumentSpecificationCreation[] =
-      DOCUMENT_TEMPLATES.map((template) => ({
+      DocumentProductionSeeder.DOCUMENT_TEMPLATES.map((template) => ({
         name: template.name,
         description: template.description,
         content: this.createTemplateContent(template.name, template.paragraphs),
@@ -267,7 +355,9 @@ export class DocumentProductionSeeder {
     const specifications =
       await this.specificationsRepository.addMany(specificationCreations)
     const documentCreations: DocumentCreation[] = specifications.map((specification) => {
-      const template = DOCUMENT_TEMPLATES.find(({ name }) => name === specification.name)
+      const template = DocumentProductionSeeder.DOCUMENT_TEMPLATES.find(
+        ({ name }) => name === specification.name,
+      )
       if (!template) {
         throw new AppError(
           'A seeded Document Template could not be resolved.',
@@ -287,7 +377,7 @@ export class DocumentProductionSeeder {
     })
     const documents = await this.documentsRepository.addMany(documentCreations)
     const seededPackage = DocumentPackageFaker.fake({
-      id: DOCUMENT_PRODUCTION_PACKAGE_ID,
+      id: DocumentProductionSeeder.DOCUMENT_PRODUCTION_PACKAGE_ID,
       context: {
         type: 'consultation',
         consultationId: references.consultationId,
@@ -331,6 +421,8 @@ export class DocumentProductionSeeder {
           areaId: area.id,
           topicId: topic.id,
           formalizationId: references.formalizationId,
+          documentTemplates: DocumentProductionSeeder.FORMALIZATION_DOCUMENT_TEMPLATES,
+          documentPackageId: DocumentProductionSeeder.FORMALIZATION_DOCUMENT_PACKAGE_ID,
         })
       : undefined
 
@@ -340,9 +432,9 @@ export class DocumentProductionSeeder {
           specifications,
           source: { type: 'consultation', id: references.consultationId, data: {} },
           requestedByCollaboratorId: references.requestedByCollaboratorId,
-          generationIds: SEEDED_GENERATION_IDS,
-          versionIds: SEEDED_VERSION_IDS,
-          fileIds: SEEDED_FILE_IDS,
+          generationIds: DocumentProductionSeeder.SEEDED_GENERATION_IDS,
+          versionIds: DocumentProductionSeeder.SEEDED_VERSION_IDS,
+          fileIds: DocumentProductionSeeder.SEEDED_FILE_IDS,
         })
       : { generations: [], versions: [] }
 
@@ -364,11 +456,12 @@ export class DocumentProductionSeeder {
               },
             },
             requestedByCollaboratorId: references.requestedByCollaboratorId,
-            generationIds: SEEDED_FORMALIZATION_GENERATION_IDS,
-            versionIds: SEEDED_FORMALIZATION_VERSION_IDS,
+            generationIds: DocumentProductionSeeder.SEEDED_FORMALIZATION_GENERATION_IDS,
+            versionIds: DocumentProductionSeeder.SEEDED_FORMALIZATION_VERSION_IDS,
             fileIds: await this.seedFormalizationFiles({
               documents: formalizationFixture.formalizationDocuments,
-              generationIds: SEEDED_FORMALIZATION_GENERATION_IDS,
+              generationIds: DocumentProductionSeeder.SEEDED_FORMALIZATION_GENERATION_IDS,
+              fileIds: DocumentProductionSeeder.SEEDED_FORMALIZATION_FILE_IDS,
             }),
           })
         : { generations: [], versions: [] }
@@ -377,7 +470,7 @@ export class DocumentProductionSeeder {
       const confirmedPackage = await this.documentPackagesRepository.confirm(
         formalizationFixture.formalizationPackage.id,
         references.requestedByCollaboratorId,
-        SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+        DocumentProductionSeeder.SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
       )
       if (!confirmedPackage) {
         throw new AppError(
@@ -403,13 +496,17 @@ export class DocumentProductionSeeder {
     areaId,
     topicId,
     formalizationId,
+    documentTemplates,
+    documentPackageId,
   }: {
     readonly areaId: string
     readonly topicId: string
     readonly formalizationId: string
+    readonly documentTemplates: readonly (typeof DocumentProductionSeeder.COMPLETED_FORMALIZATION_DOCUMENT_TEMPLATES)[number][]
+    readonly documentPackageId: string
   }) {
     const specifications = await this.specificationsRepository.addMany(
-      FORMALIZATION_DOCUMENT_TEMPLATES.map((template) => ({
+      documentTemplates.map((template) => ({
         name: template.name,
         description: template.description,
         content: this.createTemplateContent(template.name, template.paragraphs),
@@ -424,14 +521,14 @@ export class DocumentProductionSeeder {
       })),
     )
 
-    if (specifications.length !== FORMALIZATION_DOCUMENT_TEMPLATES.length) {
+    if (specifications.length !== documentTemplates.length) {
       throw new AppError(
         'The Formalization document specifications could not be seeded.',
         'Seed Error',
       )
     }
 
-    const documents = FORMALIZATION_DOCUMENT_TEMPLATES.map((template) => {
+    const documents = documentTemplates.map((template) => {
       const {
         createdAt: _createdAt,
         updatedAt: _updatedAt,
@@ -449,14 +546,14 @@ export class DocumentProductionSeeder {
     }
 
     const seededPackage = DocumentPackageFaker.fake({
-      id: FORMALIZATION_DOCUMENT_PACKAGE_ID,
+      id: documentPackageId,
       context: { type: 'formalization', formalizationId },
     })
     const formalizationPackage = await this.documentPackagesRepository.add({
       id: seededPackage.id,
       context: seededPackage.context,
     })
-    const packageDocuments = FORMALIZATION_DOCUMENT_TEMPLATES.map((template, index) => {
+    const packageDocuments = documentTemplates.map((template, index) => {
       const document = formalizationDocuments[index]
       const specification = specifications[index]
       if (!document || !specification) {
@@ -490,7 +587,13 @@ export class DocumentProductionSeeder {
   }
 
   private async clearFormalizationSeedFiles() {
-    for (const fileId of SEEDED_FORMALIZATION_FILE_IDS) {
+    const fileIds = [
+      ...DocumentProductionSeeder.SEEDED_FORMALIZATION_FILE_IDS,
+      ...DocumentProductionSeeder.COMPLETED_FORMALIZATION_FILE_IDS,
+      ...DocumentProductionSeeder.COMPLETED_FORMALIZATION_ORIGINAL_PDF_FILE_IDS,
+      ...DocumentProductionSeeder.COMPLETED_FORMALIZATION_SIGNED_PDF_FILE_IDS,
+    ]
+    for (const fileId of fileIds) {
       const file = await this.storedFilesRepository.findById(fileId)
       if (!file) continue
 
@@ -499,22 +602,117 @@ export class DocumentProductionSeeder {
     }
   }
 
+  private async seedCompletedSignaturePdfFiles(
+    documents: readonly { id: string; title: string }[],
+  ) {
+    const original: string[] = []
+    const signed: string[] = []
+
+    for (const [index, document] of documents.entries()) {
+      const originalFileId =
+        DocumentProductionSeeder.COMPLETED_FORMALIZATION_ORIGINAL_PDF_FILE_IDS[index]
+      const signedFileId =
+        DocumentProductionSeeder.COMPLETED_FORMALIZATION_SIGNED_PDF_FILE_IDS[index]
+      if (!originalFileId || !signedFileId) {
+        throw new AppError(
+          'The completed Formalization signature PDF references could not be resolved.',
+          'Seed Error',
+        )
+      }
+
+      original.push(
+        await this.seedCompletedSignaturePdf({
+          fileId: originalFileId,
+          filePath: `formalization/${document.id}/signature/original.pdf`,
+          fileName: `${document.title}-original.pdf`,
+          label: `${document.title} - original`,
+        }),
+      )
+      signed.push(
+        await this.seedCompletedSignaturePdf({
+          fileId: signedFileId,
+          filePath: `formalization/${document.id}/signature/signed.pdf`,
+          fileName: `${document.title}-assinado.pdf`,
+          label: `${document.title} - assinado`,
+        }),
+      )
+    }
+
+    return { original, signed }
+  }
+
+  private async seedCompletedSignaturePdf(input: {
+    readonly fileId: string
+    readonly filePath: string
+    readonly fileName: string
+    readonly label: string
+  }) {
+    const content = this.createSeedPdf(input.label)
+    await this.storageProvider.upload(input.filePath, content, 'application/pdf')
+    try {
+      await this.storedFilesRepository.add({
+        id: input.fileId,
+        filePath: input.filePath,
+        fileName: input.fileName,
+        contentType: 'application/pdf',
+        sizeInBytes: content.byteLength,
+        createdAt:
+          DocumentProductionSeeder.SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+      })
+    } catch (error) {
+      await this.storageProvider.remove(input.filePath)
+      throw error
+    }
+    return input.fileId
+  }
+
+  private createSeedPdf(label: string) {
+    const safeLabel = label
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[()\\]/g, '')
+    const stream = `BT /F1 18 Tf 72 760 Td (${safeLabel}) Tj ET`
+    const objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>',
+      `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    ]
+    let pdf = '%PDF-1.4\n'
+    const offsets = [0]
+    for (const [index, object] of objects.entries()) {
+      offsets.push(pdf.length)
+      pdf += `${index + 1} 0 obj\n${object}\nendobj\n`
+    }
+    const xrefOffset = pdf.length
+    pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
+    pdf += offsets
+      .slice(1)
+      .map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`)
+      .join('')
+    pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`
+    return new TextEncoder().encode(pdf)
+  }
+
   private async seedFormalizationFiles({
     documents,
     generationIds,
+    fileIds,
   }: {
     readonly documents: readonly { id: string }[]
     readonly generationIds: readonly string[]
+    readonly fileIds: readonly string[]
   }): Promise<readonly string[]> {
     const fileSeeds = [
       {
-        id: SEEDED_FORMALIZATION_FILE_IDS[0],
+        id: fileIds[0],
         documentId: documents[0]?.id,
         generationId: generationIds[0],
         fileName: 'contrato-de-formalizacao.docx',
       },
       {
-        id: SEEDED_FORMALIZATION_FILE_IDS[1],
+        id: fileIds[1],
         documentId: documents[1]?.id,
         generationId: generationIds[1],
         fileName: 'termo-de-honorarios.docx',
@@ -545,7 +743,8 @@ export class DocumentProductionSeeder {
           fileName,
           contentType,
           sizeInBytes: content.byteLength,
-          createdAt: SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
+          createdAt:
+            DocumentProductionSeeder.SEEDED_FORMALIZATION_PACKAGE_CONFIRMATION_DATE,
         }
 
         try {
@@ -558,6 +757,23 @@ export class DocumentProductionSeeder {
         return id
       }),
     )
+  }
+
+  private resolveFormalizationLegalContext(references: {
+    readonly legalAreas: readonly { id: string; name: string }[]
+    readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
+  }) {
+    const area = references.legalAreas.find(({ name }) => name === 'Cível')
+    const topic = references.legalTopics.find(
+      ({ legalAreaId, name }) => legalAreaId === area?.id && name === 'Contratos',
+    )
+    if (!area || !topic) {
+      throw new AppError(
+        'Completed Formalization document seed references are required.',
+        'Seed Error',
+      )
+    }
+    return { areaId: area.id, topicId: topic.id }
   }
 
   private async seedApprovedDocumentVersions({

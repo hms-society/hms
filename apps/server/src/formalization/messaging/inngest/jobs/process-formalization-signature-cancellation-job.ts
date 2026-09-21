@@ -21,13 +21,13 @@ import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const cancellationEvent = eventType(
-  FormalizationSignatureRequestCancellationRequestedEvent._NAME,
-  { schema: formalizationSignatureRequestCancellationRequestedEventSchema },
-)
-
 @Injectable()
 export class ProcessFormalizationSignatureCancellationJob extends InngestJob {
+  static readonly CANCELLATION_EVENT = eventType(
+    FormalizationSignatureRequestCancellationRequestedEvent._NAME,
+    { schema: formalizationSignatureRequestCancellationRequestedEventSchema },
+  )
+
   readonly function: InngestFunction.Like
 
   constructor(
@@ -61,7 +61,7 @@ export class ProcessFormalizationSignatureCancellationJob extends InngestJob {
         id: 'formalization/process-signature-cancellation',
         name: 'Process Formalization Signature Cancellation',
         retries: 5,
-        triggers: [cancellationEvent],
+        triggers: [ProcessFormalizationSignatureCancellationJob.CANCELLATION_EVENT],
       },
       ({ event, step }) =>
         step.run('process-formalization-signature-cancellation', async () => {

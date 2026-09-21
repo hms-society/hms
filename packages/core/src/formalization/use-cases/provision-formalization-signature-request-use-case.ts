@@ -75,23 +75,23 @@ type Dependencies = {
   readonly broker: Broker
 }
 
-const terminalRequestStatuses = new Set([
-  'confirmed',
-  'rejected',
-  'cancelled',
-  'expired',
-  'failed',
-])
-const terminalRecipientStatuses = new Set([
-  'confirmed',
-  'rejected',
-  'cancelled',
-  'expired',
-])
-
 export class ProvisionFormalizationSignatureRequestUseCase
   implements UseCase<Request, Response>
 {
+  static readonly TERMINAL_REQUEST_STATUSES = new Set([
+    'confirmed',
+    'rejected',
+    'cancelled',
+    'expired',
+    'failed',
+  ])
+  static readonly TERMINAL_RECIPIENT_STATUSES = new Set([
+    'confirmed',
+    'rejected',
+    'cancelled',
+    'expired',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
   async execute(request: Request): Promise<Response> {
     const attempt = await this.dependencies.attemptsRepository.findByRequestId(
@@ -103,7 +103,11 @@ export class ProvisionFormalizationSignatureRequestUseCase
       request.requestId,
     )
     if (!signatureRequest) return { outcome: 'retry_required', invitationIds: [] }
-    if (terminalRequestStatuses.has(signatureRequest.status))
+    if (
+      ProvisionFormalizationSignatureRequestUseCase.TERMINAL_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      )
+    )
       return { outcome: 'retry_required', invitationIds: [] }
     const existing = await this.dependencies.providerResourcesRepository.findByRequestId(
       signatureRequest.id,
@@ -140,7 +144,9 @@ export class ProvisionFormalizationSignatureRequestUseCase
       recipients.some(
         (recipient) =>
           recipient.requestId !== signatureRequest.id ||
-          terminalRecipientStatuses.has(recipient.status),
+          ProvisionFormalizationSignatureRequestUseCase.TERMINAL_RECIPIENT_STATUSES.has(
+            recipient.status,
+          ),
       )
     )
       throw new SignatureProviderUnavailableError()

@@ -202,7 +202,7 @@ export const FormalizationSendingConfigurationPanel = ({
             formalizationVersion={status.formalizationVersion}
             status={status}
             isRefreshing={
-              sendingController.isFetchingReview || sendingController.isLoadingStatus
+              sendingController.isFetchingReview || sendingController.isFetchingStatus
             }
             isResending={sendingController.isResending}
             isCancelling={sendingController.isCancelling || isCancellationPending}
@@ -216,6 +216,7 @@ export const FormalizationSendingConfigurationPanel = ({
               sendingController.resendInvitation({ recipientId, input })
             }
             onCancel={async (input) => sendingController.cancelSending(input)}
+            onGetDocumentContent={sendingController.getSignatureDocumentContent}
           />
         </CardContent>
       </Card>
@@ -431,6 +432,7 @@ function createEmptySendingController(): FormalizationSignatureSendingController
     isLoadingReview: false,
     isFetchingReview: false,
     isLoadingStatus: false,
+    isFetchingStatus: false,
     isConfirming: false,
     isCancelling: false,
     isCancellationPending: false,
@@ -461,10 +463,10 @@ function getConfigurationStatusLabel(
 
 function getRequestStatusLabel(status: string) {
   const labels: Record<string, string> = {
-    provisioning: 'Provisionando',
-    sending: 'Enviando',
-    sent: 'Enviado',
-    in_progress: 'Em andamento',
+    provisioning: 'Envio em andamento',
+    sending: 'Envio em andamento',
+    sent: 'Envio em andamento',
+    in_progress: 'Envio em andamento',
     partially_submitted: 'Parcialmente assinado',
     submitted: 'Enviado para confirmação',
     reconciliation_required: 'Reconciliação necessária',

@@ -148,10 +148,41 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('does not inject completion styles on non-completion provider pages', async () => {
+  it('hides the provider rejection action on the signing page', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
-        '<html><head><title>Signing</title></head><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
+        '<html><head><title>Signing</title></head><body><div data-radix-collection-item=""><svg class="lucide lucide-circle-slash-2"></svg>Reject</div><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>',
+        {
+          status: 200,
+          headers: {
+            'content-type': 'text/html',
+            'content-security-policy':
+              "default-src 'self'; style-src 'self' 'nonce-signing-style'",
+          },
+        },
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    app = await createApp()
+
+    const response = await request(app.getHttpServer()).get(
+      `${PREFIX}/${ALIAS}/sign/${ALIAS}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.text).toContain(
+      '<style nonce="signing-style">[role="menuitem"]:has(svg[class*="ban"], svg[class*="circle-slash"]), [data-radix-collection-item]:has(svg[class*="ban"], svg[class*="circle-slash"]), button:has(svg[class*="ban"], svg[class*="circle-slash"]){display:none!important}</style>',
+    )
+    expect(response.text).toContain('<svg class="lucide lucide-circle-slash-2"></svg>')
+    expect(response.text).toContain('>Reject</div>')
+    expect(response.text).toContain('<svg class="lucide lucide-sparkles"></svg>')
+    expect(response.text).toContain('>Share</button>')
+  })
+
+  it('does not inject signing action suppression on non-signing provider pages', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        '<html><head><title>Continue</title></head><body><div role="menuitem"><svg class="lucide lucide-ban"></svg>Reject</div></body></html>',
         {
           status: 200,
           headers: {
@@ -168,9 +199,8 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     const response = await request(app.getHttpServer()).get(`${PREFIX}/${ALIAS}/continue`)
 
     expect(response.status).toBe(200)
-    expect(response.text).toContain('<svg class="lucide lucide-sparkles"></svg>')
-    expect(response.text).toContain('>Share</button>')
     expect(response.text).not.toContain('nonce="signing-style"')
+    expect(response.text).toContain('>Reject</div>')
   })
 
   it('records a successful classified provider completion before returning it', async () => {
@@ -200,6 +230,10 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
       description: 'with an unsafe provider style nonce',
       csp: "default-src 'self'; style-src 'self' 'nonce-unsafe<value'",
     },
+    {
+      description: 'with a style-src-elem nonce',
+      csp: "default-src 'self'; style-src-elem 'self' 'nonce-providerStyle'",
+    },
   ])('creates a safe suppression nonce $description', async ({ csp }) => {
     const html =
       '<html><head><title>Completed</title></head><body><button><svg class="lucide lucide-sparkles"></svg>Share</button></body></html>'
@@ -215,8 +249,13 @@ describe('Signing Gateway Proxy Controller [ALL /assinaturas/provedor/:alias/{*p
     const response = await request(app.getHttpServer()).get(`${PREFIX}/${ALIAS}/complete`)
 
     expect(response.status).toBe(200)
+    const expectedNonce = csp.includes('providerStyle')
+      ? 'providerStyle'
+      : '[A-Za-z0-9+/]+={0,2}'
     expect(response.text).toMatch(
-      /<style nonce="[A-Za-z0-9+/]+={0,2}">button:has\(svg\.lucide-sparkles\)\{display:none!important\}<\/style>/,
+      new RegExp(
+        `<style nonce="${expectedNonce}">button:has\\(svg\\.lucide-sparkles\\)\\{display:none!important\\}<\\/style>`,
+      ),
     )
     expect(response.headers['content-security-policy']).toMatch(
       /style-src[^;]* 'nonce-[A-Za-z0-9+/]+={0,2}'/,

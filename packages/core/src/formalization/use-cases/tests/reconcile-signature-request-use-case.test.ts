@@ -375,12 +375,47 @@ describe('ReconcileSignatureRequestUseCase', () => {
         ],
         recipientObservations: expect.arrayContaining([
           expect.objectContaining({
-            recipientChanges: expect.objectContaining({ status: 'rejected' }),
+            recipientId: 'recipient-1',
+            recipientChanges: expect.objectContaining({ status: 'signing' }),
+          }),
+          expect.objectContaining({
+            recipientId: 'recipient-2',
+            recipientChanges: expect.objectContaining({ status: 'signing' }),
           }),
         ]),
       }),
     )
     expect(fixture.provider.downloadCompletedArtifacts).not.toHaveBeenCalled()
+  })
+
+  it('does not broadcast a client rejection to another recipient', async () => {
+    const fixture = makeFixture()
+    fixture.observation.envelopeStatus = 'rejected'
+    fixture.observation.recipients = fixture.observation.recipients.map(
+      (recipient, index) => ({
+        ...recipient,
+        recipientStatus: index === 0 ? ('rejected' as const) : ('submitted' as const),
+        items: recipient.items.map((item) => ({
+          ...item,
+          status: index === 0 ? ('rejected' as const) : ('completed' as const),
+        })),
+      }),
+    )
+    fixture.provider.findEnvelopeState.mockResolvedValue(fixture.observation)
+
+    await expect(
+      useCase(fixture).execute({
+        requestId: 'request-1',
+        reason: 'webhook',
+        occurredAt: NOW,
+      }),
+    ).resolves.toEqual({ outcome: 'terminal' })
+
+    const input = fixture.transaction.recordProviderObservationAndDerive.mock.calls[0]?.[0]
+    expect(input?.recipientObservations.map((item) => item.recipientChanges.status)).toEqual([
+      'rejected',
+      'submitted',
+    ])
   })
 
   it.each([

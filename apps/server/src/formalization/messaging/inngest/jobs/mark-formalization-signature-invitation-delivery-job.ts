@@ -12,13 +12,13 @@ import type {
   FormalizationSignatureInvitationsRepository,
 } from '@hms/core/formalization/interfaces'
 
-const invitationDeliveredEvent = eventType(
-  CommunicationSignatureInvitationDeliveredEvent._NAME,
-  { schema: communicationSignatureInvitationDeliveredEventSchema },
-)
-
 @Injectable()
 export class MarkFormalizationSignatureInvitationDeliveryJob extends InngestJob {
+  static readonly INVITATION_DELIVERED_EVENT = eventType(
+    CommunicationSignatureInvitationDeliveredEvent._NAME,
+    { schema: communicationSignatureInvitationDeliveredEventSchema },
+  )
+
   static readonly ID = 'formalization/mark-signature-invitation-delivery'
   readonly function: InngestFunction.Like
 
@@ -39,7 +39,9 @@ export class MarkFormalizationSignatureInvitationDeliveryJob extends InngestJob 
         id: MarkFormalizationSignatureInvitationDeliveryJob.ID,
         name: 'Mark Formalization Signature Invitation Delivery',
         retries: 5,
-        triggers: [invitationDeliveredEvent],
+        triggers: [
+          MarkFormalizationSignatureInvitationDeliveryJob.INVITATION_DELIVERED_EVENT,
+        ],
       },
       ({ event, step }) =>
         step.run('mark-formalization-signature-invitation-delivery', () =>
