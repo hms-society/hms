@@ -13,6 +13,8 @@ export class ListMyLegalCasesUseCase
   constructor(private readonly legalCasesRepository: LegalCasesRepository) {}
 
   execute({ collaboratorId, clientId }: Request): Promise<readonly LegalCaseSummary[]> {
-    return this.legalCasesRepository.listByTeamMember(collaboratorId, clientId)
+    return clientId
+      ? this.legalCasesRepository.listByTeamMember(collaboratorId, clientId)
+      : this.legalCasesRepository.listByTeamMember(collaboratorId)
   }
 }
