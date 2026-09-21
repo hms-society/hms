@@ -1,4 +1,7 @@
-import type { CaseChecklistItem, Pending } from '@hms/core/case-management/domain/entities'
+import type {
+  CaseChecklistItem,
+  Pending,
+} from '@hms/core/case-management/domain/entities'
 import { createAssistedMessage } from '@hms/core/case-management/use-cases'
 import { PendingReason } from '@hms/core/case-management/domain/structures'
 import type {
@@ -7,9 +10,7 @@ import type {
 } from '@hms/core/document-engine/domain/entities'
 
 import { getChecklistDocumentStatusView } from '../checklist-document-status'
-import {
-  getChecklistItemHistoryEvents,
-} from './checklist-item-history-events'
+import { getChecklistItemHistoryEvents } from './checklist-item-history-events'
 import type { ChecklistItemDetailView } from './checklist-item-detail-types'
 
 type PendingWithMessage = {
@@ -52,19 +53,22 @@ export function getChecklistItemDetailView({
     isValidated: checklistItem.status === 'validated',
   })
   const pendingReason = document ? getPendingReasonForDocument(document) : undefined
-  const activePendings = pendings.length > 0
-    ? pendings
-    : pendingReason && document
-      ? [createDocumentPending(checklistItem, document, pendingReason, clientName)]
-      : hasDocument
-        ? []
-        : [createMissingDocumentPending(checklistItem, clientName)]
+  const activePendings =
+    pendings.length > 0
+      ? pendings
+      : pendingReason && document
+        ? [createDocumentPending(checklistItem, document, pendingReason, clientName)]
+        : hasDocument
+          ? []
+          : [createMissingDocumentPending(checklistItem, clientName)]
   const pendingItems = activePendings.map(({ pending, message }) => ({
     body: message.body,
     description: pending.details ?? getPendingReasonLabel(pending.reason),
     documentFileName: pending.documentFileName,
     id: pending.id,
-    isPersisted: !pending.id.startsWith('document-pending-') && !pending.id.startsWith('missing-document-'),
+    isPersisted:
+      !pending.id.startsWith('document-pending-') &&
+      !pending.id.startsWith('missing-document-'),
     messageId: message.id,
     reason: pending.reason,
     subject: message.subject,
@@ -96,10 +100,11 @@ export function getChecklistItemDetailView({
     ],
     caseLabel: document?.checklistLink?.caseLabel ?? `Caso ${caseId.slice(0, 8)}`,
     documentLabel,
-    extractedFields: document?.extractedFields.map((field) => ({
-      label: field.label,
-      value: field.value || 'Não identificado',
-    })) ?? [],
+    extractedFields:
+      document?.extractedFields.map((field) => ({
+        label: field.label,
+        value: field.value || 'Não identificado',
+      })) ?? [],
     hasDocument,
     historyEvents,
     itemPositionLabel:
@@ -168,7 +173,9 @@ function createMissingDocumentPending(
 function getPendingReasonForDocument(
   document: DocumentValidationDocument,
 ): Pending['reason'] | undefined {
-  const reasons: Partial<Record<DocumentValidationDocument['status'], Pending['reason']>> = {
+  const reasons: Partial<
+    Record<DocumentValidationDocument['status'], Pending['reason']>
+  > = {
     illegible: PendingReason.Illegible,
     incomplete: PendingReason.Incomplete,
     duplicate: PendingReason.Duplicate,
@@ -223,5 +230,7 @@ function getReviewerDisplayName({
 }
 
 function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  )
 }

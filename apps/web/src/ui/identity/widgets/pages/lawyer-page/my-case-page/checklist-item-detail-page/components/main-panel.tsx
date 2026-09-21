@@ -92,7 +92,12 @@ const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
         queryKey: ['case-management', 'pendencies', pendingItem.id],
       })
       await queryClient.invalidateQueries({
-        queryKey: ['case-management', 'pendencies', pendingItem.id.split('-')[0], 'messages'],
+        queryKey: [
+          'case-management',
+          'pendencies',
+          pendingItem.id.split('-')[0],
+          'messages',
+        ],
       })
     },
   })
@@ -110,64 +115,67 @@ const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
   return (
     <>
       <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
-    <div className='flex items-start gap-3'>
-      <div className='flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-xs font-semibold text-destructive'>
-        {index}
-      </div>
-      <div className='flex min-w-0 flex-1 flex-col gap-2'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <h3 className='text-sm font-semibold text-foreground'>{pendingItem.title}</h3>
-          <Badge variant='destructive' className='h-5 rounded-full px-2 text-[10px]'>
-            Ativa
-          </Badge>
-        </div>
-        {pendingItem.documentFileName && (
-          <p className='text-xs text-muted-foreground'>
-            Documento: <span className='font-medium'>{pendingItem.documentFileName}</span>
-          </p>
-        )}
-        <div className='flex flex-col gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3'>
-          <div className='flex items-center justify-between gap-2'>
-            <span className='text-[11px] font-semibold uppercase tracking-wide text-muted-foreground'>
-              Mensagem assistida
-            </span>
-            <Badge variant='attention' className='h-5 rounded-full px-2 text-[10px]'>
-              {pendingItem.status === 'awaiting_approval'
-                ? 'Aguardando aprovação'
-                : pendingItem.status}
-            </Badge>
+        <div className='flex items-start gap-3'>
+          <div className='flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-xs font-semibold text-destructive'>
+            {index}
           </div>
-          <p className='text-sm italic text-foreground'>{pendingItem.body}</p>
-          <div className='flex flex-wrap gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              size='xs'
-              className='rounded-full'
-              onClick={() => setIsEditOpen(true)}
-              disabled={pendingItem.status !== 'awaiting_approval'}
-            >
-              <Icon name='pencil' className='size-3' />
-              Editar
-            </Button>
-            <Button
-              type='button'
-              variant='brand'
-              size='xs'
-              className='rounded-full'
-              onClick={() => approveMutation.mutate()}
-              disabled={
-                pendingItem.status !== 'awaiting_approval' ||
-                approveMutation.isPending
-              }
-            >
-              <Icon name='send' className='size-3' />
-              {approveMutation.isPending ? 'Aprovando...' : 'Aprovar e enviar'}
-            </Button>
+          <div className='flex min-w-0 flex-1 flex-col gap-2'>
+            <div className='flex flex-wrap items-center gap-2'>
+              <h3 className='text-sm font-semibold text-foreground'>
+                {pendingItem.title}
+              </h3>
+              <Badge variant='destructive' className='h-5 rounded-full px-2 text-[10px]'>
+                Ativa
+              </Badge>
+            </div>
+            {pendingItem.documentFileName && (
+              <p className='text-xs text-muted-foreground'>
+                Documento:{' '}
+                <span className='font-medium'>{pendingItem.documentFileName}</span>
+              </p>
+            )}
+            <div className='flex flex-col gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3'>
+              <div className='flex items-center justify-between gap-2'>
+                <span className='text-[11px] font-semibold uppercase tracking-wide text-muted-foreground'>
+                  Mensagem assistida
+                </span>
+                <Badge variant='attention' className='h-5 rounded-full px-2 text-[10px]'>
+                  {pendingItem.status === 'awaiting_approval'
+                    ? 'Aguardando aprovação'
+                    : pendingItem.status}
+                </Badge>
+              </div>
+              <p className='text-sm italic text-foreground'>{pendingItem.body}</p>
+              <div className='flex flex-wrap gap-2'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='xs'
+                  className='rounded-full'
+                  onClick={() => setIsEditOpen(true)}
+                  disabled={pendingItem.status !== 'awaiting_approval'}
+                >
+                  <Icon name='pencil' className='size-3' />
+                  Editar
+                </Button>
+                <Button
+                  type='button'
+                  variant='brand'
+                  size='xs'
+                  className='rounded-full'
+                  onClick={() => approveMutation.mutate()}
+                  disabled={
+                    pendingItem.status !== 'awaiting_approval' ||
+                    approveMutation.isPending
+                  }
+                >
+                  <Icon name='send' className='size-3' />
+                  {approveMutation.isPending ? 'Aprovando...' : 'Aprovar e enviar'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
       </article>
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
@@ -180,15 +188,28 @@ const PendingCardContent = ({ index, pendingItem }: PendingCardProps) => {
           <div className='flex flex-col gap-4'>
             <label className='flex flex-col gap-1 text-sm font-medium'>
               Assunto
-              <input className='rounded-md border bg-background px-3 py-2' value={subject} onChange={(event) => setSubject(event.target.value)} />
+              <input
+                className='rounded-md border bg-background px-3 py-2'
+                value={subject}
+                onChange={(event) => setSubject(event.target.value)}
+              />
             </label>
             <label className='flex flex-col gap-1 text-sm font-medium'>
               Mensagem
-              <textarea className='min-h-32 rounded-md border bg-background px-3 py-2' value={body} onChange={(event) => setBody(event.target.value)} />
+              <textarea
+                className='min-h-32 rounded-md border bg-background px-3 py-2'
+                value={body}
+                onChange={(event) => setBody(event.target.value)}
+              />
             </label>
           </div>
           <DialogFooter showCloseButton>
-            <Button type='button' variant='brand' onClick={() => editMutation.mutate()} disabled={editMutation.isPending || !subject.trim() || !body.trim()}>
+            <Button
+              type='button'
+              variant='brand'
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending || !subject.trim() || !body.trim()}
+            >
               {editMutation.isPending ? 'Salvando...' : 'Salvar alterações'}
             </Button>
           </DialogFooter>

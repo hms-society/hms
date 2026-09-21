@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 
-
 import { useDocumentValidationDocumentQuery } from '@/ui/document-engine/hooks/use-document-validation-document-query'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
@@ -110,7 +109,11 @@ export function useChecklistItemDetailPage({
     isLoadingChecklist ||
     Boolean(documentFileId && (isLoadingDocument || isLoadingDocumentLogs))
   const error =
-    checklistError ?? documentError ?? documentLogsError ?? pendingsError ?? pendingMessagesError
+    checklistError ??
+    documentError ??
+    documentLogsError ??
+    pendingsError ??
+    pendingMessagesError
 
   function handleBackToCase() {
     void navigateTo('lawyerCaseDetails', { params: { caseId } })
