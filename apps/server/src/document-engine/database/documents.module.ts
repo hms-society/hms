@@ -18,8 +18,10 @@ import { ListDocumentValidationLogsController } from '../rest/controllers/list-d
 import { RecordDocumentValidationDecisionController } from '../rest/controllers/record-document-validation-decision.controller'
 import { ReprocessDocumentFileController } from '../rest/controllers/reprocess-document-file.controller'
 import { RequestDocumentResendController } from '../rest/controllers/request-document-resend.controller'
-
 import { ListTriageDocumentBatchesController } from '../rest/controllers/list-triage-document-batches.controller'
+import { RequestDocumentExceptionController } from '../rest/controllers/request-document-exception.controller'
+import { ReviewDocumentExceptionController } from '../rest/controllers/review-document-exception.controller'
+import { ListCaseDocumentExceptionsController } from '../rest/controllers/list-case-document-exceptions.controller'
 
 @Module({
   imports: [
@@ -42,6 +44,9 @@ import { ListTriageDocumentBatchesController } from '../rest/controllers/list-tr
     RecordDocumentValidationDecisionController,
     ReprocessDocumentFileController,
     RequestDocumentResendController,
+    RequestDocumentExceptionController,
+    ReviewDocumentExceptionController,
+    ListCaseDocumentExceptionsController,
   ],
   providers: [
     {
