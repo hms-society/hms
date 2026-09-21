@@ -74,6 +74,13 @@ Before publishing or returning an existing pull request, inspect its complete ti
 and translate any workflow-authored English prose into pt-BR. Do not treat an already-open PR
 as compliant merely because its latest comment is in pt-BR.
 
+Treat language compliance as a blocking publication gate, not as a stylistic preference. Immediately
+before returning, run `gh pr view <number> --json title,body` for every PR and inspect both fields in
+full. Correct the PR with `gh pr edit` when any workflow-authored prose remains outside pt-BR. The
+title must also follow the pt-BR noun-phrase rule below: Conventional Commit prefixes such as
+`feat:`, `fix:`, `refactor:` and `docs:` do not make an English title compliant and must not be used.
+Do not return PR metadata until this final language audit passes for every PR in the delivery.
+
 ## Mandatory workflow invocation
 
 This prompt is a publication workflow, not a replacement for the commit or conclusion
@@ -205,33 +212,20 @@ the user whether an in-Contract discrepancy should be fixed.
 
 ## PR contract
 
-Include these sections in this order:
+Include these exact sections in this order matching `.github/pull_request_template.md`:
 
-- **Objetivo** — problem, expected outcome, scope and explicit exclusions;
-- **Tickets Jira relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
-- **Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
+- **🎯 Objetivo** — problem, expected outcome, scope and explicit exclusions;
+- **🎫 Tickets Jira Relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
+- **📜 Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
   exact revision, delivery boundary, and covered `RF-*`/`CA-*` criteria. This workflow does
   not change Jira or Confluence;
-- **Implementação** — coherent frontend, backend, domain, persistence and test slices with
-  the most relevant changed paths. Describe each affected layer concretely: name the
-  contracts/use cases, schemas, migrations/models, routes/controllers, UI routes/widgets,
-  generated artifacts and test/evidence surfaces that materially changed. Do not use a
-  generic one-line inventory when the delivery crosses multiple layers;
-- **Alterações em regras de negócio** — only when behavior, validation, authorization or workflow
-  changed; state the previous behavior, new behavior, reason and evidence. Cover ownership,
-  authorization/tenant scope, validation and invariants, persistence/side-effect boundaries,
-  conflict or concurrency behavior, and explicit exclusions. If no business behavior
+- **🛠️ Módulos e Caminhos Específicos Afetados** — checkboxes for affected modules (`apps/web`, `apps/server`, `packages/core`, `supabase`) and concrete changed paths;
+- **💼 Alterações em Regras de Negócio** — only when behavior, validation, authorization or workflow
+  changed; state the previous behavior, new behavior, reason and evidence. If no business behavior
   changed, write `Nenhuma — não há alteração de comportamento, validação, autorização ou workflow`;
-- **Testes manuais** — prerequisites, reproducible steps, expected result and error/recovery
-  flows. Include environment/services and fixture prerequisites, then numbered user-visible
-  scenarios covering the primary lifecycle, success persistence, authorization or tenant
-  isolation, validation/conflict recovery, keyboard/accessibility and responsive behavior
-  when applicable. Name the route or entry point, action, expected result and relevant retry,
-  cancellation or failure outcome. Point to `evaluation.md` for exact commands and artifact
-  identifiers;
-- **Validação automatizada** — exact commands and observed results, including failures,
-  limitations and omitted checks;
-- **Limitações conhecidas** — explicit non-blocking gaps, or `Nenhuma`.
+- **🧪 Testes Manuais** — structured sub-sections: `⚙️ Pré-requisitos e Ambiente`, `📝 Passos para Reprodução`, `✅ Resultado Esperado` and `📱 Responsividade e Acessibilidade`. Point to `evaluation.md` for exact commands and artifact identifiers;
+- **⚡ Validação Automatizada e Qualidade** — checklist of checks (`pnpm test`, `pnpm check-types`, `pnpm check`), exact commands and observed results;
+- **⚠️ Limitações Conhecidas** — explicit non-blocking gaps, or `Nenhuma`.
 
 When UI changes, summarize the visual validation result and link the detailed state/viewport
 comparisons in `evaluation.md`; do not create a separate `Visual evidence` PR section.
