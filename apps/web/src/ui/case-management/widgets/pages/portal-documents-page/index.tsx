@@ -1,9 +1,14 @@
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import type { CaseChecklistItem } from '@hms/core/case-management/domain/entities'
+import type { PortalDocumentUploadResponse } from '@hms/core/case-management/interfaces'
 
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { PortalUploadDialog } from './portal-upload-dialog'
 import { usePortalDocumentsPage } from './use-portal-documents-page'
 
 export type PortalDocumentsPageProps = {
@@ -94,9 +99,47 @@ function Section({
 export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPageProps) {
   const { pendingItems, inAnalysisItems, isLoading, error, refetch } =
     usePortalDocumentsPage(caseId, portalToken)
+  const { caseManagementService } = useRestContext()
+  const queryClient = useQueryClient()
+  const [selectedItem, setSelectedItem] = useState<CaseChecklistItem | null>(null)
+  const [uploadResult, setUploadResult] = useState<PortalDocumentUploadResponse | null>(null)
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!selectedItem) throw new Error('Selecione uma pendência antes de enviar.')
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await caseManagementService.uploadPortalDocument(
+        caseId,
+        selectedItem.id,
+        portalToken,
+        formData,
+      )
+
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: (result) => {
+      setUploadResult(result)
+      void queryClient.invalidateQueries({
+        queryKey: ['portal-pending-checklist', caseId, portalToken],
+      })
+    },
+  })
 
   function handleUpload(item: CaseChecklistItem) {
-    void item
+    uploadMutation.reset()
+    setUploadResult(null)
+    setSelectedItem(item)
+  }
+
+  function handleDialogChange(open: boolean) {
+    if (open) return
+    setSelectedItem(null)
+    setUploadResult(null)
+    uploadMutation.reset()
   }
 
   if (isLoading) {
@@ -183,6 +226,16 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
           </Section>
         </div>
       </div>
+
+      <PortalUploadDialog
+        item={selectedItem}
+        open={Boolean(selectedItem)}
+        isUploading={uploadMutation.isPending}
+        protocol={uploadResult?.protocol}
+        error={uploadMutation.error?.message}
+        onOpenChange={handleDialogChange}
+        onSubmit={(file) => uploadMutation.mutateAsync(file).then(() => undefined)}
+      />
     </main>
   )
 }

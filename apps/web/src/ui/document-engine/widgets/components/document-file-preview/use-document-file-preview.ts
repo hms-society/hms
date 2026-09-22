@@ -22,7 +22,7 @@ export function useDocumentFilePreview(documentFileId: string) {
 
   const { file, isLoadingFile, isErrorFile } = useDocumentFileQuery(documentFileId)
   const { fileUrl, isLoadingFileUrl, isErrorFileUrl } = useDocumentFileUrlQuery(
-    file?.storagePath,
+    documentFileId,
   )
 
   useEffect(() => {

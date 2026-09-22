@@ -17,10 +17,9 @@ export type ReviewCaseChecklistGateRequest = {
 
 export type PortalDocumentUploadResponse = {
   protocol: string
-  caseId: string
   checklistItemId: string
   status: string
-  receivedAt: string
+  sentAt: string
 }
 
 export type AddCaseChecklistComplementaryItemRequest = {
