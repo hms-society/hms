@@ -31,14 +31,14 @@ describe('List Case Portal Pending Checklist Use Case', () => {
 
   it('returns only pending checklist items for an authorized case', async () => {
     const legalCase = LegalCaseFaker.fake()
-    const userId = faker.string.uuid()
+    const tokenHash = faker.string.hexadecimal({ length: 64 })
     const pendingItem = checklistItem(legalCase.id, CaseChecklistItemStatus.Pending)
     const validatedItem = checklistItem(legalCase.id, CaseChecklistItemStatus.Validated)
     legalCasesRepository.findById.mockResolvedValue(legalCase)
-    grantsRepository.findActiveByUserAndCase.mockResolvedValue({
+    grantsRepository.findActiveByTokenHashAndCase.mockResolvedValue({
       id: faker.string.uuid(),
       caseId: legalCase.id,
-      userId,
+      tokenHash,
       canView: true,
       canUpload: true,
       status: 'active',
@@ -47,7 +47,7 @@ describe('List Case Portal Pending Checklist Use Case', () => {
     })
     checklistItemsRepository.listByCaseId.mockResolvedValue([pendingItem, validatedItem])
 
-    await expect(useCase.execute({ caseId: legalCase.id, userId })).resolves.toEqual([
+    await expect(useCase.execute({ caseId: legalCase.id, tokenHash })).resolves.toEqual([
       pendingItem,
     ])
   })
@@ -55,10 +55,13 @@ describe('List Case Portal Pending Checklist Use Case', () => {
   it('denies users without an active case grant', async () => {
     const legalCase = LegalCaseFaker.fake()
     legalCasesRepository.findById.mockResolvedValue(legalCase)
-    grantsRepository.findActiveByUserAndCase.mockResolvedValue(undefined)
+    grantsRepository.findActiveByTokenHashAndCase.mockResolvedValue(undefined)
 
     await expect(
-      useCase.execute({ caseId: legalCase.id, userId: faker.string.uuid() }),
+      useCase.execute({
+        caseId: legalCase.id,
+        tokenHash: faker.string.hexadecimal({ length: 64 }),
+      }),
     ).rejects.toThrow('não possui acesso')
     expect(checklistItemsRepository.listByCaseId).not.toHaveBeenCalled()
   })

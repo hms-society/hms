@@ -10,18 +10,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiBearerAuth, ApiConsumes, ApiResponse } from '@nestjs/swagger'
+import { ApiConsumes, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
-import type { AuthUser } from '@hms/core/identity/domain/structures'
+import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/entities'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '@hms/core/case-management/interfaces'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CasesController } from '@/case-management/decorators'
-import { CurrentUser } from '@/identity/decorators'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { CurrentPortalAccessGrant } from '@/case-management/rest/decorators/current-portal-access-grant.decorator'
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'application/pdf'])
@@ -36,7 +36,6 @@ type PortalFile = {
 
 @CasesController()
 @RouteAccess('case-portal-upload')
-@ApiBearerAuth()
 export class UploadCasePortalDocumentController {
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
@@ -50,6 +49,7 @@ export class UploadCasePortalDocumentController {
   ) {}
 
   @Post(':caseId/portal-pendencies/:checklistItemId/upload')
+  @ApiQuery({ name: 'portalToken', required: true, description: 'Token do link do Portal.' })
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Document uploaded for analysis.' })
@@ -57,7 +57,7 @@ export class UploadCasePortalDocumentController {
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Param('checklistItemId', new ParseUUIDPipe()) checklistItemId: string,
     @UploadedFile() file: PortalFile | undefined,
-    @CurrentUser() user: AuthUser,
+    @CurrentPortalAccessGrant() grant: CasePortalAccessGrant,
   ) {
     if (!file) throw new BadRequestException('Nenhum arquivo foi enviado.')
     if (file.size <= 0 || file.size > MAX_FILE_SIZE_BYTES) {
@@ -82,8 +82,7 @@ export class UploadCasePortalDocumentController {
 
     const batch = await this.createDocumentBatchUseCase.execute({
       channel: DocumentBatchChannel.ThirdPartyPortal,
-      sender: user.email ?? user.id,
-      createdBy: user.id,
+      sender: `portal:${grant.id}`,
       clientId: legalCase.clientId,
       files: [{
         storagePath,

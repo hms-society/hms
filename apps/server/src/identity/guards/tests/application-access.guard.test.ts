@@ -37,9 +37,10 @@ describe('Application Access Guard', () => {
 
   it('preserves active collaborator access', async () => {
     const { user } = await fixture.registerAdmin()
-    const client = await fixture.registerClient()
-    const response = await request(fixture.app.getHttpServer()).get(`/clients/${client.id}`).set('Authorization', fixture.authenticateAs(user)).expect(200)
-    expect(response.body.client.id).toBe(client.id)
+    await request(fixture.app.getHttpServer())
+      .get('/access-probe/internal')
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(200)
   })
 
   it('denies legacy client collaborators and inactive collaborators', async () => {

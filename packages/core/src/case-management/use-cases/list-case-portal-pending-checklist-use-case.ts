@@ -12,7 +12,7 @@ import type {
 
 type Request = {
   caseId: string
-  userId: string
+  tokenHash: string
 }
 
 export class ListCasePortalPendingChecklistUseCase
@@ -28,8 +28,8 @@ export class ListCasePortalPendingChecklistUseCase
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
 
-    const grant = await this.grantsRepository.findActiveByUserAndCase(
-      request.userId,
+    const grant = await this.grantsRepository.findActiveByTokenHashAndCase(
+      request.tokenHash,
       request.caseId,
     )
     if (!grant) throw new ForbiddenError('O usuário não possui acesso a este caso.')

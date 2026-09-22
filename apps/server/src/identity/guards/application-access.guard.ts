@@ -7,6 +7,10 @@ import type { IdentityRequest } from '@/identity/context'
 import { ROUTE_ACCESS } from '@/identity/decorators/route-access.decorator'
 import { AuthGuard } from '@/identity/guards/auth.guard'
 import { ActiveCollaboratorGuard } from '@/identity/guards/active-collaborator.guard'
+import {
+  hashPortalAccessToken,
+  PORTAL_ACCESS_TOKEN_HEADER,
+} from '@/case-management/security/portal-access-token'
 
 @Injectable()
 export class ApplicationAccessGuard implements CanActivate {
@@ -27,23 +31,33 @@ export class ApplicationAccessGuard implements CanActivate {
 
     if (access === 'public') return true
 
-    await this.authGuard.canActivate(context)
     if (access === 'case-portal' || access === 'case-portal-upload') {
-      const request = context.switchToHttp().getRequest<IdentityRequest & { params: { caseId?: string } }>()
+      const request = context
+        .switchToHttp()
+        .getRequest<
+          IdentityRequest & {
+            params: { caseId?: string }
+            headers: Record<string, string | undefined>
+            query?: { portalToken?: string }
+          }
+        >()
       const caseId = request.params?.caseId
-      if (!caseId || !request.user) throw new ForbiddenException('A case-specific portal grant is required')
+      const token = request.headers[PORTAL_ACCESS_TOKEN_HEADER] ?? request.query?.portalToken
+      if (!caseId || !token) throw new ForbiddenException('A valid case portal link is required')
 
-      const grant = await this.casePortalAccessGrants.findActiveByUserAndCase(
-        request.user.id,
+      const grant = await this.casePortalAccessGrants.findActiveByTokenHashAndCase(
+        hashPortalAccessToken(token),
         caseId,
       )
-      if (!grant) throw new ForbiddenException('The user is not authorized for this case')
+      if (!grant) throw new ForbiddenException('The portal link is invalid or expired')
       if (access === 'case-portal-upload' && !grant.canUpload) {
-        throw new ForbiddenException('The user is not authorized to upload for this case')
+        throw new ForbiddenException('The portal link is not authorized to upload for this case')
       }
+      request.portalAccessGrant = grant
       return true
     }
 
+    await this.authGuard.canActivate(context)
     return this.collaboratorGuard.canActivate(context)
   }
 }

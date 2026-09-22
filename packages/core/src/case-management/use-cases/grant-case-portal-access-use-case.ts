@@ -6,7 +6,7 @@ import type { CasePortalAccessGrantsRepository, LegalCasesRepository } from '../
 
 type Request = {
   caseId: string
-  userId: string
+  tokenHash: string
   collaboratorId: string
   canUpload: boolean
   expiresAt?: Date
@@ -26,7 +26,7 @@ export class GrantCasePortalAccessUseCase implements UseCase<Request, CasePortal
 
     return this.grantsRepository.add({
       caseId: request.caseId,
-      userId: request.userId,
+      tokenHash: request.tokenHash,
       canView: true,
       canUpload: request.canUpload,
       expiresAt: request.expiresAt,

@@ -1,23 +1,22 @@
 import { Get, HttpStatus, Inject, Param, ParseUUIDPipe } from '@nestjs/common'
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
+import { ApiQuery, ApiResponse } from '@nestjs/swagger'
 import type {
   CaseChecklistItemsRepository,
   CasePortalAccessGrantsRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
 import { ListCasePortalPendingChecklistUseCase } from '@hms/core/case-management/use-cases'
-import type { AuthUser } from '@hms/core/identity/domain/structures'
+import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/entities'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CasesController } from '@/case-management/decorators'
 import { CaseChecklistItemResponseDto } from '@/case-management/rest/dtos'
-import { CurrentUser } from '@/identity/decorators'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { CurrentPortalAccessGrant } from '@/case-management/rest/decorators/current-portal-access-grant.decorator'
 
 @CasesController()
 @RouteAccess('case-portal')
-@ApiBearerAuth()
 export class ListCasePortalPendingChecklistController {
   private readonly useCase: ListCasePortalPendingChecklistUseCase
 
@@ -37,6 +36,7 @@ export class ListCasePortalPendingChecklistController {
   }
 
   @Get(':caseId/portal-pendencies')
+  @ApiQuery({ name: 'portalToken', required: true, description: 'Token do link do Portal.' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The pending documents for the authorized case.',
@@ -46,8 +46,8 @@ export class ListCasePortalPendingChecklistController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, type: ErrorResponseDto })
   handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
-    @CurrentUser() user: AuthUser,
+    @CurrentPortalAccessGrant() grant: CasePortalAccessGrant,
   ) {
-    return this.useCase.execute({ caseId, userId: user.id })
+    return this.useCase.execute({ caseId, tokenHash: grant.tokenHash })
   }
 }

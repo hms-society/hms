@@ -5,8 +5,8 @@ import type {
 
 export interface CasePortalAccessGrantsRepository {
   add(grant: CasePortalAccessGrantCreation): Promise<CasePortalAccessGrant>
-  findActiveByUserAndCase(
-    userId: string,
+  findActiveByTokenHashAndCase(
+    tokenHash: string,
     caseId: string,
   ): Promise<CasePortalAccessGrant | undefined>
   revoke(grantId: string, caseId: string): Promise<CasePortalAccessGrant | undefined>

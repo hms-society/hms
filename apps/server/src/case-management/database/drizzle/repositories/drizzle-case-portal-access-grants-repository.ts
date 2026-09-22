@@ -31,17 +31,17 @@ export class DrizzleCasePortalAccessGrantsRepository
     return this.mapper.toDomain(created)
   }
 
-  async findActiveByUserAndCase(
-    userId: string,
+  async findActiveByTokenHashAndCase(
+    tokenHash: string,
     caseId: string,
-  ): ReturnType<CasePortalAccessGrantsRepository['findActiveByUserAndCase']> {
+  ): ReturnType<CasePortalAccessGrantsRepository['findActiveByTokenHashAndCase']> {
     const now = new Date()
     const [grant] = await this.database
       .select()
       .from(casePortalAccessGrantModel)
       .where(
         and(
-          eq(casePortalAccessGrantModel.userId, userId),
+          eq(casePortalAccessGrantModel.tokenHash, tokenHash),
           eq(casePortalAccessGrantModel.caseId, caseId),
           eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
           or(isNull(casePortalAccessGrantModel.expiresAt), gt(casePortalAccessGrantModel.expiresAt, now)),
