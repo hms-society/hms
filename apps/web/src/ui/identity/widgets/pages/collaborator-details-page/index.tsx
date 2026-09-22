@@ -189,6 +189,42 @@ export const CollaboratorDetailsPage = ({
           </div>
         </DetailsCard>
 
+        {collaborator.profile === 'lawyer' && (
+          <DetailsCard
+            title='WhatsApp WABA Institucional'
+            description='Canal oficial da Meta Cloud API vinculado exclusivamente a este advogado.'
+            className='xl:col-span-2'
+          >
+            <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border bg-muted/20 p-4'>
+              <div className='flex items-center gap-3'>
+                <span className='flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600'>
+                  <Icon name='message-square' className='size-5' />
+                </span>
+                <div>
+                  <div className='flex items-center gap-2'>
+                    <p className='font-medium text-foreground'>
+                      WhatsApp Business (Meta API)
+                    </p>
+                    <Badge variant='success'>Ativo (1:1)</Badge>
+                  </div>
+                  <p className='text-xs text-muted-foreground mt-0.5'>
+                    Status da Meta: Verde (GREEN) · Transmissões e atendimento 24h ativados
+                  </p>
+                </div>
+              </div>
+              <Button
+                id='btn-substituir-waba-lawyer'
+                variant='outline'
+                size='sm'
+                className='gap-2 text-xs font-medium'
+              >
+                <Icon name='refresh-cw' className='size-3.5' />
+                Substituir / Reconectar Número (Meta Popup)
+              </Button>
+            </div>
+          </DetailsCard>
+        )}
+
         <DetailsCard
           title='Atuação jurídica'
           description='Áreas e temas em que o colaborador pode ser vinculado a intakes, consultas e casos jurídicos.'

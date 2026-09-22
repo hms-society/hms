@@ -4,3 +4,5 @@ export * from './conversation'
 export * from './internal-notification'
 export * from './message'
 export * from './private-message'
+export * from './whatsapp-channel'
+
