@@ -59,6 +59,7 @@ import {
   DrizzleFormalizationSignatureRecipientDocumentsRepository,
   DrizzleFormalizationSignatureProviderDocumentResourcesRepository,
   DrizzleFormalizationSignatureDocumentAcknowledgementsRepository,
+  DrizzleFormalizationSignatureConfigurationRepository,
 } from '@/formalization/database/drizzle/repositories'
 import { DrizzleFormalizationSignatureGatewayTransaction } from '@/formalization/database/formalization-signature-gateway-transaction'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -117,6 +118,7 @@ import { DrizzleFormalizationSignatureInvitationResendTransaction } from '@/form
     DrizzleFormalizationSignatureRecipientDocumentsRepository,
     DrizzleFormalizationSignatureProviderDocumentResourcesRepository,
     DrizzleFormalizationSignatureDocumentAcknowledgementsRepository,
+    DrizzleFormalizationSignatureConfigurationRepository,
     DrizzleFormalizationSignatureGatewayTransaction,
     DrizzleFormalizationSignatureInvitationResendTransaction,
     FormalizationSeeder,

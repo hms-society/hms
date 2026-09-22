@@ -33,8 +33,6 @@ import {
 import { storedFileModel } from '@/shared/database/drizzle/models/stored-file-model'
 import { randomUUID } from 'node:crypto'
 
-const PREVIEW_SCHEDULE_CONFLICT = Symbol('PREVIEW_SCHEDULE_CONFLICT')
-
 type ConfigurationRows = {
   readonly formalization: typeof formalizationModel.$inferSelect
   readonly signatories: readonly (typeof formalizationSignatoryModel.$inferSelect)[]
@@ -48,6 +46,10 @@ export class DrizzleFormalizationSignatureConfigurationRepository
   extends DrizzleRepository
   implements FormalizationSignatureConfigurationRepository
 {
+  static readonly PREVIEW_SCHEDULE_CONFLICT = Symbol(
+    'DrizzleFormalizationSignatureConfigurationRepository.PREVIEW_SCHEDULE_CONFLICT',
+  )
+
   constructor(
     drizzle: DrizzleClient,
     private readonly mapper: DrizzleFormalizationSignatureMapper,
@@ -319,12 +321,17 @@ export class DrizzleFormalizationSignatureConfigurationRepository
 
             if (!formalization) return null
             const scheduled = await schedule(transaction)
-            if (!scheduled) throw PREVIEW_SCHEDULE_CONFLICT
+            if (!scheduled)
+              throw DrizzleFormalizationSignatureConfigurationRepository.PREVIEW_SCHEDULE_CONFLICT
             return scheduled
           })
         : await schedule(this.database)
     } catch (error) {
-      if (error === PREVIEW_SCHEDULE_CONFLICT) return null
+      if (
+        error ===
+        DrizzleFormalizationSignatureConfigurationRepository.PREVIEW_SCHEDULE_CONFLICT
+      )
+        return null
       throw error
     }
 

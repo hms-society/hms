@@ -50,16 +50,16 @@ type Dependencies = {
   readonly hasher: SignatureSecretHasher
 }
 
-const CLIENT_AUTHENTICATABLE_RECIPIENT_STATUSES = new Set([
-  'invited',
-  'authenticating',
-  'locked',
-  'authenticated',
-  'reading',
-  'signing',
-])
-
 export class VerifySignatureOtpUseCase implements UseCase<Request, Response> {
+  static readonly CLIENT_AUTHENTICATABLE_RECIPIENT_STATUSES = new Set([
+    'invited',
+    'authenticating',
+    'locked',
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -94,7 +94,9 @@ export class VerifySignatureOtpUseCase implements UseCase<Request, Response> {
     if (
       !recipient ||
       recipient.requestId !== session.requestId ||
-      !CLIENT_AUTHENTICATABLE_RECIPIENT_STATUSES.has(recipient.status) ||
+      !VerifySignatureOtpUseCase.CLIENT_AUTHENTICATABLE_RECIPIENT_STATUSES.has(
+        recipient.status,
+      ) ||
       !signatureRequest ||
       !['sending', 'sent', 'in_progress', 'partially_submitted'].includes(
         signatureRequest.status,

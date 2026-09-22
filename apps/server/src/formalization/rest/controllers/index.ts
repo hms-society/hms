@@ -16,6 +16,7 @@ export { GetFormalizationSignatureSendingReviewController } from './get-formaliz
 export { ConfirmFormalizationSignatureSendingController } from './confirm-formalization-signature-sending.controller'
 export { CancelFormalizationSignatureSendingController } from './cancel-formalization-signature-sending.controller'
 export { GetFormalizationSignaturePreviewContentController } from './get-formalization-signature-preview-content.controller'
+export { GetFormalizationSignatureDocumentContentController } from './get-formalization-signature-document-content.controller'
 export { InitializeFormalizationSignatureConfigurationController } from './initialize-formalization-signature-configuration.controller'
 export { ListFormalizationDocumentsController } from './list-formalization-documents.controller'
 export { ListFormalizationSignatureCandidatesController } from './list-formalization-signature-candidates.controller'

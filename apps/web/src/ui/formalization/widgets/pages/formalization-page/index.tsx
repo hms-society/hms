@@ -64,7 +64,12 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
         }
         formName={formalization.contractFormSnapshot.name}
         onOpenSelect={() => page.setIsFormSelectionOpen(true)}
-        canReplace={!isTerminal && formalization.contractFormState === 'open'}
+        canReplace={
+          !isTerminal &&
+          formalization.contractFormState === 'open' &&
+          !formalization.documentsConfirmedAt &&
+          !page.documentProduction.isPackageConfirmed
+        }
         expectedVersion={formalization.version}
         onChange={page.setAnswer}
         onSaveDraft={(expectedVersion, answers) =>
@@ -92,15 +97,16 @@ export const FormalizationPage = ({ formalizationId }: { formalizationId: string
         isSignatureSendingLocked={page.isSignatureSendingLocked}
         production={page.documentProduction}
       />
-      {page.documentProduction.isPackageConfirmed && (
-        <FormalizationSendingConfigurationSummary
-          formalizationId={formalizationId}
-          isPackageConfirmed
-          signatureStatus={page.signatureSending.status?.status}
-          configuration={page.signatureConfiguration.configuration}
-          controller={page.signatureConfiguration}
-        />
-      )}
+      {formalization.contractFormState === 'closed' &&
+        page.documentProduction.isPackageConfirmed && (
+          <FormalizationSendingConfigurationSummary
+            formalizationId={formalizationId}
+            isPackageConfirmed
+            signatureStatus={page.signatureSending.status?.status}
+            configuration={page.signatureConfiguration.configuration}
+            controller={page.signatureConfiguration}
+          />
+        )}
       {page.documentProduction.isPackageConfirmed && (
         <ConfirmContractingAction
           intakeVersion={data.intake.version}

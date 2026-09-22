@@ -10,9 +10,13 @@ import {
 import { SigningGatewayWebhookController } from '@/formalization/rest/controllers/signing-gateway-webhook.controller'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
-import { FORMALIZATION_REPOSITORIES } from '@/formalization/constants/formalization-repositories'
+import {
+  FORMALIZATION_DATABASE_OPERATIONS,
+  FORMALIZATION_REPOSITORIES,
+} from '@/formalization/constants/formalization-repositories'
 import { IdProvider as ServerIdProvider } from '@/shared/provision/id/id-provider'
 import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 
 const webhook = {
   id: 'event-1',
@@ -31,13 +35,14 @@ describe('SigningGatewayWebhookController', () => {
 
   it('authenticates, normalizes, and stores only the provider-neutral hint', async () => {
     const receiveWebhookPayload = vi.fn().mockResolvedValue(undefined)
+    const publish = vi.fn().mockResolvedValue(undefined)
     const normalize = vi.fn().mockResolvedValue({
       dedupeKey: 'dedupe-key',
       hintKind: 'reconciliation_only',
       hint: new Uint8Array([1, 2, 3]),
       receivedAt: new Date('2030-01-01T00:00:01.000Z'),
     })
-    app = await createApp({ receiveWebhookPayload, normalize })
+    app = await createApp({ receiveWebhookPayload, publish, normalize })
 
     const response = await sendWebhook(app)
 
@@ -52,6 +57,14 @@ describe('SigningGatewayWebhookController', () => {
         hintKind: 'reconciliation_only',
       }),
     )
+    expect(publish).toHaveBeenCalledOnce()
+    expect(publish.mock.calls[0]?.[0]).toMatchObject({
+      name: 'formalization.signature-reconciliation-requested.v1',
+      payload: expect.objectContaining({
+        requestId: 'request-1',
+        reason: 'webhook',
+      }),
+    })
   })
 
   it('accepts an authenticated but unmappable event without persisting it', async () => {
@@ -61,7 +74,7 @@ describe('SigningGatewayWebhookController', () => {
       .mockRejectedValue(
         new UnprocessableDocumensoWebhookError('Unknown provider envelope.'),
       )
-    app = await createApp({ receiveWebhookPayload, normalize })
+    app = await createApp({ receiveWebhookPayload, publish: vi.fn(), normalize })
 
     const response = await sendWebhook(app)
 
@@ -73,7 +86,7 @@ describe('SigningGatewayWebhookController', () => {
   it('rejects an invalid secret before normalizing the payload', async () => {
     const receiveWebhookPayload = vi.fn()
     const normalize = vi.fn()
-    app = await createApp({ receiveWebhookPayload, normalize })
+    app = await createApp({ receiveWebhookPayload, publish: vi.fn(), normalize })
 
     const response = await sendWebhook(app, { secret: 'wrong-secret' })
 
@@ -85,7 +98,7 @@ describe('SigningGatewayWebhookController', () => {
   it('rejects malformed payloads and mismatched provider event ids', async () => {
     const receiveWebhookPayload = vi.fn()
     const normalize = vi.fn()
-    app = await createApp({ receiveWebhookPayload, normalize })
+    app = await createApp({ receiveWebhookPayload, publish: vi.fn(), normalize })
 
     const malformed = await request(app.getHttpServer())
       .post('/formalizations/signing-gateway/webhooks/documenso')
@@ -103,7 +116,7 @@ describe('SigningGatewayWebhookController', () => {
   it('returns an error for infrastructure failures so Documenso can retry', async () => {
     const receiveWebhookPayload = vi.fn()
     const normalize = vi.fn().mockRejectedValue(new Error('database unavailable'))
-    app = await createApp({ receiveWebhookPayload, normalize })
+    app = await createApp({ receiveWebhookPayload, publish: vi.fn(), normalize })
 
     const response = await sendWebhook(app)
 
@@ -114,6 +127,7 @@ describe('SigningGatewayWebhookController', () => {
 
 async function createApp(input: {
   receiveWebhookPayload: ReturnType<typeof vi.fn>
+  publish: ReturnType<typeof vi.fn>
   normalize: ReturnType<typeof vi.fn>
 }) {
   const module = await Test.createTestingModule({
@@ -132,10 +146,37 @@ async function createApp(input: {
           encrypt: vi
             .fn()
             .mockResolvedValue({ ciphertext: 'encrypted-hint', keyId: 'key-id' }),
+          decrypt: vi
+            .fn()
+            .mockResolvedValue(
+              new TextEncoder().encode(
+                JSON.stringify({ kind: 'reconciliation_only', requestId: 'request-1' }),
+              ),
+            ),
+        },
+      },
+      {
+        provide: FORMALIZATION_DATABASE_OPERATIONS.signatureGatewayTransaction,
+        useValue: {
+          claimWebhookReceipt: vi.fn().mockResolvedValue({
+            outcome: 'claimed',
+            receipt: {
+              id: 'receipt-id',
+              dedupeKey: 'dedupe-key',
+              hintKind: 'reconciliation_only',
+              encryptedHint: 'encrypted-hint',
+              cipherKeyId: 'key-id',
+              status: 'pending',
+              receivedAt: new Date('2030-01-01T00:00:00.000Z'),
+              attempts: 0,
+            },
+          }),
+          completeWebhookReceiptClaim: vi.fn().mockResolvedValue('applied'),
         },
       },
       { provide: ServerIdProvider, useValue: { generate: () => 'receipt-id' } },
       { provide: ServerDatetimeProvider, useValue: { now: () => new Date() } },
+      { provide: InngestBroker, useValue: { publish: input.publish } },
       { provide: DocumensoWebhookNormalizer, useValue: { normalize: input.normalize } },
       {
         provide: EnvProvider,

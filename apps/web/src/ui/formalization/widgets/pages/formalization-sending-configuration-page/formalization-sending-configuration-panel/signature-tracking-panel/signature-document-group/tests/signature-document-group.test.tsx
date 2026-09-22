@@ -50,12 +50,15 @@ describe('SignatureDocumentGroup', () => {
         document={documentStatus}
         isResending={false}
         onRequestResend={vi.fn()}
+        canViewDocuments={false}
+        isSignatureRequestConfirmed
+        onGetDocumentContent={vi.fn()}
       />,
     )
 
     expect(screen.getByRole('heading', { name: 'Contrato de honorários' })).not.toBeNull()
     expect(screen.queryByText('Documento 1')).toBeNull()
-    expect(screen.getByText('PDF assinado disponível')).not.toBeNull()
+    expect(screen.getByText('Assinado')).not.toBeNull()
     expect(screen.queryByText('Confirmado')).toBeNull()
     expect(screen.getByRole('list').textContent).toBe('AnaBia')
   })
@@ -66,6 +69,9 @@ describe('SignatureDocumentGroup', () => {
         document={{ ...documentStatus, signatories: [] }}
         isResending={false}
         onRequestResend={vi.fn()}
+        canViewDocuments={false}
+        isSignatureRequestConfirmed
+        onGetDocumentContent={vi.fn()}
       />,
     )
 
@@ -77,6 +83,7 @@ describe('SignatureDocumentGroup', () => {
       <SignatureDocumentGroup
         document={{
           ...documentStatus,
+          status: 'sent',
           signedArtifactAvailable: false,
           signatories: [
             { ...first, status: 'submitted' },
@@ -85,10 +92,44 @@ describe('SignatureDocumentGroup', () => {
         }}
         isResending={false}
         onRequestResend={vi.fn()}
+        canViewDocuments={false}
+        isSignatureRequestConfirmed
+        onGetDocumentContent={vi.fn()}
       />,
     )
 
-    expect(screen.getByText('Assinado')).not.toBeNull()
-    expect(screen.queryByText('Aguardando PDF assinado')).toBeNull()
+    expect(screen.getByText('Processando documento')).not.toBeNull()
+  })
+
+  it('displays original and signed documents after all signatures are confirmed', () => {
+    render(
+      <SignatureDocumentGroup
+        document={documentStatus}
+        isResending={false}
+        onRequestResend={vi.fn()}
+        canViewDocuments
+        isSignatureRequestConfirmed
+        onGetDocumentContent={vi.fn().mockResolvedValue(new Blob())}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Ver original' })).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Ver assinado' })).not.toBeNull()
+  })
+
+  it('does not display document actions while signatures remain pending', () => {
+    render(
+      <SignatureDocumentGroup
+        document={documentStatus}
+        isResending={false}
+        onRequestResend={vi.fn()}
+        canViewDocuments
+        isSignatureRequestConfirmed={false}
+        onGetDocumentContent={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Ver original' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Ver assinado' })).toBeNull()
   })
 })

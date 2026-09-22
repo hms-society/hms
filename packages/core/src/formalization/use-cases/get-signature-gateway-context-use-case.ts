@@ -28,31 +28,6 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
-const COLLABORATOR_LOGIN_PATH = '/login?returnTo=%2Fassinaturas%2Facesso'
-const TERMINAL_STATUSES = new Set(['rejected', 'cancelled', 'expired'])
-const SIGNABLE_REQUEST_STATUSES = new Set([
-  'sending',
-  'sent',
-  'in_progress',
-  'partially_submitted',
-])
-const READABLE_RECIPIENT_STATUSES = new Set(['authenticated', 'reading', 'signing'])
-const FLOW_RECIPIENT_STATUSES = new Set([
-  'invited',
-  'authenticating',
-  'locked',
-  'authenticated',
-  'reading',
-  'signing',
-])
-const READABLE_DOCUMENT_STATUSES = new Set([
-  'provisioned',
-  'delivery_pending',
-  'sent',
-  'submitted',
-  'reconciliation_required',
-])
-
 type Request = {
   readonly sessionToken: string
   readonly deviceToken: string
@@ -85,6 +60,35 @@ type Dependencies = {
 }
 
 export class GetSignatureGatewayContextUseCase implements UseCase<Request, Response> {
+  static readonly COLLABORATOR_LOGIN_PATH = '/login?returnTo=%2Fassinaturas%2Facesso'
+  static readonly TERMINAL_STATUSES = new Set(['rejected', 'cancelled', 'expired'])
+  static readonly SIGNABLE_REQUEST_STATUSES = new Set([
+    'sending',
+    'sent',
+    'in_progress',
+    'partially_submitted',
+  ])
+  static readonly READABLE_RECIPIENT_STATUSES = new Set([
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+  static readonly FLOW_RECIPIENT_STATUSES = new Set([
+    'invited',
+    'authenticating',
+    'locked',
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+  static readonly READABLE_DOCUMENT_STATUSES = new Set([
+    'provisioned',
+    'delivery_pending',
+    'sent',
+    'submitted',
+    'reconciliation_required',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -138,8 +142,8 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     if (result) return { context: result, csrfToken }
 
     if (
-      TERMINAL_STATUSES.has(signatureRequest.status) ||
-      TERMINAL_STATUSES.has(recipient.status)
+      GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(signatureRequest.status) ||
+      GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(recipient.status)
     )
       return {
         context: {
@@ -154,14 +158,13 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       }
 
     if (
-      !SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status) ||
-      !READABLE_RECIPIENT_STATUSES.has(recipient.status)
+      !GetSignatureGatewayContextUseCase.SIGNABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      ) ||
+      !GetSignatureGatewayContextUseCase.READABLE_RECIPIENT_STATUSES.has(recipient.status)
     )
       return this.unavailable('document_unavailable', csrfToken)
-    if (
-      recipient.actorKind === 'collaborator' &&
-      request.actorId !== recipient.personId
-    )
+    if (recipient.actorKind === 'collaborator' && request.actorId !== recipient.personId)
       return this.unavailable('access_unavailable', csrfToken)
 
     const source = await this.dependencies.sourceProvider.findAuthenticationSource(
@@ -229,13 +232,17 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     csrfToken: string,
   ): Promise<BuiltResponse> {
     if (
-      TERMINAL_STATUSES.has(signatureRequest.status) ||
-      TERMINAL_STATUSES.has(recipient.status)
+      GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(signatureRequest.status) ||
+      GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(recipient.status)
     )
       return this.unavailable('access_unavailable', csrfToken)
-    if (!SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status))
+    if (
+      !GetSignatureGatewayContextUseCase.SIGNABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      )
+    )
       return this.unavailable('access_unavailable', csrfToken)
-    if (!FLOW_RECIPIENT_STATUSES.has(recipient.status))
+    if (!GetSignatureGatewayContextUseCase.FLOW_RECIPIENT_STATUSES.has(recipient.status))
       return this.unavailable('access_unavailable', csrfToken)
 
     const source = await this.dependencies.sourceProvider.findAuthenticationSource(
@@ -250,7 +257,10 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       )
         return this.unavailable('access_unavailable', csrfToken)
       return {
-        context: { step: 'collaborator_login', loginPath: COLLABORATOR_LOGIN_PATH },
+        context: {
+          step: 'collaborator_login',
+          loginPath: GetSignatureGatewayContextUseCase.COLLABORATOR_LOGIN_PATH,
+        },
         csrfToken,
       }
     }
@@ -309,9 +319,9 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
     signatureRequest: FormalizationSignatureRequest,
     recipient: FormalizationSignatureRecipient,
   ): FormalizationSignatureResult['status'] {
-    if (TERMINAL_STATUSES.has(recipient.status))
+    if (GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(recipient.status))
       return recipient.status as 'rejected' | 'cancelled' | 'expired'
-    if (TERMINAL_STATUSES.has(signatureRequest.status))
+    if (GetSignatureGatewayContextUseCase.TERMINAL_STATUSES.has(signatureRequest.status))
       return signatureRequest.status as 'rejected' | 'cancelled' | 'expired'
     if (recipient.status === 'confirmed' && signatureRequest.status === 'confirmed')
       return 'confirmed'
@@ -397,7 +407,9 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       documents.some(
         (document) =>
           document.requestId !== signatureRequest.id ||
-          !READABLE_DOCUMENT_STATUSES.has(document.status) ||
+          !GetSignatureGatewayContextUseCase.READABLE_DOCUMENT_STATUSES.has(
+            document.status,
+          ) ||
           !document.unsignedPrivateFileId ||
           !document.unsignedSha256 ||
           document.byteCount <= 0 ||
@@ -410,10 +422,11 @@ export class GetSignatureGatewayContextUseCase implements UseCase<Request, Respo
       [...documents]
         .sort((left, right) => left.position - right.position)
         .map(async (document) => {
-          const sourceDocument = await this.dependencies.sourceProvider.findDocumentVersion(
-            signatureRequest.formalizationId,
-            document.sourceDocumentVersionId,
-          )
+          const sourceDocument =
+            await this.dependencies.sourceProvider.findDocumentVersion(
+              signatureRequest.formalizationId,
+              document.sourceDocumentVersionId,
+            )
           return sourceDocument &&
             sourceDocument.documentId === document.sourceDocumentId &&
             sourceDocument.documentVersionId === document.sourceDocumentVersionId &&

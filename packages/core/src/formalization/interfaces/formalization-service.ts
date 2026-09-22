@@ -11,6 +11,7 @@ import type {
   FormalizationSignatureSendingReviewResponse,
   FormalizationSignatureSendingCancellationResponse,
   FormalizationSignatureSendingStatusResponse,
+  FormalizationSignatureDocumentContentKind,
   FormalizationCompletionSummary,
   FormalizationContractingResult,
   ResendFormalizationSignatureInvitationCommand,
@@ -109,6 +110,11 @@ export interface FormalizationService {
   getSignatureSendingStatus(
     formalizationId: string,
   ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse | null>>
+  getSignatureDocumentContent(
+    formalizationId: string,
+    requestDocumentId: string,
+    contentKind: FormalizationSignatureDocumentContentKind,
+  ): Promise<RestResponse<Blob>>
   getCompletionByIntake(
     intakeId: string,
   ): Promise<RestResponse<FormalizationCompletionSummary | null>>

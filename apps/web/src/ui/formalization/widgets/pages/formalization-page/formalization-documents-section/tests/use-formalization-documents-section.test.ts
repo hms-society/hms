@@ -102,10 +102,17 @@ describe('useFormalizationDocumentsSection', () => {
     const { result: openResult } = renderSectionHook(production, {
       formalization: { contractFormState: 'open', version: 4 },
     })
+    const confirmedProduction = createProduction().controller
+    confirmedProduction.isPackageConfirmed = true
+    const { result: openConfirmedResult } = renderSectionHook(confirmedProduction, {
+      formalization: { contractFormState: 'open', version: 4 },
+    })
 
     expect(terminalResult.current.shouldRender).toBe(true)
     expect(terminalResult.current.isReadOnly).toBe(true)
     expect(openResult.current.shouldRender).toBe(false)
+    expect(openConfirmedResult.current.shouldRender).toBe(true)
+    expect(openConfirmedResult.current.isReadOnly).toBe(true)
   })
 
   it('opens confirmation, confirms the expected version, and reopens the package', async () => {

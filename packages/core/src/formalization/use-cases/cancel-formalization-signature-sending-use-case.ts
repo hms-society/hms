@@ -54,16 +54,16 @@ type Dependencies = {
   readonly broker: Broker
 }
 
-const terminalStatuses = new Set<string>([
-  FormalizationSignatureRequestStatus.confirmed,
-  FormalizationSignatureRequestStatus.rejected,
-  FormalizationSignatureRequestStatus.cancelled,
-  FormalizationSignatureRequestStatus.expired,
-])
-
 export class CancelFormalizationSignatureSendingUseCase
   implements UseCase<Request, Response>
 {
+  static readonly TERMINAL_STATUSES = new Set<string>([
+    FormalizationSignatureRequestStatus.confirmed,
+    FormalizationSignatureRequestStatus.rejected,
+    FormalizationSignatureRequestStatus.cancelled,
+    FormalizationSignatureRequestStatus.expired,
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -88,7 +88,11 @@ export class CancelFormalizationSignatureSendingUseCase
       request.requestId,
     )
     if (!signatureRequest) throw new FormalizationSignatureRequestConflictError()
-    if (terminalStatuses.has(signatureRequest.status)) {
+    if (
+      CancelFormalizationSignatureSendingUseCase.TERMINAL_STATUSES.has(
+        signatureRequest.status,
+      )
+    ) {
       return {
         requestId: signatureRequest.id,
         outcome: 'already_terminal',

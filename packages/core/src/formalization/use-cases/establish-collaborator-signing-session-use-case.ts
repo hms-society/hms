@@ -21,21 +21,6 @@ import {
   SignatureSessionInvalidError,
 } from '../domain/errors'
 
-const COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES = new Set([
-  'invited',
-  'authenticating',
-  'locked',
-  'authenticated',
-  'reading',
-  'signing',
-])
-const SIGNABLE_REQUEST_STATUSES = new Set([
-  'sending',
-  'sent',
-  'in_progress',
-  'partially_submitted',
-])
-
 type Request = {
   readonly flowToken: string
   readonly deviceToken: string
@@ -64,6 +49,21 @@ type Dependencies = {
 export class EstablishCollaboratorSigningSessionUseCase
   implements UseCase<Request, Response>
 {
+  static readonly COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES = new Set([
+    'invited',
+    'authenticating',
+    'locked',
+    'authenticated',
+    'reading',
+    'signing',
+  ])
+  static readonly SIGNABLE_REQUEST_STATUSES = new Set([
+    'sending',
+    'sent',
+    'in_progress',
+    'partially_submitted',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -90,12 +90,18 @@ export class EstablishCollaboratorSigningSessionUseCase
       !this.isBound(session, signatureRequest, recipient)
     )
       throw new SignatureSessionInvalidError()
-    if (!SIGNABLE_REQUEST_STATUSES.has(signatureRequest.status))
+    if (
+      !EstablishCollaboratorSigningSessionUseCase.SIGNABLE_REQUEST_STATUSES.has(
+        signatureRequest.status,
+      )
+    )
       throw new SignatureSessionInvalidError()
     if (
       recipient.actorKind !== 'collaborator' ||
       recipient.personId !== request.actorId ||
-      !COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES.has(recipient.status)
+      !EstablishCollaboratorSigningSessionUseCase.COLLABORATOR_SIGNABLE_RECIPIENT_STATUSES.has(
+        recipient.status,
+      )
     )
       throw new SignatureCollaboratorUnassignedError()
 

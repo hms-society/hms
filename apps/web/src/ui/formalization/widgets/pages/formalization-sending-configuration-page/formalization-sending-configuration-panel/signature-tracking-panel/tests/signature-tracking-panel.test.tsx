@@ -53,6 +53,7 @@ function renderPanel(overrides: Partial<SignatureTrackingPanelProps> = {}) {
       onRefresh={vi.fn().mockResolvedValue(undefined)}
       onResend={vi.fn().mockResolvedValue({})}
       onCancel={vi.fn().mockResolvedValue({})}
+      onGetDocumentContent={vi.fn().mockResolvedValue(new Blob())}
       {...overrides}
     />,
   )
@@ -82,6 +83,12 @@ describe('SignatureTrackingPanel', () => {
 
     expect(
       (screen.getByRole('button', { name: 'Atualizar' }) as HTMLButtonElement).disabled,
+    ).toBe(true)
+    expect(
+      screen
+        .getByRole('button', { name: 'Atualizar' })
+        .querySelector('svg')
+        ?.classList.contains('animate-spin'),
     ).toBe(true)
     expect(
       (screen.getByRole('button', { name: 'Cancelando…' }) as HTMLButtonElement).disabled,

@@ -1,23 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import type { FormalizationSignatureConfigurationRepository } from '@hms/core/formalization/interfaces'
-import type { Broker, FileStorageProvider } from '@hms/core/shared/interfaces'
 import { ReconcileFormalizationSignaturePreviewsUseCase } from '@hms/core/formalization/use-cases'
-import { cron, type InngestFunction } from 'inngest'
+import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 
 import { FORMALIZATION_PROVIDERS } from '@/formalization/constants/formalization-providers'
-import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
-import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 @Injectable()
-export class ReconcileFormalizationSignaturePreviewsJob extends InngestJob {
+export class ReconcileFormalizationSignaturePreviewsJob {
   static readonly ID = 'formalization/reconcile-signature-previews'
-  readonly function: InngestFunction.Like
+  static readonly RECONCILIATION_LIMIT = 100
+
+  private readonly useCase: ReconcileFormalizationSignaturePreviewsUseCase
 
   constructor(
-    inngest: InngestClient,
     @Inject(FORMALIZATION_PROVIDERS.signatureConfigurationRepository)
     configurationRepository: FormalizationSignatureConfigurationRepository,
     @Inject(PROVISION_PROVIDERS.fileStorage)
@@ -25,25 +24,21 @@ export class ReconcileFormalizationSignaturePreviewsJob extends InngestJob {
     broker: InngestBroker,
     datetimeProvider: DatetimeProvider,
   ) {
-    super(inngest)
-
-    const reconcilePreviews = new ReconcileFormalizationSignaturePreviewsUseCase(
+    this.useCase = new ReconcileFormalizationSignaturePreviewsUseCase(
       configurationRepository,
       fileStorageProvider,
-      broker as Broker,
+      broker,
       datetimeProvider,
     )
+  }
 
-    this.function = this.inngest.createFunction(
-      {
-        id: ReconcileFormalizationSignaturePreviewsJob.ID,
-        name: 'Reconcile Formalization Signature Previews',
-        triggers: [cron('* * * * *')],
-      },
-      ({ step }) =>
-        step.run('reconcile-formalization-signature-previews', () =>
-          reconcilePreviews.execute({ limit: 100 }),
-        ),
-    )
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: ReconcileFormalizationSignaturePreviewsJob.ID,
+    waitForCompletion: true,
+  })
+  execute() {
+    return this.useCase.execute({
+      limit: ReconcileFormalizationSignaturePreviewsJob.RECONCILIATION_LIMIT,
+    })
   }
 }

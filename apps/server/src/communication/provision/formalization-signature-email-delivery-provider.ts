@@ -29,11 +29,11 @@ import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 type DeliveryResult = { outcome: 'delivered'; messageId: string } | { outcome: 'failed' }
 
-const INVITATION_TEMPLATE = 'formalization-signature-invitation.html'
-const OTP_TEMPLATE = 'formalization-signature-otp.html'
-
 @Injectable()
 export class FormalizationSignatureEmailDeliveryProvider {
+  static readonly INVITATION_TEMPLATE = 'formalization-signature-invitation.html'
+  static readonly OTP_TEMPLATE = 'formalization-signature-otp.html'
+
   constructor(
     @Inject(FORMALIZATION_REPOSITORIES.signatureInvitations)
     private readonly invitationsRepository: FormalizationSignatureInvitationsRepository,
@@ -94,10 +94,13 @@ export class FormalizationSignatureEmailDeliveryProvider {
         '',
         `Este convite expira em ${event.expiresAt}.`,
       ].join('\n'),
-      html: await this.renderTemplate(INVITATION_TEMPLATE, {
-        invitationLink: link,
-        expiresAt: event.expiresAt,
-      }),
+      html: await this.renderTemplate(
+        FormalizationSignatureEmailDeliveryProvider.INVITATION_TEMPLATE,
+        {
+          invitationLink: link,
+          expiresAt: event.expiresAt,
+        },
+      ),
       fileIds: [],
       references: [],
       idempotencyKey: `formalization-signature-invitation:${event.deliveryAttemptId}`,
@@ -147,10 +150,13 @@ export class FormalizationSignatureEmailDeliveryProvider {
         '',
         `Este código expira em ${event.expiresAt}.`,
       ].join('\n'),
-      html: await this.renderTemplate(OTP_TEMPLATE, {
-        code,
-        expiresAt: event.expiresAt,
-      }),
+      html: await this.renderTemplate(
+        FormalizationSignatureEmailDeliveryProvider.OTP_TEMPLATE,
+        {
+          code,
+          expiresAt: event.expiresAt,
+        },
+      ),
       fileIds: [],
       references: [],
       idempotencyKey: `formalization-signature-otp:${event.deliveryAttemptId}`,

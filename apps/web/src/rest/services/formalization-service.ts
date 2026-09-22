@@ -310,6 +310,26 @@ export const FormalizationService = (
       .then(mapSignatureSendingStatus)
   },
 
+  getSignatureDocumentContent(formalizationId, requestDocumentId, contentKind) {
+    return restClient
+      .getFile(
+        `/formalizations/${formalizationId}/signature-sending/documents/${requestDocumentId}/${contentKind}`,
+      )
+      .then((response): RestResponse<Blob> => {
+        if (!response.isSuccessful) return response as unknown as RestResponse<Blob>
+
+        if (getContentType(response.headers) === 'application/pdf') {
+          return response as unknown as RestResponse<Blob>
+        }
+
+        return new RestResponse<Blob>({
+          statusCode: HTTP_STATUS_CODE.unprocessableEntity,
+          errorMessage: 'O documento retornou um tipo de conteúdo inválido.',
+          headers: response.headers,
+        })
+      })
+  },
+
   getCompletionByIntake(intakeId) {
     return restClient
       .get<FormalizationCompletionSummary | null>(

@@ -9,15 +9,15 @@ import { eventType, type InngestFunction } from 'inngest'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const batchEvent = eventType(
-  FormalizationSignaturePreviewBatchGenerationRequestedEvent._NAME,
-  {
-    schema: formalizationSignaturePreviewBatchEventSchema,
-  },
-)
-
 @Injectable()
 export class GenerateFormalizationSignaturePreviewsInBatchJob extends InngestJob {
+  static readonly BATCH_EVENT = eventType(
+    FormalizationSignaturePreviewBatchGenerationRequestedEvent._NAME,
+    {
+      schema: formalizationSignaturePreviewBatchEventSchema,
+    },
+  )
+
   static readonly ID = 'formalization/generate-signature-previews-in-batch'
   readonly function: InngestFunction.Like
 
@@ -28,7 +28,7 @@ export class GenerateFormalizationSignaturePreviewsInBatchJob extends InngestJob
       {
         id: GenerateFormalizationSignaturePreviewsInBatchJob.ID,
         name: 'Generate Formalization Signature Previews In Batch',
-        triggers: [batchEvent],
+        triggers: [GenerateFormalizationSignaturePreviewsInBatchJob.BATCH_EVENT],
       },
       async ({ event, step }) =>
         step.sendEvent(

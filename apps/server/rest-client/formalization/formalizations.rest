@@ -6,6 +6,7 @@
 @signatoryId = 00000000-0000-4000-8000-000000000601
 @previewId = 00000000-0000-4000-8000-000000000602
 @personId = 00000000-0000-4000-8000-000000000603
+@requestDocumentId = 00000000-0000-4000-8000-000000000810
 
 ### Start or retrieve the assigned-lawyer Formalization
 POST {{baseUrl}}/formalizations/by-intake/{{intakeId}}/start
@@ -192,6 +193,14 @@ Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
 
 ### Read signature sending status
 GET {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/status
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Open the preserved original signature document
+GET {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/documents/{{requestDocumentId}}/original
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Open the preserved signed signature document
+GET {{baseUrl}}/formalizations/{{formalizationId}}/signature-sending/documents/{{requestDocumentId}}/signed
 Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
 
 ### List formalization documents

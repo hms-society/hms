@@ -62,7 +62,7 @@ export class SaveManualFormalizationDocumentVersionUseCase extends Formalization
     this.assertWritable(formalization)
     if (formalization.documentsConfirmedAt) {
       throw new FormalizationStateConflictError(
-        'Reabra a confirmação antes de editar documentos.',
+        'Reabra o pacote de documentos antes de editar documentos.',
       )
     }
     const documentPackage = await this.documentPackagesRepository.findByContext({

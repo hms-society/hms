@@ -8,12 +8,15 @@ import { FormalizationSignatureEmailDeliveryProvider } from '@/communication/pro
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const invitationReadyEvent = eventType(FormalizationSignatureInvitationReadyEvent._NAME, {
-  schema: formalizationSignatureInvitationReadyEventSchema,
-})
-
 @Injectable()
 export class SendFormalizationSignatureInvitationJob extends InngestJob {
+  static readonly INVITATION_READY_EVENT = eventType(
+    FormalizationSignatureInvitationReadyEvent._NAME,
+    {
+      schema: formalizationSignatureInvitationReadyEventSchema,
+    },
+  )
+
   static readonly ID = 'communication/send-formalization-signature-invitation'
   readonly function: InngestFunction.Like
 
@@ -27,7 +30,7 @@ export class SendFormalizationSignatureInvitationJob extends InngestJob {
         id: SendFormalizationSignatureInvitationJob.ID,
         name: 'Send Formalization Signature Invitation',
         retries: 5,
-        triggers: [invitationReadyEvent],
+        triggers: [SendFormalizationSignatureInvitationJob.INVITATION_READY_EVENT],
       },
       async ({ event, step }) => {
         const result = await step.run('send-formalization-signature-invitation', () =>

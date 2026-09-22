@@ -36,8 +36,12 @@ function createHookController(overrides: Partial<Controller> = {}): Controller {
   return {
     isForbidden: false,
     isLoading: false,
+    hasSignatureRequest: false,
     metrics: [],
+    badgeVariant: 'success',
+    description: 'A configuração está pronta para a revisão final antes do envio.',
     statusLabel: 'Pronto para envio',
+    title: 'Pronto para revisar',
     ...overrides,
   }
 }
@@ -102,7 +106,11 @@ describe('FormalizationSendingConfigurationSummary', () => {
 
   it('renders a success badge when the signature request is confirmed', () => {
     useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
-      createHookController({ statusLabel: 'Confirmado' }),
+      createHookController({
+        hasSignatureRequest: true,
+        statusLabel: 'Confirmado',
+        title: 'Assinaturas confirmadas',
+      }),
     )
 
     render(
@@ -116,6 +124,34 @@ describe('FormalizationSendingConfigurationSummary', () => {
     )
 
     expect(screen.getByText('Confirmado')).not.toBeNull()
+  })
+
+  it('changes to invitation tracking after invitations are sent', () => {
+    useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
+      createHookController({
+        badgeVariant: 'attention',
+        description: 'Os convites foram enviados. Acompanhe o progresso das assinaturas.',
+        hasSignatureRequest: true,
+        statusLabel: 'Envio em andamento',
+        title: 'Convites enviados',
+      }),
+    )
+
+    render(
+      <FormalizationSendingConfigurationSummary
+        formalizationId='formalization-1'
+        isPackageConfirmed
+        signatureStatus='sent'
+        configuration={{ ...configuration, status: 'read_only' }}
+        controller={createConfigurationController()}
+      />,
+    )
+
+    expect(screen.getByText('Envio em andamento')).not.toBeNull()
+    expect(screen.getByText('Convites enviados')).not.toBeNull()
+    expect(
+      screen.getByRole('link', { name: 'Acompanhar assinaturas' }).getAttribute('href'),
+    ).toBe('/formalizacoes/formalization-1/configuracao-envio')
   })
 
   it('keeps access locked until the package is confirmed', () => {
@@ -139,6 +175,16 @@ describe('FormalizationSendingConfigurationSummary', () => {
   })
 
   it('shows the in-progress card only for the configuring status', () => {
+    useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
+      createHookController({
+        badgeVariant: 'attention',
+        description:
+          'Abra a configuração para concluir os dados necessários para o envio.',
+        statusLabel: 'Em configuração',
+        title: 'Configuração em andamento',
+      }),
+    )
+
     render(
       <FormalizationSendingConfigurationSummary
         formalizationId='formalization-1'
@@ -152,6 +198,15 @@ describe('FormalizationSendingConfigurationSummary', () => {
   })
 
   it('hides the in-progress card after configuration is no longer active', () => {
+    useFormalizationSendingConfigurationSummaryMock.mockReturnValue(
+      createHookController({
+        badgeVariant: 'secondary',
+        description: undefined,
+        statusLabel: 'Somente leitura',
+        title: undefined,
+      }),
+    )
+
     render(
       <FormalizationSendingConfigurationSummary
         formalizationId='formalization-1'

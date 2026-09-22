@@ -8,13 +8,13 @@ import { FormalizationSignatureEmailDeliveryProvider } from '@/communication/pro
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const otpDeliveryRequestedEvent = eventType(
-  FormalizationSignatureOtpDeliveryRequestedEvent._NAME,
-  { schema: formalizationSignatureOtpDeliveryRequestedEventSchema },
-)
-
 @Injectable()
 export class SendFormalizationSignatureOtpJob extends InngestJob {
+  static readonly OTP_DELIVERY_REQUESTED_EVENT = eventType(
+    FormalizationSignatureOtpDeliveryRequestedEvent._NAME,
+    { schema: formalizationSignatureOtpDeliveryRequestedEventSchema },
+  )
+
   static readonly ID = 'communication/send-formalization-signature-otp'
   readonly function: InngestFunction.Like
 
@@ -28,7 +28,7 @@ export class SendFormalizationSignatureOtpJob extends InngestJob {
         id: SendFormalizationSignatureOtpJob.ID,
         name: 'Send Formalization Signature OTP',
         retries: 5,
-        triggers: [otpDeliveryRequestedEvent],
+        triggers: [SendFormalizationSignatureOtpJob.OTP_DELIVERY_REQUESTED_EVENT],
       },
       async ({ event, step }) => {
         const result = await step.run('send-formalization-signature-otp', () =>

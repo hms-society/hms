@@ -27,9 +27,9 @@ type Dependencies = {
   readonly hash: (value: string) => string
 }
 
-const TERMINAL_STATUSES = new Set(['rejected', 'cancelled', 'expired'])
-
 export class GetSignatureResultUseCase implements UseCase<Request, Response> {
+  static readonly TERMINAL_STATUSES = new Set(['rejected', 'cancelled', 'expired'])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -119,9 +119,9 @@ export class GetSignatureResultUseCase implements UseCase<Request, Response> {
     signatureRequest: FormalizationSignatureRequest,
     recipient: FormalizationSignatureRecipient,
   ): FormalizationSignatureResult['status'] {
-    if (TERMINAL_STATUSES.has(recipient.status))
+    if (GetSignatureResultUseCase.TERMINAL_STATUSES.has(recipient.status))
       return recipient.status as 'rejected' | 'cancelled' | 'expired'
-    if (TERMINAL_STATUSES.has(signatureRequest.status))
+    if (GetSignatureResultUseCase.TERMINAL_STATUSES.has(signatureRequest.status))
       return signatureRequest.status as 'rejected' | 'cancelled' | 'expired'
     if (recipient.status === 'confirmed' && signatureRequest.status === 'confirmed')
       return 'confirmed'

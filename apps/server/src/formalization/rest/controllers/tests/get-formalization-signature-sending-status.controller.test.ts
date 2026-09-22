@@ -85,7 +85,7 @@ describe('Get Formalization Signature Sending Status Controller [GET /formalizat
       canRetry: false,
       canConfirmContracting: false,
       viewerMode: 'operator',
-      permissions: { canOperate: true, canViewDocumentContent: false },
+      permissions: { canOperate: true, canViewDocumentContent: true },
     })
     expect(response.body.documents).toHaveLength(1)
   })

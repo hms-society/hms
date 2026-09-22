@@ -15,7 +15,7 @@ vi.mock('../formalization-context-header', () => ({
   FormalizationContextHeader: () => <div>context</div>,
 }))
 vi.mock('../formalization-sending-configuration-summary', () => ({
-  FormalizationSendingConfigurationSummary: () => <div>sending card</div>,
+  FormalizationSendingConfigurationSummary: () => <div>Configuração do envio</div>,
 }))
 vi.mock('../close-without-contract-action', () => ({
   CloseWithoutContractAction: () => null,
@@ -52,11 +52,19 @@ const data = {
     legalTopicId: 'topic-1',
     contractFormId: 'form-1',
   },
-} as never
+}
 
-function pageState(status: unknown = null) {
+function pageState(status: unknown = null, contractFormState = 'closed') {
   return {
-    query: { data, isLoading: false, isError: false, refetch: vi.fn() },
+    query: {
+      data: {
+        ...data,
+        formalization: { ...data.formalization, contractFormState },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    },
     actions: {
       saveDraft: { error: null, isPending: false, mutate: vi.fn() },
       closeForm: { error: null, isPending: false, mutate: vi.fn() },
@@ -70,6 +78,7 @@ function pageState(status: unknown = null) {
       status,
       isLoadingReview: false,
       isLoadingStatus: false,
+      isFetchingStatus: false,
       isConfirmingContracting: false,
       confirmContractingError: null,
       confirmContracting: vi.fn(),
@@ -90,13 +99,20 @@ describe('FormalizationPage', () => {
     usePage.mockReturnValue(pageState({ canConfirmContracting: true }))
     render(<FormalizationPage formalizationId='formalization-1' />)
 
-    expect(screen.getByText('sending card')).not.toBeNull()
+    expect(screen.getByText('Configuração do envio')).not.toBeNull()
     expect(screen.getByTestId('contracting-action')).not.toBeNull()
     expect(
       screen.queryByText(
         'A confirmação da contratação ficará disponível em uma etapa futura.',
       ),
     ).toBeNull()
+  })
+
+  it('hides the sending configuration while the formalization form is open', () => {
+    usePage.mockReturnValue(pageState(null, 'open'))
+    render(<FormalizationPage formalizationId='formalization-1' />)
+
+    expect(screen.queryByText('Configuração do envio')).toBeNull()
   })
 
   it('keeps primary loading and failure surfaces page-owned', () => {

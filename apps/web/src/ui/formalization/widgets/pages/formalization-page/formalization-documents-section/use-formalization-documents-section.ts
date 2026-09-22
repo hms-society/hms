@@ -116,6 +116,7 @@ export function useFormalizationDocumentsSection({
     isSelectionOpen,
     items,
     selection,
-    shouldRender: formalization.contractFormState === 'closed',
+    shouldRender:
+      formalization.contractFormState === 'closed' || production.isPackageConfirmed,
   }
 }

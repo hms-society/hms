@@ -67,24 +67,29 @@ type Dependencies = {
   readonly broker: Broker
 }
 
-const CLAIM_LEASE_MS = 30_000
-const TERMINAL_ENVELOPE_STATUSES = new Set([
-  'completed',
-  'rejected',
-  'cancelled',
-  'expired',
-])
-const TERMINAL_RECIPIENT_STATUSES = new Set([
-  'confirmed',
-  'rejected',
-  'cancelled',
-  'expired',
-])
-const TERMINAL_ITEM_STATUSES = new Set(['completed', 'rejected', 'cancelled', 'expired'])
-
 export class ProcessSignatureProviderWebhookUseCase
   implements UseCase<Request, Response>
 {
+  static readonly CLAIM_LEASE_MS = 30_000
+  static readonly TERMINAL_ENVELOPE_STATUSES = new Set([
+    'completed',
+    'rejected',
+    'cancelled',
+    'expired',
+  ])
+  static readonly TERMINAL_RECIPIENT_STATUSES = new Set([
+    'confirmed',
+    'rejected',
+    'cancelled',
+    'expired',
+  ])
+  static readonly TERMINAL_ITEM_STATUSES = new Set([
+    'completed',
+    'rejected',
+    'cancelled',
+    'expired',
+  ])
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -93,7 +98,10 @@ export class ProcessSignatureProviderWebhookUseCase
       receiptId: request.receiptId,
       claimToken,
       now: request.occurredAt,
-      leaseUntil: new Date(request.occurredAt.getTime() + CLAIM_LEASE_MS),
+      leaseUntil: new Date(
+        request.occurredAt.getTime() +
+          ProcessSignatureProviderWebhookUseCase.CLAIM_LEASE_MS,
+      ),
     })
     if (claim.outcome === 'missing' || claim.outcome === 'busy')
       return { outcome: 'retry_required' }
@@ -105,7 +113,7 @@ export class ProcessSignatureProviderWebhookUseCase
         ciphertext: claim.receipt.encryptedHint,
         keyId: claim.receipt.cipherKeyId,
         purpose: 'webhook',
-        contextId: claim.receipt.id,
+        contextId: claim.receipt.dedupeKey,
       })
       hint = parseNeutralHint(JSON.parse(new TextDecoder().decode(plaintext)))
       if (!hint || hint.kind !== claim.receipt.hintKind) {
@@ -193,15 +201,24 @@ export class ProcessSignatureProviderWebhookUseCase
       receiptId: request.receiptId,
       expectedClaimToken: claimToken,
       failedAt: request.occurredAt,
-      nextAttemptAt: new Date(request.occurredAt.getTime() + CLAIM_LEASE_MS),
+      nextAttemptAt: new Date(
+        request.occurredAt.getTime() +
+          ProcessSignatureProviderWebhookUseCase.CLAIM_LEASE_MS,
+      ),
     })
   }
 
   private isTerminalHint(hint: ObservationHint): boolean {
     return (
-      TERMINAL_ENVELOPE_STATUSES.has(hint.envelopeStatus) ||
-      TERMINAL_RECIPIENT_STATUSES.has(hint.recipient.recipientStatus) ||
-      hint.recipient.items.some((item) => TERMINAL_ITEM_STATUSES.has(item.status))
+      ProcessSignatureProviderWebhookUseCase.TERMINAL_ENVELOPE_STATUSES.has(
+        hint.envelopeStatus,
+      ) ||
+      ProcessSignatureProviderWebhookUseCase.TERMINAL_RECIPIENT_STATUSES.has(
+        hint.recipient.recipientStatus,
+      ) ||
+      hint.recipient.items.some((item) =>
+        ProcessSignatureProviderWebhookUseCase.TERMINAL_ITEM_STATUSES.has(item.status),
+      )
     )
   }
 

@@ -7,7 +7,7 @@ import { useFormalizationSendingConfigurationPage } from '../use-formalization-s
 vi.mock('../use-formalization-sending-configuration-page', () => ({
   useFormalizationSendingConfigurationPage: vi.fn(),
 }))
-vi.mock('../../formalization-sending-configuration', () => ({
+vi.mock('../formalization-sending-configuration-panel', () => ({
   FormalizationSendingConfigurationPanel: (props: Record<string, unknown>) => (
     <output data-testid='sending-panel'>{JSON.stringify(props)}</output>
   ),
@@ -33,6 +33,7 @@ function createPage(overrides: Record<string, unknown> = {}) {
       status: undefined,
       isLoadingReview: false,
       isLoadingStatus: false,
+      isFetchingStatus: false,
       refetchReview: vi.fn(),
       refetchStatus: vi.fn(),
     },

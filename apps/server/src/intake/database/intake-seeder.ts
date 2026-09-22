@@ -72,6 +72,21 @@ export class IntakeSeeder {
       demandNotes: 'Cliente aguarda o preenchimento das condições financeiras.',
       status: IntakeStatus.InFormalization,
     })
+    const completedFormalizationIntake = this.createIntake({
+      clientId: references.documentProductionClientId,
+      responsibleId: references.responsibleId,
+      createdBy: references.actorId,
+      updatedBy: references.actorId,
+      origin: 'direct',
+      contactChannel: 'email',
+      legalAreaId: references.legalAreaId,
+      legalTopicId: references.legalTopicId,
+      urgency: 'normal',
+      demandNotes:
+        'Contratação concluída com documentos formalizados e assinaturas confirmadas.',
+      status: IntakeStatus.Contracted,
+      contractedAt: new Date('2026-08-20T16:00:00.000Z'),
+    })
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
       .flatMap((clientId, index) => {
@@ -135,6 +150,7 @@ export class IntakeSeeder {
     const intakes = await this.seed([
       documentProductionIntake,
       draftFormalizationIntake,
+      completedFormalizationIntake,
       ...additionalIntakes,
     ])
     const createdDocumentProductionIntake = intakes.find(
@@ -160,12 +176,25 @@ export class IntakeSeeder {
         'Seed Error',
       )
     }
+    const createdCompletedFormalizationIntake = intakes.find(
+      ({ clientId, demandNotes, status }) =>
+        clientId === references.documentProductionClientId &&
+        demandNotes === completedFormalizationIntake.demandNotes &&
+        status === IntakeStatus.Contracted,
+    )
+    if (!createdCompletedFormalizationIntake) {
+      throw new AppError(
+        'The completed Formalization Intake could not be seeded.',
+        'Seed Error',
+      )
+    }
 
     return {
       intakes,
       documentProductionIntake: createdDocumentProductionIntake,
       formalizationIntake: createdDocumentProductionIntake,
       draftFormalizationIntake: createdDraftFormalizationIntake,
+      completedFormalizationIntake: createdCompletedFormalizationIntake,
     }
   }
 

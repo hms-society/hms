@@ -73,6 +73,12 @@ describe('Process Signature Provider Webhook Use Case', () => {
       now: NOW,
       leaseUntil: new Date('2026-01-01T12:00:30.000Z'),
     })
+    expect(dependencies.cipher.decrypt).toHaveBeenCalledWith({
+      ciphertext: 'ciphertext',
+      keyId: 'key-1',
+      purpose: 'webhook',
+      contextId: 'dedupe-1',
+    })
     expect(
       dependencies.transaction.recordProviderObservationAndDerive,
     ).toHaveBeenCalledWith(

@@ -59,16 +59,17 @@ type Dependencies = {
   readonly provider: SignatureProvider
 }
 
-const terminalStatuses = new Set<string>([
-  'rejected',
-  'cancelled',
-  'expired',
-  'confirmed',
-  'failed',
-])
-const isTerminal = (status: string) => terminalStatuses.has(status)
-
 export class ReconcileSignatureRequestUseCase implements UseCase<Request, Response> {
+  static readonly TERMINAL_STATUSES = new Set<string>([
+    'rejected',
+    'cancelled',
+    'expired',
+    'confirmed',
+    'failed',
+  ])
+  static readonly IS_TERMINAL = (status: string) =>
+    ReconcileSignatureRequestUseCase.TERMINAL_STATUSES.has(status)
+
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(request: Request): Promise<Response> {
@@ -129,12 +130,15 @@ export class ReconcileSignatureRequestUseCase implements UseCase<Request, Respon
       return { outcome: 'retry_required' }
 
     if (entity.status === 'confirmed') return { outcome: 'confirmed' }
-    if (isTerminal(entity.status)) return { outcome: 'terminal' }
+    if (ReconcileSignatureRequestUseCase.IS_TERMINAL(entity.status))
+      return { outcome: 'terminal' }
 
     const envelopeTerminalStatus = terminalRecipientStatus(observation.envelopeStatus)
     const hasTerminalItem = observation.recipients.some((recipient) =>
       recipient.items.some(
-        (item) => item.assignment === 'required' && isTerminal(item.status),
+        (item) =>
+          item.assignment === 'required' &&
+          ReconcileSignatureRequestUseCase.IS_TERMINAL(item.status),
       ),
     )
     const allRequiredItemsComplete = assignments.every((assignment) => {
@@ -185,9 +189,13 @@ export class ReconcileSignatureRequestUseCase implements UseCase<Request, Respon
       ])
     if (!freshRequest || !freshFormalization) return { outcome: 'submitted' }
     if (
-      isTerminal(freshRequest.status) ||
-      freshRecipients.some((recipient) => isTerminal(recipient.status)) ||
-      freshDocuments.some((document) => isTerminal(document.status)) ||
+      ReconcileSignatureRequestUseCase.IS_TERMINAL(freshRequest.status) ||
+      freshRecipients.some((recipient) =>
+        ReconcileSignatureRequestUseCase.IS_TERMINAL(recipient.status),
+      ) ||
+      freshDocuments.some((document) =>
+        ReconcileSignatureRequestUseCase.IS_TERMINAL(document.status),
+      ) ||
       freshFormalization.id !== entity.formalizationId ||
       (freshFormalization.signatureRequestId !== undefined &&
         freshFormalization.signatureRequestId !== entity.id)
@@ -428,9 +436,7 @@ export class ReconcileSignatureRequestUseCase implements UseCase<Request, Respon
               providerRecipient.recipientStatus === 'confirmed'
             ? 'signing'
             : providerRecipient.recipientStatus
-        const terminalStatus =
-          terminalRecipientStatus(providerRecipient.recipientStatus) ??
-          envelopeTerminalStatus
+        const terminalStatus = terminalRecipientStatus(providerRecipient.recipientStatus)
         const status =
           terminalStatus ??
           this.preserveRecipientProgress(recipient.status, derivedRecipientStatus)

@@ -31,13 +31,13 @@ import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 
-const reconciliationEvent = eventType(
-  FormalizationSignatureReconciliationRequestedEvent._NAME,
-  { schema: formalizationSignatureReconciliationRequestedEventSchema },
-)
-
 @Injectable()
 export class ReconcileFormalizationSignatureRequestJob extends InngestJob {
+  static readonly RECONCILIATION_EVENT = eventType(
+    FormalizationSignatureReconciliationRequestedEvent._NAME,
+    { schema: formalizationSignatureReconciliationRequestedEventSchema },
+  )
+
   static readonly ID = 'formalization/reconcile-signature-request'
   readonly function: InngestFunction.Like
 
@@ -97,7 +97,7 @@ export class ReconcileFormalizationSignatureRequestJob extends InngestJob {
         id: ReconcileFormalizationSignatureRequestJob.ID,
         name: 'Reconcile Formalization Signature Request',
         retries: 5,
-        triggers: [reconciliationEvent],
+        triggers: [ReconcileFormalizationSignatureRequestJob.RECONCILIATION_EVENT],
       },
       async ({ event, step }) => {
         const earliestRunAt = new Date(event.data.earliestRunAt)

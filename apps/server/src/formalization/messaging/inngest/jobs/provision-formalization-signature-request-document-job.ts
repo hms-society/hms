@@ -38,13 +38,13 @@ import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 
-const provisioningEvent = eventType(
-  FormalizationSignatureRequestProvisioningRequestedEvent._NAME,
-  { schema: formalizationSignatureRequestProvisioningRequestedEventSchema },
-)
-
 @Injectable()
 export class ProvisionFormalizationSignatureRequestDocumentJob extends InngestJob {
+  static readonly PROVISIONING_EVENT = eventType(
+    FormalizationSignatureRequestProvisioningRequestedEvent._NAME,
+    { schema: formalizationSignatureRequestProvisioningRequestedEventSchema },
+  )
+
   static readonly ID = 'formalization/provision-signature-request-document'
   readonly function: InngestFunction.Like
 
@@ -126,7 +126,7 @@ export class ProvisionFormalizationSignatureRequestDocumentJob extends InngestJo
         id: ProvisionFormalizationSignatureRequestDocumentJob.ID,
         name: 'Provision Formalization Signature Request Document',
         retries: 5,
-        triggers: [provisioningEvent],
+        triggers: [ProvisionFormalizationSignatureRequestDocumentJob.PROVISIONING_EVENT],
       },
       ({ event, step }) =>
         step.run('provision-formalization-signature-request-document', async () => {
