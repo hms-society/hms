@@ -1,32 +1,23 @@
-import type { DynamicFormAnswerValue, DynamicFormField } from '@hms/core/shared/domain'
-
 import { CollapsibleCard } from '@/ui/shared/widgets/components/collapsible-card'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { DynamicFormFieldsSection } from '../dynamic-form-fields'
+import { DynamicFormSelector } from '../dynamic-form-selector'
+import type { SelectedFormSectionProps } from './types'
+import { useSelectedFormSection } from './use-selected-form-section'
 
-export type SelectedFormSectionProps = {
-  selectedFormName: string
-  legalArea: string
-  legalTheme: string
-  fields: readonly DynamicFormField[]
-  answers: Readonly<Record<string, DynamicFormAnswerValue>>
-  errors: Readonly<Record<string, string>>
-  onChange: (fieldId: string, value: DynamicFormAnswerValue) => void
-  onOpenSelectModal: () => void
-  isReadOnly?: boolean
-}
+export const SelectedFormSection = (props: SelectedFormSectionProps) => {
+  const {
+    selectedFormName,
+    legalArea,
+    legalTheme,
+    fields,
+    answers,
+    errors,
+    onChange,
+    onOpenSelectModal,
+    isReadOnly = false,
+  } = useSelectedFormSection(props)
 
-export const SelectedFormSection = ({
-  selectedFormName,
-  legalArea,
-  legalTheme,
-  fields,
-  answers,
-  errors,
-  onChange,
-  onOpenSelectModal,
-  isReadOnly = false,
-}: SelectedFormSectionProps) => {
   return (
     <CollapsibleCard
       title={
@@ -46,33 +37,13 @@ export const SelectedFormSection = ({
       className='border-border px-6 py-6 sm:px-9 sm:py-7'
       contentClassName='space-y-6'
     >
-      <div className='space-y-2'>
-        <div className='flex items-center justify-between gap-4'>
-          <span className='text-base font-medium text-foreground'>Ficha</span>
-          <span className='text-xs text-muted-foreground'>
-            Pesquise pelo nome da ficha
-          </span>
-        </div>
-        <button
-          type='button'
-          onClick={onOpenSelectModal}
-          disabled={isReadOnly}
-          className='flex min-h-16 w-full items-center justify-between gap-4 rounded-xl border border-input bg-transparent px-3 py-2 text-left transition-colors hover:bg-muted/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-100'
-        >
-          <span className='flex min-w-0 items-center gap-3'>
-            <Icon name='file-text' className='size-5 shrink-0 text-primary' />
-            <span className='min-w-0'>
-              <span className='block truncate text-sm font-semibold text-foreground'>
-                {selectedFormName}
-              </span>
-              <span className='mt-0.5 block truncate text-xs text-muted-foreground'>
-                {legalArea} · {legalTheme}
-              </span>
-            </span>
-          </span>
-          <Icon name='chevron-down' className='size-5 shrink-0 text-muted-foreground' />
-        </button>
-      </div>
+      <DynamicFormSelector
+        selectedFormName={selectedFormName}
+        legalArea={legalArea}
+        legalTheme={legalTheme}
+        onOpenSelectModal={onOpenSelectModal}
+        isReadOnly={isReadOnly}
+      />
 
       {fields.length > 0 && (
         <>
@@ -100,3 +71,5 @@ export const SelectedFormSection = ({
     </CollapsibleCard>
   )
 }
+
+export type { SelectedFormSectionProps } from './types'

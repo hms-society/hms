@@ -7,7 +7,7 @@ evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-142
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2654209/PRD+M+dulo+de+Cat+logo+Jur+dico
-updated_at: 2026-09-16
+updated_at: 2026-09-21
 ---
 
 # Execution status
@@ -20,6 +20,7 @@ updated_at: 2026-09-16
 - **Next action:** Complete the remaining evidence conditions: exact Pencil visual matrix and the manual retry/no-op and Formalização lifecycle scenarios; retain the current Server integration and repository-wide inherited failures with their classifications.
 - **Active blockers:** The user-local schema divergence is repaired through forward migrations `0047`–`0050`; Storage is aligned to the provisioned private `documents` bucket; the real server seed plus a fresh browser create/update/reload flow complete; the focused Testcontainers usage-impact controllers pass 8/8; and fresh browser evidence covers the stale-version flow and attendant API `403` responses. The selected stacked-base gate is re-run against the canonical current-branch baseline during publication. Exact supplied-reference screenshots and the complete manual retry/no-op and Formalização lifecycle scenarios remain incomplete. Repository-wide coverage and Web integration retain inherited failures as recorded in Evaluation. The feature-local `design/handoff.md` is the explicitly approved replacement for the former `manifest.md` name and contains the required inventory and reference bundle.
 - **Builders:** `builder_core` (`01a0a690-6e88-71b3-9789-aafd84112771`), `builder_validation` (`01a0a690-6034-7762-8d9e-02f594e6c83b`), `builder_server` (`01a0a6ad-4171-7642-9153-7da3a228169b`) and `builder_web` (`01a0a6ad-e312-79d2-8a0b-71f61fc3df53`) completed their assigned implementation paths. A short-lived follow-up provider Builder (`01a0a704-2820-7650-8028-2cdc1de323c9`) corrected the field-impact JSONB predicate within the same Server ownership boundary and was closed after handoff.
+- **Builders:** `builder_core` (`01a0a690-6e88-71b3-9789-aafd84112771`), `builder_validation` (`01a0a690-6034-7762-8d9e-02f594e6c83b`), `builder_server` (`01a0a6ad-4171-7642-9153-7da3a228169b`) and `builder_web` (`01a0a6ad-e312-79d2-8a0b-71f61fc3df53`) completed their assigned implementation paths. A short-lived follow-up provider Builder (`01a0a704-2820-7650-8028-2cdc1de323c9`) corrected the field-impact JSONB predicate within the same Server ownership boundary and was closed after handoff. The PR correction activated `builder_fix_web` (`/root/builder_fix_web`) and then replacement `builder_fix_web_retry` (`/root/builder_fix_web_retry`) when the first assignment could not be resumed, both with ownership limited to `apps/web/tests/routes/legal-catalog/formularios-dinamicos.index.test.tsx`; Spec, Plan, Evaluation, production code and every other path are prohibited.
 - **Coordination:** The Orchestrator owns `apps/web/package.json`, `pnpm-lock.yaml`, generated migration artifacts, route-generation review, integration, and the Evaluation. `builder_server` owns all non-generated Server implementation paths; `builder_web` owns all Web implementation paths. Existing local edits to `documentation/infrastructure.md` and `documentation/sdd.md` remain user-owned and are not part of implementation.
 
 # Execution ledger

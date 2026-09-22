@@ -1,24 +1,16 @@
 import { DynamicFormEditorContent } from './dynamic-form-editor-content'
-import {
-  DynamicFormEditorStatus,
-  getDynamicFormEditorStatus,
-} from './dynamic-form-editor-status'
+import { DynamicFormEditorStatus } from './dynamic-form-editor-status'
 import type { DynamicFormEditorPageProps } from './types'
 import { useDynamicFormEditorPage } from './use-dynamic-form-editor-page'
 
-export function DynamicFormEditorPage(props: DynamicFormEditorPageProps) {
-  const controller = useDynamicFormEditorPage(props)
-  const status = getDynamicFormEditorStatus(props, controller)
+export const DynamicFormEditorPage = (props: DynamicFormEditorPageProps) => {
+  const editor = useDynamicFormEditorPage(props)
 
-  if (status)
-    return (
-      <DynamicFormEditorStatus
-        status={status}
-        onRetry={() => void controller.detailQuery.refetch()}
-      />
-    )
-
-  return <DynamicFormEditorContent props={props} controller={controller} />
+  return (
+    <DynamicFormEditorStatus props={props} editor={editor}>
+      <DynamicFormEditorContent props={props} editor={editor} />
+    </DynamicFormEditorStatus>
+  )
 }
 
 export type { DynamicFormEditorPageProps }

@@ -1,4 +1,3 @@
-import { useState, type KeyboardEvent } from 'react'
 import { Card, CardContent, CardHeader } from '@/ui/shadcn/card'
 import { Checkbox } from '@/ui/shadcn/checkbox'
 import { Input } from '@/ui/shadcn/input'
@@ -15,38 +14,26 @@ import { Switch } from '@/ui/shadcn/switch'
 import { Textarea } from '@/ui/shadcn/textarea'
 import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import type { DynamicFormEditorPageController } from './use-dynamic-form-editor-page'
-import type { DynamicFormEditorPageProps } from './types'
+import type { DynamicFormEditorIdentificationCardProps } from './types'
+import { useDynamicFormEditorIdentificationCard } from './use-dynamic-form-editor-identification-card'
 
-export function DynamicFormEditorIdentificationCard({
-  props,
-  controller,
-}: {
-  props: DynamicFormEditorPageProps
-  controller: DynamicFormEditorPageController
-}) {
-  const { draft } = controller
-  const form = controller.detailQuery.data?.form
-  const areas = controller.areasQuery.data ?? []
-  const topics = controller.topicsQuery.data ?? []
-  const selectedTopics = topics.filter((topic) => draft.legalTopicIds.includes(topic.id))
-  const [topicsOpen, setTopicsOpen] = useState(false)
-  const canToggleAvailability =
-    props.mode === 'edit' && !controller.isDirty && !controller.availabilityPending
-
-  function toggleTopic(topicId: string) {
-    const nextTopicIds = draft.legalTopicIds.includes(topicId)
-      ? draft.legalTopicIds.filter((id) => id !== topicId)
-      : [...draft.legalTopicIds, topicId]
-    controller.updateDraft('legalTopicIds', nextTopicIds)
-  }
-
-  function handleTopicsTriggerKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'ArrowDown') return
-
-    event.preventDefault()
-    setTopicsOpen(true)
-  }
+export const DynamicFormEditorIdentificationCard = (
+  props: DynamicFormEditorIdentificationCardProps,
+) => {
+  const {
+    editor,
+    draft,
+    form,
+    areas,
+    topics,
+    selectedTopics,
+    topicsOpen,
+    setTopicsOpen,
+    canToggleAvailability,
+    toggleTopic,
+    handleTopicsTriggerKeyDown,
+    isTopicsPending,
+  } = useDynamicFormEditorIdentificationCard(props)
 
   return (
     <Card className='border border-border shadow-2xs'>
@@ -66,7 +53,7 @@ export function DynamicFormEditorIdentificationCard({
             id='dynamic-form-availability'
             checked={form?.status === 'available'}
             disabled={!canToggleAvailability}
-            onCheckedChange={() => void controller.toggleAvailability()}
+            onCheckedChange={() => void editor.toggleAvailability()}
             aria-label='Disponível para seleção'
           />
         </div>
@@ -77,7 +64,7 @@ export function DynamicFormEditorIdentificationCard({
           <Input
             id='dynamic-form-name'
             value={draft.name}
-            onChange={(event) => controller.updateDraft('name', event.target.value)}
+            onChange={(event) => editor.updateDraft('name', event.target.value)}
             placeholder='Ex.: Triagem inicial'
           />
         </div>
@@ -87,9 +74,9 @@ export function DynamicFormEditorIdentificationCard({
           <Select
             value={draft.stage}
             onValueChange={(value) =>
-              controller.updateDraft('stage', value as typeof draft.stage)
+              editor.updateDraft('stage', value as typeof draft.stage)
             }
-            disabled={props.mode === 'edit' && Boolean(form)}
+            disabled={props.props.mode === 'edit' && Boolean(form)}
           >
             <SelectTrigger id='dynamic-form-stage' className='w-full'>
               <SelectValue />
@@ -107,8 +94,8 @@ export function DynamicFormEditorIdentificationCard({
             <Select
               value={draft.legalAreaId}
               onValueChange={(value) => {
-                controller.updateDraft('legalAreaId', value)
-                controller.updateDraft('legalTopicIds', [])
+                editor.updateDraft('legalAreaId', value)
+                editor.updateDraft('legalTopicIds', [])
               }}
             >
               <SelectTrigger id='dynamic-form-legal-area' className='w-full'>
@@ -134,12 +121,10 @@ export function DynamicFormEditorIdentificationCard({
                 <div
                   id='dynamic-form-topics'
                   role='combobox'
-                  tabIndex={
-                    !draft.legalAreaId || controller.topicsQuery.isPending ? -1 : 0
-                  }
+                  tabIndex={!draft.legalAreaId || isTopicsPending ? -1 : 0}
                   aria-label='Temas jurídicos'
                   aria-expanded={topicsOpen}
-                  aria-disabled={!draft.legalAreaId || controller.topicsQuery.isPending}
+                  aria-disabled={!draft.legalAreaId || isTopicsPending}
                   onKeyDown={handleTopicsTriggerKeyDown}
                   className='flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-left text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 aria-disabled:pointer-events-none aria-disabled:opacity-50'
                 >
@@ -217,9 +202,7 @@ export function DynamicFormEditorIdentificationCard({
           <Textarea
             id='dynamic-form-description'
             value={draft.description}
-            onChange={(event) =>
-              controller.updateDraft('description', event.target.value)
-            }
+            onChange={(event) => editor.updateDraft('description', event.target.value)}
             placeholder='Descreva quando esta ficha deve ser sugerida.'
           />
         </div>
@@ -227,3 +210,5 @@ export function DynamicFormEditorIdentificationCard({
     </Card>
   )
 }
+
+export type { DynamicFormEditorIdentificationCardProps } from './types'

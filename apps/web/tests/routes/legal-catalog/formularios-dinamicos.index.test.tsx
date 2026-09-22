@@ -138,6 +138,48 @@ test('restores row-menu focus and exposes authoritative duplicate conflict metad
         }),
       })
     }
+    if (
+      route.request().method() === 'GET' &&
+      pathname === `/legal-catalog/dynamic-forms/${FORM_ID}`
+    ) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          form: {
+            id: FORM_ID,
+            name: 'Triagem inicial',
+            description: 'Dados da consulta',
+            status: 'available',
+            stage: 'consultation',
+            legalAreaId: 'area-1',
+            legalTopicIds: ['topic-1'],
+            fields: [
+              {
+                id: 'field-1',
+                key: 'client-name',
+                label: 'Nome do cliente',
+                type: 'short_text',
+                position: 1,
+                required: true,
+              },
+            ],
+            version: 1,
+            createdAt: '2026-09-11T12:00:00.000Z',
+            updatedAt: '2026-09-11T12:00:00.000Z',
+          },
+          legalArea: { id: 'area-1', name: 'Cível', active: true },
+          legalTopics: [
+            {
+              id: 'topic-1',
+              legalAreaId: 'area-1',
+              name: 'Contratos',
+              active: true,
+            },
+          ],
+        }),
+      })
+    }
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -164,7 +206,7 @@ test('restores row-menu focus and exposes authoritative duplicate conflict metad
   await expect(editButton).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(ROUTES.dynamicForm.replace('$dynamicFormId', FORM_ID))
-  await expect(page.getByRole('heading', { name: 'Editar formulário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Triagem inicial' })).toBeVisible()
 
   await page.goto(ROUTES.dynamicForms)
   const actions = page.getByRole('button', { name: 'Ações de Triagem inicial' })
@@ -181,7 +223,7 @@ test('restores row-menu focus and exposes authoritative duplicate conflict metad
   await expect(page.getByRole('button', { name: 'Abrir formulário' })).toBeVisible()
   await page.getByRole('button', { name: 'Abrir formulário' }).click()
   await expect(page).toHaveURL(ROUTES.dynamicForm.replace('$dynamicFormId', FORM_ID))
-  await expect(page.getByRole('heading', { name: 'Editar formulário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Triagem inicial' })).toBeVisible()
 })
 
 test('announces a successful duplicate through the live region', async ({ page }) => {
