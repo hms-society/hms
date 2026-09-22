@@ -3,7 +3,7 @@ name: Server App Staging CD
 on:
   push:
     branches:
-      - develop
+      - feat/scrum-138-document-production-server-develop
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy-staging:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
