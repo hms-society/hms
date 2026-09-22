@@ -95,6 +95,29 @@ export class DrizzleCaseChecklistItemsRepository
     return updatedItem ? this.mapper.toDomain(updatedItem) : undefined
   }
 
+  async markAsInAnalysisByDocument({
+    checklistItemId,
+    documentFileId,
+    documentFileName,
+  }: Parameters<CaseChecklistItemsRepository['markAsInAnalysisByDocument']>[0]): ReturnType<
+    CaseChecklistItemsRepository['markAsInAnalysisByDocument']
+  > {
+    const [updatedItem] = await this.database
+      .update(caseChecklistItemModel)
+      .set({
+        documentFileId,
+        documentFileName,
+        status: CaseChecklistItemStatus.InAnalysis,
+        updatedAt: new Date(),
+        validatedAt: null,
+        validatedBy: null,
+      })
+      .where(eq(caseChecklistItemModel.id, checklistItemId))
+      .returning()
+
+    return updatedItem ? this.mapper.toDomain(updatedItem) : undefined
+  }
+
   async markAsValidatedByDocument({
     checklistItemId,
     documentFileId,

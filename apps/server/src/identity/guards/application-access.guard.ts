@@ -28,7 +28,7 @@ export class ApplicationAccessGuard implements CanActivate {
     if (access === 'public') return true
 
     await this.authGuard.canActivate(context)
-    if (access === 'case-portal') {
+    if (access === 'case-portal' || access === 'case-portal-upload') {
       const request = context.switchToHttp().getRequest<IdentityRequest & { params: { caseId?: string } }>()
       const caseId = request.params?.caseId
       if (!caseId || !request.user) throw new ForbiddenException('A case-specific portal grant is required')
@@ -38,6 +38,9 @@ export class ApplicationAccessGuard implements CanActivate {
         caseId,
       )
       if (!grant) throw new ForbiddenException('The user is not authorized for this case')
+      if (access === 'case-portal-upload' && !grant.canUpload) {
+        throw new ForbiddenException('The user is not authorized to upload for this case')
+      }
       return true
     }
 
