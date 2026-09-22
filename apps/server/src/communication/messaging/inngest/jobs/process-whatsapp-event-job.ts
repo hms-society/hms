@@ -10,10 +10,6 @@ import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const whatsappEventReceived = eventType('whatsapp/event.received', {
-  schema: z.record(z.string(), z.unknown()),
-})
-
 type WhatsappMedia = {
   id?: unknown
   mime_type?: unknown
@@ -39,6 +35,10 @@ type WhatsappPayload = {
 
 @Injectable()
 export class ProcessWhatsappEventJob extends InngestJob {
+  static readonly WHATSAPP_EVENT_RECEIVED = eventType('whatsapp/event.received', {
+    schema: z.record(z.string(), z.unknown()),
+  })
+
   readonly function: InngestFunction.Like
 
   constructor(
@@ -54,7 +54,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
       {
         id: 'communication/process-whatsapp-event',
         name: 'Process WhatsApp Event',
-        triggers: [whatsappEventReceived],
+        triggers: [ProcessWhatsappEventJob.WHATSAPP_EVENT_RECEIVED],
       },
       async ({ event, step }) => {
         const payload = event.data as WhatsappPayload

@@ -20,15 +20,15 @@ import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositorie
 import { eq } from 'drizzle-orm'
 import { documentBatchFileModel } from './drizzle/models'
 
-const REAL_VALIDATION_STATUS_CYCLE = [
-  DocumentValidationStatus.Valid,
-  DocumentValidationStatus.Incomplete,
-  DocumentValidationStatus.Duplicate,
-  DocumentValidationStatus.Illegible,
-] as const
-
 @Injectable()
 export class RealDocumentsSeeder {
+  static readonly REAL_VALIDATION_STATUS_CYCLE = [
+    DocumentValidationStatus.Valid,
+    DocumentValidationStatus.Incomplete,
+    DocumentValidationStatus.Duplicate,
+    DocumentValidationStatus.Illegible,
+  ] as const
+
   constructor(
     @Inject(DOCUMENT_ENGINE.documentBatches)
     private readonly documentBatchesRepository: DocumentBatchesRepository,
@@ -124,8 +124,9 @@ export class RealDocumentsSeeder {
       await Promise.all(
         (batch.files ?? []).map((file, fileIndex) => {
           const status =
-            REAL_VALIDATION_STATUS_CYCLE[
-              (index + fileIndex) % REAL_VALIDATION_STATUS_CYCLE.length
+            RealDocumentsSeeder.REAL_VALIDATION_STATUS_CYCLE[
+              (index + fileIndex) %
+                RealDocumentsSeeder.REAL_VALIDATION_STATUS_CYCLE.length
             ]
 
           return db

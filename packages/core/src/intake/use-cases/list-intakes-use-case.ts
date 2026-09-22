@@ -19,10 +19,6 @@ import type {
   IntakeListResponse,
 } from '../interfaces/intake-list-repository'
 
-const DEFAULT_PAGE = 1
-const DEFAULT_PAGE_SIZE = 20
-const MAX_PAGE_SIZE = 100
-
 export type ListIntakesUseCaseRequest = Omit<
   IntakeListQuery,
   | 'status'
@@ -41,6 +37,10 @@ export type ListIntakesUseCaseRequest = Omit<
 }
 
 export class ListIntakesUseCase {
+  static readonly DEFAULT_PAGE = 1
+  static readonly DEFAULT_PAGE_SIZE = 20
+  static readonly MAX_PAGE_SIZE = 100
+
   constructor(
     private readonly intakeListRepository: IntakeListRepository,
     private readonly intakeClientsRepository: IntakeClientsRepository,
@@ -146,17 +146,18 @@ export class ListIntakesUseCase {
   }
 
   private normalizePage(page?: number): number {
-    if (!Number.isFinite(page) || !page || page < 1) return DEFAULT_PAGE
+    if (!Number.isFinite(page) || !page || page < 1)
+      return ListIntakesUseCase.DEFAULT_PAGE
 
     return Math.floor(page)
   }
 
   private normalizePageSize(pageSize?: number): number {
     if (!Number.isFinite(pageSize) || !pageSize || pageSize < 1) {
-      return DEFAULT_PAGE_SIZE
+      return ListIntakesUseCase.DEFAULT_PAGE_SIZE
     }
 
-    return Math.min(MAX_PAGE_SIZE, Math.floor(pageSize))
+    return Math.min(ListIntakesUseCase.MAX_PAGE_SIZE, Math.floor(pageSize))
   }
 
   private normalizeDateRange(

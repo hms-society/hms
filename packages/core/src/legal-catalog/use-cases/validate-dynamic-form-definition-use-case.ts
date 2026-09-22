@@ -14,11 +14,11 @@ type Request = {
   existingForm?: DynamicForm
 }
 
-const FIELD_TYPES = Object.values(DynamicFormFieldType)
-
 export class ValidateDynamicFormDefinitionUseCase
   implements UseCase<Request, DynamicFormDefinitionField[]>
 {
+  static readonly FIELD_TYPES = Object.values(DynamicFormFieldType)
+
   constructor(private readonly idProvider: IdProvider) {}
 
   async execute({ draft, existingForm }: Request): Promise<DynamicFormDefinitionField[]> {
@@ -127,7 +127,7 @@ export class ValidateDynamicFormDefinitionUseCase
         })
       }
 
-      if (!FIELD_TYPES.includes(draftField.type)) {
+      if (!ValidateDynamicFormDefinitionUseCase.FIELD_TYPES.includes(draftField.type)) {
         issues.push({
           path: `${path}.type`,
           message: 'O tipo de campo informado é inválido.',

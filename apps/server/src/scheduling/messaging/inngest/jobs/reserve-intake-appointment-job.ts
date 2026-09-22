@@ -23,27 +23,27 @@ import { IdProvider } from '@/shared/provision/id/id-provider'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const consultationSchedulingRequestedEvent = eventType(
-  IntakeConsultationSchedulingRequestedEvent._NAME,
-  {
-    schema: z.object({
-      intakeId: z.string().uuid(),
-      clientId: z.string().uuid(),
-      assignedLawyerId: z.string().uuid(),
-      legalAreaId: z.string().uuid().optional(),
-      legalTopicId: z.string().uuid().optional(),
-      demandNotes: z.string().optional(),
-      startsAt: z.string().datetime(),
-      modality: z.enum(ConsultationModality),
-      channel: z.enum(ConsultationChannel).optional(),
-      requestedBy: z.string().uuid(),
-      occurredAt: z.string().datetime(),
-    }),
-  },
-)
-
 @Injectable()
 export class ReserveIntakeAppointmentJob extends InngestJob {
+  static readonly CONSULTATION_SCHEDULING_REQUESTED_EVENT = eventType(
+    IntakeConsultationSchedulingRequestedEvent._NAME,
+    {
+      schema: z.object({
+        intakeId: z.string().uuid(),
+        clientId: z.string().uuid(),
+        assignedLawyerId: z.string().uuid(),
+        legalAreaId: z.string().uuid().optional(),
+        legalTopicId: z.string().uuid().optional(),
+        demandNotes: z.string().optional(),
+        startsAt: z.string().datetime(),
+        modality: z.enum(ConsultationModality),
+        channel: z.enum(ConsultationChannel).optional(),
+        requestedBy: z.string().uuid(),
+        occurredAt: z.string().datetime(),
+      }),
+    },
+  )
+
   readonly function: InngestFunction.Like
 
   constructor(
@@ -68,7 +68,7 @@ export class ReserveIntakeAppointmentJob extends InngestJob {
       {
         id: 'scheduling/reserve-intake-appointment',
         name: 'Reserve Intake Appointment',
-        triggers: [consultationSchedulingRequestedEvent],
+        triggers: [ReserveIntakeAppointmentJob.CONSULTATION_SCHEDULING_REQUESTED_EVENT],
         onFailure: async ({ event, step }) => {
           const originalEvent = event.data.event
           const failedEvent = new IntakeConsultationSchedulingFailedEvent({

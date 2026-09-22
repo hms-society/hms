@@ -16,48 +16,49 @@ import { z } from 'zod'
 import { documentGenerationSourceSchema } from '@/document-production/ai/mastra/schemas'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 
-const inputSchema = z.object({
-  documentGenerationId: z.string().uuid(),
-  instructions: z.string().trim().min(1).max(4000).optional(),
-  source: documentGenerationSourceSchema,
-})
-
-const outputSchema = z.object({
-  id: z.string().uuid(),
-  documentId: z.string().uuid(),
-  documentSpecificationVersionId: z.string().uuid(),
-  requestedByCollaboratorId: z.string().uuid(),
-  instructions: z.string().trim().min(1).max(4000).optional(),
-  source: documentGenerationSourceSchema,
-  template: z.object({
-    name: z.string(),
-    content: documentTemplateContentSchema,
-    variables: z.array(documentTemplateVariableSchema),
-  }),
-  status: z.enum(DocumentGenerationStatus),
-  attemptsCount: z.number().int().min(0).max(3),
-  findings: z.array(
-    z.object({
-      category: z.enum(DocumentReviewFindingCategory),
-      message: z.string(),
-    }),
-  ),
-  documentVersionId: z.string().uuid().optional(),
-  failureMessage: z.string().optional(),
-  startedAt: z.string().datetime().optional(),
-  completedAt: z.string().datetime().optional(),
-  failedAt: z.string().datetime().optional(),
-  cancelledAt: z.string().datetime().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-type Output = z.infer<typeof outputSchema>
-
 @Injectable()
 export class LoadDocumentGenerationTool {
+  static readonly INPUT_SCHEMA = z.object({
+    documentGenerationId: z.string().uuid(),
+    instructions: z.string().trim().min(1).max(4000).optional(),
+    source: documentGenerationSourceSchema,
+  })
+  static readonly OUTPUT_SCHEMA = z.object({
+    id: z.string().uuid(),
+    documentId: z.string().uuid(),
+    documentSpecificationVersionId: z.string().uuid(),
+    requestedByCollaboratorId: z.string().uuid(),
+    instructions: z.string().trim().min(1).max(4000).optional(),
+    source: documentGenerationSourceSchema,
+    template: z.object({
+      name: z.string(),
+      content: documentTemplateContentSchema,
+      variables: z.array(documentTemplateVariableSchema),
+    }),
+    status: z.enum(DocumentGenerationStatus),
+    attemptsCount: z.number().int().min(0).max(3),
+    findings: z.array(
+      z.object({
+        category: z.enum(DocumentReviewFindingCategory),
+        message: z.string(),
+      }),
+    ),
+    documentVersionId: z.string().uuid().optional(),
+    failureMessage: z.string().optional(),
+    startedAt: z.string().datetime().optional(),
+    completedAt: z.string().datetime().optional(),
+    failedAt: z.string().datetime().optional(),
+    cancelledAt: z.string().datetime().optional(),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+  })
+
   readonly function: ReturnType<
-    typeof createTool<'load-document-generation', typeof inputSchema, typeof outputSchema>
+    typeof createTool<
+      'load-document-generation',
+      typeof LoadDocumentGenerationTool.INPUT_SCHEMA,
+      typeof LoadDocumentGenerationTool.OUTPUT_SCHEMA
+    >
   >
 
   constructor(
@@ -70,8 +71,8 @@ export class LoadDocumentGenerationTool {
       id: 'load-document-generation',
       description:
         'Load the immutable context and current state of a document generation.',
-      inputSchema,
-      outputSchema,
+      inputSchema: LoadDocumentGenerationTool.INPUT_SCHEMA,
+      outputSchema: LoadDocumentGenerationTool.OUTPUT_SCHEMA,
       strict: true,
       execute: async (input) => {
         const generation = await useCase.execute({
@@ -126,3 +127,5 @@ export class LoadDocumentGenerationTool {
     }
   }
 }
+
+type Output = z.infer<typeof LoadDocumentGenerationTool.OUTPUT_SCHEMA>

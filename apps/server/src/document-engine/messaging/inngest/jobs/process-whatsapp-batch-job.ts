@@ -6,21 +6,21 @@ import { z } from 'zod'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 
-const whatsappDocumentBatchReceived = eventType(
-  WhatsappDocumentBatchReceivedEvent._NAME,
-  {
-    schema: z.object({
-      eventoId: z.string().uuid(),
-      sender: z.string().min(1),
-      clientId: z.string().uuid(),
-      mimeType: z.string().min(1),
-      originalName: z.string().min(1),
-    }),
-  },
-)
-
 @Injectable()
 export class ProcessWhatsappBatchJob extends InngestJob {
+  static readonly WHATSAPP_DOCUMENT_BATCH_RECEIVED = eventType(
+    WhatsappDocumentBatchReceivedEvent._NAME,
+    {
+      schema: z.object({
+        eventoId: z.string().uuid(),
+        sender: z.string().min(1),
+        clientId: z.string().uuid(),
+        mimeType: z.string().min(1),
+        originalName: z.string().min(1),
+      }),
+    },
+  )
+
   private static readonly logger = new Logger(ProcessWhatsappBatchJob.name)
   static readonly ID = 'document-engine/process-whatsapp-batch'
   readonly function: InngestFunction.Like
@@ -32,7 +32,7 @@ export class ProcessWhatsappBatchJob extends InngestJob {
       {
         id: ProcessWhatsappBatchJob.ID,
         name: 'Process WhatsApp Document Batch',
-        triggers: [whatsappDocumentBatchReceived],
+        triggers: [ProcessWhatsappBatchJob.WHATSAPP_DOCUMENT_BATCH_RECEIVED],
       },
       async ({ event, step }) =>
         step.run('process-batch-metadata', async () => {

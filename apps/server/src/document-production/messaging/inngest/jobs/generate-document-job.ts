@@ -17,33 +17,32 @@ import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
-const documentGenerationRequestedEvent = eventType(
-  DocumentGenerationRequestedEvent._NAME,
-  {
-    schema: z.object({
-      documentGenerationId: z.string().uuid(),
-      documentId: z.string().uuid(),
-      documentSpecificationVersionId: z.string().uuid(),
-      requestedByCollaboratorId: z.string().uuid(),
-      instructions: z.string().trim().min(1).max(4000).optional(),
-      source: documentGenerationSourceSchema,
-      occurredAt: z.string().datetime(),
-    }),
-  },
-)
-
-const documentGenerationCancelledEvent = eventType(
-  DocumentGenerationCancelledEvent._NAME,
-  {
-    schema: z.object({
-      documentGenerationId: z.string().uuid(),
-      occurredAt: z.string().datetime(),
-    }),
-  },
-)
-
 @Injectable()
 export class GenerateDocumentJob extends InngestJob {
+  static readonly DOCUMENT_GENERATION_REQUESTED_EVENT = eventType(
+    DocumentGenerationRequestedEvent._NAME,
+    {
+      schema: z.object({
+        documentGenerationId: z.string().uuid(),
+        documentId: z.string().uuid(),
+        documentSpecificationVersionId: z.string().uuid(),
+        requestedByCollaboratorId: z.string().uuid(),
+        instructions: z.string().trim().min(1).max(4000).optional(),
+        source: documentGenerationSourceSchema,
+        occurredAt: z.string().datetime(),
+      }),
+    },
+  )
+  static readonly DOCUMENT_GENERATION_CANCELLED_EVENT = eventType(
+    DocumentGenerationCancelledEvent._NAME,
+    {
+      schema: z.object({
+        documentGenerationId: z.string().uuid(),
+        occurredAt: z.string().datetime(),
+      }),
+    },
+  )
+
   readonly function: InngestFunction.Like
 
   constructor(
@@ -67,11 +66,11 @@ export class GenerateDocumentJob extends InngestJob {
         name: 'Generate Document',
         cancelOn: [
           {
-            event: documentGenerationCancelledEvent,
+            event: GenerateDocumentJob.DOCUMENT_GENERATION_CANCELLED_EVENT,
             match: 'data.documentGenerationId',
           },
         ],
-        triggers: [documentGenerationRequestedEvent],
+        triggers: [GenerateDocumentJob.DOCUMENT_GENERATION_REQUESTED_EVENT],
         onFailure: async ({ event, error }) => {
           const originalEvent = event.data.event
           const generation = await generationsRepository.findById(

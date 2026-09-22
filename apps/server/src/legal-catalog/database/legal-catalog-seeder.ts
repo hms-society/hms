@@ -10,24 +10,27 @@ import type {
 
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 
-const DEFAULT_LEGAL_AREAS: LegalAreaCreation[] = [
-  { name: 'Administrativo', active: true },
-  { name: 'Cível', active: true },
-  { name: 'Família', active: true },
-  { name: 'Trabalhista', active: true },
-  { name: 'Previdenciário', active: true },
-]
-
-const DEFAULT_LEGAL_TOPICS: Record<string, string[]> = {
-  Administrativo: ['Servidor público', 'Licitações e contratos'],
-  Cível: ['Contratos', 'Responsabilidade civil', 'Relações de consumo'],
-  Família: ['Divórcio', 'Alimentos', 'Guarda e convivência'],
-  Trabalhista: ['Verbas rescisórias', 'Assédio no trabalho', 'Horas extras'],
-  Previdenciário: ['Aposentadoria', 'Benefício por incapacidade', 'Revisão de benefício'],
-}
-
 @Injectable()
 export class LegalCatalogSeeder {
+  static readonly DEFAULT_LEGAL_AREAS: LegalAreaCreation[] = [
+    { name: 'Administrativo', active: true },
+    { name: 'Cível', active: true },
+    { name: 'Família', active: true },
+    { name: 'Trabalhista', active: true },
+    { name: 'Previdenciário', active: true },
+  ]
+  static readonly DEFAULT_LEGAL_TOPICS: Record<string, string[]> = {
+    Administrativo: ['Servidor público', 'Licitações e contratos'],
+    Cível: ['Contratos', 'Responsabilidade civil', 'Relações de consumo'],
+    Família: ['Divórcio', 'Alimentos', 'Guarda e convivência'],
+    Trabalhista: ['Verbas rescisórias', 'Assédio no trabalho', 'Horas extras'],
+    Previdenciário: [
+      'Aposentadoria',
+      'Benefício por incapacidade',
+      'Revisão de benefício',
+    ],
+  }
+
   constructor(
     @Inject(LEGAL_CATALOG_REPOSITORIES.areas)
     private readonly legalAreasRepository: LegalAreasRepository,
@@ -41,9 +44,11 @@ export class LegalCatalogSeeder {
   }
 
   async run() {
-    const areas = await this.legalAreasRepository.addMany(DEFAULT_LEGAL_AREAS)
+    const areas = await this.legalAreasRepository.addMany(
+      LegalCatalogSeeder.DEFAULT_LEGAL_AREAS,
+    )
     const topicCreations: LegalTopicCreation[] = areas.flatMap((area) =>
-      (DEFAULT_LEGAL_TOPICS[area.name] ?? []).map((name) => ({
+      (LegalCatalogSeeder.DEFAULT_LEGAL_TOPICS[area.name] ?? []).map((name) => ({
         legalAreaId: area.id,
         name,
         active: true,

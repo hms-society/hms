@@ -12,16 +12,6 @@ import { eq } from 'drizzle-orm'
 import { documentBatchFileModel } from './drizzle/models'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
-const VALIDATION_STATUS_CYCLE = [
-  DocumentValidationStatus.NotLinked,
-  DocumentValidationStatus.Valid,
-  DocumentValidationStatus.Illegible,
-  DocumentValidationStatus.Incomplete,
-  DocumentValidationStatus.Duplicate,
-  DocumentValidationStatus.ProcessingFailure,
-  DocumentValidationStatus.ResendRequested,
-] as const
-
 type DocumentsSeedInput = {
   readonly clientIds: readonly string[]
   readonly userIds: readonly string[]
@@ -29,6 +19,16 @@ type DocumentsSeedInput = {
 
 @Injectable()
 export class DocumentsSeeder {
+  static readonly VALIDATION_STATUS_CYCLE = [
+    DocumentValidationStatus.NotLinked,
+    DocumentValidationStatus.Valid,
+    DocumentValidationStatus.Illegible,
+    DocumentValidationStatus.Incomplete,
+    DocumentValidationStatus.Duplicate,
+    DocumentValidationStatus.ProcessingFailure,
+    DocumentValidationStatus.ResendRequested,
+  ] as const
+
   constructor(
     @Inject(CreateDocumentBatchUseCase)
     private readonly createDocumentBatchUseCase: CreateDocumentBatchUseCase,
@@ -111,8 +111,9 @@ export class DocumentsSeeder {
         await Promise.all(
           (batch.files ?? []).map((file, fileIndex) => {
             const status =
-              VALIDATION_STATUS_CYCLE[
-                (index + batchIndex + fileIndex) % VALIDATION_STATUS_CYCLE.length
+              DocumentsSeeder.VALIDATION_STATUS_CYCLE[
+                (index + batchIndex + fileIndex) %
+                  DocumentsSeeder.VALIDATION_STATUS_CYCLE.length
               ]
 
             return db

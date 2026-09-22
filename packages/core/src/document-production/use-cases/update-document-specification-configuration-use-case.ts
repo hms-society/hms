@@ -22,12 +22,12 @@ type Request = {
   readonly changes: DocumentSpecificationConfigurationUpdate
 }
 
-const TECHNICAL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/
-const TOKEN_PATTERN = /{{[^{}]*}}/g
-
 export class UpdateDocumentSpecificationConfigurationUseCase
   implements UseCase<Request, DocumentSpecification>
 {
+  static readonly TECHNICAL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/
+  static readonly TOKEN_PATTERN = /{{[^{}]*}}/g
+
   constructor(
     private readonly specificationsRepository: DocumentSpecificationsRepository,
     private readonly legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
@@ -329,7 +329,9 @@ export class UpdateDocumentSpecificationConfigurationUseCase
       const systemTechnicalName = variable.systemTechnicalName?.trim()
       if (
         !variable.label.trim() ||
-        !TECHNICAL_NAME_PATTERN.test(technicalName) ||
+        !UpdateDocumentSpecificationConfigurationUseCase.TECHNICAL_NAME_PATTERN.test(
+          technicalName,
+        ) ||
         names.has(technicalName) ||
         (systemTechnicalName !== undefined &&
           (!systemNames.has(systemTechnicalName) ||
@@ -354,7 +356,9 @@ export class UpdateDocumentSpecificationConfigurationUseCase
     ])
     const inspectText = (text: string) => {
       let cursor = 0
-      for (const match of text.matchAll(TOKEN_PATTERN)) {
+      for (const match of text.matchAll(
+        UpdateDocumentSpecificationConfigurationUseCase.TOKEN_PATTERN,
+      )) {
         if (
           text.slice(cursor, match.index).includes('{{') ||
           text.slice(cursor, match.index).includes('}}')
@@ -365,7 +369,9 @@ export class UpdateDocumentSpecificationConfigurationUseCase
         }
         const technicalName = match[0].slice(2, -2)
         if (
-          !TECHNICAL_NAME_PATTERN.test(technicalName) ||
+          !UpdateDocumentSpecificationConfigurationUseCase.TECHNICAL_NAME_PATTERN.test(
+            technicalName,
+          ) ||
           !knownNames.has(technicalName)
         ) {
           throw new InvalidDocumentTemplateError(`Token desconhecido: ${match[0]}`)

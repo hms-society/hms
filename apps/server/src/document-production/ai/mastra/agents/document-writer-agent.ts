@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common'
 import { MastraAgent } from '@/shared/ai/mastra/mastra-agent'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
-const instructions = `
+@Injectable()
+export class DocumentWriterAgent extends MastraAgent<'document-writer'> {
+  static readonly INSTRUCTIONS = `
 You are a legal document drafting agent.
 
 Your task is to generate or revise legal document drafts from:
@@ -185,22 +187,20 @@ Do not include:
 - introductory text;
 - trailing text;
 - validation reports;
-- internal instructions.
+- internal DocumentWriterAgent.INSTRUCTIONS.
 
 The complete response must be parseable as JSON.
 
 If the requested document cannot be completed because information is missing, still return the document and represent every missing required value with an appropriate placeholder.
 `
 
-@Injectable()
-export class DocumentWriterAgent extends MastraAgent<'document-writer'> {
   constructor(envProvider: EnvProvider) {
     super(
       {
         id: 'document-writer',
         name: 'Document Writer',
         model: 'deepseek/deepseek-v4-pro',
-        instructions,
+        instructions: DocumentWriterAgent.INSTRUCTIONS,
       },
       envProvider,
     )

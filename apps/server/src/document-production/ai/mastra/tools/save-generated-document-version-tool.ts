@@ -26,26 +26,25 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
-const inputSchema = documentReviewCycleOutputSchema
-
-const outputSchema = z.object({
-  status: z.literal(DocumentReviewDecision.Approved),
-  documentGenerationId: z.string().uuid(),
-  documentVersionId: z.string().uuid(),
-  attemptsCount: z.number().int().min(1).max(3),
-  draft: documentDraftSchema,
-  pendingMarkers: z.array(
-    z.object({ marker: z.string().regex(/^\{[a-z][a-z0-9_]*\}$/) }),
-  ),
-})
-
 @Injectable()
 export class SaveGeneratedDocumentVersionTool {
+  static readonly INPUT_SCHEMA = documentReviewCycleOutputSchema
+  static readonly OUTPUT_SCHEMA = z.object({
+    status: z.literal(DocumentReviewDecision.Approved),
+    documentGenerationId: z.string().uuid(),
+    documentVersionId: z.string().uuid(),
+    attemptsCount: z.number().int().min(1).max(3),
+    draft: documentDraftSchema,
+    pendingMarkers: z.array(
+      z.object({ marker: z.string().regex(/^\{[a-z][a-z0-9_]*\}$/) }),
+    ),
+  })
+
   readonly function: ReturnType<
     typeof createTool<
       'save-generated-document-version',
-      typeof inputSchema,
-      typeof outputSchema
+      typeof SaveGeneratedDocumentVersionTool.INPUT_SCHEMA,
+      typeof SaveGeneratedDocumentVersionTool.OUTPUT_SCHEMA
     >
   >
 
@@ -76,8 +75,8 @@ export class SaveGeneratedDocumentVersionTool {
       id: 'save-generated-document-version',
       description:
         'Export and persist an AI-generated document draft as an immutable version.',
-      inputSchema,
-      outputSchema,
+      inputSchema: SaveGeneratedDocumentVersionTool.INPUT_SCHEMA,
+      outputSchema: SaveGeneratedDocumentVersionTool.OUTPUT_SCHEMA,
       strict: true,
       execute: async (input) => {
         const version = await saveVersionUseCase.execute({
@@ -96,7 +95,10 @@ export class SaveGeneratedDocumentVersionTool {
     })
   }
 
-  private serializeVersion(version: DocumentVersion, input: z.infer<typeof inputSchema>) {
+  private serializeVersion(
+    version: DocumentVersion,
+    input: z.infer<typeof SaveGeneratedDocumentVersionTool.INPUT_SCHEMA>,
+  ) {
     return {
       status: DocumentReviewDecision.Approved,
       documentGenerationId: input.documentGenerationId,

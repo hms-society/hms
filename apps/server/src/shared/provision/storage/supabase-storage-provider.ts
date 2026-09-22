@@ -4,10 +4,10 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
-const MAX_STORAGE_DOWNLOAD_BYTES = 50 * 1024 * 1024
-
 @Injectable()
 export class SupabaseStorageProvider implements StorageProvider {
+  static readonly MAX_STORAGE_DOWNLOAD_BYTES = 50 * 1024 * 1024
+
   private readonly supabase: SupabaseClient
   private readonly bucketName: string
 
@@ -47,7 +47,7 @@ export class SupabaseStorageProvider implements StorageProvider {
     }
 
     const content = new Uint8Array(await data.arrayBuffer())
-    if (content.byteLength > MAX_STORAGE_DOWNLOAD_BYTES) {
+    if (content.byteLength > SupabaseStorageProvider.MAX_STORAGE_DOWNLOAD_BYTES) {
       throw new AppError(
         'O arquivo excede o limite de leitura configurado.',
         'Arquivo Muito Grande',

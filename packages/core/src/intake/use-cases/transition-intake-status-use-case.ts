@@ -19,13 +19,13 @@ type Request = {
   updatedBy: string
 }
 
-const transitions: Partial<Record<IntakeStatusValue, IntakeStatusValue>> = {
-  [IntakeStatus.ConsultationScheduled]: IntakeStatus.ConsultationCompleted,
-  [IntakeStatus.ConsultationCompleted]: IntakeStatus.ViabilityRegistered,
-  [IntakeStatus.ViabilityRegistered]: IntakeStatus.InFormalization,
-}
-
 export class TransitionIntakeStatusUseCase implements UseCase<Request, Intake> {
+  static readonly TRANSITIONS: Partial<Record<IntakeStatusValue, IntakeStatusValue>> = {
+    [IntakeStatus.ConsultationScheduled]: IntakeStatus.ConsultationCompleted,
+    [IntakeStatus.ConsultationCompleted]: IntakeStatus.ViabilityRegistered,
+    [IntakeStatus.ViabilityRegistered]: IntakeStatus.InFormalization,
+  }
+
   constructor(private readonly intakesRepository: IntakesRepository) {}
 
   async execute(request: Request): Promise<Intake> {
@@ -39,7 +39,7 @@ export class TransitionIntakeStatusUseCase implements UseCase<Request, Intake> {
       return intake
     }
 
-    if (transitions[intake.status] !== request.status) {
+    if (TransitionIntakeStatusUseCase.TRANSITIONS[intake.status] !== request.status) {
       throw new InvalidIntakeTransitionError(intake.status, request.status)
     }
 

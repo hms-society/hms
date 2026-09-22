@@ -22,14 +22,14 @@ import type { DocumentSpecificationsRepository } from '../interfaces'
 
 type Request = CreateDocumentSpecificationInput
 
-const EMPTY_TEMPLATE: DocumentTemplateContent = {
-  type: 'doc',
-  content: [{ type: 'paragraph' }],
-}
-
 export class CreateDocumentSpecificationUseCase
   implements UseCase<Request, DocumentSpecification>
 {
+  static readonly EMPTY_TEMPLATE: DocumentTemplateContent = {
+    type: 'doc',
+    content: [{ type: 'paragraph' }],
+  }
+
   constructor(
     private readonly specificationsRepository: DocumentSpecificationsRepository,
     private readonly legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
@@ -39,7 +39,7 @@ export class CreateDocumentSpecificationUseCase
     const application = await this.normalizeApplication(request.application)
     const name = request.name.trim()
     const description = request.description.trim()
-    const content = request.content ?? EMPTY_TEMPLATE
+    const content = request.content ?? CreateDocumentSpecificationUseCase.EMPTY_TEMPLATE
     const variables = request.variables ?? []
     const status = request.status ?? DocumentSpecificationStatus.Available
 
