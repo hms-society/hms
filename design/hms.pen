@@ -229224,7 +229224,7 @@
       "reusable": true,
       "ref": "iCoRX",
       "name": "Modal/Checklist/Adicionar item",
-      "x": 4205,
+      "x": 3877,
       "y": 16948,
       "width": 520,
       "descendants": {
@@ -249837,28 +249837,6 @@
                           "fontWeight": "500"
                         }
                       ]
-                    },
-                    {
-                      "id": "re7KQ",
-                      "type": "ref",
-                      "ref": "SQoVa",
-                      "name": "Registrar andamento",
-                      "padding": [
-                        8,
-                        11
-                      ],
-                      "descendants": {
-                        "gfybN": {
-                          "enabled": true,
-                          "icon": "plus",
-                          "width": 12,
-                          "height": 12
-                        },
-                        "hKQ6y": {
-                          "content": "Registrar andamento",
-                          "fontSize": 10
-                        }
-                      }
                     }
                   ]
                 },
