@@ -58,6 +58,7 @@ export class GrantCasePortalAccessController {
     const grant = await this.useCase.execute({
       caseId,
       collaboratorId: collaborator.collaboratorId,
+      isAdministrator: collaborator.profile === 'admin',
       tokenHash: hashPortalAccessToken(accessToken),
       canUpload: body.canUpload,
       expiresAt: effectiveExpiresAt,

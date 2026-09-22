@@ -29,6 +29,11 @@ export class RevokeCasePortalAccessController {
     @Param('grantId', new ParseUUIDPipe()) grantId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.useCase.execute({ caseId, grantId, collaboratorId: collaborator.collaboratorId })
+    return this.useCase.execute({
+      caseId,
+      grantId,
+      collaboratorId: collaborator.collaboratorId,
+      isAdministrator: collaborator.profile === 'admin',
+    })
   }
 }

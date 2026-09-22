@@ -15,6 +15,14 @@ export type ReviewCaseChecklistGateRequest = {
   remarks?: string
 }
 
+export type PortalDocumentUploadResponse = {
+  protocol: string
+  caseId: string
+  checklistItemId: string
+  status: string
+  receivedAt: string
+}
+
 export type AddCaseChecklistComplementaryItemRequest = {
   templateItemKey: string
   title: string
@@ -69,4 +77,16 @@ export interface CaseManagementService {
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
+
+  listPortalPendingChecklist(
+    caseId: string,
+    portalToken: string,
+  ): Promise<RestResponse<readonly CaseChecklistItem[]>>
+
+  uploadPortalDocument(
+    caseId: string,
+    checklistItemId: string,
+    portalToken: string,
+    file: unknown,
+  ): Promise<RestResponse<PortalDocumentUploadResponse>>
 }

@@ -8,6 +8,7 @@ type Request = {
   caseId: string
   tokenHash: string
   collaboratorId: string
+  isAdministrator: boolean
   canUpload: boolean
   expiresAt?: Date
 }
@@ -19,8 +20,13 @@ export class GrantCasePortalAccessUseCase implements UseCase<Request, CasePortal
   ) {}
 
   async execute(request: Request): Promise<CasePortalAccessGrant> {
-    const assignedCases = await this.legalCasesRepository.listByTeamMember(request.collaboratorId)
-    if (!assignedCases.some((legalCase) => legalCase.id === request.caseId)) {
+    const canAccessCase = request.isAdministrator
+      ? Boolean(await this.legalCasesRepository.findById(request.caseId))
+      : (await this.legalCasesRepository.listByTeamMember(request.collaboratorId)).some(
+          (legalCase) => legalCase.id === request.caseId,
+        )
+
+    if (!canAccessCase) {
       throw new LegalCaseNotFoundError()
     }
 

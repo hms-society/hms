@@ -5,6 +5,7 @@ import type {
   LegalCase,
   LegalCaseSummary,
 } from '@hms/core/case-management/domain/entities'
+import type { PortalDocumentUploadResponse } from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
 export const CaseManagementService = (
@@ -44,6 +45,21 @@ export const CaseManagementService = (
 
     reviewChecklistGate(caseId, request) {
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
+    },
+
+    listPortalPendingChecklist(caseId, portalToken) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.get<readonly CaseChecklistItem[]>(
+        `/cases/${caseId}/portal-pendencies?${query.toString()}`,
+      )
+    },
+
+    uploadPortalDocument(caseId, checklistItemId, portalToken, file) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.postFormData<PortalDocumentUploadResponse>(
+        `/cases/${caseId}/portal-pendencies/${checklistItemId}/upload?${query.toString()}`,
+        file as FormData,
+      )
     },
   }
 }
