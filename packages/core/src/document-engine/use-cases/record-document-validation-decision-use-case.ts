@@ -95,7 +95,7 @@ export class RecordDocumentValidationDecisionUseCase {
 
     const checklistItemId = this.getChecklistItemIdToUpdate(decisionRequest, status)
 
-    if (checklistItemId) {
+    if (status === DocumentValidationStatus.Valid) {
       await this.tryLinkValidatedDocumentToChecklist({
         checklistItemId,
         documentFileId: request.documentFileId,
@@ -257,7 +257,7 @@ export class RecordDocumentValidationDecisionUseCase {
   }
 
   private async tryLinkValidatedDocumentToChecklist(request: {
-    checklistItemId: string
+    checklistItemId?: string
     documentFileId: string
     validatedBy: string
   }) {

@@ -26,9 +26,34 @@ export class MarkCaseChecklistItemValidatedUseCase
         validatedBy: request.validatedBy,
       })
 
+    return this.finishValidation(checklistItem, request.validatedBy)
+  }
+
+  async executeByDocumentFileId(request: Omit<Request, 'checklistItemId'>) {
+    const checklistItem =
+      await this.caseChecklistItemsRepository.findByDocumentFileId(
+        request.documentFileId,
+      )
+
     if (!checklistItem) {
       throw new LegalCaseNotFoundError()
     }
+
+    const updatedItem =
+      await this.caseChecklistItemsRepository.markAsValidatedByDocument({
+        checklistItemId: checklistItem.id,
+        documentFileId: request.documentFileId,
+        validatedBy: request.validatedBy,
+      })
+
+    return this.finishValidation(updatedItem, request.validatedBy)
+  }
+
+  private async finishValidation(
+    checklistItem: CaseChecklistItem | undefined,
+    validatedBy: string,
+  ) {
+    if (!checklistItem) throw new LegalCaseNotFoundError()
 
     const hasPendingRequiredItems =
       await this.caseChecklistItemsRepository.hasPendingRequiredItems(
@@ -38,7 +63,7 @@ export class MarkCaseChecklistItemValidatedUseCase
     if (!hasPendingRequiredItems) {
       await this.legalCasesRepository.completeChecklist(
         checklistItem.caseId,
-        request.validatedBy,
+        validatedBy,
       )
     }
 

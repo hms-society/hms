@@ -68,4 +68,22 @@ describe('useDocumentFilePreview', () => {
     })
     expect(result.current.zoom).toBe(0.5)
   })
+
+  it('revokes the blob URL after the viewer cleanup delay', () => {
+    vi.useFakeTimers()
+    const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL')
+
+    const { unmount } = renderHook(() => useDocumentFilePreview('document-file-1'))
+    unmount()
+
+    expect(revokeObjectURL).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:documento')
+    revokeObjectURL.mockRestore()
+    vi.useRealTimers()
+  })
 })

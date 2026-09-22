@@ -73,7 +73,9 @@ export function PortalUploadDialog({
 
   async function handleSubmit() {
     if (!file) {
-      setValidationError('Selecione um arquivo para enviar.')
+      if (!validationError) {
+        setValidationError('Selecione um arquivo para enviar.')
+      }
       return
     }
 
@@ -118,7 +120,7 @@ export function PortalUploadDialog({
                 htmlFor={inputId}
                 className='flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-primary/40 bg-secondary/40 px-4 py-8 text-center transition-colors hover:border-primary hover:bg-highlight/40 focus-within:ring-3 focus-within:ring-ring/50 sm:min-h-56 sm:px-6 sm:py-10'
               >
-              <Icon name='arrow-up' className='size-8 text-primary' />
+                <Icon name='arrow-up' className='size-8 text-primary' />
                 <span className='mt-3 font-sans text-sm font-semibold text-foreground'>
                   {file ? file.name : 'Escolha um arquivo para enviar'}
                 </span>
@@ -128,6 +130,7 @@ export function PortalUploadDialog({
                 <input
                   id={inputId}
                   type='file'
+                  aria-label='Selecionar arquivo'
                   className='sr-only'
                   accept={ACCEPTED_EXTENSIONS.join(',')}
                   onChange={handleFileChange}

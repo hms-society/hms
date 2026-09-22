@@ -72,6 +72,40 @@ export class DrizzleCaseChecklistItemsRepository
     return items.map((item) => this.mapper.toDomain(item))
   }
 
+  async findByDocumentFileId(
+    documentFileId: string,
+  ): ReturnType<CaseChecklistItemsRepository['findByDocumentFileId']> {
+    const [item] = await this.database
+      .select({
+        id: caseChecklistItemModel.id,
+        caseId: caseChecklistItemModel.caseId,
+        templateItemKey: caseChecklistItemModel.templateItemKey,
+        title: caseChecklistItemModel.title,
+        isRequired: caseChecklistItemModel.isRequired,
+        status: caseChecklistItemModel.status,
+        documentFileId: caseChecklistItemModel.documentFileId,
+        documentFileName: caseChecklistItemModel.documentFileName,
+        validatedAt: caseChecklistItemModel.validatedAt,
+        validatedBy: caseChecklistItemModel.validatedBy,
+        createdAt: caseChecklistItemModel.createdAt,
+        updatedAt: caseChecklistItemModel.updatedAt,
+        checklistTemplateName: checklistTemplateModel.name,
+      })
+      .from(caseChecklistItemModel)
+      .leftJoin(
+        checklistTemplateItemModel,
+        sql`${caseChecklistItemModel.templateItemKey} = ${checklistTemplateItemModel.id}::text`,
+      )
+      .leftJoin(
+        checklistTemplateModel,
+        eq(checklistTemplateModel.id, checklistTemplateItemModel.checklistTemplateId),
+      )
+      .where(eq(caseChecklistItemModel.documentFileId, documentFileId))
+      .limit(1)
+
+    return item ? this.mapper.toDomain(item) : undefined
+  }
+
   async linkPendingDocument({
     checklistItemId,
     documentFileId,
@@ -150,7 +184,10 @@ export class DrizzleCaseChecklistItemsRepository
         and(
           eq(caseChecklistItemModel.caseId, caseId),
           eq(caseChecklistItemModel.isRequired, true),
-          eq(caseChecklistItemModel.status, CaseChecklistItemStatus.Pending),
+          inArray(caseChecklistItemModel.status, [
+            CaseChecklistItemStatus.Pending,
+            CaseChecklistItemStatus.InAnalysis,
+          ]),
         ),
       )
       .limit(1)

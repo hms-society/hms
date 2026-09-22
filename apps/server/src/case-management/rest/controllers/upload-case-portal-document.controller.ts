@@ -89,6 +89,7 @@ export class UploadCasePortalDocumentController {
         originalName: file.originalname,
         mimeType: file.mimetype,
         sizeBytes: file.size,
+        checklistItemId,
       }],
     })
 

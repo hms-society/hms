@@ -22,18 +22,19 @@ function DocumentRow({
   onUpload,
 }: {
   item: CaseChecklistItem
-  status: 'pending' | 'in_analysis'
+  status: 'pending' | 'in_analysis' | 'validated'
   onUpload?: (item: CaseChecklistItem) => void
 }) {
   const isPending = status === 'pending'
+  const isValidated = status === 'validated'
 
   return (
     <div className='flex flex-col gap-4 border-b border-border px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between'>
       <div className='flex min-w-0 items-start gap-3'>
         <div className='mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-highlight'>
           <Icon
-            name={isPending ? 'file-minus' : 'clock'}
-            className='size-4 text-primary'
+            name={isPending ? 'file-minus' : isValidated ? 'check-circle-2' : 'clock'}
+            className={`size-4 ${isValidated ? 'text-emerald-600' : 'text-primary'}`}
           />
         </div>
         <div className='min-w-0'>
@@ -43,19 +44,23 @@ function DocumentRow({
           <p className='mt-1 font-sans text-xs text-muted-foreground'>
             {isPending
               ? 'Envie um arquivo legível para resolver esta pendência.'
-              : item.documentFileName
-                ? `${item.documentFileName} · aguardando análise`
-                : 'Documento recebido e encaminhado para análise.'}
+              : isValidated
+                ? item.documentFileName
+                  ? `${item.documentFileName} · documento validado`
+                  : 'Documento validado pela equipe.'
+                : item.documentFileName
+                  ? `${item.documentFileName} · aguardando análise`
+                  : 'Documento recebido e encaminhado para análise.'}
           </p>
         </div>
       </div>
 
       <div className='flex shrink-0 items-center gap-3 sm:pl-4'>
         <Badge
-          variant={isPending ? 'waiting' : 'attention'}
+          variant={isPending ? 'waiting' : isValidated ? 'success' : 'attention'}
           className='rounded-pill px-2.5 py-1 text-[11px] font-semibold'
         >
-          {isPending ? 'Pendente' : 'Em análise'}
+          {isPending ? 'Pendente' : isValidated ? 'Validado' : 'Em análise'}
         </Badge>
         {isPending && onUpload && (
           <Button
@@ -97,7 +102,7 @@ function Section({
 }
 
 export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPageProps) {
-  const { pendingItems, inAnalysisItems, isLoading, error, refetch } =
+  const { pendingItems, inAnalysisItems, validatedItems, isLoading, error, refetch } =
     usePortalDocumentsPage(caseId, portalToken)
   const { caseManagementService } = useRestContext()
   const queryClient = useQueryClient()
@@ -213,14 +218,21 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
             )}
           </Section>
 
-          <Section title='Documentos em análise' count={inAnalysisItems.length}>
-            {inAnalysisItems.length > 0 ? (
-              inAnalysisItems.map((item) => (
-                <DocumentRow key={item.id} item={item} status='in_analysis' />
+          <Section
+            title='Documentos enviados'
+            count={inAnalysisItems.length + validatedItems.length}
+          >
+            {inAnalysisItems.length + validatedItems.length > 0 ? (
+              [...inAnalysisItems, ...validatedItems].map((item) => (
+                <DocumentRow
+                  key={item.id}
+                  item={item}
+                  status={item.status}
+                />
               ))
             ) : (
               <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
-                Nenhum documento está em análise.
+                Nenhum documento foi enviado ainda.
               </div>
             )}
           </Section>

@@ -30,6 +30,18 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
   async linkValidatedDocumentToChecklist(
     request: LinkValidatedDocumentToChecklistRequest,
   ): Promise<void> {
-    await this.useCase.execute(request)
+    if (!request.checklistItemId) {
+      await this.useCase.executeByDocumentFileId({
+        documentFileId: request.documentFileId,
+        validatedBy: request.validatedBy,
+      })
+      return
+    }
+
+    await this.useCase.execute(request as {
+      checklistItemId: string
+      documentFileId: string
+      validatedBy: string
+    })
   }
 }

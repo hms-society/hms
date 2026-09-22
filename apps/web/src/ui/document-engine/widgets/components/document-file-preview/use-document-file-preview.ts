@@ -26,8 +26,12 @@ export function useDocumentFilePreview(documentFileId: string) {
   )
 
   useEffect(() => {
+    if (!fileUrl) return
+
+    // O React Strict Mode pode desmontar e montar o componente imediatamente.
+    // Atrasar a revogação evita invalidar a blob URL enquanto o PDF.js ainda a lê.
     return () => {
-      if (fileUrl) URL.revokeObjectURL(fileUrl)
+      window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
     }
   }, [fileUrl])
 

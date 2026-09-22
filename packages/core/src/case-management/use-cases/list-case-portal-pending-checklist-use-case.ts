@@ -41,7 +41,8 @@ export class ListCasePortalPendingChecklistUseCase
     return checklistItems.filter(
       (item) =>
         item.status === CaseChecklistItemStatus.Pending ||
-        item.status === CaseChecklistItemStatus.InAnalysis,
+        item.status === CaseChecklistItemStatus.InAnalysis ||
+        item.status === CaseChecklistItemStatus.Validated,
     )
   }
 }

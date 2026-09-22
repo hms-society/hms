@@ -113,9 +113,11 @@ describe('Record Document Validation Decision Use Case', () => {
       checklistRequirementId: 'Documento teste 1',
       status: DocumentValidationStatus.Valid,
     })
-    expect(
-      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
-    ).not.toHaveBeenCalled()
+    expect(caseChecklistUpdateProvider.linkValidatedDocumentToChecklist).toHaveBeenCalledWith({
+      checklistItemId: undefined,
+      documentFileId: document.id,
+      validatedBy: 'reviewer-id',
+    })
   })
 
   it('keeps the document decision recorded when the checklist synchronization fails', async () => {
@@ -151,7 +153,7 @@ describe('Record Document Validation Decision Use Case', () => {
     })
   })
 
-  it('does not update the case checklist when the validated document has no checklist link', async () => {
+  it('delegates checklist synchronization when the validated document has no direct link', async () => {
     const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,
     })
@@ -164,9 +166,11 @@ describe('Record Document Validation Decision Use Case', () => {
       decision: DocumentValidationDecision.Validate,
     })
 
-    expect(
-      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
-    ).not.toHaveBeenCalled()
+    expect(caseChecklistUpdateProvider.linkValidatedDocumentToChecklist).toHaveBeenCalledWith({
+      checklistItemId: undefined,
+      documentFileId: document.id,
+      validatedBy: 'reviewer-id',
+    })
   })
 
   it('maps mismatch decision to not corresponding status', async () => {

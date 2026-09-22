@@ -53,7 +53,7 @@ export class GrantCasePortalAccessController {
     }
 
     const accessToken = createPortalAccessToken()
-    const effectiveExpiresAt = expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000)
+    const effectiveExpiresAt = expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
     const grant = await this.useCase.execute({
       caseId,

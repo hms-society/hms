@@ -25,6 +25,7 @@ export function usePortalDocumentsPage(caseId: string, portalToken: string) {
     checklist,
     pendingItems: checklist.filter((item) => item.status === 'pending'),
     inAnalysisItems: checklist.filter((item) => item.status === 'in_analysis'),
+    validatedItems: checklist.filter((item) => item.status === 'validated'),
     isLoading: checklistQuery.isLoading,
     isFetching: checklistQuery.isFetching,
     error: checklistQuery.error,

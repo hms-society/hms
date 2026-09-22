@@ -24,6 +24,7 @@ export interface CaseChecklistItemsRepository {
     params: LinkChecklistItemPendingDocumentParams,
   ): Promise<CaseChecklistItem | undefined>
   listByCaseId(caseId: string): Promise<readonly CaseChecklistItem[]>
+  findByDocumentFileId(documentFileId: string): Promise<CaseChecklistItem | undefined>
   markAsValidatedByDocument(
     params: MarkChecklistItemValidatedParams,
   ): Promise<CaseChecklistItem | undefined>

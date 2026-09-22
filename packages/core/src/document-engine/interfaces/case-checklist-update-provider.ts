@@ -1,5 +1,5 @@
 export type LinkValidatedDocumentToChecklistRequest = {
-  checklistItemId: string
+  checklistItemId?: string
   documentFileId: string
   validatedBy: string
 }

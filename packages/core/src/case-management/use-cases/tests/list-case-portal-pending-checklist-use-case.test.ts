@@ -29,7 +29,7 @@ describe('List Case Portal Pending Checklist Use Case', () => {
     )
   })
 
-  it('returns only pending checklist items for an authorized case', async () => {
+  it('returns active and validated checklist items for an authorized case', async () => {
     const legalCase = LegalCaseFaker.fake()
     const tokenHash = faker.string.hexadecimal({ length: 64 })
     const pendingItem = checklistItem(legalCase.id, CaseChecklistItemStatus.Pending)
@@ -45,10 +45,14 @@ describe('List Case Portal Pending Checklist Use Case', () => {
       grantedBy: faker.string.uuid(),
       createdAt: new Date(),
     })
-    checklistItemsRepository.listByCaseId.mockResolvedValue([pendingItem, validatedItem])
+    checklistItemsRepository.listByCaseId.mockResolvedValue([
+      pendingItem,
+      validatedItem,
+    ])
 
     await expect(useCase.execute({ caseId: legalCase.id, tokenHash })).resolves.toEqual([
       pendingItem,
+      validatedItem,
     ])
   })
 
