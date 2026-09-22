@@ -9,6 +9,7 @@ import {
   BadRequestException,
   Body,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import {
@@ -75,6 +76,7 @@ export class InternalUploadController {
     @UploadedFiles() rawFiles: Array<MulterFile>,
     @Body('clientId', new ParseUUIDPipe({ version: '4' })) clientId: string,
     @CurrentUser() authUser: AuthUser,
+    @Query('skipProcessing') skipProcessing?: string,
   ) {
     if (!clientId) {
       throw new BadRequestException(
@@ -108,6 +110,7 @@ export class InternalUploadController {
       sender: authUser.email || authUser.id,
       createdBy: authUser.id,
       clientId: clientId,
+      skipProcessing: skipProcessing === 'true',
       files: uploadedFiles,
     })
 

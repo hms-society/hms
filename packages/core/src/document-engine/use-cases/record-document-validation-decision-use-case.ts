@@ -48,7 +48,11 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
-    if (this.isDuplicateDecisionAlreadyRecorded(currentDocument, request)) {
+    if (
+      this.isDuplicateDecisionAlreadyRecorded(currentDocument, request) &&
+      !request.caseId &&
+      !request.checklistRequirementId
+    ) {
       return currentDocument
     }
 
@@ -58,12 +62,13 @@ export class RecordDocumentValidationDecisionUseCase {
     )
     const decisionRequest = {
       ...request,
+      caseId: this.resolveCaseId(request, currentDocument),
       checklistRequirementId,
     }
 
     const updatedDocument = await this.documentValidationsRepository.recordDecision({
       ...decisionRequest,
-      caseId: this.resolveCaseId(decisionRequest, currentDocument),
+      caseId: decisionRequest.caseId,
       status,
     })
 
@@ -93,17 +98,68 @@ export class RecordDocumentValidationDecisionUseCase {
       })
     }
 
-    const checklistItemId = this.getChecklistItemIdToUpdate(decisionRequest, status)
+    const checklistItemId = this.getChecklistItemId(decisionRequest)
+    const caseId = this.resolveCaseId(decisionRequest, currentDocument)
+    const clientId = currentDocument.clientId
 
-    if (checklistItemId) {
+    if (checklistItemId && (!caseId || !clientId)) {
+      throw new AppError(
+        'Não foi possível identificar o cliente e o caso do item do checklist.',
+        'Vínculo do checklist inválido',
+      )
+    }
+
+    if (checklistItemId && caseId && clientId && status === DocumentValidationStatus.Valid) {
       await this.tryLinkValidatedDocumentToChecklist({
+        caseId,
+        clientId,
         checklistItemId,
         documentFileId: request.documentFileId,
+        documentFileName: currentDocument.fileName,
         validatedBy: request.reviewedBy,
       })
     }
 
+    if (checklistItemId && decisionRequest.caseId && status !== DocumentValidationStatus.Valid) {
+      const pendingReason = this.getPendingReason(request.decision)
+
+      if (pendingReason) {
+        await this.caseChecklistUpdateProvider?.linkPendingDocumentToChecklist({
+          checklistItemId,
+          documentFileId: request.documentFileId,
+          documentFileName: currentDocument.fileName,
+        })
+
+        await this.caseChecklistUpdateProvider?.createDocumentPending({
+          caseId: decisionRequest.caseId,
+          checklistItemId,
+          documentFileId: request.documentFileId,
+          documentFileName: currentDocument.fileName,
+          reason: pendingReason,
+          details: request.reason,
+          responsibleId: request.reviewedBy,
+        })
+      }
+    }
+
     return updatedDocument
+  }
+
+  private getPendingReason(
+    decision: DocumentValidationDecision,
+  ):
+    | 'missing'
+    | 'illegible'
+    | 'incomplete'
+    | 'duplicate'
+    | 'not_corresponding'
+    | undefined {
+    if (decision === DocumentValidationDecision.Illegible) return 'illegible'
+    if (decision === DocumentValidationDecision.Incomplete) return 'incomplete'
+    if (decision === DocumentValidationDecision.Duplicate) return 'duplicate'
+    if (decision === DocumentValidationDecision.Mismatch) return 'not_corresponding'
+    if (decision === DocumentValidationDecision.NotLinked) return 'missing'
+    return undefined
   }
 
   private validateRequest(request: RecordDocumentValidationDecisionRequest) {
@@ -194,11 +250,7 @@ export class RecordDocumentValidationDecisionUseCase {
     return Boolean(document.aiSuggestion && Object.keys(document.aiSuggestion).length > 0)
   }
 
-  private getChecklistItemIdToUpdate(
-    request: RecordDocumentValidationDecisionRequest,
-    status: DocumentValidationStatus,
-  ) {
-    if (status !== DocumentValidationStatus.Valid) return undefined
+  private getChecklistItemId(request: RecordDocumentValidationDecisionRequest) {
     if (!request.checklistRequirementId) return undefined
     if (!this.isUuid(request.checklistRequirementId)) return undefined
 
@@ -257,15 +309,14 @@ export class RecordDocumentValidationDecisionUseCase {
   }
 
   private async tryLinkValidatedDocumentToChecklist(request: {
+    caseId: string
+    clientId: string
     checklistItemId: string
     documentFileId: string
+    documentFileName: string
     validatedBy: string
   }) {
-    try {
-      await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)
-    } catch {
-      return
-    }
+    await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)
   }
 
   private buildAiCorrectionMetadata(

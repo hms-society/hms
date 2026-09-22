@@ -27,6 +27,7 @@ describe('ChecklistLinkFields', () => {
       checklistRequirementId: 'checklist-item-1',
       handleCaseSelect: vi.fn(),
       handleChecklistSelect: vi.fn(),
+      hasDocumentClient: true,
       isLoadingCases: false,
       isLoadingChecklist: false,
     })

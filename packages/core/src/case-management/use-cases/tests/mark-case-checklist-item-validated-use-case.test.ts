@@ -24,6 +24,7 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
     const caseId = '00000000-0000-4000-8000-000000000302'
     const reviewedBy = '00000000-0000-4000-8000-000000000303'
     const documentFileId = '00000000-0000-4000-8000-000000000304'
+    const documentFileName = 'procuracao.pdf'
 
     checklistItemsRepository.markAsValidatedByDocument.mockResolvedValue({
       id: checklistItemId,
@@ -40,11 +41,19 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
     })
     checklistItemsRepository.hasPendingRequiredItems.mockResolvedValue(true)
 
-    await useCase.execute({ checklistItemId, documentFileId, validatedBy: reviewedBy })
-
-    expect(checklistItemsRepository.markAsValidatedByDocument).toHaveBeenCalledWith({
+    await useCase.execute({
+      caseId,
       checklistItemId,
       documentFileId,
+      documentFileName,
+      validatedBy: reviewedBy,
+    })
+
+    expect(checklistItemsRepository.markAsValidatedByDocument).toHaveBeenCalledWith({
+      caseId,
+      checklistItemId,
+      documentFileId,
+      documentFileName,
       validatedBy: reviewedBy,
     })
     expect(legalCasesRepository.completeChecklist).not.toHaveBeenCalled()
@@ -55,6 +64,7 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
     const caseId = '00000000-0000-4000-8000-000000000402'
     const reviewedBy = '00000000-0000-4000-8000-000000000403'
     const documentFileId = '00000000-0000-4000-8000-000000000404'
+    const documentFileName = 'comprovante.pdf'
 
     checklistItemsRepository.markAsValidatedByDocument.mockResolvedValue({
       id: checklistItemId,
@@ -74,7 +84,13 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
       LegalCaseFaker.fake({ id: caseId, checklistCompletedBy: reviewedBy }),
     )
 
-    await useCase.execute({ checklistItemId, documentFileId, validatedBy: reviewedBy })
+    await useCase.execute({
+      caseId,
+      checklistItemId,
+      documentFileId,
+      documentFileName,
+      validatedBy: reviewedBy,
+    })
 
     expect(legalCasesRepository.completeChecklist).toHaveBeenCalledWith(
       caseId,
@@ -87,6 +103,7 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
     const caseId = '00000000-0000-4000-8000-000000000502'
     const reviewedBy = '00000000-0000-4000-8000-000000000503'
     const documentFileId = '00000000-0000-4000-8000-000000000504'
+    const documentFileName = 'relatorio.pdf'
 
     checklistItemsRepository.markAsValidatedByDocument.mockResolvedValue({
       id: checklistItemId,
@@ -103,7 +120,13 @@ describe('Mark Case Checklist Item Validated Use Case', () => {
     })
     checklistItemsRepository.hasPendingRequiredItems.mockResolvedValue(true)
 
-    await useCase.execute({ checklistItemId, documentFileId, validatedBy: reviewedBy })
+    await useCase.execute({
+      caseId,
+      checklistItemId,
+      documentFileId,
+      documentFileName,
+      validatedBy: reviewedBy,
+    })
 
     expect(legalCasesRepository.completeChecklist).not.toHaveBeenCalled()
   })

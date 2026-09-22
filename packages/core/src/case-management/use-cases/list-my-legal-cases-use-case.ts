@@ -4,6 +4,7 @@ import type { UseCase } from '#shared/interfaces/use-case'
 
 type Request = {
   collaboratorId: string
+  clientId?: string
 }
 
 export class ListMyLegalCasesUseCase
@@ -11,7 +12,9 @@ export class ListMyLegalCasesUseCase
 {
   constructor(private readonly legalCasesRepository: LegalCasesRepository) {}
 
-  execute({ collaboratorId }: Request): Promise<readonly LegalCaseSummary[]> {
-    return this.legalCasesRepository.listByTeamMember(collaboratorId)
+  execute({ collaboratorId, clientId }: Request): Promise<readonly LegalCaseSummary[]> {
+    return clientId
+      ? this.legalCasesRepository.listByTeamMember(collaboratorId, clientId)
+      : this.legalCasesRepository.listByTeamMember(collaboratorId)
   }
 }

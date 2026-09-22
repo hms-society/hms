@@ -3,7 +3,13 @@ import { LegalAreaTabs } from './components/legal-area-tabs'
 import { ChecklistCard } from './components/checklist-card'
 import { useChecklistsTemplates } from './use-checklist-template'
 
-export default function ChecklistsTemplatesPage() {
+type ChecklistsTemplatesPageProps = {
+  initialAreaId?: string
+}
+
+export default function ChecklistsTemplatesPage({
+  initialAreaId,
+}: ChecklistsTemplatesPageProps) {
   const {
     areas,
     activeArea,
@@ -21,7 +27,7 @@ export default function ChecklistsTemplatesPage() {
     removeDocument,
     addDocument,
     saveTemplate,
-  } = useChecklistsTemplates()
+  } = useChecklistsTemplates(initialAreaId)
 
   return (
     <main className='min-h-full bg-background px-6 py-8 lg:px-10'>

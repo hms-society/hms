@@ -10,6 +10,12 @@ import {
   ReplaceChecklistTemplateController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
+  CreatePendingController,
+  ListCasePendingsController,
+  GetPendingMessageController,
+  EditPendingMessageController,
+  ApprovePendingMessageController,
+  CancelPendingController,
 } from '@/case-management/rest/controllers'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
@@ -25,6 +31,12 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     GetLegalCaseDetailsController,
+    CreatePendingController,
+    ListCasePendingsController,
+    GetPendingMessageController,
+    EditPendingMessageController,
+    ApprovePendingMessageController,
+    CancelPendingController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

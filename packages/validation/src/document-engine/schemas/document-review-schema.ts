@@ -42,11 +42,19 @@ export const documentReview = z
       })
     }
 
-    if (data.decision === 'validate' && !data.documentTypeId) {
+    if (data.decision === 'validate' && !data.caseId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'O tipo documental é obrigatório.',
-        path: ['documentTypeId'],
+        message: 'Selecione o caso vinculado ao documento.',
+        path: ['caseId'],
+      })
+    }
+
+    if (data.decision === 'validate' && !data.checklistRequirementId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Selecione o item do checklist vinculado ao documento.',
+        path: ['checklistRequirementId'],
       })
     }
 
