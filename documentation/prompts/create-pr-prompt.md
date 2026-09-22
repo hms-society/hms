@@ -70,6 +70,13 @@ Before publishing or returning an existing pull request, inspect its complete ti
 and translate any workflow-authored English prose into pt-BR. Do not treat an already-open PR
 as compliant merely because its latest comment is in pt-BR.
 
+Treat language compliance as a blocking publication gate, not as a stylistic preference. Immediately
+before returning, run `gh pr view <number> --json title,body` for every PR and inspect both fields in
+full. Correct the PR with `gh pr edit` when any workflow-authored prose remains outside pt-BR. The
+title must also follow the pt-BR noun-phrase rule below: Conventional Commit prefixes such as
+`feat:`, `fix:`, `refactor:` and `docs:` do not make an English title compliant and must not be used.
+Do not return PR metadata until this final language audit passes for every PR in the delivery.
+
 ## Mandatory workflow invocation
 
 This prompt is a publication workflow, not a replacement for the commit or conclusion
