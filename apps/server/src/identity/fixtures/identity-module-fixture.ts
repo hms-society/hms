@@ -10,6 +10,7 @@ import type {
   UserCreation,
 } from '@hms/core/identity/domain/entities'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
+import { AuthSessionFaker } from '@hms/core/identity/domain/structures/fakers'
 import type { AuthAdministrationProvider } from '@hms/core/identity/interfaces'
 import {
   ClientFaker,
@@ -18,7 +19,9 @@ import {
 } from '@hms/core/identity/domain/entities/fakers'
 
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database/case-management-database.module'
 import { AuthModule } from '@/identity/auth.module'
+import { IdentityAccessModule } from '@/identity/identity-access.module'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import {
   DrizzleIntakeClientsRepository,
@@ -80,24 +83,37 @@ export class IdentityModuleFixture {
     return this.restFixture.get(DrizzleIntakeResponsiblesRepository)
   }
 
-  static async register(controller?: Type<unknown>) {
+  static async register(controller?: Type<unknown> | Type<unknown>[], applicationAccess = false) {
     const authentication: { user?: AuthUser } = {}
     const restFixture = await RestFixture.register(
       {
         imports: [
+          ...(applicationAccess ? [IdentityAccessModule] : []),
+          ...(applicationAccess ? [CaseManagementDatabaseModule] : []),
           AuthModule,
           IdentityDatabaseModule,
           LegalCatalogModule,
           ProvisionModule,
         ],
-        controllers: controller ? [controller] : [],
+        controllers: controller ? (Array.isArray(controller) ? controller : [controller]) : [],
         providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
       },
-      (builder) =>
+      (builder) => {
         builder
           .overrideProvider(IDENTITY_PROVIDERS.authAdministration)
           .useValue(authAdministrationFixture)
-          .overrideGuard(AuthGuard)
+
+        if (applicationAccess) {
+          // Only external Supabase verification is controlled; real guards and DB run.
+          return builder.overrideProvider(IDENTITY_PROVIDERS.auth).useValue({
+            getSession: async (token: string) =>
+              token === 'fixture-access-token' && authentication.user
+                ? AuthSessionFaker.fake({ user: authentication.user })
+                : null,
+          })
+        }
+
+        return builder.overrideGuard(AuthGuard)
           .useValue({
             canActivate: (context: ExecutionContext) => {
               const request = context.switchToHttp().getRequest<{
@@ -123,7 +139,8 @@ export class IdentityModuleFixture {
               request.identity = { auth, user: authentication.user }
               return true
             },
-          }),
+          })
+      },
     )
 
     return new IdentityModuleFixture(

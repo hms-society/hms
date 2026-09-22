@@ -9,10 +9,12 @@ import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { AuthController } from '@/identity/decorators'
 import { AuthSessionResponseDto } from '@/identity/rest/dtos/auth-session-response.dto'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 class SignInRequestBody extends createZodDto(signInSchema) {}
 
 @AuthController()
+@RouteAccess('public')
 export class SignInController {
   private readonly useCase: SignInUseCase
 

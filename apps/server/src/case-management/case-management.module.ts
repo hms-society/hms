@@ -10,6 +10,8 @@ import {
   ReplaceChecklistTemplateController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
+  GrantCasePortalAccessController,
+  RevokeCasePortalAccessController,
 } from '@/case-management/rest/controllers'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
@@ -25,6 +27,8 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     GetLegalCaseDetailsController,
+    GrantCasePortalAccessController,
+    RevokeCasePortalAccessController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

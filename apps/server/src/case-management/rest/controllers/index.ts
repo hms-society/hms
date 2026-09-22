@@ -6,3 +6,5 @@ export { ReplaceChecklistTemplateController } from './replace-checklist-template
 export { ReviewCaseChecklistGateController } from './review-case-checklist-gate.controller'
 export { CreateLegalCaseController } from './create-legal-case.controller'
 export { GetLegalCaseDetailsController } from './get-legal-case-details.controller'
+export { GrantCasePortalAccessController } from './grant-case-portal-access.controller'
+export { RevokeCasePortalAccessController } from './revoke-case-portal-access.controller'

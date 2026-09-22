@@ -6,12 +6,14 @@ import { ApiResponse } from '@nestjs/swagger'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 const { version } = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
 ) as { version: string }
 
 @Controller()
+@RouteAccess('public')
 export class CheckHealthController {
   constructor(private readonly drizzleClient: DrizzleClient) {}
 
