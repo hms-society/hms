@@ -15,6 +15,7 @@ export type ChecklistItemDetailHeaderProps = {
 export const ChecklistItemDetailHeader = ({
   checklistItem,
   itemView,
+  onBackToCase,
   onOpenValidationDesk,
 }: ChecklistItemDetailHeaderProps) => (
   <section className='rounded-lg border border-border bg-card px-5 py-4 shadow-xs mt-5'>
@@ -46,6 +47,15 @@ export const ChecklistItemDetailHeader = ({
         </div>
 
         <div className='flex flex-wrap justify-end gap-2'>
+          <Button
+            type='button'
+            variant='outline'
+            className='h-8 rounded-pill px-3 text-[11px]'
+            onClick={onBackToCase}
+          >
+            <Icon name='arrow-left' className='size-3' />
+            Voltar ao caso
+          </Button>
           <Button
             type='button'
             variant='outline'

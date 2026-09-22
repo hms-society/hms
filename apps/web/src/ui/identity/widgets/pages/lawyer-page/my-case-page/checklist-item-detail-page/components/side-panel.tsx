@@ -68,9 +68,7 @@ export const ChecklistItemSidePanel = ({
         <dt className='text-muted-foreground'>Posição</dt>
         <dd className='font-semibold text-foreground'>{itemView.itemPositionLabel}</dd>
         <dt className='text-muted-foreground'>Template</dt>
-        <dd className='font-semibold text-foreground'>
-          {checklistItem.checklistTemplateName ?? checklistItem.templateItemKey}
-        </dd>
+        <dd className='font-semibold text-foreground'>{itemView.templateName}</dd>
         <dt className='text-muted-foreground'>Bloqueia gate</dt>
         <dd className='font-semibold text-foreground'>
           {checklistItem.isRequired ? 'Sim' : 'Não'}

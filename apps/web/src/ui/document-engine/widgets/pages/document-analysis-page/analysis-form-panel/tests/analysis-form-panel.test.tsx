@@ -130,7 +130,7 @@ describe('AnalysisFormPanel', () => {
     ).toBe(true)
   })
 
-  it('shows saved not linked notice and keeps saving available', () => {
+  it('shows saved not linked notice without a save action', () => {
     useAnalysisFormPanelMock.mockReturnValue({
       isDuplicateAlreadyConfirmed: false,
       savedDecisionNotice: {
@@ -156,9 +156,6 @@ describe('AnalysisFormPanel', () => {
     expect(screen.getByRole('status').textContent).toContain(
       'Registrado por Advogado de desenvolvimento',
     )
-    expect(
-      (screen.getByRole('button', { name: 'Salvar decisão' }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(false)
+    expect(screen.queryByRole('button', { name: 'Salvar decisão' })).toBeNull()
   })
 })

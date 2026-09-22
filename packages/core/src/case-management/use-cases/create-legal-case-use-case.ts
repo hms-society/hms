@@ -1,7 +1,7 @@
 import { AppError } from '#shared/domain/errors'
 import type { LegalCase } from '../domain/entities'
 import { CaseMemberRole, LegalCaseStatus } from '../domain/structures'
-import type { CaseMembersRepository, LegalCasesRepository } from '../interfaces'
+import type { LegalCasesRepository } from '../interfaces'
 import type { IntakesRepository } from '../../intake/interfaces'
 
 export type CreateLegalCaseUseCaseParams = {

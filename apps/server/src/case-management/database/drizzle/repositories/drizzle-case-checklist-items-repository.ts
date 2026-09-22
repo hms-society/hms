@@ -96,8 +96,10 @@ export class DrizzleCaseChecklistItemsRepository
   }
 
   async markAsValidatedByDocument({
+    caseId,
     checklistItemId,
     documentFileId,
+    documentFileName,
     validatedBy,
   }: Parameters<
     CaseChecklistItemsRepository['markAsValidatedByDocument']
@@ -106,12 +108,18 @@ export class DrizzleCaseChecklistItemsRepository
       .update(caseChecklistItemModel)
       .set({
         documentFileId,
+        documentFileName,
         status: CaseChecklistItemStatus.Validated,
         validatedAt: new Date(),
         validatedBy,
         updatedAt: new Date(),
       })
-      .where(eq(caseChecklistItemModel.id, checklistItemId))
+      .where(
+        and(
+          eq(caseChecklistItemModel.id, checklistItemId),
+          eq(caseChecklistItemModel.caseId, caseId),
+        ),
+      )
       .returning()
 
     return updatedItem ? this.mapper.toDomain(updatedItem) : undefined

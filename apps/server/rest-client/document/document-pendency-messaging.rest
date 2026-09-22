@@ -1,0 +1,184 @@
+@baseUrl = http://localhost:3333
+@seedPassword = {{$dotenv HMS_USER_SEED_PASSWORD}}
+
+# Fluxo completo sem IA. Os IDs são extraídos automaticamente das respostas.
+
+### 00. Autenticar como advogado seed
+# @name signInAsSeededLawyer
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### 01. Localizar Vinicius Lopes Machado
+# @name lookupViniciusClient
+POST {{baseUrl}}/clients/lookup
+Content-Type: application/json
+Accept: application/json
+
+{
+  "phone": "5511987654321"
+}
+
+### 02. Listar casos do advogado
+# @name listMyLegalCases
+GET {{baseUrl}}/cases/my
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### 03. Checklist do caso do Vinicius (seleção automática por nome)
+# @name listViniciusChecklist
+@viniciusCaseId = {{listMyLegalCases.response.body.$[?(@.clientName == 'Vinicius Lopes Machado')].id}}
+GET {{baseUrl}}/cases/{{viniciusCaseId}}/checklist
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### 04. Upload - ilegível
+# @name uploadIllegibleDocument
+POST {{baseUrl}}/document-batches/internal-upload?skipProcessing=true
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=illegible-boundary
+
+--illegible-boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--illegible-boundary
+Content-Disposition: form-data; name="files"; filename="documento-ilegivel.png"
+Content-Type: image/png
+
+< ../../src/document-engine/database/seed-assets/teste_documento_id.png
+--illegible-boundary--
+
+### 05. Upload - incompleto
+# @name uploadIncompleteDocument
+POST {{baseUrl}}/document-batches/internal-upload?skipProcessing=true
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=incomplete-boundary
+
+--incomplete-boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--incomplete-boundary
+Content-Disposition: form-data; name="files"; filename="ficha-incompleta.png"
+Content-Type: image/png
+
+< ../../src/document-engine/database/seed-assets/teste_ficha_cadastral.png
+--incomplete-boundary--
+
+### 06. Upload - não correspondente
+# @name uploadMismatchDocument
+POST {{baseUrl}}/document-batches/internal-upload?skipProcessing=true
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=mismatch-boundary
+
+--mismatch-boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--mismatch-boundary
+Content-Disposition: form-data; name="files"; filename="documento-nao-correspondente.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/procuracao.pdf
+--mismatch-boundary--
+
+### 07. Upload - duplicado
+# @name uploadDuplicateDocument
+POST {{baseUrl}}/document-batches/internal-upload?skipProcessing=true
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=duplicate-boundary
+
+--duplicate-boundary
+Content-Disposition: form-data; name="clientId"
+
+{{lookupViniciusClient.response.body.$.client.id}}
+--duplicate-boundary
+Content-Disposition: form-data; name="files"; filename="documento-duplicado.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/comprovante_endereco.pdf
+--duplicate-boundary--
+
+### 08. Listar documentos enviados
+# @name listValidationDocuments
+GET {{baseUrl}}/document-validation/documents
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### 09. Classificar ilegível e gerar mensagem
+@illegibleDocumentFileId = {{listValidationDocuments.response.body.$[?(@.fileName == 'documento-ilegivel.png')].id}}
+@checklistItemId = {{listViniciusChecklist.response.body.$[0].id}}
+PATCH {{baseUrl}}/document-validation/documents/{{illegibleDocumentFileId}}/decision
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "illegible",
+  "caseId": "{{viniciusCaseId}}",
+  "checklistRequirementId": "{{checklistItemId}}",
+  "reason": "A imagem está sem nitidez e não permite conferir os dados."
+}
+
+### 10. Classificar incompleto e gerar mensagem
+@incompleteDocumentFileId = {{listValidationDocuments.response.body.$[?(@.fileName == 'ficha-incompleta.png')].id}}
+PATCH {{baseUrl}}/document-validation/documents/{{incompleteDocumentFileId}}/decision
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "incomplete",
+  "caseId": "{{viniciusCaseId}}",
+  "checklistRequirementId": "{{checklistItemId}}",
+  "reason": "O documento não contém todas as páginas ou informações necessárias."
+}
+
+### 11. Classificar não correspondente e gerar mensagem
+@mismatchDocumentFileId = {{listValidationDocuments.response.body.$[?(@.fileName == 'documento-nao-correspondente.pdf')].id}}
+PATCH {{baseUrl}}/document-validation/documents/{{mismatchDocumentFileId}}/decision
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "mismatch",
+  "caseId": "{{viniciusCaseId}}",
+  "checklistRequirementId": "{{checklistItemId}}",
+  "reason": "O arquivo não corresponde ao documento exigido pelo checklist."
+}
+
+### 12. Classificar duplicado e gerar mensagem
+@duplicateDocumentFileId = {{listValidationDocuments.response.body.$[?(@.fileName == 'documento-duplicado.pdf')].id}}
+@originalDocumentId = {{listValidationDocuments.response.body.$[?(@.fileName == 'comprovante_endereco.pdf')].id}}
+PATCH {{baseUrl}}/document-validation/documents/{{duplicateDocumentFileId}}/decision
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "decision": "duplicate",
+  "caseId": "{{viniciusCaseId}}",
+  "checklistRequirementId": "{{checklistItemId}}",
+  "originalDocumentId": "{{originalDocumentId}}"
+}
+
+### 13. Listar pendências do caso
+# @name listViniciusPendencies
+GET {{baseUrl}}/cases/{{viniciusCaseId}}/pendencies
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### 14. Consultar a primeira mensagem assistida
+@pendingId = {{listViniciusPendencies.response.body.$[0].id}}
+GET {{baseUrl}}/cases/pendencies/{{pendingId}}/message
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### 15. Aprovar e registrar como enviada internamente
+# Não há integração com WhatsApp; apenas atualiza o banco.
+POST {{baseUrl}}/cases/pendencies/{{pendingId}}/message/approve
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json

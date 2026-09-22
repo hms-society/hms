@@ -18,6 +18,10 @@ import { DocumentValidationStatus } from '@hms/core/document-engine/domain/struc
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { collaboratorModel, userModel } from '@/identity/database/drizzle/models'
+import {
+  caseChecklistItemModel,
+  legalCaseModel,
+} from '@/case-management/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { documentBatchFileModel, documentBatchModel } from '../models'
@@ -25,6 +29,8 @@ import { documentBatchFileModel, documentBatchModel } from '../models'
 type DocumentValidationRecord = typeof documentBatchFileModel.$inferSelect & {
   batch: typeof documentBatchModel.$inferSelect
   reviewerName?: string | null
+  caseLabel?: string | null
+  checklistItemLabel?: string | null
 }
 
 @Injectable()
@@ -46,6 +52,8 @@ export class DrizzleDocumentValidationsRepository
         reviewerName: sql<
           string | null
         >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
@@ -54,6 +62,11 @@ export class DrizzleDocumentValidationsRepository
       )
       .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
       .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
+      )
       .$dynamic()
 
     const conditions = [
@@ -72,6 +85,8 @@ export class DrizzleDocumentValidationsRepository
         ...record.file,
         batch: record.batch,
         reviewerName: record.reviewerName,
+        caseLabel: record.caseLabel,
+        checklistItemLabel: record.checklistItemLabel,
       }),
     )
   }
@@ -86,6 +101,8 @@ export class DrizzleDocumentValidationsRepository
         reviewerName: sql<
           string | null
         >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
@@ -94,6 +111,11 @@ export class DrizzleDocumentValidationsRepository
       )
       .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
       .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
+      )
       .where(eq(documentBatchFileModel.id, documentFileId))
 
     if (!record) {
@@ -104,6 +126,8 @@ export class DrizzleDocumentValidationsRepository
       ...record.file,
       batch: record.batch,
       reviewerName: record.reviewerName,
+      caseLabel: record.caseLabel,
+      checklistItemLabel: record.checklistItemLabel,
     })
   }
 
@@ -118,6 +142,8 @@ export class DrizzleDocumentValidationsRepository
         reviewerName: sql<
           string | null
         >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
@@ -126,6 +152,11 @@ export class DrizzleDocumentValidationsRepository
       )
       .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
       .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
+      )
       .where(
         and(
           eq(documentBatchFileModel.hashSha256, hashSha256),
@@ -143,6 +174,8 @@ export class DrizzleDocumentValidationsRepository
       ...record.file,
       batch: record.batch,
       reviewerName: record.reviewerName,
+      caseLabel: record.caseLabel,
+      checklistItemLabel: record.checklistItemLabel,
     })
   }
 
@@ -277,10 +310,13 @@ export class DrizzleDocumentValidationsRepository
       missingFields,
       checklistLink: {
         caseId: record.caseId ?? undefined,
-        caseLabel: (aiSuggestion.caseLabel as string | undefined) ?? undefined,
+        caseLabel:
+          record.caseLabel ?? (aiSuggestion.caseLabel as string | undefined) ?? undefined,
         checklistItemId: record.checklistItemId ?? undefined,
         checklistItemLabel:
-          (aiSuggestion.checklistItemLabel as string | undefined) ?? undefined,
+          record.checklistItemLabel ??
+          (aiSuggestion.checklistItemLabel as string | undefined) ??
+          undefined,
       },
       duplicateMatch,
       failure,

@@ -45,6 +45,8 @@ function createController(
       { id: '1', title: 'Procuração', status: 'validado' },
       { id: '2', title: 'CNIS', status: 'solicitado' },
     ],
+    pendingCountByChecklistItemId: new Map(),
+    pendings: [],
     complementaryItems: [],
     decisionReasonDialog: {
       confirmLabel: 'Confirmar exceção',

@@ -1,4 +1,12 @@
-import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
+import {
+  Get,
+  HttpStatus,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type {
   CaseChecklistItemsRepository,
@@ -57,10 +65,14 @@ export class ListCaseChecklistController {
   })
   handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
+    @Query('clientId', new ParseUUIDPipe({ optional: true })) clientId:
+      | string
+      | undefined,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
     return this.useCase.execute({
       caseId,
+      clientId,
       collaboratorId: collaborator.collaboratorId,
     })
   }
