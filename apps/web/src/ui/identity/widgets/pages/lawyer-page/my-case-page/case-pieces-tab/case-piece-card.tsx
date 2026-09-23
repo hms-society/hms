@@ -94,7 +94,7 @@ export function CasePieceCard({ piece, onOpenViewer }: CasePieceCardProps) {
           </Button>
         </div>
         <span className='text-right text-[11px] text-muted-foreground'>
-          Protocolo bloqueado até aprovação da revisão
+          {piece.status === 'Aprovada' ? 'Pronta para protocolo' : 'Protocolo bloqueado até aprovação da revisão'}
         </span>
       </footer>
     </article>

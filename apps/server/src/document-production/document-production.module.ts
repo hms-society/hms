@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
 
 import { IdentityModule } from '@/identity/identity.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
-import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 import { DocumentProductionMessagingModule } from '@/document-production/messaging/document-production-messaging.module'
 import {
   CreateDocumentSpecificationController,
@@ -14,11 +14,13 @@ import {
   UpdateDocumentSpecificationConfigurationController,
   UpdateDocumentSpecificationTemplateController,
   UpdateDocumentAccessClassificationController,
+  ListCaseDocumentsController,
 } from '@/document-production/rest/controllers'
 
 @Module({
   imports: [
     IdentityModule,
+    CaseManagementDatabaseModule,
     LegalCatalogModule,
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
@@ -32,8 +34,8 @@ import {
     UpdateDocumentSpecificationConfigurationController,
     UpdateDocumentSpecificationTemplateController,
     UpdateDocumentAccessClassificationController,
+    ListCaseDocumentsController,
   ],
-  providers: [DocumentProductionSeeder],
-  exports: [DocumentProductionSeeder, DocumentProductionMessagingModule],
+  exports: [DocumentProductionMessagingModule],
 })
 export class DocumentProductionModule {}

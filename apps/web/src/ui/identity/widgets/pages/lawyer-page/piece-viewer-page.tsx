@@ -1,6 +1,9 @@
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import { useQuery } from '@tanstack/react-query'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { DocumentEditor } from '@/ui/document-production/widgets/components/document-editor'
 
 type PieceViewerPageProps = {
   caseId: string
@@ -17,6 +20,17 @@ export function PieceViewerPage({
   onOpenEditor,
   onOpenReview,
 }: PieceViewerPageProps) {
+  const { caseDocumentProductionService } = useRestContext()
+  const documentQuery = useQuery({
+    queryKey: ['case-document', caseId, documentId],
+    queryFn: () => caseDocumentProductionService.getDocument(caseId, documentId),
+  })
+  const document = documentQuery.data?.body
+  const currentVersion = document?.versions.find((version) => version.id === document.currentVersionId) ?? document?.versions.at(-1)
+
+  if (documentQuery.isLoading) return <div className='flex min-h-screen items-center justify-center text-muted-foreground'>Carregando documento...</div>
+  if (documentQuery.isError || !document) return <div className='flex min-h-screen flex-col items-center justify-center gap-4 text-muted-foreground'><p>Documento não encontrado para este caso.</p><Button variant='outline' onClick={onClose}>Voltar para meus casos</Button></div>
+
   return (
     <div className='flex min-h-[calc(100vh-5rem)] flex-col bg-muted/50'>
       <header className='flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-6 py-4'>
@@ -26,12 +40,12 @@ export function PieceViewerPage({
           </p>
           <div className='mt-1 flex flex-wrap items-center gap-3'>
             <h1 className='font-serif text-xl font-semibold'>
-              Requerimento Administrativo — Aposentadoria por Tempo de Contribuição
+              {document.title}
             </h1>
-            <Badge variant='success'>v3 · Versão atual</Badge>
+            <Badge variant='success'>{currentVersion ? `v${currentVersion.versionNumber} · Versão atual` : 'Não gerado'}</Badge>
           </div>
           <p className='mt-1 text-xs text-muted-foreground'>
-            Mariana Costa · Submetida hoje, 10:12 · Base: minuta gerada com IA (v1)
+            {currentVersion ? `Versão ${currentVersion.versionNumber} · ${currentVersion.source === 'ai' ? 'Gerada com IA' : 'Editada manualmente'}` : 'Nenhuma versão gerada'}
           </p>
         </div>
         <Button
@@ -44,32 +58,18 @@ export function PieceViewerPage({
         </Button>
       </header>
       <main className='flex-1 overflow-y-auto p-8'>
-        <article className='mx-auto min-h-[760px] max-w-[760px] bg-card px-16 py-14 shadow-sm'>
-          <p className='text-center font-serif text-base font-semibold'>
-            AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS
-          </p>
-          <p className='mt-2 text-center text-sm text-muted-foreground'>
-            Agência da Previdência Social — São José dos Campos/SP
-          </p>
-          <p className='mt-14 text-sm leading-8'>
-            ANTÔNIO CARVALHO DA SILVA, brasileiro, casado, industrial, portador do RG nº
-            •••.••• e CPF nº •••.•••-45, residente e domiciliado à Rua Vitória Régia, nº
-            210, requer a concessão do benefício previdenciário.
-          </p>
-          <h2 className='mt-10 text-center font-serif text-base font-semibold'>
-            APOSENTADORIA POR TEMPO DE CONTRIBUIÇÃO
-          </h2>
-          <p className='mt-10 text-sm leading-8'>
-            Pelas razões de fato e de direito a seguir expostas, com a juntada dos
-            documentos comprobatórios do dossiê aprovado em 14/07/2026, requer o
-            reconhecimento dos requisitos legais.
-          </p>
-          <h2 className='mt-10 font-serif text-base font-semibold'>I — DOS FATOS</h2>
-          <p className='mt-3 text-sm leading-8'>
-            O requerente é filiado ao Regime Geral de Previdência Social desde 12/03/1989,
-            tendo exercido atividade laboral ininterrupta devidamente registrada.
-          </p>
-        </article>
+        <section className='mx-auto max-w-[900px] overflow-hidden rounded-xl border bg-card shadow-sm'>
+          {currentVersion?.content ? (
+            <DocumentEditor
+              content={currentVersion.content}
+              onChange={() => undefined}
+              ariaLabel={`Conteúdo da versão ${currentVersion.versionNumber}`}
+              editable={false}
+            />
+          ) : (
+            <p className='p-8 text-sm text-muted-foreground'>Esta versão ainda não possui conteúdo.</p>
+          )}
+        </section>
       </main>
       <footer className='flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-6 py-4'>
         <Button variant='outline' size='sm'>

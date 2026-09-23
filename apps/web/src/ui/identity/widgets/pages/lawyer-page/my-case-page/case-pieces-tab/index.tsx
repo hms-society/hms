@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
@@ -10,50 +11,42 @@ import { NewPieceDialog } from './new-piece-dialog'
 import { PieceViewerDialog } from './piece-viewer-dialog'
 import { PieceWorkflowDialog, ReviewActionDialog } from './piece-workflow-dialog'
 import type { CasePiece } from './types'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export type CasePiecesTabProps = {
   dossierApproved: boolean
   caseId?: string
 }
 
-const MOCK_PIECES: CasePiece[] = [
-  {
-    id: 'requerimento-administrativo',
-    title: 'Requerimento Administrativo — Aposentadoria por Tempo de Contribuição',
-    template: 'Requerimento INSS v2',
-    author: 'Mariana Costa',
-    reviewer: 'Dr. Ricardo Mendes',
-    updatedAt: '10:12',
-    status: 'Em revisão técnica',
-    versions: [
-      {
-        id: 'v3',
-        label: 'v3',
-        title: 'Submetida para revisão técnica',
-        author: 'Mariana Costa',
-        timestamp: 'hoje, 10:12',
-      },
-      {
-        id: 'v2',
-        label: 'v2',
-        title: 'Ajustes na fundamentação e períodos contributivos',
-        author: 'Mariana Costa',
-        timestamp: 'ontem, 17:40',
-      },
-      {
-        id: 'v1',
-        label: 'v1',
-        title: 'Minuta inicial gerada com IA a partir do dossiê',
-        author: 'Sistema',
-        timestamp: '14/07, 15:05',
-        meta: 'confiança 94%',
-      },
-    ],
-  },
-]
-
 export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
   const navigate = useNavigate()
+  const { caseDocumentProductionService } = useRestContext()
+  const { data: pieces = [], isLoading } = useQuery({
+    queryKey: ['case-documents', caseId],
+    enabled: dossierApproved && Boolean(caseId),
+    queryFn: async () => {
+      if (!caseId) return []
+      const response = await caseDocumentProductionService.listDocuments(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body.map<CasePiece>((document) => ({
+        id: document.id,
+        title: document.title,
+        template: 'Modelo documental',
+        author: 'Colaborador do caso',
+        reviewer: 'Revisor do caso',
+        updatedAt: formatDate(document.versions[0]?.createdAt),
+        status: document.versions[0]?.status === 'approved' ? 'Aprovada' : 'Em revisão técnica',
+        versions: document.versions.map((version) => ({
+          id: version.id,
+          label: `v${version.versionNumber}`,
+          title: formatVersionStatus(version.status),
+          author: 'Colaborador responsável',
+          timestamp: formatDate(version.createdAt),
+          meta: version.rejectionReason,
+        })),
+      }))
+    },
+  })
   const [isNewPieceOpen, setIsNewPieceOpen] = useState(false)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [workflow, setWorkflow] = useState<'editor' | 'review' | null>(null)
@@ -73,7 +66,9 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
       <DossierGateBanner approved={dossierApproved} />
       {dossierApproved ? (
         <>
-          {MOCK_PIECES.map((piece) => (
+          {isLoading ? <p className='rounded-md border border-border p-4 text-sm text-muted-foreground'>Carregando peças...</p> : null}
+          {!isLoading && pieces.length === 0 ? <p className='rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground'>Nenhuma peça foi adicionada a este caso.</p> : null}
+          {pieces.map((piece) => (
             <CasePieceCard
               key={piece.id}
               piece={piece}
@@ -128,4 +123,13 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
       />
     </div>
   )
+}
+
+function formatDate(value?: string) {
+  if (!value) return '—'
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+}
+
+function formatVersionStatus(status: string) {
+  return { approved: 'Aprovada', in_review: 'Em revisão', rejected: 'Rejeitada', generating: 'Gerando', generation_failed: 'Falha na geração' }[status] ?? status
 }

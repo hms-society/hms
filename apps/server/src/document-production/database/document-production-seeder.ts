@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type {
   DocumentGenerationCreation,
   DocumentGeneration,
@@ -28,14 +30,18 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
+import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
   readonly consultationId: string
+  readonly caseId?: string
+  readonly caseName?: string
   readonly requestedByCollaboratorId?: string
 }
 
@@ -50,61 +56,78 @@ type DocumentTemplateSeed = {
 const DOCUMENT_TEMPLATES = [
   {
     documentId: '00000000-0000-4000-8000-000000000201',
-    name: 'Procuração',
-    description: 'Procuração para representação em negociação contratual.',
+    name: 'Requerimento Administrativo de Aposentadoria',
+    description: 'Requerimento previdenciário para reconhecimento de tempo de contribuição e concessão de aposentadoria.',
     paragraphs: [
-      '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
-      'Os poderes ficam limitados à análise e à negociação do contrato relacionado ao atendimento descrito na consulta.',
-      'Área jurídica: {area_juridica}. Tema jurídico: {tema_juridico}.',
+      'Ao Instituto Nacional do Seguro Social — INSS, {cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, requer a concessão do benefício previdenciário.',
+      'O pedido inclui o reconhecimento do tempo de contribuição de {tempo_contribuicao} e a análise dos períodos não computados no CNIS.',
+      'Instruem o requerimento os documentos de identificação, comprovante de residência, extrato do CNIS e comprovantes dos vínculos.',
     ],
     variables: [
       { label: 'Nome do cliente', technicalName: 'cliente_nome' },
       { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
-      { label: 'Área jurídica', technicalName: 'area_juridica' },
-      { label: 'Tema jurídico', technicalName: 'tema_juridico' },
+      { label: 'Tempo de contribuição', technicalName: 'tempo_contribuicao' },
     ],
   },
   {
     documentId: '00000000-0000-4000-8000-000000000202',
-    name: 'Declaração de informações da consulta',
-    description: 'Síntese declaratória dos dados apresentados durante a consulta.',
+    name: 'Manifestação sobre Tempo de Contribuição',
+    description: 'Manifestação previdenciária sobre divergências no tempo de contribuição reconhecido administrativamente.',
     paragraphs: [
-      'Declaro que as informações usadas neste documento correspondem aos dados apresentados na consulta.',
-      'Questão principal: {questao_juridica_principal}.',
-      'Orientação registrada: {orientacao_fornecida}.',
+      'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS',
+      'Processo/Caso nº: {numero_caso}',
+      '{cliente_nome}, brasileiro(a), portador(a) do CPF nº {cliente_cpf}, por meio de seu procurador, apresenta a presente MANIFESTAÇÃO SOBRE TEMPO DE CONTRIBUIÇÃO, pelos fatos e fundamentos a seguir expostos.',
+      '1. DA QUALIFICAÇÃO DAS PARTES',
+      '{cliente_nome}, brasileiro(a), residente e domiciliado(a) no endereço informado no processo, por meio de seu procurador regularmente constituído, manifesta-se nos autos do processo/caso nº {numero_caso}, relativo ao benefício previdenciário em análise.',
+      '2. DO OBJETO DA MANIFESTAÇÃO',
+      'A presente manifestação tem por objeto o pronunciamento do requerente acerca do cômputo de tempo de contribuição apurado no âmbito do processo/caso, com vistas ao esclarecimento de divergências identificadas entre o tempo reconhecido administrativamente e aquele comprovado pela documentação constante dos autos, atualmente estimado em {tempo_contribuicao}.',
+      '3. DO HISTÓRICO DO PROCESSAMENTO',
+      'No curso da análise administrativa do benefício, foi apurado, com base nos registros do Cadastro Nacional de Informações Sociais (CNIS), tempo de contribuição divergente daquele apresentado pelo requerente.',
+      'O requerente reuniu documentação complementar apta a esclarecer a divergência, notadamente registros funcionais, contratos de trabalho, recibos de pagamento e demais elementos de prova material, que corroboram a alegação do tempo de contribuição informado.',
+      '4. DA ANÁLISE DO TEMPO DE CONTRIBUIÇÃO CONTROVERTIDO',
+      'A divergência decorre, em grande medida, de falhas no repasse de informações por empregadores e tomadores de serviço, não podendo tal circunstância ser imputada ao segurado que efetivamente exerceu a atividade laboral e sofreu o desconto das contribuições previdenciárias.',
+      'A responsabilidade pelo recolhimento das contribuições previdenciárias incidentes sobre a remuneração do empregado é do empregador, não podendo o segurado ser prejudicado por eventual inadimplemento ou omissão de terceiro na comunicação dos valores ao órgão previdenciário.',
+      'Ainda que determinados períodos não constem integralmente no CNIS, tal circunstância não afasta o direito ao reconhecimento do tempo de contribuição, desde que devidamente comprovado por outros meios de prova idôneos.',
+      '5. DO PEDIDO',
+      'Diante do exposto, requer-se o recebimento e a juntada da presente manifestação aos autos; o reconhecimento do tempo de contribuição de {tempo_contribuicao}; a intimação do requerente acerca de eventual decisão; e, subsidiariamente, a apresentação de motivação específica quanto aos períodos não reconhecidos.',
+      'Termos em que, pede deferimento.',
+      'Comarca Fictícia, {data_documento}.',
+      '{cliente_nome}\nRequerente',
     ],
     variables: [
       {
-        label: 'Questão jurídica principal',
-        technicalName: 'questao_juridica_principal',
+        label: 'Tempo de contribuição',
+        technicalName: 'tempo_contribuicao',
       },
-      { label: 'Orientação fornecida', technicalName: 'orientacao_fornecida' },
     ],
   },
   {
     documentId: '00000000-0000-4000-8000-000000000203',
-    name: 'Teste de revisão — Procuração inconsistente',
-    description:
-      'Cenário intencionalmente inconsistente para exercitar a revisão automática.',
+    name: 'Petição de Juntada de Documentos',
+    description: 'Petição para juntada de documentos complementares ao processo administrativo previdenciário.',
     paragraphs: [
-      '{cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, nomeia seu procurador para representá-lo.',
-      'O mandato é exclusivamente limitado à análise e à negociação do contrato de locação residencial descrito na consulta.',
-      'Sem prejuízo da limitação anterior, o procurador recebe poderes gerais, irrestritos e irrevogáveis para alienar, adquirir e onerar quaisquer bens do outorgante.',
-      'O objeto da representação é a compra e venda de imóvel comercial situado em {endereco_imovel_comercial}.',
-      'Fica expressamente declarado que a consulta não estabeleceu qualquer limitação aos poderes concedidos.',
+      'O requerente {cliente_nome} requer a juntada de documentos complementares aos autos do processo/caso {numero_caso}.',
+      'A documentação apresentada complementa a prova do tempo de contribuição e esclarece divergências identificadas na análise administrativa.',
+      'São juntados documento de identificação, comprovante de residência, extrato do CNIS e documentos comprobatórios de vínculos empregatícios.',
     ],
     variables: [
       { label: 'Nome do cliente', technicalName: 'cliente_nome' },
       { label: 'CPF do cliente', technicalName: 'cliente_cpf' },
-      {
-        label: 'Endereço do imóvel comercial',
-        technicalName: 'endereco_imovel_comercial',
-      },
+      { label: 'Número do caso', technicalName: 'numero_caso' },
     ],
   },
 ] as const satisfies readonly DocumentTemplateSeed[]
 
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
+
+function sanitizeStorageSegment(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase()
+}
 
 const SEEDED_GENERATION_IDS = [
   '00000000-0000-4000-8000-000000000401',
@@ -118,10 +141,10 @@ const SEEDED_VERSION_IDS = [
   '00000000-0000-4000-8000-000000000503',
 ] as const
 
-const SEEDED_FILE_IDS = [
-  '00000000-0000-4000-8000-000000000601',
-  '00000000-0000-4000-8000-000000000602',
-  '00000000-0000-4000-8000-000000000603',
+const SEEDED_FILE_NAMES = [
+  'requerimento-administrativo-aposentadoria-v1.docx',
+  'manifestacao-tempo-contribuicao-v1.docx',
+  'peticao-juntada-documentos-v1.docx',
 ] as const
 
 @Injectable()
@@ -139,6 +162,8 @@ export class DocumentProductionSeeder {
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(PROVISION_PROVIDERS.fileStorage)
+    private readonly fileStorageProvider: FileStorageProvider,
   ) {}
 
   async clear() {
@@ -200,10 +225,7 @@ export class DocumentProductionSeeder {
     const documents = await this.documentsRepository.addMany(documentCreations)
     const seededPackage = DocumentPackageFaker.fake({
       id: DOCUMENT_PRODUCTION_PACKAGE_ID,
-      context: {
-        type: 'consultation',
-        consultationId: references.consultationId,
-      },
+      context: { type: 'consultation', consultationId: references.consultationId },
     })
     const documentPackageCreation: DocumentPackageCreation = {
       id: seededPackage.id,
@@ -238,11 +260,29 @@ export class DocumentProductionSeeder {
       packageDocumentCreations,
     )
 
+    if (references.caseId) {
+      const casePackage = await this.documentPackagesRepository.add({
+        id: '00000000-0000-4000-8000-000000000302',
+        context: { type: 'case', caseId: references.caseId },
+      })
+      await this.packageDocumentsRepository.addMany(
+        documents.map((document, index) => ({
+          ...PackageDocumentFaker.fake({
+            documentPackageId: casePackage.id,
+            documentId: document.id,
+            documentSpecificationId: specifications[index]?.id,
+          }),
+          documentPackageId: casePackage.id,
+        })),
+      )
+    }
+
     const generatedDocuments = references.requestedByCollaboratorId
       ? await this.seedApprovedDocumentVersions({
           documents,
           specifications,
           consultationId: references.consultationId,
+          caseName: references.caseName,
           requestedByCollaboratorId: references.requestedByCollaboratorId,
         })
       : { generations: [], versions: [] }
@@ -260,6 +300,7 @@ export class DocumentProductionSeeder {
     documents,
     specifications,
     consultationId,
+    caseName,
     requestedByCollaboratorId,
   }: {
     readonly documents: readonly { id: string; title: string }[]
@@ -270,6 +311,7 @@ export class DocumentProductionSeeder {
       variables: readonly DocumentTemplateVariable[]
     }[]
     readonly consultationId: string
+    readonly caseName?: string
     readonly requestedByCollaboratorId: string
   }) {
     const startedAt = new Date('2026-08-20T15:05:00.000Z')
@@ -281,14 +323,24 @@ export class DocumentProductionSeeder {
       const specification = specifications[index]
       const generationId = SEEDED_GENERATION_IDS[index]
       const versionId = SEEDED_VERSION_IDS[index]
-      const fileId = SEEDED_FILE_IDS[index]
+      const fileName = SEEDED_FILE_NAMES[index]
 
-      if (!specification || !generationId || !versionId || !fileId) {
+      if (!specification || !generationId || !versionId || !fileName) {
         throw new AppError(
           'The generated document seed references could not be resolved.',
           'Seed Error',
         )
       }
+
+      const fileContent = await readFile(join(process.cwd(), 'src/document-production/database/seed-assets', fileName))
+      const safeCaseName = sanitizeStorageSegment(caseName ?? 'case')
+      const storedFile = await this.fileStorageProvider.save({
+        filePath: `cases/${safeCaseName}/pieces/${document.id}/versions/${versionId}/${fileName}`,
+        fileName,
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        sizeInBytes: fileContent.byteLength,
+        content: new Uint8Array(fileContent),
+      })
 
       const generated = DocumentGenerationFaker.fake({
         id: generationId,
@@ -344,7 +396,7 @@ export class DocumentProductionSeeder {
         id: versionId,
         documentId: document.id,
         documentGenerationId: createdGeneration.id,
-        fileId,
+        fileId: storedFile.id,
         versionNumber: 1,
         source: 'ai',
         content: specification.content,
@@ -367,27 +419,13 @@ export class DocumentProductionSeeder {
         status: version.status,
       }
       const createdVersion = await this.versionsRepository.add(versionCreation)
-      const approvedVersion = await this.versionsRepository.review(
-        createdVersion.id,
-        'approved',
-        requestedByCollaboratorId,
-        reviewedAt,
-      )
-
-      if (!approvedVersion) {
-        throw new AppError(
-          'The seeded document version could not be approved.',
-          'Seed Error',
-        )
-      }
-
       const completedGeneration = await this.generationsRepository.replace(
         createdGeneration.id,
         {
           status: 'completed',
           attemptsCount: 1,
           findings: [],
-          documentVersionId: approvedVersion.id,
+          documentVersionId: createdVersion.id,
           completedAt: reviewedAt,
           updatedAt: reviewedAt,
         },
@@ -402,7 +440,7 @@ export class DocumentProductionSeeder {
       }
 
       generations.push(completedGeneration)
-      versions.push(approvedVersion)
+      versions.push(createdVersion)
     }
 
     return { generations, versions }

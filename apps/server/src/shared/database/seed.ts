@@ -101,6 +101,9 @@ async function bootstrap() {
     )
 
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+    const piecesSeedClient = identitySeed.clients.find(
+      ({ email }) => email === 'vinicius.lopes.machado@hms.test',
+    )
 
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
 
@@ -112,7 +115,7 @@ async function bootstrap() {
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
 
-    if (!client || !lawyer || !attendant || !actor) {
+    if (!client || !piecesSeedClient || !lawyer || !attendant || !actor) {
       throw new AppError('Document Production seed identities could not be resolved')
     }
 
@@ -140,7 +143,7 @@ async function bootstrap() {
       .filter(({ profile }) => profile === 'intern')
       .map(({ id }) => id)
 
-    await app.get(CaseManagementSeeder).run({
+    const caseManagementSeed = await app.get(CaseManagementSeeder).run({
       contractedIntakes: intakeSeed.intakes.filter(
         ({ status }) => status === IntakeStatus.Contracted,
       ),
@@ -172,10 +175,21 @@ async function bootstrap() {
       throw new AppError('The document-production Consultation could not be seeded')
     }
 
+    const piecesCase = caseManagementSeed.legalCases.find(
+      ({ clientId }) => clientId === piecesSeedClient.id,
+    )
+    if (!piecesCase) {
+      throw new AppError(
+        'The Vinicius Lopes Machado case could not be resolved for document seed',
+      )
+    }
+
     const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
       consultationId: consultationSeed.consultation.id,
+      caseId: piecesCase.id,
+      caseName: piecesCase.publicCode,
       requestedByCollaboratorId: lawyer.id,
     })
 
