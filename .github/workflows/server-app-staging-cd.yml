@@ -3,9 +3,10 @@ name: Server App Staging CD
 on:
   push:
     branches:
-      - feat/scrum-138-document-production-server-develop
-      # Temporary for PR #172; remove before merging.
-      - feat/hms-observability
+      - develop
+  pull_request:
+    branches:
+      - fix/db-seed
   workflow_dispatch:
 
 permissions:
