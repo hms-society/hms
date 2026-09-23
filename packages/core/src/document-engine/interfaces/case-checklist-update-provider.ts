@@ -4,8 +4,15 @@ export type LinkValidatedDocumentToChecklistRequest = {
   validatedBy: string
 }
 
+export type MarkDocumentResendRequestedRequest = {
+  documentFileId: string
+}
+
 export interface CaseChecklistUpdateProvider {
   linkValidatedDocumentToChecklist(
     request: LinkValidatedDocumentToChecklistRequest,
+  ): Promise<void>
+  markDocumentResendRequested(
+    request: MarkDocumentResendRequestedRequest,
   ): Promise<void>
 }

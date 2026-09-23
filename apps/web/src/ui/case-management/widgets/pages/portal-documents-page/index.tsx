@@ -43,7 +43,9 @@ function DocumentRow({
           </p>
           <p className='mt-1 font-sans text-xs text-muted-foreground'>
             {isPending
-              ? 'Envie um arquivo legível para resolver esta pendência.'
+              ? item.documentFileName
+                ? 'Envie uma nova versão do documento para resolver esta pendência.'
+                : 'Envie um arquivo legível para resolver esta pendência.'
               : isValidated
                 ? item.documentFileName
                   ? `${item.documentFileName} · documento validado`

@@ -7,6 +7,7 @@ import { MarkCaseChecklistItemValidatedUseCase } from '@hms/core/case-management
 import type {
   CaseChecklistUpdateProvider as CaseChecklistUpdateProviderContract,
   LinkValidatedDocumentToChecklistRequest,
+  MarkDocumentResendRequestedRequest,
 } from '@hms/core/document-engine/interfaces'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
@@ -17,12 +18,12 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
-    caseChecklistItemsRepository: CaseChecklistItemsRepository,
+    private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
     legalCasesRepository: LegalCasesRepository,
   ) {
     this.useCase = new MarkCaseChecklistItemValidatedUseCase(
-      caseChecklistItemsRepository,
+      this.caseChecklistItemsRepository,
       legalCasesRepository,
     )
   }
@@ -42,6 +43,22 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
       checklistItemId: string
       documentFileId: string
       validatedBy: string
+    })
+  }
+
+  async markDocumentResendRequested(
+    request: MarkDocumentResendRequestedRequest,
+  ): Promise<void> {
+    const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
+      request.documentFileId,
+    )
+
+    if (!checklistItem) return
+
+    await this.caseChecklistItemsRepository.linkPendingDocument({
+      checklistItemId: checklistItem.id,
+      documentFileId: request.documentFileId,
+      documentFileName: checklistItem.documentFileName ?? 'Documento enviado',
     })
   }
 }
