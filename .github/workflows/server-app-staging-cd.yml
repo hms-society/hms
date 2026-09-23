@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - feat/scrum-138-document-production-server-develop
+      # Temporary for PR #172; remove before merging.
+      - feat/hms-observability
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,9 @@ concurrency:
 
 jobs:
   deploy-staging:
-    if: github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop'
+    if: >-
+      github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop' ||
+      github.ref == 'refs/heads/feat/hms-observability'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
