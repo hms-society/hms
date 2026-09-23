@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - codex/fix-staging-server-degradation
   workflow_dispatch:
 
 permissions:
@@ -17,8 +16,7 @@ concurrency:
 jobs:
   deploy-staging:
     if: >-
-      github.ref == 'refs/heads/develop' ||
-      github.ref == 'refs/heads/codex/fix-staging-server-degradation'
+      github.ref == 'refs/heads/develop'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
