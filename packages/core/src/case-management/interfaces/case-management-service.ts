@@ -22,6 +22,15 @@ export type PortalDocumentUploadResponse = {
   sentAt: string
 }
 
+export type GrantCasePortalAccessResponse = {
+  grantId: string
+  caseId: string
+  accessToken: string
+  portalAccessUrl: string
+  expiresAt: string
+  canUpload: boolean
+}
+
 export type AddCaseChecklistComplementaryItemRequest = {
   templateItemKey: string
   title: string
@@ -71,6 +80,11 @@ export interface CaseManagementService {
   ): Promise<RestResponse<ChecklistTemplate>>
 
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
+
+  grantCasePortalAccess(
+    caseId: string,
+    request: { canUpload: boolean },
+  ): Promise<RestResponse<GrantCasePortalAccessResponse>>
 
   reviewChecklistGate(
     caseId: string,

@@ -93,7 +93,9 @@ export class UploadCasePortalDocumentController {
       }],
     })
 
-    const uploadedFile = batch.files?.[0]
+    const uploadedFile = batch.files?.find(
+      (batchFile) => batchFile.storagePath === storagePath,
+    )
     if (!uploadedFile) throw new BadRequestException('O arquivo não foi registrado.')
 
     const updatedItem = await this.checklistItemsRepository.markAsInAnalysisByDocument({

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
+import { PortalAccessDialog } from './portal-access-dialog'
 import { useMyCasePage } from './use-my-case-page'
 
 export type CasoDetalheChecklistPageProps = {
@@ -28,6 +29,12 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     pendingItemsCount,
     validatedItemsCount,
     handleOpenChecklistTab,
+    handleClosePortalAccessDialog,
+    handleCopyPortalLink,
+    handleGeneratePortalLink,
+    isGeneratingPortalLink,
+    portalAccessExpiresAt,
+    portalAccessUrl,
     setActiveTab,
   } = useMyCasePage({ caseId })
 
@@ -91,6 +98,16 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             >
               <Icon name='plus' className='size-3' />
               Nova tarefa
+            </Button>
+            <Button
+              variant='outline'
+              size='xs'
+              className='rounded-full border-primary bg-background text-primary hover:bg-primary/10'
+              disabled={isGeneratingPortalLink}
+              onClick={handleGeneratePortalLink}
+            >
+              <Icon name='link' className='size-3' />
+              {isGeneratingPortalLink ? 'Gerando link...' : 'Gerar link para terceiro'}
             </Button>
             <Button size='xs' className='rounded-full'>
               <Icon name='plus' className='size-3' />
@@ -214,6 +231,16 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           />
         </TabsContent>
       </Tabs>
+
+      <PortalAccessDialog
+        expiresAt={portalAccessExpiresAt}
+        onCopy={handleCopyPortalLink}
+        onOpenChange={(open) => {
+          if (!open) handleClosePortalAccessDialog()
+        }}
+        open={Boolean(portalAccessUrl)}
+        url={portalAccessUrl}
+      />
     </div>
   )
 }

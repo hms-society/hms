@@ -5,7 +5,10 @@ import type {
   LegalCase,
   LegalCaseSummary,
 } from '@hms/core/case-management/domain/entities'
-import type { PortalDocumentUploadResponse } from '@hms/core/case-management/interfaces'
+import type {
+  GrantCasePortalAccessResponse,
+  PortalDocumentUploadResponse,
+} from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
 export const CaseManagementService = (
@@ -41,6 +44,13 @@ export const CaseManagementService = (
 
     getLegalCaseDetails(caseId) {
       return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
+    },
+
+    grantCasePortalAccess(caseId, request) {
+      return restClient.post<GrantCasePortalAccessResponse>(
+        `/cases/${caseId}/portal-access`,
+        request,
+      )
     },
 
     reviewChecklistGate(caseId, request) {
