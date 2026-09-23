@@ -14,6 +14,7 @@
     "./communication/domain/events": "./src/communication/domain/events/index.ts",
     "./communication/domain/structures": "./src/communication/domain/structures/index.ts",
     "./communication/interfaces": "./src/communication/interfaces/index.ts",
+    "./communication/use-cases": "./src/communication/use-cases/index.ts",
     "./consultation/domain/entities": "./src/consultation/domain/entities/index.ts",
     "./consultation/domain/entities/fakers": "./src/consultation/domain/entities/fakers/index.ts",
     "./consultation/domain/errors": "./src/consultation/domain/errors/index.ts",

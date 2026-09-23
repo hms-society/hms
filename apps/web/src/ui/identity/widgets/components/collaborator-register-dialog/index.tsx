@@ -105,6 +105,18 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
                     Será usado para login e receberá o link de definição de senha
                   </p>
                 </Field>
+                {profile === 'lawyer' && (
+                  <Field label='Celular / WhatsApp Profissional *'>
+                    <Input
+                      id='lawyer-whatsapp-phone-input'
+                      className='rounded-md px-3 text-[13px]'
+                      placeholder='+55 (11) 99999-9999'
+                    />
+                    <p className='mt-1 text-[11px] text-muted-foreground'>
+                      Número institucional corporativo do advogado (obrigatório para WhatsApp WABA)
+                    </p>
+                  </Field>
+                )}
               </div>
             </section>
             <div className='h-px bg-border' />
