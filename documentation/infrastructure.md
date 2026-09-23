@@ -250,6 +250,102 @@ docker-compose.yml
 * **Hostinger VPS:** Main server for Coolify.
 * **Cloudflare:** DNS, proxy, TLS, basic WAF, and domain protection.
 * **Coolify integrated Traefik:** Internal reverse proxy for containers.
+* **Grafana Cloud:** Central storage, visualization, and alerting for staging and
+  production infrastructure telemetry.
+* **Grafana Alloy:** One collector per Coolify host, deployed from
+  `apps/observability`, collecting Linux metrics plus selected Coolify container
+  metrics and logs. Coolify environment labels keep staging and production
+  telemetry separated inside the same Grafana Cloud stack.
+
+#### Grafana Cloud observability deployment
+
+The self-contained `apps/observability/docker-compose.yaml` embeds the Alloy
+configuration and writes it inside the container at startup. Deploy it as a
+Git-backed Coolify **Docker Compose Application** after the file is committed and
+pushed. Select the HMS Git repository, choose the Docker Compose build pack, set
+Base Directory to `apps/observability`, and set Docker Compose Location to
+`docker-compose.yaml` relative to that directory. A Docker Compose Empty Service
+can also use the same file pasted into its Compose editor. No separate config
+file, repository preservation setting, or public domain is required.
+
+Set `GRAFANA_CLOUD_API_KEY`, `GRAFANA_CLOUD_LOKI_URL`,
+`GRAFANA_CLOUD_LOKI_USER`, `GRAFANA_CLOUD_PROMETHEUS_URL`,
+`GRAFANA_CLOUD_PROMETHEUS_USER`, `HMS_COOLIFY_PROJECTS_REGEX`,
+`HMS_ENVIRONMENT`, and `HMS_OBSERVABILITY_HOST` in Coolify. The access-policy
+token requires `metrics:write` and `logs:write` scopes and must be stored as a
+Coolify secret. The embedded `HMS_ALLOY_CONFIG` contains no credentials.
+
+Use `HMS_COOLIFY_PROJECTS_REGEX` to limit collection to the relevant Coolify
+project names. For the current HMS projects, use
+`^(HMS Hermes|HMS Server App|HMS Web App)$`. When staging and production share a host, set
+`HMS_ENVIRONMENT=shared`; Alloy derives each container's environment from its
+`coolify.environmentName` label while retaining `shared` for host-level metrics.
+The `hms-documenso-staging` service is in the `HMS Server App` project, so its
+container metrics and logs are included when Alloy runs on the same Docker host.
+This collector does not, by itself, test Documenso's public availability or
+alert on failed document workflows.
+
+#### Server application telemetry
+
+The NestJS production image preloads `apps/server/instrumentation.cjs` before
+the application bundle. When `OTEL_EXPORTER_OTLP_ENDPOINT` is set, it sends
+OpenTelemetry HTTP/Express traces, request-duration metrics, and Node.js runtime
+metrics directly to Grafana Cloud over OTLP/HTTP. Without the endpoint, the
+instrumentation is disabled. Alloy continues to collect host/container metrics
+and Docker logs; no additional Compose service or inbound collector port is
+needed. Coolify may place the server and Alloy Compose service on separate
+networks, so the server does not assume it can reach Alloy by hostname.
+
+Set these values on **each HMS Server App** in Coolify (staging and production):
+
+* `OTEL_EXPORTER_OTLP_ENDPOINT`: the stack's OTLP gateway URL, ending in `/otlp`
+  (not the Prometheus remote-write URL).
+* `OTEL_EXPORTER_OTLP_HEADERS`: a secret `Authorization=Basic <base64>` header,
+  where the base64 input is `OTLP_INSTANCE_ID:ACCESS_POLICY_TOKEN`. The token
+  needs `metrics:write` and `traces:write`. Store it as a Coolify secret; never
+  commit or display it in logs.
+* `OTEL_SERVICE_NAME=hms-server` in both environments.
+* `OTEL_RESOURCE_ATTRIBUTES=service.namespace=hms,deployment.environment.name=staging`
+  for staging, or replace `staging` with `production` for production.
+
+The instrumentation excludes `/health` and `/docs` from HTTP tracing and
+redacts raw URL/path/query span attributes; route templates remain available
+from Express. It does not capture request/response bodies or headers. It does
+time Drizzle's Postgres.js operations, including those inside transactions,
+as `postgresql SELECT`/`INSERT`/`UPDATE`/`DELETE` client spans and a
+`db.client.operation.duration` histogram (seconds). Only the operation type
+and a bounded SQLSTATE error code are exported; SQL text, parameters, result
+rows, and error messages are not. Queries executed outside the shared Drizzle
+client (for example Supabase Auth and Documenso) are not covered. The standard
+`pg` instrumentation does not instrument Postgres.js. To validate, redeploy a
+server, make a real database-backed request, and check for a PostgreSQL child
+span and `db.client.operation.duration` in the matching Grafana Cloud
+environment. Dashboard panels and alerts must be created separately after
+the first telemetry arrives.
+
+#### Managed Supabase database metrics
+
+The application query duration histogram does not show database-wide CPU,
+disk, WAL, connection use, or queries made by other clients. Connect **both**
+managed HMS Supabase projects to the same Grafana Cloud stack using the
+Supabase/Grafana Cloud integration: in each Supabase project, open
+**Integrations → Grafana Cloud Observability Platform**, select the HMS
+Grafana Cloud stack, and authorize. Alternatively, in Grafana Cloud use
+**Connections → Supabase** and configure two scrape jobs named clearly for
+staging and production, each with its own project ID and Supabase Secret API
+key. Keep the key in the integration's credential store, never in Git or
+Alloy Compose environment variables. Install the supplied Supabase Project
+dashboard and verify that both projects appear in its selectors. Managed
+Supabase metrics come from the Supabase Metrics API; they do not require a
+Postgres exporter in the HMS Alloy service. The local/self-hosted Supabase
+stack is not covered by this managed-project integration. For individual slow
+SQL statements across all database clients, use Supabase's Query Performance
+view backed by `pg_stat_statements`; this setup intentionally does not export
+statement text to Grafana.
+
+Alloy requires privileged host access for cAdvisor and access to the Docker
+socket. Treat that access as root-equivalent, do not expose Alloy's HTTP port,
+and deploy the collector only from the trusted HMS repository.
 
 ### Network Security
 
@@ -350,6 +446,8 @@ api.yourdomain.com
 * **Integrated Traefik**
 * **Hostinger VPS**
 * **Cloudflare DNS/Proxy/WAF**
+* **Grafana Cloud**
+* **Grafana Alloy**
 * **Local Mailpit**
 
 ---
