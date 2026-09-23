@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
+      # Temporary for PR #174; remove when this PR is closed.
       - fix/db-seed
   workflow_dispatch:
 
@@ -20,7 +19,8 @@ jobs:
   deploy-staging:
     if: >-
       github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop' ||
-      github.ref == 'refs/heads/feat/hms-observability'
+      github.ref == 'refs/heads/feat/hms-observability' ||
+      github.ref == 'refs/heads/fix/db-seed'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
