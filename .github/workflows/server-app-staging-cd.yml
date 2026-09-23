@@ -3,9 +3,9 @@ name: Server App Staging CD
 on:
   push:
     branches:
-      - feat/scrum-138-document-production-server-develop
-      # Temporary for PR #172; remove before merging.
-      - feat/hms-observability
+      - develop
+      # Temporary for PR #174; remove when this PR is closed.
+      - fix/db-seed
   workflow_dispatch:
 
 permissions:
@@ -18,8 +18,8 @@ concurrency:
 jobs:
   deploy-staging:
     if: >-
-      github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop' ||
-      github.ref == 'refs/heads/feat/hms-observability'
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/fix/db-seed'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:
