@@ -18,8 +18,7 @@ concurrency:
 jobs:
   deploy-staging:
     if: >-
-      github.ref == 'refs/heads/feat/scrum-138-document-production-server-develop' ||
-      github.ref == 'refs/heads/feat/hms-observability' ||
+      github.ref == 'refs/heads/develop' ||
       github.ref == 'refs/heads/fix/db-seed'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
