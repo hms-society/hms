@@ -95,6 +95,25 @@ type ObservableSql = postgres.Sql | postgres.TransactionSql
 
 const observeSql = <T extends ObservableSql>(client: T): T =>
   new Proxy(client, {
+    apply(target, thisArg, args: unknown[]) {
+      const query = Reflect.apply(target, thisArg, args)
+      const template = args[0]
+
+      // The callable SQL client also builds identifiers and fragments. Only
+      // tagged templates return executable queries that should be observed.
+      if (
+        !Array.isArray(template) ||
+        !('raw' in template) ||
+        !Array.isArray(template.raw)
+      ) {
+        return query
+      }
+
+      return observeQuery(
+        query as postgres.PendingQuery<postgres.Row[]>,
+        operationName(typeof template[0] === 'string' ? template[0] : ''),
+      )
+    },
     get(target, property, receiver) {
       const value: unknown = Reflect.get(target, property, receiver)
 
