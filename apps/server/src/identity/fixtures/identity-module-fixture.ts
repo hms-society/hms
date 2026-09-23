@@ -112,6 +112,7 @@ export class IdentityModuleFixture {
 
         if (applicationAccess) {
           // Only external Supabase verification is controlled; real guards and DB run.
+          // biome-ignore lint/correctness/useHookAtTopLevel: Nest testing builder APIs are not React hooks.
           return builder.overrideProvider(IDENTITY_PROVIDERS.auth).useValue({
             getSession: async (token: string) =>
               token === 'fixture-access-token' && authentication.user
@@ -120,6 +121,7 @@ export class IdentityModuleFixture {
           })
         }
 
+        // biome-ignore lint/correctness/useHookAtTopLevel: Nest testing builder APIs are not React hooks.
         return builder.overrideGuard(AuthGuard).useValue({
           canActivate: (context: ExecutionContext) => {
             const request = context.switchToHttp().getRequest<{
