@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 
 import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
+import { CasePiecesTab } from './case-pieces-tab'
 import { OverviewTab } from './overview-tab'
 import { useMyCasePage } from './use-my-case-page'
 
@@ -153,12 +154,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               {pendingItemsCount}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger
-            value='pecas'
-            className='w-full justify-center py-3 text-[13px]'
-            disabled
-          >
-            <Icon name='lock' className='size-3.5' />
+          <TabsTrigger value='pecas' className='w-full justify-center py-3 text-[13px]'>
             Peças
           </TabsTrigger>
           <TabsTrigger value='prazos' className='w-full justify-center py-3 text-[13px]'>
@@ -212,6 +208,10 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             caseId={caseUuid}
             checklist={checklistItems}
           />
+        </TabsContent>
+
+        <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
+          <CasePiecesTab dossierApproved caseId={caseUuid ?? caseId} />
         </TabsContent>
       </Tabs>
     </div>
