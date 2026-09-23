@@ -241,6 +241,25 @@ define a equipe do Caso e não administra o andamento jurídico após a contrata
 
 ---
 
+## Gestão de Casos
+
+Organiza a execução dos serviços jurídicos contratados pela HMS, judiciais ou
+extrajudiciais, desde a abertura explícita do Caso até seu encerramento e eventual
+reabertura.
+
+Requisito de produto: [PRD — Módulo de Gestão de Casos](https://plataformahms.atlassian.net/wiki/x/AQC4Ag).
+
+- Mantém no máximo um Caso por Intake contratado, com identificação, prioridade,
+  situação, equipe e controle de acesso próprios.
+- Organiza o checklist documental, as tarefas operacionais, os prazos jurídicos e
+  o histórico imutável do Caso.
+- Integra o Caso ao Motor Documental e à Produção Documental sem assumir a
+  propriedade dos arquivos, modelos, documentos produzidos ou suas versões.
+- Controla os bloqueios de encerramento, o resultado do Caso e sua eventual
+  reabertura, preservando autoria, justificativas e acontecimentos relevantes.
+
+---
+
 ## O que não é um módulo
 
 **Analytics** não é um módulo. É uma camada de modelo de leitura que se inscreve

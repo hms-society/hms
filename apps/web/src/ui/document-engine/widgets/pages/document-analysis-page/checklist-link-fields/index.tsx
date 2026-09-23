@@ -1,5 +1,5 @@
 import { Badge } from '@/ui/shadcn/badge'
-import { Field } from '@/ui/shadcn/field'
+import { Field, FieldError } from '@/ui/shadcn/field'
 import {
   Select,
   SelectContent,
@@ -29,9 +29,13 @@ export const ChecklistLinkFields = ({
     checklistRequirementId,
     handleCaseSelect,
     handleChecklistSelect,
+    hasDocumentClient,
     isLoadingCases,
     isLoadingChecklist,
   } = useChecklistLinkFields({ document, form, isChecklistDisabled })
+
+  const caseError = form.formState.errors.caseId?.message
+  const checklistRequirementError = form.formState.errors.checklistRequirementId?.message
 
   return (
     <div className='flex flex-col gap-3'>
@@ -50,21 +54,27 @@ export const ChecklistLinkFields = ({
         )}
       </div>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-        <Field>
+        <Field data-invalid={Boolean(caseError)}>
           <label htmlFor='caseId' className='font-sans text-xs text-muted-foreground'>
             Caso
           </label>
           <Select
             value={caseId || undefined}
             onValueChange={handleCaseSelect}
-            disabled={isLoadingCases}
+            disabled={!hasDocumentClient || isLoadingCases}
           >
             <SelectTrigger
               id='caseId'
               className='h-12 w-full rounded-xl border-border bg-card px-4 font-sans text-sm font-medium shadow-sm hover:border-primary/50 hover:bg-highlight/30 focus:ring-primary/20'
             >
               <SelectValue
-                placeholder={isLoadingCases ? 'Carregando casos...' : 'Selecionar caso'}
+                placeholder={
+                  !hasDocumentClient
+                    ? 'Cliente do lote não identificado'
+                    : isLoadingCases
+                      ? 'Carregando casos...'
+                      : 'Selecionar caso'
+                }
               />
             </SelectTrigger>
             <SelectContent
@@ -78,13 +88,14 @@ export const ChecklistLinkFields = ({
                   value={caseOption.id}
                   className='min-h-10 rounded-lg px-3 py-2 font-sans text-sm text-foreground focus:bg-highlight focus:text-foreground data-[state=checked]:bg-highlight data-[state=checked]:font-semibold data-[state=checked]:text-primary'
                 >
-                  {caseOption.title}
+                  {caseOption.title} · {caseOption.publicCode}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <FieldError>{caseError}</FieldError>
         </Field>
-        <Field>
+        <Field data-invalid={Boolean(checklistRequirementError)}>
           <label
             htmlFor='checklistRequirementId'
             className='font-sans text-xs text-muted-foreground'
@@ -137,6 +148,7 @@ export const ChecklistLinkFields = ({
                 )}
             </SelectContent>
           </Select>
+          <FieldError>{checklistRequirementError}</FieldError>
         </Field>
       </div>
     </div>

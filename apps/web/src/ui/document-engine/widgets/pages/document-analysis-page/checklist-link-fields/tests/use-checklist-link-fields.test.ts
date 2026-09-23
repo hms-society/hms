@@ -26,6 +26,7 @@ describe('useChecklistLinkFields', () => {
             {
               id: 'case-1',
               title: 'Caso 0089',
+              publicCode: 'CASO-0089',
             },
           ],
         }),
@@ -53,6 +54,7 @@ describe('useChecklistLinkFields', () => {
       () =>
         useChecklistLinkFields({
           document: DocumentValidationDocumentFaker.fake({
+            clientId: 'client-1',
             checklistLink: {
               caseLabel: 'Caso 0089',
               checklistItemLabel: 'Comprovante de residência',
@@ -71,7 +73,7 @@ describe('useChecklistLinkFields', () => {
 
     expect(result.current).toMatchObject({
       caseId: 'case-1',
-      caseLabel: 'Caso 0089',
+      caseLabel: 'Caso 0089 · CASO-0089',
       checklistItemLabel: 'Comprovante de residência',
       checklistRequirementId: 'checklist-item-1',
     })

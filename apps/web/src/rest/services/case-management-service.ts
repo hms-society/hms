@@ -4,6 +4,8 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  Pending,
+  AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
 import type {
   GrantCasePortalAccessResponse,
@@ -19,6 +21,32 @@ export const CaseManagementService = (
       return restClient.post<LegalCase>('/cases', request)
     },
 
+    listCasePendings(caseId) {
+      return restClient.get<readonly Pending[]>(`/cases/${caseId}/pendencies`)
+    },
+
+    getPendingMessage(pendingId) {
+      return restClient.get<AssistedMessage>(`/cases/pendencies/${pendingId}/message`)
+    },
+
+    editPendingMessage(pendingId, request) {
+      return restClient.patch<AssistedMessage>(
+        `/cases/pendencies/${pendingId}/message`,
+        request,
+      )
+    },
+
+    approvePendingMessage(pendingId) {
+      return restClient.post<AssistedMessage>(
+        `/cases/pendencies/${pendingId}/message/approve`,
+        {},
+      )
+    },
+
+    createPending(caseId, request) {
+      return restClient.post<Pending>(`/cases/${caseId}/pendencies`, request)
+    },
+
     addComplementaryChecklistItem(caseId, request) {
       return restClient.post<CaseChecklistItem>(
         `/cases/${caseId}/checklist/items`,
@@ -26,16 +54,20 @@ export const CaseManagementService = (
       )
     },
 
-    listCaseChecklist(caseId) {
-      return restClient.get<readonly CaseChecklistItem[]>(`/cases/${caseId}/checklist`)
+    listCaseChecklist(caseId, clientId) {
+      const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+      return restClient.get<readonly CaseChecklistItem[]>(
+        `/cases/${caseId}/checklist${query}`,
+      )
     },
 
     listChecklistTemplates() {
       return restClient.get<readonly ChecklistTemplate[]>('/cases/checklist-templates')
     },
 
-    listMyCases() {
-      return restClient.get<readonly LegalCaseSummary[]>('/cases/my')
+    listMyCases(clientId) {
+      const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+      return restClient.get<readonly LegalCaseSummary[]>(`/cases/my${query}`)
     },
 
     replaceChecklistTemplate(request) {

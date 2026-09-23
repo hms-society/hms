@@ -1,0 +1,270 @@
+services:
+  alloy:
+    image: grafana/alloy:v1.19.2
+    restart: unless-stopped
+    privileged: true
+    pid: host
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        printf '%s\n' "$$HMS_ALLOY_CONFIG" > /etc/alloy/config.alloy
+        exec /bin/alloy run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    environment:
+      HMS_ALLOY_CONFIG: |-
+        logging {
+          level  = "info"
+          format = "json"
+        }
+
+        prometheus.remote_write "grafana_cloud" {
+          endpoint {
+            url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+
+            basic_auth {
+              username = sys.env("GRAFANA_CLOUD_PROMETHEUS_USER")
+              password = sys.env("GRAFANA_CLOUD_API_KEY")
+            }
+          }
+        }
+
+        prometheus.exporter.unix "host" {
+          procfs_path    = "/host/proc"
+          rootfs_path    = "/rootfs"
+          sysfs_path     = "/sys"
+          udev_data_path = "/host/run/udev/data"
+
+          disable_collectors = ["btrfs", "infiniband", "ipvs", "xfs", "zfs"]
+
+          filesystem {
+            fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+            mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+            mount_timeout        = "5s"
+          }
+
+          netclass {
+            ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+          }
+
+          netdev {
+            device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+          }
+        }
+
+        discovery.relabel "host" {
+          targets = prometheus.exporter.unix.host.targets
+
+          rule {
+            target_label = "environment"
+            replacement  = sys.env("HMS_ENVIRONMENT")
+          }
+
+          rule {
+            target_label = "instance"
+            replacement  = sys.env("HMS_OBSERVABILITY_HOST")
+          }
+
+          rule {
+            target_label = "job"
+            replacement  = "integrations/linux"
+          }
+
+          rule {
+            target_label = "service_name"
+            replacement  = "linux-host"
+          }
+
+          rule {
+            target_label = "team"
+            replacement  = "hms"
+          }
+        }
+
+        prometheus.scrape "host" {
+          targets         = discovery.relabel.host.output
+          forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+          scrape_interval = "30s"
+        }
+
+        prometheus.exporter.cadvisor "docker" {
+          docker_host                  = "unix:///var/run/docker.sock"
+          docker_only                  = true
+          storage_duration             = "5m"
+          store_container_labels       = false
+          allowlisted_container_labels = [
+            "coolify.environmentName",
+            "coolify.projectName",
+            "coolify.resourceName",
+            "coolify.serviceName",
+          ]
+        }
+
+        prometheus.scrape "docker" {
+          targets         = prometheus.exporter.cadvisor.docker.targets
+          forward_to      = [prometheus.relabel.docker.receiver]
+          scrape_interval = "30s"
+        }
+
+        prometheus.relabel "docker" {
+          forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+          rule {
+            source_labels = ["container_label_coolify_projectName"]
+            regex         = sys.env("HMS_COOLIFY_PROJECTS_REGEX")
+            action        = "keep"
+          }
+
+          rule {
+            target_label = "environment"
+            replacement  = sys.env("HMS_ENVIRONMENT")
+          }
+
+          rule {
+            source_labels = ["container_label_coolify_environmentName"]
+            regex         = "(.+)"
+            target_label  = "environment"
+            replacement   = "$1"
+          }
+
+          rule {
+            source_labels = ["name"]
+            regex         = "(.+)"
+            target_label  = "service_name"
+            replacement   = "$1"
+          }
+
+          rule {
+            source_labels = ["container_label_coolify_serviceName"]
+            regex         = "(.+)"
+            target_label  = "service_name"
+            replacement   = "$1"
+          }
+
+          rule {
+            target_label = "instance"
+            replacement  = sys.env("HMS_OBSERVABILITY_HOST")
+          }
+
+          rule {
+            target_label = "team"
+            replacement  = "hms"
+          }
+
+          rule {
+            regex  = "container_label_.*"
+            action = "labeldrop"
+          }
+        }
+
+        discovery.docker "containers" {
+          host             = "unix:///var/run/docker.sock"
+          refresh_interval = "15s"
+        }
+
+        discovery.relabel "container_logs" {
+          targets = discovery.docker.containers.targets
+
+          rule {
+            source_labels = ["__meta_docker_container_label_coolify_projectName"]
+            regex         = sys.env("HMS_COOLIFY_PROJECTS_REGEX")
+            action        = "keep"
+          }
+
+          rule {
+            source_labels = ["__meta_docker_container_name"]
+            regex         = "/(.*)"
+            target_label  = "container"
+            replacement   = "$1"
+          }
+
+          rule {
+            source_labels = ["__meta_docker_container_name"]
+            regex         = "/(.*)"
+            target_label  = "service_name"
+            replacement   = "$1"
+          }
+
+          rule {
+            source_labels = ["__meta_docker_container_label_coolify_serviceName"]
+            regex         = "(.+)"
+            target_label  = "service_name"
+            replacement   = "$1"
+          }
+
+          rule {
+            target_label = "environment"
+            replacement  = sys.env("HMS_ENVIRONMENT")
+          }
+
+          rule {
+            source_labels = ["__meta_docker_container_label_coolify_environmentName"]
+            regex         = "(.+)"
+            target_label  = "environment"
+            replacement   = "$1"
+          }
+
+          rule {
+            target_label = "instance"
+            replacement  = sys.env("HMS_OBSERVABILITY_HOST")
+          }
+
+          rule {
+            target_label = "job"
+            replacement  = "integrations/docker"
+          }
+
+          rule {
+            target_label = "team"
+            replacement  = "hms"
+          }
+        }
+
+        loki.source.docker "containers" {
+          host       = "unix:///var/run/docker.sock"
+          targets    = discovery.relabel.container_logs.output
+          forward_to = [loki.process.container_logs.receiver]
+        }
+
+        loki.process "container_logs" {
+          stage.docker { }
+
+          forward_to = [loki.write.grafana_cloud.receiver]
+        }
+
+        loki.write "grafana_cloud" {
+          endpoint {
+            url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+
+            basic_auth {
+              username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+              password = sys.env("GRAFANA_CLOUD_API_KEY")
+            }
+          }
+        }
+      GRAFANA_CLOUD_API_KEY: ${GRAFANA_CLOUD_API_KEY:?Set the Grafana Cloud access policy token}
+      GRAFANA_CLOUD_LOKI_URL: ${GRAFANA_CLOUD_LOKI_URL:?Set the Grafana Cloud Loki push URL}
+      GRAFANA_CLOUD_LOKI_USER: ${GRAFANA_CLOUD_LOKI_USER:?Set the Grafana Cloud Logs user ID}
+      GRAFANA_CLOUD_PROMETHEUS_URL: ${GRAFANA_CLOUD_PROMETHEUS_URL:?Set the Grafana Cloud Prometheus remote-write URL}
+      GRAFANA_CLOUD_PROMETHEUS_USER: ${GRAFANA_CLOUD_PROMETHEUS_USER:?Set the Grafana Cloud Metrics user ID}
+      HMS_COOLIFY_PROJECTS_REGEX: ${HMS_COOLIFY_PROJECTS_REGEX:?Set the Coolify project-name filter}
+      HMS_ENVIRONMENT: ${HMS_ENVIRONMENT:?Set shared, staging, or production}
+      HMS_OBSERVABILITY_HOST: ${HMS_OBSERVABILITY_HOST:?Set a stable host name}
+    volumes:
+      - alloy-data:/var/lib/alloy/data
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/sys:ro
+      - /run/udev/data:/host/run/udev/data:ro
+      - /var/run:/var/run:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    healthcheck:
+      test: ["CMD", "alloy", "validate", "/etc/alloy/config.alloy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  alloy-data:

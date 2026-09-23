@@ -334,15 +334,43 @@
     {
       "idx": 47,
       "version": "7",
-      "when": 1789420963086,
-      "tag": "0047_flashy_purifiers",
+      "when": 1789470000000,
+      "tag": "0047_document_pendencies",
       "breakpoints": true
     },
     {
       "idx": 48,
       "version": "7",
-      "when": 1789671610342,
-      "tag": "0048_round_the_liberteens",
+      "when": 1789470001000,
+      "tag": "0048_remove_assisted_message_instructions",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1789470002000,
+      "tag": "0049_record_assisted_message_sent",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1789470003000,
+      "tag": "0050_document_exceptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1790175066535,
+      "tag": "0051_repair_dynamic_forms_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1790175331257,
+      "tag": "0052_repair_dynamic_form_id_default",
       "breakpoints": true
     },
     {

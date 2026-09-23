@@ -5,4 +5,5 @@ export const CASE_MANAGEMENT_REPOSITORIES = {
   checklistTemplates: Symbol('CASE_MANAGEMENT_REPOSITORIES.checklistTemplates'),
   legalCases: Symbol('CASE_MANAGEMENT_REPOSITORIES.legalCases'),
   casePortalAccessGrants: Symbol('CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants'),
+  pendings: Symbol('CASE_MANAGEMENT_REPOSITORIES.pendings'),
 } as const

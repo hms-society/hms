@@ -149,6 +149,7 @@ async function bootstrap() {
       supervisorIds,
       internIds,
       actorId: actor.id,
+      legalAreaId: legalArea.id,
     })
 
     const schedulingSeed = await app.get(SchedulingSeeder).run({

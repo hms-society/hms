@@ -51,6 +51,7 @@ export const ChecklistDossierTab = ({
     checklistGateLabel,
     checklistGateRemarks,
     checklistItems,
+    pendingCountByChecklistItemId,
     complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,
@@ -360,6 +361,16 @@ export const ChecklistDossierTab = ({
                             {item.pendencies} pendência
                           </Badge>
                         )}
+                        {(pendingCountByChecklistItemId.get(item.id) ?? 0) > 0 &&
+                          !item.pendencies && (
+                            <Badge
+                              variant='destructive'
+                              className='h-5 rounded-full px-2 text-[12px]'
+                            >
+                              <Icon name='alert-circle' className='size-3' />
+                              {pendingCountByChecklistItemId.get(item.id)} pendência(s)
+                            </Badge>
+                          )}
                       </div>
                       <span className='truncate text-[14px] text-muted-foreground'>
                         {item.documentName || item.subtitle}

@@ -5,8 +5,10 @@ import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
 
 type Request = {
+  caseId: string
   checklistItemId: string
   documentFileId: string
+  documentFileName: string
   validatedBy: string
 }
 
@@ -21,15 +23,17 @@ export class MarkCaseChecklistItemValidatedUseCase
   async execute(request: Request): Promise<CaseChecklistItem> {
     const checklistItem =
       await this.caseChecklistItemsRepository.markAsValidatedByDocument({
+        caseId: request.caseId,
         checklistItemId: request.checklistItemId,
         documentFileId: request.documentFileId,
+        documentFileName: request.documentFileName,
         validatedBy: request.validatedBy,
       })
 
     return this.finishValidation(checklistItem, request.validatedBy)
   }
 
-  async executeByDocumentFileId(request: Omit<Request, 'checklistItemId'>) {
+  async executeByDocumentFileId(request: Omit<Request, 'caseId' | 'checklistItemId'>) {
     const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
       request.documentFileId,
     )
@@ -40,8 +44,10 @@ export class MarkCaseChecklistItemValidatedUseCase
 
     const updatedItem = await this.caseChecklistItemsRepository.markAsValidatedByDocument(
       {
+        caseId: checklistItem.caseId,
         checklistItemId: checklistItem.id,
         documentFileId: request.documentFileId,
+        documentFileName: request.documentFileName,
         validatedBy: request.validatedBy,
       },
     )

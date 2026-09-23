@@ -1,8 +1,10 @@
 import type { CaseChecklistItem, CaseChecklistItemCreation } from '../domain/entities'
 
 export type MarkChecklistItemValidatedParams = {
+  caseId: string
   checklistItemId: string
   documentFileId: string
+  documentFileName: string
   validatedBy: string
 }
 

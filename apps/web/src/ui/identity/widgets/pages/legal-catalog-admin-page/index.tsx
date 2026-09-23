@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/shadcn/table'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { useLegalCatalogAdminPage } from './use-legal-catalog-admin-page'
 
@@ -50,6 +51,7 @@ export const LegalCatalogAdminPage = () => {
     openNewAreaDialog,
     openNewTopicDialog,
   } = useLegalCatalogAdminPage()
+  const { navigateTo } = useNavigation()
 
   return (
     <main className='min-h-full bg-background px-6 py-8 lg:px-10'>
@@ -148,13 +150,26 @@ export const LegalCatalogAdminPage = () => {
 
                 <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
                   {selectedArea && (
-                    <Button
-                      variant='outline'
-                      onClick={() => openEditAreaDialog(selectedArea)}
-                    >
-                      <Icon name='pencil' className='size-4' />
-                      Editar área
-                    </Button>
+                    <div className='flex flex-wrap gap-2'>
+                      <Button
+                        variant='outline'
+                        onClick={() => openEditAreaDialog(selectedArea)}
+                      >
+                        <Icon name='pencil' className='size-4' />
+                        Editar área
+                      </Button>
+                      <Button
+                        variant='outline'
+                        onClick={() =>
+                          navigateTo('checklistTemplates', {
+                            search: { legalAreaId: selectedArea.id },
+                          })
+                        }
+                      >
+                        <Icon name='list-checks' className='size-4' />
+                        Configurar checklist
+                      </Button>
+                    </div>
                   )}
                   <Button disabled={!selectedArea} onClick={openNewTopicDialog}>
                     <Icon name='plus' className='size-4' />

@@ -199,6 +199,7 @@ export class DrizzleLegalCasesRepository
 
   async listByTeamMember(
     collaboratorId: string,
+    clientId?: string,
   ): ReturnType<LegalCasesRepository['listByTeamMember']> {
     const assignedCases = await this.database
       .select({
@@ -222,13 +223,22 @@ export class DrizzleLegalCasesRepository
       .innerJoin(clientModel, eq(clientModel.id, legalCaseModel.clientId))
       .innerJoin(legalAreaModel, eq(legalAreaModel.id, legalCaseModel.legalAreaId))
       .innerJoin(legalTopicModel, eq(legalTopicModel.id, legalCaseModel.legalTopicId))
-      .innerJoin(caseMemberModel, eq(caseMemberModel.caseId, legalCaseModel.id))
-      .where(eq(caseMemberModel.collaboratorId, collaboratorId))
+      .leftJoin(caseMemberModel, eq(caseMemberModel.caseId, legalCaseModel.id))
+      .where(
+        and(
+          clientId ? undefined : eq(caseMemberModel.collaboratorId, collaboratorId),
+          clientId ? eq(legalCaseModel.clientId, clientId) : undefined,
+        ),
+      )
       .orderBy(desc(legalCaseModel.openedAt))
 
-    if (assignedCases.length === 0) return []
+    const uniqueAssignedCases = Array.from(
+      new Map(assignedCases.map((legalCase) => [legalCase.id, legalCase])).values(),
+    )
 
-    const caseIds = assignedCases.map(({ id }) => id)
+    if (uniqueAssignedCases.length === 0) return []
+
+    const caseIds = uniqueAssignedCases.map(({ id }) => id)
     const teamMembers = await this.database
       .select({
         caseId: caseMemberModel.caseId,
@@ -256,7 +266,7 @@ export class DrizzleLegalCasesRepository
       teamMembersByCaseId.set(teamMember.caseId, caseTeam)
     }
 
-    return assignedCases.map(
+    return uniqueAssignedCases.map(
       (legalCase): LegalCaseSummary => ({
         id: legalCase.id,
         publicCode: legalCase.publicCode,

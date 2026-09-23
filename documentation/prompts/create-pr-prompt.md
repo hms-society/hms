@@ -70,6 +70,13 @@ Before publishing or returning an existing pull request, inspect its complete ti
 and translate any workflow-authored English prose into pt-BR. Do not treat an already-open PR
 as compliant merely because its latest comment is in pt-BR.
 
+Treat language compliance as a blocking publication gate, not as a stylistic preference. Immediately
+before returning, run `gh pr view <number> --json title,body` for every PR and inspect both fields in
+full. Correct the PR with `gh pr edit` when any workflow-authored prose remains outside pt-BR. The
+title must also follow the pt-BR noun-phrase rule below: Conventional Commit prefixes such as
+`feat:`, `fix:`, `refactor:` and `docs:` do not make an English title compliant and must not be used.
+Do not return PR metadata until this final language audit passes for every PR in the delivery.
+
 ## Mandatory workflow invocation
 
 This prompt is a publication workflow, not a replacement for the commit or conclusion
@@ -237,8 +244,27 @@ Push the prepared branch and create or update the PR. Then obtain the actual del
 gh pr view <number> --json number,url,headRefName,baseRefName,commits,statusCheckRollup
 ```
 
+### CI completion and correction loop
+
+After creating or updating a PR and pushing its head, keep the delivery active until every
+applicable CI check for the latest head SHA has completed successfully. Poll `gh pr checks`
+and `gh pr view <number> --json commits,statusCheckRollup`; queued, pending, or in-progress
+checks are not complete. Assess the results for the current head only, since a new push
+starts a new validation cycle.
+
+For every failed check, inspect its GitHub Actions logs with `gh run view <run-id> --log-failed`,
+identify the cause, correct failures within the authorized delivery scope, and run the failed
+workflow command locally when available. Commit and push each correction, then wait for the
+new head's full CI set and repeat this loop until all applicable checks pass. Rerun a failed
+workflow only after confirming it failed transiently or was canceled; do not treat a rerun as
+a fix for a reproducible failure. If an applicable check is skipped by an explicit workflow
+condition, verify and report why it was not required. Do not report the PR as validated while
+any applicable check is pending, running, or failing. If an external blocker prevents a check
+from completing, report the exact blocker and leave the validation state explicit.
+
 Return one record per PR containing its URL, number, base, head, head SHA, dependency order,
-changed-path summary and current check/review state. Do not merge or deploy.
+changed-path summary and current check/review state after the CI completion and correction loop.
+Do not merge or deploy.
 
 Reviewer comments may arrive later. They are handled by `resolve-pr-pendencies`, not by this
 workflow.

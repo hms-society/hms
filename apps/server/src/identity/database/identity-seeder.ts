@@ -1,6 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import type {
   ClientCreation,
+  Collaborator,
   CollaboratorCreation,
   UserCreation,
 } from '@hms/core/identity/domain/entities'
@@ -352,58 +353,79 @@ export class IdentitySeeder {
       throw new AppError('Default seed users were not created')
     }
 
+    const collaboratorErrors: string[] = []
     const administrator = {
       userId: adminUser.id,
       ...DEFAULT_ADMINISTRATOR,
     } satisfies CollaboratorCreation
 
-    const administratorCreated = await this.collaboratorsRepository.add(administrator)
-
-    const attendantCreated = await this.collaboratorsRepository.add({
-      userId: attendantUser.id,
-      ...DEFAULT_ATTENDANT,
-    })
-
-    const personAdministrativeCollaborators = await Promise.all(
-      DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS.map(
-        async ({ email, ...collaborator }) => {
-          const user = seededUsers.find((seededUser) => seededUser.email === email)
-
-          if (!user) {
-            throw new AppError(`Seed user for ${email} was not created`)
-          }
-
-          return this.collaboratorsRepository.add({
-            userId: user.id,
-            ...collaborator,
-          })
-        },
-      ),
+    const administratorCreated = await this.addSeededCollaborator(
+      'admin@hmsadvogados.com.br',
+      administrator,
+      collaboratorErrors,
     )
 
-    const legalCollaborators = await Promise.all(
-      DEFAULT_LEGAL_COLLABORATORS.map(async ({ email, ...collaborator }) => {
-        const user = seededUsers.find((seededUser) => seededUser.email === email)
+    const attendantCreated = await this.addSeededCollaborator(
+      'attendant@hmsadvogados.com.br',
+      {
+        userId: attendantUser.id,
+        ...DEFAULT_ATTENDANT,
+      },
+      collaboratorErrors,
+    )
 
-        if (!user) {
-          throw new AppError(`Seed user for ${email} was not created`)
-        }
+    const personAdministrativeCollaborators: Collaborator[] = []
+    for (const {
+      email,
+      ...collaborator
+    } of DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS) {
+      const user = seededUsers.find((seededUser) => seededUser.email === email)
 
-        return this.collaboratorsRepository.add({
+      if (!user) {
+        throw new AppError(`Seed user for ${email} was not created`)
+      }
+
+      const seededCollaborator = await this.addSeededCollaborator(
+        email,
+        {
+          userId: user.id,
+          ...collaborator,
+        },
+        collaboratorErrors,
+      )
+
+      if (seededCollaborator) {
+        personAdministrativeCollaborators.push(seededCollaborator)
+      }
+    }
+
+    const legalCollaborators: Collaborator[] = []
+    for (const { email, ...collaborator } of DEFAULT_LEGAL_COLLABORATORS) {
+      const user = seededUsers.find((seededUser) => seededUser.email === email)
+
+      if (!user) {
+        throw new AppError(`Seed user for ${email} was not created`)
+      }
+
+      const seededCollaborator = await this.addSeededCollaborator(
+        email,
+        {
           userId: user.id,
           ...collaborator,
           legalExpertises: [lawyerLegalExpertise],
-        })
-      }),
-    )
+        },
+        collaboratorErrors,
+      )
 
-    if (
-      !administratorCreated ||
-      !attendantCreated ||
-      personAdministrativeCollaborators.includes(undefined) ||
-      legalCollaborators.includes(undefined)
-    ) {
-      throw new AppError('Default seed collaborators were not created')
+      if (seededCollaborator) {
+        legalCollaborators.push(seededCollaborator)
+      }
+    }
+
+    if (collaboratorErrors.length > 0 || !administratorCreated || !attendantCreated) {
+      throw new AppError(
+        `Failed to seed ${collaboratorErrors.length} collaborator(s): ${collaboratorErrors.join('; ')}`,
+      )
     }
 
     const clientsToSeed = DEFAULT_CLIENTS.map((client) =>
@@ -418,11 +440,29 @@ export class IdentitySeeder {
         attendantCreated,
         ...personAdministrativeCollaborators,
         ...legalCollaborators,
-      ].filter(
-        (collaborator): collaborator is NonNullable<typeof collaborator> =>
-          collaborator !== undefined,
-      ),
+      ],
       users: seededUsers,
+    }
+  }
+
+  private async addSeededCollaborator(
+    email: string,
+    collaborator: CollaboratorCreation,
+    collaboratorErrors: string[],
+  ) {
+    try {
+      const createdCollaborator = await this.collaboratorsRepository.add(collaborator)
+
+      if (!createdCollaborator) {
+        collaboratorErrors.push(`${email}: repository returned no collaborator`)
+        return undefined
+      }
+
+      return createdCollaborator
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error)
+      collaboratorErrors.push(`${email}: ${reason}`)
+      return undefined
     }
   }
 }

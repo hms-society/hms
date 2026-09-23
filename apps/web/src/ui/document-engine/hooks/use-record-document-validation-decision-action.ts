@@ -45,11 +45,17 @@ export const useRecordDocumentValidationDecisionAction = (documentFileId: string
 
       return response.body
     },
-    onSuccess: async (document) => {
+    onSuccess: async (document, request) => {
       queryClient.setQueryData(
         ['document-validation', 'documents', documentFileId],
         document,
       )
+      const caseId = request.caseId ?? document.checklistLink?.caseId
+      if (caseId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['case-management', 'cases', caseId, 'checklist'],
+        })
+      }
       await queryClient.invalidateQueries({
         queryKey: ['document-validation', 'documents'],
       })

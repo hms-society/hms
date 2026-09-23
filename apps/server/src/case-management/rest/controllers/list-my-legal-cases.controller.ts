@@ -1,4 +1,4 @@
-import { Get, HttpStatus, Inject, UseGuards } from '@nestjs/common'
+import { Get, HttpStatus, Inject, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 import { ListMyLegalCasesUseCase } from '@hms/core/case-management/use-cases'
@@ -38,7 +38,10 @@ export class ListMyLegalCasesController {
     description: 'An active collaborator account is required.',
     type: ErrorResponseDto,
   })
-  handle(@CurrentCollaborator() collaborator: CollaboratorSummary) {
-    return this.useCase.execute({ collaboratorId: collaborator.collaboratorId })
+  handle(
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+    @Query('clientId', new ParseUUIDPipe({ optional: true })) clientId?: string,
+  ) {
+    return this.useCase.execute({ collaboratorId: collaborator.collaboratorId, clientId })
   }
 }

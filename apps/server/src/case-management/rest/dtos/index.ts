@@ -1,4 +1,5 @@
 export * from './case-checklist-item-response.dto'
+export * from './pending-response.dto'
 export * from './checklist-template-item-response.dto'
 export * from './checklist-template-response.dto'
 export * from './legal-case-response.dto'

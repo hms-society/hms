@@ -16,6 +16,7 @@ import {
   DrizzleChecklistTemplatesRepository,
   DrizzleLegalCasesRepository,
   DrizzleCasePortalAccessGrantsRepository,
+  DrizzlePendingsRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -39,6 +40,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       provide: CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants,
       useExisting: DrizzleCasePortalAccessGrantsRepository,
     },
+    DrizzlePendingsRepository,
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
       useExisting: DrizzleCaseChecklistItemsRepository,
@@ -59,6 +61,10 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       provide: CASE_MANAGEMENT_REPOSITORIES.legalCases,
       useExisting: DrizzleLegalCasesRepository,
     },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.pendings,
+      useExisting: DrizzlePendingsRepository,
+    },
     CaseManagementSeeder,
   ],
   exports: [
@@ -68,6 +74,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
     CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants,
+    CASE_MANAGEMENT_REPOSITORIES.pendings,
     CaseManagementSeeder,
   ],
 })

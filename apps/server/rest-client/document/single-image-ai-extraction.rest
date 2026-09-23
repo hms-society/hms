@@ -12,18 +12,9 @@ Accept: application/json
   "password": "{{seedPassword}}"
 }
 
-### Lookup Vinicius Lopes Machado client
-# @name lookupViniciusClient
-POST {{baseUrl}}/clients/lookup
-Content-Type: application/json
-Accept: application/json
-
-{
-  "phone": "5511987654321"
-}
-
 ### Upload documento de identificação image for AI extraction
 # Sends one image and creates one document batch, so only one Inngest run starts.
+# @prompt clientId Enter the client ID
 POST {{baseUrl}}/document-batches/internal-upload
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: multipart/form-data; boundary=boundary
@@ -31,7 +22,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="clientId"
 
-{{lookupViniciusClient.response.body.$.client.id}}
+{{clientId}}
 --boundary
 Content-Disposition: form-data; name="files"; filename="teste_documento_id.png"
 Content-Type: image/png
@@ -41,6 +32,7 @@ Content-Type: image/png
 
 ### Upload ficha cadastral image for AI extraction
 # Sends one image and creates one document batch, so only one Inngest run starts.
+# @prompt clientId Enter the client ID
 POST {{baseUrl}}/document-batches/internal-upload
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
 Content-Type: multipart/form-data; boundary=boundary
@@ -48,7 +40,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="clientId"
 
-{{lookupViniciusClient.response.body.$.client.id}}
+{{clientId}}
 --boundary
 Content-Disposition: form-data; name="files"; filename="teste_ficha_cadastral.png"
 Content-Type: image/png

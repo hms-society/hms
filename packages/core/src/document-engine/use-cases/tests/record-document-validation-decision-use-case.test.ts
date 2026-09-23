@@ -36,6 +36,7 @@ describe('Record Document Validation Decision Use Case', () => {
   it('maps validate decision to validated status', async () => {
     const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,
+      clientId: '00000000-0000-4000-8000-000000000700',
       aiSuggestion: {
         documentTypeId: 'comprovante_residencia',
         checklistItemId: 'residence-proof',
@@ -72,7 +73,9 @@ describe('Record Document Validation Decision Use Case', () => {
       action: DocumentValidationLogAction.DecisionRecorded,
       status: DocumentValidationStatus.Valid,
       decision: DocumentValidationDecision.Validate,
+      reason: undefined,
       metadata: {
+        caseId: '00000000-0000-4000-8000-000000000701',
         documentTypeId: 'comprovante_residencia',
         checklistRequirementId: checklistItemId,
       },
@@ -80,8 +83,11 @@ describe('Record Document Validation Decision Use Case', () => {
     expect(
       caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
     ).toHaveBeenCalledWith({
+      caseId: '00000000-0000-4000-8000-000000000701',
       checklistItemId,
       documentFileId: document.id,
+      documentFileName: document.fileName,
+      clientId: '00000000-0000-4000-8000-000000000700',
       validatedBy: 'reviewer-id',
     })
   })
@@ -122,9 +128,10 @@ describe('Record Document Validation Decision Use Case', () => {
     })
   })
 
-  it('keeps the document decision recorded when the checklist synchronization fails', async () => {
+  it('fails the decision when the checklist synchronization fails', async () => {
     const document = DocumentValidationDocumentFaker.fake({
       status: DocumentValidationStatus.Valid,
+      clientId: '00000000-0000-4000-8000-000000000700',
       checklistLink: {
         caseId: '00000000-0000-4000-8000-000000000701',
         checklistItemId,
@@ -143,7 +150,7 @@ describe('Record Document Validation Decision Use Case', () => {
         decision: DocumentValidationDecision.Validate,
         checklistRequirementId: checklistItemId,
       }),
-    ).resolves.toEqual(document)
+    ).rejects.toThrow('checklist sync failed')
 
     expect(documentValidationsRepository.recordDecision).toHaveBeenCalledWith({
       documentFileId: document.id,

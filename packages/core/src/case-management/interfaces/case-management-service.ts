@@ -3,6 +3,8 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  Pending,
+  AssistedMessage,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
@@ -61,6 +63,14 @@ export type CreateLegalCaseRequest = {
   }>
 }
 
+export type CreatePendingRequest = {
+  checklistItemId: string
+  documentFileId?: string
+  documentFileName?: string
+  reason: import('../domain/structures').PendingReason
+  details?: string
+}
+
 export interface CaseManagementService {
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
 
@@ -69,11 +79,14 @@ export interface CaseManagementService {
     request: AddCaseChecklistComplementaryItemRequest,
   ): Promise<RestResponse<CaseChecklistItem>>
 
-  listCaseChecklist(caseId: string): Promise<RestResponse<readonly CaseChecklistItem[]>>
+  listCaseChecklist(
+    caseId: string,
+    clientId?: string,
+  ): Promise<RestResponse<readonly CaseChecklistItem[]>>
 
   listChecklistTemplates(): Promise<RestResponse<readonly ChecklistTemplate[]>>
 
-  listMyCases(): Promise<RestResponse<readonly LegalCaseSummary[]>>
+  listMyCases(clientId?: string): Promise<RestResponse<readonly LegalCaseSummary[]>>
 
   replaceChecklistTemplate(
     request: ReplaceChecklistTemplateRequest,
@@ -102,4 +115,19 @@ export interface CaseManagementService {
     portalToken: string,
     file: unknown,
   ): Promise<RestResponse<PortalDocumentUploadResponse>>
+  listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
+
+  getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
+
+  editPendingMessage(
+    pendingId: string,
+    request: Pick<AssistedMessage, 'subject' | 'body'>,
+  ): Promise<RestResponse<AssistedMessage>>
+
+  approvePendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
+
+  createPending(
+    caseId: string,
+    request: CreatePendingRequest,
+  ): Promise<RestResponse<Pending>>
 }
