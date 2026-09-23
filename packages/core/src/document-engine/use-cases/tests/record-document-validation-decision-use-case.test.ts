@@ -113,7 +113,9 @@ describe('Record Document Validation Decision Use Case', () => {
       checklistRequirementId: 'Documento teste 1',
       status: DocumentValidationStatus.Valid,
     })
-    expect(caseChecklistUpdateProvider.linkValidatedDocumentToChecklist).toHaveBeenCalledWith({
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).toHaveBeenCalledWith({
       checklistItemId: undefined,
       documentFileId: document.id,
       validatedBy: 'reviewer-id',
@@ -166,7 +168,9 @@ describe('Record Document Validation Decision Use Case', () => {
       decision: DocumentValidationDecision.Validate,
     })
 
-    expect(caseChecklistUpdateProvider.linkValidatedDocumentToChecklist).toHaveBeenCalledWith({
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).toHaveBeenCalledWith({
       checklistItemId: undefined,
       documentFileId: document.id,
       validatedBy: 'reviewer-id',

@@ -8,7 +8,10 @@ import {
   Post,
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
-import type { LegalCasesRepository, CasePortalAccessGrantsRepository } from '@hms/core/case-management/interfaces'
+import type {
+  LegalCasesRepository,
+  CasePortalAccessGrantsRepository,
+} from '@hms/core/case-management/interfaces'
 import { GrantCasePortalAccessUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
@@ -16,7 +19,10 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 import { CasesController } from '@/case-management/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
-import { createPortalAccessToken, hashPortalAccessToken } from '@/case-management/security/portal-access-token'
+import {
+  createPortalAccessToken,
+  hashPortalAccessToken,
+} from '@/case-management/security/portal-access-token'
 
 type RequestBody = { canUpload: boolean; expiresAt?: string }
 
@@ -25,11 +31,15 @@ export class GrantCasePortalAccessController {
   private readonly useCase: GrantCasePortalAccessUseCase
 
   constructor(
-    @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases) legalCasesRepository: LegalCasesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
+    legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants)
     grantsRepository: CasePortalAccessGrantsRepository,
   ) {
-    this.useCase = new GrantCasePortalAccessUseCase(legalCasesRepository, grantsRepository)
+    this.useCase = new GrantCasePortalAccessUseCase(
+      legalCasesRepository,
+      grantsRepository,
+    )
   }
 
   @Post(':caseId/portal-access')
@@ -42,9 +52,7 @@ export class GrantCasePortalAccessController {
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
     if (!body || typeof body.canUpload !== 'boolean') {
-      throw new BadRequestException(
-        'Informe canUpload no corpo da requisição.',
-      )
+      throw new BadRequestException('Informe canUpload no corpo da requisição.')
     }
 
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined

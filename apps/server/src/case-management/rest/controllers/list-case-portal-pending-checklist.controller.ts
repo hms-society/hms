@@ -36,7 +36,11 @@ export class ListCasePortalPendingChecklistController {
   }
 
   @Get(':caseId/portal-pendencies')
-  @ApiQuery({ name: 'portalToken', required: true, description: 'Token do link do Portal.' })
+  @ApiQuery({
+    name: 'portalToken',
+    required: true,
+    description: 'Token do link do Portal.',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The pending documents for the authorized case.',

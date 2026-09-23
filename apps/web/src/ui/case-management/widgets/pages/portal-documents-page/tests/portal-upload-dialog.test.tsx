@@ -43,7 +43,11 @@ describe('PortalUploadDialog', () => {
       />,
     )
 
-    selectFile(new File(['document'], 'documento.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }))
+    selectFile(
+      new File(['document'], 'documento.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    )
     fireEvent.click(screen.getByRole('button', { name: 'Enviar documento' }))
 
     const alert = await screen.findByRole('alert')
@@ -84,9 +88,13 @@ describe('PortalUploadDialog', () => {
       />,
     )
 
-    const oversizedFile = new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'documento.pdf', {
-      type: 'application/pdf',
-    })
+    const oversizedFile = new File(
+      [new Uint8Array(10 * 1024 * 1024 + 1)],
+      'documento.pdf',
+      {
+        type: 'application/pdf',
+      },
+    )
     selectFile(oversizedFile)
     fireEvent.click(screen.getByRole('button', { name: 'Enviar documento' }))
 

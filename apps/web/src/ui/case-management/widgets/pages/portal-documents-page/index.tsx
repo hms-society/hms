@@ -109,7 +109,9 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
   const { caseManagementService } = useRestContext()
   const queryClient = useQueryClient()
   const [selectedItem, setSelectedItem] = useState<CaseChecklistItem | null>(null)
-  const [uploadResult, setUploadResult] = useState<PortalDocumentUploadResponse | null>(null)
+  const [uploadResult, setUploadResult] = useState<PortalDocumentUploadResponse | null>(
+    null,
+  )
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -172,7 +174,12 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
           <p className='mt-2 font-sans text-sm text-muted-foreground'>
             O link pode ter expirado ou não é válido para este caso.
           </p>
-          <Button type='button' variant='brand' className='mt-5 rounded-pill px-5' onClick={() => refetch()}>
+          <Button
+            type='button'
+            variant='brand'
+            className='mt-5 rounded-pill px-5'
+            onClick={() => refetch()}
+          >
             Tentar novamente
           </Button>
         </section>
@@ -211,7 +218,12 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
           <Section title='Documentos pendentes' count={pendingItems.length}>
             {pendingItems.length > 0 ? (
               pendingItems.map((item) => (
-                <DocumentRow key={item.id} item={item} status='pending' onUpload={handleUpload} />
+                <DocumentRow
+                  key={item.id}
+                  item={item}
+                  status='pending'
+                  onUpload={handleUpload}
+                />
               ))
             ) : (
               <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
@@ -226,11 +238,7 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
           >
             {inAnalysisItems.length + validatedItems.length > 0 ? (
               [...inAnalysisItems, ...validatedItems].map((item) => (
-                <DocumentRow
-                  key={item.id}
-                  item={item}
-                  status={item.status}
-                />
+                <DocumentRow key={item.id} item={item} status={item.status} />
               ))
             ) : (
               <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>

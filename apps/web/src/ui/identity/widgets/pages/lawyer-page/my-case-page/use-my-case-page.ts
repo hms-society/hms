@@ -37,7 +37,9 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
       return response.body
     },
     onSuccess: (access) => {
-      setPortalAccessUrl(new URL(access.portalAccessUrl, window.location.origin).toString())
+      setPortalAccessUrl(
+        new URL(access.portalAccessUrl, window.location.origin).toString(),
+      )
       setPortalAccessExpiresAt(access.expiresAt)
     },
   })

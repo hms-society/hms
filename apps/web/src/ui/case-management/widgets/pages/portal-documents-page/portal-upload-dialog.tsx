@@ -31,7 +31,10 @@ type PortalUploadDialogProps = {
 function validateFile(file: File) {
   const extension = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`
 
-  if (!ACCEPTED_EXTENSIONS.includes(extension) || !ACCEPTED_MIME_TYPES.includes(file.type)) {
+  if (
+    !ACCEPTED_EXTENSIONS.includes(extension) ||
+    !ACCEPTED_MIME_TYPES.includes(file.type)
+  ) {
     return 'Formato inválido. Envie PNG, JPG, JPEG ou PDF.'
   }
 
@@ -97,7 +100,10 @@ export function PortalUploadDialog({
         {protocol ? (
           <div className='px-6 py-8 text-center'>
             <div className='mx-auto flex size-12 items-center justify-center rounded-full bg-badge-success'>
-              <Icon name='check-circle-2' className='size-6 text-badge-success-foreground' />
+              <Icon
+                name='check-circle-2'
+                className='size-6 text-badge-success-foreground'
+              />
             </div>
             <h3 className='mt-4 font-serif text-xl font-semibold text-brand'>
               Documento recebido
@@ -106,10 +112,14 @@ export function PortalUploadDialog({
               O documento foi encaminhado para análise.
             </p>
             <p className='mt-5 font-sans text-sm text-foreground'>
-              Protocolo:{' '}
-              <strong className='font-mono text-primary'>{protocol}</strong>
+              Protocolo: <strong className='font-mono text-primary'>{protocol}</strong>
             </p>
-            <Button type='button' variant='brand' className='mt-6 rounded-pill px-6' onClick={() => onOpenChange(false)}>
+            <Button
+              type='button'
+              variant='brand'
+              className='mt-6 rounded-pill px-6'
+              onClick={() => onOpenChange(false)}
+            >
               Fechar
             </Button>
           </div>
@@ -147,7 +157,11 @@ export function PortalUploadDialog({
 
             <DialogFooter className='mx-0 mb-0 flex-col gap-3 rounded-b-xl px-5 py-5 sm:flex-row sm:items-center sm:justify-end sm:px-6'>
               <DialogClose asChild>
-                <Button type='button' variant='outline' className='w-full rounded-pill px-6 sm:w-auto'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  className='w-full rounded-pill px-6 sm:w-auto'
+                >
                   Cancelar
                 </Button>
               </DialogClose>

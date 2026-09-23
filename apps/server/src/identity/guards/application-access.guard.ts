@@ -1,4 +1,10 @@
-import { ForbiddenException, type CanActivate, type ExecutionContext, Inject, Injectable } from '@nestjs/common'
+import {
+  ForbiddenException,
+  type CanActivate,
+  type ExecutionContext,
+  Inject,
+  Injectable,
+} from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import type { CasePortalAccessGrantsRepository } from '@hms/core/case-management/interfaces'
 
@@ -32,18 +38,18 @@ export class ApplicationAccessGuard implements CanActivate {
     if (access === 'public') return true
 
     if (access === 'case-portal' || access === 'case-portal-upload') {
-      const request = context
-        .switchToHttp()
-        .getRequest<
-          IdentityRequest & {
-            params: { caseId?: string }
-            headers: Record<string, string | undefined>
-            query?: { portalToken?: string }
-          }
-        >()
+      const request = context.switchToHttp().getRequest<
+        IdentityRequest & {
+          params: { caseId?: string }
+          headers: Record<string, string | undefined>
+          query?: { portalToken?: string }
+        }
+      >()
       const caseId = request.params?.caseId
-      const token = request.headers[PORTAL_ACCESS_TOKEN_HEADER] ?? request.query?.portalToken
-      if (!caseId || !token) throw new ForbiddenException('A valid case portal link is required')
+      const token =
+        request.headers[PORTAL_ACCESS_TOKEN_HEADER] ?? request.query?.portalToken
+      if (!caseId || !token)
+        throw new ForbiddenException('A valid case portal link is required')
 
       const grant = await this.casePortalAccessGrants.findActiveByTokenHashAndCase(
         hashPortalAccessToken(token),
@@ -51,7 +57,9 @@ export class ApplicationAccessGuard implements CanActivate {
       )
       if (!grant) throw new ForbiddenException('The portal link is invalid or expired')
       if (access === 'case-portal-upload' && !grant.canUpload) {
-        throw new ForbiddenException('The portal link is not authorized to upload for this case')
+        throw new ForbiddenException(
+          'The portal link is not authorized to upload for this case',
+        )
       }
       request.portalAccessGrant = grant
       return true

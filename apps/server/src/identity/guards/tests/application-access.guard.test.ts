@@ -8,11 +8,15 @@ import { IdentityModuleFixture } from '@/identity/fixtures/identity-module-fixtu
 @Controller('access-probe')
 class AccessProbeController {
   @Get('internal')
-  internal() { return { allowed: true } }
+  internal() {
+    return { allowed: true }
+  }
 
   @RouteAccess('public')
   @Get('public')
-  public() { return { allowed: true } }
+  public() {
+    return { allowed: true }
+  }
 }
 
 describe('Application Access Guard', () => {
@@ -31,7 +35,9 @@ describe('Application Access Guard', () => {
   })
 
   it('allows explicitly public routes without a user session', async () => {
-    const response = await request(fixture.app.getHttpServer()).get('/access-probe/public').expect(200)
+    const response = await request(fixture.app.getHttpServer())
+      .get('/access-probe/public')
+      .expect(200)
     expect(response.body).toEqual({ allowed: true })
   })
 
@@ -46,9 +52,15 @@ describe('Application Access Guard', () => {
   it('denies legacy client collaborators and inactive collaborators', async () => {
     const user = await fixture.registerUser()
     await fixture.registerCollaborator(user, { profile: 'client' })
-    await request(fixture.app.getHttpServer()).get('/access-probe/internal').set('Authorization', fixture.authenticateAs(user)).expect(403)
+    await request(fixture.app.getHttpServer())
+      .get('/access-probe/internal')
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(403)
     const inactiveUser = await fixture.registerUser({ status: 'disabled' })
     await fixture.registerCollaborator(inactiveUser)
-    await request(fixture.app.getHttpServer()).get('/access-probe/internal').set('Authorization', fixture.authenticateAs(inactiveUser)).expect(401)
+    await request(fixture.app.getHttpServer())
+      .get('/access-probe/internal')
+      .set('Authorization', fixture.authenticateAs(inactiveUser))
+      .expect(401)
   })
 })

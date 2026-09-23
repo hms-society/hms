@@ -20,7 +20,9 @@ function RouteComponent() {
   if (!portalToken) {
     return (
       <main className='flex min-h-screen items-center justify-center bg-background px-4 py-8'>
-        <p className='font-sans text-sm text-muted-foreground'>Link do portal incompleto.</p>
+        <p className='font-sans text-sm text-muted-foreground'>
+          Link do portal incompleto.
+        </p>
       </main>
     )
   }

@@ -30,21 +30,21 @@ export class MarkCaseChecklistItemValidatedUseCase
   }
 
   async executeByDocumentFileId(request: Omit<Request, 'checklistItemId'>) {
-    const checklistItem =
-      await this.caseChecklistItemsRepository.findByDocumentFileId(
-        request.documentFileId,
-      )
+    const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
+      request.documentFileId,
+    )
 
     if (!checklistItem) {
       throw new LegalCaseNotFoundError()
     }
 
-    const updatedItem =
-      await this.caseChecklistItemsRepository.markAsValidatedByDocument({
+    const updatedItem = await this.caseChecklistItemsRepository.markAsValidatedByDocument(
+      {
         checklistItemId: checklistItem.id,
         documentFileId: request.documentFileId,
         validatedBy: request.validatedBy,
-      })
+      },
+    )
 
     return this.finishValidation(updatedItem, request.validatedBy)
   }
@@ -61,10 +61,7 @@ export class MarkCaseChecklistItemValidatedUseCase
       )
 
     if (!hasPendingRequiredItems) {
-      await this.legalCasesRepository.completeChecklist(
-        checklistItem.caseId,
-        validatedBy,
-      )
+      await this.legalCasesRepository.completeChecklist(checklistItem.caseId, validatedBy)
     }
 
     return checklistItem

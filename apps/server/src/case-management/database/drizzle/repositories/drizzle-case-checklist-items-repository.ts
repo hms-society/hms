@@ -133,9 +133,9 @@ export class DrizzleCaseChecklistItemsRepository
     checklistItemId,
     documentFileId,
     documentFileName,
-  }: Parameters<CaseChecklistItemsRepository['markAsInAnalysisByDocument']>[0]): ReturnType<
+  }: Parameters<
     CaseChecklistItemsRepository['markAsInAnalysisByDocument']
-  > {
+  >[0]): ReturnType<CaseChecklistItemsRepository['markAsInAnalysisByDocument']> {
     const [updatedItem] = await this.database
       .update(caseChecklistItemModel)
       .set({

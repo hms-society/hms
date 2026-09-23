@@ -21,7 +21,13 @@ import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
 
 @Module({
-  imports: [IdentityModule, CaseManagementDatabaseModule, IntakeDatabaseModule, DocumentsDatabaseModule, ProvisionModule],
+  imports: [
+    IdentityModule,
+    CaseManagementDatabaseModule,
+    IntakeDatabaseModule,
+    DocumentsDatabaseModule,
+    ProvisionModule,
+  ],
   controllers: [
     AddCaseChecklistComplementaryItemController,
     ListChecklistTemplatesController,

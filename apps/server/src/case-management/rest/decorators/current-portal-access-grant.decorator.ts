@@ -1,4 +1,8 @@
-import { createParamDecorator, ForbiddenException, type ExecutionContext } from '@nestjs/common'
+import {
+  createParamDecorator,
+  ForbiddenException,
+  type ExecutionContext,
+} from '@nestjs/common'
 import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/entities'
 
 export const CurrentPortalAccessGrant = createParamDecorator(

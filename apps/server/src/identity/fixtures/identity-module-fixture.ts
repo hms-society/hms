@@ -83,7 +83,10 @@ export class IdentityModuleFixture {
     return this.restFixture.get(DrizzleIntakeResponsiblesRepository)
   }
 
-  static async register(controller?: Type<unknown> | Type<unknown>[], applicationAccess = false) {
+  static async register(
+    controller?: Type<unknown> | Type<unknown>[],
+    applicationAccess = false,
+  ) {
     const authentication: { user?: AuthUser } = {}
     const restFixture = await RestFixture.register(
       {
@@ -95,7 +98,11 @@ export class IdentityModuleFixture {
           LegalCatalogModule,
           ProvisionModule,
         ],
-        controllers: controller ? (Array.isArray(controller) ? controller : [controller]) : [],
+        controllers: controller
+          ? Array.isArray(controller)
+            ? controller
+            : [controller]
+          : [],
         providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
       },
       (builder) => {
@@ -113,33 +120,32 @@ export class IdentityModuleFixture {
           })
         }
 
-        return builder.overrideGuard(AuthGuard)
-          .useValue({
-            canActivate: (context: ExecutionContext) => {
-              const request = context.switchToHttp().getRequest<{
-                headers: { authorization?: string }
-                auth?: { accessToken: string; user: AuthUser }
-                user?: AuthUser
-                identity?: {
-                  auth: { accessToken: string; user: AuthUser }
-                  user: AuthUser
-                }
-              }>()
-
-              if (!authentication.user || !request.headers.authorization) {
-                throw new UnauthorizedException('Authentication token is required')
+        return builder.overrideGuard(AuthGuard).useValue({
+          canActivate: (context: ExecutionContext) => {
+            const request = context.switchToHttp().getRequest<{
+              headers: { authorization?: string }
+              auth?: { accessToken: string; user: AuthUser }
+              user?: AuthUser
+              identity?: {
+                auth: { accessToken: string; user: AuthUser }
+                user: AuthUser
               }
+            }>()
 
-              const auth = {
-                accessToken: 'fixture-access-token',
-                user: authentication.user,
-              }
-              request.user = authentication.user
-              request.auth = auth
-              request.identity = { auth, user: authentication.user }
-              return true
-            },
-          })
+            if (!authentication.user || !request.headers.authorization) {
+              throw new UnauthorizedException('Authentication token is required')
+            }
+
+            const auth = {
+              accessToken: 'fixture-access-token',
+              user: authentication.user,
+            }
+            request.user = authentication.user
+            request.auth = auth
+            request.identity = { auth, user: authentication.user }
+            return true
+          },
+        })
       },
     )
 

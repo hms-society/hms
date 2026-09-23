@@ -21,9 +21,8 @@ export function useDocumentFilePreview(documentFileId: string) {
   })
 
   const { file, isLoadingFile, isErrorFile } = useDocumentFileQuery(documentFileId)
-  const { fileUrl, isLoadingFileUrl, isErrorFileUrl } = useDocumentFileUrlQuery(
-    documentFileId,
-  )
+  const { fileUrl, isLoadingFileUrl, isErrorFileUrl } =
+    useDocumentFileUrlQuery(documentFileId)
 
   useEffect(() => {
     if (!fileUrl) return

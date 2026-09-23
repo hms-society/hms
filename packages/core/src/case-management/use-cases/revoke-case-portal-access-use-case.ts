@@ -2,7 +2,10 @@ import type { UseCase } from '#shared/interfaces/use-case'
 
 import type { CasePortalAccessGrant } from '../domain/entities'
 import { LegalCaseNotFoundError } from '../domain/errors'
-import type { CasePortalAccessGrantsRepository, LegalCasesRepository } from '../interfaces'
+import type {
+  CasePortalAccessGrantsRepository,
+  LegalCasesRepository,
+} from '../interfaces'
 
 type Request = {
   grantId: string
@@ -11,7 +14,9 @@ type Request = {
   isAdministrator: boolean
 }
 
-export class RevokeCasePortalAccessUseCase implements UseCase<Request, CasePortalAccessGrant> {
+export class RevokeCasePortalAccessUseCase
+  implements UseCase<Request, CasePortalAccessGrant>
+{
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
     private readonly grantsRepository: CasePortalAccessGrantsRepository,

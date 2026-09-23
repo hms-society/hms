@@ -45,10 +45,7 @@ describe('List Case Portal Pending Checklist Use Case', () => {
       grantedBy: faker.string.uuid(),
       createdAt: new Date(),
     })
-    checklistItemsRepository.listByCaseId.mockResolvedValue([
-      pendingItem,
-      validatedItem,
-    ])
+    checklistItemsRepository.listByCaseId.mockResolvedValue([pendingItem, validatedItem])
 
     await expect(useCase.execute({ caseId: legalCase.id, tokenHash })).resolves.toEqual([
       pendingItem,
@@ -71,7 +68,10 @@ describe('List Case Portal Pending Checklist Use Case', () => {
   })
 })
 
-function checklistItem(caseId: string, status: CaseChecklistItem['status']): CaseChecklistItem {
+function checklistItem(
+  caseId: string,
+  status: CaseChecklistItem['status'],
+): CaseChecklistItem {
   const now = new Date()
   return {
     id: faker.string.uuid(),

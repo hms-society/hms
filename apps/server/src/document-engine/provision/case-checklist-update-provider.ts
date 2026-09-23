@@ -39,11 +39,13 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
       return
     }
 
-    await this.useCase.execute(request as {
-      checklistItemId: string
-      documentFileId: string
-      validatedBy: string
-    })
+    await this.useCase.execute(
+      request as {
+        checklistItemId: string
+        documentFileId: string
+        validatedBy: string
+      },
+    )
   }
 
   async markDocumentResendRequested(

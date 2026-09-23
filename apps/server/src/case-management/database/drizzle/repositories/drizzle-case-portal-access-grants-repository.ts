@@ -44,7 +44,10 @@ export class DrizzleCasePortalAccessGrantsRepository
           eq(casePortalAccessGrantModel.tokenHash, tokenHash),
           eq(casePortalAccessGrantModel.caseId, caseId),
           eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
-          or(isNull(casePortalAccessGrantModel.expiresAt), gt(casePortalAccessGrantModel.expiresAt, now)),
+          or(
+            isNull(casePortalAccessGrantModel.expiresAt),
+            gt(casePortalAccessGrantModel.expiresAt, now),
+          ),
           eq(casePortalAccessGrantModel.canView, true),
         ),
       )

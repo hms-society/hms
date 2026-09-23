@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Controller,
   HttpStatus,
   Inject,
   Param,
@@ -14,7 +13,10 @@ import { ApiConsumes, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/entities'
-import type { CaseChecklistItemsRepository, LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import type {
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '@hms/core/case-management/interfaces'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { CasesController } from '@/case-management/decorators'
@@ -49,10 +51,17 @@ export class UploadCasePortalDocumentController {
   ) {}
 
   @Post(':caseId/portal-pendencies/:checklistItemId/upload')
-  @ApiQuery({ name: 'portalToken', required: true, description: 'Token do link do Portal.' })
+  @ApiQuery({
+    name: 'portalToken',
+    required: true,
+    description: 'Token do link do Portal.',
+  })
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Document uploaded for analysis.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Document uploaded for analysis.',
+  })
   async handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Param('checklistItemId', new ParseUUIDPipe()) checklistItemId: string,
@@ -64,7 +73,9 @@ export class UploadCasePortalDocumentController {
       throw new BadRequestException('O arquivo deve ter entre 1 byte e 10 MB.')
     }
 
-    const extension = file.originalname.slice(file.originalname.lastIndexOf('.')).toLowerCase()
+    const extension = file.originalname
+      .slice(file.originalname.lastIndexOf('.'))
+      .toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(extension) || !ALLOWED_MIME_TYPES.has(file.mimetype)) {
       throw new BadRequestException('Formato inválido. Envie PNG, JPG, JPEG ou PDF.')
     }
@@ -74,7 +85,8 @@ export class UploadCasePortalDocumentController {
 
     const checklistItems = await this.checklistItemsRepository.listByCaseId(caseId)
     const checklistItem = checklistItems.find((item) => item.id === checklistItemId)
-    if (!checklistItem) throw new BadRequestException('Pendência não encontrada neste caso.')
+    if (!checklistItem)
+      throw new BadRequestException('Pendência não encontrada neste caso.')
 
     const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')
     const storagePath = `third-party-portal/${caseId}/${Date.now()}-${safeName}`
@@ -84,13 +96,15 @@ export class UploadCasePortalDocumentController {
       channel: DocumentBatchChannel.ThirdPartyPortal,
       sender: `portal:${grant.id}`,
       clientId: legalCase.clientId,
-      files: [{
-        storagePath,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        sizeBytes: file.size,
-        checklistItemId,
-      }],
+      files: [
+        {
+          storagePath,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          sizeBytes: file.size,
+          checklistItemId,
+        },
+      ],
     })
 
     const uploadedFile = batch.files?.find(
@@ -103,7 +117,8 @@ export class UploadCasePortalDocumentController {
       documentFileId: uploadedFile.id,
       documentFileName: uploadedFile.originalName,
     })
-    if (!updatedItem) throw new BadRequestException('A pendência não pôde ser atualizada.')
+    if (!updatedItem)
+      throw new BadRequestException('A pendência não pôde ser atualizada.')
 
     return {
       protocol: batch.readableId ?? batch.id,
