@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { Controller, Get, HttpStatus, ServiceUnavailableException } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -10,6 +16,7 @@ import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
 const { version } = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
 ) as { version: string }
+const DATABASE_HEALTH_TIMEOUT_MS = 15_000
 
 @Controller()
 export class CheckHealthController {
@@ -27,7 +34,19 @@ export class CheckHealthController {
     type: ErrorResponseDto,
   })
   async handle() {
-    const database = await this.drizzleClient.isHealthy()
+    let timeout: NodeJS.Timeout | undefined
+    const database = await Promise.race([
+      this.drizzleClient.isHealthy(),
+      new Promise<boolean>((resolve) => {
+        timeout = setTimeout(() => {
+          Logger.error('Database health query stalled; exiting to restore connectivity')
+          resolve(false)
+          process.exit(1)
+        }, DATABASE_HEALTH_TIMEOUT_MS)
+      }),
+    ]).finally(() => {
+      if (timeout) clearTimeout(timeout)
+    })
 
     if (!database) {
       throw new ServiceUnavailableException({

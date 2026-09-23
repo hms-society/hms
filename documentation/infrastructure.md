@@ -257,6 +257,17 @@ docker-compose.yml
   metrics and logs. Coolify environment labels keep staging and production
   telemetry separated inside the same Grafana Cloud stack.
 
+The server image checks `GET /health` every 30 seconds. That endpoint probes
+PostgreSQL and returns an unhealthy response while the database is unavailable;
+the container can become healthy again on a later successful probe. The database
+connection timeout is 12 seconds. If a health query remains pending for 15
+seconds, the server process exits so the container restarts with a fresh database
+pool. Docker's healthcheck timeout is 18 seconds to leave time for this recovery
+action. The Postgres.js client disables prepared statements because staging uses
+Supavisor transaction pooling. The shared communication badge polls one grouped
+summary endpoint every 10 seconds, starting the next poll only after the previous
+request completes, instead of requesting each client's full message history.
+
 #### Grafana Cloud observability deployment
 
 The self-contained `apps/observability/docker-compose.yaml` embeds the Alloy

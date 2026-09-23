@@ -5,7 +5,7 @@ import {
 } from '@opentelemetry/sdk-metrics'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import request from 'supertest'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
@@ -94,4 +94,24 @@ describe('Check Health Controller [GET /health]', () => {
     )
     expect(JSON.stringify(duration?.dataPoints)).not.toContain('select 1')
   })
+
+  it('exits so the container can restart when the database probe stalls', async () => {
+    if (!fixture) throw new Error('Health test infrastructure is unavailable')
+    const { DrizzleClient } = await import('@/shared/database/drizzle/drizzle-client.js')
+    const drizzleClient = fixture.get(DrizzleClient)
+    // A permanently stalled socket cannot be reproduced with a normal
+    // PostgreSQL Testcontainer, so this failure path controls that one query.
+    const healthProbe = vi
+      .spyOn(drizzleClient, 'isHealthy')
+      .mockImplementation(() => new Promise<boolean>(() => {}))
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+    try {
+      await request(fixture.app.getHttpServer()).get('/health').expect(503)
+      expect(exit).toHaveBeenCalledWith(1)
+    } finally {
+      healthProbe.mockRestore()
+      exit.mockRestore()
+    }
+  }, 20_000)
 })
