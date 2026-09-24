@@ -43,11 +43,9 @@ export class CreatePendingUseCase
   }
 }
 
-export function createAssistedMessage(request: Pick<
-  Request,
-  'reason' | 'documentFileName' | 'details'
-  | 'clientName'
->) {
+export function createAssistedMessage(
+  request: Pick<Request, 'reason' | 'documentFileName' | 'details' | 'clientName'>,
+) {
   const documentName = request.documentFileName ?? 'documento solicitado'
   const clientName = request.clientName?.trim() || 'cliente'
   const reasonCopy = {
