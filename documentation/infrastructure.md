@@ -300,9 +300,23 @@ file, repository preservation setting, or public domain is required.
 Set `GRAFANA_CLOUD_API_KEY`, `GRAFANA_CLOUD_LOKI_URL`,
 `GRAFANA_CLOUD_LOKI_USER`, `GRAFANA_CLOUD_PROMETHEUS_URL`,
 `GRAFANA_CLOUD_PROMETHEUS_USER`, `HMS_COOLIFY_PROJECTS_REGEX`,
-`HMS_ENVIRONMENT`, and `HMS_OBSERVABILITY_HOST` in Coolify. The access-policy
+`HMS_ENVIRONMENT`, `HMS_OBSERVABILITY_HOST`, and
+`INNGEST_METRICS_BEARER_TOKEN_STG` in Coolify. The access-policy
 token requires `metrics:write` and `logs:write` scopes and must be stored as a
-Coolify secret. The embedded `HMS_ALLOY_CONFIG` contains no credentials.
+Coolify secret. The embedded `HMS_ALLOY_CONFIG` contains no credentials. Store
+the Inngest token as a separate Coolify secret: open the Inngest Prometheus
+integration, select **Staging**, and use the bearer credential from that
+environment's generated scrape configuration. Never use the Production
+credential for this scrape or commit either credential to Git.
+
+The collector scrapes the native Inngest Cloud endpoint for
+`staging-21a934d0` over HTTPS every six minutes and forwards those metrics to
+Grafana Cloud. The Inngest plan currently displays 30-minute granularity and a
+10-minute delay, so recent executions may not appear immediately. Deploy this
+scrape on only one Alloy instance when multiple collectors share the same
+Grafana Cloud stack; otherwise each instance sends duplicate series. The
+dedicated Staging dashboard uses Inngest's native function-run counters for
+execution volume and failures. It does not derive duration metrics.
 
 Use `HMS_COOLIFY_PROJECTS_REGEX` to limit collection to the relevant Coolify
 project names. For the current HMS projects, use
