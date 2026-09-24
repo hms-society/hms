@@ -7,6 +7,8 @@ export type IconName =
   | 'circle'
   | 'clipboard-list'
   | 'file-text'
+  | 'folder-open'
+  | 'folder-open'
   | 'layout-dashboard'
   | 'inbox'
   | 'briefcase-business'

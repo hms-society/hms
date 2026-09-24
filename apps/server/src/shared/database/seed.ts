@@ -159,7 +159,7 @@ async function bootstrap() {
       .filter(({ profile }) => profile === 'intern')
       .map(({ id }) => id)
 
-    const caseManagementSeed = await app.get(CaseManagementSeeder).run({
+    await app.get(CaseManagementSeeder).run({
       contractedIntakes: intakeSeed.intakes.filter(
         ({ status }) => status === IntakeStatus.Contracted,
       ),
@@ -191,22 +191,9 @@ async function bootstrap() {
       throw new AppError('The document-production Consultation could not be seeded')
     }
 
-    const piecesCase = caseManagementSeed.legalCases.find(
-      ({ clientId }) => clientId === piecesSeedClient.id,
-    )
-    if (!piecesCase) {
-      throw new AppError(
-        'The Vinicius Lopes Machado case could not be resolved for document seed',
-      )
-    }
-
     const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
-      consultationId: consultationSeed.consultation.id,
-      caseId: piecesCase.id,
-      caseName: piecesCase.publicCode,
-      requestedByCollaboratorId: lawyer.id,
     })
 
     await app.get(CommunicationSeeder).run()
@@ -214,7 +201,9 @@ async function bootstrap() {
     LOGGER.log(
       JSON.stringify({
         consultationId: consultationSeed.consultation.id,
-        documentIds: documentProductionSeed.documents.map(({ id }) => id),
+        documentSpecifications: documentProductionSeed.specifications.map(
+          ({ name }) => name,
+        ),
         assignedLawyerEmail: actor.email,
       }),
     )

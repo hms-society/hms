@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import { Checkbox } from '@/ui/shadcn/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -23,9 +24,9 @@ type Step = 1 | 2 | 3
 const MODELS = [
   {
     id: 'retirement',
-    title: 'Requerimento Administrativo — Aposentadoria por Tempo de Contribuição',
-    description: 'Modelo padrão do escritório para requerimento inicial no INSS.',
-    version: 'v2 · atualizado 20/06',
+    title: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+    description: 'Modelo previdenciário reutilizável para requerimento administrativo.',
+    version: 'Disponível para produção jurídica',
   },
   {
     id: 'age-retirement',
@@ -46,40 +47,56 @@ const DOCUMENTS = [
     id: 'rg',
     label: 'RG — Documento de Identidade',
     detail: 'Emitido em 2003 · válido',
-    selected: false,
+    category: 'Identificação',
   },
   {
     id: 'cpf',
     label: 'CPF — Cadastro de Pessoa Física',
     detail: 'Situação regular',
-    selected: false,
+    category: 'Identificação',
   },
   {
     id: 'address',
     label: 'Comprovante de Residência',
     detail: 'Conta de luz · abril/2026',
-    selected: false,
+    category: 'Endereço',
   },
   {
     id: 'cnis',
     label: 'CNIS — Cadastro Nacional de Informações Sociais',
     detail: 'Filiação 12/03/1989 · 342 a 2 m',
-    selected: true,
+    category: 'Previdenciário',
   },
 ]
 
 export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDialogProps) {
   const [step, setStep] = useState<Step>(1)
   const [selectedModelId, setSelectedModelId] = useState(MODELS[0].id)
-  const [selectedDocumentIds, setSelectedDocumentIds] = useState(
-    DOCUMENTS.filter((document) => document.selected).map((document) => document.id),
-  )
+  const [modelSearch, setModelSearch] = useState('')
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([])
+  const [observations, setObservations] = useState('')
 
   const selectedModel = MODELS.find((model) => model.id === selectedModelId) ?? MODELS[0]
+  const filteredModels = MODELS.filter((model) =>
+    `${model.title} ${model.description}`
+      .toLocaleLowerCase('pt-BR')
+      .includes(modelSearch.trim().toLocaleLowerCase('pt-BR')),
+  )
 
   function handleClose(nextOpen: boolean) {
-    if (!nextOpen) setStep(1)
+    if (!nextOpen) {
+      setStep(1)
+      setSelectedModelId(MODELS[0].id)
+      setModelSearch('')
+      setSelectedDocumentIds([])
+      setObservations('')
+    }
     onOpenChange(nextOpen)
+  }
+
+  function handleChangeModel() {
+    setModelSearch('')
+    setStep(1)
   }
 
   function handleToggleDocument(documentId: string) {
@@ -132,14 +149,22 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
         </DialogHeader>
 
         {step === 1 ? (
-          <ModelStep selectedModelId={selectedModelId} onSelect={setSelectedModelId} />
+          <ModelStep
+            models={filteredModels}
+            search={modelSearch}
+            selectedModelId={selectedModelId}
+            onSearch={setModelSearch}
+            onSelect={setSelectedModelId}
+          />
         ) : null}
         {step === 2 ? (
           <PreparationStep
             model={selectedModel}
             selectedDocumentIds={selectedDocumentIds}
             onToggleDocument={handleToggleDocument}
-            onChangeModel={() => setStep(1)}
+            onChangeModel={handleChangeModel}
+            observations={observations}
+            onObservationsChange={setObservations}
           />
         ) : null}
         {step === 3 ? <GenerationStep /> : null}
@@ -159,16 +184,16 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
             </Button>
           )}
           {step === 1 ? (
-            <Button onClick={() => setStep(2)}>
+            <Button
+              disabled={!selectedModelId || filteredModels.length === 0}
+              onClick={() => setStep(2)}
+            >
               Próximo <Icon name='arrow-right' />
             </Button>
           ) : null}
           {step === 2 ? (
-            <Button
-              disabled={selectedDocumentIds.length === 0}
-              onClick={() => setStep(3)}
-            >
-              <Icon name='sparkles' /> Gerar minuta com IA
+            <Button disabled onClick={() => setStep(3)}>
+              <Icon name='sparkles' /> Geração com IA indisponível
             </Button>
           ) : null}
           {step === 3 ? (
@@ -211,10 +236,16 @@ function StepLabel({
 }
 
 function ModelStep({
+  models,
+  search,
   selectedModelId,
+  onSearch,
   onSelect,
 }: {
+  models: typeof MODELS
+  search: string
   selectedModelId: string
+  onSearch: (value: string) => void
   onSelect: (id: string) => void
 }) {
   return (
@@ -225,12 +256,20 @@ function ModelStep({
           className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
         />
         <input
+          aria-label='Buscar modelo por nome'
           className='h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
           placeholder='Buscar modelo por nome...'
+          value={search}
+          onChange={(event) => onSearch(event.target.value)}
         />
       </div>
       <div className='space-y-2'>
-        {MODELS.map((model) => (
+        {models.length === 0 ? (
+          <p className='rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground'>
+            Nenhum modelo encontrado.
+          </p>
+        ) : null}
+        {models.map((model) => (
           <button
             key={model.id}
             type='button'
@@ -269,11 +308,15 @@ function PreparationStep({
   selectedDocumentIds,
   onToggleDocument,
   onChangeModel,
+  observations,
+  onObservationsChange,
 }: {
   model: (typeof MODELS)[number]
   selectedDocumentIds: string[]
   onToggleDocument: (id: string) => void
   onChangeModel: () => void
+  observations: string
+  onObservationsChange: (value: string) => void
 }) {
   return (
     <div className='space-y-4'>
@@ -292,39 +335,56 @@ function PreparationStep({
         </Button>
       </div>
       <div>
-        <h3 className='font-serif text-base font-semibold'>O que a IA vai fazer</h3>
+        <h3 className='flex items-center gap-2 font-serif text-base font-semibold'>
+          <Icon name='sparkles' className='size-4 text-primary' />O que a IA vai fazer
+        </h3>
         <ul className='mt-2 space-y-2 text-sm text-muted-foreground'>
-          <li>
-            ✓ Preencher qualificação, fundamentação legal padrão e referências ao dossiê
+          <li className='flex items-center gap-2'>
+            <Icon name='check-circle-2' className='size-4 shrink-0 text-primary' />
+            Preencher qualificação, fundamentação legal padrão e referências ao dossiê
           </li>
-          <li>✓ Estruturar a peça conforme o modelo escolhido</li>
-          <li>× Não define tese jurídica — você insere após a geração</li>
-          <li>× Não protocola nem entrega — apenas gera a minuta</li>
+          <li className='flex items-center gap-2'>
+            <Icon name='check-circle-2' className='size-4 shrink-0 text-primary' />
+            Estruturar a peça conforme o modelo escolhido
+          </li>
+          <li className='flex items-center gap-2'>
+            <Icon name='x-circle' className='size-4 shrink-0 text-muted-foreground' />
+            Não define tese jurídica — você insere após a geração
+          </li>
+          <li className='flex items-center gap-2'>
+            <Icon name='x-circle' className='size-4 shrink-0 text-muted-foreground' />
+            Não protocola nem entrega — apenas gera a minuta
+          </li>
         </ul>
       </div>
       <div>
         <div className='flex flex-wrap items-center justify-between gap-2'>
-          <h3 className='font-serif text-base font-semibold'>
-            Documentos de referência do dossiê <span className='text-destructive'>*</span>
-          </h3>
-          <Badge variant='success'>
-            {selectedDocumentIds.length} de {DOCUMENTS.length} selecionados
-          </Badge>
+          <div className='flex items-center gap-2'>
+            <Icon name='folder-open' className='size-4 text-primary' />
+            <h3 className='font-serif text-base font-semibold'>
+              Documentos de referência do dossiê{' '}
+              <span className='text-destructive'>*</span>
+            </h3>
+          </div>
+          <div className='flex flex-wrap items-center gap-2'>
+            <Badge variant='success'>
+              {selectedDocumentIds.length} de {DOCUMENTS.length} selecionados
+            </Badge>
+          </div>
         </div>
         <p className='mt-1 text-xs text-muted-foreground'>
           Selecione os documentos que serão a base factual desta peça.
         </p>
         <div className='mt-2 divide-y rounded-lg border border-border'>
           {DOCUMENTS.map((document) => (
-            <label
+            <div
               key={document.id}
-              className={`flex cursor-pointer items-center gap-3 p-3 ${selectedDocumentIds.includes(document.id) ? 'bg-highlight/70' : 'bg-card'}`}
+              className={`flex items-center gap-3 p-3 ${selectedDocumentIds.includes(document.id) ? 'bg-highlight/70' : 'bg-card'}`}
             >
-              <input
-                type='checkbox'
+              <Checkbox
+                aria-label={`Selecionar ${document.label}`}
                 checked={selectedDocumentIds.includes(document.id)}
-                onChange={() => onToggleDocument(document.id)}
-                className='size-4 accent-primary'
+                onCheckedChange={() => onToggleDocument(document.id)}
               />
               <span className='min-w-0 flex-1'>
                 <span className='block text-sm font-semibold'>{document.label}</span>
@@ -332,8 +392,11 @@ function PreparationStep({
                   {document.detail}
                 </span>
               </span>
-              <Icon name='eye' className='size-4 text-muted-foreground' />
-            </label>
+              <span className='hidden rounded-full bg-muted px-2 py-1 text-[10px] text-muted-foreground sm:inline'>
+                {document.category}
+              </span>
+              <Icon name='eye' className='size-4 shrink-0 text-muted-foreground' />
+            </div>
           ))}
         </div>
       </div>
@@ -346,19 +409,33 @@ function PreparationStep({
           id='ai-notes'
           className='mt-1 min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
           placeholder='Ex.: cliente teve período rural entre 1985 e 1990...'
+          value={observations}
+          onChange={(event) => onObservationsChange(event.target.value)}
         />
       </div>
+      <p className='rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground'>
+        A geração e o salvamento da peça dependem da integração com o backend e ainda não
+        estão disponíveis.
+      </p>
       <div className='grid gap-3 sm:grid-cols-2'>
         <div>
           <p className='text-xs text-muted-foreground'>Elaborador</p>
-          <div className='mt-1 rounded-md border border-border p-2 text-sm'>
-            Mariana Costa
+          <div className='mt-1 flex items-center gap-2 rounded-md border border-border p-2 text-sm'>
+            <span className='flex size-6 items-center justify-center rounded-full bg-brand-accent text-[10px] font-semibold text-foreground'>
+              MC
+            </span>
+            <span className='flex-1'>Mariana Costa</span>
+            <Icon name='chevron-down' className='size-3.5 text-muted-foreground' />
           </div>
         </div>
         <div>
           <p className='text-xs text-muted-foreground'>Revisor</p>
-          <div className='mt-1 rounded-md border border-border p-2 text-sm'>
-            Dr. Ricardo Mendes
+          <div className='mt-1 flex items-center gap-2 rounded-md border border-border p-2 text-sm'>
+            <span className='flex size-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground'>
+              RM
+            </span>
+            <span className='flex-1'>Dr. Ricardo Mendes</span>
+            <Icon name='chevron-down' className='size-3.5 text-muted-foreground' />
           </div>
         </div>
       </div>
@@ -374,53 +451,13 @@ function GenerationStep() {
       </div>
       <div>
         <h3 className='font-serif text-lg font-semibold'>
-          Minuta gerada com sucesso
+          Geração com IA ainda não disponível
         </h3>
         <p className='mt-1 text-sm text-muted-foreground'>
-          A geração foi concluída. Volte à aba Peças para abrir o documento no editor ou
-          na revisão técnica.
+          A seleção do modelo e dos documentos está disponível, mas a geração e o
+          salvamento da peça dependem da integração com o backend.
         </p>
       </div>
-      <div className='mx-auto h-2 max-w-md overflow-hidden rounded-full bg-muted'>
-        <div className='h-full w-full rounded-full bg-primary' />
-      </div>
-      <p className='text-xs text-muted-foreground'>
-        100% — geração concluída
-      </p>
-      <div className='space-y-2 text-left'>
-        <ProgressItem label='Lendo o dossiê aprovado' done />
-        <ProgressItem label='Estruturando a peça conforme o modelo' done />
-        <ProgressItem label='Redigindo a fundamentação' done />
-        <ProgressItem label='Vinculando referências e assinatura' done />
-      </div>
-    </div>
-  )
-}
-
-function ProgressItem({
-  label,
-  done = false,
-  active = false,
-}: {
-  label: string
-  done?: boolean
-  active?: boolean
-}) {
-  return (
-    <div
-      className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${active ? 'border-primary bg-highlight' : 'border-border bg-muted/30'}`}
-    >
-      <span
-        className={`flex size-5 items-center justify-center rounded-full ${done ? 'bg-primary text-primary-foreground' : active ? 'border border-primary text-primary' : 'border border-border text-muted-foreground'}`}
-      >
-        {done ? (
-          <Icon name='check' className='size-3' />
-        ) : active ? (
-          <Icon name='sparkles' className='size-3' />
-        ) : null}
-      </span>
-      <span>{label}</span>
-      {active ? <Badge className='ml-auto text-[10px]'>em andamento</Badge> : null}
     </div>
   )
 }

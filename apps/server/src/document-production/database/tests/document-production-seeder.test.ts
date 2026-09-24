@@ -4,10 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 
 describe('DocumentProductionSeeder', () => {
-  it('seeds the universal retirement model for legal production without adding it to sample packages', async () => {
+  it('seeds available document models without creating file-backed sample pieces', async () => {
     let seededSpecifications: readonly DocumentSpecificationCreation[] = []
-    let seededDocuments: readonly { id: string; title: string }[] = []
-    let seededPackageDocuments: readonly { documentSpecificationId: string }[] = []
 
     const specificationsRepository = {
       addMany: vi.fn(async (specifications: DocumentSpecificationCreation[]) => {
@@ -20,39 +18,16 @@ describe('DocumentProductionSeeder', () => {
         }))
       }),
     }
-    const documentsRepository = {
-      addMany: vi.fn(async (documents: { id: string; title: string }[]) => {
-        seededDocuments = documents
-        return documents
-      }),
-    }
-    const packageDocumentsRepository = {
-      addMany: vi.fn(async (packageDocuments: { documentSpecificationId: string }[]) => {
-        seededPackageDocuments = packageDocuments
-        return packageDocuments.map((packageDocument) => ({
-          ...packageDocument,
-          id: 'package-document-id',
-          documentPackageId: 'package-id',
-          documentId: 'document-id',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }))
-      }),
-    }
     const seeder = new DocumentProductionSeeder(
       { add: vi.fn(), replace: vi.fn() } as never,
       specificationsRepository as never,
       { add: vi.fn(), removeAll: vi.fn() } as never,
-      documentsRepository as never,
-      {
-        add: vi.fn(async (documentPackage: { id: string }) => documentPackage),
-        removeAll: vi.fn(),
-      } as never,
-      packageDocumentsRepository as never,
-      { save: vi.fn() } as never,
+      { addMany: vi.fn(), removeAll: vi.fn() } as never,
+      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
+      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
     )
 
-    await seeder.run({
+    const result = await seeder.run({
       legalAreas: [
         { id: 'civil-area', name: 'Cível' },
         { id: 'previdenciary-area', name: 'Previdenciário' },
@@ -65,7 +40,6 @@ describe('DocumentProductionSeeder', () => {
           name: 'Aposentadoria',
         },
       ],
-      consultationId: 'consultation-id',
     })
 
     const universalModel = seededSpecifications.find(
@@ -89,7 +63,6 @@ describe('DocumentProductionSeeder', () => {
     })
     expect(JSON.stringify(universalModel?.content)).toContain('{{nome_requerente}}')
     expect(seededSpecifications).toHaveLength(4)
-    expect(seededDocuments).toHaveLength(3)
-    expect(seededPackageDocuments).toHaveLength(3)
+    expect(result.specifications).toHaveLength(4)
   })
 })

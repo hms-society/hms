@@ -1,23 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import type {
-  DocumentGenerationCreation,
-  DocumentGeneration,
-  DocumentCreation,
-  DocumentPackageCreation,
-  DocumentSpecificationCreation,
-  DocumentVersion,
-  DocumentVersionCreation,
-  PackageDocumentCreation,
-} from '@hms/core/document-production/domain/entities'
-import {
-  DocumentGenerationFaker,
-  DocumentFaker,
-  DocumentPackageFaker,
-  PackageDocumentFaker,
-  DocumentVersionFaker,
-} from '@hms/core/document-production/domain/entities/fakers'
+import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
 import type {
   DocumentTemplateContent,
   DocumentGenerationMoment,
@@ -31,23 +13,16 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
-import type { FileStorageProvider } from '@hms/core/shared/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
-import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
-  readonly consultationId: string
-  readonly caseId?: string
-  readonly caseName?: string
-  readonly requestedByCollaboratorId?: string
 }
 
 type DocumentTemplateSeed = {
-  readonly documentId?: string
   readonly name: string
   readonly description: string
   readonly paragraphs?: readonly string[]
@@ -60,7 +35,6 @@ type DocumentTemplateSeed = {
 
 const DOCUMENT_TEMPLATES: readonly DocumentTemplateSeed[] = [
   {
-    documentId: '00000000-0000-4000-8000-000000000201',
     name: 'Requerimento Administrativo de Aposentadoria',
     description:
       'Requerimento previdenciário para reconhecimento de tempo de contribuição e concessão de aposentadoria.',
@@ -76,7 +50,6 @@ const DOCUMENT_TEMPLATES: readonly DocumentTemplateSeed[] = [
     ],
   },
   {
-    documentId: '00000000-0000-4000-8000-000000000202',
     name: 'Manifestação sobre Tempo de Contribuição',
     description:
       'Manifestação previdenciária sobre divergências no tempo de contribuição reconhecido administrativamente.',
@@ -109,7 +82,6 @@ const DOCUMENT_TEMPLATES: readonly DocumentTemplateSeed[] = [
     ],
   },
   {
-    documentId: '00000000-0000-4000-8000-000000000203',
     name: 'Petição de Juntada de Documentos',
     description:
       'Petição para juntada de documentos complementares ao processo administrativo previdenciário.',
@@ -432,35 +404,6 @@ const DOCUMENT_TEMPLATES: readonly DocumentTemplateSeed[] = [
   },
 ]
 
-const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
-
-function sanitizeStorageSegment(value: string): string {
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase()
-}
-
-const SEEDED_GENERATION_IDS = [
-  '00000000-0000-4000-8000-000000000401',
-  '00000000-0000-4000-8000-000000000402',
-  '00000000-0000-4000-8000-000000000403',
-] as const
-
-const SEEDED_VERSION_IDS = [
-  '00000000-0000-4000-8000-000000000501',
-  '00000000-0000-4000-8000-000000000502',
-  '00000000-0000-4000-8000-000000000503',
-] as const
-
-const SEEDED_FILE_NAMES = [
-  'requerimento-administrativo-aposentadoria-v1.docx',
-  'manifestacao-tempo-contribuicao-v1.docx',
-  'peticao-juntada-documentos-v1.docx',
-] as const
-
 @Injectable()
 export class DocumentProductionSeeder {
   constructor(
@@ -476,8 +419,6 @@ export class DocumentProductionSeeder {
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
-    @Inject(PROVISION_PROVIDERS.fileStorage)
-    private readonly fileStorageProvider: FileStorageProvider,
   ) {}
 
   async clear() {
@@ -522,265 +463,9 @@ export class DocumentProductionSeeder {
           status: 'available',
         }
       })
-    const specifications =
-      await this.specificationsRepository.addMany(specificationCreations)
-    const seededDocumentTemplates = DOCUMENT_TEMPLATES.filter(
-      (template) => template.documentId,
-    )
-    const documentCreations: DocumentCreation[] = seededDocumentTemplates.map(
-      (template) => {
-        if (!template.documentId) {
-          throw new AppError('A seeded document ID is required.', 'Seed Error')
-        }
-
-        const {
-          createdAt: _createdAt,
-          updatedAt: _updatedAt,
-          ...document
-        } = DocumentFaker.fake({
-          id: template.documentId,
-          title: template.name,
-        })
-        return document
-      },
-    )
-    const documents = await this.documentsRepository.addMany(documentCreations)
-    const seededPackage = DocumentPackageFaker.fake({
-      id: DOCUMENT_PRODUCTION_PACKAGE_ID,
-      context: { type: 'consultation', consultationId: references.consultationId },
-    })
-    const documentPackageCreation: DocumentPackageCreation = {
-      id: seededPackage.id,
-      context: seededPackage.context,
-    }
-    const documentPackage = await this.documentPackagesRepository.add(
-      documentPackageCreation,
-    )
-    const packageDocumentCreations: PackageDocumentCreation[] = documents.map(
-      (document) => {
-        const specification = specifications.find(({ name }) => name === document.title)
-        if (!specification) {
-          throw new AppError(
-            'A Document Specification is missing from the seeded package.',
-            'Seed Error',
-          )
-        }
-
-        const {
-          createdAt: _createdAt,
-          updatedAt: _updatedAt,
-          ...packageDocument
-        } = PackageDocumentFaker.fake({
-          documentPackageId: documentPackage.id,
-          documentId: document.id,
-          documentSpecificationId: specification.id,
-        })
-        return packageDocument
-      },
-    )
-    const packageDocuments = await this.packageDocumentsRepository.addMany(
-      packageDocumentCreations,
-    )
-
-    if (references.caseId) {
-      const casePackage = await this.documentPackagesRepository.add({
-        id: '00000000-0000-4000-8000-000000000302',
-        context: { type: 'case', caseId: references.caseId },
-      })
-      await this.packageDocumentsRepository.addMany(
-        documents.map((document) => {
-          const specification = specifications.find(({ name }) => name === document.title)
-          if (!specification) {
-            throw new AppError(
-              'A seeded Document Specification is missing from the case package.',
-              'Seed Error',
-            )
-          }
-
-          return {
-            ...PackageDocumentFaker.fake({
-              documentPackageId: casePackage.id,
-              documentId: document.id,
-              documentSpecificationId: specification.id,
-            }),
-            documentPackageId: casePackage.id,
-          }
-        }),
-      )
-    }
-
-    const generatedDocuments = references.requestedByCollaboratorId
-      ? await this.seedApprovedDocumentVersions({
-          documents,
-          specifications,
-          consultationId: references.consultationId,
-          caseName: references.caseName,
-          requestedByCollaboratorId: references.requestedByCollaboratorId,
-        })
-      : { generations: [], versions: [] }
-
     return {
-      specifications,
-      documents,
-      documentPackage,
-      packageDocuments,
-      ...generatedDocuments,
+      specifications: await this.specificationsRepository.addMany(specificationCreations),
     }
-  }
-
-  private async seedApprovedDocumentVersions({
-    documents,
-    specifications,
-    consultationId,
-    caseName,
-    requestedByCollaboratorId,
-  }: {
-    readonly documents: readonly { id: string; title: string }[]
-    readonly specifications: readonly {
-      id: string
-      name: string
-      content: DocumentTemplateContent
-      variables: readonly DocumentTemplateVariable[]
-    }[]
-    readonly consultationId: string
-    readonly caseName?: string
-    readonly requestedByCollaboratorId: string
-  }) {
-    const startedAt = new Date('2026-08-20T15:05:00.000Z')
-    const reviewedAt = new Date('2026-08-20T15:10:00.000Z')
-    const generations: DocumentGeneration[] = []
-    const versions: DocumentVersion[] = []
-
-    for (const [index, document] of documents.entries()) {
-      const specification = specifications.find(({ name }) => name === document.title)
-      const generationId = SEEDED_GENERATION_IDS[index]
-      const versionId = SEEDED_VERSION_IDS[index]
-      const fileName = SEEDED_FILE_NAMES[index]
-
-      if (!specification || !generationId || !versionId || !fileName) {
-        throw new AppError(
-          'The generated document seed references could not be resolved.',
-          'Seed Error',
-        )
-      }
-
-      const fileContent = await readFile(
-        join(process.cwd(), 'src/document-production/database/seed-assets', fileName),
-      )
-      const safeCaseName = sanitizeStorageSegment(caseName ?? 'case')
-      const storedFile = await this.fileStorageProvider.save({
-        filePath: `cases/${safeCaseName}/pieces/${document.id}/versions/${versionId}/${fileName}`,
-        fileName,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        sizeInBytes: fileContent.byteLength,
-        content: new Uint8Array(fileContent),
-      })
-
-      const generated = DocumentGenerationFaker.fake({
-        id: generationId,
-        documentId: document.id,
-        documentSpecificationVersionId: specification.id,
-        requestedByCollaboratorId,
-        source: {
-          type: 'consultation',
-          id: consultationId,
-          data: { documentTitle: document.title },
-        },
-        template: {
-          name: specification.name,
-          content: specification.content,
-          variables: specification.variables,
-        },
-        status: 'pending',
-        attemptsCount: 0,
-        findings: [],
-      })
-      const generationCreation: DocumentGenerationCreation = {
-        id: generated.id,
-        documentId: generated.documentId,
-        documentSpecificationVersionId: generated.documentSpecificationVersionId,
-        requestedByCollaboratorId: generated.requestedByCollaboratorId,
-        source: generated.source,
-        template: generated.template,
-        status: generated.status,
-        attemptsCount: generated.attemptsCount,
-        findings: generated.findings,
-      }
-      const createdGeneration = await this.generationsRepository.add(generationCreation)
-      const runningGeneration = await this.generationsRepository.replace(
-        createdGeneration.id,
-        {
-          status: 'running',
-          attemptsCount: 1,
-          findings: [],
-          startedAt,
-          updatedAt: startedAt,
-        },
-        ['pending'],
-      )
-
-      if (!runningGeneration) {
-        throw new AppError(
-          'The seeded document generation could not be started.',
-          'Seed Error',
-        )
-      }
-
-      const version = DocumentVersionFaker.fake({
-        id: versionId,
-        documentId: document.id,
-        documentGenerationId: createdGeneration.id,
-        fileId: storedFile.id,
-        storagePath: storedFile.filePath,
-        versionNumber: 1,
-        source: 'ai',
-        content: specification.content,
-        pendingMarkers: [],
-        createdByCollaboratorId: requestedByCollaboratorId,
-        createdAt: startedAt,
-        status: 'in_review',
-      })
-      const versionCreation: DocumentVersionCreation = {
-        id: version.id,
-        documentId: version.documentId,
-        documentGenerationId: version.documentGenerationId,
-        fileId: version.fileId,
-        storagePath: version.storagePath,
-        versionNumber: version.versionNumber,
-        source: version.source,
-        content: version.content,
-        pendingMarkers: version.pendingMarkers,
-        createdByCollaboratorId: version.createdByCollaboratorId,
-        createdAt: version.createdAt,
-        status: version.status,
-      }
-      const createdVersion = await this.versionsRepository.add(versionCreation)
-      const completedGeneration = await this.generationsRepository.replace(
-        createdGeneration.id,
-        {
-          status: 'completed',
-          attemptsCount: 1,
-          findings: [],
-          documentVersionId: createdVersion.id,
-          completedAt: reviewedAt,
-          updatedAt: reviewedAt,
-        },
-        ['running'],
-      )
-
-      if (!completedGeneration) {
-        throw new AppError(
-          'The seeded document generation could not be completed.',
-          'Seed Error',
-        )
-      }
-
-      generations.push(completedGeneration)
-      versions.push(createdVersion)
-    }
-
-    return { generations, versions }
   }
 
   private createTemplateContent(

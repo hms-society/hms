@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
@@ -7,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { CasePiecesTab } from './case-pieces-tab'
+import { NewPieceDialog } from './case-pieces-tab/new-piece-dialog'
 import { OverviewTab } from './overview-tab'
 import { useMyCasePage } from './use-my-case-page'
 
@@ -15,6 +19,8 @@ export type CasoDetalheChecklistPageProps = {
 }
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
+  const queryClient = useQueryClient()
+  const [isNewPieceOpen, setIsNewPieceOpen] = useState(false)
   const {
     activeTab,
     caseClientName,
@@ -93,7 +99,14 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               <Icon name='plus' className='size-3' />
               Nova tarefa
             </Button>
-            <Button size='xs' className='rounded-full'>
+            <Button
+              size='xs'
+              className='rounded-full'
+              onClick={() => {
+                setActiveTab('pecas')
+                setIsNewPieceOpen(true)
+              }}
+            >
               <Icon name='plus' className='size-3' />
               Nova peça
             </Button>
@@ -214,6 +227,18 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <CasePiecesTab dossierApproved caseId={caseUuid ?? caseId} />
         </TabsContent>
       </Tabs>
+      <NewPieceDialog
+        open={isNewPieceOpen}
+        onOpenChange={setIsNewPieceOpen}
+        onGenerated={() => {
+          const targetCaseId = caseUuid ?? caseId
+          if (targetCaseId) {
+            void queryClient.invalidateQueries({
+              queryKey: ['case-documents', targetCaseId],
+            })
+          }
+        }}
+      />
     </div>
   )
 }

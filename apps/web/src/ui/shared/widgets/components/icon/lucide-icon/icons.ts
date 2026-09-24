@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  FolderOpen,
   History,
   IdCard,
   Inbox,
@@ -106,6 +107,7 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
 
   'clipboard-list': ClipboardList,
   'file-text': FileText,
+  'folder-open': FolderOpen,
   'layout-dashboard': LayoutDashboard,
   inbox: Inbox,
 
