@@ -1,15 +1,27 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Checkbox } from '@/ui/shadcn/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ui/shadcn/dialog'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/ui/shadcn/dialog'
+import { Label } from '@/ui/shadcn/label'
 import { Textarea } from '@/ui/shadcn/textarea'
 
 type PieceWorkflowDialogProps = {
   mode: 'editor' | 'review'
   open: boolean
+  documentTitle?: string
+  caseId?: string
+  versionNumber?: number
+  documentPreview?: ReactNode
   onOpenChange: (open: boolean) => void
   onRequestAdjustments: () => void
   onBlock: () => void
@@ -24,6 +36,10 @@ const documentReferences = [
 export function PieceWorkflowDialog({
   mode,
   open,
+  documentTitle,
+  caseId,
+  versionNumber,
+  documentPreview,
   onOpenChange,
   onRequestAdjustments,
   onBlock,
@@ -43,15 +59,16 @@ export function PieceWorkflowDialog({
         <header className='flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3'>
           <div>
             <p className='text-xs text-muted-foreground'>
-              CASO-20260703-0089 · Peças · {isReview ? 'Revisão técnica' : 'Editor'}
+              {caseId ? `Caso ${caseId}` : 'Peças'} ·{' '}
+              {isReview ? 'Revisão técnica' : 'Editor'}
             </p>
             <h2 className='font-serif text-lg font-semibold'>
-              Requerimento Administrativo — Aposentadoria por Tempo de Contribuição
+              {documentTitle ?? 'Editor de peça'}
             </h2>
           </div>
           <div className='flex items-center gap-2'>
             <Badge variant={isReview ? 'info' : 'attention'}>
-              {isReview ? 'Em revisão · v4' : 'Em elaboração · v3'}
+              {isReview ? 'Em revisão técnica' : `Em elaboração · v${versionNumber ?? 1}`}
             </Badge>
             <Button variant='outline' size='sm'>
               <Icon name='refresh-cw' /> Versões
@@ -82,30 +99,11 @@ export function PieceWorkflowDialog({
             ))}
           </aside>
           <main className='overflow-y-auto bg-muted/50 p-6'>
-            <div className='mx-auto min-h-[570px] max-w-[650px] bg-card p-10 shadow-sm'>
-              <p className='text-center font-serif text-sm font-semibold'>
-                AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS
-              </p>
-              <p className='mt-2 text-center text-xs text-muted-foreground'>
-                Agência da Previdência Social — São José dos Campos/SP
-              </p>
-              <p className='mt-10 text-sm leading-7'>
-                ANTÔNIO CARVALHO DA SILVA, brasileiro, casado, industrial, portador do RG
-                nº •••.••• e CPF nº •••.•••-45, residente e domiciliado à Rua Vitória
-                Régia, nº 210, vem respeitosamente requerer:
-              </p>
-              <h3 className='mt-8 font-serif text-sm font-semibold'>I — DOS FATOS</h3>
-              <p className='mt-3 text-sm leading-7'>
-                O requerente é filiado ao Regime Geral de Previdência Social desde
-                12/03/1989, tendo exercido atividade laboral ininterrupta pelos vínculos
-                registrados em CTPS e confirmados pelo CNIS.
-              </p>
-              <h3 className='mt-8 font-serif text-sm font-semibold'>II — DO DIREITO</h3>
-              <p className='mt-3 text-sm leading-7'>
-                Nos termos da legislação aplicável, requer o reconhecimento dos requisitos
-                legais e a concessão do benefício mais vantajoso.
-              </p>
-            </div>
+            {documentPreview ?? (
+              <div className='flex min-h-[570px] items-center justify-center rounded-md bg-card p-8 text-sm text-muted-foreground'>
+                Selecione uma peça para visualizar o documento.
+              </div>
+            )}
           </main>
           <aside className='flex flex-col border-l border-border p-4'>
             {isReview ? (
@@ -204,14 +202,23 @@ type ReviewActionDialogProps = {
   kind: 'adjustments' | 'block' | 'approval'
   open: boolean
   onOpenChange: (open: boolean) => void
+  documentTitle?: string
+  casePublicCode?: string
+  versionNumber?: number
+  onConfirm?: () => void
 }
 
 export function ReviewActionDialog({
   kind,
   open,
   onOpenChange,
+  documentTitle = 'Peça jurídica',
+  casePublicCode,
+  versionNumber,
+  onConfirm,
 }: ReviewActionDialogProps) {
   const [confirmed, setConfirmed] = useState(false)
+  const [adjustmentComment, setAdjustmentComment] = useState('')
   const isBlock = kind === 'block'
   const isApproval = kind === 'approval'
   const title = isBlock
@@ -219,56 +226,161 @@ export function ReviewActionDialog({
     : isApproval
       ? 'Confirmar aprovação da peça'
       : 'Solicitar ajustes na peça'
+  const iconName = isBlock
+    ? 'octagon-alert'
+    : isApproval
+      ? 'badge-check'
+      : 'message-square-text'
+  const description = isBlock
+    ? 'Confirme o bloqueio somente quando o dossiê não permitir a aprovação técnica.'
+    : isApproval
+      ? 'Esta ação altera o status da peça para Aprovada e a libera para protocolo.'
+      : 'Descreva de forma objetiva o que deve ser corrigido antes de devolver a peça.'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[520px]'>
-        <DialogTitle className='font-serif text-xl'>{title}</DialogTitle>
-        <DialogDescription>
-          {isBlock
-            ? 'Confirme o bloqueio somente quando o dossiê não permitir a aprovação técnica.'
-            : isApproval
-              ? 'Esta ação altera o status da peça para Aprovada e a libera para protocolo.'
-              : 'Descreva de forma objetiva o que deve ser corrigido antes de devolver a peça.'}
-        </DialogDescription>
-        <div className='rounded-md bg-muted p-3 text-sm font-medium'>
-          Requerimento Administrativo — Aposentadoria por Tempo de Contribuição · Versão
-          v4
-        </div>
-        {isApproval ? (
-          <div className='flex items-start gap-2 rounded-md border border-primary p-3 text-sm'>
-            <Checkbox
-              checked={confirmed}
-              onCheckedChange={(value) => setConfirmed(value === true)}
-            />
-            Confirmo minha responsabilidade técnica pela aprovação desta peça.
+      <DialogContent showCloseButton={false} className='gap-0 p-6 sm:max-w-[480px]'>
+        <header className='flex items-start gap-3 pr-8'>
+          <span
+            className={`flex size-10 shrink-0 items-center justify-center rounded-full ${isBlock ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}
+          >
+            <Icon name={iconName} className='size-5' />
+          </span>
+          <div className='min-w-0 flex-1'>
+            <DialogTitle className='font-serif text-xl leading-6 font-semibold'>
+              {title}
+            </DialogTitle>
+            <DialogDescription className='mt-1 text-sm leading-5'>
+              {description}
+            </DialogDescription>
           </div>
-        ) : isBlock ? (
-          <div className='rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive'>
-            Esta ação marcará a peça como bloqueada por dossiê incompleto e retornará o
-            caso para a etapa documental.
+          <DialogClose asChild>
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              className='absolute top-4 right-4'
+              aria-label='Fechar diálogo'
+            >
+              <Icon name='x' />
+            </Button>
+          </DialogClose>
+        </header>
+
+        {isBlock ? (
+          <div className='mt-5 space-y-3'>
+            <section className='rounded-lg bg-muted p-3'>
+              <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                PEÇA AFETADA
+              </p>
+              <p className='mt-1 text-sm font-semibold'>
+                {documentTitle} · Versão v{versionNumber ?? 1}
+              </p>
+            </section>
+            <section className='rounded-lg border border-destructive/30 bg-destructive/5 p-3'>
+              <h3 className='flex items-center gap-2 text-sm font-semibold text-destructive'>
+                <Icon name='triangle-alert' className='size-4 shrink-0' />
+                Esta ação terá os seguintes efeitos
+              </h3>
+              <ul className='mt-2 space-y-1.5 text-xs text-destructive'>
+                <li>• Peça → Bloqueada por dossiê incompleto</li>
+                <li>• Caso → retorna à fase de checklist documental</li>
+                <li>• Decisão → registrada no Log de Auditoria</li>
+              </ul>
+            </section>
+            <p className='flex items-start gap-2 rounded-lg bg-muted p-3 text-xs text-muted-foreground'>
+              <Icon name='shield-check' className='mt-0.5 size-4 shrink-0 text-primary' />
+              A IA não pode bloquear a peça nem alterar seu status sem esta confirmação
+              humana.
+            </p>
+          </div>
+        ) : isApproval ? (
+          <div className='mt-5 space-y-3'>
+            <section className='rounded-lg bg-secondary p-3'>
+              <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                PEÇA EM REVISÃO
+              </p>
+              <p className='mt-1 text-sm font-semibold'>{documentTitle}</p>
+              <p className='mt-1 text-xs text-primary'>
+                {casePublicCode ? `${casePublicCode} · ` : ''}Versão v{versionNumber ?? 1}
+              </p>
+            </section>
+            <div className='flex items-start gap-2 rounded-lg border border-primary p-3 text-xs'>
+              <Checkbox
+                id='piece-approval-responsibility'
+                checked={confirmed}
+                onCheckedChange={(value) => setConfirmed(value === true)}
+              />
+              <Label htmlFor='piece-approval-responsibility' className='cursor-pointer'>
+                <strong className='block'>Confirmação obrigatória</strong>
+                Confirmo minha responsabilidade técnica pela aprovação desta peça.
+              </Label>
+            </div>
+            <p className='flex items-start gap-2 rounded-lg bg-muted p-3 text-xs text-muted-foreground'>
+              <Icon name='shield-check' className='mt-0.5 size-4 shrink-0 text-primary' />
+              O clique humano será registrado no Log de Auditoria. A IA não pode executar
+              esta ação.
+            </p>
           </div>
         ) : (
-          <Textarea
-            placeholder='Ex.: Corrigir a contagem do tempo de contribuição e incluir o comprovante do último vínculo.'
-            required
-          />
+          <div className='mt-5 space-y-3'>
+            <p className='flex items-start gap-2 rounded-lg bg-secondary p-3 text-xs text-secondary-foreground'>
+              <Icon name='arrow-left' className='mt-0.5 size-4 shrink-0 text-primary' />A
+              peça retornará para Dra. Mariana Lopes com status Ajustes solicitados.
+            </p>
+            <div className='space-y-1.5'>
+              <Label htmlFor='piece-adjustment-comment' className='text-sm font-semibold'>
+                Comentários para ajuste <span className='text-destructive'>*</span>
+              </Label>
+              <Textarea
+                id='piece-adjustment-comment'
+                aria-label='Comentários para ajuste'
+                placeholder='Ex.: Relacionar o laudo ortopédico ao pedido principal e confirmar o NIT da parte autora...'
+                className='min-h-32 resize-y'
+                maxLength={1000}
+                value={adjustmentComment}
+                onChange={(event) => setAdjustmentComment(event.target.value)}
+                required
+              />
+              <div className='flex justify-between gap-3 text-xs text-muted-foreground'>
+                <span>Campo obrigatório para devolver a peça.</span>
+                <span aria-live='polite'>{adjustmentComment.length}/1000</span>
+              </div>
+            </div>
+          </div>
         )}
-        <div className='flex justify-end gap-2'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+
+        <footer className='mt-5 flex justify-end gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            className='rounded-full px-4'
+            onClick={() => onOpenChange(false)}
+          >
             Cancelar
           </Button>
           <Button
             variant={isBlock ? 'destructive' : 'default'}
-            disabled={isApproval && !confirmed}
-            onClick={() => onOpenChange(false)}
+            size='sm'
+            className={`rounded-full px-4 ${isBlock ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}`}
+            disabled={
+              (isApproval && !confirmed) ||
+              (!isApproval && !isBlock && adjustmentComment.trim().length === 0)
+            }
+            onClick={() => {
+              onConfirm?.()
+              onOpenChange(false)
+            }}
           >
+            {isBlock ? <Icon name='octagon-alert' /> : null}
+            {isApproval ? <Icon name='check' /> : null}
+            {!isBlock && !isApproval ? <Icon name='send' /> : null}
             {isBlock
               ? 'Confirmar bloqueio'
               : isApproval
                 ? 'Aprovar peça'
                 : 'Enviar solicitação'}
           </Button>
-        </div>
+        </footer>
       </DialogContent>
     </Dialog>
   )

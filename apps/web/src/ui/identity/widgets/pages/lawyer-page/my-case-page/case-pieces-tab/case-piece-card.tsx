@@ -4,12 +4,17 @@ import { Button } from '@/ui/shadcn/button'
 
 import type { CasePiece } from './types'
 
-type CasePieceCardProps = {
+export type CasePieceCardProps = {
   piece: CasePiece
-  onOpenViewer?: () => void
+  onOpenReview?: () => void
+  onOpenEditor?: () => void
 }
 
-export function CasePieceCard({ piece, onOpenViewer }: CasePieceCardProps) {
+export function CasePieceCard({
+  piece,
+  onOpenReview,
+  onOpenEditor,
+}: CasePieceCardProps) {
   return (
     <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
       <header className='flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between'>
@@ -86,10 +91,15 @@ export function CasePieceCard({ piece, onOpenViewer }: CasePieceCardProps) {
 
       <footer className='mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <div className='flex flex-wrap gap-2'>
-          <Button size='xs' className='rounded-full' onClick={onOpenViewer}>
+          <Button size='xs' className='rounded-full' onClick={onOpenReview}>
             <Icon name='eye' className='size-3' /> Abrir revisão técnica
           </Button>
-          <Button variant='outline' size='xs' className='rounded-full'>
+          <Button
+            variant='outline'
+            size='xs'
+            className='rounded-full'
+            onClick={onOpenEditor}
+          >
             <Icon name='pencil' className='size-3' /> Abrir no editor
           </Button>
         </div>

@@ -14,6 +14,9 @@ export type IntakeSeedReferences = {
   readonly actorId: string
   readonly legalAreaId: string
   readonly legalTopicId: string
+  readonly previdenciaryClientId: string
+  readonly previdenciaryLegalAreaId: string
+  readonly previdenciaryLegalTopicId: string
 }
 
 @Injectable()
@@ -56,6 +59,25 @@ export class IntakeSeeder {
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
       .flatMap((clientId, index) => {
+        if (clientId === references.previdenciaryClientId) {
+          return [
+            this.createIntake({
+              clientId,
+              responsibleId: references.responsibleId,
+              createdBy: references.actorId,
+              updatedBy: references.actorId,
+              origin: 'direct',
+              contactChannel: 'whatsapp',
+              legalAreaId: references.previdenciaryLegalAreaId,
+              legalTopicId: references.previdenciaryLegalTopicId,
+              urgency: 'normal',
+              demandNotes:
+                'Cliente solicita análise de aposentadoria por tempo de contribuição e reconhecimento de períodos contributivos.',
+              status: IntakeStatus.Contracted,
+            }),
+          ]
+        }
+
         if (index === 0) {
           return [
             this.createIntake({

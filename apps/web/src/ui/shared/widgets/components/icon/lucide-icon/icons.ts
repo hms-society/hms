@@ -86,6 +86,8 @@ import {
   Map as MapIcon,
   AlertTriangle,
   AlertCircle,
+  BadgeCheck,
+  OctagonAlert,
   HelpCircle,
   SlidersHorizontal,
 } from 'lucide-react'
@@ -206,4 +208,6 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   'alert-circle': AlertCircle,
   'help-circle': HelpCircle,
   'sliders-horizontal': SlidersHorizontal,
+  'badge-check': BadgeCheck,
+  'octagon-alert': OctagonAlert,
 }

@@ -11,6 +11,7 @@ class CaseDocumentVersionResponseDto {
   @ApiPropertyOptional() reviewedAt?: Date
   @ApiPropertyOptional() rejectionReason?: string
   @ApiPropertyOptional() content?: DocumentVersion['content']
+  @ApiPropertyOptional() storagePath?: string
 }
 
 export class CaseDocumentResponseDto {
@@ -20,6 +21,6 @@ export class CaseDocumentResponseDto {
   @ApiProperty({ type: [CaseDocumentVersionResponseDto] }) versions!: CaseDocumentVersionResponseDto[]
 
   static fromDomain(input: { document: Document; versions: readonly DocumentVersion[] }): CaseDocumentResponseDto {
-    return { id: input.document.id, title: input.document.title, currentVersionId: input.document.currentVersionId, versions: input.versions.map((version) => ({ id: version.id, versionNumber: version.versionNumber, source: version.source, status: version.status, createdAt: version.createdAt, createdByCollaboratorId: version.createdByCollaboratorId, reviewedAt: version.reviewedAt, rejectionReason: version.rejectionReason, content: version.content })) }
+    return { id: input.document.id, title: input.document.title, currentVersionId: input.document.currentVersionId, versions: input.versions.map((version) => ({ id: version.id, versionNumber: version.versionNumber, source: version.source, status: version.status, createdAt: version.createdAt, createdByCollaboratorId: version.createdByCollaboratorId, reviewedAt: version.reviewedAt, rejectionReason: version.rejectionReason, content: version.content, storagePath: version.storagePath })) }
   }
 }

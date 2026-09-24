@@ -178,7 +178,7 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
                 onGenerated()
               }}
             >
-              Abrir peça gerada
+              Voltar para peças
             </Button>
           ) : null}
         </DialogFooter>
@@ -374,24 +374,24 @@ function GenerationStep() {
       </div>
       <div>
         <h3 className='font-serif text-lg font-semibold'>
-          A IA está preparando a minuta
+          Minuta gerada com sucesso
         </h3>
         <p className='mt-1 text-sm text-muted-foreground'>
-          Esse processo costuma levar entre 20 e 40 segundos. Você pode fechar esta janela
-          e voltar depois.
+          A geração foi concluída. Volte à aba Peças para abrir o documento no editor ou
+          na revisão técnica.
         </p>
       </div>
       <div className='mx-auto h-2 max-w-md overflow-hidden rounded-full bg-muted'>
-        <div className='h-full w-[65%] rounded-full bg-primary' />
+        <div className='h-full w-full rounded-full bg-primary' />
       </div>
       <p className='text-xs text-muted-foreground'>
-        65% — geralmente concluído em segundos
+        100% — geração concluída
       </p>
       <div className='space-y-2 text-left'>
         <ProgressItem label='Lendo o dossiê aprovado' done />
         <ProgressItem label='Estruturando a peça conforme o modelo' done />
-        <ProgressItem label='Redigindo a fundamentação' active />
-        <ProgressItem label='Vinculando referências e assinatura' />
+        <ProgressItem label='Redigindo a fundamentação' done />
+        <ProgressItem label='Vinculando referências e assinatura' done />
       </div>
     </div>
   )

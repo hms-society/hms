@@ -76,6 +76,7 @@ export class SaveGeneratedDocumentVersionUseCase
         documentId: generation.documentId,
         documentGenerationId: generation.id,
         fileId: file.id,
+        storagePath: file.filePath,
         versionNumber,
         source: DocumentVersionSource.Ai,
         content: request.content,

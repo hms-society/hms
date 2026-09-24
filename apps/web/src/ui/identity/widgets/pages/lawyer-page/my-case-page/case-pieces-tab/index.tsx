@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
@@ -12,6 +11,7 @@ import { PieceViewerDialog } from './piece-viewer-dialog'
 import { PieceWorkflowDialog, ReviewActionDialog } from './piece-workflow-dialog'
 import type { CasePiece } from './types'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 export type CasePiecesTabProps = {
   dossierApproved: boolean
@@ -19,7 +19,8 @@ export type CasePiecesTabProps = {
 }
 
 export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
-  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { navigateTo } = useNavigation()
   const { caseDocumentProductionService } = useRestContext()
   const { data: pieces = [], isLoading } = useQuery({
     queryKey: ['case-documents', caseId],
@@ -72,15 +73,23 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
             <CasePieceCard
               key={piece.id}
               piece={piece}
-              onOpenViewer={() => {
+              onOpenReview={() => {
                 if (caseId) {
-                  navigate({
-                    to: '/advogado/meus-casos/$caseId/pecas/$documentId',
+                  void navigateTo('lawyerCasePieceReview', {
                     params: { caseId, documentId: piece.id },
                   })
                   return
                 }
                 setIsViewerOpen(true)
+              }}
+              onOpenEditor={() => {
+                if (caseId) {
+                  void navigateTo('lawyerCasePieceEditor', {
+                    params: { caseId, documentId: piece.id },
+                  })
+                  return
+                }
+                setWorkflow('editor')
               }}
             />
           ))}
@@ -95,7 +104,11 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
       <NewPieceDialog
         open={isNewPieceOpen}
         onOpenChange={setIsNewPieceOpen}
-        onGenerated={() => setIsViewerOpen(true)}
+        onGenerated={() => {
+          if (caseId) {
+            void queryClient.invalidateQueries({ queryKey: ['case-documents', caseId] })
+          }
+        }}
       />
       <PieceViewerDialog
         open={isViewerOpen}

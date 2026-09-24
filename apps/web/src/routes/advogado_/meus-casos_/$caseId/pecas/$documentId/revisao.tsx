@@ -6,6 +6,7 @@ export const Route = createFileRoute(
   '/advogado_/meus-casos_/$caseId/pecas/$documentId/revisao',
 )({
   component: RouteComponent,
+  ssr: false,
 })
 
 function RouteComponent() {

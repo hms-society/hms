@@ -6,7 +6,7 @@ export type CaseDocumentResponse = {
   id: string
   title: string
   currentVersionId?: string
-  versions: Array<{ id: string; versionNumber: number; source: 'ai' | 'manual'; status: string; createdAt: string; createdByCollaboratorId: string; reviewedAt?: string; rejectionReason?: string; content?: DocumentTemplateContent }>
+  versions: Array<{ id: string; versionNumber: number; source: 'ai' | 'manual'; status: string; createdAt: string; createdByCollaboratorId: string; reviewedAt?: string; rejectionReason?: string; content?: DocumentTemplateContent; storagePath?: string }>
 }
 
 export const CaseDocumentProductionService = (restClient: RestClient) => ({
@@ -15,5 +15,8 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
   },
   getDocument(caseId: string, documentId: string): Promise<RestResponse<CaseDocumentResponse>> {
     return restClient.get(`/cases/${caseId}/documents/${documentId}`)
+  },
+  getDocumentFile(caseId: string, documentId: string): Promise<RestResponse<Blob>> {
+    return restClient.getFile(`/cases/${caseId}/documents/${documentId}/file`)
   },
 })

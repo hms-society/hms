@@ -156,7 +156,7 @@ export class CaseManagementSeeder {
         intakeId: intake.id,
         legalAreaId: intake.legalAreaId,
         legalTopicId: intake.legalTopicId,
-        title: this.getTitleByIndex(index),
+        title: this.getTitleByIntake(intake, index),
         status: LegalCaseStatus.Documentation,
         openedAt,
       }
@@ -256,7 +256,15 @@ export class CaseManagementSeeder {
     })
   }
 
-  private getTitleByIndex(index: number): string {
+  private getTitleByIntake(intake: Intake, index: number): string {
+    if (
+      intake.demandNotes
+        ?.toLocaleLowerCase('pt-BR')
+        .includes('aposentadoria por tempo de contribuição')
+    ) {
+      return 'Aposentadoria por tempo de contribuição'
+    }
+
     const titles = [
       'Revisao contratual',
       'Divorcio consensual',

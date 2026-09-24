@@ -18,6 +18,8 @@ export const ROUTES = {
   lawyerCases: '/advogado/meus-casos',
   lawyerCaseDetails: '/advogado/meus-casos/$caseId',
   lawyerCasePiece: '/advogado/meus-casos/$caseId/pecas/$documentId',
+  lawyerCasePieceEditor: '/advogado/meus-casos/$caseId/pecas/$documentId/editor',
+  lawyerCasePieceReview: '/advogado/meus-casos/$caseId/pecas/$documentId/revisao',
   lawyerCaseCreation: '/advogado/meus-casos/novo-caso',
   lawyerCaseChecklistItem: '/advogado/meus-casos/$caseId/checklist/$checklistItemId',
   clients: '/clientes',

@@ -83,6 +83,19 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
+    const previdenciaryLegalArea = legalCatalog.areas.find(
+      (area) => area.name === 'Previdenciário',
+    )
+    const retirementLegalTopic = legalCatalog.topics.find(
+      (topic) =>
+        topic.legalAreaId === previdenciaryLegalArea?.id &&
+        topic.name === 'Aposentadoria',
+    )
+
+    if (!previdenciaryLegalArea || !retirementLegalTopic) {
+      throw new AppError('Previdenciary case seed classification could not be resolved')
+    }
+
     const consultationDynamicForm = dynamicForms.find(
       ({ name }) => name === 'Triagem Cível',
     )
@@ -126,6 +139,9 @@ async function bootstrap() {
       actorId: actor.id,
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
+      previdenciaryClientId: piecesSeedClient.id,
+      previdenciaryLegalAreaId: previdenciaryLegalArea.id,
+      previdenciaryLegalTopicId: retirementLegalTopic.id,
     })
 
     const lawyerIds = identitySeed.collaborators
