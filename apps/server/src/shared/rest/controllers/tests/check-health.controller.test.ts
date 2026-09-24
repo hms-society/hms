@@ -17,6 +17,7 @@ describe('Check Health Controller [GET /health]', () => {
   const metricReader = new PeriodicExportingMetricReader({ exporter: metricExporter })
   let fixture: RestFixture | undefined
   let sdk: NodeSDK | undefined
+  let isInngestDev = true
 
   beforeAll(async () => {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'http://127.0.0.1:4318'
@@ -34,15 +35,41 @@ describe('Check Health Controller [GET /health]', () => {
     })
     sdk.start()
     // Production preloads the SDK before importing the database client.
-    const [{ SharedDatabaseModule }, { CheckHealthController }, { RestFixture }] =
-      await Promise.all([
-        import('@/shared/database/drizzle/database.module.js'),
-        import('@/shared/rest/controllers/check-health.controller.js'),
-        import('@/shared/rest/tests/rest-fixture.js'),
-      ])
+    const [
+      { SharedDatabaseModule },
+      { CheckHealthController },
+      { EnvProvider },
+      { RestFixture },
+    ] = await Promise.all([
+      import('@/shared/database/drizzle/database.module.js'),
+      import('@/shared/rest/controllers/check-health.controller.js'),
+      import('@/shared/provision/env/env-provider.js'),
+      import('@/shared/rest/tests/rest-fixture.js'),
+    ])
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(null, { status: 200 })),
+    )
     fixture = await RestFixture.register({
       imports: [SharedDatabaseModule],
       controllers: [CheckHealthController],
+      providers: [
+        {
+          provide: EnvProvider,
+          useValue: {
+            get(key: string) {
+              if (key === 'SUPABASE_URL') return 'http://localhost:8000'
+              if (key === 'SUPABASE_SERVICE_ROLE_KEY') return 'service-role-key'
+              if (key === 'HMS_SERVER_APP_PORT') return 3333
+              if (key === 'INNGEST_DEV') return isInngestDev ? '1' : '0'
+              if (key === 'INNGEST_API_KEY') return 'test-api-key'
+              if (key === 'INNGEST_APP_URL')
+                return 'https://server-staging.app.hmsadvogados.com.br/api/inngest'
+              return undefined
+            },
+          },
+        },
+      ],
     })
   })
 
@@ -53,6 +80,7 @@ describe('Check Health Controller [GET /health]', () => {
       try {
         await sdk?.shutdown()
       } finally {
+        vi.unstubAllGlobals()
         if (originalEndpoint === undefined) {
           delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT
         } else {
@@ -66,7 +94,10 @@ describe('Check Health Controller [GET /health]', () => {
     if (!fixture || !sdk) throw new Error('Health test infrastructure is unavailable')
     const response = await request(fixture.app.getHttpServer()).get('/health').expect(200)
 
-    expect(response.body).toMatchObject({ status: 'ok', services: { database: 'UP' } })
+    expect(response.body).toMatchObject({
+      status: 'degraded',
+      services: { database: 'UP', documenso: 'NOT_CONFIGURED' },
+    })
 
     await metricReader.forceFlush()
     await sdk.shutdown()
@@ -95,7 +126,7 @@ describe('Check Health Controller [GET /health]', () => {
     expect(JSON.stringify(duration?.dataPoints)).not.toContain('select 1')
   })
 
-  it('exits so the container can restart when the database probe stalls', async () => {
+  it('reports a stalled database without terminating the process', async () => {
     if (!fixture) throw new Error('Health test infrastructure is unavailable')
     const { DrizzleClient } = await import('@/shared/database/drizzle/drizzle-client.js')
     const drizzleClient = fixture.get(DrizzleClient)
@@ -107,11 +138,88 @@ describe('Check Health Controller [GET /health]', () => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
 
     try {
-      await request(fixture.app.getHttpServer()).get('/health').expect(503)
-      expect(exit).toHaveBeenCalledWith(1)
+      const response = await request(fixture.app.getHttpServer())
+        .get('/health')
+        .expect(503)
+      expect(response.body).toMatchObject({
+        status: 'not_ready',
+        services: {
+          database: 'DOWN',
+          'supabase-auth': 'UP',
+          inngest: 'UP',
+          documenso: 'NOT_CONFIGURED',
+        },
+      })
+      expect(exit).not.toHaveBeenCalled()
     } finally {
       healthProbe.mockRestore()
       exit.mockRestore()
     }
-  }, 20_000)
+  }, 10_000)
+
+  it('reports Inngest Cloud sync only when the active app has the expected URL', async () => {
+    if (!fixture) throw new Error('Health test infrastructure is unavailable')
+    isInngestDev = false
+    const mockedFetch = vi.mocked(fetch)
+    mockedFetch.mockImplementation(async (input) => {
+      if (String(input) === 'https://api.inngest.com/v2/apps/hms-server') {
+        return new Response(
+          JSON.stringify({
+            data: {
+              id: 'hms-server',
+              isArchived: false,
+              functionCount: 16,
+              latestSync: {
+                status: 'success',
+                url: 'https://server-staging.app.hmsadvogados.com.br/api/inngest',
+              },
+            },
+          }),
+          { status: 200 },
+        )
+      }
+      return new Response(null, { status: 200 })
+    })
+
+    try {
+      const synced = await request(fixture.app.getHttpServer()).get('/health').expect(200)
+      expect(synced.body.services.inngest).toBe('UP')
+      expect(mockedFetch).toHaveBeenCalledWith(
+        'https://api.inngest.com/v2/apps/hms-server',
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer test-api-key' },
+        }),
+      )
+
+      mockedFetch.mockImplementation(async (input) => {
+        if (String(input) === 'https://api.inngest.com/v2/apps/hms-server') {
+          return new Response(
+            JSON.stringify({
+              data: {
+                id: 'hms-server',
+                isArchived: false,
+                functionCount: 16,
+                latestSync: {
+                  status: 'success',
+                  url: 'https://wrong.example.com/api/inngest',
+                },
+              },
+            }),
+            { status: 200 },
+          )
+        }
+        return new Response(null, { status: 200 })
+      })
+      const mismatched = await request(fixture.app.getHttpServer())
+        .get('/health')
+        .expect(200)
+      expect(mismatched.body).toMatchObject({
+        status: 'degraded',
+        services: { inngest: 'DOWN' },
+      })
+    } finally {
+      isInngestDev = true
+      mockedFetch.mockImplementation(async () => new Response(null, { status: 200 }))
+    }
+  })
 })

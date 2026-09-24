@@ -4,7 +4,10 @@ import { z } from 'zod'
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1).url(),
-  HMS_SERVER_APP_PORT: z.coerce.number().default(3333),
+  HMS_SERVER_APP_PORT: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.coerce.number().int().positive().default(3333),
+  ),
   HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'stg']),
   HMS_WEB_APP_URL: z.string(),
   OLLAMA_AI_MODEL: z.string().min(1).default('qwen3.5:2b'),
@@ -13,9 +16,21 @@ export const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().min(1).optional(),
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  DOCUMENSO_URL: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url().optional(),
+  ),
   HMS_USER_SEED_PASSWORD: z.string().min(6).optional(),
   INNGEST_DEV: z.enum(['0', '1']).default('0'),
   INNGEST_BASE_URL: z.string().url().optional(),
+  INNGEST_API_KEY: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().min(1).optional(),
+  ),
+  INNGEST_APP_URL: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url().optional(),
+  ),
   INNGEST_EVENT_KEY: z.string().optional(),
   INNGEST_SIGNING_KEY: z.string().optional(),
   WHATSAPP_API_TOKEN: z.string().default(''),

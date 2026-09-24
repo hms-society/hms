@@ -257,16 +257,34 @@ docker-compose.yml
   metrics and logs. Coolify environment labels keep staging and production
   telemetry separated inside the same Grafana Cloud stack.
 
-The server image checks `GET /health` every 30 seconds. That endpoint probes
-PostgreSQL and returns an unhealthy response while the database is unavailable;
-the container can become healthy again on a later successful probe. The database
-connection timeout is 12 seconds. If a health query remains pending for 15
-seconds, the server process exits so the container restarts with a fresh database
-pool. Docker's healthcheck timeout is 18 seconds to leave time for this recovery
-action. The Postgres.js client disables prepared statements because staging uses
-Supavisor transaction pooling. The shared communication badge polls one grouped
-summary endpoint every 10 seconds, starting the next poll only after the previous
-request completes, instead of requesting each client's full message history.
+The server image checks `GET /health` every 30 seconds. This route probes
+PostgreSQL and Supabase Auth (`services["supabase-auth"]`) and returns 503 when
+either required dependency is unavailable; later successful probes make the
+container healthy again. The health response also reports Supabase Storage,
+`services.inngest`, and `services.documenso` independently. Failures of these
+auxiliary services produce `degraded` with HTTP 200 rather than removing the whole API
+from service. In local development, the Inngest check verifies the local
+`/api/inngest` handler. In staging and production, set an environment-scoped
+`INNGEST_API_KEY` and the public `INNGEST_APP_URL` (including `/api/inngest`).
+The check reads `hms-server` from the Inngest Cloud v2 API and requires an active
+app with functions, a successful latest sync, and a matching endpoint URL. A
+missing key or URL reports `NOT_CONFIGURED`. This verifies registration, not
+whether individual function executions succeed. The API key is distinct from
+the event and signing keys and must be stored as a server secret.
+
+Set `DOCUMENSO_URL` on the Server App to the reachable Documenso base URL to
+include its `/api/health` response; if omitted, its state is `NOT_CONFIGURED`.
+Documenso reports `warning` when its signing certificate has an issue, which
+readiness exposes as `DEGRADED`. Each dependency probe has a five-second
+deadline, and Docker gives the readiness request seven seconds. A separate
+database watchdog in staging and production checks every 30 seconds and exits
+the process only after two consecutive database health queries stall for 15
+seconds. An ordinary database error does not trigger a restart. The database
+connection timeout remains 12 seconds. The Postgres.js client disables prepared
+statements because staging uses Supavisor transaction pooling. The shared
+communication badge polls one grouped summary endpoint every 10 seconds,
+starting the next poll only after the previous request completes, instead of
+requesting each client's full message history.
 
 #### Grafana Cloud observability deployment
 
@@ -319,7 +337,7 @@ Set these values on **each HMS Server App** in Coolify (staging and production):
 * `OTEL_RESOURCE_ATTRIBUTES=service.namespace=hms,deployment.environment.name=staging`
   for staging, or replace `staging` with `production` for production.
 
-The instrumentation excludes `/health` and `/docs` from HTTP tracing and
+The instrumentation excludes all `/health` routes and `/docs` from HTTP tracing and
 redacts raw URL/path/query span attributes; route templates remain available
 from Express. It does not capture request/response bodies or headers. It does
 time Drizzle's Postgres.js operations, including those inside transactions,
