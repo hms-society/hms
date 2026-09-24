@@ -9,6 +9,7 @@ import type { Entity } from '../../../shared/domain/entities/entity'
 
 export type DocumentBatchFile = Entity & {
   batchId: string
+  checklistItemId?: string
   storagePath: string
   originalName: string
   mimeType: string

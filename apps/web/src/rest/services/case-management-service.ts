@@ -7,6 +7,10 @@ import type {
   Pending,
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
+import type {
+  GrantCasePortalAccessResponse,
+  PortalDocumentUploadResponse,
+} from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
 export const CaseManagementService = (
@@ -74,8 +78,30 @@ export const CaseManagementService = (
       return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
     },
 
+    grantCasePortalAccess(caseId, request) {
+      return restClient.post<GrantCasePortalAccessResponse>(
+        `/cases/${caseId}/portal-access`,
+        request,
+      )
+    },
+
     reviewChecklistGate(caseId, request) {
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
+    },
+
+    listPortalPendingChecklist(caseId, portalToken) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.get<readonly CaseChecklistItem[]>(
+        `/cases/${caseId}/portal-pendencies?${query.toString()}`,
+      )
+    },
+
+    uploadPortalDocument(caseId, checklistItemId, portalToken, file) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.postFormData<PortalDocumentUploadResponse>(
+        `/cases/${caseId}/portal-pendencies/${checklistItemId}/upload?${query.toString()}`,
+        file as FormData,
+      )
     },
   }
 }

@@ -16,8 +16,10 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 @Controller('integrations/whatsapp/webhook')
+@RouteAccess('public')
 export class WhatsappWebhookController {
   private readonly logger = new Logger(WhatsappWebhookController.name)
 

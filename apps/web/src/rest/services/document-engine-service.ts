@@ -22,6 +22,9 @@ export const DocumentEngineService = (client: RestClient) => {
     getDocumentFile: async (fileId: string) => {
       return client.get<DocumentBatchFile>(`/documents/files/${fileId}`)
     },
+    getDocumentFileContent: async (fileId: string) => {
+      return client.getFile(`/documents/files/${fileId}/content`)
+    },
     requestException: async (
       caseId: string,
       payload: {

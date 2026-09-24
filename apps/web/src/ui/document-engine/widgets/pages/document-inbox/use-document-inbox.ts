@@ -147,6 +147,7 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   function getChannelIcon(channel?: string): IconName {
     if (channel === DocumentBatchChannel.WhatsApp) return 'message-square'
     if (channel === DocumentBatchChannel.Email) return 'mail'
+    if (channel === DocumentBatchChannel.ThirdPartyPortal) return 'shield-check'
 
     return 'help-circle'
   }
@@ -154,6 +155,7 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
   function getChannelLabel(channel?: string) {
     if (channel === DocumentBatchChannel.WhatsApp) return 'WhatsApp'
     if (channel === DocumentBatchChannel.Email) return 'E-mail'
+    if (channel === DocumentBatchChannel.ThirdPartyPortal) return 'Portal do cliente'
 
     return 'Portal do cliente'
   }
@@ -168,6 +170,11 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
         : 'phone' in batch.sender
           ? batch.sender.phone
           : batch.sender.email
+    const isThirdPartyPortal = channel === DocumentBatchChannel.ThirdPartyPortal
+    const displaySender = isThirdPartyPortal ? 'Terceiro autorizado' : senderString
+    const displayContact = isThirdPartyPortal
+      ? 'Portal do cliente · Link seguro'
+      : `${getChannelLabel(channel)} · ${senderString}`
 
     if (batch.files && batch.files.length > 0) {
       return batch.files.map((file) => {
@@ -180,8 +187,8 @@ export function useDocumentInbox(_params: UseDocumentInboxParams = {}) {
           fileType: getFileType(file.originalName, file.mimeType),
           fileSize: formatFileSize(file.sizeBytes),
           receivedFromIcon: getChannelIcon(channel),
-          receivedFrom: senderString,
-          contactInfo: `${getChannelLabel(channel)} · ${senderString}`,
+          receivedFrom: displaySender,
+          contactInfo: displayContact,
           caseId: batch.readableId ?? 'Sem vínculo seguro',
           caseDesc: batch.clientId
             ? 'Titular pré-identificado'

@@ -42,6 +42,11 @@ export class ActiveCollaboratorGuard implements CanActivate {
       const collaborator = await this.getCurrentCollaboratorUseCase.execute({
         authUser: request.user,
       })
+
+      if (collaborator.profile === 'client') {
+        throw new CollaboratorNotAuthorizedError()
+      }
+
       request.collaborator = collaborator
       request.identity = {
         auth: request.auth,

@@ -7,7 +7,8 @@ import type { Response } from 'express'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { HealthResponseDto } from '@/shared/rest/dtos'
+import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 const { version } = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
@@ -17,6 +18,7 @@ const DEPENDENCY_TIMEOUT_MS = 5_000
 type HealthStatus = 'UP' | 'DOWN' | 'DEGRADED' | 'NOT_CONFIGURED'
 
 @Controller()
+@RouteAccess('public')
 export class CheckHealthController {
   constructor(
     private readonly drizzleClient: DrizzleClient,

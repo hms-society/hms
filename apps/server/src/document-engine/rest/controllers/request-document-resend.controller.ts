@@ -1,5 +1,6 @@
 import { Body, Inject, Param, Post } from '@nestjs/common'
 import type {
+  CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '@hms/core/document-engine/interfaces'
@@ -7,6 +8,7 @@ import { RequestDocumentResendUseCase } from '@hms/core/document-engine/use-case
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
+import { DOCUMENT_ENGINE_PROVIDERS } from '@/document-engine/constants/document-engine-providers'
 import { CurrentUser } from '@/identity/decorators'
 import { DocumentValidationController } from '../decorators/document-validation-controller'
 
@@ -24,10 +26,13 @@ export class RequestDocumentResendController {
     documentValidationsRepository: DocumentValidationsRepository,
     @Inject(DOCUMENT_ENGINE.documentValidationLogs)
     documentValidationLogsRepository: DocumentValidationLogsRepository,
+    @Inject(DOCUMENT_ENGINE_PROVIDERS.caseChecklistUpdate)
+    caseChecklistUpdateProvider: CaseChecklistUpdateProvider,
   ) {
     this.useCase = new RequestDocumentResendUseCase(
       documentValidationsRepository,
       documentValidationLogsRepository,
+      caseChecklistUpdateProvider,
     )
   }
 

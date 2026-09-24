@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
@@ -12,6 +13,8 @@ export type UseMyCasePageParams = {
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   const { caseManagementService } = useRestContext()
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
+  const [portalAccessUrl, setPortalAccessUrl] = useState<string | null>(null)
+  const [portalAccessExpiresAt, setPortalAccessExpiresAt] = useState<string | null>(null)
 
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
@@ -21,6 +24,24 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
       return res.body
     },
     enabled: !!caseUuid,
+  })
+
+  const portalAccessMutation = useMutation({
+    mutationFn: async () => {
+      const response = await caseManagementService.grantCasePortalAccess(caseUuid, {
+        canUpload: true,
+      })
+
+      if (response.isFailure) response.throwError()
+
+      return response.body
+    },
+    onSuccess: (access) => {
+      setPortalAccessUrl(
+        new URL(access.portalAccessUrl, window.location.origin).toString(),
+      )
+      setPortalAccessExpiresAt(access.expiresAt)
+    },
   })
 
   const [activeTab, setActiveTab] = useState('visao-geral')
@@ -50,6 +71,26 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     setActiveTab('checklist')
   }
 
+  function handleGeneratePortalLink() {
+    return portalAccessMutation.mutateAsync()
+  }
+
+  function handleClosePortalAccessDialog() {
+    setPortalAccessUrl(null)
+    setPortalAccessExpiresAt(null)
+  }
+
+  async function handleCopyPortalLink() {
+    if (!portalAccessUrl) return
+
+    try {
+      await navigator.clipboard.writeText(portalAccessUrl)
+      toast.success('Link do portal copiado.')
+    } catch {
+      toast.error('Não foi possível copiar o link.')
+    }
+  }
+
   return {
     activeTab,
     caseClientName,
@@ -65,6 +106,13 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     pendingItemsCount,
     validatedItemsCount,
     handleOpenChecklistTab,
+    handleClosePortalAccessDialog,
+    handleCopyPortalLink,
+    handleGeneratePortalLink,
+    isGeneratingPortalLink: portalAccessMutation.isPending,
+    portalAccessError: portalAccessMutation.error,
+    portalAccessExpiresAt,
+    portalAccessUrl,
     setActiveTab,
   }
 }
