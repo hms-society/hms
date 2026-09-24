@@ -10,6 +10,33 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      exclude: [
+        'src/**/*.{test,spec}.ts',
+        'src/**/tests/**',
+        'src/**/fixtures/**',
+        'src/**/index.ts',
+        'src/**/*.d.ts',
+      ],
+      include: ['src/**/*.ts'],
+      provider: 'v8',
+      reporter: [
+        'text-summary',
+        'json-summary',
+        'html',
+        ['lcov', { projectRoot: '../..' }],
+      ],
+      reportOnFailure: true,
+      reportsDirectory: './coverage',
+      // Measured floor on 2026-09-24. Raise as coverage improves.
+      thresholds: {
+        autoUpdate: false,
+        branches: 40.8,
+        functions: 54.5,
+        lines: 51.6,
+        statements: 50.8,
+      },
+    },
     fileParallelism: false,
     globals: true,
     hookTimeout: 120_000,
