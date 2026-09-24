@@ -76,19 +76,23 @@ Single tool for both lint and format, configured in `biome.json` (schema `2.5.1`
 - **Linter:** enabled with a curated rule set (most rules at `warn`); notable
   relaxations include `noExplicitAny: off` and `organizeImports: off` (import
   organization is handled by the editor on save, see `apps/web/.vscode`).
+- **Complexity checks:** `code-multivitals` compares the current source metrics
+  with `.code-multivitals-baseline.json.gz`; update the compressed shared baseline with
+  `pnpm update:complexity-baseline` when intentionally accepting new complexity.
 - Commands:
   ```
   pnpm format          # format the whole repo (write)
   pnpm check           # lint + format + safe fixes (write)
-  pnpm --filter web check:code
+  pnpm --filter web check:lint
   pnpm --filter web check:types
-  pnpm --filter server check:code
+  pnpm --filter server check:lint
   pnpm --filter server check:types
+  pnpm check:complexity
   ```
 
-The application workspaces keep code and type validation as separate checks:
+The application workspaces keep lint and type validation as separate checks:
 
-- `check:code` runs Biome checks;
+- `check:lint` runs Biome checks;
 - `check:types` runs TypeScript without emitting files.
 
 The shared packages currently retain their package-specific `lint` and
@@ -102,7 +106,7 @@ The application and core workspaces use Vitest for automated tests.
 - `apps/server`:
   - `pnpm --filter server test` — unit and REST integration tests
   - `pnpm --filter server test:watch` — watch mode
-  - `pnpm --filter server test:cov` — coverage
+  - `pnpm --filter server test:coverage` — coverage
   - `pnpm --filter server test:e2e` — uses `test/vitest-e2e.config.mts`
 - `packages/core`: `pnpm --filter @hms/core test` (`vitest run`)
 - `pnpm test` runs the test task across all workspaces through Turborepo.
@@ -110,6 +114,38 @@ The application and core workspaces use Vitest for automated tests.
 Server REST integration tests use Testcontainers and are configured with
 `fileParallelism: false` so each module fixture can own an isolated database
 without competing container startups.
+
+### Test coverage gate
+
+Core, Server, and Web run Vitest with V8 coverage. The configured source globs
+include production files even when tests do not import them. Tests, test
+fixtures, Core fakers and barrels, and generated Web route metadata are excluded
+where applicable. Run all three workspaces with `pnpm test:coverage`, or run one
+with `pnpm --filter @hms/core test:coverage`, `pnpm --filter server test:coverage`,
+or `pnpm --filter web test:coverage`.
+
+Each workspace prints a text summary and writes ignored JSON, HTML, and LCOV
+reports under its `coverage/` directory. Vitest fails when any statement,
+branch, function, or line percentage falls below the measured floor in that
+workspace's Vitest config.
+Automatic threshold updates are disabled; raise a floor when sustained coverage
+improves. The longer-term target is 85% for statements, functions, and lines and
+80% for branches. Coverage percentages supplement behavioral and integration
+evidence; they do not establish that an acceptance criterion is complete.
+
+| Workspace | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| Core floor | 70.3% | 61.5% | 68.9% | 73.5% |
+| Server floor | 50.8% | 40.8% | 54.5% | 51.6% |
+| Web floor | 47.2% | 45.6% | 44.0% | 48.7% |
+| Longer-term target | 85% | 80% | 85% | 85% |
+
+The Core, Server, and Web PR workflows run their own coverage commands. When a
+coverage summary is available, they write a GitHub Actions job summary and
+create or update a coverage comment on internal pull requests, even if the
+coverage command fails. They upload the full report as an artifact retained for
+14 days. Pull requests from forks receive the job summary and artifact without
+the comment.
 
 ## CI/CD — GitHub Actions and Coolify
 
@@ -187,17 +223,22 @@ Bring it up with `docker compose up`.
 
 ## Helper scripts (`scripts/`)
 
-- `install-skills.sh` — installs the agent skills used in this repo
+- `node scripts/install-skills.mjs` — installs the agent skills used in this repo
   (`frontend-design`, `caveman-commit`) via `npx skills add`.
-- `generate-supabase-keys.sh` — generates local `ANON_KEY` and
+- `node scripts/generate-supabase-keys.mjs` — generates local `ANON_KEY` and
   `SUPABASE_SERVICE_ROLE_KEY` values signed with the `JWT_SECRET` from `.env`.
-- `sync-commands.sh` — turns canonical prompts in `documentation/prompts/*.md`
+- `node scripts/sync-commands.mjs` — turns canonical prompts in `documentation/prompts/*.md`
   into slash-command files (`.cursor/commands`, `.claude/commands`,
   `.opencode/commands`) and generated Codex skills under `.codex/skills`, removing
   stale managed artifacts when a workflow is retired.
-- `sync-agents.sh` — generates Codex, Claude, and OpenCode role configuration from
+- `node scripts/sync-agents.mjs` — generates Codex, Claude, and OpenCode role configuration from
   `documentation/agents/*-agent.md`; Searcher and Integrated Reviewer roles are
   read-only, while Builders receive workspace-write access without subagent creation.
+- `pnpm check:complexity` — checks complexity against the shared baseline. Add
+  `-- --scope apps/server` (or `apps/web`, `packages/core`, or
+  `packages/validation`) to check one source scope.
+- `node scripts/write-coverage-report.mjs` — formats the JSON coverage summary
+  for the CI job summary and pull-request comment.
 
 ## Editor configuration
 
