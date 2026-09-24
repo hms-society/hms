@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { Controller, Get, HttpStatus, Res } from '@nestjs/common'
+import { Controller, Get, HttpStatus, Logger, Res } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type { Response } from 'express'
 
@@ -149,6 +149,10 @@ export class CheckHealthController {
       })
       if (!result.ok) {
         await result.body?.cancel()
+        Logger.warn(
+          `Inngest Cloud app lookup returned HTTP ${result.status}`,
+          CheckHealthController.name,
+        )
         return 'DOWN'
       }
 
@@ -164,12 +168,28 @@ export class CheckHealthController {
       const sync = app?.latestSync
       const isSynced =
         app?.id === 'hms-server' &&
-        app.isArchived === false &&
+        app.isArchived !== true &&
         (app.functionCount ?? 0) > 0 &&
         (sync?.status === 'success' || sync?.status === 'duplicate') &&
         sync.url === appUrl
-      return isSynced ? 'UP' : 'DOWN'
+      if (isSynced) return 'UP'
+
+      const reason =
+        app?.id !== 'hms-server'
+          ? 'app ID mismatch'
+          : app.isArchived === true
+            ? 'app archived'
+            : (app.functionCount ?? 0) === 0
+              ? 'no registered functions'
+              : sync?.status !== 'success' && sync?.status !== 'duplicate'
+                ? 'latest sync not successful'
+                : sync.url !== appUrl
+                  ? 'endpoint URL mismatch'
+                  : 'unknown metadata mismatch'
+      Logger.warn(`Inngest Cloud app check failed: ${reason}`, CheckHealthController.name)
+      return 'DOWN'
     } catch {
+      Logger.warn('Inngest Cloud app lookup failed', CheckHealthController.name)
       return 'DOWN'
     }
   }
