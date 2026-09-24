@@ -1,4 +1,5 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common'
+import { Get, Param, UseGuards } from '@nestjs/common'
+import { CommunicationsController } from '@/communication/decorators'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { privateMessageModel } from '@/communication/database/drizzle/models/private-message-model'
 import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
@@ -6,7 +7,7 @@ import { eq, desc } from 'drizzle-orm'
 import { AuthGuard } from '@/identity/guards'
 import { decrypt } from '@/shared/utils/crypto'
 
-@Controller('communications')
+@CommunicationsController()
 @UseGuards(AuthGuard)
 export class ListClientCommunicationsController {
   constructor(private readonly drizzleClient: DrizzleClient) {}

@@ -1,0 +1,23 @@
+@baseUrl = http://localhost:3333
+@accessToken = your-access-token
+@clientId = your-client-uuid
+
+### List communication summaries
+GET {{baseUrl}}/communications/summary
+Authorization: Bearer {{accessToken}}
+
+### List a client's messages
+GET {{baseUrl}}/communications/clients/{{clientId}}
+Authorization: Bearer {{accessToken}}
+
+### Send a message
+POST {{baseUrl}}/communications/send
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "content": "Hello",
+  "channel": "whatsapp",
+  "type": "text"
+}

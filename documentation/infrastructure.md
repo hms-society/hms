@@ -257,6 +257,36 @@ docker-compose.yml
   metrics and logs. Coolify environment labels keep staging and production
   telemetry separated inside the same Grafana Cloud stack.
 
+The server image checks `GET /health` every 30 seconds. This route probes
+PostgreSQL and Supabase Auth (`services["supabase-auth"]`) and returns 503 when
+either required dependency is unavailable; later successful probes make the
+container healthy again. The health response also reports Supabase Storage
+(`services["supabase-storage"]`),
+`services.inngest`, and `services.documenso` independently. Failures of these
+auxiliary services produce `degraded` with HTTP 200 rather than removing the whole API
+from service. In local development, the Inngest check verifies the local
+`/api/inngest` handler. In staging and production, set an environment-scoped
+`INNGEST_API_KEY` and the public `INNGEST_APP_URL` (including `/api/inngest`).
+The check reads `hms-server` from the Inngest Cloud v2 API and requires an active
+app with functions, a successful latest sync, and a matching endpoint URL. A
+missing key or URL reports `NOT_CONFIGURED`. This verifies registration, not
+whether individual function executions succeed. The API key is distinct from
+the event and signing keys and must be stored as a server secret.
+
+Set `DOCUMENSO_URL` on the Server App to the reachable Documenso base URL to
+include its `/api/health` response; if omitted, its state is `NOT_CONFIGURED`.
+Documenso reports `warning` when its signing certificate has an issue, which
+readiness exposes as `DEGRADED`. Each dependency probe has a five-second
+deadline, and Docker gives the readiness request seven seconds. A separate
+database watchdog in staging and production checks every 30 seconds and exits
+the process only after two consecutive database health queries stall for 15
+seconds. An ordinary database error does not trigger a restart. The database
+connection timeout remains 12 seconds. The Postgres.js client disables prepared
+statements because staging uses Supavisor transaction pooling. The shared
+communication badge polls one grouped summary endpoint every 10 seconds,
+starting the next poll only after the previous request completes, instead of
+requesting each client's full message history.
+
 #### Grafana Cloud observability deployment
 
 The self-contained `apps/observability/docker-compose.yaml` embeds the Alloy
@@ -271,9 +301,23 @@ file, repository preservation setting, or public domain is required.
 Set `GRAFANA_CLOUD_API_KEY`, `GRAFANA_CLOUD_LOKI_URL`,
 `GRAFANA_CLOUD_LOKI_USER`, `GRAFANA_CLOUD_PROMETHEUS_URL`,
 `GRAFANA_CLOUD_PROMETHEUS_USER`, `HMS_COOLIFY_PROJECTS_REGEX`,
-`HMS_ENVIRONMENT`, and `HMS_OBSERVABILITY_HOST` in Coolify. The access-policy
+`HMS_ENVIRONMENT`, `HMS_OBSERVABILITY_HOST`, and
+`INNGEST_METRICS_BEARER_TOKEN_STG` in Coolify. The access-policy
 token requires `metrics:write` and `logs:write` scopes and must be stored as a
-Coolify secret. The embedded `HMS_ALLOY_CONFIG` contains no credentials.
+Coolify secret. The embedded `HMS_ALLOY_CONFIG` contains no credentials. Store
+the Inngest token as a separate Coolify secret: open the Inngest Prometheus
+integration, select **Staging**, and use the bearer credential from that
+environment's generated scrape configuration. Never use the Production
+credential for this scrape or commit either credential to Git.
+
+The collector scrapes the native Inngest Cloud endpoint for
+`staging-21a934d0` over HTTPS every six minutes and forwards those metrics to
+Grafana Cloud. The Inngest plan currently displays 30-minute granularity and a
+10-minute delay, so recent executions may not appear immediately. Deploy this
+scrape on only one Alloy instance when multiple collectors share the same
+Grafana Cloud stack; otherwise each instance sends duplicate series. The
+dedicated Staging dashboard uses Inngest's native function-run counters for
+execution volume and failures. It does not derive duration metrics.
 
 Use `HMS_COOLIFY_PROJECTS_REGEX` to limit collection to the relevant Coolify
 project names. For the current HMS projects, use
@@ -308,7 +352,7 @@ Set these values on **each HMS Server App** in Coolify (staging and production):
 * `OTEL_RESOURCE_ATTRIBUTES=service.namespace=hms,deployment.environment.name=staging`
   for staging, or replace `staging` with `production` for production.
 
-The instrumentation excludes `/health` and `/docs` from HTTP tracing and
+The instrumentation excludes all `/health` routes and `/docs` from HTTP tracing and
 redacts raw URL/path/query span attributes; route templates remain available
 from Express. It does not capture request/response bodies or headers. It does
 time Drizzle's Postgres.js operations, including those inside transactions,

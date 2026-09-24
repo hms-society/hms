@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - develop
-      # Temporary for PR #174; remove when this PR is closed.
-      - fix/db-seed
   workflow_dispatch:
 
 permissions:
@@ -18,8 +16,7 @@ concurrency:
 jobs:
   deploy-staging:
     if: >-
-      github.ref == 'refs/heads/develop' ||
-      github.ref == 'refs/heads/fix/db-seed'
+      github.ref == 'refs/heads/develop'
     name: Migrate and deploy server staging
     runs-on: ubuntu-latest
     environment:

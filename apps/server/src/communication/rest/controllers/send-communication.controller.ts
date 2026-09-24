@@ -1,5 +1,4 @@
 import {
-  Controller,
   Post,
   Body,
   UseGuards,
@@ -12,6 +11,7 @@ import {
 import { ApiResponse } from '@nestjs/swagger'
 import { ZodValidationPipe } from 'nestjs-zod'
 import { AuthGuard } from '@/identity/guards'
+import { CommunicationsController } from '@/communication/decorators'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { SendCommunicationDto } from '../dtos/send-communication.dto'
@@ -24,7 +24,7 @@ import { encrypt } from '@/shared/utils/crypto'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
-@Controller('communications')
+@CommunicationsController()
 @UseGuards(AuthGuard)
 export class SendCommunicationController {
   constructor(
