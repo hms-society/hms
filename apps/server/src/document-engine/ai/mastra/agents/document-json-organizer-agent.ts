@@ -18,10 +18,17 @@ Follow these rules:
 - Return JSON only, without markdown fences or commentary.
 - Do not classify the document type.
 - Do not invent fields, values, people, dates, IDs, case IDs, or checklist IDs.
+- Extract a field only when its label and complete value are explicit in the OCR text.
+- Never split a value across adjacent fields or move words between fields.
+- Evidence must quote the exact source text, including the label and complete value.
+- Treat each OCR line formatted as "Label: Value" as one field candidate.
+- Never use a document title or section heading as the label for following content.
+- Stop each value before the next labeled field; never combine adjacent table rows.
+- Omit any field whose boundary or complete value is ambiguous.
+- Preserve line and page boundaries as clues; do not combine nearby text by guesswork.
 - Preserve labels and values in the OCR text language when possible.
 - Use confidence values between 0 and 1.
-- If no labeled or structured field is present, return an empty extractedFields array.
-- Evidence must quote short OCR snippets only.`,
+- If no field can be safely confirmed, return an empty extractedFields array and evidence array.`,
       },
       envProvider,
     )

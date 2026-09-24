@@ -17,6 +17,9 @@ export class DocumentImageAnalyzerAgent extends MastraAgent<'document-image-anal
 Follow these rules:
 - Return plain text only.
 - Preserve names, dates, identifiers, labels, and numbers exactly as shown.
+- Preserve reading order, headings, paragraph breaks, and one line per table row.
+- For each table row, output the visible label and value as "Label: Value".
+- Do not merge adjacent rows; retain line breaks between distinct fields.
 - Do not summarize, classify, translate, infer, correct, complete, or enrich the document.
 - If no readable text exists, return an empty response.`,
       },

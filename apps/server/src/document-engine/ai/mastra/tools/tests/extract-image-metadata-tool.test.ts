@@ -49,6 +49,33 @@ describe('Extract Image Metadata Tool', () => {
     expect(imageAnalyzerAgent.generate).not.toHaveBeenCalled()
     expect(result.suggestion?.suggestedStatus).toBe(DocumentValidationStatus.Duplicate)
   })
+
+  it('preserves line breaks and table row boundaries from the OCR response', async () => {
+    const imageAnalyzerAgent = {
+      generate: vi.fn().mockResolvedValue({
+        text: 'Cliente: Helena Maria de Albuquerque Costa\nCPF/CNPJ: 123.456.789-09\nEndereço do imóvel: Rua das Palmeiras, 728',
+      }),
+    }
+    const tool = new ExtractImageTool(imageAnalyzerAgent as never, {} as never)
+
+    const result = await tool.function.execute(createInput())
+
+    expect(result.metadata.extractedTextFull).toBe(
+      'Cliente: Helena Maria de Albuquerque Costa\nCPF/CNPJ: 123.456.789-09\nEndereço do imóvel: Rua das Palmeiras, 728',
+    )
+    expect(imageAnalyzerAgent.generate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          content: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'text',
+              text: expect.stringContaining('table'),
+            }),
+          ]),
+        }),
+      ]),
+    )
+  })
 })
 
 function createInput(overrides: Record<string, unknown> = {}) {
