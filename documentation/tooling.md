@@ -77,7 +77,7 @@ Single tool for both lint and format, configured in `biome.json` (schema `2.5.1`
   relaxations include `noExplicitAny: off` and `organizeImports: off` (import
   organization is handled by the editor on save, see `apps/web/.vscode`).
 - **Complexity checks:** `code-multivitals` compares the current source metrics
-  with `.code-multivitals-baseline.json`; update the shared baseline with
+  with `.code-multivitals-baseline.json.gz`; update the compressed shared baseline with
   `pnpm update:complexity-baseline` when intentionally accepting new complexity.
 - Commands:
   ```

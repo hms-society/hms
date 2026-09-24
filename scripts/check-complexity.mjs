@@ -4,10 +4,11 @@ import path from 'node:path'
 import process from 'node:process'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { gunzipSync, gzipSync } from 'node:zlib'
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url))
 const ROOT_DIRECTORY = path.resolve(SCRIPT_DIRECTORY, '..')
-const BASELINE_PATH = path.join(ROOT_DIRECTORY, '.code-multivitals-baseline.json')
+const BASELINE_PATH = path.join(ROOT_DIRECTORY, '.code-multivitals-baseline.json.gz')
 const CONFIG_PATH = path.join(ROOT_DIRECTORY, '.code-multivitals.json')
 const SOURCE_PATTERNS = [
   'apps/server/src/**/*.ts',
@@ -161,10 +162,7 @@ function updateBaseline(tempDirectory) {
     throw new Error('CodeMultiVitals did not produce a baseline file.')
   }
   const baseline = JSON.parse(readFileSync(temporaryBaselinePath, 'utf8'))
-  writeFileSync(
-    BASELINE_PATH,
-    `${JSON.stringify(normalizeBaseline(baseline), null, 2)}\n`,
-  )
+  writeFileSync(BASELINE_PATH, gzipSync(JSON.stringify(normalizeBaseline(baseline))))
   console.log(`CodeMultiVitals baseline updated at ${toRepositoryPath(BASELINE_PATH)}`)
 }
 
@@ -174,7 +172,7 @@ function checkAgainstBaseline(tempDirectory) {
       `Missing ${toRepositoryPath(BASELINE_PATH)}. Run pnpm update:complexity-baseline first.`,
     )
   }
-  const baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  const baseline = JSON.parse(gunzipSync(readFileSync(BASELINE_PATH)).toString('utf8'))
   const temporaryBaselinePath = path.join(tempDirectory, 'baseline.json')
   writeFileSync(
     temporaryBaselinePath,
