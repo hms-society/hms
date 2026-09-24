@@ -20,6 +20,7 @@ import {
 } from '@hms/core/document-production/domain/entities/fakers'
 import type {
   DocumentTemplateContent,
+  DocumentGenerationMoment,
   DocumentTemplateVariable,
 } from '@hms/core/document-production/domain/structures'
 import type {
@@ -46,18 +47,23 @@ export type DocumentProductionSeedReferences = {
 }
 
 type DocumentTemplateSeed = {
-  readonly documentId: string
+  readonly documentId?: string
   readonly name: string
   readonly description: string
-  readonly paragraphs: readonly string[]
+  readonly paragraphs?: readonly string[]
+  readonly content?: DocumentTemplateContent
   readonly variables: readonly DocumentTemplateVariable[]
+  readonly moment?: DocumentGenerationMoment
+  readonly legalAreaName?: string
+  readonly legalTopicName?: string
 }
 
-const DOCUMENT_TEMPLATES = [
+const DOCUMENT_TEMPLATES: readonly DocumentTemplateSeed[] = [
   {
     documentId: '00000000-0000-4000-8000-000000000201',
     name: 'Requerimento Administrativo de Aposentadoria',
-    description: 'Requerimento previdenciário para reconhecimento de tempo de contribuição e concessão de aposentadoria.',
+    description:
+      'Requerimento previdenciário para reconhecimento de tempo de contribuição e concessão de aposentadoria.',
     paragraphs: [
       'Ao Instituto Nacional do Seguro Social — INSS, {cliente_nome}, inscrito no CPF sob o nº {cliente_cpf}, requer a concessão do benefício previdenciário.',
       'O pedido inclui o reconhecimento do tempo de contribuição de {tempo_contribuicao} e a análise dos períodos não computados no CNIS.',
@@ -72,7 +78,8 @@ const DOCUMENT_TEMPLATES = [
   {
     documentId: '00000000-0000-4000-8000-000000000202',
     name: 'Manifestação sobre Tempo de Contribuição',
-    description: 'Manifestação previdenciária sobre divergências no tempo de contribuição reconhecido administrativamente.',
+    description:
+      'Manifestação previdenciária sobre divergências no tempo de contribuição reconhecido administrativamente.',
     paragraphs: [
       'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS',
       'Processo/Caso nº: {numero_caso}',
@@ -104,7 +111,8 @@ const DOCUMENT_TEMPLATES = [
   {
     documentId: '00000000-0000-4000-8000-000000000203',
     name: 'Petição de Juntada de Documentos',
-    description: 'Petição para juntada de documentos complementares ao processo administrativo previdenciário.',
+    description:
+      'Petição para juntada de documentos complementares ao processo administrativo previdenciário.',
     paragraphs: [
       'O requerente {cliente_nome} requer a juntada de documentos complementares aos autos do processo/caso {numero_caso}.',
       'A documentação apresentada complementa a prova do tempo de contribuição e esclarece divergências identificadas na análise administrativa.',
@@ -116,7 +124,313 @@ const DOCUMENT_TEMPLATES = [
       { label: 'Número do caso', technicalName: 'numero_caso' },
     ],
   },
-] as const satisfies readonly DocumentTemplateSeed[]
+  {
+    name: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+    description:
+      'Modelo universal de requerimento administrativo previdenciário. Fatos, períodos contributivos e documentos devem ser preenchidos e conferidos para cada requerente antes da submissão.',
+    moment: 'legal_production',
+    legalAreaName: 'Previdenciário',
+    legalTopicName: 'Aposentadoria',
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, textAlign: 'center' },
+          content: [
+            {
+              type: 'text',
+              text: 'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'center' },
+          content: [
+            {
+              type: 'text',
+              text: 'REQUERIMENTO ADMINISTRATIVO DE BENEFÍCIO PREVIDENCIÁRIO',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'Requerente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NIT/PIS/PASEP: {{nit_requerente}}',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [{ type: 'text', text: 'Endereço: {{endereco_requerente}}' }],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2, textAlign: 'left' },
+          content: [{ type: 'text', text: 'I — DO OBJETO' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'O(A) requerente acima identificado(a) solicita a análise de seu histórico previdenciário e a concessão do benefício {{beneficio_requerido}}, caso sejam preenchidos os requisitos legais aplicáveis. Requer, ainda, a análise do benefício mais vantajoso eventualmente cabível, conforme os elementos comprovados no processo administrativo.',
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2, textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'II — DO HISTÓRICO CONTRIBUTIVO E DOS DOCUMENTOS',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'O histórico contributivo deverá ser conferido a partir do CNIS e dos documentos apresentados. Os períodos cuja análise é solicitada são: {{periodos_contributivos}}.',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'Documentos que instruem este requerimento: {{documentos_apresentados}}. A relação deve refletir exclusivamente os arquivos efetivamente juntados.',
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2, textAlign: 'left' },
+          content: [{ type: 'text', text: 'III — DA ANÁLISE DO PEDIDO' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'Requer-se a apuração dos requisitos previdenciários pertinentes, incluindo tempo de contribuição e carência quando aplicáveis, com consideração dos registros do CNIS e dos documentos apresentados. Eventuais divergências ou períodos não computados devem ser examinados individualmente, sem presumir como comprovado período que não esteja apoiado nos elementos dos autos.',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [
+            {
+              type: 'text',
+              text: 'Se os elementos indicarem mais de uma regra possível, requer-se a análise das hipóteses cabíveis na data relevante e a indicação fundamentada da opção mais vantajosa, acompanhada da memória de cálculo.',
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2, textAlign: 'left' },
+          content: [{ type: 'text', text: 'IV — DOS REQUERIMENTOS' }],
+        },
+        {
+          type: 'orderedList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'o recebimento e o processamento do presente requerimento;',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'a análise do CNIS e dos documentos efetivamente apresentados, com exame dos períodos indicados;',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'a apuração dos requisitos e das regras previdenciárias aplicáveis, com memória de cálculo;',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'a concessão do benefício requerido, se comprovado o preenchimento dos requisitos;',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'caso sejam necessários elementos adicionais, a indicação objetiva das informações ou documentos pendentes;',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'a emissão de decisão fundamentada, com identificação dos períodos considerados e não considerados.',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [{ type: 'text', text: 'Termos em que, pede deferimento.' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'left' },
+          content: [{ type: 'text', text: '{{municipio}}, {{data_documento}}.' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'center' },
+          content: [{ type: 'text', text: '__________________________________' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'center' },
+          content: [{ type: 'text', text: '{{nome_requerente}} | Requerente' }],
+        },
+        {
+          type: 'paragraph',
+          attrs: { textAlign: 'center' },
+          content: [
+            {
+              type: 'text',
+              text: 'Representante, se houver: {{nome_representante}} | OAB/{{uf_oab}} {{numero_oab}}',
+            },
+          ],
+        },
+      ],
+    } as unknown as DocumentTemplateContent,
+    variables: [
+      {
+        label: 'Nome do requerente',
+        technicalName: 'nome_requerente',
+        description: 'Nome completo da pessoa requerente.',
+      },
+      {
+        label: 'CPF do requerente',
+        technicalName: 'cpf_requerente',
+        description: 'CPF da pessoa requerente.',
+      },
+      {
+        label: 'NIT/PIS/PASEP',
+        technicalName: 'nit_requerente',
+        description: 'Número previdenciário, se disponível.',
+      },
+      {
+        label: 'Endereço do requerente',
+        technicalName: 'endereco_requerente',
+        description: 'Endereço atualizado da pessoa requerente.',
+      },
+      {
+        label: 'Benefício requerido',
+        technicalName: 'beneficio_requerido',
+        description: 'Espécie ou denominação do benefício objeto do pedido.',
+      },
+      {
+        label: 'Períodos contributivos',
+        technicalName: 'periodos_contributivos',
+        description:
+          'Períodos cuja análise é requerida, conforme documentação conferida.',
+      },
+      {
+        label: 'Documentos apresentados',
+        technicalName: 'documentos_apresentados',
+        description: 'Relação dos documentos efetivamente juntados.',
+      },
+      {
+        label: 'Município',
+        technicalName: 'municipio',
+        description: 'Município indicado para fechamento do requerimento.',
+      },
+      {
+        label: 'Data do documento',
+        technicalName: 'data_documento',
+        description: 'Data de elaboração do requerimento.',
+      },
+      {
+        label: 'Nome do representante',
+        technicalName: 'nome_representante',
+        description: 'Nome do representante, quando houver.',
+      },
+      {
+        label: 'UF da OAB',
+        technicalName: 'uf_oab',
+        description:
+          'Unidade federativa de inscrição profissional, quando houver representante.',
+      },
+      {
+        label: 'Número da OAB',
+        technicalName: 'numero_oab',
+        description: 'Número de inscrição profissional, quando houver representante.',
+      },
+    ],
+  },
+]
 
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 
@@ -176,52 +490,60 @@ export class DocumentProductionSeeder {
   }
 
   async run(references: DocumentProductionSeedReferences) {
-    const area = references.legalAreas.find(({ name }) => name === 'Cível')
-    const topic = references.legalTopics.find(
-      ({ legalAreaId, name }) => legalAreaId === area?.id && name === 'Contratos',
-    )
-    if (!area || !topic) {
-      throw new AppError(
-        'Document Production seed references are required.',
-        'Seed Error',
-      )
-    }
-
     const specificationCreations: DocumentSpecificationCreation[] =
-      DOCUMENT_TEMPLATES.map((template) => ({
-        name: template.name,
-        description: template.description,
-        content: this.createTemplateContent(template.name, template.paragraphs),
-        variables: [...template.variables],
-        application: {
-          scope: 'legal_context',
-          moment: 'consultation',
-          legalAreaIds: [area.id],
-          legalTopicIdsByArea: { [area.id]: [topic.id] },
-        },
-        status: 'available',
-      }))
+      DOCUMENT_TEMPLATES.map((template) => {
+        const legalAreaName = template.legalAreaName ?? 'Cível'
+        const legalTopicName = template.legalTopicName ?? 'Contratos'
+        const area = references.legalAreas.find(({ name }) => name === legalAreaName)
+        const topic = references.legalTopics.find(
+          ({ legalAreaId, name }) => legalAreaId === area?.id && name === legalTopicName,
+        )
+
+        if (!area || !topic) {
+          throw new AppError(
+            `Document Production seed references for ${legalAreaName} / ${legalTopicName} are required.`,
+            'Seed Error',
+          )
+        }
+
+        return {
+          name: template.name,
+          description: template.description,
+          content:
+            template.content ??
+            this.createTemplateContent(template.name, template.paragraphs ?? []),
+          variables: [...template.variables],
+          application: {
+            scope: 'legal_context',
+            moment: template.moment ?? 'consultation',
+            legalAreaIds: [area.id],
+            legalTopicIdsByArea: { [area.id]: [topic.id] },
+          },
+          status: 'available',
+        }
+      })
     const specifications =
       await this.specificationsRepository.addMany(specificationCreations)
-    const documentCreations: DocumentCreation[] = specifications.map((specification) => {
-      const template = DOCUMENT_TEMPLATES.find(({ name }) => name === specification.name)
-      if (!template) {
-        throw new AppError(
-          'A seeded Document Template could not be resolved.',
-          'Seed Error',
-        )
-      }
+    const seededDocumentTemplates = DOCUMENT_TEMPLATES.filter(
+      (template) => template.documentId,
+    )
+    const documentCreations: DocumentCreation[] = seededDocumentTemplates.map(
+      (template) => {
+        if (!template.documentId) {
+          throw new AppError('A seeded document ID is required.', 'Seed Error')
+        }
 
-      const {
-        createdAt: _createdAt,
-        updatedAt: _updatedAt,
-        ...document
-      } = DocumentFaker.fake({
-        id: template.documentId,
-        title: specification.name,
-      })
-      return document
-    })
+        const {
+          createdAt: _createdAt,
+          updatedAt: _updatedAt,
+          ...document
+        } = DocumentFaker.fake({
+          id: template.documentId,
+          title: template.name,
+        })
+        return document
+      },
+    )
     const documents = await this.documentsRepository.addMany(documentCreations)
     const seededPackage = DocumentPackageFaker.fake({
       id: DOCUMENT_PRODUCTION_PACKAGE_ID,
@@ -235,8 +557,8 @@ export class DocumentProductionSeeder {
       documentPackageCreation,
     )
     const packageDocumentCreations: PackageDocumentCreation[] = documents.map(
-      (document, index) => {
-        const specification = specifications[index]
+      (document) => {
+        const specification = specifications.find(({ name }) => name === document.title)
         if (!specification) {
           throw new AppError(
             'A Document Specification is missing from the seeded package.',
@@ -266,14 +588,24 @@ export class DocumentProductionSeeder {
         context: { type: 'case', caseId: references.caseId },
       })
       await this.packageDocumentsRepository.addMany(
-        documents.map((document, index) => ({
-          ...PackageDocumentFaker.fake({
+        documents.map((document) => {
+          const specification = specifications.find(({ name }) => name === document.title)
+          if (!specification) {
+            throw new AppError(
+              'A seeded Document Specification is missing from the case package.',
+              'Seed Error',
+            )
+          }
+
+          return {
+            ...PackageDocumentFaker.fake({
+              documentPackageId: casePackage.id,
+              documentId: document.id,
+              documentSpecificationId: specification.id,
+            }),
             documentPackageId: casePackage.id,
-            documentId: document.id,
-            documentSpecificationId: specifications[index]?.id,
-          }),
-          documentPackageId: casePackage.id,
-        })),
+          }
+        }),
       )
     }
 
@@ -320,7 +652,7 @@ export class DocumentProductionSeeder {
     const versions: DocumentVersion[] = []
 
     for (const [index, document] of documents.entries()) {
-      const specification = specifications[index]
+      const specification = specifications.find(({ name }) => name === document.title)
       const generationId = SEEDED_GENERATION_IDS[index]
       const versionId = SEEDED_VERSION_IDS[index]
       const fileName = SEEDED_FILE_NAMES[index]
@@ -332,12 +664,15 @@ export class DocumentProductionSeeder {
         )
       }
 
-      const fileContent = await readFile(join(process.cwd(), 'src/document-production/database/seed-assets', fileName))
+      const fileContent = await readFile(
+        join(process.cwd(), 'src/document-production/database/seed-assets', fileName),
+      )
       const safeCaseName = sanitizeStorageSegment(caseName ?? 'case')
       const storedFile = await this.fileStorageProvider.save({
         filePath: `cases/${safeCaseName}/pieces/${document.id}/versions/${versionId}/${fileName}`,
         fileName,
-        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        contentType:
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         sizeInBytes: fileContent.byteLength,
         content: new Uint8Array(fileContent),
       })
@@ -397,6 +732,7 @@ export class DocumentProductionSeeder {
         documentId: document.id,
         documentGenerationId: createdGeneration.id,
         fileId: storedFile.id,
+        storagePath: storedFile.filePath,
         versionNumber: 1,
         source: 'ai',
         content: specification.content,
@@ -410,6 +746,7 @@ export class DocumentProductionSeeder {
         documentId: version.documentId,
         documentGenerationId: version.documentGenerationId,
         fileId: version.fileId,
+        storagePath: version.storagePath,
         versionNumber: version.versionNumber,
         source: version.source,
         content: version.content,
