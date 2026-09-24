@@ -260,7 +260,8 @@ docker-compose.yml
 The server image checks `GET /health` every 30 seconds. This route probes
 PostgreSQL and Supabase Auth (`services["supabase-auth"]`) and returns 503 when
 either required dependency is unavailable; later successful probes make the
-container healthy again. The health response also reports Supabase Storage,
+container healthy again. The health response also reports Supabase Storage
+(`services["supabase-storage"]`),
 `services.inngest`, and `services.documenso` independently. Failures of these
 auxiliary services produce `degraded` with HTTP 200 rather than removing the whole API
 from service. In local development, the Inngest check verifies the local

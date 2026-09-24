@@ -96,7 +96,11 @@ describe('Check Health Controller [GET /health]', () => {
 
     expect(response.body).toMatchObject({
       status: 'degraded',
-      services: { database: 'UP', documenso: 'NOT_CONFIGURED' },
+      services: {
+        database: 'UP',
+        'supabase-storage': 'UP',
+        documenso: 'NOT_CONFIGURED',
+      },
     })
 
     await metricReader.forceFlush()

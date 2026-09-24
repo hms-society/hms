@@ -57,7 +57,7 @@ export class CheckHealthController {
     const services = {
       database,
       'supabase-auth': supabaseAuth,
-      storage,
+      'supabase-storage': storage,
       inngest,
       documenso,
     }

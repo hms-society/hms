@@ -7,7 +7,7 @@ export const healthResponseSchema = z.object({
   services: z.object({
     database: z.enum(['UP', 'DOWN']),
     'supabase-auth': z.enum(['UP', 'DOWN']),
-    storage: z.enum(['UP', 'DOWN']),
+    'supabase-storage': z.enum(['UP', 'DOWN']),
     inngest: z.enum(['UP', 'DOWN', 'NOT_CONFIGURED']),
     documenso: z.enum(['UP', 'DOWN', 'DEGRADED', 'NOT_CONFIGURED']),
   }),
