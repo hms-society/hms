@@ -86,6 +86,27 @@ services:
           scrape_interval = "30s"
         }
 
+        prometheus.scrape "inngest_staging" {
+          targets = [{
+            "__address__" = "api.inngest.com:443",
+            "environment" = "staging",
+            "job"         = "inngest-staging-21a934d0",
+            "service_name" = "inngest-cloud",
+            "team"         = "hms",
+          }]
+          scheme           = "https"
+          metrics_path     = "/v1/prom/staging-21a934d0"
+          scrape_interval  = "360s"
+          honor_labels     = true
+          honor_timestamps = true
+          forward_to       = [prometheus.remote_write.grafana_cloud.receiver]
+
+          authorization {
+            type        = "Bearer"
+            credentials = sys.env("INNGEST_METRICS_BEARER_TOKEN_STG")
+          }
+        }
+
         prometheus.exporter.cadvisor "docker" {
           docker_host                  = "unix:///var/run/docker.sock"
           docker_only                  = true
@@ -249,6 +270,7 @@ services:
       HMS_COOLIFY_PROJECTS_REGEX: ${HMS_COOLIFY_PROJECTS_REGEX:?Set the Coolify project-name filter}
       HMS_ENVIRONMENT: ${HMS_ENVIRONMENT:?Set shared, staging, or production}
       HMS_OBSERVABILITY_HOST: ${HMS_OBSERVABILITY_HOST:?Set a stable host name}
+      INNGEST_METRICS_BEARER_TOKEN_STG: ${INNGEST_METRICS_BEARER_TOKEN_STG:?Set the Inngest Staging Prometheus bearer token}
     volumes:
       - alloy-data:/var/lib/alloy/data
       - /:/rootfs:ro

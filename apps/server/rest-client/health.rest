@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/health
 
-### Check server health
+### Check server availability and dependencies
 GET {{BASE_URL}}/health
 Accept: application/json

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -33,6 +33,21 @@ export class DrizzlePrivateMessagesRepository
       .where(eq(privateMessageModel.intakeId, intakeId))
 
     return records.map(DrizzlePrivateMessageMapper.toDomain)
+  }
+
+  async listSummariesByClient(): ReturnType<
+    PrivateMessagesRepository['listSummariesByClient']
+  > {
+    return this.database
+      .select({
+        clientId: privateMessageModel.clientId,
+        inboundCount: sql<number>`count(*) filter (where ${privateMessageModel.direction} = 'inbound')::integer`,
+        isLastMessageInbound: sql<boolean>`
+          (array_agg(${privateMessageModel.direction} order by ${privateMessageModel.createdAt} desc, ${privateMessageModel.id} desc))[1] = 'inbound'
+        `,
+      })
+      .from(privateMessageModel)
+      .groupBy(privateMessageModel.clientId)
   }
 
   async add(
