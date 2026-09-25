@@ -237,4 +237,40 @@ describe('NewPieceDialog', () => {
     expect(screen.queryByRole('button', { name: 'Gerar novamente' })).toBeNull()
     expect(generateDocument).toHaveBeenCalledTimes(1)
   })
+
+  it('shows completion actions together and lets the close icon stand alone', async () => {
+    const generateDocument = vi.fn().mockResolvedValue({
+      isFailure: false,
+      body: { documentId: 'piece-1', documentGenerationId: 'generation-1' },
+    })
+    const getDocument = vi.fn().mockResolvedValue({
+      isFailure: false,
+      body: {
+        id: 'piece-1',
+        title: 'Peça de teste',
+        currentVersionId: 'version-1',
+        versions: [{ id: 'version-1', versionNumber: 1 }],
+        generation: { id: 'generation-1', status: 'completed' },
+      },
+    })
+
+    renderDialogWithServices({ getDocument, generateDocument })
+    await screen.findByText('Modelo Universal')
+    fireEvent.click(screen.getByRole('button', { name: /Próximo/i }))
+    fireEvent.click(
+      await screen.findByRole('checkbox', {
+        name: 'Selecionar RG — Documento de Identidade',
+      }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar minuta com IA' }))
+
+    await screen.findByRole('heading', { name: 'Minuta pronta para revisão' })
+
+    const footer = screen.getByRole('button', { name: 'Voltar para peças' }).parentElement
+    expect(footer?.className).toContain('sm:flex-row')
+    expect(footer?.className).toContain('w-full')
+    expect(
+      screen.getAllByRole('button').map((button) => button.textContent?.trim()),
+    ).not.toContain('Fechar e continuar em segundo plano')
+  })
 })

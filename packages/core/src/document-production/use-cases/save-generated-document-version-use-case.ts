@@ -57,6 +57,9 @@ export class SaveGeneratedDocumentVersionUseCase
     const latestVersion = await this.versionsRepository.findLatestByDocumentId(
       generation.documentId,
     )
+    const sourceDocumentVersionId = generation.source.data.baseDocumentVersionId
+    const hasSourceDocumentVersionId =
+      typeof sourceDocumentVersionId === 'string' && sourceDocumentVersionId.length > 0
     const versionNumber = (latestVersion?.versionNumber ?? 0) + 1
     const exportedFile = await this.documentFileExporter.export({
       title: generation.template.name,
@@ -75,6 +78,9 @@ export class SaveGeneratedDocumentVersionUseCase
       return await this.versionsRepository.add({
         documentId: generation.documentId,
         documentGenerationId: generation.id,
+        ...(hasSourceDocumentVersionId
+          ? { sourceDocumentVersionId: sourceDocumentVersionId as string }
+          : {}),
         fileId: file.id,
         storagePath: file.filePath,
         versionNumber,

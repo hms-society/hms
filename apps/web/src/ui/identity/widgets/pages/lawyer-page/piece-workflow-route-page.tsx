@@ -2,11 +2,22 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Checkbox } from '@/ui/shadcn/checkbox'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/shadcn/alert-dialog'
 import { DocumentEditor } from '@/ui/document-production/widgets/components/document-editor'
 import { PendingVariableValuesDialog } from './pending-variable-values-dialog'
 import { PieceFilePreview } from './piece-file-preview'
 import { VersionHistory } from './version-history'
 import { ReviewActionDialog } from './my-case-page/case-pieces-tab/piece-workflow-dialog'
+import { ElaborateDocumentVersionDialog } from './elaborate-document-version-dialog'
 import {
   type PieceWorkflowRoutePageMode,
   usePieceWorkflowRoutePage,
@@ -51,16 +62,25 @@ export function PieceWorkflowRoutePage({
     casePublicCode,
     isDocumentError,
     isLoadingDocument,
+    isReadOnlyVersion,
+    isDiscardEditsDialogOpen,
     isAuthor,
     isCheckingReviewer,
     isPendingVariableDialogOpen,
+    isVersionDialogOpen,
+    isGeneratingRevision,
+    versionActionError,
     isReviewConfirmed,
     reviewAction,
     pendingVariables,
+    currentVersion,
     saveState,
     version,
     handleBackToCase,
     handleChangeContent,
+    handleSelectVersion,
+    handleCancelDiscardEdits,
+    handleConfirmDiscardEdits,
     handleEditorReady,
     handleOpenPendingVariableDialog,
     handlePendingVariableDialogOpenChange,
@@ -70,6 +90,11 @@ export function PieceWorkflowRoutePage({
     handleOpenReview,
     handleOpenReviewAction,
     handleReviewConfirmationChange,
+    handleOpenVersionDialog,
+    handleVersionDialogOpenChange,
+    handleStartManualVersion,
+    handleGenerateRevision,
+    handleSaveNewVersion,
   } = usePieceWorkflowRoutePage({ mode, caseId, documentId })
 
   if (isLoadingDocument) {
@@ -117,9 +142,11 @@ export function PieceWorkflowRoutePage({
               <Badge variant={isReview ? 'info' : 'attention'}>
                 {isReview
                   ? `Em revisão · v${version.versionNumber}`
-                  : adjustmentsRequested
-                    ? `Ajustes solicitados · v${version.versionNumber}`
-                    : `Em elaboração · v${version.versionNumber}`}
+                  : isReadOnlyVersion
+                    ? `Somente leitura · v${version.versionNumber}`
+                    : adjustmentsRequested
+                      ? `Ajustes solicitados · v${version.versionNumber}`
+                      : `Em elaboração · v${version.versionNumber}`}
               </Badge>
             </div>
           </div>
@@ -137,22 +164,39 @@ export function PieceWorkflowRoutePage({
                   : saveState === 'error'
                     ? 'Falha ao salvar'
                     : editedContent
-                      ? 'Salvo automaticamente'
+                      ? 'Alterações não salvas'
                       : 'Versão carregada'}
               </span>
-              <Button variant='outline' size='sm' disabled>
+              <Button variant='outline' size='sm' onClick={handleOpenVersionDialog}>
                 <Icon name='history' /> Versões
               </Button>
-              <Button
-                size='sm'
-                disabled={saveState !== 'saved'}
-                onClick={handleOpenReview}
-              >
-                <Icon name='eye' />
-                {adjustmentsRequested
-                  ? 'Resubmeter para revisão'
-                  : 'Submeter para revisão'}
-              </Button>
+              {editedContent ? (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  disabled={saveState === 'saving'}
+                  onClick={handleSaveNewVersion}
+                >
+                  {saveState === 'saving' ? (
+                    <Icon name='refresh-cw' className='animate-spin' />
+                  ) : (
+                    <Icon name='check' />
+                  )}
+                  {saveState === 'saving' ? 'Salvando versão…' : 'Salvar nova versão'}
+                </Button>
+              ) : null}
+              {!isReadOnlyVersion ? (
+                <Button
+                  size='sm'
+                  disabled={saveState !== 'saved'}
+                  onClick={handleOpenReview}
+                >
+                  <Icon name='eye' />
+                  {adjustmentsRequested
+                    ? 'Resubmeter para revisão'
+                    : 'Submeter para revisão'}
+                </Button>
+              ) : null}
             </>
           )}
         </div>
@@ -161,7 +205,11 @@ export function PieceWorkflowRoutePage({
       {isReview ? (
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_minmax(280px,320px)]'>
           <div className='min-w-0'>
-            <VersionHistory versions={document.versions} currentVersionId={version.id} />
+            <VersionHistory
+              versions={document.versions}
+              currentVersionId={currentVersion?.id ?? version.id}
+              selectedVersionId={version.id}
+            />
           </div>
           <div className='min-w-0 overflow-y-auto bg-muted/50 p-4 sm:p-6'>
             <div className='mx-auto max-w-[900px] overflow-hidden rounded-lg border bg-card shadow-sm'>
@@ -266,7 +314,12 @@ export function PieceWorkflowRoutePage({
       ) : (
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[240px_minmax(0,1fr)_minmax(280px,300px)]'>
           <div className='min-w-0'>
-            <VersionHistory versions={document.versions} currentVersionId={version.id} />
+            <VersionHistory
+              versions={document.versions}
+              currentVersionId={currentVersion?.id ?? version.id}
+              selectedVersionId={version.id}
+              onSelectVersion={handleSelectVersion}
+            />
           </div>
           <div className='min-w-0 overflow-y-auto bg-muted/50 p-4 sm:p-6'>
             <div className='mx-auto max-w-[900px] overflow-hidden rounded-lg border bg-card shadow-sm'>
@@ -274,6 +327,7 @@ export function PieceWorkflowRoutePage({
                 <DocumentEditor
                   content={currentContent}
                   onChange={handleChangeContent}
+                  editable={!isReadOnlyVersion}
                   onEditorReady={handleEditorReady}
                   ariaLabel='Conteúdo da peça jurídica'
                   highlightedTerms={pendingVariables.map((variable) => variable.marker)}
@@ -338,7 +392,7 @@ export function PieceWorkflowRoutePage({
                   <Button
                     size='sm'
                     variant='outline'
-                    disabled={!editorActions}
+                    disabled={!editorActions || isReadOnlyVersion}
                     onClick={handleOpenPendingVariableDialog}
                   >
                     <Icon name='pencil' /> Inserir valores
@@ -374,9 +428,20 @@ export function PieceWorkflowRoutePage({
                 Não foi possível salvar as alterações no banco. Tente editar novamente.
               </p>
             ) : null}
-            <Button variant='outline' className='mt-5 w-full' onClick={handleOpenReview}>
-              Abrir revisão técnica
-            </Button>
+            {!isReadOnlyVersion ? (
+              <Button
+                variant='outline'
+                className='mt-5 w-full'
+                onClick={handleOpenReview}
+              >
+                Abrir revisão técnica
+              </Button>
+            ) : (
+              <p className='mt-5 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground'>
+                Esta versão está em modo de leitura. Use “Versões” para elaborar uma nova
+                versão baseada nela.
+              </p>
+            )}
           </aside>
         </section>
       )}
@@ -406,6 +471,45 @@ export function PieceWorkflowRoutePage({
           variables={pendingVariables}
           onOpenChange={handlePendingVariableDialogOpenChange}
           onApply={handleApplyPendingVariableValues}
+        />
+      ) : null}
+      {!isReview ? (
+        <AlertDialog
+          open={isDiscardEditsDialogOpen}
+          onOpenChange={(open) => !open && handleCancelDiscardEdits()}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Descartar alterações não salvas?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Ao alternar para outra versão, as alterações atuais serão descartadas. A
+                versão salva no histórico não será modificada.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelDiscardEdits}>
+                Continuar editando
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant='destructive'
+                onClick={handleConfirmDiscardEdits}
+              >
+                Descartar e alternar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : null}
+      {!isReview ? (
+        <ElaborateDocumentVersionDialog
+          open={isVersionDialogOpen}
+          versions={document.versions}
+          currentVersionId={currentVersion?.id ?? version.id}
+          isGenerating={isGeneratingRevision}
+          error={versionActionError}
+          onOpenChange={handleVersionDialogOpenChange}
+          onStartManual={handleStartManualVersion}
+          onGenerateWithAi={handleGenerateRevision}
         />
       ) : null}
     </main>

@@ -3,7 +3,7 @@ import {
   DocumentReviewFindingCategory,
 } from '@hms/core/document-production/domain/structures'
 import { FindDocumentPendingMarkersUseCase } from '@hms/core/document-production/use-cases'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import {
@@ -11,6 +11,7 @@ import {
   DocumentWriterAgent,
 } from '@/document-production/ai/mastra/agents'
 import { ReviewDocumentCycleTool } from '@/document-production/ai/mastra/tools/review-document-cycle-tool'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 describe('ReviewDocumentCycleTool', () => {
   let writerGenerate: ReturnType<typeof vi.fn>
@@ -24,6 +25,7 @@ describe('ReviewDocumentCycleTool', () => {
   }
 
   beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => undefined)
     writerOutput = {
       blocks: [
         { kind: 'heading1', runs: [{ text: 'Requerimento', marks: [] }] },
@@ -45,11 +47,14 @@ describe('ReviewDocumentCycleTool', () => {
     findPendingMarkers = vi.fn().mockResolvedValue([{ marker: '{nome_requerente}' }])
   })
 
+  afterEach(() => vi.restoreAllMocks())
+
   it('converts the flat AI draft into validated Tiptap before review', async () => {
     const tool = new ReviewDocumentCycleTool(
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     const result = await tool.function.execute({
@@ -117,6 +122,13 @@ describe('ReviewDocumentCycleTool', () => {
     })
     expect(result.draft.content.type).toBe('doc')
     expect(reviewerGenerate).toHaveBeenCalledOnce()
+    const [logLabel, serializedResponse] = vi.mocked(console.log).mock.calls[0] ?? []
+    expect(logLabel).toBe('[document-generation] writer AI response')
+    expect(JSON.parse(String(serializedResponse))).toEqual({
+      documentGenerationId: '00000000-0000-4000-8000-000000000001',
+      attempt: 1,
+      output: writerOutput,
+    })
   })
 
   it('retries the review once when structured output validation fails', async () => {
@@ -131,6 +143,7 @@ describe('ReviewDocumentCycleTool', () => {
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     await tool.function.execute({
@@ -148,6 +161,56 @@ describe('ReviewDocumentCycleTool', () => {
     expect(reviewerGenerate.mock.calls[0]?.[0]).toContain('approved')
     expect(reviewerGenerate.mock.calls[0]?.[0]).toContain('changes_required')
     expect(reviewerGenerate.mock.calls[1]?.[0]).toContain('Return decision as exactly')
+  })
+
+  it('does not log generated legal content outside local development', async () => {
+    const tool = new ReviewDocumentCycleTool(
+      { generate: writerGenerate } as unknown as DocumentWriterAgent,
+      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
+      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('stg'),
+    )
+
+    await tool.function.execute({
+      documentGenerationId: '00000000-0000-4000-8000-000000000001',
+      source: { type: 'case', id: 'case-1', data: {} },
+      template: {
+        name: 'Modelo previdenciário',
+        content: { type: 'doc', content: [] },
+        variables: [],
+      },
+      attemptsCount: 0,
+    })
+
+    expect(console.log).not.toHaveBeenCalled()
+  })
+
+  it('logs a null structured response in local development before failing clearly', async () => {
+    writerGenerate.mockResolvedValueOnce({ object: undefined })
+    const tool = new ReviewDocumentCycleTool(
+      { generate: writerGenerate } as unknown as DocumentWriterAgent,
+      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
+      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
+    )
+
+    await expect(
+      tool.function.execute({
+        documentGenerationId: '00000000-0000-4000-8000-000000000001',
+        source: { type: 'case', id: 'case-1', data: {} },
+        template: {
+          name: 'Modelo previdenciário',
+          content: { type: 'doc', content: [] },
+          variables: [],
+        },
+        attemptsCount: 0,
+      }),
+    ).rejects.toThrow('O agente redator não retornou um documento válido.')
+
+    const [, serializedResponse] = vi.mocked(console.log).mock.calls[0] ?? []
+    expect(JSON.parse(String(serializedResponse))).toEqual(
+      expect.objectContaining({ output: null, attempt: 1 }),
+    )
   })
 
   it('approves a draft when the only review finding is a placeholder for missing source data', async () => {
@@ -170,6 +233,7 @@ describe('ReviewDocumentCycleTool', () => {
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     const result = await tool.function.execute({
@@ -216,6 +280,7 @@ describe('ReviewDocumentCycleTool', () => {
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     const result = await tool.function.execute({
@@ -263,6 +328,7 @@ describe('ReviewDocumentCycleTool', () => {
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     const result = await tool.function.execute({
@@ -298,6 +364,7 @@ describe('ReviewDocumentCycleTool', () => {
       { generate: writerGenerate } as unknown as DocumentWriterAgent,
       { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
       { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
+      createEnvProvider('dev'),
     )
 
     await expect(
@@ -316,3 +383,9 @@ describe('ReviewDocumentCycleTool', () => {
     expect(reviewerGenerate).toHaveBeenCalledOnce()
   })
 })
+
+function createEnvProvider(mode: 'dev' | 'stg' | 'prod') {
+  return {
+    get: (key: string) => (key === 'HMS_SERVER_APP_MODE' ? mode : undefined),
+  } as EnvProvider
+}

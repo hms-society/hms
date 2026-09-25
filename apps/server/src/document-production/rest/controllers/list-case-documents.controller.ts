@@ -4,10 +4,7 @@ import {
   HttpStatus,
   Inject,
   Logger,
-  ForbiddenException,
   NotFoundException,
-  Body,
-  Patch,
   Param,
   ParseUUIDPipe,
   StreamableFile,
@@ -22,20 +19,12 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
-import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
-import {
-  FindDocumentPendingMarkersUseCase,
-  ListCaseDocumentsUseCase,
-} from '@hms/core/document-production/use-cases'
-import { documentTemplateContentSchema } from '@hms/validation/document-production'
-import { ZodValidationPipe } from 'nestjs-zod'
+import { ListCaseDocumentsUseCase } from '@hms/core/document-production/use-cases'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { CaseDocumentResponseDto } from '@/document-production/rest/dtos'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
-import { CurrentCollaborator } from '@/identity/decorators'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 
@@ -46,7 +35,6 @@ import type { StorageProvider } from '@hms/core/shared/interfaces'
 export class ListCaseDocumentsController {
   private readonly logger = new Logger(ListCaseDocumentsController.name)
   private readonly useCase: ListCaseDocumentsUseCase
-  private readonly versions: DocumentVersionsRepository
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases) cases: LegalCasesRepository,
@@ -61,7 +49,6 @@ export class ListCaseDocumentsController {
     generations: DocumentGenerationsRepository,
     @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
   ) {
-    this.versions = versions
     this.useCase = new ListCaseDocumentsUseCase(
       cases,
       packages,
@@ -82,9 +69,11 @@ export class ListCaseDocumentsController {
     const item = (await this.useCase.execute({ caseId })).find(
       ({ document }) => document.id === documentId,
     )
-    const version =
-      item?.versions.find(({ id }) => id === item.document.currentVersionId) ??
-      item?.versions.at(-1)
+    const version = item?.versions.reduce<(typeof item.versions)[number] | undefined>(
+      (latest, candidate) =>
+        !latest || candidate.versionNumber > latest.versionNumber ? candidate : latest,
+      undefined,
+    )
     if (!version?.storagePath) {
       this.logger.warn(
         `Versão ${version?.id ?? 'inexistente'} sem storagePath para peça ${documentId}`,
@@ -121,38 +110,5 @@ export class ListCaseDocumentsController {
       ({ document: item }) => item.id === documentId,
     )
     return document ? CaseDocumentResponseDto.fromDomain(document) : undefined
-  }
-
-  @Patch(':caseId/documents/:documentId/versions/:versionId')
-  async saveEditedContent(
-    @Param('caseId', new ParseUUIDPipe()) caseId: string,
-    @Param('documentId', new ParseUUIDPipe()) documentId: string,
-    @Param('versionId', new ParseUUIDPipe()) versionId: string,
-    @Body(new ZodValidationPipe(documentTemplateContentSchema))
-    content: DocumentTemplateContent,
-    @CurrentCollaborator() collaborator: CollaboratorSummary,
-  ) {
-    const item = (await this.useCase.execute({ caseId })).find(
-      ({ document }) => document.id === documentId,
-    )
-    if (!item?.versions.some(({ id }) => id === versionId)) {
-      throw new NotFoundException('Versão da peça não encontrada neste caso.')
-    }
-
-    const pendingMarkers = await new FindDocumentPendingMarkersUseCase().execute({
-      content,
-    })
-    const version = await this.versions.saveEditableContent(
-      versionId,
-      collaborator.collaboratorId,
-      content,
-      pendingMarkers,
-    )
-    if (!version) {
-      throw new ForbiddenException(
-        'Somente o autor pode editar uma versão ainda não revisada.',
-      )
-    }
-    return { savedAt: new Date().toISOString(), versionId }
   }
 }

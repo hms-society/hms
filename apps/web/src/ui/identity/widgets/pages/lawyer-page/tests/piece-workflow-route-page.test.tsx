@@ -29,6 +29,7 @@ const usePieceWorkflowRoutePageMock = vi.mocked(usePieceWorkflowRoutePage)
 
 const DOCUMENT_ID = 'document-id'
 const VERSION_ID = 'version-id'
+const OLDER_VERSION_ID = 'older-version-id'
 const CASE_ID = 'case-id'
 
 function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
@@ -49,8 +50,27 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     },
     versions: [
       {
-        id: VERSION_ID,
+        id: OLDER_VERSION_ID,
         versionNumber: 1,
+        source: 'ai',
+        status: 'approved',
+        createdAt: '2026-09-24T12:00:00.000Z',
+        createdByCollaboratorId: 'previous-author-id',
+        storagePath: 'generated/document-v1.pdf',
+        content: {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Conteúdo anterior.' }],
+            },
+          ],
+        } as unknown as DocumentTemplateContent,
+        pendingVariables: [],
+      },
+      {
+        id: VERSION_ID,
+        versionNumber: 2,
         source: 'ai',
         status: 'in_review',
         createdAt: '2026-09-25T12:00:00.000Z',
@@ -94,19 +114,28 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     editorActions: null,
     isDocumentError: false,
     isLoadingDocument: false,
+    isReadOnlyVersion: false,
+    isDiscardEditsDialogOpen: false,
     isAuthor: false,
     isCheckingReviewer: false,
     isPendingVariableDialogOpen: false,
+    isVersionDialogOpen: false,
+    isGeneratingRevision: false,
+    versionActionError: undefined,
     isReviewConfirmed: false,
     mode: 'editor',
-    pendingVariables: document.versions[0].pendingVariables,
+    pendingVariables: document.versions[1].pendingVariables,
     saveState: 'saved',
     reviewAction: null,
-    version: document.versions[0],
+    currentVersion: document.versions[1],
+    version: document.versions[1],
     caseId: CASE_ID,
     casePublicCode: 'CASO-20260925-0002',
     handleBackToCase: vi.fn(),
     handleChangeContent: vi.fn(),
+    handleSelectVersion: vi.fn(),
+    handleCancelDiscardEdits: vi.fn(),
+    handleConfirmDiscardEdits: vi.fn(),
     handleEditorReady: vi.fn(),
     handleOpenPendingVariableDialog: vi.fn(),
     handlePendingVariableDialogOpenChange: vi.fn(),
@@ -116,6 +145,11 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     handleOpenReview: vi.fn(),
     handleOpenReviewAction: vi.fn(),
     handleReviewConfirmationChange: vi.fn(),
+    handleOpenVersionDialog: vi.fn(),
+    handleVersionDialogOpenChange: vi.fn(),
+    handleStartManualVersion: vi.fn(),
+    handleGenerateRevision: vi.fn(),
+    handleSaveNewVersion: vi.fn(),
   }
 }
 
@@ -135,6 +169,7 @@ beforeEach(() => {
     )
     const [editorActions, setEditorActions] = useState<DocumentEditorActions | null>(null)
     const [isPendingVariableDialogOpen, setPendingVariableDialogOpen] = useState(false)
+    const [isVersionDialogOpen, setVersionDialogOpen] = useState(false)
     const currentContent = editedContent ?? pageState.version?.content
     const serializedContent = currentContent ? JSON.stringify(currentContent) : ''
     const pendingVariables =
@@ -147,14 +182,26 @@ beforeEach(() => {
       editedContent,
       editorActions,
       isPendingVariableDialogOpen,
+      isVersionDialogOpen,
+      isGeneratingRevision: false,
+      versionActionError: undefined,
       pendingVariables,
-      handleChangeContent: setEditedContent,
+      handleChangeContent: (content) => {
+        if (JSON.stringify(content) !== JSON.stringify(pageState.version?.content)) {
+          setEditedContent(content)
+        }
+      },
       handleEditorReady: setEditorActions,
       handleOpenPendingVariableDialog: () => setPendingVariableDialogOpen(true),
       handlePendingVariableDialogOpenChange: setPendingVariableDialogOpen,
       handleApplyPendingVariableValues: (replacements) => {
         editorActions?.replacePendingMarkers(replacements)
       },
+      handleOpenVersionDialog: async () => setVersionDialogOpen(true),
+      handleVersionDialogOpenChange: setVersionDialogOpen,
+      handleStartManualVersion: vi.fn(),
+      handleGenerateRevision: vi.fn(),
+      handleSaveNewVersion: vi.fn(),
     }
   })
 })
@@ -211,6 +258,31 @@ describe('PieceWorkflowRoutePage', () => {
         .textContent?.includes('Períodos: {periodos_contributivos}'),
     ).toBe(true)
     await waitFor(() => expect(screen.queryByTestId('piece-file-preview')).toBeNull())
+  })
+
+  it('opens version actions from the Versões button', () => {
+    render(
+      <PieceWorkflowRoutePage mode='editor' caseId={CASE_ID} documentId={DOCUMENT_ID} />,
+    )
+    expect(screen.getByText('(Atual)')).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Versões' }))
+    expect(screen.getByRole('heading', { name: 'Elaborar nova versão' })).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Edição manual/ })).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Geração por IA/ })).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Abrir no editor' })).not.toBeNull()
+  })
+
+  it('lets the user select a version from the history list', () => {
+    const pageState = buildPageState()
+    usePieceWorkflowRoutePageMock.mockReturnValue(pageState)
+
+    render(
+      <PieceWorkflowRoutePage mode='editor' caseId={CASE_ID} documentId={DOCUMENT_ID} />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Visualizar versão v1' }))
+
+    expect(pageState.handleSelectVersion).toHaveBeenCalledWith(OLDER_VERSION_ID)
   })
 
   it('opens the pending-values dialog and replaces all matching markers in the piece', async () => {

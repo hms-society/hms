@@ -94,15 +94,26 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
   ): Promise<RestResponse<CaseDocumentResponse>> {
     return restClient.get(`/cases/${caseId}/documents/${documentId}`)
   },
-  saveEditedContent(
+  saveManualVersion(
     caseId: string,
     documentId: string,
-    versionId: string,
+    sourceVersionId: string,
     content: DocumentTemplateContent,
-  ): Promise<RestResponse<{ savedAt: string; versionId: string }>> {
-    return restClient.patch(
-      `/cases/${caseId}/documents/${documentId}/versions/${versionId}`,
-      content,
+  ): Promise<RestResponse<{ id: string }>> {
+    return restClient.post(
+      `/cases/${caseId}/documents/${documentId}/versions/${sourceVersionId}/manual`,
+      { content },
+    )
+  },
+  generateRevision(
+    caseId: string,
+    documentId: string,
+    sourceVersionId: string,
+    instructions: string,
+  ): Promise<RestResponse<{ documentGenerationId: string; documentId: string }>> {
+    return restClient.post(
+      `/cases/${caseId}/documents/${documentId}/versions/${sourceVersionId}/generations`,
+      { instructions },
     )
   },
   getDocumentFile(caseId: string, documentId: string): Promise<RestResponse<Blob>> {

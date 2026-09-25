@@ -1,19 +1,16 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
-import type { CaseDocumentResponse } from '@/rest/services/case-document-production-service'
-import { RestResponse } from '@hms/core/shared/responses/rest-response'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import type {
   DocumentEditorActions,
   PendingMarkerReplacement,
 } from '@/ui/document-production/widgets/components/document-editor'
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
-import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export type PieceWorkflowRoutePageMode = 'editor' | 'review'
-
 export type UsePieceWorkflowRoutePageProps = {
   mode: PieceWorkflowRoutePageMode
   caseId: string
@@ -35,25 +32,26 @@ export function usePieceWorkflowRoutePage({
   >(null)
   const [isReviewConfirmed, setIsReviewConfirmed] = useState(false)
   const [editedContent, setEditedContent] = useState<DocumentTemplateContent | null>(null)
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
+  const [versionIdToSelectAfterDiscard, setVersionIdToSelectAfterDiscard] = useState<
+    string | null
+  >(null)
+  const [isDiscardEditsDialogOpen, setIsDiscardEditsDialogOpen] = useState(false)
+  const [editingSourceVersionId, setEditingSourceVersionId] = useState<string | null>(
+    null,
+  )
   const [editorActions, setEditorActions] = useState<DocumentEditorActions | null>(null)
   const [isPendingVariableDialogOpen, setIsPendingVariableDialogOpen] = useState(false)
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false)
+  const [isGeneratingRevision, setIsGeneratingRevision] = useState(false)
+  const [versionActionError, setVersionActionError] = useState<string | undefined>()
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
-  const lastSavedContent = useRef<string | null>(null)
-  const saveSequence = useRef(0)
-  const saveQueue = useRef<Promise<void>>(Promise.resolve())
-  const saveTimeout = useRef<number | null>(null)
-  const isMounted = useRef(true)
-  const pendingSave = useRef<{
-    content: DocumentTemplateContent
-    versionId: string
-  } | null>(null)
-  const persistEditedContentRef = useRef(persistEditedContent)
-  const documentQueryKey = ['case-document', caseId, documentId] as const
   const {
     data: documentResponse,
     error: documentError,
     isError: isDocumentError,
     isLoading: isLoadingDocument,
+    refetch: refetchDocument,
   } = useQuery({
     queryKey: ['case-document', caseId, documentId],
     queryFn: () => caseDocumentProductionService.getDocument(caseId, documentId),
@@ -67,197 +65,250 @@ export function usePieceWorkflowRoutePage({
     },
   })
   const document = documentResponse?.body
+  const currentVersion = document?.versions.reduce<
+    (typeof document.versions)[number] | undefined
+  >(
+    (latest, candidate) =>
+      !latest || candidate.versionNumber > latest.versionNumber ? candidate : latest,
+    undefined,
+  )
   const version =
-    document?.versions.find((item) => item.id === document.currentVersionId) ??
-    document?.versions.at(-1)
+    document?.versions.find((item) => item.id === selectedVersionId) ?? currentVersion
+  const isReadOnlyVersion = Boolean(
+    mode === 'editor' && version && currentVersion && version.id !== currentVersion.id,
+  )
+  const editingSourceVersion = document?.versions.find(
+    (item) => item.id === editingSourceVersionId,
+  )
   const currentContent = editedContent ?? version?.content
   const serializedContent = currentContent ? JSON.stringify(currentContent) : ''
   const pendingVariables =
-    version?.pendingVariables.filter((variable) =>
+    version?.pendingVariables?.filter((variable) =>
       serializedContent.includes(variable.marker),
     ) ?? []
   const isAuthor = Boolean(
     version && currentCollaborator?.collaboratorId === version.createdByCollaboratorId,
   )
 
-  useEffect(() => {
-    if (!editedContent || !version || mode !== 'editor') return
-    pendingSave.current = { content: editedContent, versionId: version.id }
-  }, [editedContent, mode, version])
+  function serializeComparableContent(content: DocumentTemplateContent) {
+    function normalize(value: unknown): unknown {
+      if (Array.isArray(value)) return value.map(normalize)
+      if (typeof value !== 'object' || value === null) return value
 
-  useEffect(() => {
-    isMounted.current = true
-    return () => {
-      isMounted.current = false
-      const unsavedContent = pendingSave.current
-      if (
-        !unsavedContent ||
-        JSON.stringify(unsavedContent.content) === lastSavedContent.current
-      )
-        return
-      if (saveTimeout.current !== null) window.clearTimeout(saveTimeout.current)
-      saveTimeout.current = null
-      void persistEditedContentRef.current(
-        unsavedContent.content,
-        unsavedContent.versionId,
-        ++saveSequence.current,
-      )
+      const normalizedEntries = Object.entries(value as Record<string, unknown>)
+        .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))
+        .flatMap(([key, entryValue]) => {
+          if (key === 'attrs' && typeof entryValue === 'object' && entryValue !== null) {
+            const attributes = Object.fromEntries(
+              Object.entries(entryValue as Record<string, unknown>).filter(
+                ([attribute, attributeValue]) =>
+                  attributeValue !== null &&
+                  attributeValue !== undefined &&
+                  !(attribute === 'start' && attributeValue === 1),
+              ),
+            )
+            return Object.keys(attributes).length ? [[key, normalize(attributes)]] : []
+          }
+          return [[key, normalize(entryValue)]]
+        })
+
+      return Object.fromEntries(normalizedEntries)
     }
-  }, [])
 
-  persistEditedContentRef.current = persistEditedContent
+    return JSON.stringify(normalize(content))
+  }
 
-  useEffect(() => {
-    if (!editedContent || !version || mode !== 'editor') return
-    const serialized = JSON.stringify(editedContent)
-    if (serialized === lastSavedContent.current) return
-
-    const sequence = ++saveSequence.current
+  async function saveManualVersion(
+    content: DocumentTemplateContent,
+    sourceVersionId: string,
+  ) {
     setSaveState('saving')
-    const timeout = window.setTimeout(() => {
-      saveTimeout.current = null
-      void persistEditedContentRef.current(editedContent, version.id, sequence)
-    }, 700)
-    saveTimeout.current = timeout
-
-    return () => {
-      window.clearTimeout(timeout)
-      if (saveTimeout.current === timeout) saveTimeout.current = null
+    const response = await caseDocumentProductionService.saveManualVersion(
+      caseId,
+      documentId,
+      sourceVersionId,
+      content,
+    )
+    if (response.isFailure) {
+      setSaveState('error')
+      return null
     }
-  }, [editedContent, mode, version])
+    const savedVersionId = response.body.id
+    setEditedContent(null)
+    setEditingSourceVersionId(null)
+    setSelectedVersionId(savedVersionId)
+    setSaveState('saved')
+    await queryClient.invalidateQueries({
+      queryKey: ['case-document', caseId, documentId],
+    })
+    await refetchDocument()
+    return savedVersionId
+  }
 
   async function handleBackToCase() {
-    if (mode === 'editor' && editedContent && version) {
-      if (saveTimeout.current !== null) {
-        window.clearTimeout(saveTimeout.current)
-        saveTimeout.current = null
-      }
-
-      const sequence = ++saveSequence.current
-      setSaveState('saving')
-      const didSave = await persistEditedContent(editedContent, version.id, sequence)
-      if (!didSave) return
+    if (mode === 'editor' && editedContent && editingSourceVersionId) {
+      if (!(await saveManualVersion(editedContent, editingSourceVersionId))) return
     }
-
     await navigateTo('lawyerCaseDetails', { params: { caseId } })
   }
 
-  function handleOpenReview() {
-    void navigateTo('lawyerCasePieceReview', {
-      params: { caseId, documentId },
-    })
+  async function handleOpenReview() {
+    if (editedContent && editingSourceVersionId) {
+      if (!(await saveManualVersion(editedContent, editingSourceVersionId))) return
+    }
+    void navigateTo('lawyerCasePieceReview', { params: { caseId, documentId } })
   }
-
   function handleCloseReviewAction() {
     setReviewAction(null)
   }
-
   function handleConfirmReviewAction() {
     if (isAuthor) return
-    if (reviewAction === 'adjustments') {
+    if (reviewAction === 'adjustments')
       void navigateTo('lawyerCasePieceEditor', {
         params: { caseId, documentId },
         search: { reviewState: 'adjustments_requested' },
       })
-    }
     setReviewAction(null)
   }
-
   function handleOpenReviewAction(action: 'adjustments' | 'block' | 'approval') {
-    if (isAuthor) return
-    setReviewAction(action)
+    if (!isAuthor) setReviewAction(action)
   }
-
   function handleReviewConfirmationChange(confirmed: boolean) {
     setIsReviewConfirmed(confirmed)
   }
-
   function handleChangeContent(content: DocumentTemplateContent) {
+    const baseContent = editingSourceVersion?.content ?? version?.content
+    if (
+      baseContent &&
+      serializeComparableContent(content) === serializeComparableContent(baseContent)
+    ) {
+      setEditedContent(null)
+      setEditingSourceVersionId(null)
+      setSaveState('saved')
+      return
+    }
+    if (!editingSourceVersionId && version) setEditingSourceVersionId(version.id)
     setEditedContent(content)
+    setSaveState('saved')
   }
-
-  async function persistEditedContent(
-    content: DocumentTemplateContent,
-    versionId: string,
-    sequence: number,
-  ) {
-    const serialized = JSON.stringify(content)
-    const saveOperation = saveQueue.current
-      .catch(() => undefined)
-      .then(async () => {
-        if (serialized === lastSavedContent.current) return true
-
-        try {
-          const response = await caseDocumentProductionService.saveEditedContent(
-            caseId,
-            documentId,
-            versionId,
-            content,
-          )
-          if (response.isFailure) {
-            if (isMounted.current && sequence === saveSequence.current)
-              setSaveState('error')
-            return false
-          }
-
-          lastSavedContent.current = serialized
-          if (
-            pendingSave.current &&
-            JSON.stringify(pendingSave.current.content) === serialized
-          )
-            pendingSave.current = null
-          const cachedResponse =
-            queryClient.getQueryData<RestResponse<CaseDocumentResponse>>(documentQueryKey)
-          if (cachedResponse && !cachedResponse.isFailure) {
-            const cachedDocument = cachedResponse.body
-            const updatedDocument: CaseDocumentResponse = {
-              ...cachedDocument,
-              versions: cachedDocument.versions.map((item) =>
-                item.id === versionId ? { ...item, content } : item,
-              ),
-            }
-            queryClient.setQueryData(
-              documentQueryKey,
-              new RestResponse({
-                body: updatedDocument,
-                statusCode: cachedResponse.statusCode,
-                headers: cachedResponse.headers,
-              }),
-            )
-          }
-          if (isMounted.current && sequence === saveSequence.current)
-            setSaveState('saved')
-          return true
-        } catch {
-          if (isMounted.current && sequence === saveSequence.current)
-            setSaveState('error')
-          return false
-        }
-      })
-    saveQueue.current = saveOperation.then(
-      () => undefined,
-      () => undefined,
-    )
-    return saveOperation
+  function handleSelectVersion(versionId: string) {
+    if (versionId === version?.id) return
+    if (editedContent && editingSourceVersionId) {
+      setVersionIdToSelectAfterDiscard(versionId)
+      setIsDiscardEditsDialogOpen(true)
+      return
+    }
+    setSelectedVersionId(versionId)
+    setEditedContent(null)
+    setEditingSourceVersionId(null)
+    setSaveState('saved')
   }
-
-  const handleEditorReady = useCallback((actions: DocumentEditorActions) => {
-    setEditorActions(actions)
-  }, [])
-
+  function handleCancelDiscardEdits() {
+    setIsDiscardEditsDialogOpen(false)
+    setVersionIdToSelectAfterDiscard(null)
+  }
+  function handleConfirmDiscardEdits() {
+    if (versionIdToSelectAfterDiscard) {
+      setSelectedVersionId(versionIdToSelectAfterDiscard)
+      setEditedContent(null)
+      setEditingSourceVersionId(null)
+      setSaveState('saved')
+    }
+    handleCancelDiscardEdits()
+  }
+  const handleEditorReady = useCallback(
+    (actions: DocumentEditorActions) => setEditorActions(actions),
+    [],
+  )
   function handleOpenPendingVariableDialog() {
     setIsPendingVariableDialogOpen(true)
   }
-
   function handlePendingVariableDialogOpenChange(open: boolean) {
     setIsPendingVariableDialogOpen(open)
   }
-
   function handleApplyPendingVariableValues(
     replacements: readonly PendingMarkerReplacement[],
   ) {
     editorActions?.replacePendingMarkers(replacements)
     setIsPendingVariableDialogOpen(false)
+  }
+  async function handleOpenVersionDialog() {
+    setVersionActionError(undefined)
+    if (editedContent && editingSourceVersionId) {
+      const savedVersionId = await saveManualVersion(
+        editedContent,
+        editingSourceVersionId,
+      )
+      if (!savedVersionId) return
+    }
+    setIsVersionDialogOpen(true)
+  }
+  function handleStartManualVersion(sourceVersionId: string) {
+    if (editedContent) {
+      setVersionActionError(
+        'Salve as alterações atuais como nova versão antes de iniciar outra edição.',
+      )
+      return
+    }
+    const sourceVersion = document?.versions.find((item) => item.id === sourceVersionId)
+    if (sourceVersionId !== currentVersion?.id) {
+      setVersionActionError('Somente a versão atual pode ser aberta para edição manual.')
+      return
+    }
+    if (!sourceVersion?.content) {
+      setVersionActionError(
+        'Esta versão não possui conteúdo estruturado para edição manual.',
+      )
+      return
+    }
+    setEditingSourceVersionId(sourceVersionId)
+    setSelectedVersionId(sourceVersionId)
+    setSaveState('saved')
+    setIsVersionDialogOpen(false)
+  }
+  async function handleGenerateRevision(sourceVersionId: string, instructions: string) {
+    let revisionSourceVersionId = sourceVersionId
+    if (editedContent && editingSourceVersionId) {
+      const savedVersionId = await saveManualVersion(
+        editedContent,
+        editingSourceVersionId,
+      )
+      if (!savedVersionId) {
+        setVersionActionError('Não foi possível salvar a versão atual antes da geração.')
+        return
+      }
+      revisionSourceVersionId = savedVersionId
+    }
+    setIsGeneratingRevision(true)
+    setVersionActionError(undefined)
+    try {
+      const response = await caseDocumentProductionService.generateRevision(
+        caseId,
+        documentId,
+        revisionSourceVersionId,
+        instructions,
+      )
+      if (response.isFailure) {
+        setVersionActionError(response.errorMessage)
+        return
+      }
+      setIsVersionDialogOpen(false)
+      setSelectedVersionId(null)
+      await queryClient.invalidateQueries({
+        queryKey: ['case-document', caseId, documentId],
+      })
+      await refetchDocument()
+    } catch (error) {
+      setVersionActionError(
+        error instanceof Error ? error.message : 'Não foi possível iniciar a geração.',
+      )
+    } finally {
+      setIsGeneratingRevision(false)
+    }
+  }
+  async function handleSaveNewVersion() {
+    if (!editedContent || !editingSourceVersionId) return
+    await saveManualVersion(editedContent, editingSourceVersionId)
   }
 
   return {
@@ -268,7 +319,12 @@ export function usePieceWorkflowRoutePage({
     editorActions,
     isDocumentError,
     isLoadingDocument,
+    isReadOnlyVersion,
+    isDiscardEditsDialogOpen,
     isPendingVariableDialogOpen,
+    isVersionDialogOpen,
+    isGeneratingRevision,
+    versionActionError,
     isAuthor,
     isCheckingReviewer: isLoadingCurrentCollaborator,
     saveState,
@@ -276,11 +332,15 @@ export function usePieceWorkflowRoutePage({
     mode,
     pendingVariables,
     reviewAction,
+    currentVersion,
     version,
     caseId,
     casePublicCode: caseDetails?.publicCode,
     handleBackToCase,
     handleChangeContent,
+    handleSelectVersion,
+    handleCancelDiscardEdits,
+    handleConfirmDiscardEdits,
     handleEditorReady,
     handleOpenPendingVariableDialog,
     handlePendingVariableDialogOpenChange,
@@ -290,5 +350,10 @@ export function usePieceWorkflowRoutePage({
     handleOpenReview,
     handleOpenReviewAction,
     handleReviewConfirmationChange,
+    handleOpenVersionDialog,
+    handleVersionDialogOpenChange: setIsVersionDialogOpen,
+    handleStartManualVersion,
+    handleGenerateRevision,
+    handleSaveNewVersion,
   }
 }

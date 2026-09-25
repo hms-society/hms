@@ -9,6 +9,7 @@ import { DocumentProductionMessagingModule } from '@/document-production/messagi
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import {
   CreateDocumentSpecificationController,
   DeleteDocumentSpecificationController,
@@ -20,6 +21,7 @@ import {
   ListCaseDocumentsController,
   GetCaseDocumentGenerationContextController,
   GenerateCaseDocumentController,
+  SaveManualCaseDocumentVersionController,
 } from '@/document-production/rest/controllers'
 
 @Module({
@@ -30,6 +32,7 @@ import {
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
     DocumentProductionMessagingModule,
+    DocumentProductionProvisionModule,
     ProvisionModule,
     DocumentsDatabaseModule,
     SharedMessagingModule,
@@ -45,6 +48,7 @@ import {
     ListCaseDocumentsController,
     GetCaseDocumentGenerationContextController,
     GenerateCaseDocumentController,
+    SaveManualCaseDocumentVersionController,
   ],
   exports: [DocumentProductionMessagingModule],
 })

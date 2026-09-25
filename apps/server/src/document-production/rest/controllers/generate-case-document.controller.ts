@@ -15,6 +15,7 @@ import type {
 } from '@hms/core/case-management/interfaces'
 import {
   GenerateLegalCaseDocumentUseCase,
+  GenerateLegalCaseDocumentRevisionUseCase,
   RetryLegalCaseDocumentGenerationUseCase,
 } from '@hms/core/case-management/use-cases'
 import type { DocumentValidationsRepository } from '@hms/core/document-engine/interfaces'
@@ -24,10 +25,14 @@ import type {
   DocumentsRepository,
   DocumentSpecificationsRepository,
   PackageDocumentsRepository,
+  DocumentVersionsRepository,
 } from '@hms/core/document-production/interfaces'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import { generateCaseDocumentSchema } from '@hms/validation/document-production'
+import {
+  generateCaseDocumentRevisionSchema,
+  generateCaseDocumentSchema,
+} from '@hms/validation/document-production'
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
@@ -49,6 +54,7 @@ import { ErrorResponseDto } from '@/shared/rest/dtos'
 export class GenerateCaseDocumentController {
   private readonly useCase: GenerateLegalCaseDocumentUseCase
   private readonly retryUseCase: RetryLegalCaseDocumentGenerationUseCase
+  private readonly revisionUseCase: GenerateLegalCaseDocumentRevisionUseCase
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases) cases: LegalCasesRepository,
@@ -66,6 +72,8 @@ export class GenerateCaseDocumentController {
     specifications: DocumentSpecificationsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
+    versions: DocumentVersionsRepository,
     broker: InngestBroker,
     datetime: DatetimeProvider,
     ids: IdProvider,
@@ -88,6 +96,16 @@ export class GenerateCaseDocumentController {
       packages,
       packageDocuments,
       generations,
+      broker,
+      datetime,
+      ids,
+    )
+    this.revisionUseCase = new GenerateLegalCaseDocumentRevisionUseCase(
+      cases,
+      packages,
+      packageDocuments,
+      generations,
+      versions,
       broker,
       datetime,
       ids,
@@ -134,6 +152,29 @@ export class GenerateCaseDocumentController {
     return this.retryUseCase.execute({
       caseId,
       documentId,
+      requestedByCollaboratorId: collaborator.collaboratorId,
+      requestedByCollaboratorProfile: collaborator.profile,
+    })
+  }
+
+  @Post(':caseId/documents/:documentId/versions/:sourceDocumentVersionId/generations')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiResponse({ status: HttpStatus.ACCEPTED, type: CaseDocumentGenerationResponseDto })
+  handleRevision(
+    @Param('caseId', new ParseUUIDPipe()) caseId: string,
+    @Param('documentId', new ParseUUIDPipe()) documentId: string,
+    @Param('sourceDocumentVersionId', new ParseUUIDPipe())
+    sourceDocumentVersionId: string,
+    @Body(new ZodValidationPipe(generateCaseDocumentRevisionSchema)) body: {
+      instructions: string
+    },
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ): Promise<CaseDocumentGenerationResponseDto> {
+    return this.revisionUseCase.execute({
+      caseId,
+      documentId,
+      sourceDocumentVersionId,
+      instructions: body.instructions,
       requestedByCollaboratorId: collaborator.collaboratorId,
       requestedByCollaboratorProfile: collaborator.profile,
     })

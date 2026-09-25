@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools'
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import {
   DocumentReviewDecision,
   DocumentReviewFindingCategory,
@@ -19,6 +19,7 @@ import {
   documentReviewCycleOutputSchema,
   documentReviewSchema,
 } from '@/document-production/ai/mastra/schemas'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 type ReviewCycleInput = z.infer<typeof documentReviewCycleInputSchema>
 type Draft = z.infer<typeof documentDraftSchema>
@@ -38,6 +39,7 @@ export class ReviewDocumentCycleTool {
     private readonly writerAgent: DocumentWriterAgent,
     private readonly reviewerAgent: DocumentReviewerAgent,
     private readonly findDocumentPendingMarkersUseCase: FindDocumentPendingMarkersUseCase,
+    @Inject(EnvProvider) private readonly envProvider: EnvProvider,
   ) {
     this.function = createTool({
       id: 'review-document-cycle',
@@ -53,6 +55,21 @@ export class ReviewDocumentCycleTool {
           },
         )
         const draftOutput = writerResponse.object
+
+        if (this.envProvider.get('HMS_SERVER_APP_MODE') === 'dev') {
+          console.log(
+            '[document-generation] writer AI response',
+            JSON.stringify(
+              {
+                documentGenerationId: input.documentGenerationId,
+                attempt: input.attemptsCount + 1,
+                output: draftOutput ?? null,
+              },
+              null,
+              2,
+            ),
+          )
+        }
 
         if (!draftOutput) {
           throw new AppError(

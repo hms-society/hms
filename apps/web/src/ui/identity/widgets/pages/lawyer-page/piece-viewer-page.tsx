@@ -34,9 +34,13 @@ export function PieceViewerPage({
     },
   })
   const document = documentQuery.data?.body
-  const currentVersion =
-    document?.versions.find((version) => version.id === document.currentVersionId) ??
-    document?.versions.at(-1)
+  const currentVersion = document?.versions.reduce<
+    (typeof document.versions)[number] | undefined
+  >(
+    (latest, candidate) =>
+      !latest || candidate.versionNumber > latest.versionNumber ? candidate : latest,
+    undefined,
+  )
 
   if (documentQuery.isLoading)
     return (

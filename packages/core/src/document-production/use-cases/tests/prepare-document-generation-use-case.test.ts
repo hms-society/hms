@@ -138,4 +138,49 @@ describe('Prepare Document Generation Use Case', () => {
       }),
     )
   })
+
+  it('uses the selected prior version content as the base for a revision', async () => {
+    const specification = DocumentSpecificationFaker.fake({
+      content: {
+        type: 'doc',
+        content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Template original' }] },
+        ],
+      } as unknown as DocumentTemplateContent,
+      variables: [],
+    })
+    const baseDocumentContent = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Texto já editado na versão v2' }],
+        },
+      ],
+    } as unknown as DocumentTemplateContent
+    const generation = DocumentGenerationFaker.fake()
+    specificationsRepository.findById.mockResolvedValue(specification)
+    generationsRepository.addOrGet.mockResolvedValue(generation)
+
+    await new PrepareDocumentGenerationUseCase(
+      generationsRepository,
+      specificationsRepository,
+    ).execute({
+      documentGenerationId: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: specification.id,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source: {
+        type: 'case',
+        id: '7c470059-82f8-4616-ac79-70934f758f37',
+        data: { baseDocumentContent },
+      },
+    })
+
+    expect(generationsRepository.addOrGet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({ content: baseDocumentContent }),
+      }),
+    )
+  })
 })

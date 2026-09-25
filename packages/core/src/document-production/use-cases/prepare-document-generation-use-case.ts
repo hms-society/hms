@@ -5,6 +5,7 @@ import { DocumentSpecificationNotFoundError } from '../domain/errors'
 import {
   DocumentGenerationStatus,
   type DocumentGenerationSource,
+  type DocumentTemplateContent,
 } from '../domain/structures'
 import type {
   DocumentGenerationsRepository,
@@ -37,6 +38,15 @@ export class PrepareDocumentGenerationUseCase
     }
 
     const templateVariableValues = this.getTemplateVariableValues(request.source.data)
+    const baseDocumentContent = request.source.data.baseDocumentContent
+    const templateContent =
+      typeof baseDocumentContent === 'object' &&
+      baseDocumentContent !== null &&
+      !Array.isArray(baseDocumentContent) &&
+      'type' in baseDocumentContent &&
+      baseDocumentContent.type === 'doc'
+        ? (baseDocumentContent as DocumentTemplateContent)
+        : specification.content
 
     return this.generationsRepository.addOrGet({
       id: request.documentGenerationId,
@@ -46,10 +56,7 @@ export class PrepareDocumentGenerationUseCase
       source: request.source,
       template: {
         name: specification.name,
-        content: this.fillTemplateVariables(
-          specification.content,
-          templateVariableValues,
-        ),
+        content: this.fillTemplateVariables(templateContent, templateVariableValues),
         variables: specification.variables,
       },
       status: DocumentGenerationStatus.Pending,

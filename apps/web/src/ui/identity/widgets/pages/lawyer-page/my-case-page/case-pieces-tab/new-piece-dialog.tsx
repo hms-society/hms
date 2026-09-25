@@ -215,60 +215,61 @@ export function NewPieceDialog({
           <GenerationStep
             complete={isGenerationComplete}
             failed={isGenerationFailed}
-            versionNumber={generationQuery.data?.versions.at(-1)?.versionNumber}
+            versionNumber={generationQuery.data?.versions.reduce(
+              (latest, candidate) => Math.max(latest, candidate.versionNumber),
+              0,
+            )}
           />
         ) : null}
 
-        <DialogFooter className='gap-2 sm:justify-between'>
-          {step === 1 ? (
-            <Button variant='ghost' onClick={() => handleClose(false)}>
-              Cancelar
-            </Button>
-          ) : step === 2 ? (
-            <Button variant='outline' onClick={() => setStep(1)}>
-              <Icon name='arrow-left' /> Voltar
-            </Button>
-          ) : (
-            <Button variant='ghost' onClick={() => handleClose(false)}>
-              Fechar e continuar em segundo plano
-            </Button>
-          )}
-          {step === 1 ? (
-            <Button
-              disabled={
-                !selectedModelId ||
-                filteredModels.length === 0 ||
-                contextQuery.isLoading ||
-                !context?.canGenerate
-              }
-              onClick={() => setStep(2)}
-            >
-              Próximo <Icon name='arrow-right' />
-            </Button>
-          ) : null}
-          {step === 2 ? (
-            <Button
-              disabled={!selectedDocumentIds.length || generationMutation.isPending}
-              onClick={() => generationMutation.mutate()}
-            >
-              <Icon name='sparkles' />{' '}
-              {generationMutation.isPending ? 'Enviando...' : 'Gerar minuta com IA'}
-            </Button>
-          ) : null}
-          {step === 3 && isGenerationComplete && generation ? (
-            <div className='flex flex-wrap gap-2'>
-              <Button variant='outline' onClick={() => handleClose(false)}>
-                Voltar para peças
+        {step !== 3 || isGenerationComplete ? (
+          <DialogFooter className={step === 3 ? 'sm:justify-end' : 'sm:justify-between'}>
+            {step === 1 ? (
+              <Button variant='ghost' onClick={() => handleClose(false)}>
+                Cancelar
               </Button>
-              <Button variant='outline' onClick={() => openGeneratedDocument('editor')}>
-                <Icon name='pencil' /> Abrir no editor
+            ) : step === 2 ? (
+              <Button variant='outline' onClick={() => setStep(1)}>
+                <Icon name='arrow-left' /> Voltar
               </Button>
-              <Button onClick={() => openGeneratedDocument('review')}>
-                <Icon name='eye' /> Abrir revisão técnica
+            ) : null}
+            {step === 1 ? (
+              <Button
+                disabled={
+                  !selectedModelId ||
+                  filteredModels.length === 0 ||
+                  contextQuery.isLoading ||
+                  !context?.canGenerate
+                }
+                onClick={() => setStep(2)}
+              >
+                Próximo <Icon name='arrow-right' />
               </Button>
-            </div>
-          ) : null}
-        </DialogFooter>
+            ) : null}
+            {step === 2 ? (
+              <Button
+                disabled={!selectedDocumentIds.length || generationMutation.isPending}
+                onClick={() => generationMutation.mutate()}
+              >
+                <Icon name='sparkles' />{' '}
+                {generationMutation.isPending ? 'Enviando...' : 'Gerar minuta com IA'}
+              </Button>
+            ) : null}
+            {step === 3 && isGenerationComplete && generation ? (
+              <div className='flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap'>
+                <Button variant='outline' onClick={() => handleClose(false)}>
+                  Voltar para peças
+                </Button>
+                <Button variant='outline' onClick={() => openGeneratedDocument('editor')}>
+                  <Icon name='pencil' /> Abrir no editor
+                </Button>
+                <Button onClick={() => openGeneratedDocument('review')}>
+                  <Icon name='eye' /> Abrir revisão técnica
+                </Button>
+              </div>
+            ) : null}
+          </DialogFooter>
+        ) : null}
       </DialogContent>
     </Dialog>
   )

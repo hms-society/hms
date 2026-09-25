@@ -45,6 +45,11 @@ describe('Save Generated Document Version Use Case', () => {
   it('exports, stores, and persists the next generated document version', async () => {
     const generation = DocumentGenerationFaker.fake({
       status: 'running',
+      source: {
+        type: 'case',
+        id: 'case-id',
+        data: { baseDocumentVersionId: 'source-version-id' },
+      },
       template: {
         name: 'Procuração Jurídica',
         content: { type: 'doc' },
@@ -117,7 +122,9 @@ describe('Save Generated Document Version Use Case', () => {
       documentId: generation.documentId,
       documentGenerationId: generation.id,
       fileId: storedFile.id,
+      storagePath: storedFile.filePath,
       versionNumber: 3,
+      sourceDocumentVersionId: 'source-version-id',
       source: 'ai',
       content,
       pendingMarkers,
