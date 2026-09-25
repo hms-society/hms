@@ -3,6 +3,7 @@ import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Checkbox } from '@/ui/shadcn/checkbox'
 import { DocumentEditor } from '@/ui/document-production/widgets/components/document-editor'
+import { PendingVariableValuesDialog } from './pending-variable-values-dialog'
 import { PieceFilePreview } from './piece-file-preview'
 import { VersionHistory } from './version-history'
 import { ReviewActionDialog } from './my-case-page/case-pieces-tab/piece-workflow-dialog'
@@ -46,14 +47,24 @@ export function PieceWorkflowRoutePage({
     document,
     documentError,
     editedContent,
+    editorActions,
     casePublicCode,
     isDocumentError,
     isLoadingDocument,
+    isAuthor,
+    isCheckingReviewer,
+    isPendingVariableDialogOpen,
     isReviewConfirmed,
     reviewAction,
+    pendingVariables,
+    saveState,
     version,
     handleBackToCase,
     handleChangeContent,
+    handleEditorReady,
+    handleOpenPendingVariableDialog,
+    handlePendingVariableDialogOpenChange,
+    handleApplyPendingVariableValues,
     handleCloseReviewAction,
     handleConfirmReviewAction,
     handleOpenReview,
@@ -120,13 +131,23 @@ export function PieceWorkflowRoutePage({
             </span>
           ) : (
             <>
-              <span className='text-xs text-muted-foreground'>
-                {editedContent ? 'Alterações locais não salvas' : 'Versão carregada'}
+              <span className='text-xs text-muted-foreground' role='status'>
+                {saveState === 'saving'
+                  ? 'Salvando…'
+                  : saveState === 'error'
+                    ? 'Falha ao salvar'
+                    : editedContent
+                      ? 'Salvo automaticamente'
+                      : 'Versão carregada'}
               </span>
               <Button variant='outline' size='sm' disabled>
                 <Icon name='history' /> Versões
               </Button>
-              <Button size='sm' onClick={handleOpenReview}>
+              <Button
+                size='sm'
+                disabled={saveState !== 'saved'}
+                onClick={handleOpenReview}
+              >
                 <Icon name='eye' />
                 {adjustmentsRequested
                   ? 'Resubmeter para revisão'
@@ -144,13 +165,22 @@ export function PieceWorkflowRoutePage({
           </div>
           <div className='min-w-0 overflow-y-auto bg-muted/50 p-4 sm:p-6'>
             <div className='mx-auto max-w-[900px] overflow-hidden rounded-lg border bg-card shadow-sm'>
-              <PieceFilePreview
-                caseId={caseId}
-                documentId={documentId}
-                versionId={version.id}
-                storagePath={version.storagePath}
-                versionNumber={version.versionNumber}
-              />
+              {version.content ? (
+                <DocumentEditor
+                  content={version.content}
+                  onChange={() => undefined}
+                  editable={false}
+                  ariaLabel='Conteúdo da peça em revisão'
+                />
+              ) : (
+                <PieceFilePreview
+                  caseId={caseId}
+                  documentId={documentId}
+                  versionId={version.id}
+                  storagePath={version.storagePath}
+                  versionNumber={version.versionNumber}
+                />
+              )}
             </div>
           </div>
           <aside className='flex min-w-0 flex-col gap-4 border-t bg-card p-4 xl:border-l xl:border-t-0'>
@@ -184,6 +214,15 @@ export function PieceWorkflowRoutePage({
               </p>
             </section>
             <div className='mt-auto space-y-2 border-t pt-4'>
+              {isAuthor ? (
+                <p
+                  role='alert'
+                  className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
+                >
+                  Quem elaborou esta versão não pode revisá-la. Outro membro da equipe
+                  deve assumir a revisão técnica.
+                </p>
+              ) : null}
               <label
                 htmlFor='review-responsibility-confirmation'
                 className='flex items-start gap-2 rounded-md border border-primary/50 bg-primary/10 p-3 text-xs'
@@ -200,7 +239,7 @@ export function PieceWorkflowRoutePage({
               </label>
               <Button
                 className='w-full'
-                disabled={!isReviewConfirmed}
+                disabled={!isReviewConfirmed || isAuthor || isCheckingReviewer}
                 onClick={() => handleOpenReviewAction('approval')}
               >
                 <Icon name='check' /> Aprovar peça
@@ -208,12 +247,14 @@ export function PieceWorkflowRoutePage({
               <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
                 <Button
                   variant='outline'
+                  disabled={isAuthor || isCheckingReviewer}
                   onClick={() => handleOpenReviewAction('adjustments')}
                 >
                   Solicitar ajustes
                 </Button>
                 <Button
                   variant='destructive'
+                  disabled={isAuthor || isCheckingReviewer}
                   onClick={() => handleOpenReviewAction('block')}
                 >
                   Bloqueio
@@ -233,7 +274,10 @@ export function PieceWorkflowRoutePage({
                 <DocumentEditor
                   content={currentContent}
                   onChange={handleChangeContent}
+                  onEditorReady={handleEditorReady}
                   ariaLabel='Conteúdo da peça jurídica'
+                  highlightedTerms={pendingVariables.map((variable) => variable.marker)}
+                  focusFirstHighlightedTerm={false}
                 />
               ) : (
                 <>
@@ -288,14 +332,26 @@ export function PieceWorkflowRoutePage({
               </p>
             ) : null}
             <section className='mt-5 border-t pt-4'>
-              <h3 className='font-serif font-semibold'>Variáveis pendentes</h3>
+              <div className='flex flex-wrap items-center justify-between gap-2'>
+                <h3 className='font-serif font-semibold'>Variáveis pendentes</h3>
+                {pendingVariables.length ? (
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    disabled={!editorActions}
+                    onClick={handleOpenPendingVariableDialog}
+                  >
+                    <Icon name='pencil' /> Inserir valores
+                  </Button>
+                ) : null}
+              </div>
               <p className='mt-1 text-xs text-muted-foreground'>
-                Valores não localizados nos documentos de referência; complete-os no texto
-                da peça, se necessário.
+                Complete os campos ausentes diretamente no texto ou use o preenchimento em
+                lote. Os marcadores destacados ainda precisam de valor.
               </p>
-              {version.pendingVariables.length ? (
+              {pendingVariables.length ? (
                 <ul className='mt-3 space-y-2'>
-                  {version.pendingVariables.map((variable) => (
+                  {pendingVariables.map((variable) => (
                     <li
                       key={variable.marker}
                       className='rounded-md border bg-muted/30 p-3 text-sm'
@@ -313,10 +369,11 @@ export function PieceWorkflowRoutePage({
                 </p>
               )}
             </section>
-            <p className='mt-3 text-xs text-muted-foreground'>
-              A edição e o salvamento de novas versões dependem da integração de
-              persistência.
-            </p>
+            {saveState === 'error' ? (
+              <p role='alert' className='mt-3 text-xs text-destructive'>
+                Não foi possível salvar as alterações no banco. Tente editar novamente.
+              </p>
+            ) : null}
             <Button variant='outline' className='mt-5 w-full' onClick={handleOpenReview}>
               Abrir revisão técnica
             </Button>
@@ -342,6 +399,14 @@ export function PieceWorkflowRoutePage({
             Voltar para peças
           </Button>
         </div>
+      ) : null}
+      {!isReview && currentContent ? (
+        <PendingVariableValuesDialog
+          open={isPendingVariableDialogOpen}
+          variables={pendingVariables}
+          onOpenChange={handlePendingVariableDialogOpenChange}
+          onApply={handleApplyPendingVariableValues}
+        />
       ) : null}
     </main>
   )

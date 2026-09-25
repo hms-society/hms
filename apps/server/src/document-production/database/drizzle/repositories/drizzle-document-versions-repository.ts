@@ -1,4 +1,7 @@
-import type { DocumentVersionCreation } from '@hms/core/document-production/domain/entities'
+import type {
+  DocumentVersion,
+  DocumentVersionCreation,
+} from '@hms/core/document-production/domain/entities'
 import type { DocumentVersionsRepository } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { and, asc, desc, eq, inArray } from 'drizzle-orm'
@@ -104,6 +107,26 @@ export class DrizzleDocumentVersionsRepository
       .where(
         and(
           eq(documentVersionModel.id, documentVersionId),
+          eq(documentVersionModel.status, 'in_review'),
+        ),
+      )
+      .returning()
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async saveEditableContent(
+    documentVersionId: string,
+    collaboratorId: string,
+    content: DocumentVersion['content'],
+    pendingMarkers: DocumentVersion['pendingMarkers'],
+  ) {
+    const [record] = await this.database
+      .update(documentVersionModel)
+      .set({ content, pendingMarkers })
+      .where(
+        and(
+          eq(documentVersionModel.id, documentVersionId),
+          eq(documentVersionModel.createdByCollaboratorId, collaboratorId),
           eq(documentVersionModel.status, 'in_review'),
         ),
       )

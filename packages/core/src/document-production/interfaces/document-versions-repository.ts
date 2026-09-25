@@ -10,6 +10,12 @@ export interface DocumentVersionsRepository {
   ): Promise<DocumentVersion | undefined>
   findById(documentVersionId: string): Promise<DocumentVersion | undefined>
   findByDocumentIds(documentIds: readonly string[]): Promise<readonly DocumentVersion[]>
+  saveEditableContent(
+    documentVersionId: string,
+    collaboratorId: string,
+    content: DocumentVersion['content'],
+    pendingMarkers: DocumentVersion['pendingMarkers'],
+  ): Promise<DocumentVersion | undefined>
   review(
     documentVersionId: string,
     status: Extract<DocumentVersionStatus, 'approved' | 'rejected'>,
