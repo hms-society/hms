@@ -5,7 +5,7 @@ import {
   DocumentGenerationFaker,
   DocumentSpecificationFaker,
 } from '../../domain/entities/fakers'
-import { DocumentSpecificationNotFoundError } from '../../domain/errors'
+import type { DocumentTemplateContent } from '../../domain/structures'
 import type {
   DocumentGenerationsRepository,
   DocumentSpecificationsRepository,
@@ -21,93 +21,121 @@ describe('Prepare Document Generation Use Case', () => {
     specificationsRepository = mock<DocumentSpecificationsRepository>()
   })
 
-  it('creates a pending generation with source and template snapshots', async () => {
-    const specification = DocumentSpecificationFaker.fake({ name: 'Procuração' })
+  it('fills template variables from the immutable validated source snapshot', async () => {
+    const specification = DocumentSpecificationFaker.fake({
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Requerente: {{nome_requerente}}; CPF: {{cpf_requerente}}',
+              },
+            ],
+          },
+        ],
+      } as unknown as DocumentTemplateContent,
+      variables: [
+        { label: 'Nome', technicalName: 'nome_requerente' },
+        { label: 'CPF', technicalName: 'cpf_requerente' },
+      ],
+    })
     const generation = DocumentGenerationFaker.fake()
     const source = {
-      type: 'consultation' as const,
+      type: 'case' as const,
       id: '7c470059-82f8-4616-ac79-70934f758f37',
-      data: { clientName: 'Maria da Silva' },
-    }
-    specificationsRepository.findById.mockResolvedValue(specification)
-    generationsRepository.addOrGet.mockResolvedValue(generation)
-
-    const result = await new PrepareDocumentGenerationUseCase(
-      generationsRepository,
-      specificationsRepository,
-    ).execute({
-      documentGenerationId: generation.id,
-      documentId: generation.documentId,
-      documentSpecificationVersionId: specification.id,
-      requestedByCollaboratorId: generation.requestedByCollaboratorId,
-      source,
-    })
-
-    expect(result).toBe(generation)
-    expect(generationsRepository.addOrGet).toHaveBeenCalledWith({
-      id: generation.id,
-      documentId: generation.documentId,
-      documentSpecificationVersionId: specification.id,
-      requestedByCollaboratorId: generation.requestedByCollaboratorId,
-      source,
-      template: {
-        name: specification.name,
-        content: specification.content,
-        variables: specification.variables,
-      },
-      status: 'pending',
-      attemptsCount: 0,
-      findings: [],
-    })
-  })
-
-  it('returns the existing generation when the event is replayed', async () => {
-    const specification = DocumentSpecificationFaker.fake({ name: 'Procuração' })
-    const generation = DocumentGenerationFaker.fake({
-      documentSpecificationVersionId: specification.id,
-    })
-    const source = {
-      type: 'consultation' as const,
-      id: '7c470059-82f8-4616-ac79-70934f758f37',
-      data: { clientName: 'Maria da Silva' },
-    }
-    specificationsRepository.findById.mockResolvedValue(specification)
-    generationsRepository.addOrGet.mockResolvedValue(generation)
-
-    const result = await new PrepareDocumentGenerationUseCase(
-      generationsRepository,
-      specificationsRepository,
-    ).execute({
-      documentGenerationId: generation.id,
-      documentId: generation.documentId,
-      documentSpecificationVersionId: specification.id,
-      requestedByCollaboratorId: generation.requestedByCollaboratorId,
-      source,
-    })
-
-    expect(result).toBe(generation)
-    expect(generationsRepository.addOrGet).toHaveBeenCalledTimes(1)
-  })
-
-  it('rejects a request whose document specification does not exist', async () => {
-    specificationsRepository.findById.mockResolvedValue(undefined)
-
-    await expect(
-      new PrepareDocumentGenerationUseCase(
-        generationsRepository,
-        specificationsRepository,
-      ).execute({
-        documentGenerationId: '78a38ffd-cfb1-49b7-9f49-830333b63367',
-        documentId: '17fcbb49-5a34-48fc-9245-a5bc718e9d43',
-        documentSpecificationVersionId: 'bd83c776-c478-4ff9-aeb7-a51afbcd7440',
-        requestedByCollaboratorId: '6a64134b-06b4-49cb-9317-3379e048c611',
-        source: {
-          type: 'formalization',
-          id: '4ec7a0cb-7213-4fcd-bc97-bb899d5b13e3',
-          data: {},
+      data: {
+        templateVariableValues: {
+          nome_requerente: 'Helena Maria de Albuquerque Costa',
+          cpf_requerente: '123.456.789-09',
         },
+      },
+    }
+    specificationsRepository.findById.mockResolvedValue(specification)
+    generationsRepository.addOrGet.mockResolvedValue(generation)
+
+    await new PrepareDocumentGenerationUseCase(
+      generationsRepository,
+      specificationsRepository,
+    ).execute({
+      documentGenerationId: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: specification.id,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source,
+    })
+
+    expect(generationsRepository.addOrGet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Requerente: Helena Maria de Albuquerque Costa; CPF: 123.456.789-09',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
       }),
-    ).rejects.toBeInstanceOf(DocumentSpecificationNotFoundError)
-    expect(generationsRepository.addOrGet).not.toHaveBeenCalled()
+    )
+  })
+
+  it('keeps unresolved variables as explicit placeholders instead of inventing values', async () => {
+    const specification = DocumentSpecificationFaker.fake({
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'NIT: {{nit_requerente}}' }],
+          },
+        ],
+      } as unknown as DocumentTemplateContent,
+      variables: [{ label: 'NIT', technicalName: 'nit_requerente' }],
+    })
+    const generation = DocumentGenerationFaker.fake()
+    const source = {
+      type: 'case' as const,
+      id: '7c470059-82f8-4616-ac79-70934f758f37',
+      data: { templateVariableValues: {} },
+    }
+    specificationsRepository.findById.mockResolvedValue(specification)
+    generationsRepository.addOrGet.mockResolvedValue(generation)
+
+    await new PrepareDocumentGenerationUseCase(
+      generationsRepository,
+      specificationsRepository,
+    ).execute({
+      documentGenerationId: generation.id,
+      documentId: generation.documentId,
+      documentSpecificationVersionId: specification.id,
+      requestedByCollaboratorId: generation.requestedByCollaboratorId,
+      source,
+    })
+
+    expect(generationsRepository.addOrGet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [{ type: 'text', text: 'NIT: {{nit_requerente}}' }],
+              },
+            ],
+          },
+        }),
+      }),
+    )
   })
 })

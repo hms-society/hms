@@ -13,6 +13,7 @@ import { useRecordDocumentValidationDecisionAction } from '@/ui/document-engine/
 import { useRequestDocumentResendAction } from '@/ui/document-engine/hooks/use-request-document-resend-action'
 import { useReprocessDocumentFileAction } from '@/ui/document-engine/hooks/use-reprocess-document-file-action'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
+import { getVisibleExtractedFields } from '@/ui/document-engine/utils/get-visible-extracted-fields'
 
 export type AnalysisDocumentView = {
   id: string
@@ -151,7 +152,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
   }
 
   function getSenderName(validationDocument: DocumentValidationDocument) {
-    const titular = validationDocument.extractedFields.find(
+    const titular = getVisibleExtractedFields(validationDocument).find(
       (field) => field.label === 'Titular',
     )
 
@@ -204,8 +205,7 @@ export function useDocumentAnalysis({ fileId, fromCaseId }: UseDocumentAnalysisP
         document?.duplicateMatch?.documentFileId ??
         document?.humanCorrection?.originalDocumentId ??
         '',
-      extractedFields:
-        document?.humanCorrection?.extractedFields ?? document?.extractedFields ?? [],
+      extractedFields: (document && getVisibleExtractedFields(document)) ?? [],
     },
   })
 

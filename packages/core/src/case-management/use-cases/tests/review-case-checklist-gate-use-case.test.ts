@@ -9,11 +9,16 @@ import { ReviewCaseChecklistGateUseCase } from '../review-case-checklist-gate-us
 
 describe('Review Case Checklist Gate Use Case', () => {
   let repository: MockProxy<LegalCasesRepository>
+  let checklistItemsRepository: MockProxy<
+    import('../../interfaces').CaseChecklistItemsRepository
+  >
   let useCase: ReviewCaseChecklistGateUseCase
 
   beforeEach(() => {
     repository = mock<LegalCasesRepository>()
-    useCase = new ReviewCaseChecklistGateUseCase(repository)
+    checklistItemsRepository =
+      mock<import('../../interfaces').CaseChecklistItemsRepository>()
+    useCase = new ReviewCaseChecklistGateUseCase(repository, checklistItemsRepository)
   })
 
   it('rejects full approval until required checklist items can be verified server-side', async () => {
@@ -27,6 +32,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     repository.listByTeamMember.mockResolvedValue([
       fakeLegalCaseSummary({ id: legalCase.id }),
     ])
+    checklistItemsRepository.listByCaseId.mockResolvedValue([
+      { isRequired: true, status: 'pending' } as never,
+    ])
 
     await expect(
       useCase.execute({
@@ -34,7 +42,7 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy,
       }),
-    ).rejects.toThrow('validação server-side')
+    ).rejects.toThrow('documentos obrigatórios')
 
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
@@ -46,6 +54,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     repository.listByTeamMember.mockResolvedValue([
       fakeLegalCaseSummary({ id: legalCase.id }),
     ])
+    checklistItemsRepository.listByCaseId.mockResolvedValue([
+      { isRequired: true, status: 'pending' } as never,
+    ])
 
     await expect(
       useCase.execute({
@@ -53,9 +64,39 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy: '00000000-0000-4000-8000-000000000110',
       }),
-    ).rejects.toThrow('validação server-side')
+    ).rejects.toThrow('documentos obrigatórios')
 
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('allows full approval when every required checklist item is validated', async () => {
+    const decidedBy = '00000000-0000-4000-8000-000000000118'
+    const legalCase = LegalCaseFaker.fake()
+    const reviewedCase = LegalCaseFaker.fake({
+      id: legalCase.id,
+      status: LegalCaseStatus.ReadyForLegalProduction,
+      checklistGate: {
+        decision: CaseChecklistGateDecision.Approved,
+        decidedAt: new Date('2026-08-24T12:00:00.000Z'),
+        decidedBy,
+      },
+    })
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([
+      fakeLegalCaseSummary({ id: legalCase.id }),
+    ])
+    checklistItemsRepository.listByCaseId.mockResolvedValue([
+      { isRequired: true, status: 'validated' } as never,
+    ])
+    repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.Approved,
+        decidedBy,
+      }),
+    ).resolves.toBe(reviewedCase)
   })
 
   it('records approval with exception only when remarks explain the exception', async () => {

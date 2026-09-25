@@ -2,6 +2,11 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { z } from 'zod'
 
+const optionalEnvString = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().min(1).optional(),
+)
+
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1).url(),
   HMS_SERVER_APP_PORT: z.coerce.number().default(3333),
@@ -10,7 +15,14 @@ export const envSchema = z.object({
   OLLAMA_AI_MODEL: z.string().min(1).default('qwen3.5:2b'),
   OLLAMA_VISION_AI_MODEL: z.string().min(1).default('qwen2.5vl:3b'),
   OLLAMA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(900_000),
-  OPENROUTER_API_KEY: z.string().min(1).optional(),
+  AI_PROVIDER: z.enum(['ollama', 'openai', 'gemini']).default('ollama'),
+  OPENAI_API_KEY: optionalEnvString,
+  OPENAI_AI_MODEL: optionalEnvString,
+  OPENAI_VISION_AI_MODEL: optionalEnvString,
+  GEMINI_API_KEY: optionalEnvString,
+  GEMINI_AI_MODEL: optionalEnvString,
+  GEMINI_VISION_AI_MODEL: optionalEnvString,
+  OPENROUTER_API_KEY: optionalEnvString,
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   HMS_USER_SEED_PASSWORD: z.string().min(6).optional(),

@@ -340,6 +340,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
     suggestion: DocumentJsonOrganization,
     extractedTextFull: string,
   ): DocumentJsonOrganization {
+    const fieldLabels = suggestion.extractedFields.map((field) => field.label)
     const extractedFields = suggestion.extractedFields.filter((field) => {
       const evidence = suggestion.evidence.find(
         (candidate) =>
@@ -357,25 +358,39 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       }
 
       const evidenceStart = extractedTextFull.indexOf(evidence.sourceText)
+      const citedValue = this.getCitedValue(evidence.sourceText, field.label)
+
+      if (citedValue === undefined || evidenceStart < 0) {
+        return false
+      }
+
       const labelPattern = new RegExp(
-        `^\\s*${this.escapeRegExp(field.label)}\\s*[:：]\\s*`,
+        `^\\s*${this.escapeRegExp(field.label)}(?:\\s*[:：]\\s*|\\s+)`,
         'i',
       )
-      const labelMatch = labelPattern.exec(evidence.sourceText)
+      const labelMatch = labelPattern.exec(extractedTextFull.slice(evidenceStart))
 
-      if (!labelMatch || evidenceStart < 0) {
+      if (!labelMatch) {
         return false
       }
 
       const valueStart = evidenceStart + labelMatch[0].length
-      const nextLabel = this.findNextLabeledField(extractedTextFull, valueStart)
-      const valueEnd = nextLabel?.index ?? extractedTextFull.length
-      const sourceValue = extractedTextFull.slice(valueStart, valueEnd).trim()
-      const citedValue = evidence.sourceText.slice(labelMatch[0].length).trim()
+      const nextField = this.findNextFieldLabel(
+        extractedTextFull,
+        valueStart,
+        fieldLabels.filter(
+          (label) =>
+            this.normalizeFieldLabel(label) !== this.normalizeFieldLabel(field.label),
+        ),
+      )
+      const sourceValue = extractedTextFull
+        .slice(valueStart, nextField?.index)
+        .replace(/[,:;|]+$/u, '')
+        .trim()
 
       return (
-        this.normalizeFieldValue(sourceValue) === this.normalizeFieldValue(field.value) &&
-        this.normalizeFieldValue(citedValue) === this.normalizeFieldValue(field.value)
+        this.normalizeFieldValue(citedValue) === this.normalizeFieldValue(field.value) &&
+        this.normalizeFieldValue(sourceValue) === this.normalizeFieldValue(field.value)
       )
     })
 
@@ -396,26 +411,30 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
     }
   }
 
-  private findNextLabeledField(text: string, startIndex: number) {
-    const labelPattern = /[\p{L}][\p{L}\p{N} _/().-]{0,40}\s*[:：]/gu
-    for (const match of text.slice(startIndex).matchAll(labelPattern)) {
-      const relativeIndex = match.index
+  private getCitedValue(sourceText: string, label: string) {
+    const labelPattern = new RegExp(
+      `^\\s*${this.escapeRegExp(label)}(?:\\s*[:：]\\s*|\\s+)`,
+      'i',
+    )
+    const labelMatch = labelPattern.exec(sourceText)
 
-      if (relativeIndex !== undefined) {
-        const absoluteIndex = startIndex + relativeIndex
-        const precedingCharacter = text[absoluteIndex - 1]
+    return labelMatch ? sourceText.slice(labelMatch[0].length).trim() : undefined
+  }
 
-        if (
-          absoluteIndex === startIndex ||
-          precedingCharacter === undefined ||
-          /[\s,;|]/u.test(precedingCharacter)
-        ) {
-          return { index: absoluteIndex }
-        }
-      }
-    }
+  private findNextFieldLabel(text: string, startIndex: number, labels: string[]) {
+    const nextIndexes = labels.flatMap((label) => {
+      const pattern = new RegExp(
+        `(^|[\\s,;|])${this.escapeRegExp(label)}(?=\\s|[:：])`,
+        'iu',
+      )
+      const match = pattern.exec(text.slice(startIndex))
 
-    return undefined
+      return match ? [startIndex + match.index + match[1].length] : []
+    })
+
+    const nextIndex = Math.min(...nextIndexes)
+
+    return Number.isFinite(nextIndex) ? { index: nextIndex } : undefined
   }
 
   private normalizeFieldLabel(value: string) {

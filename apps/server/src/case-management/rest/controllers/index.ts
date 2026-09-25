@@ -6,6 +6,7 @@ export { ReplaceChecklistTemplateController } from './replace-checklist-template
 export { CreatePendingController } from './create-pending.controller'
 export { ListCasePendingsController } from './list-case-pendings.controller'
 export { ReviewCaseChecklistGateController } from './review-case-checklist-gate.controller'
+export { HomologateCaseDossierController } from './homologate-case-dossier.controller'
 export { CreateLegalCaseController } from './create-legal-case.controller'
 export { GetLegalCaseDetailsController } from './get-legal-case-details.controller'
 export { GetPendingMessageController } from './get-pending-message.controller'

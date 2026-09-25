@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -12,91 +15,125 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/shadcn/dialog'
+import type { CaseDocumentGenerationContext } from '@/rest/services/case-document-production-service'
 
-type NewPieceDialogProps = {
+export type NewPieceDialogProps = {
   open: boolean
+  caseId?: string
   onOpenChange: (open: boolean) => void
   onGenerated: () => void
 }
 
 type Step = 1 | 2 | 3
 
-const MODELS = [
-  {
-    id: 'retirement',
-    title: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
-    description: 'Modelo previdenciário reutilizável para requerimento administrativo.',
-    version: 'Disponível para produção jurídica',
-  },
-  {
-    id: 'age-retirement',
-    title: 'Requerimento Administrativo — Aposentadoria por Idade',
-    description: 'Requerimento inicial baseado em requisito etário.',
-    version: 'v3 · atualizado 12/06',
-  },
-  {
-    id: 'appeal',
-    title: 'Recurso Administrativo INSS',
-    description: 'Recurso contra indeferimento em primeira instância administrativa.',
-    version: 'v1 · atualizado 08/05',
-  },
-]
-
-const DOCUMENTS = [
-  {
-    id: 'rg',
-    label: 'RG — Documento de Identidade',
-    detail: 'Emitido em 2003 · válido',
-    category: 'Identificação',
-  },
-  {
-    id: 'cpf',
-    label: 'CPF — Cadastro de Pessoa Física',
-    detail: 'Situação regular',
-    category: 'Identificação',
-  },
-  {
-    id: 'address',
-    label: 'Comprovante de Residência',
-    detail: 'Conta de luz · abril/2026',
-    category: 'Endereço',
-  },
-  {
-    id: 'cnis',
-    label: 'CNIS — Cadastro Nacional de Informações Sociais',
-    detail: 'Filiação 12/03/1989 · 342 a 2 m',
-    category: 'Previdenciário',
-  },
-]
-
-export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDialogProps) {
+export function NewPieceDialog({
+  open,
+  caseId,
+  onOpenChange,
+  onGenerated,
+}: NewPieceDialogProps) {
+  const queryClient = useQueryClient()
+  const { navigateTo } = useNavigation()
+  const { caseDocumentProductionService } = useRestContext()
   const [step, setStep] = useState<Step>(1)
-  const [selectedModelId, setSelectedModelId] = useState(MODELS[0].id)
+  const [selectedModelId, setSelectedModelId] = useState('')
   const [modelSearch, setModelSearch] = useState('')
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([])
   const [observations, setObservations] = useState('')
+  const [generation, setGeneration] = useState<{
+    documentId: string
+    documentGenerationId: string
+  }>()
 
-  const selectedModel = MODELS.find((model) => model.id === selectedModelId) ?? MODELS[0]
-  const filteredModels = MODELS.filter((model) =>
-    `${model.title} ${model.description}`
+  const contextQuery = useQuery({
+    queryKey: ['case-document-generation-context', caseId],
+    enabled: open && Boolean(caseId),
+    queryFn: async () => {
+      if (!caseId) throw new Error('Caso não identificado.')
+      const response = await caseDocumentProductionService.getGenerationContext(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+  })
+  const context = contextQuery.data as CaseDocumentGenerationContext | undefined
+  const models = context?.models ?? []
+  const documents = context?.documents ?? []
+  const selectedModel = models.find((model) => model.id === selectedModelId)
+  const filteredModels = models.filter((model) =>
+    `${model.name} ${model.description}`
       .toLocaleLowerCase('pt-BR')
       .includes(modelSearch.trim().toLocaleLowerCase('pt-BR')),
   )
 
+  const generationMutation = useMutation({
+    mutationFn: async () => {
+      if (!caseId || !selectedModel)
+        throw new Error('Selecione um modelo disponível para este caso.')
+      const response = await caseDocumentProductionService.generateDocument(caseId, {
+        documentSpecificationId: selectedModel.id,
+        documentFileIds: selectedDocumentIds,
+        ...(observations.trim() ? { instructions: observations.trim() } : {}),
+      })
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: (result) => {
+      setGeneration(result)
+      setStep(3)
+      onGenerated()
+      void queryClient.invalidateQueries({ queryKey: ['case-documents', caseId] })
+    },
+  })
+
+  const generationQuery = useQuery({
+    queryKey: ['case-document-generation-result', caseId, generation?.documentId],
+    enabled: open && step === 3 && Boolean(caseId && generation?.documentId),
+    queryFn: async () => {
+      if (!caseId || !generation?.documentId) throw new Error('Geração não identificada.')
+      const response = await caseDocumentProductionService.getDocument(
+        caseId,
+        generation.documentId,
+      )
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    refetchInterval: (query) => {
+      const status = query.state.data?.generation?.status
+      if (status === 'completed' || status === 'failed' || status === 'cancelled')
+        return false
+      if (query.state.data?.versions.length) return false
+      return 2500
+    },
+    retry: true,
+  })
+  const isGenerationComplete = Boolean(
+    generationQuery.data?.generation?.status === 'completed' ||
+      generationQuery.data?.versions.length,
+  )
+  const isGenerationFailed = Boolean(
+    generationQuery.data?.generation?.status === 'failed' ||
+      generationQuery.data?.generation?.status === 'cancelled' ||
+      generationQuery.isError,
+  )
+
+  useEffect(() => {
+    if (!selectedModelId && models.length) setSelectedModelId(models[0]?.id ?? '')
+  }, [models, selectedModelId])
+
   function handleClose(nextOpen: boolean) {
     if (!nextOpen) {
       setStep(1)
-      setSelectedModelId(MODELS[0].id)
+      setSelectedModelId('')
       setModelSearch('')
       setSelectedDocumentIds([])
       setObservations('')
+      setGeneration(undefined)
+      generationMutation.reset()
+      void queryClient.removeQueries({
+        queryKey: ['case-document-generation-result', caseId],
+      })
     }
     onOpenChange(nextOpen)
-  }
-
-  function handleChangeModel() {
-    setModelSearch('')
-    setStep(1)
   }
 
   function handleToggleDocument(documentId: string) {
@@ -125,12 +162,7 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
             Fluxo de criação de uma nova peça jurídica.
           </DialogDescription>
           <div className='flex items-center gap-2 pt-2 text-xs text-muted-foreground'>
-            <StepLabel
-              active={step >= 1}
-              current={step === 1}
-              label='Modelo'
-              number='1'
-            />
+            <StepLabel active current={step === 1} label='Modelo' number='1' />
             <span className='h-px w-8 bg-border' />
             <StepLabel
               active={step >= 2}
@@ -150,6 +182,13 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
 
         {step === 1 ? (
           <ModelStep
+            loading={contextQuery.isLoading}
+            error={
+              contextQuery.isError
+                ? 'Não foi possível carregar modelos e documentos deste caso.'
+                : undefined
+            }
+            generationAllowed={context?.canGenerate ?? false}
             models={filteredModels}
             search={modelSearch}
             selectedModelId={selectedModelId}
@@ -157,17 +196,28 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
             onSelect={setSelectedModelId}
           />
         ) : null}
-        {step === 2 ? (
+        {step === 2 && selectedModel ? (
           <PreparationStep
             model={selectedModel}
+            documents={documents}
             selectedDocumentIds={selectedDocumentIds}
             onToggleDocument={handleToggleDocument}
-            onChangeModel={handleChangeModel}
+            onChangeModel={() => setStep(1)}
             observations={observations}
             onObservationsChange={setObservations}
+            checklistGateDecision={context?.checklistGateDecision}
+            error={
+              generationMutation.isError ? generationMutation.error.message : undefined
+            }
           />
         ) : null}
-        {step === 3 ? <GenerationStep /> : null}
+        {step === 3 ? (
+          <GenerationStep
+            complete={isGenerationComplete}
+            failed={isGenerationFailed}
+            versionNumber={generationQuery.data?.versions.at(-1)?.versionNumber}
+          />
+        ) : null}
 
         <DialogFooter className='gap-2 sm:justify-between'>
           {step === 1 ? (
@@ -180,36 +230,60 @@ export function NewPieceDialog({ open, onOpenChange, onGenerated }: NewPieceDial
             </Button>
           ) : (
             <Button variant='ghost' onClick={() => handleClose(false)}>
-              Cancelar geração
+              Fechar e continuar em segundo plano
             </Button>
           )}
           {step === 1 ? (
             <Button
-              disabled={!selectedModelId || filteredModels.length === 0}
+              disabled={
+                !selectedModelId ||
+                filteredModels.length === 0 ||
+                contextQuery.isLoading ||
+                !context?.canGenerate
+              }
               onClick={() => setStep(2)}
             >
               Próximo <Icon name='arrow-right' />
             </Button>
           ) : null}
           {step === 2 ? (
-            <Button disabled onClick={() => setStep(3)}>
-              <Icon name='sparkles' /> Geração com IA indisponível
+            <Button
+              disabled={!selectedDocumentIds.length || generationMutation.isPending}
+              onClick={() => generationMutation.mutate()}
+            >
+              <Icon name='sparkles' />{' '}
+              {generationMutation.isPending ? 'Enviando...' : 'Gerar minuta com IA'}
             </Button>
           ) : null}
-          {step === 3 ? (
-            <Button
-              onClick={() => {
-                handleClose(false)
-                onGenerated()
-              }}
-            >
-              Voltar para peças
-            </Button>
+          {step === 3 && isGenerationComplete && generation ? (
+            <div className='flex flex-wrap gap-2'>
+              <Button variant='outline' onClick={() => handleClose(false)}>
+                Voltar para peças
+              </Button>
+              <Button variant='outline' onClick={() => openGeneratedDocument('editor')}>
+                <Icon name='pencil' /> Abrir no editor
+              </Button>
+              <Button onClick={() => openGeneratedDocument('review')}>
+                <Icon name='eye' /> Abrir revisão técnica
+              </Button>
+            </div>
           ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
+
+  function openGeneratedDocument(destination: 'editor' | 'review') {
+    if (!generation || !caseId) return
+    handleClose(false)
+    onGenerated()
+    void navigateTo(
+      destination === 'editor' ? 'lawyerCasePieceEditor' : 'lawyerCasePieceReview',
+      {
+        params: { caseId, documentId: generation.documentId },
+      },
+    )
+  }
 }
 
 function StepLabel({
@@ -236,13 +310,19 @@ function StepLabel({
 }
 
 function ModelStep({
+  loading,
+  error,
+  generationAllowed,
   models,
   search,
   selectedModelId,
   onSearch,
   onSelect,
 }: {
-  models: typeof MODELS
+  loading: boolean
+  error?: string
+  generationAllowed: boolean
+  models: CaseDocumentGenerationContext['models']
   search: string
   selectedModelId: string
   onSearch: (value: string) => void
@@ -263,10 +343,29 @@ function ModelStep({
           onChange={(event) => onSearch(event.target.value)}
         />
       </div>
+      {loading ? (
+        <p className='rounded-md border p-4 text-sm text-muted-foreground'>
+          Carregando modelos e documentos validados...
+        </p>
+      ) : null}
+      {error ? (
+        <p
+          role='alert'
+          className='rounded-md border border-destructive/40 p-3 text-sm text-destructive'
+        >
+          {error}
+        </p>
+      ) : null}
+      {!loading && !error && !generationAllowed ? (
+        <p className='rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground'>
+          A geração será liberada quando o dossiê estiver homologado e o caso estiver na
+          etapa de produção jurídica.
+        </p>
+      ) : null}
       <div className='space-y-2'>
-        {models.length === 0 ? (
+        {!loading && !error && models.length === 0 ? (
           <p className='rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground'>
-            Nenhum modelo encontrado.
+            Nenhum modelo disponível para este caso.
           </p>
         ) : null}
         {models.map((model) => (
@@ -276,7 +375,7 @@ function ModelStep({
             onClick={() => onSelect(model.id)}
             className={`w-full rounded-lg border p-3 text-left transition-colors ${selectedModelId === model.id ? 'border-primary bg-highlight' : 'border-border hover:bg-muted/50'}`}
           >
-            <div className='flex items-start gap-3'>
+            <span className='flex items-start gap-3'>
               <span
                 className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${selectedModelId === model.id ? 'border-primary bg-primary' : 'border-input'}`}
               >
@@ -286,16 +385,16 @@ function ModelStep({
               </span>
               <span className='min-w-0'>
                 <span className='block text-sm font-semibold text-foreground'>
-                  {model.title}
+                  {model.name}
                 </span>
                 <span className='mt-1 block text-xs text-muted-foreground'>
                   {model.description}
                 </span>
                 <span className='mt-1 block text-[11px] text-muted-foreground'>
-                  {model.version}
+                  Disponível para produção jurídica
                 </span>
               </span>
-            </div>
+            </span>
           </button>
         ))}
       </div>
@@ -305,18 +404,24 @@ function ModelStep({
 
 function PreparationStep({
   model,
+  documents,
   selectedDocumentIds,
   onToggleDocument,
   onChangeModel,
   observations,
   onObservationsChange,
+  checklistGateDecision,
+  error,
 }: {
-  model: (typeof MODELS)[number]
+  model: CaseDocumentGenerationContext['models'][number]
+  documents: CaseDocumentGenerationContext['documents']
   selectedDocumentIds: string[]
   onToggleDocument: (id: string) => void
   onChangeModel: () => void
   observations: string
   onObservationsChange: (value: string) => void
+  checklistGateDecision?: string
+  error?: string
 }) {
   return (
     <div className='space-y-4'>
@@ -327,7 +432,7 @@ function PreparationStep({
             <p className='text-[11px] uppercase text-muted-foreground'>
               Modelo selecionado
             </p>
-            <p className='text-sm font-semibold text-foreground'>{model.title}</p>
+            <p className='text-sm font-semibold text-foreground'>{model.name}</p>
           </div>
         </div>
         <Button variant='link' size='xs' onClick={onChangeModel}>
@@ -341,19 +446,19 @@ function PreparationStep({
         <ul className='mt-2 space-y-2 text-sm text-muted-foreground'>
           <li className='flex items-center gap-2'>
             <Icon name='check-circle-2' className='size-4 shrink-0 text-primary' />
-            Preencher qualificação, fundamentação legal padrão e referências ao dossiê
+            Preencher variáveis com dados dos documentos selecionados e validados
           </li>
           <li className='flex items-center gap-2'>
             <Icon name='check-circle-2' className='size-4 shrink-0 text-primary' />
-            Estruturar a peça conforme o modelo escolhido
+            Estruturar a minuta conforme o modelo escolhido
           </li>
           <li className='flex items-center gap-2'>
             <Icon name='x-circle' className='size-4 shrink-0 text-muted-foreground' />
-            Não define tese jurídica — você insere após a geração
+            Não inventa valores ausentes nem resolve divergências entre fontes
           </li>
           <li className='flex items-center gap-2'>
             <Icon name='x-circle' className='size-4 shrink-0 text-muted-foreground' />
-            Não protocola nem entrega — apenas gera a minuta
+            Não aprova, protocola nem entrega a peça
           </li>
         </ul>
       </div>
@@ -366,17 +471,22 @@ function PreparationStep({
               <span className='text-destructive'>*</span>
             </h3>
           </div>
-          <div className='flex flex-wrap items-center gap-2'>
-            <Badge variant='success'>
-              {selectedDocumentIds.length} de {DOCUMENTS.length} selecionados
-            </Badge>
-          </div>
+          <Badge variant='success'>
+            {selectedDocumentIds.length} de {documents.length} selecionados
+          </Badge>
         </div>
         <p className='mt-1 text-xs text-muted-foreground'>
-          Selecione os documentos que serão a base factual desta peça.
+          Selecione os documentos validados que serão a base factual desta peça. Cada
+          arquivo ficará registrado com sua origem.
         </p>
         <div className='mt-2 divide-y rounded-lg border border-border'>
-          {DOCUMENTS.map((document) => (
+          {documents.length === 0 ? (
+            <p className='p-4 text-sm text-muted-foreground'>
+              Nenhum documento do checklist tem validação humana concluída para servir de
+              referência.
+            </p>
+          ) : null}
+          {documents.map((document) => (
             <div
               key={document.id}
               className={`flex items-center gap-3 p-3 ${selectedDocumentIds.includes(document.id) ? 'bg-highlight/70' : 'bg-card'}`}
@@ -389,11 +499,11 @@ function PreparationStep({
               <span className='min-w-0 flex-1'>
                 <span className='block text-sm font-semibold'>{document.label}</span>
                 <span className='block text-xs text-muted-foreground'>
-                  {document.detail}
+                  {document.fileName} ·{' '}
+                  {document.validationStatus === 'validated'
+                    ? 'validado por pessoa'
+                    : document.validationStatus}
                 </span>
-              </span>
-              <span className='hidden rounded-full bg-muted px-2 py-1 text-[10px] text-muted-foreground sm:inline'>
-                {document.category}
               </span>
               <Icon name='eye' className='size-4 shrink-0 text-muted-foreground' />
             </div>
@@ -408,56 +518,71 @@ function PreparationStep({
         <textarea
           id='ai-notes'
           className='mt-1 min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
-          placeholder='Ex.: cliente teve período rural entre 1985 e 1990...'
+          placeholder='Instruções adicionais para a minuta...'
           value={observations}
           onChange={(event) => onObservationsChange(event.target.value)}
         />
       </div>
+      {error ? (
+        <p
+          role='alert'
+          className='rounded-md border border-destructive/40 p-3 text-sm text-destructive'
+        >
+          {error}
+        </p>
+      ) : null}
       <p className='rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground'>
-        A geração e o salvamento da peça dependem da integração com o backend e ainda não
-        estão disponíveis.
+        O solicitante é o colaborador autenticado. A minuta só se torna apta a protocolo
+        após revisão e aprovação humana.
       </p>
-      <div className='grid gap-3 sm:grid-cols-2'>
-        <div>
-          <p className='text-xs text-muted-foreground'>Elaborador</p>
-          <div className='mt-1 flex items-center gap-2 rounded-md border border-border p-2 text-sm'>
-            <span className='flex size-6 items-center justify-center rounded-full bg-brand-accent text-[10px] font-semibold text-foreground'>
-              MC
-            </span>
-            <span className='flex-1'>Mariana Costa</span>
-            <Icon name='chevron-down' className='size-3.5 text-muted-foreground' />
-          </div>
-        </div>
-        <div>
-          <p className='text-xs text-muted-foreground'>Revisor</p>
-          <div className='mt-1 flex items-center gap-2 rounded-md border border-border p-2 text-sm'>
-            <span className='flex size-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground'>
-              RM
-            </span>
-            <span className='flex-1'>Dr. Ricardo Mendes</span>
-            <Icon name='chevron-down' className='size-3.5 text-muted-foreground' />
-          </div>
-        </div>
-      </div>
+      {checklistGateDecision === 'approved_with_exception' ? (
+        <p className='rounded-md border border-brand-accent/50 bg-highlight p-3 text-xs text-foreground'>
+          Dossiê aprovado com exceção. Dados ausentes permanecerão como campos pendentes
+          na minuta.
+        </p>
+      ) : null}
     </div>
   )
 }
 
-function GenerationStep() {
+function GenerationStep({
+  complete,
+  failed,
+  versionNumber,
+}: {
+  complete: boolean
+  failed: boolean
+  versionNumber?: number
+}) {
   return (
     <div className='space-y-4 py-4 text-center'>
       <div className='mx-auto flex size-16 items-center justify-center rounded-full border-2 border-primary bg-highlight text-primary'>
-        <Icon name='sparkles' className='size-7' />
+        <Icon
+          name={complete ? 'check' : failed ? 'x-circle' : 'sparkles'}
+          className='size-7'
+        />
       </div>
       <div>
         <h3 className='font-serif text-lg font-semibold'>
-          Geração com IA ainda não disponível
+          {complete
+            ? 'Minuta pronta para revisão'
+            : failed
+              ? 'Não foi possível confirmar a geração'
+              : 'A IA está preparando a minuta'}
         </h3>
         <p className='mt-1 text-sm text-muted-foreground'>
-          A seleção do modelo e dos documentos está disponível, mas a geração e o
-          salvamento da peça dependem da integração com o backend.
+          {complete
+            ? `A versão ${versionNumber ? `v${versionNumber}` : 'atual'} foi criada. Escolha abrir no editor ou na revisão técnica.`
+            : failed
+              ? 'Você pode fechar esta janela e verificar o estado na lista de peças.'
+              : 'A geração continua em segundo plano; você pode fechar esta janela e voltar depois.'}
         </p>
       </div>
+      {!complete && !failed ? (
+        <div className='mx-auto h-2 max-w-sm overflow-hidden rounded-full bg-muted'>
+          <div className='h-full w-1/2 animate-pulse rounded-full bg-primary' />
+        </div>
+      ) : null}
     </div>
   )
 }

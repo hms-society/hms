@@ -108,6 +108,71 @@ describe('OrganizeDocumentFileJsonWithOllamaJob', () => {
     )
   })
 
+  it('organizes complete fields from flattened text without label delimiters', async () => {
+    const extractedTextFull =
+      'Nome Vinicius Lopes Machado CPF 123.456.789-09 Cidade São José dos Campos CEP 12233-470'
+    mockAgent.generate.mockImplementationOnce(async () => ({
+      text: JSON.stringify(
+        createSuggestion({
+          extractedFields: [
+            { label: 'Nome', value: 'Vinicius Lopes Machado', confidence: 0.96 },
+            { label: 'CPF', value: '123.456.789-09', confidence: 0.98 },
+            { label: 'Cidade', value: 'São José dos Campos', confidence: 0.91 },
+            { label: 'CEP', value: '12233-470', confidence: 0.97 },
+          ],
+          evidence: [
+            { field: 'Nome', sourceText: 'Nome Vinicius Lopes Machado' },
+            { field: 'CPF', sourceText: 'CPF 123.456.789-09' },
+            { field: 'Cidade', sourceText: 'Cidade São José dos Campos' },
+            { field: 'CEP', sourceText: 'CEP 12233-470' },
+          ],
+        }),
+      ),
+    }))
+
+    await runJob(extractedTextFull)
+
+    expect(mockRepository.recordAnalysis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extractedFields: [
+          expect.objectContaining({ label: 'Nome', value: 'Vinicius Lopes Machado' }),
+          expect.objectContaining({ label: 'CPF', value: '123.456.789-09' }),
+          expect.objectContaining({ label: 'Cidade', value: 'São José dos Campos' }),
+          expect.objectContaining({ label: 'CEP', value: '12233-470' }),
+        ],
+      }),
+    )
+  })
+
+  it('preserves source-supported low-confidence fields for internal review filtering', async () => {
+    const extractedTextFull = 'Nome Vinicius Lopes Machado CPF 123.456.789-09'
+    mockAgent.generate.mockImplementationOnce(async () => ({
+      text: JSON.stringify(
+        createSuggestion({
+          extractedFields: [
+            { label: 'Nome', value: 'Vinicius Lopes Machado', confidence: 0.96 },
+            { label: 'CPF', value: '123.456.789-09', confidence: 0.42 },
+          ],
+          evidence: [
+            { field: 'Nome', sourceText: 'Nome Vinicius Lopes Machado' },
+            { field: 'CPF', sourceText: 'CPF 123.456.789-09' },
+          ],
+        }),
+      ),
+    }))
+
+    await runJob(extractedTextFull)
+
+    expect(mockRepository.recordAnalysis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extractedFields: [
+          expect.objectContaining({ label: 'Nome', confidence: 0.96 }),
+          expect.objectContaining({ label: 'CPF', confidence: 0.42 }),
+        ],
+      }),
+    )
+  })
+
   it('leaves unverified OCR fields empty for manual validation instead of saving bad values', async () => {
     const extractedTextFull = 'Cidade: São José dos Campos\nCEP: 12223-353'
     mockAgent.generate.mockImplementationOnce(async () => ({

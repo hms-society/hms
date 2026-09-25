@@ -41,4 +41,19 @@ describe('ReadOnlyValidatedPanel', () => {
     ).toBeDefined()
     expect(screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/)).toBeNull()
   })
+
+  it('hides low-confidence extracted fields from the read-only result', () => {
+    const document = DocumentValidationDocumentFaker.fake({
+      aiSuggestion: { ollamaJsonOrganizationCaptured: true },
+      extractedFields: [
+        { label: 'Nome', value: 'Vinicius Lopes Machado', confidence: 0.96 },
+        { label: 'Cidade', value: 'São José dos', confidence: 0.42 },
+      ],
+    })
+
+    render(<ReadOnlyValidatedPanel document={document} />)
+
+    expect(screen.getByText('Vinicius Lopes Machado')).toBeDefined()
+    expect(screen.queryByText('São José dos')).toBeNull()
+  })
 })

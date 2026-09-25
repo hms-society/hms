@@ -83,6 +83,8 @@ export interface CaseManagementService {
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
 
+  homologateDossier(caseId: string): Promise<RestResponse<LegalCase>>
+
   listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
 
   getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>

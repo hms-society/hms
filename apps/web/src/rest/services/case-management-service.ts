@@ -77,5 +77,9 @@ export const CaseManagementService = (
     reviewChecklistGate(caseId, request) {
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
     },
+
+    homologateDossier(caseId) {
+      return restClient.patch<LegalCase>(`/cases/${caseId}/dossier-gate/homologation`, {})
+    },
   }
 }

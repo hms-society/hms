@@ -16,6 +16,7 @@ import {
   EditPendingMessageController,
   ApprovePendingMessageController,
   CancelPendingController,
+  HomologateCaseDossierController,
 } from '@/case-management/rest/controllers'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
@@ -30,6 +31,7 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ListMyLegalCasesController,
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
+    HomologateCaseDossierController,
     GetLegalCaseDetailsController,
     CreatePendingController,
     ListCasePendingsController,

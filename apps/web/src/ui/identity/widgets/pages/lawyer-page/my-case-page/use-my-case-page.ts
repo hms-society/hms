@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
+
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
+import { CASE_STAGES } from './case-page-data'
 import { useCaseChecklist } from './hooks/use-case-checklist'
 
 export type UseMyCasePageParams = {
@@ -35,6 +38,49 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     },
   })
   const legalCase = legalCases.find((caseItem) => caseItem.id === caseUuid)
+  const caseDetails = caseQuery.data
+  const caseStatus =
+    caseDetails?.status ?? legalCase?.status ?? LegalCaseStatus.Documentation
+  const dossierApproved = Boolean(
+    caseDetails?.dossierGate.homologatedAt ?? legalCase?.dossierGate.homologatedAt,
+  )
+  const statusPresentation = {
+    [LegalCaseStatus.Documentation]: {
+      label: 'Documentação em formação',
+      stage: 'Documentação',
+      stageStatus: 'Checklist e dossiê',
+    },
+    [LegalCaseStatus.ReadyForLegalProduction]: {
+      label: 'Pronto para produção jurídica',
+      stage: 'Produção Jurídica',
+      stageStatus: 'Aguardando homologação do dossiê',
+    },
+    [LegalCaseStatus.LegalProduction]: {
+      label: 'Produção jurídica',
+      stage: 'Produção Jurídica',
+      stageStatus: 'Em andamento',
+    },
+    [LegalCaseStatus.ProtocolDelivery]: {
+      label: 'Protocolo / entrega',
+      stage: 'Protocolo / Entrega',
+    },
+    [LegalCaseStatus.Execution]: {
+      label: 'Execução',
+      stage: 'Execução',
+    },
+    [LegalCaseStatus.Closed]: {
+      label: 'Encerrado',
+      stage: 'Encerramento',
+    },
+  }[caseStatus]
+  const caseStages = CASE_STAGES.map((stage) => ({
+    ...stage,
+    isActive: stage.label === statusPresentation.stage,
+    status:
+      stage.label === statusPresentation.stage
+        ? statusPresentation.stageStatus
+        : undefined,
+  }))
   const caseTitle = legalCase?.title ?? 'Aposentadoria por Tempo de Contribuição'
   const caseLegalArea = legalCase?.legalArea ?? 'Área jurídica do checklist'
   const caseClientName = legalCase?.clientName ?? 'Antônio Carvalho'
@@ -56,7 +102,10 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     caseLegalArea,
     caseTitle,
     caseUuid,
-    caseDetails: caseQuery.data,
+    caseDetails,
+    caseStatusLabel: statusPresentation.label,
+    caseStages,
+    dossierApproved,
     isLoading: caseQuery.isLoading,
     checklistItems,
     completionPercentage,

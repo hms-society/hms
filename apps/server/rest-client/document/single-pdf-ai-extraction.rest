@@ -48,6 +48,132 @@ Content-Type: application/pdf
 < ../../src/document-engine/database/seed-assets/comprovante_endereco.pdf
 --boundary--
 
+### Upload AI challenge document as a single PDF
+# This request is independent from the image challenge request in single-image-ai-extraction.rest.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="document-ai-challenge.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/document-ai-challenge.pdf
+--boundary--
+
+### Upload fictitious CNIS PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="cnis.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/cnis.pdf
+--boundary--
+
+### Upload fictitious proof-of-address PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="comprovante-residencia.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/comprovante-residencia.pdf
+--boundary--
+
+### Upload fictitious INSS decision PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="decisao-inss.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/decisao-inss.pdf
+--boundary--
+
+### Upload fictitious identity document PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="documento-identificacao.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/documento-identificacao.pdf
+--boundary--
+
+### Upload fictitious INSS protocol PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="protocolo-inss.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/protocolo-inss.pdf
+--boundary--
+
+### Upload fictitious INSS application PDF for AI extraction
+# Send only this PDF per request; run each document request separately.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="requerimento-inss.pdf"
+Content-Type: application/pdf
+
+< ../../src/document-engine/database/seed-assets/requerimento-inss.pdf
+--boundary--
+
 ### List document batches in triage
 GET {{baseUrl}}/document-batches/triage?page=1&limit=10
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

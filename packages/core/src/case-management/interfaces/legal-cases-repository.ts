@@ -13,6 +13,13 @@ export type ReviewChecklistGateRepositoryParams = {
   status: LegalCaseStatus
 }
 
+export type HomologateDossierRepositoryParams = {
+  caseId: string
+  homologatedBy: string
+  expectedStatus: LegalCaseStatus
+  status: LegalCaseStatus
+}
+
 export type CreateCaseWithTeamParams = {
   legalCase: Omit<LegalCaseCreation, 'publicCode'>
   team: Array<Omit<CaseMemberCreation, 'caseId'>>
@@ -30,6 +37,9 @@ export interface LegalCasesRepository {
   ): Promise<readonly LegalCaseSummary[]>
   reviewChecklistGate(
     params: ReviewChecklistGateRepositoryParams,
+  ): Promise<LegalCase | undefined>
+  homologateDossier(
+    params: HomologateDossierRepositoryParams,
   ): Promise<LegalCase | undefined>
   removeAll(): Promise<void>
 }

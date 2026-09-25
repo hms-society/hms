@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
@@ -9,6 +9,7 @@ import { NewCasePieceCard } from './new-case-piece-card'
 import { NewPieceDialog } from './new-piece-dialog'
 import { PieceViewerDialog } from './piece-viewer-dialog'
 import { PieceWorkflowDialog, ReviewActionDialog } from './piece-workflow-dialog'
+import type { CaseDocumentResponse } from '@/rest/services/case-document-production-service'
 import type { CasePiece } from './types'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -33,10 +34,19 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
         id: document.id,
         title: document.title,
         template: 'Modelo documental',
-        author: 'Colaborador do caso',
-        reviewer: 'Revisor do caso',
+        author: 'Solicitante atual',
+        reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
         updatedAt: formatDate(document.versions[0]?.createdAt),
-        status: document.versions[0]?.status === 'approved' ? 'Aprovada' : 'Em revisão técnica',
+        status:
+          document.generation?.status === 'pending' ||
+          document.generation?.status === 'running'
+            ? 'Gerando minuta'
+            : document.generation?.status === 'failed' ||
+                document.generation?.status === 'cancelled'
+              ? 'Falha na geração'
+              : document.versions[0]?.status === 'approved'
+                ? 'Aprovada'
+                : 'Em revisão técnica',
         versions: document.versions.map((version) => ({
           id: version.id,
           label: `v${version.versionNumber}`,
@@ -46,6 +56,33 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
           meta: version.rejectionReason,
         })),
       }))
+    },
+    refetchInterval: (query) =>
+      query.state.data?.some((piece) => piece.status === 'Gerando minuta') ? 3000 : false,
+  })
+  const retryMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      if (!caseId) throw new Error('Caso não identificado.')
+      const response = await caseDocumentProductionService.retryGeneration(
+        caseId,
+        documentId,
+      )
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData<CaseDocumentResponse[]>(
+        ['case-documents', caseId],
+        (current) =>
+          current?.map((document) =>
+            document.id === result.documentId
+              ? {
+                  ...document,
+                  generation: { id: result.documentGenerationId, status: 'pending' },
+                }
+              : document,
+          ),
+      )
     },
   })
   const [isNewPieceOpen, setIsNewPieceOpen] = useState(false)
@@ -67,12 +104,27 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
       <DossierGateBanner approved={dossierApproved} />
       {dossierApproved ? (
         <>
-          {isLoading ? <p className='rounded-md border border-border p-4 text-sm text-muted-foreground'>Carregando peças...</p> : null}
-          {!isLoading && pieces.length === 0 ? <p className='rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground'>Nenhuma peça foi adicionada a este caso.</p> : null}
+          {isLoading ? (
+            <p className='rounded-md border border-border p-4 text-sm text-muted-foreground'>
+              Carregando peças...
+            </p>
+          ) : null}
+          {!isLoading && pieces.length === 0 ? (
+            <p className='rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground'>
+              Nenhuma peça foi adicionada a este caso.
+            </p>
+          ) : null}
           {pieces.map((piece) => (
             <CasePieceCard
               key={piece.id}
               piece={piece}
+              onRetry={() => retryMutation.mutate(piece.id)}
+              isRetrying={retryMutation.isPending && retryMutation.variables === piece.id}
+              retryError={
+                retryMutation.isError && retryMutation.variables === piece.id
+                  ? retryMutation.error.message
+                  : undefined
+              }
               onOpenReview={() => {
                 if (caseId) {
                   void navigateTo('lawyerCasePieceReview', {
@@ -103,6 +155,7 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
       ) : null}
       <NewPieceDialog
         open={isNewPieceOpen}
+        caseId={caseId}
         onOpenChange={setIsNewPieceOpen}
         onGenerated={() => {
           if (caseId) {
@@ -140,9 +193,20 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
 
 function formatDate(value?: string) {
   if (!value) return '—'
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }
 
 function formatVersionStatus(status: string) {
-  return { approved: 'Aprovada', in_review: 'Em revisão', rejected: 'Rejeitada', generating: 'Gerando', generation_failed: 'Falha na geração' }[status] ?? status
+  return (
+    {
+      approved: 'Aprovada',
+      in_review: 'Em revisão',
+      rejected: 'Rejeitada',
+      generating: 'Gerando',
+      generation_failed: 'Falha na geração',
+    }[status] ?? status
+  )
 }

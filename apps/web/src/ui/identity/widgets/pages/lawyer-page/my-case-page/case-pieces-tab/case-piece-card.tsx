@@ -8,13 +8,21 @@ export type CasePieceCardProps = {
   piece: CasePiece
   onOpenReview?: () => void
   onOpenEditor?: () => void
+  onRetry?: () => void
+  isRetrying?: boolean
+  retryError?: string
 }
 
 export function CasePieceCard({
   piece,
   onOpenReview,
   onOpenEditor,
+  onRetry,
+  isRetrying = false,
+  retryError,
 }: CasePieceCardProps) {
+  const canRetry =
+    piece.status === 'Gerando minuta' || piece.status === 'Falha na geração'
   return (
     <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
       <header className='flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between'>
@@ -48,6 +56,15 @@ export function CasePieceCard({
           </Button>
         </div>
         <div className='divide-y divide-border'>
+          {piece.versions.length === 0 ? (
+            <p className='py-2 text-xs text-muted-foreground'>
+              {piece.status === 'Gerando minuta'
+                ? 'A geração está pendente ou em andamento. Se ela ficar parada, você pode iniciar novamente.'
+                : piece.status === 'Falha na geração'
+                  ? 'A geração falhou. Esta peça ainda não tem uma versão para abrir.'
+                  : 'A versão ainda não foi criada.'}
+            </p>
+          ) : null}
           {piece.versions.map((version, index) => (
             <div
               key={version.id}
@@ -91,22 +108,53 @@ export function CasePieceCard({
 
       <footer className='mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <div className='flex flex-wrap gap-2'>
-          <Button size='xs' className='rounded-full' onClick={onOpenReview}>
+          {canRetry ? (
+            <Button
+              variant='outline'
+              size='xs'
+              className='rounded-full'
+              disabled={isRetrying}
+              aria-busy={isRetrying}
+              onClick={onRetry}
+            >
+              <Icon
+                name='refresh-cw'
+                className={`size-3 ${isRetrying ? 'animate-spin' : ''}`}
+              />
+              {isRetrying ? 'Enviando...' : 'Gerar novamente'}
+            </Button>
+          ) : null}
+          <Button
+            size='xs'
+            className='rounded-full'
+            disabled={!piece.versions.length}
+            onClick={onOpenReview}
+          >
             <Icon name='eye' className='size-3' /> Abrir revisão técnica
           </Button>
           <Button
             variant='outline'
             size='xs'
             className='rounded-full'
+            disabled={!piece.versions.length}
             onClick={onOpenEditor}
           >
             <Icon name='pencil' className='size-3' /> Abrir no editor
           </Button>
         </div>
         <span className='text-right text-[11px] text-muted-foreground'>
-          {piece.status === 'Aprovada' ? 'Pronta para protocolo' : 'Protocolo bloqueado até aprovação da revisão'}
+          {piece.status === 'Aprovada'
+            ? 'Pronta para protocolo'
+            : piece.status === 'Gerando minuta'
+              ? 'Aguardando geração'
+              : 'Protocolo bloqueado até aprovação da revisão'}
         </span>
       </footer>
+      {retryError ? (
+        <p role='alert' className='mt-2 text-xs text-destructive'>
+          {retryError}
+        </p>
+      ) : null}
     </article>
   )
 }

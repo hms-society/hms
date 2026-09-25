@@ -12,20 +12,21 @@ export class DocumentJsonOrganizerAgent extends MastraAgent<'document-json-organ
         name: 'Document JSON Organizer',
         model: 'deepseek/deepseek-v4-flash',
         localModelEnvKey: 'OLLAMA_AI_MODEL',
-        instructions: `You organize already extracted OCR text into strict JSON fields.
+        instructions: `You organize already extracted text into structured JSON fields. The input may come from OCR, selectable PDF text, flattened tables, or text with lost line breaks.
 
 Follow these rules:
 - Return JSON only, without markdown fences or commentary.
 - Do not classify the document type.
 - Do not invent fields, values, people, dates, IDs, case IDs, or checklist IDs.
-- Extract a field only when its label and complete value are explicit in the OCR text.
-- Never split a value across adjacent fields or move words between fields.
-- Evidence must quote the exact source text, including the label and complete value.
-- Treat each OCR line formatted as "Label: Value" as one field candidate.
+- Extract every field whose label and complete value can be identified from the source.
+- Do not require a colon, line break, or one-field-per-line formatting. Labels and values may be adjacent in flattened tables or paragraphs.
+- Keep each value complete and stop it at the next identifiable field label. Never move words between adjacent fields or combine neighboring rows.
+- Evidence must quote an exact, contiguous source span containing the field label and only that field's complete value; the source span need not contain a colon.
+- Use surrounding labels, section structure, and document context to identify boundaries, but never use context to invent or complete a value.
 - Never use a document title or section heading as the label for following content.
 - Stop each value before the next labeled field; never combine adjacent table rows.
-- Omit any field whose boundary or complete value is ambiguous.
-- Preserve line and page boundaries as clues; do not combine nearby text by guesswork.
+- If a value is genuinely uncertain, include it only when the source span still supports the proposed value; lower its confidence. Do not guess between conflicting values.
+- Preserve line and page boundaries when present, but also organize flattened text.
 - Preserve labels and values in the OCR text language when possible.
 - Use confidence values between 0 and 1.
 - If no field can be safely confirmed, return an empty extractedFields array and evidence array.`,

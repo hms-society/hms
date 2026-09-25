@@ -32,6 +32,7 @@ describe('useChecklistDossierTab', () => {
   const navigateTo = vi.fn()
   const caseManagementService = {
     addComplementaryChecklistItem: vi.fn(),
+    homologateDossier: vi.fn(),
     listCaseChecklist: vi.fn(),
     reviewChecklistGate: vi.fn(),
   }
@@ -100,6 +101,8 @@ describe('useChecklistDossierTab', () => {
     const wrapper = ({ children }: PropsWithChildren) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     )
+    queryClient.setQueryData(['case-details', 'case-1'], { status: 'documentation' })
+    queryClient.setQueryData(['case-management', 'my-cases'], [])
     caseManagementService.reviewChecklistGate.mockResolvedValue(
       new RestResponse({
         body: {
@@ -155,6 +158,46 @@ describe('useChecklistDossierTab', () => {
     expect(result.current.dossierGateLabel).toBe('Dossiê pendente')
     expect(result.current.canStartLegalWriting).toBe(false)
     expect(result.current.isDecisionReasonDialogOpen).toBe(false)
+    expect(queryClient.getQueryState(['case-details', 'case-1'])?.isInvalidated).toBe(
+      true,
+    )
+    expect(
+      queryClient.getQueryState(['case-management', 'my-cases'])?.isInvalidated,
+    ).toBe(true)
+  })
+
+  it('restores a previously persisted checklist decision after reopening the case', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          caseDetails: {
+            id: 'case-1',
+            status: 'ready_for_legal_production',
+            checklistGate: {
+              decision: CaseChecklistGateDecision.ApprovedWithException,
+              decidedAt: '2026-08-24T12:00:00.000Z',
+              decidedBy: 'collaborator-1',
+              remarks: 'Dispensa da procuração aprovada pelo supervisor.',
+            },
+            dossierGate: {},
+          } as never,
+          checklist: [],
+        }),
+      { wrapper },
+    )
+
+    expect(result.current.checklistGateLabel).toBe('Aprovado com exceção')
+    expect(result.current.checklistGateRemarks).toContain('Dispensa da procuração')
+    expect(result.current.hasChecklistDecision).toBe(true)
+    expect(result.current.canHomologateDossier).toBe(false)
   })
 
   it('requires a decision reason before submitting justified decisions', async () => {

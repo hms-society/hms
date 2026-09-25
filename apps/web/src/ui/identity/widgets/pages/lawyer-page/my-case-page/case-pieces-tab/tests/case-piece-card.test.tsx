@@ -4,35 +4,36 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CasePieceCard } from '../case-piece-card'
 import type { CasePiece } from '../types'
 
+const piece: CasePiece = {
+  id: 'document-1',
+  title: 'Requerimento administrativo',
+  template: 'Modelo Universal',
+  author: 'Solicitante atual',
+  reviewer: '—',
+  updatedAt: '—',
+  status: 'Gerando minuta',
+  versions: [],
+}
+
 describe('CasePieceCard', () => {
   afterEach(cleanup)
 
-  it('opens the technical review and editor destinations independently', () => {
-    const onOpenReviewMock = vi.fn()
-    const onOpenEditorMock = vi.fn()
-    const piece: CasePiece = {
-      id: 'piece-1',
-      title: 'Requerimento administrativo',
-      template: 'Modelo documental',
-      author: 'Colaborador',
-      reviewer: 'Revisor',
-      updatedAt: 'hoje',
-      status: 'Em revisão técnica',
-      versions: [],
-    }
+  it('offers retry for a stuck generation and invokes its handler', () => {
+    const onRetry = vi.fn()
+    render(<CasePieceCard piece={piece} onRetry={onRetry} />)
 
-    render(
-      <CasePieceCard
-        piece={piece}
-        onOpenReview={onOpenReviewMock}
-        onOpenEditor={onOpenEditorMock}
-      />,
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar novamente' }))
 
-    fireEvent.click(screen.getByRole('button', { name: /Abrir revisão técnica/i }))
-    fireEvent.click(screen.getByRole('button', { name: /Abrir no editor/i }))
+    expect(onRetry).toHaveBeenCalledOnce()
+    expect(screen.getByText(/Se ela ficar parada/)).toBeTruthy()
+  })
 
-    expect(onOpenReviewMock).toHaveBeenCalledOnce()
-    expect(onOpenEditorMock).toHaveBeenCalledOnce()
+  it('disables the retry action while a retry request is being sent', () => {
+    render(<CasePieceCard piece={piece} isRetrying onRetry={vi.fn()} />)
+
+    const button = screen.getByRole('button', { name: 'Enviando...' })
+    expect(button).toHaveProperty('disabled', true)
+    expect(button.getAttribute('aria-busy')).toBe('true')
+    expect(button.querySelector('svg')?.classList.contains('animate-spin')).toBe(true)
   })
 })

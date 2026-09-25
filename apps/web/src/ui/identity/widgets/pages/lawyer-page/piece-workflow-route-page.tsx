@@ -229,15 +229,7 @@ export function PieceWorkflowRoutePage({
           </div>
           <div className='min-w-0 overflow-y-auto bg-muted/50 p-4 sm:p-6'>
             <div className='mx-auto max-w-[900px] overflow-hidden rounded-lg border bg-card shadow-sm'>
-              {version.storagePath ? (
-                <PieceFilePreview
-                  caseId={caseId}
-                  documentId={documentId}
-                  versionId={version.id}
-                  storagePath={version.storagePath}
-                  versionNumber={version.versionNumber}
-                />
-              ) : currentContent ? (
+              {currentContent ? (
                 <DocumentEditor
                   content={currentContent}
                   onChange={handleChangeContent}
@@ -260,24 +252,67 @@ export function PieceWorkflowRoutePage({
             </div>
           </div>
           <aside className='border-l bg-card p-4'>
-            <h2 className='font-serif font-semibold'>Documentos do dossiê</h2>
             {adjustmentsRequested ? (
               <div className='mt-3 rounded-md border border-attention bg-attention/20 p-3 text-sm'>
                 Ajustes solicitados pela revisão técnica. Faça as correções antes de
                 resubmeter a peça.
               </div>
             ) : null}
-            <p className='mt-1 text-xs text-muted-foreground'>
-              Referências usadas na elaboração desta peça.
-            </p>
+            <h2 className='font-serif font-semibold'>
+              Referências usadas na elaboração desta peça
+            </h2>
             <ul className='mt-4 space-y-2 text-sm'>
-              {['CNIS', 'CTPS', 'Certidão de Tempo de Contribuição'].map((name) => (
-                <li key={name} className='flex items-center gap-2 rounded-md border p-3'>
-                  <Icon name='file-text' className='size-4 text-primary' />
-                  {name}
+              {(document.generation?.referenceDocuments ?? []).map((reference) => (
+                <li
+                  key={reference.id}
+                  className='flex items-start gap-2 rounded-md border p-3'
+                >
+                  <Icon
+                    name='file-text'
+                    className='mt-0.5 size-4 shrink-0 text-primary'
+                  />
+                  <span className='min-w-0 break-words'>
+                    <span className='block font-medium'>{reference.fileName}</span>
+                    {reference.checklistItemLabel ? (
+                      <span className='mt-0.5 block text-xs text-muted-foreground'>
+                        {reference.checklistItemLabel}
+                      </span>
+                    ) : null}
+                  </span>
                 </li>
               ))}
             </ul>
+            {!document.generation?.referenceDocuments?.length ? (
+              <p className='mt-3 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground'>
+                Nenhum documento de referência foi registrado para esta geração.
+              </p>
+            ) : null}
+            <section className='mt-5 border-t pt-4'>
+              <h3 className='font-serif font-semibold'>Variáveis pendentes</h3>
+              <p className='mt-1 text-xs text-muted-foreground'>
+                Valores não localizados nos documentos de referência; complete-os no texto
+                da peça, se necessário.
+              </p>
+              {version.pendingVariables.length ? (
+                <ul className='mt-3 space-y-2'>
+                  {version.pendingVariables.map((variable) => (
+                    <li
+                      key={variable.marker}
+                      className='rounded-md border bg-muted/30 p-3 text-sm'
+                    >
+                      <span className='block font-medium'>{variable.label}</span>
+                      <span className='mt-1 block text-xs text-muted-foreground'>
+                        Não informado nos documentos
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className='mt-3 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground'>
+                  Nenhuma variável pendente nesta versão.
+                </p>
+              )}
+            </section>
             <p className='mt-3 text-xs text-muted-foreground'>
               A edição e o salvamento de novas versões dependem da integração de
               persistência.
