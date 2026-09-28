@@ -7,6 +7,7 @@ import type {
 import { SYSTEM_DOCUMENT_TEMPLATE_VARIABLES } from '@hms/core/document-production/domain/structures'
 import { documentSpecificationConfigurationUpdateSchema } from '@hms/validation/document-production'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DocumentEditorActions } from '@/ui/document-production/widgets/components/document-editor'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
@@ -334,8 +335,8 @@ export function useDocumentSpecificationPage({
     )
   }
 
-  const handleEditorReady = useCallback((insert: (name: string) => void) => {
-    setInsertVariable(() => insert)
+  const handleEditorReady = useCallback((actions: DocumentEditorActions) => {
+    setInsertVariable(() => actions.insertVariable)
   }, [])
 
   function handleApplicationScope(value: string) {
