@@ -52,8 +52,8 @@ The reviewed TypeScript addition count uses the repository size-gate rule: added
 | Order | Proposed branch | Scope | TypeScript additions | Base / dependency | Criteria and outcome |
 | --- | --- | --- | ---: | --- | --- |
 | 1 | `codex/agenda-core-validation` | Core contracts/use cases, shared schemas, migration-independent Spec/Plan/Evaluation/design bundle, timestamp precision Rule clarification and minimal Validation lockfile entry | 3,448 | `develop`; independent foundation | `RF-01`–`RF-08`; `CA-01`–`CA-09`; domain/persistence contracts. |
-| 2 | `codex/agenda-server` | Server modules, REST/controllers, repositories, consultation synchronization/outbox, migration 0053–0055, fixtures and REST examples | 3,724 | Base on PR 1 | `CA-02`–`CA-07`, `CA-09`; real persistence and access boundaries. |
-| 3 | `codex/agenda-lawyer-selector` | Shared Identity lawyer selector extraction and existing Intake integration | 633 | Base on PR 2 | Reusable dependency required by the reschedule flow; supports `RF-06`/`CA-06` without duplicating Identity search rules. |
+| 2 | `codex/agenda-server` | Server modules, REST/controllers, repositories, consultation synchronization/outbox, migration 0053–0055, fixtures and REST examples | 3,735 | Base on PR 1 | `CA-02`–`CA-07`, `CA-09`; real persistence and access boundaries. |
+| 3 | `codex/agenda-lawyer-selector` | Shared Identity lawyer selector extraction and existing Intake integration | 342 | Base on PR 2 | Reusable dependency required by the reschedule flow; supports `RF-06`/`CA-06` without duplicating Identity search rules. |
 | 4 | `codex/agenda-web` | `/agenda/consultas`, typed REST consumers, calendar/dialog widgets and tests, generated route metadata; removes only blank placeholder consultation pages/routes | 4,611 | Base on PR 3 | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
 
 Every slice remains under the 5,000-line limit. Push and publish all four as ready-for-review PRs in this dependency order. Keep inherited test-integrity tooling, unrelated Identity/Intake test edits, the generated local Playwright snapshot and other dirty user files outside the branches.
