@@ -14,6 +14,7 @@ import {
   DrizzleClientsRepository,
   DrizzleCollaboratorRegistrationAttemptsRepository,
   DrizzleIdentityTransaction,
+  DrizzleCalendarIdentityProvider,
 } from '@/identity/database/drizzle/repositories'
 import {
   DrizzleIntakeClientsRepository,
@@ -39,6 +40,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleIdentityTransaction,
     DrizzleIntakeClientsRepository,
     DrizzleIntakeResponsiblesRepository,
+    DrizzleCalendarIdentityProvider,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -63,6 +65,10 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       provide: IDENTITY_REPOSITORIES.intakeResponsibles,
       useExisting: DrizzleIntakeResponsiblesRepository,
     },
+    {
+      provide: IDENTITY_REPOSITORIES.calendarProvider,
+      useExisting: DrizzleCalendarIdentityProvider,
+    },
     IdentitySeeder,
   ],
   exports: [
@@ -74,6 +80,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     IDENTITY_REPOSITORIES.transaction,
     IDENTITY_REPOSITORIES.intakeClients,
     IDENTITY_REPOSITORIES.intakeResponsibles,
+    IDENTITY_REPOSITORIES.calendarProvider,
     IdentitySeeder,
   ],
 })

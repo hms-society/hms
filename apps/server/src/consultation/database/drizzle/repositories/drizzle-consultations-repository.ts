@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm'
 
 import { DrizzleConsultationMapper } from '@/consultation/database/drizzle/mappers'
 import { consultationModel } from '@/consultation/database/drizzle/models'
+import { DatabaseTransactionContext } from '@/shared/database/drizzle/database-transaction-context'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -20,12 +21,17 @@ export class DrizzleConsultationsRepository
   constructor(
     drizzle: DrizzleClient,
     private readonly mapper: DrizzleConsultationMapper,
+    private readonly transactionContext: DatabaseTransactionContext,
   ) {
     super(drizzle)
   }
 
+  private get executor() {
+    return this.transactionContext.get() ?? this.database
+  }
+
   async add(consultation: Consultation) {
-    const [record] = await this.database
+    const [record] = await this.executor
       .insert(consultationModel)
       .values({ ...consultation })
       .onConflictDoNothing({ target: consultationModel.intakeId })
@@ -48,7 +54,7 @@ export class DrizzleConsultationsRepository
   async addMany(consultations: readonly Consultation[]) {
     if (consultations.length === 0) return []
 
-    const records = await this.database
+    const records = await this.executor
       .insert(consultationModel)
       .values(consultations.map((consultation) => ({ ...consultation })))
       .returning()
@@ -57,7 +63,7 @@ export class DrizzleConsultationsRepository
   }
 
   async findById(consultationId: string) {
-    const [record] = await this.database
+    const [record] = await this.executor
       .select()
       .from(consultationModel)
       .where(eq(consultationModel.id, consultationId))
@@ -67,7 +73,7 @@ export class DrizzleConsultationsRepository
   }
 
   async findByIntakeId(intakeId: string) {
-    const [record] = await this.database
+    const [record] = await this.executor
       .select()
       .from(consultationModel)
       .where(eq(consultationModel.intakeId, intakeId))
@@ -77,7 +83,7 @@ export class DrizzleConsultationsRepository
   }
 
   async replace(consultationId: string, changes: ConsultationUpdate) {
-    const [record] = await this.database
+    const [record] = await this.executor
       .update(consultationModel)
       .set({ ...changes, updatedAt: new Date() })
       .where(eq(consultationModel.id, consultationId))
@@ -87,6 +93,6 @@ export class DrizzleConsultationsRepository
   }
 
   async removeAll() {
-    await this.database.delete(consultationModel)
+    await this.executor.delete(consultationModel)
   }
 }
