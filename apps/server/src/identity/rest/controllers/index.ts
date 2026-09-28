@@ -16,6 +16,8 @@ export { RemoveCancelledCollaboratorController } from '@/identity/rest/controlle
 export { UpdateCollaboratorController } from '@/identity/rest/controllers/update-collaborator.controller'
 export { RegisterClientController } from '@/identity/rest/controllers/register-client.controller'
 export { RegisterThirdPartyController } from '@/identity/rest/controllers/register-third-party.controller'
+export { ListThirdPartiesController } from '@/identity/rest/controllers/list-third-parties.controller'
+export { GetThirdPartyController } from '@/identity/rest/controllers/get-third-party.controller'
 export { SignInController } from '@/identity/rest/controllers/sign-in.controller'
 export { ListClientsController } from '@/identity/rest/controllers/list-clients.controller'
 export { ListActiveCollaboratorsController } from '@/identity/rest/controllers/list-active-collaborators.controller'

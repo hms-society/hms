@@ -3,6 +3,8 @@ import type { TaxId } from '../domain/structures'
 
 export interface ThirdPartiesRepository {
   add(thirdParty: ThirdPartyCreation): Promise<ThirdParty | undefined>
+  findById(thirdPartyId: string): Promise<ThirdParty | undefined>
+  findAll(): Promise<ThirdParty[]>
   findByTaxId(
     taxId: TaxId<'cnpj' | 'official_registration' | 'other_national_document'>,
   ): Promise<ThirdParty | undefined>

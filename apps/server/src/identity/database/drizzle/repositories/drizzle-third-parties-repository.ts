@@ -7,7 +7,7 @@ import { thirdPartyModel } from '@/identity/database/drizzle/models'
 import { DrizzleThirdPartyMapper } from '@/identity/database/drizzle/mappers'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { eq, and } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 @Injectable()
 export class DrizzleThirdPartiesRepository
@@ -31,6 +31,25 @@ export class DrizzleThirdPartiesRepository
     return createdThirdParty
       ? this.thirdPartyMapper.toDomain(createdThirdParty)
       : undefined
+  }
+
+  async findById(thirdPartyId: string): Promise<ThirdParty | undefined> {
+    const [thirdParty] = await this.database
+      .select()
+      .from(thirdPartyModel)
+      .where(eq(thirdPartyModel.id, thirdPartyId))
+      .limit(1)
+
+    return thirdParty ? this.thirdPartyMapper.toDomain(thirdParty) : undefined
+  }
+
+  async findAll(): Promise<ThirdParty[]> {
+    const thirdParties = await this.database
+      .select()
+      .from(thirdPartyModel)
+      .orderBy(desc(thirdPartyModel.createdAt))
+
+    return thirdParties.map((thirdParty) => this.thirdPartyMapper.toDomain(thirdParty))
   }
 
   async findByTaxId(
