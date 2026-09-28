@@ -113,7 +113,8 @@ export const CollaboratorRegisterDialog = (props: CollaboratorRegisterDialogProp
                       placeholder='+55 (11) 99999-9999'
                     />
                     <p className='mt-1 text-[11px] text-muted-foreground'>
-                      Número institucional corporativo do advogado (obrigatório para WhatsApp WABA)
+                      Número institucional corporativo do advogado (obrigatório para
+                      WhatsApp WABA)
                     </p>
                   </Field>
                 )}

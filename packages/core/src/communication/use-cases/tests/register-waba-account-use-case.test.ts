@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { RegisterWabaAccountUseCase } from '../register-waba-account-use-case'
-import type {
-  WhatsappChannelRepository,
-  MetaCloudApiClient,
-} from '../../interfaces'
+import type { WhatsappChannelRepository, MetaCloudApiClient } from '../../interfaces'
 import type { WhatsappChannel } from '../../domain/entities'
 
 describe('RegisterWabaAccountUseCase', () => {
@@ -51,9 +48,9 @@ describe('RegisterWabaAccountUseCase', () => {
       'phone_999999',
       'valid_meta_access_token',
     )
-    expect(
-      mockWhatsappChannelRepository.disableChannelByLawyerId,
-    ).toHaveBeenCalledWith('lawyer-uuid-123')
+    expect(mockWhatsappChannelRepository.disableChannelByLawyerId).toHaveBeenCalledWith(
+      'lawyer-uuid-123',
+    )
     expect(mockWhatsappChannelRepository.save).toHaveBeenCalled()
 
     expect(result.assignedLawyerId).toBe('lawyer-uuid-123')

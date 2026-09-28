@@ -208,7 +208,8 @@ export const CollaboratorDetailsPage = ({
                     <Badge variant='success'>Ativo (1:1)</Badge>
                   </div>
                   <p className='text-xs text-muted-foreground mt-0.5'>
-                    Status da Meta: Verde (GREEN) · Transmissões e atendimento 24h ativados
+                    Status da Meta: Verde (GREEN) · Transmissões e atendimento 24h
+                    ativados
                   </p>
                 </div>
               </div>

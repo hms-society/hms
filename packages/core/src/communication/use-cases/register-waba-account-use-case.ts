@@ -1,9 +1,6 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 import type { WhatsappChannel } from '../domain/entities'
-import type {
-  WhatsappChannelRepository,
-  MetaCloudApiClient,
-} from '../interfaces'
+import type { WhatsappChannelRepository, MetaCloudApiClient } from '../interfaces'
 
 type Request = {
   readonly lawyerId: string

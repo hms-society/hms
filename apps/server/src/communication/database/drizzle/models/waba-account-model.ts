@@ -1,10 +1,7 @@
 import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { userModel } from '@/identity/database/drizzle/models/user-model'
 
-export const wabaAccountStatusEnum = pgEnum('waba_account_status', [
-  'active',
-  'disabled',
-])
+export const wabaAccountStatusEnum = pgEnum('waba_account_status', ['active', 'disabled'])
 
 export const whatsappChannelQualityEnum = pgEnum('whatsapp_channel_quality', [
   'GREEN',

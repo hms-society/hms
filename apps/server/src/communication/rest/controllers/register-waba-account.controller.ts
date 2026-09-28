@@ -14,7 +14,10 @@ import { ZodValidationPipe } from 'nestjs-zod'
 import { AuthGuard } from '@/identity/guards'
 import { RegisterWabaAccountDto } from '../dtos/register-waba-account.dto'
 import { RegisterWabaAccountUseCase } from '@hms/core/communication/use-cases'
-import type { UsersRepository, CollaboratorsRepository } from '@hms/core/identity/interfaces'
+import type {
+  UsersRepository,
+  CollaboratorsRepository,
+} from '@hms/core/identity/interfaces'
 
 @Controller('communication/waba')
 @UseGuards(AuthGuard)

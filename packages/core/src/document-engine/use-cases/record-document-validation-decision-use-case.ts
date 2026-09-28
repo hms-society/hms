@@ -109,7 +109,12 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
-    if (checklistItemId && caseId && clientId && status === DocumentValidationStatus.Valid) {
+    if (
+      checklistItemId &&
+      caseId &&
+      clientId &&
+      status === DocumentValidationStatus.Valid
+    ) {
       await this.tryLinkValidatedDocumentToChecklist({
         caseId,
         clientId,
@@ -120,7 +125,11 @@ export class RecordDocumentValidationDecisionUseCase {
       })
     }
 
-    if (checklistItemId && decisionRequest.caseId && status !== DocumentValidationStatus.Valid) {
+    if (
+      checklistItemId &&
+      decisionRequest.caseId &&
+      status !== DocumentValidationStatus.Valid
+    ) {
       const pendingReason = this.getPendingReason(request.decision)
 
       if (pendingReason) {
