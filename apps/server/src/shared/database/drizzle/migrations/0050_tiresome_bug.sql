@@ -1,0 +1,1 @@
+ALTER TYPE "public"."case_checklist_item_status" ADD VALUE 'in_analysis' BEFORE 'validated';

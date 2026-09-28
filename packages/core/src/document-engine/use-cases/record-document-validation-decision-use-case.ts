@@ -109,18 +109,31 @@ export class RecordDocumentValidationDecisionUseCase {
       )
     }
 
-    if (checklistItemId && caseId && clientId && status === DocumentValidationStatus.Valid) {
-      await this.tryLinkValidatedDocumentToChecklist({
-        caseId,
-        clientId,
-        checklistItemId,
+    if (status === DocumentValidationStatus.Valid) {
+      const linkRequest: Parameters<
+        CaseChecklistUpdateProvider['linkValidatedDocumentToChecklist']
+      >[0] = {
         documentFileId: request.documentFileId,
-        documentFileName: currentDocument.fileName,
         validatedBy: request.reviewedBy,
-      })
+      }
+
+      if (checklistItemId && caseId && clientId) {
+        Object.assign(linkRequest, {
+          caseId,
+          clientId,
+          checklistItemId,
+          documentFileName: currentDocument.fileName,
+        })
+      }
+
+      await this.tryLinkValidatedDocumentToChecklist(linkRequest)
     }
 
-    if (checklistItemId && decisionRequest.caseId && status !== DocumentValidationStatus.Valid) {
+    if (
+      checklistItemId &&
+      decisionRequest.caseId &&
+      status !== DocumentValidationStatus.Valid
+    ) {
       const pendingReason = this.getPendingReason(request.decision)
 
       if (pendingReason) {
@@ -309,11 +322,11 @@ export class RecordDocumentValidationDecisionUseCase {
   }
 
   private async tryLinkValidatedDocumentToChecklist(request: {
-    caseId: string
-    clientId: string
-    checklistItemId: string
+    caseId?: string
+    clientId?: string
+    checklistItemId?: string
     documentFileId: string
-    documentFileName: string
+    documentFileName?: string
     validatedBy: string
   }) {
     await this.caseChecklistUpdateProvider?.linkValidatedDocumentToChecklist(request)

@@ -61,6 +61,13 @@ describe('CasoDetalheChecklistPage piece entry point', () => {
       pendingItemsCount: 0,
       validatedItemsCount: 0,
       handleOpenChecklistTab: vi.fn(),
+      handleClosePortalAccessDialog: vi.fn(),
+      handleCopyPortalLink: vi.fn(),
+      handleGeneratePortalLink: vi.fn(),
+      isGeneratingPortalLink: false,
+      portalAccessError: null,
+      portalAccessExpiresAt: null,
+      portalAccessUrl: null,
       setActiveTab: setActiveTabMock,
     })
     const queryClient = new QueryClient()
@@ -104,6 +111,13 @@ describe('CasoDetalheChecklistPage piece entry point', () => {
       pendingItemsCount: 0,
       validatedItemsCount: 0,
       handleOpenChecklistTab: vi.fn(),
+      handleClosePortalAccessDialog: vi.fn(),
+      handleCopyPortalLink: vi.fn(),
+      handleGeneratePortalLink: vi.fn(),
+      isGeneratingPortalLink: false,
+      portalAccessError: null,
+      portalAccessExpiresAt: null,
+      portalAccessUrl: null,
       setActiveTab: setActiveTabMock,
     })
     const queryClient = new QueryClient()

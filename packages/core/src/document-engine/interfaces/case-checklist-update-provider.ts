@@ -1,16 +1,21 @@
 export type LinkValidatedDocumentToChecklistRequest = {
-  caseId: string
-  clientId: string
-  checklistItemId: string
+  caseId?: string
+  clientId?: string
+  checklistItemId?: string
   documentFileId: string
-  documentFileName: string
+  documentFileName?: string
   validatedBy: string
+}
+
+export type MarkDocumentResendRequestedRequest = {
+  documentFileId: string
 }
 
 export interface CaseChecklistUpdateProvider {
   linkValidatedDocumentToChecklist(
     request: LinkValidatedDocumentToChecklistRequest,
   ): Promise<void>
+  markDocumentResendRequested(request: MarkDocumentResendRequestedRequest): Promise<void>
 
   linkPendingDocumentToChecklist(request: {
     checklistItemId: string

@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
+    "check:complexity": "node ../../scripts/check-complexity.mjs --scope apps/web",
+    "check:lint": "biome check src",
+    "check:types": "tsc --noEmit",
     "dev": "vite dev --port 3000",
+    "format": "biome format",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
@@ -12,10 +16,7 @@
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests --testTimeout=30000",
     "test:integration": "playwright test",
-    "test:integration:ui": "playwright test --ui",
-    "format": "biome format",
-    "check:code": "biome check src",
-    "check:types": "tsc --noEmit"
+    "test:integration:ui": "playwright test --ui"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",

@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: web-app-ci-pr-${{ github.event.pull_request.number }}
@@ -39,7 +40,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}"
           changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|\.github/workflows/web-app-ci\.yaml$|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(apps/web/|\.github/workflows/web-app-ci\.yaml$|dependency-cruiser\.config\.mjs$|package\.json$|pnpm-lock\.yaml$|turbo\.json$|packages/core/|packages/validation/|scripts/write-coverage-report\.mjs$)'; then
             echo 'relevant=true' >> "$GITHUB_OUTPUT"
             echo 'Web changes detected.'
           else
@@ -72,17 +73,63 @@ jobs:
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter web check:architecture
 
-      - name: Code checks
+      - name: Lint checks
         if: steps.scope.outputs.relevant == 'true'
-        run: pnpm --filter web check:code
+        run: pnpm --filter web check:lint
 
       - name: Type checks
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter web check:types
 
-      - name: Test
+      - name: Run tests with coverage
+        id: coverage
         if: steps.scope.outputs.relevant == 'true'
-        run: pnpm --filter web test
+        run: pnpm --filter web test:coverage
+
+      - name: Write Web coverage report
+        if: always() && steps.scope.outputs.relevant == 'true' && hashFiles('apps/web/coverage/coverage-summary.json') != ''
+        run: node scripts/write-coverage-report.mjs web apps/web/coverage/coverage-summary.json apps/web/coverage/coverage-comment.md
+        env:
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+
+      - name: Publish Web coverage on pull request
+        if: always() && steps.scope.outputs.relevant == 'true' && github.event.pull_request.head.repo.full_name == github.repository && hashFiles('apps/web/coverage/coverage-comment.md') != ''
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('node:fs')
+            const marker = '<!-- coverage-report:web -->'
+            const body = fs.readFileSync('apps/web/coverage/coverage-comment.md', 'utf8')
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            })
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker),
+            )
+            const request = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            }
+            if (existing) {
+              await github.rest.issues.updateComment({ ...request, comment_id: existing.id })
+            } else {
+              await github.rest.issues.createComment({
+                ...request,
+                issue_number: context.issue.number,
+              })
+            }
+
+      - name: Upload Web coverage artifact
+        if: always() && steps.scope.outputs.relevant == 'true' && hashFiles('apps/web/coverage/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage-${{ github.run_id }}
+          path: apps/web/coverage/
+          retention-days: 14
 
       - name: Install Playwright browser
         if: steps.scope.outputs.relevant == 'true'

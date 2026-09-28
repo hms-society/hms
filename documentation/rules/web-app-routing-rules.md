@@ -326,12 +326,12 @@ For route changes, run the checks in this order:
 
 ```bash
 pnpm --filter web generate-routes
-pnpm --filter web check:code
+pnpm --filter web check:lint
 pnpm --filter web check:types
 pnpm --filter web test
 ```
 
-If `check:code` reports unrelated pre-existing findings, identify them clearly;
+If `check:lint` reports unrelated pre-existing findings, identify them clearly;
 do not weaken Biome rules or edit unrelated files merely to hide the failure.
 
 For route, authentication, form, search, or REST changes, also run the focused

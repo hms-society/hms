@@ -7,7 +7,6 @@ import {
   useCallback,
   useRef,
 } from 'react'
-import { useClientsQuery } from '@/ui/identity/hooks/use-clients-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { playNotificationBeep } from '@/ui/shared/utils/audio-notifier'
 
@@ -28,16 +27,11 @@ const CommunicationContext = createContext<CommunicationContextType | undefined>
 export const CommunicationProvider = ({ children }: { children: ReactNode }) => {
   const [unreadChatIds, setUnreadChatIds] = useState<string[]>([])
   const [activeClientId, setActiveClientIdState] = useState<string>('')
-  const [isInitialized, setIsInitialized] = useState(false)
+  const activeClientIdRef = useRef('')
+  const hasInitializedUnreadChats = useRef(false)
   const lastInboundCountMap = useRef<Record<string, number>>({})
 
   const { communicationService } = useRestContext()
-
-  // Automatically fetch clients with polling interval
-  const { clientsPage } = useClientsQuery({
-    page: 1,
-    limit: 50,
-  })
 
   const markAsRead = useCallback((clientId: string) => {
     if (!clientId) return
@@ -49,6 +43,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
 
   const setActiveClientId = useCallback(
     (clientId: string) => {
+      activeClientIdRef.current = clientId
       setActiveClientIdState(clientId)
       if (clientId) {
         markAsRead(clientId)
@@ -66,71 +61,34 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   }, [])
 
   const initializeUnreadChats = useCallback((ids: string[]) => {
-    setIsInitialized((prevInitialized) => {
-      if (prevInitialized) return prevInitialized
-      setUnreadChatIds(ids)
-      return true
-    })
+    if (hasInitializedUnreadChats.current) return
+    hasInitializedUnreadChats.current = true
+    setUnreadChatIds(ids)
   }, [])
 
-  // Poll client communications to detect initial & new inbound messages
   useEffect(() => {
-    const clients = (clientsPage?.data as any[]) || []
-    if (!clients || !Array.isArray(clients) || clients.length === 0) return
+    let isActive = true
+    let timer: ReturnType<typeof setTimeout> | undefined
 
-    let isMounted = true
-
-    const checkNewMessages = async () => {
+    async function checkNewMessages() {
       try {
-        const results = await Promise.all(
-          clients.map(async (item) => {
-            const c = item.client || item
-            if (!c?.id) return null
+        const response = await communicationService.listClientCommunicationSummaries()
+        if (response.isFailure) response.throwError()
+        if (!isActive) return
 
-            try {
-              const response: any = await communicationService.listClientCommunications(
-                c.id,
-              )
-              let msgs: any[] = []
-              if (Array.isArray(response)) {
-                msgs = response
-              } else if (response?.body && Array.isArray(response.body)) {
-                msgs = response.body
-              } else if (response?.data && Array.isArray(response.data)) {
-                msgs = response.data
-              }
-
-              const inboundCount = msgs.filter(
-                (m: any) => m.direction === 'inbound',
-              ).length
-              const lastMsg = msgs[0]
-              const isLastMessageInbound = lastMsg?.direction === 'inbound'
-              return { clientId: c.id, inboundCount, isLastMessageInbound }
-            } catch (_err) {
-              return null
-            }
-          }),
-        )
-
-        if (!isMounted) return
-
-        for (const res of results) {
-          if (!res) continue
-          const { clientId, inboundCount, isLastMessageInbound } = res
+        for (const { clientId, inboundCount, isLastMessageInbound } of response.body) {
           const prevCount = lastInboundCountMap.current[clientId]
 
           if (prevCount === undefined) {
-            // Carga inicial: se a última mensagem da conversa for do cliente (não respondida), exibe badge sem som
             lastInboundCountMap.current[clientId] = inboundCount
-            if (isLastMessageInbound && clientId !== activeClientId) {
+            if (isLastMessageInbound && clientId !== activeClientIdRef.current) {
               setUnreadChatIds((prev) =>
                 prev.includes(clientId) ? prev : [...prev, clientId],
               )
             }
           } else if (inboundCount > prevCount) {
-            // Nova mensagem recebida durante a sessão
             lastInboundCountMap.current[clientId] = inboundCount
-            if (clientId === activeClientId) {
+            if (clientId === activeClientIdRef.current) {
               markAsRead(clientId)
             } else {
               addUnreadChat(clientId)
@@ -138,29 +96,21 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
           }
         }
 
-        if (!isInitialized) {
-          setIsInitialized(true)
-        }
+        hasInitializedUnreadChats.current = true
       } catch (_err) {
-        // Ignora erros de polling temporários
+        // A failed poll is retried after the interval without overlapping requests.
+      } finally {
+        if (isActive) timer = setTimeout(checkNewMessages, 10_000)
       }
     }
 
-    checkNewMessages()
+    void checkNewMessages()
 
-    const timer = setInterval(checkNewMessages, 10000)
     return () => {
-      isMounted = false
-      clearInterval(timer)
+      isActive = false
+      if (timer) clearTimeout(timer)
     }
-  }, [
-    clientsPage,
-    activeClientId,
-    communicationService,
-    addUnreadChat,
-    markAsRead,
-    isInitialized,
-  ])
+  }, [communicationService, addUnreadChat, markAsRead])
 
   const hasUnread = unreadChatIds.length > 0
 

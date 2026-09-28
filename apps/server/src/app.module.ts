@@ -13,6 +13,7 @@ import { DOCUMENT_ENGINE_INNGEST_FUNCTIONS } from '@/document-engine/messaging/d
 import { IntakeModule } from '@/intake/intake.module'
 import { INTAKE_INNGEST_FUNCTIONS } from '@/intake/messaging/intake-messaging.module'
 import { IdentityModule } from '@/identity/identity.module'
+import { IdentityAccessModule } from '@/identity/identity-access.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedModule } from '@/shared/shared.module'
 import { SchedulingModule } from '@/scheduling/database/drizzle/repositories/scheduling.module'
@@ -27,6 +28,7 @@ import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.modul
 
 @Module({
   imports: [
+    IdentityAccessModule,
     SharedModule,
     IdentityModule,
     LegalCatalogModule,

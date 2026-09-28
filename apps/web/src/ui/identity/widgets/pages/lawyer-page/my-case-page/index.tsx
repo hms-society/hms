@@ -12,6 +12,7 @@ import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { CasePiecesTab } from './case-pieces-tab'
 import { NewPieceDialog } from './case-pieces-tab/new-piece-dialog'
 import { OverviewTab } from './overview-tab'
+import { PortalAccessDialog } from './portal-access-dialog'
 import { useMyCasePage } from './use-my-case-page'
 
 export type CasoDetalheChecklistPageProps = {
@@ -38,6 +39,12 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     pendingItemsCount,
     validatedItemsCount,
     handleOpenChecklistTab,
+    handleClosePortalAccessDialog,
+    handleCopyPortalLink,
+    handleGeneratePortalLink,
+    isGeneratingPortalLink,
+    portalAccessExpiresAt,
+    portalAccessUrl,
     setActiveTab,
   } = useMyCasePage({ caseId })
 
@@ -101,6 +108,16 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             >
               <Icon name='plus' className='size-3' />
               Nova tarefa
+            </Button>
+            <Button
+              variant='outline'
+              size='xs'
+              className='rounded-full border-primary bg-background text-primary hover:bg-primary/10'
+              disabled={isGeneratingPortalLink}
+              onClick={handleGeneratePortalLink}
+            >
+              <Icon name='link' className='size-3' />
+              {isGeneratingPortalLink ? 'Gerando link...' : 'Gerar link para terceiro'}
             </Button>
             <Button
               size='xs'
@@ -249,6 +266,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             })
           }
         }}
+      />
+      <PortalAccessDialog
+        expiresAt={portalAccessExpiresAt}
+        onCopy={handleCopyPortalLink}
+        onOpenChange={(open) => {
+          if (!open) handleClosePortalAccessDialog()
+        }}
+        open={Boolean(portalAccessUrl)}
+        url={portalAccessUrl}
       />
     </div>
   )

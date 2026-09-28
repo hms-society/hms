@@ -4,6 +4,7 @@ import { CommunicationMessagingModule } from '@/communication/messaging/communic
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { ListClientCommunicationsController } from '@/communication/rest/controllers/list-client-communications.controller'
+import { ListClientCommunicationSummariesController } from '@/communication/rest/controllers/list-client-communication-summaries.controller'
 import { SendCommunicationController } from '@/communication/rest/controllers/send-communication.controller'
 import { CommunicationSeeder } from '@/communication/database/communication-seeder'
 import { COMMUNICATION_REPOSITORIES } from '@/communication/constants/communication-repositories'
@@ -20,7 +21,11 @@ import { CommunicationModule as SharedCommunicationModule } from '@/shared/commu
     ProvisionModule,
     SharedCommunicationModule,
   ],
-  controllers: [ListClientCommunicationsController, SendCommunicationController],
+  controllers: [
+    ListClientCommunicationsController,
+    ListClientCommunicationSummariesController,
+    SendCommunicationController,
+  ],
   providers: [
     CommunicationSeeder,
     DrizzlePrivateMessagesRepository,
