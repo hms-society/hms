@@ -1,0 +1,65 @@
+import { Injectable } from '@nestjs/common'
+import type { ThirdParty, ThirdPartyCreation } from '@hms/core/identity/domain/entities'
+import type { TaxId } from '@hms/core/identity/domain/structures'
+import type { ThirdPartiesRepository } from '@hms/core/identity/interfaces'
+
+import { thirdPartyModel } from '@/identity/database/drizzle/models'
+import { DrizzleThirdPartyMapper } from '@/identity/database/drizzle/mappers'
+import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { eq, and } from 'drizzle-orm'
+
+@Injectable()
+export class DrizzleThirdPartiesRepository
+  extends DrizzleRepository
+  implements ThirdPartiesRepository
+{
+  constructor(
+    drizzle: DrizzleClient,
+    private readonly thirdPartyMapper: DrizzleThirdPartyMapper,
+  ) {
+    super(drizzle)
+  }
+
+  async add(thirdParty: ThirdPartyCreation): Promise<ThirdParty | undefined> {
+    const [createdThirdParty] = await this.database
+      .insert(thirdPartyModel)
+      .values(this.toDrizzle(thirdParty))
+      .onConflictDoNothing()
+      .returning()
+
+    return createdThirdParty
+      ? this.thirdPartyMapper.toDomain(createdThirdParty)
+      : undefined
+  }
+
+  async findByTaxId(
+    taxId: TaxId<'cnpj' | 'official_registration' | 'other_national_document'>,
+  ): Promise<ThirdParty | undefined> {
+    const [thirdParty] = await this.database
+      .select()
+      .from(thirdPartyModel)
+      .where(
+        and(
+          eq(thirdPartyModel.taxIdType, taxId.type),
+          eq(thirdPartyModel.taxIdValue, taxId.value),
+        ),
+      )
+      .limit(1)
+
+    return thirdParty ? this.thirdPartyMapper.toDomain(thirdParty) : undefined
+  }
+
+  private toDrizzle(thirdParty: ThirdPartyCreation) {
+    return {
+      type: thirdParty.type,
+      legalName: thirdParty.legalName,
+      tradeName: thirdParty.tradeName ?? null,
+      taxIdType: thirdParty.taxId.type,
+      taxIdValue: thirdParty.taxId.value,
+      taxIdDescription: thirdParty.taxId.description ?? null,
+      internalResponsibleId: thirdParty.internalResponsibleId,
+      relationshipTypes: thirdParty.relationshipTypes,
+    }
+  }
+}
