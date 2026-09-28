@@ -1,6 +1,7 @@
 import { All, Controller, Inject, Req, Res } from '@nestjs/common'
 import { serve } from 'inngest/express'
 import type { Request, Response } from 'express'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 import {
   INNGEST_OPTIONS,
@@ -8,6 +9,7 @@ import {
 } from '@/shared/messaging/inngest/inngest-options'
 
 @Controller('api/inngest')
+@RouteAccess('public')
 export class InngestController {
   constructor(
     @Inject(INNGEST_OPTIONS)

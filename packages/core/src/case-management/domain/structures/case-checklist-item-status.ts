@@ -1,5 +1,6 @@
 export const CaseChecklistItemStatus = {
   Pending: 'pending',
+  InAnalysis: 'in_analysis',
   Validated: 'validated',
 } as const
 

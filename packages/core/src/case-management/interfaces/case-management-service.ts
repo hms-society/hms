@@ -17,6 +17,22 @@ export type ReviewCaseChecklistGateRequest = {
   remarks?: string
 }
 
+export type PortalDocumentUploadResponse = {
+  protocol: string
+  checklistItemId: string
+  status: string
+  sentAt: string
+}
+
+export type GrantCasePortalAccessResponse = {
+  grantId: string
+  caseId: string
+  accessToken: string
+  portalAccessUrl: string
+  expiresAt: string
+  canUpload: boolean
+}
+
 export type AddCaseChecklistComplementaryItemRequest = {
   templateItemKey: string
   title: string
@@ -78,11 +94,27 @@ export interface CaseManagementService {
 
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
 
+  grantCasePortalAccess(
+    caseId: string,
+    request: { canUpload: boolean },
+  ): Promise<RestResponse<GrantCasePortalAccessResponse>>
+
   reviewChecklistGate(
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
 
+  listPortalPendingChecklist(
+    caseId: string,
+    portalToken: string,
+  ): Promise<RestResponse<readonly CaseChecklistItem[]>>
+
+  uploadPortalDocument(
+    caseId: string,
+    checklistItemId: string,
+    portalToken: string,
+    file: unknown,
+  ): Promise<RestResponse<PortalDocumentUploadResponse>>
   listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
 
   getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>

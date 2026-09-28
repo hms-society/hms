@@ -1,5 +1,6 @@
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type { AuthSession, AuthUser } from '@hms/core/identity/domain/structures'
+import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/entities'
 
 export type IdentityRequestContext = {
   readonly auth: AuthSession
@@ -11,6 +12,7 @@ export type IdentityRequest = {
   auth?: AuthSession
   user?: AuthUser
   collaborator?: CollaboratorSummary
+  portalAccessGrant?: CasePortalAccessGrant
   identity?: IdentityRequestContext
 }
 

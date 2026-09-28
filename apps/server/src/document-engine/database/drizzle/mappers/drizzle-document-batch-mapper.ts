@@ -16,6 +16,7 @@ export class DrizzleDocumentBatchMapper {
       files: record.files.map((file) => ({
         id: file.id,
         batchId: file.batchId,
+        checklistItemId: file.checklistItemId ?? undefined,
         storagePath: file.storagePath,
         originalName: file.originalName,
         mimeType: file.mimeType,

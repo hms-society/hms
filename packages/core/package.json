@@ -97,6 +97,7 @@
   },
   "scripts": {
     "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
+    "check:complexity": "node ../../scripts/check-complexity.mjs --scope packages/core",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "biome lint src",

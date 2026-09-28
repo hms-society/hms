@@ -7,6 +7,7 @@ import {
   DocumentValidationStatus,
 } from '../../domain/structures'
 import type {
+  CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
 } from '../../interfaces'
@@ -15,14 +16,17 @@ import { RequestDocumentResendUseCase } from '../request-document-resend-use-cas
 describe('Request Document Resend Use Case', () => {
   let documentValidationsRepository: MockProxy<DocumentValidationsRepository>
   let documentValidationLogsRepository: MockProxy<DocumentValidationLogsRepository>
+  let caseChecklistUpdateProvider: MockProxy<CaseChecklistUpdateProvider>
   let useCase: RequestDocumentResendUseCase
 
   beforeEach(() => {
     documentValidationsRepository = mock<DocumentValidationsRepository>()
     documentValidationLogsRepository = mock<DocumentValidationLogsRepository>()
+    caseChecklistUpdateProvider = mock<CaseChecklistUpdateProvider>()
     useCase = new RequestDocumentResendUseCase(
       documentValidationsRepository,
       documentValidationLogsRepository,
+      caseChecklistUpdateProvider,
     )
   })
 
@@ -47,6 +51,9 @@ describe('Request Document Resend Use Case', () => {
       status: DocumentValidationStatus.ResendRequested,
       reason: 'Campos obrigatórios ausentes.',
       message: 'Olá, envie novamente com todos os campos obrigatórios.',
+    })
+    expect(caseChecklistUpdateProvider.markDocumentResendRequested).toHaveBeenCalledWith({
+      documentFileId: document.id,
     })
   })
 })

@@ -51,7 +51,7 @@ Accept: application/json
   "documentFileName": "Documento de identificação",
   "clientName": "Antônio",
   "reason": "illegible",
-  "details": "O arquivo não permite a leitura das informações." 
+	"details": "O arquivo não permite a leitura das informações."
 }
 
 ### Get the assisted message generated for the created pending

@@ -10,6 +10,10 @@ import {
   ReplaceChecklistTemplateController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
+  GrantCasePortalAccessController,
+  RevokeCasePortalAccessController,
+  ListCasePortalPendingChecklistController,
+  UploadCasePortalDocumentController,
   CreatePendingController,
   ListCasePendingsController,
   GetPendingMessageController,
@@ -17,11 +21,19 @@ import {
   ApprovePendingMessageController,
   CancelPendingController,
 } from '@/case-management/rest/controllers'
+import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
 
 @Module({
-  imports: [IdentityModule, CaseManagementDatabaseModule, IntakeDatabaseModule],
+  imports: [
+    IdentityModule,
+    CaseManagementDatabaseModule,
+    IntakeDatabaseModule,
+    DocumentsDatabaseModule,
+    ProvisionModule,
+  ],
   controllers: [
     AddCaseChecklistComplementaryItemController,
     ListChecklistTemplatesController,
@@ -31,6 +43,10 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     GetLegalCaseDetailsController,
+    GrantCasePortalAccessController,
+    RevokeCasePortalAccessController,
+    ListCasePortalPendingChecklistController,
+    UploadCasePortalDocumentController,
     CreatePendingController,
     ListCasePendingsController,
     GetPendingMessageController,

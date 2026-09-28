@@ -11,6 +11,7 @@ import {
 import type {
   CaseChecklistUpdateProvider as CaseChecklistUpdateProviderContract,
   LinkValidatedDocumentToChecklistRequest,
+  MarkDocumentResendRequestedRequest,
 } from '@hms/core/document-engine/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 
@@ -20,22 +21,18 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderContract {
   private readonly useCase: MarkCaseChecklistItemValidatedUseCase
   private readonly createPendingUseCase: CreatePendingUseCase
-  private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository
-  private readonly legalCasesRepository: LegalCasesRepository
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
-    caseChecklistItemsRepository: CaseChecklistItemsRepository,
+    private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
-    legalCasesRepository: LegalCasesRepository,
+    private readonly legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings)
     pendingsRepository: PendingsRepository,
   ) {
-    this.caseChecklistItemsRepository = caseChecklistItemsRepository
-    this.legalCasesRepository = legalCasesRepository
     this.useCase = new MarkCaseChecklistItemValidatedUseCase(
-      caseChecklistItemsRepository,
-      legalCasesRepository,
+      this.caseChecklistItemsRepository,
+      this.legalCasesRepository,
     )
     this.createPendingUseCase = new CreatePendingUseCase(pendingsRepository)
   }
@@ -43,6 +40,28 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
   async linkValidatedDocumentToChecklist(
     request: LinkValidatedDocumentToChecklistRequest,
   ): Promise<void> {
+    if (!request.checklistItemId) {
+      const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
+        request.documentFileId,
+      )
+
+      if (!checklistItem) return
+
+      await this.useCase.executeByDocumentFileId({
+        documentFileId: request.documentFileId,
+        documentFileName: request.documentFileName ?? 'Documento enviado',
+        validatedBy: request.validatedBy,
+      })
+      return
+    }
+
+    if (!request.caseId || !request.clientId) {
+      throw new AppError(
+        'Não foi possível identificar o cliente e o caso do item do checklist.',
+        'Vínculo do checklist inválido',
+      )
+    }
+
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
 
     if (!legalCase || legalCase.clientId !== request.clientId) {
@@ -52,7 +71,29 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
       )
     }
 
-    await this.useCase.execute(request)
+    await this.useCase.execute({
+      caseId: request.caseId,
+      checklistItemId: request.checklistItemId,
+      documentFileId: request.documentFileId,
+      documentFileName: request.documentFileName ?? 'Documento enviado',
+      validatedBy: request.validatedBy,
+    })
+  }
+
+  async markDocumentResendRequested(
+    request: MarkDocumentResendRequestedRequest,
+  ): Promise<void> {
+    const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
+      request.documentFileId,
+    )
+
+    if (!checklistItem) return
+
+    await this.caseChecklistItemsRepository.linkPendingDocument({
+      checklistItemId: checklistItem.id,
+      documentFileId: request.documentFileId,
+      documentFileName: checklistItem.documentFileName ?? 'Documento enviado',
+    })
   }
 
   async linkPendingDocumentToChecklist(request: {

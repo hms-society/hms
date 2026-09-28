@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@nestjs/common'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
-import type { DocumentExceptionAuditLog } from '@hms/core/document-engine/domain/entities'
 import type {
   CreateDocumentExceptionAuditLogData,
   DocumentExceptionAuditLogsRepository,

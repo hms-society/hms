@@ -1,6 +1,7 @@
 import type {
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
+  CaseChecklistUpdateProvider,
 } from '../interfaces'
 import {
   DocumentValidationLogAction,
@@ -18,6 +19,7 @@ export class RequestDocumentResendUseCase {
   constructor(
     private readonly documentValidationsRepository: DocumentValidationsRepository,
     private readonly documentValidationLogsRepository: DocumentValidationLogsRepository,
+    private readonly caseChecklistUpdateProvider?: CaseChecklistUpdateProvider,
   ) {}
 
   async execute(request: RequestDocumentResendRequest) {
@@ -30,6 +32,10 @@ export class RequestDocumentResendUseCase {
       status: DocumentValidationStatus.ResendRequested,
       reason: request.reason,
       message: request.message,
+    })
+
+    await this.caseChecklistUpdateProvider?.markDocumentResendRequested({
+      documentFileId: request.documentFileId,
     })
 
     return document

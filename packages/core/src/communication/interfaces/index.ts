@@ -1,6 +1,7 @@
 export * from './attendance-repository'
 export * from './attendant-assignment-repository'
 export * from './client-contact-repository'
+export * from './communication-service'
 export * from './conversation-repository'
 export * from './email-provider'
 export * from './internal-notification-repository'

@@ -1,28 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { BROWSER_ENV } from '@/constants'
-import { supabaseClient } from '@/provision/auth/supabase/supabase-client'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-export function useDocumentFileUrlQuery(storagePath?: string) {
+export function useDocumentFileUrlQuery(fileId?: string) {
+  const { documentService } = useRestContext()
   const {
     data: fileUrl,
     error: fileUrlError,
     isLoading: isLoadingFileUrl,
     isError: isErrorFileUrl,
   } = useQuery({
-    queryKey: ['document-file-url', storagePath],
+    queryKey: ['document-file-url', fileId],
     queryFn: async () => {
-      if (!storagePath) return null
+      if (!fileId) return null
 
-      const { data, error } = await supabaseClient.storage
-        .from(BROWSER_ENV.supabaseStorageBucket)
-        .download(storagePath)
+      const response = await documentService.getDocumentFileContent(fileId)
+      if (response.isFailure) response.throwError()
 
-      if (error) throw error
-
-      return URL.createObjectURL(data)
+      return URL.createObjectURL(response.body)
     },
-    enabled: Boolean(storagePath),
+    enabled: Boolean(fileId),
     retry: false,
   })
 

@@ -8,10 +8,7 @@ import type {
   DocumentExceptionsRepository,
   DocumentExceptionAuditLogsRepository,
 } from '@hms/core/document-engine/interfaces'
-import {
-  DocumentExceptionStatus,
-  DocumentExceptionType,
-} from '@hms/core/document-engine/domain/structures'
+import { DocumentExceptionStatus } from '@hms/core/document-engine/domain/structures'
 
 @Injectable()
 export class ExpireProvisionalAcceptancesJob extends InngestJob {
