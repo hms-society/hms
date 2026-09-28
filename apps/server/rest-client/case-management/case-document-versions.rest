@@ -1,0 +1,57 @@
+@BASE_URL = http://localhost:3333
+@url = {{BASE_URL}}/cases
+
+# Preconditions: run `pnpm seed`, start the API, and sign in as the seeded
+# lawyer. These requests exercise the backend directly; no web app is needed.
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### List generated pieces and their versions for a case
+# @prompt caseId Enter the case ID whose dossier is approved
+GET {{url}}/{{caseId}}/documents
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Request an AI-assisted new version (may consume Gemini API quota)
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the document ID from the list response
+# @prompt sourceDocumentVersionId Enter the base version ID
+POST {{url}}/{{caseId}}/documents/{{documentId}}/versions/{{sourceDocumentVersionId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "instructions": "Revise a minuta conforme a solicitação, preserve os fatos comprovados e mantenha pendentes os dados sem evidência."
+}
+
+### Save a manual version from an existing version
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the document ID from the list response
+# @prompt sourceDocumentVersionId Enter the base version ID
+POST {{url}}/{{caseId}}/documents/{{documentId}}/versions/{{sourceDocumentVersionId}}/manual
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [{ "type": "text", "text": "Conteúdo de teste da versão manual." }]
+      }
+    ]
+  }
+}
