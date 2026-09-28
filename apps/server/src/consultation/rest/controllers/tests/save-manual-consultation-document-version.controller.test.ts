@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { ConsultationModuleFixture } from '@/consultation/fixtures'
 import { SaveManualConsultationDocumentVersionController } from '@/consultation/rest/controllers'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 
 describe('Save Manual Consultation Document Version Controller [POST /consultations/:consultationId/documents/:documentId/versions/:sourceDocumentVersionId/manual]', () => {
   let fixture: ConsultationModuleFixture
@@ -50,5 +51,18 @@ describe('Save Manual Consultation Document Version Controller [POST /consultati
       content,
       pendingMarkers: [{ marker: '{cliente_nome}' }],
     })
+
+    const storedFile = await fixture.app
+      .get(PROVISION_PROVIDERS.fileStorage)
+      .get(response.body.fileId)
+
+    expect(storedFile).toMatchObject({
+      file: {
+        fileName: 'procuracao-v2.docx',
+        contentType:
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      },
+    })
+    expect(storedFile?.content.byteLength).toBeGreaterThan(0)
   })
 })

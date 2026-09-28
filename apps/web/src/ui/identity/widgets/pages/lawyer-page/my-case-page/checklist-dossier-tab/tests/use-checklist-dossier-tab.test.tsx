@@ -33,6 +33,7 @@ describe('useChecklistDossierTab', () => {
   const caseManagementService = {
     addComplementaryChecklistItem: vi.fn(),
     listCaseChecklist: vi.fn(),
+    listCasePendings: vi.fn(),
     reviewChecklistGate: vi.fn(),
   }
   const documentValidationService = {
@@ -62,6 +63,9 @@ describe('useChecklistDossierTab', () => {
         body: [],
         statusCode: 200,
       }),
+    )
+    caseManagementService.listCasePendings.mockResolvedValue(
+      new RestResponse({ body: [], statusCode: 200 }),
     )
     caseManagementService.addComplementaryChecklistItem.mockResolvedValue(
       new RestResponse({
@@ -496,5 +500,157 @@ describe('useChecklistDossierTab', () => {
       'A revisão deste checklist ainda não está disponível.',
     )
     expect(caseManagementService.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
+  it('requires a reason for blocking and reports the persisted decision audit', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.reviewChecklistGate.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'case-1',
+          status: 'documentation',
+          checklistGate: {
+            decision: CaseChecklistGateDecision.BlockedInsufficient,
+            decidedBy: 'collaborator-2',
+            decidedAt: '2026-08-24T12:00:00.000Z',
+            remarks: 'Documento essencial ausente.',
+          },
+          dossierGate: {},
+        },
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
+        }),
+      { wrapper },
+    )
+
+    act(() => result.current.handleBlockChecklist())
+    expect(result.current.decisionReasonDialog).toMatchObject({
+      confirmLabel: 'Confirmar bloqueio',
+      title: 'Deseja bloquear este checklist?',
+    })
+
+    await act(async () => {
+      await result.current.handleConfirmDecisionReason()
+    })
+    expect(result.current.reasonError).toBe('Informe o motivo da decisão.')
+    expect(caseManagementService.reviewChecklistGate).not.toHaveBeenCalled()
+
+    act(() => result.current.handleRemarksChange('  Documento essencial ausente.  '))
+    expect(result.current.reasonError).toBeNull()
+
+    await act(async () => {
+      await result.current.handleConfirmDecisionReason()
+    })
+
+    expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
+      decision: CaseChecklistGateDecision.BlockedInsufficient,
+      remarks: 'Documento essencial ausente.',
+    })
+    expect(result.current.checklistGateLabel).toBe('Bloqueado/insuficiente')
+    expect(result.current.checklistGateAuditLabel).toBe(
+      'Decisão registrada por collaborator-2 em 24/08/2026 09:00',
+    )
+    expect(result.current.canStartLegalWriting).toBe(false)
+    expect(result.current.isDecisionReasonDialogOpen).toBe(false)
+  })
+
+  it('allows legal writing after an approved checklist and homologated dossier', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.reviewChecklistGate.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'case-1',
+          status: 'legal_production',
+          checklistGate: {
+            decision: CaseChecklistGateDecision.Approved,
+            decidedBy: 'collaborator-1',
+            decidedAt: '2026-08-24T12:00:00.000Z',
+          },
+          dossierGate: { homologatedAt: '2026-08-25T12:00:00.000Z' },
+        },
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
+        }),
+      { wrapper },
+    )
+
+    await act(async () => result.current.handleApproveChecklist())
+
+    expect(result.current.checklistGateLabel).toBe('Aprovado')
+    expect(result.current.dossierGateLabel).toBe('Dossiê homologado')
+    expect(result.current.canStartLegalWriting).toBe(true)
+  })
+
+  it('keeps persisted checklist items navigable when no file is linked yet', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.listCaseChecklist.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'checklist-item-1',
+            caseId: 'case-1',
+            templateItemKey: 'procuracao-assinada',
+            title: 'Procuração assinada',
+            isRequired: true,
+            status: 'pending',
+            createdAt: '2026-08-27T12:00:00.000Z',
+            updatedAt: '2026-08-27T12:00:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () => useChecklistDossierTab({ caseId: 'case-1', checklist: [] }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.checklistItems).toHaveLength(1))
+    await act(async () => {
+      await result.current.handleValidateChecklistItem('checklist-item-1')
+    })
+
+    expect(navigateTo).toHaveBeenCalledWith('lawyerCaseChecklistItem', {
+      params: { caseId: 'case-1', checklistItemId: 'checklist-item-1' },
+    })
   })
 })
