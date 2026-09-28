@@ -7,7 +7,6 @@
     "paths": {
       "@/*": ["./src/*"],
       "#consultation/*": ["../../packages/core/src/consultation/*"],
-      "#identity/*": ["../../packages/core/src/identity/*"],
       "#shared/*": ["../../packages/core/src/shared/*"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
