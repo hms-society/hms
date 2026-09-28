@@ -10,8 +10,8 @@ import {
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { ListRescheduleSlotsUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type {
-  AppointmentsRepository,
-  SchedulesRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type { CalendarIdentityProvider } from '@hms/core/shared/interfaces'
@@ -38,8 +38,9 @@ export class ListRescheduleSlotsController {
 
   constructor(
     @Inject(SCHEDULING_REPOSITORIES.appointments)
-    appointmentsRepository: AppointmentsRepository,
-    @Inject(SCHEDULING_REPOSITORIES.schedules) schedulesRepository: SchedulesRepository,
+    appointmentsRepository: CalendarAppointmentsRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: CalendarSchedulesRepository,
     @Inject(IDENTITY_REPOSITORIES.calendarProvider)
     identityProvider: CalendarIdentityProvider,
     datetimeProvider: DatetimeProvider,

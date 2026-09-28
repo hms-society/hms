@@ -21,8 +21,8 @@ import {
   ScheduleFaker,
 } from '@hms/core/scheduling/domain/entities/fakers'
 import type {
-  AppointmentsRepository,
-  SchedulesRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import { vi, type Mock } from 'vitest'
 
@@ -38,8 +38,8 @@ export class SchedulingModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
     readonly broker: { publish: Mock },
-    readonly schedulesRepository: SchedulesRepository,
-    readonly appointmentsRepository: AppointmentsRepository,
+    readonly schedulesRepository: CalendarSchedulesRepository,
+    readonly appointmentsRepository: CalendarAppointmentsRepository,
     readonly clientsRepository: ClientsRepository,
     readonly intakesRepository: IntakesRepository,
     private readonly usersRepository: UsersRepository,

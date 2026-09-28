@@ -7,8 +7,8 @@ import {
 } from '@hms/validation/scheduling'
 import { ZodValidationPipe } from 'nestjs-zod'
 import type {
-  AppointmentsRepository,
-  SchedulesRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import type { CalendarIdentityProvider } from '@hms/core/shared/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
@@ -28,9 +28,10 @@ export class ListCalendarFilterOptionsController {
   private readonly useCase: ListCalendarFilterOptionsUseCase
 
   constructor(
-    @Inject(SCHEDULING_REPOSITORIES.schedules) schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: CalendarSchedulesRepository,
     @Inject(SCHEDULING_REPOSITORIES.appointments)
-    appointmentsRepository: AppointmentsRepository,
+    appointmentsRepository: CalendarAppointmentsRepository,
     @Inject(IDENTITY_REPOSITORIES.calendarProvider)
     identityProvider: CalendarIdentityProvider,
   ) {

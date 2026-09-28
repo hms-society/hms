@@ -1,6 +1,6 @@
 import { Injectable, Optional } from '@nestjs/common'
 import type { Appointment, AppointmentChange } from '@hms/core/scheduling/domain/entities'
-import type { AppointmentsRepository } from '@hms/core/scheduling/interfaces'
+import type { CalendarAppointmentsRepository } from '@hms/core/scheduling/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { and, asc, eq, gt, gte, inArray, isNull, lt, type SQL } from 'drizzle-orm'
 
@@ -20,7 +20,7 @@ import type { SchedulingDatabaseExecutor } from '@/scheduling/database/drizzle/r
 @Injectable()
 export class DrizzleAppointmentsRepository
   extends DrizzleRepository
-  implements AppointmentsRepository
+  implements CalendarAppointmentsRepository
 {
   constructor(
     drizzle: DrizzleClient,

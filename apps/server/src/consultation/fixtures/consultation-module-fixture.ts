@@ -177,9 +177,7 @@ export class ConsultationModuleFixture {
       professionalName: 'Colaborador sem acesso',
       jobTitle: 'Advogado',
       profile: 'lawyer',
-      legalExpertises: [
-        { legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] },
-      ],
+      legalExpertises: [{ legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] }],
     })
     if (!collaborator) throw new Error('Test unauthorized collaborator was not created')
     return { user, collaborator }
