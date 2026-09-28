@@ -5,6 +5,7 @@ import type {
   DynamicFormsRepository,
   IdProvider,
   Broker,
+  AppointmentWriteTransactionProvider,
   UseCase,
 } from '#shared/interfaces'
 import {
@@ -15,6 +16,7 @@ import {
 import type { Consultation } from '../domain/entities'
 import { ConsultationLegalContextUpdatedEvent } from '../domain/events'
 import {
+  ConsultationAppointmentCancelledError,
   ConsultationAttendanceFinalizationError,
   ConsultationNotFoundError,
 } from '../domain/errors'
@@ -25,7 +27,7 @@ import {
   ConsultationSuggestionStatus,
   ConsultationViability,
 } from '../domain/structures'
-import type { ConsultationsRepository } from '../interfaces'
+import type { ConsultationOutboxRepository, ConsultationsRepository } from '../interfaces'
 
 export type FinalizeConsultationAttendanceRequest = {
   readonly consultationId: string
@@ -62,9 +64,15 @@ export class FinalizeConsultationAttendanceUseCase
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
     private readonly broker: Broker,
+    private readonly appointmentTransactionProvider?: AppointmentWriteTransactionProvider,
+    private readonly outboxRepository?: ConsultationOutboxRepository,
   ) {}
 
   async execute(request: FinalizeConsultationAttendanceRequest) {
+    if (this.appointmentTransactionProvider) {
+      return this.executeWithLockedAppointment(request)
+    }
+
     const consultation = await this.consultationsRepository.findById(
       request.consultationId,
     )
@@ -134,6 +142,101 @@ export class FinalizeConsultationAttendanceUseCase
     }
 
     return updated
+  }
+
+  private async executeWithLockedAppointment(
+    request: FinalizeConsultationAttendanceRequest,
+  ): Promise<Consultation> {
+    const current = await this.consultationsRepository.findById(request.consultationId)
+    if (!current) throw new ConsultationNotFoundError()
+    this.validateConsultationAccess(current, request.collaboratorId, request.collaboratorProfile)
+    this.validateConsultationContext(current, request)
+    this.validateDecisionAndViability(request)
+    const dynamicForm = await this.findDynamicForm(request.dynamicFormId)
+    this.validateDynamicForm(dynamicForm, request.answers ?? [])
+
+    return this.appointmentTransactionProvider!.runWithLockedAppointment(
+      current.appointmentId,
+      async (appointment) => {
+        if (!appointment || appointment.status !== 'scheduled') {
+          throw new ConsultationAppointmentCancelledError()
+        }
+        const consultation = await this.consultationsRepository.findById(
+          request.consultationId,
+        )
+        if (!consultation) throw new ConsultationNotFoundError()
+        this.validateConsultationAccess(
+          consultation,
+          request.collaboratorId,
+          request.collaboratorProfile,
+        )
+        this.validateConsultationContext(consultation, request)
+        const finalizedAt = this.datetimeProvider.now()
+        const updated = await this.consultationsRepository.replace(request.consultationId, {
+          legalAreaId: request.legalAreaId,
+          legalTopicId: request.legalTopicId,
+          primaryLegalQuestion: request.primaryLegalQuestion.trim(),
+          guidanceProvided: request.guidanceProvided.trim(),
+          notes: request.notes?.trim() || undefined,
+          viability: request.viability.trim(),
+          decision: request.decision.trim(),
+          relevantFacts: request.relevantFacts?.map((fact) => ({
+            id: fact.id ?? this.idProvider.generate(),
+            description: fact.description.trim(),
+            ...(fact.date ? { occurredOn: parseFactDate(fact.date) } : {}),
+          })),
+          potentialLegalRequests: request.potentialLegalRequests?.map((claim) => ({
+            id: this.idProvider.generate(),
+            description: [claim.title.trim(), claim.summary?.trim()]
+              .filter(Boolean)
+              .join(' — '),
+          })),
+          dynamicFormId: request.dynamicFormId ?? undefined,
+          dynamicFormAnswers: [...(request.answers ?? [])],
+          dynamicFormSnapshot: dynamicForm
+            ? {
+                dynamicFormId: dynamicForm.id,
+                name: dynamicForm.name,
+                description: dynamicForm.description,
+                fields: dynamicForm.fields,
+              }
+            : undefined,
+          attendanceFinalizedAt: finalizedAt,
+          attendanceFinalizedByCollaboratorId: request.collaboratorId,
+        })
+        if (!updated) throw new ConsultationNotFoundError()
+        if (
+          consultation.legalAreaId !== request.legalAreaId ||
+          consultation.legalTopicId !== request.legalTopicId
+        ) {
+          const event = new ConsultationLegalContextUpdatedEvent({
+            consultationId: updated.id,
+            intakeId: updated.intakeId,
+            legalAreaId: request.legalAreaId,
+            legalTopicId: request.legalTopicId,
+            updatedBy: request.collaboratorId,
+            occurredAt: finalizedAt,
+          })
+          if (this.outboxRepository) {
+            await this.outboxRepository.add({
+              id: this.idProvider.generate(),
+              consultationId: updated.id,
+              name: ConsultationLegalContextUpdatedEvent._NAME,
+              payload: {
+                consultationId: updated.id,
+                intakeId: updated.intakeId,
+                legalAreaId: request.legalAreaId,
+                legalTopicId: request.legalTopicId,
+                updatedBy: request.collaboratorId,
+                occurredAt: finalizedAt.toISOString(),
+              },
+              occurredAt: finalizedAt,
+            })
+          }
+        }
+        return updated
+      },
+    )
   }
 
   private validateConsultationAccess(

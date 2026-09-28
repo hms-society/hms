@@ -18,7 +18,15 @@ export interface SchedulesRepository {
   addMany(schedules: readonly Schedule[]): Promise<readonly Schedule[]>
   removeAll(): Promise<void>
   findById(id: string): Promise<Schedule | null>
+  findByIdForUpdate(id: string): Promise<Schedule | null>
   findByCollaboratorId(collaboratorId: string): Promise<Schedule | null>
+  findByCollaboratorIdForUpdate(collaboratorId: string): Promise<Schedule | null>
+  listByCollaboratorIds(ids?: readonly string[]): Promise<readonly Schedule[]>
+  listBlockedPeriods(
+    scheduleIds: readonly string[],
+    startsOn: CalendarDate,
+    endsOn: CalendarDate,
+  ): Promise<readonly (BlockedPeriod & { scheduleId: string })[]>
   findBlockedPeriodsByScheduleId(scheduleId: string): Promise<BlockedPeriod[]>
   createSchedule(data: CreateScheduleInput): Promise<Schedule | any>
   updateWeeklyAvailability(

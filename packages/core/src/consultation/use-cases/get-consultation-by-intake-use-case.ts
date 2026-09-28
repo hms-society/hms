@@ -7,10 +7,15 @@ import type {
 } from '../../identity/interfaces'
 import type { IntakesRepository } from '../../intake/interfaces'
 import type { AppointmentsRepository } from '../../scheduling/interfaces'
+import type { CollaboratorProfile } from '../../identity/domain/structures'
 import { GetConsultationUseCase } from './get-consultation-use-case'
 
 export type GetConsultationByIntakeRequest = {
   readonly intakeId: string
+  readonly actor?: {
+    collaboratorId: string
+    profile: CollaboratorProfile
+  }
 }
 
 export class GetConsultationByIntakeUseCase {
@@ -32,15 +37,16 @@ export class GetConsultationByIntakeUseCase {
     )
   }
 
-  async execute({
-    intakeId,
-  }: GetConsultationByIntakeRequest): Promise<ConsultationDetails> {
-    const consultation = await this.consultationsRepository.findByIntakeId(intakeId)
+  async execute(request: GetConsultationByIntakeRequest): Promise<ConsultationDetails> {
+    const consultation = await this.consultationsRepository.findByIntakeId(request.intakeId)
 
     if (!consultation) {
       throw new ConsultationNotFoundError()
     }
 
-    return this.getConsultation.execute({ consultationId: consultation.id })
+    return this.getConsultation.execute({
+      consultationId: consultation.id,
+      ...(request.actor ? { actor: request.actor } : {}),
+    })
   }
 }

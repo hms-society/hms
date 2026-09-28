@@ -1,18 +1,25 @@
 import type { DocumentPackagesRepository } from '../../document-production/interfaces'
-import type { Broker, DatetimeProvider, UseCase } from '#shared/interfaces'
+import type {
+  AppointmentWriteTransactionProvider,
+  Broker,
+  DatetimeProvider,
+  IdProvider,
+  UseCase,
+} from '#shared/interfaces'
 import {
   CollaboratorProfile,
   type CollaboratorProfile as CollaboratorProfileValue,
 } from '../../identity/domain/structures'
 
 import {
+  ConsultationAppointmentCancelledError,
   ConsultationCompletionBlockedError,
   ConsultationNotFoundError,
 } from '../domain/errors'
 import { ConsultationCompletedEvent } from '../domain/events'
 import { ConsultationStatus } from '../domain/structures'
 import type { Consultation } from '../domain/entities'
-import type { ConsultationsRepository } from '../interfaces'
+import type { ConsultationOutboxRepository, ConsultationsRepository } from '../interfaces'
 
 type Request = {
   readonly consultationId: string
@@ -26,9 +33,16 @@ export class CompleteConsultationUseCase implements UseCase<Request, Consultatio
     private readonly documentPackagesRepository: DocumentPackagesRepository,
     private readonly broker: Broker,
     private readonly datetimeProvider: DatetimeProvider,
+    private readonly appointmentTransactionProvider?: AppointmentWriteTransactionProvider,
+    private readonly outboxRepository?: ConsultationOutboxRepository,
+    private readonly idProvider?: IdProvider,
   ) {}
 
   async execute(request: Request) {
+    if (this.appointmentTransactionProvider) {
+      return this.executeWithLockedAppointment(request)
+    }
+
     const consultation = await this.consultationsRepository.findById(
       request.consultationId,
     )
@@ -79,5 +93,68 @@ export class CompleteConsultationUseCase implements UseCase<Request, Consultatio
     )
 
     return completed
+  }
+
+  private async executeWithLockedAppointment(request: Request): Promise<Consultation> {
+    const current = await this.consultationsRepository.findById(request.consultationId)
+    if (!current) throw new ConsultationNotFoundError()
+    return this.appointmentTransactionProvider!.runWithLockedAppointment(
+      current.appointmentId,
+      async (appointment) => {
+        if (!appointment || appointment.status !== 'scheduled') {
+          throw new ConsultationAppointmentCancelledError()
+        }
+        const consultation = await this.consultationsRepository.findById(
+          request.consultationId,
+        )
+        if (!consultation) throw new ConsultationNotFoundError()
+        if (
+          request.collaboratorProfile !== CollaboratorProfile.Admin &&
+          consultation.assignedLawyerId !== request.collaboratorId
+        ) {
+          throw new ConsultationCompletionBlockedError(
+            'Somente o advogado associado pode concluir a consulta.',
+          )
+        }
+        if (consultation.status !== ConsultationStatus.Pending) {
+          throw new ConsultationCompletionBlockedError(
+            'Somente uma consulta pendente pode ser concluída.',
+          )
+        }
+        if (!consultation.attendanceFinalizedAt) {
+          throw new ConsultationCompletionBlockedError('Finalize a ficha de atendimento primeiro.')
+        }
+        const documentPackage = await this.documentPackagesRepository.findByContext({
+          type: 'consultation',
+          consultationId: request.consultationId,
+        })
+        if (!documentPackage?.confirmedAt) {
+          throw new ConsultationCompletionBlockedError(
+            'Confirme o pacote de documentos antes de concluir a consulta.',
+          )
+        }
+        const completedAt = this.datetimeProvider.now()
+        const completed = await this.consultationsRepository.replace(request.consultationId, {
+          status: ConsultationStatus.Completed,
+          completedAt,
+        })
+        if (!completed) throw new ConsultationNotFoundError()
+        if (this.outboxRepository) {
+          await this.outboxRepository.add({
+            id: this.idProvider?.generate() ?? `${completed.id}:${completedAt.toISOString()}`,
+            consultationId: completed.id,
+            name: ConsultationCompletedEvent._NAME,
+            payload: {
+              consultationId: completed.id,
+              intakeId: completed.intakeId,
+              completedBy: request.collaboratorId,
+              occurredAt: completedAt.toISOString(),
+            },
+            occurredAt: completedAt,
+          })
+        }
+        return completed
+      },
+    )
   }
 }
