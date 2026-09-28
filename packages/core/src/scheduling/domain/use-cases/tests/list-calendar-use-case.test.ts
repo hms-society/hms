@@ -2,20 +2,26 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { AppointmentFaker, ScheduleFaker } from '../../entities/fakers'
-import type { CalendarConsultationProvider, CalendarIdentityProvider } from '#shared/interfaces'
-import type { AppointmentsRepository, SchedulesRepository } from '../../../interfaces'
+import type {
+  CalendarConsultationProvider,
+  CalendarIdentityProvider,
+} from '#shared/interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../../interfaces'
 import { AppointmentActionForbiddenError, AppointmentNotFoundError } from '../../errors'
 import { ListCalendarUseCase } from '../list-calendar-use-case'
 
 describe('List Calendar Use Case', () => {
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let identityProvider: MockProxy<CalendarIdentityProvider>
   let consultationProvider: MockProxy<CalendarConsultationProvider>
 
   beforeEach(() => {
-    appointmentsRepository = mock<AppointmentsRepository>()
-    schedulesRepository = mock<SchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
     identityProvider = mock<CalendarIdentityProvider>()
     consultationProvider = mock<CalendarConsultationProvider>()
   })
@@ -29,11 +35,21 @@ describe('List Calendar Use Case', () => {
     })
     schedulesRepository.listByCollaboratorIds.mockResolvedValue([schedule])
     schedulesRepository.listBlockedPeriods.mockResolvedValue([
-      { id: 'block-1', scheduleId: schedule.id, startsOn: '2026-08-10', endsOn: '2026-08-10', createdAt: new Date() },
+      {
+        id: 'block-1',
+        scheduleId: schedule.id,
+        startsOn: '2026-08-10',
+        endsOn: '2026-08-10',
+        createdAt: new Date(),
+      },
     ])
     appointmentsRepository.listOverlapping.mockResolvedValue([appointment])
-    identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
-    identityProvider.getLawyers.mockResolvedValue(new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]))
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
+    identityProvider.getLawyers.mockResolvedValue(
+      new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
+    )
     consultationProvider.getByAppointmentIds.mockResolvedValue(new Map())
 
     const events = await new ListCalendarUseCase(
@@ -43,7 +59,12 @@ describe('List Calendar Use Case', () => {
       consultationProvider,
     ).execute({
       actor: { collaboratorId: 'attendant-1', profile: 'attendant' },
-      query: { view: 'week', date: '2026-08-10', event: 'all', clientId: appointment.clientId },
+      query: {
+        view: 'week',
+        date: '2026-08-10',
+        event: 'all',
+        clientId: appointment.clientId,
+      },
     })
 
     expect(events).toHaveLength(1)
@@ -57,7 +78,9 @@ describe('List Calendar Use Case', () => {
     schedulesRepository.listByCollaboratorIds.mockResolvedValue([secondSchedule])
     schedulesRepository.listBlockedPeriods.mockResolvedValue([])
     appointmentsRepository.listOverlapping.mockResolvedValue([appointment])
-    identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
     identityProvider.getLawyers.mockResolvedValue(
       new Map([[secondSchedule.collaboratorId, { name: 'Second Lawyer', active: true }]]),
     )
@@ -84,43 +107,48 @@ describe('List Calendar Use Case', () => {
     expect(events).toMatchObject([
       { kind: 'appointment', lawyerId: secondSchedule.collaboratorId },
     ])
-    expect(events).not.toContainEqual(expect.objectContaining({ lawyerId: firstSchedule.collaboratorId }))
+    expect(events).not.toContainEqual(
+      expect.objectContaining({ lawyerId: firstSchedule.collaboratorId }),
+    )
   })
 
-  it.each(['attendant', 'supervisor', 'paralegal'] as const)(
-    'exposes consultation status and start indicators to %s without the consultation ID',
-    async (profile) => {
-      const schedule = ScheduleFaker.fake({ collaboratorId: 'lawyer-1' })
-      const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })
-      const startedAt = new Date('2026-08-13T13:05:00.000Z')
-      schedulesRepository.listByCollaboratorIds.mockResolvedValue([schedule])
-      schedulesRepository.listBlockedPeriods.mockResolvedValue([])
-      appointmentsRepository.listOverlapping.mockResolvedValue([appointment])
-      identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
-      identityProvider.getLawyers.mockResolvedValue(
-        new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
-      )
-      consultationProvider.getByAppointmentIds.mockResolvedValue(
-        new Map([[appointment.id, { id: 'consultation-1', status: 'no_show', startedAt }]]),
-      )
+  it.each([
+    'attendant',
+    'supervisor',
+    'paralegal',
+  ] as const)('exposes consultation status and start indicators to %s without the consultation ID', async (profile) => {
+    const schedule = ScheduleFaker.fake({ collaboratorId: 'lawyer-1' })
+    const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })
+    const startedAt = new Date('2026-08-13T13:05:00.000Z')
+    schedulesRepository.listByCollaboratorIds.mockResolvedValue([schedule])
+    schedulesRepository.listBlockedPeriods.mockResolvedValue([])
+    appointmentsRepository.listOverlapping.mockResolvedValue([appointment])
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
+    identityProvider.getLawyers.mockResolvedValue(
+      new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
+    )
+    consultationProvider.getByAppointmentIds.mockResolvedValue(
+      new Map([[appointment.id, { id: 'consultation-1', status: 'no_show', startedAt }]]),
+    )
 
-      const events = await new ListCalendarUseCase(
-        schedulesRepository,
-        appointmentsRepository,
-        identityProvider,
-        consultationProvider,
-      ).execute({
-        actor: { collaboratorId: `${profile}-1`, profile },
-        query: { view: 'week', date: '2026-08-10', event: 'all' },
-      })
+    const events = await new ListCalendarUseCase(
+      schedulesRepository,
+      appointmentsRepository,
+      identityProvider,
+      consultationProvider,
+    ).execute({
+      actor: { collaboratorId: `${profile}-1`, profile },
+      query: { view: 'week', date: '2026-08-10', event: 'all' },
+    })
 
-      expect(events[0]).toMatchObject({
-        consultationStatus: 'no_show',
-        consultationStartedAt: startedAt,
-      })
-      expect(events[0]).not.toHaveProperty('consultationId')
-    },
-  )
+    expect(events[0]).toMatchObject({
+      consultationStatus: 'no_show',
+      consultationStartedAt: startedAt,
+    })
+    expect(events[0]).not.toHaveProperty('consultationId')
+  })
 
   it('rejects inactive actors and malformed civil dates before reading calendars', async () => {
     const useCase = new ListCalendarUseCase(
@@ -216,7 +244,9 @@ describe('List Calendar Use Case', () => {
     schedulesRepository.listByCollaboratorIds.mockResolvedValue([schedule])
     schedulesRepository.listBlockedPeriods.mockResolvedValue([block])
     appointmentsRepository.listOverlapping.mockResolvedValue([appointment])
-    identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
     identityProvider.getLawyers.mockResolvedValue(
       new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
     )
@@ -240,7 +270,9 @@ describe('List Calendar Use Case', () => {
       query: { view: 'week', date: '2026-08-10', event: 'blocked' },
     })
 
-    expect(noShows).toMatchObject([{ kind: 'appointment', appointmentId: appointment.id }])
+    expect(noShows).toMatchObject([
+      { kind: 'appointment', appointmentId: appointment.id },
+    ])
     expect(blocked).toMatchObject([{ kind: 'block', blockedPeriodId: block.id }])
     expect(appointmentsRepository.listOverlapping).toHaveBeenCalledTimes(2)
     expect(consultationProvider.getByAppointmentIds).toHaveBeenCalledTimes(2)

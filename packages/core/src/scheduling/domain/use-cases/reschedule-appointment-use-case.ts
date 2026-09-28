@@ -1,10 +1,27 @@
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#identity/domain/structures'
-import type { CalendarConsultationProvider, CalendarIdentityProvider, DatetimeProvider, IdProvider, RescheduledAppointmentConsultationProvider, UseCase } from '#shared/interfaces'
+import type {
+  CalendarConsultationProvider,
+  CalendarIdentityProvider,
+  DatetimeProvider,
+  IdProvider,
+  RescheduledAppointmentConsultationProvider,
+  UseCase,
+} from '#shared/interfaces'
 
 import type { Appointment, Schedule } from '../entities'
-import { AppointmentActionForbiddenError, AppointmentConflictError, AppointmentNotEditableError, AppointmentNotFoundError, AppointmentRevisionConflictError } from '../errors'
+import {
+  AppointmentActionForbiddenError,
+  AppointmentConflictError,
+  AppointmentNotEditableError,
+  AppointmentNotFoundError,
+  AppointmentRevisionConflictError,
+} from '../errors'
 import type { AppointmentDetails } from '../structures'
-import type { AppointmentsRepository, SchedulingDatabase, SchedulesRepository } from '../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+  SchedulingDatabase,
+} from '../../interfaces'
 import { CheckAppointmentAvailabilityUseCase } from './check-appointment-availability-use-case'
 import { GetAppointmentDetailsUseCase } from './get-appointment-details-use-case'
 
@@ -20,22 +37,24 @@ type Request = {
   lawyerId?: string
 }
 
-export class RescheduleAppointmentUseCase implements UseCase<Request, AppointmentDetails> {
+export class RescheduleAppointmentUseCase
+  implements UseCase<Request, AppointmentDetails>
+{
   private readonly checkAvailability = new CheckAppointmentAvailabilityUseCase()
   private readonly getDetails: GetAppointmentDetailsUseCase
 
   constructor(
     private readonly database: SchedulingDatabase,
-    schedulesRepository: SchedulesRepository,
+    schedulesRepository: CalendarSchedulesRepository,
     private readonly identityProvider: CalendarIdentityProvider,
     private readonly consultationProvider: CalendarConsultationProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
-    appointmentsRepository?: AppointmentsRepository,
+    appointmentsRepository?: CalendarAppointmentsRepository,
     private readonly rescheduledConsultationProvider?: RescheduledAppointmentConsultationProvider,
   ) {
     this.getDetails = new GetAppointmentDetailsUseCase(
-      appointmentsRepository ?? ({ } as AppointmentsRepository),
+      appointmentsRepository ?? ({} as CalendarAppointmentsRepository),
       schedulesRepository,
       identityProvider,
       consultationProvider,
@@ -45,9 +64,13 @@ export class RescheduleAppointmentUseCase implements UseCase<Request, Appointmen
   async execute(request: Request): Promise<AppointmentDetails> {
     assertWriteAccess(request.actor)
     await this.database.run(async ({ appointmentsRepository, schedulesRepository }) => {
-      const appointmentReference = await appointmentsRepository.findById(request.appointmentId)
+      const appointmentReference = await appointmentsRepository.findById(
+        request.appointmentId,
+      )
       if (!appointmentReference) throw new AppointmentNotFoundError()
-      const originSchedule = await schedulesRepository.findById(appointmentReference.scheduleId)
+      const originSchedule = await schedulesRepository.findById(
+        appointmentReference.scheduleId,
+      )
       if (!originSchedule) throw new AppointmentNotFoundError()
       const targetLawyerId = request.lawyerId ?? originSchedule.collaboratorId
       const lawyer = (await this.identityProvider.getLawyers([targetLawyerId])).get(
@@ -69,7 +92,9 @@ export class RescheduleAppointmentUseCase implements UseCase<Request, Appointmen
       }
       const schedule = lockedSchedules.get(targetSchedule.id)
       if (!schedule) throw new AppointmentConflictError()
-      const appointment = await appointmentsRepository.findByIdForUpdate(request.appointmentId)
+      const appointment = await appointmentsRepository.findByIdForUpdate(
+        request.appointmentId,
+      )
       if (!appointment) throw new AppointmentNotFoundError()
       if (appointment.scheduleId !== originSchedule.id) {
         throw new AppointmentRevisionConflictError()
@@ -148,7 +173,9 @@ export class RescheduleAppointmentUseCase implements UseCase<Request, Appointmen
   }
 
   private async assertEditable(appointment: Appointment): Promise<void> {
-    const consultation = await this.consultationProvider.getByAppointmentIds([appointment.id])
+    const consultation = await this.consultationProvider.getByAppointmentIds([
+      appointment.id,
+    ])
     const current = consultation.get(appointment.id)
     if (current && (current.status !== 'pending' || current.startedAt)) {
       throw new AppointmentNotEditableError()
@@ -157,7 +184,8 @@ export class RescheduleAppointmentUseCase implements UseCase<Request, Appointmen
 }
 
 function assertWriteAccess(actor: Request['actor']): void {
-  if (actor.status && actor.status !== 'active') throw new AppointmentActionForbiddenError()
+  if (actor.status && actor.status !== 'active')
+    throw new AppointmentActionForbiddenError()
   if (actor.profile !== 'admin' && actor.profile !== 'attendant') {
     throw new AppointmentActionForbiddenError()
   }
@@ -170,7 +198,9 @@ function localDate(date: Date, timeZone: string): `${number}-${number}-${number}
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).formatToParts(date).map(({ type, value }) => [type, value]),
+    })
+      .formatToParts(date)
+      .map(({ type, value }) => [type, value]),
   )
   return `${parts.year}-${parts.month}-${parts.day}` as `${number}-${number}-${number}`
 }

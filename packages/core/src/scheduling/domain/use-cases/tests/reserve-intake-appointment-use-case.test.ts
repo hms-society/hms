@@ -9,6 +9,8 @@ import {
 } from '../../errors'
 import type {
   AppointmentsRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
   SchedulesRepository,
   SchedulingDatabase,
 } from '../../../interfaces'
@@ -19,15 +21,15 @@ const currentDate = new Date('2026-08-12T15:00:00.000Z')
 const appointmentId = 'f7aab3e3-5474-4fdb-8d45-8508e44b7029'
 
 describe('Reserve Intake Appointment Use Case', () => {
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let database: MockProxy<SchedulingDatabase>
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
   let idProvider: MockProxy<IdProvider>
   let datetimeProvider: MockProxy<DatetimeProvider>
 
   beforeEach(() => {
-    schedulesRepository = mock<SchedulesRepository>()
-    appointmentsRepository = mock<AppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
     database = mock<SchedulingDatabase>()
     database.run.mockImplementation(async (operation) =>
       operation({ schedulesRepository, appointmentsRepository }),
@@ -161,5 +163,34 @@ describe('Reserve Intake Appointment Use Case', () => {
         startsAt: appointment.startsAt,
       }),
     ).rejects.toBeInstanceOf(AppointmentConflictError)
+  })
+
+  it('preserves the legacy repository constructor path', async () => {
+    const schedule = ScheduleFaker.fake()
+    const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })
+    schedulesRepository.findByCollaboratorId.mockResolvedValue(schedule)
+    appointmentsRepository.add.mockResolvedValue(appointment)
+    const legacySchedulesRepository: SchedulesRepository = schedulesRepository
+    const legacyAppointmentsRepository: AppointmentsRepository = appointmentsRepository
+    const useCase = new ReserveIntakeAppointmentUseCase(
+      legacySchedulesRepository,
+      legacyAppointmentsRepository,
+      idProvider,
+      datetimeProvider,
+    )
+
+    await expect(
+      useCase.execute({
+        intakeId: appointment.intakeId,
+        clientId: appointment.clientId,
+        assignedLawyerId: schedule.collaboratorId,
+        startsAt: appointment.startsAt,
+      }),
+    ).resolves.toBe(appointment)
+    expect(schedulesRepository.findByCollaboratorId).toHaveBeenCalledWith(
+      schedule.collaboratorId,
+    )
+    expect(schedulesRepository.findByCollaboratorIdForUpdate).not.toHaveBeenCalled()
+    expect(database.run).not.toHaveBeenCalled()
   })
 })
