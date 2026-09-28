@@ -8,7 +8,7 @@ import type {
 import type {
   CreateBlockedPeriodInput,
   CreateScheduleInput,
-  SchedulesRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 
 import { DRIZZLE } from '@/shared/database/drizzle/database.provider'
@@ -20,7 +20,7 @@ type ScheduleRecord = typeof schedules.$inferSelect & {
 }
 
 @Injectable()
-export class DrizzleSchedulesRepository implements SchedulesRepository {
+export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
   constructor(
     @Inject(DRIZZLE)
     private readonly db: SchedulingDatabaseExecutor,
