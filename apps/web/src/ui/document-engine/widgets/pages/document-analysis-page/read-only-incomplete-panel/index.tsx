@@ -2,6 +2,7 @@ import type { DocumentValidationDocument } from '@hms/core/document-engine/domai
 
 import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { getVisibleExtractedFields } from '@/ui/document-engine/utils/get-visible-extracted-fields'
 import { ExtractedFields } from '../extracted-fields'
 
 export type ReadOnlyIncompletePanelProps = {
@@ -9,9 +10,9 @@ export type ReadOnlyIncompletePanelProps = {
 }
 
 export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelProps) => {
+  const extractedFields = getVisibleExtractedFields(document)
   const senderName =
-    document.extractedFields.find((field) => field.label === 'Titular')?.value ??
-    document.sender
+    extractedFields.find((field) => field.label === 'Titular')?.value ?? document.sender
   const reviewedBy = document.reviewedByName?.trim() || 'responsável não identificado'
   const reviewedAt = document.reviewedAt
     ? new Intl.DateTimeFormat('pt-BR', {
@@ -99,7 +100,7 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
             <span className='flex items-center gap-1 self-end font-sans text-[10px] text-muted-foreground'>
               <Icon name='lock' className='size-3' /> Somente leitura
             </span>
-            <ExtractedFields title='Campos extraídos' fields={document.extractedFields} />
+            <ExtractedFields title='Campos extraídos' fields={extractedFields} />
           </div>
           <div className='flex flex-col gap-3'>
             {document.missingFields.length > 0 && (

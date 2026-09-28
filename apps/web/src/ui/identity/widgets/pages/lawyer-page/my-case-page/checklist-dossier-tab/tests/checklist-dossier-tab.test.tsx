@@ -38,6 +38,7 @@ function createController(
   return {
     actionFeedback: null,
     canStartLegalWriting: false,
+    canHomologateDossier: false,
     checklistGateAuditLabel: undefined,
     checklistGateLabel: 'Checklist pendente',
     checklistGateRemarks: undefined,
@@ -56,6 +57,7 @@ function createController(
     dossierGateLabel: 'Dossiê pendente',
     error: null,
     handleApproveChecklist: vi.fn(),
+    handleHomologateDossier: vi.fn(),
     handleApproveWithException: vi.fn(),
     handleBlockChecklist: vi.fn(),
     handleCancelDecisionReason: vi.fn(),
@@ -74,6 +76,8 @@ function createController(
     isExceptionModalOpen: false,
     isRequestingException: false,
     isReviewDisabled: false,
+    hasChecklistDecision: false,
+    isHomologatingDossier: false,
     isReviewingChecklistGate: false,
     mandatoryItemsCount: 2,
     pendingItemsCount: 1,
@@ -108,7 +112,7 @@ describe('ChecklistDossierTab', () => {
     )
 
     expect(screen.getByText('Checklist pendente')).toBeTruthy()
-    expect(screen.getByText('Dossiê pendente')).toBeTruthy()
+    expect(screen.getAllByText('Dossiê pendente').length).toBeGreaterThan(0)
     expect(screen.getByText('Escrita bloqueada')).toBeTruthy()
     expect(screen.getByText('1 de 2 obrigatórios - 50%')).toBeTruthy()
 
