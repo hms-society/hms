@@ -48,7 +48,10 @@ describe('Save Generated Document Version Use Case', () => {
       source: {
         type: 'case',
         id: 'case-id',
-        data: { baseDocumentVersionId: 'source-version-id' },
+        data: {
+          baseDocumentVersionId: 'source-version-id',
+          templateVariableValues: { nome_requerente: 'Helena' },
+        },
       },
       template: {
         name: 'Procuração Jurídica',
@@ -62,9 +65,23 @@ describe('Save Generated Document Version Use Case', () => {
     })
     const content = {
       type: 'doc',
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Texto' }] }],
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Requerente: Helena. Períodos: ' },
+            { type: 'text', text: '{periodos_contributivos}' },
+          ],
+        },
+      ],
     } as unknown as DocumentTemplateContent
-    const pendingMarkers = [{ marker: '{client_cpf}' }]
+    const pendingMarkers = [
+      {
+        marker: '{periodos_contributivos}',
+        technicalName: 'periodos_contributivos',
+        label: 'Períodos contributivos',
+      },
+    ]
     const bytes = new Uint8Array([1, 2, 3])
     const storedFile: File = {
       id: '90e0f45e-cfa6-41f4-a96a-cacbdcdb84b7',
@@ -132,6 +149,8 @@ describe('Save Generated Document Version Use Case', () => {
       createdAt: now,
       status: 'in_review',
     })
+    expect(savedVersion.content).toEqual(content)
+    expect(savedVersion.pendingMarkers).toEqual(pendingMarkers)
   })
 
   it('starts numbering at one when the document has no previous version', async () => {

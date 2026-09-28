@@ -52,7 +52,7 @@ describe('CasoDetalheChecklistPage piece entry point', () => {
       } as never,
       caseStatusLabel: 'Pronto para produção jurídica',
       caseStages: [],
-      dossierApproved: false,
+      dossierApproved: true,
       isLoading: false,
       checklistItems: [],
       completionPercentage: 0,
@@ -76,8 +76,49 @@ describe('CasoDetalheChecklistPage piece entry point', () => {
     expect(screen.getByRole('dialog').getAttribute('data-case-id')).toBe('case-1')
     expect(screen.getByText('Pronto para produção jurídica')).toBeDefined()
     expect(screen.getByTestId('case-pieces').getAttribute('data-dossier-approved')).toBe(
-      'false',
+      'true',
     )
     expect(setActiveTabMock).toHaveBeenCalledWith('pecas')
+  })
+
+  it('keeps the new-piece dialog closed until the dossier is approved', () => {
+    const setActiveTabMock = vi.fn()
+    useMyCasePageMock.mockReturnValue({
+      activeTab: 'pecas',
+      caseClientName: 'Vinicius Lopes Machado',
+      caseLegalArea: 'Direito Previdenciário',
+      caseTitle: 'Aposentadoria por Tempo de Contribuição',
+      caseUuid: 'case-1',
+      caseDetails: {
+        status: 'documentation',
+        dossierGate: {},
+      } as never,
+      caseStatusLabel: 'Documentação em formação',
+      caseStages: [],
+      dossierApproved: false,
+      isLoading: false,
+      checklistItems: [],
+      completionPercentage: 0,
+      displayCaseId: 'CASO-20260923-0002',
+      mandatoryItemsCount: 0,
+      pendingItemsCount: 0,
+      validatedItemsCount: 0,
+      handleOpenChecklistTab: vi.fn(),
+      setActiveTab: setActiveTabMock,
+    })
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CasoDetalheChecklistPage caseId='case-1' />
+      </QueryClientProvider>,
+    )
+
+    const newPieceButton = screen.getByRole('button', { name: 'Nova peça' })
+    fireEvent.click(newPieceButton)
+
+    expect(newPieceButton.hasAttribute('disabled')).toBe(true)
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(setActiveTabMock).not.toHaveBeenCalled()
   })
 })

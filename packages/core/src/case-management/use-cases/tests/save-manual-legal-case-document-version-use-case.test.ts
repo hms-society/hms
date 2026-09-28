@@ -63,7 +63,15 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
     const sourceVersion = DocumentVersionFaker.fake({
       id: 'source-version',
       documentId: document.id,
+      status: 'approved',
+      content: {
+        type: 'doc',
+        content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Versão original.' }] },
+        ],
+      } as unknown as DocumentTemplateContent,
     })
+    const sourceSnapshot = structuredClone(sourceVersion)
     const createdAt = new Date('2026-09-25T15:00:00.000Z')
     const content = { type: 'doc', content: [] } as unknown as DocumentTemplateContent
     cases.findById.mockResolvedValue(legalCase)
@@ -123,6 +131,16 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
     expect(storage.save).toHaveBeenCalledWith(
       expect.objectContaining({
         filePath: expect.stringContaining('/manual/new-version-id/'),
+      }),
+    )
+    expect(sourceVersion).toEqual(sourceSnapshot)
+    expect(versions.add).toHaveBeenCalledTimes(1)
+    expect(versions.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: document.id,
+        sourceDocumentVersionId: sourceVersion.id,
+        content,
+        status: 'in_review',
       }),
     )
   })

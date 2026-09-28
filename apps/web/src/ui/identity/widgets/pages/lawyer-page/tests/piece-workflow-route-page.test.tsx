@@ -233,6 +233,33 @@ describe('PieceWorkflowRoutePage', () => {
     ).toBe(true)
   })
 
+  it('allows a different reviewer to decide after confirming responsibility', () => {
+    const pageState = {
+      ...buildPageState(),
+      mode: 'review' as const,
+      isAuthor: false,
+      isReviewConfirmed: true,
+    }
+    usePieceWorkflowRoutePageMock.mockReturnValue(pageState)
+
+    render(
+      <PieceWorkflowRoutePage mode='review' caseId={CASE_ID} documentId={DOCUMENT_ID} />,
+    )
+
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Aprovar peça' }).hasAttribute('disabled'),
+    ).toBe(false)
+    expect(
+      screen.getByRole('button', { name: 'Solicitar ajustes' }).hasAttribute('disabled'),
+    ).toBe(false)
+    expect(
+      screen.getByRole('button', { name: 'Bloqueio' }).hasAttribute('disabled'),
+    ).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: 'Solicitar ajustes' }))
+    expect(pageState.handleOpenReviewAction).toHaveBeenCalledWith('adjustments')
+  })
+
   it('shows generation references and unresolved variables beside the editable document', async () => {
     render(
       <PieceWorkflowRoutePage mode='editor' caseId={CASE_ID} documentId={DOCUMENT_ID} />,

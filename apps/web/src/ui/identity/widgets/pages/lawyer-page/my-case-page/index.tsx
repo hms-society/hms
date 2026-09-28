@@ -105,6 +105,12 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             <Button
               size='xs'
               className='rounded-full'
+              disabled={!dossierApproved}
+              title={
+                dossierApproved
+                  ? undefined
+                  : 'A elaboração será liberada após a aprovação do dossiê documental.'
+              }
               onClick={() => {
                 setActiveTab('pecas')
                 setIsNewPieceOpen(true)
@@ -232,7 +238,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </TabsContent>
       </Tabs>
       <NewPieceDialog
-        open={isNewPieceOpen}
+        open={isNewPieceOpen && dossierApproved}
         caseId={caseUuid}
         onOpenChange={setIsNewPieceOpen}
         onGenerated={() => {

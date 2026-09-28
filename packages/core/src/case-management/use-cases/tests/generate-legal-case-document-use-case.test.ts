@@ -252,4 +252,33 @@ describe('Generate Legal Case Document Use Case', () => {
     expect(broker.publish).not.toHaveBeenCalled()
     expect(documents.add).not.toHaveBeenCalled()
   })
+
+  it('does not allow checklist exception approval to bypass dossier homologation', async () => {
+    cases.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        id: 'case-id',
+        checklistGate: {
+          decision: CaseChecklistGateDecision.ApprovedWithException,
+          decidedAt: new Date('2026-09-27T12:00:00.000Z'),
+          decidedBy: 'reviewer-id',
+          remarks: 'Documento pendente foi justificado na análise.',
+        },
+        dossierGate: { homologatedAt: undefined, homologatedBy: undefined },
+      }),
+    )
+    cases.listByTeamMember.mockResolvedValue([{ id: 'case-id' } as never])
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-id',
+        documentSpecificationId: 'spec-id',
+        documentFileIds: ['file-id'],
+        requestedByCollaboratorId: 'actor-id',
+        requestedByCollaboratorProfile: 'lawyer',
+      }),
+    ).rejects.toThrow('dossiê documental')
+
+    expect(broker.publish).not.toHaveBeenCalled()
+    expect(documents.add).not.toHaveBeenCalled()
+  })
 })

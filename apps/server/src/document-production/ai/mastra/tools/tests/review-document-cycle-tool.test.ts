@@ -356,6 +356,46 @@ describe('ReviewDocumentCycleTool', () => {
         correction: 'Incluir o endereçamento previsto no modelo.',
       },
     ])
+    expect(result.draft.content).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, textAlign: null },
+          content: [{ type: 'text', text: 'Requerimento' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Requerente: ' },
+            { type: 'text', text: '{nome_requerente}', marks: [{ type: 'bold' }] },
+          ],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Documento de identidade' }],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Comprovante de residência' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
   })
 
   it('does not retry provider availability errors', async () => {
