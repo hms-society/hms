@@ -465,7 +465,7 @@ blocked live-AI scenario, not as passing evidence.
 - **Confluence PRD — Produção Documental v15**, sections 12.2–12.8: new AI/manual
   versions, immutable content/files, review, explicit current selection,
   case-team access, and interface actions.
-- **Jira:** no ticket was found or supplied for this direct-request change.
+- **Jira:** user-provided ticket [SCRUM-38 — HMS-US029](https://plataformahms.atlassian.net/browse/SCRUM-38); its supplied story and acceptance criteria are the verified delivery authority.
 - **Modules:** `documentation/modules.md` assigns immutable generated/manual
   versions, review/approval, current selection, and event publication to Produção
   Documental; Case Management owns its case gate and case-member authorization.
