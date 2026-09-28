@@ -112,14 +112,3 @@ export const ConsultationPage = ({ consultationId, children }: ConsultationPageP
     </div>
   )
 }
-
-export const ConsultationIndexPage = () => (
-  <div className='mx-auto flex min-h-[50vh] w-full max-w-3xl items-center justify-center px-4 py-12 sm:px-8'>
-    <div className='w-full rounded-2xl border border-border bg-card p-8 text-center shadow-sm'>
-      <h1 className='font-serif text-2xl text-foreground'>Consulta</h1>
-      <p className='mt-2 text-sm text-muted-foreground'>
-        Abra uma consulta usando o endereço que contém o ID da consulta.
-      </p>
-    </div>
-  </div>
-)
