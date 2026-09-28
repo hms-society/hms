@@ -1,5 +1,7 @@
 export * from './scheduling-provider'
 export * from './schedules-repository'
 export * from './appointments-repository'
+export * from './calendar-appointments-repository'
+export * from './calendar-schedules-repository'
 export * from './scheduling-database'
 export * from './scheduling-database-repositories'

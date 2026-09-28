@@ -15,8 +15,8 @@ import { toSchedulingActor } from './controller-actor'
 import { CurrentCollaborator } from '@/identity/decorators'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type {
-  AppointmentsRepository,
-  SchedulesRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import type {
   CalendarConsultationProvider,
@@ -30,9 +30,10 @@ export class ListCalendarController {
   private readonly useCase: ListCalendarUseCaseType
 
   constructor(
-    @Inject(SCHEDULING_REPOSITORIES.schedules) schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: CalendarSchedulesRepository,
     @Inject(SCHEDULING_REPOSITORIES.appointments)
-    appointmentsRepository: AppointmentsRepository,
+    appointmentsRepository: CalendarAppointmentsRepository,
     @Inject(IDENTITY_REPOSITORIES.calendarProvider)
     identityProvider: CalendarIdentityProvider,
     @Inject(CONSULTATION_REPOSITORIES.calendarProvider)

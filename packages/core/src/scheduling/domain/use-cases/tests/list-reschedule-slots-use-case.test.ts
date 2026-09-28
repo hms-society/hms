@@ -4,17 +4,20 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import { AppointmentFaker, ScheduleFaker } from '../../entities/fakers'
 import type { CalendarIdentityProvider } from '#shared/interfaces'
 import { AppointmentActionForbiddenError, AppointmentConflictError } from '../../errors'
-import type { AppointmentsRepository, SchedulesRepository } from '../../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../../interfaces'
 import { ListRescheduleSlotsUseCase } from '../list-reschedule-slots-use-case'
 
 describe('List Reschedule Slots Use Case', () => {
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let identityProvider: MockProxy<CalendarIdentityProvider>
 
   beforeEach(() => {
-    appointmentsRepository = mock<AppointmentsRepository>()
-    schedulesRepository = mock<SchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
     identityProvider = mock<CalendarIdentityProvider>()
   })
 
@@ -22,7 +25,9 @@ describe('List Reschedule Slots Use Case', () => {
     const schedule = ScheduleFaker.fake({
       collaboratorId: 'lawyer-1',
       appointmentDurationInMinutes: 45,
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:30' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:30' }] },
+      ],
     })
     const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })
     appointmentsRepository.findById.mockResolvedValue(appointment)
@@ -50,7 +55,9 @@ describe('List Reschedule Slots Use Case', () => {
       collaboratorId: 'lawyer-destination',
       timeZone: 'America/Los_Angeles',
       appointmentDurationInMinutes: 30,
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:00' }] },
+      ],
     })
     const appointment = AppointmentFaker.fake({
       scheduleId: currentSchedule.id,
@@ -63,7 +70,12 @@ describe('List Reschedule Slots Use Case', () => {
     schedulesRepository.findByCollaboratorId.mockResolvedValue(destinationSchedule)
     schedulesRepository.listBlockedPeriods.mockResolvedValue([])
     identityProvider.getLawyers.mockResolvedValue(
-      new Map([[destinationSchedule.collaboratorId, { name: 'Destination Lawyer', active: true }]]),
+      new Map([
+        [
+          destinationSchedule.collaboratorId,
+          { name: 'Destination Lawyer', active: true },
+        ],
+      ]),
     )
 
     const slots = await new ListRescheduleSlotsUseCase(
@@ -113,13 +125,17 @@ describe('List Reschedule Slots Use Case', () => {
       lawyerId: targetSchedule.collaboratorId,
     }
 
-    await expect(useCase.execute(request)).rejects.toBeInstanceOf(AppointmentConflictError)
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(
+      AppointmentConflictError,
+    )
 
     identityProvider.getLawyers.mockResolvedValue(
       new Map([[targetSchedule.collaboratorId, { name: 'Target', active: true }]]),
     )
     schedulesRepository.findByCollaboratorId.mockResolvedValue(null)
-    await expect(useCase.execute(request)).rejects.toBeInstanceOf(AppointmentConflictError)
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(
+      AppointmentConflictError,
+    )
 
     const missingLawyerRequest = { ...request, lawyerId: undefined }
     schedulesRepository.findByCollaboratorId.mockClear()
