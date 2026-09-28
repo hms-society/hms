@@ -7,4 +7,5 @@ export const IDENTITY_REPOSITORIES = {
   collaborators: Symbol('IDENTITY_REPOSITORIES.collaborators'),
   registrationAttempts: Symbol('IDENTITY_REPOSITORIES.registrationAttempts'),
   transaction: Symbol('IDENTITY_REPOSITORIES.transaction'),
+  calendarProvider: Symbol('IDENTITY_REPOSITORIES.calendarProvider'),
 } as const

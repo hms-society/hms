@@ -1,7 +1,10 @@
 import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
 import { UnauthorizedException } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
-import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
+import type {
+  ConsultationOutboxRepository,
+  ConsultationsRepository,
+} from '@hms/core/consultation/interfaces'
 import type { DocumentGenerationCreation } from '@hms/core/document-production/domain/entities'
 import { DocumentGenerationFaker } from '@hms/core/document-production/domain/entities/fakers'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
@@ -18,6 +21,14 @@ import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
+import {
+  AppointmentFaker,
+  ScheduleFaker,
+} from '@hms/core/scheduling/domain/entities/fakers'
+import type {
+  AppointmentsRepository,
+  SchedulesRepository,
+} from '@hms/core/scheduling/interfaces'
 import type {
   LegalAreasRepository,
   LegalTopicsRepository,
@@ -38,8 +49,10 @@ import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
+import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 
 export class ConsultationModuleFixture {
@@ -47,6 +60,9 @@ export class ConsultationModuleFixture {
     private readonly restFixture: RestFixture,
     readonly broker: Broker & { publish: Mock },
     readonly consultationsRepository: ConsultationsRepository,
+    readonly outboxRepository: ConsultationOutboxRepository,
+    readonly appointmentsRepository: AppointmentsRepository,
+    readonly schedulesRepository: SchedulesRepository,
     readonly intakesRepository: IntakesRepository,
     readonly clientsRepository: ClientsRepository,
     readonly legalAreasRepository: LegalAreasRepository,
@@ -70,7 +86,7 @@ export class ConsultationModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller: Type<unknown>) {
+  static async register(controller: Type<unknown> | readonly Type<unknown>[]) {
     const authentication: { user?: AuthUser } = {}
     const broker: Broker & { publish: Mock } = { publish: vi.fn() }
     const restFixture = await RestFixture.register(
@@ -83,9 +99,10 @@ export class ConsultationModuleFixture {
           ConsultationDatabaseModule,
           DocumentProductionDatabaseModule,
           DocumentProductionProvisionModule,
+          SharedDatabaseModule,
           ProvisionModule,
         ],
-        controllers: [controller],
+        controllers: Array.isArray(controller) ? [...controller] : [controller],
         providers: [{ provide: InngestBroker, useValue: broker }],
       },
       (builder) =>
@@ -113,6 +130,9 @@ export class ConsultationModuleFixture {
       restFixture,
       broker,
       restFixture.get(CONSULTATION_REPOSITORIES.consultations),
+      restFixture.get(CONSULTATION_REPOSITORIES.outbox),
+      restFixture.get(SCHEDULING_REPOSITORIES.appointments),
+      restFixture.get(SCHEDULING_REPOSITORIES.schedules),
       restFixture.get(INTAKE_REPOSITORIES.intakes),
       restFixture.get(IDENTITY_REPOSITORIES.clients),
       restFixture.get(LEGAL_CATALOG_REPOSITORIES.areas),
@@ -139,6 +159,29 @@ export class ConsultationModuleFixture {
     })
     if (!collaborator) throw new Error('Test collaborator was not created')
     this.authentication.user = { id: user.id, email: user.email }
+    return { user, collaborator }
+  }
+
+  async registerUnauthorizedCollaborator() {
+    const [legalArea] = await this.legalAreasRepository.addMany([
+      { name: 'Direito Civil sem vínculo', active: true },
+    ])
+    if (!legalArea) throw new Error('Test legal area was not created')
+    const [legalTopic] = await this.legalTopicsRepository.addMany([
+      { legalAreaId: legalArea.id, name: 'Tópico sem vínculo', active: true },
+    ])
+    if (!legalTopic) throw new Error('Test legal topic was not created')
+    const user = await this.registerUser()
+    const collaborator = await this.collaboratorsRepository.add({
+      userId: user.id,
+      professionalName: 'Colaborador sem acesso',
+      jobTitle: 'Advogado',
+      profile: 'lawyer',
+      legalExpertises: [
+        { legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] },
+      ],
+    })
+    if (!collaborator) throw new Error('Test unauthorized collaborator was not created')
     return { user, collaborator }
   }
 
@@ -197,6 +240,28 @@ export class ConsultationModuleFixture {
     const seededConsultation = { ...consultationContext, intakeId: intake.id }
     await this.consultationsRepository.addMany([seededConsultation])
     return seededConsultation
+  }
+
+  async seedConsultationWithAppointment(
+    consultation: Consultation,
+    status: 'scheduled' | 'cancelled' = 'scheduled',
+  ) {
+    const seededConsultation = await this.seedConsultation(consultation)
+    const [schedule] = await this.schedulesRepository.addMany([
+      ScheduleFaker.fake({ collaboratorId: seededConsultation.assignedLawyerId }),
+    ])
+    if (!schedule) throw new Error('Test consultation schedule was not created')
+    const [appointment] = await this.appointmentsRepository.addMany([
+      AppointmentFaker.fake({
+        id: seededConsultation.appointmentId,
+        intakeId: seededConsultation.intakeId,
+        scheduleId: schedule.id,
+        clientId: seededConsultation.clientId,
+        status,
+      }),
+    ])
+    if (!appointment) throw new Error('Test consultation appointment was not created')
+    return { consultation: seededConsultation, schedule, appointment }
   }
 
   async seedDocument(consultationId: string) {
