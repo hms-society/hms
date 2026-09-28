@@ -14,18 +14,6 @@ describe('CaseManagementService', () => {
       canUpload: true,
     })
   })
-
-  it('homologates the legal case dossier', async () => {
-    const restClient = makeRestClient()
-    const service = CaseManagementService(restClient)
-
-    await service.homologateDossier('case-1')
-
-    expect(restClient.patch).toHaveBeenCalledWith(
-      '/cases/case-1/dossier-gate/homologation',
-      {},
-    )
-  })
 })
 
 function makeRestClient(): RestClient {

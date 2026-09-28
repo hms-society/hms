@@ -89,10 +89,6 @@ export const CaseManagementService = (
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
     },
 
-    homologateDossier(caseId) {
-      return restClient.patch<LegalCase>(`/cases/${caseId}/dossier-gate/homologation`, {})
-    },
-
     listPortalPendingChecklist(caseId, portalToken) {
       const query = new URLSearchParams({ portalToken })
       return restClient.get<readonly CaseChecklistItem[]>(
