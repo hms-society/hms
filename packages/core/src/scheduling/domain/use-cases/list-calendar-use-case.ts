@@ -3,9 +3,20 @@ import type { UseCase } from '#shared/interfaces'
 
 import type { Appointment, BlockedPeriod, Schedule } from '../entities'
 import { AppointmentActionForbiddenError, AppointmentNotFoundError } from '../errors'
-import type { CalendarAppointment, CalendarBlock, CalendarEvent, CalendarQuery } from '../structures'
-import type { CalendarConsultationProvider, CalendarIdentityProvider } from '#shared/interfaces'
-import type { AppointmentsRepository, SchedulesRepository } from '../../interfaces'
+import type {
+  CalendarAppointment,
+  CalendarBlock,
+  CalendarEvent,
+  CalendarQuery,
+} from '../structures'
+import type {
+  CalendarConsultationProvider,
+  CalendarIdentityProvider,
+} from '#shared/interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../interfaces'
 
 type Actor = {
   collaboratorId: string
@@ -20,8 +31,8 @@ type Request = {
 
 export class ListCalendarUseCase implements UseCase<Request, readonly CalendarEvent[]> {
   constructor(
-    private readonly schedulesRepository: SchedulesRepository,
-    private readonly appointmentsRepository: AppointmentsRepository,
+    private readonly schedulesRepository: CalendarSchedulesRepository,
+    private readonly appointmentsRepository: CalendarAppointmentsRepository,
     private readonly identityProvider: CalendarIdentityProvider,
     private readonly consultationProvider: CalendarConsultationProvider,
   ) {}
@@ -31,9 +42,8 @@ export class ListCalendarUseCase implements UseCase<Request, readonly CalendarEv
     const period = getPeriod(query.view, query.date)
     const collaboratorIds = getScheduleCollaboratorIds(actor, query.lawyerId)
     if (collaboratorIds?.length === 0) return []
-    const schedules = await this.schedulesRepository.listByCollaboratorIds(
-      collaboratorIds,
-    )
+    const schedules =
+      await this.schedulesRepository.listByCollaboratorIds(collaboratorIds)
     const scheduleIds = schedules.map((schedule) => schedule.id)
     if (scheduleIds.length === 0) return []
 
@@ -51,14 +61,22 @@ export class ListCalendarUseCase implements UseCase<Request, readonly CalendarEv
             period.startsOn as `${number}-${number}-${number}`,
             period.endsOn as `${number}-${number}-${number}`,
           )
-    const appointmentsBySchedule = new Map(schedules.map((schedule) => [schedule.id, schedule]))
+    const appointmentsBySchedule = new Map(
+      schedules.map((schedule) => [schedule.id, schedule]),
+    )
     const filteredAppointments = appointments.filter((appointment) =>
-      isInLocalPeriod(appointment, appointmentsBySchedule.get(appointment.scheduleId), period),
+      isInLocalPeriod(
+        appointment,
+        appointmentsBySchedule.get(appointment.scheduleId),
+        period,
+      ),
     )
     const consultations = await this.consultationProvider.getByAppointmentIds(
       filteredAppointments.map((appointment) => appointment.id),
     )
-    const clientIds = unique(filteredAppointments.map((appointment) => appointment.clientId))
+    const clientIds = unique(
+      filteredAppointments.map((appointment) => appointment.clientId),
+    )
     const lawyerIds = unique(schedules.map((schedule) => schedule.collaboratorId))
     const [clients, lawyers] = await Promise.all([
       this.identityProvider.getClients(clientIds),
@@ -136,15 +154,20 @@ function getScheduleCollaboratorIds(
 }
 
 function assertReadAccess(actor: Actor): void {
-  if (actor.status && actor.status !== 'active') throw new AppointmentActionForbiddenError()
-  if (!['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)) {
+  if (actor.status && actor.status !== 'active')
+    throw new AppointmentActionForbiddenError()
+  if (
+    !['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)
+  ) {
     throw new AppointmentActionForbiddenError()
   }
 }
 
 function canOpenConsultation(actor: Actor, lawyerId: string): boolean {
-  return actor.profile === 'admin' ||
+  return (
+    actor.profile === 'admin' ||
     (actor.profile === 'lawyer' && actor.collaboratorId === lawyerId)
+  )
 }
 
 function unique(values: readonly string[]): string[] {
@@ -199,11 +222,17 @@ function isInLocalPeriod(
   return localDate >= period.startsOn && localDate <= period.endsOn
 }
 
-function isBlockInPeriod(block: BlockedPeriod & { scheduleId: string }, period: ReturnType<typeof getPeriod>): boolean {
+function isBlockInPeriod(
+  block: BlockedPeriod & { scheduleId: string },
+  period: ReturnType<typeof getPeriod>,
+): boolean {
   return block.endsOn >= period.startsOn && block.startsOn <= period.endsOn
 }
 
-function matchesEventFilter(event: CalendarEvent, filter: CalendarQuery['event']): boolean {
+function matchesEventFilter(
+  event: CalendarEvent,
+  filter: CalendarQuery['event'],
+): boolean {
   if (filter === 'all') return true
   if (filter === 'blocked') return event.kind === 'block'
   if (event.kind === 'block') return false
@@ -212,5 +241,7 @@ function matchesEventFilter(event: CalendarEvent, filter: CalendarQuery['event']
 }
 
 function eventSortValue(event: CalendarEvent): number {
-  return event.kind === 'block' ? Date.parse(`${event.startsOn}T00:00:00Z`) : event.startsAt.getTime()
+  return event.kind === 'block'
+    ? Date.parse(`${event.startsOn}T00:00:00Z`)
+    : event.startsAt.getTime()
 }

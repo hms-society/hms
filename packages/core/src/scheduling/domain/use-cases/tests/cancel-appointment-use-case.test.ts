@@ -8,23 +8,23 @@ import type {
   IdProvider,
 } from '#shared/interfaces'
 import type {
-  AppointmentsRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
   SchedulingDatabase,
-  SchedulesRepository,
 } from '../../../interfaces'
 import { CancelAppointmentUseCase } from '../cancel-appointment-use-case'
 
 describe('Cancel Appointment Use Case', () => {
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let database: MockProxy<SchedulingDatabase>
   let identityProvider: MockProxy<CalendarIdentityProvider>
   let consultationProvider: MockProxy<CalendarConsultationProvider>
   let idProvider: MockProxy<IdProvider>
 
   beforeEach(() => {
-    appointmentsRepository = mock<AppointmentsRepository>()
-    schedulesRepository = mock<SchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
     database = mock<SchedulingDatabase>()
     identityProvider = mock<CalendarIdentityProvider>()
     consultationProvider = mock<CalendarConsultationProvider>()

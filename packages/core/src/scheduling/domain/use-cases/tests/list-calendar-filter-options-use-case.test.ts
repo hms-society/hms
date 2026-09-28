@@ -2,18 +2,21 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { CalendarIdentityProvider } from '#shared/interfaces'
-import type { AppointmentsRepository, SchedulesRepository } from '../../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../../interfaces'
 import { ScheduleFaker } from '../../entities/fakers'
 import { ListCalendarFilterOptionsUseCase } from '../list-calendar-filter-options-use-case'
 
 describe('List Calendar Filter Options Use Case', () => {
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let identityProvider: MockProxy<CalendarIdentityProvider>
 
   beforeEach(() => {
-    appointmentsRepository = mock<AppointmentsRepository>()
-    schedulesRepository = mock<SchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
     identityProvider = mock<CalendarIdentityProvider>()
   })
 
@@ -21,7 +24,10 @@ describe('List Calendar Filter Options Use Case', () => {
     const schedule = ScheduleFaker.fake()
     schedulesRepository.listByCollaboratorIds.mockResolvedValue([schedule])
     identityProvider.searchClients.mockResolvedValue({
-      items: [{ id: 'client-1', name: 'Visible' }, { id: 'client-2', name: 'Hidden' }],
+      items: [
+        { id: 'client-1', name: 'Visible' },
+        { id: 'client-2', name: 'Hidden' },
+      ],
     })
     appointmentsRepository.filterFacetIdsInScope.mockResolvedValue(['client-1'])
 
@@ -29,7 +35,10 @@ describe('List Calendar Filter Options Use Case', () => {
       schedulesRepository,
       appointmentsRepository,
       identityProvider,
-    ).execute({ actor: { collaboratorId: 'attendant-1', profile: 'attendant' }, kind: 'client' })
+    ).execute({
+      actor: { collaboratorId: 'attendant-1', profile: 'attendant' },
+      kind: 'client',
+    })
 
     expect(result).toEqual({ items: [{ id: 'client-1', name: 'Visible' }] })
   })
@@ -55,7 +64,10 @@ describe('List Calendar Filter Options Use Case', () => {
       schedulesRepository,
       appointmentsRepository,
       identityProvider,
-    ).execute({ actor: { collaboratorId: 'attendant-1', profile: 'attendant' }, kind: 'client' })
+    ).execute({
+      actor: { collaboratorId: 'attendant-1', profile: 'attendant' },
+      kind: 'client',
+    })
 
     expect(result).toEqual({ items: secondPage, nextCursor: 'page-3' })
     expect(identityProvider.searchClients).toHaveBeenNthCalledWith(1, '', undefined, 20)
@@ -79,7 +91,10 @@ describe('List Calendar Filter Options Use Case', () => {
       schedulesRepository,
       appointmentsRepository,
       identityProvider,
-    ).execute({ actor: { collaboratorId: 'attendant-1', profile: 'attendant' }, kind: 'client' })
+    ).execute({
+      actor: { collaboratorId: 'attendant-1', profile: 'attendant' },
+      kind: 'client',
+    })
 
     expect(scanCalls).toBe(5)
     expect(identityProvider.searchClients).toHaveBeenLastCalledWith('', 'page-5', 20)

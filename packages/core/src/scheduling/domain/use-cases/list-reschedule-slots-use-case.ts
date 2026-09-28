@@ -1,10 +1,22 @@
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#identity/domain/structures'
-import type { CalendarIdentityProvider, DatetimeProvider, UseCase } from '#shared/interfaces'
+import type {
+  CalendarIdentityProvider,
+  DatetimeProvider,
+  UseCase,
+} from '#shared/interfaces'
 
 import type { AvailableSlot } from '../structures'
-import { AppointmentActionForbiddenError, AppointmentConflictError, AppointmentNotEditableError, AppointmentNotFoundError } from '../errors'
+import {
+  AppointmentActionForbiddenError,
+  AppointmentConflictError,
+  AppointmentNotEditableError,
+  AppointmentNotFoundError,
+} from '../errors'
 import { CheckAppointmentAvailabilityUseCase } from './check-appointment-availability-use-case'
-import type { AppointmentsRepository, SchedulesRepository } from '../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../interfaces'
 
 type Request = {
   actor: {
@@ -17,12 +29,14 @@ type Request = {
   lawyerId?: string
 }
 
-export class ListRescheduleSlotsUseCase implements UseCase<Request, readonly AvailableSlot[]> {
+export class ListRescheduleSlotsUseCase
+  implements UseCase<Request, readonly AvailableSlot[]>
+{
   private readonly checkAvailability = new CheckAppointmentAvailabilityUseCase()
 
   constructor(
-    private readonly appointmentsRepository: AppointmentsRepository,
-    private readonly schedulesRepository: SchedulesRepository,
+    private readonly appointmentsRepository: CalendarAppointmentsRepository,
+    private readonly schedulesRepository: CalendarSchedulesRepository,
     private readonly datetimeProvider?: DatetimeProvider,
     private readonly identityProvider?: CalendarIdentityProvider,
   ) {}
@@ -32,7 +46,9 @@ export class ListRescheduleSlotsUseCase implements UseCase<Request, readonly Ava
     const appointment = await this.appointmentsRepository.findById(request.appointmentId)
     if (!appointment) throw new AppointmentNotFoundError()
     if (appointment.status !== 'scheduled') throw new AppointmentNotEditableError()
-    const currentSchedule = await this.schedulesRepository.findById(appointment.scheduleId)
+    const currentSchedule = await this.schedulesRepository.findById(
+      appointment.scheduleId,
+    )
     if (!currentSchedule) throw new AppointmentNotFoundError()
     const lawyerId = request.lawyerId ?? currentSchedule.collaboratorId
     if (!this.identityProvider && request.lawyerId) throw new AppointmentConflictError()
@@ -73,9 +89,7 @@ export class ListRescheduleSlotsUseCase implements UseCase<Request, readonly Ava
         startsAtMinutes += 15
       ) {
         const startsAt = localDateTimeToUtc(date, startsAtMinutes, schedule.timeZone)
-        const endsAt = new Date(
-          startsAt.getTime() + durationInMinutes * 60_000,
-        )
+        const endsAt = new Date(startsAt.getTime() + durationInMinutes * 60_000)
         if (this.datetimeProvider && startsAt <= this.datetimeProvider.now()) continue
         if (
           await this.checkAvailability.execute({
@@ -96,7 +110,8 @@ export class ListRescheduleSlotsUseCase implements UseCase<Request, readonly Ava
 }
 
 function assertWriteAccess(actor: Request['actor']): void {
-  if (actor.status && actor.status !== 'active') throw new AppointmentActionForbiddenError()
+  if (actor.status && actor.status !== 'active')
+    throw new AppointmentActionForbiddenError()
   if (actor.profile !== 'admin' && actor.profile !== 'attendant') {
     throw new AppointmentActionForbiddenError()
   }
@@ -115,15 +130,17 @@ function addDays(value: string, days: number): string {
 }
 
 function weekdayForDate(value: string) {
-  return ([
-    'sunday',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-  ] as const)[new Date(`${value}T00:00:00Z`).getUTCDay()]
+  return (
+    [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ] as const
+  )[new Date(`${value}T00:00:00Z`).getUTCDay()]
 }
 
 function timeToMinutes(value: string): number {

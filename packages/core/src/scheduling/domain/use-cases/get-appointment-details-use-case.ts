@@ -1,9 +1,20 @@
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#identity/domain/structures'
-import type { CalendarConsultationProvider, CalendarIdentityProvider, UseCase } from '#shared/interfaces'
+import type {
+  CalendarConsultationProvider,
+  CalendarIdentityProvider,
+  UseCase,
+} from '#shared/interfaces'
 
-import type { CalendarAppointment, AppointmentChangeDisplay, AppointmentDetails } from '../structures'
+import type {
+  CalendarAppointment,
+  AppointmentChangeDisplay,
+  AppointmentDetails,
+} from '../structures'
 import { AppointmentActionForbiddenError, AppointmentNotFoundError } from '../errors'
-import type { AppointmentsRepository, SchedulesRepository } from '../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../interfaces'
 
 type Request = {
   actor: {
@@ -14,10 +25,12 @@ type Request = {
   appointmentId: string
 }
 
-export class GetAppointmentDetailsUseCase implements UseCase<Request, AppointmentDetails> {
+export class GetAppointmentDetailsUseCase
+  implements UseCase<Request, AppointmentDetails>
+{
   constructor(
-    private readonly appointmentsRepository: AppointmentsRepository,
-    private readonly schedulesRepository: SchedulesRepository,
+    private readonly appointmentsRepository: CalendarAppointmentsRepository,
+    private readonly schedulesRepository: CalendarSchedulesRepository,
     private readonly identityProvider: CalendarIdentityProvider,
     private readonly consultationProvider: CalendarConsultationProvider,
   ) {}
@@ -27,7 +40,11 @@ export class GetAppointmentDetailsUseCase implements UseCase<Request, Appointmen
     const appointment = await this.appointmentsRepository.findById(request.appointmentId)
     if (!appointment) throw new AppointmentNotFoundError()
     const schedule = await this.schedulesRepository.findById(appointment.scheduleId)
-    if (!schedule || request.actor.profile === 'lawyer' && schedule.collaboratorId !== request.actor.collaboratorId) {
+    if (
+      !schedule ||
+      (request.actor.profile === 'lawyer' &&
+        schedule.collaboratorId !== request.actor.collaboratorId)
+    ) {
       throw new AppointmentNotFoundError()
     }
 
@@ -64,7 +81,9 @@ export class GetAppointmentDetailsUseCase implements UseCase<Request, Appointmen
       ...(consultation
         ? {
             consultationStatus: consultation.status,
-            ...(consultation.startedAt ? { consultationStartedAt: consultation.startedAt } : {}),
+            ...(consultation.startedAt
+              ? { consultationStartedAt: consultation.startedAt }
+              : {}),
             ...(canOpenConsultation(request.actor, schedule.collaboratorId)
               ? { consultationId: consultation.id }
               : {}),
@@ -77,13 +96,18 @@ export class GetAppointmentDetailsUseCase implements UseCase<Request, Appointmen
 }
 
 function assertReadAccess(actor: Request['actor']): void {
-  if (actor.status && actor.status !== 'active') throw new AppointmentActionForbiddenError()
-  if (!['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)) {
+  if (actor.status && actor.status !== 'active')
+    throw new AppointmentActionForbiddenError()
+  if (
+    !['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)
+  ) {
     throw new AppointmentActionForbiddenError()
   }
 }
 
 function canOpenConsultation(actor: Request['actor'], lawyerId: string): boolean {
-  return actor.profile === 'admin' ||
-    actor.profile === 'lawyer' && actor.collaboratorId === lawyerId
+  return (
+    actor.profile === 'admin' ||
+    (actor.profile === 'lawyer' && actor.collaboratorId === lawyerId)
+  )
 }
