@@ -12,6 +12,8 @@ import { finalizeConsultationAttendanceSchema } from '@hms/validation/consultati
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import { FinalizeConsultationAttendanceUseCase } from '@hms/core/consultation/use-cases'
 import type { Broker, DynamicFormsRepository } from '@hms/core/shared/interfaces'
+import type { AppointmentWriteTransactionProvider } from '@hms/core/shared/interfaces'
+import type { ConsultationOutboxRepository } from '@hms/core/consultation/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ZodValidationPipe } from 'nestjs-zod'
 
@@ -26,6 +28,7 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
 @ConsultationsController()
 @ApiBearerAuth()
@@ -41,6 +44,10 @@ export class FinalizeConsultationAttendanceController {
     datetimeProvider: DatetimeProvider,
     idProvider: IdProvider,
     @Inject(InngestBroker) broker: Broker,
+    @Inject(SCHEDULING_REPOSITORIES.appointmentWriteTransactionProvider)
+    appointmentTransactionProvider: AppointmentWriteTransactionProvider,
+    @Inject(CONSULTATION_REPOSITORIES.outbox)
+    outboxRepository: ConsultationOutboxRepository,
   ) {
     this.useCase = new FinalizeConsultationAttendanceUseCase(
       consultationsRepository,
@@ -48,6 +55,8 @@ export class FinalizeConsultationAttendanceController {
       datetimeProvider,
       idProvider,
       broker,
+      appointmentTransactionProvider,
+      outboxRepository,
     )
   }
 

@@ -15,7 +15,7 @@ import { INTAKE_INNGEST_FUNCTIONS } from '@/intake/messaging/intake-messaging.mo
 import { IdentityModule } from '@/identity/identity.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { SharedModule } from '@/shared/shared.module'
-import { SchedulingModule } from '@/scheduling/database/drizzle/repositories/scheduling.module'
+import { SchedulingModule } from '@/scheduling/scheduling.module'
 import { SCHEDULING_INNGEST_FUNCTIONS } from '@/scheduling/messaging/scheduling-messaging.module'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestModule } from '@/shared/messaging/inngest/inngest.module'
