@@ -1,7 +1,7 @@
-import type { AppointmentsRepository } from './appointments-repository'
-import type { SchedulesRepository } from './schedules-repository'
+import type { CalendarAppointmentsRepository } from './calendar-appointments-repository'
+import type { CalendarSchedulesRepository } from './calendar-schedules-repository'
 
 export interface SchedulingDatabaseRepositories {
-  readonly appointmentsRepository: AppointmentsRepository
-  readonly schedulesRepository: SchedulesRepository
+  readonly appointmentsRepository: CalendarAppointmentsRepository
+  readonly schedulesRepository: CalendarSchedulesRepository
 }
