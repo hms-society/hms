@@ -34,7 +34,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-03` | Cross-layer | `git status --short --branch`; `git diff --stat`; staged diff inspection | PR worktree `codex/agenda-web` began clean at published PR #183 head. | `passed` |
 | `EV-04` | Core | `pnpm --filter @hms/core check-types` after F1 integration | Passed (exit 0) after frozen-lockfile dependency installation. No tests were added or run locally. | `passed` |
 | `EV-05` | UI | `pnpm --filter web check:types` and `pnpm --filter web check:lint` after F2 integration | Both passed (exit 0); Biome checked 620 files. No tests were edited or run. | `passed` |
-| `EV-06` | Cross-layer | Current PR #183 CI after candidate push | Pending; record current head and check/run URLs after GitHub completes. | `pending` |
+| `EV-06` | Cross-layer | Current follow-up PR CI after candidate push | Pending; this correction is split as a dependent PR based on the Agenda delivery to meet the repository size limit. Record current head and check/run URLs after GitHub completes. | `pending` |
 | `EV-07` | Cross-layer | Plan-backed Builder activation | `builder_core` owns F1-T1 and two Core use cases; `builder_web` owns F2-T1 and four appointment-details/reschedule UI files. Spec revision, criteria, paths, Rule Pack, design reference and non-test checks were recorded before code edits. | `passed` |
 | `EV-08` | Tooling | `pnpm install --frozen-lockfile` in `/tmp/hms-agenda-web-final` | Lockfile current; all 5 workspace projects installed 1477 packages; no manifest/lockfile change. | `passed` |
 | `EV-09` | Core | Initial Core typecheck before dependency installation | Failed before useful project diagnostics because worktree lacked `node_modules`; superseded by EV-04. | `stale` |
@@ -47,6 +47,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-16` | UI | `pnpm --filter web check:types` and `pnpm --filter web check:lint` on the recovered candidate | Both passed (exit 0); Biome checked 620 files. No tests added or run. | `passed` |
 | `EV-17` | Cross-layer | `git diff --check` on the recovered candidate | Passed with no whitespace errors. | `passed` |
 | `EV-18` | Cross-layer | Read-only integrated review of the current Core/Web candidate | Completed: no source blocker. The reviewer found and this ledger corrected stale status wording in `EV-07`/Plan. Does not establish runtime or visual behavior. | `passed` |
+| `EV-19` | Publication | PR #183 size check on the unsplit candidate `0464d946` | Failed: 5,069 added TypeScript lines exceeded the 5,000-line limit. This candidate was removed from PR #183 and the change is now a dependent delivery based on `codex/agenda-web`; the new PR diff is 221 added TypeScript lines. | `stale` |
 
 ## Manual evidence
 
@@ -82,6 +83,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `FND-05` | SDD process | Implementation edits began while change Spec was still `open` | `EV-07`, `EV-12` | `resolved` | Spec set to `in_progress` at integrated checkpoint and Plan/Evaluation reconciled; no Contract change after activation. |
 | `FND-06` | Environment/recovery | Temporary PR worktree disappeared after Builder completion | `EV-14`–`EV-18` | `resolved` | Recreated `/tmp/hms-agenda-web-final` from `codex/agenda-web`, reconstructed the recorded candidate diff, reinstalled frozen dependencies and reran Core/Web type/lint and diff checks. Branch and PR remained unchanged during recovery. |
 | `FND-07` | SDD status consistency | Review identified stale Plan Spec status and contradictory wording in the Builder activation evidence | `EV-07`, `EV-18` | `resolved` | Reconciled Plan’s Spec status to `in_progress` and corrected the Evaluation wording; source review completed with no blocker. |
+| `FND-08` | Publication size | PR #183 size gate counted 5,069 added TypeScript lines against the 5,000-line maximum | `EV-19` | `resolved` | Kept the original Agenda delivery within its size limit and separated the coherent Lawyer rescheduling authorization/UI correction into a dependent PR based on `codex/agenda-web`. |
 
 ## Lessons learned
 
@@ -94,9 +96,9 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | PR #183 Core package checks | `<pending>` | `pending` | `<pending>` |
-| `CI-02` | PR #183 Web app checks | `<pending>` | `pending` | `<pending>` |
-| `CI-03` | PR #183 Check PR Size and Review | `<pending>` | `pending` | `<pending>` |
+| `CI-01` | Lawyer rescheduling follow-up Core package checks | `<pending>` | `pending` | `<pending>` |
+| `CI-02` | Lawyer rescheduling follow-up Web app checks | `<pending>` | `pending` | `<pending>` |
+| `CI-03` | Lawyer rescheduling follow-up Check PR Size and Review | `<pending>` | `pending` | `<pending>` |
 
 ## History
 
@@ -109,3 +111,4 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `2026-09-29 16:56` | Web typecheck/lint passed after correcting initial source interface/markup findings; no tests run; browser/manual/visual evidence pending. |
 | `2026-09-29 17:02` | Recovered the removed PR worktree from `codex/agenda-web`, reconstructed the recorded source and SDD diff, reinstalled dependencies and reran Core typecheck, Web typecheck/lint and `git diff --check`; all passed. No tests added or run. |
 | `2026-09-29 17:03` | Read-only integrated source review completed with no source blocker; corrected stale SDD status wording. PR CI and manual/visual evidence remain pending. |
+| `2026-09-29 17:45` | PR #183 check-size rejected the combined candidate at 5,069 added TypeScript lines. Reverted that candidate from PR #183 and split the authorization/UI correction into a dependent branch/PR; original implementation commit remains available in the follow-up history. |
