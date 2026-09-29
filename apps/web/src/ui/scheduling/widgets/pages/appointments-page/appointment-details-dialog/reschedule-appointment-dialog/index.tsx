@@ -66,7 +66,10 @@ export const RescheduleAppointmentDialog = (props: RescheduleAppointmentDialogPr
     handleConfirm,
     isRescheduling,
     error,
-  } = useRescheduleAppointmentDialog(open, detail, onSuccess, onReloadDetail)
+  } = useRescheduleAppointmentDialog(open, detail, onSuccess, onReloadDetail, {
+    canReschedule,
+    canSelectLawyer,
+  })
   const selectedLawyer = activeLawyers.find(
     (lawyer) => lawyer.collaboratorId === selectedLawyerId,
   )

@@ -48,6 +48,9 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-17` | Cross-layer | `git diff --check` on the recovered candidate | Passed with no whitespace errors. | `passed` |
 | `EV-18` | Cross-layer | Read-only integrated review of the current Core/Web candidate | Completed: no source blocker. The reviewer found and this ledger corrected stale status wording in `EV-07`/Plan. Does not establish runtime or visual behavior. | `passed` |
 | `EV-19` | Publication | PR #183 size check on the unsplit candidate `0464d946` | Failed: 5,069 added TypeScript lines exceeded the 5,000-line limit. This candidate was removed from PR #183 and the change is now a dependent delivery based on `codex/agenda-web`; the new PR diff is 221 added TypeScript lines. | `stale` |
+| `EV-20` | UI/CI | PR #190 Web checks on `9d98bc21` | Failed one existing hook test: `useRescheduleAppointmentDialog` read `useCurrentCollaboratorQuery` without the test's `RestContextProvider`. 121/122 files and 405/409 tests passed. Corrected the hook to receive explicit dialog capabilities from its component; the hook's default keeps its prior Admin/Attendant behavior for existing callers. | `stale` |
+| `EV-21` | UI | `pnpm --filter web check:types`, `pnpm --filter web check:lint`, and `git diff --check` after EV-20 correction | All passed (exit 0); Biome checked 620 files. No tests were run locally. | `passed` |
+| `EV-22` | Cross-layer | Read-only reviewer recheck of the EV-20 correction | Pending review of the current source change; no tests or browser flows requested. | `pending` |
 
 ## Manual evidence
 
@@ -84,6 +87,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `FND-06` | Environment/recovery | Temporary PR worktree disappeared after Builder completion | `EV-14`–`EV-18` | `resolved` | Recreated `/tmp/hms-agenda-web-final` from `codex/agenda-web`, reconstructed the recorded candidate diff, reinstalled frozen dependencies and reran Core/Web type/lint and diff checks. Branch and PR remained unchanged during recovery. |
 | `FND-07` | SDD status consistency | Review identified stale Plan Spec status and contradictory wording in the Builder activation evidence | `EV-07`, `EV-18` | `resolved` | Reconciled Plan’s Spec status to `in_progress` and corrected the Evaluation wording; source review completed with no blocker. |
 | `FND-08` | Publication size | PR #183 size gate counted 5,069 added TypeScript lines against the 5,000-line maximum | `EV-19` | `resolved` | Kept the original Agenda delivery within its size limit and separated the coherent Lawyer rescheduling authorization/UI correction into a dependent PR based on `codex/agenda-web`. |
+| `FND-09` | UI/test composition | Web CI exposed a pre-existing hook test that does not mount `RestContextProvider`; the hook acquired a new direct current-collaborator context dependency | `EV-20`–`EV-22` | `active` | Removed the hook's context read and pass explicit capabilities from the dialog parent. Await the reviewer recheck and current-head CI. |
 
 ## Lessons learned
 
@@ -112,3 +116,4 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `2026-09-29 17:02` | Recovered the removed PR worktree from `codex/agenda-web`, reconstructed the recorded source and SDD diff, reinstalled dependencies and reran Core typecheck, Web typecheck/lint and `git diff --check`; all passed. No tests added or run. |
 | `2026-09-29 17:03` | Read-only integrated source review completed with no source blocker; corrected stale SDD status wording. PR CI and manual/visual evidence remain pending. |
 | `2026-09-29 17:45` | PR #183 check-size rejected the combined candidate at 5,069 added TypeScript lines. Reverted that candidate from PR #183 and split the authorization/UI correction into a dependent branch/PR; original implementation commit remains available in the follow-up history. |
+| `2026-09-29 17:53` | PR #190 Web CI exposed a missing `RestContextProvider` in an existing hook test after the new direct context dependency. Reworked the hook to receive explicit capabilities from the dialog component; Web typecheck/lint and diff check passed locally. No tests were run locally; reviewer and new-head CI are pending. |

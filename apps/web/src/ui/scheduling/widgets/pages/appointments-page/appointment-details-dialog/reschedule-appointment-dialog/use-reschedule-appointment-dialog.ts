@@ -6,7 +6,6 @@ import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { SchedulingRequestError } from '@/rest/services/scheduling-service'
 import { useActiveCollaboratorsQuery } from '@/ui/identity/hooks/use-active-collaborators-query'
-import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useAppointmentActions } from '@/ui/scheduling/hooks/use-appointment-actions'
 import { useRescheduleSlots } from '@/ui/scheduling/hooks/use-reschedule-slots'
 import { addCivilDays, getTodayInSaoPaulo } from '@/ui/scheduling/date-utils'
@@ -19,20 +18,16 @@ export function useRescheduleAppointmentDialog(
   detail: AppointmentDetailsView | undefined,
   onSuccess: () => void,
   onReloadDetail?: () => Promise<unknown>,
+  permissions: { canReschedule: boolean; canSelectLawyer: boolean } = {
+    canReschedule: true,
+    canSelectLawyer: true,
+  },
 ) {
   const initialDate = addCivilDays(getTodayInSaoPaulo(), 1)
   const form = useForm<RescheduleForm>({ defaultValues: { date: initialDate } })
   const date = form.watch('date')
   const currentLawyerId = detail?.lawyerId
-  const { currentCollaborator } = useCurrentCollaboratorQuery()
-  const canSelectLawyer =
-    currentCollaborator?.profile === CollaboratorProfile.Admin ||
-    currentCollaborator?.profile === CollaboratorProfile.Attendant
-  const canReschedule = Boolean(
-    canSelectLawyer ||
-      (currentCollaborator?.profile === CollaboratorProfile.Lawyer &&
-        currentCollaborator.collaboratorId === currentLawyerId),
-  )
+  const { canReschedule, canSelectLawyer } = permissions
   const [selectedLawyerId, setSelectedLawyerId] = useState(detail?.lawyerId ?? '')
   const [selectedSlot, setSelectedSlot] = useState<string>()
   const [lawyerPage, setLawyerPage] = useState(1)

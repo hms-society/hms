@@ -14,10 +14,10 @@ updated_at: 2026-09-29
 
 - **Spec:** [`./spec.md`](./spec.md), revision 1, `in_progress`.
 - **Strategy:** Plan-backed because authorization is enforced in Core and surfaced in Web, with an integrated security review.
-- **Current phase:** F3 source review completed; integrated validation remains in progress.
+- **Current phase:** F3 reviewer recheck in progress; integrated validation remains open.
 - **Next action:** Publish the candidate and record current PR CI; authenticated runtime and visual evidence remain pending.
 - **Active blockers:** Local tests were not added or run under the task instruction. Use permitted type/lint checks and record PR CI; real manual/visual evidence remains pending.
-- **Builders:** `builder_core` (`/root/builder_core`) and `builder_web` (`/root/builder_web`) completed; `reviewer` (`/root/reviewer`) completed the read-only integrated source review with no source blocker.
+- **Builders:** `builder_core` (`/root/builder_core`) and `builder_web` (`/root/builder_web`) completed; `reviewer` (`/root/reviewer`) completed the initial read-only review and is rechecking the CI-driven hook correction.
 - **Coordination:** Core and Web change disjoint paths. No REST, Validation, Database, migration, generated-file, package or lockfile work is in scope.
 
 # 2. Execution ledger
@@ -26,7 +26,7 @@ updated_at: 2026-09-29
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `builder_core` | F1 | Enforce own-schedule rescheduling in Core | — | F2 | `completed` | Core typecheck passes; no tests added or run; authorization and locked schedule ownership reviewed. |
 | 1 | `builder_web` | F2 | Expose role-specific rescheduling UI | — | F1 | `completed` | Web typecheck/lint pass; lawyer stays fixed for Lawyer; Admin/Attendant selector remains; no tests added or run. |
-| 2 | `reviewer` | F3 | Integrated read-only security and UI source review | F1, F2 | — | `completed` | Current diff conforms to all CA at source level; findings and evidence gaps are recorded; no source blocker. Runtime/visual evidence remains open in validation. |
+| 2 | `reviewer` | F3 | Integrated read-only security and UI source review | F1, F2 | — | `in_progress` | Recheck the CI-driven hook correction, record findings and evidence gaps, and confirm no source blocker. Runtime/visual evidence remains open in validation. |
 
 ### F1 — Core authorization
 
@@ -56,13 +56,13 @@ updated_at: 2026-09-29
 
 #### F3-T1 — Review integrated role boundary and dialog
 
-- **Status/owner:** `completed` — `reviewer` (`/root/reviewer`)
+- **Status/owner:** `in_progress` — `reviewer` (`/root/reviewer`)
 - **Depends/parallel:** F1-T1 and F2-T1 integrated.
 - **Paths:** Complete candidate diff under the Spec Core/Web paths; no edits.
 - **Contract:** `RF-01`–`RF-03`; `CA-01`–`CA-04`.
 - **Outcome:** Independent source review verifies ownership against the locked schedule and distinct UI capabilities.
 - **Rules:** Full Spec Rule Pack, SDD, Architecture, Modules, Design and root agent guidance.
-- **Exit:** Completed read-only conformance review; no source blocker. Review identified stale Plan/Evaluation wording, now reconciled. No tests/browser flow/screenshots were run; those evidence gaps remain explicit.
+- **Exit:** Initial review found no source blocker and identified stale Plan/Evaluation wording, now reconciled. Reviewer is rechecking the CI-driven capability wiring correction. No tests/browser flow/screenshots were run; those evidence gaps remain explicit.
 
 # 3. Validation and handoff
 
