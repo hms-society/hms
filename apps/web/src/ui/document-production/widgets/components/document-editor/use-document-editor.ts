@@ -21,11 +21,22 @@ export type DocumentEditorProps = {
   content: DocumentTemplateContent
   onChange: (content: DocumentTemplateContent) => void
   editable?: boolean
-  onEditorReady?: (insert: (name: string) => void) => void
+  onEditorReady?: (actions: DocumentEditorActions) => void
   onFocus?: () => void
   ariaLabel?: string
   emptyState?: ReactNode
   highlightedTerms?: readonly string[]
+  focusFirstHighlightedTerm?: boolean
+}
+
+export type PendingMarkerReplacement = {
+  marker: string
+  value: string
+}
+
+export type DocumentEditorActions = {
+  insertVariable: (name: string) => void
+  replacePendingMarkers: (replacements: readonly PendingMarkerReplacement[]) => void
 }
 
 export const DOCUMENT_TEMPLATE_LINK_OPTIONS = {
@@ -75,8 +86,11 @@ export function useDocumentEditor({
   onFocus,
   ariaLabel = 'Conteúdo do template',
   highlightedTerms = [],
+  focusFirstHighlightedTerm = true,
 }: DocumentEditorProps) {
   const lastEmittedContent = useRef<string | null>(null)
+  const normalizedHighlightedTerms = normalizePendingMarkerTerms(highlightedTerms)
+  const highlightedTermsKey = normalizedHighlightedTerms.join('\u0000')
   const editor = useEditor({
     immediatelyRender: false,
     editable,
@@ -170,8 +184,9 @@ export function useDocumentEditor({
   useEffect(
     function syncHighlightedTerms() {
       if (!editor) return
-      const terms = normalizePendingMarkerTerms(highlightedTerms)
+      const terms = highlightedTermsKey ? highlightedTermsKey.split('\u0000') : []
       editor.view.dispatch(editor.state.tr.setMeta(pendingMarkerPluginKey, terms))
+      if (!focusFirstHighlightedTerm) return
       const firstTerm = terms[0]
       if (!firstTerm) return
       const range = findFirstTextRange(editor, firstTerm)
@@ -180,7 +195,7 @@ export function useDocumentEditor({
         editor.commands.focus()
       }
     },
-    [editor, highlightedTerms],
+    [editor, focusFirstHighlightedTerm, highlightedTermsKey],
   )
 
   function setParagraph() {
@@ -241,11 +256,40 @@ export function useDocumentEditor({
 
   useEffect(
     function exposeVariableInsertion() {
-      if (editor && onEditorReady)
-        onEditorReady(function insertVariable(name: string) {
+      if (!editor || !onEditorReady) return
+
+      onEditorReady({
+        insertVariable(name) {
           if (!editable) return
           editor.chain().focus().insertContent(`{{${name}}}`).run()
-        })
+        },
+        replacePendingMarkers(replacements) {
+          if (!editable || replacements.length === 0) return
+
+          const ranges: Array<{ from: number; to: number; value: string }> = []
+          editor.state.doc.descendants((node, position) => {
+            if (!node.isText || !node.text) return
+            for (const { marker, value } of replacements) {
+              if (!marker) continue
+              let index = node.text.indexOf(marker)
+              while (index >= 0) {
+                ranges.push({
+                  from: position + index,
+                  to: position + index + marker.length,
+                  value,
+                })
+                index = node.text.indexOf(marker, index + marker.length)
+              }
+            }
+          })
+
+          if (ranges.length === 0) return
+          const transaction = editor.state.tr
+          for (const range of ranges.sort((left, right) => right.from - left.from))
+            transaction.insertText(range.value, range.from, range.to)
+          editor.view.dispatch(transaction)
+        },
+      })
     },
     [editable, editor, onEditorReady],
   )
