@@ -15,9 +15,11 @@ import {
 } from '../domain/structures'
 import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 import type { ThirdPartiesRepository } from '../interfaces/third-parties-repository'
+import type { ThirdPartyAuditLogsRepository } from '../interfaces/third-party-audit-logs-repository'
 import type { UsersRepository } from '../interfaces/users-repository'
 
 export type RegisterThirdPartyRequest = {
+  readonly actorId: string
   readonly actorProfile: 'admin' | 'supervisor'
   readonly type: ThirdPartyType
   readonly legalName: string
@@ -36,6 +38,7 @@ export class RegisterThirdPartyUseCase
     private readonly thirdPartiesRepository: ThirdPartiesRepository,
     private readonly collaboratorsRepository: CollaboratorsRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly auditLogsRepository?: ThirdPartyAuditLogsRepository,
   ) {}
 
   async execute(request: RegisterThirdPartyRequest): Promise<ThirdParty> {
@@ -73,10 +76,22 @@ export class RegisterThirdPartyUseCase
     })
 
     if (!thirdParty) throw new ThirdPartyAlreadyExistsError()
+
+    await this.auditLogsRepository?.create({
+      actorId: request.actorId,
+      actorProfile: request.actorProfile,
+      action: 'created',
+      thirdParty,
+    })
+
     return thirdParty
   }
 
   private validateRequest(request: RegisterThirdPartyRequest) {
+    if (!request.actorId?.trim()) {
+      throw new InvalidThirdPartyDataError('Autor do cadastro é obrigatório.')
+    }
+
     if (!['admin', 'supervisor'].includes(request.actorProfile)) {
       throw new InvalidThirdPartyDataError(
         'Somente administradores e supervisores podem cadastrar terceiros.',

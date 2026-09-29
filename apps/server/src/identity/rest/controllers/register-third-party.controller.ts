@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger'
 import type {
   CollaboratorsRepository,
   ThirdPartiesRepository,
+  ThirdPartyAuditLogsRepository,
   UsersRepository,
 } from '@hms/core/identity/interfaces'
 import { RegisterThirdPartyUseCase } from '@hms/core/identity/use-cases'
@@ -10,7 +11,12 @@ import { registerThirdPartyRequestSchema } from '@hms/validation/identity'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
-import { CurrentCollaborator, ThirdPartiesController } from '@/identity/decorators'
+import {
+  CurrentCollaborator,
+  CurrentUser,
+  ThirdPartiesController,
+} from '@/identity/decorators'
+import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type { AuthorizedIdentityRequest } from '@/identity/context'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
@@ -32,11 +38,14 @@ export class RegisterThirdPartyController {
     collaboratorsRepository: CollaboratorsRepository,
     @Inject(IDENTITY_REPOSITORIES.users)
     usersRepository: UsersRepository,
+    @Inject(IDENTITY_REPOSITORIES.thirdPartyAuditLogs)
+    auditLogsRepository: ThirdPartyAuditLogsRepository,
   ) {
     this.useCase = new RegisterThirdPartyUseCase(
       thirdPartiesRepository,
       collaboratorsRepository,
       usersRepository,
+      auditLogsRepository,
     )
   }
 
@@ -57,12 +66,14 @@ export class RegisterThirdPartyController {
     type: ErrorResponseDto,
   })
   handle(
+    @CurrentUser() authUser: AuthUser,
     @CurrentCollaborator() collaborator: AuthorizedIdentityRequest['collaborator'],
     @Body(new ZodValidationPipe(registerThirdPartyRequestSchema))
     body: RegisterThirdPartyRequestBody,
   ) {
     return this.useCase.execute({
       ...body,
+      actorId: authUser.id,
       actorProfile: collaborator.profile as 'admin' | 'supervisor',
     })
   }

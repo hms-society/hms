@@ -8,6 +8,7 @@ import {
 } from '../../domain/entities/fakers'
 import type { CollaboratorsRepository } from '../../interfaces/collaborators-repository'
 import type { ThirdPartiesRepository } from '../../interfaces/third-parties-repository'
+import type { ThirdPartyAuditLogsRepository } from '../../interfaces/third-party-audit-logs-repository'
 import type { UsersRepository } from '../../interfaces/users-repository'
 import {
   RegisterThirdPartyUseCase,
@@ -20,6 +21,7 @@ describe('RegisterThirdPartyUseCase', () => {
   let thirdPartiesRepository: MockProxy<ThirdPartiesRepository>
   let collaboratorsRepository: MockProxy<CollaboratorsRepository>
   let usersRepository: MockProxy<UsersRepository>
+  let auditLogsRepository: MockProxy<ThirdPartyAuditLogsRepository>
   let useCase: RegisterThirdPartyUseCase
   const collaborator = CollaboratorFaker.administrative({
     id: 'collaborator-1',
@@ -31,6 +33,7 @@ describe('RegisterThirdPartyUseCase', () => {
     thirdPartiesRepository = mock<ThirdPartiesRepository>()
     collaboratorsRepository = mock<CollaboratorsRepository>()
     usersRepository = mock<UsersRepository>()
+    auditLogsRepository = mock<ThirdPartyAuditLogsRepository>()
     collaboratorsRepository.findById.mockResolvedValue(collaborator)
     usersRepository.findById.mockResolvedValue(user)
     thirdPartiesRepository.findByTaxId.mockResolvedValue(undefined)
@@ -38,6 +41,7 @@ describe('RegisterThirdPartyUseCase', () => {
       thirdPartiesRepository,
       collaboratorsRepository,
       usersRepository,
+      auditLogsRepository,
     )
   })
 
@@ -49,6 +53,7 @@ describe('RegisterThirdPartyUseCase', () => {
 
     await expect(
       useCase.execute({
+        actorId: 'user-1',
         actorProfile: 'admin',
         type: 'union',
         legalName: '  Sindicato HMS  ',
@@ -68,6 +73,12 @@ describe('RegisterThirdPartyUseCase', () => {
       taxId: { type: 'cnpj', value: cnpj, description: 'Cadastro nacional' },
       internalResponsibleId: collaborator.id,
       relationshipTypes: ['demand_origin', 'payer'],
+    })
+    expect(auditLogsRepository.create).toHaveBeenCalledWith({
+      actorId: 'user-1',
+      actorProfile: 'admin',
+      action: 'created',
+      thirdParty,
     })
   })
 
@@ -135,6 +146,7 @@ describe('RegisterThirdPartyUseCase', () => {
 
 function validRequest(): RegisterThirdPartyRequest {
   return {
+    actorId: 'user-1',
     actorProfile: 'admin',
     type: 'union',
     legalName: 'Sindicato HMS',

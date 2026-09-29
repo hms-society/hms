@@ -16,6 +16,7 @@ import {
   DrizzleCollaboratorRegistrationAttemptsRepository,
   DrizzleIdentityTransaction,
   DrizzleThirdPartiesRepository,
+  DrizzleThirdPartyAuditLogsRepository,
 } from '@/identity/database/drizzle/repositories'
 import {
   DrizzleIntakeClientsRepository,
@@ -43,6 +44,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleIntakeClientsRepository,
     DrizzleIntakeResponsiblesRepository,
     DrizzleThirdPartiesRepository,
+    DrizzleThirdPartyAuditLogsRepository,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -71,6 +73,10 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       provide: IDENTITY_REPOSITORIES.thirdParties,
       useExisting: DrizzleThirdPartiesRepository,
     },
+    {
+      provide: IDENTITY_REPOSITORIES.thirdPartyAuditLogs,
+      useExisting: DrizzleThirdPartyAuditLogsRepository,
+    },
     IdentitySeeder,
   ],
   exports: [
@@ -83,6 +89,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     IDENTITY_REPOSITORIES.intakeClients,
     IDENTITY_REPOSITORIES.intakeResponsibles,
     IDENTITY_REPOSITORIES.thirdParties,
+    IDENTITY_REPOSITORIES.thirdPartyAuditLogs,
     IdentitySeeder,
   ],
 })
