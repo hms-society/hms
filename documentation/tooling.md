@@ -44,6 +44,7 @@ Configured in `turbo.json`. Root scripts fan out to every workspace:
 
 | Root command         | Runs                                  |
 | -------------------- | ------------------------------------- |
+| `pnpm start`         | `docker compose up -d` then `turbo run dev` |
 | `pnpm build`         | `turbo run build`                     |
 | `pnpm dev`           | `turbo run dev` (persistent, no cache)|
 | `pnpm lint`          | `turbo run lint`                      |
@@ -211,7 +212,9 @@ with `tsx`.
 
 `docker-compose.yaml` plus `volumes/` (auth email templates, DB roles/JWT SQL,
 Kong gateway config) provide the local backing services (Supabase-style stack).
-Bring it up with `docker compose up`.
+`pnpm start` brings up the stack in the background and starts the web and server
+development processes. Use `docker compose up` when you only need the backing
+services, or `pnpm dev` when they are already running.
 
 ## Git hooks — husky + commitlint
 

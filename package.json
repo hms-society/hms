@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "start": "docker compose up -d && turbo run dev",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
