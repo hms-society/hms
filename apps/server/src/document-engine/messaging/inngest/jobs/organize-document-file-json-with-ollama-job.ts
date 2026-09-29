@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
 import { DocumentFileJsonOrganizationRequestedEvent } from '@hms/core/document-engine/domain/events'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
@@ -8,6 +8,7 @@ import { eventType, type InngestFunction } from 'inngest'
 import { DocumentJsonOrganizerAgent } from '@/document-engine/ai/mastra/agents'
 import { buildDocumentJsonOrganizationPrompt } from '@/document-engine/ai/mastra/prompts'
 import { documentJsonOrganizationSchema } from '@/document-engine/ai/mastra/schemas'
+import type { DocumentJsonOrganization } from '@/document-engine/ai/mastra/schemas'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 import { documentFileJsonOrganizationRequestedSchema } from '@/document-engine/messaging/inngest/schemas'
 import type { DocumentJsonOrganizationResult } from '@/document-engine/messaging/inngest/structures'
@@ -23,6 +24,7 @@ const documentFileJsonOrganizationRequested = eventType(
 export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
   static readonly ID = 'document-engine/organize-document-file-json-with-ollama'
   readonly function: InngestFunction.Like
+  private readonly logger = new Logger(OrganizeDocumentFileJsonWithOllamaJob.name)
 
   constructor(
     inngest: InngestClient,
@@ -68,6 +70,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
           'generate-document-json-with-ollama',
           async () =>
             this.generateSuggestion({
+              documentFileId: event.data.documentFileId,
               extractedTextFull,
             }),
         )
@@ -106,6 +109,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
           }
 
           const { suggestion } = ollamaResult
+          const hasVerifiedFields = suggestion.extractedFields.length > 0
           const status = latestDocument.checklistLink?.checklistItemId
             ? DocumentValidationStatus.AwaitingValidation
             : DocumentValidationStatus.NotLinked
@@ -125,7 +129,9 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
             aiSuggestion: {
               ...this.getPreservedSuggestionContext(latestDocument.aiSuggestion),
               suggestedStatus: status,
-              confidenceLabel: 'Organizado pelo Ollama',
+              confidenceLabel: hasVerifiedFields
+                ? 'Organizado pelo Ollama — confira os campos'
+                : 'Campos não confirmados — revisão manual',
               evidence: suggestion.evidence,
               metadata: {
                 mimeType: event.data.mimeType,
@@ -134,26 +140,33 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
                 textLength: extractedTextFull.length,
                 extractedTextFull,
               },
-              ollamaJsonOrganizationCaptured: true,
+              ollamaJsonOrganizationCaptured: hasVerifiedFields,
             },
           })
 
-          return { skipped: false, documentFileId: event.data.documentFileId }
+          return hasVerifiedFields
+            ? { skipped: false, documentFileId: event.data.documentFileId }
+            : {
+                skipped: true,
+                reason: 'no_source_verified_fields',
+                documentFileId: event.data.documentFileId,
+              }
         })
       },
     )
   }
 
   private async generateSuggestion(input: {
+    documentFileId: string
     extractedTextFull: string
   }): Promise<DocumentJsonOrganizationResult> {
+    const startedAt = Date.now()
+
     try {
       const response = await this.documentJsonOrganizerAgent.generate([
         {
           role: 'user',
-          content: buildDocumentJsonOrganizationPrompt(
-            this.compactText(input.extractedTextFull),
-          ),
+          content: buildDocumentJsonOrganizationPrompt(input.extractedTextFull),
         },
       ])
       const text = response.text
@@ -165,22 +178,44 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       const suggestion = documentJsonOrganizationSchema.parse(
         JSON.parse(this.extractJson(text)),
       )
+      const verifiedSuggestion = this.keepSourceVerifiedFields(
+        suggestion,
+        input.extractedTextFull,
+      )
 
-      if (suggestion.extractedFields.length === 0) {
-        return {
-          captured: false,
-          reason: 'ollama_empty_extracted_fields',
-        }
+      this.logger.log(
+        JSON.stringify({
+          event: 'document_json_organization_completed',
+          documentFileId: input.documentFileId,
+          durationMs: Date.now() - startedAt,
+          inputTextLength: input.extractedTextFull.length,
+          returnedFieldsCount: suggestion.extractedFields.length,
+          verifiedFieldsCount: verifiedSuggestion.extractedFields.length,
+        }),
+      )
+
+      return {
+        captured: true,
+        suggestion: verifiedSuggestion,
       }
-
-      return { captured: true, suggestion }
     } catch (error) {
+      const reason =
+        error instanceof Error && error.message.trim().length > 0
+          ? error.message.trim().slice(0, 180)
+          : 'ollama_unknown_error'
+      this.logger.warn(
+        JSON.stringify({
+          event: 'document_json_organization_failed',
+          documentFileId: input.documentFileId,
+          durationMs: Date.now() - startedAt,
+          inputTextLength: input.extractedTextFull.length,
+          reason,
+        }),
+      )
+
       return {
         captured: false,
-        reason:
-          error instanceof Error && error.message.trim().length > 0
-            ? error.message.trim().slice(0, 180)
-            : 'ollama_unknown_error',
+        reason,
       }
     }
   }
@@ -301,8 +336,127 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
     return /[\p{L}\p{N}]{2,}/u.test(text)
   }
 
-  private compactText(text: string) {
-    return text.replace(/\s+/g, ' ').trim().slice(0, 3000)
+  private keepSourceVerifiedFields(
+    suggestion: DocumentJsonOrganization,
+    extractedTextFull: string,
+  ): DocumentJsonOrganization {
+    const fieldLabels = suggestion.extractedFields.map((field) => field.label)
+    const extractedFields = suggestion.extractedFields.filter((field) => {
+      const evidence = suggestion.evidence.find(
+        (candidate) =>
+          this.normalizeFieldLabel(candidate.field) ===
+            this.normalizeFieldLabel(field.label) &&
+          extractedTextFull.includes(candidate.sourceText),
+      )
+
+      if (!evidence) {
+        return false
+      }
+
+      if (this.hasEmbeddedFieldLabel(field.value, field.label)) {
+        return false
+      }
+
+      const evidenceStart = extractedTextFull.indexOf(evidence.sourceText)
+      const citedValue = this.getCitedValue(evidence.sourceText, field.label)
+
+      if (citedValue === undefined || evidenceStart < 0) {
+        return false
+      }
+
+      const labelPattern = new RegExp(
+        `^\\s*${this.escapeRegExp(field.label)}(?:\\s*[:：]\\s*|\\s+)`,
+        'i',
+      )
+      const labelMatch = labelPattern.exec(extractedTextFull.slice(evidenceStart))
+
+      if (!labelMatch) {
+        return false
+      }
+
+      const valueStart = evidenceStart + labelMatch[0].length
+      const nextField = this.findNextFieldLabel(
+        extractedTextFull,
+        valueStart,
+        fieldLabels.filter(
+          (label) =>
+            this.normalizeFieldLabel(label) !== this.normalizeFieldLabel(field.label),
+        ),
+      )
+      const sourceValue = extractedTextFull
+        .slice(valueStart, nextField?.index)
+        .replace(/[,:;|]+$/u, '')
+        .trim()
+
+      return (
+        this.normalizeFieldValue(citedValue) === this.normalizeFieldValue(field.value) &&
+        this.normalizeFieldValue(sourceValue) === this.normalizeFieldValue(field.value)
+      )
+    })
+
+    const verifiedLabels = new Set(
+      extractedFields.map((field) => this.normalizeFieldLabel(field.label)),
+    )
+    const evidence = suggestion.evidence.filter((item) =>
+      verifiedLabels.has(this.normalizeFieldLabel(item.field)),
+    )
+    const originalFieldCount = suggestion.extractedFields.length
+    const verificationRatio =
+      originalFieldCount === 0 ? 0 : extractedFields.length / originalFieldCount
+
+    return {
+      confidence: Math.min(suggestion.confidence, verificationRatio),
+      extractedFields,
+      evidence,
+    }
+  }
+
+  private getCitedValue(sourceText: string, label: string) {
+    const labelPattern = new RegExp(
+      `^\\s*${this.escapeRegExp(label)}(?:\\s*[:：]\\s*|\\s+)`,
+      'i',
+    )
+    const labelMatch = labelPattern.exec(sourceText)
+
+    return labelMatch ? sourceText.slice(labelMatch[0].length).trim() : undefined
+  }
+
+  private findNextFieldLabel(text: string, startIndex: number, labels: string[]) {
+    const nextIndexes = labels.flatMap((label) => {
+      const pattern = new RegExp(
+        `(^|[\\s,;|])${this.escapeRegExp(label)}(?=\\s|[:：])`,
+        'iu',
+      )
+      const match = pattern.exec(text.slice(startIndex))
+
+      return match ? [startIndex + match.index + match[1].length] : []
+    })
+
+    const nextIndex = Math.min(...nextIndexes)
+
+    return Number.isFinite(nextIndex) ? { index: nextIndex } : undefined
+  }
+
+  private normalizeFieldLabel(value: string) {
+    return value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('pt-BR')
+  }
+
+  private hasEmbeddedFieldLabel(value: string, currentLabel: string) {
+    const fieldLabels =
+      /\b(?:cliente|cpf\/cnpj|cpf|cnpj|endereço(?: de instalação| do imóvel| de correspondência)?|bairro|cidade\/uf|cep(?: do imóvel| de correspondência)?|matrícula(?: do imóvel)?|mês de referência|leitura anterior|leitura atual|consumo faturado|valor da fatura atual|saldo da fatura anterior|data de emissão|data de vencimento|protocolo de atendimento)\b/giu
+    const normalizedCurrentLabel = this.normalizeFieldLabel(currentLabel)
+
+    return [...value.matchAll(fieldLabels)].some(
+      (match) => this.normalizeFieldLabel(match[0]) !== normalizedCurrentLabel,
+    )
+  }
+
+  private normalizeFieldValue(value: string) {
+    return value.trim().replace(/\s+/g, ' ')
+  }
+
+  private escapeRegExp(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
 
   private getPreservedSuggestionContext(aiSuggestion?: Record<string, unknown>) {
