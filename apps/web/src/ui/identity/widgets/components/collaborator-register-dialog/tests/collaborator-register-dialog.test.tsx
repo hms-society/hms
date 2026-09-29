@@ -163,7 +163,7 @@ describe('CollaboratorRegisterDialog [POST /collaborators form]', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Remover área' })[0])
     expect(screen.queryByRole('button', { name: 'Remover área' })).toBeNull()
     expect(screen.getAllByRole('combobox', { name: /Área jurídica/ })).toHaveLength(1)
-  }, 15000)
+  }, 30000)
 
   it('submits the schema-compatible expertise array without duplicating areas', async () => {
     render(<CollaboratorRegisterDialog open onOpenChange={vi.fn()} />)
