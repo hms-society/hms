@@ -14,7 +14,7 @@ updated_at: 2026-09-29
 
 Evaluation of Spec revision `1` against the current implementation.
 
-Current result: Core and Web source changes implement the own-schedule Lawyer contract; Core typecheck and Web typecheck/lint pass. Independent source review and PR CI are pending. Local tests were not added or run; authenticated runtime/manual and role-specific screenshot evidence remain pending.
+Current result: Core and Web source changes implement the own-schedule Lawyer contract; Core typecheck, Web typecheck/lint, integrated source review and all automated PR checks passed on final evidence head `4e0da493` (the preceding code head is `0e909cb6`). Local tests were not added or run; authenticated runtime/manual and role-specific screenshot evidence remain pending.
 
 ## Acceptance matrix
 
@@ -51,6 +51,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-20` | UI/CI | PR #190 Web checks on `9d98bc21` | Failed one existing hook test: `useRescheduleAppointmentDialog` read `useCurrentCollaboratorQuery` without the test's `RestContextProvider`. 121/122 files and 405/409 tests passed. Corrected the hook to receive explicit dialog capabilities from its component; the hook's default keeps its prior Admin/Attendant behavior for existing callers. | `stale` |
 | `EV-21` | UI | `pnpm --filter web check:types`, `pnpm --filter web check:lint`, and `git diff --check` after EV-20 correction | All passed (exit 0); Biome checked 620 files. No tests were run locally. | `passed` |
 | `EV-22` | Cross-layer | Read-only reviewer recheck of the EV-20 correction | Passed: production component passes role capabilities explicitly, the dialog defaults to deny, and the hook no longer reads `RestContext`. Reviewer confirmed current Lawyer/Admin distinction; no source blocker. Hook default preserves legacy Admin-like direct callers, while the production component always passes explicit capabilities. No tests/browser flows were run by the reviewer. | `passed` |
+| `EV-23` | Cross-layer | PR #190 final evidence-head CI, SHA `4e0da49328529a0b8b36812ef44870d01f035881` | Core, Server, Web, check-size and Hermes review passed. Supabase Preview skipped because no Supabase project changed. Runs: [Core](https://github.com/hms-society/hms/actions/runs/36609937052), [Server](https://github.com/hms-society/hms/actions/runs/36609937114), [Web](https://github.com/hms-society/hms/actions/runs/36609936871), [size](https://github.com/hms-society/hms/actions/runs/36609937063), [review](https://github.com/hms-society/hms/actions/runs/36609935059). | `passed` |
 
 ## Manual evidence
 
@@ -100,10 +101,10 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | Lawyer rescheduling follow-up Core package checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Core](https://github.com/hms-society/hms/actions/runs/36608511660) |
-| `CI-02` | Lawyer rescheduling follow-up Web app checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Web](https://github.com/hms-society/hms/actions/runs/36608511481) |
-| `CI-03` | Lawyer rescheduling follow-up Check PR Size and Review | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [size](https://github.com/hms-society/hms/actions/runs/36608511754) · [review](https://github.com/hms-society/hms/actions/runs/36608509290) |
-| `CI-04` | Lawyer rescheduling follow-up Server app checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Server](https://github.com/hms-society/hms/actions/runs/36608511496) |
+| `CI-01` | Lawyer rescheduling follow-up Core package checks | `4e0da49328529a0b8b36812ef44870d01f035881` | `passed` | [Core](https://github.com/hms-society/hms/actions/runs/36609937052) |
+| `CI-02` | Lawyer rescheduling follow-up Web app checks | `4e0da49328529a0b8b36812ef44870d01f035881` | `passed` | [Web](https://github.com/hms-society/hms/actions/runs/36609936871) |
+| `CI-03` | Lawyer rescheduling follow-up Check PR Size and Review | `4e0da49328529a0b8b36812ef44870d01f035881` | `passed` | [size](https://github.com/hms-society/hms/actions/runs/36609937063) · [review](https://github.com/hms-society/hms/actions/runs/36609935059) |
+| `CI-04` | Lawyer rescheduling follow-up Server app checks | `4e0da49328529a0b8b36812ef44870d01f035881` | `passed` | [Server](https://github.com/hms-society/hms/actions/runs/36609937114) |
 
 ## History
 
@@ -120,3 +121,4 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `2026-09-29 17:53` | PR #190 Web CI exposed a missing `RestContextProvider` in an existing hook test after the new direct context dependency. Reworked the hook to receive explicit capabilities from the dialog component; Web typecheck/lint and diff check passed locally. No tests were run locally; reviewer and new-head CI are pending. |
 | `2026-09-29 17:55` | Reviewer rechecked the capability wiring: no source blocker; current component passes explicit role permissions and the hook has no direct `RestContext` dependency. The production dialog defaults to deny; current-head CI remains pending. |
 | `2026-09-29 18:07` | PR #190 CI completed successfully on `0e909cb61957fa80f4e74c5f26a58c884e452032`: Core, Server, Web, size and Hermes review passed; Supabase Preview skipped. The earlier failing Web run was on superseded SHA `9d98bc21` and is recorded in EV-20. |
+| `2026-09-29 18:20` | PR #190 final evidence-head CI completed successfully on `4e0da49328529a0b8b36812ef44870d01f035881`: Core, Server, Web, size and Hermes review passed; Supabase Preview skipped. Authenticated runtime/manual and visual checks remain pending. |
