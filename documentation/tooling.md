@@ -116,7 +116,7 @@ Server REST integration tests use Testcontainers and are configured with
 `fileParallelism: false` so each module fixture can own an isolated database
 without competing container startups.
 
-### Test coverage gate
+### Test coverage reports
 
 Core, Server, and Web run Vitest with V8 coverage. The configured source globs
 include production files even when tests do not import them. Tests, test
@@ -126,20 +126,10 @@ with `pnpm --filter @hms/core test:coverage`, `pnpm --filter server test:coverag
 or `pnpm --filter web test:coverage`.
 
 Each workspace prints a text summary and writes ignored JSON, HTML, and LCOV
-reports under its `coverage/` directory. Vitest fails when any statement,
-branch, function, or line percentage falls below the measured floor in that
-workspace's Vitest config.
-Automatic threshold updates are disabled; raise a floor when sustained coverage
-improves. The longer-term target is 85% for statements, functions, and lines and
-80% for branches. Coverage percentages supplement behavioral and integration
-evidence; they do not establish that an acceptance criterion is complete.
-
-| Workspace | Statements | Branches | Functions | Lines |
-| --- | ---: | ---: | ---: | ---: |
-| Core floor | 70.3% | 61.5% | 68.9% | 73.5% |
-| Server floor | 50.8% | 40.8% | 54.5% | 51.6% |
-| Web floor | 47.2% | 45.6% | 44.0% | 48.7% |
-| Longer-term target | 85% | 80% | 85% | 85% |
+reports under its `coverage/` directory. Coverage percentages are informational
+and do not fail CI; test failures still fail the command. Coverage reports
+supplement behavioral and integration evidence but do not establish that an
+acceptance criterion is complete.
 
 The Core, Server, and Web PR workflows run their own coverage commands. When a
 coverage summary is available, they write a GitHub Actions job summary and

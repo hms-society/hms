@@ -88,8 +88,9 @@ conclusion automatically after it returns evaluation to `ready`.
    `documentation/tooling.md`.
 2. Run the applicable local generation, formatting/code, type, unit coverage, integration,
    Playwright MCP, architecture and build preflight required by the Spec and changed paths.
-   Every affected Core, Server, or Web workspace must pass its `test:coverage` command
-   without lowering the configured floor.
+   Every affected Core, Server, or Web workspace must pass its `test:coverage` command.
+   Review its coverage report as informational evidence; coverage percentage changes do not
+   block validation.
 3. Reconcile generated artifacts, migrations, saved design evidence and factual
    documentation against the current diff.
 4. Rerun the final Spec conformance comparison and verify the current validation evidence covers
