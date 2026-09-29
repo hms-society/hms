@@ -51,8 +51,15 @@ describe('useDocumentAnalysis', () => {
     fileName: 'documento-real.pdf',
     status: DocumentValidationStatus.Valid,
     sender: 'remetente@email.com',
-    extractedFields: [{ label: 'Titular', value: 'Titular Real' }],
-    aiSuggestion: { confidenceLabel: 'Alta confiança' },
+    extractedFields: [
+      { label: 'Titular', value: 'Titular Real', confidence: 0.96 },
+      { label: 'CPF', value: '123.456.789-09', confidence: 0.42 },
+      { label: 'CEP', value: '12233-470' },
+    ],
+    aiSuggestion: {
+      confidenceLabel: 'Alta confiança',
+      ollamaJsonOrganizationCaptured: true,
+    },
   })
   const recordDecision = vi.fn()
   const requestResend = vi.fn()
@@ -94,6 +101,14 @@ describe('useDocumentAnalysis', () => {
       receivedFrom: 'Titular Real',
       status: 'Válido',
     })
+  })
+
+  it('does not put uncertain extracted fields into the review form', () => {
+    const { result } = renderHook(() => useDocumentAnalysis({ fileId: document.id }))
+
+    expect(result.current.form.getValues('extractedFields')).toEqual([
+      { label: 'Titular', value: 'Titular Real', confidence: 0.96 },
+    ])
   })
 
   it('opens the original document in the analysis page', () => {

@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { LegalCase } from '@hms/core/case-management/domain/entities'
+import type {
+  LegalCase,
+  LegalCaseSummary,
+} from '@hms/core/case-management/domain/entities'
 import {
   CaseChecklistGateDecision,
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,
@@ -17,6 +20,7 @@ import type { ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
   caseId: string
+  caseDetails?: LegalCaseSummary
   checklist: ChecklistItem[]
   isReviewDisabled?: boolean
 }
@@ -66,6 +70,7 @@ const DECISION_DIALOG_COPY: Record<
 
 export function useChecklistDossierTab({
   caseId,
+  caseDetails,
   checklist,
   isReviewDisabled = false,
 }: UseChecklistDossierTabParams) {
@@ -110,25 +115,34 @@ export function useChecklistDossierTab({
     persistedChecklistItems,
     validatedItemsCount,
   } = useCaseChecklist({ caseId, fallbackChecklist: checklistItems })
-  const checklistGateDecision = reviewedCase?.checklistGate.decision
-  const checklistGateRemarks = reviewedCase?.checklistGate.remarks
+  const persistedCase = reviewedCase ?? caseDetails
+  const checklistGateDecision = persistedCase?.checklistGate.decision
+  const checklistGateRemarks = persistedCase?.checklistGate.remarks
   const checklistGateAuditLabel =
-    reviewedCase?.checklistGate.decidedAt && reviewedCase.checklistGate.decidedBy
+    persistedCase?.checklistGate.decidedAt && persistedCase.checklistGate.decidedBy
       ? `Decisão registrada por ${getChecklistGateReviewerName(
-          reviewedCase.checklistGate.decidedBy,
+          persistedCase.checklistGate.decidedBy,
           currentCollaborator,
-        )} em ${formatChecklistGateDecisionDate(reviewedCase.checklistGate.decidedAt)}`
+        )} em ${formatChecklistGateDecisionDate(persistedCase.checklistGate.decidedAt)}`
       : undefined
   const checklistGateLabel = checklistGateDecision
     ? CHECKLIST_GATE_LABELS[checklistGateDecision]
     : 'Checklist pendente'
-  const dossierGateLabel = reviewedCase?.dossierGate.homologatedAt
+  const dossierGateLabel = persistedCase?.dossierGate.homologatedAt
     ? 'Dossiê homologado'
     : 'Dossiê pendente'
   const canStartLegalWriting = Boolean(
-    reviewedCase?.checklistGate.decision &&
-      reviewedCase.dossierGate.homologatedAt &&
-      reviewedCase.status === LegalCaseStatus.LegalProduction,
+    persistedCase?.checklistGate.decision &&
+      persistedCase.dossierGate.homologatedAt &&
+      persistedCase.status === LegalCaseStatus.LegalProduction,
+  )
+  const hasChecklistDecision = Boolean(checklistGateDecision)
+  const canHomologateDossier = Boolean(
+    !persistedCase?.dossierGate.homologatedAt &&
+      (checklistGateDecision === CaseChecklistGateDecision.Approved ||
+        checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException) &&
+      persistedCase?.status === LegalCaseStatus.ReadyForLegalProduction &&
+      isChecklistComplete,
   )
   const decisionReasonDialog = pendingDecision
     ? DECISION_DIALOG_COPY[pendingDecision]
@@ -150,11 +164,30 @@ export function useChecklistDossierTab({
 
       return response.body
     },
-    onSuccess: (legalCase) => {
+    onSuccess: async (legalCase) => {
       setReviewedCase(legalCase)
       setPendingDecision(null)
       setRemarks('')
       setReasonError(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['case-details', caseId] }),
+        queryClient.invalidateQueries({ queryKey: ['case-management', 'my-cases'] }),
+      ])
+    },
+  })
+
+  const homologationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await caseManagementService.homologateDossier(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    onSuccess: async (legalCase) => {
+      setReviewedCase(legalCase)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['case-details', caseId] }),
+        queryClient.invalidateQueries({ queryKey: ['case-management', 'my-cases'] }),
+      ])
     },
   })
 
@@ -246,6 +279,10 @@ export function useChecklistDossierTab({
     return mutation.mutateAsync(CaseChecklistGateDecision.Approved)
   }
 
+  function handleHomologateDossier() {
+    return homologationMutation.mutateAsync()
+  }
+
   function handleApproveWithException() {
     openDecisionReasonDialog(CaseChecklistGateDecision.ApprovedWithException)
   }
@@ -296,6 +333,7 @@ export function useChecklistDossierTab({
   return {
     actionFeedback,
     canStartLegalWriting,
+    canHomologateDossier,
     checklistGateAuditLabel,
     checklistGateLabel,
     checklistGateRemarks,
@@ -305,8 +343,9 @@ export function useChecklistDossierTab({
     complementaryItems,
     decisionReasonDialog,
     dossierGateLabel,
-    error: mutation.error,
+    error: homologationMutation.error ?? mutation.error,
     handleApproveChecklist,
+    handleHomologateDossier,
     handleApproveWithException,
     handleBlockChecklist,
     handleCancelDecisionReason,
@@ -325,6 +364,8 @@ export function useChecklistDossierTab({
     isExceptionModalOpen,
     isRequestingException,
     isReviewDisabled,
+    hasChecklistDecision,
+    isHomologatingDossier: homologationMutation.isPending,
     isReviewingChecklistGate:
       mutation.isPending || addComplementaryItemMutation.isPending,
     mandatoryItemsCount,
