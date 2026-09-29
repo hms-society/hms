@@ -24,11 +24,10 @@ Pause for the user only when a Contract or higher-authority decision is required
 authority is missing, an external blocker prevents progress, or the same failure reaches the
 retry limit defined by the Orchestrator.
 
-If an explicitly authorized merge is already in progress and has unresolved paths, immediately
-invoke [`resolve-merge-conflicts`](resolve-merge-conflicts-prompt.md). Let it resolve and stage
-the conflict paths and complete its applicable validation, then resume `conclude-spec` in the
-current task. Do not start or continue a merge just to reach this workflow;
-`resolve-merge-conflicts` does not initiate or continue the merge.
+The `create-pr` workflow owns integration-branch updates and conflict routing. If that update
+starts a merge with unresolved paths, `create-pr` invokes
+[`resolve-merge-conflicts`](resolve-merge-conflicts-prompt.md), then resumes publication after
+the conflict workflow returns. Do not resolve merge conflicts directly in `conclude-spec`.
 
 ## Preconditions
 

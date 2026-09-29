@@ -129,16 +129,16 @@ including the file speculatively.
    update the predecessor slice, then propagate the current predecessor branch as the base of
    the dependent slice. Every branch must contain the history required by its declared base;
    require the same explicit commit authority for any merge commit.
-6. If the merge has only minor, unambiguous textual conflicts in delivery-owned files, resolve
-   them automatically by preserving the intended delivery change and the current `main`
-   behavior, then stage the resolutions, complete the merge, and review the resulting diff.
-   Never guess when a conflict affects business behavior, authorization, migrations or other
-   generated artifacts, unrelated user work, or the intended ownership of a change.
-7. If conflicts are complex or ambiguous, stop before publishing and ask the user for guidance.
-   Report each conflicted path, the competing changes, and the decision needed; do not abort or
-   complete the merge, push, or create/update the PR until the user directs the resolution.
-8. After the merge is complete, calculate and review the complete diff against the PR base.
-9. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
+6. If updating a delivery branch starts a merge with unresolved conflicts, immediately invoke
+   [`resolve-merge-conflicts`](resolve-merge-conflicts-prompt.md). Do not resolve conflicts
+   directly in this publication workflow. Let the conflict workflow inspect and resolve the
+   paths, stage its resolutions and run applicable validation. If it requests user guidance,
+   stop publication and relay the conflicted paths, competing changes and required decision;
+   do not push or create/update the PR until the conflict is resolved.
+7. After the conflict workflow returns, review its staged resolutions and validation evidence.
+   Complete the in-progress merge only with the explicit merge/commit authority required above,
+   then review the resulting diff. Recalculate the publication diff and size against the PR base.
+8. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
    size-compliant PR set required by the splitting policy.
 
 Do not use destructive Git operations, bypass hooks, create accidental dependent branches
