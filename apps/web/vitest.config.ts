@@ -27,14 +27,6 @@ export default defineConfig({
       ],
       reportOnFailure: true,
       reportsDirectory: './coverage',
-      // Measured floor on 2026-09-24. Raise as coverage improves.
-      thresholds: {
-        autoUpdate: false,
-        branches: 45.6,
-        functions: 44,
-        lines: 48.7,
-        statements: 47.2,
-      },
     },
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],

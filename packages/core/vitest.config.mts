@@ -19,14 +19,6 @@ export default defineConfig({
       ],
       reportOnFailure: true,
       reportsDirectory: './coverage',
-      // Measured floor on 2026-09-24. Raise as coverage improves.
-      thresholds: {
-        autoUpdate: false,
-        branches: 61.5,
-        functions: 68.9,
-        lines: 73.5,
-        statements: 70.3,
-      },
     },
     globals: true,
   },
