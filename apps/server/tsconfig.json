@@ -16,6 +16,7 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"],
+      "#communication/*": ["../../packages/core/src/communication/*"],
       "#consultation/*": ["../../packages/core/src/consultation/*"],
       "#shared/*": ["../../packages/core/src/shared/*"]
     },

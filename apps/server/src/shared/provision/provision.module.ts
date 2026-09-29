@@ -9,6 +9,8 @@ import { SupabaseFileStorageProvider } from '@/shared/provision/file-storage/sup
 import { IdProvider } from '@/shared/provision/id/id-provider'
 import { SupabaseStorageProvider } from '@/shared/provision/storage/supabase-storage-provider'
 
+import { MetaCloudApiProvider } from '@/shared/provision/meta-cloud-api.provider'
+
 export const STORAGE_PROVIDER = Symbol('STORAGE_PROVIDER')
 
 @Module({
@@ -26,6 +28,7 @@ export const STORAGE_PROVIDER = Symbol('STORAGE_PROVIDER')
     FakeFileStorageProvider,
     SupabaseFileStorageProvider,
     SupabaseStorageProvider,
+    MetaCloudApiProvider,
     {
       provide: PROVISION_PROVIDERS.fileStorage,
       useExisting: SupabaseFileStorageProvider,
@@ -39,6 +42,7 @@ export const STORAGE_PROVIDER = Symbol('STORAGE_PROVIDER')
     EnvProvider,
     DatetimeProvider,
     IdProvider,
+    MetaCloudApiProvider,
     PROVISION_PROVIDERS.fileStorage,
     STORAGE_PROVIDER,
   ],
