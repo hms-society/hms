@@ -21,7 +21,10 @@ export class DrizzleThirdPartyAuditLogsRepository
       idEntidade: log.thirdParty.id,
       campoAlterado: log.action,
       valorAnterior: null,
-      valorNovo: JSON.stringify(log.thirdParty),
+      valorNovo: JSON.stringify({
+        thirdParty: log.thirdParty,
+        ...(log.permission ? { permission: log.permission } : {}),
+      }),
     })
   }
 

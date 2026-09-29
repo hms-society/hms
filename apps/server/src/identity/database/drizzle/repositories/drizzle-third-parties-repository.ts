@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { ThirdParty, ThirdPartyCreation } from '@hms/core/identity/domain/entities'
-import type { TaxId } from '@hms/core/identity/domain/structures'
+import type { TaxId, ThirdPartyStatus } from '@hms/core/identity/domain/structures'
 import type { ThirdPartiesRepository } from '@hms/core/identity/interfaces'
 
 import { thirdPartyModel } from '@/identity/database/drizzle/models'
@@ -50,6 +50,21 @@ export class DrizzleThirdPartiesRepository
       .orderBy(desc(thirdPartyModel.createdAt))
 
     return thirdParties.map((thirdParty) => this.thirdPartyMapper.toDomain(thirdParty))
+  }
+
+  async updateStatus(
+    thirdPartyId: string,
+    status: ThirdPartyStatus,
+  ): Promise<ThirdParty | undefined> {
+    const [updatedThirdParty] = await this.database
+      .update(thirdPartyModel)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(thirdPartyModel.id, thirdPartyId))
+      .returning()
+
+    return updatedThirdParty
+      ? this.thirdPartyMapper.toDomain(updatedThirdParty)
+      : undefined
   }
 
   async findByTaxId(
