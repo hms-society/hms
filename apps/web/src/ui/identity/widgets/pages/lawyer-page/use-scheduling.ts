@@ -9,11 +9,8 @@ import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 export function useSchedule() {
   const { user } = useAuthContext()
   const { schedulingService } = useRestContext()
-  const {
-    currentCollaborator,
-    currentCollaboratorError,
-    isLoadingCurrentCollaborator,
-  } = useCurrentCollaboratorQuery()
+  const { currentCollaborator, currentCollaboratorError, isLoadingCurrentCollaborator } =
+    useCurrentCollaboratorQuery()
   const collaboratorId = currentCollaborator?.collaboratorId
 
   const query = useQuery({
