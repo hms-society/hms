@@ -1,26 +1,33 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+
+import { AppError } from '@hms/core/shared/domain/errors'
+
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useSchedule } from './use-scheduling'
 
 export function useConsultation() {
-  const { user } = useAuthContext()
   const { schedulingService } = useRestContext()
   const queryClient = useQueryClient()
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
+  const collaboratorId = currentCollaborator?.collaboratorId
+  const scheduleQueryKey = ['schedule', collaboratorId] as const
 
   const { schedule, isLoading, isError, error } = useSchedule()
   const [duration, setDuration] = useState<'30min' | '45min' | '1h'>('45min')
 
-  const getOrCreateScheduleId = async (): Promise<string> => {
-    if (!user) throw new Error('Usuário não autenticado')
+  async function getOrCreateScheduleId(): Promise<string> {
+    if (!collaboratorId) {
+      throw new AppError('Current collaborator is required')
+    }
 
     let scheduleId =
       schedule?.id || (schedule as any)?._id || (schedule as any)?.schedule?.id
 
     if (!scheduleId) {
       const createResponse = await schedulingService.createSchedule({
-        collaboratorId: user.id,
+        collaboratorId,
         defaultDurationMinutes: 45,
         weeklyAvailability: [],
       })
@@ -33,7 +40,7 @@ export function useConsultation() {
     }
 
     if (!scheduleId) {
-      throw new Error('Não foi possível obter ou criar uma agenda para o colaborador')
+      throw new AppError('Unable to obtain or create a schedule for the collaborator')
     }
 
     return scheduleId
@@ -52,7 +59,7 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: scheduleQueryKey })
     },
   })
 
@@ -72,7 +79,7 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: scheduleQueryKey })
     },
   })
 
@@ -100,12 +107,12 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: scheduleQueryKey })
     },
   })
   const removeBlockMutation = useMutation({
     mutationFn: async (blockId: string) => {
-      if (!blockId) throw new Error('ID do bloqueio não informado')
+      if (!blockId) throw new AppError('Blocked period ID is required')
 
       const response = await schedulingService.removeBlock(blockId)
 
@@ -116,7 +123,7 @@ export function useConsultation() {
       return response?.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: scheduleQueryKey })
     },
   })
 
