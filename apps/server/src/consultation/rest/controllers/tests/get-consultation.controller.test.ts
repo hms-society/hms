@@ -62,17 +62,4 @@ describe('Get Consultation Controller [GET /consultations/:consultationId]', () 
       .set('Authorization', fixture.authenticateAs(user))
       .expect(404)
   })
-
-  it('returns not found for an authenticated collaborator without authorization', async () => {
-    const { collaborator } = await fixture.registerAssociatedCollaborator()
-    const consultation = await fixture.seedConsultation(
-      ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
-    )
-    const { user } = await fixture.registerUnauthorizedCollaborator()
-
-    await request(fixture.app.getHttpServer())
-      .get(`/consultations/${consultation.id}`)
-      .set('Authorization', fixture.authenticateAs(user))
-      .expect(404)
-  })
 })

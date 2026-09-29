@@ -11,10 +11,8 @@ import type {
 import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
 export type SchedulingSeedReferences = {
-  readonly appointments: readonly {
-    readonly intakeId: string
-    readonly clientId: string
-  }[]
+  readonly intakeId: string
+  readonly clientId: string
   readonly assignedLawyerId: string
 }
 
@@ -59,48 +57,15 @@ export class SchedulingSeeder {
       ],
     })
     const [createdSchedule] = await this.schedulesRepository.addMany([schedule])
-    const blockedPeriod = await this.schedulesRepository.createBlockedPeriod({
+    const appointment = AppointmentFaker.fake({
+      intakeId: references.intakeId,
       scheduleId: createdSchedule.id,
-      startsOn: '2026-09-30',
-      endsOn: '2026-09-30',
-      reason: 'Audiência externa',
+      clientId: references.clientId,
+      startsAt: new Date('2030-01-14T13:00:00.000Z'),
+      endsAt: new Date('2030-01-14T13:45:00.000Z'),
     })
-    const appointmentStartTimes = [
-      '2026-09-21T12:00:00.000Z',
-      '2026-09-21T14:00:00.000Z',
-      '2026-09-22T12:00:00.000Z',
-      '2026-09-22T14:00:00.000Z',
-      '2026-09-22T16:00:00.000Z',
-      '2026-09-23T12:00:00.000Z',
-      '2026-09-23T14:00:00.000Z',
-      '2026-09-23T16:00:00.000Z',
-      '2026-09-24T12:00:00.000Z',
-      '2026-09-24T14:00:00.000Z',
-      '2026-09-25T12:00:00.000Z',
-      '2026-09-25T13:00:00.000Z',
-      '2026-09-25T15:00:00.000Z',
-    ]
-    const appointments = references.appointments
-      .slice(0, appointmentStartTimes.length)
-      .map(({ intakeId, clientId }, index) => {
-        const startsAt = new Date(appointmentStartTimes[index])
+    const [createdAppointment] = await this.appointmentsRepository.addMany([appointment])
 
-        return AppointmentFaker.fake({
-          intakeId,
-          scheduleId: createdSchedule.id,
-          clientId,
-          startsAt,
-          endsAt: new Date(startsAt.getTime() + 45 * 60 * 1000),
-        })
-      })
-    const createdAppointments = await this.appointmentsRepository.addMany(appointments)
-
-    const appointment = createdAppointments[0]
-
-    return {
-      schedule: { ...createdSchedule, blockedPeriods: [blockedPeriod] },
-      appointment,
-      appointments: createdAppointments,
-    }
+    return { schedule: createdSchedule, appointment: createdAppointment }
   }
 }

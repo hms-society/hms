@@ -9,7 +9,10 @@ import {
 } from '@hms/core/consultation/domain/structures'
 import { AppointmentReservedEvent } from '@hms/core/scheduling/domain/events'
 import { ReserveIntakeAppointmentUseCase } from '@hms/core/scheduling/domain/use-cases'
-import type { SchedulingDatabase } from '@hms/core/scheduling/interfaces'
+import type {
+  AppointmentsRepository,
+  SchedulesRepository,
+} from '@hms/core/scheduling/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { eventType, type InngestFunction, NonRetriableError } from 'inngest'
 import { z } from 'zod'
@@ -45,15 +48,18 @@ export class ReserveIntakeAppointmentJob extends InngestJob {
 
   constructor(
     inngest: InngestClient,
-    @Inject(SCHEDULING_REPOSITORIES.database)
-    database: SchedulingDatabase,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.appointments)
+    appointmentsRepository: AppointmentsRepository,
     idProvider: IdProvider,
     datetimeProvider: DatetimeProvider,
   ) {
     super(inngest)
 
     const useCase = new ReserveIntakeAppointmentUseCase(
-      database,
+      schedulesRepository,
+      appointmentsRepository,
       idProvider,
       datetimeProvider,
     )

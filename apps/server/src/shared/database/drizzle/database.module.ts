@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
-import { DatabaseTransactionContext } from '@/shared/database/drizzle/database-transaction-context'
 import { databaseProviders, DRIZZLE } from '@/shared/database/drizzle/database.provider'
 import { DYNAMIC_FORMS_REPOSITORIES } from '@/shared/constants/dynamic-forms-repositories'
 import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
@@ -11,7 +10,6 @@ import { DrizzleDynamicFormsRepository } from '@/shared/database/drizzle/reposit
 @Module({
   providers: [
     DrizzleClient,
-    DatabaseTransactionContext,
     ...databaseProviders,
     DrizzleDynamicFormMapper,
     DrizzleDynamicFormsRepository,
@@ -23,7 +21,6 @@ import { DrizzleDynamicFormsRepository } from '@/shared/database/drizzle/reposit
   ],
   exports: [
     DrizzleClient,
-    DatabaseTransactionContext,
     DRIZZLE,
     DYNAMIC_FORMS_REPOSITORIES.dynamicForms,
     DynamicFormsSeeder,

@@ -1,7 +1,0 @@
-export * from './list-calendar.controller'
-export * from './get-appointment-details.controller'
-export * from './list-calendar-filter-options.controller'
-export * from './list-reschedule-slots.controller'
-export * from './cancel-appointment.controller'
-export * from './reschedule-appointment.controller'
-export * from './schedules.controller'
