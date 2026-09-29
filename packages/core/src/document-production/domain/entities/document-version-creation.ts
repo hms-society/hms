@@ -11,6 +11,7 @@ export type DocumentVersionCreation = {
   readonly documentGenerationId?: string
   readonly sourceDocumentVersionId?: string
   readonly fileId: string
+  readonly storagePath?: string
   readonly versionNumber: number
   readonly source: DocumentVersionSource
   readonly content: DocumentTemplateContent

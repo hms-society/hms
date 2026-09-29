@@ -104,6 +104,8 @@ export interface CaseManagementService {
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
 
+  homologateDossier(caseId: string): Promise<RestResponse<LegalCase>>
+
   listPortalPendingChecklist(
     caseId: string,
     portalToken: string,
@@ -115,6 +117,7 @@ export interface CaseManagementService {
     portalToken: string,
     file: unknown,
   ): Promise<RestResponse<PortalDocumentUploadResponse>>
+
   listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
 
   getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>
