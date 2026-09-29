@@ -34,7 +34,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-03` | Cross-layer | `git status --short --branch`; `git diff --stat`; staged diff inspection | PR worktree `codex/agenda-web` began clean at published PR #183 head. | `passed` |
 | `EV-04` | Core | `pnpm --filter @hms/core check-types` after F1 integration | Passed (exit 0) after frozen-lockfile dependency installation. No tests were added or run locally. | `passed` |
 | `EV-05` | UI | `pnpm --filter web check:types` and `pnpm --filter web check:lint` after F2 integration | Both passed (exit 0); Biome checked 620 files. No tests were edited or run. | `passed` |
-| `EV-06` | Cross-layer | Current follow-up PR CI after candidate push | Pending; this correction is split as a dependent PR based on the Agenda delivery to meet the repository size limit. Record current head and check/run URLs after GitHub completes. | `pending` |
+| `EV-06` | Cross-layer | PR #190 current-head CI, SHA `0e909cb61957fa80f4e74c5f26a58c884e452032` | Core, Server, Web, check-size and Hermes review passed. Supabase Preview was skipped because no Supabase project changed. Runs: [Core](https://github.com/hms-society/hms/actions/runs/36608511660), [Server](https://github.com/hms-society/hms/actions/runs/36608511496), [Web](https://github.com/hms-society/hms/actions/runs/36608511481), [size](https://github.com/hms-society/hms/actions/runs/36608511754), [review](https://github.com/hms-society/hms/actions/runs/36608509290). | `passed` |
 | `EV-07` | Cross-layer | Plan-backed Builder activation | `builder_core` owns F1-T1 and two Core use cases; `builder_web` owns F2-T1 and four appointment-details/reschedule UI files. Spec revision, criteria, paths, Rule Pack, design reference and non-test checks were recorded before code edits. | `passed` |
 | `EV-08` | Tooling | `pnpm install --frozen-lockfile` in `/tmp/hms-agenda-web-final` | Lockfile current; all 5 workspace projects installed 1477 packages; no manifest/lockfile change. | `passed` |
 | `EV-09` | Core | Initial Core typecheck before dependency installation | Failed before useful project diagnostics because worktree lacked `node_modules`; superseded by EV-04. | `stale` |
@@ -100,9 +100,10 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
-| `CI-01` | Lawyer rescheduling follow-up Core package checks | `<pending>` | `pending` | `<pending>` |
-| `CI-02` | Lawyer rescheduling follow-up Web app checks | `<pending>` | `pending` | `<pending>` |
-| `CI-03` | Lawyer rescheduling follow-up Check PR Size and Review | `<pending>` | `pending` | `<pending>` |
+| `CI-01` | Lawyer rescheduling follow-up Core package checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Core](https://github.com/hms-society/hms/actions/runs/36608511660) |
+| `CI-02` | Lawyer rescheduling follow-up Web app checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Web](https://github.com/hms-society/hms/actions/runs/36608511481) |
+| `CI-03` | Lawyer rescheduling follow-up Check PR Size and Review | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [size](https://github.com/hms-society/hms/actions/runs/36608511754) · [review](https://github.com/hms-society/hms/actions/runs/36608509290) |
+| `CI-04` | Lawyer rescheduling follow-up Server app checks | `0e909cb61957fa80f4e74c5f26a58c884e452032` | `passed` | [Server](https://github.com/hms-society/hms/actions/runs/36608511496) |
 
 ## History
 
@@ -118,3 +119,4 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `2026-09-29 17:45` | PR #183 check-size rejected the combined candidate at 5,069 added TypeScript lines. Reverted that candidate from PR #183 and split the authorization/UI correction into a dependent branch/PR; original implementation commit remains available in the follow-up history. |
 | `2026-09-29 17:53` | PR #190 Web CI exposed a missing `RestContextProvider` in an existing hook test after the new direct context dependency. Reworked the hook to receive explicit capabilities from the dialog component; Web typecheck/lint and diff check passed locally. No tests were run locally; reviewer and new-head CI are pending. |
 | `2026-09-29 17:55` | Reviewer rechecked the capability wiring: no source blocker; current component passes explicit role permissions and the hook has no direct `RestContext` dependency. The production dialog defaults to deny; current-head CI remains pending. |
+| `2026-09-29 18:07` | PR #190 CI completed successfully on `0e909cb61957fa80f4e74c5f26a58c884e452032`: Core, Server, Web, size and Hermes review passed; Supabase Preview skipped. The earlier failing Web run was on superseded SHA `9d98bc21` and is recorded in EV-20. |
