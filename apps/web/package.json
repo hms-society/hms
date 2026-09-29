@@ -7,7 +7,7 @@
     "check:complexity": "node ../../scripts/check-complexity.mjs --scope apps/web",
     "check:lint": "biome check src",
     "check:types": "tsc --noEmit",
-    "dev": "vite dev --port 3000",
+    "dev": "vite dev",
     "format": "biome format",
     "generate-routes": "tsr generate",
     "build": "vite build",
