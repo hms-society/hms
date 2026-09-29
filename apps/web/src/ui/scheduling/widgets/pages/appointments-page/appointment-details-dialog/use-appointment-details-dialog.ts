@@ -10,9 +10,6 @@ export function useAppointmentDetailsDialog(open: boolean, appointmentId?: strin
   const isResponsibleLawyer =
     currentCollaborator?.profile === CollaboratorProfile.Lawyer &&
     detailsQuery.data?.lawyerId === currentCollaborator.collaboratorId
-  const canManageAppointments =
-    currentCollaborator?.profile === CollaboratorProfile.Admin ||
-    currentCollaborator?.profile === CollaboratorProfile.Attendant
 
   return {
     ...detailsQuery,
@@ -20,7 +17,8 @@ export function useAppointmentDetailsDialog(open: boolean, appointmentId?: strin
     canOpenConsultation: Boolean(
       detailsQuery.data?.consultationId && (isAdmin || isResponsibleLawyer),
     ),
-    canManageAppointments,
-    canRescheduleAppointments: canManageAppointments || isResponsibleLawyer,
+    canManageAppointments:
+      currentCollaborator?.profile === CollaboratorProfile.Admin ||
+      currentCollaborator?.profile === CollaboratorProfile.Attendant,
   }
 }

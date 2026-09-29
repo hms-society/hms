@@ -63,14 +63,6 @@ export class RescheduleAppointmentUseCase
 
   async execute(request: Request): Promise<AppointmentDetails> {
     assertWriteAccess(request.actor)
-    const isLawyer = request.actor.profile === 'lawyer'
-    if (
-      isLawyer &&
-      request.lawyerId &&
-      request.lawyerId !== request.actor.collaboratorId
-    ) {
-      throw new AppointmentActionForbiddenError()
-    }
     await this.database.run(async ({ appointmentsRepository, schedulesRepository }) => {
       const appointmentReference = await appointmentsRepository.findById(
         request.appointmentId,
@@ -106,15 +98,6 @@ export class RescheduleAppointmentUseCase
       if (!appointment) throw new AppointmentNotFoundError()
       if (appointment.scheduleId !== originSchedule.id) {
         throw new AppointmentRevisionConflictError()
-      }
-      const lockedOriginSchedule = lockedSchedules.get(originSchedule.id)
-      if (!lockedOriginSchedule) throw new AppointmentConflictError()
-      if (
-        isLawyer &&
-        (lockedOriginSchedule.collaboratorId !== request.actor.collaboratorId ||
-          targetSchedule.id !== lockedOriginSchedule.id)
-      ) {
-        throw new AppointmentActionForbiddenError()
       }
       if (appointment.status !== 'scheduled') throw new AppointmentNotEditableError()
       if (appointment.updatedAt.getTime() !== request.expectedRevision.getTime()) {
@@ -201,17 +184,9 @@ export class RescheduleAppointmentUseCase
 }
 
 function assertWriteAccess(actor: Request['actor']): void {
-  if (
-    (actor.status && actor.status !== 'active') ||
-    (actor.profile === 'lawyer' && actor.status !== 'active')
-  ) {
+  if (actor.status && actor.status !== 'active')
     throw new AppointmentActionForbiddenError()
-  }
-  if (
-    actor.profile !== 'admin' &&
-    actor.profile !== 'attendant' &&
-    actor.profile !== 'lawyer'
-  ) {
+  if (actor.profile !== 'admin' && actor.profile !== 'attendant') {
     throw new AppointmentActionForbiddenError()
   }
 }
