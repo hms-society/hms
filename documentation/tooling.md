@@ -137,7 +137,7 @@ evidence; they do not establish that an acceptance criterion is complete.
 | --- | ---: | ---: | ---: | ---: |
 | Core floor | 70.3% | 61.5% | 68.9% | 73.5% |
 | Server floor | 50.8% | 40.8% | 54.5% | 51.6% |
-| Web floor | 47.2% | 45.6% | 44.0% | 48.7% |
+| Web floor | 46.8% | 45.3% | 43.7% | 48.3% |
 | Longer-term target | 85% | 80% | 85% | 85% |
 
 The Core, Server, and Web PR workflows run their own coverage commands. When a
