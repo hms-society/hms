@@ -16,6 +16,6 @@ describe('envSchema', () => {
       SUPABASE_STORAGE_BUCKET: storageBucket,
     })
 
-    expect(env.SUPABASE_STORAGE_BUCKET).toBe('documents')
+    expect(env.SUPABASE_STORAGE_BUCKET).toBe('hms-bucket')
   })
 })
