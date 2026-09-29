@@ -46,14 +46,11 @@ export function AppointmentDetailsDialog({
   const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false)
   const detail = controller.details
-  const isEligibleForChanges = Boolean(
-    detail?.status === 'scheduled' &&
+  const canChange = Boolean(
+    controller.canManageAppointments &&
+      detail?.status === 'scheduled' &&
       !detail.consultationStartedAt &&
       !['completed', 'no_show', 'in_progress'].includes(detail.consultationStatus ?? ''),
-  )
-  const canCancel = Boolean(controller.canManageAppointments && isEligibleForChanges)
-  const canReschedule = Boolean(
-    controller.canRescheduleAppointments && isEligibleForChanges,
   )
 
   function closeAfterAction() {
@@ -235,7 +232,7 @@ export function AppointmentDetailsDialog({
                   ))}
                 </div>
               ) : null}
-              {!isEligibleForChanges && detail.status === 'scheduled' ? (
+              {!canChange && detail.status === 'scheduled' ? (
                 <p className='flex items-center gap-2 border-t border-border pt-4 text-sm text-muted-foreground'>
                   <Clock3 className='size-4' aria-hidden='true' />
                   Este compromisso não pode mais ser alterado porque a Consulta já iniciou
@@ -243,26 +240,22 @@ export function AppointmentDetailsDialog({
                 </p>
               ) : null}
               <div className='flex flex-row justify-end gap-2 border-t border-border pt-4'>
-                {controller.canManageAppointments ? (
-                  <Button
-                    type='button'
-                    variant='destructive'
-                    disabled={!canCancel}
-                    onClick={() => setIsCancelOpen(true)}
-                  >
-                    Cancelar agendamento
-                  </Button>
-                ) : null}
-                {controller.canRescheduleAppointments ? (
-                  <Button
-                    type='button'
-                    variant='brand'
-                    disabled={!canReschedule}
-                    onClick={() => setIsRescheduleOpen(true)}
-                  >
-                    Remarcar
-                  </Button>
-                ) : null}
+                <Button
+                  type='button'
+                  variant='destructive'
+                  disabled={!canChange}
+                  onClick={() => setIsCancelOpen(true)}
+                >
+                  Cancelar agendamento
+                </Button>
+                <Button
+                  type='button'
+                  variant='brand'
+                  disabled={!canChange}
+                  onClick={() => setIsRescheduleOpen(true)}
+                >
+                  Remarcar
+                </Button>
               </div>
             </>
           ) : null}
@@ -277,8 +270,6 @@ export function AppointmentDetailsDialog({
       <RescheduleAppointmentDialog
         open={isRescheduleOpen}
         detail={detail ?? undefined}
-        canReschedule={controller.canRescheduleAppointments}
-        canSelectLawyer={controller.canManageAppointments}
         onOpenChange={setIsRescheduleOpen}
         onSuccess={closeAfterAction}
         onReloadDetail={() => controller.refetch({ throwOnError: true })}

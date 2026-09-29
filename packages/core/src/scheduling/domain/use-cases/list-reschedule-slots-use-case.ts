@@ -50,20 +50,8 @@ export class ListRescheduleSlotsUseCase
       appointment.scheduleId,
     )
     if (!currentSchedule) throw new AppointmentNotFoundError()
-    const isLawyer = request.actor.profile === 'lawyer'
-    if (
-      isLawyer &&
-      (currentSchedule.collaboratorId !== request.actor.collaboratorId ||
-        (request.lawyerId && request.lawyerId !== request.actor.collaboratorId))
-    ) {
-      throw new AppointmentActionForbiddenError()
-    }
-    const lawyerId = isLawyer
-      ? currentSchedule.collaboratorId
-      : (request.lawyerId ?? currentSchedule.collaboratorId)
-    if (!this.identityProvider && request.lawyerId && !isLawyer) {
-      throw new AppointmentConflictError()
-    }
+    const lawyerId = request.lawyerId ?? currentSchedule.collaboratorId
+    if (!this.identityProvider && request.lawyerId) throw new AppointmentConflictError()
     if (this.identityProvider) {
       const lawyer = (await this.identityProvider.getLawyers([lawyerId])).get(lawyerId)
       if (!lawyer?.active) throw new AppointmentConflictError()
@@ -122,17 +110,9 @@ export class ListRescheduleSlotsUseCase
 }
 
 function assertWriteAccess(actor: Request['actor']): void {
-  if (
-    (actor.status && actor.status !== 'active') ||
-    (actor.profile === 'lawyer' && actor.status !== 'active')
-  ) {
+  if (actor.status && actor.status !== 'active')
     throw new AppointmentActionForbiddenError()
-  }
-  if (
-    actor.profile !== 'admin' &&
-    actor.profile !== 'attendant' &&
-    actor.profile !== 'lawyer'
-  ) {
+  if (actor.profile !== 'admin' && actor.profile !== 'attendant') {
     throw new AppointmentActionForbiddenError()
   }
 }
