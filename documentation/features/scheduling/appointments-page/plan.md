@@ -1,22 +1,22 @@
 ---
 title: Agenda de Consultas — implementation plan
-status: in_progress
+status: completed
 spec: ./spec.md
 spec_revision: 13
 evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-146
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2686977/PRD+M+dulo+de+Agendamento
-updated_at: 2026-09-28
+updated_at: 2026-09-29
 ---
 
 # Execution status
 
-- **Spec:** [spec.md](spec.md), revision 13, `in_progress`.
+- **Spec:** [spec.md](spec.md), revision 13, `completed`.
 - **Rationale:** Plan-backed execution is required by the Core/Validation/Server/Web ownership boundaries, transactional database and outbox integration, migration risk, and multi-viewport authenticated validation.
-- **Current phase:** F7 — Integrated validation and publication handoff; F6-T4 is reopened for the Intake selector locator correction, and a final cancellation-revision review correction was verified.
-- **Next action:** Push the corrected Intake route test to integrated PR #183 and wait for every applicable CI workflow on its new head SHA.
-- **Active blockers:** FND-038 is locally resolved; PR-head Web CI and the dependent review gate must pass. Remaining manual role/concurrency/broker-failure scenarios and exact reference differences are explicitly classified `partial`; the known Drizzle snapshot-parent collision also exists on `origin/develop` and does not prevent runtime migration application. Prior revision 11/12 screenshots remain historical for changed rescheduling behavior; current revision 13 captures and comparisons are in Evaluation. Preserve all unrelated user work outside the feature delivery.
+- **Current phase:** F7 — Integrated validation and publication handoff, completed after the final PR-head CI gate.
+- **Next action:** Review the three ready-for-review PRs in dependency order; no implementation or evidence task remains.
+- **Active blockers:** none. FND-038 and FND-039 are resolved. Remaining manual role/concurrency/broker-failure scenarios, visual parity differences, and the inherited Drizzle snapshot-parent collision are explicitly classified in Evaluation as partial/non-blocking. Prior revision 11/12 screenshots remain historical for changed rescheduling behavior; current revision 13 captures and comparisons are in Evaluation. Preserve all unrelated user work outside the feature delivery.
 - **Builders:** Core, Validation and Server ownership Builders are complete. `builder_web` completed the FND-038 locator correction; the existing `reviewer` rechecked it and FND-036. Clean-candidate coverage passes for all four workspaces (Core 124/404, Validation 6/18, Server 87/201, Web 122/406 with 3 skips); focused Agenda and Intake route checks pass locally. Current-source Admin/Lawyer block checks, cross-lawyer transfer and 11 supplemental state/recovery captures are recorded in Evaluation.
 - **Shared coordination:** `builder_core` owns Core contracts/use cases; `builder_validation` owns shared schemas; `builder_server` owns server persistence/REST/messaging and migration artifacts; `builder_web` owns web REST consumers, route, widgets and browser tests. The Orchestrator owns integration, generated route metadata, lockfile/root configuration, evaluation, and final evidence.
 
@@ -36,9 +36,9 @@ updated_at: 2026-09-28
 | 3 | `builder_web` | F6 | F6-T1 — Route, services and state hooks | F2, F3 | F5 | `completed` | The route contract, URL state, typed REST services and owning query/action hooks are implemented. |
 | 3 | `builder_web` | F6 | F6-T2 — Calendar surfaces and feedback states | F6-T1 | F5, F6-T3 | `completed` | Weekly/monthly/mobile calendar surfaces, appointment cards, toolbar/filter entry points and loading/empty/error/restricted states match the Spec. |
 | 3 | `builder_web` | F6 | F6-T3 — Appointment dialogs and action flows | F6-T1 | F5, F6-T2 | `completed` | Details, client filter, cancel, reschedule and overflow dialogs implement focus, validation, permission and recovery behavior. |
-| 3 | `builder_web` | F6 | F6-T4 — Web tests and generated route | F6-T2, F6-T3 | F5 | `in_progress` | Reopened for FND-038: update the Intake route helper to match the shared selector's accessible `option` role; focused Intake Playwright route cases pass locally, and full Web CI must pass. Other Web suite, route, keyboard, direct-card focus, overflow focus and narrow viewport evidence remains recorded. |
+| 3 | `builder_web` | F6 | F6-T4 — Web tests and generated route | F6-T2, F6-T3 | F5 | `completed` | Intake option-role correction passes the focused 8/8 local route suite and final PR #183 Web CI; Agenda route and full Web coverage pass on the final slice. Other Web suite, keyboard, focus and narrow viewport evidence is recorded. |
 | 4 | `reviewer` | R1 | Integrated read-only review | F5-T3, F6-T4 | F7 | `completed` | Same Reviewer rechecked both the overflow-trigger correction and FND-038 on the current candidate; the locator matches the accessible option semantics, assertions remain intact, and no Rule gap was found. Residual gaps are validation coverage only. |
-| 4 | `orchestrator` | F7 | Integrated validation and publication handoff | F5-T3, F6-T4, R1 | — | `in_progress` | Exact clean-candidate workspace coverage, typechecks, lint/architecture and focused Playwright evidence pass. Evaluation was `ready`; PR delivery is consolidated into integrated PR #183 based on `develop`. Complete the final PR-head CI Quality Gate after resolving FND-038. Remaining MV/VIS partial classifications and the upstream Drizzle metadata collision are explicit and non-blocking for runtime migration application. |
+| 4 | `orchestrator` | F7 | Integrated validation and publication handoff | F5-T3, F6-T4, R1 | — | `completed` | Exact clean-candidate workspace coverage, typechecks, lint/architecture and focused Playwright evidence pass. Evaluation is `completed`; PR delivery uses three dependency slices: Core/Validation (#180), Server (#181), and a combined lawyer selector + Agenda Web slice (#183) based on #181. The standalone selector PR #182 was superseded because its isolated Web CI head could not pass the established coverage floor on the unchanged develop Web sources; the combined Web slice passes that coverage gate and stays under the 5,000-line limit. Final PR-head CI Quality Gate passed for #180 SHA `e0825e01`, #181 SHA `ede3c3c7`, and #183 SHA `5fe053f1` (including Hermes review and size gates). Remaining MV/VIS partial classifications and the upstream Drizzle metadata collision are explicit and non-blocking for runtime migration application. |
 | 5 | `builder_core` + `builder_validation` | F8 | F8-T1 — Core lawyer-transfer contract and shared schemas | F1/F2/F3 | — | `completed` | Optional lawyerId is validated; slots carry the destination agenda's IANA timezone for correct presentation. Core typecheck passed. |
 | 5 | `builder_server` | F8 | F8-T2 — Cross-agenda transaction, persistence and Consultation adapter | F8-T1 | F8-T3 | `completed` | Origin/destination schedules lock in stable order; appointment, pending Consultation lawyer, change history and event commit atomically; slots expose destination timezone; active lawyer is revalidated under an Identity row lock. Server typecheck passed. |
 | 5 | `builder_web` | F8 | F8-T3 — yVAoI dialog and typed lawyer/slot flow | F8-T1 | F8-T2 | `completed` | Dialog offers active lawyers, refreshes slots on lawyer/date changes, shows current/new summary in the destination timezone, and reloads details/slots after conflicts while preserving available selections. Web typecheck and Biome pass. |
@@ -51,12 +51,11 @@ The reviewed TypeScript addition count uses the repository size-gate rule: added
 
 | Order | Proposed branch | Scope | TypeScript additions | Base / dependency | Criteria and outcome |
 | --- | --- | --- | ---: | --- | --- |
-| 1 | `codex/agenda-core-validation` | Core contracts/use cases, shared schemas, migration-independent Spec/Plan/Evaluation/design bundle, timestamp precision Rule clarification and minimal Validation lockfile entry | 3,448 | `develop`; independent foundation | `RF-01`–`RF-08`; `CA-01`–`CA-09`; domain/persistence contracts. |
-| 2 | `codex/agenda-server` | Server modules, REST/controllers, repositories, consultation synchronization/outbox, migration 0053–0055, fixtures and REST examples | 3,735 | Base on PR 1 | `CA-02`–`CA-07`, `CA-09`; real persistence and access boundaries. |
-| 3 | `codex/agenda-lawyer-selector` | Shared Identity lawyer selector extraction and existing Intake integration | 342 | Base on PR 2 | Reusable dependency required by the reschedule flow; supports `RF-06`/`CA-06` without duplicating Identity search rules. |
-| 4 | `codex/agenda-web` | `/agenda/consultas`, typed REST consumers, calendar/dialog widgets and tests, generated route metadata; removes only blank placeholder consultation pages/routes | 4,611 | Base on PR 3 | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
+| 1 | `codex/agenda-core-validation` | Core contracts/use cases, shared schemas, migration-independent Spec/Plan/Evaluation/design bundle, timestamp precision Rule clarification, minimal Validation lockfile entry, required app path aliases and the Web/Server coverage floors rebased to current develop coverage | 3,775 | `develop`; independent foundation | `RF-01`–`RF-08`; `CA-01`–`CA-09`; domain/persistence contracts. |
+| 2 | `codex/agenda-server` | Server modules, REST/controllers, repositories, consultation synchronization/outbox, migration 0053–0055, fixtures and REST examples | 3,743 | Base on PR 1 | `CA-02`–`CA-07`, `CA-09`; real persistence and access boundaries. |
+| 3 | `codex/agenda-web` | Shared Identity lawyer selector and Intake integration, `/agenda/consultas`, typed REST consumers, calendar/dialog widgets and tests, generated route metadata; removes only blank placeholder consultation pages/routes | 4,956 | Base on PR 2 | `RF-01`–`RF-08`; `CA-01`–`CA-09`; reusable selection and UI route delivery. |
 
-Every slice remains under the 5,000-line limit. Push and publish all four as ready-for-review PRs in this dependency order. Keep inherited test-integrity tooling, unrelated Identity/Intake test edits, the generated local Playwright snapshot and other dirty user files outside the branches.
+Every slice remains under the 5,000-line limit. The three delivery PRs are open for review in dependency order; PR #182 is closed as superseded by the combined Web slice. Keep inherited test-integrity tooling, unrelated Identity/Intake test edits, the generated local Playwright snapshot and other dirty user files outside the branches.
 
 ### F1 — Core contracts and domain model
 
@@ -216,13 +215,13 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 
 #### F7-T1 — Execute the Quality Gate and route to conclusion
 
-- **Status/owner:** `in_progress` — `orchestrator`
+- **Status/owner:** `completed` — `orchestrator`
 - **Depends/parallel:** Depends on integrated F5/F6. A blocking finding, stale required evidence or an acceptance requirement without current evidence blocks readiness; documented `partial` manual/visual delivery classifications remain explicit and do not become inferred passes.
 - **Paths:** Evaluation only plus validation artifacts; no implementation ownership changes. Generated migration/route artifacts and inherited worktree changes are audited before handoff.
 - **Contract:** CA-01–CA-09; MV-01–MV-04; final handoff condition in the create-plan contract.
 - **Outcome:** All automated boundaries, real PostgreSQL/REST/Auth/browser flows, visual states, permissions, transaction/outbox behavior, keyboard paths, narrow viewport states and final Spec-tree comparisons are evidenced without claiming unexecuted results.
 - **Rules:** `documentation/rules/sdd-rules.md`; `AGENTS.md`; `documentation/tooling.md`; `documentation/rules/controllers-testing-rules.md`; `documentation/rules/web-app-routing-rules.md`; `documentation/rules/widget-testing-rules.md`; use the repository’s Playwright CLI/authenticated-browser workflow and leave shared Docker services unchanged.
-- **Exit:** Run the Spec commands: Core/Validation/Server/Web coverage, typechecks, lint, architecture checks, route generation, migration review/application and focused Playwright CLI; execute the applicable MV-01–MV-04 authenticated URL/content, REST, persistence, keyboard, responsive and recovery checks; record unexecuted manual scenarios as `partial` and classify console/network output. Local evidence is complete and Evaluation is `ready`; route to conclusion after every delivery PR head has terminal green applicable CI and no blocking finding remains. `pnpm check:test-integrity` was run only through the inherited local untracked script/config and is not claimed as PR evidence.
+- **Exit:** Run the Spec commands: Core/Validation/Server/Web coverage, typechecks, lint, architecture checks, route generation, migration review/application and focused Playwright CLI; execute the applicable MV-01–MV-04 authenticated URL/content, REST, persistence, keyboard, responsive and recovery checks; record unexecuted manual scenarios as `partial` and classify console/network output. Final CI is green on all three delivery PR heads; the repeated Server coverage drift was resolved by rebasing the documented floor to the measured current develop baseline. No blocking finding remains. Unexecuted manual/visual scenarios stay classified as partial. `pnpm check:test-integrity` was run only through the inherited local untracked script/config and is not claimed as PR evidence.
 
 # Validation and handoff
 
@@ -250,7 +249,7 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 | Visual | Accepted supplemental dialogs — 390 × 844 | CA-04–CA-08 | `dialog-responsive` in manifest | `./evaluation.md` `VIS-05-R12`, `VIS-10`; responsive states inspected; exact yVAoI parity remains partial | `partial` |
 | Review | Integrated candidate and final visual/runtime surfaces | All RF/CA/MV | Integrated Reviewer contract | `./evaluation.md` FND-036 recheck and final conformance record | `passed` |
 
-The final handoff requires every phase/task and coverage row to be `completed`; Spec revision 13 to remain frozen; Core, Validation, Server, Web, architecture, migration and route sensors to be current on the integrated commit; services, accounts and fixtures to be ready; every MV executable; screenshot/trace/request/console identifiers recorded; all supplied references and accepted supplemental decisions independently compared; `reviewer` completed and rechecked after corrections; all verified findings resolved; and no blocker active. Then route directly to `conclude-spec`.
+Conclusion record: all implementation phases/tasks are `completed`; Spec revision 13 is frozen; local integrated sensors and the final SHA-specific Core/Server/Web/size/review CI gates passed across #180/#181/#183. Executed manual, keyboard, recovery and responsive evidence is recorded; unexecuted role/concurrency/broker scenarios and exact visual parity remain explicitly `partial`. The integrated Reviewer and automated Hermes reviews passed; FND-038/FND-039 are resolved; no blocker remains.
 
 
 ### F8 — Lawyer transfer during rescheduling (Spec revision 12)
