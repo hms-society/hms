@@ -12,6 +12,8 @@ import { CompleteConsultationUseCase } from '@hms/core/consultation/use-cases'
 import type { DocumentPackagesRepository } from '@hms/core/document-production/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import type { Broker } from '@hms/core/shared/interfaces'
+import type { AppointmentWriteTransactionProvider } from '@hms/core/shared/interfaces'
+import type { ConsultationOutboxRepository } from '@hms/core/consultation/interfaces'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
 import { ConsultationsController } from '@/consultation/decorators'
@@ -21,6 +23,8 @@ import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
+import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 @ConsultationsController()
@@ -36,12 +40,20 @@ export class CompleteConsultationController {
     documentPackagesRepository: DocumentPackagesRepository,
     @Inject(InngestBroker) broker: Broker,
     datetimeProvider: DatetimeProvider,
+    @Inject(SCHEDULING_REPOSITORIES.appointmentWriteTransactionProvider)
+    appointmentTransactionProvider: AppointmentWriteTransactionProvider,
+    @Inject(CONSULTATION_REPOSITORIES.outbox)
+    outboxRepository: ConsultationOutboxRepository,
+    idProvider: IdProvider,
   ) {
     this.useCase = new CompleteConsultationUseCase(
       consultationsRepository,
       documentPackagesRepository,
       broker,
       datetimeProvider,
+      appointmentTransactionProvider,
+      outboxRepository,
+      idProvider,
     )
   }
 

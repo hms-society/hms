@@ -1,6 +1,7 @@
 import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
+import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { GetConsultationUseCase } from '@hms/core/consultation/use-cases'
 import type {
   ClientsRepository,
@@ -14,6 +15,7 @@ import { ConsultationsController } from '@/consultation/decorators'
 import { ConsultationResponseDto } from '@/consultation/rest/dtos'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
+import { CurrentCollaborator } from '@/identity/decorators'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
@@ -50,9 +52,18 @@ export class GetConsultationController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: ErrorResponseDto })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, type: ErrorResponseDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, type: ErrorResponseDto })
-  handle(@Param('consultationId', new ParseUUIDPipe()) consultationId: string) {
+  handle(
+    @Param('consultationId', new ParseUUIDPipe()) consultationId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
     return this.useCase
-      .execute({ consultationId })
+      .execute({
+        consultationId,
+        actor: {
+          collaboratorId: collaborator.collaboratorId,
+          profile: collaborator.profile,
+        },
+      })
       .then(ConsultationResponseDto.fromDomain)
   }
 }
