@@ -40,20 +40,20 @@ const rows = metrics.map(([metric, label]) => {
   const result = summary.total?.[metric]
   if (!result) throw new Error(`Coverage summary is missing the ${metric} metric.`)
   const baseline = thresholdsBlock.match(new RegExp(`\\b${metric}:\\s*([\\d.]+)`))?.[1]
-  if (!baseline) throw new Error(`Coverage config is missing the ${metric} threshold.`)
-  return `| ${label} | ${result.pct}% | ${baseline}% | ${result.covered} / ${result.total} |`
+  const baselineDisplay = !baseline || baseline === '0' ? 'N/A' : `${baseline}%`
+  return `| ${label} | ${result.pct}% | ${baselineDisplay} | ${result.covered} / ${result.total} |`
 })
 const report = [
   `<!-- coverage-report:${workspace} -->`,
   `## Cobertura de testes: ${workspaceName}`,
   '',
-  '| Métrica | Cobertura | Piso atual | Cobertos / Total |',
+  '| Métrica | Cobertura | Piso mínimo | Cobertos / Total |',
   '| --- | ---: | ---: | ---: |',
   ...rows,
   '',
   coveragePassed
-    ? '✅ Todos os pisos de cobertura configurados no Vitest foram atingidos.'
-    : '❌ Os testes ou os pisos de cobertura configurados no Vitest falharam. O resultado bloqueia a CI.',
+    ? '✅ Testes unitários executados com sucesso.'
+    : '❌ Os testes unitários falharam. O resultado bloqueia a CI.',
   ...(runUrl ? ['', `[Abrir execução](${runUrl})`] : []),
   '',
 ].join('\n')
