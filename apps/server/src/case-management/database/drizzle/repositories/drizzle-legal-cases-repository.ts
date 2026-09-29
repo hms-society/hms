@@ -321,4 +321,37 @@ export class DrizzleLegalCasesRepository
 
     return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
   }
+
+  async homologateDossier({
+    caseId,
+    homologatedBy,
+    expectedStatus,
+    status,
+  }: Parameters<LegalCasesRepository['homologateDossier']>[0]): ReturnType<
+    LegalCasesRepository['homologateDossier']
+  > {
+    const now = new Date()
+    const [updatedCase] = await this.database
+      .update(legalCaseModel)
+      .set({
+        dossierGateHomologatedAt: now,
+        dossierGateHomologatedBy: homologatedBy,
+        status,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.status, expectedStatus),
+          inArray(legalCaseModel.checklistGateDecision, [
+            'approved',
+            'approved_with_exception',
+          ]),
+          isNull(legalCaseModel.dossierGateHomologatedAt),
+        ),
+      )
+      .returning()
+
+    return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
+  }
 }
