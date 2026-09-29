@@ -127,9 +127,9 @@ or `pnpm --filter web test:coverage`.
 Each workspace prints a text summary and writes ignored JSON, HTML, and LCOV
 reports under its `coverage/` directory. Floors reflect measured current `develop`
 baselines (Server and Web remeasured 2026-09-29 after restored source surfaces). Vitest
-fails when any statement,
-branch, function, or line percentage falls below the measured floor in that
-workspace's Vitest config.
+currently reports coverage without blocking on these floors while legacy coverage
+debt is addressed. The values below are measured baselines, not enforced thresholds;
+update the table and workspace configs together when enforcement is restored.
 Automatic threshold updates are disabled; raise a floor when sustained coverage
 improves. The longer-term target is 85% for statements, functions, and lines and
 80% for branches. Coverage percentages supplement behavioral and integration
