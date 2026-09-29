@@ -45,7 +45,24 @@ delivery risk, not file or endpoint counts:
 | Mode | Use when |
 | --- | --- |
 | `compact` | One cohesive outcome, stable dependencies, limited ownership and low delivery risk. |
-| `complete` | Multiple applications or layers, persistence/integration changes, several UI states, or material security, concurrency, migration or operational risk. |
+| `complete` | Two or more material risk drivers require coordinated proof: security/tenant isolation, destructive or concurrent writes, migrations/backfills, external side effects, operational rollout, or a user-requested exhaustive cross-layer delivery. |
+
+Do not choose `complete` merely because a feature crosses layers, has several screens, or is
+design-backed. Those are planning signals, not proof requirements by themselves. A cohesive
+cross-layer feature without material risk may remain `compact` with focused boundary tests and
+one representative manual flow. Record the choice and its rationale in `1. Context and scope`.
+
+Use the smallest validation profile that proves the Contract:
+
+| Profile | Required proof |
+| --- | --- |
+| `focused` | Automated tests at the owning boundary and, only when the user-visible path cannot be proved there, one representative integration or browser flow. |
+| `standard` | Affected automated boundaries, the primary success and rejection states, and targeted browser/visual evidence for acceptance-critical UI. |
+| `exhaustive` | Full role/state/concurrency/integration and visual matrix, reserved for the `complete` mode or an explicit product/regulatory requirement. |
+
+The Spec must not promote optional exploratory coverage into acceptance criteria. Put deferred
+or recommended coverage in a short risk note or follow-up, not in the Contract's blocking
+handoff conditions.
 
 #### Parallel Searcher research
 
@@ -329,9 +346,9 @@ The design manifest must preserve that analysis in a concise table or linked des
 | `<screenshot>` | `<route and state>` | `<width × height>` | `<elements and hierarchy>` | `<controls/states>` | `<explicit notes>` | `<CA/MV/validation-artifact identifier>` |
 
 After reviewing the supplied screenshots, the Spec creator must decide whether additional
-screenshots are necessary. Suggest them whenever the supplied bundle leaves a material gap,
-including missing loading, error, empty, success, disabled, dialog, dropdown, permission,
-role, tenant, mobile or breakpoint states. Each suggestion must state:
+screenshots are necessary. Suggest them when the supplied bundle leaves a material
+acceptance-critical gap, such as a required loading, error, empty, success, disabled, dialog,
+dropdown, permission, role, tenant, mobile or breakpoint state. Each suggestion must state:
 
 - the proposed route/surface/state and role or fixture;
 - the exact viewport;
@@ -339,10 +356,10 @@ role, tenant, mobile or breakpoint states. Each suggestion must state:
 - the RF/CA/MV criteria it would clarify;
 - whether it is **required before implementation** or **recommended supplemental coverage**.
 
-Required supplemental screenshots must be captured and added to the feature-local design
-bundle before the Spec becomes `open`, or the user must explicitly accept a documented
-visual assumption. Recommended screenshots may be deferred only when the manifest records
-the deferral, rationale and planned validation state.
+Only screenshots for acceptance-critical states are required before the Spec becomes `open`.
+Recommended supplemental screenshots may be deferred when the manifest records the deferral,
+rationale and planned validation state. Illustrative references must still be inspected and
+mapped, but they do not automatically create a blocking implementation or visual gate.
 
 During Spec research, use the Pencil skill and MCP for `.pen` contents. Never inspect a
 `.pen` file through shell or generic filesystem tools. Before setting the Spec to `open`:
@@ -914,11 +931,13 @@ strategy with these two tables:
 | --- | --- | --- | --- |
 | `<test path>` | `<real test/suite name or descriptive case>` | `<scenario>` | `<observable assertions and side effects>` |
 
-List the relevant cases for every contracted test file, including domain rule branches,
+List the relevant cases for every contracted test file. Include domain branches,
 authorization/tenant boundaries, transport failures, persistence effects, query/action hook
-state and UI recovery. Assertions must describe observable outcomes, not only mocked method
-calls. Preserve the repository's real naming convention; do not invent arbitrary coverage
-percentages or implementation-only test claims.
+state or UI recovery only when that concern is in the Contract or materially risks the
+delivery. Assertions must describe observable outcomes, not only mocked method calls. Preserve
+the repository's real naming convention; do not invent arbitrary coverage percentages or
+implementation-only test claims. Explicitly mark non-applicable branches as out of scope
+instead of adding them as speculative acceptance work.
 
 Use this required coverage table:
 
@@ -926,7 +945,7 @@ Use this required coverage table:
 | --- | --- | --- | --- |
 | `CA-01` | `<real test file/suite or none with reason>` | `MV-01` or `—` | `<evaluation section/artifact>` |
 
-For each `MV-*`, provide:
+For each applicable `MV-*`, provide:
 
 - mapped CA IDs, services/health checks, accounts/fixtures and preconditions;
 - starting route/state, exact viewport and saved design reference when applicable;
@@ -938,10 +957,12 @@ For each `MV-*`, provide:
 List applicable commands in a `Command | Purpose/coverage` table and link the expected
 evidence record as `./evaluation.md`.
 
-The Orchestrator executes every applicable `MV-*` with the Playwright MCP. Design-backed
-visual comparison is optional evidence for material acceptance decisions and does not require
-a dedicated visual-reference integration test. Builder checks and automated results remain
-supporting evidence for the applicable behavioral and manual validation.
+The Orchestrator executes every applicable `MV-*` with the repository-approved browser
+workflow. Small cohesive features may have no `MV-*` scenario when automated proof is
+sufficient. Design-backed visual comparison is required only for acceptance-critical visual
+states in the selected profile; it is optional evidence for illustrative references and does
+not require a dedicated visual-reference integration test. Builder checks and automated
+results remain supporting evidence for the applicable behavioral and manual validation.
 
 ### 5. Documentation alignment and revision history
 
@@ -980,7 +1001,8 @@ or integrity work remains. Before changing it to `open`, verify:
 - filesystem-valid layer-contract path and change classifications;
 - complete resulting field schemas for every affected Entity and Structure;
 - no unresolved material product or technical ambiguity;
-- complete/current design bundle and screenshot integrity when applicable;
+- complete/current design bundle and screenshot integrity for acceptance-critical references;
+  illustrative references have an inspection record and explicit deviation/defer decision;
 - visual analysis inventory for every supplied screenshot and a recorded decision for every
   additional-screenshot suggestion;
 - a complete data-model contract for every created or modified migration path, including
@@ -997,10 +1019,10 @@ interpretive:
   one path per line and explicit component boundaries;
 - declare allowed paths, prohibited paths, owning layer/module, generated-file treatment and
   the Builder validation exits;
-- map every supplied design screenshot and every required supplemental state to an exact
+- map every acceptance-critical design screenshot and required supplemental state to an exact
   route, viewport, state, implementation surface and transient validation-artifact identifier;
-- define the required loading, empty, success, error, recovery, disabled, selected, focus,
-  keyboard and responsive behavior wherever applicable;
+- define loading, empty, success, error, recovery, disabled, selected, focus, keyboard and
+  responsive behavior only where applicable to the Contract and selected validation profile;
 - include an explicit exclusion list so an implementation cannot infer missing behavior from
   the existing codebase or from a screenshot alone;
 - ensure the resulting Spec can be checked against the filesystem and the declared validation

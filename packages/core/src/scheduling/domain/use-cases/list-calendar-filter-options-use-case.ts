@@ -3,7 +3,10 @@ import type { UseCase } from '#shared/interfaces'
 
 import { AppointmentActionForbiddenError } from '../errors'
 import type { CalendarIdentityProvider } from '#shared/interfaces'
-import type { AppointmentsRepository, SchedulesRepository } from '../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+} from '../../interfaces'
 
 type Request = {
   actor: {
@@ -26,8 +29,8 @@ const MAX_IDENTITY_SCAN_PAGES = 5
 
 export class ListCalendarFilterOptionsUseCase implements UseCase<Request, Response> {
   constructor(
-    private readonly schedulesRepository: SchedulesRepository,
-    private readonly appointmentsRepository: AppointmentsRepository,
+    private readonly schedulesRepository: CalendarSchedulesRepository,
+    private readonly appointmentsRepository: CalendarAppointmentsRepository,
     private readonly identityProvider: CalendarIdentityProvider,
   ) {}
 
@@ -52,9 +55,18 @@ export class ListCalendarFilterOptionsUseCase implements UseCase<Request, Respon
 
     while (items.length < PAGE_SIZE && scanPages < MAX_IDENTITY_SCAN_PAGES) {
       scanPages += 1
-      const identityResult = request.kind === 'client'
-        ? await this.identityProvider.searchClients(search, cursor, PAGE_SIZE - items.length)
-        : await this.identityProvider.searchLawyers(search, cursor, PAGE_SIZE - items.length)
+      const identityResult =
+        request.kind === 'client'
+          ? await this.identityProvider.searchClients(
+              search,
+              cursor,
+              PAGE_SIZE - items.length,
+            )
+          : await this.identityProvider.searchLawyers(
+              search,
+              cursor,
+              PAGE_SIZE - items.length,
+            )
       const candidates = identityResult.items.filter((item) => !seenIds.has(item.id))
       candidates.forEach((item) => seenIds.add(item.id))
       const visibleIds = await this.appointmentsRepository.filterFacetIdsInScope(
@@ -78,8 +90,11 @@ export class ListCalendarFilterOptionsUseCase implements UseCase<Request, Respon
 }
 
 function assertReadAccess(actor: Request['actor']): void {
-  if (actor.status && actor.status !== 'active') throw new AppointmentActionForbiddenError()
-  if (!['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)) {
+  if (actor.status && actor.status !== 'active')
+    throw new AppointmentActionForbiddenError()
+  if (
+    !['admin', 'attendant', 'lawyer', 'paralegal', 'supervisor'].includes(actor.profile)
+  ) {
     throw new AppointmentActionForbiddenError()
   }
 }

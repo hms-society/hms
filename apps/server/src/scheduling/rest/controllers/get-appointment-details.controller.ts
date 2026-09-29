@@ -2,8 +2,8 @@ import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestj
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { GetAppointmentDetailsUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type {
-  AppointmentsRepository,
-  SchedulesRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import type {
   CalendarConsultationProvider,
@@ -28,8 +28,9 @@ export class GetAppointmentDetailsController {
 
   constructor(
     @Inject(SCHEDULING_REPOSITORIES.appointments)
-    appointmentsRepository: AppointmentsRepository,
-    @Inject(SCHEDULING_REPOSITORIES.schedules) schedulesRepository: SchedulesRepository,
+    appointmentsRepository: CalendarAppointmentsRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: CalendarSchedulesRepository,
     @Inject(IDENTITY_REPOSITORIES.calendarProvider)
     identityProvider: CalendarIdentityProvider,
     @Inject(CONSULTATION_REPOSITORIES.calendarProvider)

@@ -20,13 +20,11 @@ vi.mock('@/ui/shared/widgets/components/anchor', () => ({
       href={
         route === 'intakeDetails'
           ? `/intakes/${(params as Record<string, string> | undefined)?.intakeId}`
-          : route === 'attendantConsultations'
-            ? '/consultas'
-            : route === 'consultation'
-              ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}`
-              : route === 'consultationAttendanceForm'
-                ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}/ficha-atendimento`
-                : '/intakes'
+          : route === 'consultation'
+            ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}`
+            : route === 'consultationAttendanceForm'
+              ? `/consultas/${(params as Record<string, string> | undefined)?.consultationId}/ficha-atendimento`
+              : '/intakes'
       }
       {...props}
     >

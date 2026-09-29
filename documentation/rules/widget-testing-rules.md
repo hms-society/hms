@@ -158,9 +158,19 @@ it. For example, `useAppLayout` tests mock `useUrlPathname`, not TanStack Router
 `useLocation`.
 
 When one application hook consumes another domain-specific hook, test the
-consumer by mocking the domain-specific hook. Test the lower hook separately for
-the behavior it owns. For example, a hook consuming `useIntakesQuery` should not
-reconstruct a `useQuery` result or test React Query itself.
+consumer by mocking the domain-specific hook. For example, a hook consuming
+`useIntakesQuery` should not reconstruct a `useQuery` result or test React Query
+itself.
+
+Domain query and action hooks that wrap REST calls or TanStack Query mutations
+do not receive dedicated hook test files in new feature work. Verify their
+request parameters, cache isolation, invalidation, pending/error recovery, and
+visible results through the owning page or dialog hook tests and a route
+integration test that renders the real domain hooks. A route test may mock HTTP
+responses for deterministic cases, but must exercise the real hook-to-service
+mapping and assert the outgoing request and resulting UI state. This exception
+does not remove the widget/owning-hook test pair above. Existing dedicated
+domain-hook tests may remain until their feature is materially revised.
 
 This rule applies to the hook layer. A consumer hook test should verify its
 complete state and action matrix, not only one happy-path mutation. Cover every

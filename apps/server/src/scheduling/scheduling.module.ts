@@ -35,7 +35,8 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import type {
-  AppointmentsRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
   SchedulingDatabase,
   SchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
@@ -79,8 +80,8 @@ import type {
         CONSULTATION_REPOSITORIES.calendarProvider,
       ],
       useFactory: (
-        schedulesRepository: SchedulesRepository,
-        appointmentsRepository: AppointmentsRepository,
+        schedulesRepository: CalendarSchedulesRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
         identityProvider: CalendarIdentityProvider,
         consultationProvider: CalendarConsultationProvider,
       ) =>
@@ -100,8 +101,8 @@ import type {
         CONSULTATION_REPOSITORIES.calendarProvider,
       ],
       useFactory: (
-        appointmentsRepository: AppointmentsRepository,
-        schedulesRepository: SchedulesRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
+        schedulesRepository: CalendarSchedulesRepository,
         identityProvider: CalendarIdentityProvider,
         consultationProvider: CalendarConsultationProvider,
       ) =>
@@ -120,8 +121,8 @@ import type {
         IDENTITY_REPOSITORIES.calendarProvider,
       ],
       useFactory: (
-        schedulesRepository: SchedulesRepository,
-        appointmentsRepository: AppointmentsRepository,
+        schedulesRepository: CalendarSchedulesRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
         identityProvider: CalendarIdentityProvider,
       ) =>
         new ListCalendarFilterOptionsUseCase(
@@ -139,8 +140,8 @@ import type {
         IDENTITY_REPOSITORIES.calendarProvider,
       ],
       useFactory: (
-        appointmentsRepository: AppointmentsRepository,
-        schedulesRepository: SchedulesRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
+        schedulesRepository: CalendarSchedulesRepository,
         datetimeProvider: DatetimeProvider,
         identityProvider: CalendarIdentityProvider,
       ) =>
@@ -164,12 +165,12 @@ import type {
       ],
       useFactory: (
         database: SchedulingDatabase,
-        schedulesRepository: SchedulesRepository,
+        schedulesRepository: CalendarSchedulesRepository,
         identityProvider: CalendarIdentityProvider,
         consultationProvider: CalendarConsultationProvider,
         datetimeProvider: DatetimeProvider,
         idProvider: IdProvider,
-        appointmentsRepository: AppointmentsRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
       ) =>
         new CancelAppointmentUseCase(
           database,
@@ -195,12 +196,12 @@ import type {
       ],
       useFactory: (
         database: SchedulingDatabase,
-        schedulesRepository: SchedulesRepository,
+        schedulesRepository: CalendarSchedulesRepository,
         identityProvider: CalendarIdentityProvider,
         consultationProvider: CalendarConsultationProvider,
         datetimeProvider: DatetimeProvider,
         idProvider: IdProvider,
-        appointmentsRepository: AppointmentsRepository,
+        appointmentsRepository: CalendarAppointmentsRepository,
         rescheduledConsultationProvider: RescheduledAppointmentConsultationProvider,
       ) =>
         new RescheduleAppointmentUseCase(

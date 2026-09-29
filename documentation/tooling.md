@@ -147,11 +147,26 @@ coverage command fails. They upload the full report as an artifact retained for
 14 days. Pull requests from forks receive the job summary and artifact without
 the comment.
 
+### Test integrity gate
+
+Run `pnpm check:test-integrity` to check test ownership and changes against
+`develop`. The policy in `test-integrity.config.mjs` requires a direct test for
+changed Core use cases and REST controllers, checks new test locations and
+suffixes, and rejects changes that reduce test cases or assertions or increase
+skipped/todo tests. Existing `.spec.ts` and colocated tests remain valid as
+baseline migration debt; new tests follow the current testing rules.
+
+Use `pnpm check:test-integrity -- --base <git-ref>` for another base, or add
+`--json` for machine-readable output. The Test Integrity CI workflow runs the
+same check on every pull request against its exact base commit. This check
+complements the workspace coverage gates above.
+
 ## CI/CD — GitHub Actions and Coolify
 
 - `.github/workflows/core-package-ci.yaml` validates the shared core package on PRs.
 - `.github/workflows/server-app-ci.yaml` validates and builds the server on PRs.
 - `.github/workflows/web-app-ci.yaml` validates and builds the web app on PRs.
+- `.github/workflows/test-integrity-ci.yaml` checks test ownership and weakening on PRs.
 - `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
   then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
   merged PR into `main`.
@@ -237,6 +252,8 @@ Bring it up with `docker compose up`.
 - `pnpm check:complexity` — checks complexity against the shared baseline. Add
   `-- --scope apps/server` (or `apps/web`, `packages/core`, or
   `packages/validation`) to check one source scope.
+- `pnpm check:test-integrity` — checks test ownership and changed test strength
+  against `develop`.
 - `node scripts/write-coverage-report.mjs` — formats the JSON coverage summary
   for the CI job summary and pull-request comment.
 

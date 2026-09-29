@@ -164,6 +164,34 @@ Before the first implementation change for the current revision:
    Rule/documentation compliance, findings and lessons learned;
 9. record required services, accounts, fixtures, design references and evidence targets.
 
+### Authenticated validation fixture policy
+
+When an applicable `MV-*` or visual state requires domain data that is missing from the local
+development database, do not stop at an empty state or report the scenario as merely pending.
+Within the repository's local validation scope, create controlled fixture data and use it to
+exercise the real authenticated REST/browser flow. This mutation is part of implementation
+validation and does not require a separate permission request when it is limited to the local
+development database and the current Spec's entities.
+
+The fixture workflow must:
+
+1. resolve existing seeded role accounts and reuse existing schedules/clients when safe;
+2. create deterministic, uniquely identifiable rows for every required relationship (for
+   example intake, schedule, appointment, block and Consultation projection), including the
+   states needed by the manual and visual matrix;
+3. reserve separate rows for destructive or state-changing actions so cancellation,
+   rescheduling, conflict and retry checks can run against the real API without corrupting
+   unrelated seed data;
+4. record the fixture identifiers, mutation command, observed REST/DB results, screenshots,
+   console/request classification and cleanup plan in `evaluation.md`;
+5. remove the fixture rows in dependency order after validation and verify that cleanup
+   completed. If a failure interrupts the run, perform cleanup before reporting the result.
+
+Do not substitute `page.route` mocks for required manual evidence when the real local services
+are available. Mocks remain valid for isolated route/widget tests only and must be labeled as
+mocked coverage. Never mutate production, shared external systems or user-owned data outside
+the local validation database under this policy.
+
 Do not proceed when the Builder activation, baseline conformance comparison or Playwright
 health result is missing or failed. A prose statement that these steps happened is insufficient;
 record exact paths, commands, results and evidence identifiers.

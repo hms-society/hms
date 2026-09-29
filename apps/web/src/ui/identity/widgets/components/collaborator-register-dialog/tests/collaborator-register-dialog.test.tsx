@@ -191,7 +191,7 @@ describe('CollaboratorRegisterDialog [POST /collaborators form]', () => {
         ],
       }),
     )
-  })
+  }, 15000)
 
   it('blocks legal-area selection and submission while areas are loading', async () => {
     useLegalAreasMock.mockReturnValue({

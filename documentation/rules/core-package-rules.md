@@ -146,6 +146,27 @@ Consumers must import auth data structures from the structures barrel and the
 provider contract from the interfaces barrel. Do not place provider-specific
 types or Supabase imports in `packages/core`.
 
+## Name cross-module projection contracts as providers
+
+When a use case needs a narrow, read-only projection owned by another module,
+declare a shared provider contract under `packages/core/src/shared/interfaces`
+and name it `<Purpose><OwningModule>Provider` (or `<Purpose>Provider` when the
+owner is already clear). Use the same `Provider` suffix in the kebab-case
+filename. For example, the calendar contracts are `CalendarIdentityProvider`
+and `CalendarConsultationProvider`, not module-local `Reader` contracts.
+
+The provider returns only the fields the consuming use case needs. The owning
+module implements and exports the shared contract without exposing its tables,
+ORM types, or full domain records to the consumer. A database-backed implementation may
+live in that owner's database layer; the `Provider` suffix describes the core
+boundary, not a requirement to move SQL into a provision layer.
+
+Keep `Repository` for persistence of the owning module's aggregates. Do not
+duplicate the shared provider contract under a feature's `interfaces` directory
+or move domain-owned SQL into `shared/provision`. Existing specialized
+source/content readers are not renamed by this convention; apply
+it to new or materially changed cross-module projection contracts.
+
 ## Entity identity and composition
 
 Only domain entity declarations may own a local identity. An entity is represented

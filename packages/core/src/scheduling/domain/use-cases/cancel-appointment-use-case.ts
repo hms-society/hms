@@ -16,9 +16,9 @@ import {
 } from '../errors'
 import type { AppointmentDetails } from '../structures'
 import type {
-  AppointmentsRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
   SchedulingDatabase,
-  SchedulesRepository,
 } from '../../interfaces'
 import { GetAppointmentDetailsUseCase } from './get-appointment-details-use-case'
 
@@ -37,15 +37,15 @@ export class CancelAppointmentUseCase implements UseCase<Request, AppointmentDet
 
   constructor(
     private readonly database: SchedulingDatabase,
-    private readonly schedulesRepository: SchedulesRepository,
+    schedulesRepository: CalendarSchedulesRepository,
     private readonly identityProvider: CalendarIdentityProvider,
     private readonly consultationProvider: CalendarConsultationProvider,
     private readonly datetimeProvider: DatetimeProvider,
     private readonly idProvider: IdProvider,
-    private readonly appointmentsRepository?: AppointmentsRepository,
+    appointmentsRepository?: CalendarAppointmentsRepository,
   ) {
     this.getDetails = new GetAppointmentDetailsUseCase(
-      appointmentsRepository ?? ({} as AppointmentsRepository),
+      appointmentsRepository ?? ({} as CalendarAppointmentsRepository),
       schedulesRepository,
       identityProvider,
       consultationProvider,

@@ -10,9 +10,9 @@ import {
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { RescheduleAppointmentUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type {
-  AppointmentsRepository,
+  CalendarAppointmentsRepository,
   SchedulingDatabase,
-  SchedulesRepository,
+  CalendarSchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 import type {
   CalendarConsultationProvider,
@@ -45,13 +45,14 @@ export class RescheduleAppointmentController {
 
   constructor(
     @Inject(SCHEDULING_REPOSITORIES.database) database: SchedulingDatabase,
-    @Inject(SCHEDULING_REPOSITORIES.schedules) schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.schedules)
+    schedulesRepository: CalendarSchedulesRepository,
     @Inject(IDENTITY_REPOSITORIES.calendarProvider)
     identityProvider: CalendarIdentityProvider,
     @Inject(CONSULTATION_REPOSITORIES.calendarProvider)
     consultationProvider: CalendarConsultationProvider,
     @Inject(SCHEDULING_REPOSITORIES.appointments)
-    appointmentsRepository: AppointmentsRepository,
+    appointmentsRepository: CalendarAppointmentsRepository,
     datetimeProvider: DatetimeProvider,
     idProvider: IdProvider,
     @Inject(CONSULTATION_REPOSITORIES.rescheduledAppointmentProvider)

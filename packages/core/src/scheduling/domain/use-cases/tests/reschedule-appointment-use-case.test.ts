@@ -8,7 +8,11 @@ import type {
   IdProvider,
   RescheduledAppointmentConsultationProvider,
 } from '#shared/interfaces'
-import type { AppointmentsRepository, SchedulingDatabase, SchedulesRepository } from '../../../interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
+  SchedulingDatabase,
+} from '../../../interfaces'
 import {
   AppointmentActionForbiddenError,
   AppointmentConflictError,
@@ -19,8 +23,8 @@ import {
 import { RescheduleAppointmentUseCase } from '../reschedule-appointment-use-case'
 
 describe('Reschedule Appointment Use Case', () => {
-  let appointmentsRepository: MockProxy<AppointmentsRepository>
-  let schedulesRepository: MockProxy<SchedulesRepository>
+  let appointmentsRepository: MockProxy<CalendarAppointmentsRepository>
+  let schedulesRepository: MockProxy<CalendarSchedulesRepository>
   let database: MockProxy<SchedulingDatabase>
   let identityProvider: MockProxy<CalendarIdentityProvider>
   let consultationProvider: MockProxy<CalendarConsultationProvider>
@@ -28,8 +32,8 @@ describe('Reschedule Appointment Use Case', () => {
   let idProvider: MockProxy<IdProvider>
 
   beforeEach(() => {
-    appointmentsRepository = mock<AppointmentsRepository>()
-    schedulesRepository = mock<SchedulesRepository>()
+    appointmentsRepository = mock<CalendarAppointmentsRepository>()
+    schedulesRepository = mock<CalendarSchedulesRepository>()
     database = mock<SchedulingDatabase>()
     identityProvider = mock<CalendarIdentityProvider>()
     consultationProvider = mock<CalendarConsultationProvider>()
@@ -44,7 +48,9 @@ describe('Reschedule Appointment Use Case', () => {
   it('preserves the appointment identity while moving its interval', async () => {
     const schedule = ScheduleFaker.fake({
       collaboratorId: 'lawyer-1',
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
     let appointment = AppointmentFaker.fake({
       scheduleId: schedule.id,
@@ -58,10 +64,12 @@ describe('Reschedule Appointment Use Case', () => {
       return appointment
     })
     appointmentsRepository.findById.mockImplementation(async () => appointment)
-    appointmentsRepository.replaceIfRevisionMatches.mockImplementation(async (_id, _revision, changes) => {
-      appointment = { ...appointment, ...changes }
-      return appointment
-    })
+    appointmentsRepository.replaceIfRevisionMatches.mockImplementation(
+      async (_id, _revision, changes) => {
+        appointment = { ...appointment, ...changes }
+        return appointment
+      },
+    )
     appointmentsRepository.listOverlapping.mockResolvedValue([])
     schedulesRepository.findByIdForUpdate.mockImplementation(async (scheduleId) => {
       lockOrder.push(`schedule:${scheduleId}`)
@@ -70,8 +78,12 @@ describe('Reschedule Appointment Use Case', () => {
     schedulesRepository.findById.mockResolvedValue(schedule)
     schedulesRepository.listBlockedPeriods.mockResolvedValue([])
     appointmentsRepository.listChanges.mockResolvedValue([])
-    identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
-    identityProvider.getLawyers.mockResolvedValue(new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]))
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
+    identityProvider.getLawyers.mockResolvedValue(
+      new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
+    )
     identityProvider.getCollaborators.mockResolvedValue(new Map())
     consultationProvider.getByAppointmentIds.mockResolvedValue(new Map())
 
@@ -102,12 +114,16 @@ describe('Reschedule Appointment Use Case', () => {
     const originSchedule = ScheduleFaker.fake({
       id: 'schedule-z',
       collaboratorId: 'lawyer-z',
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
     const destinationSchedule = ScheduleFaker.fake({
       id: 'schedule-a',
       collaboratorId: 'lawyer-a',
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
     let appointment = AppointmentFaker.fake({
       scheduleId: originSchedule.id,
@@ -125,14 +141,16 @@ describe('Reschedule Appointment Use Case', () => {
       lockOrder.push('appointment')
       return appointment
     })
-    appointmentsRepository.replaceIfRevisionMatches.mockImplementation(async (_id, _revision, changes) => {
-      appointment = { ...appointment, ...changes }
-      return appointment
-    })
+    appointmentsRepository.replaceIfRevisionMatches.mockImplementation(
+      async (_id, _revision, changes) => {
+        appointment = { ...appointment, ...changes }
+        return appointment
+      },
+    )
     appointmentsRepository.listOverlapping.mockResolvedValue([])
     appointmentsRepository.listChanges.mockResolvedValue([])
-    schedulesRepository.findById.mockImplementation(async (scheduleId) =>
-      schedulesById.get(scheduleId) ?? null,
+    schedulesRepository.findById.mockImplementation(
+      async (scheduleId) => schedulesById.get(scheduleId) ?? null,
     )
     schedulesRepository.findByCollaboratorId.mockResolvedValue(destinationSchedule)
     schedulesRepository.findByIdForUpdate.mockImplementation(async (scheduleId) => {
@@ -140,8 +158,12 @@ describe('Reschedule Appointment Use Case', () => {
       return schedulesById.get(scheduleId) ?? null
     })
     schedulesRepository.listBlockedPeriods.mockResolvedValue([])
-    identityProvider.getClients.mockResolvedValue(new Map([[appointment.clientId, { name: 'Client' }]]))
-    identityProvider.getLawyers.mockResolvedValue(new Map([[destinationSchedule.collaboratorId, { name: 'Lawyer', active: true }]]))
+    identityProvider.getClients.mockResolvedValue(
+      new Map([[appointment.clientId, { name: 'Client' }]]),
+    )
+    identityProvider.getLawyers.mockResolvedValue(
+      new Map([[destinationSchedule.collaboratorId, { name: 'Lawyer', active: true }]]),
+    )
     identityProvider.getCollaborators.mockResolvedValue(new Map())
     consultationProvider.getByAppointmentIds.mockResolvedValue(new Map())
 
@@ -162,7 +184,11 @@ describe('Reschedule Appointment Use Case', () => {
       lawyerId: destinationSchedule.collaboratorId,
     })
 
-    expect(lockOrder).toEqual(['schedule:schedule-a', 'schedule:schedule-z', 'appointment'])
+    expect(lockOrder).toEqual([
+      'schedule:schedule-a',
+      'schedule:schedule-z',
+      'appointment',
+    ])
     expect(schedulesRepository.findByIdForUpdate).toHaveBeenCalledTimes(2)
     expect(rescheduledConsultationProvider.syncLawyerForAppointment).toHaveBeenCalledWith(
       appointment.id,
@@ -187,10 +213,16 @@ describe('Reschedule Appointment Use Case', () => {
     }
 
     await expect(
-      useCase.execute({ ...request, actor: { collaboratorId: 'user-1', profile: 'admin', status: 'inactive' } }),
+      useCase.execute({
+        ...request,
+        actor: { collaboratorId: 'user-1', profile: 'admin', status: 'inactive' },
+      }),
     ).rejects.toBeInstanceOf(AppointmentActionForbiddenError)
     await expect(
-      useCase.execute({ ...request, actor: { collaboratorId: 'user-1', profile: 'supervisor' } }),
+      useCase.execute({
+        ...request,
+        actor: { collaboratorId: 'user-1', profile: 'supervisor' },
+      }),
     ).rejects.toBeInstanceOf(AppointmentActionForbiddenError)
     expect(database.run).not.toHaveBeenCalled()
   })
@@ -215,21 +247,27 @@ describe('Reschedule Appointment Use Case', () => {
     }
 
     appointmentsRepository.findById.mockResolvedValue(undefined)
-    await expect(useCase.execute(request)).rejects.toBeInstanceOf(AppointmentNotFoundError)
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(
+      AppointmentNotFoundError,
+    )
 
     appointmentsRepository.findById.mockResolvedValue(appointment)
     schedulesRepository.findById.mockResolvedValue(schedule)
     identityProvider.getLawyers.mockResolvedValue(
       new Map([[schedule.collaboratorId, { name: 'Lawyer', active: false }]]),
     )
-    await expect(useCase.execute(request)).rejects.toBeInstanceOf(AppointmentConflictError)
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(
+      AppointmentConflictError,
+    )
     expect(schedulesRepository.findByIdForUpdate).not.toHaveBeenCalled()
   })
 
   it('rejects stale appointment revisions and already-started consultations', async () => {
     const schedule = ScheduleFaker.fake({
       collaboratorId: 'lawyer-1',
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
     const appointment = AppointmentFaker.fake({
       scheduleId: schedule.id,
@@ -259,23 +297,35 @@ describe('Reschedule Appointment Use Case', () => {
       new Map([[schedule.collaboratorId, { name: 'Lawyer', active: true }]]),
     )
 
-    await expect(useCase.execute(request)).rejects.toBeInstanceOf(AppointmentRevisionConflictError)
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(
+      AppointmentRevisionConflictError,
+    )
 
     const currentRequest = { ...request, expectedRevision: appointment.updatedAt }
     consultationProvider.getByAppointmentIds.mockResolvedValue(
-      new Map([[
-        appointment.id,
-        { id: 'consultation-1', status: 'in_progress', startedAt: new Date('2026-08-10T12:30:00Z') },
-      ]]),
+      new Map([
+        [
+          appointment.id,
+          {
+            id: 'consultation-1',
+            status: 'in_progress',
+            startedAt: new Date('2026-08-10T12:30:00Z'),
+          },
+        ],
+      ]),
     )
-    await expect(useCase.execute(currentRequest)).rejects.toBeInstanceOf(AppointmentNotEditableError)
+    await expect(useCase.execute(currentRequest)).rejects.toBeInstanceOf(
+      AppointmentNotEditableError,
+    )
     expect(appointmentsRepository.replaceIfRevisionMatches).not.toHaveBeenCalled()
   })
 
   it('rejects a requested interval that is outside destination availability', async () => {
     const schedule = ScheduleFaker.fake({
       collaboratorId: 'lawyer-1',
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '10:00' }] },
+      ],
     })
     const appointment = AppointmentFaker.fake({
       scheduleId: schedule.id,
