@@ -14,7 +14,7 @@ updated_at: 2026-09-29
 
 Evaluation of Spec revision `1` against the current implementation.
 
-Current result: Core and Web source changes implement the own-schedule Lawyer contract; Core typecheck, Web typecheck/lint, integrated source review and all automated PR checks passed on final evidence head `4e0da493` (the preceding code head is `0e909cb6`). Local tests were not added or run; authenticated runtime/manual and role-specific screenshot evidence remain pending.
+Current result: Core and Web source changes implement the own-schedule Lawyer contract; Core typecheck, Web typecheck/lint, integrated source review and all automated PR checks passed on final evidence head `4e0da493` (the preceding code head is `0e909cb6`). Authenticated browser inspection verified the active responsible Lawyer can open rescheduling, sees a fixed lawyer and no cancellation action, and can load/select an available slot without saving. Exact viewport captures are recorded below. Another-Lawyer/Admin/Attendant comparison, wrong-owner and reassignment denial, persistence, and the final keyboard path remain unverified. Local tests were not added or run.
 
 ## Acceptance matrix
 
@@ -52,27 +52,28 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `EV-21` | UI | `pnpm --filter web check:types`, `pnpm --filter web check:lint`, and `git diff --check` after EV-20 correction | All passed (exit 0); Biome checked 620 files. No tests were run locally. | `passed` |
 | `EV-22` | Cross-layer | Read-only reviewer recheck of the EV-20 correction | Passed: production component passes role capabilities explicitly, the dialog defaults to deny, and the hook no longer reads `RestContext`. Reviewer confirmed current Lawyer/Admin distinction; no source blocker. Hook default preserves legacy Admin-like direct callers, while the production component always passes explicit capabilities. No tests/browser flows were run by the reviewer. | `passed` |
 | `EV-23` | Cross-layer | PR #190 final evidence-head CI, SHA `4e0da49328529a0b8b36812ef44870d01f035881` | Core, Server, Web, check-size and Hermes review passed. Supabase Preview skipped because no Supabase project changed. Runs: [Core](https://github.com/hms-society/hms/actions/runs/36609937052), [Server](https://github.com/hms-society/hms/actions/runs/36609937114), [Web](https://github.com/hms-society/hms/actions/runs/36609936871), [size](https://github.com/hms-society/hms/actions/runs/36609937063), [review](https://github.com/hms-society/hms/actions/runs/36609935059). | `passed` |
+| `EV-24` | Cross-layer/runtime | Authenticated browser flow against the PR worktree services on Web `:3000`, Server `:3333`, Supabase Auth `:8000` | Admin and active Lawyer password sign-ins and `/auth/complete-sign-in` returned 200; both loaded the real scheduling calendar. Lawyer details and slot lookup returned 200; selecting a real available slot enabled confirmation. Admin details showed Cancelar agendamento/Remarcar and the lawyer selector. One `/communications/summary` request returned 401 during each logout/session transition; subsequent authenticated requests succeeded. No reschedule/cancel mutation was submitted. Storage container showed unhealthy in `docker compose ps -a`, while Server health reported database/Auth/storage UP. | `passed` |
 
 ## Manual evidence
 
 | ID | Scenario | Criteria | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| `MV-01` | Lawyer own schedule vs another lawyer, slot lookup, remarcação/persistence and cancellation boundary | `CA-01`, `CA-02` | Own eligible appointment moves in same schedule; another appointment or different `lawyerId` is denied; appointment, Consultation and history remain consistent; lawyer cannot cancel. | Not executed. No authenticated session started for this task. | `pending` |
-| `MV-02` | Role-specific actions and reschedule dialog | `CA-03`, `CA-04` | Responsible Lawyer sees Remarcar only and a fixed lawyer; another Lawyer sees no write actions; Admin/Attendant retain Cancelar/Remarcar and selector. Keyboard and 390 × 844 remain usable. | Not executed. No browser assertions/screenshots run. | `pending` |
+| `MV-01` | Lawyer own schedule vs another lawyer, slot lookup, remarcação/persistence and cancellation boundary | `CA-01`, `CA-02` | Own eligible appointment moves in same schedule; another appointment or different `lawyerId` is denied; appointment, Consultation and history remain consistent; lawyer cannot cancel. | Signed in as the seeded active Lawyer and opened an eligible appointment assigned to the same lawyer. The details exposed `Remarcar` and no `Cancelar agendamento`; the real slot endpoint returned available Oct 1 slots, and selecting 08:00 enabled confirmation. Confirmation was intentionally not submitted, so persistence/history and a different lawyer's appointment were not exercised. | `pending` |
+| `MV-02` | Role-specific actions and reschedule dialog | `CA-03`, `CA-04` | Responsible Lawyer sees Remarcar only and a fixed lawyer; another Lawyer sees no write actions; Admin/Attendant retain Cancelar/Remarcar and selector. Keyboard and 390 × 844 remain usable. | Lawyer dialog showed the fixed “Advogado responsável” field, no lawyer selector, and Remarcar; `Cancelar` in its details dialog only closes it, while “Cancelar agendamento” is absent. Admin dialog showed Cancelar agendamento/Remarcar and five available lawyer options. At 390 × 844 the Lawyer form scrolled to date/slots and the footer exposed confirmation. Attendant and another Lawyer were not inspected; keyboard navigation was not fully verified. | `pending` |
 
 ## Visual evidence
 
 | ID | Surface and state | Viewport | Reference | Implementation | Differences | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `VIS-01` | Reschedule dialog for responsible Lawyer with fixed lawyer | 600 × 834 | `../../design/yVAoI.png` | — | New Lawyer state hides editable lawyer selector while retaining date, slots and confirmation; capture/inspect exact viewport. | `pending` |
-| `VIS-02` | Reschedule dialog for responsible Lawyer, narrow | 390 × 844 | `../../design/yVAoI.png` | — | Responsive fixed-lawyer state, focus, keyboard and scroll need current capture/inspection. | `pending` |
+| `VIS-01` | Reschedule dialog for responsible Lawyer with fixed lawyer | 600 × 834 | `../../design/yVAoI.png` | [`lawyer-dialog-600x834.png`](./evidence/lawyer-dialog-600x834.png) | Preserves the reference's client card, current schedule, teal section headings, form hierarchy and footer actions. Lawyer is fixed as required for this role. The seeded Sep 30 full-day block produces the empty-slot state instead of the reference's selected-slot preview; a separate real Oct 1 slot was loaded and selected during MV-01. | `passed` |
+| `VIS-02` | Reschedule dialog for responsible Lawyer, narrow | 390 × 844 | `../../design/yVAoI.png` | [`lawyer-dialog-390x844.png`](./evidence/lawyer-dialog-390x844.png) | Client/current-schedule content stacks vertically; the form scrolls to date and available slots while the confirmation action remains in the footer. The selected-slot preview is visible. Keyboard navigation remains unverified under MV-02. | `passed` |
 
 ## Rule and documentation compliance
 
 | Authority | Reference | Result | Notes |
 | --- | --- | --- | --- |
 | Rule Pack | `documentation/rules/core-package-rules.md`; `use-case-testing-rules.md`; `ui-layer-rules.md`; `code-conventions-rules.md` | `passed` | Read before implementation. No Rule or architecture change requested. |
-| Design | `documentation/design.md`; `appointments-page/design/manifest.md`; `yVAoI.png` | `pending` | Read/inventoried; role-specific visual state lacks fresh evidence. |
+| Design | `documentation/design.md`; `appointments-page/design/manifest.md`; `yVAoI.png` | `passed` | Exact 600 × 834 and 390 × 844 Lawyer-state captures are saved in this change's `evidence/` directory and compared above. |
 | PRD | Confluence `2686977`, v14 REQ-018/JN-010 | `passed` | Canonical authority updated and reread before the change Spec. |
 | SDD | `documentation/rules/sdd-rules.md`; tooling, modules and architecture docs | `passed` | Read for change workflow, ownership and validation. |
 
@@ -81,7 +82,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | ID | Classification | Source | Affected evidence | Status | Resolution |
 | --- | --- | --- | --- | --- | --- |
 | `FND-01` | Contract/authorization/UI | PRD v14 REQ-018/JN-010 versus Spec 13 baseline and current source | `EV-01`, `CA-01`–`CA-04`, `MV-01`–`MV-02`, `VIS-01`–`VIS-02` | `resolved` | Implemented and confirmed by read-only source review; CI and runtime evidence remain tracked independently. |
-| `FND-02` | Validation/environment | Task instruction disallows adding/running tests locally; authenticated-browser/manual flow not executed | `EV-06`, `MV-01`–`MV-02`, `VIS-01`–`VIS-02` | `active` | Keep runtime/manual/visual evidence explicitly pending; PR CI can supply automated checks. |
+| `FND-02` | Validation coverage | Local tests were not added or run; browser coverage is partial | `EV-06`, `MV-01`–`MV-02`, `VIS-01`–`VIS-02` | `active` | Saved real authenticated Lawyer captures and observed role-specific reschedule/slot selection. Leave wrong-owner authorization, persistence/history, other Lawyer, Admin/Attendant and full keyboard coverage pending. Logout produced one transient `/communications/summary` 401 before the next login; auth and all subsequent scheduling requests returned 200, with no continuing console/network errors. |
 | `FND-03` | Environment | Initial Core typecheck used fallback TypeScript because isolated worktree lacked dependencies | `EV-09` | `resolved` | `pnpm install --frozen-lockfile`; documented Core typecheck passed as EV-04. |
 | `FND-04` | Implementation/lint | Initial Web wiring left typed mocks incomplete and added generic role/formatting issue | `EV-10`–`EV-11`, `CA-03`–`CA-04` | `resolved` | Dialog permission props default to deny, generic role removed, formatting corrected; Web typecheck/lint pass. |
 | `FND-05` | SDD process | Implementation edits began while change Spec was still `open` | `EV-07`, `EV-12` | `resolved` | Spec set to `in_progress` at integrated checkpoint and Plan/Evaluation reconciled; no Contract change after activation. |
@@ -95,7 +96,7 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | Lesson | Source finding | Authority disposition |
 | --- | --- | --- |
 | Core must authorize against the current schedule owner, while UI separates cancellation and rescheduling capabilities. | `FND-01` | Feature-local decision in PRD v14 REQ-018/JN-010 and this Spec; no reusable Rule change. |
-| CI does not substitute for authenticated browser evidence or exact visual comparison. | `FND-02` | Existing SDD/root guidance covers this; local manual/visual evidence stays pending. |
+| CI does not substitute for authenticated browser evidence or exact visual comparison. | `FND-02` | Existing SDD/root guidance covers this; evidence is recorded by role, viewport and scenario, with uncovered cases left pending. |
 
 ## PR CI quality gate
 
@@ -122,3 +123,4 @@ Current result: Core and Web source changes implement the own-schedule Lawyer co
 | `2026-09-29 17:55` | Reviewer rechecked the capability wiring: no source blocker; current component passes explicit role permissions and the hook has no direct `RestContext` dependency. The production dialog defaults to deny; current-head CI remains pending. |
 | `2026-09-29 18:07` | PR #190 CI completed successfully on `0e909cb61957fa80f4e74c5f26a58c884e452032`: Core, Server, Web, size and Hermes review passed; Supabase Preview skipped. The earlier failing Web run was on superseded SHA `9d98bc21` and is recorded in EV-20. |
 | `2026-09-29 18:20` | PR #190 final evidence-head CI completed successfully on `4e0da49328529a0b8b36812ef44870d01f035881`: Core, Server, Web, size and Hermes review passed; Supabase Preview skipped. Authenticated runtime/manual and visual checks remain pending. |
+| `2026-09-29 19:24` | Authenticated runtime validation in the PR worktree: Admin and seeded Lawyer sign-ins succeeded; Lawyer loaded the real agenda/details and slot endpoints, saw fixed-lawyer rescheduling without a cancellation action, and selected an Oct 1 08:00 slot without submitting. Admin retained cancellation and lawyer selection. Saved 600 × 834 and 390 × 844 captures; other-role, cross-owner, persistence/history and full keyboard checks remain pending. Communications-summary 401s occurred only during logout/session transitions; subsequent authenticated requests succeeded. |
