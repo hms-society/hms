@@ -28,6 +28,14 @@ export default defineConfig({
       ],
       reportOnFailure: true,
       reportsDirectory: './coverage',
+      // Thresholds set to 0 to avoid blocking CI on legacy code while reporting coverage
+      thresholds: {
+        autoUpdate: false,
+        branches: 0,
+        functions: 0,
+        lines: 0,
+        statements: 0,
+      },
     },
     fileParallelism: false,
     globals: true,
