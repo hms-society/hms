@@ -1,7 +1,5 @@
 export interface CalendarConsultationProvider {
-  getByAppointmentIds(
-    ids: readonly string[],
-  ): Promise<
+  getByAppointmentIds(ids: readonly string[]): Promise<
     ReadonlyMap<
       string,
       {

@@ -18,7 +18,8 @@ import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
 import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
-import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
+import { Route as AgendaConsultasRouteImport } from './routes/agenda/consultas'
+import { Route as AgendaMinhaDisponibilidadeRouteImport } from './routes/agenda/minha-disponibilidade'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as CaixaDeDocumentosIndexRouteImport } from './routes/caixa-de-documentos/index'
 import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
@@ -28,7 +29,6 @@ import { Route as ClientesIndexRouteImport } from './routes/clientes/index'
 import { Route as ClientesClienteIdRouteImport } from './routes/clientes/$clienteId'
 import { Route as ColaboradoresIndexRouteImport } from './routes/colaboradores/index'
 import { Route as ColaboradoresColaboradorIdRouteImport } from './routes/colaboradores/$colaboradorId'
-import { Route as ConsultasIndexRouteImport } from './routes/consultas/index'
 import { Route as ConsultasConsultationIdRouteRouteImport } from './routes/consultas/$consultationId/route'
 import { Route as ConviteIndexRouteImport } from './routes/convite/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
@@ -101,11 +101,17 @@ const AgendaIndexRoute = AgendaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AgendaRouteRoute,
 } as any)
-const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
+const AgendaConsultasRoute = AgendaConsultasRouteImport.update({
   id: '/consultas',
   path: '/consultas',
-  getParentRoute: () => AtendimentoRouteRoute,
+  getParentRoute: () => AgendaRouteRoute,
 } as any)
+const AgendaMinhaDisponibilidadeRoute =
+  AgendaMinhaDisponibilidadeRouteImport.update({
+    id: '/minha-disponibilidade',
+    path: '/minha-disponibilidade',
+    getParentRoute: () => AgendaRouteRoute,
+  } as any)
 const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -152,11 +158,6 @@ const ColaboradoresColaboradorIdRoute =
     path: '/colaboradores/$colaboradorId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ConsultasIndexRoute = ConsultasIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ConsultasRouteRoute,
-} as any)
 const ConsultasConsultationIdRouteRoute =
   ConsultasConsultationIdRouteRouteImport.update({
     id: '/$consultationId',
@@ -313,7 +314,8 @@ export interface FileRoutesByFullPath {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/agenda/consultas': typeof AgendaConsultasRoute
+  '/agenda/minha-disponibilidade': typeof AgendaMinhaDisponibilidadeRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -329,7 +331,6 @@ export interface FileRoutesByFullPath {
   '/caixa-de-documentos/': typeof CaixaDeDocumentosIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
-  '/consultas/': typeof ConsultasIndexRoute
   '/convite/': typeof ConviteIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
@@ -356,8 +357,10 @@ export interface FileRoutesByTo {
   '/advogado': typeof AdvogadoRouteRouteWithChildren
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
+  '/consultas': typeof ConsultasRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/agenda/consultas': typeof AgendaConsultasRoute
+  '/agenda/minha-disponibilidade': typeof AgendaMinhaDisponibilidadeRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -373,7 +376,6 @@ export interface FileRoutesByTo {
   '/caixa-de-documentos': typeof CaixaDeDocumentosIndexRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
-  '/consultas': typeof ConsultasIndexRoute
   '/convite': typeof ConviteIndexRoute
   '/home': typeof HomeIndexRoute
   '/intakes': typeof IntakesIndexRoute
@@ -406,7 +408,8 @@ export interface FileRoutesById {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/atendimento/consultas': typeof AtendimentoConsultasRoute
+  '/agenda/consultas': typeof AgendaConsultasRoute
+  '/agenda/minha-disponibilidade': typeof AgendaMinhaDisponibilidadeRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
   '/cliente/mensagens': typeof ClienteMensagensRoute
@@ -422,7 +425,6 @@ export interface FileRoutesById {
   '/caixa-de-documentos/': typeof CaixaDeDocumentosIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
-  '/consultas/': typeof ConsultasIndexRoute
   '/convite/': typeof ConviteIndexRoute
   '/home/': typeof HomeIndexRoute
   '/intakes/': typeof IntakesIndexRoute
@@ -456,7 +458,8 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
-    | '/atendimento/consultas'
+    | '/agenda/consultas'
+    | '/agenda/minha-disponibilidade'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
     | '/cliente/mensagens'
@@ -472,7 +475,6 @@ export interface FileRouteTypes {
     | '/caixa-de-documentos/'
     | '/clientes/'
     | '/colaboradores/'
-    | '/consultas/'
     | '/convite/'
     | '/home/'
     | '/intakes/'
@@ -499,8 +501,10 @@ export interface FileRouteTypes {
     | '/advogado'
     | '/atendimento'
     | '/cliente'
+    | '/consultas'
     | '/advogado/comunicacao'
-    | '/atendimento/consultas'
+    | '/agenda/consultas'
+    | '/agenda/minha-disponibilidade'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
     | '/cliente/mensagens'
@@ -516,7 +520,6 @@ export interface FileRouteTypes {
     | '/caixa-de-documentos'
     | '/clientes'
     | '/colaboradores'
-    | '/consultas'
     | '/convite'
     | '/home'
     | '/intakes'
@@ -548,7 +551,8 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
-    | '/atendimento/consultas'
+    | '/agenda/consultas'
+    | '/agenda/minha-disponibilidade'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
     | '/cliente/mensagens'
@@ -564,7 +568,6 @@ export interface FileRouteTypes {
     | '/caixa-de-documentos/'
     | '/clientes/'
     | '/colaboradores/'
-    | '/consultas/'
     | '/convite/'
     | '/home/'
     | '/intakes/'
@@ -680,12 +683,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaIndexRouteImport
       parentRoute: typeof AgendaRouteRoute
     }
-    '/atendimento/consultas': {
-      id: '/atendimento/consultas'
+    '/agenda/consultas': {
+      id: '/agenda/consultas'
       path: '/consultas'
-      fullPath: '/atendimento/consultas'
-      preLoaderRoute: typeof AtendimentoConsultasRouteImport
-      parentRoute: typeof AtendimentoRouteRoute
+      fullPath: '/agenda/consultas'
+      preLoaderRoute: typeof AgendaConsultasRouteImport
+      parentRoute: typeof AgendaRouteRoute
+    }
+    '/agenda/minha-disponibilidade': {
+      id: '/agenda/minha-disponibilidade'
+      path: '/minha-disponibilidade'
+      fullPath: '/agenda/minha-disponibilidade'
+      preLoaderRoute: typeof AgendaMinhaDisponibilidadeRouteImport
+      parentRoute: typeof AgendaRouteRoute
     }
     '/atendimento/dashboard': {
       id: '/atendimento/dashboard'
@@ -749,13 +759,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/colaboradores/$colaboradorId'
       preLoaderRoute: typeof ColaboradoresColaboradorIdRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/consultas/': {
-      id: '/consultas/'
-      path: '/'
-      fullPath: '/consultas/'
-      preLoaderRoute: typeof ConsultasIndexRouteImport
-      parentRoute: typeof ConsultasRouteRoute
     }
     '/consultas/$consultationId': {
       id: '/consultas/$consultationId'
@@ -964,10 +967,14 @@ const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
 )
 
 interface AgendaRouteRouteChildren {
+  AgendaConsultasRoute: typeof AgendaConsultasRoute
+  AgendaMinhaDisponibilidadeRoute: typeof AgendaMinhaDisponibilidadeRoute
   AgendaIndexRoute: typeof AgendaIndexRoute
 }
 
 const AgendaRouteRouteChildren: AgendaRouteRouteChildren = {
+  AgendaConsultasRoute: AgendaConsultasRoute,
+  AgendaMinhaDisponibilidadeRoute: AgendaMinhaDisponibilidadeRoute,
   AgendaIndexRoute: AgendaIndexRoute,
 }
 
@@ -976,12 +983,10 @@ const AgendaRouteRouteWithChildren = AgendaRouteRoute._addFileChildren(
 )
 
 interface AtendimentoRouteRouteChildren {
-  AtendimentoConsultasRoute: typeof AtendimentoConsultasRoute
   AtendimentoDashboardRoute: typeof AtendimentoDashboardRoute
 }
 
 const AtendimentoRouteRouteChildren: AtendimentoRouteRouteChildren = {
-  AtendimentoConsultasRoute: AtendimentoConsultasRoute,
   AtendimentoDashboardRoute: AtendimentoDashboardRoute,
 }
 
@@ -1031,13 +1036,11 @@ const ConsultasConsultationIdRouteRouteWithChildren =
 
 interface ConsultasRouteRouteChildren {
   ConsultasConsultationIdRouteRoute: typeof ConsultasConsultationIdRouteRouteWithChildren
-  ConsultasIndexRoute: typeof ConsultasIndexRoute
 }
 
 const ConsultasRouteRouteChildren: ConsultasRouteRouteChildren = {
   ConsultasConsultationIdRouteRoute:
     ConsultasConsultationIdRouteRouteWithChildren,
-  ConsultasIndexRoute: ConsultasIndexRoute,
 }
 
 const ConsultasRouteRouteWithChildren = ConsultasRouteRoute._addFileChildren(

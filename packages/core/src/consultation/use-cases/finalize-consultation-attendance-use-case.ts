@@ -149,7 +149,11 @@ export class FinalizeConsultationAttendanceUseCase
   ): Promise<Consultation> {
     const current = await this.consultationsRepository.findById(request.consultationId)
     if (!current) throw new ConsultationNotFoundError()
-    this.validateConsultationAccess(current, request.collaboratorId, request.collaboratorProfile)
+    this.validateConsultationAccess(
+      current,
+      request.collaboratorId,
+      request.collaboratorProfile,
+    )
     this.validateConsultationContext(current, request)
     this.validateDecisionAndViability(request)
     const dynamicForm = await this.findDynamicForm(request.dynamicFormId)
@@ -172,38 +176,41 @@ export class FinalizeConsultationAttendanceUseCase
         )
         this.validateConsultationContext(consultation, request)
         const finalizedAt = this.datetimeProvider.now()
-        const updated = await this.consultationsRepository.replace(request.consultationId, {
-          legalAreaId: request.legalAreaId,
-          legalTopicId: request.legalTopicId,
-          primaryLegalQuestion: request.primaryLegalQuestion.trim(),
-          guidanceProvided: request.guidanceProvided.trim(),
-          notes: request.notes?.trim() || undefined,
-          viability: request.viability.trim(),
-          decision: request.decision.trim(),
-          relevantFacts: request.relevantFacts?.map((fact) => ({
-            id: fact.id ?? this.idProvider.generate(),
-            description: fact.description.trim(),
-            ...(fact.date ? { occurredOn: parseFactDate(fact.date) } : {}),
-          })),
-          potentialLegalRequests: request.potentialLegalRequests?.map((claim) => ({
-            id: this.idProvider.generate(),
-            description: [claim.title.trim(), claim.summary?.trim()]
-              .filter(Boolean)
-              .join(' — '),
-          })),
-          dynamicFormId: request.dynamicFormId ?? undefined,
-          dynamicFormAnswers: [...(request.answers ?? [])],
-          dynamicFormSnapshot: dynamicForm
-            ? {
-                dynamicFormId: dynamicForm.id,
-                name: dynamicForm.name,
-                description: dynamicForm.description,
-                fields: dynamicForm.fields,
-              }
-            : undefined,
-          attendanceFinalizedAt: finalizedAt,
-          attendanceFinalizedByCollaboratorId: request.collaboratorId,
-        })
+        const updated = await this.consultationsRepository.replace(
+          request.consultationId,
+          {
+            legalAreaId: request.legalAreaId,
+            legalTopicId: request.legalTopicId,
+            primaryLegalQuestion: request.primaryLegalQuestion.trim(),
+            guidanceProvided: request.guidanceProvided.trim(),
+            notes: request.notes?.trim() || undefined,
+            viability: request.viability.trim(),
+            decision: request.decision.trim(),
+            relevantFacts: request.relevantFacts?.map((fact) => ({
+              id: fact.id ?? this.idProvider.generate(),
+              description: fact.description.trim(),
+              ...(fact.date ? { occurredOn: parseFactDate(fact.date) } : {}),
+            })),
+            potentialLegalRequests: request.potentialLegalRequests?.map((claim) => ({
+              id: this.idProvider.generate(),
+              description: [claim.title.trim(), claim.summary?.trim()]
+                .filter(Boolean)
+                .join(' — '),
+            })),
+            dynamicFormId: request.dynamicFormId ?? undefined,
+            dynamicFormAnswers: [...(request.answers ?? [])],
+            dynamicFormSnapshot: dynamicForm
+              ? {
+                  dynamicFormId: dynamicForm.id,
+                  name: dynamicForm.name,
+                  description: dynamicForm.description,
+                  fields: dynamicForm.fields,
+                }
+              : undefined,
+            attendanceFinalizedAt: finalizedAt,
+            attendanceFinalizedByCollaboratorId: request.collaboratorId,
+          },
+        )
         if (!updated) throw new ConsultationNotFoundError()
         if (
           consultation.legalAreaId !== request.legalAreaId ||

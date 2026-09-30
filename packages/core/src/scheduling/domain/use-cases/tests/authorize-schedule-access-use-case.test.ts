@@ -29,7 +29,10 @@ describe('Authorize Schedule Access Use Case', () => {
   it('rejects a write by a supervisor', async () => {
     await expect(
       new AuthorizeScheduleAccessUseCase(schedulesRepository).execute({
-        actor: { collaboratorId: 'supervisor-1', profile: CollaboratorProfile.Supervisor },
+        actor: {
+          collaboratorId: 'supervisor-1',
+          profile: CollaboratorProfile.Supervisor,
+        },
         collaboratorId: 'lawyer-1',
         operation: 'write',
       }),

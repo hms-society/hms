@@ -12,7 +12,10 @@ import type {
   DatetimeProvider,
   IdProvider,
 } from '#shared/interfaces'
-import type { ConsultationOutboxRepository, ConsultationsRepository } from '../../interfaces'
+import type {
+  ConsultationOutboxRepository,
+  ConsultationsRepository,
+} from '../../interfaces'
 import { CompleteConsultationUseCase } from '../complete-consultation-use-case'
 
 describe('Complete Consultation Use Case', () => {

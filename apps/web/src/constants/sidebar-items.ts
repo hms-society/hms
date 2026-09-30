@@ -24,17 +24,18 @@ const LAWYER_SIDEBAR_ITEMS: SidebarItem[] = [
     icon: 'message-square',
   },
   { label: 'Caixa de Documentos', route: 'documentInbox', icon: 'inbox' },
-  { label: 'Minha Agenda', route: 'lawyerSchedule', icon: 'calendar' },
+  { label: 'Agenda', route: 'appointmentsCalendar', icon: 'calendar' },
   { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
 const ATTENDANT_SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Intakes', route: 'intakes', icon: 'file-text' },
-  { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+  { label: 'Agenda', route: 'appointmentsCalendar', icon: 'calendar' },
   { label: 'Clientes', route: 'clients', icon: 'users' },
 ]
 
 const PARALEGAL_SIDEBAR_ITEMS: SidebarItem[] = [
+  { label: 'Agenda', route: 'appointmentsCalendar', icon: 'calendar' },
   { label: 'Meus Casos', route: 'paralegalCases', icon: 'briefcase' },
   { label: 'Documentos', route: 'paralegalDocuments', icon: 'file-text' },
   {
@@ -54,7 +55,11 @@ export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Admin]: [
     { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
-    { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+    {
+      label: 'Agenda',
+      route: 'appointmentsCalendar',
+      icon: 'calendar',
+    },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
     { label: 'Clientes', route: 'clients', icon: 'users' },
     { label: 'Áreas e Demandas', route: 'legalCatalogAdmin', icon: 'scale' },
