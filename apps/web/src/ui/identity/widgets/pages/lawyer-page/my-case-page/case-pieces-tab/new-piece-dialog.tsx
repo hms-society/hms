@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
@@ -22,6 +21,7 @@ export type NewPieceDialogProps = {
   caseId?: string
   onOpenChange: (open: boolean) => void
   onGenerated: () => void
+  onOpenDocument?: (destination: 'editor' | 'review') => void
 }
 
 type Step = 1 | 2 | 3
@@ -31,9 +31,9 @@ export function NewPieceDialog({
   caseId,
   onOpenChange,
   onGenerated,
+  onOpenDocument,
 }: NewPieceDialogProps) {
   const queryClient = useQueryClient()
-  const { navigateTo } = useNavigation()
   const { caseDocumentProductionService } = useRestContext()
   const [step, setStep] = useState<Step>(1)
   const [selectedModelId, setSelectedModelId] = useState('')
@@ -215,6 +215,7 @@ export function NewPieceDialog({
           <GenerationStep
             complete={isGenerationComplete}
             failed={isGenerationFailed}
+            canOpenDocument={Boolean(onOpenDocument)}
             versionNumber={generationQuery.data?.versions.reduce(
               (latest, candidate) => Math.max(latest, candidate.versionNumber),
               0,
@@ -255,7 +256,7 @@ export function NewPieceDialog({
                 {generationMutation.isPending ? 'Enviando...' : 'Gerar minuta com IA'}
               </Button>
             ) : null}
-            {step === 3 && isGenerationComplete && generation ? (
+            {step === 3 && isGenerationComplete && generation && onOpenDocument ? (
               <div className='flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap'>
                 <Button variant='outline' onClick={() => handleClose(false)}>
                   Voltar para peças
@@ -275,15 +276,10 @@ export function NewPieceDialog({
   )
 
   function openGeneratedDocument(destination: 'editor' | 'review') {
-    if (!generation || !caseId) return
+    if (!generation || !caseId || !onOpenDocument) return
     handleClose(false)
     onGenerated()
-    void navigateTo(
-      destination === 'editor' ? 'lawyerCasePieceEditor' : 'lawyerCasePieceReview',
-      {
-        params: { caseId, documentId: generation.documentId },
-      },
-    )
+    onOpenDocument(destination)
   }
 }
 
@@ -549,10 +545,12 @@ function PreparationStep({
 function GenerationStep({
   complete,
   failed,
+  canOpenDocument,
   versionNumber,
 }: {
   complete: boolean
   failed: boolean
+  canOpenDocument: boolean
   versionNumber?: number
 }) {
   return (
@@ -573,7 +571,7 @@ function GenerationStep({
         </h3>
         <p className='mt-1 text-sm text-muted-foreground'>
           {complete
-            ? `A versão ${versionNumber ? `v${versionNumber}` : 'atual'} foi criada. Escolha abrir no editor ou na revisão técnica.`
+            ? `A versão ${versionNumber ? `v${versionNumber}` : 'atual'} foi criada.${canOpenDocument ? ' Escolha abrir no editor ou na revisão técnica.' : ''}`
             : failed
               ? 'Você pode fechar esta janela e verificar o estado na lista de peças.'
               : 'A geração continua em segundo plano; você pode fechar esta janela e voltar depois.'}

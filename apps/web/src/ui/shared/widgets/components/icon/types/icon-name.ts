@@ -8,7 +8,6 @@ export type IconName =
   | 'clipboard-list'
   | 'file-text'
   | 'folder-open'
-  | 'folder-open'
   | 'layout-dashboard'
   | 'inbox'
   | 'briefcase-business'
