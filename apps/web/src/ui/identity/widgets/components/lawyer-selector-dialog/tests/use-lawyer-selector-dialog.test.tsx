@@ -77,6 +77,7 @@ describe('useLawyerSelectorDialog', () => {
           open: true,
           onOpenChange: vi.fn(),
           onSelect: vi.fn(),
+          description: 'Busca por advogado.',
         }),
       { wrapper: createWrapper() },
     )
