@@ -18,11 +18,16 @@ export function useRescheduleAppointmentDialog(
   detail: AppointmentDetailsView | undefined,
   onSuccess: () => void,
   onReloadDetail?: () => Promise<unknown>,
+  permissions: { canReschedule: boolean; canSelectLawyer: boolean } = {
+    canReschedule: true,
+    canSelectLawyer: true,
+  },
 ) {
   const initialDate = addCivilDays(getTodayInSaoPaulo(), 1)
   const form = useForm<RescheduleForm>({ defaultValues: { date: initialDate } })
   const date = form.watch('date')
   const currentLawyerId = detail?.lawyerId
+  const { canReschedule, canSelectLawyer } = permissions
   const [selectedLawyerId, setSelectedLawyerId] = useState(detail?.lawyerId ?? '')
   const [selectedSlot, setSelectedSlot] = useState<string>()
   const [lawyerPage, setLawyerPage] = useState(1)
@@ -44,9 +49,9 @@ export function useRescheduleAppointmentDialog(
     pageSize: 100,
   })
   const slotsQuery = useRescheduleSlots(
-    open ? detail?.appointmentId : undefined,
+    open && canReschedule ? detail?.appointmentId : undefined,
     date,
-    selectedLawyerId || undefined,
+    (canSelectLawyer ? selectedLawyerId : currentLawyerId) || undefined,
   )
   const selectedSlotDetails = slotsQuery.data?.find(
     (slot) => slot.startsAt === selectedSlot,
@@ -91,6 +96,8 @@ export function useRescheduleAppointmentDialog(
   }
 
   function handleLawyerChange(lawyerId: string) {
+    if (!canSelectLawyer) return
+
     setSelectedLawyerId(lawyerId)
     setSelectedSlot(undefined)
     setError(null)
@@ -167,7 +174,8 @@ export function useRescheduleAppointmentDialog(
   }
 
   async function handleConfirm(values: RescheduleForm) {
-    if (!detail || !selectedSlot || !selectedLawyerId) return
+    const targetLawyerId = canSelectLawyer ? selectedLawyerId : currentLawyerId
+    if (!canReschedule || !detail || !selectedSlot || !targetLawyerId) return
 
     setError(null)
     try {
@@ -175,7 +183,7 @@ export function useRescheduleAppointmentDialog(
         appointmentId: detail.appointmentId,
         expectedRevision: detail.updatedAt,
         startsAt: selectedSlot,
-        lawyerId: selectedLawyerId,
+        lawyerId: targetLawyerId,
       })
       onSuccess()
     } catch (requestError) {
