@@ -15,7 +15,14 @@ export class SupabaseFileStorageProvider implements FileStorageProvider {
   async save(input: SaveFileInput): Promise<File> {
     const id = randomUUID()
     await this.storage.upload(input.filePath, input.content, input.contentType)
-    const file = { id, filePath: input.filePath, fileName: input.fileName, contentType: input.contentType, sizeInBytes: input.sizeInBytes, createdAt: new Date() }
+    const file = {
+      id,
+      filePath: input.filePath,
+      fileName: input.fileName,
+      contentType: input.contentType,
+      sizeInBytes: input.sizeInBytes,
+      createdAt: new Date(),
+    }
     this.files.set(id, file)
     return file
   }
