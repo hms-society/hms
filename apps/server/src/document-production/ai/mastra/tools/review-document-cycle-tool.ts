@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { FindDocumentPendingMarkersUseCase } from '@hms/core/document-production/use-cases'
 import { z } from 'zod'
+import { documentTemplateContentSchema } from '@hms/validation/document-production'
 
 import {
   DocumentReviewerAgent,
@@ -17,6 +18,18 @@ import {
 
 type ReviewCycleInput = z.infer<typeof documentReviewCycleInputSchema>
 type Draft = z.infer<typeof documentDraftSchema>
+
+const writerResponseSchema = z.union([
+  documentTemplateContentSchema,
+  z
+    .object({
+      content: z.union([
+        documentTemplateContentSchema,
+        documentTemplateContentSchema.shape.content.unwrap(),
+      ]),
+    })
+    .strict(),
+])
 
 @Injectable()
 export class ReviewDocumentCycleTool {
@@ -43,17 +56,23 @@ export class ReviewDocumentCycleTool {
         const writerResponse = await this.writerAgent.generate(
           this.createWriterPrompt(input),
           {
-            structuredOutput: { schema: documentDraftSchema },
+            structuredOutput: {
+              schema: writerResponseSchema,
+              jsonPromptInjection: true,
+              errorStrategy: 'strict',
+            },
           },
         )
-        const draft = writerResponse.object
+        const writerOutput = writerResponse.object
 
-        if (!draft) {
+        if (!writerOutput) {
           throw new AppError(
             'O agente redator não retornou um documento válido.',
             'Erro de Geração Documental',
           )
         }
+
+        const draft = this.normalizeWriterOutput(writerOutput)
 
         const pendingMarkers = await this.findDocumentPendingMarkersUseCase.execute({
           content: draft.content,
@@ -81,6 +100,15 @@ export class ReviewDocumentCycleTool {
           pendingMarkers,
         }
       },
+    })
+  }
+
+  private normalizeWriterOutput(output: z.infer<typeof writerResponseSchema>): Draft {
+    if ('type' in output) return documentDraftSchema.parse({ content: output })
+    return documentDraftSchema.parse({
+      content: Array.isArray(output.content)
+        ? { type: 'doc', content: output.content }
+        : output.content,
     })
   }
 

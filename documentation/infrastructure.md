@@ -91,6 +91,22 @@ Meta Cloud API webhook
 ### AI
 
 * **Mastra AI:** AI orchestration layer for agents, tools, and intelligent flows.
+* **Local document drafting:** Writer and reviewer use OpenRouter free models
+  through Mastra's native fallback array, in order:
+  `qwen/qwen3.8-27b:free`, `nvidia/nemotron-3-super-120b-a12b:free`,
+  `dots-studio/dots-3-note-preview:free`, `liquid/lfm-2.5-2.6b:free`.
+  Each entry has `maxRetries: 0`, so failed calls advance to the next model.
+  `OPENROUTER_API_KEY` is required locally for drafting. Document Engine extraction
+  and organization continue to use Ollama locally; staging retains the per-agent
+  DeepSeek models below.
+* **Production document drafting and placeholder generation:** The writer uses
+  Mastra native fallbacks in this order: DeepSeek V4.1 Flash through DeepInfra,
+  CoreWeave, then NextBit; GPT-6 Luna through Azure, then OpenAI. Each route is
+  pinned using OpenRouter `provider.only` with `allow_fallbacks: false` and
+  `require_parameters: true`, with no per-route retries. Exhausting the five
+  routes fails the call. The reviewer uses the same providers with the model
+  groups reversed: GPT-6 Luna through Azure, then OpenAI, followed by DeepSeek
+  V4.1 Flash through DeepInfra, CoreWeave, then NextBit.
 * **DeepSeek V4:** Main language model for AI agents. Two variants are available:
 
   * **DeepSeek V4-Pro:** 1.6T total parameters, 49B active per token. Used for tasks requiring complex reasoning, assisted legal drafting, and document analysis.
