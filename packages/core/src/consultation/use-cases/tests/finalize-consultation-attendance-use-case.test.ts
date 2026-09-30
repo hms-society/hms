@@ -11,11 +11,13 @@ import {
 import { CollaboratorProfile } from '#identity/domain/structures'
 import type { ConsultationsRepository } from '#consultation/interfaces'
 import type {
+  AppointmentWriteTransactionProvider,
   Broker,
   DatetimeProvider,
   DynamicFormsRepository,
   IdProvider,
 } from '#shared/interfaces'
+import type { ConsultationOutboxRepository } from '../../interfaces'
 
 import type { FinalizeConsultationAttendanceRequest } from '../finalize-consultation-attendance-use-case'
 import { FinalizeConsultationAttendanceUseCase } from '../finalize-consultation-attendance-use-case'
@@ -26,6 +28,8 @@ describe('Finalize Consultation Attendance Use Case', () => {
   let datetimeProvider: MockProxy<DatetimeProvider>
   let idProvider: MockProxy<IdProvider>
   let broker: MockProxy<Broker>
+  let appointmentTransactionProvider: MockProxy<AppointmentWriteTransactionProvider>
+  let outboxRepository: MockProxy<ConsultationOutboxRepository>
 
   beforeEach(() => {
     consultationsRepository = mock<ConsultationsRepository>()
@@ -33,6 +37,8 @@ describe('Finalize Consultation Attendance Use Case', () => {
     datetimeProvider = mock<DatetimeProvider>()
     idProvider = mock<IdProvider>()
     broker = mock<Broker>()
+    appointmentTransactionProvider = mock<AppointmentWriteTransactionProvider>()
+    outboxRepository = mock<ConsultationOutboxRepository>()
   })
 
   it('rejects closing without a contract unless the consultation is not viable', async () => {
@@ -144,6 +150,51 @@ describe('Finalize Consultation Attendance Use Case', () => {
           occurredAt,
         }),
       }),
+    )
+  })
+
+  it('persists a UUID from the injected provider for the context outbox event', async () => {
+    const consultation = makePendingConsultation()
+    const updatedConsultation = {
+      ...consultation,
+      legalAreaId: '11111111-1111-4111-8111-111111111111',
+      legalTopicId: '22222222-2222-4222-8222-222222222222',
+    }
+    const finalizedAt = new Date('2026-08-19T12:00:00.000Z')
+    const outboxId = '33333333-3333-4333-8333-333333333333'
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    consultationsRepository.replace.mockResolvedValue(updatedConsultation)
+    datetimeProvider.now.mockReturnValue(finalizedAt)
+    idProvider.generate.mockReturnValue(outboxId)
+    outboxRepository.add.mockImplementation(async (event) => event)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_appointmentId, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+
+    await new FinalizeConsultationAttendanceUseCase(
+      consultationsRepository,
+      dynamicFormsRepository,
+      datetimeProvider,
+      idProvider,
+      broker,
+      appointmentTransactionProvider,
+      outboxRepository,
+    ).execute({
+      ...makeRequest(consultation),
+      legalAreaId: updatedConsultation.legalAreaId,
+      legalTopicId: updatedConsultation.legalTopicId,
+    })
+
+    expect(outboxRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: outboxId,
+        consultationId: consultation.id,
+        occurredAt: finalizedAt,
+      }),
+    )
+    expect(outboxRepository.add).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: `${consultation.id}:${finalizedAt.toISOString()}` }),
     )
   })
 

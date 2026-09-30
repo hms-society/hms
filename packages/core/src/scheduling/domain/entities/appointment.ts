@@ -1,5 +1,5 @@
 import type { Entity } from '#shared/domain/entities/entity'
-import type { AppointmentStatus } from '../structures'
+import type { AppointmentStatus } from '../structures/appointment-status'
 
 export type Appointment = Entity & {
   intakeId: string
