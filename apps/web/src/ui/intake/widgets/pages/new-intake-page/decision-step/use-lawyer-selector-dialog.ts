@@ -26,8 +26,6 @@ export type LawyerSelectorDialogProps = {
   onOpenChange: (open: boolean) => void
   selectedLawyer?: string
   onSelect: (lawyer: LawyerOption) => void
-  description: string
-  helperText?: string
 }
 
 export function useLawyerSelectorDialog({
@@ -43,7 +41,7 @@ export function useLawyerSelectorDialog({
   const [topic, setTopic] = useState('all')
 
   const lawyersQuery = useInfiniteQuery({
-    queryKey: ['identity', 'lawyers', { search }],
+    queryKey: ['intake-lawyers', { search }],
     queryFn: async function fetchLawyers({ pageParam }) {
       const response = await identityService.listLawyers({
         page: pageParam,

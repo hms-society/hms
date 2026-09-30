@@ -32,7 +32,7 @@ import {
 
 import type { StepRef } from '../demand-step'
 import { useDecisionStep } from '@/ui/intake/widgets/pages/new-intake-page/decision-step/use-decision-step'
-import { LawyerSelectorDialog } from '@/ui/identity/widgets/components/lawyer-selector-dialog'
+import { LawyerSelectorDialog } from './lawyer-selector-dialog'
 
 const CANAIS_VIRTUAIS = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
@@ -412,8 +412,6 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
         onOpenChange={setIsLawyerDialogOpen}
         selectedLawyer={selectedLawyer}
         onSelect={handleLawyerChange}
-        description='Busque por nome ou refine pelos campos jurídicos.'
-        helperText='Os horários serão recalculados para o advogado selecionado.'
       />
     </div>
   )
