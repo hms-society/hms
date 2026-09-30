@@ -43,7 +43,7 @@ export const envSchema = z.object({
   NGROK_DOMAIN: z.string().optional(),
   SUPABASE_STORAGE_BUCKET: z.preprocess(
     (value) => (value === '' ? undefined : value),
-    z.string().default('documents'),
+    z.string().default('hms-bucket'),
   ),
 })
 

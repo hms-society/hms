@@ -303,6 +303,7 @@ authorization.
 | Publish, run PR CI, and close | [`conclude-spec-prompt.md`](../prompts/conclude-spec-prompt.md) |
 | Create or update the delivery PR | [`create-pr-prompt.md`](../prompts/create-pr-prompt.md) |
 | Resolve later PR comments | [`resolve-pr-pendencies.md`](../prompts/resolve-pr-pendencies.md) |
+| Resolve conflicts in an in-progress merge | [`resolve-merge-conflicts-prompt.md`](../prompts/resolve-merge-conflicts-prompt.md) |
 
 Files under `documentation/prompts/` are canonical. `scripts/sync-commands.mjs` synchronizes
 their generated command and skill representations.

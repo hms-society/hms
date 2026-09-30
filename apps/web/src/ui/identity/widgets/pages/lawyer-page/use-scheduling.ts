@@ -2,22 +2,26 @@ import { useQuery } from '@tanstack/react-query'
 
 import { AppError } from '@hms/core/shared/domain/errors'
 
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export function useSchedule() {
   const { user } = useAuthContext()
   const { schedulingService } = useRestContext()
+  const { currentCollaborator, currentCollaboratorError, isLoadingCurrentCollaborator } =
+    useCurrentCollaboratorQuery()
+  const collaboratorId = currentCollaborator?.collaboratorId
 
   const query = useQuery({
-    queryKey: ['schedule', user?.id],
-    enabled: !!user,
+    queryKey: ['schedule', collaboratorId],
+    enabled: !!user && !!collaboratorId,
     queryFn: async () => {
-      if (!user) {
-        throw new AppError('Authenticated user is required')
+      if (!collaboratorId) {
+        throw new AppError('Current collaborator is required')
       }
 
-      const response = await schedulingService.getByCollaborator(user.id)
+      const response = await schedulingService.getByCollaborator(collaboratorId)
 
       if (response.isFailure) {
         response.throwError()
@@ -29,9 +33,9 @@ export function useSchedule() {
 
   return {
     schedule: query.data,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
+    isLoading: isLoadingCurrentCollaborator || query.isLoading,
+    isError: Boolean(currentCollaboratorError) || query.isError,
+    error: currentCollaboratorError ?? query.error,
     refetch: query.refetch,
   }
 }

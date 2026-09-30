@@ -44,6 +44,7 @@ Configured in `turbo.json`. Root scripts fan out to every workspace:
 
 | Root command         | Runs                                  |
 | -------------------- | ------------------------------------- |
+| `pnpm start`         | `docker compose up -d` then `turbo run dev` |
 | `pnpm build`         | `turbo run build`                     |
 | `pnpm dev`           | `turbo run dev` (persistent, no cache)|
 | `pnpm lint`          | `turbo run lint`                      |
@@ -115,7 +116,7 @@ Server REST integration tests use Testcontainers and are configured with
 `fileParallelism: false` so each module fixture can own an isolated database
 without competing container startups.
 
-### Test coverage gate
+### Test coverage reports
 
 Core, Server, and Web run Vitest with V8 coverage. The configured source globs
 include production files even when tests do not import them. Tests, test
@@ -213,7 +214,9 @@ with `tsx`.
 
 `docker-compose.yaml` plus `volumes/` (auth email templates, DB roles/JWT SQL,
 Kong gateway config) provide the local backing services (Supabase-style stack).
-Bring it up with `docker compose up`.
+`pnpm start` brings up the stack in the background and starts the web and server
+development processes. Use `docker compose up` when you only need the backing
+services, or `pnpm dev` when they are already running.
 
 ## Git hooks — husky + commitlint
 

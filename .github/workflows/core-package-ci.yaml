@@ -72,7 +72,7 @@ jobs:
         run: pnpm --filter @hms/core check-types
 
       - name: Run tests with coverage
-        id: coverage
+        id: tests
         if: steps.scope.outputs.relevant == 'true'
         run: pnpm --filter @hms/core test:coverage
 
@@ -80,7 +80,7 @@ jobs:
         if: always() && steps.scope.outputs.relevant == 'true' && hashFiles('packages/core/coverage/coverage-summary.json') != ''
         run: node scripts/write-coverage-report.mjs core packages/core/coverage/coverage-summary.json packages/core/coverage/coverage-comment.md
         env:
-          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
 
       - name: Publish Core coverage on pull request
         if: always() && steps.scope.outputs.relevant == 'true' && github.event.pull_request.head.repo.full_name == github.repository && hashFiles('packages/core/coverage/coverage-comment.md') != ''
