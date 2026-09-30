@@ -14,6 +14,8 @@ type PendingGeneration = {
   readonly attemptId: string
   readonly baselineVersionId?: string
   readonly baselineVersionNumber?: number
+  readonly baselineGenerationStatus?: ConsultationDocumentListItem['generationStatus']
+  readonly hasObservedActiveGeneration?: boolean
   readonly startedAt: number
 }
 
@@ -35,6 +37,24 @@ function hasFinishedGeneration(document: ConsultationDocumentListItem | undefine
     document?.generationStatus === 'completed' ||
     document?.generationStatus === 'failed' ||
     document?.generationStatus === 'cancelled'
+  )
+}
+
+function isGenerationActive(document: ConsultationDocumentListItem | undefined) {
+  return (
+    document?.generationStatus === 'pending' || document?.generationStatus === 'running'
+  )
+}
+
+function hasFinishedCurrentGeneration(
+  document: ConsultationDocumentListItem | undefined,
+  pending: PendingGeneration,
+) {
+  return (
+    hasNewerVersion(document, pending) ||
+    (hasFinishedGeneration(document) &&
+      (pending.hasObservedActiveGeneration ||
+        document?.generationStatus !== pending.baselineGenerationStatus))
   )
 }
 
@@ -109,6 +129,7 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
           attemptId,
           baselineVersionId: latest?.id,
           baselineVersionNumber: latest?.versionNumber,
+          baselineGenerationStatus: current?.generationStatus,
           startedAt: Date.now(),
         },
       }))
@@ -166,7 +187,7 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
       const document = documents?.find((item) => item.id === documentId)
       return (
         current?.attemptId === context.attemptId &&
-        (hasFinishedGeneration(document) || hasNewerVersion(document, current))
+        hasFinishedCurrentGeneration(document, current)
       )
     })
     const remaining = context.documentIds.filter((id) => !completed.includes(id))
@@ -176,6 +197,13 @@ export function useGenerateConsultationDocumentAction(consultationId?: string) {
       const next = { ...entries }
       for (const documentId of completed) {
         if (next[documentId]?.attemptId === context.attemptId) delete next[documentId]
+      }
+      for (const documentId of remaining) {
+        const document = documents?.find((item) => item.id === documentId)
+        const entry = next[documentId]
+        if (entry?.attemptId === context.attemptId && isGenerationActive(document)) {
+          next[documentId] = { ...entry, hasObservedActiveGeneration: true }
+        }
       }
       return next
     })

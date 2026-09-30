@@ -6,7 +6,11 @@ import {
   CollaboratorProfile,
   type CollaboratorProfile as CollaboratorProfileValue,
 } from '../../identity/domain/structures'
-import { DocumentVersionConflictError } from '../../document-production/domain/errors'
+import {
+  DocumentVersionConflictError,
+  DocumentVersionPendingMarkersError,
+} from '../../document-production/domain/errors'
+import { FindDocumentPendingMarkersUseCase } from '../../document-production/use-cases/find-document-pending-markers-use-case'
 import type {
   DocumentPackagesRepository,
   DocumentVersionsRepository,
@@ -37,6 +41,8 @@ type Request = {
 export class ReviewConsultationDocumentVersionUseCase
   implements UseCase<Request, DocumentVersion>
 {
+  private readonly findPendingMarkersUseCase = new FindDocumentPendingMarkersUseCase()
+
   constructor(
     private readonly consultationsRepository: ConsultationsRepository,
     private readonly documentPackagesRepository: DocumentPackagesRepository,
@@ -76,6 +82,15 @@ export class ReviewConsultationDocumentVersionUseCase
     const version = await this.versionsRepository.findById(request.documentVersionId)
     if (!version || version.documentId !== request.documentId) {
       throw new ConsultationDocumentNotFoundError()
+    }
+
+    if (request.decision === DocumentVersionStatus.Approved) {
+      const markersInContent = await this.findPendingMarkersUseCase.execute({
+        content: version.content,
+      })
+      if (version.pendingMarkers.length > 0 || markersInContent.length > 0) {
+        throw new DocumentVersionPendingMarkersError()
+      }
     }
 
     const reviewed = await this.versionsRepository.review(

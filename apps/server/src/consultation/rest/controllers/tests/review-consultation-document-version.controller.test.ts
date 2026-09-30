@@ -55,4 +55,31 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
       .send({ decision: 'rejected' })
       .expect(400)
   })
+
+  it('blocks approval with pending markers and preserves the version for rejection', async () => {
+    const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const consultation = await fixture.seedConsultation(
+      ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
+    )
+    const document = await fixture.seedDocument(consultation.id)
+    const version = await fixture.seedDocumentVersion(document.id, collaborator.id, {
+      pendingMarkers: [{ marker: '{cliente_cpf}' }],
+    })
+    const route = `/consultations/${consultation.id}/documents/${document.id}/versions/${version.id}/review`
+    const response = await request(fixture.app.getHttpServer())
+      .patch(route)
+      .set('Authorization', fixture.authenticateAs(user))
+      .send({ decision: 'approved' })
+      .expect(409)
+    expect(response.body.message).toContain('Resolva as pendências')
+    expect(await fixture.documentVersionsRepository.findById(version.id)).toMatchObject({
+      status: 'in_review',
+      pendingMarkers: [{ marker: '{cliente_cpf}' }],
+    })
+    await request(fixture.app.getHttpServer())
+      .patch(route)
+      .set('Authorization', fixture.authenticateAs(user))
+      .send({ decision: 'rejected', rejectionReason: 'CPF pendente.' })
+      .expect(200)
+  })
 })
