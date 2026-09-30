@@ -1,26 +1,27 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useSchedule } from './use-scheduling'
 
 export function useConsultation() {
-  const { user } = useAuthContext()
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
   const { schedulingService } = useRestContext()
   const queryClient = useQueryClient()
+  const collaboratorId = currentCollaborator?.collaboratorId
 
   const { schedule, isLoading, isError, error } = useSchedule()
   const [duration, setDuration] = useState<'30min' | '45min' | '1h'>('45min')
 
   const getOrCreateScheduleId = async (): Promise<string> => {
-    if (!user) throw new Error('Usuário não autenticado')
+    if (!collaboratorId) throw new Error('Colaborador não identificado')
 
     let scheduleId =
       schedule?.id || (schedule as any)?._id || (schedule as any)?.schedule?.id
 
     if (!scheduleId) {
       const createResponse = await schedulingService.createSchedule({
-        collaboratorId: user.id,
+        collaboratorId,
         defaultDurationMinutes: 45,
         weeklyAvailability: [],
       })
@@ -52,7 +53,7 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['schedule', collaboratorId] })
     },
   })
 
@@ -72,7 +73,7 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['schedule', collaboratorId] })
     },
   })
 
@@ -100,7 +101,7 @@ export function useConsultation() {
       return response.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['schedule', collaboratorId] })
     },
   })
   const removeBlockMutation = useMutation({
@@ -116,7 +117,7 @@ export function useConsultation() {
       return response?.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedule', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['schedule', collaboratorId] })
     },
   })
 
