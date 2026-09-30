@@ -1,3 +1,4 @@
+export * from './consultation-appointment-cancelled-error'
 export * from './consultation-document-access-denied-error'
 export * from './consultation-document-not-found-error'
 export * from './consultation-document-selection-removal-error'

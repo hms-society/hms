@@ -171,6 +171,19 @@ domain, and implement exactly the semantics declared by the core contract.
 Repositories may compose queries and enforce persistence concerns such as
 optimistic version matching, but they must not decide business policy.
 
+### Timestamp revisions must preserve database precision and ordering
+
+Do not compare a timestamp revision serialized at millisecond precision to a
+PostgreSQL `timestamp` value using exact equality when the database value can
+retain sub-millisecond precision. Match the precision exposed by the API (for
+example, a half-open one-millisecond interval for a millisecond token), while
+still rejecting genuinely stale revisions.
+
+When the contract requires a strictly increasing timestamp revision, do not
+write the injected clock value directly: derive the new value as at least one
+millisecond after the previous revision when the clock is equal or earlier.
+Test both sub-millisecond persisted values and equal/backward clock values.
+
 ## Repositories do not receive tests
 
 Do not create test files for repository implementations, mappers, Drizzle models,
