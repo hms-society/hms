@@ -40,6 +40,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify staging Auth before reset
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_STG }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_STG }}
+          HMS_USER_SEED_PASSWORD: ${{ secrets.HMS_USER_SEED_PASSWORD_STG }}
+        run: pnpm --filter server exec node scripts/check-seed-auth.mjs
+
       - name: Reset staging database
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STG }}

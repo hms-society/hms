@@ -158,7 +158,8 @@ the comment.
 - `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
   then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
   merged PR into `main`.
-- `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations,
+- `.github/workflows/server-app-staging-cd.yml` checks Auth admin user listing and
+  required seed credentials before resetting the staging schemas, applies Drizzle migrations,
   resets and seeds staging, and then triggers the server staging Coolify webhook
   with `COOLIFY_API_TOKEN` after pushes to `develop`.
 - `.github/workflows/web-app-staging-cd.yml` deploys web staging after pushes to
