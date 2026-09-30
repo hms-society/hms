@@ -7,6 +7,7 @@ export type IconName =
   | 'circle'
   | 'clipboard-list'
   | 'file-text'
+  | 'folder-open'
   | 'layout-dashboard'
   | 'inbox'
   | 'briefcase-business'
@@ -89,3 +90,5 @@ export type IconName =
   | 'edit-3'
   | 'x-circle'
   | 'shield-alert'
+  | 'badge-check'
+  | 'octagon-alert'

@@ -5,18 +5,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { RestContext } from '@/ui/shared/contexts/rest-context'
 import { NewPieceDialog } from '../new-piece-dialog'
 
-vi.mock('@/ui/shared/hooks/use-navigation', () => ({
-  useNavigation: () => ({ navigateTo: vi.fn() }),
-}))
-
 function renderDialogWithServices({
   getDocument = vi.fn(),
   generateDocument = vi.fn(),
   onOpenChange = () => {},
+  onOpenDocument = vi.fn(),
 }: {
   getDocument?: ReturnType<typeof vi.fn>
   generateDocument?: ReturnType<typeof vi.fn>
   onOpenChange?: (open: boolean) => void
+  onOpenDocument?: (destination: 'editor' | 'review') => void
 } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -64,6 +62,7 @@ function renderDialogWithServices({
           open
           caseId='case-1'
           onOpenChange={onOpenChange}
+          onOpenDocument={onOpenDocument}
           onGenerated={vi.fn()}
         />
       </RestContext.Provider>

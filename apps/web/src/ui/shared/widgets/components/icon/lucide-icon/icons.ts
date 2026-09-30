@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  FolderOpen,
   History,
   IdCard,
   Inbox,
@@ -88,6 +89,8 @@ import {
   AlertCircle,
   HelpCircle,
   SlidersHorizontal,
+  BadgeCheck,
+  OctagonAlert,
 } from 'lucide-react'
 
 import type { LucideIcon as LucideIconComponent } from 'lucide-react'
@@ -104,6 +107,7 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
 
   'clipboard-list': ClipboardList,
   'file-text': FileText,
+  'folder-open': FolderOpen,
   'layout-dashboard': LayoutDashboard,
   inbox: Inbox,
 
@@ -206,4 +210,6 @@ export const ICONS: Record<IconName, LucideIconComponent> = {
   'alert-circle': AlertCircle,
   'help-circle': HelpCircle,
   'sliders-horizontal': SlidersHorizontal,
+  'badge-check': BadgeCheck,
+  'octagon-alert': OctagonAlert,
 }

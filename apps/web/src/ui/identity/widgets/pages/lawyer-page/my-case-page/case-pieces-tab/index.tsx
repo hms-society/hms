@@ -12,7 +12,6 @@ import { PieceWorkflowDialog, ReviewActionDialog } from './piece-workflow-dialog
 import type { CaseDocumentResponse } from '@/rest/services/case-document-production-service'
 import type { CasePiece } from './types'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
-import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
 export type CasePiecesTabProps = {
   dossierApproved: boolean
@@ -21,7 +20,6 @@ export type CasePiecesTabProps = {
 
 export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
   const queryClient = useQueryClient()
-  const { navigateTo } = useNavigation()
   const { caseDocumentProductionService } = useRestContext()
   const { data: pieces = [], isLoading } = useQuery({
     queryKey: ['case-documents', caseId],
@@ -126,21 +124,9 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
                   : undefined
               }
               onOpenReview={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceReview', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
-                setIsViewerOpen(true)
+                setWorkflow('review')
               }}
               onOpenEditor={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceEditor', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
                 setWorkflow('editor')
               }}
             />
@@ -157,6 +143,7 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
         open={isNewPieceOpen}
         caseId={caseId}
         onOpenChange={setIsNewPieceOpen}
+        onOpenDocument={(destination) => setWorkflow(destination)}
         onGenerated={() => {
           if (caseId) {
             void queryClient.invalidateQueries({ queryKey: ['case-documents', caseId] })
