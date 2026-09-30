@@ -97,7 +97,7 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
       .expect(409)
 
     expect(response.body.message).toBe(
-      'A aprovação integral do checklist exige validação server-side dos itens obrigatórios.',
+      'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios validados.',
     )
     expect(response.body.statusCode).toBe(409)
   })
