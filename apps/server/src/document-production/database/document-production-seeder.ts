@@ -28,6 +28,7 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
+import { FindDocumentPendingMarkersUseCase } from '@hms/core/document-production/use-cases'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -35,6 +36,7 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 export type DocumentProductionSeedReferences = {
   readonly legalAreas: readonly { id: string; name: string }[]
   readonly legalTopics: readonly { id: string; legalAreaId: string; name: string }[]
+  readonly hasPendingDocumentData?: boolean
   readonly consultationId: string
   readonly requestedByCollaboratorId?: string
 }
@@ -104,6 +106,23 @@ const DOCUMENT_TEMPLATES = [
   },
 ] as const satisfies readonly DocumentTemplateSeed[]
 
+const PENDING_MARKERS_TEMPLATE = {
+  documentId: '00000000-0000-4000-8000-000000000204',
+  name: 'Teste de pendências — Procuração para locação',
+  description:
+    'Modelo para testar dados ausentes, o registro de pendências e o bloqueio da aprovação.',
+  paragraphs: [
+    'O cliente nomeia {procurador_nome}, inscrito na OAB sob o nº {procurador_oab}, para representá-lo na negociação da locação residencial.',
+    'O imóvel objeto da negociação está situado em {endereco_imovel}.',
+    'Os poderes ficam limitados à análise e à negociação do contrato de locação residencial.',
+  ],
+  variables: [
+    { label: 'Nome do procurador', technicalName: 'procurador_nome' },
+    { label: 'Inscrição do procurador na OAB', technicalName: 'procurador_oab' },
+    { label: 'Endereço do imóvel', technicalName: 'endereco_imovel' },
+  ],
+} as const satisfies DocumentTemplateSeed
+
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 
 const SEEDED_GENERATION_IDS = [
@@ -162,8 +181,11 @@ export class DocumentProductionSeeder {
       )
     }
 
-    const specificationCreations: DocumentSpecificationCreation[] =
-      DOCUMENT_TEMPLATES.map((template) => ({
+    const templates: readonly DocumentTemplateSeed[] = references.hasPendingDocumentData
+      ? [PENDING_MARKERS_TEMPLATE]
+      : DOCUMENT_TEMPLATES
+    const specificationCreations: DocumentSpecificationCreation[] = templates.map(
+      (template) => ({
         name: template.name,
         description: template.description,
         content: this.createTemplateContent(template.name, template.paragraphs),
@@ -175,11 +197,12 @@ export class DocumentProductionSeeder {
           legalTopicIdsByArea: { [area.id]: [topic.id] },
         },
         status: 'available',
-      }))
+      }),
+    )
     const specifications =
       await this.specificationsRepository.addMany(specificationCreations)
     const documentCreations: DocumentCreation[] = specifications.map((specification) => {
-      const template = DOCUMENT_TEMPLATES.find(({ name }) => name === specification.name)
+      const template = templates.find(({ name }) => name === specification.name)
       if (!template) {
         throw new AppError(
           'A seeded Document Template could not be resolved.',
@@ -199,7 +222,9 @@ export class DocumentProductionSeeder {
     })
     const documents = await this.documentsRepository.addMany(documentCreations)
     const seededPackage = DocumentPackageFaker.fake({
-      id: DOCUMENT_PRODUCTION_PACKAGE_ID,
+      id: references.hasPendingDocumentData
+        ? '00000000-0000-4000-8000-000000000302'
+        : DOCUMENT_PRODUCTION_PACKAGE_ID,
       context: {
         type: 'consultation',
         consultationId: references.consultationId,
@@ -239,7 +264,8 @@ export class DocumentProductionSeeder {
     )
 
     const generatedDocuments = references.requestedByCollaboratorId
-      ? await this.seedApprovedDocumentVersions({
+      ? await this.seedDocumentVersions({
+          hasPendingDocumentData: references.hasPendingDocumentData,
           documents,
           specifications,
           consultationId: references.consultationId,
@@ -256,12 +282,14 @@ export class DocumentProductionSeeder {
     }
   }
 
-  private async seedApprovedDocumentVersions({
+  private async seedDocumentVersions({
+    hasPendingDocumentData,
     documents,
     specifications,
     consultationId,
     requestedByCollaboratorId,
   }: {
+    readonly hasPendingDocumentData?: boolean
     readonly documents: readonly { id: string; title: string }[]
     readonly specifications: readonly {
       id: string
@@ -279,9 +307,15 @@ export class DocumentProductionSeeder {
 
     for (const [index, document] of documents.entries()) {
       const specification = specifications[index]
-      const generationId = SEEDED_GENERATION_IDS[index]
-      const versionId = SEEDED_VERSION_IDS[index]
-      const fileId = SEEDED_FILE_IDS[index]
+      const generationId = hasPendingDocumentData
+        ? '00000000-0000-4000-8000-000000000404'
+        : SEEDED_GENERATION_IDS[index]
+      const versionId = hasPendingDocumentData
+        ? '00000000-0000-4000-8000-000000000504'
+        : SEEDED_VERSION_IDS[index]
+      const fileId = hasPendingDocumentData
+        ? '00000000-0000-4000-8000-000000000604'
+        : SEEDED_FILE_IDS[index]
 
       if (!specification || !generationId || !versionId || !fileId) {
         throw new AppError(
@@ -348,7 +382,11 @@ export class DocumentProductionSeeder {
         versionNumber: 1,
         source: 'ai',
         content: specification.content,
-        pendingMarkers: [],
+        pendingMarkers: hasPendingDocumentData
+          ? await new FindDocumentPendingMarkersUseCase().execute({
+              content: specification.content,
+            })
+          : [],
         createdByCollaboratorId: requestedByCollaboratorId,
         createdAt: startedAt,
         status: 'in_review',
@@ -367,14 +405,16 @@ export class DocumentProductionSeeder {
         status: version.status,
       }
       const createdVersion = await this.versionsRepository.add(versionCreation)
-      const approvedVersion = await this.versionsRepository.review(
-        createdVersion.id,
-        'approved',
-        requestedByCollaboratorId,
-        reviewedAt,
-      )
+      const seededVersion = hasPendingDocumentData
+        ? createdVersion
+        : await this.versionsRepository.review(
+            createdVersion.id,
+            'approved',
+            requestedByCollaboratorId,
+            reviewedAt,
+          )
 
-      if (!approvedVersion) {
+      if (!seededVersion) {
         throw new AppError(
           'The seeded document version could not be approved.',
           'Seed Error',
@@ -387,7 +427,7 @@ export class DocumentProductionSeeder {
           status: 'completed',
           attemptsCount: 1,
           findings: [],
-          documentVersionId: approvedVersion.id,
+          documentVersionId: seededVersion.id,
           completedAt: reviewedAt,
           updatedAt: reviewedAt,
         },
@@ -402,7 +442,7 @@ export class DocumentProductionSeeder {
       }
 
       generations.push(completedGeneration)
-      versions.push(approvedVersion)
+      versions.push(seededVersion)
     }
 
     return { generations, versions }
