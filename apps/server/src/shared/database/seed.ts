@@ -160,6 +160,7 @@ async function bootstrap() {
         ),
       ].map(({ id: intakeId, clientId }) => ({ intakeId, clientId })),
       assignedLawyerId: lawyer.id,
+      lawyerIds,
     })
 
     const consultationSeed = await app.get(ConsultationSeeder).run({

@@ -3,10 +3,12 @@ import {
   AppointmentFaker,
   ScheduleFaker,
 } from '@hms/core/scheduling/domain/entities/fakers'
+import type { WeeklyAvailability } from '@hms/core/scheduling/domain/structures'
 import type {
   AppointmentsRepository,
   SchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
+import { AppError } from '@hms/core/shared/domain/errors'
 
 import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
@@ -16,7 +18,32 @@ export type SchedulingSeedReferences = {
     readonly clientId: string
   }[]
   readonly assignedLawyerId: string
+  readonly lawyerIds: readonly string[]
 }
+
+const WEEKLY_AVAILABILITIES_BY_LAWYER: WeeklyAvailability[][] = [
+  [
+    { weekday: 'monday', timeRanges: [{ startsAt: '08:00', endsAt: '12:00' }] },
+    { weekday: 'tuesday', timeRanges: [{ startsAt: '10:00', endsAt: '14:00' }] },
+    { weekday: 'wednesday', timeRanges: [{ startsAt: '10:00', endsAt: '14:00' }] },
+    { weekday: 'thursday', timeRanges: [{ startsAt: '10:00', endsAt: '14:00' }] },
+    { weekday: 'friday', timeRanges: [{ startsAt: '11:00', endsAt: '15:00' }] },
+  ],
+  [
+    { weekday: 'monday', timeRanges: [{ startsAt: '10:00', endsAt: '13:00' }] },
+    { weekday: 'tuesday', timeRanges: [{ startsAt: '12:00', endsAt: '16:00' }] },
+    { weekday: 'wednesday', timeRanges: [{ startsAt: '12:00', endsAt: '16:00' }] },
+    { weekday: 'thursday', timeRanges: [{ startsAt: '08:00', endsAt: '12:00' }] },
+    { weekday: 'friday', timeRanges: [{ startsAt: '08:00', endsAt: '11:00' }] },
+  ],
+  [
+    { weekday: 'monday', timeRanges: [{ startsAt: '13:00', endsAt: '17:00' }] },
+    { weekday: 'tuesday', timeRanges: [{ startsAt: '08:00', endsAt: '11:00' }] },
+    { weekday: 'wednesday', timeRanges: [{ startsAt: '08:00', endsAt: '11:00' }] },
+    { weekday: 'thursday', timeRanges: [{ startsAt: '08:00', endsAt: '11:00' }] },
+    { weekday: 'friday', timeRanges: [{ startsAt: '09:00', endsAt: '13:00' }] },
+  ],
+]
 
 @Injectable()
 export class SchedulingSeeder {
@@ -33,32 +60,29 @@ export class SchedulingSeeder {
   }
 
   async run(references: SchedulingSeedReferences) {
-    const schedule = ScheduleFaker.fake({
-      collaboratorId: references.assignedLawyerId,
-      weeklyAvailability: [
-        {
-          weekday: 'monday',
-          timeRanges: [{ startsAt: '08:00', endsAt: '18:00' }],
-        },
-        {
-          weekday: 'tuesday',
-          timeRanges: [{ startsAt: '08:00', endsAt: '18:00' }],
-        },
-        {
-          weekday: 'wednesday',
-          timeRanges: [{ startsAt: '08:00', endsAt: '18:00' }],
-        },
-        {
-          weekday: 'thursday',
-          timeRanges: [{ startsAt: '08:00', endsAt: '18:00' }],
-        },
-        {
-          weekday: 'friday',
-          timeRanges: [{ startsAt: '08:00', endsAt: '18:00' }],
-        },
-      ],
-    })
-    const [createdSchedule] = await this.schedulesRepository.addMany([schedule])
+    const lawyerIds = [
+      references.assignedLawyerId,
+      ...references.lawyerIds.filter(
+        (lawyerId) => lawyerId !== references.assignedLawyerId,
+      ),
+    ]
+    const schedules = lawyerIds.map((collaboratorId, index) =>
+      ScheduleFaker.fake({
+        collaboratorId,
+        weeklyAvailability:
+          WEEKLY_AVAILABILITIES_BY_LAWYER[index % WEEKLY_AVAILABILITIES_BY_LAWYER.length],
+      }),
+    )
+    const createdSchedules = await this.schedulesRepository.addMany(schedules)
+    const scheduleByLawyerId = new Map(
+      createdSchedules.map((schedule) => [schedule.collaboratorId, schedule]),
+    )
+    const createdSchedule = scheduleByLawyerId.get(references.assignedLawyerId)
+
+    if (!createdSchedule) {
+      throw new AppError('The assigned lawyer schedule could not be seeded')
+    }
+
     const blockedPeriod = await this.schedulesRepository.createBlockedPeriod({
       scheduleId: createdSchedule.id,
       startsOn: '2026-09-30',
@@ -85,9 +109,16 @@ export class SchedulingSeeder {
       .map(({ intakeId, clientId }, index) => {
         const startsAt = new Date(appointmentStartTimes[index])
 
+        const lawyerId = lawyerIds[index % lawyerIds.length]
+        const schedule = lawyerId ? scheduleByLawyerId.get(lawyerId) : undefined
+
+        if (!schedule) {
+          throw new AppError(`Schedule for lawyer ${lawyerId} could not be seeded`)
+        }
+
         return AppointmentFaker.fake({
           intakeId,
-          scheduleId: createdSchedule.id,
+          scheduleId: schedule.id,
           clientId,
           startsAt,
           endsAt: new Date(startsAt.getTime() + 45 * 60 * 1000),
