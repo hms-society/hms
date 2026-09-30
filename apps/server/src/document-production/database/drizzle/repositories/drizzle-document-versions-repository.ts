@@ -131,6 +131,7 @@ export class DrizzleDocumentVersionsRepository
         ),
       )
       .returning()
+
     return record ? this.mapper.toDomain(record) : undefined
   }
 }
