@@ -58,18 +58,17 @@ describe('MastraAgent model resolution', () => {
         }
       }),
     ),
-  )(
-    'routes $provider $modelType models in dev',
-    ({ env, expectedGenerateOptions, expectedModel, localModelEnvKey }) => {
-      const agent = new TestMastraAgent(
-        createEnvProvider(env),
-        localModelEnvKey,
-      )
+  )('routes $provider $modelType models in dev', ({
+    env,
+    expectedGenerateOptions,
+    expectedModel,
+    localModelEnvKey,
+  }) => {
+    const agent = new TestMastraAgent(createEnvProvider(env), localModelEnvKey)
 
-      expect(agent.model).toEqual(expectedModel)
-      expect(agent.getDefaultGenerateOptionsLegacy()).toEqual(expectedGenerateOptions)
-    },
-  )
+    expect(agent.model).toEqual(expectedModel)
+    expect(agent.getDefaultGenerateOptionsLegacy()).toEqual(expectedGenerateOptions)
+  })
 
   it.each([
     'stg',
