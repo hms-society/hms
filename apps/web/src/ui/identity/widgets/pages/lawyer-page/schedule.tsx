@@ -14,17 +14,66 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
+import {
+  type WeeklyAvailability,
+  type LocalTime,
+  Weekday,
+} from '@hms/core/scheduling/domain/structures'
 import { useConsultation } from './use-schedule'
 
-const DEFAULT_WEEKLY_AVAILABILITY = [
-  { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },
-  { id: 'tuesday', name: 'Terça-feira', active: true, slots: [] },
-  { id: 'wednesday', name: 'Quarta-feira', active: true, slots: [] },
-  { id: 'thursday', name: 'Quinta-feira', active: true, slots: [] },
-  { id: 'friday', name: 'Sexta-feira', active: true, slots: [] },
-  { id: 'saturday', name: 'Sábado', active: false, slots: [] },
-  { id: 'sunday', name: 'Domingo', active: false, slots: [] },
+type DayConfig = {
+  id: Weekday
+  name: string
+  active: boolean
+  timeRanges: { startsAt: LocalTime; endsAt: LocalTime }[]
+}
+
+const WEEKDAY_ORDER: { id: Weekday; name: string }[] = [
+  { id: Weekday.Monday, name: 'Segunda-feira' },
+  { id: Weekday.Tuesday, name: 'Terça-feira' },
+  { id: Weekday.Wednesday, name: 'Quarta-feira' },
+  { id: Weekday.Thursday, name: 'Quinta-feira' },
+  { id: Weekday.Friday, name: 'Sexta-feira' },
+  { id: Weekday.Saturday, name: 'Sábado' },
+  { id: Weekday.Sunday, name: 'Domingo' },
 ]
+
+function normalizeWeeklyAvailabilityFromDomain(
+  rawList?: readonly WeeklyAvailability[],
+): DayConfig[] {
+  const availabilityMap = new Map<Weekday, { startsAt: LocalTime; endsAt: LocalTime }[]>()
+
+  if (Array.isArray(rawList)) {
+    for (const item of rawList) {
+      if (!item) continue
+      const weekday = (item.weekday ?? (item as any).id) as Weekday
+      const ranges = (item.timeRanges ?? (item as any).slots ?? []).map((r: any) => ({
+        startsAt: (r.startsAt ?? r.start) as LocalTime,
+        endsAt: (r.endsAt ?? r.end) as LocalTime,
+      }))
+      availabilityMap.set(weekday, ranges)
+    }
+  }
+
+  return WEEKDAY_ORDER.map(({ id, name }) => {
+    const timeRanges = availabilityMap.get(id) ?? []
+    return {
+      id,
+      name,
+      active: timeRanges.length > 0,
+      timeRanges,
+    }
+  })
+}
+
+function normalizeWeeklyAvailabilityToDomain(days: DayConfig[]): WeeklyAvailability[] {
+  return days
+    .filter((day) => day.active && day.timeRanges.length > 0)
+    .map((day) => ({
+      weekday: day.id,
+      timeRanges: day.timeRanges,
+    }))
+}
 
 function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
   if (!startsOn || startsOn.includes('NaN') || startsOn === 'Data inválida') {
@@ -77,9 +126,9 @@ export const Schedule = () => {
   } = useConsultation()
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
-  const [startTime, setStartTime] = useState('08:00')
-  const [endTime, setEndTime] = useState('12:00')
+  const [selectedDayId, setSelectedDayId] = useState<Weekday | null>(null)
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
 
   const [modalBlockOpen, setModalBlockOpen] = useState(false)
   const [startDate, setStartDate] = useState('')
@@ -88,8 +137,7 @@ export const Schedule = () => {
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
-  const weeklyAvailability =
-    rawAvailability.length > 0 ? rawAvailability : DEFAULT_WEEKLY_AVAILABILITY
+  const weeklyAvailability = normalizeWeeklyAvailabilityFromDomain(rawAvailability)
   const blockedPeriods = schedule?.blockedPeriods ?? []
 
   const currentDuration =
@@ -97,19 +145,44 @@ export const Schedule = () => {
     (schedule as any)?.defaultDurationMinutes ??
     45
 
-  const handleToggleDay = async (dayId: string, currentActive: boolean) => {
-    const updated = weeklyAvailability.map((day: any) =>
-      day.id === dayId ? { ...day, active: !currentActive } : day,
-    )
+  const [localActiveMap, setLocalActiveMap] = useState<Record<string, boolean>>({})
 
-    try {
-      await updateAvailability(updated)
-    } catch (error) {
-      console.error('Erro ao atualizar dia:', error)
+  const isDayActive = (day: DayConfig) => {
+    if (localActiveMap[day.id] !== undefined) {
+      return localActiveMap[day.id]
+    }
+    return day.timeRanges.length > 0
+  }
+
+  const handleToggleDay = async (dayId: Weekday, currentActive: boolean) => {
+    const nextActive = !currentActive
+    setLocalActiveMap((prev) => ({ ...prev, [dayId]: nextActive }))
+
+    if (!nextActive) {
+      // If turned off, remove all intervals for this day and save
+      const updated = weeklyAvailability.map((day) => {
+        if (day.id === dayId) {
+          return {
+            ...day,
+            active: false,
+            timeRanges: [],
+          }
+        }
+        return day
+      })
+
+      try {
+        await updateAvailability(normalizeWeeklyAvailabilityToDomain(updated))
+      } catch (error) {
+        console.error('Erro ao atualizar dia:', error)
+      }
+    } else {
+      // If turned on, open modal to add the first interval
+      handleOpenAddModal(dayId)
     }
   }
 
-  const handleOpenAddModal = (dayId: string) => {
+  const handleOpenAddModal = (dayId: Weekday) => {
     setSelectedDayId(dayId)
     setStartTime('08:00')
     setEndTime('12:00')
@@ -117,44 +190,54 @@ export const Schedule = () => {
   }
 
   const handleAddSlot = async () => {
-    if (!selectedDayId) return
+    if (!selectedDayId || !startTime || !endTime) return
 
-    const updated = weeklyAvailability.map((day: any) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === selectedDayId) {
-        const currentSlots = day.slots ?? []
         return {
           ...day,
           active: true,
-          slots: [...currentSlots, { start: startTime, end: endTime }],
+          timeRanges: [
+            ...day.timeRanges,
+            { startsAt: startTime as LocalTime, endsAt: endTime as LocalTime },
+          ],
         }
       }
       return day
     })
 
+    setLocalActiveMap((prev) => ({ ...prev, [selectedDayId]: true }))
+
     try {
-      await updateAvailability(updated)
+      await updateAvailability(normalizeWeeklyAvailabilityToDomain(updated))
       setModalOpen(false)
     } catch (error) {
       console.error('Erro ao adicionar intervalo:', error)
     }
   }
 
-  const handleRemoveSlot = async (dayId: string, slotIndex: number) => {
-    const updated = weeklyAvailability.map((day: any) => {
+  const handleRemoveSlot = async (dayId: Weekday, slotIndex: number) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === dayId) {
-        const newSlots = (day.slots ?? []).filter(
-          (_: any, idx: number) => idx !== slotIndex,
-        )
+        const newTimeRanges = day.timeRanges.filter((_, idx) => idx !== slotIndex)
         return {
           ...day,
-          slots: newSlots,
+          active: newTimeRanges.length > 0,
+          timeRanges: newTimeRanges,
         }
       }
       return day
     })
 
+    if (
+      updated.find((d) => d.id === dayId)?.timeRanges.length === 0 &&
+      localActiveMap[dayId] === undefined
+    ) {
+      setLocalActiveMap((prev) => ({ ...prev, [dayId]: false }))
+    }
+
     try {
-      await updateAvailability(updated)
+      await updateAvailability(normalizeWeeklyAvailabilityToDomain(updated))
     } catch (error) {
       console.error('Erro ao remover intervalo:', error)
     }
@@ -265,24 +348,20 @@ export const Schedule = () => {
         </div>
 
         <div className='flex flex-col divide-y divide-border/40'>
-          {weeklyAvailability.map(
-            (day: {
-              id: string
-              name: string
-              active: boolean
-              slots?: { start: string; end: string }[]
-            }) => (
+          {weeklyAvailability.map((day) => {
+            const active = isDayActive(day)
+            return (
               <div
                 key={day.id}
                 className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 py-3.5 px-2 rounded-lg transition-colors ${
-                  !day.active ? 'opacity-60 bg-muted/20' : ''
+                  !active ? 'opacity-60 bg-muted/20' : ''
                 }`}
               >
                 <div className='flex items-center gap-3 min-w-[160px]'>
                   <Switch
-                    checked={day.active}
+                    checked={active}
                     disabled={isUpdatingAvailability}
-                    onCheckedChange={() => handleToggleDay(day.id, day.active)}
+                    onCheckedChange={() => handleToggleDay(day.id, active)}
                   />
 
                   <span className='text-[14px] font-medium text-foreground shrink-0'>
@@ -290,16 +369,16 @@ export const Schedule = () => {
                   </span>
                 </div>
                 <div className='flex items-center justify-between sm:justify-end gap-3 flex-1 w-full sm:w-auto pl-11 sm:pl-0'>
-                  {day.active ? (
+                  {active ? (
                     <div className='flex items-center gap-2 flex-wrap flex-1 sm:justify-start'>
-                      {day.slots?.map((slot, idx) => (
+                      {day.timeRanges?.map((slot, idx) => (
                         <div
-                          key={`${day.id}-${slot.start}-${slot.end}`}
+                          key={`${day.id}-${slot.startsAt}-${slot.endsAt}`}
                           className='flex items-center gap-1.5 bg-muted/50 border border-border px-2.5 py-1 rounded-lg text-[13px] text-foreground group'
                         >
-                          <span>{slot.start}</span>
+                          <span>{slot.startsAt}</span>
                           <span className='text-muted-foreground'>—</span>
-                          <span>{slot.end}</span>
+                          <span>{slot.endsAt}</span>
 
                           <button
                             type='button'
@@ -329,8 +408,8 @@ export const Schedule = () => {
                   )}
                 </div>
               </div>
-            ),
-          )}
+            )
+          })}
         </div>
       </div>
 
@@ -406,8 +485,11 @@ export const Schedule = () => {
 
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 py-4'>
             <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário inicial</Label>
+              <Label htmlFor='start-time-input' className='text-[13px] text-foreground'>
+                Horário inicial
+              </Label>
               <Input
+                id='start-time-input'
                 type='time'
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -415,8 +497,11 @@ export const Schedule = () => {
             </div>
 
             <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário final</Label>
+              <Label htmlFor='end-time-input' className='text-[13px] text-foreground'>
+                Horário final
+              </Label>
               <Input
+                id='end-time-input'
                 type='time'
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { registerWabaAccountSchema } from './waba-embedded-signup.schema'
+import { registerWabaAccountSchema } from '../waba-embedded-signup.schema'
 
 describe('wabaEmbeddedSignupSchema', () => {
   it('should validate valid WABA registration input', () => {
