@@ -57,6 +57,26 @@ describe('Grant Case Portal Access Use Case', () => {
 
     expect(grantsRepository.add).not.toHaveBeenCalled()
   })
+
+  it('associates the access grant with a third party when provided', async () => {
+    const legalCase = LegalCaseFaker.fake()
+    const grant = fakeGrant(legalCase.id)
+    legalCasesRepository.findById.mockResolvedValue(legalCase)
+    grantsRepository.add.mockResolvedValue(grant)
+
+    await useCase.execute({
+      caseId: legalCase.id,
+      thirdPartyId: 'third-party-1',
+      collaboratorId: faker.string.uuid(),
+      isAdministrator: true,
+      tokenHash: faker.string.hexadecimal({ length: 64 }),
+      canUpload: true,
+    })
+
+    expect(grantsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({ thirdPartyId: 'third-party-1' }),
+    )
+  })
 })
 
 function fakeGrant(caseId: string): CasePortalAccessGrant {

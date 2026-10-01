@@ -12,6 +12,7 @@ export { GrantCasePortalAccessController } from './grant-case-portal-access.cont
 export { RevokeCasePortalAccessController } from './revoke-case-portal-access.controller'
 export { ListCasePortalPendingChecklistController } from './list-case-portal-pending-checklist.controller'
 export { UploadCasePortalDocumentController } from './upload-case-portal-document.controller'
+export { GetThirdPartyPortalCaseController } from './get-third-party-portal-case.controller'
 export { GetPendingMessageController } from './get-pending-message.controller'
 export { EditPendingMessageController } from './edit-pending-message.controller'
 export { ApprovePendingMessageController } from './approve-pending-message.controller'

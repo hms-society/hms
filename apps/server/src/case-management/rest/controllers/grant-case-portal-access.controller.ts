@@ -12,6 +12,7 @@ import type {
   LegalCasesRepository,
   CasePortalAccessGrantsRepository,
 } from '@hms/core/case-management/interfaces'
+import type { ThirdPartiesRepository } from '@hms/core/identity/interfaces'
 import { GrantCasePortalAccessUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
@@ -19,12 +20,13 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 import { CasesController } from '@/case-management/decorators'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import {
   createPortalAccessToken,
   hashPortalAccessToken,
 } from '@/case-management/security/portal-access-token'
 
-type RequestBody = { canUpload: boolean; expiresAt?: string }
+type RequestBody = { canUpload: boolean; expiresAt?: string; thirdPartyId?: string }
 
 @CasesController()
 export class GrantCasePortalAccessController {
@@ -35,6 +37,8 @@ export class GrantCasePortalAccessController {
     legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants)
     grantsRepository: CasePortalAccessGrantsRepository,
+    @Inject(IDENTITY_REPOSITORIES.thirdParties)
+    private readonly thirdPartiesRepository: ThirdPartiesRepository,
   ) {
     this.useCase = new GrantCasePortalAccessUseCase(
       legalCasesRepository,
@@ -55,6 +59,16 @@ export class GrantCasePortalAccessController {
       throw new BadRequestException('Informe canUpload no corpo da requisição.')
     }
 
+    if (body.thirdPartyId) {
+      const thirdParty = await this.thirdPartiesRepository.findById(body.thirdPartyId)
+      if (!thirdParty) {
+        throw new BadRequestException('O terceiro informado não foi encontrado.')
+      }
+      if (thirdParty.status !== 'active') {
+        throw new BadRequestException('Terceiros inativos não podem receber links.')
+      }
+    }
+
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined
     if (expiresAt && Number.isNaN(expiresAt.getTime())) {
       throw new BadRequestException('expiresAt deve ser uma data ISO válida.')
@@ -65,6 +79,7 @@ export class GrantCasePortalAccessController {
 
     const grant = await this.useCase.execute({
       caseId,
+      thirdPartyId: body.thirdPartyId,
       collaboratorId: collaborator.collaboratorId,
       isAdministrator: collaborator.profile === 'admin',
       tokenHash: hashPortalAccessToken(accessToken),
@@ -75,8 +90,11 @@ export class GrantCasePortalAccessController {
     return {
       grantId: grant.id,
       caseId: grant.caseId,
+      thirdPartyId: grant.thirdPartyId,
       accessToken,
-      portalAccessUrl: `/cases/${grant.caseId}/portal-pendencies?portalToken=${accessToken}`,
+      portalAccessUrl: body.thirdPartyId
+        ? `/third-party-portal/cases/${grant.caseId}?portalToken=${accessToken}`
+        : `/cases/${grant.caseId}/portal-pendencies?portalToken=${accessToken}`,
       expiresAt: grant.expiresAt,
       canUpload: grant.canUpload,
     }

@@ -9,6 +9,7 @@ export interface CasePortalAccessGrantsRepository {
     tokenHash: string,
     caseId: string,
   ): Promise<CasePortalAccessGrant | undefined>
+  findActiveByTokenHash(tokenHash: string): Promise<CasePortalAccessGrant | undefined>
   revoke(grantId: string, caseId: string): Promise<CasePortalAccessGrant | undefined>
   removeAll(): Promise<void>
 }

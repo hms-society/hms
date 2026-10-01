@@ -10,6 +10,7 @@ export class DrizzleCasePortalAccessGrantMapper {
     return {
       id: record.id,
       caseId: record.caseId,
+      thirdPartyId: record.thirdPartyId ?? undefined,
       tokenHash: record.tokenHash,
       canView: Boolean(record.canView),
       canUpload: Boolean(record.canUpload),

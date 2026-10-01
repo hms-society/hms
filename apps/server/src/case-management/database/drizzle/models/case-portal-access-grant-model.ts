@@ -10,6 +10,7 @@ import {
 
 import { casePortalAccessGrantStatusModel } from './case-portal-access-grant-status-model'
 import { legalCaseModel } from './legal-case-model'
+import { thirdPartyModel } from '@/identity/database/drizzle/models/third-party-model'
 
 export const casePortalAccessGrantModel = pgTable(
   'case_portal_access_grants',
@@ -18,6 +19,9 @@ export const casePortalAccessGrantModel = pgTable(
     caseId: uuid('case_id')
       .notNull()
       .references(() => legalCaseModel.id, { onDelete: 'cascade' }),
+    thirdPartyId: uuid('third_party_id').references(() => thirdPartyModel.id, {
+      onDelete: 'cascade',
+    }),
     tokenHash: text('token_hash').notNull(),
     canView: boolean('can_view').default(false).notNull(),
     canUpload: boolean('can_upload').default(false).notNull(),
@@ -32,5 +36,6 @@ export const casePortalAccessGrantModel = pgTable(
   (table) => [
     uniqueIndex('case_portal_access_grants_token_hash_uidx').on(table.tokenHash),
     index('case_portal_access_grants_case_status_idx').on(table.caseId, table.status),
+    index('case_portal_access_grants_third_party_idx').on(table.thirdPartyId),
   ],
 )

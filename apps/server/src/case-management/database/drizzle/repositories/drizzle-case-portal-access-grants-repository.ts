@@ -56,6 +56,29 @@ export class DrizzleCasePortalAccessGrantsRepository
     return grant ? this.mapper.toDomain(grant) : undefined
   }
 
+  async findActiveByTokenHash(
+    tokenHash: string,
+  ): ReturnType<CasePortalAccessGrantsRepository['findActiveByTokenHash']> {
+    const now = new Date()
+    const [grant] = await this.database
+      .select()
+      .from(casePortalAccessGrantModel)
+      .where(
+        and(
+          eq(casePortalAccessGrantModel.tokenHash, tokenHash),
+          eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
+          or(
+            isNull(casePortalAccessGrantModel.expiresAt),
+            gt(casePortalAccessGrantModel.expiresAt, now),
+          ),
+          eq(casePortalAccessGrantModel.canView, true),
+        ),
+      )
+      .limit(1)
+
+    return grant ? this.mapper.toDomain(grant) : undefined
+  }
+
   async revoke(
     grantId: string,
     caseId: string,

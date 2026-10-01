@@ -9,6 +9,7 @@ import type {
 
 type Request = {
   caseId: string
+  thirdPartyId?: string
   tokenHash: string
   collaboratorId: string
   isAdministrator: boolean
@@ -37,6 +38,7 @@ export class GrantCasePortalAccessUseCase
 
     return this.grantsRepository.add({
       caseId: request.caseId,
+      thirdPartyId: request.thirdPartyId,
       tokenHash: request.tokenHash,
       canView: true,
       canUpload: request.canUpload,

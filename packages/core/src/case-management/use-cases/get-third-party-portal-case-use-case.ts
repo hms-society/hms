@@ -1,0 +1,41 @@
+import type { UseCase } from '#shared/interfaces/use-case'
+
+import type { CasePortalAccessGrant, LegalCase } from '../domain/entities'
+import { LegalCaseNotFoundError } from '../domain/errors'
+import type { LegalCasesRepository } from '../interfaces'
+
+export type ThirdPartyPortalCaseView = {
+  caseId: string
+  publicCode: string
+  title: string
+  status: LegalCase['status']
+  intakeId: string
+  updatedAt: Date
+  canUpload: boolean
+}
+
+type Request = {
+  caseId: string
+  grant: CasePortalAccessGrant
+}
+
+export class GetThirdPartyPortalCaseUseCase
+  implements UseCase<Request, ThirdPartyPortalCaseView>
+{
+  constructor(private readonly legalCasesRepository: LegalCasesRepository) {}
+
+  async execute({ caseId, grant }: Request): Promise<ThirdPartyPortalCaseView> {
+    const legalCase = await this.legalCasesRepository.findById(caseId)
+    if (!legalCase) throw new LegalCaseNotFoundError()
+
+    return {
+      caseId: legalCase.id,
+      publicCode: legalCase.publicCode,
+      title: legalCase.title,
+      status: legalCase.status,
+      intakeId: legalCase.intakeId,
+      updatedAt: legalCase.updatedAt,
+      canUpload: grant.canUpload,
+    }
+  }
+}
