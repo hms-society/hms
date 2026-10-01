@@ -14,6 +14,21 @@ describe('CaseManagementService', () => {
       canUpload: true,
     })
   })
+
+  it('sends the selected third party when generating the unified portal link', async () => {
+    const restClient = makeRestClient()
+    const service = CaseManagementService(restClient)
+
+    await service.grantCasePortalAccess('case-1', {
+      canUpload: true,
+      thirdPartyId: 'third-party-1',
+    })
+
+    expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/portal-access', {
+      canUpload: true,
+      thirdPartyId: 'third-party-1',
+    })
+  })
 })
 
 function makeRestClient(): RestClient {
