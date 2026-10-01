@@ -8,6 +8,7 @@ export type ThirdPartyPortalCaseView = {
   caseId: string
   publicCode: string
   title: string
+  clientName: string
   status: LegalCase['status']
   intakeId: string
   updatedAt: Date
@@ -25,13 +26,14 @@ export class GetThirdPartyPortalCaseUseCase
   constructor(private readonly legalCasesRepository: LegalCasesRepository) {}
 
   async execute({ caseId, grant }: Request): Promise<ThirdPartyPortalCaseView> {
-    const legalCase = await this.legalCasesRepository.findById(caseId)
+    const legalCase = await this.legalCasesRepository.getCaseDetails(caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
 
     return {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       title: legalCase.title,
+      clientName: legalCase.clientName,
       status: legalCase.status,
       intakeId: legalCase.intakeId,
       updatedAt: legalCase.updatedAt,

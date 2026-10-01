@@ -10,6 +10,7 @@ export type LegalCaseTeamMemberSummary = {
 }
 
 export type LegalCaseSummary = Pick<Entity, 'id'> & {
+  intakeId: string
   publicCode: string
   title: string
   status: LegalCaseStatus

@@ -10,7 +10,21 @@ describe('GetThirdPartyPortalCaseUseCase', () => {
   it('returns a restricted case summary and upload capability', async () => {
     const legalCase = LegalCaseFaker.fake({ id: 'case-1' })
     const repository = mock<LegalCasesRepository>()
-    repository.findById.mockResolvedValue(legalCase)
+    repository.getCaseDetails.mockResolvedValue({
+      id: legalCase.id,
+      intakeId: legalCase.intakeId,
+      publicCode: legalCase.publicCode,
+      title: legalCase.title,
+      clientName: 'Cliente do portal',
+      legalArea: 'Direito civil',
+      legalTopic: 'Contratos',
+      status: legalCase.status,
+      openedAt: legalCase.openedAt,
+      updatedAt: legalCase.updatedAt,
+      checklistGate: legalCase.checklistGate,
+      dossierGate: legalCase.dossierGate,
+      team: [],
+    })
     const useCase = new GetThirdPartyPortalCaseUseCase(repository)
 
     await expect(
@@ -19,6 +33,7 @@ describe('GetThirdPartyPortalCaseUseCase', () => {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       title: legalCase.title,
+      clientName: 'Cliente do portal',
       status: legalCase.status,
       intakeId: legalCase.intakeId,
       updatedAt: legalCase.updatedAt,

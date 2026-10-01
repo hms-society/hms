@@ -133,6 +133,7 @@ export class DrizzleLegalCasesRepository
     const [assignedCase] = await this.database
       .select({
         id: legalCaseModel.id,
+        intakeId: legalCaseModel.intakeId,
         publicCode: legalCaseModel.publicCode,
         title: legalCaseModel.title,
         status: legalCaseModel.status,
@@ -175,6 +176,7 @@ export class DrizzleLegalCasesRepository
 
     return {
       id: assignedCase.id,
+      intakeId: assignedCase.intakeId,
       publicCode: assignedCase.publicCode,
       title: assignedCase.title,
       status: assignedCase.status,
