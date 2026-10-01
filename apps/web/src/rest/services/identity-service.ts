@@ -3,6 +3,7 @@ import type {
   ClientConsent,
   ClientDetails,
   CollaboratorSummary,
+  ThirdParty,
 } from '@hms/core/identity/domain/entities'
 import type { ConsentType } from '@hms/core/identity/domain/structures'
 import type { CollaboratorListQuery } from '@hms/core/identity/domain/structures'
@@ -24,6 +25,10 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
   }
 
   return {
+    listThirdParties() {
+      return restClient.get<readonly ThirdParty[]>('/third-parties')
+    },
+
     getClient(clientId) {
       return restClient.get<ClientDetails>(`/clients/${clientId}`)
     },

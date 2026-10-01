@@ -10,6 +10,7 @@ import type {
 import type {
   GrantCasePortalAccessResponse,
   PortalDocumentUploadResponse,
+  ThirdPartyPortalCaseResponse,
 } from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
@@ -93,6 +94,13 @@ export const CaseManagementService = (
       const query = new URLSearchParams({ portalToken })
       return restClient.get<readonly CaseChecklistItem[]>(
         `/cases/${caseId}/portal-pendencies?${query.toString()}`,
+      )
+    },
+
+    getThirdPartyPortalCase(caseId, portalToken) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.get<ThirdPartyPortalCaseResponse>(
+        `/third-party-portal/cases/${caseId}?${query.toString()}`,
       )
     },
 

@@ -4,6 +4,7 @@ import type {
   ClientConsent,
   ClientDetails,
   CollaboratorSummary,
+  ThirdParty,
 } from '../domain/entities'
 import type {
   CollaboratorListQuery,
@@ -16,6 +17,7 @@ import type { LookupClientRequest } from '../use-cases/lookup-client-use-case'
 import type { RegisterClientRequest } from '../use-cases/register-client-use-case'
 
 export interface IdentityService {
+  listThirdParties(): Promise<RestResponse<readonly ThirdParty[]>>
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>
   lookupClient(request: LookupClientRequest): Promise<RestResponse<ClientDetails>>
   registerClient(request: RegisterClientRequest): Promise<RestResponse<ClientDetails>>

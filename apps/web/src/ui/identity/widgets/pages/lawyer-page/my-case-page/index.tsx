@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
+import { useState } from 'react'
 
 import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
@@ -15,6 +16,7 @@ export type CasoDetalheChecklistPageProps = {
 }
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
+  const [isPortalPickerOpen, setIsPortalPickerOpen] = useState(false)
   const {
     activeTab,
     caseClientName,
@@ -35,6 +37,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     isGeneratingPortalLink,
     portalAccessExpiresAt,
     portalAccessUrl,
+    selectedThirdPartyId,
+    setSelectedThirdPartyId,
+    thirdParties,
     setActiveTab,
   } = useMyCasePage({ caseId })
 
@@ -104,7 +109,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               size='xs'
               className='rounded-full border-primary bg-background text-primary hover:bg-primary/10'
               disabled={isGeneratingPortalLink}
-              onClick={handleGeneratePortalLink}
+              onClick={() => setIsPortalPickerOpen(true)}
             >
               <Icon name='link' className='size-3' />
               {isGeneratingPortalLink ? 'Gerando link...' : 'Gerar link para terceiro'}
@@ -234,11 +239,20 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
 
       <PortalAccessDialog
         expiresAt={portalAccessExpiresAt}
+        isGenerating={isGeneratingPortalLink}
+        onGenerate={handleGeneratePortalLink}
         onCopy={handleCopyPortalLink}
         onOpenChange={(open) => {
-          if (!open) handleClosePortalAccessDialog()
+          setIsPortalPickerOpen(open)
+          if (!open) {
+            handleClosePortalAccessDialog()
+            setSelectedThirdPartyId('')
+          }
         }}
-        open={Boolean(portalAccessUrl)}
+        open={Boolean(portalAccessUrl) || isPortalPickerOpen}
+        selectedThirdPartyId={selectedThirdPartyId}
+        onThirdPartyChange={setSelectedThirdPartyId}
+        thirdParties={thirdParties}
         url={portalAccessUrl}
       />
     </div>

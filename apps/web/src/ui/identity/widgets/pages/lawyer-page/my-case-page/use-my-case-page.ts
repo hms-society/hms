@@ -11,10 +11,11 @@ export type UseMyCasePageParams = {
 }
 
 export function useMyCasePage({ caseId }: UseMyCasePageParams) {
-  const { caseManagementService } = useRestContext()
+  const { caseManagementService, identityService } = useRestContext()
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
   const [portalAccessUrl, setPortalAccessUrl] = useState<string | null>(null)
   const [portalAccessExpiresAt, setPortalAccessExpiresAt] = useState<string | null>(null)
+  const [selectedThirdPartyId, setSelectedThirdPartyId] = useState('')
 
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
@@ -26,10 +27,20 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     enabled: !!caseUuid,
   })
 
+  const thirdPartiesQuery = useQuery({
+    queryKey: ['third-parties', 'active'],
+    queryFn: async () => {
+      const response = await identityService.listThirdParties()
+      if (response.isFailure) response.throwError()
+      return response.body.filter((thirdParty) => thirdParty.status === 'active')
+    },
+  })
+
   const portalAccessMutation = useMutation({
     mutationFn: async () => {
       const response = await caseManagementService.grantCasePortalAccess(caseUuid, {
         canUpload: true,
+        thirdPartyId: selectedThirdPartyId,
       })
 
       if (response.isFailure) response.throwError()
@@ -72,6 +83,7 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   }
 
   function handleGeneratePortalLink() {
+    if (!selectedThirdPartyId) return
     return portalAccessMutation.mutateAsync()
   }
 
@@ -113,6 +125,9 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     portalAccessError: portalAccessMutation.error,
     portalAccessExpiresAt,
     portalAccessUrl,
+    selectedThirdPartyId,
+    setSelectedThirdPartyId,
+    thirdParties: thirdPartiesQuery.data ?? [],
     setActiveTab,
   }
 }

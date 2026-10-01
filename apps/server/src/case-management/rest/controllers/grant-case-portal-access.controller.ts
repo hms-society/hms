@@ -26,7 +26,7 @@ import {
   hashPortalAccessToken,
 } from '@/case-management/security/portal-access-token'
 
-type RequestBody = { canUpload: boolean; expiresAt?: string; thirdPartyId?: string }
+type RequestBody = { canUpload: boolean; thirdPartyId?: string }
 
 @CasesController()
 export class GrantCasePortalAccessController {
@@ -59,6 +59,10 @@ export class GrantCasePortalAccessController {
       throw new BadRequestException('Informe canUpload no corpo da requisição.')
     }
 
+    if (!body.thirdPartyId) {
+      throw new BadRequestException('Selecione um terceiro para gerar o link.')
+    }
+
     if (body.thirdPartyId) {
       const thirdParty = await this.thirdPartiesRepository.findById(body.thirdPartyId)
       if (!thirdParty) {
@@ -69,13 +73,7 @@ export class GrantCasePortalAccessController {
       }
     }
 
-    const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined
-    if (expiresAt && Number.isNaN(expiresAt.getTime())) {
-      throw new BadRequestException('expiresAt deve ser uma data ISO válida.')
-    }
-
     const accessToken = createPortalAccessToken()
-    const effectiveExpiresAt = expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
     const grant = await this.useCase.execute({
       caseId,
@@ -84,7 +82,7 @@ export class GrantCasePortalAccessController {
       isAdministrator: collaborator.profile === 'admin',
       tokenHash: hashPortalAccessToken(accessToken),
       canUpload: body.canUpload,
-      expiresAt: effectiveExpiresAt,
+      expiresAt: undefined,
     })
 
     return {
@@ -92,10 +90,8 @@ export class GrantCasePortalAccessController {
       caseId: grant.caseId,
       thirdPartyId: grant.thirdPartyId,
       accessToken,
-      portalAccessUrl: body.thirdPartyId
-        ? `/third-party-portal/cases/${grant.caseId}?portalToken=${accessToken}`
-        : `/cases/${grant.caseId}/portal-pendencies?portalToken=${accessToken}`,
-      expiresAt: grant.expiresAt,
+      portalAccessUrl: `/third-party-portal/cases/${grant.caseId}?portalToken=${accessToken}`,
+      expiresAt: grant.expiresAt?.toISOString() ?? null,
       canUpload: grant.canUpload,
     }
   }
