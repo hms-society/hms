@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import type { PendingMarkersDialogProps } from './index'
+import type { PendingMarkersDialogProps } from './types/pending-markers-dialog-props'
 
 const PENDING_MARKER_LABELS: Readonly<Record<string, string>> = {
   area_juridica: 'Área jurídica',

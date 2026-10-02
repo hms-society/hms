@@ -11,18 +11,9 @@ import {
   DialogTitle,
 } from '@/ui/shadcn/dialog'
 import { Icon } from '@/ui/shared/widgets/components/icon'
-import type { DocumentPendingMarker } from '@hms/core/document-production/domain/structures'
+import type { PendingMarkersDialogProps } from './types/pending-markers-dialog-props'
 
-export type PendingMarkersDialogProps = {
-  open: boolean
-  markers: readonly DocumentPendingMarker[]
-  isRemoving: boolean
-  onOpenChange: (open: boolean) => void
-  onLocate: (marker: string) => void
-  onFill: (marker: string, value: string) => void
-  onRemove: (marker: string) => void
-  onRemoveAll: () => void
-}
+export type { PendingMarkersDialogProps } from './types/pending-markers-dialog-props'
 
 export const PendingMarkersDialog = ({
   open,

@@ -63,3 +63,16 @@ Será registrado após a publicação; nenhuma execução remota alegada nesta e
 - Fluxo real `/tmp/hms-pr-browser.cjs` repetido após correção: aprovado, zero erros de console/rede; screenshots e trace renovados. Enter abre Preencher, Cancelar desfaz o formulário e Fechar encerra o diálogo.
 - PRD Produção Documental confirmado via Atlassian HMS: página 2588673, versão 16, parent 2523137; seção 12.5 contém o bloqueio aprovado pelo usuário nesta sessão.
 - `pnpm --filter web build`: aprovado novamente após a correção responsiva; log temporário `/tmp/hms-pr-web-build.log`.
+
+### Correção de CI — ciclo de dependências
+
+Web App CI falhou na arquitetura em
+https://github.com/hms-society/hms/actions/runs/37041452775
+(head `d3d7103f1655b08ba4273976aa67ee316f82576e`). Reproduzido localmente
+por `pnpm --filter web check:architecture`: importação de tipo do hook para
+index.tsx fechava um ciclo com a importação do hook pelo componente.
+FND-04: contrato de props movido para `types/pending-markers-dialog-props.ts`,
+reexportado pelo widget; comportamento e markup preservados. EV-07 Web anterior
+à extração do hook não cobria esse estado e foi invalidado.
+
+FND-04 resolvido: `pnpm --filter web check:architecture` passou (654 módulos, 2721 dependências); `pnpm --filter web check:types` e os 31 testes focados da revisão também passaram. Biome corrigiu somente newline final do novo arquivo de tipo. Extração altera somente importações de tipos; markup e handlers permanecem idênticos às capturas já verificadas.
