@@ -68,6 +68,31 @@ describe('List Case Portal Pending Checklist Use Case', () => {
     ).rejects.toThrow('não possui acesso')
     expect(checklistItemsRepository.listByCaseId).not.toHaveBeenCalled()
   })
+
+  it('denies pending documents when the grant does not allow uploads', async () => {
+    const legalCase = LegalCaseFaker.fake()
+    legalCasesRepository.findById.mockResolvedValue(legalCase)
+    grantsRepository.findActiveByTokenHashAndCase.mockResolvedValue({
+      id: faker.string.uuid(),
+      caseId: legalCase.id,
+      tokenHash: faker.string.hexadecimal({ length: 64 }),
+      canView: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: false,
+      canUpload: false,
+      status: 'active',
+      grantedBy: faker.string.uuid(),
+      createdAt: new Date(),
+    })
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        tokenHash: faker.string.hexadecimal({ length: 64 }),
+      }),
+    ).rejects.toThrow('permissão para visualizar pendências')
+    expect(checklistItemsRepository.listByCaseId).not.toHaveBeenCalled()
+  })
 })
 
 function checklistItem(

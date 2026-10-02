@@ -39,6 +39,15 @@ describe('CaseManagementService', () => {
       thirdPartyId: 'third-party-1',
     })
   })
+
+  it('lists active portal links for a case', async () => {
+    const restClient = makeRestClient()
+    const service = CaseManagementService(restClient)
+
+    await service.listCasePortalAccess('case-1')
+
+    expect(restClient.get).toHaveBeenCalledWith('/cases/case-1/portal-access')
+  })
 })
 
 function makeRestClient(): RestClient {

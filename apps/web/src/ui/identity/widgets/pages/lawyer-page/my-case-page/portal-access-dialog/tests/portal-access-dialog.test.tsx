@@ -39,6 +39,7 @@ describe('PortalAccessDialog', () => {
     })
     rerender(
       <PortalAccessDialog
+        canViewCaseStatus
         expiresAt={null}
         onCopy={vi.fn()}
         onGenerate={onGenerate}
@@ -93,8 +94,51 @@ describe('PortalAccessDialog', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: 'Link para terceiro gerado' })).toBeTruthy()
-    expect(screen.getByText(/permanece válido enquanto o acesso estiver ativo/i)).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Link para terceiro gerado' }),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(/permanece válido enquanto o acesso estiver ativo/i),
+    ).toBeTruthy()
     expect(screen.getByDisplayValue(/third-party-portal/)).toBeTruthy()
+  })
+
+  it('restores the previously selected third party permissions', () => {
+    render(
+      <PortalAccessDialog
+        canViewCaseStatus={false}
+        canViewIntakeStatus
+        canUpload={false}
+        expiresAt={null}
+        onCopy={vi.fn()}
+        onOpenChange={vi.fn()}
+        open
+        selectedThirdPartyId={thirdParty.id}
+        thirdParties={[thirdParty]}
+        url={null}
+      />,
+    )
+
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Visualizar status do caso',
+        }) as HTMLInputElement
+      ).checked,
+    ).toBe(false)
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Visualizar status do intake',
+        }) as HTMLInputElement
+      ).checked,
+    ).toBe(true)
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Permitir envio de documentos',
+        }) as HTMLInputElement
+      ).checked,
+    ).toBe(false)
   })
 })
