@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePendingMarkersDialog } from './use-pending-markers-dialog'
 import { Input } from '@/ui/shadcn/input'
 import { Button } from '@/ui/shadcn/button'
 import {
@@ -24,29 +24,6 @@ export type PendingMarkersDialogProps = {
   onRemoveAll: () => void
 }
 
-const pendingMarkerLabels: Readonly<Record<string, string>> = {
-  area_juridica: 'Área jurídica',
-  cliente_cpf: 'CPF do cliente',
-  cliente_nome: 'Nome do cliente',
-  endereco_imovel_comercial: 'Endereço do imóvel comercial',
-  orientacao_fornecida: 'Orientação fornecida',
-  questao_juridica_principal: 'Questão jurídica principal',
-  tema_juridico: 'Tema jurídico',
-  valor_honorarios: 'Valor dos honorários',
-}
-
-function getPendingMarkerLabel(marker: string) {
-  const technicalName = marker.replace(/^\{+|\}+$/g, '')
-  const knownLabel = pendingMarkerLabels[technicalName]
-  if (knownLabel) return knownLabel
-
-  return technicalName
-    .split('_')
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase() + part.slice(1))
-    .join(' ')
-}
-
 export const PendingMarkersDialog = ({
   open,
   markers,
@@ -57,20 +34,20 @@ export const PendingMarkersDialog = ({
   onFill,
   onRemoveAll,
 }: PendingMarkersDialogProps) => {
-  const [editingMarker, setEditingMarker] = useState<string>()
-  const [value, setValue] = useState('')
-
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) {
-      setEditingMarker(undefined)
-      setValue('')
-    }
-    onOpenChange(nextOpen)
-  }
+  const {
+    editingMarker,
+    value,
+    handleOpenChange,
+    handleStartFilling,
+    handleCancelFilling,
+    handleValueChange,
+    handleSubmit,
+    getPendingMarkerLabel,
+  } = usePendingMarkersDialog({ isRemoving, onOpenChange, onFill })
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Pendências do documento</DialogTitle>
           <DialogDescription>
@@ -100,10 +77,7 @@ export const PendingMarkersDialog = ({
                     size='sm'
                     variant='outline'
                     disabled={isRemoving}
-                    onClick={() => {
-                      setEditingMarker(item.marker)
-                      setValue('')
-                    }}
+                    onClick={() => handleStartFilling(item.marker)}
                   >
                     <Icon name='pencil' className='size-3.5' />
                     Preencher
@@ -133,11 +107,8 @@ export const PendingMarkersDialog = ({
                 </div>
                 {editingMarker === item.marker && (
                   <form
-                    className='flex w-full flex-wrap items-end gap-2'
-                    onSubmit={(event) => {
-                      event.preventDefault()
-                      if (value.trim() && !isRemoving) onFill(item.marker, value)
-                    }}
+                    className='flex w-full flex-col gap-2 sm:flex-row sm:items-end'
+                    onSubmit={handleSubmit}
                   >
                     <div className='min-w-0 flex-1 space-y-2'>
                       <label
@@ -151,7 +122,7 @@ export const PendingMarkersDialog = ({
                         autoFocus
                         value={value}
                         disabled={isRemoving}
-                        onChange={(event) => setValue(event.target.value)}
+                        onChange={handleValueChange}
                       />
                       <p className='text-xs text-muted-foreground'>
                         O valor substituirá este marcador em todo o documento e será salvo
@@ -170,7 +141,7 @@ export const PendingMarkersDialog = ({
                       size='sm'
                       variant='outline'
                       disabled={isRemoving}
-                      onClick={() => setEditingMarker(undefined)}
+                      onClick={handleCancelFilling}
                     >
                       Cancelar
                     </Button>
