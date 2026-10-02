@@ -41,7 +41,20 @@ export abstract class MastraAgent<
         productionModels,
         config.id,
       ),
+      ...(!developmentModels &&
+        MastraAgent.usesOpenAiWithLowReasoningEffort(envProvider) && {
+          defaultGenerateOptionsLegacy: {
+            providerOptions: { openai: { reasoningEffort: 'low' } },
+          },
+        }),
     })
+  }
+
+  private static usesOpenAiWithLowReasoningEffort(envProvider: EnvProvider): boolean {
+    return (
+      envProvider.get('HMS_SERVER_APP_MODE') === 'dev' &&
+      envProvider.get('AI_PROVIDER') === 'openai'
+    )
   }
 
   private static resolveModel(
@@ -55,6 +68,31 @@ export abstract class MastraAgent<
     const isDevelopment = envProvider.get('HMS_SERVER_APP_MODE') === 'dev'
 
     if (isDevelopment && !developmentModels) {
+      const aiProvider = envProvider.get('AI_PROVIDER')
+      const usesVisionModel = localModelEnvKey === 'OLLAMA_VISION_AI_MODEL'
+
+      if (aiProvider === 'openai') {
+        return MastraAgent.resolveExternalModel(
+          'openai',
+          usesVisionModel
+            ? envProvider.get('OPENAI_VISION_AI_MODEL')
+            : envProvider.get('OPENAI_AI_MODEL'),
+          envProvider.get('OPENAI_API_KEY'),
+          'https://api.openai.com/v1',
+        )
+      }
+
+      if (aiProvider === 'gemini') {
+        return MastraAgent.resolveExternalModel(
+          'gemini',
+          usesVisionModel
+            ? envProvider.get('GEMINI_VISION_AI_MODEL')
+            : envProvider.get('GEMINI_AI_MODEL'),
+          envProvider.get('GEMINI_API_KEY'),
+          'https://generativelanguage.googleapis.com/v1beta/openai/',
+        )
+      }
+
       return {
         providerId: 'ollama',
         modelId: envProvider.get(localModelEnvKey),
@@ -115,5 +153,28 @@ export abstract class MastraAgent<
     return envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
       ? [{ model: new ObservedMastraModel(model, agentId, 0) }]
       : model
+  }
+
+  private static resolveExternalModel(
+    providerId: 'openai' | 'gemini',
+    modelId: string | undefined,
+    apiKey: string | undefined,
+    url: string,
+  ): OpenAICompatibleConfig {
+    if (!apiKey) {
+      throw new AppError(
+        `Configure a credencial do ${providerId} para usar esse provedor em desenvolvimento.`,
+        'Erro de Configuração de IA',
+      )
+    }
+
+    if (!modelId) {
+      throw new AppError(
+        `Configure o ID do modelo do ${providerId} para usar esse provedor em desenvolvimento.`,
+        'Erro de Configuração de IA',
+      )
+    }
+
+    return { providerId, modelId, url, apiKey }
   }
 }
