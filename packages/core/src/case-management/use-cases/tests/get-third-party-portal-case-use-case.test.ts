@@ -38,7 +38,39 @@ describe('GetThirdPartyPortalCaseUseCase', () => {
       intakeId: legalCase.intakeId,
       updatedAt: legalCase.updatedAt,
       canUpload: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
     })
+  })
+
+  it('hides case status when the link only allows intake visibility', async () => {
+    const legalCase = LegalCaseFaker.fake({ id: 'case-1' })
+    const repository = mock<LegalCasesRepository>()
+    repository.getCaseDetails.mockResolvedValue({
+      id: legalCase.id,
+      intakeId: legalCase.intakeId,
+      publicCode: legalCase.publicCode,
+      title: legalCase.title,
+      clientName: 'Cliente do portal',
+      legalArea: 'Direito civil',
+      legalTopic: 'Contratos',
+      status: legalCase.status,
+      openedAt: legalCase.openedAt,
+      updatedAt: legalCase.updatedAt,
+      checklistGate: legalCase.checklistGate,
+      dossierGate: legalCase.dossierGate,
+      team: [],
+    })
+    const useCase = new GetThirdPartyPortalCaseUseCase(repository)
+    const grant = { ...grantFixture(), canViewCaseStatus: false }
+
+    await expect(useCase.execute({ caseId: legalCase.id, grant })).resolves.toMatchObject(
+      {
+        status: undefined,
+        canViewCaseStatus: false,
+        canViewIntakeStatus: true,
+      },
+    )
   })
 })
 
@@ -49,6 +81,8 @@ function grantFixture(): CasePortalAccessGrant {
     thirdPartyId: 'third-party-1',
     tokenHash: 'hash',
     canView: true,
+    canViewCaseStatus: true,
+    canViewIntakeStatus: true,
     canUpload: true,
     status: 'active',
     grantedBy: 'collaborator-1',

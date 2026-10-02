@@ -11,8 +11,6 @@ export * from '@/identity/database/drizzle/models/registration-attempt-status-mo
 export * from '@/identity/database/drizzle/models/tax-id-type-model'
 export * from '@/identity/database/drizzle/models/third-party-document-type-model'
 export * from '@/identity/database/drizzle/models/third-party-model'
-export * from '@/identity/database/drizzle/models/third-party-permission-model'
-export * from '@/identity/database/drizzle/models/third-party-permission-grant-model'
 export * from '@/identity/database/drizzle/models/third-party-status-model'
 export * from '@/identity/database/drizzle/models/third-party-type-model'
 export * from '@/identity/database/drizzle/models/user-model'

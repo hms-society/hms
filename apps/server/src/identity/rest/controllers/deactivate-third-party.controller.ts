@@ -4,7 +4,6 @@ import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type {
   ThirdPartyAuditLogsRepository,
   ThirdPartiesRepository,
-  ThirdPartyPermissionsRepository,
 } from '@hms/core/identity/interfaces'
 import { DeactivateThirdPartyUseCase } from '@hms/core/identity/use-cases'
 
@@ -29,13 +28,10 @@ export class DeactivateThirdPartyController {
     thirdPartiesRepository: ThirdPartiesRepository,
     @Inject(IDENTITY_REPOSITORIES.thirdPartyAuditLogs)
     auditLogsRepository: ThirdPartyAuditLogsRepository,
-    @Inject(IDENTITY_REPOSITORIES.thirdPartyPermissions)
-    permissionsRepository: ThirdPartyPermissionsRepository,
   ) {
     this.useCase = new DeactivateThirdPartyUseCase(
       thirdPartiesRepository,
       auditLogsRepository,
-      permissionsRepository,
     )
   }
 

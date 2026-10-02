@@ -9,4 +9,3 @@ export * from '@/identity/database/drizzle/repositories/drizzle-intake-clients-r
 export * from '@/identity/database/drizzle/repositories/drizzle-intake-responsibles-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-third-parties-repository'
 export * from '@/identity/database/drizzle/repositories/drizzle-third-party-audit-logs-repository'
-export * from '@/identity/database/drizzle/repositories/drizzle-third-party-permissions-repository'

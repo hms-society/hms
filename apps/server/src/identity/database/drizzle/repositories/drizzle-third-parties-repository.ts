@@ -52,6 +52,41 @@ export class DrizzleThirdPartiesRepository
     return thirdParties.map((thirdParty) => this.thirdPartyMapper.toDomain(thirdParty))
   }
 
+  async update(
+    thirdPartyId: string,
+    changes: Partial<ThirdPartyCreation>,
+  ): Promise<ThirdParty | undefined> {
+    const [updatedThirdParty] = await this.database
+      .update(thirdPartyModel)
+      .set({
+        ...(changes.type ? { type: changes.type } : {}),
+        ...(changes.legalName ? { legalName: changes.legalName } : {}),
+        ...(changes.tradeName !== undefined
+          ? { tradeName: changes.tradeName ?? null }
+          : {}),
+        ...(changes.taxId
+          ? {
+              taxIdType: changes.taxId.type,
+              taxIdValue: changes.taxId.value,
+              taxIdDescription: changes.taxId.description ?? null,
+            }
+          : {}),
+        ...(changes.internalResponsibleId
+          ? { internalResponsibleId: changes.internalResponsibleId }
+          : {}),
+        ...(changes.relationshipTypes
+          ? { relationshipTypes: changes.relationshipTypes }
+          : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(thirdPartyModel.id, thirdPartyId))
+      .returning()
+
+    return updatedThirdParty
+      ? this.thirdPartyMapper.toDomain(updatedThirdParty)
+      : undefined
+  }
+
   async updateStatus(
     thirdPartyId: string,
     status: ThirdPartyStatus,

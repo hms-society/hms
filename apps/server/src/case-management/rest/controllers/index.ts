@@ -9,6 +9,7 @@ export { ReviewCaseChecklistGateController } from './review-case-checklist-gate.
 export { CreateLegalCaseController } from './create-legal-case.controller'
 export { GetLegalCaseDetailsController } from './get-legal-case-details.controller'
 export { GrantCasePortalAccessController } from './grant-case-portal-access.controller'
+export { ListCasePortalAccessController } from './list-case-portal-access.controller'
 export { RevokeCasePortalAccessController } from './revoke-case-portal-access.controller'
 export { ListCasePortalPendingChecklistController } from './list-case-portal-pending-checklist.controller'
 export { UploadCasePortalDocumentController } from './upload-case-portal-document.controller'

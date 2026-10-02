@@ -31,11 +31,25 @@ export type GrantCasePortalAccessResponse = {
   portalAccessUrl: string
   expiresAt: string | null
   canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
 }
 
 export type GrantCasePortalAccessRequest = {
   canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
   thirdPartyId?: string
+}
+
+export type CasePortalAccessSummary = {
+  grantId: string
+  caseId: string
+  thirdPartyId?: string
+  canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+  createdAt: string
 }
 
 export type ThirdPartyPortalCaseResponse = {
@@ -43,10 +57,12 @@ export type ThirdPartyPortalCaseResponse = {
   publicCode: string
   title: string
   clientName: string
-  status: LegalCase['status']
+  status?: LegalCase['status']
   intakeId: string
   updatedAt: string
   canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
   intake?: {
     id: string
     status: string
@@ -119,6 +135,9 @@ export interface CaseManagementService {
     caseId: string,
     request: GrantCasePortalAccessRequest,
   ): Promise<RestResponse<GrantCasePortalAccessResponse>>
+  listCasePortalAccess(
+    caseId: string,
+  ): Promise<RestResponse<readonly CasePortalAccessSummary[]>>
 
   reviewChecklistGate(
     caseId: string,

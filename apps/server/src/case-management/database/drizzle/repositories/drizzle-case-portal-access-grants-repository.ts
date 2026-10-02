@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CasePortalAccessGrantStatus } from '@hms/core/case-management/domain/structures'
 import type { CasePortalAccessGrantsRepository } from '@hms/core/case-management/interfaces'
-import { and, eq, gt, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull, or } from 'drizzle-orm'
 
 import { DrizzleCasePortalAccessGrantMapper } from '@/case-management/database/drizzle/mappers/drizzle-case-portal-access-grant-mapper'
 import { casePortalAccessGrantModel } from '@/case-management/database/drizzle/models/case-portal-access-grant-model'
@@ -77,6 +77,39 @@ export class DrizzleCasePortalAccessGrantsRepository
       .limit(1)
 
     return grant ? this.mapper.toDomain(grant) : undefined
+  }
+
+  async findByCaseId(
+    caseId: string,
+  ): ReturnType<CasePortalAccessGrantsRepository['findByCaseId']> {
+    const grants = await this.database
+      .select()
+      .from(casePortalAccessGrantModel)
+      .where(
+        and(
+          eq(casePortalAccessGrantModel.caseId, caseId),
+          eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
+        ),
+      )
+      .orderBy(desc(casePortalAccessGrantModel.createdAt))
+
+    return grants.map((grant) => this.mapper.toDomain(grant))
+  }
+
+  async revokeActiveByCaseAndThirdParty(
+    caseId: string,
+    thirdPartyId: string,
+  ): Promise<void> {
+    await this.database
+      .update(casePortalAccessGrantModel)
+      .set({ status: CasePortalAccessGrantStatus.Revoked, revokedAt: new Date() })
+      .where(
+        and(
+          eq(casePortalAccessGrantModel.caseId, caseId),
+          eq(casePortalAccessGrantModel.thirdPartyId, thirdPartyId),
+          eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
+        ),
+      )
   }
 
   async revoke(

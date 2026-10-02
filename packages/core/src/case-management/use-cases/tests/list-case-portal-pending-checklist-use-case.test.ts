@@ -40,6 +40,8 @@ describe('List Case Portal Pending Checklist Use Case', () => {
       caseId: legalCase.id,
       tokenHash,
       canView: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
       canUpload: true,
       status: 'active',
       grantedBy: faker.string.uuid(),

@@ -5,6 +5,7 @@ export type ThirdPartyAuditLog = {
   readonly actorProfile: string
   readonly action:
     | 'created'
+    | 'updated'
     | 'deactivated'
     | 'reactivated'
     | 'permission_granted'

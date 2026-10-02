@@ -6,6 +6,8 @@ export type CasePortalAccessGrant = Entity & {
   thirdPartyId?: string
   tokenHash: string
   canView: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
   canUpload: boolean
   status: CasePortalAccessGrantStatus
   expiresAt?: Date

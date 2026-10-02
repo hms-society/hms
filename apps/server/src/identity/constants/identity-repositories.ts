@@ -8,6 +8,5 @@ export const IDENTITY_REPOSITORIES = {
   registrationAttempts: Symbol('IDENTITY_REPOSITORIES.registrationAttempts'),
   thirdParties: Symbol('IDENTITY_REPOSITORIES.thirdParties'),
   thirdPartyAuditLogs: Symbol('IDENTITY_REPOSITORIES.thirdPartyAuditLogs'),
-  thirdPartyPermissions: Symbol('IDENTITY_REPOSITORIES.thirdPartyPermissions'),
   transaction: Symbol('IDENTITY_REPOSITORIES.transaction'),
 } as const

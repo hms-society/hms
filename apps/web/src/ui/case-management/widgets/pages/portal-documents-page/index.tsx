@@ -134,15 +134,25 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
     isLoading,
     error,
     refetch,
-  } =
-    usePortalDocumentsPage(caseId, portalToken)
+  } = usePortalDocumentsPage(caseId, portalToken)
   const { caseManagementService } = useRestContext()
   const queryClient = useQueryClient()
   const [selectedItem, setSelectedItem] = useState<CaseChecklistItem | null>(null)
   const [uploadResult, setUploadResult] = useState<PortalDocumentUploadResponse | null>(
     null,
   )
-  const [activeSection, setActiveSection] = useState<'documents' | 'tracking'>('documents')
+  const [activeSection, setActiveSection] = useState<'documents' | 'tracking'>(
+    'documents',
+  )
+  const canUpload = portalCase?.canUpload === true
+  const canViewTracking =
+    portalCase?.canViewCaseStatus === true || portalCase?.canViewIntakeStatus === true
+  const visibleSection =
+    activeSection === 'documents' && canUpload
+      ? 'documents'
+      : canViewTracking
+        ? 'tracking'
+        : 'documents'
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -230,7 +240,9 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
             Portal do terceiro
           </h1>
           <p className='mt-2 max-w-2xl font-sans text-sm leading-6 text-muted-foreground'>
-            Acompanhe o caso e envie os documentos solicitados com segurança.
+            {canUpload
+              ? 'Acompanhe o caso e envie os documentos solicitados com segurança.'
+              : 'Acompanhe as atualizações disponíveis para este acesso.'}
           </p>
           {portalCase && (
             <div className='mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-3'>
@@ -264,26 +276,30 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
 
         <div className='grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]'>
           <nav className='flex gap-2 rounded-xl border border-border bg-card p-2 shadow-card lg:flex-col lg:self-start'>
-            <button
-              type='button'
-              className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${activeSection === 'documents' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-              onClick={() => setActiveSection('documents')}
-            >
-              <Icon name='file-text' className='size-4' />
-              Documentos
-            </button>
-            <button
-              type='button'
-              className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${activeSection === 'tracking' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-              onClick={() => setActiveSection('tracking')}
-            >
-              <Icon name='chart-line' className='size-4' />
-              Acompanhamento
-            </button>
+            {canUpload && (
+              <button
+                type='button'
+                className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${visibleSection === 'documents' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                onClick={() => setActiveSection('documents')}
+              >
+                <Icon name='file-text' className='size-4' />
+                Documentos
+              </button>
+            )}
+            {canViewTracking && (
+              <button
+                type='button'
+                className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${visibleSection === 'tracking' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                onClick={() => setActiveSection('tracking')}
+              >
+                <Icon name='chart-line' className='size-4' />
+                Acompanhamento
+              </button>
+            )}
           </nav>
 
           <div className='flex flex-col gap-6'>
-            {activeSection === 'tracking' && portalCase ? (
+            {visibleSection === 'tracking' && portalCase ? (
               <section className='rounded-xl border border-border bg-card p-5 shadow-card sm:p-6'>
                 <div className='flex items-start justify-between gap-4'>
                   <div>
@@ -294,22 +310,26 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
                       Consulte as atualizações disponíveis para este acesso.
                     </p>
                   </div>
-                  <Badge
-                    variant='info'
-                    className='rounded-pill px-2.5 py-1 text-[11px] font-semibold'
-                  >
-                    {getStatusLabel(portalCase.status)}
-                  </Badge>
+                  {portalCase.canViewCaseStatus && portalCase.status && (
+                    <Badge
+                      variant='info'
+                      className='rounded-pill px-2.5 py-1 text-[11px] font-semibold'
+                    >
+                      {getStatusLabel(portalCase.status)}
+                    </Badge>
+                  )}
                 </div>
                 <div className='mt-6 space-y-4 border-l-2 border-highlight pl-5'>
-                  <div>
-                    <p className='font-sans text-sm font-semibold text-foreground'>
-                      Status do caso
-                    </p>
-                    <p className='mt-1 font-sans text-sm text-muted-foreground'>
-                      {getStatusLabel(portalCase.status)}
-                    </p>
-                  </div>
+                  {portalCase.canViewCaseStatus && portalCase.status && (
+                    <div>
+                      <p className='font-sans text-sm font-semibold text-foreground'>
+                        Status do caso
+                      </p>
+                      <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                        {getStatusLabel(portalCase.status)}
+                      </p>
+                    </div>
+                  )}
                   {portalCase.intake && (
                     <div>
                       <p className='font-sans text-sm font-semibold text-foreground'>

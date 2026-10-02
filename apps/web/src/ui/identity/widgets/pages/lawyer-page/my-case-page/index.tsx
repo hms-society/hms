@@ -23,6 +23,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     caseLegalArea,
     caseTitle,
     caseUuid,
+    canViewCaseStatus,
+    canViewIntakeStatus,
+    canUpload,
     caseDetails,
     checklistItems,
     completionPercentage,
@@ -38,6 +41,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     portalAccessExpiresAt,
     portalAccessUrl,
     selectedThirdPartyId,
+    setCanViewCaseStatus,
+    setCanViewIntakeStatus,
+    setCanUpload,
     setSelectedThirdPartyId,
     thirdParties,
     setActiveTab,
@@ -239,6 +245,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
 
       <PortalAccessDialog
         expiresAt={portalAccessExpiresAt}
+        canViewCaseStatus={canViewCaseStatus}
+        canViewIntakeStatus={canViewIntakeStatus}
+        canUpload={canUpload}
         isGenerating={isGeneratingPortalLink}
         onGenerate={handleGeneratePortalLink}
         onCopy={handleCopyPortalLink}
@@ -251,6 +260,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         }}
         open={Boolean(portalAccessUrl) || isPortalPickerOpen}
         selectedThirdPartyId={selectedThirdPartyId}
+        onCanViewCaseStatusChange={setCanViewCaseStatus}
+        onCanViewIntakeStatusChange={setCanViewIntakeStatus}
+        onCanUploadChange={setCanUpload}
         onThirdPartyChange={setSelectedThirdPartyId}
         thirdParties={thirdParties}
         url={portalAccessUrl}

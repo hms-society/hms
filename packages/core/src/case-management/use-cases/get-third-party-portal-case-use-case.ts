@@ -9,10 +9,12 @@ export type ThirdPartyPortalCaseView = {
   publicCode: string
   title: string
   clientName: string
-  status: LegalCase['status']
+  status?: LegalCase['status']
   intakeId: string
   updatedAt: Date
   canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
 }
 
 type Request = {
@@ -34,10 +36,12 @@ export class GetThirdPartyPortalCaseUseCase
       publicCode: legalCase.publicCode,
       title: legalCase.title,
       clientName: legalCase.clientName,
-      status: legalCase.status,
+      status: grant.canViewCaseStatus ? legalCase.status : undefined,
       intakeId: legalCase.intakeId,
       updatedAt: legalCase.updatedAt,
       canUpload: grant.canUpload,
+      canViewCaseStatus: grant.canViewCaseStatus,
+      canViewIntakeStatus: grant.canViewIntakeStatus,
     }
   }
 }

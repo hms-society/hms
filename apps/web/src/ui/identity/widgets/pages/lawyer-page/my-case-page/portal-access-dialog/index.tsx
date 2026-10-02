@@ -12,10 +12,16 @@ import { Input } from '@/ui/shadcn/input'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
 export type PortalAccessDialogProps = {
+  canViewCaseStatus?: boolean
+  canViewIntakeStatus?: boolean
+  canUpload?: boolean
   expiresAt: string | null
   isGenerating?: boolean
   onGenerate?: () => void
   onCopy: () => void
+  onCanViewCaseStatusChange?: (value: boolean) => void
+  onCanViewIntakeStatusChange?: (value: boolean) => void
+  onCanUploadChange?: (value: boolean) => void
   onOpenChange: (open: boolean) => void
   open: boolean
   selectedThirdPartyId?: string
@@ -25,10 +31,16 @@ export type PortalAccessDialogProps = {
 }
 
 export const PortalAccessDialog = ({
+  canViewCaseStatus = false,
+  canViewIntakeStatus = false,
+  canUpload = false,
   expiresAt,
   isGenerating = false,
   onGenerate,
   onCopy,
+  onCanViewCaseStatusChange = () => {},
+  onCanViewIntakeStatusChange = () => {},
+  onCanUploadChange = () => {},
   onOpenChange,
   open,
   selectedThirdPartyId = '',
@@ -66,12 +78,7 @@ export const PortalAccessDialog = ({
               Link de acesso
             </label>
             <div className='flex flex-col gap-2 sm:flex-row'>
-              <Input
-                id='portal-access-url'
-                readOnly
-                value={url}
-                className='min-w-0'
-              />
+              <Input id='portal-access-url' readOnly value={url} className='min-w-0' />
               <Button type='button' className='rounded-full sm:shrink-0' onClick={onCopy}>
                 <Icon name='copy' className='size-4' />
                 Copiar link
@@ -79,7 +86,7 @@ export const PortalAccessDialog = ({
             </div>
           </div>
         ) : (
-          <div className='flex flex-col gap-2'>
+          <div className='flex flex-col gap-5'>
             <label
               htmlFor='portal-third-party'
               className='text-sm font-medium text-foreground'
@@ -99,6 +106,42 @@ export const PortalAccessDialog = ({
                 </option>
               ))}
             </select>
+            <fieldset className='space-y-3'>
+              <legend className='text-sm font-medium text-foreground'>
+                Permissões deste link
+              </legend>
+              <div className='grid gap-3 sm:grid-cols-2'>
+                <label className='flex items-center gap-2 text-sm text-foreground'>
+                  <input
+                    type='checkbox'
+                    checked={canViewCaseStatus}
+                    onChange={(event) => onCanViewCaseStatusChange(event.target.checked)}
+                    className='size-4 accent-primary'
+                  />
+                  Visualizar status do caso
+                </label>
+                <label className='flex items-center gap-2 text-sm text-foreground'>
+                  <input
+                    type='checkbox'
+                    checked={canViewIntakeStatus}
+                    onChange={(event) =>
+                      onCanViewIntakeStatusChange(event.target.checked)
+                    }
+                    className='size-4 accent-primary'
+                  />
+                  Visualizar status do intake
+                </label>
+                <label className='flex items-center gap-2 text-sm text-foreground sm:col-span-2'>
+                  <input
+                    type='checkbox'
+                    checked={canUpload}
+                    onChange={(event) => onCanUploadChange(event.target.checked)}
+                    className='size-4 accent-primary'
+                  />
+                  Permitir envio de documentos
+                </label>
+              </div>
+            </fieldset>
           </div>
         )}
 
@@ -117,7 +160,11 @@ export const PortalAccessDialog = ({
             <Button
               type='button'
               className='rounded-full'
-              disabled={!selectedThirdPartyId || isGenerating}
+              disabled={
+                !selectedThirdPartyId ||
+                (!canViewCaseStatus && !canViewIntakeStatus && !canUpload) ||
+                isGenerating
+              }
               onClick={onGenerate}
             >
               {isGenerating ? 'Gerando link...' : 'Gerar link'}

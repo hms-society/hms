@@ -24,6 +24,8 @@ export const casePortalAccessGrantModel = pgTable(
     }),
     tokenHash: text('token_hash').notNull(),
     canView: boolean('can_view').default(false).notNull(),
+    canViewCaseStatus: boolean('can_view_case_status').default(false).notNull(),
+    canViewIntakeStatus: boolean('can_view_intake_status').default(false).notNull(),
     canUpload: boolean('can_upload').default(false).notNull(),
     status: casePortalAccessGrantStatusModel('status').default('active').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }),

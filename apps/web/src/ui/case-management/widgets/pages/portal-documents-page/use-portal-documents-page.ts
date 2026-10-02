@@ -20,7 +20,7 @@ export function usePortalDocumentsPage(caseId: string, portalToken: string) {
 
   const checklistQuery = useQuery({
     queryKey: ['portal-pending-checklist', caseId, portalToken],
-    enabled: Boolean(caseId && portalToken),
+    enabled: Boolean(caseId && portalToken && portalCaseQuery.data?.canUpload),
     queryFn: async () => {
       const response = await caseManagementService.listPortalPendingChecklist(
         caseId,
@@ -44,7 +44,8 @@ export function usePortalDocumentsPage(caseId: string, portalToken: string) {
     isFetching: checklistQuery.isFetching || portalCaseQuery.isFetching,
     error: checklistQuery.error ?? portalCaseQuery.error,
     refetch: async () => {
-      await Promise.all([checklistQuery.refetch(), portalCaseQuery.refetch()])
+      await portalCaseQuery.refetch()
+      if (portalCaseQuery.data?.canUpload) await checklistQuery.refetch()
     },
   }
 }

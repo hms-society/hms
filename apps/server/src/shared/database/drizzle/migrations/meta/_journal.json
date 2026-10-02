@@ -414,6 +414,13 @@
       "when": 1790864350987,
       "tag": "0055_lean_thanos",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1790955246072,
+      "tag": "0056_move_portal_permissions_to_case_grants",
+      "breakpoints": true
     }
   ]
 }

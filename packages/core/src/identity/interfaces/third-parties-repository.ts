@@ -6,6 +6,10 @@ export interface ThirdPartiesRepository {
   add(thirdParty: ThirdPartyCreation): Promise<ThirdParty | undefined>
   findById(thirdPartyId: string): Promise<ThirdParty | undefined>
   findAll(): Promise<ThirdParty[]>
+  update(
+    thirdPartyId: string,
+    changes: Partial<ThirdPartyCreation>,
+  ): Promise<ThirdParty | undefined>
   updateStatus(
     thirdPartyId: string,
     status: ThirdPartyStatus,

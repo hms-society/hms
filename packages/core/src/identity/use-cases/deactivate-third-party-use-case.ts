@@ -5,7 +5,6 @@ import { InvalidThirdPartyDataError, ThirdPartyNotFoundError } from '../domain/e
 import { ThirdPartyStatus } from '../domain/structures'
 import type { ThirdPartyAuditLogsRepository } from '../interfaces/third-party-audit-logs-repository'
 import type { ThirdPartiesRepository } from '../interfaces/third-parties-repository'
-import type { ThirdPartyPermissionsRepository } from '../interfaces/third-party-permissions-repository'
 
 export type DeactivateThirdPartyRequest = {
   readonly actorId: string
@@ -19,7 +18,6 @@ export class DeactivateThirdPartyUseCase
   constructor(
     private readonly thirdPartiesRepository: ThirdPartiesRepository,
     private readonly auditLogsRepository?: ThirdPartyAuditLogsRepository,
-    private readonly permissionsRepository?: ThirdPartyPermissionsRepository,
   ) {}
 
   async execute(request: DeactivateThirdPartyRequest): Promise<ThirdParty> {
@@ -37,8 +35,6 @@ export class DeactivateThirdPartyUseCase
       ThirdPartyStatus.Inactive,
     )
     if (!updated) throw new ThirdPartyNotFoundError()
-
-    await this.permissionsRepository?.revokeAll(thirdParty.id)
 
     await this.auditLogsRepository?.create({
       actorId: request.actorId,

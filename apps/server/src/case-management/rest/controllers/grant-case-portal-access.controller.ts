@@ -26,7 +26,12 @@ import {
   hashPortalAccessToken,
 } from '@/case-management/security/portal-access-token'
 
-type RequestBody = { canUpload: boolean; thirdPartyId?: string }
+type RequestBody = {
+  canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+  thirdPartyId?: string
+}
 
 @CasesController()
 export class GrantCasePortalAccessController {
@@ -55,8 +60,15 @@ export class GrantCasePortalAccessController {
     @Body() body: RequestBody | undefined,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    if (!body || typeof body.canUpload !== 'boolean') {
-      throw new BadRequestException('Informe canUpload no corpo da requisição.')
+    if (
+      !body ||
+      typeof body.canUpload !== 'boolean' ||
+      typeof body.canViewCaseStatus !== 'boolean' ||
+      typeof body.canViewIntakeStatus !== 'boolean'
+    ) {
+      throw new BadRequestException(
+        'Informe as permissões do link no corpo da requisição.',
+      )
     }
 
     if (!body.thirdPartyId) {
@@ -80,6 +92,8 @@ export class GrantCasePortalAccessController {
       thirdPartyId: body.thirdPartyId,
       collaboratorId: collaborator.collaboratorId,
       isAdministrator: collaborator.profile === 'admin',
+      canViewCaseStatus: body.canViewCaseStatus,
+      canViewIntakeStatus: body.canViewIntakeStatus,
       tokenHash: hashPortalAccessToken(accessToken),
       canUpload: body.canUpload,
       expiresAt: undefined,
@@ -92,6 +106,8 @@ export class GrantCasePortalAccessController {
       accessToken,
       portalAccessUrl: `/third-party-portal/cases/${grant.caseId}?portalToken=${accessToken}`,
       expiresAt: grant.expiresAt?.toISOString() ?? null,
+      canViewCaseStatus: grant.canViewCaseStatus,
+      canViewIntakeStatus: grant.canViewIntakeStatus,
       canUpload: grant.canUpload,
     }
   }

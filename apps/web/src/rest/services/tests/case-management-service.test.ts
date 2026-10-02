@@ -8,10 +8,16 @@ describe('CaseManagementService', () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)
 
-    await service.grantCasePortalAccess('case-1', { canUpload: true })
+    await service.grantCasePortalAccess('case-1', {
+      canUpload: true,
+      canViewCaseStatus: false,
+      canViewIntakeStatus: false,
+    })
 
     expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/portal-access', {
       canUpload: true,
+      canViewCaseStatus: false,
+      canViewIntakeStatus: false,
     })
   })
 
@@ -21,11 +27,15 @@ describe('CaseManagementService', () => {
 
     await service.grantCasePortalAccess('case-1', {
       canUpload: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
       thirdPartyId: 'third-party-1',
     })
 
     expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/portal-access', {
       canUpload: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
       thirdPartyId: 'third-party-1',
     })
   })

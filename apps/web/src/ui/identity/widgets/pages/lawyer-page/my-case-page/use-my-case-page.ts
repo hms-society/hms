@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
@@ -16,6 +16,9 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   const [portalAccessUrl, setPortalAccessUrl] = useState<string | null>(null)
   const [portalAccessExpiresAt, setPortalAccessExpiresAt] = useState<string | null>(null)
   const [selectedThirdPartyId, setSelectedThirdPartyId] = useState('')
+  const [canViewCaseStatus, setCanViewCaseStatus] = useState(false)
+  const [canViewIntakeStatus, setCanViewIntakeStatus] = useState(false)
+  const [canUpload, setCanUpload] = useState(false)
 
   const caseQuery = useQuery({
     queryKey: ['case-details', caseUuid],
@@ -36,10 +39,39 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     },
   })
 
+  const portalAccessQuery = useQuery({
+    queryKey: ['case-portal-access', caseUuid],
+    queryFn: async () => {
+      const response = await caseManagementService.listCasePortalAccess(caseUuid)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    enabled: Boolean(caseUuid),
+  })
+
+  useEffect(() => {
+    if (selectedThirdPartyId || !portalAccessQuery.data?.length) return
+
+    const activeThirdPartyIds = new Set(
+      (thirdPartiesQuery.data ?? []).map((thirdParty) => thirdParty.id),
+    )
+    const previousAccess = portalAccessQuery.data.find(
+      (access) => access.thirdPartyId && activeThirdPartyIds.has(access.thirdPartyId),
+    )
+    if (!previousAccess?.thirdPartyId) return
+
+    setSelectedThirdPartyId(previousAccess.thirdPartyId)
+    setCanViewCaseStatus(previousAccess.canViewCaseStatus)
+    setCanViewIntakeStatus(previousAccess.canViewIntakeStatus)
+    setCanUpload(previousAccess.canUpload)
+  }, [portalAccessQuery.data, selectedThirdPartyId, thirdPartiesQuery.data])
+
   const portalAccessMutation = useMutation({
     mutationFn: async () => {
       const response = await caseManagementService.grantCasePortalAccess(caseUuid, {
-        canUpload: true,
+        canUpload,
+        canViewCaseStatus,
+        canViewIntakeStatus,
         thirdPartyId: selectedThirdPartyId,
       })
 
@@ -52,6 +84,7 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
         new URL(access.portalAccessUrl, window.location.origin).toString(),
       )
       setPortalAccessExpiresAt(access.expiresAt)
+      void portalAccessQuery.refetch()
     },
   })
 
@@ -90,6 +123,9 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
   function handleClosePortalAccessDialog() {
     setPortalAccessUrl(null)
     setPortalAccessExpiresAt(null)
+    setCanViewCaseStatus(false)
+    setCanViewIntakeStatus(false)
+    setCanUpload(false)
   }
 
   async function handleCopyPortalLink() {
@@ -127,6 +163,12 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     portalAccessUrl,
     selectedThirdPartyId,
     setSelectedThirdPartyId,
+    canViewCaseStatus,
+    setCanViewCaseStatus,
+    canViewIntakeStatus,
+    setCanViewIntakeStatus,
+    canUpload,
+    setCanUpload,
     thirdParties: thirdPartiesQuery.data ?? [],
     setActiveTab,
   }

@@ -13,6 +13,8 @@ type Request = {
   tokenHash: string
   collaboratorId: string
   isAdministrator: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
   canUpload: boolean
   expiresAt?: Date
 }
@@ -36,11 +38,20 @@ export class GrantCasePortalAccessUseCase
       throw new LegalCaseNotFoundError()
     }
 
+    if (request.thirdPartyId) {
+      await this.grantsRepository.revokeActiveByCaseAndThirdParty(
+        request.caseId,
+        request.thirdPartyId,
+      )
+    }
+
     return this.grantsRepository.add({
       caseId: request.caseId,
       thirdPartyId: request.thirdPartyId,
       tokenHash: request.tokenHash,
       canView: true,
+      canViewCaseStatus: request.canViewCaseStatus,
+      canViewIntakeStatus: request.canViewIntakeStatus,
       canUpload: request.canUpload,
       expiresAt: request.expiresAt,
       grantedBy: request.collaboratorId,

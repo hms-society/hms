@@ -8,6 +8,7 @@ import type {
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
 import type {
+  CasePortalAccessSummary,
   GrantCasePortalAccessResponse,
   PortalDocumentUploadResponse,
   ThirdPartyPortalCaseResponse,
@@ -83,6 +84,12 @@ export const CaseManagementService = (
       return restClient.post<GrantCasePortalAccessResponse>(
         `/cases/${caseId}/portal-access`,
         request,
+      )
+    },
+
+    listCasePortalAccess(caseId) {
+      return restClient.get<readonly CasePortalAccessSummary[]>(
+        `/cases/${caseId}/portal-access`,
       )
     },
 

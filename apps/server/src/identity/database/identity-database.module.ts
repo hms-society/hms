@@ -9,7 +9,6 @@ import {
   DrizzleClientMapper,
   DrizzleCollaboratorRegistrationAttemptMapper,
   DrizzleThirdPartyMapper,
-  DrizzleThirdPartyPermissionGrantMapper,
 } from '@/identity/database/drizzle/mappers'
 import {
   DrizzleClientConsentsRepository,
@@ -18,7 +17,6 @@ import {
   DrizzleIdentityTransaction,
   DrizzleThirdPartiesRepository,
   DrizzleThirdPartyAuditLogsRepository,
-  DrizzleThirdPartyPermissionsRepository,
 } from '@/identity/database/drizzle/repositories'
 import {
   DrizzleIntakeClientsRepository,
@@ -39,7 +37,6 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleClientConsentMapper,
     DrizzleCollaboratorRegistrationAttemptMapper,
     DrizzleThirdPartyMapper,
-    DrizzleThirdPartyPermissionGrantMapper,
     DrizzleClientsRepository,
     DrizzleClientConsentsRepository,
     DrizzleCollaboratorRegistrationAttemptsRepository,
@@ -48,7 +45,6 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleIntakeResponsiblesRepository,
     DrizzleThirdPartiesRepository,
     DrizzleThirdPartyAuditLogsRepository,
-    DrizzleThirdPartyPermissionsRepository,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -81,10 +77,6 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       provide: IDENTITY_REPOSITORIES.thirdPartyAuditLogs,
       useExisting: DrizzleThirdPartyAuditLogsRepository,
     },
-    {
-      provide: IDENTITY_REPOSITORIES.thirdPartyPermissions,
-      useExisting: DrizzleThirdPartyPermissionsRepository,
-    },
     IdentitySeeder,
   ],
   exports: [
@@ -98,7 +90,6 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     IDENTITY_REPOSITORIES.intakeResponsibles,
     IDENTITY_REPOSITORIES.thirdParties,
     IDENTITY_REPOSITORIES.thirdPartyAuditLogs,
-    IDENTITY_REPOSITORIES.thirdPartyPermissions,
     IdentitySeeder,
   ],
 })
