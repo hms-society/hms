@@ -4,6 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { ConsultationModuleFixture } from '@/consultation/fixtures'
 import { SaveManualConsultationDocumentVersionController } from '@/consultation/rest/controllers'
+import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
+import { FakeFileStorageProvider } from '@/shared/provision/file-storage/fake-file-storage-provider'
 
 describe('Save Manual Consultation Document Version Controller [POST /consultations/:consultationId/documents/:documentId/versions/:sourceDocumentVersionId/manual]', () => {
   let fixture: ConsultationModuleFixture
@@ -11,6 +13,11 @@ describe('Save Manual Consultation Document Version Controller [POST /consultati
   beforeAll(async () => {
     fixture = await ConsultationModuleFixture.register(
       SaveManualConsultationDocumentVersionController,
+      (builder) => {
+        builder
+          .overrideProvider(PROVISION_PROVIDERS.fileStorage)
+          .useClass(FakeFileStorageProvider)
+      },
     )
   })
   beforeEach(async () => fixture.resetDatabase())
@@ -47,6 +54,19 @@ describe('Save Manual Consultation Document Version Controller [POST /consultati
       versionNumber: 2,
       source: 'manual',
       status: 'in_review',
+      content,
+      pendingMarkers: [{ marker: '{cliente_nome}' }],
+    })
+
+    const savedVersion = await fixture.documentVersionsRepository.findById(
+      response.body.id,
+    )
+
+    expect(savedVersion).toMatchObject({
+      id: response.body.id,
+      documentId: document.id,
+      sourceDocumentVersionId: sourceVersion.id,
+      versionNumber: 2,
       content,
       pendingMarkers: [{ marker: '{cliente_nome}' }],
     })

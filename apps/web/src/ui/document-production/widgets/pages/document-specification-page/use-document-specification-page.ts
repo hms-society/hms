@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
+import type { DocumentEditorActions } from '@/ui/document-production/widgets/components/document-editor/use-document-editor'
 import { HTTP_STATUS_CODE } from '@hms/core/shared/constants'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -334,8 +335,8 @@ export function useDocumentSpecificationPage({
     )
   }
 
-  const handleEditorReady = useCallback((insert: (name: string) => void) => {
-    setInsertVariable(() => insert)
+  const handleEditorReady = useCallback((actions: DocumentEditorActions) => {
+    setInsertVariable(() => actions.insertVariable)
   }, [])
 
   function handleApplicationScope(value: string) {

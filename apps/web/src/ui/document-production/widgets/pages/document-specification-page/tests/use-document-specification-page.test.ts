@@ -239,6 +239,21 @@ describe('useDocumentSpecificationPage', () => {
     expect(result.current.isDirty).toBe(false)
   })
 
+  it('keeps the editor variable insertion action from the editor actions contract', () => {
+    const { result } = renderDocumentSpecificationPage({ mode: 'create' })
+    const insertVariable = vi.fn()
+
+    act(() =>
+      result.current.handleEditorReady({
+        insertVariable,
+        replacePendingMarkers: vi.fn(),
+      }),
+    )
+    act(() => result.current.insertVariable?.('cliente_nome'))
+
+    expect(insertVariable).toHaveBeenCalledWith('cliente_nome')
+  })
+
   it('updates application scope, areas, and topics through the form handlers', () => {
     const { result } = renderDocumentSpecificationPage({ mode: 'create' })
 
