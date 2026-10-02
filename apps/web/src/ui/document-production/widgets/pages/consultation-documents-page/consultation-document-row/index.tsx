@@ -27,6 +27,9 @@ export const ConsultationDocumentRow = ({
   onUpdateAccess,
 }: ConsultationDocumentRowProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const canReview = Boolean(
+    item.latestVersion && item.status === 'in_review' && !isReadOnly,
+  )
 
   return (
     <>
@@ -77,7 +80,7 @@ export const ConsultationDocumentRow = ({
                 <Icon name={item.status === 'failed' ? 'refresh-cw' : 'list-plus'} />
                 {item.status === 'failed' ? 'Tentar novamente' : 'Gerar documento'}
               </Button>
-            ) : item.latestVersion && item.status === 'in_review' && !isReadOnly ? (
+            ) : canReview ? (
               <Button asChild variant='brand' size='sm'>
                 <Anchor
                   route='consultationDocumentVersion'
@@ -89,7 +92,7 @@ export const ConsultationDocumentRow = ({
               </Button>
             ) : null}
 
-            {item.latestVersion && (
+            {item.latestVersion && !canReview && (
               <Button asChild variant='secondary' size='sm'>
                 <Anchor
                   route='consultationDocumentVersion'

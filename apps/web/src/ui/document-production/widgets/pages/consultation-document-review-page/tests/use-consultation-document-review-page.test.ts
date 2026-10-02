@@ -489,6 +489,26 @@ describe('useConsultationDocumentReviewPage', () => {
     expect(result.current.isMarkerNotFoundOpen).toBe(true)
   })
 
+  it('fills a pending marker and saves a new manual version with literal text', async () => {
+    const saveAction = createSaveAction()
+    useSaveManualConsultationDocumentVersionActionMock.mockReturnValue(
+      saveAction as never,
+    )
+    const { result } = renderReviewHook()
+    await waitFor(() => expect(result.current.draft).toEqual(documentContent))
+    act(() => result.current.handleFillPendingMarker('{client_name}', '  Cliente $&  '))
+    await waitFor(() => expect(saveAction.saveManualVersion).toHaveBeenCalledOnce())
+    const request = (
+      saveAction.saveManualVersion.mock.calls as unknown as [
+        { sourceDocumentVersionId: string; content: unknown },
+      ][]
+    )[0][0]
+    expect(request.sourceDocumentVersionId).toBe(result.current.version?.id)
+    expect(JSON.stringify(request.content)).toContain('Cliente $&')
+    expect(JSON.stringify(request.content)).not.toContain('{client_name}')
+    await waitFor(() => expect(result.current.isPendingMarkersOpen).toBe(false))
+  })
+
   it('opens pending markers instead of approval and prevents direct confirmation', async () => {
     const generationAction = createReviewAction()
     useReviewConsultationDocumentVersionActionMock.mockReturnValue(

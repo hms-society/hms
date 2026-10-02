@@ -72,13 +72,15 @@ function cloneContent(content: DocumentTemplateContent): DocumentTemplateContent
 function removeMarkerFromContent(
   content: DocumentTemplateContent,
   marker: string,
+  replacement = '',
 ): DocumentTemplateContent {
   const nextContent = cloneContent(content)
 
   function removeMarker(value: unknown) {
     if (!value || typeof value !== 'object') return
     const node = value as { text?: string; content?: unknown[] }
-    if (typeof node.text === 'string') node.text = node.text.replaceAll(marker, '')
+    if (typeof node.text === 'string')
+      node.text = node.text.replaceAll(marker, () => replacement)
     node.content?.forEach(removeMarker)
   }
 
@@ -392,7 +394,7 @@ export function useConsultationDocumentReviewPage({
       if (!result.body) {
         setIsPendingMarkersOpen(false)
         setActionError(
-          'Não foi possível persistir a remoção da pendência. Tente novamente.',
+          'Não foi possível salvar a alteração da pendência. Tente novamente.',
         )
         return
       }
@@ -537,7 +539,7 @@ export function useConsultationDocumentReviewPage({
     setHighlightedTerms([marker])
   }
 
-  async function persistPendingMarkerRemoval(
+  async function persistPendingMarkerResolution(
     nextDraft: DocumentTemplateContent,
     removedMarkers: readonly string[],
   ) {
@@ -559,15 +561,21 @@ export function useConsultationDocumentReviewPage({
       await navigateToVersion(result.body.id)
     } catch {
       setIsPendingMarkersOpen(false)
-      setActionError(
-        'Não foi possível persistir a remoção da pendência. Tente novamente.',
-      )
+      setActionError('Não foi possível salvar a alteração da pendência. Tente novamente.')
     }
   }
 
   function handleRemovePendingMarker(marker: string) {
     if (!draft || saveAction.isSavingManualVersion) return
-    void persistPendingMarkerRemoval(removeMarkerFromContent(draft, marker), [marker])
+    void persistPendingMarkerResolution(removeMarkerFromContent(draft, marker), [marker])
+  }
+
+  function handleFillPendingMarker(marker: string, value: string) {
+    if (!draft || saveAction.isSavingManualVersion || !value.trim()) return
+    void persistPendingMarkerResolution(
+      removeMarkerFromContent(draft, marker, value.trim()),
+      [marker],
+    )
   }
 
   function handleRemoveAllPendingMarkers() {
@@ -576,7 +584,7 @@ export function useConsultationDocumentReviewPage({
       (content, item) => removeMarkerFromContent(content, item.marker),
       draft,
     )
-    void persistPendingMarkerRemoval(
+    void persistPendingMarkerResolution(
       nextDraft,
       versionPendingMarkers.map((item) => item.marker),
     )
@@ -606,6 +614,7 @@ export function useConsultationDocumentReviewPage({
     handleLocateMarker,
     handleRemoveAllPendingMarkers,
     handleRemovePendingMarker,
+    handleFillPendingMarker,
     handleReject,
     handleRequestCancel,
     handleRequestSave,
