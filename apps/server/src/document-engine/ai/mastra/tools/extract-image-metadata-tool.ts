@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { z } from 'zod'
@@ -31,9 +31,13 @@ const outputSchema = z.object({
   }),
   suggestion: suggestionSchema.optional(),
 })
+export type ExtractImageInput = z.infer<typeof inputSchema>
+export type ExtractImageOutput = z.infer<typeof outputSchema>
 
 @Injectable()
 export class ExtractImageTool {
+  private readonly logger = new Logger(ExtractImageTool.name)
+
   readonly function: ReturnType<
     typeof createTool<'extract-image-metadata', typeof inputSchema, typeof outputSchema>
   >
@@ -61,7 +65,11 @@ export class ExtractImageTool {
           }
         }
 
-        const extraction = await this.extractText(input.contentBase64, input.mimeType)
+        const extraction = await this.extractText(
+          input.contentBase64,
+          input.mimeType,
+          input.documentFileId,
+        )
 
         if (!extraction.success) {
           return {
@@ -96,7 +104,13 @@ export class ExtractImageTool {
     })
   }
 
-  private async extractText(contentBase64: string, mimeType: string) {
+  private async extractText(
+    contentBase64: string,
+    mimeType: string,
+    documentFileId: string,
+  ) {
+    const startedAt = Date.now()
+
     try {
       const response = await this.imageAnalyzerAgent.generate([
         {
@@ -104,7 +118,10 @@ export class ExtractImageTool {
           content: [
             {
               type: 'text',
-              text: 'Transcribe only the readable text from this image. Return plain text only.',
+              text: `Transcribe all readable text from this image. Return plain text only.
+Preserve section headings, paragraph breaks, reading order, and one line per table row.
+For tables, format each row as "Label: Value" using the exact visible label and value.
+Do not merge adjacent rows, summarize, infer, correct, or omit repeated labels.`,
             },
             {
               type: 'image',
@@ -124,14 +141,34 @@ export class ExtractImageTool {
         )
       }
 
+      const normalizedText = this.normalizeText(extractedTextFull)
+      this.logger.log(
+        JSON.stringify({
+          event: 'document_image_ocr_completed',
+          documentFileId,
+          durationMs: Date.now() - startedAt,
+          textLength: normalizedText.length,
+        }),
+      )
+
       return {
         success: true as const,
-        text: this.normalizeText(extractedTextFull),
+        text: normalizedText,
       }
     } catch (error) {
+      const reason = this.normalizeErrorReason(error)
+      this.logger.warn(
+        JSON.stringify({
+          event: 'document_image_ocr_failed',
+          documentFileId,
+          durationMs: Date.now() - startedAt,
+          reason,
+        }),
+      )
+
       return {
         success: false as const,
-        reason: this.normalizeErrorReason(error),
+        reason,
       }
     }
   }
@@ -162,9 +199,11 @@ export class ExtractImageTool {
 
   private normalizeText(text: string) {
     const normalized = text
-      .replace(/[^\S\r\n]+/g, ' ')
-      .replace(/\s*\n\s*/g, '\n')
-      .replace(/\s+/g, ' ')
+      .replace(/\r\n?/g, '\n')
+      .split('\n')
+      .map((line) => line.replace(/[^\S\n]+/g, ' ').trim())
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
       .trim()
 
     if (this.isEmptyTextResponse(normalized)) {

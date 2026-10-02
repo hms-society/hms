@@ -48,6 +48,24 @@ Content-Type: image/png
 < ../../src/document-engine/database/seed-assets/teste_ficha_cadastral.png
 --boundary--
 
+### Upload AI challenge document as a single PNG image
+# This request is independent from the PDF challenge request in single-pdf-ai-extraction.rest.
+# @prompt clientId Enter the client ID
+POST {{baseUrl}}/document-batches/internal-upload
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clientId"
+
+{{clientId}}
+--boundary
+Content-Disposition: form-data; name="files"; filename="document-ai-challenge.png"
+Content-Type: image/png
+
+< ../../src/document-engine/database/seed-assets/document-ai-challenge.png
+--boundary--
+
 ### List document batches in triage
 GET {{baseUrl}}/document-batches/triage?page=1&limit=10
 Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}

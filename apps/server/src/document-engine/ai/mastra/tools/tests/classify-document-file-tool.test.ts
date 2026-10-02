@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
-import { ClassifyDocumentFileTool } from '../classify-document-file-tool'
+import {
+  ClassifyDocumentFileTool,
+  type ClassifyDocumentFileOutput,
+} from '../classify-document-file-tool'
 
 const HASH_SHA_256 = 'a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3'
 
@@ -20,7 +23,10 @@ describe('Classify Document File Tool', () => {
       },
     })
 
-    const result = await tool.function.execute(input)
+    const result = (await tool.function.execute?.(
+      input,
+      {} as never,
+    )) as ClassifyDocumentFileOutput
 
     expect(result.suggestion).toEqual(input.suggestion)
   })
@@ -28,7 +34,7 @@ describe('Classify Document File Tool', () => {
   it('extracts all functional identification fields from readable OCR text', async () => {
     const tool = new ClassifyDocumentFileTool()
 
-    const result = await tool.function.execute(
+    const result = (await tool.function.execute?.(
       createInput({
         metadata: {
           mimeType: 'image/png',
@@ -39,7 +45,8 @@ describe('Classify Document File Tool', () => {
             'DOCUMENTO DE IDENTIFICAÇÃO FUNÇIONAL (TESTE) Nome: Carlos Eduardo Ferreira Matrícula: MF-208734 Cargo: Analista de Sistemas Departamento: Tecnologia da Informação Admissão: 02/05/2018 Validade: 31/12/2027 Código de barras (simulado): 1011010110110101',
         },
       }),
-    )
+      {} as never,
+    )) as ClassifyDocumentFileOutput
 
     expect(result.suggestion.suggestedStatus).toBe(DocumentValidationStatus.NotLinked)
     expect(result.suggestion.documentTypeId).toBe('functional_identification')
@@ -88,7 +95,10 @@ describe('Classify Document File Tool', () => {
       },
     })
 
-    const result = await tool.function.execute(input)
+    const result = (await tool.function.execute?.(
+      input,
+      {} as never,
+    )) as ClassifyDocumentFileOutput
 
     expect(result.suggestion.suggestedStatus).toBe(
       DocumentValidationStatus.ProcessingFailure,
