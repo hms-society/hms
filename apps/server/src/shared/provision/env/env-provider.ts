@@ -14,6 +14,10 @@ export const envSchema = z.object({
   OLLAMA_VISION_AI_MODEL: z.string().min(1).default('qwen2.5vl:3b'),
   OLLAMA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(900_000),
   OPENROUTER_API_KEY: z.string().min(1).optional(),
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url().optional(),
+  ),
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   DOCUMENSO_URL: z.preprocess(

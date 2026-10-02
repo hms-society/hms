@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools'
 import { Injectable } from '@nestjs/common'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { z } from 'zod'
+import { SpanType } from '@mastra/core/observability'
 
 import { documentGenerationWorkflowOutputSchema } from '@/document-production/ai/mastra/schemas'
 
@@ -29,7 +30,21 @@ export class ResolveDocumentGenerationOutcomeTool {
       inputSchema,
       outputSchema,
       strict: true,
-      execute: async (input) => {
+      execute: async (input, context) => {
+        const outcome =
+          input['save-generated-document-version'] ?? input['fail-document-generation']
+        if (outcome) {
+          const metadata = {
+            generationOutcome: outcome.status,
+            ...('documentVersionId' in outcome
+              ? { documentVersionId: outcome.documentVersionId }
+              : {}),
+          }
+          context?.tracingContext?.currentSpan?.update({ metadata })
+          context?.tracingContext?.currentSpan
+            ?.findParent(SpanType.WORKFLOW_RUN)
+            ?.update({ metadata })
+        }
         const approved = input['save-generated-document-version']
         if (approved) return approved
 

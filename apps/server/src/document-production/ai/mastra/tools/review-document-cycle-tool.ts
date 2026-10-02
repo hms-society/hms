@@ -52,10 +52,18 @@ export class ReviewDocumentCycleTool {
       inputSchema: documentReviewCycleInputSchema,
       outputSchema: documentReviewCycleOutputSchema,
       strict: true,
-      execute: async (input) => {
+      execute: async (input, context) => {
+        const tracingContext = context?.tracingContext
+        const metadata = {
+          documentGenerationId: input.documentGenerationId,
+          reviewAttempt: input.attemptsCount + 1,
+        }
+        tracingContext?.currentSpan?.update({ metadata })
         const writerResponse = await this.writerAgent.generate(
           this.createWriterPrompt(input),
           {
+            tracingContext,
+            tracingOptions: { hideInput: true, hideOutput: true, metadata },
             structuredOutput: {
               schema: writerResponseSchema,
               jsonPromptInjection: true,
@@ -80,6 +88,8 @@ export class ReviewDocumentCycleTool {
         const reviewerResponse = await this.reviewerAgent.generate(
           this.createReviewerPrompt(input, draft, pendingMarkers),
           {
+            tracingContext,
+            tracingOptions: { hideInput: true, hideOutput: true, metadata },
             structuredOutput: { schema: documentReviewSchema },
           },
         )
@@ -91,6 +101,13 @@ export class ReviewDocumentCycleTool {
             'Erro de Geração Documental',
           )
         }
+
+        tracingContext?.currentSpan?.update({
+          metadata: {
+            reviewDecision: review.decision,
+            pendingMarkersCount: pendingMarkers.length,
+          },
+        })
 
         return {
           ...input,

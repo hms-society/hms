@@ -4,6 +4,7 @@ import type { OpenAICompatibleConfig } from '@mastra/core/llm'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { ObservedMastraModel } from '@/shared/ai/mastra/observed-mastra-model'
 
 type Config<AgentId extends string> = {
   readonly id: AgentId
@@ -38,6 +39,7 @@ export abstract class MastraAgent<
         localModelEnvKey,
         developmentModels,
         productionModels,
+        config.id,
       ),
     })
   }
@@ -48,6 +50,7 @@ export abstract class MastraAgent<
     localModelEnvKey: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL' = 'OLLAMA_AI_MODEL',
     developmentModels?: readonly [string, ...string[]],
     productionModels?: Config<string>['productionModels'],
+    agentId = 'unknown',
   ): OpenAICompatibleConfig | ModelWithRetries[] {
     const isDevelopment = envProvider.get('HMS_SERVER_APP_MODE') === 'dev'
 
@@ -69,15 +72,28 @@ export abstract class MastraAgent<
     }
 
     if (isDevelopment && developmentModels) {
-      return developmentModels.map((modelId) => ({
-        model: { providerId: 'openrouter', modelId, apiKey },
+      return developmentModels.map((modelId, routeIndex) => ({
+        model: envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+          ? new ObservedMastraModel(
+              { providerId: 'openrouter', modelId, apiKey },
+              agentId,
+              routeIndex,
+            )
+          : { providerId: 'openrouter', modelId, apiKey },
         maxRetries: 0,
       }))
     }
 
     if (envProvider.get('HMS_SERVER_APP_MODE') === 'prod' && productionModels) {
-      return productionModels.map(({ model: modelId, provider }) => ({
-        model: { providerId: 'openrouter', modelId, apiKey },
+      return productionModels.map(({ model: modelId, provider }, routeIndex) => ({
+        model: envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+          ? new ObservedMastraModel(
+              { providerId: 'openrouter', modelId, apiKey },
+              agentId,
+              routeIndex,
+              provider,
+            )
+          : { providerId: 'openrouter', modelId, apiKey },
         maxRetries: 0,
         providerOptions: {
           openrouter: {
@@ -91,10 +107,13 @@ export abstract class MastraAgent<
       }))
     }
 
-    return {
+    const model = {
       providerId: 'openrouter',
       modelId: openRouterModel,
       apiKey,
     }
+    return envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+      ? [{ model: new ObservedMastraModel(model, agentId, 0) }]
+      : model
   }
 }
