@@ -16,7 +16,10 @@ describe('ReadOnlyIncompletePanel', () => {
           reviewedByName: 'Atendente HMS',
           reviewedAt: new Date('2026-09-10T12:00:00.000Z'),
           sender: 'remetente@email.com',
-          extractedFields: [{ label: 'Titular', value: 'Mariana Costa Silva' }],
+          aiSuggestion: { ollamaJsonOrganizationCaptured: true },
+          extractedFields: [
+            { label: 'Titular', value: 'Mariana Costa Silva', confidence: 0.95 },
+          ],
           missingFields: ['Data de emissão'],
         })}
       />,

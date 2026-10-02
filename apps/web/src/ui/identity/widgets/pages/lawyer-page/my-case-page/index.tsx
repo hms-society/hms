@@ -1,11 +1,16 @@
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 
-import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
+import { CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
+import { CasePiecesTab } from './case-pieces-tab'
+import { NewPieceDialog } from './case-pieces-tab/new-piece-dialog'
 import { OverviewTab } from './overview-tab'
 import { PortalAccessDialog } from './portal-access-dialog'
 import { useMyCasePage } from './use-my-case-page'
@@ -15,6 +20,8 @@ export type CasoDetalheChecklistPageProps = {
 }
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
+  const queryClient = useQueryClient()
+  const [isNewPieceOpen, setIsNewPieceOpen] = useState(false)
   const {
     activeTab,
     caseClientName,
@@ -22,6 +29,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     caseTitle,
     caseUuid,
     caseDetails,
+    caseStatusLabel,
+    caseStages,
+    dossierApproved,
     checklistItems,
     completionPercentage,
     displayCaseId,
@@ -49,7 +59,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               </h1>
               <Badge variant='attention' className='h-6 rounded-full px-3 text-[12px]'>
                 <span className='size-1.5 rounded-full bg-brand-accent' />
-                Documentação em formação
+                {caseStatusLabel}
               </Badge>
             </div>
 
@@ -109,7 +119,20 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               <Icon name='link' className='size-3' />
               {isGeneratingPortalLink ? 'Gerando link...' : 'Gerar link para terceiro'}
             </Button>
-            <Button size='xs' className='rounded-full'>
+            <Button
+              size='xs'
+              className='rounded-full'
+              disabled={!dossierApproved}
+              title={
+                dossierApproved
+                  ? undefined
+                  : 'A elaboração será liberada após a aprovação do dossiê documental.'
+              }
+              onClick={() => {
+                setActiveTab('pecas')
+                setIsNewPieceOpen(true)
+              }}
+            >
               <Icon name='plus' className='size-3' />
               Nova peça
             </Button>
@@ -117,7 +140,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </div>
 
         <div className='mt-5 flex w-full flex-wrap items-center gap-x-5 gap-y-3 overflow-hidden border-t border-border pt-4'>
-          {CASE_STAGES.map((stage, index) => (
+          {caseStages.map((stage, index) => (
             <div key={stage.label} className='flex min-w-fit items-center'>
               <div
                 className={`flex items-center gap-2 text-[14px] font-semibold ${
@@ -142,7 +165,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
                   )}
                 </span>
               </div>
-              {index < CASE_STAGES.length - 1 && (
+              {index < caseStages.length - 1 && (
                 <div className='mx-2 hidden h-px w-10 bg-border lg:block' />
               )}
             </div>
@@ -170,12 +193,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               {pendingItemsCount}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger
-            value='pecas'
-            className='w-full justify-center py-3 text-[13px]'
-            disabled
-          >
-            <Icon name='lock' className='size-3.5' />
+          <TabsTrigger value='pecas' className='w-full justify-center py-3 text-[13px]'>
             Peças
           </TabsTrigger>
           <TabsTrigger value='prazos' className='w-full justify-center py-3 text-[13px]'>
@@ -227,11 +245,28 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <ChecklistDossierTab
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
+            caseDetails={caseDetails}
             checklist={checklistItems}
           />
         </TabsContent>
-      </Tabs>
 
+        <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
+          <CasePiecesTab dossierApproved={dossierApproved} caseId={caseUuid} />
+        </TabsContent>
+      </Tabs>
+      <NewPieceDialog
+        open={isNewPieceOpen && dossierApproved}
+        caseId={caseUuid}
+        onOpenChange={setIsNewPieceOpen}
+        onGenerated={() => {
+          const targetCaseId = caseUuid ?? caseId
+          if (targetCaseId) {
+            void queryClient.invalidateQueries({
+              queryKey: ['case-documents', targetCaseId],
+            })
+          }
+        }}
+      />
       <PortalAccessDialog
         expiresAt={portalAccessExpiresAt}
         onCopy={handleCopyPortalLink}

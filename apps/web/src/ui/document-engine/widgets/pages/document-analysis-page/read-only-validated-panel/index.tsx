@@ -2,6 +2,7 @@ import type { DocumentValidationDocument } from '@hms/core/document-engine/domai
 
 import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { getVisibleExtractedFields } from '@/ui/document-engine/utils/get-visible-extracted-fields'
 import { ExtractedFields } from '../extracted-fields'
 
 export type ReadOnlyValidatedPanelProps = {
@@ -92,7 +93,10 @@ export const ReadOnlyValidatedPanel = ({ document }: ReadOnlyValidatedPanelProps
           <span className='flex items-center gap-1 self-end font-sans text-[10px] text-muted-foreground'>
             <Icon name='lock' className='size-3' /> Somente leitura
           </span>
-          <ExtractedFields title='Campos extraídos' fields={document.extractedFields} />
+          <ExtractedFields
+            title='Campos extraídos'
+            fields={getVisibleExtractedFields(document)}
+          />
         </div>
       </div>
     </aside>

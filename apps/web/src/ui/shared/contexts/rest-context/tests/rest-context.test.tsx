@@ -25,6 +25,10 @@ vi.mock('@/rest/axios/axios-rest-client', () => ({
   AxiosRestClient: vi.fn(() => restClient),
 }))
 
+vi.mock('@/constants', () => ({
+  BROWSER_ENV: { hmsServerAppUrl: 'http://localhost:3001' },
+}))
+
 vi.mock('@/ui/shared/contexts/auth-context/use-auth-context', () => ({
   useAuthContext: () => ({
     getSession: getSessionMock,
@@ -61,5 +65,17 @@ describe('RestContext', () => {
     expect(restClient.get).toHaveBeenCalledWith(
       '/consultations/consultation-id/documents',
     )
+  })
+
+  it('registers the case document production service with the shared client', async () => {
+    const { result } = renderHook(() => useRestContext(), {
+      wrapper: ({ children }) => <RestContextProvider>{children}</RestContextProvider>,
+    })
+
+    restClient.get.mockResolvedValue({})
+
+    await result.current.caseDocumentProductionService.listDocuments('case-id')
+
+    expect(restClient.get).toHaveBeenCalledWith('/cases/case-id/documents')
   })
 })
