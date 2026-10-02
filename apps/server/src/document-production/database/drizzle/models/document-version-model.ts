@@ -23,6 +23,7 @@ export const documentVersionModel = pgTable(
     documentGenerationId: uuid('document_generation_id'),
     sourceDocumentVersionId: uuid('source_document_version_id'),
     fileId: uuid('file_id').notNull(),
+    storagePath: text('storage_path'),
     versionNumber: integer('version_number').notNull(),
     source: text('source').notNull(),
     content: jsonb('content').$type<DocumentTemplateContent>().notNull(),

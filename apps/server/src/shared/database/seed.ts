@@ -83,6 +83,19 @@ async function bootstrap() {
       throw new AppError('Default lawyer legal expertise could not be seeded')
     }
 
+    const previdenciaryLegalArea = legalCatalog.areas.find(
+      (area) => area.name === 'Previdenciário',
+    )
+    const retirementLegalTopic = legalCatalog.topics.find(
+      (topic) =>
+        topic.legalAreaId === previdenciaryLegalArea?.id &&
+        topic.name === 'Aposentadoria',
+    )
+
+    if (!previdenciaryLegalArea || !retirementLegalTopic) {
+      throw new AppError('Previdenciary case seed classification could not be resolved')
+    }
+
     const consultationDynamicForm = dynamicForms.find(
       ({ name }) => name === 'Triagem Cível',
     )
@@ -101,6 +114,9 @@ async function bootstrap() {
     )
 
     const client = identitySeed.clients.find(({ email }) => email === 'client@hms.br')
+    const piecesSeedClient = identitySeed.clients.find(
+      ({ email }) => email === 'vinicius.lopes.machado@hms.test',
+    )
 
     const lawyer = identitySeed.collaborators.find(({ profile }) => profile === 'lawyer')
 
@@ -112,7 +128,7 @@ async function bootstrap() {
       ({ email }) => email === 'lawyer@hmsadvogados.com.br',
     )
 
-    if (!client || !lawyer || !attendant || !actor) {
+    if (!client || !piecesSeedClient || !lawyer || !attendant || !actor) {
       throw new AppError('Document Production seed identities could not be resolved')
     }
 
@@ -123,6 +139,9 @@ async function bootstrap() {
       actorId: actor.id,
       legalAreaId: legalArea.id,
       legalTopicId: legalTopic.id,
+      previdenciaryClientId: piecesSeedClient.id,
+      previdenciaryLegalAreaId: previdenciaryLegalArea.id,
+      previdenciaryLegalTopicId: retirementLegalTopic.id,
     })
 
     const lawyerIds = identitySeed.collaborators
@@ -175,8 +194,6 @@ async function bootstrap() {
     const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
-      consultationId: consultationSeed.consultation.id,
-      requestedByCollaboratorId: lawyer.id,
     })
 
     await app.get(CommunicationSeeder).run()
@@ -184,7 +201,9 @@ async function bootstrap() {
     LOGGER.log(
       JSON.stringify({
         consultationId: consultationSeed.consultation.id,
-        documentIds: documentProductionSeed.documents.map(({ id }) => id),
+        documentSpecifications: documentProductionSeed.specifications.map(
+          ({ name }) => name,
+        ),
         assignedLawyerEmail: actor.email,
       }),
     )

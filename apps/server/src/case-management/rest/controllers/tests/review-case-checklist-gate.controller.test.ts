@@ -73,7 +73,7 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
     expect(response.body.statusCode).toBe(400)
   })
 
-  it('rejects full approval until mandatory checklist items can be verified server-side', async () => {
+  it('rejects full approval until required checklist items are instantiated and validated', async () => {
     const collaborator = await fixture.registerCollaborator()
     const legalCase = await fixture.registerLegalCase({
       clientId: collaborator.clientId,
