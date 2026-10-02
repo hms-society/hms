@@ -1,6 +1,6 @@
 ---
 title: Agenda de Consultas
-status: in_progress
+status: completed
 revision: 13
 source:
   type: jira-ticket
@@ -13,7 +13,7 @@ scope:
   - packages/validation
   - apps/server
   - apps/web
-last_updated_at: 2026-09-28
+last_updated_at: 2026-09-29
 ---
 
 # 1. Context and scope

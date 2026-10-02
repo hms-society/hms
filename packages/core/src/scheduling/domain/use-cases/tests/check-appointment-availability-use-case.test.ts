@@ -8,7 +8,9 @@ describe('Check Appointment Availability Use Case', () => {
 
   it('accepts an interval inside weekly availability', async () => {
     const schedule = ScheduleFaker.fake({
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
 
     await expect(
@@ -24,7 +26,9 @@ describe('Check Appointment Availability Use Case', () => {
 
   it('rejects overlap and permits an excluded appointment', async () => {
     const schedule = ScheduleFaker.fake({
-      weeklyAvailability: [{ weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] }],
+      weeklyAvailability: [
+        { weekday: 'monday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
     })
     const appointment = AppointmentFaker.fake({
       startsAt: new Date('2026-08-10T12:00:00.000Z'),

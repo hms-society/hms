@@ -48,8 +48,16 @@ describe('Get Consultation By Intake Use Case', () => {
 
     const result = await makeUseCase().execute({ intakeId: consultation.intakeId })
 
-    expect(result).toMatchObject({ ...consultation, intake, client, assignedLawyer: lawyer, appointment })
-    expect(consultationsRepository.findByIntakeId).toHaveBeenCalledWith(consultation.intakeId)
+    expect(result).toMatchObject({
+      ...consultation,
+      intake,
+      client,
+      assignedLawyer: lawyer,
+      appointment,
+    })
+    expect(consultationsRepository.findByIntakeId).toHaveBeenCalledWith(
+      consultation.intakeId,
+    )
   })
 
   it('does not reveal a consultation to an unrelated collaborator', async () => {

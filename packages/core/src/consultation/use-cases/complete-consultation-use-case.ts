@@ -122,7 +122,9 @@ export class CompleteConsultationUseCase implements UseCase<Request, Consultatio
           )
         }
         if (!consultation.attendanceFinalizedAt) {
-          throw new ConsultationCompletionBlockedError('Finalize a ficha de atendimento primeiro.')
+          throw new ConsultationCompletionBlockedError(
+            'Finalize a ficha de atendimento primeiro.',
+          )
         }
         const documentPackage = await this.documentPackagesRepository.findByContext({
           type: 'consultation',
@@ -134,14 +136,19 @@ export class CompleteConsultationUseCase implements UseCase<Request, Consultatio
           )
         }
         const completedAt = this.datetimeProvider.now()
-        const completed = await this.consultationsRepository.replace(request.consultationId, {
-          status: ConsultationStatus.Completed,
-          completedAt,
-        })
+        const completed = await this.consultationsRepository.replace(
+          request.consultationId,
+          {
+            status: ConsultationStatus.Completed,
+            completedAt,
+          },
+        )
         if (!completed) throw new ConsultationNotFoundError()
         if (this.outboxRepository) {
           await this.outboxRepository.add({
-            id: this.idProvider?.generate() ?? `${completed.id}:${completedAt.toISOString()}`,
+            id:
+              this.idProvider?.generate() ??
+              `${completed.id}:${completedAt.toISOString()}`,
             consultationId: completed.id,
             name: ConsultationCompletedEvent._NAME,
             payload: {

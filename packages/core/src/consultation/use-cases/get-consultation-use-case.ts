@@ -8,7 +8,10 @@ import type {
 import type { IntakesRepository } from '../../intake/interfaces'
 import type { AppointmentsRepository } from '../../scheduling/interfaces'
 import type { UseCase } from '#shared/interfaces/use-case'
-import { CollaboratorProfile, type CollaboratorProfile as CollaboratorProfileValue } from '../../identity/domain/structures'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '../../identity/domain/structures'
 
 export type GetConsultationRequest = {
   readonly consultationId: string
@@ -30,7 +33,9 @@ export class GetConsultationUseCase
   ) {}
 
   async execute(request: GetConsultationRequest): Promise<ConsultationDetails> {
-    const consultation = await this.consultationsRepository.findById(request.consultationId)
+    const consultation = await this.consultationsRepository.findById(
+      request.consultationId,
+    )
 
     if (!consultation) {
       throw new ConsultationNotFoundError()
@@ -38,9 +43,9 @@ export class GetConsultationUseCase
 
     if (
       request.actor &&
-      (request.actor.profile !== CollaboratorProfile.Admin &&
-        (request.actor.profile !== CollaboratorProfile.Lawyer ||
-          request.actor.collaboratorId !== consultation.assignedLawyerId))
+      request.actor.profile !== CollaboratorProfile.Admin &&
+      (request.actor.profile !== CollaboratorProfile.Lawyer ||
+        request.actor.collaboratorId !== consultation.assignedLawyerId)
     ) {
       throw new ConsultationNotFoundError()
     }

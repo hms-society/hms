@@ -2,22 +2,23 @@ import { useQuery } from '@tanstack/react-query'
 
 import { AppError } from '@hms/core/shared/domain/errors'
 
-import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 export function useSchedule() {
-  const { user } = useAuthContext()
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
   const { schedulingService } = useRestContext()
+  const collaboratorId = currentCollaborator?.collaboratorId
 
   const query = useQuery({
-    queryKey: ['schedule', user?.id],
-    enabled: !!user,
+    queryKey: ['schedule', collaboratorId],
+    enabled: !!collaboratorId,
     queryFn: async () => {
-      if (!user) {
-        throw new AppError('Authenticated user is required')
+      if (!collaboratorId) {
+        throw new AppError('Authenticated collaborator is required')
       }
 
-      const response = await schedulingService.getByCollaborator(user.id)
+      const response = await schedulingService.getByCollaborator(collaboratorId)
 
       if (response.isFailure) {
         response.throwError()

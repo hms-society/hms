@@ -38,7 +38,9 @@ export class GetConsultationByIntakeUseCase {
   }
 
   async execute(request: GetConsultationByIntakeRequest): Promise<ConsultationDetails> {
-    const consultation = await this.consultationsRepository.findByIntakeId(request.intakeId)
+    const consultation = await this.consultationsRepository.findByIntakeId(
+      request.intakeId,
+    )
 
     if (!consultation) {
       throw new ConsultationNotFoundError()

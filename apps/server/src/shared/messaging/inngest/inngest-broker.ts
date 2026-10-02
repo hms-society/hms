@@ -10,9 +10,10 @@ export class InngestBroker implements Broker {
 
   constructor(private readonly inngest: InngestClient) {}
 
-  async publish(event: Event): Promise<void> {
+  async publish(event: Event, id?: string): Promise<void> {
     try {
       await this.inngest.send({
+        ...(id ? { id } : {}),
         name: event.name,
         data: event.payload as Record<string, unknown>,
       })

@@ -55,7 +55,6 @@ export class AuthGuard implements CanActivate {
       )
       throw error
     }
-
     if (!session) {
       this.logger.warn(
         JSON.stringify({
