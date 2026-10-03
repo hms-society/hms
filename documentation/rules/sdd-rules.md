@@ -227,6 +227,11 @@ Builder and Reviewer reports are inputs, not official evidence. The Orchestrator
 diff, commands, browser behavior, and findings. `evaluation.md` is updated after every material
 implementation or validation change, and affected earlier evidence is marked stale.
 
+During implementation, the Orchestrator and Builders monitor added TypeScript LOCs. When substantive
+changes exceed the advisory threshold of ~1,200 LOC (excluding generated files, test snapshots, and
+fixtures), the agent reports the volume, evaluates which completed task is ready for publication,
+and suggests opening a Small PR for `develop` before continuing with dependent slices.
+
 ## 6. Integrated validation
 
 Run the exact Core, Validation, Server, Web, database, architecture, build, integration, and

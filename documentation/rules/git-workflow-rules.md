@@ -146,3 +146,26 @@ Antes de abrir ou atualizar qualquer PR:
 - [ ] Se a tarefa depende de um PR anterior não mergeado, a label `stacked-pr` foi aplicada?
 - [ ] Se o PR anterior foi mergeado, a branch foi sincronizada com `develop` e a label `stacked-pr` foi removida?
 - [ ] O tamanho do PR cumpre os limites do repositório (máximo de 5.000 linhas de TypeScript adicionadas)?
+
+---
+
+## 8. Lembrete Consultivo de Tamanho e Fatiamento (~1.200 LOC)
+
+Durante a fase de codificação/implementação, os agentes e desenvolvedores devem monitorar o
+volume de código acumulado para incentivar entregas menores e evitar que PRs fiquem extensos.
+
+### Critérios de cálculo:
+- **Contagem**: Considera apenas adições líquidas em arquivos TypeScript/TSX (`.ts`, `.tsx`, `.mts`, `.cts`).
+- **Exclusões explícitas** (não contam para o limiar de 1.200 LOC):
+  - Arquivos gerados (ex: `routeTree.gen.ts`, arquivos `.gen.*`);
+  - Snapshots de testes e fixtures/mocks de dados extensos;
+  - Migrações SQL e seeders de banco de dados gerados;
+  - Documentação Markdown (`.md`), schemas JSON e lockfiles.
+
+### Comportamento do agente ao ultrapassar 1.200 LOC:
+- O limite de 1.200 LOC é **consultivo / não-impeditivo** (não bloqueia a execução).
+- Ao concluir a tarefa ou fase atual, se o diff substantivo ultrapassar ~1.200 LOC adicionadas:
+  1. O agente emite um aviso no relatório final/chat indicando a contagem estimada de LOCs.
+  2. O agente avalia o progresso das tarefas da User Story (ex: Contratos finalizados e testados vs Backend/UI pendentes).
+  3. O agente sugere formalmente ao desenvolvedor se deseja abrir o PR da fatia mais completa para a `develop` (iniciando o fluxo de `stacked-pr` para as tasks subsequentes) ou prosseguir na mesma branch.
+
