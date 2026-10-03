@@ -11,10 +11,12 @@ import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 describe('Get Document File Controller [GET /documents/files/:fileId, GET /documents/files/:fileId/content]', () => {
   let fixture: DocumentEngineModuleFixture
   let storage: StorageProvider
+  let storageFixture: LocalSupabaseStorageFixture
   const uploadedPaths: string[] = []
   beforeAll(async () => {
+    storageFixture = await LocalSupabaseStorageFixture.start()
     fixture = await DocumentEngineModuleFixture.register(undefined, (builder) =>
-      LocalSupabaseStorageFixture.configure(builder),
+      storageFixture.configure(builder),
     )
     storage = fixture.app.get<StorageProvider>(STORAGE_PROVIDER)
   })
@@ -23,7 +25,11 @@ describe('Get Document File Controller [GET /documents/files/:fileId, GET /docum
     try {
       for (const path of uploadedPaths) await storage?.remove(path)
     } finally {
-      await fixture?.close()
+      try {
+        await fixture?.close()
+      } finally {
+        await storageFixture?.close()
+      }
     }
   })
 

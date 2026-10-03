@@ -17,13 +17,16 @@ import { hashPortalAccessToken } from '@/case-management/security/portal-access-
 describe('Upload Case Portal Document Controller [POST /cases/:caseId/portal-pendencies/:checklistItemId/upload]', () => {
   let fixture: CaseManagementModuleFixture
   let inngest: InngestFixture
+  let storageFixture: LocalSupabaseStorageFixture
   const uploadedPaths: string[] = []
   beforeAll(async () => {
+    storageFixture = await LocalSupabaseStorageFixture.start()
     inngest = await InngestFixture.register({ createFunctions: () => [] })
     fixture = await CaseManagementModuleFixture.register(
       UploadCasePortalDocumentController,
       (builder) =>
-        LocalSupabaseStorageFixture.configure(builder)
+        storageFixture
+          .configure(builder)
           .overrideProvider(InngestClient)
           .useValue(inngest.client),
     )
@@ -37,7 +40,11 @@ describe('Upload Case Portal Document Controller [POST /cases/:caseId/portal-pen
       try {
         await fixture?.close()
       } finally {
-        await inngest?.close()
+        try {
+          await inngest?.close()
+        } finally {
+          await storageFixture?.close()
+        }
       }
     }
   })

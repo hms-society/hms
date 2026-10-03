@@ -14,16 +14,18 @@ import {
 
 describe('Internal Upload Controller [POST /document-batches/internal-upload]', () => {
   let fixture: DocumentEngineModuleFixture
+  let storageFixture: LocalSupabaseStorageFixture
   let userId: string
   let clientId: string
   const uploadedPaths: string[] = []
 
   beforeAll(async () => {
+    storageFixture = await LocalSupabaseStorageFixture.start()
     userId = randomUUID()
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       undefined,
       userId,
-      (builder) => LocalSupabaseStorageFixture.configure(builder),
+      (builder) => storageFixture.configure(builder),
     )
   })
 
@@ -34,9 +36,16 @@ describe('Internal Upload Controller [POST /document-batches/internal-upload]', 
   })
 
   afterAll(async () => {
-    const storage = fixture?.app.get<StorageProvider>(STORAGE_PROVIDER)
-    for (const path of uploadedPaths) await storage?.remove(path)
-    await fixture?.close()
+    try {
+      const storage = fixture?.app.get<StorageProvider>(STORAGE_PROVIDER)
+      for (const path of uploadedPaths) await storage?.remove(path)
+    } finally {
+      try {
+        await fixture?.close()
+      } finally {
+        await storageFixture?.close()
+      }
+    }
   })
 
   it('stores file metadata and creates a batch for the selected client', async () => {

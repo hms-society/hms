@@ -1,3 +1,5 @@
+import { createServer } from 'node:http'
+
 import {
   AggregationTemporality,
   InMemoryMetricExporter,
@@ -17,11 +19,29 @@ describe('Check Health Controller [GET /health]', () => {
   const metricReader = new PeriodicExportingMetricReader({ exporter: metricExporter })
   let fixture: RestFixture | undefined
   let sdk: NodeSDK | undefined
+  let supabaseHealthServer: ReturnType<typeof createServer> | undefined
+  let supabaseBaseUrl = ''
   let isInngestDev = true
   let inngestApiBaseUrl = 'https://api.inngest.com'
 
   beforeAll(async () => {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'http://127.0.0.1:4318'
+    supabaseHealthServer = createServer((incoming, outgoing) => {
+      const isAuth = incoming.url === '/auth/v1/health'
+      const isStorage = incoming.url === '/storage/v1/status'
+      outgoing.writeHead(isAuth || isStorage ? 200 : 404, {
+        'content-type': 'application/json',
+      })
+      outgoing.end(JSON.stringify(isAuth ? { version: 'local' } : { status: 'ok' }))
+    })
+    await new Promise<void>((resolve, reject) => {
+      supabaseHealthServer?.once('error', reject)
+      supabaseHealthServer?.listen(0, '127.0.0.1', resolve)
+    })
+    const supabaseAddress = supabaseHealthServer.address()
+    if (!supabaseAddress || typeof supabaseAddress === 'string')
+      throw new Error('Supabase health test port unavailable')
+    supabaseBaseUrl = `http://127.0.0.1:${supabaseAddress.port}`
     sdk = new NodeSDK({
       traceExporter: {
         export(spans, callback) {
@@ -55,7 +75,7 @@ describe('Check Health Controller [GET /health]', () => {
           provide: EnvProvider,
           useValue: {
             get(key: string) {
-              if (key === 'SUPABASE_URL') return 'http://localhost:8000'
+              if (key === 'SUPABASE_URL') return supabaseBaseUrl
               if (key === 'SUPABASE_SERVICE_ROLE_KEY') return 'service-role-key'
               if (key === 'HMS_SERVER_APP_PORT') return 3333
               if (key === 'INNGEST_DEV') return isInngestDev ? '1' : '0'
@@ -78,10 +98,17 @@ describe('Check Health Controller [GET /health]', () => {
       try {
         await sdk?.shutdown()
       } finally {
-        if (originalEndpoint === undefined) {
-          delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-        } else {
-          process.env.OTEL_EXPORTER_OTLP_ENDPOINT = originalEndpoint
+        try {
+          supabaseHealthServer?.closeAllConnections()
+          await new Promise<void>(
+            (resolve) => supabaseHealthServer?.close(() => resolve()) ?? resolve(),
+          )
+        } finally {
+          if (originalEndpoint === undefined) {
+            delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+          } else {
+            process.env.OTEL_EXPORTER_OTLP_ENDPOINT = originalEndpoint
+          }
         }
       }
     }
@@ -211,4 +238,3 @@ describe('Check Health Controller [GET /health]', () => {
     }
   })
 })
-import { createServer } from 'node:http'
