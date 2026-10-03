@@ -460,6 +460,20 @@ the result is unchanged:
 If a check fails, keep the affected work `in_progress`; do not mark it passed because another
 sensor passed. The next action is correction and rerun, not a user permission request.
 
+### Advisory code volume and task slicing check (~1,200 LOC)
+
+To prevent implementation branches from becoming oversized and difficult to review, monitor the
+net added TypeScript LOCs (`.ts`, `.tsx`, `.mts`, `.cts`) throughout the implementation phases.
+Exclude generated files (`routeTree.gen.ts`, `.gen.*`), test snapshots, extensive mock fixtures,
+generated migrations/seeders, and markdown documentation.
+
+When substantive additions exceed the advisory threshold of ~1,200 LOC:
+- Report the estimated added LOC count in the progress/handoff summary;
+- Assess completed tasks/boundaries (e.g. Core contracts and schemas complete vs Server/Web in progress);
+- Formally recommend to the developer whether to slice and open a Small PR for `develop` with the most
+  complete task (applying the `stacked-pr` label to subsequent tasks as needed) or continue in the current branch.
+This threshold is advisory and non-blocking; it guides proactive task slicing without interrupting active execution.
+
 ## Design-backed UI execution
 
 When a Design Contract exists:
