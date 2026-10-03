@@ -28,11 +28,11 @@ describe('List Document Specifications Controller [GET /document-specifications]
       legalTopics: topics,
       consultationId,
     })
-    await fixture.registerAdmin()
+    const admin = await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())
       .get('/document-specifications')
-      .set('Authorization', 'Bearer fixture-access-token')
+      .set('Authorization', fixture.authenticateAs(admin))
       .query({ search: 'negociação contratual', page: 1, pageSize: 1 })
       .expect(200)
 
@@ -79,11 +79,11 @@ describe('List Document Specifications Controller [GET /document-specifications]
         },
       }),
     ])
-    await fixture.registerAdmin()
+    const admin = await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())
       .get('/document-specifications')
-      .set('Authorization', 'Bearer fixture-access-token')
+      .set('Authorization', fixture.authenticateAs(admin))
       .query({ legalAreaId: areas[1].id, page: 2, pageSize: 1 })
       .expect(200)
 

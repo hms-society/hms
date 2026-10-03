@@ -92,6 +92,12 @@ Cover every meaningful behavior, including:
 Assert both the returned domain value and the important dependency calls. Avoid
 tests that only repeat implementation details.
 
+Event publication assertions import the owning domain event and compare its
+`_NAME` and relevant payload fields. Do not repeat event-name literals in tests
+or derived event-name types. Follow
+[`messaging-layer-rules.md`](messaging-layer-rules.md) for the canonical event
+contract; core unit tests continue to use a mocked `Broker`.
+
 ## Mock dependencies with vitest-mock-extended
 
 Repository, gateway, and provider dependencies must use:

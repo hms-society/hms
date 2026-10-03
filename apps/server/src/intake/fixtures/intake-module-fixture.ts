@@ -1,5 +1,6 @@
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
 import type { Intake, IntakeCreation } from '@hms/core/intake/domain/entities'
+import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type { Broker } from '@hms/core/shared/interfaces'
 import { IntakeFaker } from '@hms/core/intake/domain/entities/fakers'
@@ -10,19 +11,26 @@ import { DrizzleIntakeListRepository } from '@/intake/database/drizzle/repositor
 import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
 import { IntakeSeeder } from '@/intake/database/intake-seeder'
 import { IdentityModule } from '@/identity/identity.module'
-import { AuthGuard } from '@/identity/guards'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import type { UsersRepository } from '@hms/core/identity/interfaces'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
+import { InngestFixture } from '@/shared/messaging/inngest/fixtures/inngest-fixture'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 import { vi, type Mock } from 'vitest'
 
 export class IntakeModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
-    private readonly intakesRepository: DrizzleIntakesRepository,
+    private readonly repository: DrizzleIntakesRepository,
     private readonly intakeSeeder: IntakeSeeder,
     readonly broker: Broker & { publish: Mock },
     readonly authUser: AuthUser,
+    private readonly authFixture: SupabaseAuthFixture,
+    private readonly usersRepository: UsersRepository,
+    private readonly inngestFixture: InngestFixture,
   ) {}
 
   get app(): INestApplication {
@@ -33,33 +41,59 @@ export class IntakeModuleFixture {
     return this.restFixture.get(DrizzleIntakeListRepository)
   }
 
+  get intakesRepository(): IntakesRepository {
+    return this.repository
+  }
+
   static async register(controller?: Type<unknown>) {
-    const authUser: AuthUser = {
-      id: '91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30',
-      email: 'intake.fixture@hms.test',
+    const authFixture = await SupabaseAuthFixture.register()
+    const auth = await authFixture.createSignedInUser()
+    const authUser: AuthUser = { id: auth.user.id, email: auth.user.email }
+    let inngestFixture: InngestFixture
+    try {
+      inngestFixture = await InngestFixture.register({ createFunctions: () => [] })
+    } catch (error) {
+      await authFixture.close()
+      throw error
     }
-    const broker: Broker & { publish: Mock } = { publish: vi.fn() }
-    const restFixture = await RestFixture.register(
-      {
-        imports: [IdentityModule, IntakeDatabaseModule],
-        controllers: controller ? [controller] : [],
-        providers: [
-          DatetimeProvider,
-          {
-            provide: InngestBroker,
-            useValue: broker,
-          },
-        ],
-      },
-      (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{ user?: AuthUser }>()
-            request.user = authUser
-            return true
-          },
-        }),
-    )
+    const realBroker = new InngestBroker(inngestFixture.client as InngestClient)
+    const broker: Broker & { publish: Mock } = {
+      publish: vi.fn((event: Parameters<Broker['publish']>[0]) =>
+        realBroker.publish(event),
+      ),
+    }
+    let restFixture: RestFixture
+    try {
+      restFixture = await RestFixture.register(
+        {
+          imports: [IdentityModule, IntakeDatabaseModule],
+          controllers: controller ? [controller] : [],
+          providers: [
+            DatetimeProvider,
+            {
+              provide: InngestBroker,
+              useValue: broker,
+            },
+          ],
+        },
+        (builder) => authFixture.configure(builder),
+        (app) =>
+          app.use(
+            (
+              request: { headers: { authorization?: string } },
+              _response: unknown,
+              next: () => void,
+            ) => {
+              request.headers.authorization = `Bearer ${auth.accessToken}`
+              next()
+            },
+          ),
+      )
+    } catch (error) {
+      await authFixture.close()
+      await inngestFixture.close()
+      throw error
+    }
 
     return new IntakeModuleFixture(
       restFixture,
@@ -67,23 +101,42 @@ export class IntakeModuleFixture {
       restFixture.get(IntakeSeeder),
       broker,
       authUser,
+      authFixture,
+      restFixture.get(IDENTITY_REPOSITORIES.users),
+      inngestFixture,
     )
   }
 
   registerIntake(overrides: Partial<IntakeCreation> = {}) {
-    return this.intakesRepository.add(this.createIntake(overrides))
+    return this.repository.add(this.createIntake(overrides))
   }
 
   seedIntakes(overrides: Partial<IntakeCreation>[]) {
     return this.intakeSeeder.seed(overrides.map((intake) => this.createIntake(intake)))
   }
 
-  resetDatabase() {
-    return this.restFixture.resetDatabase()
+  async resetDatabase() {
+    this.broker.publish.mockClear()
+    await this.restFixture.resetDatabase()
+    await this.usersRepository.addMany([
+      {
+        id: this.authUser.id,
+        email: this.authUser.email ?? '',
+        status: 'active',
+      },
+    ])
   }
 
-  close() {
-    return this.restFixture.close()
+  async close() {
+    try {
+      await this.restFixture.close()
+    } finally {
+      try {
+        await this.authFixture.close()
+      } finally {
+        await this.inngestFixture.close()
+      }
+    }
   }
 
   private createIntake(overrides: Partial<IntakeCreation>): IntakeCreation {
