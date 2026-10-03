@@ -174,7 +174,6 @@ export abstract class MastraAgent<
         'Erro de Configuração de IA',
       )
     }
-
     return { providerId, modelId, url, apiKey }
   }
 }
