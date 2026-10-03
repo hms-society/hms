@@ -11,6 +11,7 @@ describe('WhatsappProvider', () => {
       get: vi.fn((key: string) => {
         if (key === 'WHATSAPP_API_TOKEN') return 'fake-token'
         if (key === 'WHATSAPP_PHONE_NUMBER_ID') return 'fake-phone-id'
+        if (key === 'META_GRAPH_API_BASE_URL') return 'https://graph.facebook.com/v25.0'
         if (key === 'HMS_SERVER_APP_MODE') return 'dev'
         return ''
       }),

@@ -30,6 +30,19 @@ Publishers and consumers import `_NAME`; they must not repeat the event-name
 literal. When a job creates a child event, instantiate the domain event and send
 its `name` and `payload` instead of recreating an untyped object.
 
+Controller tests and use-case tests must also assert names through the owning
+domain event's `_NAME`. Do not copy an event-name string into a controller,
+publisher, Inngest trigger, or test assertion. Audit every controller location,
+including integration controllers outside `rest/controllers`, when changing an
+event name or its publisher.
+
+An inbound provider webhook is a transport event until the application translates
+it into a domain occurrence. When it has no domain event class, define one named
+event-name constant in the owning adapter, or in shared messaging when the
+transport crosses modules, and import it in its publisher, consumer, and tests;
+do not misrepresent the raw provider payload as a core domain event merely to
+share a string.
+
 The shared broker contract remains deliberately small:
 
 ```ts
@@ -40,6 +53,24 @@ export interface Broker {
 
 Core use cases depend on `Broker`, never on `InngestClient`. `InngestBroker` is
 the shared server implementation.
+
+## Messaging tests identify the boundary they prove
+
+Controller publication tests use the real `InngestBroker` and an
+`InngestFixture` local service. An observing spy may wrap `publish` only if it
+forwards the event to the real broker and returns its promise. Assert the domain
+event's `_NAME` and relevant payload fields.
+
+A spy call alone proves an attempted broker call. A completed real publish proves
+the service accepted publication; it does not prove a downstream function ran.
+Fixtures registered with `createFunctions: () => []` provide publication
+coverage only. Job execution tests must register the actual function and wait
+for its persisted effect or an observer event, using bounded polling rather than
+fixed sleeps.
+
+Raw provider transport names shared across modules are centralized in
+`apps/server/src/shared/messaging/inngest/integration-event-names.ts`. Their
+publishers, triggers, transport types, and tests import those constants.
 
 ## The originating module builds authoritative event data
 

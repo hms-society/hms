@@ -1,4 +1,5 @@
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
+import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {
   CaseChecklistItemCreation,
   CaseMemberCreation,
@@ -15,6 +16,9 @@ import {
   DrizzleCaseChecklistItemsRepository,
   DrizzleCaseMembersRepository,
   DrizzleLegalCasesRepository,
+  DrizzlePendingsRepository,
+  DrizzleCasePortalAccessGrantsRepository,
+  DrizzleChecklistTemplatesRepository,
 } from '@/case-management/database/drizzle/repositories'
 import {
   DrizzleClientsRepository,
@@ -22,15 +26,18 @@ import {
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IntakeDatabaseModule } from '@/intake/database'
+import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
-import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { IdentityModule } from '@/identity/identity.module'
+import { IdentityAccessModule } from '@/identity/identity-access.module'
 import {
   DrizzleLegalAreasRepository,
   DrizzleLegalTopicsRepository,
 } from '@/legal-catalog/database/drizzle/repositories'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 
 type RegisteredCollaborator = {
   collaboratorId: string
@@ -50,6 +57,9 @@ export class CaseManagementModuleFixture {
     private readonly legalCasesRepository: DrizzleLegalCasesRepository,
     private readonly caseChecklistItemsRepository: DrizzleCaseChecklistItemsRepository,
     private readonly caseMembersRepository: DrizzleCaseMembersRepository,
+    private readonly pendingsRepository: DrizzlePendingsRepository,
+    private readonly grantsRepository: DrizzleCasePortalAccessGrantsRepository,
+    private readonly templatesRepository: DrizzleChecklistTemplatesRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
     private readonly clientsRepository: DrizzleClientsRepository,
@@ -57,6 +67,7 @@ export class CaseManagementModuleFixture {
     private readonly legalTopicsRepository: DrizzleLegalTopicsRepository,
     private readonly intakesRepository: DrizzleIntakesRepository,
     readonly authUser: AuthUser,
+    private readonly authFixture: SupabaseAuthFixture,
     private readonly currentCollaborator: { value?: RegisteredCollaborator },
   ) {}
 
@@ -64,67 +75,60 @@ export class CaseManagementModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller?: Type<unknown>) {
-    const authUser: AuthUser = {
-      id: '91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30',
-      email: 'case-management.fixture@hms.test',
-    }
+  static async register(
+    controller?: Type<unknown>,
+    configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+  ) {
+    const authFixture = await SupabaseAuthFixture.register()
+    const auth = await authFixture.createSignedInUser()
+    const authUser: AuthUser = { id: auth.user.id, email: auth.user.email }
     const currentCollaborator: { value?: RegisteredCollaborator } = {}
-    const restFixture = await RestFixture.register(
-      {
-        imports: [
-          IdentityModule,
-          LegalCatalogModule,
-          CaseManagementDatabaseModule,
-          IntakeDatabaseModule,
-        ],
-        controllers: controller ? [controller] : [],
-      },
-      (builder) =>
-        builder
-          .overrideGuard(AuthGuard)
-          .useValue({
-            canActivate: (context: ExecutionContext) => {
-              const request = context.switchToHttp().getRequest<{
-                auth?: { accessToken: string; user: AuthUser }
-                user?: AuthUser
-              }>()
-              request.user = authUser
-              request.auth = { accessToken: 'fixture-access-token', user: authUser }
-              return true
+    let restFixture: RestFixture
+    try {
+      restFixture = await RestFixture.register(
+        {
+          imports: [
+            IdentityModule,
+            IdentityAccessModule,
+            LegalCatalogModule,
+            CaseManagementDatabaseModule,
+            IntakeDatabaseModule,
+            ...(configure ? [DocumentsDatabaseModule, ProvisionModule] : []),
+          ],
+          controllers: controller ? [controller] : [],
+        },
+        (builder) => {
+          const authenticatedBuilder = authFixture.configure(builder)
+          return configure?.(authenticatedBuilder) ?? authenticatedBuilder
+        },
+        (app) => {
+          app.use(
+            (
+              request: {
+                headers: { authorization?: string }
+              },
+              _response: unknown,
+              next: () => void,
+            ) => {
+              request.headers.authorization = `Bearer ${auth.accessToken}`
+              next()
             },
-          })
-          .overrideGuard(ActiveCollaboratorGuard)
-          .useValue({
-            canActivate: (context: ExecutionContext) => {
-              const request = context.switchToHttp().getRequest<{
-                collaborator?: {
-                  collaboratorId: string
-                  professionalName: string
-                  email: string
-                  profile: string
-                  status: string
-                }
-              }>()
-              const collaborator = currentCollaborator.value
-              request.collaborator = {
-                collaboratorId: collaborator?.collaboratorId ?? authUser.id,
-                professionalName:
-                  collaborator?.professionalName ?? 'Case Management Fixture',
-                email: authUser.email ?? 'case-management.fixture@hms.test',
-                profile: collaborator?.profile ?? 'lawyer',
-                status: 'active',
-              }
-              return true
-            },
-          }),
-    )
+          )
+        },
+      )
+    } catch (error) {
+      await authFixture.close()
+      throw error
+    }
 
     return new CaseManagementModuleFixture(
       restFixture,
       restFixture.get(DrizzleLegalCasesRepository),
       restFixture.get(DrizzleCaseChecklistItemsRepository),
       restFixture.get(DrizzleCaseMembersRepository),
+      restFixture.get(DrizzlePendingsRepository),
+      restFixture.get(DrizzleCasePortalAccessGrantsRepository),
+      restFixture.get(DrizzleChecklistTemplatesRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
       restFixture.get(DrizzleClientsRepository),
@@ -132,6 +136,7 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleLegalTopicsRepository),
       restFixture.get(DrizzleIntakesRepository),
       authUser,
+      authFixture,
       currentCollaborator,
     )
   }
@@ -164,7 +169,11 @@ export class CaseManagementModuleFixture {
     if (!client) throw new Error('Client fixture was not created')
 
     const [user] = await this.usersRepository.addMany([
-      UserFaker.fake({ id: this.authUser.id, email: this.authUser.email }),
+      UserFaker.fake({
+        id: this.authUser.id,
+        email: this.authUser.email,
+        status: 'active',
+      }),
     ])
     if (!user) throw new Error('User fixture was not created')
 
@@ -260,12 +269,69 @@ export class CaseManagementModuleFixture {
     return this.caseChecklistItemsRepository.addMany(checklistItems)
   }
 
+  async registerPending(caseId: string, checklistItemId: string, responsibleId: string) {
+    return this.pendingsRepository.createWithMessage({
+      pending: { caseId, checklistItemId, responsibleId, reason: 'missing' },
+      message: {
+        caseId,
+        checklistItemId,
+        subject: 'Documento pendente',
+        body: 'Envie o documento pendente.',
+        status: 'awaiting_approval',
+      },
+    })
+  }
+
+  registerPortalGrant(
+    caseId: string,
+    tokenHash: string,
+    grantedBy: string,
+    canUpload = false,
+  ) {
+    return this.grantsRepository.add({
+      caseId,
+      tokenHash,
+      canView: true,
+      canUpload,
+      expiresAt: new Date(Date.now() + 60_000),
+      grantedBy,
+    })
+  }
+
+  registerChecklistTemplate(legalAreaId: string) {
+    return this.templatesRepository.add({
+      legalAreaId,
+      name: 'Documentos iniciais',
+      isActive: true,
+    })
+  }
+
+  findPending(pendingId: string) {
+    return this.pendingsRepository.findById(pendingId)
+  }
+
+  findPendingMessage(pendingId: string) {
+    return this.pendingsRepository.findMessageByPendingId(pendingId)
+  }
+
+  findPortalGrant(tokenHash: string, caseId: string) {
+    return this.grantsRepository.findActiveByTokenHashAndCase(tokenHash, caseId)
+  }
+
+  findChecklistTemplate(legalAreaId: string) {
+    return this.templatesRepository.findByLegalAreaId(legalAreaId)
+  }
+
   resetDatabase() {
     return this.restFixture.resetDatabase()
   }
 
-  close() {
-    return this.restFixture.close()
+  async close() {
+    try {
+      await this.restFixture.close()
+    } finally {
+      await this.authFixture.close()
+    }
   }
 
   private createLegalCase(overrides: Partial<LegalCaseCreation>): LegalCaseCreation {

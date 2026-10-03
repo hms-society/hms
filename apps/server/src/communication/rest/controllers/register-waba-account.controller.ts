@@ -18,15 +18,16 @@ import type {
   UsersRepository,
   CollaboratorsRepository,
 } from '@hms/core/identity/interfaces'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 
 @Controller('communication/waba')
 @UseGuards(AuthGuard)
 export class RegisterWabaAccountController {
   constructor(
     private readonly registerWabaAccountUseCase: RegisterWabaAccountUseCase,
-    @Inject('USERS_REPOSITORY')
+    @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
-    @Inject('COLLABORATORS_REPOSITORY')
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaboratorsRepository: CollaboratorsRepository,
   ) {}
 
@@ -42,12 +43,12 @@ export class RegisterWabaAccountController {
   @UsePipes(ZodValidationPipe)
   async handle(@Body() body: RegisterWabaAccountDto, @Req() req: any) {
     const user = await this.usersRepository.findById(req.user.id)
-    if (!user || user.status !== 'active') {
+    if (user?.status !== 'active') {
       throw new ForbiddenException('User is inactive or unauthorized.')
     }
 
     const collaborator = await this.collaboratorsRepository.findByUserId(user.id)
-    if (!collaborator || collaborator.profile !== 'admin') {
+    if (collaborator?.profile !== 'admin') {
       throw new ForbiddenException('Apenas Administradores podem registrar números WABA.')
     }
 

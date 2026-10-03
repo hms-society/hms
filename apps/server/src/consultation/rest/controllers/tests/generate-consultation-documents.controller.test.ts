@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 import { ConsultationFaker } from '@hms/core/consultation/domain/entities/fakers'
+import { DocumentBatchGenerationRequestedEvent } from '@hms/core/document-production/domain/events'
 
 import { ConsultationModuleFixture } from '@/consultation/fixtures'
 import { GenerateConsultationDocumentsController } from '@/consultation/rest/controllers'
@@ -31,7 +32,7 @@ describe('Generate Consultation Documents Controller [POST /consultations/:consu
     expect(response.body).toEqual([expect.objectContaining({ documentId: document.id })])
     expect(fixture.broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document-batch.generation-requested',
+        name: DocumentBatchGenerationRequestedEvent._NAME,
         payload: expect.objectContaining({
           source: expect.objectContaining({
             data: expect.objectContaining({

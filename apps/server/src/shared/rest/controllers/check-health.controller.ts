@@ -7,7 +7,7 @@ import type { Response } from 'express'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
+import { HealthResponseDto } from '@/shared/rest/dtos'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 const { version } = JSON.parse(
@@ -144,11 +144,14 @@ export class CheckHealthController {
     }
 
     try {
-      const result = await fetch('https://api.inngest.com/v2/apps/hms-server', {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        redirect: 'error',
-        signal: AbortSignal.timeout(DEPENDENCY_TIMEOUT_MS),
-      })
+      const result = await fetch(
+        new URL('/v2/apps/hms-server', this.envProvider.get('INNGEST_API_BASE_URL')),
+        {
+          headers: { Authorization: `Bearer ${apiKey}` },
+          redirect: 'error',
+          signal: AbortSignal.timeout(DEPENDENCY_TIMEOUT_MS),
+        },
+      )
       if (!result.ok) {
         await result.body?.cancel()
         Logger.warn(

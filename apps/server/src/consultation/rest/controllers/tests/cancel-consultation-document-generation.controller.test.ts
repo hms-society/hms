@@ -1,4 +1,5 @@
 import { ConsultationFaker } from '@hms/core/consultation/domain/entities/fakers'
+import { DocumentGenerationCancelledEvent } from '@hms/core/document-production/domain/events'
 import request from 'supertest'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -39,7 +40,7 @@ describe('Cancel Consultation Document Generation Controller [POST /consultation
     )
     expect(fixture.broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document.generation-cancelled',
+        name: DocumentGenerationCancelledEvent._NAME,
         payload: expect.objectContaining({ documentGenerationId: generation.id }),
       }),
     )
