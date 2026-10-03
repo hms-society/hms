@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 import { ConsultationFaker } from '@hms/core/consultation/domain/entities/fakers'
+import { DocumentGenerationRequestedEvent } from '@hms/core/document-production/domain/events'
 
 import { ConsultationModuleFixture } from '@/consultation/fixtures'
 import { GenerateConsultationDocumentController } from '@/consultation/rest/controllers'
@@ -43,7 +44,7 @@ describe('Generate Consultation Document Controller [POST /consultations/:consul
     )
     expect(fixture.broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document.generation-requested',
+        name: DocumentGenerationRequestedEvent._NAME,
         payload: expect.objectContaining({
           source: expect.objectContaining({
             data: expect.objectContaining({
@@ -85,7 +86,7 @@ describe('Generate Consultation Document Controller [POST /consultations/:consul
     expect(response.body).toMatchObject({ documentId: document.id })
     expect(fixture.broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document.generation-requested',
+        name: DocumentGenerationRequestedEvent._NAME,
         payload: expect.objectContaining({
           documentId: document.id,
         }),

@@ -19,7 +19,7 @@ describe('Register Intakes Controller [POST /intakes]', () => {
 
   beforeEach(async () => fixture.resetDatabase())
 
-  afterAll(async () => fixture.close())
+  afterAll(async () => fixture?.close())
 
   it('registers an intake', async () => {
     const draft = IntakeFaker.fake()

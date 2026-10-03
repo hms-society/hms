@@ -10,6 +10,8 @@ export default defineConfig({
     },
   },
   test: {
+    globalSetup: ['./src/shared/rest/tests/test-services-global-setup.ts'],
+    setupFiles: ['./src/shared/rest/tests/test-services-setup.ts'],
     coverage: {
       exclude: [
         'src/**/*.{test,spec}.ts',

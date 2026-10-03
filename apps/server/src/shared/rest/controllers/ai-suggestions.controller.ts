@@ -7,6 +7,7 @@ import {
   Body,
   Inject,
   HttpStatus,
+  HttpCode,
 } from '@nestjs/common'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
@@ -56,6 +57,7 @@ export class AiSuggestionsController {
   }
 
   @Post(':id/feedback')
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Feedback registrado com sucesso.',

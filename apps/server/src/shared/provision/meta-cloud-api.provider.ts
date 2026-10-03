@@ -17,7 +17,9 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
     const appId = this.envProvider.get('META_APP_ID') || 'mock_app_id'
     const appSecret = this.envProvider.get('META_APP_SECRET') || 'mock_app_secret'
 
-    const url = new URL('https://graph.facebook.com/v25.0/oauth/access_token')
+    const url = new URL(
+      `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/oauth/access_token`,
+    )
     url.searchParams.append('client_id', appId)
     url.searchParams.append('client_secret', appSecret)
     url.searchParams.append('code', code)
@@ -57,13 +59,6 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
     } catch (err) {
       if (err instanceof AppError) throw err
       this.logger.error(`[MetaCloudApiProvider] Exception during token exchange: ${err}`)
-      // In development/test mode with mock code, fallback to mock token if network fails
-      if (process.env.NODE_ENV === 'test' || code.startsWith('mock_')) {
-        return {
-          accessToken: 'mock_system_user_access_token',
-          tokenType: 'bearer',
-        }
-      }
       throw new AppError(
         'Erro ao conectar com a Meta Graph API.',
         'WabaRegistrationFailedError',
@@ -75,7 +70,7 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
     phoneNumberId: string,
     accessToken: string,
   ): Promise<MetaPhoneNumberDetailsResult> {
-    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}?fields=display_phone_number,verified_name,quality_rating`
+    const url = `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/${phoneNumberId}?fields=display_phone_number,verified_name,quality_rating`
 
     try {
       const response = await fetch(url, {
@@ -90,14 +85,6 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
         this.logger.error(
           `[MetaCloudApiProvider] Get phone number details failed (${response.status}): ${errorText}`,
         )
-        // Fallback for tests / mock ids
-        if (phoneNumberId.startsWith('phone_') || process.env.NODE_ENV === 'test') {
-          return {
-            displayPhoneNumber: '+5511999998888',
-            verifiedName: 'Advocacia HMS',
-            qualityRating: 'GREEN',
-          }
-        }
         throw new AppError(
           'Falha ao consultar detalhes do número de telefone na Meta.',
           'WabaRegistrationFailedError',
@@ -117,13 +104,6 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
       }
     } catch (err) {
       if (err instanceof AppError) throw err
-      if (phoneNumberId.startsWith('phone_') || process.env.NODE_ENV === 'test') {
-        return {
-          displayPhoneNumber: '+5511999998888',
-          verifiedName: 'Advocacia HMS',
-          qualityRating: 'GREEN',
-        }
-      }
       throw err
     }
   }

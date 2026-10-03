@@ -4,35 +4,18 @@ import request from 'supertest'
 
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
 import { RequestDocumentExceptionController } from '@/document-engine/rest/controllers/request-document-exception.controller'
-import { ActiveCollaboratorGuard } from '@/identity/guards'
 
 describe('Request Document Exception Controller [POST /cases/:caseId/document-exceptions]', () => {
   let fixture: DocumentEngineModuleFixture
   let userId: string
   let clientId: string
   let caseId: string
-  let collaboratorId: string
 
   beforeAll(async () => {
     userId = randomUUID()
-    collaboratorId = randomUUID()
-
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       RequestDocumentExceptionController,
       userId,
-      (builder) =>
-        builder.overrideGuard(ActiveCollaboratorGuard).useValue({
-          canActivate(context: any) {
-            const req = context.switchToHttp().getRequest()
-            req.collaborator = {
-              collaboratorId,
-              userId: req.user.id,
-              profile: 'lawyer',
-              permissions: [],
-            }
-            return true
-          },
-        }),
     )
   })
 

@@ -5,13 +5,18 @@ import { AuthModule } from '@/identity/auth.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { DatabaseHealthWatchdog } from '@/shared/rest/database-health-watchdog'
 import {
+  AiSuggestionsController,
   CheckHealthController,
   ListDynamicFormsController,
 } from '@/shared/rest/controllers'
 
 @Module({
   imports: [AuthModule, SharedDatabaseModule, ProvisionModule],
-  controllers: [CheckHealthController, ListDynamicFormsController],
+  controllers: [
+    CheckHealthController,
+    ListDynamicFormsController,
+    AiSuggestionsController,
+  ],
   providers: [DatabaseHealthWatchdog],
 })
 export class SharedRestModule {}

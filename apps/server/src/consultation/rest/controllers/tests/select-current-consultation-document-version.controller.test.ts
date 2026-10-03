@@ -14,7 +14,7 @@ describe('Select Current Consultation Document Version Controller [PATCH /consul
     )
   })
   beforeEach(async () => fixture.resetDatabase())
-  afterAll(async () => fixture.close())
+  afterAll(async () => fixture?.close())
 
   it('selects an approved version as current', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
