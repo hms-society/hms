@@ -11,10 +11,14 @@ import { integracaoEvento } from '@/shared/database/drizzle/schema/integracao-ev
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
+import {
+  WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME,
+  WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME,
+} from '@/shared/messaging/inngest/integration-event-names'
 import { encrypt } from '@/shared/utils/crypto'
 import { IntakeStatus } from '@hms/core/intake/domain/structures'
 
-const whatsappEventReceived = eventType('whatsapp/event.received', {
+const whatsappEventReceived = eventType(WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME, {
   schema: z.record(z.string(), z.unknown()),
 })
 
@@ -73,7 +77,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
         const eventsToDispatch = await step.run('route-whatsapp-media', async () => {
           const database = this.drizzleClient.requireDatabase()
           const events: Array<{
-            name: 'documents/whatsapp.batch.received'
+            name: typeof WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME
             data: Record<string, unknown>
           }> = []
 
@@ -229,7 +233,7 @@ export class ProcessWhatsappEventJob extends InngestJob {
                 .returning()
 
               events.push({
-                name: 'documents/whatsapp.batch.received',
+                name: WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME,
                 data: {
                   eventoId: evento.id,
                   sender,

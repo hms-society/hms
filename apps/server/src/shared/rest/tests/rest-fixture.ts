@@ -17,6 +17,7 @@ export class RestFixture {
   static async register(
     metadata: TestingModuleMetadata,
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+    configureApp?: (app: INestApplication) => void,
   ) {
     const databaseFixture = await DatabaseFixture.register()
     let app: INestApplication | undefined
@@ -25,6 +26,7 @@ export class RestFixture {
       const builder = Test.createTestingModule(metadata)
       const moduleRef = await (configure?.(builder) ?? builder).compile()
       app = moduleRef.createNestApplication()
+      configureApp?.(app)
       // biome-ignore lint/correctness/useHookAtTopLevel: Nest global filter registration is not a React hook.
       app.useGlobalFilters(new GlobalErrorHandler(app.get(HttpAdapterHost)))
       await app.init()

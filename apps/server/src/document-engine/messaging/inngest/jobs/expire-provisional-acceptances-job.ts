@@ -10,6 +10,8 @@ import type {
 } from '@hms/core/document-engine/interfaces'
 import { DocumentExceptionStatus } from '@hms/core/document-engine/domain/structures'
 
+const SYSTEM_ACTOR_ID = '00000000-0000-4000-8000-000000000000'
+
 @Injectable()
 export class ExpireProvisionalAcceptancesJob extends InngestJob {
   static readonly ID = 'document-engine/expire-provisional-acceptances'
@@ -39,13 +41,13 @@ export class ExpireProvisionalAcceptancesJob extends InngestJob {
           for (const exception of expiredExceptions) {
             await this.documentExceptionsRepository.updateStatus(exception.id, {
               status: DocumentExceptionStatus.EXPIRED,
-              reviewedBy: 'SYSTEM',
+              reviewedBy: SYSTEM_ACTOR_ID,
             })
 
             await this.auditLogsRepository.create({
               documentExceptionId: exception.id,
               action: 'EXPIRED',
-              userId: 'SYSTEM',
+              userId: SYSTEM_ACTOR_ID,
             })
 
             count++

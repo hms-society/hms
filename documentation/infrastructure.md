@@ -182,9 +182,9 @@ sequenceDiagram
 
 * **Vitest:** Unit tests for services, business rules, schemas, and helpers.
 * **Supertest:** HTTP integration tests for the NestJS server.
-* **Testcontainers:** Spins up real databases/services in tests when needed.
-* **FakeWhatsAppProvider:** In-memory provider used in the main automated tests.
-* **Route integration tests:** Validate controllers, middlewares, authentication, permissions, contracts, and HTTP responses.
+* **Testcontainers:** Runs isolated PostgreSQL, GoTrue Auth, Mailpit, and Inngest services for controller integration tests.
+* **Local service tests:** Controller tests use the local Supabase Storage service and a local HTTP server that implements the Meta Graph protocol.
+* **Route integration tests:** Validate controllers, middlewares, real authentication and persistence, provider calls, permissions, contracts, and HTTP responses.
 
 ---
 
