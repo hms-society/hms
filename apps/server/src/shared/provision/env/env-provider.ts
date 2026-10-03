@@ -26,6 +26,11 @@ export const envSchema = z.object({
   GEMINI_AI_MODEL: optionalEnvString,
   GEMINI_VISION_AI_MODEL: optionalEnvString,
   OPENROUTER_API_KEY: optionalEnvString,
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url().optional(),
+  ),
+
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   DOCUMENSO_URL: z.preprocess(

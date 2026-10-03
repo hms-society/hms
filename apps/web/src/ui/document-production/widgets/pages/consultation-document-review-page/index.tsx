@@ -48,6 +48,7 @@ export const ConsultationDocumentReviewPage = (
     handleLocateMarker,
     handleRemoveAllPendingMarkers,
     handleRemovePendingMarker,
+    handleFillPendingMarker,
     handleReject,
     handleRequestCancel,
     handleRequestSave,
@@ -203,6 +204,7 @@ export const ConsultationDocumentReviewPage = (
         onOpenChange={setIsPendingMarkersOpen}
         onLocate={handleLocateMarker}
         onRemove={handleRemovePendingMarker}
+        onFill={handleFillPendingMarker}
         onRemoveAll={handleRemoveAllPendingMarkers}
       />
       <PendingMarkerNotFoundDialog

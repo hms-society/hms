@@ -66,13 +66,27 @@ agent by default.
 
 The shared `MastraAgent` resolves the runtime provider:
 
-- local development uses Ollama and the single `OLLAMA_AI_MODEL` environment
-  value so the team can select a model compatible with each machine;
-- staging and production use OpenRouter with the model declared by the agent;
+- local Document Production drafting and review use OpenRouter with the ordered
+  free-model fallback array declared by the feature in `developmentModels`:
+  `qwen/qwen3.8-27b:free`, `nvidia/nemotron-3-super-120b-a12b:free`,
+  `dots-studio/dots-3-note-preview:free`, `liquid/lfm-2.5-2.6b:free`;
+- the shared base resolves that array into Mastra native model fallbacks with
+  `maxRetries: 0` per entry, advancing to the next model on a failed call;
+- other local agents use Ollama with `OLLAMA_AI_MODEL` for text or
+  `OLLAMA_VISION_AI_MODEL` for images;
+- the production document writer declares `productionModels`: DeepSeek V4.1 Flash
+  through DeepInfra, CoreWeave, NextBit, then GPT-6 Luna through Azure and OpenAI.
+  The shared base maps these to native Mastra fallback entries, each pinned with
+  OpenRouter `provider.only`, `allow_fallbacks: false`, `require_parameters: true`
+  and `maxRetries: 0`. This chain covers drafting and its placeholder generation;
+- the production reviewer uses the same routes with the model groups reversed:
+  GPT-6 Luna through Azure and OpenAI, then DeepSeek V4.1 Flash through DeepInfra,
+  CoreWeave and NextBit;
+- staging and other production agents use OpenRouter with their declared model;
 - agent model names use the provider catalog identifier such as
   `deepseek/deepseek-v4-pro`, without an additional `openrouter/` prefix;
-- a missing production OpenRouter credential raises `AppError`, never native
-  `Error`.
+- a missing OpenRouter credential raises `AppError` in any environment that uses
+  OpenRouter, never native `Error`.
 
 Local execution exists to validate workflow composition and integration. It is
 not expected to reproduce the production model's reasoning quality.
@@ -172,6 +186,17 @@ silently incorporating later changes from the source module.
 Agent results use Zod structured output. Never parse free-form model text as the
 primary success path when a schema can express the expected result. The schema
 must constrain the content that crosses from the model into application code.
+
+The document writer uses `jsonPromptInjection: true` and `errorStrategy: 'strict'`
+with a writer response schema. The prompt requests `{ content: { type: 'doc',
+content: [...] } }`. The AI transport also accepts a valid bare Tiptap document
+or a wrapper containing validated block nodes, normalizes these into the same
+draft wrapper, and parses `documentDraftSchema` before marker extraction and
+review. Unsupported nodes, marks, attributes and nesting remain rejected.
+Its recursive Tiptap schema is injected into the
+prompt rather than sent as native `response_format`, avoiding provider schema
+depth limits while retaining Mastra's runtime validation. The reviewer continues
+to use native structured output for its shallow review schema.
 
 AI-generated legal documents pass through a reviewer loop owned by the feature
 workflow. Review findings exposed outside the AI layer use domain categories and
