@@ -460,20 +460,6 @@ the result is unchanged:
 If a check fails, keep the affected work `in_progress`; do not mark it passed because another
 sensor passed. The next action is correction and rerun, not a user permission request.
 
-### Advisory code volume and task slicing check (~1,200 LOC)
-
-To prevent implementation branches from becoming oversized and difficult to review, monitor the
-net added TypeScript LOCs (`.ts`, `.tsx`, `.mts`, `.cts`) throughout the implementation phases.
-Exclude generated files (`routeTree.gen.ts`, `.gen.*`), test snapshots, extensive mock fixtures,
-generated migrations/seeders, and markdown documentation.
-
-When substantive additions exceed the advisory threshold of ~1,200 LOC:
-- Report the estimated added LOC count in the progress/handoff summary;
-- Assess completed tasks/boundaries (e.g. Core contracts and schemas complete vs Server/Web in progress);
-- Formally recommend to the developer whether to slice and open a Small PR for `develop` with the most
-  complete task (applying the `stacked-pr` label to subsequent tasks as needed) or continue in the current branch.
-This threshold is advisory and non-blocking; it guides proactive task slicing without interrupting active execution.
-
 ## Design-backed UI execution
 
 When a Design Contract exists:
@@ -546,6 +532,44 @@ When product behavior, design intent or technical boundaries change:
 
 Ask the user only when the classification or intended product/technical outcome is genuinely
 ambiguous.
+
+## Coverage execution policy
+
+`implement-spec` is the only local SDD workflow that runs `test:coverage`. Run it once
+per affected Core, Server, or Web workspace for the delivery, after focused
+checks pass and the implementation is integrated. Do not reset this allowance
+on a resume, correction, conclusion retry, or Spec amendment within that delivery.
+Before executing, inspect Evaluation for an existing attempt. Record the command,
+workspace, outcome, report path, and measured implementation in Evaluation;
+a failed or interrupted attempt also counts as the single run.
+
+Builders and reviewers use focused tests without coverage. After later changes
+or failures, rerun only affected tests without coverage and update behavioral
+validation. Preserve the coverage run as a historical measurement when its
+implementation changes; never claim its percentages measure a later candidate.
+Resolve every failure with current test evidence before readiness. Do not rerun
+coverage to refresh percentages. Local conclusion, commit, and publication reuse
+this record and must not run `test:coverage` or enable coverage through another
+command. CI independently runs coverage and every applicable quality gate on
+each current PR head. A separate local coverage refresh requires an explicit user request.
+
+## Web integration execution policy
+
+Only `implement-spec` runs the complete Web `test:integration` suite locally in SDD,
+once per delivery when Web integration is applicable, after focused browser
+checks pass. Inspect Evaluation before execution and record the command,
+outcome, measured implementation, and Playwright artifacts. Failed or interrupted
+attempts count; resumes, corrections, amendments, and publication retries do not
+reset the allowance. Later fixes use focused Playwright CLI tests for affected
+routes and scenarios, with real REST/Auth services where required. Preserve the
+full-suite result as historical when its candidate changes and resolve failures
+with current focused evidence. Do not claim a focused rerun is a green full run.
+Local conclusion, commit, and publication reuse the recorded integration evidence
+and must not rerun the full suite, including through an equivalent unfiltered
+Playwright command. A separate full integration refresh requires an explicit user
+request. CI independently runs the full Web integration suite on each applicable
+PR head. This policy does not remove required authenticated-browser, responsive,
+keyboard, console/network, or acceptance-scenario validation.
 
 ## Integrated validation and readiness
 
