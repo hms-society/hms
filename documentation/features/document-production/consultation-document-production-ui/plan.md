@@ -435,7 +435,7 @@ Resultado observável: fixture compartilhada, stateful e autenticada por transpo
 RF / CA: CA-01 a CA-12; todos RF
 Parallelizable: não. Precisa de ambas as rotas e de todos os widgets reais.
 
-Evidência: `pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts tests/document-production/consultation-document-version-page.test.ts` passou com 4/4. O fixture autentica pela tela de login usando transporte Supabase mockado para o cenário isolado, cobre `complete-sign-in`, mantém estadoful GET/POST/PATCH, fluxo de review, conflito 409 sem falso sucesso, geração em lote, viewport estreito e teclado. O aviso do gerador sobre `src/routes/modelos-de-documentos/index.test.ts` é preexistente.
+Evidência: `pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.tsx tests/document-production/consultation-document-version-page.test.tsx` passou com 11/11 testes (5 na listagem e 6 na página de versão). O fixture autentica pela tela de login usando transporte Supabase mockado para o cenário isolado, cobre `complete-sign-in`, mantém estadoful GET/POST/PATCH, fluxo de review, conflito 409 sem falso sucesso, geração em lote, viewport estreito e teclado. O aviso do gerador sobre `src/routes/modelos-de-documentos/index.test.ts` é preexistente.
 
 #### F5-T2 — verified with preexisting blockers
 
@@ -445,7 +445,7 @@ Resultado observável: executa o Quality Gate na ordem: generate-routes, check:c
 RF / CA: RF-001 a RF-012; CA-01 a CA-12
 Parallelizable: não. O gate deve ser integrado e repetível após correções.
 
-Evidência: `generate-routes`, `check:code` e os 4 testes de integração focados
+Evidência: `generate-routes`, `check:code` e os 11 testes de integração focados
 passaram. `check:types` e `build` continuam bloqueados somente pela dependência
 preexistente `react-pdf` em `apps/web/src/ui/identity/widgets/pages/document-viewer/index.tsx`;
 a suíte `pnpm --filter web test` passou 201/202, com o único timeout preexistente
