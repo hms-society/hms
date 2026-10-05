@@ -56,6 +56,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
+    { label: 'Terceiros', route: 'thirdParties', icon: 'briefcase-business' },
     { label: 'Clientes', route: 'clients', icon: 'users' },
     { label: 'Áreas e Demandas', route: 'legalCatalogAdmin', icon: 'scale' },
     {
@@ -69,7 +70,10 @@ export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Attendant]: ATTENDANT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Lawyer]: LAWYER_SIDEBAR_ITEMS,
   [CollaboratorProfile.Paralegal]: PARALEGAL_SIDEBAR_ITEMS,
-  [CollaboratorProfile.Supervisor]: LAWYER_SIDEBAR_ITEMS,
+  [CollaboratorProfile.Supervisor]: [
+    ...LAWYER_SIDEBAR_ITEMS,
+    { label: 'Terceiros', route: 'thirdParties', icon: 'briefcase-business' },
+  ],
   [CollaboratorProfile.Client]: CLIENT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Intern]: [],
 }

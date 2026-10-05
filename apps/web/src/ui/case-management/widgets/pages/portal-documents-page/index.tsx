@@ -16,6 +16,28 @@ export type PortalDocumentsPageProps = {
   portalToken: string
 }
 
+const statusLabels: Record<string, string> = {
+  documentation: 'Documentação',
+  ready_for_legal_production: 'Pronto para produção jurídica',
+  legal_production: 'Produção jurídica',
+  protocol_delivery: 'Entrega de protocolo',
+  execution: 'Execução',
+  closed: 'Encerrado',
+  registered: 'Registrado',
+  consultation_scheduling: 'Agendando consulta',
+  consultation_scheduling_failed: 'Agendamento com falha',
+  consultation_scheduled: 'Consulta agendada',
+  consultation_completed: 'Consulta realizada',
+  viability_registered: 'Viabilidade registrada',
+  in_formalization: 'Em formalização',
+  contracted: 'Contratado',
+  closed_without_contract: 'Encerrado sem contratação',
+}
+
+function getStatusLabel(status: string) {
+  return statusLabels[status] ?? status.replaceAll('_', ' ')
+}
+
 function DocumentRow({
   item,
   status,
@@ -104,14 +126,33 @@ function Section({
 }
 
 export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPageProps) {
-  const { pendingItems, inAnalysisItems, validatedItems, isLoading, error, refetch } =
-    usePortalDocumentsPage(caseId, portalToken)
+  const {
+    pendingItems,
+    inAnalysisItems,
+    validatedItems,
+    portalCase,
+    isLoading,
+    error,
+    refetch,
+  } = usePortalDocumentsPage(caseId, portalToken)
   const { caseManagementService } = useRestContext()
   const queryClient = useQueryClient()
   const [selectedItem, setSelectedItem] = useState<CaseChecklistItem | null>(null)
   const [uploadResult, setUploadResult] = useState<PortalDocumentUploadResponse | null>(
     null,
   )
+  const [activeSection, setActiveSection] = useState<'documents' | 'tracking'>(
+    'documents',
+  )
+  const canUpload = portalCase?.canUpload === true
+  const canViewTracking =
+    portalCase?.canViewCaseStatus === true || portalCase?.canViewIntakeStatus === true
+  const visibleSection =
+    activeSection === 'documents' && canUpload
+      ? 'documents'
+      : canViewTracking
+        ? 'tracking'
+        : 'documents'
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -196,56 +237,168 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
             Portal seguro de documentos
           </div>
           <h1 className='mt-3 font-serif text-3xl font-semibold text-brand sm:text-4xl'>
-            Meus documentos
+            Portal do terceiro
           </h1>
           <p className='mt-2 max-w-2xl font-sans text-sm leading-6 text-muted-foreground'>
-            Envie os documentos solicitados e acompanhe a análise do atendimento.
+            {canUpload
+              ? 'Acompanhe o caso e envie os documentos solicitados com segurança.'
+              : 'Acompanhe as atualizações disponíveis para este acesso.'}
           </p>
+          {portalCase && (
+            <div className='mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-3'>
+              <div>
+                <p className='font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                  Caso
+                </p>
+                <p className='mt-1 font-sans text-sm font-semibold text-foreground'>
+                  {portalCase.publicCode}
+                </p>
+              </div>
+              <div>
+                <p className='font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                  Título
+                </p>
+                <p className='mt-1 font-sans text-sm font-semibold text-foreground'>
+                  {portalCase.title}
+                </p>
+              </div>
+              <div>
+                <p className='font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                  Cliente
+                </p>
+                <p className='mt-1 font-sans text-sm font-semibold text-foreground'>
+                  {portalCase.clientName}
+                </p>
+              </div>
+            </div>
+          )}
         </header>
 
-        <div className='flex flex-col gap-6'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <h2 className='font-serif text-2xl font-semibold text-brand'>
-                Acompanhamento documental
-              </h2>
-              <p className='mt-1 font-sans text-sm text-muted-foreground'>
-                Resolva as pendências abaixo para dar continuidade ao atendimento.
-              </p>
-            </div>
+        <div className='grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]'>
+          <nav className='flex gap-2 rounded-xl border border-border bg-card p-2 shadow-card lg:flex-col lg:self-start'>
+            {canUpload && (
+              <button
+                type='button'
+                className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${visibleSection === 'documents' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                onClick={() => setActiveSection('documents')}
+              >
+                <Icon name='file-text' className='size-4' />
+                Documentos
+              </button>
+            )}
+            {canViewTracking && (
+              <button
+                type='button'
+                className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-3 text-left font-sans text-sm font-semibold transition-colors lg:flex-none ${visibleSection === 'tracking' ? 'bg-highlight text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                onClick={() => setActiveSection('tracking')}
+              >
+                <Icon name='chart-line' className='size-4' />
+                Acompanhamento
+              </button>
+            )}
+          </nav>
+
+          <div className='flex flex-col gap-6'>
+            {visibleSection === 'tracking' && portalCase ? (
+              <section className='rounded-xl border border-border bg-card p-5 shadow-card sm:p-6'>
+                <div className='flex items-start justify-between gap-4'>
+                  <div>
+                    <h2 className='font-serif text-2xl font-semibold text-brand'>
+                      Acompanhamento do caso
+                    </h2>
+                    <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                      Consulte as atualizações disponíveis para este acesso.
+                    </p>
+                  </div>
+                  {portalCase.canViewCaseStatus && portalCase.status && (
+                    <Badge
+                      variant='info'
+                      className='rounded-pill px-2.5 py-1 text-[11px] font-semibold'
+                    >
+                      {getStatusLabel(portalCase.status)}
+                    </Badge>
+                  )}
+                </div>
+                <div className='mt-6 space-y-4 border-l-2 border-highlight pl-5'>
+                  {portalCase.canViewCaseStatus && portalCase.status && (
+                    <div>
+                      <p className='font-sans text-sm font-semibold text-foreground'>
+                        Status do caso
+                      </p>
+                      <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                        {getStatusLabel(portalCase.status)}
+                      </p>
+                    </div>
+                  )}
+                  {portalCase.intake && (
+                    <div>
+                      <p className='font-sans text-sm font-semibold text-foreground'>
+                        Status do intake
+                      </p>
+                      <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                        {getStatusLabel(portalCase.intake.status)}
+                      </p>
+                    </div>
+                  )}
+                  {portalCase.updatedAt && (
+                    <div>
+                      <p className='font-sans text-sm font-semibold text-foreground'>
+                        Última atualização
+                      </p>
+                      <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                        {new Date(portalCase.updatedAt).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            ) : (
+              <>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <h2 className='font-serif text-2xl font-semibold text-brand'>
+                      Acompanhamento documental
+                    </h2>
+                    <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                      Resolva as pendências abaixo para dar continuidade ao atendimento.
+                    </p>
+                  </div>
+                </div>
+
+                <Section title='Documentos pendentes' count={pendingItems.length}>
+                  {pendingItems.length > 0 ? (
+                    pendingItems.map((item) => (
+                      <DocumentRow
+                        key={item.id}
+                        item={item}
+                        status='pending'
+                        onUpload={portalCase?.canUpload ? handleUpload : undefined}
+                      />
+                    ))
+                  ) : (
+                    <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
+                      Não há documentos pendentes no momento.
+                    </div>
+                  )}
+                </Section>
+
+                <Section
+                  title='Documentos enviados'
+                  count={inAnalysisItems.length + validatedItems.length}
+                >
+                  {inAnalysisItems.length + validatedItems.length > 0 ? (
+                    [...inAnalysisItems, ...validatedItems].map((item) => (
+                      <DocumentRow key={item.id} item={item} status={item.status} />
+                    ))
+                  ) : (
+                    <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
+                      Nenhum documento foi enviado ainda.
+                    </div>
+                  )}
+                </Section>
+              </>
+            )}
           </div>
-
-          <Section title='Documentos pendentes' count={pendingItems.length}>
-            {pendingItems.length > 0 ? (
-              pendingItems.map((item) => (
-                <DocumentRow
-                  key={item.id}
-                  item={item}
-                  status='pending'
-                  onUpload={handleUpload}
-                />
-              ))
-            ) : (
-              <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
-                Não há documentos pendentes no momento.
-              </div>
-            )}
-          </Section>
-
-          <Section
-            title='Documentos enviados'
-            count={inAnalysisItems.length + validatedItems.length}
-          >
-            {inAnalysisItems.length + validatedItems.length > 0 ? (
-              [...inAnalysisItems, ...validatedItems].map((item) => (
-                <DocumentRow key={item.id} item={item} status={item.status} />
-              ))
-            ) : (
-              <div className='px-5 py-8 text-center font-sans text-sm text-muted-foreground'>
-                Nenhum documento foi enviado ainda.
-              </div>
-            )}
-          </Section>
         </div>
       </div>
 

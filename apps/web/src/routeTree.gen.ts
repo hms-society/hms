@@ -42,16 +42,17 @@ import { Route as ModelosDeDocumentosDocumentSpecificationIdRouteImport } from '
 import { Route as ModelosDeDocumentosNovoRouteImport } from './routes/modelos-de-documentos/novo'
 import { Route as PedirRedefinirSenhaIndexRouteImport } from './routes/pedir-redefinir-senha/index'
 import { Route as RedefinirSenhaIndexRouteImport } from './routes/redefinir-senha/index'
+import { Route as TerceirosIndexRouteImport } from './routes/terceiros/index'
 import { Route as AdvogadoMeusCasosIndexRouteImport } from './routes/advogado/meus-casos/index'
 import { Route as AdvogadoMeusCasosCaseIdRouteImport } from './routes/advogado/meus-casos/$caseId'
 import { Route as AdvogadoMeusCasosNovoCasoRouteImport } from './routes/advogado/meus-casos/novo-caso'
-import { Route as CasesCaseIdPortalPendenciesRouteImport } from './routes/cases/$caseId/portal-pendencies'
 import { Route as ChecklistsTemplatesIndexRouteImport } from './routes/checklists/templates/index'
 import { Route as ClienteMeusCasosIndexRouteImport } from './routes/cliente/meus-casos/index'
 import { Route as ClienteMeusCasosCaseIdRouteImport } from './routes/cliente/meus-casos/$caseId'
 import { Route as ConfiguracoesAreasTiposDemandaIndexRouteImport } from './routes/configuracoes/areas-tipos-demanda/index'
 import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consultas/$consultationId/index'
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
+import { Route as ThirdPartyPortalCasesCaseIdRouteImport } from './routes/third-party-portal/cases/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
 import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
@@ -226,6 +227,11 @@ const RedefinirSenhaIndexRoute = RedefinirSenhaIndexRouteImport.update({
   path: '/redefinir-senha/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TerceirosIndexRoute = TerceirosIndexRouteImport.update({
+  id: '/terceiros/',
+  path: '/terceiros/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdvogadoMeusCasosIndexRoute = AdvogadoMeusCasosIndexRouteImport.update({
   id: '/meus-casos/',
   path: '/meus-casos/',
@@ -241,12 +247,6 @@ const AdvogadoMeusCasosNovoCasoRoute =
     id: '/meus-casos/novo-caso',
     path: '/meus-casos/novo-caso',
     getParentRoute: () => AdvogadoRouteRoute,
-  } as any)
-const CasesCaseIdPortalPendenciesRoute =
-  CasesCaseIdPortalPendenciesRouteImport.update({
-    id: '/cases/$caseId/portal-pendencies',
-    path: '/cases/$caseId/portal-pendencies',
-    getParentRoute: () => rootRouteImport,
   } as any)
 const ChecklistsTemplatesIndexRoute =
   ChecklistsTemplatesIndexRouteImport.update({
@@ -281,6 +281,12 @@ const ConsultasConsultationIdFichaAtendimentoRoute =
     id: '/ficha-atendimento',
     path: '/ficha-atendimento',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
+  } as any)
+const ThirdPartyPortalCasesCaseIdRoute =
+  ThirdPartyPortalCasesCaseIdRouteImport.update({
+    id: '/third-party-portal/cases/$caseId',
+    path: '/third-party-portal/cases/$caseId',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ConsultasConsultationIdDocumentosIndexRoute =
   ConsultasConsultationIdDocumentosIndexRouteImport.update({
@@ -337,11 +343,12 @@ export interface FileRoutesByFullPath {
   '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/terceiros/': typeof TerceirosIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
-  '/cases/$caseId/portal-pendencies': typeof CasesCaseIdPortalPendenciesRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/third-party-portal/cases/$caseId': typeof ThirdPartyPortalCasesCaseIdRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
   '/checklists/templates/': typeof ChecklistsTemplatesIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
@@ -381,11 +388,12 @@ export interface FileRoutesByTo {
   '/modelos-de-documentos': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
+  '/terceiros': typeof TerceirosIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
-  '/cases/$caseId/portal-pendencies': typeof CasesCaseIdPortalPendenciesRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/third-party-portal/cases/$caseId': typeof ThirdPartyPortalCasesCaseIdRoute
   '/advogado/meus-casos': typeof AdvogadoMeusCasosIndexRoute
   '/checklists/templates': typeof ChecklistsTemplatesIndexRoute
   '/cliente/meus-casos': typeof ClienteMeusCasosIndexRoute
@@ -430,11 +438,12 @@ export interface FileRoutesById {
   '/modelos-de-documentos/': typeof ModelosDeDocumentosIndexRoute
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
+  '/terceiros/': typeof TerceirosIndexRoute
   '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
-  '/cases/$caseId/portal-pendencies': typeof CasesCaseIdPortalPendenciesRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
+  '/third-party-portal/cases/$caseId': typeof ThirdPartyPortalCasesCaseIdRoute
   '/advogado/meus-casos/': typeof AdvogadoMeusCasosIndexRoute
   '/checklists/templates/': typeof ChecklistsTemplatesIndexRoute
   '/cliente/meus-casos/': typeof ClienteMeusCasosIndexRoute
@@ -480,11 +489,12 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/terceiros/'
     | '/advogado/meus-casos/$caseId'
     | '/advogado/meus-casos/novo-caso'
-    | '/cases/$caseId/portal-pendencies'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/third-party-portal/cases/$caseId'
     | '/advogado/meus-casos/'
     | '/checklists/templates/'
     | '/cliente/meus-casos/'
@@ -524,11 +534,12 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos'
     | '/pedir-redefinir-senha'
     | '/redefinir-senha'
+    | '/terceiros'
     | '/advogado/meus-casos/$caseId'
     | '/advogado/meus-casos/novo-caso'
-    | '/cases/$caseId/portal-pendencies'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/third-party-portal/cases/$caseId'
     | '/advogado/meus-casos'
     | '/checklists/templates'
     | '/cliente/meus-casos'
@@ -572,11 +583,12 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/'
     | '/pedir-redefinir-senha/'
     | '/redefinir-senha/'
+    | '/terceiros/'
     | '/advogado/meus-casos/$caseId'
     | '/advogado/meus-casos/novo-caso'
-    | '/cases/$caseId/portal-pendencies'
     | '/cliente/meus-casos/$caseId'
     | '/consultas/$consultationId/ficha-atendimento'
+    | '/third-party-portal/cases/$caseId'
     | '/advogado/meus-casos/'
     | '/checklists/templates/'
     | '/cliente/meus-casos/'
@@ -610,7 +622,8 @@ export interface RootRouteChildren {
   ModelosDeDocumentosIndexRoute: typeof ModelosDeDocumentosIndexRoute
   PedirRedefinirSenhaIndexRoute: typeof PedirRedefinirSenhaIndexRoute
   RedefinirSenhaIndexRoute: typeof RedefinirSenhaIndexRoute
-  CasesCaseIdPortalPendenciesRoute: typeof CasesCaseIdPortalPendenciesRoute
+  TerceirosIndexRoute: typeof TerceirosIndexRoute
+  ThirdPartyPortalCasesCaseIdRoute: typeof ThirdPartyPortalCasesCaseIdRoute
   ChecklistsTemplatesIndexRoute: typeof ChecklistsTemplatesIndexRoute
   ConfiguracoesAreasTiposDemandaIndexRoute: typeof ConfiguracoesAreasTiposDemandaIndexRoute
 }
@@ -848,6 +861,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RedefinirSenhaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terceiros/': {
+      id: '/terceiros/'
+      path: '/terceiros'
+      fullPath: '/terceiros/'
+      preLoaderRoute: typeof TerceirosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/advogado/meus-casos/': {
       id: '/advogado/meus-casos/'
       path: '/meus-casos'
@@ -868,13 +888,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/advogado/meus-casos/novo-caso'
       preLoaderRoute: typeof AdvogadoMeusCasosNovoCasoRouteImport
       parentRoute: typeof AdvogadoRouteRoute
-    }
-    '/cases/$caseId/portal-pendencies': {
-      id: '/cases/$caseId/portal-pendencies'
-      path: '/cases/$caseId/portal-pendencies'
-      fullPath: '/cases/$caseId/portal-pendencies'
-      preLoaderRoute: typeof CasesCaseIdPortalPendenciesRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/checklists/templates/': {
       id: '/checklists/templates/'
@@ -917,6 +930,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/consultas/$consultationId/ficha-atendimento'
       preLoaderRoute: typeof ConsultasConsultationIdFichaAtendimentoRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
+    }
+    '/third-party-portal/cases/$caseId': {
+      id: '/third-party-portal/cases/$caseId'
+      path: '/third-party-portal/cases/$caseId'
+      fullPath: '/third-party-portal/cases/$caseId'
+      preLoaderRoute: typeof ThirdPartyPortalCasesCaseIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/consultas/$consultationId/documentos/': {
       id: '/consultas/$consultationId/documentos/'
@@ -1084,7 +1104,8 @@ const rootRouteChildren: RootRouteChildren = {
   ModelosDeDocumentosIndexRoute: ModelosDeDocumentosIndexRoute,
   PedirRedefinirSenhaIndexRoute: PedirRedefinirSenhaIndexRoute,
   RedefinirSenhaIndexRoute: RedefinirSenhaIndexRoute,
-  CasesCaseIdPortalPendenciesRoute: CasesCaseIdPortalPendenciesRoute,
+  TerceirosIndexRoute: TerceirosIndexRoute,
+  ThirdPartyPortalCasesCaseIdRoute: ThirdPartyPortalCasesCaseIdRoute,
   ChecklistsTemplatesIndexRoute: ChecklistsTemplatesIndexRoute,
   ConfiguracoesAreasTiposDemandaIndexRoute:
     ConfiguracoesAreasTiposDemandaIndexRoute,
