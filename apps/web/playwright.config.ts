@@ -4,7 +4,7 @@ const WEB_APP_URL = 'http://127.0.0.1:3100'
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/*.test.ts',
+  testMatch: '**/*.test.ts?(x)',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
