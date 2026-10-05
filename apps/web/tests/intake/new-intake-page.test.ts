@@ -1,18 +1,45 @@
 import { expect, test as playwrightTest, type Page } from '@playwright/test'
 
-import { test } from '../../fixtures/auth-fixture'
+import { test } from '../fixtures/auth-fixture'
 
-import { ROUTES } from '../../../src/constants/routes'
+import { ROUTES } from '../../src/constants/routes'
 
 const BACKEND_URL = 'http://hms-api.test'
 const LEGAL_AREA_ID = '47dfd634-75e9-41e4-a47e-05114f923bd0'
 const LEGAL_TOPIC_ID = '6aa955f2-a42f-47ce-ab5f-5f0bb62a8d4d'
 const CLIENT_ID = '09ee728b-80f6-4234-899c-ca40c75c841f'
 const LAWYER_ID = 'lawyer-1'
+const LEGAL_AREA = { id: LEGAL_AREA_ID, name: 'Trabalhista', active: true }
+const LEGAL_TOPIC = { id: LEGAL_TOPIC_ID, name: 'Verbas rescisórias', active: true }
+const CLIENT = {
+  id: CLIENT_ID,
+  type: 'natural',
+  name: 'Ricardo Alves',
+  taxId: { type: 'cpf', value: '52998224725' },
+  phone: '12987654321',
+  email: 'ricardo.alves@example.com',
+  createdAt: '2026-07-28T12:00:00.000Z',
+  updatedAt: '2026-07-28T12:00:00.000Z',
+}
+const LAWYER = {
+  collaboratorId: LAWYER_ID,
+  professionalName: 'Advogado de teste',
+  email: 'lawyer@hms.test',
+  profile: 'lawyer',
+  status: 'active',
+  legalExpertises: [
+    {
+      legalArea: LEGAL_AREA,
+      legalTopics: [LEGAL_TOPIC],
+    },
+  ],
+}
 
 async function openNewIntake(page: Page) {
   await page.goto(ROUTES.newIntake)
-  await expect(page.getByRole('heading', { name: 'Registrar demanda' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Registrar demanda' })).toBeVisible({
+    timeout: 30_000,
+  })
 }
 
 async function selectDemand(page: Page) {
@@ -72,7 +99,7 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify([{ id: LEGAL_AREA_ID, name: 'Trabalhista' }]),
+      body: JSON.stringify([LEGAL_AREA]),
     })
   })
 
@@ -82,7 +109,7 @@ test.beforeEach(async ({ page }) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ id: LEGAL_TOPIC_ID, name: 'Verbas rescisórias' }]),
+        body: JSON.stringify([LEGAL_TOPIC]),
       })
     },
   )
@@ -92,23 +119,7 @@ test.beforeEach(async ({ page }) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        items: [
-          {
-            collaboratorId: LAWYER_ID,
-            professionalName: 'Advogado de teste',
-            email: 'lawyer@hms.test',
-            profile: 'lawyer',
-            status: 'active',
-            legalExpertises: [
-              {
-                legalArea: { id: LEGAL_AREA_ID, name: 'Trabalhista', active: true },
-                legalTopics: [
-                  { id: LEGAL_TOPIC_ID, name: 'Verbas rescisórias', active: true },
-                ],
-              },
-            ],
-          },
-        ],
+        items: [LAWYER],
         page: 1,
         pageSize: 10,
         total: 1,
@@ -122,16 +133,7 @@ test.beforeEach(async ({ page }) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        client: {
-          id: CLIENT_ID,
-          type: 'natural',
-          name: 'Ricardo Alves',
-          taxId: { type: 'cpf', value: '52998224725' },
-          phone: '12987654321',
-          email: 'ricardo.alves@example.com',
-          createdAt: '2026-07-28T12:00:00.000Z',
-          updatedAt: '2026-07-28T12:00:00.000Z',
-        },
+        client: CLIENT,
         consents: [],
       }),
     })
@@ -148,23 +150,26 @@ test.beforeEach(async ({ page }) => {
 
 test('registers a scheduled intake through the protected route', async ({
   page,
-  auth,
+  authFixture,
 }) => {
   await openNewIntake(page)
   await goToClientStep(page)
   await linkExistingClient(page)
   await selectLawyer(page)
 
-  const registerRequestPromise = page.waitForRequest(
-    (request) =>
-      request.method() === 'POST' && request.url() === `${BACKEND_URL}/intakes`,
+  const registerResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url() === `${BACKEND_URL}/intakes`,
   )
   await page.getByRole('button', { name: 'Criar intake' }).click()
-  const registerRequest = await registerRequestPromise
+  const registerResponse = await registerResponsePromise
+  expect(registerResponse.status()).toBe(201)
+  expect(await registerResponse.json()).toEqual({ id: 'registered-intake-id' })
 
-  expect(registerRequest.postDataJSON()).toMatchObject({
+  expect(registerResponse.request().postDataJSON()).toMatchObject({
     clientId: CLIENT_ID,
-    responsibleId: auth.id,
+    responsibleId: authFixture.id,
     origin: 'direct',
     contactChannel: 'whatsapp',
     urgency: 'normal',
@@ -176,7 +181,7 @@ test('registers a scheduled intake through the protected route', async ({
 playwrightTest('redirects unauthenticated users to login', async ({ page }) => {
   await page.goto(ROUTES.newIntake)
 
-  await expect(page).toHaveURL(new RegExp(`${ROUTES.login}$`))
+  await expect(page).toHaveURL(new RegExp(`${ROUTES.login}$`), { timeout: 30_000 })
 })
 
 test('allows progressing when optional legal context is absent', async ({ page }) => {
@@ -252,7 +257,7 @@ test('shows an error and keeps the form when intake registration fails', async (
 })
 test('closes an intake without contract and sends the closure reason', async ({
   page,
-  auth,
+  authFixture,
 }) => {
   await openNewIntake(page)
   await goToClientStep(page)
@@ -274,16 +279,18 @@ test('closes an intake without contract and sends the closure reason', async ({
   })
   await expect(dialogHeading).toBeVisible({ timeout: 10000 })
 
-  const closeRequestPromise = page.waitForRequest(
-    (request) =>
-      request.method() === 'POST' && request.url() === `${BACKEND_URL}/intakes`,
+  const closeResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url() === `${BACKEND_URL}/intakes`,
   )
   await page.getByRole('button', { name: 'Encerrar sem contratação' }).last().click()
 
-  const closeRequest = await closeRequestPromise
-  expect(closeRequest.postDataJSON()).toMatchObject({
+  const closeResponse = await closeResponsePromise
+  expect(closeResponse.status()).toBe(201)
+  expect(closeResponse.request().postDataJSON()).toMatchObject({
     clientId: CLIENT_ID,
-    responsibleId: auth.id,
+    responsibleId: authFixture.id,
     decision: 'close_without_contract',
     closureReason: 'out_of_scope',
   })

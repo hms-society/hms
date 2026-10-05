@@ -6,12 +6,17 @@ description: Integration-testing rules for NestJS controllers and database-backe
 
 These rules apply to controller tests under `apps/server/src`.
 
-## Controller tests are integration tests
+## Controller tests are the API integration boundary
 
 Test controllers through their HTTP routes with a NestJS test application and
 Supertest. The test must exercise the real path from controller to manually
 instantiated use case, repository contract binding, Drizzle repository, mapper,
 and database.
+
+This is the API integration tier for HMS. Browser layout and page tests are
+defined in [`web-app-integration-testing-rules.md`](web-app-integration-testing-rules.md);
+when they stub requests with `page.route`, they cover the web-to-API request
+mapping and not the real API implementation.
 
 Do not call `controller.handle()` directly. Do not replace the repository with a
 mock merely to make a controller test resemble a unit test.

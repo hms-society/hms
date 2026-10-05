@@ -21,8 +21,8 @@ vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
   }),
 }))
 
-vi.mock('@/ui/intake/widgets/pages/intakes-page/use-intakes-query', () => ({
-  useIntakesQuery: () => ({
+vi.mock('@/ui/intake/hooks/use-intakes-list-query', () => ({
+  useIntakesListQuery: () => ({
     data: {
       items: [
         {

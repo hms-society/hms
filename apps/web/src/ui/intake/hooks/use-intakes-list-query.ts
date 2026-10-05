@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
-export function useIntakesQuery(query: IntakeListQuery) {
+export function useIntakesListQuery(query: IntakeListQuery) {
   const { intakeService } = useRestContext()
 
   return useQuery({

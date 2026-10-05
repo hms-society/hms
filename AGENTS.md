@@ -21,7 +21,7 @@ pnpm --filter web test:integration
 For a focused run or debugging, use the local CLI through the workspace:
 
 ```bash
-pnpm --filter web exec playwright test tests/routes/identity/login.index.test.tsx
+pnpm --filter web exec playwright test tests/identity/sign-in-page.test.ts
 pnpm --filter web exec playwright test --headed
 pnpm --filter web exec playwright test --debug
 ```
@@ -215,6 +215,26 @@ and helper scripts.
   git hooks.
 
 ## Workflow expectations
+
+### Parallel work with subagents
+
+Use subagents when a task contains independent, bounded work that can proceed
+in parallel. Keep dependent work sequential, and avoid splitting changes that
+need frequent coordination or compete for the same files, services, or test
+ports.
+
+When delegating implementation:
+
+- Give each subagent a clear outcome and exclusive ownership of its files or
+  responsibility. Tell it that agents share the workspace, so it must preserve
+  other agents' edits and adapt to changes already present.
+- Pass the relevant task context, repository rules, and validation expectations.
+  Ask the subagent to report the files changed, checks run, and any blockers.
+- Coordinate shared resources such as browser servers and test ports; do not
+  run competing validations concurrently when they rely on the same resource.
+- Review and integrate all subagent changes in the parent task. Resolve conflicts,
+  inspect the combined diff, and run validation against the integrated result
+  before reporting completion.
 
 - Always read `AGENTS.local.md` and the rules router first. Read the dynamically
   selected rule documents and the relevant documents above **before** starting,

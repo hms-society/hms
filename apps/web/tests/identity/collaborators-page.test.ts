@@ -1,8 +1,6 @@
 import { expect, test as playwrightTest } from '@playwright/test'
 
-import { test } from '../../fixtures/auth-fixture'
-
-import { ROUTES } from '../../../src/constants/routes'
+import { ROUTES } from '../../src/constants/routes'
 
 import {
   ACTIVE_COLLABORATOR,
@@ -13,14 +11,15 @@ import {
   DISABLED_COLLABORATOR,
   INVITED_COLLABORATOR,
   confirmAction,
-  mockCollaboratorRoutes,
   openCollaboratorActions,
-} from './colaboradores-test-helpers'
+  test,
+} from '../fixtures/identity-fixture'
 
 test('preserves the final list URL and query contract for an administrator', async ({
   page,
+  identityFixture,
 }) => {
-  await mockCollaboratorRoutes(page, {
+  await identityFixture.mockCollaboratorRoutes({
     collaborators: [
       ACTIVE_COLLABORATOR,
       {
@@ -32,10 +31,10 @@ test('preserves the final list URL and query contract for an administrator', asy
     ],
   })
 
-  const listRequestPromise = page.waitForRequest(
-    (request) =>
-      request.method() === 'GET' &&
-      request.url().startsWith(`${BACKEND_URL}/collaborators?`),
+  const listResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      new URL(response.url()).pathname === '/collaborators',
   )
 
   const expectedUrl = `${ROUTES.collaborators}?search=Maria&status=active&page=2&pageSize=1`
@@ -46,18 +45,23 @@ test('preserves the final list URL and query contract for an administrator', asy
   await expect(page.getByText('Maria Oliveira 2')).toBeVisible()
   await expect(page.getByText('Página 2 de 2')).toBeVisible()
 
-  const listRequest = await listRequestPromise
-  const requestUrl = new URL(listRequest.url())
+  const listResponse = await listResponsePromise
+  expect(listResponse.status()).toBe(200)
+  const requestUrl = new URL(listResponse.url())
   expect(requestUrl.searchParams.get('search')).toBe('Maria')
   expect(requestUrl.searchParams.get('status')).toBe('active')
   expect(requestUrl.searchParams.get('page')).toBe('2')
   expect(requestUrl.searchParams.get('pageSize')).toBe('1')
+  expect(await listResponse.json()).toMatchObject({
+    items: [expect.objectContaining({ professionalName: 'Maria Oliveira 2' })],
+  })
 })
 
 test('renders the action matrix for active, invited, disabled, and cancelled collaborators', async ({
   page,
+  identityFixture,
 }) => {
-  await mockCollaboratorRoutes(page, {
+  await identityFixture.mockCollaboratorRoutes({
     collaborators: [
       ACTIVE_COLLABORATOR,
       INVITED_COLLABORATOR,
@@ -91,8 +95,9 @@ test('renders the action matrix for active, invited, disabled, and cancelled col
 
 test('shows the loading state while the collaborators request is pending', async ({
   page,
+  identityFixture,
 }) => {
-  await mockCollaboratorRoutes(page, { listDelayMs: 700 })
+  await identityFixture.mockCollaboratorRoutes({ listDelayMs: 700 })
 
   await page.goto(ROUTES.collaborators)
 
@@ -102,8 +107,11 @@ test('shows the loading state while the collaborators request is pending', async
   await expect(page.getByText('Maria Oliveira')).toBeVisible({ timeout: 15_000 })
 })
 
-test('shows a list error and recovers after retrying the request', async ({ page }) => {
-  const state = await mockCollaboratorRoutes(page, { listError: 'List failed' })
+test('shows a list error and recovers after retrying the request', async ({
+  page,
+  identityFixture,
+}) => {
+  const state = await identityFixture.mockCollaboratorRoutes({ listError: 'List failed' })
 
   await page.goto(ROUTES.collaborators)
 
@@ -123,8 +131,11 @@ test('shows a list error and recovers after retrying the request', async ({ page
   await expect(page.getByText('Maria Oliveira')).toBeVisible()
 })
 
-test('resends an invitation with the expected POST contract', async ({ page }) => {
-  const state = await mockCollaboratorRoutes(page, {
+test('resends an invitation with the expected POST contract', async ({
+  page,
+  identityFixture,
+}) => {
+  const state = await identityFixture.mockCollaboratorRoutes({
     collaborators: [INVITED_COLLABORATOR],
   })
   await page.goto(ROUTES.collaborators)
@@ -149,8 +160,9 @@ test('resends an invitation with the expected POST contract', async ({ page }) =
 
 test('cancels an invitation, updates its status, and removes the cancelled collaborator', async ({
   page,
+  identityFixture,
 }) => {
-  const state = await mockCollaboratorRoutes(page, {
+  const state = await identityFixture.mockCollaboratorRoutes({
     collaborators: [INVITED_COLLABORATOR],
   })
   await page.goto(ROUTES.collaborators)
@@ -193,8 +205,9 @@ test('cancels an invitation, updates its status, and removes the cancelled colla
 
 test('deactivates and reactivates a collaborator through the corresponding POST contracts', async ({
   page,
+  identityFixture,
 }) => {
-  const state = await mockCollaboratorRoutes(page, {
+  const state = await identityFixture.mockCollaboratorRoutes({
     collaborators: [ACTIVE_COLLABORATOR],
   })
   await page.goto(ROUTES.collaborators)
@@ -234,8 +247,11 @@ test('deactivates and reactivates a collaborator through the corresponding POST 
   await expect(page.getByText('Ativo')).toBeVisible()
 })
 
-test('keeps the action dialog pending and reports a mutation error', async ({ page }) => {
-  await mockCollaboratorRoutes(page, {
+test('keeps the action dialog pending and reports a mutation error', async ({
+  page,
+  identityFixture,
+}) => {
+  await identityFixture.mockCollaboratorRoutes({
     actionErrors: { deactivate: 'Não foi possível inativar agora.' },
     actionDelays: { deactivate: 700 },
   })
@@ -258,8 +274,11 @@ test('keeps the action dialog pending and reports a mutation error', async ({ pa
   await expect(dialog.getByRole('button', { name: 'Cancelar' })).toBeEnabled()
 })
 
-test('edits a collaborator and sends the PATCH payload', async ({ page }) => {
-  const state = await mockCollaboratorRoutes(page)
+test('edits a collaborator and sends the PATCH payload', async ({
+  page,
+  identityFixture,
+}) => {
+  const state = await identityFixture.mockCollaboratorRoutes()
   await page.goto(ROUTES.collaborators)
   await openCollaboratorActions(page, ACTIVE_COLLABORATOR.professionalName)
   await page.getByRole('menuitem', { name: 'Editar' }).click()
@@ -294,8 +313,9 @@ test('edits a collaborator and sends the PATCH payload', async ({ page }) => {
 
 test('redirects an authenticated non-administrator away from the collaborators list', async ({
   page,
+  identityFixture,
 }) => {
-  await mockCollaboratorRoutes(page, { currentCollaborator: ATTENDANT })
+  await identityFixture.mockCollaboratorRoutes({ currentCollaborator: ATTENDANT })
 
   await page.goto(ROUTES.collaborators)
 

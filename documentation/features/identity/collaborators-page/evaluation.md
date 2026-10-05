@@ -113,8 +113,8 @@ de widget com cobertura de rota:
 
 - As suítes de rota são organizadas pelo módulo bounded context (`identity`),
   não pelo segmento localizado da URL.
-- Cada arquivo de rota possui sua própria suíte: `colaboradores.index.test.tsx`
-  e `colaboradores.$colaboradorId.test.tsx`; o mock stateful de transporte foi
+- Cada arquivo de rota possui sua própria suíte: `collaborators-page.test.ts`
+  e `collaborator-details-page.test.ts`; o mock stateful de transporte foi
   extraído para `colaboradores-test-helpers.ts`.
 - O parâmetro da rota TanStack foi padronizado para `$colaboradorId`, enquanto
   `collaboratorId` permanece no domínio, nos contratos REST e nas entidades.
@@ -129,7 +129,7 @@ de widget com cobertura de rota:
 | Sensor | Resultado |
 |---|---|
 | `pnpm --filter web generate-routes` | passou após a renomeação para `$colaboradorId` |
-| `pnpm --filter web test:integration tests/routes/identity` | 13 testes passaram após a separação por rota |
+| `pnpm --filter web test:integration tests/identity` | 13 testes passaram após a separação por rota |
 | Playwright focado de listagem e detalhe após a renomeação final | 2 testes passaram |
 | Web typecheck e Biome focados | passaram |
 

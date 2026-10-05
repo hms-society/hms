@@ -1,4 +1,9 @@
-import type { IntakeListItem, IntakeListStatus } from '@hms/core/intake/domain/structures'
+import type {
+  ContactChannel,
+  IntakeListItem,
+  IntakeListStatus,
+  IntakeOrigin,
+} from '@hms/core/intake/domain/structures'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
@@ -93,8 +98,8 @@ type PeriodValue = (typeof periodOptions)[number][0]
 type AdvancedFilterDraft = {
   period: PeriodValue
   responsibleId: string | null
-  origin: string | null
-  contactChannel: string | null
+  origin: IntakeOrigin | null
+  contactChannel: ContactChannel | null
   registeredFrom: string | null
   registeredTo: string | null
 }
@@ -116,8 +121,8 @@ export const IntakesPage = () => {
     hasFilters,
     page,
     totalPages,
-    update,
-    clear,
+    updateSearchParams,
+    clearSearchParams,
   } = useIntakesPage()
   const counts = intakes.data?.statusCounts
 
@@ -141,7 +146,7 @@ export const IntakesPage = () => {
   }
 
   function applyAdvancedFilters() {
-    void update({
+    void updateSearchParams({
       responsibleId: advancedDraft.responsibleId,
       origin: advancedDraft.origin,
       contactChannel: advancedDraft.contactChannel,
@@ -152,7 +157,7 @@ export const IntakesPage = () => {
   }
 
   function clearAdvancedFilters() {
-    void update({
+    void updateSearchParams({
       responsibleId: null,
       origin: null,
       contactChannel: null,
@@ -196,7 +201,7 @@ export const IntakesPage = () => {
               id='intake-search'
               aria-label='Buscar por ID, cliente ou demanda'
               value={searchParams.search}
-              onChange={(event) => update({ search: event.target.value })}
+              onChange={(event) => updateSearchParams({ search: event.target.value })}
               placeholder='Buscar por ID, cliente ou demanda'
               className='h-11 rounded-full border-input bg-card pl-11 text-sm shadow-none placeholder:text-muted-foreground/90'
             />
@@ -218,7 +223,9 @@ export const IntakesPage = () => {
         <Tabs
           value={searchParams.status ?? 'all'}
           onValueChange={(value) =>
-            update({ status: value === 'all' ? null : (value as IntakeListStatus) })
+            updateSearchParams({
+              status: value === 'all' ? null : (value as IntakeListStatus),
+            })
           }
         >
           <TabsList
@@ -312,7 +319,7 @@ export const IntakesPage = () => {
                   onChange={(value) =>
                     setAdvancedDraft((draft) => ({
                       ...draft,
-                      origin: value || null,
+                      origin: (value as IntakeOrigin) || null,
                     }))
                   }
                   ariaLabel='Filtrar por origem'
@@ -331,7 +338,7 @@ export const IntakesPage = () => {
                   onChange={(value) =>
                     setAdvancedDraft((draft) => ({
                       ...draft,
-                      contactChannel: value || null,
+                      contactChannel: (value as ContactChannel) || null,
                     }))
                   }
                   ariaLabel='Filtrar por canal de contato'
@@ -432,11 +439,11 @@ export const IntakesPage = () => {
             pageSize={intakes.data.pageSize}
             total={intakes.data.total}
             totalPages={totalPages}
-            onPage={(nextPage) => update({ page: nextPage })}
+            onPage={(nextPage) => updateSearchParams({ page: nextPage })}
           />
         </>
       ) : (
-        <IntakesEmpty filtered={hasFilters} onClear={() => void clear()} />
+        <IntakesEmpty filtered={hasFilters} onClear={() => void clearSearchParams()} />
       )}
     </main>
   )

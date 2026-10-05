@@ -1,14 +1,15 @@
+// Mocked page integration: Supabase Auth and local sign-in REST use page.route.
 import { expect, test as playwrightTest, type Page } from '@playwright/test'
 
-import { test as authenticatedTest } from '../../fixtures/auth-fixture'
+import { test as authFixtureTest } from '../fixtures/auth-fixture'
 
-import { ROUTES } from '../../../src/constants/routes'
+import { ROUTES } from '../../src/constants/routes'
 
 const BACKEND_URL = 'http://hms-api.test'
 const SUPABASE_USER = {
   id: 'login-user-id',
   email: 'admin@hmsadvogados.com.br',
-}
+} as const
 
 function createAuthSession() {
   const now = new Date().toISOString()
@@ -42,8 +43,15 @@ async function mockLogout(page: Page) {
 }
 
 async function mockSuccessfulAuthentication(page: Page) {
-  const tokenRequestPromise = page.waitForRequest(
-    (request) => request.method() === 'POST' && request.url().includes('/auth/v1/token'),
+  const tokenResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url() === 'http://supabase.test/auth/v1/token?grant_type=password',
+  )
+  const localSignInResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url() === `${BACKEND_URL}/auth/complete-sign-in`,
   )
 
   await page.route('**/auth/v1/token*', async (route) => {
@@ -61,10 +69,10 @@ async function mockSuccessfulAuthentication(page: Page) {
     })
   })
 
-  return { tokenRequestPromise }
+  return { tokenResponsePromise, localSignInResponsePromise }
 }
 
-authenticatedTest(
+authFixtureTest(
   'redirects an authenticated user from login to home',
   async ({ page }) => {
     await page.goto(ROUTES.login)
@@ -88,17 +96,28 @@ playwrightTest('renders the login form for an unauthenticated user', async ({ pa
 playwrightTest(
   'authenticates the user and completes local sign-in before home',
   async ({ page }) => {
-    const { tokenRequestPromise } = await mockSuccessfulAuthentication(page)
+    const { tokenResponsePromise, localSignInResponsePromise } =
+      await mockSuccessfulAuthentication(page)
     await page.goto(ROUTES.login)
 
     await page.getByLabel('Email:').fill(SUPABASE_USER.email)
     await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
     await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
 
-    const tokenRequest = await tokenRequestPromise
-    expect(tokenRequest.postDataJSON()).toMatchObject({
+    const tokenResponse = await tokenResponsePromise
+    expect(tokenResponse.status()).toBe(200)
+    expect(tokenResponse.request().postDataJSON()).toMatchObject({
       email: SUPABASE_USER.email,
       password: '123456',
+    })
+    expect(await tokenResponse.json()).toMatchObject({
+      user: { email: SUPABASE_USER.email },
+    })
+
+    const localSignInResponse = await localSignInResponsePromise
+    expect(localSignInResponse.status()).toBe(200)
+    expect(await localSignInResponse.json()).toEqual({
+      collaboratorId: 'collaborator-id',
     })
     await expect(page).toHaveURL(new RegExp(`${ROUTES.home}$`))
     await expect(page.getByRole('heading', { name: 'Bem-vindo ao HMS' })).toBeVisible()
@@ -108,6 +127,11 @@ playwrightTest(
 playwrightTest(
   'shows an authentication error and keeps the login form available',
   async ({ page }) => {
+    const tokenResponsePromise = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        response.url() === 'http://supabase.test/auth/v1/token?grant_type=password',
+    )
     await page.route('**/auth/v1/token*', async (route) => {
       await route.fulfill({
         status: 400,
@@ -124,6 +148,11 @@ playwrightTest(
 
     await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
 
+    const tokenResponse = await tokenResponsePromise
+    expect(tokenResponse.status()).toBe(400)
+    expect(await tokenResponse.json()).toMatchObject({
+      error_code: 'invalid_credentials',
+    })
     await expect(page.getByRole('alert')).toContainText('Email ou senha inválidos.')
     await expect(page).toHaveURL(new RegExp(`${ROUTES.login}$`))
     await expect(page.getByRole('button', { name: 'Entrar na plataforma' })).toBeEnabled()
@@ -133,6 +162,11 @@ playwrightTest(
 playwrightTest(
   'shows the local access error after authentication succeeds',
   async ({ page }) => {
+    const localSignInResponsePromise = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        response.url() === `${BACKEND_URL}/auth/complete-sign-in`,
+    )
     await page.route('**/auth/v1/token*', async (route) => {
       await route.fulfill({
         status: 200,
@@ -152,6 +186,11 @@ playwrightTest(
 
     await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
 
+    const localSignInResponse = await localSignInResponsePromise
+    expect(localSignInResponse.status()).toBe(403)
+    expect(await localSignInResponse.json()).toEqual({
+      message: 'Conta sem acesso ativo.',
+    })
     await expect(page.getByRole('alert')).toContainText('Conta sem acesso ativo.')
     await expect(page).toHaveURL(new RegExp(`${ROUTES.login}$`))
   },

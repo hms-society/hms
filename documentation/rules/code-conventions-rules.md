@@ -51,6 +51,20 @@ const fetchLastWeekRankingWinnersController =
   new FetchLastWeekRankingWinnersController()
 ```
 
+Functions returned from hooks are part of the consumer-facing contract. Name
+them for the state or resource they change and the operation they perform.
+Avoid generic names such as `update` and `clear` when the target is known:
+
+```ts
+return {
+  updateSearchParams,
+  clearSearchParams,
+}
+```
+
+Consumers should preserve those descriptive names when destructuring the hook
+result instead of shortening them back to `update` or `clear`.
+
 ### Boolean variables
 
 Use prefixes such as `is`, `has`, `can`, and `should` for boolean values:
