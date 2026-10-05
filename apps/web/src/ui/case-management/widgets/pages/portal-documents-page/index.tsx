@@ -340,14 +340,16 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
                       </p>
                     </div>
                   )}
-                  <div>
-                    <p className='font-sans text-sm font-semibold text-foreground'>
-                      Última atualização
-                    </p>
-                    <p className='mt-1 font-sans text-sm text-muted-foreground'>
-                      {new Date(portalCase.updatedAt).toLocaleString('pt-BR')}
-                    </p>
-                  </div>
+                  {portalCase.updatedAt && (
+                    <div>
+                      <p className='font-sans text-sm font-semibold text-foreground'>
+                        Última atualização
+                      </p>
+                      <p className='mt-1 font-sans text-sm text-muted-foreground'>
+                        {new Date(portalCase.updatedAt).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </section>
             ) : (
