@@ -9,11 +9,24 @@ import { RestContext } from '@/ui/shared/contexts/rest-context'
 describe('usePortalDocumentsPage', () => {
   let queryClient: QueryClient
   const mockCaseManagementService = {
+    getThirdPartyPortalCase: vi.fn(),
     listPortalPendingChecklist: vi.fn(),
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCaseManagementService.getThirdPartyPortalCase.mockResolvedValue({
+      isFailure: false,
+      body: {
+        caseId: 'case-1',
+        publicCode: 'CASE-001',
+        title: 'Caso de teste',
+        clientName: 'Cliente de teste',
+        canUpload: true,
+        canViewCaseStatus: true,
+        canViewIntakeStatus: false,
+      },
+    })
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },

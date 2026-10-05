@@ -104,7 +104,7 @@ describe('PortalDocumentsPage', () => {
   it('renders checklist items, statuses, and the upload action only for pending items', () => {
     renderPortalDocumentsPage()
 
-    expect(screen.getByRole('heading', { name: 'Meus documentos' })).not.toBeNull()
+    expect(screen.getByRole('heading', { name: 'Portal do terceiro' })).not.toBeNull()
     expect(screen.getByText('Documento de identidade')).not.toBeNull()
     expect(screen.getByText('Comprovante de endereço')).not.toBeNull()
     expect(screen.getByText('Comprovante de renda')).not.toBeNull()
