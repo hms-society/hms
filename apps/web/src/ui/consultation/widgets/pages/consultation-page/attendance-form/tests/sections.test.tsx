@@ -462,16 +462,13 @@ describe('ConclusionSection', () => {
   it('disables routing decisions when marked not viable and delegates available choices', () => {
     const setViability = vi.fn()
     const setDecision = vi.fn()
-    render(
-      <ConclusionSection
-        {...getConclusionProps({
-          viability: 'Inviável',
-          decision: 'Encerrar sem contratação',
-          setViability,
-          setDecision,
-        })}
-      />,
-    )
+    const props = getConclusionProps({
+      viability: 'Inviável',
+      decision: 'Encerrar sem contratação',
+      setViability,
+      setDecision,
+    })
+    const { rerender } = render(<ConclusionSection {...props} />)
 
     const proceedButton = screen.getByRole('button', {
       name: 'Prosseguir para contratação',
@@ -479,7 +476,8 @@ describe('ConclusionSection', () => {
     expect((proceedButton as HTMLButtonElement).disabled).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Viável' }))
     expect(setViability).toHaveBeenCalledWith('Viável')
-    expect((proceedButton as HTMLButtonElement).disabled).toBe(true)
+    rerender(<ConclusionSection {...props} viability='Viável' />)
+    expect((proceedButton as HTMLButtonElement).disabled).toBe(false)
     expect(
       (screen.getByLabelText('Questão jurídica principal *') as HTMLInputElement)
         .disabled,
