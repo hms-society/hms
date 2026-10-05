@@ -2,6 +2,8 @@ import { createServer, type Server } from 'node:http'
 
 export class MetaGraphFixture {
   private readonly originalBaseUrl = process.env.META_GRAPH_API_BASE_URL
+  private readonly originalAppId = process.env.META_APP_ID
+  private readonly originalAppSecret = process.env.META_APP_SECRET
   readonly requests: Array<{ method?: string; path?: string; body: unknown }> = []
 
   private constructor(private readonly server: Server) {}
@@ -39,6 +41,8 @@ export class MetaGraphFixture {
     if (!address || typeof address === 'string')
       throw new Error('Meta protocol port unavailable')
     process.env.META_GRAPH_API_BASE_URL = `http://127.0.0.1:${address.port}/v25.0`
+    process.env.META_APP_ID = 'local-meta-app-id'
+    process.env.META_APP_SECRET = 'local-meta-app-secret'
     return fixture
   }
 
@@ -47,5 +51,9 @@ export class MetaGraphFixture {
     await new Promise<void>((resolve) => this.server.close(() => resolve()))
     if (this.originalBaseUrl === undefined) delete process.env.META_GRAPH_API_BASE_URL
     else process.env.META_GRAPH_API_BASE_URL = this.originalBaseUrl
+    if (this.originalAppId === undefined) delete process.env.META_APP_ID
+    else process.env.META_APP_ID = this.originalAppId
+    if (this.originalAppSecret === undefined) delete process.env.META_APP_SECRET
+    else process.env.META_APP_SECRET = this.originalAppSecret
   }
 }

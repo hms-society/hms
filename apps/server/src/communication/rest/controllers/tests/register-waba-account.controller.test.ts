@@ -31,6 +31,10 @@ describe('Register Waba Account Controller [POST /communication/waba/embedded-si
     expect(fixture.metaFixture.requests.map(({ method }) => method)).toEqual(
       expect.arrayContaining(['GET', 'GET']),
     )
+    expect(fixture.metaFixture.requests[0]?.path).toContain('client_id=local-meta-app-id')
+    expect(fixture.metaFixture.requests[0]?.path).toContain(
+      'client_secret=local-meta-app-secret',
+    )
     expect(await fixture.channelsRepository.findById(response.body.id)).toMatchObject({
       assignedLawyerId: admin.userId,
       phoneNumberId: 'phone-local',

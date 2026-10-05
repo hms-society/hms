@@ -8,8 +8,9 @@ import {
   Inject,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common'
-import { ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
   GetAiSuggestionsUseCase,
   RegisterAiFeedbackUseCase,
@@ -20,16 +21,21 @@ import type {
 } from '@hms/core/shared/interfaces'
 import { AI_SUGGESTIONS_REPOSITORIES } from '@/shared/constants/ai-suggestions-repositories'
 import { DatetimeProvider as ConcreteDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { CurrentCollaborator } from '@/identity/decorators'
+import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import { ErrorResponseDto } from '@/shared/rest/dtos'
 
 export class RegisterAiFeedbackDto {
   action: 'accept' | 'adjust' | 'reject' | 'block'
   adjustedContent?: string
   rejectionReason?: string
-  collaboratorId?: string
 }
 
 @ApiTags('ai-suggestions')
+@ApiBearerAuth()
 @Controller('ai-suggestions')
+@UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class AiSuggestionsController {
   private readonly getUseCase: GetAiSuggestionsUseCase
   private readonly feedbackUseCase: RegisterAiFeedbackUseCase
@@ -49,6 +55,8 @@ export class AiSuggestionsController {
     status: HttpStatus.OK,
     description: 'Sugestões de IA recuperadas com sucesso.',
   })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: ErrorResponseDto })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, type: ErrorResponseDto })
   async getSuggestions(@Query('entityId') entityId: string) {
     if (!entityId) {
       return []
@@ -62,13 +70,19 @@ export class AiSuggestionsController {
     status: HttpStatus.OK,
     description: 'Feedback registrado com sucesso.',
   })
-  async registerFeedback(@Param('id') id: string, @Body() dto: RegisterAiFeedbackDto) {
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: ErrorResponseDto })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, type: ErrorResponseDto })
+  async registerFeedback(
+    @Param('id') id: string,
+    @Body() dto: RegisterAiFeedbackDto,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
     return this.feedbackUseCase.execute({
       suggestionId: id,
       action: dto.action,
       adjustedContent: dto.adjustedContent,
       rejectionReason: dto.rejectionReason,
-      collaboratorId: dto.collaboratorId ?? 'system-user',
+      collaboratorId: collaborator.collaboratorId,
     })
   }
 }
