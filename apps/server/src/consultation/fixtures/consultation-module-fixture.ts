@@ -1,4 +1,5 @@
 import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
+import type { TestingModuleBuilder } from '@nestjs/testing'
 import { UnauthorizedException } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
@@ -70,7 +71,10 @@ export class ConsultationModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller: Type<unknown>) {
+  static async register(
+    controller: Type<unknown>,
+    configure?: (builder: TestingModuleBuilder) => void,
+  ) {
     const authentication: { user?: AuthUser } = {}
     const broker: Broker & { publish: Mock } = { publish: vi.fn() }
     const restFixture = await RestFixture.register(
@@ -88,7 +92,7 @@ export class ConsultationModuleFixture {
         controllers: [controller],
         providers: [{ provide: InngestBroker, useValue: broker }],
       },
-      (builder) =>
+      (builder) => {
         builder.overrideGuard(AuthGuard).useValue({
           canActivate: (context: ExecutionContext) => {
             const request = context.switchToHttp().getRequest<{
@@ -106,7 +110,10 @@ export class ConsultationModuleFixture {
             }
             return true
           },
-        }),
+        })
+        configure?.(builder)
+        return builder
+      },
     )
 
     return new ConsultationModuleFixture(

@@ -11,6 +11,7 @@ export type DocumentVersion = Entity & {
   documentGenerationId?: string
   sourceDocumentVersionId?: string
   fileId: string
+  storagePath?: string
   versionNumber: number
   source: DocumentVersionSource
   content: DocumentTemplateContent

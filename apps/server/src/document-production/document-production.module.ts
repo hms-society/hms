@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common'
 
 import { IdentityModule } from '@/identity/identity.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
-import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
 import { DocumentProductionMessagingModule } from '@/document-production/messaging/document-production-messaging.module'
+import { ProvisionModule } from '@/shared/provision/provision.module'
+import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
+import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
+import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import {
   CreateDocumentSpecificationController,
   DeleteDocumentSpecificationController,
@@ -14,15 +18,24 @@ import {
   UpdateDocumentSpecificationConfigurationController,
   UpdateDocumentSpecificationTemplateController,
   UpdateDocumentAccessClassificationController,
+  ListCaseDocumentsController,
+  GetCaseDocumentGenerationContextController,
+  GenerateCaseDocumentController,
+  SaveManualCaseDocumentVersionController,
 } from '@/document-production/rest/controllers'
 
 @Module({
   imports: [
     IdentityModule,
+    CaseManagementDatabaseModule,
     LegalCatalogModule,
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
     DocumentProductionMessagingModule,
+    DocumentProductionProvisionModule,
+    ProvisionModule,
+    DocumentsDatabaseModule,
+    SharedMessagingModule,
   ],
   controllers: [
     CreateDocumentSpecificationController,
@@ -32,8 +45,11 @@ import {
     UpdateDocumentSpecificationConfigurationController,
     UpdateDocumentSpecificationTemplateController,
     UpdateDocumentAccessClassificationController,
+    ListCaseDocumentsController,
+    GetCaseDocumentGenerationContextController,
+    GenerateCaseDocumentController,
+    SaveManualCaseDocumentVersionController,
   ],
-  providers: [DocumentProductionSeeder],
-  exports: [DocumentProductionSeeder, DocumentProductionMessagingModule],
+  exports: [DocumentProductionMessagingModule],
 })
 export class DocumentProductionModule {}
