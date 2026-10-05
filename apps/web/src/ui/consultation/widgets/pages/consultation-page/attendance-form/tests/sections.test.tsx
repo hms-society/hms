@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from '@testing-library/react'
+import { useCallback, useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ClaimsSection } from '../sections/claim-section'
 import { ConclusionSection } from '../sections/conclusion-section'
@@ -271,6 +272,42 @@ const getQualificationProps = (
   ...overrides,
 })
 
+function StatefulQualificationSection({
+  setRgSpy,
+  setProfessionSpy,
+}: {
+  setRgSpy: (value: string) => void
+  setProfessionSpy: (value: string) => void
+}) {
+  const [rg, setRg] = useState('')
+  const [profession, setProfession] = useState('')
+  const handleSetRg = useCallback(
+    (value: string) => {
+      setRgSpy(value)
+      setRg(value)
+    },
+    [setRgSpy],
+  )
+  const handleSetProfession = useCallback(
+    (value: string) => {
+      setProfessionSpy(value)
+      setProfession(value)
+    },
+    [setProfessionSpy],
+  )
+
+  return (
+    <QualificationSection
+      {...getQualificationProps({
+        rg,
+        setRg: handleSetRg,
+        profession,
+        setProfession: handleSetProfession,
+      })}
+    />
+  )
+}
+
 describe('QualificationSection', () => {
   afterEach(() => {
     cleanup()
@@ -353,26 +390,30 @@ describe('QualificationSection', () => {
     expect(props.setUf).toHaveBeenCalledWith('SP')
   })
 
-  it('restores saved extra fields and persists current values by consultation', async () => {
+  it('restores saved extra fields and persists the restored values by consultation', async () => {
     localStorage.setItem(
       'extra_client_fields_consultation-qualification',
       JSON.stringify({ rg: '12.345.678-9', profession: 'Advogada' }),
     )
     const setRg = vi.fn()
     const setProfession = vi.fn()
-    render(<QualificationSection {...getQualificationProps({ setRg, setProfession })} />)
+    render(
+      <StatefulQualificationSection setRgSpy={setRg} setProfessionSpy={setProfession} />,
+    )
 
     await waitFor(() => {
       expect(setRg).toHaveBeenCalledWith('12.345.678-9')
       expect(setProfession).toHaveBeenCalledWith('Advogada')
     })
-    expect(
-      JSON.parse(
-        localStorage.getItem('extra_client_fields_consultation-qualification') ?? '{}',
-      ),
-    ).toMatchObject({
-      rg: '',
-      profession: '',
+    await waitFor(() => {
+      expect(
+        JSON.parse(
+          localStorage.getItem('extra_client_fields_consultation-qualification') ?? '{}',
+        ),
+      ).toMatchObject({
+        rg: '12.345.678-9',
+        profession: 'Advogada',
+      })
     })
   })
 })
