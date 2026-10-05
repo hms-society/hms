@@ -21,13 +21,26 @@ describe('List Document Specifications Controller [GET /document-specifications]
 
   afterAll(async () => fixture.close())
 
-  it('lists seeded specifications with resolved legal names for an active administrator', async () => {
+  it('lists specifications with resolved legal names for an active administrator', async () => {
     const { areas, topics } = await fixture.seedCatalog()
-    await fixture.specificationsSeeder.run({
-      legalAreas: areas,
-      legalTopics: topics,
-      consultationId,
-    })
+    const legalArea = areas.find(({ name }) => name === 'Cível')
+    const legalTopic = topics.find(
+      ({ legalAreaId, name }) => legalAreaId === legalArea?.id && name === 'Contratos',
+    )
+    if (!legalArea || !legalTopic)
+      throw new Error('Fixture legal references were not seeded')
+    await fixture.specificationsRepository.add(
+      createSpecification({
+        name: 'Procuração',
+        description: 'Procuração para representação em negociação contratual.',
+        application: {
+          scope: 'legal_context',
+          moment: 'consultation',
+          legalAreaIds: [legalArea.id],
+          legalTopicIdsByArea: { [legalArea.id]: [legalTopic.id] },
+        },
+      }),
+    )
     await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())

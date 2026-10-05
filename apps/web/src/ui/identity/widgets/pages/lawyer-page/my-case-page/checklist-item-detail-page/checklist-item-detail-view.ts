@@ -8,6 +8,7 @@ import type {
   DocumentValidationDocument,
   DocumentValidationLog,
 } from '@hms/core/document-engine/domain/entities'
+import { getVisibleExtractedFields } from '@/ui/document-engine/utils/get-visible-extracted-fields'
 
 import { getChecklistDocumentStatusView } from '../checklist-document-status'
 import { getChecklistItemHistoryEvents } from './checklist-item-history-events'
@@ -101,7 +102,7 @@ export function getChecklistItemDetailView({
     caseLabel: document?.checklistLink?.caseLabel ?? `Caso ${caseId.slice(0, 8)}`,
     documentLabel,
     extractedFields:
-      document?.extractedFields.map((field) => ({
+      (document ? getVisibleExtractedFields(document) : []).map((field) => ({
         label: field.label,
         value: field.value || 'Não identificado',
       })) ?? [],

@@ -28,10 +28,12 @@ import { RejectDocumentExceptionModal } from '@/ui/document-engine/widgets/pages
 import { useListCaseDocumentExceptionsQuery } from '@/ui/document-engine/hooks/use-list-case-document-exceptions-query'
 import { useApproveDocumentExceptionAction } from '@/ui/document-engine/hooks/use-approve-document-exception-action'
 import { useRejectDocumentExceptionAction } from '@/ui/document-engine/hooks/use-reject-document-exception-action'
+import type { LegalCaseSummary } from '@hms/core/case-management/domain/entities'
 
 export type ChecklistDossierTabProps = {
   activities: ActivityItem[]
   caseId: string
+  caseDetails?: LegalCaseSummary
   checklist: ChecklistItem[]
   isReviewDisabled?: boolean
   reviewDisabledReason?: string
@@ -40,6 +42,7 @@ export type ChecklistDossierTabProps = {
 export const ChecklistDossierTab = ({
   activities,
   caseId,
+  caseDetails,
   checklist,
   isReviewDisabled = false,
   reviewDisabledReason,
@@ -47,6 +50,7 @@ export const ChecklistDossierTab = ({
   const {
     actionFeedback,
     canStartLegalWriting,
+    canHomologateDossier,
     checklistGateAuditLabel,
     checklistGateLabel,
     checklistGateRemarks,
@@ -57,6 +61,7 @@ export const ChecklistDossierTab = ({
     dossierGateLabel,
     error,
     handleApproveChecklist,
+    handleHomologateDossier,
     handleApproveWithException,
     handleBlockChecklist,
     handleCancelDecisionReason,
@@ -76,6 +81,8 @@ export const ChecklistDossierTab = ({
     isRequestingException,
     isReviewDisabled: isChecklistReviewDisabled,
     isReviewingChecklistGate,
+    isHomologatingDossier,
+    hasChecklistDecision,
     mandatoryItemsCount,
     pendingItemsCount,
     reasonError,
@@ -85,6 +92,7 @@ export const ChecklistDossierTab = ({
     validatedItemsCount,
   } = useChecklistDossierTab({
     caseId,
+    caseDetails,
     checklist,
     isReviewDisabled,
   })
@@ -194,6 +202,7 @@ export const ChecklistDossierTab = ({
             className='rounded-full border-accent bg-background text-accent-foreground hover:bg-secondary'
             disabled={
               !isChecklistComplete ||
+              hasChecklistDecision ||
               isChecklistReviewDisabled ||
               isReviewingChecklistGate
             }
@@ -206,7 +215,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-accent bg-background text-accent-foreground hover:bg-secondary'
-            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleApproveWithException}
           >
             <Icon name='shield-check' className='size-3' />
@@ -216,7 +229,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-background text-destructive hover:bg-destructive/10'
-            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleBlockChecklist}
           >
             <Icon name='lock' className='size-3' />
@@ -226,7 +243,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-background text-destructive hover:bg-destructive/10'
-            disabled={isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleRejectOnMerit}
           >
             <Icon name='shield-alert' className='size-3' />
@@ -454,19 +475,25 @@ export const ChecklistDossierTab = ({
           <h2 className='font-serif text-lg font-semibold text-foreground'>
             Dossiê Documental
           </h2>
-          <Badge variant='secondary' className='h-6 rounded-full px-3 text-[12px]'>
-            Não iniciado
+          <Badge
+            variant={dossierGateLabel === 'Dossiê homologado' ? 'success' : 'secondary'}
+            className='h-6 rounded-full px-3 text-[12px]'
+          >
+            {dossierGateLabel}
           </Badge>
         </div>
         <p className='text-[14px] text-muted-foreground'>
-          O dossiê é formado automaticamente pelos documentos validados assim que o
-          checklist final for aprovado. É a base documental oficial da produção jurídica.
+          Revise os documentos do checklist. A homologação registra a conferência humana
+          do dossiê e libera a produção jurídica quando todos os itens obrigatórios estão
+          validados.
         </p>
         <div className='flex flex-col gap-1.5'>
           {[
             'Checklist aprovado',
-            'Dossiê formado e aprovado',
-            'Produção jurídica liberada',
+            dossierGateLabel,
+            canStartLegalWriting
+              ? 'Produção jurídica liberada'
+              : 'Produção jurídica bloqueada',
           ].map((label, index) => (
             <div
               key={label}
@@ -481,14 +508,35 @@ export const ChecklistDossierTab = ({
                 />
                 {label}
               </span>
-              <Icon name='lock' className='size-3' />
+              <Icon
+                name={
+                  (index === 0 && hasChecklistDecision) ||
+                  (index === 1 && dossierGateLabel === 'Dossiê homologado') ||
+                  (index === 2 && canStartLegalWriting)
+                    ? 'check'
+                    : 'lock'
+                }
+                className='size-3'
+              />
             </div>
           ))}
         </div>
+        {!canStartLegalWriting && (
+          <Button
+            variant='brand'
+            size='xs'
+            className='w-full rounded-full'
+            disabled={!canHomologateDossier || isHomologatingDossier}
+            onClick={() => void handleHomologateDossier()}
+          >
+            <Icon name='shield-check' className='size-3.5' />
+            {isHomologatingDossier ? 'Homologando dossiê…' : 'Homologar dossiê'}
+          </Button>
+        )}
         {pendingItemsCount > 0 && (
           <p className='text-[14px] text-muted-foreground'>
-            {pendingItemsCount} itens ainda exigem validação ou exceção autorizada antes
-            do avanço de fase.
+            {pendingItemsCount} itens ainda exigem validação antes da homologação do
+            dossiê.
           </p>
         )}
       </section>

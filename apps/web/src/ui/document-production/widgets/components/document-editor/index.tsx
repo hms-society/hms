@@ -11,7 +11,11 @@ export {
   isAllowedDocumentTemplateHref,
   parseDocumentTemplateContent,
 } from './use-document-editor'
-export type { DocumentEditorProps } from './use-document-editor'
+export type {
+  DocumentEditorActions,
+  DocumentEditorProps,
+  PendingMarkerReplacement,
+} from './use-document-editor'
 
 export const DocumentEditor = ({
   content,
@@ -22,6 +26,7 @@ export const DocumentEditor = ({
   editable = true,
   emptyState,
   highlightedTerms = [],
+  focusFirstHighlightedTerm,
 }: DocumentEditorProps) => {
   const documentEditor = useDocumentEditor({
     content,
@@ -31,6 +36,7 @@ export const DocumentEditor = ({
     ariaLabel,
     editable,
     highlightedTerms,
+    focusFirstHighlightedTerm,
   })
   const { editor } = documentEditor
   if (!editor)

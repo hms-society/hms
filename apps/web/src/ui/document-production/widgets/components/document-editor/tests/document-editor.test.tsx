@@ -88,8 +88,8 @@ describe('DocumentEditor', () => {
     await waitForEditor()
     await waitFor(() => expect(onEditorReady).toHaveBeenCalledOnce())
 
-    const insertVariable = onEditorReady.mock.calls[0][0]
-    insertVariable('cliente_nome')
+    const actions = onEditorReady.mock.calls[0][0]
+    actions.insertVariable('cliente_nome')
 
     await waitFor(() => expect(onChange).toHaveBeenCalled())
     expect(JSON.stringify(onChange.mock.lastCall?.[0])).toContain('{{cliente_nome}}')
@@ -133,5 +133,69 @@ describe('DocumentEditor', () => {
     )
     expect(parseDocumentTemplateContent(content).success).toBe(true)
     expect(onChange.mock.lastCall?.[0]).toEqual(content)
+  })
+
+  it('does not steal focus when focusing pending markers is disabled', async () => {
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { textAlign: null },
+          content: [{ type: 'text', text: 'Preencha {{cliente_nome}}.' }],
+        },
+      ],
+    } as unknown as DocumentTemplateContent
+    renderDocumentEditor(content, {
+      highlightedTerms: ['{{cliente_nome}}'],
+      focusFirstHighlightedTerm: false,
+    })
+    const editor = await waitForEditor()
+
+    await waitFor(() =>
+      expect(editor.querySelector('[data-pending-marker="true"]')).not.toBeNull(),
+    )
+    expect(document.activeElement).not.toBe(editor)
+  })
+
+  it('replaces every occurrence of pending markers through the editor actions', async () => {
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { textAlign: null },
+          content: [
+            {
+              type: 'text',
+              text: 'Períodos: {periodos_contributivos}; benefício: {numero_beneficio}; repetir: {periodos_contributivos}.',
+            },
+          ],
+        },
+      ],
+    } as unknown as DocumentTemplateContent
+    const { onChange, onEditorReady } = renderDocumentEditor(content, {
+      highlightedTerms: ['{periodos_contributivos}', '{numero_beneficio}'],
+    })
+    const editor = await waitForEditor()
+    await waitFor(() => expect(onEditorReady).toHaveBeenCalledOnce())
+
+    await waitFor(() =>
+      expect(editor.querySelectorAll('[data-pending-marker="true"]')).toHaveLength(3),
+    )
+    onEditorReady.mock.lastCall?.[0].replacePendingMarkers([
+      { marker: '{periodos_contributivos}', value: '1991 a 2026' },
+      { marker: '{numero_beneficio}', value: '987.654.321-0' },
+    ])
+
+    await waitFor(() =>
+      expect(editor.textContent).toBe(
+        'Períodos: 1991 a 2026; benefício: 987.654.321-0; repetir: 1991 a 2026.',
+      ),
+    )
+    expect(editor.querySelector('[data-pending-marker="true"]')).toBeNull()
+    expect(JSON.stringify(onChange.mock.lastCall?.[0])).not.toContain(
+      '{periodos_contributivos}',
+    )
   })
 })

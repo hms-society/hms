@@ -8,6 +8,7 @@ import {
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,
 } from '../domain/structures'
 import type { LegalCasesRepository } from '../interfaces'
+import type { CaseChecklistItemsRepository } from '../interfaces'
 
 type Request = {
   caseId: string
@@ -17,7 +18,10 @@ type Request = {
 }
 
 export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCase> {
-  constructor(private readonly legalCasesRepository: LegalCasesRepository) {}
+  constructor(
+    private readonly legalCasesRepository: LegalCasesRepository,
+    private readonly checklistItemsRepository: CaseChecklistItemsRepository,
+  ) {}
 
   async execute(request: Request): Promise<LegalCase> {
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
@@ -41,7 +45,7 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
 
     const remarks = request.remarks?.trim() || undefined
     this.ensureRemarksWhenRequired(request.decision, remarks)
-    this.ensureChecklistIsCompleteWhenApproving(request.decision)
+    await this.ensureChecklistIsCompleteWhenApproving(request.decision, request.caseId)
     const status = this.getStatusAfterDecision(request.decision)
 
     const reviewedCase = await this.legalCasesRepository.reviewChecklistGate({
@@ -99,14 +103,21 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     }
   }
 
-  private ensureChecklistIsCompleteWhenApproving(
+  private async ensureChecklistIsCompleteWhenApproving(
     decision: CaseChecklistGateDecisionValue,
+    caseId: string,
   ) {
     if (decision !== CaseChecklistGateDecision.Approved) return
-
-    throw new CaseChecklistGateReviewError(
-      'A aprovação integral do checklist exige validação server-side dos itens obrigatórios.',
-    )
+    const items = await this.checklistItemsRepository.listByCaseId(caseId)
+    const requiredItems = items.filter((item) => item.isRequired)
+    if (
+      requiredItems.length === 0 ||
+      requiredItems.some((item) => item.status !== 'validated')
+    ) {
+      throw new CaseChecklistGateReviewError(
+        'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios validados.',
+      )
+    }
   }
 
   private getStatusAfterDecision(decision: CaseChecklistGateDecisionValue) {

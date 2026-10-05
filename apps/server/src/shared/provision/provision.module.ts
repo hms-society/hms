@@ -5,6 +5,7 @@ import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-prov
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { envSchema, EnvProvider } from '@/shared/provision/env/env-provider'
 import { FakeFileStorageProvider } from '@/shared/provision/file-storage/fake-file-storage-provider'
+import { SupabaseFileStorageProvider } from '@/shared/provision/file-storage/supabase-file-storage-provider'
 import { IdProvider } from '@/shared/provision/id/id-provider'
 import { SupabaseStorageProvider } from '@/shared/provision/storage/supabase-storage-provider'
 
@@ -25,11 +26,12 @@ export const STORAGE_PROVIDER = Symbol('STORAGE_PROVIDER')
     DatetimeProvider,
     IdProvider,
     FakeFileStorageProvider,
+    SupabaseFileStorageProvider,
     SupabaseStorageProvider,
     MetaCloudApiProvider,
     {
       provide: PROVISION_PROVIDERS.fileStorage,
-      useExisting: FakeFileStorageProvider,
+      useExisting: SupabaseFileStorageProvider,
     },
     {
       provide: STORAGE_PROVIDER,
