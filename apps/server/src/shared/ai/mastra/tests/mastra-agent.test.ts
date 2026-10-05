@@ -17,57 +17,57 @@ const MODELS = [
 afterEach(() => vi.unstubAllGlobals())
 
 describe('Document drafting model resolution', () => {
-  it.each([
-    DocumentWriterAgent,
-    DocumentReviewerAgent,
-  ])('uses native fallbacks in order and preserves structured output for %s', async (Agent) => {
-    const requestedModels: string[] = []
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (_url, init) => {
-        const body = JSON.parse(init.body)
-        requestedModels.push(body.model)
+  it.each([DocumentWriterAgent, DocumentReviewerAgent])(
+    'uses native fallbacks in order and preserves structured output for %s',
+    async (Agent) => {
+      const requestedModels: string[] = []
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (_url, init) => {
+          const body = JSON.parse(init.body)
+          requestedModels.push(body.model)
 
-        if (body.model !== MODELS[3]) {
-          return Response.json(
-            { error: { message: 'Model unavailable', code: 429 } },
-            { status: 429 },
-          )
-        }
+          if (body.model !== MODELS[3]) {
+            return Response.json(
+              { error: { message: 'Model unavailable', code: 429 } },
+              { status: 429 },
+            )
+          }
 
-        const chunk = {
-          id: 'test-completion',
-          object: 'chat.completion',
-          created: 0,
-          model: body.model,
-          choices: [
-            {
-              index: 0,
-              message: { role: 'assistant', content: '{"result":"draft"}' },
-              finish_reason: 'stop',
-            },
-          ],
-        }
+          const chunk = {
+            id: 'test-completion',
+            object: 'chat.completion',
+            created: 0,
+            model: body.model,
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: '{"result":"draft"}' },
+                finish_reason: 'stop',
+              },
+            ],
+          }
 
-        return Response.json(chunk)
-      }),
-    )
+          return Response.json(chunk)
+        }),
+      )
 
-    const agent = new Agent(createEnvProvider('dev'))
-    const response = await agent.generate('Generate a draft.', {
-      structuredOutput: { schema: z.object({ result: z.string() }) },
-    })
+      const agent = new Agent(createEnvProvider('dev'))
+      const response = await agent.generate('Generate a draft.', {
+        structuredOutput: { schema: z.object({ result: z.string() }) },
+      })
 
-    expect(requestedModels).toEqual(MODELS)
-    expect(response.object).toEqual({ result: 'draft' })
-  })
+      expect(requestedModels).toEqual(MODELS)
+      expect(response.object).toEqual({ result: 'draft' })
+    },
+  )
 
-  it.each([
-    DocumentWriterAgent,
-    DocumentReviewerAgent,
-  ])('requires OpenRouter credentials locally for %s', (Agent) => {
-    expect(() => new Agent(createEnvProvider('dev', ''))).toThrow(AppError)
-  })
+  it.each([DocumentWriterAgent, DocumentReviewerAgent])(
+    'requires OpenRouter credentials locally for %s',
+    (Agent) => {
+      expect(() => new Agent(createEnvProvider('dev', ''))).toThrow(AppError)
+    },
+  )
 
   it.each(['stg'])('keeps per-agent models in %s', (mode) => {
     const envProvider = createEnvProvider(mode)
@@ -134,7 +134,11 @@ describe('Document drafting model resolution', () => {
   })
 
   it('uses the configured Gemini vision model for image extraction', () => {
-    expect(new DocumentImageAnalyzerAgent(createEnvProvider('dev', 'test-gemini-key', 'gemini')).model).toMatchObject({
+    expect(
+      new DocumentImageAnalyzerAgent(
+        createEnvProvider('dev', 'test-gemini-key', 'gemini'),
+      ).model,
+    ).toMatchObject({
       providerId: 'gemini',
       modelId: 'gemini-vision-model',
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
