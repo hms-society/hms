@@ -24,6 +24,7 @@ jobs:
       PORT: '5555'
       HMS_SERVER_APP_PORT: '5555'
       HMS_SERVER_APP_MODE: dev
+      OPENROUTER_API_KEY: test-openrouter-api-key
       HMS_WEB_APP_URL: http://localhost:5000
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       SUPABASE_URL: http://localhost:8000

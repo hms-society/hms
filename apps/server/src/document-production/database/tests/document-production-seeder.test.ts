@@ -1,4 +1,8 @@
-import type { DocumentSpecificationCreation } from '@hms/core/document-production/domain/entities'
+import type {
+  DocumentCreation,
+  DocumentPackageCreation,
+  DocumentSpecificationCreation,
+} from '@hms/core/document-production/domain/entities'
 import { describe, expect, it, vi } from 'vitest'
 
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
@@ -18,13 +22,28 @@ describe('DocumentProductionSeeder', () => {
         }))
       }),
     }
+    const documentsRepository = {
+      addMany: vi.fn(async (documents: DocumentCreation[]) =>
+        documents.map((document) => ({
+          ...document,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+      ),
+    }
+    const documentPackagesRepository = {
+      add: vi.fn(async (documentPackage: DocumentPackageCreation) => ({
+        ...documentPackage,
+        createdAt: new Date(),
+      })),
+    }
     const seeder = new DocumentProductionSeeder(
       { add: vi.fn(), replace: vi.fn() } as never,
       specificationsRepository as never,
       { add: vi.fn(), removeAll: vi.fn() } as never,
+      documentsRepository as never,
+      documentPackagesRepository as never,
       { addMany: vi.fn(), removeAll: vi.fn() } as never,
-      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
-      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
     )
 
     const result = await seeder.run({
@@ -42,27 +61,26 @@ describe('DocumentProductionSeeder', () => {
       ],
     })
 
-    const universalModel = seededSpecifications.find(
-      ({ name }) =>
-        name === 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+    const powerOfAttorneyTemplate = seededSpecifications.find(
+      ({ name }) => name === 'Procuração',
     )
 
-    expect(universalModel).toMatchObject({
+    expect(powerOfAttorneyTemplate).toMatchObject({
       application: {
         scope: 'legal_context',
-        moment: 'legal_production',
-        legalAreaIds: ['previdenciary-area'],
-        legalTopicIdsByArea: { 'previdenciary-area': ['retirement-topic'] },
+        moment: 'consultation',
+        legalAreaIds: ['civil-area'],
+        legalTopicIdsByArea: { 'civil-area': ['contracts-topic'] },
       },
       variables: expect.arrayContaining([
         expect.objectContaining({
-          label: 'Nome do requerente',
-          technicalName: 'nome_requerente',
+          label: 'Nome do cliente',
+          technicalName: 'cliente_nome',
         }),
       ]),
     })
-    expect(JSON.stringify(universalModel?.content)).toContain('{{nome_requerente}}')
-    expect(seededSpecifications).toHaveLength(4)
-    expect(result.specifications).toHaveLength(4)
+    expect(JSON.stringify(powerOfAttorneyTemplate?.content)).toContain('{cliente_nome}')
+    expect(seededSpecifications).toHaveLength(3)
+    expect(result.specifications).toHaveLength(3)
   })
 })

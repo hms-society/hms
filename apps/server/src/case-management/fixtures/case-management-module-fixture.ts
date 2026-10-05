@@ -8,7 +8,11 @@ import type {
 } from '@hms/core/case-management/domain/entities'
 import { LegalCaseFaker } from '@hms/core/case-management/domain/entities/fakers'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
-import { ClientFaker, UserFaker } from '@hms/core/identity/domain/entities/fakers'
+import {
+  ClientFaker,
+  ThirdPartyFaker,
+  UserFaker,
+} from '@hms/core/identity/domain/entities/fakers'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 
 import { CaseManagementDatabaseModule } from '@/case-management/database'
@@ -24,6 +28,7 @@ import {
   DrizzleClientsRepository,
   DrizzleCollaboratorsRepository,
   DrizzleUsersRepository,
+  DrizzleThirdPartiesRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IntakeDatabaseModule } from '@/intake/database'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
@@ -62,6 +67,7 @@ export class CaseManagementModuleFixture {
     private readonly templatesRepository: DrizzleChecklistTemplatesRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
+    private readonly thirdPartiesRepository: DrizzleThirdPartiesRepository,
     private readonly clientsRepository: DrizzleClientsRepository,
     private readonly legalAreasRepository: DrizzleLegalAreasRepository,
     private readonly legalTopicsRepository: DrizzleLegalTopicsRepository,
@@ -131,6 +137,7 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleChecklistTemplatesRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
+      restFixture.get(DrizzleThirdPartiesRepository),
       restFixture.get(DrizzleClientsRepository),
       restFixture.get(DrizzleLegalAreasRepository),
       restFixture.get(DrizzleLegalTopicsRepository),
@@ -282,14 +289,24 @@ export class CaseManagementModuleFixture {
     })
   }
 
-  registerPortalGrant(
+  async registerThirdParty(internalResponsibleId: string) {
+    const thirdParty = await this.thirdPartiesRepository.add(
+      ThirdPartyFaker.fake({ internalResponsibleId }),
+    )
+    if (!thirdParty) throw new Error('Third party fixture was not created')
+    return thirdParty
+  }
+
+  async registerPortalGrant(
     caseId: string,
     tokenHash: string,
     grantedBy: string,
     canUpload = false,
   ) {
+    const thirdParty = await this.registerThirdParty(grantedBy)
     return this.grantsRepository.add({
       caseId,
+      thirdPartyId: thirdParty.id,
       tokenHash,
       canView: true,
       canViewCaseStatus: true,

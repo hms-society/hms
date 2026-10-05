@@ -29,14 +29,20 @@ describe('Grant Case Portal Access Controller [POST /cases/:caseId/portal-access
         isPrimary: true,
       },
     ])
+    const thirdParty = await fixture.registerThirdParty(collaborator.collaboratorId)
     const response = await request(fixture.app.getHttpServer())
       .post(`/cases/${legalCase.id}/portal-access`)
-      .send({ canUpload: true })
+      .send({
+        thirdPartyId: thirdParty.id,
+        canUpload: true,
+        canViewCaseStatus: true,
+        canViewIntakeStatus: true,
+      })
       .expect(201)
     expect(response.body).toMatchObject({
       caseId: legalCase.id,
       canUpload: true,
-      portalAccessUrl: expect.stringContaining('/portal-pendencies?portalToken='),
+      portalAccessUrl: expect.stringContaining('/third-party-portal/cases/'),
     })
     expect(response.body.accessToken).toBeTruthy()
     expect(response.body.grantId).toBeTruthy()
@@ -46,7 +52,7 @@ describe('Grant Case Portal Access Controller [POST /cases/:caseId/portal-access
     await fixture.registerCollaborator()
     await request(fixture.app.getHttpServer())
       .post('/cases/91c6e2f4-3a8b-47d1-a5e9-6f2c4b7d8a30/portal-access')
-      .send({})
+      .send({ canUpload: true, canViewCaseStatus: true, canViewIntakeStatus: true })
       .expect(400)
   })
 })

@@ -22,7 +22,7 @@ describe('Register Waba Account Controller [POST /communication/waba/embedded-si
         wabaId: 'waba-local',
         phoneNumberId: 'phone-local',
       })
-      .expect(201)
+    expect(response.status, JSON.stringify(response.body)).toBe(201)
     expect(response.body).toMatchObject({
       assignedLawyerId: admin.userId,
       displayPhoneNumber: '+5511999998888',

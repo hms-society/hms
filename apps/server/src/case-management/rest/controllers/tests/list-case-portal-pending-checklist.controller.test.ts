@@ -36,10 +36,12 @@ describe('List Case Portal Pending Checklist Controller [GET /cases/:caseId/port
       legalCase.id,
       hashPortalAccessToken('test-token'),
       collaborator.collaboratorId,
+      true,
     )
-    const response = await request(fixture.app.getHttpServer())
-      .get(`/cases/${legalCase.id}/portal-pendencies?portalToken=test-token`)
-      .expect(200)
+    const response = await request(fixture.app.getHttpServer()).get(
+      `/cases/${legalCase.id}/portal-pendencies?portalToken=test-token`,
+    )
+    expect(response.status, JSON.stringify(response.body)).toBe(200)
     expect(response.body).toEqual([
       expect.objectContaining({ id: item.id, caseId: legalCase.id, status: 'pending' }),
     ])

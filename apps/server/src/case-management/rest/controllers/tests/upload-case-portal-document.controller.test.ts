@@ -76,7 +76,7 @@ describe('Upload Case Portal Document Controller [POST /cases/:caseId/portal-pen
         `/cases/${legalCase.id}/portal-pendencies/${item.id}/upload?portalToken=upload-test-token`,
       )
       .attach('file', Buffer.from('portal document'), 'documento.pdf')
-      .expect(201)
+    expect(response.status, JSON.stringify(response.body)).toBe(201)
     expect(response.body).toMatchObject({
       checklistItemId: item.id,
       status: 'in_analysis',
