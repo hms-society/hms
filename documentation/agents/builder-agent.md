@@ -97,6 +97,8 @@ coordinates integration of their diffs.
 - **Status:** completed | blocked
 - **Files created/changed:**
   - `<path>`
+- **Estimated added TypeScript LOC:** <number> (excluding generated/fixtures)
+- **Slicing advice:** none | <completed task ready for PR if > ~1,200 LOC>
 - **Observable result:** <concise evidence>
 - **Local checks:** <commands and results>
 - **Documentation gaps:** none | <document, evidence, and action>

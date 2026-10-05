@@ -77,17 +77,11 @@ hms/
     pnpm install
     ```
 
-4.  **Start the local infrastructure:**
+4.  **Start the project (development mode):**
     ```bash
-    docker compose up -d
+    pnpm start
     ```
-    Brings up local Supabase (Auth, PostgreSQL, Storage, Kong) and Mailpit.
-
-5.  **Run the project (development mode):**
-    ```bash
-    pnpm dev
-    ```
-    Starts all monorepo applications simultaneously via Turborepo.
+    Starts the local Docker infrastructure and all monorepo applications.
 
 ## 📖 Documentation
 

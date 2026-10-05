@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "start": "docker compose up -d && turbo run dev",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
@@ -15,6 +16,8 @@
     "update:complexity-baseline": "node scripts/check-complexity.mjs --update-baseline",
     "validate": "pnpm check && pnpm check-types && pnpm test && pnpm test:coverage",
     "seed": "pnpm --filter server db:seed",
+    "db push": "pnpm --filter server db:schema:push",
+    "db schema push": "pnpm --filter server db:schema:push",
     "server": "pnpm --filter server dev",
     "web": "pnpm --filter web dev",
     "ngrok": "node scripts/start-ngrok.mjs",
