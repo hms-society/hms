@@ -148,7 +148,11 @@ export function usePieceWorkflowRoutePage({
   async function handleBackToCase() {
     if (mode === 'editor' && editedContent && editingSourceVersionId) {
       const sourceContent = editingSourceVersion?.content ?? version?.content
-      if (sourceContent && serializeComparableContent(editedContent) === serializeComparableContent(sourceContent)) {
+      if (
+        sourceContent &&
+        serializeComparableContent(editedContent) ===
+          serializeComparableContent(sourceContent)
+      ) {
         setEditedContent(null)
         setEditingSourceVersionId(null)
         setSaveState('saved')

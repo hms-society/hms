@@ -215,7 +215,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-accent bg-background text-accent-foreground hover:bg-secondary'
-            disabled={hasChecklistDecision || isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleApproveWithException}
           >
             <Icon name='shield-check' className='size-3' />
@@ -225,7 +229,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-background text-destructive hover:bg-destructive/10'
-            disabled={hasChecklistDecision || isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleBlockChecklist}
           >
             <Icon name='lock' className='size-3' />
@@ -235,7 +243,11 @@ export const ChecklistDossierTab = ({
             variant='outline'
             size='xs'
             className='rounded-full border-destructive/20 bg-background text-destructive hover:bg-destructive/10'
-            disabled={hasChecklistDecision || isChecklistReviewDisabled || isReviewingChecklistGate}
+            disabled={
+              hasChecklistDecision ||
+              isChecklistReviewDisabled ||
+              isReviewingChecklistGate
+            }
             onClick={handleRejectOnMerit}
           >
             <Icon name='shield-alert' className='size-3' />
@@ -479,7 +491,9 @@ export const ChecklistDossierTab = ({
           {[
             'Checklist aprovado',
             dossierGateLabel,
-            canStartLegalWriting ? 'Produção jurídica liberada' : 'Produção jurídica bloqueada',
+            canStartLegalWriting
+              ? 'Produção jurídica liberada'
+              : 'Produção jurídica bloqueada',
           ].map((label, index) => (
             <div
               key={label}
@@ -487,7 +501,9 @@ export const ChecklistDossierTab = ({
             >
               <span className='flex items-center gap-2'>
                 <Icon
-                  name={index === 0 ? 'list-checks' : index === 1 ? 'file-text' : 'pencil'}
+                  name={
+                    index === 0 ? 'list-checks' : index === 1 ? 'file-text' : 'pencil'
+                  }
                   className='size-3'
                 />
                 {label}

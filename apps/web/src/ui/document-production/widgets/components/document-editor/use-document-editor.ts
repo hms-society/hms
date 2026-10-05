@@ -266,7 +266,9 @@ export function useDocumentEditor({
             if (!node.content) return node
             return { ...node, content: node.content.map(replaceNodeText) }
           }
-          editor.commands.setContent(replaceNodeText(editor.getJSON()), { emitUpdate: true })
+          editor.commands.setContent(replaceNodeText(editor.getJSON()), {
+            emitUpdate: true,
+          })
         }
         onEditorReady(insertVariable)
       }

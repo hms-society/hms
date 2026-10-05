@@ -171,13 +171,10 @@ beforeEach(() => {
     const editorActionsRef = useRef<DocumentEditorActions | null>(null)
     const [isPendingVariableDialogOpen, setPendingVariableDialogOpen] = useState(false)
     const [isVersionDialogOpen, setVersionDialogOpen] = useState(false)
-    const handleEditorReady = useCallback(
-      (actions: DocumentEditorActions) => {
-        editorActionsRef.current = actions
-        setEditorActions(() => actions)
-      },
-      [],
-    )
+    const handleEditorReady = useCallback((actions: DocumentEditorActions) => {
+      editorActionsRef.current = actions
+      setEditorActions(() => actions)
+    }, [])
     const currentContent = editedContent ?? pageState.version?.content
     const serializedContent = currentContent ? JSON.stringify(currentContent) : ''
     const pendingVariables =
@@ -330,7 +327,9 @@ describe('PieceWorkflowRoutePage', () => {
       expect(editor.querySelectorAll('[data-pending-marker="true"]')).toHaveLength(3),
     )
     const insertValuesButton = screen.getByRole('button', { name: 'Inserir valores' })
-    await waitFor(() => expect((insertValuesButton as HTMLButtonElement).disabled).toBe(false))
+    await waitFor(() =>
+      expect((insertValuesButton as HTMLButtonElement).disabled).toBe(false),
+    )
     fireEvent.click(insertValuesButton)
 
     expect(screen.getByRole('dialog')).not.toBeNull()
