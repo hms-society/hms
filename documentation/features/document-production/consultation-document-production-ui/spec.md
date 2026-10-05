@@ -805,8 +805,8 @@ texto informativo dos dialogs da feature deve permanecer abaixo de `text-sm`.
   - Compõem editor, histórico, decisões, vigência, edição manual, pendências e
     regeneração sem instruções; os testes cobrem permissões por status e races.
 
-- `apps/web/tests/document-production/consultation-documents-page.test.ts`
-- `apps/web/tests/document-production/consultation-document-version-page.test.ts`
+- `apps/web/tests/document-production/consultation-documents-page.test.tsx`
+- `apps/web/tests/document-production/consultation-document-version-page.test.tsx`
 
   - Integração browser consumindo a fixture canônica de Produção Documental; não
     criam helpers locais de teste nem registram um segundo backend mockado.
@@ -920,8 +920,8 @@ pnpm --filter web generate-routes
 pnpm --filter web check:code
 pnpm --filter web check:types
 pnpm --filter web test
-pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts
-pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.ts
+pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.tsx
+pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.tsx
 pnpm --filter web build
 ```
 

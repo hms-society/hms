@@ -189,8 +189,8 @@ A implementação deve executar, nesta ordem, os checks adequados ao escopo:
     pnpm --filter web check:code
     pnpm --filter web check:types
     pnpm --filter web test
-    pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts
-    pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.ts
+    pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.tsx
+    pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.tsx
     pnpm --filter web build
 
 O adapter/contexto e os hooks/editor devem ter sensores focados antes do gate
