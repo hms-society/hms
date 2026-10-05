@@ -1,9 +1,18 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Mastra } from '@mastra/core/mastra'
+import { Observability } from '@mastra/observability'
+import { SamplingStrategyType, SpanType } from '@mastra/core/observability'
 import { Injectable } from '@nestjs/common'
 import { DocumentReviewDecision } from '@hms/core/document-production/domain/structures'
 import type { DocumentGenerationWorkflowInput } from '@hms/core/document-production/domain/structures'
 import type { GenerateDocumentWorkflow as IGenerateDocumentWorkflow } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
+import { GrafanaOtelBridge } from '@/shared/ai/mastra/grafana-otel-bridge'
+import { EnvProvider } from '@/shared/provision/env/env-provider'
+import {
+  DocumentWriterAgent,
+  DocumentReviewerAgent,
+} from '@/document-production/ai/mastra/agents'
 
 import {
   documentGenerationWorkflowInputSchema,
@@ -19,11 +28,9 @@ import {
   StartDocumentGenerationTool,
 } from '@/document-production/ai/mastra/tools'
 
-type DocumentWorkflow = ReturnType<typeof createWorkflow>
-
 @Injectable()
 export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
-  private readonly workflow: DocumentWorkflow
+  private readonly mastra: Mastra
 
   constructor(
     private readonly loadDocumentGenerationTool: LoadDocumentGenerationTool,
@@ -33,6 +40,9 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     private readonly failDocumentGenerationTool: FailDocumentGenerationTool,
     private readonly reviewDocumentCycleTool: ReviewDocumentCycleTool,
     private readonly resolveDocumentGenerationOutcomeTool: ResolveDocumentGenerationOutcomeTool,
+    writerAgent: DocumentWriterAgent,
+    reviewerAgent: DocumentReviewerAgent,
+    envProvider: EnvProvider,
   ) {
     const prepareGenerationStep = createStep(this.prepareDocumentGenerationTool.function)
     const startGenerationStep = createStep(this.startDocumentGenerationTool.function)
@@ -46,10 +56,12 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     )
     const failGenerationStep = createStep(this.failDocumentGenerationTool.function)
 
-    this.workflow = createWorkflow({
+    const workflow = createWorkflow({
       id: 'generate-document-workflow',
       inputSchema: documentGenerationWorkflowInputSchema,
       outputSchema: documentGenerationWorkflowOutputSchema,
+      // Inngest owns durable retries; observability must not add snapshot storage.
+      options: { shouldPersistSnapshot: () => false },
     })
       .then(prepareGenerationStep)
       .then(startGenerationStep)
@@ -81,11 +93,42 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
       ])
       .then(resolveOutcomeStep)
       .commit()
+
+    this.mastra = new Mastra({
+      logger: false,
+      agents: { writerAgent, reviewerAgent },
+      workflows: { 'generate-document-workflow': workflow },
+      observability: new Observability({
+        configs: {
+          grafana: {
+            serviceName: 'hms-server',
+            sampling: {
+              type: envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+                ? SamplingStrategyType.ALWAYS
+                : SamplingStrategyType.NEVER,
+            },
+            bridge: new GrafanaOtelBridge(),
+            excludeSpanTypes: [SpanType.MODEL_CHUNK],
+          },
+        },
+      }),
+    })
   }
 
   async run(input: DocumentGenerationWorkflowInput): Promise<void> {
-    const run = await this.workflow.createRun()
-    const result = await run.start({ inputData: input })
+    const run = await this.mastra.getWorkflow('generate-document-workflow').createRun()
+    const result = await run.start({
+      inputData: input,
+      tracingOptions: {
+        hideInput: true,
+        hideOutput: true,
+        metadata: {
+          documentGenerationId: input.documentGenerationId,
+          documentId: input.documentId,
+          documentSpecificationVersionId: input.documentSpecificationVersionId,
+        },
+      },
+    })
 
     if (result.status === 'failed') throw result.error
 

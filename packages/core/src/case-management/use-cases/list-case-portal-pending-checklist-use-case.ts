@@ -33,6 +33,11 @@ export class ListCasePortalPendingChecklistUseCase
       request.caseId,
     )
     if (!grant) throw new ForbiddenError('O usuário não possui acesso a este caso.')
+    if (!grant.canUpload) {
+      throw new ForbiddenError(
+        'O usuário não possui permissão para visualizar pendências documentais.',
+      )
+    }
 
     const checklistItems = await this.caseChecklistItemsRepository.listByCaseId(
       request.caseId,

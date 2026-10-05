@@ -33,6 +33,8 @@ describe('Grant Case Portal Access Use Case', () => {
         collaboratorId: faker.string.uuid(),
         isAdministrator: true,
         tokenHash: faker.string.hexadecimal({ length: 64 }),
+        canViewCaseStatus: true,
+        canViewIntakeStatus: true,
         canUpload: true,
       }),
     ).resolves.toEqual(grant)
@@ -51,11 +53,39 @@ describe('Grant Case Portal Access Use Case', () => {
         collaboratorId: faker.string.uuid(),
         isAdministrator: false,
         tokenHash: faker.string.hexadecimal({ length: 64 }),
+        canViewCaseStatus: true,
+        canViewIntakeStatus: true,
         canUpload: false,
       }),
     ).rejects.toThrow('O caso não foi encontrado')
 
     expect(grantsRepository.add).not.toHaveBeenCalled()
+  })
+
+  it('associates the access grant with a third party when provided', async () => {
+    const legalCase = LegalCaseFaker.fake()
+    const grant = fakeGrant(legalCase.id)
+    legalCasesRepository.findById.mockResolvedValue(legalCase)
+    grantsRepository.add.mockResolvedValue(grant)
+
+    await useCase.execute({
+      caseId: legalCase.id,
+      thirdPartyId: 'third-party-1',
+      collaboratorId: faker.string.uuid(),
+      isAdministrator: true,
+      tokenHash: faker.string.hexadecimal({ length: 64 }),
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
+      canUpload: true,
+    })
+
+    expect(grantsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({ thirdPartyId: 'third-party-1' }),
+    )
+    expect(grantsRepository.revokeActiveByCaseAndThirdParty).toHaveBeenCalledWith(
+      legalCase.id,
+      'third-party-1',
+    )
   })
 })
 
@@ -65,6 +95,8 @@ function fakeGrant(caseId: string): CasePortalAccessGrant {
     caseId,
     tokenHash: faker.string.hexadecimal({ length: 64 }),
     canView: true,
+    canViewCaseStatus: true,
+    canViewIntakeStatus: true,
     canUpload: true,
     status: 'active',
     grantedBy: faker.string.uuid(),

@@ -226,7 +226,8 @@ or invalidated local checks without coverage.
 - `.github/workflows/server-app-production-cd.yml` applies production Drizzle migrations and
   then triggers the server production Coolify webhook with `COOLIFY_API_TOKEN` after a
   merged PR into `main`.
-- `.github/workflows/server-app-staging-cd.yml` applies staging Drizzle migrations,
+- `.github/workflows/server-app-staging-cd.yml` checks Auth admin user listing and
+  required seed credentials before resetting the staging schemas, applies Drizzle migrations,
   resets and seeds staging, and then triggers the server staging Coolify webhook
   with `COOLIFY_API_TOKEN` after pushes to `develop`.
 - `.github/workflows/web-app-staging-cd.yml` deploys web staging after pushes to
@@ -273,6 +274,19 @@ The `production` and `staging` GitHub environments must provide these secrets:
   pnpm --filter server db:studio     # open Drizzle Studio
   pnpm --filter server db:seed       # reset and seed dev/staging through Nest
   ```
+
+The document-production seed includes a pending-data example at consultation
+`00000000-0000-4000-8000-000000000102`, with its own intake and appointment.
+Its template, **Teste de pendências — Procuração para locação**, requires
+`{procurador_nome}`, `{procurador_oab}`, and `{endereco_imovel}`, which are
+explicitly absent from the consultation. Document
+`00000000-0000-4000-8000-000000000204` already has an AI-source seed version
+`00000000-0000-4000-8000-000000000504` in review, with all three pending markers
+registered. Use it to check the pending-marker list and disabled approval, edit
+and resolve the markers, or generate a new version through the linked template.
+The seed simulates completed generation without calling an AI provider. The seed
+log includes this example's consultation, document, template, and version IDs.
+Running `db:seed` resets the development/staging database and Auth users.
 
 The seed entrypoint must run through the Nest compiler so emitted decorator
 metadata remains available to the application context. Do not execute it directly

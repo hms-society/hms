@@ -8,9 +8,12 @@ import type {
   SchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 
+import { AppError } from '@hms/core/shared/domain/errors'
+
 import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
 export type SchedulingSeedReferences = {
+  readonly pendingMarkersIntakeId?: string
   readonly intakeId: string
   readonly clientId: string
   readonly assignedLawyerId: string
@@ -64,8 +67,36 @@ export class SchedulingSeeder {
       startsAt: new Date('2030-01-14T13:00:00.000Z'),
       endsAt: new Date('2030-01-14T13:45:00.000Z'),
     })
-    const [createdAppointment] = await this.appointmentsRepository.addMany([appointment])
+    const pendingMarkersAppointment = references.pendingMarkersIntakeId
+      ? AppointmentFaker.fake({
+          scheduleId: createdSchedule.id,
+          clientId: references.clientId,
+          intakeId: references.pendingMarkersIntakeId,
+          startsAt: new Date('2030-01-14T14:00:00.000Z'),
+          endsAt: new Date('2030-01-14T14:45:00.000Z'),
+        })
+      : undefined
+    const appointments = await this.appointmentsRepository.addMany([
+      appointment,
+      ...(pendingMarkersAppointment ? [pendingMarkersAppointment] : []),
+    ])
 
-    return { schedule: createdSchedule, appointment: createdAppointment }
+    const createdAppointment = appointments.find(
+      ({ intakeId }) => intakeId === references.intakeId,
+    )
+    if (!createdAppointment) {
+      throw new AppError(
+        'The document-production Appointment could not be seeded.',
+        'Seed Error',
+      )
+    }
+
+    return {
+      schedule: createdSchedule,
+      appointment: createdAppointment,
+      pendingMarkersAppointment: appointments.find(
+        ({ intakeId }) => intakeId === references.pendingMarkersIntakeId,
+      ),
+    }
   }
 }

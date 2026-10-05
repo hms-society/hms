@@ -23,6 +23,13 @@ describe('List Consultation Documents Controller [GET /consultations/:consultati
     )
     const document = await fixture.seedDocument(consultation.id)
     const version = await fixture.seedDocumentVersion(document.id, collaborator.id)
+    const documentPackage = await fixture.documentPackagesRepository.findByContext({
+      type: 'consultation',
+      consultationId: consultation.id,
+    })
+    if (!documentPackage) throw new Error('Test document package was not created')
+    const [packageDocument] =
+      await fixture.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
 
     const response = await request(fixture.app.getHttpServer())
       .get(`/consultations/${consultation.id}/documents`)
@@ -33,6 +40,7 @@ describe('List Consultation Documents Controller [GET /consultations/:consultati
       expect.objectContaining({
         id: document.id,
         title: document.title,
+        documentSpecificationId: packageDocument.documentSpecificationId,
         versions: [
           expect.objectContaining({
             id: version.id,

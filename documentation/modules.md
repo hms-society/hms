@@ -115,6 +115,10 @@ Requisito de produto: [PRD — Módulo de Produção Documental](https://platafo
   registros imutáveis.
 - Permite várias versões aprovadas, mantendo no máximo uma versão vigente por
   documento; aprovar ou rejeitar uma versão não apaga as anteriores.
+- Na revisão documental da Consulta, impede a aprovação enquanto a versão possuir
+  pendências registradas ou marcadores ainda presentes no conteúdo. O profissional
+  precisa resolver as pendências e salvar uma nova versão; a rejeição continua
+  disponível.
 - Trata geração, revisão, aprovação, rejeição e falha como estados das versões e
   execuções, não do item que associa o documento ao pacote.
 - Publica eventos de produção para que o módulo responsável acompanhe o resultado
