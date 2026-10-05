@@ -5,7 +5,10 @@ import { SamplingStrategyType, SpanType } from '@mastra/core/observability'
 import { Injectable } from '@nestjs/common'
 import { DocumentReviewDecision } from '@hms/core/document-production/domain/structures'
 import type { DocumentGenerationWorkflowInput } from '@hms/core/document-production/domain/structures'
-import type { GenerateDocumentWorkflow as IGenerateDocumentWorkflow } from '@hms/core/document-production/interfaces'
+import type {
+  DocumentGenerationWorkflowResult,
+  GenerateDocumentWorkflow as IGenerateDocumentWorkflow,
+} from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { GrafanaOtelBridge } from '@/shared/ai/mastra/grafana-otel-bridge'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
@@ -115,7 +118,9 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     })
   }
 
-  async run(input: DocumentGenerationWorkflowInput): Promise<void> {
+  async run(
+    input: DocumentGenerationWorkflowInput,
+  ): Promise<DocumentGenerationWorkflowResult> {
     const run = await this.mastra.getWorkflow('generate-document-workflow').createRun()
     const result = await run.start({
       inputData: input,
@@ -139,6 +144,22 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
       )
     }
 
-    documentGenerationWorkflowOutputSchema.parse(result.result)
+    const output = documentGenerationWorkflowOutputSchema.parse(result.result)
+    if (output.status === 'approved') {
+      return {
+        status: output.status,
+        documentGenerationId: output.documentGenerationId,
+        documentVersionId: output.documentVersionId,
+        attemptsCount: output.attemptsCount,
+        pendingMarkersCount: output.pendingMarkers.length,
+      }
+    }
+
+    return {
+      status: output.status,
+      documentGenerationId: output.documentGenerationId,
+      attemptsCount: output.attemptsCount,
+      findingsCount: output.findings.length,
+    }
   }
 }
