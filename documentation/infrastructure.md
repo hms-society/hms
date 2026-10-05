@@ -91,6 +91,22 @@ Meta Cloud API webhook
 ### AI
 
 * **Mastra AI:** AI orchestration layer for agents, tools, and intelligent flows.
+* **Local document drafting:** Writer and reviewer use OpenRouter free models
+  through Mastra's native fallback array, in order:
+  `qwen/qwen3.8-27b:free`, `nvidia/nemotron-3-super-120b-a12b:free`,
+  `dots-studio/dots-3-note-preview:free`, `liquid/lfm-2.5-2.6b:free`.
+  Each entry has `maxRetries: 0`, so failed calls advance to the next model.
+  `OPENROUTER_API_KEY` is required locally for drafting. Document Engine extraction
+  and organization continue to use Ollama locally; staging retains the per-agent
+  DeepSeek models below.
+* **Production document drafting and placeholder generation:** The writer uses
+  Mastra native fallbacks in this order: DeepSeek V4.1 Flash through DeepInfra,
+  CoreWeave, then NextBit; GPT-6 Luna through Azure, then OpenAI. Each route is
+  pinned using OpenRouter `provider.only` with `allow_fallbacks: false` and
+  `require_parameters: true`, with no per-route retries. Exhausting the five
+  routes fails the call. The reviewer uses the same providers with the model
+  groups reversed: GPT-6 Luna through Azure, then OpenAI, followed by DeepSeek
+  V4.1 Flash through DeepInfra, CoreWeave, then NextBit.
 * **DeepSeek V4:** Main language model for AI agents. Two variants are available:
 
   * **DeepSeek V4-Pro:** 1.6T total parameters, 49B active per token. Used for tasks requiring complex reasoning, assisted legal drafting, and document analysis.
@@ -366,6 +382,69 @@ server, make a real database-backed request, and check for a PostgreSQL child
 span and `db.client.operation.duration` in the matching Grafana Cloud
 environment. Dashboard panels and alerts must be created separately after
 the first telemetry arrives.
+
+#### Document drafting agent telemetry
+
+Document Production registers its workflow, Writer and Reviewer with Mastra
+Observability (`@mastra/observability`) and an OpenTelemetry bridge
+(`@mastra/otel-bridge`). The bridge reuses the globally registered server SDK,
+OTLP endpoint, authentication headers, service name and environment resource
+attributes. It does not create another SDK, exporter, collector or Mastra Cloud
+connection. It is enabled only when `OTEL_EXPORTER_OTLP_ENDPOINT` is configured;
+the production Docker command preloads the SDK before importing the app. Local
+`dev`/`prod` scripts do not preload it automatically.
+
+The trace includes the Inngest execution, workflow steps, each Writer/Reviewer
+review cycle, model generation and inference. Mastra trace attributes retain
+`mastra.span.type`, `gen_ai.agent.id`, model/provider identifiers and token usage.
+Correlation fields `mastra.metadata.documentGenerationId`,
+`mastra.metadata.documentId` and
+`mastra.metadata.documentSpecificationVersionId` identify the requested work.
+The save-version step adds `mastra.metadata.documentVersionId` after persistence.
+Review steps record `reviewAttempt`, `reviewDecision` and `pendingMarkersCount`.
+The final workflow span records `generationOutcome` (`approved` or `failed`) and,
+on success, the saved `documentVersionId`. A workflow can execute successfully
+while producing a domain failure after three rejected review cycles.
+The enclosing job span records `hms.inngest.run_id`,
+`hms.document.generation_id` and `hms.document.id`. Each durable retry gets a new
+trace; the generation and Inngest IDs connect those traces.
+
+Native Mastra inference spans can encompass several model fallbacks. Additional
+`hms.ai.model.attempt` spans identify each attempted route with
+`gen_ai.request.model`, `gen_ai.agent.id`, `hms.ai.route.provider`,
+`hms.ai.route.index` (zero-based), `hms.ai.fallback`, outcome and, on provider
+failure, a numeric HTTP status when available. These preserve Mastra's native
+fallback ordering and retry settings. Shared OpenRouter agents use the same route
+instrumentation when OTLP is enabled; the full workflow/agent trace registration
+currently belongs to Document Production.
+
+The existing OTLP metrics exporter also sends:
+
+* `hms.ai.operation.duration` (seconds): duration of exported Mastra operations,
+  with span type, entity, model/provider and success/error labels.
+* `hms.ai.token.usage`: input/output token counters from model-generation totals
+  only, avoiding repeated inference/step token counts. Providers that omit usage
+  do not contribute token values.
+* `hms.ai.model.attempts`: attempted route counter, including failed and cancelled
+  calls, labeled by agent, model, route provider/index, fallback and outcome.
+
+Document, generation, version and Inngest IDs are trace attributes only, never
+metric labels. Per-token chunks are excluded. The bridge uses an allowlist and
+exports no prompts, instructions, inputs, outputs, schemas, request context,
+document contents, credentials or original error messages/stacks. Provider errors
+retain a generic failure category. Mastra's raw console logger is disabled for
+this registered runtime, preventing provider payloads from entering Alloy's
+Docker log collection. Domain records and Inngest retry behavior are unchanged.
+Workflow snapshots are disabled: Inngest continues to own durable execution and
+the existing repositories continue to own the document generation history.
+
+After redeploying the Server App, generate a document and inspect Tempo using
+`{ resource.service.name = "hms-server" && span.mastra.span.type = "agent_run" }`.
+Inspect `hms.ai.model.attempt` spans for fallback routing, and filter
+`span.mastra.metadata.documentGenerationId` for a generation's Mastra spans.
+The source integration tests use the real Mastra runtime and global OpenTelemetry
+SDK with simulated model transport/persistence and in-memory telemetry collectors;
+they do not establish Grafana Cloud ingestion or real model availability.
 
 #### Managed Supabase database metrics
 

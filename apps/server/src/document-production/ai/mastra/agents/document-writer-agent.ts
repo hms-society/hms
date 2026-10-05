@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { DOCUMENT_DRAFTING_DEVELOPMENT_MODELS } from '@/document-production/constants/document-drafting-development-models'
+import { DOCUMENT_DRAFTING_PRODUCTION_MODELS } from '@/document-production/constants/document-drafting-production-models'
 import { MastraAgent } from '@/shared/ai/mastra/mastra-agent'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
@@ -65,14 +67,18 @@ Examples:
 
 ## 5. Tiptap output
 
-- Return valid Tiptap JSONContent.
-- The root node must be:
+- Return one draft object whose "content" value is valid Tiptap JSONContent.
+- The complete response must use this wrapper:
 
 {
-  "type": "doc",
-  "content": [...]
+  "content": {
+    "type": "doc",
+    "content": [...]
+  }
 }
 
+- Do not return the bare doc node or a block array as the complete response.
+- The outer "content" must be an object; only the inner doc "content" is an array.
 - Use only the Tiptap node types explicitly allowed by the request.
 - Use only the Tiptap marks explicitly allowed by the request.
 - Never invent node types, mark types, or attributes.
@@ -200,6 +206,8 @@ export class DocumentWriterAgent extends MastraAgent<'document-writer'> {
         id: 'document-writer',
         name: 'Document Writer',
         model: 'deepseek/deepseek-v4-pro',
+        developmentModels: DOCUMENT_DRAFTING_DEVELOPMENT_MODELS,
+        productionModels: DOCUMENT_DRAFTING_PRODUCTION_MODELS,
         instructions,
       },
       envProvider,

@@ -301,6 +301,11 @@ describe('useConsultationDocumentReviewPage', () => {
   })
 
   it('submits approval and rejection decisions with the current context', async () => {
+    useConsultationDocumentVersionQueryMock.mockReturnValue(
+      createVersionQuery({
+        documentVersion: createVersion({ pendingMarkers: [] }),
+      }) as never,
+    )
     const reviewAction = createReviewAction()
     useReviewConsultationDocumentVersionActionMock.mockReturnValue(reviewAction as never)
     const { result } = renderReviewHook()
@@ -340,6 +345,11 @@ describe('useConsultationDocumentReviewPage', () => {
   })
 
   it('maps a review conflict to refreshed data and a visible action error', async () => {
+    useConsultationDocumentVersionQueryMock.mockReturnValue(
+      createVersionQuery({
+        documentVersion: createVersion({ pendingMarkers: [] }),
+      }) as never,
+    )
     const documentsRefetchMock = vi.fn().mockResolvedValue(undefined)
     const versionRefetchMock = vi.fn().mockResolvedValue(undefined)
     const reviewAction = createReviewAction({
@@ -350,7 +360,10 @@ describe('useConsultationDocumentReviewPage', () => {
       createDocumentsQuery({ refetch: documentsRefetchMock }) as never,
     )
     useConsultationDocumentVersionQueryMock.mockReturnValue(
-      createVersionQuery({ refetch: versionRefetchMock }) as never,
+      createVersionQuery({
+        refetch: versionRefetchMock,
+        documentVersion: createVersion({ pendingMarkers: [] }),
+      }) as never,
     )
     const { result } = renderReviewHook()
 
@@ -419,6 +432,50 @@ describe('useConsultationDocumentReviewPage', () => {
     expect(result.current.isRegenerateOpen).toBe(false)
   })
 
+  it('closes confirmation and shows generation while the request is still pending', async () => {
+    let finishRequest!: () => void
+    const request = new Promise<void>((resolve) => {
+      finishRequest = resolve
+    })
+    const generationAction = createGenerationAction({
+      generateDocument: vi.fn().mockReturnValue(request),
+    })
+    useGenerateConsultationDocumentActionMock.mockReturnValue(generationAction as never)
+    const { result } = renderReviewHook()
+    act(() => result.current.handleRequestRegenerate())
+
+    let confirmation!: Promise<void>
+    act(() => {
+      confirmation = result.current.handleConfirmRegenerate('escreva em alemão')
+    })
+
+    expect(result.current.isRegenerateOpen).toBe(false)
+    expect(result.current.viewModel?.isGenerating).toBe(true)
+    expect(result.current.isRegenerating).toBe(true)
+    await act(async () => {
+      finishRequest()
+      await confirmation
+    })
+  })
+
+  it('restores confirmation and clears immediate loading when the request fails', async () => {
+    const generationAction = createGenerationAction({
+      generateDocument: vi.fn().mockRejectedValue(new Error('Network unavailable')),
+    })
+    useGenerateConsultationDocumentActionMock.mockReturnValue(generationAction as never)
+    const { result } = renderReviewHook()
+    act(() => result.current.handleRequestRegenerate())
+    act(() => result.current.setRegenerationInstructions('escreva em alemão'))
+    await act(async () => {
+      await result.current.handleConfirmRegenerate('escreva em alemão')
+    })
+
+    expect(result.current.isRegenerateOpen).toBe(true)
+    expect(result.current.regenerationInstructions).toBe('escreva em alemão')
+    expect(result.current.viewModel?.isGenerating).toBe(false)
+    expect(result.current.actionError).toContain('Não foi possível solicitar')
+  })
+
   it('locates present markers and reports markers that are absent', async () => {
     const { result } = renderReviewHook()
 
@@ -430,5 +487,124 @@ describe('useConsultationDocumentReviewPage', () => {
     act(() => result.current.handleLocateMarker('{missing_marker}'))
     expect(result.current.highlightedTerms).toEqual(['{client_name}'])
     expect(result.current.isMarkerNotFoundOpen).toBe(true)
+  })
+
+  it('fills a pending marker and saves a new manual version with literal text', async () => {
+    const saveAction = createSaveAction()
+    useSaveManualConsultationDocumentVersionActionMock.mockReturnValue(
+      saveAction as never,
+    )
+    const { result } = renderReviewHook()
+    await waitFor(() => expect(result.current.draft).toEqual(documentContent))
+    act(() => result.current.handleFillPendingMarker('{client_name}', '  Cliente $&  '))
+    await waitFor(() => expect(saveAction.saveManualVersion).toHaveBeenCalledOnce())
+    const request = (
+      saveAction.saveManualVersion.mock.calls as unknown as [
+        { sourceDocumentVersionId: string; content: unknown },
+      ][]
+    )[0][0]
+    expect(request.sourceDocumentVersionId).toBe(result.current.version?.id)
+    expect(JSON.stringify(request.content)).toContain('Cliente $&')
+    expect(JSON.stringify(request.content)).not.toContain('{client_name}')
+    await waitFor(() => expect(result.current.isPendingMarkersOpen).toBe(false))
+  })
+
+  it('opens pending markers instead of approval and prevents direct confirmation', async () => {
+    const generationAction = createReviewAction()
+    useReviewConsultationDocumentVersionActionMock.mockReturnValue(
+      generationAction as never,
+    )
+    const { result } = renderReviewHook()
+    act(() => result.current.handleApprove())
+    expect(result.current.isApproveOpen).toBe(false)
+    expect(result.current.isPendingMarkersOpen).toBe(true)
+    await act(async () => {
+      await result.current.handleConfirmApprove()
+    })
+    expect(generationAction.reviewVersion).not.toHaveBeenCalled()
+    expect(result.current.actionError).toContain('Resolva as pendências')
+  })
+
+  it('opens the newly generated AI version once without selecting the approved current version', async () => {
+    const navigateTo = vi.fn().mockResolvedValue(undefined)
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn().mockResolvedValue(undefined),
+    })
+    const { result, rerender } = renderReviewHook()
+    await act(async () => {
+      await result.current.handleConfirmRegenerate('escreva em alemão')
+    })
+    expect(navigateTo).not.toHaveBeenCalled()
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createDocumentsQuery({
+        data: [
+          createDocument({
+            generationStatus: DocumentGenerationStatus.Completed,
+            versions: [
+              createVersionSummary(),
+              createVersionSummary({
+                id: 'manual-3',
+                versionNumber: 3,
+                source: 'manual',
+              }),
+              createVersionSummary({ id: 'generated-4', versionNumber: 4 }),
+            ],
+          }),
+        ],
+      }) as never,
+    )
+    rerender()
+    await waitFor(() =>
+      expect(navigateTo).toHaveBeenCalledWith('consultationDocumentVersion', {
+        params: {
+          consultationId: 'consultation-1',
+          documentId: 'document-1',
+          documentVersionId: 'generated-4',
+        },
+      }),
+    )
+    rerender()
+    expect(navigateTo).toHaveBeenCalledOnce()
+  })
+
+  it('preserves historical review when a new version appears without requesting regeneration', () => {
+    const { rerender } = renderReviewHook()
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createDocumentsQuery({
+        data: [
+          createDocument({
+            versions: [
+              createVersionSummary(),
+              createVersionSummary({ id: 'version-3', versionNumber: 3 }),
+            ],
+          }),
+        ],
+      }) as never,
+    )
+    rerender()
+    expect(useNavigationMock.mock.results[0].value.navigateTo).not.toHaveBeenCalled()
+  })
+
+  it('does not switch versions after cancelling regeneration', async () => {
+    const { result, rerender } = renderReviewHook()
+    await act(async () => {
+      await result.current.handleConfirmRegenerate('Corrigir o documento.')
+      await result.current.handleCancelGeneration()
+    })
+    useConsultationDocumentsQueryMock.mockReturnValue(
+      createDocumentsQuery({
+        data: [
+          createDocument({
+            versions: [
+              createVersionSummary(),
+              createVersionSummary({ id: 'version-3', versionNumber: 3 }),
+            ],
+          }),
+        ],
+      }) as never,
+    )
+    rerender()
+    expect(useNavigationMock.mock.results[0].value.navigateTo).not.toHaveBeenCalled()
   })
 })

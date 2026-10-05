@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Button } from '@/ui/shadcn/button'
-import { Badge } from '@/ui/shadcn/badge'
 import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { DocumentStatusChip } from '../../../components/document-status-chip'
@@ -28,6 +27,9 @@ export const ConsultationDocumentRow = ({
   onUpdateAccess,
 }: ConsultationDocumentRowProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const canReview = Boolean(
+    item.latestVersion && item.status === 'in_review' && !isReadOnly,
+  )
 
   return (
     <>
@@ -78,37 +80,29 @@ export const ConsultationDocumentRow = ({
                 <Icon name={item.status === 'failed' ? 'refresh-cw' : 'list-plus'} />
                 {item.status === 'failed' ? 'Tentar novamente' : 'Gerar documento'}
               </Button>
-            ) : item.latestVersion ? (
-              <>
-                {item.status === 'in_review' && !isReadOnly && (
-                  <Button asChild variant='brand' size='sm'>
-                    <Anchor
-                      route='consultationDocumentVersion'
-                      params={item.latestVersionRouteParams}
-                    >
-                      <Icon name='pencil' />
-                      Revisar
-                    </Anchor>
-                  </Button>
-                )}
-                {(item.status === 'rejected' || item.status === 'approved') && (
-                  <Badge
-                    asChild
-                    variant='secondary'
-                    className='bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent dark:bg-slate-500/20 dark:text-slate-300 shadow-sm whitespace-nowrap cursor-pointer font-medium'
-                  >
-                    <Anchor
-                      route='consultationDocumentVersion'
-                      params={item.latestVersionRouteParams}
-                      className='flex items-center gap-1.5'
-                    >
-                      <Icon name='eye' className='size-3' />
-                      Visualizar
-                    </Anchor>
-                  </Badge>
-                )}
-              </>
+            ) : canReview ? (
+              <Button asChild variant='brand' size='sm'>
+                <Anchor
+                  route='consultationDocumentVersion'
+                  params={item.latestVersionRouteParams}
+                >
+                  <Icon name='pencil' />
+                  Revisar
+                </Anchor>
+              </Button>
             ) : null}
+
+            {item.latestVersion && !canReview && (
+              <Button asChild variant='secondary' size='sm'>
+                <Anchor
+                  route='consultationDocumentVersion'
+                  params={item.latestVersionRouteParams}
+                >
+                  <Icon name='eye' />
+                  Visualizar
+                </Anchor>
+              </Button>
+            )}
 
             {isReadOnly ? (
               <DocumentAccessBadge classification={item.document.classificacaoAcesso} />
