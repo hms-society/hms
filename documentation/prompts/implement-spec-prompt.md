@@ -539,9 +539,16 @@ ambiguous.
 per affected Core, Server, or Web workspace for the delivery, after focused
 checks pass and the implementation is integrated. Do not reset this allowance
 on a resume, correction, conclusion retry, or Spec amendment within that delivery.
-Before executing, inspect Evaluation for an existing attempt. Record the command,
-workspace, outcome, report path, and measured implementation in Evaluation;
-a failed or interrupted attempt also counts as the single run.
+Before executing, inspect Evaluation for an existing usable report and reuse it
+when present. Record every attempt's command, workspace, outcome, report path,
+and measured implementation in Evaluation. An attempt satisfies the one-run
+allowance only when it produced a readable coverage report for that workspace;
+a failed or interrupted attempt without a usable report does not consume it.
+After such an attempt, retry only after recording and correcting its cause or
+recovering the failed environment. If an attempt produced a usable report but
+the command failed for another reason, keep the report and resolve that failure
+with focused checks rather than rerunning coverage. A valid report remains the
+single local coverage run even if its measured implementation later changes.
 
 Builders and reviewers use focused tests without coverage. After later changes
 or failures, rerun only affected tests without coverage and update behavioral
