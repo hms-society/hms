@@ -50,7 +50,7 @@ scope:
   - apps/web/src/routes/modelos-de-documentos
   - apps/web/src/routeTree.gen.ts
   - apps/web/src/ui/document-production
-  - apps/web/tests/routes/document-production
+  - apps/web/tests/document-production
 last_updated_at: 2026-08-09
 ---
 
@@ -1112,7 +1112,7 @@ homônimos kebab-case, cada um com `index.tsx`; testes ficam no `tests` da pági
 7. `pnpm --filter web test`, incluindo serviço, hooks reais, formulários, editor,
    variáveis, estados, dirty guard e navegação da listagem;
 8. `pnpm --filter web test:integration` nos arquivos
-   `tests/routes/document-production/modelos-de-documentos.novo.test.tsx` e
+   `tests/document-production/modelos-de-documentos.novo.test.tsx` e
    `modelos-de-documentos.$documentSpecificationId.test.tsx`, com transporte
    mockado stateful, identificado como integração de rota;
 9. ciclo integrado `pnpm lint`, `pnpm check-types` e `pnpm test`.

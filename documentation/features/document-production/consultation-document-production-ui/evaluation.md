@@ -98,7 +98,7 @@ teste, sem mudança comportamental.
 
 ## F11-T1 — verificado
 
-O teste focado `consultation-document-review-page.test.tsx` passou 4/4; o Biome
+O teste focado `consultation-document-review-page.test.ts` passou 4/4; o Biome
 `check:code` passou. O Browser Use/CDP validou a página autenticada e o dialog
 `RGqCe`: largura computada de 440 px, textarea com 80 px, descrição contextual,
 asterisco no label, hint de histórico e **Rejeitar versão** desabilitado enquanto o

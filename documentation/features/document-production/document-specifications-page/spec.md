@@ -41,7 +41,7 @@ scope:
   - apps/web/src/ui/document-production
   - apps/web/src/ui/shared/contexts/rest-context
   - apps/web/src/ui/shared/widgets/layouts/app-layout/tests
-  - apps/web/tests/routes/document-production
+  - apps/web/tests/document-production
 last_updated_at: 2026-08-05
 ---
 
@@ -599,7 +599,7 @@ O parâmetro real recebe `@Query()`. O controller expõe somente
    filtros combinados, ordenação e paginação;
 6. `pnpm --filter web generate-routes`, `check:code` e `check:types`;
 7. `pnpm --filter web test`, incluindo serviço, hook, página, URL e estados;
-8. integração de rota em `tests/routes/document-production`;
+8. integração de rota em `tests/document-production`;
 9. ciclo curto final `pnpm lint`, `pnpm check-types` e `pnpm test`.
 
 `pnpm build` é a validação final do CI, não um sensor local do ciclo SDD.

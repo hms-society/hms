@@ -172,7 +172,7 @@ fluxo oficial do Browser Use, preservando o caminho retornado.
   wrapper; usar tipos públicos do widget em mocks.
 - Cobrir loading, sucesso, vazio, erro/retry, pending, sucesso de mutation, cada status,
   dialogs, dirty/cancel, proteção e redirect; não aceitar somente snapshots ou spies.
-- Testes de rota ficam em apps/web/tests/routes/document-production, um arquivo por rota,
+- Testes de rota ficam em apps/web/tests/document-production, um arquivo por rota,
   com page.route stateful apenas para o transporte mockado; afirmar URL, request,
   response e resultado visível.
 - A passagem real não usa mocks de transporte e deve provar Auth, bootstrap Nest, REST,
@@ -189,8 +189,8 @@ A implementação deve executar, nesta ordem, os checks adequados ao escopo:
     pnpm --filter web check:code
     pnpm --filter web check:types
     pnpm --filter web test
-    pnpm --filter web test:integration tests/routes/document-production/consultation-documents.index.test.tsx
-    pnpm --filter web test:integration tests/routes/document-production/consultation-document-version.test.tsx
+    pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts
+    pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.ts
     pnpm --filter web build
 
 O adapter/contexto e os hooks/editor devem ter sensores focados antes do gate
@@ -430,12 +430,12 @@ Dependência: F3-T3 e F4-T3. Estado: accepted.
 #### F5-T1 — verified
 
 Dependências: F3-T3, F4-T3
-Paths: `apps/web/tests/fixtures/document-production-fixture.ts`; dois testes em `apps/web/tests/routes/document-production/`
+Paths: `apps/web/tests/fixtures/document-production-fixture.ts`; dois testes em `apps/web/tests/document-production/`
 Resultado observável: fixture compartilhada, stateful e autenticada por transporte mockado cobre GET/POST/PATCH, mutações refletidas no GET seguinte, redirect, 403/404/409, loading/retry, URLs finais, bodies, estados visíveis, viewport estreito, teclado, tema e ausência de overflow horizontal.
 RF / CA: CA-01 a CA-12; todos RF
 Parallelizable: não. Precisa de ambas as rotas e de todos os widgets reais.
 
-Evidência: `pnpm --filter web test:integration tests/routes/document-production/consultation-documents.index.test.tsx tests/routes/document-production/consultation-document-version.test.tsx` passou com 4/4. O fixture autentica pela tela de login usando transporte Supabase mockado para o cenário isolado, cobre `complete-sign-in`, mantém estadoful GET/POST/PATCH, fluxo de review, conflito 409 sem falso sucesso, geração em lote, viewport estreito e teclado. O aviso do gerador sobre `src/routes/modelos-de-documentos/index.test.ts` é preexistente.
+Evidência: `pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts tests/document-production/consultation-document-version-page.test.ts` passou com 4/4. O fixture autentica pela tela de login usando transporte Supabase mockado para o cenário isolado, cobre `complete-sign-in`, mantém estadoful GET/POST/PATCH, fluxo de review, conflito 409 sem falso sucesso, geração em lote, viewport estreito e teclado. O aviso do gerador sobre `src/routes/modelos-de-documentos/index.test.ts` é preexistente.
 
 #### F5-T2 — verified with preexisting blockers
 
