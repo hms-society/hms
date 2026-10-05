@@ -14,9 +14,11 @@ const MAX_EVIDENCE_TEXT_CHARS = 240
 const LABEL_VALUE_PATTERN =
   /([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9 /_.-]{1,40})\s*:\s*([^:]+?)(?=\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9 /_.-]{1,40}\s*:|$)/g
 
-type DocumentSuggestion = z.output<typeof suggestionSchema>
-type ExtractedField = DocumentSuggestion['extractedFields'][number]
-type Evidence = DocumentSuggestion['evidence'][number]
+export type DocumentSuggestion = z.output<typeof suggestionSchema>
+export type ExtractedField = DocumentSuggestion['extractedFields'][number]
+export type Evidence = DocumentSuggestion['evidence'][number]
+export type ClassifyDocumentFileInput = z.infer<typeof inputSchema>
+export type ClassifyDocumentFileOutput = z.infer<typeof outputSchema>
 
 @Injectable()
 export class ClassifyDocumentFileTool {

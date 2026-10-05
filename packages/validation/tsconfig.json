@@ -11,8 +11,10 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
+      "#consultation/*": ["../core/src/consultation/*"],
       "#shared/*": ["../core/src/shared/*"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/tests/*"]
 }

@@ -16,7 +16,9 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"],
+      "#communication/*": ["../../packages/core/src/communication/*"],
       "#consultation/*": ["../../packages/core/src/consultation/*"],
+      "#identity/*": ["../../packages/core/src/identity/*"],
       "#shared/*": ["../../packages/core/src/shared/*"]
     },
     "incremental": true,

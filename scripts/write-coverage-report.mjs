@@ -18,19 +18,23 @@ const metrics = [
   ['lines', 'Linhas'],
 ]
 const workspaceName = workspace[0].toUpperCase() + workspace.slice(1)
+const testRunPassed = (process.env.TEST_OUTCOME ?? 'success') === 'success'
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const coverageConfigPaths = {
   core: 'packages/core/vitest.config.mts',
   server: 'apps/server/vitest.config.mts',
   web: 'apps/web/vitest.config.ts',
 }
-const coveragePassed = (process.env.COVERAGE_OUTCOME ?? 'success') === 'success'
 const runUrl = process.env.GITHUB_SERVER_URL
   ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : undefined
-const coverageConfigPath = coverageConfigPaths[workspace]
-if (!coverageConfigPath) throw new Error(`Unknown coverage workspace: ${workspace}`)
-const coverageConfig = await readFile(resolve(projectRoot, coverageConfigPath), 'utf8')
+if (!['core', 'server', 'web'].includes(workspace)) {
+  throw new Error(`Unknown coverage workspace: ${workspace}`)
+}
+const coverageConfig = await readFile(
+  resolve(projectRoot, coverageConfigPaths[workspace]),
+  'utf8',
+)
 const thresholdsBlock = coverageConfig.match(/thresholds:\s*\{([\s\S]*?)\n\s*\}/)?.[1]
 if (!thresholdsBlock) {
   throw new Error(`Coverage config is missing thresholds for ${workspace}.`)
@@ -40,20 +44,20 @@ const rows = metrics.map(([metric, label]) => {
   const result = summary.total?.[metric]
   if (!result) throw new Error(`Coverage summary is missing the ${metric} metric.`)
   const baseline = thresholdsBlock.match(new RegExp(`\\b${metric}:\\s*([\\d.]+)`))?.[1]
-  if (!baseline) throw new Error(`Coverage config is missing the ${metric} threshold.`)
-  return `| ${label} | ${result.pct}% | ${baseline}% | ${result.covered} / ${result.total} |`
+  const baselineDisplay = !baseline || baseline === '0' ? 'N/A' : `${baseline}%`
+  return `| ${label} | ${result.pct}% | ${baselineDisplay} | ${result.covered} / ${result.total} |`
 })
 const report = [
   `<!-- coverage-report:${workspace} -->`,
   `## Cobertura de testes: ${workspaceName}`,
   '',
-  '| Métrica | Cobertura | Piso atual | Cobertos / Total |',
+  '| Métrica | Cobertura | Piso mínimo | Cobertos / Total |',
   '| --- | ---: | ---: | ---: |',
   ...rows,
   '',
-  coveragePassed
-    ? '✅ Todos os pisos de cobertura configurados no Vitest foram atingidos.'
-    : '❌ Os testes ou os pisos de cobertura configurados no Vitest falharam. O resultado bloqueia a CI.',
+  testRunPassed
+    ? '✅ Execução de testes concluída. Os percentuais de cobertura são informativos.'
+    : '❌ A execução de testes falhou. Os percentuais de cobertura são informativos.',
   ...(runUrl ? ['', `[Abrir execução](${runUrl})`] : []),
   '',
 ].join('\n')

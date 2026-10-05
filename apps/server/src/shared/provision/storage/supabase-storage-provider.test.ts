@@ -35,8 +35,8 @@ describe('SupabaseStorageProvider', () => {
       provider.upload('seed/file.pdf', new Uint8Array([1]), 'application/pdf'),
     ).resolves.toBe('seed/file.pdf')
 
-    expect(createBucket).toHaveBeenCalledWith('documents', { public: false })
-    expect(from).toHaveBeenCalledWith('documents')
+    expect(createBucket).toHaveBeenCalledWith('hms-bucket', { public: false })
+    expect(from).toHaveBeenCalledWith('hms-bucket')
     expect(upload).toHaveBeenCalledWith('seed/file.pdf', new Uint8Array([1]), {
       contentType: 'application/pdf',
       upsert: true,
@@ -62,7 +62,7 @@ function createEnvProvider(): EnvProvider {
       const env = {
         SUPABASE_URL: 'http://localhost:8000',
         SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
-        SUPABASE_STORAGE_BUCKET: 'documents',
+        SUPABASE_STORAGE_BUCKET: 'hms-bucket',
       }
 
       return env[key as keyof typeof env]

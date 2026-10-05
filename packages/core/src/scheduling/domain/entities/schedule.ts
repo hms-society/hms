@@ -1,4 +1,4 @@
-import type { WeeklyAvailability } from '../structures'
+import type { WeeklyAvailability } from '../structures/weekly-availability'
 import type { Entity } from '#shared/domain/entities/entity'
 import type { BlockedPeriod } from './blocked-period'
 
