@@ -44,7 +44,9 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
             : document.generation?.status === 'failed' ||
                 document.generation?.status === 'cancelled'
               ? 'Falha na geração'
-              : document.versions[0]?.status === 'approved'
+              : document.versions[0]?.status === 'rejected'
+                ? 'Ajustes solicitados'
+                : document.versions[0]?.status === 'approved'
                 ? 'Aprovada'
                 : 'Em revisão técnica',
         versions: document.versions.map((version) => ({
@@ -126,26 +128,21 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
                   : undefined
               }
               onOpenReview={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceReview', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
-                setIsViewerOpen(true)
+                void navigateTo('lawyerCasePieceReview', {
+                  params: { caseId: caseId ?? '', documentId: piece.id },
+                })
               }}
               onOpenEditor={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceEditor', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
-                setWorkflow('editor')
+                void navigateTo('lawyerCasePieceEditor', {
+                  params: { caseId: caseId ?? '', documentId: piece.id },
+                  search:
+                    piece.status === 'Ajustes solicitados'
+                      ? { reviewState: 'adjustments_requested' }
+                      : undefined,
+                })
               }}
             />
           ))}
-          <NewCasePieceCard onOpen={() => setIsNewPieceOpen(true)} />
           <p className='flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground'>
             <Icon name='shield-check' className='mt-0.5 size-3.5 shrink-0 text-primary' />
             A IA gera e sugere minutas, mas nenhuma peça é protocolada ou entregue sem
@@ -153,6 +150,10 @@ export function CasePiecesTab({ dossierApproved, caseId }: CasePiecesTabProps) {
           </p>
         </>
       ) : null}
+      <NewCasePieceCard
+        disabled={!dossierApproved}
+        onOpen={() => setIsNewPieceOpen(true)}
+      />
       <NewPieceDialog
         open={isNewPieceOpen}
         caseId={caseId}

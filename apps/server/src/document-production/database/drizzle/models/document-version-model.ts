@@ -27,6 +27,7 @@ export const documentVersionModel = pgTable(
     versionNumber: integer('version_number').notNull(),
     source: text('source').notNull(),
     content: jsonb('content').$type<DocumentTemplateContent>().notNull(),
+    contentHash: text('content_hash'),
     pendingMarkers: jsonb('pending_markers')
       .$type<readonly DocumentPendingMarker[]>()
       .notNull(),

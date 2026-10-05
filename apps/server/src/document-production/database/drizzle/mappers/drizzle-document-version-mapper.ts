@@ -14,6 +14,7 @@ export class DrizzleDocumentVersionMapper {
       versionNumber: record.versionNumber,
       source: record.source as DocumentVersion['source'],
       content: record.content,
+      contentHash: record.contentHash ?? undefined,
       pendingMarkers: [...record.pendingMarkers],
       createdByCollaboratorId: record.createdByCollaboratorId,
       createdAt: record.createdAt,

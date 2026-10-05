@@ -97,6 +97,9 @@ export function PieceWorkflowRoutePage({
     handleSaveNewVersion,
   } = usePieceWorkflowRoutePage({ mode, caseId, documentId })
 
+  const adjustmentComment =
+    version?.status === 'rejected' ? version.rejectionReason : undefined
+
   if (isLoadingDocument) {
     return (
       <div className='flex min-h-screen items-center justify-center text-muted-foreground'>
@@ -256,10 +259,17 @@ export function PieceWorkflowRoutePage({
             </section>
             <section className='border-t pt-4'>
               <h2 className='font-serif font-semibold'>Revisões dos membros</h2>
-              <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
-                Comentários e histórico de revisão serão exibidos aqui quando disponíveis
-                para esta versão.
-              </p>
+              {adjustmentComment ? (
+                <div className='mt-2 rounded-md border border-attention bg-attention/20 p-3 text-xs'>
+                  <p className='font-semibold'>Ajustes solicitados</p>
+                  <p className='mt-1 whitespace-pre-wrap'>{adjustmentComment}</p>
+                </div>
+              ) : (
+                <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
+                  Comentários e histórico de revisão serão exibidos aqui quando disponíveis
+                  para esta versão.
+                </p>
+              )}
             </section>
             <div className='mt-auto space-y-2 border-t pt-4'>
               {isAuthor ? (
@@ -354,6 +364,9 @@ export function PieceWorkflowRoutePage({
               <div className='mt-3 rounded-md border border-attention bg-attention/20 p-3 text-sm'>
                 Ajustes solicitados pela revisão técnica. Faça as correções antes de
                 resubmeter a peça.
+                {adjustmentComment ? (
+                  <p className='mt-2 whitespace-pre-wrap text-xs'>{adjustmentComment}</p>
+                ) : null}
               </div>
             ) : null}
             <h2 className='font-serif font-semibold'>

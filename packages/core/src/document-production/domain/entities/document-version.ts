@@ -15,6 +15,8 @@ export type DocumentVersion = Entity & {
   versionNumber: number
   source: DocumentVersionSource
   content: DocumentTemplateContent
+  /** SHA-256 of the canonical serialized content, when persisted. */
+  contentHash?: string
   pendingMarkers: DocumentPendingMarker[]
   createdByCollaboratorId: string
   createdAt: Date

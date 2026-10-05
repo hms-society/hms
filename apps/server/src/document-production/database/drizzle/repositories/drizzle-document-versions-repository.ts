@@ -5,6 +5,7 @@ import type {
 import type { DocumentVersionsRepository } from '@hms/core/document-production/interfaces'
 import { AppError } from '@hms/core/shared/domain/errors'
 import { and, asc, desc, eq, inArray } from 'drizzle-orm'
+import { createHash } from 'node:crypto'
 import { Injectable } from '@nestjs/common'
 
 import { DrizzleDocumentVersionMapper } from '@/document-production/database/drizzle/mappers'
@@ -25,9 +26,12 @@ export class DrizzleDocumentVersionsRepository
   }
 
   async add(version: DocumentVersionCreation) {
+    const contentHash = createHash('sha256')
+      .update(JSON.stringify(version.content))
+      .digest('hex')
     const [record] = await this.database
       .insert(documentVersionModel)
-      .values(version)
+      .values({ ...version, contentHash })
       .returning()
 
     if (!record) {
@@ -120,9 +124,12 @@ export class DrizzleDocumentVersionsRepository
     content: DocumentVersion['content'],
     pendingMarkers: DocumentVersion['pendingMarkers'],
   ) {
+    const contentHash = createHash('sha256')
+      .update(JSON.stringify(content))
+      .digest('hex')
     const [record] = await this.database
       .update(documentVersionModel)
-      .set({ content, pendingMarkers })
+      .set({ content, contentHash, pendingMarkers })
       .where(
         and(
           eq(documentVersionModel.id, documentVersionId),
