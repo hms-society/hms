@@ -5,8 +5,8 @@ import { CollaboratorProfile } from '@hms/core/identity/domain/structures'
 
 import { ROUTES } from '@/constants/routes'
 import { SIDEBAR_ITEMS } from '@/constants/sidebar-items'
+import { useSignOutAction } from '@/ui/shared/hooks/use-sign-out-action'
 import { AppLayout } from '../index'
-import { useSignOutAction } from '../sidebar/use-sign-out-action'
 import { useAppLayout } from '../use-app-layout'
 import type { AnchorProps } from '../../../components/anchor'
 
