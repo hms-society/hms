@@ -118,7 +118,9 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     })
   }
 
-  async run(input: DocumentGenerationWorkflowInput): Promise<DocumentGenerationWorkflowResult> {
+  async run(
+    input: DocumentGenerationWorkflowInput,
+  ): Promise<DocumentGenerationWorkflowResult> {
     const run = await this.mastra.getWorkflow('generate-document-workflow').createRun()
     const result = await run.start({
       inputData: input,

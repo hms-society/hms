@@ -90,10 +90,7 @@ describe('CaseDocumentResponseDto', () => {
   it('preserves pending variables for manual versions in list and detail payloads', () => {
     const version = DocumentVersionFaker.fake({
       source: 'manual',
-      pendingMarkers: [
-        { marker: '{cliente_nome}' },
-        { marker: '{numero_beneficio}' },
-      ],
+      pendingMarkers: [{ marker: '{cliente_nome}' }, { marker: '{numero_beneficio}' }],
     })
 
     const response = CaseDocumentResponseDto.fromDomain({
@@ -109,7 +106,11 @@ describe('CaseDocumentResponseDto', () => {
       id: version.id,
       source: 'manual',
       pendingVariables: [
-        { marker: '{cliente_nome}', technicalName: 'cliente_nome', label: 'cliente nome' },
+        {
+          marker: '{cliente_nome}',
+          technicalName: 'cliente_nome',
+          label: 'cliente nome',
+        },
         {
           marker: '{numero_beneficio}',
           technicalName: 'numero_beneficio',
