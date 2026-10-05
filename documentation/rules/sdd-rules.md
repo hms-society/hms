@@ -247,16 +247,19 @@ to CI. A separate local coverage refresh requires an explicit user request.
 ### Single Web integration owner
 
 Only `implement-spec` runs the full Web `test:integration` suite locally, once per delivery
-when applicable. Record the attempt and artifacts in Evaluation; failed or
-interrupted attempts count. Resumes, corrections, amendments, and publication
-retries reuse that record. Later fixes run focused Playwright CLI tests for the
-affected routes and scenarios. Local conclusion, commit, and publication must not
-repeat the full suite through `test:integration` or an equivalent unfiltered
-command. Missing evidence routes to `implement-spec`. Preserve historical full
-results and resolve failures with current focused evidence without relabeling a
-failed full run as green. A separate full integration refresh requires an explicit
-user request. CI independently runs the full integration suite on each applicable
-PR head. Required real-service browser and acceptance checks still apply.
+when applicable. Record every attempt, its outcome, and artifacts in Evaluation. An attempt
+uses the one-run allowance only when the suite completed and produced usable results and
+artifacts for the full scenario set. A failed or interrupted attempt without complete usable
+evidence does not consume the allowance; retry only after recording and correcting its cause
+or recovering the failed environment. A completed run with failing scenarios does consume the
+allowance: preserve its results as historical and resolve failures with current focused
+Playwright CLI tests for affected routes and scenarios, without relabeling the full run as
+green. Resumes, corrections, amendments, and publication retries reuse valid completed-suite
+evidence. Local conclusion, commit, and publication must not repeat a completed full suite
+through `test:integration` or an equivalent unfiltered command. Missing complete evidence
+routes to `implement-spec`. A separate full integration refresh after a valid completed run
+requires an explicit user request. CI independently runs the full integration suite on each
+applicable PR head. Required real-service browser and acceptance checks still apply.
 
 Run the exact Core, Validation, Server, Web, database, architecture, build, integration, and
 browser sensors required by the Spec and [`../tooling.md`](../tooling.md). Build is part of the

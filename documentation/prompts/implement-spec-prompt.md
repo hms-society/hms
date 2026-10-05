@@ -564,19 +564,23 @@ each current PR head. A separate local coverage refresh requires an explicit use
 
 Only `implement-spec` runs the complete Web `test:integration` suite locally in SDD,
 once per delivery when Web integration is applicable, after focused browser
-checks pass. Inspect Evaluation before execution and record the command,
-outcome, measured implementation, and Playwright artifacts. Failed or interrupted
-attempts count; resumes, corrections, amendments, and publication retries do not
-reset the allowance. Later fixes use focused Playwright CLI tests for affected
-routes and scenarios, with real REST/Auth services where required. Preserve the
-full-suite result as historical when its candidate changes and resolve failures
-with current focused evidence. Do not claim a focused rerun is a green full run.
-Local conclusion, commit, and publication reuse the recorded integration evidence
-and must not rerun the full suite, including through an equivalent unfiltered
-Playwright command. A separate full integration refresh requires an explicit user
-request. CI independently runs the full Web integration suite on each applicable
-PR head. This policy does not remove required authenticated-browser, responsive,
-keyboard, console/network, or acceptance-scenario validation.
+checks pass. Inspect Evaluation before execution and record every attempt's command,
+outcome, measured implementation, and Playwright artifacts. An attempt uses the
+one-run allowance only when the suite completed and produced usable results and
+artifacts for the full scenario set. A failed or interrupted attempt without complete
+usable evidence does not consume the allowance; retry only after recording and
+correcting its cause or recovering the failed environment. A completed run with
+failing scenarios does consume the allowance. Preserve its results as historical
+when its candidate changes and resolve failures with current focused Playwright CLI
+tests for affected routes and scenarios, with real REST/Auth services where required.
+Do not claim a focused rerun is a green full run. Local conclusion, commit, and
+publication reuse valid completed-suite evidence and must not rerun the full suite,
+including through an equivalent unfiltered Playwright command. Missing complete
+evidence routes to `implement-spec`. A separate full integration refresh after a
+valid completed run requires an explicit user request. CI independently runs the
+full Web integration suite on each applicable PR head. This policy does not remove
+required authenticated-browser, responsive, keyboard, console/network, or
+acceptance-scenario validation.
 
 ## Integrated validation and readiness
 
