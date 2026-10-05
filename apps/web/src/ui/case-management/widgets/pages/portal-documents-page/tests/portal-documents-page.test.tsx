@@ -51,6 +51,16 @@ const validatedItem: CaseChecklistItem = {
   documentFileName: 'renda.pdf',
 }
 
+const portalCase = {
+  caseId: 'case-1',
+  publicCode: 'CASE-001',
+  title: 'Caso de teste',
+  clientName: 'Cliente de teste',
+  canUpload: true,
+  canViewCaseStatus: true,
+  canViewIntakeStatus: false,
+}
+
 function renderPortalDocumentsPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -80,6 +90,7 @@ describe('PortalDocumentsPage', () => {
     })
     usePortalDocumentsPageMock.mockReturnValue({
       checklist: [pendingItem, inAnalysisItem, validatedItem],
+      portalCase,
       pendingItems: [pendingItem],
       inAnalysisItems: [inAnalysisItem],
       validatedItems: [validatedItem],
@@ -109,6 +120,7 @@ describe('PortalDocumentsPage', () => {
   it('shows checklist loading placeholders', () => {
     usePortalDocumentsPageMock.mockReturnValue({
       checklist: [],
+      portalCase: undefined,
       pendingItems: [],
       inAnalysisItems: [],
       validatedItems: [],
@@ -125,6 +137,7 @@ describe('PortalDocumentsPage', () => {
   it('shows empty states for pending and previously uploaded documents', () => {
     usePortalDocumentsPageMock.mockReturnValue({
       checklist: [],
+      portalCase,
       pendingItems: [],
       inAnalysisItems: [],
       validatedItems: [],
@@ -200,6 +213,7 @@ describe('PortalDocumentsPage', () => {
     const refetch = vi.fn()
     usePortalDocumentsPageMock.mockReturnValue({
       checklist: [],
+      portalCase: undefined,
       pendingItems: [],
       inAnalysisItems: [],
       validatedItems: [],
