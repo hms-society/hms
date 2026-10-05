@@ -9,7 +9,10 @@ import {
   UsePipes,
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
-import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import type {
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '@hms/core/case-management/interfaces'
 import { ReviewCaseChecklistGateUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { reviewCaseChecklistGateSchema } from '@hms/validation/case-management'
@@ -34,8 +37,13 @@ export class ReviewCaseChecklistGateController {
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
     legalCasesRepository: LegalCasesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
+    checklistItemsRepository: CaseChecklistItemsRepository,
   ) {
-    this.useCase = new ReviewCaseChecklistGateUseCase(legalCasesRepository)
+    this.useCase = new ReviewCaseChecklistGateUseCase(
+      legalCasesRepository,
+      checklistItemsRepository,
+    )
   }
 
   @Patch(':caseId/checklist-gate')

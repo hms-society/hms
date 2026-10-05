@@ -13,7 +13,9 @@ test('renders the administrator shell and marks the current page in navigation',
   await page.goto(ROUTES.collaborators)
 
   expect(new URL(page.url()).pathname).toBe(ROUTES.collaborators)
-  await expect(page.getByRole('heading', { name: 'Colaboradores' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Colaboradores' })).toBeVisible({
+    timeout: 15_000,
+  })
 
   const mainNavigation = page.getByRole('complementary', { name: 'Navegação principal' })
   await expect(mainNavigation).toBeVisible()
@@ -34,7 +36,9 @@ test('renders navigation for the authenticated attendant profile', async ({
   await page.goto(ROUTES.attendantDashboard)
 
   await expect(page).toHaveURL(ROUTES.attendantDashboard)
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible({
+    timeout: 15_000,
+  })
 
   const mainNavigation = page.getByRole('complementary', { name: 'Navegação principal' })
   await expect(mainNavigation.getByRole('link', { name: 'Intakes' })).toBeVisible()

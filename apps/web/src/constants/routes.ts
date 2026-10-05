@@ -9,6 +9,7 @@ export const ROUTES = {
   resetPassword: '/redefinir-senha',
   invite: '/convite',
   attendant: '/atendimento',
+  attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyerSchedule: '/agenda',
   lawyer: '/advogado',
@@ -22,6 +23,8 @@ export const ROUTES = {
   clients: '/clientes',
   clientDetails: '/clientes/$clienteId',
   collaborators: '/colaboradores',
+  collaboratorDetails: '/colaboradores/$colaboradorId',
+  thirdParties: '/terceiros',
   documentBatch: '/lotes-documentos',
   documentViewer: '/lotes-documentos/$fileId',
   documentInbox: '/caixa-de-documentos',
@@ -54,6 +57,14 @@ export function buildConsultationDocumentsPath(consultationId: string): string {
 
 export function buildConsultationPath(consultationId: string): string {
   return ROUTES.consultation.replace('$consultationId', consultationId)
+}
+
+export function buildClientDetailsPath(clienteId: string): string {
+  return ROUTES.clientDetails.replace('$clienteId', clienteId)
+}
+
+export function buildCollaboratorDetailsPath(colaboradorId: string): string {
+  return ROUTES.collaboratorDetails.replace('$colaboradorId', colaboradorId)
 }
 
 export function buildConsultationDocumentVersionPath(params: {

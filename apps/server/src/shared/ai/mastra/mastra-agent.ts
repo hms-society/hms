@@ -16,7 +16,7 @@ type Config<AgentId extends string> = {
     { readonly model: string; readonly provider: string },
     ...{ readonly model: string; readonly provider: string }[],
   ]
-  readonly localModelEnvKey?: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL'
+  readonly vision?: boolean
 }
 
 export abstract class MastraAgent<
@@ -27,7 +27,7 @@ export abstract class MastraAgent<
       model,
       developmentModels,
       productionModels,
-      localModelEnvKey,
+      vision,
       ...agentConfig
     } = config
 
@@ -36,69 +36,41 @@ export abstract class MastraAgent<
       model: MastraAgent.resolveModel(
         model,
         envProvider,
-        localModelEnvKey,
+        vision,
         developmentModels,
         productionModels,
         config.id,
       ),
-      ...(!developmentModels &&
-        MastraAgent.usesOpenAiWithLowReasoningEffort(envProvider) && {
-          defaultGenerateOptionsLegacy: {
-            providerOptions: { openai: { reasoningEffort: 'low' } },
-          },
-        }),
     })
-  }
-
-  private static usesOpenAiWithLowReasoningEffort(envProvider: EnvProvider): boolean {
-    return (
-      envProvider.get('HMS_SERVER_APP_MODE') === 'dev' &&
-      envProvider.get('AI_PROVIDER') === 'openai'
-    )
   }
 
   private static resolveModel(
     openRouterModel: string,
     envProvider: EnvProvider,
-    localModelEnvKey: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL' = 'OLLAMA_AI_MODEL',
+    vision = false,
     developmentModels?: readonly [string, ...string[]],
     productionModels?: Config<string>['productionModels'],
     agentId = 'unknown',
   ): OpenAICompatibleConfig | ModelWithRetries[] {
     const isDevelopment = envProvider.get('HMS_SERVER_APP_MODE') === 'dev'
+    const aiProvider = isDevelopment ? envProvider.get('AI_PROVIDER') : 'openrouter'
 
-    if (isDevelopment && !developmentModels) {
-      const aiProvider = envProvider.get('AI_PROVIDER')
-      const usesVisionModel = localModelEnvKey === 'OLLAMA_VISION_AI_MODEL'
+    if (isDevelopment && aiProvider === 'gemini') {
+      return MastraAgent.resolveExternalModel(
+        'gemini',
+        vision
+          ? envProvider.get('GEMINI_VISION_AI_MODEL')
+          : envProvider.get('GEMINI_AI_MODEL'),
+        envProvider.get('GEMINI_API_KEY'),
+        'https://generativelanguage.googleapis.com/v1beta/openai/',
+      )
+    }
 
-      if (aiProvider === 'openai') {
-        return MastraAgent.resolveExternalModel(
-          'openai',
-          usesVisionModel
-            ? envProvider.get('OPENAI_VISION_AI_MODEL')
-            : envProvider.get('OPENAI_AI_MODEL'),
-          envProvider.get('OPENAI_API_KEY'),
-          'https://api.openai.com/v1',
-        )
-      }
-
-      if (aiProvider === 'gemini') {
-        return MastraAgent.resolveExternalModel(
-          'gemini',
-          usesVisionModel
-            ? envProvider.get('GEMINI_VISION_AI_MODEL')
-            : envProvider.get('GEMINI_AI_MODEL'),
-          envProvider.get('GEMINI_API_KEY'),
-          'https://generativelanguage.googleapis.com/v1beta/openai/',
-        )
-      }
-
-      return {
-        providerId: 'ollama',
-        modelId: envProvider.get(localModelEnvKey),
-        url: 'http://localhost:11434/v1',
-        apiKey: 'ollama',
-      }
+    if (aiProvider !== 'openrouter') {
+      throw new AppError(
+        'O provedor de IA configurado não é suportado.',
+        'Erro de Configuração de IA',
+      )
     }
 
     const apiKey = envProvider.get('OPENROUTER_API_KEY')
@@ -156,7 +128,7 @@ export abstract class MastraAgent<
   }
 
   private static resolveExternalModel(
-    providerId: 'openai' | 'gemini',
+    providerId: 'gemini',
     modelId: string | undefined,
     apiKey: string | undefined,
     url: string,
