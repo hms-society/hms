@@ -4,6 +4,7 @@ import type {
   ClientConsent,
   ClientDetails,
   CollaboratorSummary,
+  ThirdParty,
 } from '../domain/entities'
 import type {
   CollaboratorListQuery,
@@ -14,8 +15,22 @@ import type { CollaboratorUpdate } from '../domain/entities'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
 import type { LookupClientRequest } from '../use-cases/lookup-client-use-case'
 import type { RegisterClientRequest } from '../use-cases/register-client-use-case'
+import type { RegisterThirdPartyRequest } from '../use-cases/register-third-party-use-case'
+
+export type ThirdPartyRegistration = Omit<
+  RegisterThirdPartyRequest,
+  'actorId' | 'actorProfile'
+>
 
 export interface IdentityService {
+  listThirdParties(): Promise<RestResponse<readonly ThirdParty[]>>
+  registerThirdParty(request: ThirdPartyRegistration): Promise<RestResponse<ThirdParty>>
+  updateThirdParty(
+    thirdPartyId: string,
+    changes: Partial<ThirdPartyRegistration>,
+  ): Promise<RestResponse<ThirdParty>>
+  deactivateThirdParty(thirdPartyId: string): Promise<RestResponse<ThirdParty>>
+  reactivateThirdParty(thirdPartyId: string): Promise<RestResponse<ThirdParty>>
   getClient(clientId: string): Promise<RestResponse<ClientDetails>>
   lookupClient(request: LookupClientRequest): Promise<RestResponse<ClientDetails>>
   registerClient(request: RegisterClientRequest): Promise<RestResponse<ClientDetails>>

@@ -42,12 +42,12 @@ export class RegisterWabaAccountController {
   @UsePipes(ZodValidationPipe)
   async handle(@Body() body: RegisterWabaAccountDto, @Req() req: any) {
     const user = await this.usersRepository.findById(req.user.id)
-    if (!user || user.status !== 'active') {
+    if (user?.status !== 'active') {
       throw new ForbiddenException('User is inactive or unauthorized.')
     }
 
     const collaborator = await this.collaboratorsRepository.findByUserId(user.id)
-    if (!collaborator || collaborator.profile !== 'admin') {
+    if (collaborator?.profile !== 'admin') {
       throw new ForbiddenException('Apenas Administradores podem registrar números WABA.')
     }
 
