@@ -17,7 +17,7 @@ export default async function setup(project: TestProject) {
   const originalAuthUrl = process.env.SUPABASE_URL
   const originalAuthKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const database = await DatabaseFixture.register({ dedicated: true })
-  let auth: SupabaseAuthFixture
+  let auth: SupabaseAuthFixture | undefined
   try {
     auth = await SupabaseAuthFixture.register({ dedicated: true })
     project.provide('hmsTestServices', {
