@@ -28,7 +28,7 @@ export const Sidebar = ({
       className={`hidden lg:flex flex-col items-start bg-hms-sidebar-foreground border border-black/10 rounded-[2px] shadow-md transition-all duration-300 shrink-0 ${
         isCollapsed
           ? 'w-[72px] py-6 justify-between h-screen sticky top-0'
-          : 'w-[239px] h-screen sticky top-0'
+          : 'w-72 h-screen sticky top-0'
       }`}
     >
       <div className='w-full flex flex-col items-start px-4 pt-4 gap-6'>
@@ -100,7 +100,9 @@ export const Sidebar = ({
                     <span className='absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-destructive animate-pulse' />
                   )}
                 </div>
-                {!isCollapsed && <span className='text-sm flex-1'>{item.label}</span>}
+                {!isCollapsed && (
+                  <span className='text-sm flex-1 whitespace-nowrap'>{item.label}</span>
+                )}
                 {item.route === 'lawyerCommunication' && !isCollapsed && hasUnread && (
                   <span className='h-2 w-2 rounded-full bg-destructive shrink-0 mr-1 animate-pulse' />
                 )}

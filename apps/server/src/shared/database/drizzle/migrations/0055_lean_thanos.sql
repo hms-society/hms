@@ -1,0 +1,3 @@
+ALTER TABLE "case_portal_access_grants" ADD COLUMN "third_party_id" uuid;--> statement-breakpoint
+ALTER TABLE "case_portal_access_grants" ADD CONSTRAINT "case_portal_access_grants_third_party_id_third_parties_id_fk" FOREIGN KEY ("third_party_id") REFERENCES "public"."third_parties"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "case_portal_access_grants_third_party_idx" ON "case_portal_access_grants" USING btree ("third_party_id");

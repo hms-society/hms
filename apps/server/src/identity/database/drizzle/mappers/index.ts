@@ -2,4 +2,5 @@ export * from '@/identity/database/drizzle/mappers/drizzle-client-consent-mapper
 export * from '@/identity/database/drizzle/mappers/drizzle-client-mapper'
 export * from '@/identity/database/drizzle/mappers/drizzle-collaborator-mapper'
 export * from '@/identity/database/drizzle/mappers/drizzle-collaborator-registration-attempt-mapper'
+export * from '@/identity/database/drizzle/mappers/drizzle-third-party-mapper'
 export * from '@/identity/database/drizzle/mappers/drizzle-user-mapper'

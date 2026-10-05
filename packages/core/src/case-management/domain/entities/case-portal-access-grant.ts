@@ -3,8 +3,11 @@ import type { CasePortalAccessGrantStatus } from '../structures'
 
 export type CasePortalAccessGrant = Entity & {
   caseId: string
+  thirdPartyId?: string
   tokenHash: string
   canView: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
   canUpload: boolean
   status: CasePortalAccessGrantStatus
   expiresAt?: Date

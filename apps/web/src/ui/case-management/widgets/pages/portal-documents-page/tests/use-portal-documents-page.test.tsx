@@ -3,12 +3,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { usePortalDocumentsPage } from '../use-portal-documents-page'
 import { RestContext } from '@/ui/shared/contexts/rest-context'
+import { usePortalDocumentsPage } from '../use-portal-documents-page'
 
 describe('usePortalDocumentsPage', () => {
   let queryClient: QueryClient
   const mockCaseManagementService = {
+    getThirdPartyPortalCase: vi.fn(),
     listPortalPendingChecklist: vi.fn(),
   }
 
@@ -24,11 +25,7 @@ describe('usePortalDocumentsPage', () => {
   function wrapper({ children }: { children: ReactNode }) {
     return (
       <RestContext.Provider
-        value={
-          {
-            caseManagementService: mockCaseManagementService as any,
-          } as any
-        }
+        value={{ caseManagementService: mockCaseManagementService } as never}
       >
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </RestContext.Provider>
@@ -42,6 +39,10 @@ describe('usePortalDocumentsPage', () => {
       { id: '3', title: 'Doc 3', status: 'validated' },
     ]
 
+    mockCaseManagementService.getThirdPartyPortalCase.mockResolvedValue({
+      isFailure: false,
+      body: { canUpload: true },
+    })
     mockCaseManagementService.listPortalPendingChecklist.mockResolvedValue({
       isFailure: false,
       body: items,
@@ -62,10 +63,11 @@ describe('usePortalDocumentsPage', () => {
     expect(result.current.validatedItems[0].id).toBe('3')
   })
 
-  it('handles empty parameters gracefully without executing query', () => {
+  it('handles empty parameters gracefully without executing queries', () => {
     const { result } = renderHook(() => usePortalDocumentsPage('', ''), { wrapper })
 
     expect(result.current.checklist).toEqual([])
+    expect(mockCaseManagementService.getThirdPartyPortalCase).not.toHaveBeenCalled()
     expect(mockCaseManagementService.listPortalPendingChecklist).not.toHaveBeenCalled()
   })
 })

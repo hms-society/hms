@@ -1,14 +1,21 @@
 import { Agent as NativeMastraAgent } from '@mastra/core/agent'
+import type { ModelWithRetries } from '@mastra/core/agent'
 import type { OpenAICompatibleConfig } from '@mastra/core/llm'
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { ObservedMastraModel } from '@/shared/ai/mastra/observed-mastra-model'
 
 type Config<AgentId extends string> = {
   readonly id: AgentId
   readonly name: string
   readonly instructions: string
   readonly model: string
+  readonly developmentModels?: readonly [string, ...string[]]
+  readonly productionModels?: readonly [
+    { readonly model: string; readonly provider: string },
+    ...{ readonly model: string; readonly provider: string }[],
+  ]
   readonly localModelEnvKey?: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL'
 }
 
@@ -16,16 +23,30 @@ export abstract class MastraAgent<
   AgentId extends string,
 > extends NativeMastraAgent<AgentId> {
   constructor(config: Config<AgentId>, envProvider: EnvProvider) {
-    const { model, ...agentConfig } = config
+    const {
+      model,
+      developmentModels,
+      productionModels,
+      localModelEnvKey,
+      ...agentConfig
+    } = config
 
     super({
       ...agentConfig,
-      model: MastraAgent.resolveModel(model, envProvider, config.localModelEnvKey),
-      ...(MastraAgent.usesOpenAiWithLowReasoningEffort(envProvider) && {
-        defaultGenerateOptionsLegacy: {
-          providerOptions: { openai: { reasoningEffort: 'low' } },
-        },
-      }),
+      model: MastraAgent.resolveModel(
+        model,
+        envProvider,
+        localModelEnvKey,
+        developmentModels,
+        productionModels,
+        config.id,
+      ),
+      ...(!developmentModels &&
+        MastraAgent.usesOpenAiWithLowReasoningEffort(envProvider) && {
+          defaultGenerateOptionsLegacy: {
+            providerOptions: { openai: { reasoningEffort: 'low' } },
+          },
+        }),
     })
   }
 
@@ -40,8 +61,13 @@ export abstract class MastraAgent<
     openRouterModel: string,
     envProvider: EnvProvider,
     localModelEnvKey: 'OLLAMA_AI_MODEL' | 'OLLAMA_VISION_AI_MODEL' = 'OLLAMA_AI_MODEL',
-  ): OpenAICompatibleConfig {
-    if (envProvider.get('HMS_SERVER_APP_MODE') === 'dev') {
+    developmentModels?: readonly [string, ...string[]],
+    productionModels?: Config<string>['productionModels'],
+    agentId = 'unknown',
+  ): OpenAICompatibleConfig | ModelWithRetries[] {
+    const isDevelopment = envProvider.get('HMS_SERVER_APP_MODE') === 'dev'
+
+    if (isDevelopment && !developmentModels) {
       const aiProvider = envProvider.get('AI_PROVIDER')
       const usesVisionModel = localModelEnvKey === 'OLLAMA_VISION_AI_MODEL'
 
@@ -78,16 +104,55 @@ export abstract class MastraAgent<
     const apiKey = envProvider.get('OPENROUTER_API_KEY')
     if (!apiKey) {
       throw new AppError(
-        'A credencial do OpenRouter é obrigatória em staging e produção.',
+        'A credencial do OpenRouter é obrigatória para os agentes configurados com OpenRouter.',
         'Erro de Configuração de IA',
       )
     }
 
-    return {
+    if (isDevelopment && developmentModels) {
+      return developmentModels.map((modelId, routeIndex) => ({
+        model: envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+          ? new ObservedMastraModel(
+              { providerId: 'openrouter', modelId, apiKey },
+              agentId,
+              routeIndex,
+            )
+          : { providerId: 'openrouter', modelId, apiKey },
+        maxRetries: 0,
+      }))
+    }
+
+    if (envProvider.get('HMS_SERVER_APP_MODE') === 'prod' && productionModels) {
+      return productionModels.map(({ model: modelId, provider }, routeIndex) => ({
+        model: envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+          ? new ObservedMastraModel(
+              { providerId: 'openrouter', modelId, apiKey },
+              agentId,
+              routeIndex,
+              provider,
+            )
+          : { providerId: 'openrouter', modelId, apiKey },
+        maxRetries: 0,
+        providerOptions: {
+          openrouter: {
+            provider: {
+              only: [provider],
+              allow_fallbacks: false,
+              require_parameters: true,
+            },
+          },
+        },
+      }))
+    }
+
+    const model = {
       providerId: 'openrouter',
       modelId: openRouterModel,
       apiKey,
     }
+    return envProvider.get('OTEL_EXPORTER_OTLP_ENDPOINT')
+      ? [{ model: new ObservedMastraModel(model, agentId, 0) }]
+      : model
   }
 
   private static resolveExternalModel(
@@ -109,7 +174,6 @@ export abstract class MastraAgent<
         'Erro de Configuração de IA',
       )
     }
-
     return { providerId, modelId, url, apiKey }
   }
 }
