@@ -173,6 +173,7 @@ async function bootstrap() {
 
     const schedulingSeed = await app.get(SchedulingSeeder).run({
       intakeId: intakeSeed.documentProductionIntake.id,
+      pendingMarkersIntakeId: intakeSeed.pendingMarkersIntake.id,
       clientId: client.id,
       assignedLawyerId: lawyer.id,
     })
@@ -196,6 +197,32 @@ async function bootstrap() {
       legalTopics: legalCatalog.topics,
     })
 
+    if (!schedulingSeed.pendingMarkersAppointment) {
+      throw new AppError('The pending-markers Appointment could not be seeded')
+    }
+
+    const pendingMarkersConsultationSeed = await app.get(ConsultationSeeder).run({
+      hasPendingDocumentData: true,
+      intakeId: intakeSeed.pendingMarkersIntake.id,
+      appointmentId: schedulingSeed.pendingMarkersAppointment.id,
+      clientId: client.id,
+      assignedLawyerId: lawyer.id,
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+      dynamicForm: consultationDynamicForm,
+    })
+    if (!pendingMarkersConsultationSeed.consultation) {
+      throw new AppError('The pending-markers Consultation could not be seeded')
+    }
+
+    const pendingMarkersDocumentSeed = await app.get(DocumentProductionSeeder).run({
+      hasPendingDocumentData: true,
+      legalAreas: legalCatalog.areas,
+      legalTopics: legalCatalog.topics,
+      consultationId: pendingMarkersConsultationSeed.consultation.id,
+      requestedByCollaboratorId: lawyer.id,
+    })
+
     await app.get(CommunicationSeeder).run()
 
     LOGGER.log(
@@ -205,6 +232,17 @@ async function bootstrap() {
           ({ name }) => name,
         ),
         assignedLawyerEmail: actor.email,
+        pendingMarkersExample: {
+          consultationId: pendingMarkersConsultationSeed.consultation.id,
+          documentIds: pendingMarkersDocumentSeed.documents.map(({ id }) => id),
+          documentTemplateIds: pendingMarkersDocumentSeed.specifications.map(
+            ({ id }) => id,
+          ),
+          versionIds: pendingMarkersDocumentSeed.versions.map(({ id }) => id),
+          pendingMarkers: pendingMarkersDocumentSeed.versions.flatMap(
+            ({ pendingMarkers }) => pendingMarkers,
+          ),
+        },
       }),
     )
   } finally {

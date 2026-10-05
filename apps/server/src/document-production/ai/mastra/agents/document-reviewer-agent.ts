@@ -4,6 +4,8 @@ import {
   DocumentReviewFindingCategory,
 } from '@hms/core/document-production/domain/structures'
 
+import { DOCUMENT_DRAFTING_DEVELOPMENT_MODELS } from '@/document-production/constants/document-drafting-development-models'
+import { DOCUMENT_REVIEW_PRODUCTION_MODELS } from '@/document-production/constants/document-drafting-production-models'
 import { MastraAgent } from '@/shared/ai/mastra/mastra-agent'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
@@ -15,6 +17,8 @@ export class DocumentReviewerAgent extends MastraAgent<'document-reviewer'> {
         id: 'document-reviewer',
         name: 'Document Reviewer',
         model: 'deepseek/deepseek-v4-flash',
+        developmentModels: DOCUMENT_DRAFTING_DEVELOPMENT_MODELS,
+        productionModels: DOCUMENT_REVIEW_PRODUCTION_MODELS,
         instructions: `You review a generated legal document draft against its authoritative template and supplied source data.
 
 Review only these criteria:

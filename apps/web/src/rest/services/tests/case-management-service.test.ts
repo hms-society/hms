@@ -8,23 +8,45 @@ describe('CaseManagementService', () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)
 
-    await service.grantCasePortalAccess('case-1', { canUpload: true })
+    await service.grantCasePortalAccess('case-1', {
+      canUpload: true,
+      canViewCaseStatus: false,
+      canViewIntakeStatus: false,
+    })
 
     expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/portal-access', {
       canUpload: true,
+      canViewCaseStatus: false,
+      canViewIntakeStatus: false,
     })
   })
 
-  it('homologates a case dossier', async () => {
+  it('sends the selected third party when generating the unified portal link', async () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)
 
-    await service.homologateDossier('case-1')
+    await service.grantCasePortalAccess('case-1', {
+      canUpload: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
+      thirdPartyId: 'third-party-1',
+    })
 
-    expect(restClient.patch).toHaveBeenCalledWith(
-      '/cases/case-1/dossier-gate/homologation',
-      {},
-    )
+    expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/portal-access', {
+      canUpload: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
+      thirdPartyId: 'third-party-1',
+    })
+  })
+
+  it('lists active portal links for a case', async () => {
+    const restClient = makeRestClient()
+    const service = CaseManagementService(restClient)
+
+    await service.listCasePortalAccess('case-1')
+
+    expect(restClient.get).toHaveBeenCalledWith('/cases/case-1/portal-access')
   })
 })
 

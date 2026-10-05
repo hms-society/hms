@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
+import type { ConsultationDocumentListItem } from '@hms/core/consultation/domain/structures'
 
 export const DOCUMENT_PRODUCTION_BACKEND = 'http://hms-api.test'
 export const CONSULTATION_ID = 'consultation-1'
@@ -77,7 +78,9 @@ type ConsultationDocumentSummary = {
 type ConsultationDocument = {
   id: string
   title: string
+  documentSpecificationId?: string
   currentVersionId?: string
+  generationStatus?: ConsultationDocumentListItem['generationStatus']
   versions: ConsultationDocumentSummary[]
 }
 
@@ -142,6 +145,7 @@ function createConsultationState(): ConsultationDocumentProductionState {
       {
         id: CONSULTATION_DOCUMENT_ID,
         title: 'Contrato de prestação de serviços',
+        documentSpecificationId: 'spec-1',
         versions: [
           {
             id: version.id,

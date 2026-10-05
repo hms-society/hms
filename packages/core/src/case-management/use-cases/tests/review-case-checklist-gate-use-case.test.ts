@@ -313,6 +313,7 @@ function fakeLegalCaseSummary(
 
   return {
     id: legalCase.id,
+    intakeId: legalCase.intakeId,
     publicCode: legalCase.publicCode,
     title: legalCase.title,
     status: legalCase.status,

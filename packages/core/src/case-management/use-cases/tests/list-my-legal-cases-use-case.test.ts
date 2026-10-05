@@ -17,6 +17,7 @@ describe('List My Legal Cases Use Case', () => {
     repository.listByTeamMember.mockResolvedValue([
       {
         id: 'case-1',
+        intakeId: 'intake-1',
         publicCode: 'CASO-20260825-0001',
         title: 'Revisao contratual',
         status: 'documentation',

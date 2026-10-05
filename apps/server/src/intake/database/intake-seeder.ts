@@ -56,6 +56,11 @@ export class IntakeSeeder {
         'The client needs representation to review and negotiate a residential lease agreement.',
       status: IntakeStatus.ConsultationScheduled,
     })
+    const pendingMarkersIntake = this.createIntake({
+      ...documentProductionIntake,
+      demandNotes:
+        'Teste de pendências: procuração para negociar locação residencial. O cliente ainda não informou o nome e a OAB do procurador nem o endereço do imóvel.',
+    })
     const additionalIntakes = references.clientIds
       .filter((clientId) => clientId !== references.documentProductionClientId)
       .flatMap((clientId, index) => {
@@ -148,7 +153,11 @@ export class IntakeSeeder {
         ]
       })
 
-    const intakes = await this.seed([documentProductionIntake, ...additionalIntakes])
+    const intakes = await this.seed([
+      documentProductionIntake,
+      pendingMarkersIntake,
+      ...additionalIntakes,
+    ])
     const createdDocumentProductionIntake = intakes.find(
       ({ clientId, status }) =>
         clientId === references.documentProductionClientId &&
@@ -162,7 +171,18 @@ export class IntakeSeeder {
       )
     }
 
-    return { intakes, documentProductionIntake: createdDocumentProductionIntake }
+    const createdPendingMarkersIntake = intakes.find(
+      ({ demandNotes }) => demandNotes === pendingMarkersIntake.demandNotes,
+    )
+    if (!createdPendingMarkersIntake) {
+      throw new AppError('The pending-markers Intake could not be seeded.', 'Seed Error')
+    }
+
+    return {
+      intakes,
+      documentProductionIntake: createdDocumentProductionIntake,
+      pendingMarkersIntake: createdPendingMarkersIntake,
+    }
   }
 
   private createIntake(overrides: Partial<Intake>): IntakeCreation {

@@ -10,11 +10,13 @@ import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
 const inputSchema = z.object({
   documentGenerationId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
 })
 
 const outputSchema = z.object({
   documentGenerationId: z.string().uuid(),
+  instructions: z.string().trim().min(1).max(4000).optional(),
   source: documentGenerationSourceSchema,
   status: z.literal('running'),
 })
@@ -52,6 +54,7 @@ export class StartDocumentGenerationTool {
 
         return {
           documentGenerationId: generation.id,
+          instructions: input.instructions,
           source: input.source,
           status: 'running' as const,
         }

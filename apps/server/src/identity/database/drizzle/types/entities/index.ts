@@ -5,3 +5,4 @@ export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-l
 export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-legal-expertise-topic'
 export * from '@/identity/database/drizzle/types/entities/drizzle-collaborator-registration-attempt'
 export * from '@/identity/database/drizzle/types/entities/drizzle-user'
+export * from '@/identity/database/drizzle/types/entities/drizzle-third-party'

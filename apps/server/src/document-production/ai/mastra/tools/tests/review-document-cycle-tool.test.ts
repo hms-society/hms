@@ -1,99 +1,26 @@
-import {
-  DocumentReviewDecision,
-  DocumentReviewFindingCategory,
-} from '@hms/core/document-production/domain/structures'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { FindDocumentPendingMarkersUseCase } from '@hms/core/document-production/use-cases'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DocumentGenerationFaker } from '@hms/core/document-production/domain/entities/fakers'
+import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 
 import {
-  DocumentReviewerAgent,
   DocumentWriterAgent,
+  DocumentReviewerAgent,
 } from '@/document-production/ai/mastra/agents'
 import { ReviewDocumentCycleTool } from '@/document-production/ai/mastra/tools/review-document-cycle-tool'
-import { EnvProvider } from '@/shared/provision/env/env-provider'
+import { StartDocumentGenerationTool } from '@/document-production/ai/mastra/tools/start-document-generation-tool'
+import { LoadDocumentGenerationTool } from '@/document-production/ai/mastra/tools/load-document-generation-tool'
+import { documentReviewCycleOutputSchema } from '@/document-production/ai/mastra/schemas'
+import type { EnvProvider } from '@/shared/provision/env/env-provider'
 
-describe('ReviewDocumentCycleTool', () => {
-  let writerGenerate: ReturnType<typeof vi.fn>
-  let reviewerGenerate: ReturnType<typeof vi.fn>
-  let findPendingMarkers: ReturnType<typeof vi.fn>
-  let writerOutput: {
-    blocks: Array<{
-      kind: string
-      runs: Array<{ text: string; marks: string[] }>
-    }>
-  }
-
-  beforeEach(() => {
-    vi.spyOn(console, 'log').mockImplementation(() => undefined)
-    writerOutput = {
-      blocks: [
-        { kind: 'heading1', runs: [{ text: 'Requerimento', marks: [] }] },
-        {
-          kind: 'paragraph',
-          runs: [
-            { text: 'Requerente: ', marks: [] },
-            { text: '{nome_requerente}', marks: ['bold'] },
-          ],
-        },
-        { kind: 'bullet', runs: [{ text: 'Documento de identidade', marks: [] }] },
-        { kind: 'bullet', runs: [{ text: 'Comprovante de residência', marks: [] }] },
-      ],
-    }
-    writerGenerate = vi.fn().mockResolvedValue({ object: writerOutput })
-    reviewerGenerate = vi.fn().mockResolvedValue({
-      object: { decision: DocumentReviewDecision.Approved, findings: [] },
-    })
-    findPendingMarkers = vi.fn().mockResolvedValue([{ marker: '{nome_requerente}' }])
-  })
-
-  afterEach(() => vi.restoreAllMocks())
-
-  it('converts the flat AI draft into validated Tiptap before review', async () => {
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    const result = await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: { type: 'case', id: 'case-1', data: {} },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [],
-      },
-      attemptsCount: 0,
-    })
-
-    const writerSchema = writerGenerate.mock.calls[0]?.[1].structuredOutput.schema
-    expect(writerSchema.safeParse(writerOutput).success).toBe(true)
-    expect(writerSchema.safeParse({ blocks: [] }).success).toBe(false)
-    const writerJsonSchema = JSON.stringify(z.toJSONSchema(writerSchema))
-    expect(writerJsonSchema).not.toContain('anyOf')
-    expect(writerJsonSchema).not.toContain('$ref')
-    expect(findPendingMarkers).toHaveBeenCalledWith({
-      content: {
-        type: 'doc',
+const DRAFT = {
+  content: {
+    type: 'doc',
+    content: [
+      {
+        type: 'blockquote',
         content: [
-          {
-            type: 'heading',
-            attrs: { level: 1, textAlign: null },
-            content: [{ type: 'text', text: 'Requerimento' }],
-          },
-          expect.objectContaining({
-            type: 'paragraph',
-            content: [
-              { type: 'text', text: 'Requerente: ' },
-              {
-                type: 'text',
-                text: '{nome_requerente}',
-                marks: [{ type: 'bold' }],
-              },
-            ],
-          }),
           {
             type: 'bulletList',
             content: [
@@ -102,16 +29,7 @@ describe('ReviewDocumentCycleTool', () => {
                 content: [
                   {
                     type: 'paragraph',
-                    content: [{ type: 'text', text: 'Documento de identidade' }],
-                  },
-                ],
-              },
-              {
-                type: 'listItem',
-                content: [
-                  {
-                    type: 'paragraph',
-                    content: [{ type: 'text', text: 'Comprovante de residência' }],
+                    content: [{ type: 'text', text: 'Client: {client_name}' }],
                   },
                 ],
               },
@@ -119,313 +37,249 @@ describe('ReviewDocumentCycleTool', () => {
           },
         ],
       },
-    })
-    expect(result.draft.content.type).toBe('doc')
-    expect(reviewerGenerate).toHaveBeenCalledOnce()
-    const [logLabel, serializedResponse] = vi.mocked(console.log).mock.calls[0] ?? []
-    expect(logLabel).toBe('[document-generation] writer AI response')
-    expect(JSON.parse(String(serializedResponse))).toEqual({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      attempt: 1,
-      output: writerOutput,
-    })
+    ],
+  },
+}
+
+afterEach(() => vi.unstubAllGlobals())
+
+describe('Review Document Cycle Tool', () => {
+  it.each([
+    ['wrapped document', DRAFT],
+    ['bare document', DRAFT.content],
+    ['wrapped block array', { content: DRAFT.content.content }],
+  ])('normalizes a %s before marker extraction and review', async (_shape, output) => {
+    const requests: Record<string, any>[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        const body = JSON.parse(init.body)
+        requests.push(body)
+        return Response.json({
+          id: 'normalized-draft',
+          object: 'chat.completion',
+          created: 0,
+          model: body.model,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: JSON.stringify(
+                  body.response_format ? { decision: 'approved', findings: [] } : output,
+                ),
+              },
+              finish_reason: 'stop',
+            },
+          ],
+        })
+      }),
+    )
+    const result = await createTool().function.execute(createInput())
+    expect(result.draft).toEqual(DRAFT)
+    expect(result.pendingMarkers).toEqual([{ marker: '{client_name}' }])
+    const reviewerMessage = requests[1].messages.find(
+      (message: { role: string }) => message.role === 'user',
+    )
+    expect(JSON.parse(reviewerMessage.content).draft).toEqual(DRAFT)
+    expect(requests).toHaveLength(2)
   })
 
-  it('retries the review once when structured output validation fails', async () => {
-    reviewerGenerate
-      .mockRejectedValueOnce(
-        new Error('Structured output validation failed: decision: Entrada inválida'),
+  it('preserves regeneration instructions through start, load, writing and review', async () => {
+    const input = createInput()
+    const generation = DocumentGenerationFaker.fake({
+      id: input.documentGenerationId,
+      template: input.template,
+      source: input.source,
+      status: 'pending',
+    })
+    const started = { ...generation, status: 'running' as const }
+    const repository = {
+      findById: vi.fn().mockResolvedValueOnce(generation).mockResolvedValue(started),
+      replace: vi.fn().mockResolvedValue(started),
+    }
+    const datetimeProvider = {
+      now: vi.fn().mockReturnValue(new Date('2026-09-30T15:00:00Z')),
+    }
+    const start = new StartDocumentGenerationTool(
+      repository as never,
+      datetimeProvider as never,
+    )
+    const load = new LoadDocumentGenerationTool(repository as never)
+    const requests: Record<string, any>[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        const body = JSON.parse(init.body)
+        requests.push(body)
+        return Response.json({
+          id: 'test-completion',
+          object: 'chat.completion',
+          created: 0,
+          model: body.model,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: JSON.stringify(
+                  body.response_format ? { decision: 'approved', findings: [] } : DRAFT,
+                ),
+              },
+              finish_reason: 'stop',
+            },
+          ],
+        })
+      }),
+    )
+
+    const workflow = createWorkflow({
+      id: 'regeneration-instructions-regression',
+      inputSchema: z.object({
+        documentGenerationId: z.string().uuid(),
+        instructions: z.string(),
+        source: z.object({
+          type: z.literal('consultation'),
+          id: z.string(),
+          data: z.record(z.string(), z.unknown()),
+        }),
+      }),
+      outputSchema: documentReviewCycleOutputSchema,
+    })
+      .then(createStep(start.function))
+      .then(createStep(load.function))
+      .map(async ({ inputData }) => ({
+        documentGenerationId: inputData.id,
+        instructions: inputData.instructions,
+        source: inputData.source,
+        template: inputData.template,
+        attemptsCount: 0,
+      }))
+      .then(createStep(createTool().function))
+      .commit()
+    const run = await workflow.createRun()
+    const result = await run.start({
+      inputData: {
+        documentGenerationId: input.documentGenerationId,
+        instructions: 'escreva em alemão',
+        source: input.source,
+      },
+    })
+
+    expect(result.status).toBe('success')
+    expect(requests).toHaveLength(2)
+    for (const request of requests) {
+      const userMessage = request.messages.find(
+        (message: { role: string }) => message.role === 'user',
       )
-      .mockResolvedValueOnce({
-        object: { decision: DocumentReviewDecision.Approved, findings: [] },
-      })
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: { type: 'case', id: 'case-1', data: {} },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [],
-      },
-      attemptsCount: 0,
-    })
-
-    expect(reviewerGenerate).toHaveBeenCalledTimes(2)
-    expect(reviewerGenerate.mock.calls[0]?.[0]).toContain('approved')
-    expect(reviewerGenerate.mock.calls[0]?.[0]).toContain('changes_required')
-    expect(reviewerGenerate.mock.calls[1]?.[0]).toContain('Return decision as exactly')
+      expect(JSON.parse(userMessage.content).instructions).toBe('escreva em alemão')
+    }
   })
 
-  it('does not log generated legal content outside local development', async () => {
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('stg'),
-    )
+  it('supports the recursive draft schema on Liquid after earlier models fail', async () => {
+    const requests: Record<string, any>[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        const body = JSON.parse(init.body)
+        requests.push(body)
+        const isWriter = !body.response_format
 
-    await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: { type: 'case', id: 'case-1', data: {} },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [],
-      },
-      attemptsCount: 0,
-    })
+        if (isWriter && body.model !== 'liquid/lfm-2.5-2.6b:free') {
+          return Response.json(
+            { error: { message: 'Model unavailable', code: 429 } },
+            { status: 429 },
+          )
+        }
 
-    expect(console.log).not.toHaveBeenCalled()
-  })
-
-  it('logs a null structured response in local development before failing clearly', async () => {
-    writerGenerate.mockResolvedValueOnce({ object: undefined })
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    await expect(
-      tool.function.execute({
-        documentGenerationId: '00000000-0000-4000-8000-000000000001',
-        source: { type: 'case', id: 'case-1', data: {} },
-        template: {
-          name: 'Modelo previdenciário',
-          content: { type: 'doc', content: [] },
-          variables: [],
-        },
-        attemptsCount: 0,
+        const output = isWriter ? DRAFT : { decision: 'approved', findings: [] }
+        return Response.json({
+          id: 'test-completion',
+          object: 'chat.completion',
+          created: 0,
+          model: body.model,
+          choices: [
+            {
+              index: 0,
+              message: { role: 'assistant', content: JSON.stringify(output) },
+              finish_reason: 'stop',
+            },
+          ],
+        })
       }),
-    ).rejects.toThrow('O agente redator não retornou um documento válido.')
-
-    const [, serializedResponse] = vi.mocked(console.log).mock.calls[0] ?? []
-    expect(JSON.parse(String(serializedResponse))).toEqual(
-      expect.objectContaining({ output: null, attempt: 1 }),
-    )
-  })
-
-  it('approves a draft when the only review finding is a placeholder for missing source data', async () => {
-    findPendingMarkers.mockResolvedValue([{ marker: '{periodos_contributivos}' }])
-    reviewerGenerate.mockResolvedValue({
-      object: {
-        decision: DocumentReviewDecision.ChangesRequired,
-        findings: [
-          {
-            category: DocumentReviewFindingCategory.PendingCorrespondence,
-            description:
-              'O marcador {periodos_contributivos} não possui períodos no CNIS.',
-            correction: 'Solicitar os períodos contributivos ao cliente.',
-          },
-        ],
-      },
-    })
-
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
     )
 
-    const result = await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: {
-        type: 'case',
-        id: 'case-1',
-        data: { templateVariableValues: {} },
-      },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [
-          { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
-        ],
-      },
-      attemptsCount: 0,
-    })
+    const result = await createTool().function.execute(createInput())
 
-    expect(result.review).toEqual({
-      decision: DocumentReviewDecision.Approved,
-      findings: [],
-    })
-    expect(result.pendingMarkers).toEqual([{ marker: '{periodos_contributivos}' }])
-  })
-
-  it('keeps review findings when a pending marker has source data available', async () => {
-    findPendingMarkers.mockResolvedValue([{ marker: '{periodos_contributivos}' }])
-    reviewerGenerate.mockResolvedValue({
-      object: {
-        decision: DocumentReviewDecision.ChangesRequired,
-        findings: [
-          {
-            category: DocumentReviewFindingCategory.PendingCorrespondence,
-            description:
-              'O marcador {periodos_contributivos} foi mantido apesar de haver dados.',
-            correction: 'Substituir o marcador pelos períodos fornecidos.',
-          },
-        ],
-      },
-    })
-
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    const result = await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: {
-        type: 'case',
-        id: 'case-1',
-        data: { templateVariableValues: { periodos_contributivos: '2010 a 2025' } },
-      },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [
-          { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
-        ],
-      },
-      attemptsCount: 0,
-    })
-
-    expect(result.review.decision).toBe(DocumentReviewDecision.ChangesRequired)
-    expect(result.review.findings).toHaveLength(1)
-  })
-
-  it('keeps structural findings while accepting placeholders for missing source data', async () => {
-    findPendingMarkers.mockResolvedValue([{ marker: '{periodos_contributivos}' }])
-    reviewerGenerate.mockResolvedValue({
-      object: {
-        decision: DocumentReviewDecision.ChangesRequired,
-        findings: [
-          {
-            category: DocumentReviewFindingCategory.PendingCorrespondence,
-            description: 'O marcador {periodos_contributivos} aguarda dados do CNIS.',
-            correction: 'O advogado preencherá os períodos durante a revisão humana.',
-          },
-          {
-            category: DocumentReviewFindingCategory.Structure,
-            description: 'O rascunho não contém o endereçamento exigido pelo modelo.',
-            correction: 'Incluir o endereçamento previsto no modelo.',
-          },
-        ],
-      },
-    })
-
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    const result = await tool.function.execute({
-      documentGenerationId: '00000000-0000-4000-8000-000000000001',
-      source: {
-        type: 'case',
-        id: 'case-1',
-        data: { templateVariableValues: {} },
-      },
-      template: {
-        name: 'Modelo previdenciário',
-        content: { type: 'doc', content: [] },
-        variables: [
-          { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
-        ],
-      },
-      attemptsCount: 0,
-    })
-
-    expect(result.review.decision).toBe(DocumentReviewDecision.ChangesRequired)
-    expect(result.review.findings).toEqual([
-      {
-        category: DocumentReviewFindingCategory.Structure,
-        description: 'O rascunho não contém o endereçamento exigido pelo modelo.',
-        correction: 'Incluir o endereçamento previsto no modelo.',
-      },
+    expect(requests.map((body) => body.model)).toEqual([
+      'qwen/qwen3.8-27b:free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'dots-studio/dots-3-note-preview:free',
+      'liquid/lfm-2.5-2.6b:free',
+      'qwen/qwen3.8-27b:free',
     ])
-    expect(result.draft.content).toEqual({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, textAlign: null },
-          content: [{ type: 'text', text: 'Requerimento' }],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            { type: 'text', text: 'Requerente: ' },
-            { type: 'text', text: '{nome_requerente}', marks: [{ type: 'bold' }] },
-          ],
-        },
-        {
-          type: 'bulletList',
-          content: [
-            {
-              type: 'listItem',
-              content: [
-                {
-                  type: 'paragraph',
-                  content: [{ type: 'text', text: 'Documento de identidade' }],
-                },
-              ],
-            },
-            {
-              type: 'listItem',
-              content: [
-                {
-                  type: 'paragraph',
-                  content: [{ type: 'text', text: 'Comprovante de residência' }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    })
+    expect(requests.slice(0, 4).every((body) => body.response_format === undefined)).toBe(
+      true,
+    )
+    expect(
+      requests[3].messages.some((message: { content: string }) =>
+        /schema/i.test(JSON.stringify(message.content)),
+      ),
+    ).toBe(true)
+    expect(requests[4].response_format.type).toBe('json_schema')
+    expect(result.draft).toEqual(DRAFT)
+    expect(result.pendingMarkers).toEqual([{ marker: '{client_name}' }])
+    expect(result.review).toEqual({ decision: 'approved', findings: [] })
   })
 
-  it('does not retry provider availability errors', async () => {
-    reviewerGenerate.mockRejectedValueOnce(new Error('Service Unavailable'))
-    const tool = new ReviewDocumentCycleTool(
-      { generate: writerGenerate } as unknown as DocumentWriterAgent,
-      { generate: reviewerGenerate } as unknown as DocumentReviewerAgent,
-      { execute: findPendingMarkers } as unknown as FindDocumentPendingMarkersUseCase,
-      createEnvProvider('dev'),
-    )
-
-    await expect(
-      tool.function.execute({
-        documentGenerationId: '00000000-0000-4000-8000-000000000001',
-        source: { type: 'case', id: 'case-1', data: {} },
-        template: {
-          name: 'Modelo previdenciário',
-          content: { type: 'doc', content: [] },
-          variables: [],
-        },
-        attemptsCount: 0,
+  it.each([
+    { content: { type: 'doc', content: [{ type: 'unsupported' }] } },
+    { content: [{ type: 'unsupported' }] },
+    { type: 'doc', content: [{ type: 'text', text: 'Invalid block nesting' }] },
+    { content: 'Not a document' },
+  ])('rejects invalid draft content %j before invoking the reviewer', async (output) => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        id: 'invalid-draft',
+        object: 'chat.completion',
+        created: 0,
+        model: 'qwen/qwen3.8-27b:free',
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: JSON.stringify(output),
+            },
+            finish_reason: 'stop',
+          },
+        ],
       }),
-    ).rejects.toThrow('Service Unavailable')
+    )
+    vi.stubGlobal('fetch', fetch)
 
-    expect(reviewerGenerate).toHaveBeenCalledOnce()
+    await expect(createTool().function.execute(createInput())).rejects.toThrow()
+    expect(fetch).toHaveBeenCalledTimes(1)
   })
 })
 
-function createEnvProvider(mode: 'dev' | 'stg' | 'prod') {
+function createTool() {
+  const envProvider = {
+    get: vi.fn((key: string) => (key === 'HMS_SERVER_APP_MODE' ? 'dev' : 'test-key')),
+  } as unknown as EnvProvider
+
+  return new ReviewDocumentCycleTool(
+    new DocumentWriterAgent(envProvider),
+    new DocumentReviewerAgent(envProvider),
+    new FindDocumentPendingMarkersUseCase(),
+  )
+}
+
+function createInput() {
   return {
-    get: (key: string) => (key === 'HMS_SERVER_APP_MODE' ? mode : undefined),
-  } as EnvProvider
+    documentGenerationId: '746d73af-b629-4fe9-a4ee-e4ea3c9b2ba1',
+    source: { type: 'consultation' as const, id: 'consultation-1', data: {} },
+    template: { name: 'Test document', content: DRAFT.content, variables: [] },
+    attemptsCount: 0,
+  }
 }

@@ -5,6 +5,7 @@ import type { ClassificacaoAcesso } from '../../../document-production/domain/en
 export type ConsultationDocumentListItem = {
   readonly id: string
   readonly title: string
+  readonly documentSpecificationId?: string
   readonly currentVersionId?: string
   readonly generationStatus?: DocumentGenerationStatus
   readonly classificacaoAcesso?: ClassificacaoAcesso
