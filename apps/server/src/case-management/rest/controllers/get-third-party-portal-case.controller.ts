@@ -55,11 +55,26 @@ export class GetThirdPartyPortalCaseController {
     }
 
     const caseView = await this.useCase.execute({ caseId, grant })
-    if (!grant.canViewIntakeStatus) return caseView
+    const response = {
+      caseId: caseView.caseId,
+      publicCode: caseView.publicCode,
+      title: caseView.title,
+      clientName: caseView.clientName,
+      canUpload: caseView.canUpload,
+      canViewCaseStatus: caseView.canViewCaseStatus,
+      canViewIntakeStatus: caseView.canViewIntakeStatus,
+      ...(grant.canViewCaseStatus
+        ? { status: caseView.status, updatedAt: caseView.updatedAt }
+        : {}),
+    }
+    if (!grant.canViewIntakeStatus) return response
 
-    const intake = await this.intakesRepository.findById(caseView.intakeId)
+    const intake = caseView.intakeId
+      ? await this.intakesRepository.findById(caseView.intakeId)
+      : undefined
     return {
-      ...caseView,
+      ...response,
+      intakeId: caseView.intakeId,
       intake: intake
         ? { id: intake.id, status: intake.status, updatedAt: intake.updatedAt }
         : undefined,

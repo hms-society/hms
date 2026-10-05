@@ -58,8 +58,8 @@ export type ThirdPartyPortalCaseResponse = {
   title: string
   clientName: string
   status?: LegalCase['status']
-  intakeId: string
-  updatedAt: string
+  intakeId?: string
+  updatedAt?: string
   canUpload: boolean
   canViewCaseStatus: boolean
   canViewIntakeStatus: boolean

@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { CasePortalAccessGrantStatus } from '@hms/core/case-management/domain/structures'
+import { ThirdPartyStatus } from '@hms/core/identity/domain/structures'
 import type { CasePortalAccessGrantsRepository } from '@hms/core/case-management/interfaces'
 import { and, desc, eq, gt, isNull, or } from 'drizzle-orm'
 
 import { DrizzleCasePortalAccessGrantMapper } from '@/case-management/database/drizzle/mappers/drizzle-case-portal-access-grant-mapper'
 import { casePortalAccessGrantModel } from '@/case-management/database/drizzle/models/case-portal-access-grant-model'
+import { thirdPartyModel } from '@/identity/database/drizzle/models/third-party-model'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 
@@ -37,13 +39,18 @@ export class DrizzleCasePortalAccessGrantsRepository
   ): ReturnType<CasePortalAccessGrantsRepository['findActiveByTokenHashAndCase']> {
     const now = new Date()
     const [grant] = await this.database
-      .select()
+      .select({ grant: casePortalAccessGrantModel })
       .from(casePortalAccessGrantModel)
+      .innerJoin(
+        thirdPartyModel,
+        eq(casePortalAccessGrantModel.thirdPartyId, thirdPartyModel.id),
+      )
       .where(
         and(
           eq(casePortalAccessGrantModel.tokenHash, tokenHash),
           eq(casePortalAccessGrantModel.caseId, caseId),
           eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
+          eq(thirdPartyModel.status, ThirdPartyStatus.Active),
           or(
             isNull(casePortalAccessGrantModel.expiresAt),
             gt(casePortalAccessGrantModel.expiresAt, now),
@@ -53,7 +60,7 @@ export class DrizzleCasePortalAccessGrantsRepository
       )
       .limit(1)
 
-    return grant ? this.mapper.toDomain(grant) : undefined
+    return grant ? this.mapper.toDomain(grant.grant) : undefined
   }
 
   async findActiveByTokenHash(
@@ -61,12 +68,17 @@ export class DrizzleCasePortalAccessGrantsRepository
   ): ReturnType<CasePortalAccessGrantsRepository['findActiveByTokenHash']> {
     const now = new Date()
     const [grant] = await this.database
-      .select()
+      .select({ grant: casePortalAccessGrantModel })
       .from(casePortalAccessGrantModel)
+      .innerJoin(
+        thirdPartyModel,
+        eq(casePortalAccessGrantModel.thirdPartyId, thirdPartyModel.id),
+      )
       .where(
         and(
           eq(casePortalAccessGrantModel.tokenHash, tokenHash),
           eq(casePortalAccessGrantModel.status, CasePortalAccessGrantStatus.Active),
+          eq(thirdPartyModel.status, ThirdPartyStatus.Active),
           or(
             isNull(casePortalAccessGrantModel.expiresAt),
             gt(casePortalAccessGrantModel.expiresAt, now),
@@ -76,7 +88,7 @@ export class DrizzleCasePortalAccessGrantsRepository
       )
       .limit(1)
 
-    return grant ? this.mapper.toDomain(grant) : undefined
+    return grant ? this.mapper.toDomain(grant.grant) : undefined
   }
 
   async findByCaseId(
