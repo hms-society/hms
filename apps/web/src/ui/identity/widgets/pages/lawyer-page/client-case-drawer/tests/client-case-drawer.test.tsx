@@ -19,6 +19,7 @@ describe('ClientCaseDrawer', () => {
       clientCases: [
         {
           id: 'case-1',
+          intakeId: 'intake-1',
           publicCode: 'CASO-20260916-0001',
           title: 'Aposentadoria Antônio',
           clientName: 'Antônio Carvalho',
@@ -41,6 +42,7 @@ describe('ClientCaseDrawer', () => {
       ],
       activeCase: {
         id: 'case-1',
+        intakeId: 'intake-1',
         publicCode: 'CASO-20260916-0001',
         title: 'Aposentadoria Antônio',
         clientName: 'Antônio Carvalho',
@@ -122,6 +124,7 @@ describe('ClientCaseDrawer', () => {
       clientCases: [
         {
           id: 'case-1',
+          intakeId: 'intake-1',
           publicCode: 'CASO-001',
           title: 'Aposentadoria',
           clientName: 'Antônio',
@@ -136,6 +139,7 @@ describe('ClientCaseDrawer', () => {
         },
         {
           id: 'case-2',
+          intakeId: 'intake-2',
           publicCode: 'CASO-002',
           title: 'Revisão',
           clientName: 'Antônio',
@@ -151,6 +155,7 @@ describe('ClientCaseDrawer', () => {
       ],
       activeCase: {
         id: 'case-1',
+        intakeId: 'intake-1',
         publicCode: 'CASO-001',
         title: 'Aposentadoria',
         clientName: 'Antônio',
