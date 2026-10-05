@@ -31,6 +31,8 @@ const outputSchema = z.object({
   }),
   suggestion: suggestionSchema.optional(),
 })
+export type ExtractImageInput = z.infer<typeof inputSchema>
+export type ExtractImageOutput = z.infer<typeof outputSchema>
 
 @Injectable()
 export class ExtractImageTool {

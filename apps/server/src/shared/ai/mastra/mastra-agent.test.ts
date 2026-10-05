@@ -23,89 +23,51 @@ describe('MastraAgent model resolution', () => {
     })
   })
 
-  it('routes text agents to the OpenAI generative model with low reasoning effort in dev', () => {
-    const agent = new TestMastraAgent(
-      createEnvProvider({
-        HMS_SERVER_APP_MODE: 'dev',
-        AI_PROVIDER: 'openai',
-        OPENAI_API_KEY: 'openai-test-key',
-        OPENAI_AI_MODEL: 'openai-generative-model',
-        OPENAI_VISION_AI_MODEL: 'openai-vision-model',
+  it.each(
+    (['openai', 'gemini'] as const).flatMap((provider) =>
+      (['text', 'vision'] as const).map((modelType) => {
+        const isVision = modelType === 'vision'
+        const isOpenAi = provider === 'openai'
+        const apiKey = `${provider}-test-key`
+        const modelId = `${provider}-${isVision ? 'vision' : 'generative'}-model`
+
+        return {
+          provider,
+          modelType,
+          localModelEnvKey: isVision ? ('OLLAMA_VISION_AI_MODEL' as const) : undefined,
+          env: {
+            HMS_SERVER_APP_MODE: 'dev',
+            AI_PROVIDER: provider,
+            [isOpenAi ? 'OPENAI_API_KEY' : 'GEMINI_API_KEY']: apiKey,
+            [isOpenAi ? 'OPENAI_AI_MODEL' : 'GEMINI_AI_MODEL']:
+              `${provider}-generative-model`,
+            [isOpenAi ? 'OPENAI_VISION_AI_MODEL' : 'GEMINI_VISION_AI_MODEL']:
+              `${provider}-vision-model`,
+          },
+          expectedModel: {
+            providerId: provider,
+            modelId,
+            url: isOpenAi
+              ? 'https://api.openai.com/v1'
+              : 'https://generativelanguage.googleapis.com/v1beta/openai/',
+            apiKey,
+          },
+          expectedGenerateOptions: isOpenAi
+            ? { providerOptions: { openai: { reasoningEffort: 'low' } } }
+            : {},
+        }
       }),
-    )
+    ),
+  )('routes $provider $modelType models in dev', ({
+    env,
+    expectedGenerateOptions,
+    expectedModel,
+    localModelEnvKey,
+  }) => {
+    const agent = new TestMastraAgent(createEnvProvider(env), localModelEnvKey)
 
-    expect(agent.model).toEqual({
-      providerId: 'openai',
-      modelId: 'openai-generative-model',
-      url: 'https://api.openai.com/v1',
-      apiKey: 'openai-test-key',
-    })
-    expect(agent.getDefaultGenerateOptionsLegacy()).toMatchObject({
-      providerOptions: { openai: { reasoningEffort: 'low' } },
-    })
-  })
-
-  it('routes vision agents to the OpenAI vision model with low reasoning effort in dev', () => {
-    const agent = new TestMastraAgent(
-      createEnvProvider({
-        HMS_SERVER_APP_MODE: 'dev',
-        AI_PROVIDER: 'openai',
-        OPENAI_API_KEY: 'openai-test-key',
-        OPENAI_AI_MODEL: 'openai-generative-model',
-        OPENAI_VISION_AI_MODEL: 'openai-vision-model',
-      }),
-      'OLLAMA_VISION_AI_MODEL',
-    )
-
-    expect(agent.model).toEqual({
-      providerId: 'openai',
-      modelId: 'openai-vision-model',
-      url: 'https://api.openai.com/v1',
-      apiKey: 'openai-test-key',
-    })
-    expect(agent.getDefaultGenerateOptionsLegacy()).toMatchObject({
-      providerOptions: { openai: { reasoningEffort: 'low' } },
-    })
-  })
-
-  it('routes text agents to the Gemini generative model in dev', () => {
-    const agent = new TestMastraAgent(
-      createEnvProvider({
-        HMS_SERVER_APP_MODE: 'dev',
-        AI_PROVIDER: 'gemini',
-        GEMINI_API_KEY: 'gemini-test-key',
-        GEMINI_AI_MODEL: 'gemini-generative-model',
-        GEMINI_VISION_AI_MODEL: 'gemini-vision-model',
-      }),
-    )
-
-    expect(agent.model).toEqual({
-      providerId: 'gemini',
-      modelId: 'gemini-generative-model',
-      url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-      apiKey: 'gemini-test-key',
-    })
-    expect(agent.getDefaultGenerateOptionsLegacy()).toEqual({})
-  })
-
-  it('routes vision agents to the Gemini vision model in dev', () => {
-    const agent = new TestMastraAgent(
-      createEnvProvider({
-        HMS_SERVER_APP_MODE: 'dev',
-        AI_PROVIDER: 'gemini',
-        GEMINI_API_KEY: 'gemini-test-key',
-        GEMINI_AI_MODEL: 'gemini-generative-model',
-        GEMINI_VISION_AI_MODEL: 'gemini-vision-model',
-      }),
-      'OLLAMA_VISION_AI_MODEL',
-    )
-
-    expect(agent.model).toEqual({
-      providerId: 'gemini',
-      modelId: 'gemini-vision-model',
-      url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-      apiKey: 'gemini-test-key',
-    })
+    expect(agent.model).toEqual(expectedModel)
+    expect(agent.getDefaultGenerateOptionsLegacy()).toEqual(expectedGenerateOptions)
   })
 
   it.each([

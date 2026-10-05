@@ -227,6 +227,11 @@ Builder and Reviewer reports are inputs, not official evidence. The Orchestrator
 diff, commands, browser behavior, and findings. `evaluation.md` is updated after every material
 implementation or validation change, and affected earlier evidence is marked stale.
 
+During implementation, the Orchestrator and Builders monitor added TypeScript LOCs. When substantive
+changes exceed the advisory threshold of ~1,200 LOC (excluding generated files, test snapshots, and
+fixtures), the agent reports the volume, evaluates which completed task is ready for publication,
+and suggests opening a Small PR for `develop` before continuing with dependent slices.
+
 ## 6. Integrated validation
 
 Run the exact Core, Validation, Server, Web, database, architecture, build, integration, and
@@ -265,8 +270,8 @@ With explicit authorization to commit, push, and publish, conclusion:
 2. verifies generated artifacts, migrations, design evidence, and documentation;
 3. invokes `commit-code` for intentional scoped commits;
 4. invokes `create-pr` whenever the current delivery PR set is absent or stale; `create-pr`
-   applies the repository's 5,000-added-TypeScript-line limit and splits oversized deliveries
-   only across semantic or explicitly dependent PR slices;
+   applies the repository's 5,000-added-TypeScript-line limit, enforces `develop` as the PR base
+   for all slices, and manages dependent slices with the `stacked-pr` label until predecessor merges;
 5. waits for every applicable GitHub Actions check on every current delivery PR head SHA;
 6. routes failures immediately through implementation or amendment and repeats publication/CI;
 7. records each workflow result, URL, PR head SHA and delivery-PR dependency in Evaluation;
@@ -303,6 +308,7 @@ authorization.
 | Publish, run PR CI, and close | [`conclude-spec-prompt.md`](../prompts/conclude-spec-prompt.md) |
 | Create or update the delivery PR | [`create-pr-prompt.md`](../prompts/create-pr-prompt.md) |
 | Resolve later PR comments | [`resolve-pr-pendencies.md`](../prompts/resolve-pr-pendencies.md) |
+| Resolve conflicts in an in-progress merge | [`resolve-merge-conflicts-prompt.md`](../prompts/resolve-merge-conflicts-prompt.md) |
 
 Files under `documentation/prompts/` are canonical. `scripts/sync-commands.mjs` synchronizes
 their generated command and skill representations.

@@ -47,10 +47,14 @@ determines where to cut the work.
 - If it exceeds 5,000 lines, split it before publication into slices that each remain at or
   below 5,000 lines. Every slice must remain coherent; never cut files or behavior into
   arbitrary line-count fragments.
-- The first or independent slice uses `develop` as its base. A dependent slice may use the
-  immediately preceding slice branch as its base, forming an explicit PR dependency chain.
-  Record each slice's scope, base PR, dependency order and covered `RF-*`/`CA-*` criteria in
-  the delivery artifacts and PR body.
+- Every slice uses `develop` as its PR base. Never open a PR targeting another personal or
+  slice branch.
+- For dependent slices (e.g. Task 2 created while Task 1 is awaiting merge), open the PR targeting
+  `develop` with the `stacked-pr` label (`gh pr create --base develop --label "stacked-pr"`). Once
+  the predecessor slice merges into `develop`, merge `origin/develop` into the dependent branch,
+  push, and remove the `stacked-pr` label (`gh pr edit <number> --remove-label "stacked-pr"`).
+- Record each slice's scope, predecessor dependency, and covered `RF-*`/`CA-*` criteria in the
+  delivery artifacts and PR body.
 - If no coherent partition satisfies the limit, stop publication and route the delivery back
   through `create-plan` or `create-spec` rather than publishing an oversized or arbitrary PR.
 
@@ -120,25 +124,23 @@ including the file speculatively.
    gh pr list --state all --search "<Spec or Jira terms>"
    ```
 
-3. Verify base, head, SHA and ancestry; branch names do not prove incorporation.
-4. Use `develop`/`origin/develop` as the integration base for the first or an independent slice.
-   For a dependent slice, use the immediately preceding slice branch as the PR base and record
-   that dependency explicitly.
-5. Before calculating the publication diff or creating/updating a PR, update the first or
-   independent delivery branch with the fetched `origin/develop`. For dependent slices, first
-   update the predecessor slice, then propagate the current predecessor branch as the base of
-   the dependent slice. Every branch must contain the history required by its declared base;
-   require the same explicit commit authority for any merge commit.
-6. If the merge has only minor, unambiguous textual conflicts in delivery-owned files, resolve
-   them automatically by preserving the intended delivery change and the current `main`
-   behavior, then stage the resolutions, complete the merge, and review the resulting diff.
-   Never guess when a conflict affects business behavior, authorization, migrations or other
-   generated artifacts, unrelated user work, or the intended ownership of a change.
-7. If conflicts are complex or ambiguous, stop before publishing and ask the user for guidance.
-   Report each conflicted path, the competing changes, and the decision needed; do not abort or
-   complete the merge, push, or create/update the PR until the user directs the resolution.
-8. After the merge is complete, calculate and review the complete diff against the PR base.
-9. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
+4. Use `develop`/`origin/develop` as the integration base for all PRs without exception.
+5. Before calculating the publication diff or creating/updating a PR, update the delivery branch
+   with the fetched `origin/develop` (`git merge origin/develop`). For dependent slices created
+   from a predecessor slice branch, open the PR targeting `develop` with the `stacked-pr` label.
+   Once the predecessor merges into `develop`, merge `origin/develop` into the dependent branch,
+   push, and remove the `stacked-pr` label. Every branch must contain the history required by
+   `develop`; require explicit commit authority for any merge commit.
+6. If updating a delivery branch starts a merge with unresolved conflicts, immediately invoke
+   [`resolve-merge-conflicts`](resolve-merge-conflicts-prompt.md). Do not resolve conflicts
+   directly in this publication workflow. Let the conflict workflow inspect and resolve the
+   paths, stage its resolutions and run applicable validation. If it requests user guidance,
+   stop publication and relay the conflicted paths, competing changes and required decision;
+   do not push or create/update the PR until the conflict is resolved.
+7. After the conflict workflow returns, review its staged resolutions and validation evidence.
+   Complete the in-progress merge only with the explicit merge/commit authority required above,
+   then review the resulting diff. Recalculate the publication diff and size against the PR base.
+8. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
    size-compliant PR set required by the splitting policy.
 
 Do not use destructive Git operations, bypass hooks, create accidental dependent branches

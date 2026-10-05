@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
-import { ExtractImageTool } from '../extract-image-metadata-tool'
+import { ExtractImageOutput, ExtractImageTool } from '../extract-image-metadata-tool'
 
 const HASH_SHA_256 = 'a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3'
 
@@ -10,12 +10,13 @@ describe('Extract Image Metadata Tool', () => {
     const imageAnalyzerAgent = {
       generate: vi.fn().mockRejectedValue(new Error('Headers Timeout Error')),
     }
-    const envProvider = {
-      get: vi.fn().mockReturnValue(900_000),
-    }
-    const tool = new ExtractImageTool(imageAnalyzerAgent as never, envProvider as never)
 
-    const result = await tool.function.execute(createInput())
+    const tool = new ExtractImageTool(imageAnalyzerAgent as never)
+
+    const result = (await tool.function.execute?.(
+      createInput(),
+      {} as never,
+    )) as ExtractImageOutput
 
     expect(result.metadata.extractedTextFull).toBe('')
     expect(result.suggestion?.suggestedStatus).toBe(
@@ -28,12 +29,10 @@ describe('Extract Image Metadata Tool', () => {
     const imageAnalyzerAgent = {
       generate: vi.fn(),
     }
-    const envProvider = {
-      get: vi.fn().mockReturnValue(900_000),
-    }
-    const tool = new ExtractImageTool(imageAnalyzerAgent as never, envProvider as never)
 
-    const result = await tool.function.execute(
+    const tool = new ExtractImageTool(imageAnalyzerAgent as never)
+
+    const result = (await tool.function.execute?.(
       createInput({
         suggestion: {
           suggestedStatus: DocumentValidationStatus.Duplicate,
@@ -44,7 +43,8 @@ describe('Extract Image Metadata Tool', () => {
           evidence: [],
         },
       }),
-    )
+      {} as never,
+    )) as ExtractImageOutput
 
     expect(imageAnalyzerAgent.generate).not.toHaveBeenCalled()
     expect(result.suggestion?.suggestedStatus).toBe(DocumentValidationStatus.Duplicate)
@@ -56,9 +56,12 @@ describe('Extract Image Metadata Tool', () => {
         text: 'Cliente: Helena Maria de Albuquerque Costa\nCPF/CNPJ: 123.456.789-09\nEndereço do imóvel: Rua das Palmeiras, 728',
       }),
     }
-    const tool = new ExtractImageTool(imageAnalyzerAgent as never, {} as never)
+    const tool = new ExtractImageTool(imageAnalyzerAgent as never)
 
-    const result = await tool.function.execute(createInput())
+    const result = (await tool.function.execute?.(
+      createInput(),
+      {} as never,
+    )) as ExtractImageOutput
 
     expect(result.metadata.extractedTextFull).toBe(
       'Cliente: Helena Maria de Albuquerque Costa\nCPF/CNPJ: 123.456.789-09\nEndereço do imóvel: Rua das Palmeiras, 728',

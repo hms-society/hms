@@ -58,6 +58,7 @@ and surface the discrepancy before silently copying the implementation.
 | [`messaging-layer-rules.md`](messaging-layer-rules.md) | Creating or changing domain events, brokers, Inngest jobs, fan-out, event schemas, the shared Inngest endpoint, or job registration. | `packages/core/src/**/domain/events/**`, `packages/core/src/shared/interfaces/broker.ts`, `apps/server/src/shared/messaging/**`, `apps/server/src/**/messaging/**`, `apps/server/src/app.module.ts` |
 | [`ai-layer-rules.md`](ai-layer-rules.md) | Creating or changing AI modules, Mastra agents, tools, schemas, workflows, model selection, prompts, or exported workflow contracts. | `apps/server/src/shared/ai/**`, `apps/server/src/**/ai/**`, workflow interfaces and structures in `packages/core` |
 | [`commit-rules.md`](commit-rules.md) | Writing, validating, or creating a commit; changing commitlint or commit hooks; or preparing a commit message for the user. | `.husky/**`, `commitlint.config.mjs`, commit operations or commit-message requests |
+| [`git-workflow-rules.md`](git-workflow-rules.md) | Creating, branching, synchronizing, slicing, or publishing Pull Requests; managing branch dependencies and the `stacked-pr` label lifecycle. | Git operations, branching, PR creation/updates, SDD workflow transitions |
 
 ## Common multi-rule combinations
 
@@ -80,6 +81,7 @@ actual scope:
 | Add or change an AI workflow | AI Layer + Server App Layer + Core Package; add Provision Layer when model environment resolution changes |
 | Change a database-backed controller test | REST Layer + Controller Testing + Database Layer |
 | Create a commit | Commit Rules, plus the implementation rules already selected for validating the changed scope |
+| Create or update a Pull Request | Git Workflow Rules + Commit Rules, plus the implementation rules already selected for the delivery scope |
 
 ## Re-evaluate when scope changes
 

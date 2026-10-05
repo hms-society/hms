@@ -18,19 +18,23 @@ const metrics = [
   ['lines', 'Linhas'],
 ]
 const workspaceName = workspace[0].toUpperCase() + workspace.slice(1)
+const testRunPassed = (process.env.TEST_OUTCOME ?? 'success') === 'success'
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const coverageConfigPaths = {
   core: 'packages/core/vitest.config.mts',
   server: 'apps/server/vitest.config.mts',
   web: 'apps/web/vitest.config.ts',
 }
-const coveragePassed = (process.env.COVERAGE_OUTCOME ?? 'success') === 'success'
 const runUrl = process.env.GITHUB_SERVER_URL
   ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : undefined
-const coverageConfigPath = coverageConfigPaths[workspace]
-if (!coverageConfigPath) throw new Error(`Unknown coverage workspace: ${workspace}`)
-const coverageConfig = await readFile(resolve(projectRoot, coverageConfigPath), 'utf8')
+if (!['core', 'server', 'web'].includes(workspace)) {
+  throw new Error(`Unknown coverage workspace: ${workspace}`)
+}
+const coverageConfig = await readFile(
+  resolve(projectRoot, coverageConfigPaths[workspace]),
+  'utf8',
+)
 const thresholdsBlock = coverageConfig.match(/thresholds:\s*\{([\s\S]*?)\n\s*\}/)?.[1]
 if (!thresholdsBlock) {
   throw new Error(`Coverage config is missing thresholds for ${workspace}.`)
@@ -51,9 +55,9 @@ const report = [
   '| --- | ---: | ---: | ---: |',
   ...rows,
   '',
-  coveragePassed
-    ? '✅ Testes unitários executados com sucesso.'
-    : '❌ Os testes unitários falharam. O resultado bloqueia a CI.',
+  testRunPassed
+    ? '✅ Execução de testes concluída. Os percentuais de cobertura são informativos.'
+    : '❌ A execução de testes falhou. Os percentuais de cobertura são informativos.',
   ...(runUrl ? ['', `[Abrir execução](${runUrl})`] : []),
   '',
 ].join('\n')

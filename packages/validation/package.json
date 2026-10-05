@@ -9,6 +9,7 @@
     "./legal-catalog": "./src/legal-catalog/index.ts",
     "./shared": "./src/shared/index.ts",
     "./consultation": "./src/consultation/index.ts",
+    "./scheduling": "./src/scheduling/index.ts",
     "./document-production": "./src/document-production/index.ts",
     "./document-engine": "./src/document-engine/index.ts",
     "./formalization": "./src/formalization/index.ts",
@@ -17,6 +18,7 @@
   "scripts": {
     "check:architecture": "dependency-cruise --config .dependency-cruiser.mjs src",
     "check:complexity": "node ../../scripts/check-complexity.mjs --scope packages/validation",
+    "test": "vitest run",
     "lint": "biome lint src",
     "check-types": "tsc --noEmit"
   },
@@ -25,6 +27,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "4.1.9"
   }
 }
