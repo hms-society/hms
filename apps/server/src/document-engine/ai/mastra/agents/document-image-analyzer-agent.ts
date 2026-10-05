@@ -11,7 +11,7 @@ export class DocumentImageAnalyzerAgent extends MastraAgent<'document-image-anal
         id: 'document-image-analyzer',
         name: 'Document Image Analyzer',
         model: 'deepseek/deepseek-v4-flash',
-        localModelEnvKey: 'OLLAMA_VISION_AI_MODEL',
+        vision: true,
         instructions: `You transcribe readable text from document images.
 
 Follow these rules:

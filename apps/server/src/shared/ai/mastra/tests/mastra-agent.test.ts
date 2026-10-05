@@ -66,7 +66,7 @@ describe('Document drafting model resolution', () => {
     DocumentWriterAgent,
     DocumentReviewerAgent,
   ])('requires OpenRouter credentials locally for %s', (Agent) => {
-    expect(() => new Agent(createEnvProvider('dev', undefined))).toThrow(AppError)
+    expect(() => new Agent(createEnvProvider('dev', ''))).toThrow(AppError)
   })
 
   it.each(['stg'])('keeps per-agent models in %s', (mode) => {
@@ -133,11 +133,15 @@ describe('Document drafting model resolution', () => {
     )
   })
 
-  it('preserves local Ollama vision extraction', () => {
-    expect(new DocumentImageAnalyzerAgent(createEnvProvider('dev')).model).toMatchObject({
-      providerId: 'ollama',
-      modelId: 'local-vision-model',
-      url: 'http://localhost:11434/v1',
+  it('uses the configured Gemini vision model for image extraction', () => {
+    expect(
+      new DocumentImageAnalyzerAgent(
+        createEnvProvider('dev', 'test-gemini-key', 'gemini'),
+      ).model,
+    ).toMatchObject({
+      providerId: 'gemini',
+      modelId: 'gemini-vision-model',
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     })
   })
 
@@ -165,12 +169,18 @@ describe('Document drafting model resolution', () => {
   })
 })
 
-function createEnvProvider(mode: string, ...credentials: [string | undefined] | []) {
+function createEnvProvider(
+  mode: string,
+  credential = 'test-key',
+  provider: 'gemini' | 'openrouter' = 'openrouter',
+) {
   const values: Record<string, string | undefined> = {
     HMS_SERVER_APP_MODE: mode,
-    OPENROUTER_API_KEY: credentials.length ? credentials[0] : 'test-key',
-    OLLAMA_AI_MODEL: 'local-text-model',
-    OLLAMA_VISION_AI_MODEL: 'local-vision-model',
+    AI_PROVIDER: provider,
+    OPENROUTER_API_KEY: provider === 'openrouter' ? credential : undefined,
+    GEMINI_API_KEY: provider === 'gemini' ? credential : undefined,
+    GEMINI_AI_MODEL: provider === 'gemini' ? 'gemini-text-model' : undefined,
+    GEMINI_VISION_AI_MODEL: provider === 'gemini' ? 'gemini-vision-model' : undefined,
   }
 
   return { get: vi.fn((key: string) => values[key]) } as unknown as EnvProvider

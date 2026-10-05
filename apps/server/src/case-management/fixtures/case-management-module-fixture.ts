@@ -292,6 +292,8 @@ export class CaseManagementModuleFixture {
       caseId,
       tokenHash,
       canView: true,
+      canViewCaseStatus: true,
+      canViewIntakeStatus: true,
       canUpload,
       expiresAt: new Date(Date.now() + 60_000),
       grantedBy,

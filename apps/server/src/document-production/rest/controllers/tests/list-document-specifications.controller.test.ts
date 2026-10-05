@@ -21,7 +21,7 @@ describe('List Document Specifications Controller [GET /document-specifications]
 
   afterAll(async () => fixture.close())
 
-  it('lists seeded specifications with resolved legal names for an active administrator', async () => {
+  it('lists specifications with resolved legal names for an active administrator', async () => {
     const { areas, topics } = await fixture.seedCatalog()
     await fixture.specificationsSeeder.run({
       legalAreas: areas,

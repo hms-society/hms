@@ -22,6 +22,7 @@ import {
   EditPendingMessageController,
   ApprovePendingMessageController,
   CancelPendingController,
+  HomologateCaseDossierController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -44,6 +45,7 @@ import { IntakeDatabaseModule } from '@/intake/database'
     ListMyLegalCasesController,
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
+    HomologateCaseDossierController,
     GetLegalCaseDetailsController,
     GrantCasePortalAccessController,
     ListCasePortalAccessController,
