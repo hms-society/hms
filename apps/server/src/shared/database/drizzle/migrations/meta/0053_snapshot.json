@@ -1,5 +1,5 @@
 {
-  "id": "fada4ef0-de9b-4a79-ad40-b885b56c93e3",
+  "id": "8e639702-d401-4c6b-977f-b52cef300242",
   "prevId": "5f50f4a6-08ae-45ab-96ec-af993d85f8c9",
   "version": "7",
   "dialect": "postgresql",
@@ -105,9 +105,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "case_checklist_items_case_status_idx": {
           "name": "case_checklist_items_case_status_idx",
@@ -126,20 +126,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "case_checklist_items_case_id_cases_id_fk": {
           "name": "case_checklist_items_case_id_cases_id_fk",
           "tableFrom": "case_checklist_items",
-          "columnsFrom": ["case_id"],
           "tableTo": "cases",
+          "columnsFrom": ["case_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -196,7 +196,7 @@
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'visualiza\u00e7\u00e3o'"
+          "default": "'visualização'"
         },
         "is_primary": {
           "name": "is_primary",
@@ -244,9 +244,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "case_members_case_id_idx": {
           "name": "case_members_case_id_idx",
@@ -259,9 +259,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "case_members_collaborator_id_idx": {
           "name": "case_members_collaborator_id_idx",
@@ -274,9 +274,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "case_members_one_primary_per_case_uidx": {
           "name": "case_members_one_primary_per_case_uidx",
@@ -289,21 +289,147 @@
             }
           ],
           "isUnique": true,
-          "with": {},
-          "method": "btree",
           "where": "\"case_members\".\"is_primary\" = true",
-          "concurrently": false
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
         "case_members_case_id_cases_id_fk": {
           "name": "case_members_case_id_cases_id_fk",
           "tableFrom": "case_members",
-          "columnsFrom": ["case_id"],
           "tableTo": "cases",
+          "columnsFrom": ["case_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.case_portal_access_grants": {
+      "name": "case_portal_access_grants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "can_view": {
+          "name": "can_view",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "can_upload": {
+          "name": "can_upload",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "case_portal_access_grant_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "granted_by": {
+          "name": "granted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "case_portal_access_grants_token_hash_uidx": {
+          "name": "case_portal_access_grants_token_hash_uidx",
+          "columns": [
+            {
+              "expression": "token_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_portal_access_grants_case_status_idx": {
+          "name": "case_portal_access_grants_case_status_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_portal_access_grants_case_id_cases_id_fk": {
+          "name": "case_portal_access_grants_case_id_cases_id_fk",
+          "tableFrom": "case_portal_access_grants",
+          "tableTo": "cases",
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -456,9 +582,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "cases_intake_id_uidx": {
           "name": "cases_intake_id_uidx",
@@ -471,9 +597,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "cases_client_status_idx": {
           "name": "cases_client_status_idx",
@@ -492,9 +618,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "cases_opened_at_idx": {
           "name": "cases_opened_at_idx",
@@ -507,9 +633,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -538,6 +664,326 @@
           "value": "\"cases\".\"updated_at\" >= \"cases\".\"created_at\""
         }
       },
+      "isRLSEnabled": false
+    },
+    "public.pendencies": {
+      "name": "pendencies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "checklist_item_id": {
+          "name": "checklist_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "document_file_id": {
+          "name": "document_file_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_file_name": {
+          "name": "document_file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "details": {
+          "name": "details",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "responsible_id": {
+          "name": "responsible_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_by": {
+          "name": "cancelled_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pendencies_case_id_idx": {
+          "name": "pendencies_case_id_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pendencies_case_id_cases_id_fk": {
+          "name": "pendencies_case_id_cases_id_fk",
+          "tableFrom": "pendencies",
+          "tableTo": "cases",
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pendencies_checklist_item_id_case_checklist_items_id_fk": {
+          "name": "pendencies_checklist_item_id_case_checklist_items_id_fk",
+          "tableFrom": "pendencies",
+          "tableTo": "case_checklist_items",
+          "columnsFrom": ["checklist_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pendencies_reason_check": {
+          "name": "pendencies_reason_check",
+          "value": "\"pendencies\".\"reason\" in ('missing', 'illegible', 'incomplete', 'duplicate', 'not_corresponding')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.assisted_messages": {
+      "name": "assisted_messages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pending_id": {
+          "name": "pending_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "checklist_item_id": {
+          "name": "checklist_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'awaiting_approval'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by": {
+          "name": "approved_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "assisted_messages_case_id_idx": {
+          "name": "assisted_messages_case_id_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "assisted_messages_pending_id_pendencies_id_fk": {
+          "name": "assisted_messages_pending_id_pendencies_id_fk",
+          "tableFrom": "assisted_messages",
+          "tableTo": "pendencies",
+          "columnsFrom": ["pending_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assisted_messages_case_id_cases_id_fk": {
+          "name": "assisted_messages_case_id_cases_id_fk",
+          "tableFrom": "assisted_messages",
+          "tableTo": "cases",
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "assisted_messages_checklist_item_id_case_checklist_items_id_fk": {
+          "name": "assisted_messages_checklist_item_id_case_checklist_items_id_fk",
+          "tableFrom": "assisted_messages",
+          "tableTo": "case_checklist_items",
+          "columnsFrom": ["checklist_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assisted_messages_pending_id_unique": {
+          "name": "assisted_messages_pending_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["pending_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "assisted_messages_status_check": {
+          "name": "assisted_messages_status_check",
+          "value": "\"assisted_messages\".\"status\" in ('awaiting_approval', 'approved', 'sent', 'cancelled')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pending_ai_errors": {
+      "name": "pending_ai_errors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pending_id": {
+          "name": "pending_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pending_ai_errors_pending_id_pendencies_id_fk": {
+          "name": "pending_ai_errors_pending_id_pendencies_id_fk",
+          "tableFrom": "pending_ai_errors",
+          "tableTo": "pendencies",
+          "columnsFrom": ["pending_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.checklist_templates": {
@@ -596,9 +1042,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "checklist_templates_updated_at_idx": {
           "name": "checklist_templates_updated_at_idx",
@@ -611,20 +1057,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "checklist_templates_legal_area_id_legal_areas_id_fk": {
           "name": "checklist_templates_legal_area_id_legal_areas_id_fk",
           "tableFrom": "checklist_templates",
-          "columnsFrom": ["legal_area_id"],
           "tableTo": "legal_areas",
+          "columnsFrom": ["legal_area_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "restrict"
+          "onDelete": "restrict",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -707,20 +1153,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "checklist_template_items_checklist_template_id_checklist_templates_id_fk": {
           "name": "checklist_template_items_checklist_template_id_checklist_templates_id_fk",
           "tableFrom": "checklist_template_items",
-          "columnsFrom": ["checklist_template_id"],
           "tableTo": "checklist_templates",
+          "columnsFrom": ["checklist_template_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -883,9 +1329,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "intakes_client_created_at_idx": {
           "name": "intakes_client_created_at_idx",
@@ -904,9 +1350,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "intakes_status_updated_at_idx": {
           "name": "intakes_status_updated_at_idx",
@@ -925,9 +1371,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "intakes_responsible_status_idx": {
           "name": "intakes_responsible_status_idx",
@@ -946,9 +1392,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1021,9 +1467,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "client_consents_active_uidx": {
           "name": "client_consents_active_uidx",
@@ -1042,21 +1488,21 @@
             }
           ],
           "isUnique": true,
-          "with": {},
-          "method": "btree",
           "where": "\"client_consents\".\"revoked_at\" IS NULL",
-          "concurrently": false
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
         "client_consents_client_id_clients_id_fk": {
           "name": "client_consents_client_id_clients_id_fk",
           "tableFrom": "client_consents",
-          "columnsFrom": ["client_id"],
           "tableTo": "clients",
+          "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1201,9 +1647,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "clients_phone_idx": {
           "name": "clients_phone_idx",
@@ -1216,9 +1662,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1279,20 +1725,20 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "collaborator_legal_expertises_collaborator_id_collaborators_id_fk": {
           "name": "collaborator_legal_expertises_collaborator_id_collaborators_id_fk",
           "tableFrom": "collaborator_legal_expertises",
-          "columnsFrom": ["collaborator_id"],
           "tableTo": "collaborators",
+          "columnsFrom": ["collaborator_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1343,20 +1789,20 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "collaborator_legal_expertise_topics_expertise_id_collaborator_legal_expertises_id_fk": {
           "name": "collaborator_legal_expertise_topics_expertise_id_collaborator_legal_expertises_id_fk",
           "tableFrom": "collaborator_legal_expertise_topics",
-          "columnsFrom": ["expertise_id"],
           "tableTo": "collaborator_legal_expertises",
+          "columnsFrom": ["expertise_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1428,9 +1874,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "collaborators_profile_idx": {
           "name": "collaborators_profile_idx",
@@ -1443,20 +1889,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "collaborators_user_id_users_id_fk": {
           "name": "collaborators_user_id_users_id_fk",
           "tableFrom": "collaborators",
-          "columnsFrom": ["user_id"],
           "tableTo": "users",
+          "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1534,9 +1980,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1544,6 +1990,165 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.third_parties": {
+      "name": "third_parties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "third_party_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_name": {
+          "name": "legal_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trade_name": {
+          "name": "trade_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_type": {
+          "name": "document_type",
+          "type": "third_party_document_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_id_value": {
+          "name": "tax_id_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_id_description": {
+          "name": "tax_id_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "internal_responsible_id": {
+          "name": "internal_responsible_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relationship_types": {
+          "name": "relationship_types",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "third_party_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "third_parties_tax_id_uidx": {
+          "name": "third_parties_tax_id_uidx",
+          "columns": [
+            {
+              "expression": "document_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tax_id_value",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "third_parties_status_idx": {
+          "name": "third_parties_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "third_parties_responsible_idx": {
+          "name": "third_parties_responsible_idx",
+          "columns": [
+            {
+              "expression": "internal_responsible_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "third_parties_internal_responsible_id_collaborators_id_fk": {
+          "name": "third_parties_internal_responsible_id_collaborators_id_fk",
+          "tableFrom": "third_parties",
+          "tableTo": "collaborators",
+          "columnsFrom": ["internal_responsible_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "third_parties_relationship_types_check": {
+          "name": "third_parties_relationship_types_check",
+          "value": "jsonb_typeof(\"third_parties\".\"relationship_types\") = 'array' AND jsonb_array_length(\"third_parties\".\"relationship_types\") > 0"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.users": {
@@ -1596,15 +2201,15 @@
           "columns": [
             {
               "expression": "lower(btrim(\"email\"))",
-              "isExpression": true,
               "asc": true,
+              "isExpression": true,
               "nulls": "last"
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1728,15 +2333,15 @@
           "columns": [
             {
               "expression": "lower(btrim(\"name\"))",
-              "isExpression": true,
               "asc": true,
+              "isExpression": true,
               "nulls": "last"
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1803,26 +2408,26 @@
             },
             {
               "expression": "lower(btrim(\"name\"))",
-              "isExpression": true,
               "asc": true,
+              "isExpression": true,
               "nulls": "last"
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "legal_topics_legal_area_id_legal_areas_id_fk": {
           "name": "legal_topics_legal_area_id_legal_areas_id_fk",
           "tableFrom": "legal_topics",
-          "columnsFrom": ["legal_area_id"],
           "tableTo": "legal_areas",
+          "columnsFrom": ["legal_area_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "restrict"
+          "onDelete": "restrict",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1860,20 +2465,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "document_specification_legal_areas_document_specification_id_document_specifications_id_fk": {
           "name": "document_specification_legal_areas_document_specification_id_document_specifications_id_fk",
           "tableFrom": "document_specification_legal_areas",
-          "columnsFrom": ["document_specification_id"],
           "tableTo": "document_specifications",
+          "columnsFrom": ["document_specification_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -1922,20 +2527,20 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "document_specification_legal_topics_area_fk": {
           "name": "document_specification_legal_topics_area_fk",
           "tableFrom": "document_specification_legal_topics",
-          "columnsFrom": ["document_specification_id", "legal_area_id"],
           "tableTo": "document_specification_legal_areas",
+          "columnsFrom": ["document_specification_id", "legal_area_id"],
           "columnsTo": ["document_specification_id", "legal_area_id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -2025,15 +2630,15 @@
           "columns": [
             {
               "expression": "lower(trim(\"name\"))",
-              "isExpression": true,
               "asc": true,
+              "isExpression": true,
               "nulls": "last"
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_specifications_moment_idx": {
           "name": "document_specifications_moment_idx",
@@ -2046,9 +2651,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_specifications_status_idx": {
           "name": "document_specifications_status_idx",
@@ -2061,9 +2666,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -2216,9 +2821,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_generations_status_idx": {
           "name": "document_generations_status_idx",
@@ -2231,9 +2836,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -2379,9 +2984,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_versions_generation_uq": {
           "name": "document_versions_generation_uq",
@@ -2394,9 +2999,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_versions_document_id_idx": {
           "name": "document_versions_document_id_idx",
@@ -2409,9 +3014,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_versions_source_version_id_idx": {
           "name": "document_versions_source_version_id_idx",
@@ -2424,9 +3029,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -2518,9 +3123,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -2597,9 +3202,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -2675,9 +3280,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "package_documents_package_specification_uq": {
           "name": "package_documents_package_specification_uq",
@@ -2696,9 +3301,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "package_documents_document_id_idx": {
           "name": "package_documents_document_id_idx",
@@ -2711,38 +3316,38 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "package_documents_document_package_id_document_packages_id_fk": {
           "name": "package_documents_document_package_id_document_packages_id_fk",
           "tableFrom": "package_documents",
-          "columnsFrom": ["document_package_id"],
           "tableTo": "document_packages",
+          "columnsFrom": ["document_package_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "package_documents_document_id_documents_id_fk": {
           "name": "package_documents_document_id_documents_id_fk",
           "tableFrom": "package_documents",
-          "columnsFrom": ["document_id"],
           "tableTo": "documents",
+          "columnsFrom": ["document_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "package_documents_document_specification_id_document_specifications_id_fk": {
           "name": "package_documents_document_specification_id_document_specifications_id_fk",
           "tableFrom": "package_documents",
-          "columnsFrom": ["document_specification_id"],
           "tableTo": "document_specifications",
+          "columnsFrom": ["document_specification_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "restrict"
+          "onDelete": "restrict",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2801,11 +3406,11 @@
         "auditoria_documentos_documento_id_documents_id_fk": {
           "name": "auditoria_documentos_documento_id_documents_id_fk",
           "tableFrom": "auditoria_documentos",
-          "columnsFrom": ["documento_id"],
           "tableTo": "documents",
+          "columnsFrom": ["documento_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2862,11 +3467,11 @@
         "logs_acesso_externo_documento_id_documents_id_fk": {
           "name": "logs_acesso_externo_documento_id_documents_id_fk",
           "tableFrom": "logs_acesso_externo",
-          "columnsFrom": ["documento_id"],
           "tableTo": "documents",
+          "columnsFrom": ["documento_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2931,20 +3536,20 @@
         "communications_client_id_clients_id_fk": {
           "name": "communications_client_id_clients_id_fk",
           "tableFrom": "communications",
-          "columnsFrom": ["client_id"],
           "tableTo": "clients",
+          "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "communications_author_id_users_id_fk": {
           "name": "communications_author_id_users_id_fk",
           "tableFrom": "communications",
-          "columnsFrom": ["author_id"],
           "tableTo": "users",
+          "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3021,11 +3626,11 @@
         "private_messages_client_id_clients_id_fk": {
           "name": "private_messages_client_id_clients_id_fk",
           "tableFrom": "private_messages",
-          "columnsFrom": ["client_id"],
           "tableTo": "clients",
+          "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3232,9 +3837,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "consultations_intake_id_uq": {
           "name": "consultations_intake_id_uq",
@@ -3247,9 +3852,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -3355,9 +3960,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -3544,11 +4149,11 @@
         "blocked_periods_schedule_id_schedules_id_fk": {
           "name": "blocked_periods_schedule_id_schedules_id_fk",
           "tableFrom": "blocked_periods",
-          "columnsFrom": ["schedule_id"],
           "tableTo": "schedules",
+          "columnsFrom": ["schedule_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3609,8 +4214,8 @@
       "uniqueConstraints": {
         "schedules_collaborator_id_unique": {
           "name": "schedules_collaborator_id_unique",
-          "columns": ["collaborator_id"],
-          "nullsNotDistinct": false
+          "nullsNotDistinct": false,
+          "columns": ["collaborator_id"]
         }
       },
       "policies": {},
@@ -3744,9 +4349,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_batches_status_idx": {
           "name": "document_batches_status_idx",
@@ -3759,9 +4364,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_batches_client_id_idx": {
           "name": "document_batches_client_id_idx",
@@ -3774,9 +4379,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_batches_in_triage_box_idx": {
           "name": "document_batches_in_triage_box_idx",
@@ -3789,46 +4394,46 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "document_batches_client_id_clients_id_fk": {
           "name": "document_batches_client_id_clients_id_fk",
           "tableFrom": "document_batches",
-          "columnsFrom": ["client_id"],
           "tableTo": "clients",
+          "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         },
         "document_batches_intake_id_intakes_id_fk": {
           "name": "document_batches_intake_id_intakes_id_fk",
           "tableFrom": "document_batches",
-          "columnsFrom": ["intake_id"],
           "tableTo": "intakes",
+          "columnsFrom": ["intake_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         },
         "document_batches_created_by_users_id_fk": {
           "name": "document_batches_created_by_users_id_fk",
           "tableFrom": "document_batches",
-          "columnsFrom": ["created_by"],
           "tableTo": "users",
+          "columnsFrom": ["created_by"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "document_batches_readable_id_unique": {
           "name": "document_batches_readable_id_unique",
-          "columns": ["readable_id"],
-          "nullsNotDistinct": false
+          "nullsNotDistinct": false,
+          "columns": ["readable_id"]
         }
       },
       "policies": {},
@@ -3969,29 +4574,29 @@
         "document_batch_files_batch_id_document_batches_id_fk": {
           "name": "document_batch_files_batch_id_document_batches_id_fk",
           "tableFrom": "document_batch_files",
-          "columnsFrom": ["batch_id"],
           "tableTo": "document_batches",
+          "columnsFrom": ["batch_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "document_batch_files_original_document_id_document_batch_files_id_fk": {
           "name": "document_batch_files_original_document_id_document_batch_files_id_fk",
           "tableFrom": "document_batch_files",
-          "columnsFrom": ["original_document_id"],
           "tableTo": "document_batch_files",
+          "columnsFrom": ["original_document_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         },
         "document_batch_files_reviewed_by_users_id_fk": {
           "name": "document_batch_files_reviewed_by_users_id_fk",
           "tableFrom": "document_batch_files",
-          "columnsFrom": ["reviewed_by"],
           "tableTo": "users",
+          "columnsFrom": ["reviewed_by"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -4080,9 +4685,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_validation_logs_actor_idx": {
           "name": "document_validation_logs_actor_idx",
@@ -4095,9 +4700,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_validation_logs_action_idx": {
           "name": "document_validation_logs_action_idx",
@@ -4110,9 +4715,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "document_validation_logs_created_at_idx": {
           "name": "document_validation_logs_created_at_idx",
@@ -4125,29 +4730,29 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "document_validation_logs_document_file_id_document_batch_files_id_fk": {
           "name": "document_validation_logs_document_file_id_document_batch_files_id_fk",
           "tableFrom": "document_validation_logs",
-          "columnsFrom": ["document_file_id"],
           "tableTo": "document_batch_files",
+          "columnsFrom": ["document_file_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "document_validation_logs_actor_id_users_id_fk": {
           "name": "document_validation_logs_actor_id_users_id_fk",
           "tableFrom": "document_validation_logs",
-          "columnsFrom": ["actor_id"],
           "tableTo": "users",
+          "columnsFrom": ["actor_id"],
           "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -4301,134 +4906,8 @@
         "document_exception_audit_logs_document_exception_id_document_exceptions_id_fk": {
           "name": "document_exception_audit_logs_document_exception_id_document_exceptions_id_fk",
           "tableFrom": "document_exception_audit_logs",
-          "columnsFrom": ["document_exception_id"],
           "tableTo": "document_exceptions",
-          "columnsTo": ["id"],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.case_portal_access_grants": {
-      "name": "case_portal_access_grants",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "case_id": {
-          "name": "case_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "can_view": {
-          "name": "can_view",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "can_upload": {
-          "name": "can_upload",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "status": {
-          "name": "status",
-          "type": "case_portal_access_grant_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "granted_by": {
-          "name": "granted_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "revoked_at": {
-          "name": "revoked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "case_portal_access_grants_token_hash_uidx": {
-          "name": "case_portal_access_grants_token_hash_uidx",
-          "columns": [
-            {
-              "expression": "token_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "case_portal_access_grants_case_status_idx": {
-          "name": "case_portal_access_grants_case_status_idx",
-          "columns": [
-            {
-              "expression": "case_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "case_portal_access_grants_case_id_cases_id_fk": {
-          "name": "case_portal_access_grants_case_id_cases_id_fk",
-          "tableFrom": "case_portal_access_grants",
-          "tableTo": "cases",
-          "columnsFrom": ["case_id"],
+          "columnsFrom": ["document_exception_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -4455,12 +4934,17 @@
     "public.case_checklist_item_status": {
       "name": "case_checklist_item_status",
       "schema": "public",
-      "values": ["pending", "validated"]
+      "values": ["pending", "in_analysis", "validated"]
     },
     "public.case_member_role": {
       "name": "case_member_role",
       "schema": "public",
       "values": ["lead_lawyer", "lawyer", "paralegal", "supervisor", "intern"]
+    },
+    "public.case_portal_access_grant_status": {
+      "name": "case_portal_access_grant_status",
+      "schema": "public",
+      "values": ["active", "revoked"]
     },
     "public.legal_case_status": {
       "name": "legal_case_status",
@@ -4555,6 +5039,27 @@
       "schema": "public",
       "values": ["cpf", "cnpj"]
     },
+    "public.third_party_document_type": {
+      "name": "third_party_document_type",
+      "schema": "public",
+      "values": ["cnpj", "official_registration", "other_national_document"]
+    },
+    "public.third_party_status": {
+      "name": "third_party_status",
+      "schema": "public",
+      "values": ["active", "inactive"]
+    },
+    "public.third_party_type": {
+      "name": "third_party_type",
+      "schema": "public",
+      "values": [
+        "union",
+        "association",
+        "partner_company",
+        "institutional_partner",
+        "other"
+      ]
+    },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
@@ -4614,18 +5119,13 @@
         "processing_failure",
         "resend_requested"
       ]
-    },
-    "public.case_portal_access_grant_status": {
-      "name": "case_portal_access_grant_status",
-      "schema": "public",
-      "values": ["active", "revoked"]
     }
   },
   "schemas": {},
-  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

@@ -1,6 +1,6 @@
 {
-  "id": "bb484032-60bf-45b8-b3ab-88ea4bf0236e",
-  "prevId": "6cfb01b4-7de4-4d55-bc40-468f14b1d6c9",
+  "id": "9cd83c16-a09b-44c2-9f17-bdad321c7ec0",
+  "prevId": "7b87690e-b96e-4423-b52f-76adb681b7e1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -329,6 +329,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "third_party_id": {
+          "name": "third_party_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "token_hash": {
           "name": "token_hash",
           "type": "text",
@@ -419,6 +425,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "case_portal_access_grants_third_party_idx": {
+          "name": "case_portal_access_grants_third_party_idx",
+          "columns": [
+            {
+              "expression": "third_party_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -427,6 +448,15 @@
           "tableFrom": "case_portal_access_grants",
           "tableTo": "cases",
           "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "case_portal_access_grants_third_party_id_third_parties_id_fk": {
+          "name": "case_portal_access_grants_third_party_id_third_parties_id_fk",
+          "tableFrom": "case_portal_access_grants",
+          "tableTo": "third_parties",
+          "columnsFrom": ["third_party_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1992,6 +2022,286 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.third_parties": {
+      "name": "third_parties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "third_party_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_name": {
+          "name": "legal_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trade_name": {
+          "name": "trade_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_type": {
+          "name": "document_type",
+          "type": "third_party_document_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_id_value": {
+          "name": "tax_id_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_id_description": {
+          "name": "tax_id_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "internal_responsible_id": {
+          "name": "internal_responsible_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relationship_types": {
+          "name": "relationship_types",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "third_party_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "third_parties_tax_id_uidx": {
+          "name": "third_parties_tax_id_uidx",
+          "columns": [
+            {
+              "expression": "document_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tax_id_value",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "third_parties_status_idx": {
+          "name": "third_parties_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "third_parties_responsible_idx": {
+          "name": "third_parties_responsible_idx",
+          "columns": [
+            {
+              "expression": "internal_responsible_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "third_parties_internal_responsible_id_collaborators_id_fk": {
+          "name": "third_parties_internal_responsible_id_collaborators_id_fk",
+          "tableFrom": "third_parties",
+          "tableTo": "collaborators",
+          "columnsFrom": ["internal_responsible_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "third_parties_relationship_types_check": {
+          "name": "third_parties_relationship_types_check",
+          "value": "jsonb_typeof(\"third_parties\".\"relationship_types\") = 'array' AND jsonb_array_length(\"third_parties\".\"relationship_types\") > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.third_party_permission_grants": {
+      "name": "third_party_permission_grants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "third_party_id": {
+          "name": "third_party_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "permission": {
+          "name": "permission",
+          "type": "third_party_permission",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "granted_by": {
+          "name": "granted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "granted_at": {
+          "name": "granted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "third_party_permission_grants_party_permission_uidx": {
+          "name": "third_party_permission_grants_party_permission_uidx",
+          "columns": [
+            {
+              "expression": "third_party_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "permission",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "third_party_permission_grants_party_active_idx": {
+          "name": "third_party_permission_grants_party_active_idx",
+          "columns": [
+            {
+              "expression": "third_party_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "third_party_permission_grants_third_party_id_third_parties_id_fk": {
+          "name": "third_party_permission_grants_third_party_id_third_parties_id_fk",
+          "tableFrom": "third_party_permission_grants",
+          "tableTo": "third_parties",
+          "columnsFrom": ["third_party_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "third_party_permission_grants_granted_by_users_id_fk": {
+          "name": "third_party_permission_grants_granted_by_users_id_fk",
+          "tableFrom": "third_party_permission_grants",
+          "tableTo": "users",
+          "columnsFrom": ["granted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -3480,165 +3790,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.waba_accounts": {
-      "name": "waba_accounts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "waba_id": {
-          "name": "waba_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "access_token": {
-          "name": "access_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "waba_account_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.whatsapp_channels": {
-      "name": "whatsapp_channels",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "waba_account_id": {
-          "name": "waba_account_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "phone_number_id": {
-          "name": "phone_number_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "display_phone_number": {
-          "name": "display_phone_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "verified_name": {
-          "name": "verified_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quality_rating": {
-          "name": "quality_rating",
-          "type": "whatsapp_channel_quality",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'UNKNOWN'"
-        },
-        "assigned_lawyer_id": {
-          "name": "assigned_lawyer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "whatsapp_channel_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "whatsapp_channels_waba_account_id_waba_accounts_id_fk": {
-          "name": "whatsapp_channels_waba_account_id_waba_accounts_id_fk",
-          "tableFrom": "whatsapp_channels",
-          "tableTo": "waba_accounts",
-          "columnsFrom": ["waba_account_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "whatsapp_channels_assigned_lawyer_id_users_id_fk": {
-          "name": "whatsapp_channels_assigned_lawyer_id_users_id_fk",
-          "tableFrom": "whatsapp_channels",
-          "tableTo": "users",
-          "columnsFrom": ["assigned_lawyer_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.consultations": {
       "name": "consultations",
       "schema": "",
@@ -4099,235 +4250,6 @@
           "value": "\"dynamic_forms\".\"status\" in ('available', 'unavailable')"
         }
       },
-      "isRLSEnabled": false
-    },
-    "public.ai_suggestions": {
-      "name": "ai_suggestions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "entity_id": {
-          "name": "entity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "entity_type": {
-          "name": "entity_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suggestion_type": {
-          "name": "suggestion_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "adjusted_content": {
-          "name": "adjusted_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "rejection_reason": {
-          "name": "rejection_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confidence": {
-          "name": "confidence",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reviewed_by": {
-          "name": "reviewed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reviewed_at": {
-          "name": "reviewed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "suggested_at": {
-          "name": "suggested_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.ai_errors": {
-      "name": "ai_errors",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "suggestion_id": {
-          "name": "suggestion_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "entity_id": {
-          "name": "entity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suggestion_type": {
-          "name": "suggestion_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suggested_content": {
-          "name": "suggested_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "rejection_reason": {
-          "name": "rejection_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by_collaborator_id": {
-          "name": "created_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.ai_blocks": {
-      "name": "ai_blocks",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "suggestion_id": {
-          "name": "suggestion_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "entity_id": {
-          "name": "entity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suggestion_type": {
-          "name": "suggestion_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "blocked_by_collaborator_id": {
-          "name": "blocked_by_collaborator_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_unblocked": {
-          "name": "is_unblocked",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "blocked_at": {
-          "name": "blocked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.blocked_periods": {
@@ -5268,6 +5190,32 @@
       "schema": "public",
       "values": ["cpf", "cnpj"]
     },
+    "public.third_party_document_type": {
+      "name": "third_party_document_type",
+      "schema": "public",
+      "values": ["cnpj", "official_registration", "other_national_document"]
+    },
+    "public.third_party_permission": {
+      "name": "third_party_permission",
+      "schema": "public",
+      "values": ["view_intake_status", "view_case_status"]
+    },
+    "public.third_party_status": {
+      "name": "third_party_status",
+      "schema": "public",
+      "values": ["active", "inactive"]
+    },
+    "public.third_party_type": {
+      "name": "third_party_type",
+      "schema": "public",
+      "values": [
+        "union",
+        "association",
+        "partner_company",
+        "institutional_partner",
+        "other"
+      ]
+    },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
@@ -5292,21 +5240,6 @@
       "name": "communication_direction",
       "schema": "public",
       "values": ["inbound", "outbound"]
-    },
-    "public.waba_account_status": {
-      "name": "waba_account_status",
-      "schema": "public",
-      "values": ["active", "disabled"]
-    },
-    "public.whatsapp_channel_quality": {
-      "name": "whatsapp_channel_quality",
-      "schema": "public",
-      "values": ["GREEN", "YELLOW", "RED", "UNKNOWN"]
-    },
-    "public.whatsapp_channel_status": {
-      "name": "whatsapp_channel_status",
-      "schema": "public",
-      "values": ["active", "disabled"]
     },
     "public.document_batch_status": {
       "name": "document_batch_status",

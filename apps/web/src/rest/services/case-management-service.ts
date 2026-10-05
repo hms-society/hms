@@ -8,8 +8,10 @@ import type {
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
 import type {
+  CasePortalAccessSummary,
   GrantCasePortalAccessResponse,
   PortalDocumentUploadResponse,
+  ThirdPartyPortalCaseResponse,
 } from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
 
@@ -85,6 +87,12 @@ export const CaseManagementService = (
       )
     },
 
+    listCasePortalAccess(caseId) {
+      return restClient.get<readonly CasePortalAccessSummary[]>(
+        `/cases/${caseId}/portal-access`,
+      )
+    },
+
     reviewChecklistGate(caseId, request) {
       return restClient.patch<LegalCase>(`/cases/${caseId}/checklist-gate`, request)
     },
@@ -93,6 +101,13 @@ export const CaseManagementService = (
       const query = new URLSearchParams({ portalToken })
       return restClient.get<readonly CaseChecklistItem[]>(
         `/cases/${caseId}/portal-pendencies?${query.toString()}`,
+      )
+    },
+
+    getThirdPartyPortalCase(caseId, portalToken) {
+      const query = new URLSearchParams({ portalToken })
+      return restClient.get<ThirdPartyPortalCaseResponse>(
+        `/third-party-portal/cases/${caseId}?${query.toString()}`,
       )
     },
 
