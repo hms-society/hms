@@ -73,7 +73,15 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
     })
     const sourceSnapshot = structuredClone(sourceVersion)
     const createdAt = new Date('2026-09-25T15:00:00.000Z')
-    const content = { type: 'doc', content: [] } as unknown as DocumentTemplateContent
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Requerimento de {cliente_nome}.' }],
+        },
+      ],
+    } as unknown as DocumentTemplateContent
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
     packages.findByContext.mockResolvedValue({ id: 'package-id' } as never)
@@ -140,6 +148,7 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
         documentId: document.id,
         sourceDocumentVersionId: sourceVersion.id,
         content,
+        pendingMarkers: [{ marker: '{cliente_nome}' }],
         status: 'in_review',
       }),
     )

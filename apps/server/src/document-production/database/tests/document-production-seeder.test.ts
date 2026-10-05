@@ -22,9 +22,35 @@ describe('DocumentProductionSeeder', () => {
       { add: vi.fn(), replace: vi.fn() } as never,
       specificationsRepository as never,
       { add: vi.fn(), removeAll: vi.fn() } as never,
-      { addMany: vi.fn(), removeAll: vi.fn() } as never,
-      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
-      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
+      {
+        addMany: vi.fn(async (documents) =>
+          documents.map((document, index) => ({
+            ...document,
+            id: `document-${index}`,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })),
+        ),
+        removeAll: vi.fn(),
+      } as never,
+      {
+        add: vi.fn(async (documentPackage) => ({
+          ...documentPackage,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+        addMany: vi.fn(async (documents) => documents),
+        removeAll: vi.fn(),
+      } as never,
+      {
+        add: vi.fn(async (documentPackage) => ({
+          ...documentPackage,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+        addMany: vi.fn(async (documents) => documents),
+        removeAll: vi.fn(),
+      } as never,
     )
 
     const result = await seeder.run({
@@ -56,7 +82,7 @@ describe('DocumentProductionSeeder', () => {
       },
       variables: expect.arrayContaining([
         expect.objectContaining({
-          label: 'Nome do requerente',
+          label: 'Nome da pessoa requerente',
           technicalName: 'nome_requerente',
         }),
       ]),

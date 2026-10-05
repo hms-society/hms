@@ -47,6 +47,9 @@ type DocumentTemplateSeed = {
   readonly description: string
   readonly paragraphs: readonly string[]
   readonly variables: readonly DocumentTemplateVariable[]
+  readonly moment?: 'consultation' | 'formalization' | 'legal_production'
+  readonly legalAreaName?: string
+  readonly legalTopicName?: string
 }
 
 const DOCUMENT_TEMPLATES = [
@@ -102,6 +105,37 @@ const DOCUMENT_TEMPLATES = [
         label: 'Endereço do imóvel comercial',
         technicalName: 'endereco_imovel_comercial',
       },
+    ],
+  },
+  {
+    documentId: '00000000-0000-4000-8000-000000000205',
+    name: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+    description:
+      'Modelo universal de requerimento administrativo previdenciário. Fatos, períodos contributivos e documentos devem ser preenchidos e conferidos para cada requerente antes da submissão.',
+    moment: 'legal_production',
+    legalAreaName: 'Previdenciário',
+    legalTopicName: 'Aposentadoria',
+    paragraphs: [
+      'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS',
+      'REQUERIMENTO ADMINISTRATIVO DE BENEFÍCIO PREVIDENCIÁRIO',
+      'Requerente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NIT/PIS/PASEP: {{nit_requerente}}',
+      'Endereço: {{endereco_requerente}}',
+      'O(A) requerente solicita a análise de seu histórico previdenciário e a concessão do benefício {{beneficio_requerido}}, caso sejam preenchidos os requisitos legais aplicáveis.',
+      'Os períodos cuja análise é solicitada são: {{periodos_contributivos}}.',
+      'Documentos que instruem este requerimento: {{documentos_apresentados}}.',
+      'Requer o recebimento e processamento, a análise do CNIS e dos documentos apresentados, a apuração dos requisitos aplicáveis e a concessão do benefício se comprovado o preenchimento dos requisitos.',
+      'Termos em que, pede deferimento. {{municipio}}, {{data_documento}}.',
+    ],
+    variables: [
+      { label: 'Nome da pessoa requerente', technicalName: 'nome_requerente' },
+      { label: 'CPF da pessoa requerente', technicalName: 'cpf_requerente' },
+      { label: 'NIT/PIS/PASEP', technicalName: 'nit_requerente' },
+      { label: 'Endereço da pessoa requerente', technicalName: 'endereco_requerente' },
+      { label: 'Benefício requerido', technicalName: 'beneficio_requerido' },
+      { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
+      { label: 'Documentos apresentados', technicalName: 'documentos_apresentados' },
+      { label: 'Município', technicalName: 'municipio' },
+      { label: 'Data do documento', technicalName: 'data_documento' },
     ],
   },
 ] as const satisfies readonly DocumentTemplateSeed[]
@@ -170,34 +204,38 @@ export class DocumentProductionSeeder {
   }
 
   async run(references: DocumentProductionSeedReferences) {
-    const area = references.legalAreas.find(({ name }) => name === 'Cível')
-    const topic = references.legalTopics.find(
-      ({ legalAreaId, name }) => legalAreaId === area?.id && name === 'Contratos',
-    )
-    if (!area || !topic) {
-      throw new AppError(
-        'Document Production seed references are required.',
-        'Seed Error',
-      )
-    }
-
     const templates: readonly DocumentTemplateSeed[] = references.hasPendingDocumentData
       ? [PENDING_MARKERS_TEMPLATE]
       : DOCUMENT_TEMPLATES
     const specificationCreations: DocumentSpecificationCreation[] = templates.map(
-      (template) => ({
-        name: template.name,
-        description: template.description,
-        content: this.createTemplateContent(template.name, template.paragraphs),
-        variables: [...template.variables],
-        application: {
-          scope: 'legal_context',
-          moment: 'consultation',
-          legalAreaIds: [area.id],
-          legalTopicIdsByArea: { [area.id]: [topic.id] },
-        },
-        status: 'available',
-      }),
+      (template) => {
+        const area = references.legalAreas.find(
+          ({ name }) => name === (template.legalAreaName ?? 'Cível'),
+        )
+        const topic = references.legalTopics.find(
+          ({ legalAreaId, name }) =>
+            legalAreaId === area?.id && name === (template.legalTopicName ?? 'Contratos'),
+        )
+        if (!area || !topic) {
+          throw new AppError(
+            `Document Production seed references are missing for ${template.name}.`,
+            'Seed Error',
+          )
+        }
+        return {
+          name: template.name,
+          description: template.description,
+          content: this.createTemplateContent(template.name, template.paragraphs),
+          variables: [...template.variables],
+          application: {
+            scope: 'legal_context',
+            moment: template.moment ?? 'consultation',
+            legalAreaIds: [area.id],
+            legalTopicIdsByArea: { [area.id]: [topic.id] },
+          },
+          status: 'available',
+        }
+      },
     )
     const specifications =
       await this.specificationsRepository.addMany(specificationCreations)
