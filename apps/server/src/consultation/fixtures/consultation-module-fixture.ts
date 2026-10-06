@@ -1,6 +1,5 @@
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
 import type { TestingModuleBuilder } from '@nestjs/testing'
-import { UnauthorizedException } from '@nestjs/common'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import type { DocumentGenerationCreation } from '@hms/core/document-production/domain/entities'
@@ -16,7 +15,6 @@ import type {
 } from '@hms/core/document-production/interfaces'
 import type { User, UserCreation } from '@hms/core/identity/domain/entities'
 import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
-import type { AuthUser } from '@hms/core/identity/domain/structures'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
 import type {
@@ -33,15 +31,18 @@ import { DocumentProductionDatabaseModule } from '@/document-production/database
 import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { IdentityModule } from '@/identity/identity.module'
-import { AuthGuard } from '@/identity/guards'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
 import { IntakeDatabaseModule } from '@/intake/database/intake-database.module'
 import { LEGAL_CATALOG_REPOSITORIES } from '@/legal-catalog/constants/legal-catalog-repositories'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { InngestBroker } from '@/shared/messaging/inngest/inngest-broker'
+import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
+import { InngestFixture } from '@/shared/messaging/inngest/fixtures/inngest-fixture'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-database.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
+import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
 
 export class ConsultationModuleFixture {
   private constructor(
@@ -64,7 +65,9 @@ export class ConsultationModuleFixture {
     private readonly collaboratorsRepository: ReturnType<
       typeof ConsultationModuleFixture.resolveCollaboratorsRepository
     >,
-    private readonly authentication: { user?: AuthUser },
+    private readonly authFixture: SupabaseAuthFixture,
+    private readonly accessTokens: Map<string, string>,
+    private readonly inngestFixture: InngestFixture,
   ) {}
 
   get app(): INestApplication {
@@ -72,50 +75,53 @@ export class ConsultationModuleFixture {
   }
 
   static async register(
-    controller: Type<unknown>,
+    controller?: Type<unknown>,
     configure?: (builder: TestingModuleBuilder) => void,
   ) {
-    const authentication: { user?: AuthUser } = {}
-    const broker: Broker & { publish: Mock } = { publish: vi.fn() }
-    const restFixture = await RestFixture.register(
-      {
-        imports: [
-          IdentityModule,
-          LegalCatalogModule,
-          IntakeDatabaseModule,
-          SchedulingDatabaseModule,
-          ConsultationDatabaseModule,
-          DocumentProductionDatabaseModule,
-          DocumentProductionProvisionModule,
-          ProvisionModule,
-        ],
-        controllers: [controller],
-        providers: [{ provide: InngestBroker, useValue: broker }],
-      },
-      (builder) => {
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              user?: AuthUser
-              auth?: { accessToken: string; user: AuthUser }
-            }>()
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
-            request.user = authentication.user
-            request.auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            return true
-          },
-        })
-        configure?.(builder)
-        return builder
-      },
-    )
-
+    const authFixture = await SupabaseAuthFixture.register()
+    const accessTokens = new Map<string, string>()
+    let inngestFixture: InngestFixture
+    try {
+      inngestFixture = await InngestFixture.register({ createFunctions: () => [] })
+    } catch (error) {
+      await authFixture.close()
+      throw error
+    }
+    const realBroker = new InngestBroker(inngestFixture.client as InngestClient)
+    const broker: Broker & { publish: Mock } = {
+      publish: vi.fn((event: Parameters<Broker['publish']>[0]) =>
+        realBroker.publish(event),
+      ),
+    }
+    let restFixture: RestFixture
+    try {
+      restFixture = await RestFixture.register(
+        {
+          imports: [
+            IdentityModule,
+            LegalCatalogModule,
+            IntakeDatabaseModule,
+            SchedulingDatabaseModule,
+            ConsultationDatabaseModule,
+            DocumentProductionDatabaseModule,
+            DocumentProductionProvisionModule,
+            ProvisionModule,
+            SharedDatabaseModule,
+          ],
+          controllers: controller ? [controller] : [],
+          providers: [{ provide: InngestBroker, useValue: broker }],
+        },
+        (builder) => {
+          authFixture.configure(builder)
+          configure?.(builder)
+          return builder
+        },
+      )
+    } catch (error) {
+      await authFixture.close()
+      await inngestFixture.close()
+      throw error
+    }
     return new ConsultationModuleFixture(
       restFixture,
       broker,
@@ -132,7 +138,9 @@ export class ConsultationModuleFixture {
       restFixture.get(DOCUMENT_PRODUCTION_REPOSITORIES.generations),
       ConsultationModuleFixture.resolveUsersRepository(restFixture),
       ConsultationModuleFixture.resolveCollaboratorsRepository(restFixture),
-      authentication,
+      authFixture,
+      accessTokens,
+      inngestFixture,
     )
   }
 
@@ -145,13 +153,13 @@ export class ConsultationModuleFixture {
       profile: 'admin',
     })
     if (!collaborator) throw new Error('Test collaborator was not created')
-    this.authentication.user = { id: user.id, email: user.email }
     return { user, collaborator }
   }
 
   authenticateAs(user: User) {
-    this.authentication.user = { id: user.id, email: user.email }
-    return 'Bearer fixture-access-token'
+    const token = this.accessTokens.get(user.id)
+    if (!token) throw new Error('No Auth session was registered for the test user')
+    return `Bearer ${token}`
   }
 
   async seedConsultation(consultation: Consultation) {
@@ -288,18 +296,33 @@ export class ConsultationModuleFixture {
   }
 
   resetDatabase() {
-    this.broker.publish.mockReset()
+    this.broker.publish.mockClear()
     return this.restFixture.resetDatabase()
   }
 
-  close() {
-    return this.restFixture.close()
+  async close() {
+    try {
+      await this.restFixture.close()
+    } finally {
+      try {
+        await this.authFixture.close()
+      } finally {
+        await this.inngestFixture.close()
+      }
+    }
   }
 
   private async registerUser(overrides: Partial<UserCreation> = {}) {
-    const draft = UserFaker.fake({ status: 'active', ...overrides })
+    const auth = await this.authFixture.createSignedInUser(overrides.email)
+    const draft = UserFaker.fake({
+      status: 'active',
+      ...overrides,
+      id: auth.user.id,
+      email: auth.user.email,
+    })
     const [user] = await this.usersRepository.addMany([draft])
     if (!user) throw new Error('Test user was not created')
+    this.accessTokens.set(user.id, auth.accessToken)
     return user
   }
 

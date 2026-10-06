@@ -5,6 +5,7 @@ import { InngestClient } from '../messaging/inngest/inngest-client'
 import type { Request, Response } from 'express'
 import { ForbiddenException, HttpStatus } from '@nestjs/common'
 import { createHmac } from 'node:crypto'
+import { WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME } from '@/shared/messaging/inngest/integration-event-names'
 
 describe('WhatsappWebhookController', () => {
   let controller: WhatsappWebhookController
@@ -91,7 +92,7 @@ describe('WhatsappWebhookController', () => {
       expect(result).toEqual({ status: 'success' })
       expect(mockInngestSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'whatsapp/event.received',
+          name: WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME,
           data: payload,
         }),
       )

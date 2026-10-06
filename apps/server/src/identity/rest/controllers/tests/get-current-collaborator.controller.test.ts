@@ -37,11 +37,9 @@ describe('Get Current Collaborator Controller [GET /collaborators/me]', () => {
     await request(fixture.app.getHttpServer()).get('/collaborators/me').expect(401)
 
     const user = await fixture.registerUser()
-    fixture.authenticateAs(user)
-
     await request(fixture.app.getHttpServer())
       .get('/collaborators/me')
-      .set('Authorization', 'Bearer fixture-access-token')
+      .set('Authorization', fixture.authenticateAs(user))
       .expect(403)
   })
 })

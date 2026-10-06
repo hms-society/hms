@@ -17,7 +17,11 @@ describe('GenerateDocumentWorkflow', () => {
     }
     const start = vi.fn().mockResolvedValue({ status: 'success', result: outcome })
     const workflow = Object.assign(Object.create(GenerateDocumentWorkflow.prototype), {
-      workflow: { createRun: vi.fn().mockResolvedValue({ start }) },
+      mastra: {
+        getWorkflow: vi.fn().mockReturnValue({
+          createRun: vi.fn().mockResolvedValue({ start }),
+        }),
+      },
     }) as GenerateDocumentWorkflow
 
     const result = await workflow.run({} as never)

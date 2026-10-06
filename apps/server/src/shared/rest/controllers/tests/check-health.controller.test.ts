@@ -1,3 +1,5 @@
+import { createServer } from 'node:http'
+
 import {
   AggregationTemporality,
   InMemoryMetricExporter,
@@ -17,10 +19,29 @@ describe('Check Health Controller [GET /health]', () => {
   const metricReader = new PeriodicExportingMetricReader({ exporter: metricExporter })
   let fixture: RestFixture | undefined
   let sdk: NodeSDK | undefined
+  let supabaseHealthServer: ReturnType<typeof createServer> | undefined
+  let supabaseBaseUrl = ''
   let isInngestDev = true
+  let inngestApiBaseUrl = 'https://api.inngest.com'
 
   beforeAll(async () => {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'http://127.0.0.1:4318'
+    supabaseHealthServer = createServer((incoming, outgoing) => {
+      const isAuth = incoming.url === '/auth/v1/health'
+      const isStorage = incoming.url === '/storage/v1/status'
+      outgoing.writeHead(isAuth || isStorage ? 200 : 404, {
+        'content-type': 'application/json',
+      })
+      outgoing.end(JSON.stringify(isAuth ? { version: 'local' } : { status: 'ok' }))
+    })
+    await new Promise<void>((resolve, reject) => {
+      supabaseHealthServer?.once('error', reject)
+      supabaseHealthServer?.listen(0, '127.0.0.1', resolve)
+    })
+    const supabaseAddress = supabaseHealthServer.address()
+    if (!supabaseAddress || typeof supabaseAddress === 'string')
+      throw new Error('Supabase health test port unavailable')
+    supabaseBaseUrl = `http://127.0.0.1:${supabaseAddress.port}`
     sdk = new NodeSDK({
       traceExporter: {
         export(spans, callback) {
@@ -46,10 +67,6 @@ describe('Check Health Controller [GET /health]', () => {
       import('@/shared/provision/env/env-provider.js'),
       import('@/shared/rest/tests/rest-fixture.js'),
     ])
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response(null, { status: 200 })),
-    )
     fixture = await RestFixture.register({
       imports: [SharedDatabaseModule],
       controllers: [CheckHealthController],
@@ -58,11 +75,12 @@ describe('Check Health Controller [GET /health]', () => {
           provide: EnvProvider,
           useValue: {
             get(key: string) {
-              if (key === 'SUPABASE_URL') return 'http://localhost:8000'
+              if (key === 'SUPABASE_URL') return supabaseBaseUrl
               if (key === 'SUPABASE_SERVICE_ROLE_KEY') return 'service-role-key'
               if (key === 'HMS_SERVER_APP_PORT') return 3333
               if (key === 'INNGEST_DEV') return isInngestDev ? '1' : '0'
               if (key === 'INNGEST_API_KEY') return 'test-api-key'
+              if (key === 'INNGEST_API_BASE_URL') return inngestApiBaseUrl
               if (key === 'INNGEST_APP_URL')
                 return 'https://server-staging.app.hmsadvogados.com.br/api/inngest'
               return undefined
@@ -80,11 +98,17 @@ describe('Check Health Controller [GET /health]', () => {
       try {
         await sdk?.shutdown()
       } finally {
-        vi.unstubAllGlobals()
-        if (originalEndpoint === undefined) {
-          delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-        } else {
-          process.env.OTEL_EXPORTER_OTLP_ENDPOINT = originalEndpoint
+        try {
+          supabaseHealthServer?.closeAllConnections()
+          await new Promise<void>(
+            (resolve) => supabaseHealthServer?.close(() => resolve()) ?? resolve(),
+          )
+        } finally {
+          if (originalEndpoint === undefined) {
+            delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+          } else {
+            process.env.OTEL_EXPORTER_OTLP_ENDPOINT = originalEndpoint
+          }
         }
       }
     }
@@ -150,7 +174,6 @@ describe('Check Health Controller [GET /health]', () => {
         services: {
           database: 'DOWN',
           'supabase-auth': 'UP',
-          inngest: 'UP',
           documenso: 'NOT_CONFIGURED',
         },
       })
@@ -164,56 +187,43 @@ describe('Check Health Controller [GET /health]', () => {
   it('reports Inngest Cloud sync only when the active app has the expected URL', async () => {
     if (!fixture) throw new Error('Health test infrastructure is unavailable')
     isInngestDev = false
-    const mockedFetch = vi.mocked(fetch)
-    mockedFetch.mockImplementation(async (input) => {
-      if (String(input) === 'https://api.inngest.com/v2/apps/hms-server') {
-        return new Response(
-          JSON.stringify({
-            data: {
-              id: 'hms-server',
-              isArchived: false,
-              functionCount: 16,
-              latestSync: {
-                status: 'success',
-                url: 'https://server-staging.app.hmsadvogados.com.br/api/inngest',
-              },
-            },
-          }),
-          { status: 200 },
-        )
-      }
-      return new Response(null, { status: 200 })
+    let syncUrl = 'https://server-staging.app.hmsadvogados.com.br/api/inngest'
+    const requests: Array<{
+      path: string | undefined
+      authorization: string | undefined
+    }> = []
+    const server = createServer((incoming, outgoing) => {
+      requests.push({
+        path: incoming.url,
+        authorization: incoming.headers.authorization,
+      })
+      outgoing.writeHead(200, { 'content-type': 'application/json' })
+      outgoing.end(
+        JSON.stringify({
+          data: {
+            id: 'hms-server',
+            isArchived: false,
+            functionCount: 16,
+            latestSync: { status: 'success', url: syncUrl },
+          },
+        }),
+      )
     })
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const address = server.address()
+    if (!address || typeof address === 'string')
+      throw new Error('Inngest test port unavailable')
+    inngestApiBaseUrl = `http://127.0.0.1:${address.port}`
 
     try {
       const synced = await request(fixture.app.getHttpServer()).get('/health').expect(200)
       expect(synced.body.services.inngest).toBe('UP')
-      expect(mockedFetch).toHaveBeenCalledWith(
-        'https://api.inngest.com/v2/apps/hms-server',
-        expect.objectContaining({
-          headers: { Authorization: 'Bearer test-api-key' },
-        }),
-      )
-
-      mockedFetch.mockImplementation(async (input) => {
-        if (String(input) === 'https://api.inngest.com/v2/apps/hms-server') {
-          return new Response(
-            JSON.stringify({
-              data: {
-                id: 'hms-server',
-                isArchived: false,
-                functionCount: 16,
-                latestSync: {
-                  status: 'success',
-                  url: 'https://wrong.example.com/api/inngest',
-                },
-              },
-            }),
-            { status: 200 },
-          )
-        }
-        return new Response(null, { status: 200 })
+      expect(requests).toContainEqual({
+        path: '/v2/apps/hms-server',
+        authorization: 'Bearer test-api-key',
       })
+
+      syncUrl = 'https://wrong.example.com/api/inngest'
       const mismatched = await request(fixture.app.getHttpServer())
         .get('/health')
         .expect(200)
@@ -223,7 +233,8 @@ describe('Check Health Controller [GET /health]', () => {
       })
     } finally {
       isInngestDev = true
-      mockedFetch.mockImplementation(async () => new Response(null, { status: 200 }))
+      inngestApiBaseUrl = 'https://api.inngest.com'
+      await new Promise<void>((resolve) => server.close(() => resolve()))
     }
   })
 })

@@ -1,30 +1,42 @@
-import { describe, expect, it, vi } from 'vitest'
-import { ListClientCommunicationSummariesController } from '../list-client-communication-summaries.controller'
-import type { PrivateMessagesRepository } from '@hms/core/communication/interfaces'
+import { randomUUID } from 'node:crypto'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import request from 'supertest'
 
-describe('ListClientCommunicationSummariesController', () => {
-  it('delegates execution to the use case and returns summaries', async () => {
-    const mockSummaries = [
-      {
-        clientId: 'client-1',
-        clientName: 'Cliente Teste',
-        lastMessage: 'Mensagem recente',
-        lastMessageAt: new Date(),
-        unreadCount: 1,
-      },
-    ]
+import { CommunicationRestModuleFixture } from '@/communication/fixtures/communication-rest-module-fixture'
 
-    const mockRepo: Partial<PrivateMessagesRepository> = {
-      listSummariesByClient: vi.fn().mockResolvedValue(mockSummaries),
-    }
+describe('List Client Communication Summaries Controller [GET /communications/summary]', () => {
+  let fixture: CommunicationRestModuleFixture
+  beforeAll(async () => {
+    fixture = await CommunicationRestModuleFixture.register()
+  })
+  beforeEach(async () => fixture.resetDatabase())
+  afterAll(async () => fixture?.close())
 
-    const controller = new ListClientCommunicationSummariesController(
-      mockRepo as PrivateMessagesRepository,
-    )
+  it('groups private messages by client in PostgreSQL', async () => {
+    const token = await fixture.createSession()
+    const client = await fixture.createClient()
+    await fixture.messagesRepository.add({
+      clientId: client.id,
+      collaboratorId: randomUUID(),
+      intakeId: randomUUID(),
+      direction: 'incoming',
+      content: 'Preciso de ajuda',
+      fileIds: [],
+    })
+    const response = await request(fixture.app.getHttpServer())
+      .get('/communications/summary')
+      .set('Authorization', token)
+      .expect(200)
+    expect(response.body).toEqual([
+      expect.objectContaining({
+        clientId: client.id,
+        inboundCount: 1,
+        isLastMessageInbound: true,
+      }),
+    ])
+  })
 
-    const result = await controller.handle()
-
-    expect(mockRepo.listSummariesByClient).toHaveBeenCalledTimes(1)
-    expect(result).toEqual(mockSummaries)
+  it('requires authentication', async () => {
+    await request(fixture.app.getHttpServer()).get('/communications/summary').expect(401)
   })
 })

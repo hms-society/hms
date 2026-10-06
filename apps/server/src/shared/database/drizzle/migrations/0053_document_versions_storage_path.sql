@@ -1,1 +1,1 @@
-ALTER TABLE "document_versions" ADD COLUMN "storage_path" text;
+ALTER TABLE "document_versions" ADD COLUMN IF NOT EXISTS "storage_path" text;

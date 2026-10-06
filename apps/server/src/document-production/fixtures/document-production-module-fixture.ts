@@ -1,35 +1,39 @@
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
-import { UnauthorizedException } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
 import type {
   CollaboratorCreation,
   User,
   UserCreation,
 } from '@hms/core/identity/domain/entities'
 import { UserFaker } from '@hms/core/identity/domain/entities/fakers'
-import type { AuthUser } from '@hms/core/identity/domain/structures'
 
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
+import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentProductionSeeder } from '@/document-production/database/document-production-seeder'
-import { DrizzleDocumentSpecificationsRepository } from '@/document-production/database/drizzle/repositories'
+import {
+  DrizzleDocumentGenerationsRepository,
+  DrizzleDocumentSpecificationsRepository,
+} from '@/document-production/database/drizzle/repositories'
 import { IdentityModule } from '@/identity/identity.module'
 import {
   DrizzleCollaboratorsRepository,
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
-import { AuthGuard } from '@/identity/guards'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
+import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 
 export class DocumentProductionModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
+    private readonly authFixture: SupabaseAuthFixture,
     readonly specificationsRepository: DrizzleDocumentSpecificationsRepository,
+    readonly generationsRepository: DrizzleDocumentGenerationsRepository,
     readonly specificationsSeeder: DocumentProductionSeeder,
     readonly legalCatalogSeeder: LegalCatalogSeeder,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
-    private readonly authentication: { user?: AuthUser },
+    private readonly accessTokens: Map<string, string>,
   ) {}
 
   get app(): INestApplication {
@@ -37,48 +41,49 @@ export class DocumentProductionModuleFixture {
   }
 
   static async register(controller?: Type<unknown>) {
-    const authentication: { user?: AuthUser } = {}
-    const restFixture = await RestFixture.register(
-      {
-        imports: [IdentityModule, LegalCatalogModule, DocumentProductionDatabaseModule],
-        controllers: controller ? [controller] : [],
-        providers: [DocumentProductionSeeder],
-      },
-      (builder) =>
-        builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              user?: AuthUser
-              auth?: { accessToken: string; user: AuthUser }
-            }>()
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
-            const auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            request.user = authentication.user
-            request.auth = auth
-            return true
-          },
-        }),
-    )
+    const authFixture = await SupabaseAuthFixture.register()
+    const accessTokens = new Map<string, string>()
+    let restFixture: RestFixture
+    try {
+      restFixture = await RestFixture.register(
+        {
+          imports: [
+            IdentityModule,
+            LegalCatalogModule,
+            DocumentProductionDatabaseModule,
+            ConsultationDatabaseModule,
+          ],
+          controllers: controller ? [controller] : [],
+          providers: [DocumentProductionSeeder],
+        },
+        (builder) => authFixture.configure(builder),
+      )
+    } catch (error) {
+      await authFixture.close()
+      throw error
+    }
 
     return new DocumentProductionModuleFixture(
       restFixture,
+      authFixture,
       restFixture.get(DrizzleDocumentSpecificationsRepository),
+      restFixture.get(DrizzleDocumentGenerationsRepository),
       restFixture.get(DocumentProductionSeeder),
       restFixture.get(LegalCatalogSeeder),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
-      authentication,
+      accessTokens,
     )
   }
 
   async registerUser(overrides: Partial<UserCreation> = {}) {
-    const draft = UserFaker.fake({ status: 'active', ...overrides })
+    const auth = await this.authFixture.createSignedInUser(overrides.email)
+    const draft = UserFaker.fake({
+      status: 'active',
+      ...overrides,
+      id: auth.user.id,
+      email: auth.user.email,
+    })
     const [user] = await this.usersRepository.addMany([
       {
         id: draft.id,
@@ -88,6 +93,7 @@ export class DocumentProductionModuleFixture {
       },
     ])
     if (!user) throw new Error('Test user was not created')
+    this.accessTokens.set(user.id, auth.accessToken)
     return user
   }
 
@@ -100,13 +106,13 @@ export class DocumentProductionModuleFixture {
       profile: 'admin',
     } satisfies CollaboratorCreation)
     if (!collaborator) throw new Error('Test administrator was not created')
-    this.authentication.user = { id: user.id, email: user.email }
     return user
   }
 
   authenticateAs(user: User) {
-    this.authentication.user = { id: user.id, email: user.email }
-    return 'Bearer fixture-access-token'
+    const token = this.accessTokens.get(user.id)
+    if (!token) throw new Error('No Auth session was registered for the test user')
+    return `Bearer ${token}`
   }
 
   async seedCatalog() {
@@ -114,10 +120,15 @@ export class DocumentProductionModuleFixture {
   }
 
   resetDatabase() {
+    this.accessTokens.clear()
     return this.restFixture.resetDatabase()
   }
 
-  close() {
-    return this.restFixture.close()
+  async close() {
+    try {
+      await this.restFixture.close()
+    } finally {
+      await this.authFixture.close()
+    }
   }
 }

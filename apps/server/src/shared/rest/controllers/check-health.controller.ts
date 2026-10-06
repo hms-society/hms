@@ -144,11 +144,14 @@ export class CheckHealthController {
     }
 
     try {
-      const result = await fetch('https://api.inngest.com/v2/apps/hms-server', {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        redirect: 'error',
-        signal: AbortSignal.timeout(DEPENDENCY_TIMEOUT_MS),
-      })
+      const result = await fetch(
+        new URL('/v2/apps/hms-server', this.envProvider.get('INNGEST_API_BASE_URL')),
+        {
+          headers: { Authorization: `Bearer ${apiKey}` },
+          redirect: 'error',
+          signal: AbortSignal.timeout(DEPENDENCY_TIMEOUT_MS),
+        },
+      )
       if (!result.ok) {
         await result.body?.cancel()
         Logger.warn(
