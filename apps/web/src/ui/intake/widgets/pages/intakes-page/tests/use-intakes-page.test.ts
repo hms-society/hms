@@ -3,40 +3,35 @@ import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useIntakeResponsiblesQuery } from '@/ui/intake/hooks/use-intake-responsibles-query'
+import { useIntakesListQuery } from '@/ui/intake/hooks/use-intakes-list-query'
 import { useIntakesPage } from '../use-intakes-page'
-import { useIntakesQuery } from '../use-intakes-query'
 
-vi.mock('../use-intakes-query', () => ({
-  useIntakesQuery: vi.fn(),
+vi.mock('@/ui/intake/hooks/use-intakes-list-query', () => ({
+  useIntakesListQuery: vi.fn(() => ({
+    data: { items: [], page: 2, pageSize: 10, total: 20, totalPages: 2 },
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+  })),
 }))
 vi.mock('@/ui/intake/hooks/use-intake-responsibles-query', () => ({
   useIntakeResponsiblesQuery: vi.fn(),
 }))
 
-const useIntakesQueryMock = vi.mocked(useIntakesQuery)
+const useIntakesListQueryMock = vi.mocked(useIntakesListQuery)
 const useIntakeResponsiblesQueryMock = vi.mocked(useIntakeResponsiblesQuery)
 
 describe('useIntakesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useIntakesQueryMock.mockReturnValue({
-      data: { items: [], page: 2, pageSize: 10, total: 20, totalPages: 2 },
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as never)
-    useIntakeResponsiblesQueryMock.mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    } as never)
+    useIntakeResponsiblesQueryMock.mockReturnValue({ data: [] } as never)
   })
 
-  it('maps URL filters to the list query', () => {
+  it('maps URL filters to the intake list query', () => {
     const { result } = renderHook(() => useIntakesPage(), {
       wrapper: withNuqsTestingAdapter({
         searchParams:
-          '?search=  Ana  &status=consultation_scheduled&responsibleId=responsible-1&origin=direct&contactChannel=whatsapp&registeredFrom=2026-08-01&registeredTo=2026-08-31&page=2&pageSize=10',
+          '?search=++Ana++&status=consultation_scheduled&responsibleId=responsible-1&origin=direct&contactChannel=whatsapp&registeredFrom=2026-08-01&registeredTo=2026-08-31&page=2&pageSize=10',
       }),
     })
 
@@ -51,9 +46,46 @@ describe('useIntakesPage', () => {
       page: 2,
       pageSize: 10,
     })
-    expect(useIntakesQueryMock).toHaveBeenCalledWith(result.current.query)
+    expect(useIntakesListQueryMock).toHaveBeenCalledWith(result.current.query)
     expect(result.current.page).toBe(2)
     expect(result.current.totalPages).toBe(2)
+    expect(result.current.responsibles).toEqual({ data: [] })
+  })
+
+  it('normalizes malformed URL filters before they reach the intake list query', () => {
+    const { result } = renderHook(() => useIntakesPage(), {
+      wrapper: withNuqsTestingAdapter({
+        searchParams:
+          '?search=++Ana++&status=invalid&responsibleId=++&origin=unknown&contactChannel=emailish&registeredFrom=2026-02-30&registeredTo=2026-08-31&page=0&pageSize=101',
+      }),
+    })
+
+    expect(result.current.query).toEqual({
+      search: 'Ana',
+      status: undefined,
+      responsibleId: undefined,
+      origin: undefined,
+      contactChannel: undefined,
+      registeredFrom: undefined,
+      registeredTo: '2026-08-31',
+      page: 1,
+      pageSize: 20,
+    })
+    expect(useIntakesListQueryMock).toHaveBeenCalledWith(result.current.query)
+  })
+
+  it('trims valid origin and contact channel URL filters before querying', () => {
+    const { result } = renderHook(() => useIntakesPage(), {
+      wrapper: withNuqsTestingAdapter({
+        searchParams: '?origin=++direct++&contactChannel=++whatsapp++',
+      }),
+    })
+
+    expect(result.current.query).toMatchObject({
+      origin: 'direct',
+      contactChannel: 'whatsapp',
+    })
+    expect(useIntakesListQueryMock).toHaveBeenCalledWith(result.current.query)
   })
 
   it('resets pagination when a filter changes', async () => {
@@ -62,7 +94,7 @@ describe('useIntakesPage', () => {
     })
 
     await act(async () => {
-      await result.current.update({ status: 'contracted' })
+      await result.current.updateSearchParams({ status: 'contracted' })
     })
 
     expect(result.current.query).toMatchObject({
@@ -82,7 +114,7 @@ describe('useIntakesPage', () => {
     expect(result.current.hasFilters).toBe(true)
 
     await act(async () => {
-      await result.current.clear()
+      await result.current.clearSearchParams()
     })
 
     expect(result.current.hasFilters).toBe(false)

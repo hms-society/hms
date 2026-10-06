@@ -90,8 +90,8 @@ function createPageResult(overrides: Record<string, unknown> = {}) {
     hasFilters: false,
     page: 1,
     totalPages: 1,
-    update: vi.fn(),
-    clear: vi.fn(),
+    updateSearchParams: vi.fn(),
+    clearSearchParams: vi.fn(),
     ...overrides,
   }
 }
@@ -153,7 +153,7 @@ describe('IntakesPage', () => {
   })
 
   it('offers to clear filters when the filtered list is empty', () => {
-    const clear = vi.fn()
+    const clearSearchParamsMock = vi.fn()
     useIntakesPageMock.mockReturnValue(
       createPageResult({
         intakes: {
@@ -168,14 +168,14 @@ describe('IntakesPage', () => {
           refetch: vi.fn(),
         },
         hasFilters: true,
-        clear,
+        clearSearchParams: clearSearchParamsMock,
       }) as never,
     )
 
     render(<IntakesPage />)
     fireEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }))
 
-    expect(clear).toHaveBeenCalledOnce()
+    expect(clearSearchParamsMock).toHaveBeenCalledOnce()
     expect(
       screen.getByRole('heading', { name: 'Nenhum Intake encontrado' }),
     ).toBeDefined()
@@ -197,8 +197,10 @@ describe('IntakesPage', () => {
   })
 
   it('opens advanced filters in a dialog and applies them together', () => {
-    const update = vi.fn()
-    useIntakesPageMock.mockReturnValue(createPageResult({ update }) as never)
+    const updateSearchParamsMock = vi.fn()
+    useIntakesPageMock.mockReturnValue(
+      createPageResult({ updateSearchParams: updateSearchParamsMock }) as never,
+    )
 
     render(<IntakesPage />)
 
@@ -210,7 +212,7 @@ describe('IntakesPage', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Aplicar filtros' }))
 
-    expect(update).toHaveBeenCalledWith(
+    expect(updateSearchParamsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         origin: 'referral',
         responsibleId: null,
@@ -218,5 +220,158 @@ describe('IntakesPage', () => {
       }),
     )
     expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('updates search and status filters and shows the unfiltered empty state', () => {
+    const updateSearchParamsMock = vi.fn()
+    useIntakesPageMock.mockReturnValue(
+      createPageResult({
+        intakes: {
+          data: {
+            ...createPageResult().intakes.data,
+            items: [],
+            total: 0,
+            totalPages: 0,
+          },
+          isLoading: false,
+          isError: false,
+          refetch: vi.fn(),
+        },
+        updateSearchParams: updateSearchParamsMock,
+      }) as never,
+    )
+
+    render(<IntakesPage />)
+    fireEvent.change(
+      screen.getByRole('textbox', { name: 'Buscar por ID, cliente ou demanda' }),
+      {
+        target: { value: 'Ana' },
+      },
+    )
+    fireEvent.keyDown(screen.getByRole('tab', { name: /Contratado/ }), { key: 'Enter' })
+
+    expect(updateSearchParamsMock).toHaveBeenNthCalledWith(1, { search: 'Ana' })
+    expect(updateSearchParamsMock).toHaveBeenNthCalledWith(2, { status: 'contracted' })
+    expect(
+      screen.getByRole('heading', { name: 'Nenhum Intake registrado' }),
+    ).toBeDefined()
+    expect(screen.getAllByRole('link', { name: 'Novo Intake' })).toHaveLength(2)
+  })
+
+  it('applies a custom registration range and clears advanced filters', () => {
+    const updateSearchParamsMock = vi.fn()
+    useIntakesPageMock.mockReturnValue(
+      createPageResult({ updateSearchParams: updateSearchParamsMock }) as never,
+    )
+
+    render(<IntakesPage />)
+    fireEvent.click(screen.getByRole('button', { name: 'Filtros' }))
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'Filtrar por período de registro' }),
+      {
+        target: { value: 'custom' },
+      },
+    )
+    fireEvent.change(screen.getByLabelText('Data inicial de registro'), {
+      target: { value: '2026-08-01' },
+    })
+    fireEvent.change(screen.getByLabelText('Data final de registro'), {
+      target: { value: '2026-08-31' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicar filtros' }))
+
+    expect(updateSearchParamsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        registeredFrom: '2026-08-01',
+        registeredTo: '2026-08-31',
+      }),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filtros' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }))
+
+    expect(updateSearchParamsMock).toHaveBeenLastCalledWith({
+      responsibleId: null,
+      origin: null,
+      contactChannel: null,
+      registeredFrom: null,
+      registeredTo: null,
+    })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('shows pagination boundaries and requests the adjacent page', () => {
+    const updateSearchParamsMock = vi.fn()
+    useIntakesPageMock.mockReturnValue(
+      createPageResult({
+        intakes: {
+          data: {
+            ...createPageResult().intakes.data,
+            page: 2,
+            pageSize: 10,
+            total: 25,
+            totalPages: 3,
+          },
+          isLoading: false,
+          isError: false,
+          refetch: vi.fn(),
+        },
+        page: 2,
+        totalPages: 3,
+        updateSearchParams: updateSearchParamsMock,
+      }) as never,
+    )
+
+    render(<IntakesPage />)
+    expect(
+      screen.getByRole('navigation', { name: 'Paginação de Intakes' }).textContent,
+    ).toContain('Exibindo 11–20 de 25 Intakes')
+    fireEvent.click(screen.getByRole('button', { name: 'Anterior' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima' }))
+
+    expect(updateSearchParamsMock).toHaveBeenNthCalledWith(1, { page: 1 })
+    expect(updateSearchParamsMock).toHaveBeenNthCalledWith(2, { page: 3 })
+  })
+
+  it('renders status variants, missing values, and an invalid registration date safely', () => {
+    const statuses = [
+      'consultation_scheduling_failed',
+      'consultation_completed',
+      'viability_registered',
+      'consultation_scheduling',
+      'closed_without_contract',
+      'unknown_status',
+    ]
+    const items = statuses.map((status, index) => ({
+      ...intake,
+      intakeId: `intake-${index}`,
+      displayId: `INT-${index}`,
+      status,
+      createdAt: index === 0 ? 'invalid-date' : intake.createdAt,
+      demandNotes: null,
+      contactChannel: 'unknown-channel',
+    }))
+    useIntakesPageMock.mockReturnValue(
+      createPageResult({
+        intakes: {
+          data: { ...createPageResult().intakes.data, items },
+          isLoading: false,
+          isError: false,
+          refetch: vi.fn(),
+        },
+      }) as never,
+    )
+
+    render(<IntakesPage />)
+
+    expect(screen.getAllByText('Agendamento com falha').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Consulta realizada').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Viabilidade registrada').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Agendando consulta').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Encerrado sem contratação').length).toBeGreaterThan(0)
+    expect(screen.getByText('unknown_status')).toBeDefined()
+    expect(screen.getByText('—')).toBeDefined()
+    expect(screen.getAllByText('Sem descrição registrada')).toHaveLength(statuses.length)
+    expect(screen.getAllByText('unknown-channel')).toHaveLength(statuses.length)
   })
 })

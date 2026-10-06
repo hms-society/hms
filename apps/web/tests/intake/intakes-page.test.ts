@@ -1,7 +1,7 @@
 import { expect, test as playwrightTest } from '@playwright/test'
 
-import { test } from '../../fixtures/auth-fixture'
-import { ROUTES } from '../../../src/constants/routes'
+import { test } from '../fixtures/auth-fixture'
+import { ROUTES } from '../../src/constants/routes'
 
 const BACKEND_URL = 'http://hms-api.test'
 
@@ -57,31 +57,56 @@ test('renders the protected intake list and sends status filters to the REST end
     })
   })
 
-  const listRequests: string[] = []
-  await page.route(`${BACKEND_URL}/intakes?*`, async (route) => {
-    listRequests.push(route.request().url())
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(intakePage),
-    })
-  })
+  await page.route(
+    (url) => url.origin === BACKEND_URL && url.pathname === '/intakes',
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(intakePage),
+      })
+    },
+  )
 
+  const initialListResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      new URL(response.url()).origin === BACKEND_URL &&
+      new URL(response.url()).pathname === '/intakes',
+  )
   await page.goto(ROUTES.intakes)
 
   await expect(page).toHaveURL(new RegExp(`${ROUTES.intakes}(\\?.*)?$`))
   await expect(page.getByRole('heading', { name: 'Intakes' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'ID' })).toBeVisible()
   await expect(page.getByText('INT-0142')).toBeVisible()
-  const initialRequestUrl = new URL(listRequests[0])
+  const initialListResponse = await initialListResponsePromise
+  expect(initialListResponse.status()).toBe(200)
+  const initialRequestUrl = new URL(initialListResponse.url())
   expect(initialRequestUrl.searchParams.get('page')).toBe('1')
   expect(initialRequestUrl.searchParams.get('pageSize')).toBe('20')
+  expect(await initialListResponse.json()).toMatchObject({
+    items: [expect.objectContaining({ displayId: 'INT-0142' })],
+  })
 
+  const filteredListResponsePromise = page.waitForResponse((response) => {
+    const responseUrl = new URL(response.url())
+    return (
+      response.request().method() === 'GET' &&
+      responseUrl.origin === BACKEND_URL &&
+      responseUrl.pathname === '/intakes' &&
+      responseUrl.searchParams.get('status') === 'consultation_scheduled'
+    )
+  })
   await page.getByRole('tab', { name: /Consulta agendada/ }).click()
 
   await expect(page).toHaveURL(/status=consultation_scheduled/)
   await expect(page.getByText('Ana Beatriz')).toBeVisible()
-  expect(listRequests.at(-1)).toContain('status=consultation_scheduled')
+  const filteredListResponse = await filteredListResponsePromise
+  expect(filteredListResponse.status()).toBe(200)
+  expect(await filteredListResponse.json()).toMatchObject({
+    items: [expect.objectContaining({ displayId: 'INT-0142' })],
+  })
 })
 
 playwrightTest(

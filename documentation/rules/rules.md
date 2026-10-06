@@ -47,6 +47,7 @@ and surface the discrepancy before silently copying the implementation.
 | [`ui-layer-rules.md`](ui-layer-rules.md) | Creating or changing web UI, widgets, layouts, hooks, contexts, routes, route middleware, sidebar configuration, icons, browser environment values, or web REST adapters. | `apps/web/src/ui/**`, `apps/web/src/constants/**`, `apps/web/src/middlewares/**`, `apps/web/src/rest/**`, `apps/web/src/routes/**` |
 | [`web-app-routing-rules.md`](web-app-routing-rules.md) | Creating, changing, renaming, or reviewing web application routes, route constants, route middleware, search validation, navigation paths, or generated route metadata. | `apps/web/src/routes/**`, `apps/web/src/constants/routes.ts`, `apps/web/src/middlewares/**`, `apps/web/src/routeTree.gen.ts` |
 | [`widget-testing-rules.md`](widget-testing-rules.md) | Creating, changing, or reviewing tests for React widgets, layouts, pages, application hooks, navigation behavior, or their mocks. | `apps/web/src/**/*.test.ts`, `apps/web/src/**/*.test.tsx`, colocated web `tests/` directories |
+| [`web-app-integration-testing-rules.md`](web-app-integration-testing-rules.md) | Creating or changing Playwright integration tests for web layouts, routes, pages, authentication flows, or web-to-API behavior. | `apps/web/tests/**`, `apps/web/playwright.config.ts` |
 | [`core-package-rules.md`](core-package-rules.md) | Changing shared domain entities, structures, errors, events, interfaces, constants, or use cases. Also read it when an app change requires a new or changed core contract. | `packages/core/src/**`, `packages/core/package.json` exports |
 | [`validation-package-rules.md`](validation-package-rules.md) | Creating, changing, moving, exporting, testing, or consuming reusable Zod schemas, including form, REST, route-search, environment, and event validation. | `packages/validation/**`, imports from `@hms/validation/**`, reusable schemas in apps |
 | [`use-case-testing-rules.md`](use-case-testing-rules.md) | Creating or changing core use cases, their unit tests, domain fakers used by those tests, or mocked use-case dependencies. | `packages/core/src/**/use-cases/**`, `packages/core/src/**/domain/**/fakers/**` |
@@ -70,7 +71,10 @@ actual scope:
 | Build or change a widget | UI Layer; add Widget Testing when tests change |
 | Add or change a web application route | UI Layer + Web App Routing; add Widget Testing when navigation behavior is tested |
 | Change an internal layout widget | UI Layer + Widget Testing, because behavior is tested at the owning layout boundary |
-| Add a domain-specific query or realtime hook | UI Layer + Widget Testing |
+| Add or change web layout or page integration coverage | Web App Integration Testing; add Widget Testing for isolated widget or hook tests |
+| Add or change a server API integration test | Controller Testing; add REST Layer and Database Layer when endpoint or persistence behavior changes |
+| Add a domain-specific query hook | UI Layer + Widget Testing at its consumer |
+| Add a realtime subscription hook | UI Layer + Widget Testing |
 | Add a web REST service for an existing endpoint | UI Layer + REST Layer; add Widget Testing and Web App Routing when consumer or browser tests cover the mapping; add Core Package when the service contract changes |
 | Add or change a shared form or route-search schema | Validation Package + UI Layer; add Web App Routing for search parameters and Widget Testing for consumer behavior |
 | Add a complete REST operation | Core Package + REST Layer; add Validation Package when shared request/response schemas change; add Database Layer when persistence changes; add Controller Testing and Use Case Testing for their respective tests |

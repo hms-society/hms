@@ -7,12 +7,12 @@ const AUTHENTICATED_USER = {
   email: 'attendant@hms.test',
 } as const
 
-export type AuthFixture = {
-  auth: typeof AUTHENTICATED_USER
+export type FixtureAuth = {
+  authFixture: typeof AUTHENTICATED_USER
 }
 
-export const test = base.extend<AuthFixture>({
-  auth: [
+export const test = base.extend<FixtureAuth>({
+  authFixture: [
     async ({ page }, use) => {
       const now = new Date().toISOString()
       const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60

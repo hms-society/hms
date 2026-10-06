@@ -1,19 +1,26 @@
 import { expect, type Page } from '@playwright/test'
 
+import { test as authFixtureTest } from './auth-fixture'
+
 export const BACKEND_URL = 'http://hms-api.test'
 export const COLLABORATOR_ID = 'collaborator-id'
 
-type CollaboratorStatus = 'active' | 'invited' | 'disabled'
-
-type CollaboratorFixture = {
+type FixtureCollaborator = {
   collaboratorId: string
   professionalName: string
   email: string
-  profile: string
-  status: CollaboratorStatus
+  profile:
+    | 'admin'
+    | 'attendant'
+    | 'client'
+    | 'lawyer'
+    | 'paralegal'
+    | 'supervisor'
+    | 'intern'
+  status: 'active' | 'invited' | 'disabled'
   jobTitle?: string
   lastAccessAt?: string
-  legalExpertises: readonly unknown[]
+  legalExpertises?: readonly unknown[]
 }
 
 type ActionKind = 'resend' | 'cancel-invitation' | 'deactivate' | 'reactivate' | 'remove'
@@ -25,7 +32,7 @@ type RecordedRequest = {
 }
 
 type RouteMockState = {
-  collaborators: CollaboratorFixture[]
+  collaborators: FixtureCollaborator[]
   listError?: string
   listDelayMs: number
   actionErrors: Partial<Record<ActionKind, string>>
@@ -33,7 +40,24 @@ type RouteMockState = {
   requests: RecordedRequest[]
 }
 
-export const ADMINISTRATOR: CollaboratorFixture = {
+type CollaboratorRouteOptions = {
+  currentCollaborator?: FixtureCollaborator
+  collaborators?: FixtureCollaborator[]
+  listError?: string
+  listDelayMs?: number
+  actionErrors?: Partial<Record<ActionKind, string>>
+  actionDelays?: Partial<Record<ActionKind, number>>
+}
+
+type FixtureIdentity = {
+  identityFixture: {
+    mockCollaboratorRoutes: (
+      options?: CollaboratorRouteOptions,
+    ) => Promise<RouteMockState>
+  }
+}
+
+export const ADMINISTRATOR: FixtureCollaborator = {
   collaboratorId: 'administrator-id',
   professionalName: 'Administrador HMS',
   email: 'admin@hms.test',
@@ -41,19 +65,19 @@ export const ADMINISTRATOR: CollaboratorFixture = {
   status: 'active',
   jobTitle: 'Administrador',
   lastAccessAt: '2026-07-30T12:00:00.000Z',
-  legalExpertises: [],
 }
 
-export const ATTENDANT: CollaboratorFixture = {
-  ...ADMINISTRATOR,
+export const ATTENDANT: FixtureCollaborator = {
   collaboratorId: 'attendant-id',
   professionalName: 'Atendente HMS',
   email: 'attendant@hms.test',
   profile: 'attendant',
+  status: 'active',
   jobTitle: 'Atendimento',
+  lastAccessAt: '2026-07-30T12:00:00.000Z',
 }
 
-export const ACTIVE_COLLABORATOR: CollaboratorFixture = {
+export const ACTIVE_COLLABORATOR: FixtureCollaborator = {
   collaboratorId: COLLABORATOR_ID,
   professionalName: 'Maria Oliveira',
   email: 'maria@example.com',
@@ -64,8 +88,7 @@ export const ACTIVE_COLLABORATOR: CollaboratorFixture = {
   legalExpertises: [],
 }
 
-export const INVITED_COLLABORATOR: CollaboratorFixture = {
-  ...ACTIVE_COLLABORATOR,
+export const INVITED_COLLABORATOR: FixtureCollaborator = {
   collaboratorId: 'invited-collaborator-id',
   professionalName: 'João Mendes',
   email: 'joao@example.com',
@@ -75,25 +98,35 @@ export const INVITED_COLLABORATOR: CollaboratorFixture = {
   lastAccessAt: undefined,
 }
 
-export const DISABLED_COLLABORATOR: CollaboratorFixture = {
-  ...ACTIVE_COLLABORATOR,
+export const DISABLED_COLLABORATOR: FixtureCollaborator = {
   collaboratorId: 'disabled-collaborator-id',
   professionalName: 'Carlos Lima',
+  email: 'carlos@example.com',
+  profile: 'lawyer',
   status: 'disabled',
+  jobTitle: 'Advogado',
   lastAccessAt: '2026-07-28T15:30:00.000Z',
+  legalExpertises: [],
 }
 
-export const CANCELLED_COLLABORATOR: CollaboratorFixture = {
-  ...INVITED_COLLABORATOR,
+export const CANCELLED_COLLABORATOR: FixtureCollaborator = {
   collaboratorId: 'cancelled-collaborator-id',
   professionalName: 'Ana Souza',
   email: 'ana@example.com',
+  profile: 'attendant',
   status: 'disabled',
+  jobTitle: 'Atendente',
   lastAccessAt: undefined,
 }
 
-function cloneCollaborator(collaborator: CollaboratorFixture) {
-  return { ...collaborator, legalExpertises: [...collaborator.legalExpertises] }
+const LEGAL_AREA = { id: 'labor-id', name: 'Trabalhista', active: true }
+const LEGAL_TOPIC = { id: 'contracts-id', name: 'Contratos', active: true }
+
+function cloneCollaborator(collaborator: FixtureCollaborator) {
+  return {
+    ...collaborator,
+    legalExpertises: [...(collaborator.legalExpertises ?? [])],
+  }
 }
 
 function getActionFromPath(
@@ -117,14 +150,7 @@ function getActionFromPath(
 
 export async function mockCollaboratorRoutes(
   page: Page,
-  options: {
-    currentCollaborator?: CollaboratorFixture
-    collaborators?: CollaboratorFixture[]
-    listError?: string
-    listDelayMs?: number
-    actionErrors?: Partial<Record<ActionKind, string>>
-    actionDelays?: Partial<Record<ActionKind, number>>
-  } = {},
+  options: CollaboratorRouteOptions = {},
 ) {
   const state: RouteMockState = {
     collaborators: (options.collaborators ?? [ACTIVE_COLLABORATOR]).map(
@@ -164,7 +190,7 @@ export async function mockCollaboratorRoutes(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ id: 'labor-id', name: 'Trabalhista' }]),
+        body: JSON.stringify([LEGAL_AREA]),
       })
       return
     }
@@ -176,7 +202,7 @@ export async function mockCollaboratorRoutes(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ id: 'contracts-id', name: 'Contratos', active: true }]),
+        body: JSON.stringify([LEGAL_TOPIC]),
       })
       return
     }
@@ -229,7 +255,7 @@ export async function mockCollaboratorRoutes(
       pathname === `/collaborators/${COLLABORATOR_ID}` &&
       request.method() === 'PATCH'
     ) {
-      const body = request.postDataJSON() as Partial<CollaboratorFixture>
+      const body = request.postDataJSON() as Partial<FixtureCollaborator>
       const collaborator = state.collaborators.find(
         (item) => item.collaboratorId === COLLABORATOR_ID,
       )
@@ -366,3 +392,11 @@ export async function confirmAction(page: Page, menuLabel: string, buttonLabel: 
   await expect(dialog.getByRole('button', { name: buttonLabel })).toBeVisible()
   await dialog.getByRole('button', { name: buttonLabel }).click()
 }
+
+export const test = authFixtureTest.extend<FixtureIdentity>({
+  identityFixture: async ({ page }, use) => {
+    await use({
+      mockCollaboratorRoutes: (options) => mockCollaboratorRoutes(page, options),
+    })
+  },
+})
