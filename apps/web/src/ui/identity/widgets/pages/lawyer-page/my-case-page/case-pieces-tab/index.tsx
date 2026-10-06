@@ -28,7 +28,13 @@ export function CasePiecesTab({
   const queryClient = useQueryClient()
   const { navigateTo } = useNavigation()
   const { caseDocumentProductionService } = useRestContext()
-  const { data: pieces = [], isLoading } = useQuery({
+  const {
+    data: pieces = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['case-documents', caseId],
     enabled: dossierApproved && Boolean(caseId),
     queryFn: async () => {
@@ -117,7 +123,22 @@ export function CasePiecesTab({
               Carregando peças...
             </p>
           ) : null}
-          {!isLoading && pieces.length === 0 ? (
+          {isError ? (
+            <div className='rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive'>
+              <p>Não foi possível carregar as peças deste caso.</p>
+              <p className='mt-1 text-xs'>
+                {error instanceof Error ? error.message : 'Tente novamente.'}
+              </p>
+              <button
+                type='button'
+                className='mt-3 rounded-md border border-destructive/40 px-3 py-1.5 text-xs font-medium'
+                onClick={() => void refetch()}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          ) : null}
+          {!isLoading && !isError && pieces.length === 0 ? (
             <p className='rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground'>
               Nenhuma peça foi adicionada a este caso.
             </p>
@@ -151,11 +172,12 @@ export function CasePiecesTab({
                 }
                 setWorkflow('editor')
               }}
-              onDownloadVersion={async () => {
+              onDownloadVersion={async (versionId, versionLabel) => {
                 if (!caseId) return
                 const response = await caseDocumentProductionService.getDocumentFile(
                   caseId,
                   piece.id,
+                  versionId,
                 )
                 if (response.isFailure) {
                   response.throwError()
@@ -163,7 +185,7 @@ export function CasePiecesTab({
                 const url = URL.createObjectURL(response.body)
                 const anchor = document.createElement('a')
                 anchor.href = url
-                anchor.download = `${piece.title}.pdf`
+                anchor.download = `${piece.title}-${versionLabel}.pdf`
                 anchor.click()
                 URL.revokeObjectURL(url)
               }}
