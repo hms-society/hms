@@ -13,6 +13,12 @@ Publish an HMS delivery through one or more coherent, size-compliant GitHub pull
 Use `gh`, preserve the user's worktree and update existing delivery PRs instead of creating
 duplicates.
 
+Web full integration evidence also belongs to `implement-spec`, which runs
+`test:integration` once per delivery. Reuse that record; do not rerun the full
+suite or an equivalent unfiltered Playwright command. Run only focused browser
+checks for missing or invalidated scenarios, and route missing full-suite
+records to `implement-spec`.
+
 ## Inputs and authority
 
 Read the implemented Spec or Bug Report, Plan when present, `evaluation.md`, actual diff,
@@ -251,6 +257,12 @@ gh pr view <number> --json number,url,headRefName,baseRefName,commits,statusChec
 ```
 
 ### CI completion and correction loop
+
+Reuse the local coverage evidence recorded by `implement-spec`; do not rerun
+coverage locally during publication. CI independently runs coverage, integration
+tests, and every applicable quality gate on the current PR head. The local
+single-run limit does not apply to CI. Corrections use focused local tests
+without coverage and preserve the original local coverage measurement.
 
 After creating or updating a PR and pushing its head, keep the delivery active until every
 applicable CI check for the latest head SHA has completed successfully. Poll `gh pr checks`

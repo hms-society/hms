@@ -79,7 +79,7 @@ export class SaveGeneratedDocumentVersionTool {
       inputSchema,
       outputSchema,
       strict: true,
-      execute: async (input) => {
+      execute: async (input, context) => {
         const version = await saveVersionUseCase.execute({
           documentGenerationId: input.documentGenerationId,
           content: input.draft.content as unknown as DocumentTemplateContent,
@@ -89,6 +89,13 @@ export class SaveGeneratedDocumentVersionTool {
           documentGenerationId: input.documentGenerationId,
           documentVersionId: version.id,
           attemptsCount: input.attemptsCount,
+        })
+
+        context?.tracingContext?.currentSpan?.update({
+          metadata: {
+            documentGenerationId: input.documentGenerationId,
+            documentVersionId: version.id,
+          },
         })
 
         return this.serializeVersion(version, input)

@@ -133,6 +133,7 @@ export class DrizzleLegalCasesRepository
     const [assignedCase] = await this.database
       .select({
         id: legalCaseModel.id,
+        intakeId: legalCaseModel.intakeId,
         publicCode: legalCaseModel.publicCode,
         title: legalCaseModel.title,
         status: legalCaseModel.status,
@@ -175,6 +176,7 @@ export class DrizzleLegalCasesRepository
 
     return {
       id: assignedCase.id,
+      intakeId: assignedCase.intakeId,
       publicCode: assignedCase.publicCode,
       title: assignedCase.title,
       status: assignedCase.status,
@@ -204,6 +206,7 @@ export class DrizzleLegalCasesRepository
     const assignedCases = await this.database
       .select({
         id: legalCaseModel.id,
+        intakeId: legalCaseModel.intakeId,
         publicCode: legalCaseModel.publicCode,
         title: legalCaseModel.title,
         status: legalCaseModel.status,
@@ -269,6 +272,7 @@ export class DrizzleLegalCasesRepository
     return uniqueAssignedCases.map(
       (legalCase): LegalCaseSummary => ({
         id: legalCase.id,
+        intakeId: legalCase.intakeId,
         publicCode: legalCase.publicCode,
         title: legalCase.title,
         status: legalCase.status,
@@ -315,6 +319,39 @@ export class DrizzleLegalCasesRepository
           eq(legalCaseModel.id, caseId),
           eq(legalCaseModel.status, expectedStatus),
           isNull(legalCaseModel.checklistGateDecision),
+        ),
+      )
+      .returning()
+
+    return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
+  }
+
+  async homologateDossier({
+    caseId,
+    homologatedBy,
+    expectedStatus,
+    status,
+  }: Parameters<LegalCasesRepository['homologateDossier']>[0]): ReturnType<
+    LegalCasesRepository['homologateDossier']
+  > {
+    const now = new Date()
+    const [updatedCase] = await this.database
+      .update(legalCaseModel)
+      .set({
+        dossierGateHomologatedAt: now,
+        dossierGateHomologatedBy: homologatedBy,
+        status,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.status, expectedStatus),
+          inArray(legalCaseModel.checklistGateDecision, [
+            'approved',
+            'approved_with_exception',
+          ]),
+          isNull(legalCaseModel.dossierGateHomologatedAt),
         ),
       )
       .returning()

@@ -11,7 +11,7 @@ export class DocumentJsonOrganizerAgent extends MastraAgent<'document-json-organ
         id: 'document-json-organizer',
         name: 'Document JSON Organizer',
         model: 'deepseek/deepseek-v4-flash',
-        localModelEnvKey: 'OLLAMA_AI_MODEL',
+        vision: false,
         instructions: `You organize already extracted text into structured JSON fields. The input may come from OCR, selectable PDF text, flattened tables, or text with lost line breaks.
 
 Follow these rules:

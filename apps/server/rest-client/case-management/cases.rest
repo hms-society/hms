@@ -35,6 +35,35 @@ GET {{url}}/{{caseId}}/checklist
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### Load legal-piece generation context (available models and validated checklist files)
+# @prompt caseId Enter the case ID to prepare a legal piece
+GET {{url}}/{{caseId}}/document-generation-context
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Request an AI-generated legal-piece draft
+# @prompt caseId Enter the approved case ID
+# @prompt documentSpecificationId Enter an available document model ID from the generation context
+# @prompt documentFileId Enter a validated checklist document ID from the generation context
+POST {{url}}/{{caseId}}/documents/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "documentSpecificationId": "{{documentSpecificationId}}",
+  "documentFileIds": ["{{documentFileId}}"],
+  "instructions": "Use somente fatos comprovados nos documentos selecionados; preserve como pendência toda variável sem evidência."
+}
+
+### Retry a stuck or failed legal-piece generation
+# @prompt caseId Enter the approved case ID
+# @prompt documentId Enter the existing legal-piece document ID
+POST {{url}}/{{caseId}}/documents/{{documentId}}/generations/retry
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+
 ### Add complementary checklist item
 # @prompt caseId Enter the case ID to update
 POST {{url}}/{{caseId}}/checklist/items
@@ -93,3 +122,12 @@ Content-Type: application/json
   "decidedBy": "{{getCurrentCollaborator.response.body.$.collaboratorId}}",
   "remarks": "Pendências documentais impedem o avanço para produção jurídica."
 }
+
+### Homologate case dossier after reviewing all required documents
+# @prompt caseId Enter the case ID whose checklist has already been approved
+PATCH {{url}}/{{caseId}}/dossier-gate/homologation
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{}

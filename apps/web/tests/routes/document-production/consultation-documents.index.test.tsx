@@ -6,6 +6,41 @@ import {
   test,
 } from '../../fixtures/document-production-fixture'
 
+for (const generationStatus of ['pending', 'running', 'failed'] as const) {
+  test(`keeps existing versions viewable while generation is ${generationStatus} [mocked]`, async ({
+    documentProduction,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    documentProduction.consultation.documents[0].generationStatus = generationStatus
+    await page.route('**/communications/summary', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    )
+    await page.goto(`/consultas/${CONSULTATION_ID}/documentos`)
+    await expect(
+      page.getByRole('heading', { name: 'Contrato de prestação de serviços' }),
+    ).toBeVisible({ timeout: 20_000 })
+    const documentRow = page.getByRole('listitem').filter({
+      has: page.getByRole('heading', { name: 'Contrato de prestação de serviços' }),
+    })
+    await expect(documentRow.getByRole('link', { name: 'Visualizar' })).toHaveAttribute(
+      'href',
+      `/consultas/${CONSULTATION_ID}/documentos/document-1/versoes/version-1`,
+    )
+    const emptyRow = page.getByRole('listitem').filter({
+      has: page.getByRole('heading', { name: 'Procuração', exact: true }),
+    })
+    await expect(emptyRow.getByRole('link', { name: 'Visualizar' })).toHaveCount(0)
+    if (generationStatus !== 'failed')
+      await expect(
+        documentRow.getByRole('button', { name: 'Cancelar geração' }),
+      ).toBeVisible()
+    await documentRow.getByRole('link', { name: 'Visualizar' }).press('Enter')
+    await expect(page).toHaveURL(/\/documentos\/document-1\/versoes\/version-1$/)
+    await expect(page.getByRole('heading', { name: 'Revisar documento' })).toBeVisible()
+  })
+}
+
 test('lists consultation documents and navigates to the review route', async ({
   documentProduction,
   page,

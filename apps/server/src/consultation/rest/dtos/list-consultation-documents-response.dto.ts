@@ -24,6 +24,7 @@ class ConsultationDocumentVersionSummaryDto {
 export class ListConsultationDocumentsResponseDto {
   @ApiProperty({ format: 'uuid' }) readonly id!: string
   @ApiProperty() readonly title!: string
+  @ApiProperty({ format: 'uuid' }) readonly documentSpecificationId!: string
   @ApiPropertyOptional({ format: 'uuid' }) readonly currentVersionId?: string
   @ApiPropertyOptional({ enum: Object.values(DocumentGenerationStatus) })
   readonly generationStatus?: DocumentGenerationStatusValue
@@ -41,12 +42,14 @@ export class ListConsultationDocumentsResponseDto {
 
   static fromDomain(input: {
     readonly document: Document
+    readonly documentSpecificationId: string
     readonly generationStatus?: DocumentGenerationStatusValue
     readonly versions: readonly DocumentVersion[]
   }): ListConsultationDocumentsResponseDto {
     return {
       id: input.document.id,
       title: input.document.title,
+      documentSpecificationId: input.documentSpecificationId,
       currentVersionId: input.document.currentVersionId,
       generationStatus: input.generationStatus,
       classificacaoAcesso: input.document.classificacaoAcesso,

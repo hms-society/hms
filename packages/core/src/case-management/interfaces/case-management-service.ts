@@ -29,8 +29,45 @@ export type GrantCasePortalAccessResponse = {
   caseId: string
   accessToken: string
   portalAccessUrl: string
-  expiresAt: string
+  expiresAt: string | null
   canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+}
+
+export type GrantCasePortalAccessRequest = {
+  canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+  thirdPartyId?: string
+}
+
+export type CasePortalAccessSummary = {
+  grantId: string
+  caseId: string
+  thirdPartyId?: string
+  canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+  createdAt: string
+}
+
+export type ThirdPartyPortalCaseResponse = {
+  caseId: string
+  publicCode: string
+  title: string
+  clientName: string
+  status?: LegalCase['status']
+  intakeId?: string
+  updatedAt?: string
+  canUpload: boolean
+  canViewCaseStatus: boolean
+  canViewIntakeStatus: boolean
+  intake?: {
+    id: string
+    status: string
+    updatedAt: string
+  }
 }
 
 export type AddCaseChecklistComplementaryItemRequest = {
@@ -96,18 +133,28 @@ export interface CaseManagementService {
 
   grantCasePortalAccess(
     caseId: string,
-    request: { canUpload: boolean },
+    request: GrantCasePortalAccessRequest,
   ): Promise<RestResponse<GrantCasePortalAccessResponse>>
+  listCasePortalAccess(
+    caseId: string,
+  ): Promise<RestResponse<readonly CasePortalAccessSummary[]>>
 
   reviewChecklistGate(
     caseId: string,
     request: ReviewCaseChecklistGateRequest,
   ): Promise<RestResponse<LegalCase>>
 
+  homologateDossier(caseId: string): Promise<RestResponse<LegalCase>>
+
   listPortalPendingChecklist(
     caseId: string,
     portalToken: string,
   ): Promise<RestResponse<readonly CaseChecklistItem[]>>
+
+  getThirdPartyPortalCase(
+    caseId: string,
+    portalToken: string,
+  ): Promise<RestResponse<ThirdPartyPortalCaseResponse>>
 
   uploadPortalDocument(
     caseId: string,
@@ -115,6 +162,7 @@ export interface CaseManagementService {
     portalToken: string,
     file: unknown,
   ): Promise<RestResponse<PortalDocumentUploadResponse>>
+
   listCasePendings(caseId: string): Promise<RestResponse<readonly Pending[]>>
 
   getPendingMessage(pendingId: string): Promise<RestResponse<AssistedMessage>>

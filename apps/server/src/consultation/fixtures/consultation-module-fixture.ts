@@ -1,4 +1,5 @@
 import type { INestApplication, Type } from '@nestjs/common'
+import type { TestingModuleBuilder } from '@nestjs/testing'
 import type { Consultation } from '@hms/core/consultation/domain/entities'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
 import type { DocumentGenerationCreation } from '@hms/core/document-production/domain/entities'
@@ -73,7 +74,10 @@ export class ConsultationModuleFixture {
     return this.restFixture.app
   }
 
-  static async register(controller?: Type<unknown>) {
+  static async register(
+    controller?: Type<unknown>,
+    configure?: (builder: TestingModuleBuilder) => void,
+  ) {
     const authFixture = await SupabaseAuthFixture.register()
     const accessTokens = new Map<string, string>()
     let inngestFixture: InngestFixture
@@ -107,7 +111,11 @@ export class ConsultationModuleFixture {
           controllers: controller ? [controller] : [],
           providers: [{ provide: InngestBroker, useValue: broker }],
         },
-        (builder) => authFixture.configure(builder),
+        (builder) => {
+          authFixture.configure(builder)
+          configure?.(builder)
+          return builder
+        },
       )
     } catch (error) {
       await authFixture.close()

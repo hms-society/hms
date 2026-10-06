@@ -14,6 +14,7 @@ import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation
 const DOCUMENT_PRODUCTION_CONSULTATION_ID = '00000000-0000-4000-8000-000000000101'
 
 export type ConsultationSeedReferences = {
+  readonly hasPendingDocumentData?: boolean
   readonly intakeId: string
   readonly appointmentId: string
   readonly clientId: string
@@ -40,7 +41,9 @@ export class ConsultationSeeder {
 
   async run(references: ConsultationSeedReferences) {
     const consultation = ConsultationFaker.fake({
-      id: DOCUMENT_PRODUCTION_CONSULTATION_ID,
+      id: references.hasPendingDocumentData
+        ? '00000000-0000-4000-8000-000000000102'
+        : DOCUMENT_PRODUCTION_CONSULTATION_ID,
       intakeId: references.intakeId,
       appointmentId: references.appointmentId,
       clientId: references.clientId,
@@ -54,8 +57,10 @@ export class ConsultationSeeder {
         'Quais poderes são necessários para representar o cliente na negociação do contrato de locação?',
       guidanceProvided:
         'Preparar uma procuração com poderes limitados para a negociação e a análise do contrato.',
-      notes:
-        'O cliente deseja que a representação seja limitada à negociação do contrato de locação residencial.',
+      notes: references.hasPendingDocumentData
+        ? 'Teste de pendências documentais: o cliente deseja uma procuração limitada à negociação da locação residencial, mas não informou o nome do procurador, sua inscrição na OAB ou o endereço do imóvel. Esses dados devem permanecer como marcadores; não devem ser inventados.'
+        : 'O cliente deseja que a representação seja limitada à negociação do contrato de locação residencial.',
+      dynamicFormAnswers: [],
       dynamicFormId: references.dynamicForm?.id,
       dynamicFormSnapshot: references.dynamicForm
         ? {

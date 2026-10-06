@@ -7,7 +7,7 @@ import type { Response } from 'express'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
-import { ErrorResponseDto, HealthResponseDto } from '@/shared/rest/dtos'
+import { HealthResponseDto } from '@/shared/rest/dtos'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 
 const { version } = JSON.parse(

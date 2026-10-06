@@ -27,6 +27,7 @@ type Request = {
 
 type Response = readonly {
   readonly document: Document
+  readonly documentSpecificationId: string
   readonly generationStatus?: DocumentGenerationStatus
   readonly versions: readonly DocumentVersion[]
 }[]
@@ -72,13 +73,14 @@ export class ListConsultationDocumentsUseCase implements UseCase<Request, Respon
       generations.map((generation) => [generation.documentId, generation]),
     )
 
-    return packageDocuments.flatMap(({ documentId }) => {
+    return packageDocuments.flatMap(({ documentId, documentSpecificationId }) => {
       const document = documentsById.get(documentId)
       if (!document) return []
       const generation = generationsByDocumentId.get(documentId)
       return [
         {
           document,
+          documentSpecificationId,
           ...(generation ? { generationStatus: generation.status } : {}),
           versions: versions.filter((version) => version.documentId === documentId),
         },

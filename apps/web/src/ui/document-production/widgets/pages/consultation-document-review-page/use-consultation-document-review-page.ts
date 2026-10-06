@@ -37,6 +37,8 @@ type ErrorWithStatus = Error & { statusCode?: number }
 
 export type ConsultationDocumentReviewViewModel = {
   title: string
+  documentSpecificationId?: string
+  pendingMarkersCount?: number
   versionNumber: number
   sourceLabel: string
   status: ConsultationDocumentReviewStatus
@@ -70,13 +72,15 @@ function cloneContent(content: DocumentTemplateContent): DocumentTemplateContent
 function removeMarkerFromContent(
   content: DocumentTemplateContent,
   marker: string,
+  replacement = '',
 ): DocumentTemplateContent {
   const nextContent = cloneContent(content)
 
   function removeMarker(value: unknown) {
     if (!value || typeof value !== 'object') return
     const node = value as { text?: string; content?: unknown[] }
-    if (typeof node.text === 'string') node.text = node.text.replaceAll(marker, '')
+    if (typeof node.text === 'string')
+      node.text = node.text.replaceAll(marker, () => replacement)
     node.content?.forEach(removeMarker)
   }
 
@@ -129,6 +133,8 @@ function createReviewViewModel(
 
   return {
     title: document.title,
+    documentSpecificationId: document.documentSpecificationId,
+    pendingMarkersCount: version.pendingMarkers.length,
     versionNumber: version.versionNumber,
     sourceLabel: getSourceLabel(version.source),
     status: version.status,
@@ -189,6 +195,13 @@ export function useConsultationDocumentReviewPage({
   const [isPendingMarkersOpen, setIsPendingMarkersOpen] = useState(false)
   const [isMarkerNotFoundOpen, setIsMarkerNotFoundOpen] = useState(false)
   const [isRegenerateOpen, setIsRegenerateOpen] = useState(false)
+  const [isRequestingGeneration, setIsRequestingGeneration] = useState(false)
+  const [generationNavigation, setGenerationNavigation] = useState<{
+    consultationId: string
+    documentId: string
+    documentVersionId: string
+    baselineVersionNumber: number
+  }>()
   const [hasCancelledGeneration, setHasCancelledGeneration] = useState(false)
   const [regenerationInstructions, setRegenerationInstructions] = useState('')
   const [isApproveOpen, setIsApproveOpen] = useState(false)
@@ -207,6 +220,46 @@ export function useConsultationDocumentReviewPage({
     [documentId, documentsQuery.data],
   )
   const version = versionQuery.documentVersion
+
+  useEffect(
+    function openGeneratedVersion() {
+      if (
+        !generationNavigation ||
+        isRequestingGeneration ||
+        generationNavigation.consultationId !== consultationId ||
+        generationNavigation.documentId !== documentId ||
+        generationNavigation.documentVersionId !== documentVersionId
+      )
+        return
+      const generatedVersion = document?.versions
+        .filter(
+          (item) =>
+            item.source === DocumentVersionSource.Ai &&
+            item.versionNumber > generationNavigation.baselineVersionNumber,
+        )
+        .sort((left, right) => right.versionNumber - left.versionNumber)[0]
+      if (!generatedVersion) return
+      setGenerationNavigation(undefined)
+      void navigateTo('consultationDocumentVersion', {
+        params: {
+          consultationId,
+          documentId,
+          documentVersionId: generatedVersion.id,
+        },
+      }).catch(() => {
+        setActionError('Não foi possível abrir a nova versão. Selecione-a no histórico.')
+      })
+    },
+    [
+      consultationId,
+      documentId,
+      documentVersionId,
+      document,
+      generationNavigation,
+      isRequestingGeneration,
+      navigateTo,
+    ],
+  )
 
   useEffect(
     function synchronizeLoadedVersion() {
@@ -248,7 +301,8 @@ export function useConsultationDocumentReviewPage({
         ? createReviewViewModel(
             document,
             version,
-            regenerateAction.isGeneratingDocument ||
+            isRequestingGeneration ||
+              regenerateAction.isGeneratingDocument ||
               (regenerateAction.pendingDocumentIds.includes(documentId) &&
                 !hasCancelledGeneration),
             hasCancelledGeneration,
@@ -259,6 +313,7 @@ export function useConsultationDocumentReviewPage({
       documentId,
       regenerateAction.isGeneratingDocument,
       regenerateAction.pendingDocumentIds,
+      isRequestingGeneration,
       hasCancelledGeneration,
       version,
     ],
@@ -290,6 +345,7 @@ export function useConsultationDocumentReviewPage({
       setIsCancelOpen(true)
       return
     }
+    setGenerationNavigation(undefined)
     setIsHistoryOpen(false)
     void navigateToVersion(nextVersionId)
   }
@@ -338,7 +394,7 @@ export function useConsultationDocumentReviewPage({
       if (!result.body) {
         setIsPendingMarkersOpen(false)
         setActionError(
-          'Não foi possível persistir a remoção da pendência. Tente novamente.',
+          'Não foi possível salvar a alteração da pendência. Tente novamente.',
         )
         return
       }
@@ -364,7 +420,9 @@ export function useConsultationDocumentReviewPage({
       setRejectionReason('')
       if (result.isConflict) {
         await Promise.all([documentsQuery.refetch(), versionQuery.refetch()])
-        setActionError('Conflito: a decisão já foi alterada. Os dados foram atualizados.')
+        setActionError(
+          'Conflito: não foi possível registrar a decisão. Verifique as pendências e o estado da versão. Os dados foram atualizados.',
+        )
       }
     } catch {
       setActionError('Não foi possível concluir a decisão. Tente novamente.')
@@ -372,6 +430,10 @@ export function useConsultationDocumentReviewPage({
   }
 
   function handleApprove() {
+    if (versionPendingMarkers.length > 0) {
+      setIsPendingMarkersOpen(true)
+      return
+    }
     setIsApproveOpen(true)
   }
 
@@ -395,6 +457,11 @@ export function useConsultationDocumentReviewPage({
   }
 
   async function handleConfirmApprove() {
+    if (versionPendingMarkers.length > 0) {
+      setIsApproveOpen(false)
+      setActionError('Resolva as pendências do documento antes de aprovar esta versão.')
+      return
+    }
     await handleReview({ decision: DocumentVersionStatus.Approved })
   }
 
@@ -425,12 +492,27 @@ export function useConsultationDocumentReviewPage({
   }
 
   async function handleConfirmRegenerate(instructions: string) {
+    if (isRequestingGeneration || viewModel?.isGenerating) return
     setActionError(undefined)
+    setIsRequestingGeneration(true)
+    setIsRegenerateOpen(false)
+    setGenerationNavigation({
+      consultationId,
+      documentId,
+      documentVersionId,
+      baselineVersionNumber: Math.max(
+        0,
+        ...(document?.versions.map((item) => item.versionNumber) ?? []),
+      ),
+    })
     try {
       await regenerateAction.generateDocument({ documentId, instructions })
-      setIsRegenerateOpen(false)
     } catch {
+      setGenerationNavigation(undefined)
+      setIsRegenerateOpen(true)
       setActionError('Não foi possível solicitar uma nova versão. Tente novamente.')
+    } finally {
+      setIsRequestingGeneration(false)
     }
   }
 
@@ -438,6 +520,7 @@ export function useConsultationDocumentReviewPage({
     setActionError(undefined)
     try {
       await cancellationAction.cancelDocumentGeneration(documentId)
+      setGenerationNavigation(undefined)
       setHasCancelledGeneration(true)
       await documentsQuery.refetch()
     } catch {
@@ -456,7 +539,7 @@ export function useConsultationDocumentReviewPage({
     setHighlightedTerms([marker])
   }
 
-  async function persistPendingMarkerRemoval(
+  async function persistPendingMarkerResolution(
     nextDraft: DocumentTemplateContent,
     removedMarkers: readonly string[],
   ) {
@@ -478,15 +561,21 @@ export function useConsultationDocumentReviewPage({
       await navigateToVersion(result.body.id)
     } catch {
       setIsPendingMarkersOpen(false)
-      setActionError(
-        'Não foi possível persistir a remoção da pendência. Tente novamente.',
-      )
+      setActionError('Não foi possível salvar a alteração da pendência. Tente novamente.')
     }
   }
 
   function handleRemovePendingMarker(marker: string) {
     if (!draft || saveAction.isSavingManualVersion) return
-    void persistPendingMarkerRemoval(removeMarkerFromContent(draft, marker), [marker])
+    void persistPendingMarkerResolution(removeMarkerFromContent(draft, marker), [marker])
+  }
+
+  function handleFillPendingMarker(marker: string, value: string) {
+    if (!draft || saveAction.isSavingManualVersion || !value.trim()) return
+    void persistPendingMarkerResolution(
+      removeMarkerFromContent(draft, marker, value.trim()),
+      [marker],
+    )
   }
 
   function handleRemoveAllPendingMarkers() {
@@ -495,7 +584,7 @@ export function useConsultationDocumentReviewPage({
       (content, item) => removeMarkerFromContent(content, item.marker),
       draft,
     )
-    void persistPendingMarkerRemoval(
+    void persistPendingMarkerResolution(
       nextDraft,
       versionPendingMarkers.map((item) => item.marker),
     )
@@ -525,6 +614,7 @@ export function useConsultationDocumentReviewPage({
     handleLocateMarker,
     handleRemoveAllPendingMarkers,
     handleRemovePendingMarker,
+    handleFillPendingMarker,
     handleReject,
     handleRequestCancel,
     handleRequestSave,
@@ -554,7 +644,7 @@ export function useConsultationDocumentReviewPage({
     isSaving: saveAction.isSavingManualVersion,
     isSubmittingDecision: reviewAction.isReviewingVersion,
     isSelectingCurrent: currentAction.isSelectingCurrentVersion,
-    isRegenerating: regenerateAction.isGeneratingDocument,
+    isRegenerating: isRequestingGeneration || regenerateAction.isGeneratingDocument,
     isCancellingGeneration: cancellationAction.isCancellingDocument,
     handleCancelGeneration,
     history,

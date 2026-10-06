@@ -3,7 +3,9 @@ import type {
   ClientConsent,
   ClientDetails,
   CollaboratorSummary,
+  ThirdParty,
 } from '@hms/core/identity/domain/entities'
+import type { ThirdPartyRegistration } from '@hms/core/identity/interfaces'
 import type { ConsentType } from '@hms/core/identity/domain/structures'
 import type { CollaboratorListQuery } from '@hms/core/identity/domain/structures'
 import type { CollaboratorUpdate } from '@hms/core/identity/domain/entities'
@@ -24,6 +26,26 @@ export const IdentityService = (restClient: RestClient): IdentityRestService => 
   }
 
   return {
+    listThirdParties() {
+      return restClient.get<readonly ThirdParty[]>('/third-parties')
+    },
+
+    registerThirdParty(request: ThirdPartyRegistration) {
+      return restClient.post<ThirdParty>('/third-parties', request)
+    },
+
+    updateThirdParty(thirdPartyId, changes) {
+      return restClient.patch<ThirdParty>(`/third-parties/${thirdPartyId}`, changes)
+    },
+
+    deactivateThirdParty(thirdPartyId) {
+      return restClient.patch<ThirdParty>(`/third-parties/${thirdPartyId}/deactivate`, {})
+    },
+
+    reactivateThirdParty(thirdPartyId) {
+      return restClient.patch<ThirdParty>(`/third-parties/${thirdPartyId}/reactivate`, {})
+    },
+
     getClient(clientId) {
       return restClient.get<ClientDetails>(`/clients/${clientId}`)
     },
