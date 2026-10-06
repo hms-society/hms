@@ -8,6 +8,7 @@ import {
   DrizzleChecklistTemplateMapper,
   DrizzleLegalCaseMapper,
   DrizzleCasePortalAccessGrantMapper,
+  DrizzleCaseTaskMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseChecklistItemsRepository,
@@ -17,6 +18,7 @@ import {
   DrizzleLegalCasesRepository,
   DrizzleCasePortalAccessGrantsRepository,
   DrizzlePendingsRepository,
+  DrizzleCaseTasksRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -30,6 +32,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     DrizzleChecklistTemplateMapper,
     DrizzleLegalCaseMapper,
     DrizzleCasePortalAccessGrantMapper,
+    DrizzleCaseTaskMapper,
     DrizzleCaseChecklistItemsRepository,
     DrizzleCaseMembersRepository,
     DrizzleChecklistTemplateItemsRepository,
@@ -41,6 +44,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       useExisting: DrizzleCasePortalAccessGrantsRepository,
     },
     DrizzlePendingsRepository,
+    DrizzleCaseTasksRepository,
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
       useExisting: DrizzleCaseChecklistItemsRepository,
@@ -65,6 +69,10 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       provide: CASE_MANAGEMENT_REPOSITORIES.pendings,
       useExisting: DrizzlePendingsRepository,
     },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseTasks,
+      useExisting: DrizzleCaseTasksRepository,
+    },
     CaseManagementSeeder,
   ],
   exports: [
@@ -75,6 +83,7 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
     CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants,
     CASE_MANAGEMENT_REPOSITORIES.pendings,
+    CASE_MANAGEMENT_REPOSITORIES.caseTasks,
     CaseManagementSeeder,
   ],
 })

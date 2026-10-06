@@ -23,6 +23,10 @@ import {
   ApprovePendingMessageController,
   CancelPendingController,
   HomologateCaseDossierController,
+  CreateCaseTaskController,
+  ListCaseTasksController,
+  UpdateCaseTaskController,
+  DeleteCaseTaskController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -59,6 +63,10 @@ import { IntakeDatabaseModule } from '@/intake/database'
     EditPendingMessageController,
     ApprovePendingMessageController,
     CancelPendingController,
+    CreateCaseTaskController,
+    ListCaseTasksController,
+    UpdateCaseTaskController,
+    DeleteCaseTaskController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

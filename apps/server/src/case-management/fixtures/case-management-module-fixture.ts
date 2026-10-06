@@ -3,10 +3,11 @@ import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {
   CaseChecklistItemCreation,
   CaseMemberCreation,
+  CaseTask,
   LegalCase,
   LegalCaseCreation,
 } from '@hms/core/case-management/domain/entities'
-import { LegalCaseFaker } from '@hms/core/case-management/domain/entities/fakers'
+import { CaseTaskFaker, LegalCaseFaker } from '@hms/core/case-management/domain/entities/fakers'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import {
   ClientFaker,
@@ -23,6 +24,7 @@ import {
   DrizzlePendingsRepository,
   DrizzleCasePortalAccessGrantsRepository,
   DrizzleChecklistTemplatesRepository,
+  DrizzleCaseTasksRepository,
 } from '@/case-management/database/drizzle/repositories'
 import {
   DrizzleClientsRepository,
@@ -63,6 +65,7 @@ export class CaseManagementModuleFixture {
     private readonly caseChecklistItemsRepository: DrizzleCaseChecklistItemsRepository,
     private readonly caseMembersRepository: DrizzleCaseMembersRepository,
     private readonly pendingsRepository: DrizzlePendingsRepository,
+    private readonly caseTasksRepository: DrizzleCaseTasksRepository,
     private readonly grantsRepository: DrizzleCasePortalAccessGrantsRepository,
     private readonly templatesRepository: DrizzleChecklistTemplatesRepository,
     private readonly usersRepository: DrizzleUsersRepository,
@@ -133,6 +136,7 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleCaseChecklistItemsRepository),
       restFixture.get(DrizzleCaseMembersRepository),
       restFixture.get(DrizzlePendingsRepository),
+      restFixture.get(DrizzleCaseTasksRepository),
       restFixture.get(DrizzleCasePortalAccessGrantsRepository),
       restFixture.get(DrizzleChecklistTemplatesRepository),
       restFixture.get(DrizzleUsersRepository),
@@ -287,6 +291,31 @@ export class CaseManagementModuleFixture {
         status: 'awaiting_approval',
       },
     })
+  }
+
+  registerCaseTask(caseId: string, overrides: Partial<CaseTask> = {}) {
+    const task = CaseTaskFaker.fake({ caseId, ...overrides })
+    return this.caseTasksRepository.add({
+      caseId: task.caseId,
+      type: task.type,
+      customType: task.customType,
+      description: task.description,
+      plannedDate: task.plannedDate,
+      plannedTime: task.plannedTime,
+      status: task.status,
+      createdById: task.createdById,
+      source: task.source,
+      completionNote: task.completionNote,
+      completedAt: task.completedAt,
+      completedById: task.completedById,
+      lastReminderAt: task.lastReminderAt,
+      assigneeIds: task.assigneeIds,
+      reminders: task.reminders.map(({ daysBefore }) => ({ daysBefore })),
+    })
+  }
+
+  findCaseTask(caseTaskId: string) {
+    return this.caseTasksRepository.findById(caseTaskId)
   }
 
   async registerThirdParty(internalResponsibleId: string) {
