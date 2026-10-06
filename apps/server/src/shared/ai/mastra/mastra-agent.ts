@@ -23,7 +23,13 @@ export abstract class MastraAgent<
   AgentId extends string,
 > extends NativeMastraAgent<AgentId> {
   constructor(config: Config<AgentId>, envProvider: EnvProvider) {
-    const { model, developmentModels, productionModels, vision, ...agentConfig } = config
+    const {
+      model,
+      developmentModels,
+      productionModels,
+      vision,
+      ...agentConfig
+    } = config
 
     super({
       ...agentConfig,

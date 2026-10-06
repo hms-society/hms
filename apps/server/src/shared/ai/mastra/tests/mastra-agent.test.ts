@@ -134,11 +134,7 @@ describe('Document drafting model resolution', () => {
   })
 
   it('uses the configured Gemini vision model for image extraction', () => {
-    expect(
-      new DocumentImageAnalyzerAgent(
-        createEnvProvider('dev', 'test-gemini-key', 'gemini'),
-      ).model,
-    ).toMatchObject({
+    expect(new DocumentImageAnalyzerAgent(createEnvProvider('dev', 'test-gemini-key', 'gemini')).model).toMatchObject({
       providerId: 'gemini',
       modelId: 'gemini-vision-model',
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/',

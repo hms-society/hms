@@ -16,9 +16,8 @@ describe('GenerateDocumentWorkflow', () => {
       pendingMarkers: [],
     }
     const start = vi.fn().mockResolvedValue({ status: 'success', result: outcome })
-    const createRun = vi.fn().mockResolvedValue({ start })
     const workflow = Object.assign(Object.create(GenerateDocumentWorkflow.prototype), {
-      mastra: { getWorkflow: vi.fn(() => ({ createRun })) },
+      workflow: { createRun: vi.fn().mockResolvedValue({ start }) },
     }) as GenerateDocumentWorkflow
 
     const result = await workflow.run({} as never)
@@ -31,6 +30,5 @@ describe('GenerateDocumentWorkflow', () => {
       pendingMarkersCount: 0,
     })
     expect(start).toHaveBeenCalledOnce()
-    expect(createRun).toHaveBeenCalledOnce()
   })
 })

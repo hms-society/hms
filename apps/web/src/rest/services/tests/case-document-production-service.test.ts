@@ -31,6 +31,17 @@ describe('CaseDocumentProductionService', () => {
       { instructions: 'Inclua pedido subsidiário.' },
     )
   })
+
+  it('requests the selected document version file', async () => {
+    const restClient = makeRestClient()
+    const service = CaseDocumentProductionService(restClient)
+
+    await service.getDocumentFile('case-1', 'document-1', 'version-2')
+
+    expect(restClient.getFile).toHaveBeenCalledWith(
+      '/cases/case-1/documents/document-1/file?versionId=version-2',
+    )
+  })
 })
 
 function makeRestClient(): RestClient {

@@ -292,7 +292,6 @@ function createWorkflow(isEnabled: boolean, mode = 'dev') {
   const envProvider = {
     get(key: string) {
       if (key === 'HMS_SERVER_APP_MODE') return mode
-      if (key === 'AI_PROVIDER') return 'openrouter'
       if (key === 'OTEL_EXPORTER_OTLP_ENDPOINT')
         return isEnabled ? 'http://localhost:4318' : undefined
       return 'test-secret-key'

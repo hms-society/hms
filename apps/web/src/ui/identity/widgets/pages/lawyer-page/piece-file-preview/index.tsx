@@ -6,6 +6,10 @@ import {
   usePieceFilePreview,
 } from './use-piece-file-preview'
 
+const DOCX_MIME_TYPE =
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+const PDF_MIME_TYPE = 'application/pdf'
+
 export type PieceFilePreviewProps = UsePieceFilePreviewProps & {
   className?: string
   versionNumber?: number
@@ -21,16 +25,11 @@ export const PieceFilePreview = ({
 }: PieceFilePreviewProps) => {
   const { docxContainerRef, fileQuery, fileUrl, isRendering, renderError } =
     usePieceFilePreview({ caseId, documentId, versionId, storagePath })
-
-  if (!storagePath) {
-    return (
-      <div
-        className={`flex min-h-96 items-center justify-center p-8 text-sm text-muted-foreground ${className ?? ''}`}
-      >
-        Esta versão ainda não possui um arquivo associado no Storage.
-      </div>
-    )
-  }
+  const isDocxFile =
+    storagePath?.toLowerCase().endsWith('.docx') ||
+    fileQuery.data?.type === DOCX_MIME_TYPE
+  const isPdfFile =
+    storagePath?.toLowerCase().endsWith('.pdf') || fileQuery.data?.type === PDF_MIME_TYPE
 
   if (fileQuery.isError) {
     return (
@@ -40,13 +39,13 @@ export const PieceFilePreview = ({
         <Icon name='triangle-alert' className='size-5' />
         <span>Não foi possível carregar o arquivo da peça.</span>
         <span className='max-w-full break-all font-mono text-xs text-muted-foreground'>
-          {storagePath}
+          {storagePath ?? 'A versão selecionada não possui um caminho de Storage.'}
         </span>
       </div>
     )
   }
 
-  if (storagePath.toLowerCase().endsWith('.docx')) {
+  if (isDocxFile) {
     return (
       <div
         className={`relative min-h-96 min-w-0 max-w-full overflow-x-hidden bg-muted/30 p-5 ${className ?? ''}`}
@@ -86,7 +85,7 @@ export const PieceFilePreview = ({
     )
   }
 
-  if (storagePath.toLowerCase().endsWith('.pdf')) {
+  if (isPdfFile) {
     return (
       <div className={`min-w-0 max-w-full overflow-x-hidden ${className ?? ''}`}>
         {versionNumber ? (

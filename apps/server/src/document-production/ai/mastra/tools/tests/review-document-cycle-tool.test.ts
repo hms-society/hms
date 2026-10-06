@@ -265,11 +265,7 @@ describe('Review Document Cycle Tool', () => {
 
 function createTool() {
   const envProvider = {
-    get: vi.fn((key: string) => {
-      if (key === 'HMS_SERVER_APP_MODE') return 'dev'
-      if (key === 'AI_PROVIDER') return 'openrouter'
-      return 'test-key'
-    }),
+    get: vi.fn((key: string) => (key === 'HMS_SERVER_APP_MODE' ? 'dev' : 'test-key')),
   } as unknown as EnvProvider
 
   return new ReviewDocumentCycleTool(

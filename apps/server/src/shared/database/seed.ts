@@ -195,7 +195,6 @@ async function bootstrap() {
     const documentProductionSeed = await app.get(DocumentProductionSeeder).run({
       legalAreas: legalCatalog.areas,
       legalTopics: legalCatalog.topics,
-      consultationId: consultationSeed.consultation.id,
     })
 
     if (!schedulingSeed.pendingMarkersAppointment) {

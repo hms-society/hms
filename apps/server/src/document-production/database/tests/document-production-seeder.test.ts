@@ -18,25 +18,13 @@ describe('DocumentProductionSeeder', () => {
         }))
       }),
     }
-    const documentsRepository = {
-      addMany: vi.fn(async (documents) =>
-        documents.map((document, index) => ({ ...document, id: `document-${index}` })),
-      ),
-    }
-    const documentPackagesRepository = {
-      add: vi.fn(async (documentPackage) => documentPackage),
-    }
-    const packageDocumentsRepository = {
-      addMany: vi.fn(async (packageDocuments) => packageDocuments),
-    }
-
     const seeder = new DocumentProductionSeeder(
-      {} as never,
+      { add: vi.fn(), replace: vi.fn() } as never,
       specificationsRepository as never,
-      {} as never,
-      documentsRepository as never,
-      documentPackagesRepository as never,
-      packageDocumentsRepository as never,
+      { add: vi.fn(), removeAll: vi.fn() } as never,
+      { addMany: vi.fn(), removeAll: vi.fn() } as never,
+      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
+      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
     )
 
     const result = await seeder.run({
@@ -52,27 +40,29 @@ describe('DocumentProductionSeeder', () => {
           name: 'Aposentadoria',
         },
       ],
-      consultationId: 'consultation-id',
     })
 
-    const model = seededSpecifications.find(({ name }) => name === 'Procuração')
+    const universalModel = seededSpecifications.find(
+      ({ name }) =>
+        name === 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+    )
 
-    expect(model).toMatchObject({
+    expect(universalModel).toMatchObject({
       application: {
         scope: 'legal_context',
-        moment: 'consultation',
-        legalAreaIds: ['civil-area'],
-        legalTopicIdsByArea: { 'civil-area': ['contracts-topic'] },
+        moment: 'legal_production',
+        legalAreaIds: ['previdenciary-area'],
+        legalTopicIdsByArea: { 'previdenciary-area': ['retirement-topic'] },
       },
       variables: expect.arrayContaining([
         expect.objectContaining({
-          label: 'Nome do cliente',
-          technicalName: 'cliente_nome',
+          label: 'Nome do requerente',
+          technicalName: 'nome_requerente',
         }),
       ]),
     })
-    expect(JSON.stringify(model?.content)).toContain('{cliente_nome}')
-    expect(seededSpecifications).toHaveLength(3)
-    expect(result.specifications).toHaveLength(3)
+    expect(JSON.stringify(universalModel?.content)).toContain('{{nome_requerente}}')
+    expect(seededSpecifications).toHaveLength(4)
+    expect(result.specifications).toHaveLength(4)
   })
 })

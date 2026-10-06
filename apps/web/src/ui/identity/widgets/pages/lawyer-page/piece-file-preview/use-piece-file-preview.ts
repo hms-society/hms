@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
+const DOCX_MIME_TYPE =
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
 export type UsePieceFilePreviewProps = {
   caseId: string
   documentId: string
@@ -28,11 +31,12 @@ export function usePieceFilePreview({
       const response = await caseDocumentProductionService.getDocumentFile(
         caseId,
         documentId,
+        versionId,
       )
       if (response.isFailure) response.throwError()
       return response.body
     },
-    enabled: Boolean(storagePath),
+    enabled: Boolean(caseId && documentId && versionId),
     retry: false,
   })
 
@@ -45,7 +49,10 @@ export function usePieceFilePreview({
 
   useEffect(() => {
     if (!fileUrl || !docxContainerRef.current) return
-    if (!storagePath?.toLowerCase().endsWith('.docx')) return
+    const isDocxFile =
+      storagePath?.toLowerCase().endsWith('.docx') ||
+      fileQuery.data?.type === DOCX_MIME_TYPE
+    if (!isDocxFile) return
 
     let cancelled = false
     setIsRendering(true)
@@ -76,7 +83,7 @@ export function usePieceFilePreview({
       cancelled = true
       docxContainerRef.current?.replaceChildren()
     }
-  }, [fileUrl, storagePath])
+  }, [fileQuery.data?.type, fileUrl, storagePath])
 
   return {
     docxContainerRef,

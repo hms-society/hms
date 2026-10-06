@@ -116,7 +116,14 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
       { instructions },
     )
   },
-  getDocumentFile(caseId: string, documentId: string): Promise<RestResponse<Blob>> {
-    return restClient.getFile(`/cases/${caseId}/documents/${documentId}/file`)
+  getDocumentFile(
+    caseId: string,
+    documentId: string,
+    versionId?: string,
+  ): Promise<RestResponse<Blob>> {
+    const versionQuery = versionId ? `?versionId=${encodeURIComponent(versionId)}` : ''
+    return restClient.getFile(
+      `/cases/${caseId}/documents/${documentId}/file${versionQuery}`,
+    )
   },
 })
