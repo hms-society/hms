@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ptBR } from 'date-fns/locale'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
@@ -15,7 +15,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover'
 
 import type { CreateTaskDeadlineInput, TaskDeadlineItem, TaskDeadlineType } from './types'
-import type { CaseTeamMember } from '../types'
 
 const TYPES: Array<
   [
@@ -37,20 +36,13 @@ export function NewItemDialog({
   onCreate,
   editingItem,
   onUpdate,
-  team,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreate: (input: CreateTaskDeadlineInput) => void
   editingItem?: TaskDeadlineItem
   onUpdate?: (item: TaskDeadlineItem) => void
-  team: readonly CaseTeamMember[]
 }) {
-  const lawyers = useMemo(
-    () =>
-      team.filter((member) => member.role === 'lead_lawyer' || member.role === 'lawyer'),
-    [team],
-  )
   const [type, setType] = useState<TaskDeadlineType>('Publicação')
   const [description, setDescription] = useState('')
   const [plannedDate, setPlannedDate] = useState('')
@@ -61,7 +53,6 @@ export function NewItemDialog({
   const [alerts, setAlerts] = useState<string[]>([])
   const [error, setError] = useState('')
   const [status, setStatus] = useState('A fazer')
-  const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([])
   useEffect(() => {
     if (!open) return
     setType(editingItem?.type ?? 'Publicação')
@@ -71,18 +62,12 @@ export function NewItemDialog({
     setStatus(editingItem?.status ?? 'A fazer')
     setCustomType(editingItem?.customType ?? '')
     setAlerts(editingItem?.alerts ?? [])
-    setSelectedAssigneeIds(
-      editingItem?.assigneeIds ??
-        lawyers.flatMap((member) =>
-          member.collaboratorId ? [member.collaboratorId] : [],
-        ),
-    )
     setSelectedDate(
       editingItem?.plannedDate
         ? new Date(`${editingItem.plannedDate}T12:00:00`)
         : undefined,
     )
-  }, [editingItem, lawyers, open])
+  }, [editingItem, open])
   const submit = () => {
     if (!description.trim() || !plannedDate || (type === 'Outro' && !customType.trim())) {
       setError('Preencha os campos obrigatórios para continuar.')
@@ -93,13 +78,7 @@ export function NewItemDialog({
       description: description.trim(),
       plannedDate,
       plannedTime,
-      people: lawyers
-        .filter(
-          (member) =>
-            member.collaboratorId && selectedAssigneeIds.includes(member.collaboratorId),
-        )
-        .map((member) => member.name),
-      assigneeIds: selectedAssigneeIds,
+      people: ['Dr. Ricardo Mendes'],
       alerts,
       customType: customType.trim() || undefined,
     }
@@ -111,7 +90,6 @@ export function NewItemDialog({
     setPlannedTime('')
     setCustomType('')
     setAlerts([])
-    setSelectedAssigneeIds([])
     setError('')
     onOpenChange(false)
   }
@@ -272,42 +250,17 @@ export function NewItemDialog({
               Uma ou mais pessoas da equipe do caso serão notificadas.
             </p>
             <div className='mt-2 rounded-lg border border-border px-3 py-2 text-sm'>
-              {lawyers.length === 0 ? (
-                <p className='text-xs text-muted-foreground'>
-                  Nenhum integrante disponível na equipe deste caso.
-                </p>
-              ) : (
-                <div className='flex flex-col gap-2'>
-                  {lawyers.map((member) => {
-                    const collaboratorId = member.collaboratorId
-                    if (!collaboratorId) return null
-                    const selected = selectedAssigneeIds.includes(collaboratorId)
-
-                    return (
-                      <label
-                        key={collaboratorId}
-                        className='flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted'
-                      >
-                        <input
-                          type='checkbox'
-                          checked={selected}
-                          onChange={() =>
-                            setSelectedAssigneeIds((current) =>
-                              selected
-                                ? current.filter((id) => id !== collaboratorId)
-                                : [...current, collaboratorId],
-                            )
-                          }
-                        />
-                        <span>{member.name}</span>
-                        <span className='ml-auto text-xs text-muted-foreground'>
-                          {member.role}
-                        </span>
-                      </label>
-                    )
-                  })}
-                </div>
-              )}
+              <span className='rounded-full bg-primary/10 px-3 py-1 text-primary'>
+                RM · Dr. Ricardo Mendes
+              </span>
+              <Button
+                type='button'
+                variant='outline'
+                size='xs'
+                className='mt-2 rounded-full'
+              >
+                + Adicionar
+              </Button>
             </div>
           </div>
           <div>

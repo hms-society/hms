@@ -13,7 +13,6 @@ export type TaskDeadlineItem = {
   plannedDate: string
   plannedTime?: string
   people: string[]
-  assigneeIds?: string[]
   alerts?: string[]
   customType?: string
   status: string
