@@ -146,9 +146,9 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
 
     const outcome = documentGenerationWorkflowOutputSchema.parse(result.result)
 
-    if (outcome.status === 'approved') {
+    if (outcome.status === DocumentReviewDecision.Approved) {
       return {
-        status: outcome.status,
+        status: 'approved',
         documentGenerationId: outcome.documentGenerationId,
         documentVersionId: outcome.documentVersionId,
         attemptsCount: outcome.attemptsCount,
@@ -157,7 +157,7 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
     }
 
     return {
-      status: outcome.status,
+      status: 'failed',
       documentGenerationId: outcome.documentGenerationId,
       attemptsCount: outcome.attemptsCount,
       findingsCount: outcome.findings.length,
