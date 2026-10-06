@@ -80,6 +80,7 @@ export function NewItemDialog({
     setStatus(editingItem?.status ?? 'A fazer')
     setCustomType(editingItem?.customType ?? '')
     setAlerts(editingItem?.alerts ?? [])
+    setError('')
     setSelectedAssigneeIds(editingItem?.assigneeIds ?? [])
     setSelectedDate(
       editingItem?.plannedDate

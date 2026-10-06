@@ -41,6 +41,7 @@ export function TasksDeadlinesTab({
           ? item.type !== 'Tarefa interna'
           : item.type === 'Tarefa interna')),
   )
+  const openItemsCount = items.filter((item) => !item.completed).length
   const completedItems = items.filter((item) => item.completed)
   const createItem = (input: CreateTaskDeadlineInput) =>
     setItems((current) => [
@@ -90,7 +91,7 @@ export function TasksDeadlinesTab({
           icon='list-checks'
         />
         <SummaryStat
-          value={String(openItems.length)}
+          value={String(openItemsCount)}
           label='itens abertos'
           icon='list-checks'
         />
