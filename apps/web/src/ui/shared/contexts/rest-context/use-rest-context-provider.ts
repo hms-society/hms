@@ -15,6 +15,7 @@ import { IdentityService } from '@/rest/services/identity-service'
 import { IntakeService } from '@/rest/services/intake-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
 import { SchedulingService } from '@/rest/services/scheduling-service'
+import { AuditLogsService } from '@/rest/services/audit-logs-service'
 
 import { useAuthContext } from '@/ui/shared/contexts/auth-context/use-auth-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -57,5 +58,6 @@ export function useRestContextProvider(): RestContextValue {
     aiSuggestionsService: AiSuggestionsService(restClient),
     documentValidationService: DocumentValidationService(restClient),
     dynamicFormService: DynamicFormService(restClient),
+    auditLogsService: AuditLogsService(restClient),
   }
 }

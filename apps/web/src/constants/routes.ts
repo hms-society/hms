@@ -23,6 +23,7 @@ export const ROUTES = {
   clientDetails: '/clientes/$clienteId',
   collaborators: '/colaboradores',
   thirdParties: '/terceiros',
+  auditLogs: '/auditoria',
   documentBatch: '/lotes-documentos',
   documentViewer: '/lotes-documentos/$fileId',
   documentInbox: '/caixa-de-documentos',

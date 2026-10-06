@@ -57,6 +57,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
     { label: 'Terceiros', route: 'thirdParties', icon: 'briefcase-business' },
+    { label: 'Auditoria', route: 'auditLogs', icon: 'history' },
     { label: 'Clientes', route: 'clients', icon: 'users' },
     { label: 'Áreas e Demandas', route: 'legalCatalogAdmin', icon: 'scale' },
     { label: 'Documentos', route: 'documentSpecifications', icon: 'file-text' },
@@ -69,6 +70,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
   [CollaboratorProfile.Supervisor]: [
     ...LAWYER_SIDEBAR_ITEMS,
     { label: 'Terceiros', route: 'thirdParties', icon: 'briefcase-business' },
+    { label: 'Auditoria', route: 'auditLogs', icon: 'history' },
   ],
   [CollaboratorProfile.Client]: CLIENT_SIDEBAR_ITEMS,
   [CollaboratorProfile.Intern]: [],
