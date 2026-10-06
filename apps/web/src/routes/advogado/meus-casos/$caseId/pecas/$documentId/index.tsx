@@ -3,11 +3,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { PieceViewerPage } from '@/ui/identity/widgets/pages/lawyer-page/piece-viewer-page'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 
-export const Route = createFileRoute('/advogado_/meus-casos_/$caseId/pecas/$documentId/')(
-  {
-    component: PieceViewerRoute,
-  },
-)
+export const Route = createFileRoute('/advogado/meus-casos/$caseId/pecas/$documentId/')({
+  component: PieceViewerRoute,
+})
 
 function PieceViewerRoute() {
   const { caseId, documentId } = Route.useParams()
