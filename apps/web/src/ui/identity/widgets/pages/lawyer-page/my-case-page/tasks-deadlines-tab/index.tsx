@@ -109,7 +109,9 @@ export function TasksDeadlinesTab({
             <p className='text-xs text-muted-foreground'>
               {openItems.length
                 ? 'Ordenados pela urgência do caso.'
-                : 'Nenhum item cadastrado neste caso.'}
+                : items.length
+                  ? 'Nenhum item corresponde ao filtro selecionado.'
+                  : 'Nenhum item cadastrado neste caso.'}
             </p>
           </div>
           <div className='flex gap-2'>
