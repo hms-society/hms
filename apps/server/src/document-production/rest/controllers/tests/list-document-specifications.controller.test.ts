@@ -21,31 +21,18 @@ describe('List Document Specifications Controller [GET /document-specifications]
 
   afterAll(async () => fixture.close())
 
-  it('lists specifications with resolved legal names for an active administrator', async () => {
+  it('lists seeded specifications with resolved legal names for an active administrator', async () => {
     const { areas, topics } = await fixture.seedCatalog()
-    const legalArea = areas.find(({ name }) => name === 'Cível')
-    const legalTopic = topics.find(
-      ({ legalAreaId, name }) => legalAreaId === legalArea?.id && name === 'Contratos',
-    )
-    if (!legalArea || !legalTopic)
-      throw new Error('Fixture legal references were not seeded')
-    await fixture.specificationsRepository.add(
-      createSpecification({
-        name: 'Procuração',
-        description: 'Procuração para representação em negociação contratual.',
-        application: {
-          scope: 'legal_context',
-          moment: 'consultation',
-          legalAreaIds: [legalArea.id],
-          legalTopicIdsByArea: { [legalArea.id]: [legalTopic.id] },
-        },
-      }),
-    )
-    await fixture.registerAdmin()
+    await fixture.specificationsSeeder.run({
+      legalAreas: areas,
+      legalTopics: topics,
+      consultationId,
+    })
+    const admin = await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())
       .get('/document-specifications')
-      .set('Authorization', 'Bearer fixture-access-token')
+      .set('Authorization', fixture.authenticateAs(admin))
       .query({ search: 'negociação contratual', page: 1, pageSize: 1 })
       .expect(200)
 
@@ -92,11 +79,11 @@ describe('List Document Specifications Controller [GET /document-specifications]
         },
       }),
     ])
-    await fixture.registerAdmin()
+    const admin = await fixture.registerAdmin()
 
     const response = await request(fixture.app.getHttpServer())
       .get('/document-specifications')
-      .set('Authorization', 'Bearer fixture-access-token')
+      .set('Authorization', fixture.authenticateAs(admin))
       .query({ legalAreaId: areas[1].id, page: 2, pageSize: 1 })
       .expect(200)
 

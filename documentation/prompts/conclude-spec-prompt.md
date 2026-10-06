@@ -9,6 +9,12 @@ Close a validation-ready implementation in the current task. `conclude-spec` own
 the final pull-request CI gate for the delivery PR set, evidence closure and artifact completion. It does not
 implement changes or process later reviewer feedback.
 
+Web full integration evidence also belongs to `implement-spec`, which runs
+`test:integration` once per delivery. Reuse that record; do not rerun the full
+suite or an equivalent unfiltered Playwright command. Run only focused browser
+checks for missing or invalidated scenarios, and route missing full-suite
+records to `implement-spec`.
+
 ## Workflow continuity
 
 Treat every route named by this workflow as an immediate transition inside the current task,
@@ -86,11 +92,13 @@ conclusion automatically after it returns evaluation to `ready`.
 
 1. Read the Spec Validation Contract, Rule Pack, current evaluation and
    `documentation/tooling.md`.
-2. Run the applicable local generation, formatting/code, type, unit coverage, integration,
-   Playwright MCP, architecture and build preflight required by the Spec and changed paths.
-   Every affected Core, Server, or Web workspace must pass its `test:coverage` command.
-   Review its coverage report as informational evidence; coverage percentage changes do not
-   block validation.
+2. Verify the current generation, formatting/code, type, unit, integration, browser,
+   architecture and build evidence required by the Spec and changed paths. Reuse valid
+   implementation evidence; run only missing or invalidated checks without coverage.
+   Reuse the single coverage attempt per affected workspace recorded by `implement-spec`.
+   Do not run `test:coverage` or regenerate coverage. Review its report as informational
+   evidence and identify historical measurements; verify any recorded failures have been
+   resolved through current tests. Route a missing coverage record to `implement-spec`.
 3. Reconcile generated artifacts, migrations, saved design evidence and factual
    documentation against the current diff.
 4. Rerun the final Spec conformance comparison and verify the current validation evidence covers

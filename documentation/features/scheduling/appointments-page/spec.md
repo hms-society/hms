@@ -754,7 +754,7 @@ O job junta cada linha pendente ao Agendamento para obter o `clientId`. O evento
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/cancel-appointment-dialog/tests/use-cancel-appointment-dialog.test.ts` | Create | `useCancelAppointmentDialog` | owning hook test | Submissão/revisão/409 | Preserva contexto e recupera | — | Vitest |
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/reschedule-appointment-dialog.test.tsx` | Create | `RescheduleAppointmentDialog` | widget test | Data, slots, resumo e confirmação | Empty/pending/conflict/error | yVAoI/390 × 844 | Vitest |
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/use-reschedule-appointment-dialog.test.ts` | Create | `useRescheduleAppointmentDialog` | owning hook test | RHF, slot, data, revisão | Preserva seleção em 409 | — | Vitest |
-| `apps/web/tests/routes/agenda/consultas.test.ts` | Create | rota com hooks reais e HTTP mockado | route test | Search, queries e mutações reais no cliente | Request/query/body, cache/refetch e UI sem stale de outro escopo | 390 × 844 | Playwright CLI |
+| `apps/web/tests/agenda/consultas.test.ts` | Create | rota com hooks reais e HTTP mockado | route test | Search, queries e mutações reais no cliente | Request/query/body, cache/refetch e UI sem stale de outro escopo | 390 × 844 | Playwright CLI |
 
 **UI file/widget tree.** Cada linha abaixo é um caminho relativo ao repositório; o recuo mostra o widget pai, sem transferir a propriedade do estado ao filho.
 
@@ -874,7 +874,7 @@ Testes de widget/rota com page.route são cobertura isolada, não prova de integ
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/cancel-appointment-dialog/tests/use-cancel-appointment-dialog.test.ts | owning hook | Cancelamento | Revisão, submissão única, 409 e recovery |
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/reschedule-appointment-dialog.test.tsx | widget | Remarcação | Slots, resumo, pending/conflict/error, teclado |
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/use-reschedule-appointment-dialog.test.ts | owning hook | Remarcação | RHF, data/slot/revisão e preservação em 409 |
-| apps/web/tests/routes/agenda/consultas.test.ts | route, HTTP mocked | URL/rota/hooks reais | Search/back/forward, requests, invalidação/refetch, viewport/teclado isolados |
+| apps/web/tests/agenda/consultas.test.ts | route, HTTP mocked | URL/rota/hooks reais | Search/back/forward, requests, invalidação/refetch, viewport/teclado isolados |
 
 | Test file | Test case | Description | Assertions |
 | --- | --- | --- | --- |
@@ -960,7 +960,7 @@ Testes de widget/rota com page.route são cobertura isolada, não prova de integ
 | pnpm --filter @hms/core test | Unit de Agendamento/Consulta e regressão de reserva. |
 | pnpm --filter server test | Controller de Agendamento/Consulta com PostgreSQL real, acesso GET por ID/Intake e jobs de outbox. |
 | pnpm --filter web test -- src/ui/scheduling | Widgets/hooks. |
-| pnpm --filter web exec playwright test tests/routes/agenda/consultas.test.ts | Rota isolada; mocks rotulados. |
+| pnpm --filter web exec playwright test tests/agenda/consultas.test.ts | Rota isolada; mocks rotulados. |
 | pnpm --filter web test:integration | Suíte browser; não substitui MV real. |
 | pnpm --filter web generate-routes | Gerar routeTree.gen.ts. |
 | pnpm --filter @hms/core check-types; pnpm --filter @hms/validation check-types; pnpm --filter server check:types; pnpm --filter web check:types | Typecheck dos quatro workspaces, sequencial. |

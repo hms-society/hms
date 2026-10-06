@@ -1,77 +1,84 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { DocumentFileProcessingRequestedEvent } from '@hms/core/document-engine/domain/events'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
+import { InngestFixture } from '@/shared/messaging/inngest/fixtures/inngest-fixture'
+import { WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME } from '@/shared/messaging/inngest/integration-event-names'
 import { ProcessWhatsappBatchJob } from '../process-whatsapp-batch-job'
 
+const ORIGINAL_NAME = 'Procuração inicial.pdf'
+
 describe('ProcessWhatsappBatchJob', () => {
-  let job: ProcessWhatsappBatchJob
-  let mockInngest: any
-  let mockCreateDocumentBatchUseCase: any
-  let mockStorageProvider: any
-  let mockWhatsappProvider: any
+  let inngestFixture: InngestFixture
+  let documentEngineFixture: DocumentEngineModuleFixture
+  const processingRequests: Record<string, unknown>[] = []
 
-  beforeEach(() => {
-    mockInngest = {
-      createFunction: vi.fn((_config, handler) => handler),
+  beforeAll(async () => {
+    documentEngineFixture = await DocumentEngineModuleFixture.register()
+    try {
+      inngestFixture = await InngestFixture.register({
+        createFunctions(client) {
+          const useCase = documentEngineFixture.createDocumentBatchUseCase({
+            publish: async (event) => {
+              await client.send({ name: event.name, data: event.payload })
+            },
+          })
+          const job = new ProcessWhatsappBatchJob(client, useCase)
+          const observer = client.createFunction(
+            {
+              id: 'integration/observe-document-processing',
+              triggers: [{ event: DocumentFileProcessingRequestedEvent._NAME }],
+            },
+            ({ event }) => {
+              processingRequests.push(event.data)
+            },
+          )
+          return [job.function, observer]
+        },
+      })
+    } catch (error) {
+      await documentEngineFixture.close()
+      throw error
     }
-
-    mockCreateDocumentBatchUseCase = {
-      execute: vi.fn().mockResolvedValue({ id: 'batch-123' }),
-    }
-
-    mockStorageProvider = {
-      upload: vi.fn().mockResolvedValue('uploaded-path'),
-    }
-
-    mockWhatsappProvider = {
-      downloadMedia: vi.fn().mockResolvedValue({
-        buffer: Buffer.from('fake-media-content'),
-        mimeType: 'application/pdf',
-      }),
-    }
-
-    job = new ProcessWhatsappBatchJob(
-      mockInngest,
-      mockCreateDocumentBatchUseCase,
-      mockStorageProvider,
-      mockWhatsappProvider,
-    )
   })
 
-  it('should sanitize special characters, accents, and em-dashes in originalName when generating storagePath', async () => {
-    const handler = (job as any).function
-    const step = {
-      run: vi.fn(async (_name, fn) => await fn()),
+  afterAll(async () => {
+    try {
+      await inngestFixture?.close()
+    } finally {
+      await documentEngineFixture?.close()
     }
+  })
 
-    const event = {
+  it('persists a WhatsApp batch and dispatches file processing through Inngest', async () => {
+    await inngestFixture.client.send({
+      name: WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME,
       data: {
-        eventoId: 'evento-1',
-        mediaId: 'media-123',
-        sender: '5519999999999',
-        clientId: 'client-uuid',
-        originalName: '_712020c3-PRD — Módulo de Agendamento-310726.pdf',
+        eventoId: 'integration-event-1',
+        sender: '5511999999999',
+        originalName: ORIGINAL_NAME,
         mimeType: 'application/pdf',
+        storagePath: 'whatsapp/integration-event-1/document.pdf',
+        sizeBytes: 123,
       },
-    }
+    })
 
-    const result = await handler({ event, step })
-
-    expect(mockWhatsappProvider.downloadMedia).toHaveBeenCalledWith('media-123')
-    expect(mockStorageProvider.upload).toHaveBeenCalledWith(
-      'whatsapp/evento-1/_712020c3-PRD___Modulo_de_Agendamento-310726.pdf',
-      expect.any(Buffer),
-      'application/pdf',
-    )
-    expect(mockCreateDocumentBatchUseCase.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        files: [
-          expect.objectContaining({
-            originalName: '_712020c3-PRD — Módulo de Agendamento-310726.pdf',
-            storagePath:
-              'whatsapp/evento-1/_712020c3-PRD___Modulo_de_Agendamento-310726.pdf',
-          }),
-        ],
-      }),
-    )
-    expect(result).toEqual({ status: 'received', batchId: 'batch-123' })
-  })
+    await expect
+      .poll(
+        async () =>
+          (await documentEngineFixture.documentBatchesRepository.findTriageBatches())
+            .items,
+        { timeout: 20_000 },
+      )
+      .toEqual([
+        expect.objectContaining({
+          channel: 'whatsapp',
+          sender: '5511999999999',
+          files: [
+            expect.objectContaining({ originalName: ORIGINAL_NAME, sizeBytes: 123 }),
+          ],
+        }),
+      ])
+    await expect.poll(() => processingRequests.length, { timeout: 20_000 }).toBe(1)
+  }, 30_000)
 })

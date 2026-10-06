@@ -9,6 +9,7 @@ import type {
   DocumentTemplateVariable,
 } from '@hms/core/document-production/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
+import { toast } from 'sonner'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
@@ -255,6 +256,41 @@ describe('useDocumentSpecificationPage', () => {
     expect(result.current.isConfigurationDirty).toBe(true)
   })
 
+  it('ignores invalid application choices and removes topics with their selected area', () => {
+    const { result } = renderDocumentSpecificationPage({ mode: 'create' })
+
+    act(() => {
+      result.current.handleApplicationScope('invalid')
+      result.current.handleApplicationMoment('invalid')
+      result.current.handleAreaToggle('area-1')
+    })
+    expect(result.current.application).toEqual({
+      scope: 'global',
+      moment: 'consultation',
+    })
+
+    act(() => result.current.handleApplicationScope('legal_context'))
+    act(() => result.current.handleApplicationMoment('formalization'))
+    act(() => result.current.handleAreaToggle('area-1'))
+    act(() => result.current.handleTopicToggle('area-1', 'topic-1'))
+    act(() => result.current.handleTopicToggle('area-1', 'topic-1'))
+
+    expect(result.current.application).toMatchObject({
+      scope: 'legal_context',
+      legalTopicIdsByArea: { 'area-1': [] },
+    })
+
+    act(() => result.current.handleTopicToggle('area-1', 'topic-1'))
+    act(() => result.current.handleAreaToggle('area-1'))
+
+    expect(result.current.application).toMatchObject({
+      scope: 'legal_context',
+      moment: 'formalization',
+      legalAreaIds: [],
+      legalTopicIdsByArea: {},
+    })
+  })
+
   it('confirms before clearing legal associations when switching to global scope', () => {
     const confirmMock = vi.spyOn(window, 'confirm').mockReturnValue(false)
     const { result } = renderDocumentSpecificationPage({ mode: 'create' })
@@ -414,5 +450,225 @@ describe('useDocumentSpecificationPage', () => {
 
     expect(deleteDocumentSpecification).toHaveBeenCalledWith('spec-1')
     expect(navigateTo).toHaveBeenCalledWith('documentSpecifications', { replace: true })
+  })
+
+  it('retries the detail and catalog queries through their recovery handlers', async () => {
+    const areasRefetch = vi.fn()
+    const topicsRefetch = vi.fn()
+    const services = createRestServices()
+    useRestContextMock.mockReturnValue(services as never)
+    useDocumentCatalogQueryMock.mockReturnValue({
+      areas: { data: [], isLoading: false, isError: true, refetch: areasRefetch },
+    } as never)
+    useDocumentTopicsQueryMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: true,
+      refetch: topicsRefetch,
+    } as never)
+    const { result } = renderDocumentSpecificationPage({
+      mode: 'edit',
+      documentSpecificationId: 'spec-1',
+    })
+
+    await waitFor(() => expect(result.current.detail.data?.name).toBe(DETAIL.name))
+    await waitFor(() =>
+      expect(
+        services.documentProductionService.getDocumentSpecification,
+      ).toHaveBeenCalledOnce(),
+    )
+    act(() =>
+      result.current.form.setValue(
+        'application',
+        {
+          scope: 'legal_context',
+          moment: 'consultation',
+          legalAreaIds: ['area-1'],
+          legalTopicIdsByArea: { 'area-1': ['topic-1'] },
+        },
+        { shouldDirty: true },
+      ),
+    )
+    await waitFor(() => expect(result.current.application.scope).toBe('legal_context'))
+    act(() => result.current.handleRetry())
+    act(() => result.current.handleCatalogRetry())
+
+    await waitFor(() =>
+      expect(
+        services.documentProductionService.getDocumentSpecification,
+      ).toHaveBeenCalledTimes(2),
+    )
+    expect(areasRefetch).toHaveBeenCalledOnce()
+    expect(topicsRefetch).toHaveBeenCalledOnce()
+    expect(result.current.application.scope).toBe('legal_context')
+  })
+
+  it('creates a named specification and navigates to the saved model', async () => {
+    const createDocumentSpecification = vi.fn().mockResolvedValue(
+      new RestResponse({
+        body: { documentSpecificationId: 'created-specification' },
+        statusCode: 201,
+      }),
+    )
+    const navigateTo = vi.fn().mockResolvedValue(undefined)
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ createDocumentSpecification }),
+    )
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn().mockResolvedValue(undefined),
+    })
+    const { result } = renderDocumentSpecificationPage({ mode: 'create' })
+
+    act(() => result.current.form.setValue('name', 'Procuração', { shouldDirty: true }))
+    await act(async () => result.current.handleTemplateSave())
+
+    expect(createDocumentSpecification).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Procuração', status: 'available' }),
+    )
+    expect(navigateTo).toHaveBeenCalledWith('documentSpecification', {
+      params: { documentSpecificationId: 'created-specification' },
+      replace: true,
+    })
+  })
+
+  it('shows a create failure without navigating away', async () => {
+    const createDocumentSpecification = vi
+      .fn()
+      .mockResolvedValue(
+        new RestResponse({ statusCode: 500, errorMessage: 'Could not create model' }),
+      )
+    const navigateTo = vi.fn()
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ createDocumentSpecification }),
+    )
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn().mockResolvedValue(undefined),
+    })
+    const { result } = renderDocumentSpecificationPage({ mode: 'create' })
+
+    act(() => result.current.form.setValue('name', 'Procuração', { shouldDirty: true }))
+    await act(async () => result.current.handleTemplateSave())
+
+    expect(toast.error).toHaveBeenCalledWith('Could not create model')
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+
+  it('keeps an available configuration unsaved until its template is populated', async () => {
+    const updateConfiguration = vi.fn()
+    const services = createRestServices()
+    services.documentProductionService.getDocumentSpecification.mockResolvedValue(
+      new RestResponse({
+        body: {
+          ...DETAIL,
+          content: {
+            type: 'doc',
+            content: [{ type: 'paragraph', attrs: { textAlign: null } }],
+          } as unknown as DocumentTemplateContent,
+        },
+      }),
+    )
+    useRestContextMock.mockReturnValue(services as never)
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ updateConfiguration }),
+    )
+    const { result } = renderDocumentSpecificationPage({
+      mode: 'edit',
+      documentSpecificationId: 'spec-1',
+    })
+
+    await waitFor(() => expect(result.current.detail.data?.name).toBe(DETAIL.name))
+    await act(async () => {
+      await result.current.handleConfigurationSubmit({
+        name: 'Procuração',
+        description: '',
+        status: 'available',
+        application: { scope: 'global', moment: 'consultation' },
+      })
+    })
+
+    expect(updateConfiguration).not.toHaveBeenCalled()
+    expect(result.current.form.getFieldState('status').error?.message).toContain(
+      'template válido',
+    )
+    expect(toast.error).toHaveBeenCalledWith(
+      'Escreva e salve um template válido antes de disponibilizar o modelo.',
+    )
+  })
+
+  it('reports a deletion failure and keeps the model in place', async () => {
+    const deleteDocumentSpecification = vi
+      .fn()
+      .mockResolvedValue(
+        new RestResponse({ statusCode: 500, errorMessage: 'Could not remove model' }),
+      )
+    const navigateTo = vi.fn()
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ deleteDocumentSpecification }),
+    )
+    useNavigationMock.mockReturnValue({
+      navigateTo,
+      navigateCollaboratorsSearch: vi.fn().mockResolvedValue(undefined),
+    })
+    const { result } = renderDocumentSpecificationPage({
+      mode: 'edit',
+      documentSpecificationId: 'spec-1',
+    })
+
+    await act(async () => result.current.handleDeleteConfirm())
+
+    expect(deleteDocumentSpecification).toHaveBeenCalledWith('spec-1')
+    expect(toast.error).toHaveBeenCalledWith('Could not remove model')
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+
+  it('keeps an open delete confirmation from closing while removal is pending', () => {
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ isDeleting: true }),
+    )
+    const { result } = renderDocumentSpecificationPage({
+      mode: 'edit',
+      documentSpecificationId: 'spec-1',
+    })
+
+    act(() => result.current.handleDeleteRequest())
+    act(() => result.current.handleDeleteDialogOpenChange(false))
+
+    expect(result.current.isDeleteDialogOpen).toBe(true)
+  })
+
+  it('keeps the dirty model on the page when saving its configuration fails', async () => {
+    const updateConfiguration = vi
+      .fn()
+      .mockResolvedValue(
+        new RestResponse({ statusCode: 500, errorMessage: 'Could not update model' }),
+      )
+    useDocumentSpecificationActionsMock.mockReturnValue(
+      createActions({ updateConfiguration }),
+    )
+    const { result } = renderDocumentSpecificationPage({
+      mode: 'edit',
+      documentSpecificationId: 'spec-1',
+    })
+
+    await waitFor(() => expect(result.current.detail.data?.name).toBe(DETAIL.name))
+    act(() =>
+      result.current.handleContentChange({
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            attrs: { textAlign: null },
+            content: [{ type: 'text', text: 'Atualizado' }],
+          },
+        ],
+      } as unknown as DocumentTemplateContent),
+    )
+    await act(async () => result.current.handleTemplateSave())
+
+    expect(updateConfiguration).toHaveBeenCalledOnce()
+    expect(toast.error).toHaveBeenCalledWith('Could not update model')
+    expect(result.current.isDirty).toBe(true)
   })
 })

@@ -509,15 +509,16 @@ F4-T3 — verificado. `generate-routes`, `check:code`, teste focado (4/4) e
 
 F5-T1 — verificado. O fixture autenticado foi corrigido para executar o login pela
 UI no cenário isolado, com transporte Supabase e `complete-sign-in` mockados antes
-da navegação protegida. Os dois testes de rota passaram com 4/4: listagem e
-navegação, geração em lote em viewport estreito com teclado, abertura de versão,
+da navegação protegida. Os dois arquivos de teste de rota passaram com 11/11 testes,
+cobrindo listagem e navegação, geração em lote em viewport estreito com teclado,
+abertura de versão,
 aprovação via PATCH e conflito 409 com refetch autoritativo e aviso recuperável.
 O título da review é um parágrafo conforme a composição visual; a mensagem de
 conflito não declara sucesso. O aviso do gerador sobre `index.test.ts` é
 preexistente.
 
 F5-T2 — verificado com blockers preexistentes. `generate-routes`, `check:code` e
-os 4 testes de integração focados passaram. `check:types` e `build` falharam
+os 11 testes de integração focados passaram. `check:types` e `build` falharam
 somente ao resolver `react-pdf` no `document-viewer` preexistente; a suíte web
 passou 201/202, com timeout isolado no teste preexistente de
 `collaborator-register-dialog`. O aviso do gerador sobre `index.test.ts` também

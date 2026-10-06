@@ -4,6 +4,7 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../../document-production/interfaces'
+import { DocumentBatchGenerationRequestedEvent } from '../../../document-production/domain/events'
 import type { IntakesRepository } from '../../../intake/interfaces'
 import { ClientFaker } from '../../../identity/domain/entities/fakers'
 import type { ClientsRepository } from '../../../identity/interfaces'
@@ -131,7 +132,7 @@ describe('Generate Consultation Documents Use Case', () => {
     ])
     expect(broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document-batch.generation-requested',
+        name: DocumentBatchGenerationRequestedEvent._NAME,
         payload: expect.objectContaining({
           documents: [expect.objectContaining({ documentId: eligibleDocumentId })],
           source: {

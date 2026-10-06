@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { ConsultationFaker } from '#consultation/domain/entities/fakers'
+import { ConsultationCompletedEvent } from '#consultation/domain/events'
 import type { Consultation } from '#consultation/domain/entities/consultation'
 import { ConsultationStatus } from '#consultation/domain/structures'
 import type { DocumentPackagesRepository } from '#document-production/interfaces'
@@ -12,7 +13,10 @@ import type {
   DatetimeProvider,
   IdProvider,
 } from '#shared/interfaces'
-import type { ConsultationOutboxRepository, ConsultationsRepository } from '../../interfaces'
+import type {
+  ConsultationOutboxRepository,
+  ConsultationsRepository,
+} from '../../interfaces'
 import { CompleteConsultationUseCase } from '../complete-consultation-use-case'
 
 describe('Complete Consultation Use Case', () => {
@@ -93,7 +97,7 @@ describe('Complete Consultation Use Case', () => {
     expect(outboxRepository.add).toHaveBeenCalledWith({
       id: 'outbox-event-id',
       consultationId: completed.id,
-      name: 'consultation/consultation.completed',
+      name: ConsultationCompletedEvent._NAME,
       payload: {
         consultationId: completed.id,
         intakeId: completed.intakeId,

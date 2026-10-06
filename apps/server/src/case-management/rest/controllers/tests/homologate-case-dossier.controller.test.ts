@@ -16,6 +16,7 @@ describe('Homologate Case Dossier Controller [PATCH /cases/:caseId/dossier-gate/
   afterAll(async () => fixture.close())
 
   it('rejects invalid case identifiers', async () => {
+    await fixture.registerCollaborator()
     const response = await request(fixture.app.getHttpServer())
       .patch('/cases/not-a-uuid/dossier-gate/homologation')
       .send({})
