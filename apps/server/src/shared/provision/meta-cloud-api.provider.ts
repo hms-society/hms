@@ -14,8 +14,15 @@ export class MetaCloudApiProvider implements MetaCloudApiClient {
   constructor(private readonly envProvider: EnvProvider) {}
 
   async exchangeCodeForToken(code: string): Promise<MetaTokenExchangeResult> {
-    const appId = this.envProvider.get('META_APP_ID') || 'mock_app_id'
-    const appSecret = this.envProvider.get('META_APP_SECRET') || 'mock_app_secret'
+    const appId = this.envProvider.get('META_APP_ID')
+    const appSecret = this.envProvider.get('META_APP_SECRET')
+
+    if (!appId.trim() || !appSecret.trim()) {
+      throw new AppError(
+        'META_APP_ID e META_APP_SECRET devem estar configurados para autenticar com a Meta.',
+        'WabaRegistrationFailedError',
+      )
+    }
 
     const url = new URL(
       `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/oauth/access_token`,

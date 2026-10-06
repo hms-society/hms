@@ -22,7 +22,7 @@ describe('Retry Intake Consultation Scheduling Controller [POST /intakes/:intake
 
   beforeEach(async () => {
     await fixture.resetDatabase()
-    fixture.broker.publish.mockReset()
+    fixture.broker.publish.mockClear()
   })
 
   afterAll(async () => fixture.close())

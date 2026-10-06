@@ -216,6 +216,8 @@ export class SupabaseAuthFixture {
     const url = process.env.SUPABASE_URL
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY
     const metaGraphUrl = process.env.META_GRAPH_API_BASE_URL
+    const metaAppId = process.env.META_APP_ID
+    const metaAppSecret = process.env.META_APP_SECRET
     // biome-ignore lint/correctness/useHookAtTopLevel: Nest testing builder APIs are not React hooks.
     return builder.overrideProvider(EnvProvider).useFactory({
       inject: [ConfigService],
@@ -227,7 +229,11 @@ export class SupabaseAuthFixture {
               ? key
               : name === 'META_GRAPH_API_BASE_URL' && metaGraphUrl
                 ? metaGraphUrl
-                : config.get(name),
+                : name === 'META_APP_ID' && metaAppId
+                  ? metaAppId
+                  : name === 'META_APP_SECRET' && metaAppSecret
+                    ? metaAppSecret
+                    : config.get(name),
       }),
     })
   }
