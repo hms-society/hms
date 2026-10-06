@@ -16,6 +16,7 @@ import type {
   ChecklistTemplateItemsRepository,
   ChecklistTemplatesRepository,
   LegalCasesRepository,
+  CaseTasksRepository,
 } from '@hms/core/case-management/interfaces'
 import type { Intake } from '@hms/core/intake/domain/entities'
 import { AppError } from '@hms/core/shared/domain/errors'
@@ -45,9 +46,12 @@ export class CaseManagementSeeder {
     private readonly checklistTemplatesRepository: ChecklistTemplatesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems)
     private readonly checklistTemplateItemsRepository: ChecklistTemplateItemsRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseTasks)
+    private readonly caseTasksRepository: CaseTasksRepository,
   ) {}
 
   async clear() {
+    await this.caseTasksRepository.removeAll()
     await this.caseChecklistItemsRepository.removeAll()
     await this.caseMembersRepository.removeAll()
     await this.legalCasesRepository.removeAll()

@@ -6,4 +6,5 @@ export const CASE_MANAGEMENT_REPOSITORIES = {
   legalCases: Symbol('CASE_MANAGEMENT_REPOSITORIES.legalCases'),
   casePortalAccessGrants: Symbol('CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants'),
   pendings: Symbol('CASE_MANAGEMENT_REPOSITORIES.pendings'),
+  caseTasks: Symbol('CASE_MANAGEMENT_REPOSITORIES.caseTasks'),
 } as const
