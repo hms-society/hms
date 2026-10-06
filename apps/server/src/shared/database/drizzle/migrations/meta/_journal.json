@@ -421,13 +421,6 @@
       "when": 1790955246072,
       "tag": "0056_move_portal_permissions_to_case_grants",
       "breakpoints": true
-    },
-    {
-      "idx": 57,
-      "version": "7",
-      "when": 1791243121922,
-      "tag": "0057_burly_lorna_dane",
-      "breakpoints": true
     }
   ]
 }
