@@ -34,10 +34,9 @@ export function DossierGateBanner({ approved }: DossierGateBannerProps) {
           <Icon name='file-text' className='size-4' />
         </div>
         <div>
-          <h2 className='text-sm font-semibold text-primary'>Dossiê aprovado em 14/07</h2>
+          <h2 className='text-sm font-semibold text-primary'>Dossiê aprovado</h2>
           <p className='text-xs text-primary/75'>
-            7 documentos validados · aprovado por Dr. Ricardo Mendes · toda peça produzida
-            referencia esta versão do dossiê.
+            A elaboração de peças está liberada com base no dossiê aprovado.
           </p>
         </div>
       </div>

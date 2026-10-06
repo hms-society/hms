@@ -29,7 +29,7 @@ export function CasePiecesTab({
   const { navigateTo } = useNavigation()
   const { caseDocumentProductionService } = useRestContext()
   const {
-    data: pieces = [],
+    data: pieces,
     isLoading,
     isError,
     error,
@@ -41,32 +41,7 @@ export function CasePiecesTab({
       if (!caseId) return []
       const response = await caseDocumentProductionService.listDocuments(caseId)
       if (response.isFailure) response.throwError()
-      return response.body.map<CasePiece>((document) => ({
-        id: document.id,
-        title: document.title,
-        template: 'Modelo documental',
-        author: 'Solicitante atual',
-        reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
-        updatedAt: formatDate(document.versions[0]?.createdAt),
-        status:
-          document.generation?.status === 'pending' ||
-          document.generation?.status === 'running'
-            ? 'Gerando minuta'
-            : document.generation?.status === 'failed' ||
-                document.generation?.status === 'cancelled'
-              ? 'Falha na geração'
-              : document.versions[0]?.status === 'approved'
-                ? 'Aprovada'
-                : 'Em revisão técnica',
-        versions: document.versions.map((version) => ({
-          id: version.id,
-          label: `v${version.versionNumber}`,
-          title: formatVersionStatus(version.status),
-          author: 'Colaborador responsável',
-          timestamp: formatDate(version.createdAt),
-          meta: version.rejectionReason,
-        })),
-      }))
+      return response.body.map(mapCaseDocumentToPiece)
     },
     refetchInterval: (query) =>
       query.state.data?.some((piece) => piece.status === 'Gerando minuta') ? 3000 : false,
@@ -82,17 +57,10 @@ export function CasePiecesTab({
       return response.body
     },
     onSuccess: (result) => {
-      queryClient.setQueryData<CaseDocumentResponse[]>(
-        ['case-documents', caseId],
-        (current) =>
-          current?.map((document) =>
-            document.id === result.documentId
-              ? {
-                  ...document,
-                  generation: { id: result.documentGenerationId, status: 'pending' },
-                }
-              : document,
-          ),
+      queryClient.setQueryData<CasePiece[]>(['case-documents', caseId], (current) =>
+        current?.map((piece) =>
+          piece.id === result.documentId ? { ...piece, status: 'Gerando minuta' } : piece,
+        ),
       )
     },
   })
@@ -138,59 +106,63 @@ export function CasePiecesTab({
               </button>
             </div>
           ) : null}
-          {!isLoading && !isError && pieces.length === 0 ? (
+          {!isLoading && !isError && pieces?.length === 0 ? (
             <p className='rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground'>
               Nenhuma peça foi adicionada a este caso.
             </p>
           ) : null}
-          {pieces.map((piece) => (
-            <CasePieceCard
-              key={piece.id}
-              piece={piece}
-              onRetry={() => retryMutation.mutate(piece.id)}
-              isRetrying={retryMutation.isPending && retryMutation.variables === piece.id}
-              retryError={
-                retryMutation.isError && retryMutation.variables === piece.id
-                  ? retryMutation.error.message
-                  : undefined
-              }
-              onOpenReview={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceReview', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
-                setIsViewerOpen(true)
-              }}
-              onOpenEditor={() => {
-                if (caseId) {
-                  void navigateTo('lawyerCasePieceEditor', {
-                    params: { caseId, documentId: piece.id },
-                  })
-                  return
-                }
-                setWorkflow('editor')
-              }}
-              onDownloadVersion={async (versionId, versionLabel) => {
-                if (!caseId) return
-                const response = await caseDocumentProductionService.getDocumentFile(
-                  caseId,
-                  piece.id,
-                  versionId,
-                )
-                if (response.isFailure) {
-                  response.throwError()
-                }
-                const url = URL.createObjectURL(response.body)
-                const anchor = document.createElement('a')
-                anchor.href = url
-                anchor.download = `${piece.title}-${versionLabel}.pdf`
-                anchor.click()
-                URL.revokeObjectURL(url)
-              }}
-            />
-          ))}
+          {!isError
+            ? pieces?.map((piece) => (
+                <CasePieceCard
+                  key={piece.id}
+                  piece={piece}
+                  onRetry={() => retryMutation.mutate(piece.id)}
+                  isRetrying={
+                    retryMutation.isPending && retryMutation.variables === piece.id
+                  }
+                  retryError={
+                    retryMutation.isError && retryMutation.variables === piece.id
+                      ? retryMutation.error.message
+                      : undefined
+                  }
+                  onOpenReview={() => {
+                    if (caseId) {
+                      void navigateTo('lawyerCasePieceReview', {
+                        params: { caseId, documentId: piece.id },
+                      })
+                      return
+                    }
+                    setIsViewerOpen(true)
+                  }}
+                  onOpenEditor={() => {
+                    if (caseId) {
+                      void navigateTo('lawyerCasePieceEditor', {
+                        params: { caseId, documentId: piece.id },
+                      })
+                      return
+                    }
+                    setWorkflow('editor')
+                  }}
+                  onDownloadVersion={async (versionId, versionLabel) => {
+                    if (!caseId) return
+                    const response = await caseDocumentProductionService.getDocumentFile(
+                      caseId,
+                      piece.id,
+                      versionId,
+                    )
+                    if (response.isFailure) {
+                      response.throwError()
+                    }
+                    const url = URL.createObjectURL(response.body)
+                    const anchor = document.createElement('a')
+                    anchor.href = url
+                    anchor.download = `${piece.title}-${versionLabel}.pdf`
+                    anchor.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                />
+              ))
+            : null}
           <NewCasePieceCard onOpen={() => setIsNewPieceOpen(true)} />
           <p className='flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground'>
             <Icon name='shield-check' className='mt-0.5 size-3.5 shrink-0 text-primary' />
@@ -243,6 +215,35 @@ function formatDate(value?: string) {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))
+}
+
+export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiece {
+  return {
+    id: document.id,
+    title: document.title,
+    template: 'Modelo documental',
+    author: 'Solicitante atual',
+    reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
+    updatedAt: formatDate(document.versions[0]?.createdAt),
+    status:
+      document.generation?.status === 'pending' ||
+      document.generation?.status === 'running'
+        ? 'Gerando minuta'
+        : document.generation?.status === 'failed' ||
+            document.generation?.status === 'cancelled'
+          ? 'Falha na geração'
+          : document.versions[0]?.status === 'approved'
+            ? 'Aprovada'
+            : 'Em revisão técnica',
+    versions: document.versions.map((version) => ({
+      id: version.id,
+      label: `v${version.versionNumber}`,
+      title: formatVersionStatus(version.status),
+      author: 'Colaborador responsável',
+      timestamp: formatDate(version.createdAt),
+      meta: version.rejectionReason,
+    })),
+  }
 }
 
 function formatVersionStatus(status: string) {
