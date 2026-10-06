@@ -6,6 +6,7 @@ import { Button } from '@/ui/shadcn/button'
 
 import { NewItemDialog } from './new-item-dialog'
 import type { CreateTaskDeadlineInput, TaskDeadlineItem } from './types'
+import type { CaseTeamMember } from '../types'
 
 type Filter = 'Todos' | 'Prazos' | 'Tarefas'
 
@@ -18,7 +19,7 @@ const typeClasses: Record<string, string> = {
   Outro: 'bg-muted text-muted-foreground',
 }
 
-export function TasksDeadlinesTab() {
+export function TasksDeadlinesTab({ team = [] }: { team?: readonly CaseTeamMember[] }) {
   const [items, setItems] = useState<TaskDeadlineItem[]>([])
   const [filter, setFilter] = useState<Filter>('Todos')
   const [showCompleted, setShowCompleted] = useState(false)
@@ -159,6 +160,7 @@ export function TasksDeadlinesTab() {
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onCreate={createItem}
+        team={team}
         editingItem={editingItem}
         onUpdate={updateItem}
       />
