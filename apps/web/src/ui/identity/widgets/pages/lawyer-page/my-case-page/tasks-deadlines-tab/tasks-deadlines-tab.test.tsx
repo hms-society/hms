@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { TasksDeadlinesTab } from './index'
+import { NewItemDialog } from './new-item-dialog'
 
 describe('TasksDeadlinesTab', () => {
   it('renders an empty case task list without seeded items', () => {
@@ -25,5 +26,28 @@ describe('TasksDeadlinesTab', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Data prevista' }))
     expect(screen.getByRole('grid')).toBeTruthy()
+  })
+
+  it('shows the validation message when Outro has no custom type', () => {
+    render(
+      <NewItemDialog
+        open
+        onOpenChange={() => undefined}
+        onCreate={() => undefined}
+        team={[]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Outro/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Criar item' }))
+
+    expect(
+      screen.getByText('Preencha os campos obrigatórios para continuar.', {
+        selector: '#custom-type-error',
+      }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('textbox', { name: 'Nome do tipo' }).getAttribute('aria-invalid'),
+    ).toBe('true')
   })
 })

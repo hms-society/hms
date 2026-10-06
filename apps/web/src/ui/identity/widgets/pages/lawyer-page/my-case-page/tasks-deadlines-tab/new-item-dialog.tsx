@@ -183,7 +183,10 @@ export function NewItemDialog({
                 Nome do tipo <span className='text-destructive'>*</span>
               </span>
               <input
+                id='custom-type'
                 aria-label='Nome do tipo'
+                aria-describedby='custom-type-error'
+                aria-invalid={Boolean(error && !customType.trim())}
                 value={customType}
                 onChange={(event) => {
                   setCustomType(event.target.value)
@@ -192,6 +195,14 @@ export function NewItemDialog({
                 placeholder='Informe o tipo do item'
                 className='h-10 rounded-lg border border-border bg-background px-3 text-sm font-normal placeholder:text-muted-foreground/55'
               />
+              {error && !customType.trim() && (
+                <span
+                  id='custom-type-error'
+                  className='text-xs font-normal text-destructive'
+                >
+                  {error}
+                </span>
+              )}
             </div>
           )}
           <label className='flex flex-col gap-2 text-sm font-semibold'>
