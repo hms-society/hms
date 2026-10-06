@@ -9,7 +9,6 @@ import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { OverviewTab } from './overview-tab'
 import { PortalAccessDialog } from './portal-access-dialog'
-import { TasksDeadlinesTab } from './tasks-deadlines-tab'
 import { useMyCasePage } from './use-my-case-page'
 
 export type CasoDetalheChecklistPageProps = {
@@ -241,10 +240,6 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             caseId={caseUuid}
             checklist={checklistItems}
           />
-        </TabsContent>
-
-        <TabsContent value='prazos' className='mt-4 flex flex-col gap-4'>
-          <TasksDeadlinesTab />
         </TabsContent>
       </Tabs>
 
