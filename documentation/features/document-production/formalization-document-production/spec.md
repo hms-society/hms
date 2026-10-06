@@ -680,8 +680,8 @@ migration transaction.
 | `apps/web/src/ui/intake/widgets/pages/intake-details-page/intake-details-content/index.tsx` | Modify | Journey card | Open/create Formalization; no direct `Confirmar contratação` action |
 | `apps/web/src/ui/intake/widgets/pages/intake-details-page/tests/intake-details-page.test.tsx` | Modify | Intake regression | Pending/error/idempotent navigation and absence of direct contracting |
 | `apps/web/tests/fixtures/document-production-fixture.ts` | Modify | Stateful integration fixture | Separate Consultation/Formalization state and requests so cache/route mixups fail tests |
-| `apps/web/tests/routes/formalization/formalization.index.test.tsx` | Create | Browser integration | Full mocked transport route contract, reload, failures, 390px and keyboard |
-| `apps/web/tests/routes/document-production/consultation-documents.index.test.tsx` | Modify | Reuse regression | Existing Consultation behavior remains green after extraction |
+| `apps/web/tests/formalization/formalization.index.test.tsx` | Create | Browser integration | Full mocked transport route contract, reload, failures, 390px and keyboard |
+| `apps/web/tests/document-production/consultation-documents-page.test.ts` | Modify | Reuse regression | Existing Consultation behavior remains green after extraction |
 
 No component hardcodes the seed’s commercial field order/options/values. `FieldError`
 remains the accessible error primitive. All behavior-owning widgets have colocated hooks;
@@ -699,8 +699,8 @@ generated routes are regenerated only from route source files.
 | Server controller/database/seed suites | `CA-01`–`CA-03`, `CA-05`–`CA-11`, `CA-13` | `pnpm --filter server test -- src/formalization` then `pnpm --filter server test` | Real migrations, unique race, persistence/reload, explicit 403, event source, convergence and seed |
 | Server static/build | server delta | `pnpm --filter server check:code`, `check:types`, `build` | Nest composition boots; no `UnknownDependenciesException` |
 | Migration proof | `CA-01`, `CA-06`, `CA-13` | `pnpm --filter server db:migration:generate`, `db:migration:apply`, `db:seed` | Generated artifacts clean, constraints apply and fixture is deterministic |
-| Web unit/integration | `CA-03`–`CA-12` | `pnpm --filter web test` and focused `pnpm --filter web test:integration tests/routes/formalization/formalization.index.test.tsx` | Field lifecycle, locks, failures, shared widget, no batch/download, narrow/keyboard |
-| Consultation regression | `CA-07`, `CA-09` | `pnpm --filter web test:integration tests/routes/document-production/consultation-documents.index.test.tsx` | Extraction does not change Consultation behavior |
+| Web unit/integration | `CA-03`–`CA-12` | `pnpm --filter web test` and focused `pnpm --filter web test:integration tests/formalization/formalization.index.test.tsx` | Field lifecycle, locks, failures, shared widget, no batch/download, narrow/keyboard |
+| Consultation regression | `CA-07`, `CA-09` | `pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.ts` | Extraction does not change Consultation behavior |
 | Web generated/static | Web delta | `pnpm --filter web generate-routes`, `check:code`, `check:types` | Route tree synchronized and all service/query types aligned |
 
 Use the actual package scripts if the validation package exposes a differently named test

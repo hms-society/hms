@@ -4,15 +4,26 @@ import {
   CONSULTATION_ID,
   DOCUMENT_PRODUCTION_BACKEND,
   test,
-} from '../../fixtures/document-production-fixture'
+} from '../fixtures/document-production-fixture'
+import {
+  buildConsultationDocumentVersionPath,
+  buildConsultationDocumentsPath,
+} from '../../src/constants/routes'
+
+const CONSULTATION_DOCUMENTS_PATH = buildConsultationDocumentsPath(CONSULTATION_ID)
+const CONSULTATION_DOCUMENT_VERSION_PATH = buildConsultationDocumentVersionPath({
+  consultationId: CONSULTATION_ID,
+  documentId: 'document-1',
+  documentVersionId: 'version-1',
+})
 
 for (const generationStatus of ['pending', 'running', 'failed'] as const) {
   test(`keeps existing versions viewable while generation is ${generationStatus} [mocked]`, async ({
-    documentProduction,
+    documentProductionFixture,
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    documentProduction.consultation.documents[0].generationStatus = generationStatus
+    documentProductionFixture.consultation.documents[0].generationStatus = generationStatus
     await page.route('**/communications/summary', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
     )
@@ -42,18 +53,18 @@ for (const generationStatus of ['pending', 'running', 'failed'] as const) {
 }
 
 test('lists consultation documents and navigates to the review route', async ({
-  documentProduction,
+  documentProductionFixture,
   page,
 }) => {
-  const requestPromise = page.waitForRequest(
-    (request) =>
-      request.method() === 'GET' &&
-      request.url() ===
+  const listResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      response.url() ===
         `${DOCUMENT_PRODUCTION_BACKEND}/consultations/${CONSULTATION_ID}/documents`,
   )
 
-  await page.goto(`/consultas/${CONSULTATION_ID}/documentos`)
-  await expect(page).toHaveURL(`/consultas/${CONSULTATION_ID}/documentos`)
+  await page.goto(CONSULTATION_DOCUMENTS_PATH)
+  await expect(page).toHaveURL(CONSULTATION_DOCUMENTS_PATH)
   await expect(
     page.getByRole('heading', { name: 'Documentos da consulta' }),
   ).toBeVisible()
@@ -63,22 +74,28 @@ test('lists consultation documents and navigates to the review route', async ({
   await expect(page.getByText('Em revisão', { exact: true }).first()).toBeVisible()
   await expect(page.getByRole('link', { name: 'Revisar' })).toHaveAttribute(
     'href',
-    `/consultas/${CONSULTATION_ID}/documentos/document-1/versoes/version-1`,
+    CONSULTATION_DOCUMENT_VERSION_PATH,
   )
 
-  const request = await requestPromise
-  expect(request.url()).toBe(
+  const listResponse = await listResponsePromise
+  expect(listResponse.status()).toBe(200)
+  expect(listResponse.url()).toBe(
     `${DOCUMENT_PRODUCTION_BACKEND}/consultations/${CONSULTATION_ID}/documents`,
   )
-  expect(documentProduction.consultation.listRequests).toBe(1)
+  expect(await listResponse.json()).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: 'Contrato de prestação de serviços' }),
+    ]),
+  )
+  expect(documentProductionFixture.consultation.listRequests).toBe(1)
 })
 
 test('opens document selection and exercises narrow keyboard layout', async ({
-  documentProduction: _,
+  documentProductionFixture: _,
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(`/consultas/${CONSULTATION_ID}/documentos`)
+  await page.goto(CONSULTATION_DOCUMENTS_PATH)
 
   const selectDocuments = page.getByRole('button', { name: 'Selecionar documentos' })
   await expect(selectDocuments).toBeVisible()

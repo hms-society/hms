@@ -44,7 +44,7 @@ scope:
   - apps/web/src/ui/document-production
   - apps/web/src/ui/shadcn/dialog.tsx
   - apps/web/src/ui/shadcn/alert-dialog.tsx
-  - apps/web/tests/routes/document-production
+  - apps/web/tests/document-production
   - packages/core/src/consultation/use-cases
   - apps/server/src/consultation/rest/controllers
 last_updated_at: 2026-08-14
@@ -805,8 +805,8 @@ texto informativo dos dialogs da feature deve permanecer abaixo de `text-sm`.
   - Compõem editor, histórico, decisões, vigência, edição manual, pendências e
     regeneração sem instruções; os testes cobrem permissões por status e races.
 
-- `apps/web/tests/routes/document-production/consultation-documents.index.test.tsx`
-- `apps/web/tests/routes/document-production/consultation-document-version.test.tsx`
+- `apps/web/tests/document-production/consultation-documents-page.test.tsx`
+- `apps/web/tests/document-production/consultation-document-version-page.test.tsx`
 
   - Integração browser consumindo a fixture canônica de Produção Documental; não
     criam helpers locais de teste nem registram um segundo backend mockado.
@@ -873,7 +873,7 @@ texto informativo dos dialogs da feature deve permanecer abaixo de `text-sm`.
   `RestClient` e teste de mapeamento.
 - `apps/web/src/ui/shared/contexts/rest-context/` governa composição do adapter.
 - `apps/web/src/routes/modelos-de-documentos/` e
-  `apps/web/tests/routes/document-production/` governam rotas dinâmicas protegidas e
+  `apps/web/tests/document-production/` governam rotas dinâmicas protegidas e
   browser integration com transporte mockado.
 - `apps/server/rest-client/consultation/consultations.rest` governa método/path/body
   e credenciais seeded para a validação real.
@@ -920,8 +920,8 @@ pnpm --filter web generate-routes
 pnpm --filter web check:code
 pnpm --filter web check:types
 pnpm --filter web test
-pnpm --filter web test:integration tests/routes/document-production/consultation-documents.index.test.tsx
-pnpm --filter web test:integration tests/routes/document-production/consultation-document-version.test.tsx
+pnpm --filter web test:integration tests/document-production/consultation-documents-page.test.tsx
+pnpm --filter web test:integration tests/document-production/consultation-document-version-page.test.tsx
 pnpm --filter web build
 ```
 
