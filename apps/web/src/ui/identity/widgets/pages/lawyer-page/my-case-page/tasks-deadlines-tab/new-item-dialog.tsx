@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ptBR } from 'date-fns/locale'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
@@ -71,8 +71,12 @@ export function NewItemDialog({
   const [error, setError] = useState('')
   const [status, setStatus] = useState('A fazer')
   const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([])
+  const assigneesInitialized = useRef(false)
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      assigneesInitialized.current = false
+      return
+    }
     setType(editingItem?.type ?? 'Publicação')
     setDescription(editingItem?.description ?? '')
     setPlannedDate(editingItem?.plannedDate ?? '')
@@ -82,6 +86,7 @@ export function NewItemDialog({
     setAlerts(editingItem?.alerts ?? [])
     setError('')
     setSelectedAssigneeIds(editingItem?.assigneeIds ?? [])
+    assigneesInitialized.current = Boolean(editingItem)
     setSelectedDate(
       editingItem?.plannedDate
         ? new Date(`${editingItem.plannedDate}T12:00:00`)
@@ -89,9 +94,11 @@ export function NewItemDialog({
     )
   }, [editingItem, open])
   useEffect(() => {
-    if (!open || editingItem || selectedAssigneeIds.length > 0) return
+    if (!open || editingItem || assigneesInitialized.current || lawyerIds.length === 0)
+      return
     setSelectedAssigneeIds(lawyerIds)
-  }, [editingItem, lawyerIds, open, selectedAssigneeIds.length])
+    assigneesInitialized.current = true
+  }, [editingItem, lawyerIds, open])
   const submit = () => {
     if (!description.trim() || !plannedDate || (type === 'Outro' && !customType.trim())) {
       setError('Preencha os campos obrigatórios para continuar.')

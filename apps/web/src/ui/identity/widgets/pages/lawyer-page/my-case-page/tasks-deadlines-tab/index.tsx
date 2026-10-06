@@ -33,16 +33,15 @@ export function TasksDeadlinesTab({
   const [showCompleted, setShowCompleted] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<TaskDeadlineItem>()
-  const openItems = items.filter(
-    (item) =>
-      !item.completed &&
-      (filter === 'Todos' ||
-        (filter === 'Prazos'
-          ? item.type !== 'Tarefa interna'
-          : item.type === 'Tarefa interna')),
-  )
+  const matchesFilter = (item: TaskDeadlineItem) =>
+    filter === 'Todos' ||
+    (filter === 'Prazos'
+      ? item.type !== 'Tarefa interna'
+      : item.type === 'Tarefa interna')
+  const openItems = items.filter((item) => !item.completed && matchesFilter(item))
   const openItemsCount = items.filter((item) => !item.completed).length
-  const completedItems = items.filter((item) => item.completed)
+  const completedItems = items.filter((item) => item.completed && matchesFilter(item))
+  const completedItemsCount = items.filter((item) => item.completed).length
   const createItem = (input: CreateTaskDeadlineInput) =>
     setItems((current) => [
       ...current,
@@ -96,7 +95,7 @@ export function TasksDeadlinesTab({
           icon='list-checks'
         />
         <SummaryStat
-          value={String(completedItems.length)}
+          value={String(completedItemsCount)}
           label='concluídos'
           icon='shield-alert'
         />
