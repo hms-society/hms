@@ -122,6 +122,7 @@ export class ConsultationModuleFixture {
       await inngestFixture.close()
       throw error
     }
+
     return new ConsultationModuleFixture(
       restFixture,
       broker,

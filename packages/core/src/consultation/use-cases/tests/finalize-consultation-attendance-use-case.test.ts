@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { ConsultationFaker } from '#consultation/domain/entities/fakers'
+import { ConsultationLegalContextUpdatedEvent } from '#consultation/domain/events'
 import {
   ConsultationDecision,
   ConsultationModality,
@@ -140,7 +141,7 @@ describe('Finalize Consultation Attendance Use Case', () => {
 
     expect(broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'consultation/consultation.legal-context-updated',
+        name: ConsultationLegalContextUpdatedEvent._NAME,
         payload: expect.objectContaining({
           consultationId: consultation.id,
           intakeId: consultation.intakeId,
