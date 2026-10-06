@@ -86,4 +86,37 @@ describe('CaseDocumentResponseDto', () => {
 
     expect(response.versions[0].pendingVariables[0].label).toBe('numero beneficio')
   })
+
+  it('preserves pending variables for manual versions in list and detail payloads', () => {
+    const version = DocumentVersionFaker.fake({
+      source: 'manual',
+      pendingMarkers: [{ marker: '{cliente_nome}' }, { marker: '{numero_beneficio}' }],
+    })
+
+    const response = CaseDocumentResponseDto.fromDomain({
+      document: DocumentFaker.fake({
+        id: version.documentId,
+        currentVersionId: version.id,
+      }),
+      versions: [version],
+    })
+
+    expect(response.versions).toHaveLength(1)
+    expect(response.versions[0]).toMatchObject({
+      id: version.id,
+      source: 'manual',
+      pendingVariables: [
+        {
+          marker: '{cliente_nome}',
+          technicalName: 'cliente_nome',
+          label: 'cliente nome',
+        },
+        {
+          marker: '{numero_beneficio}',
+          technicalName: 'numero_beneficio',
+          label: 'numero beneficio',
+        },
+      ],
+    })
+  })
 })
