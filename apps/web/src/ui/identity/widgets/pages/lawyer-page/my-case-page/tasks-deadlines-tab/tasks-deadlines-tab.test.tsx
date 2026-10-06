@@ -6,7 +6,7 @@ import { NewItemDialog } from './new-item-dialog'
 
 describe('TasksDeadlinesTab', () => {
   it('renders an empty case task list without seeded items', () => {
-    render(<TasksDeadlinesTab />)
+    render(<TasksDeadlinesTab caseIdentifier='CASE-TEST' caseTitle='Caso de teste' />)
 
     expect(screen.getByText('Prazos e tarefas')).toBeTruthy()
     expect(screen.getByText('Nenhum item cadastrado neste caso.')).toBeTruthy()
@@ -14,7 +14,7 @@ describe('TasksDeadlinesTab', () => {
   })
 
   it('opens the new item modal and creates a publication locally', () => {
-    render(<TasksDeadlinesTab />)
+    render(<TasksDeadlinesTab caseIdentifier='CASE-TEST' caseTitle='Caso de teste' />)
 
     fireEvent.click(screen.getAllByRole('button', { name: /Novo item/ })[0])
     expect(screen.getByRole('dialog')).toBeTruthy()
@@ -31,6 +31,8 @@ describe('TasksDeadlinesTab', () => {
   it('shows the validation message when Outro has no custom type', () => {
     render(
       <NewItemDialog
+        caseIdentifier='CASE-TEST'
+        caseTitle='Caso de teste'
         open
         onOpenChange={() => undefined}
         onCreate={() => undefined}

@@ -32,6 +32,8 @@ const TYPES: Array<
 ]
 
 export function NewItemDialog({
+  caseIdentifier,
+  caseTitle,
   open,
   onOpenChange,
   onCreate,
@@ -39,6 +41,8 @@ export function NewItemDialog({
   onUpdate,
   team,
 }: {
+  caseIdentifier: string
+  caseTitle: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreate: (input: CreateTaskDeadlineInput) => void
@@ -50,6 +54,11 @@ export function NewItemDialog({
     () =>
       team.filter((member) => member.role === 'lead_lawyer' || member.role === 'lawyer'),
     [team],
+  )
+  const lawyerIds = useMemo(
+    () =>
+      lawyers.flatMap((member) => (member.collaboratorId ? [member.collaboratorId] : [])),
+    [lawyers],
   )
   const [type, setType] = useState<TaskDeadlineType>('Publicação')
   const [description, setDescription] = useState('')
@@ -71,18 +80,17 @@ export function NewItemDialog({
     setStatus(editingItem?.status ?? 'A fazer')
     setCustomType(editingItem?.customType ?? '')
     setAlerts(editingItem?.alerts ?? [])
-    setSelectedAssigneeIds(
-      editingItem?.assigneeIds ??
-        lawyers.flatMap((member) =>
-          member.collaboratorId ? [member.collaboratorId] : [],
-        ),
-    )
+    setSelectedAssigneeIds(editingItem?.assigneeIds ?? [])
     setSelectedDate(
       editingItem?.plannedDate
         ? new Date(`${editingItem.plannedDate}T12:00:00`)
         : undefined,
     )
-  }, [editingItem, lawyers, open])
+  }, [editingItem, open])
+  useEffect(() => {
+    if (!open || editingItem || selectedAssigneeIds.length > 0) return
+    setSelectedAssigneeIds(lawyerIds)
+  }, [editingItem, lawyerIds, open, selectedAssigneeIds.length])
   const submit = () => {
     if (!description.trim() || !plannedDate || (type === 'Outro' && !customType.trim())) {
       setError('Preencha os campos obrigatórios para continuar.')
@@ -101,7 +109,7 @@ export function NewItemDialog({
         .map((member) => member.name),
       assigneeIds: selectedAssigneeIds,
       alerts,
-      customType: customType.trim() || undefined,
+      customType: type === 'Outro' ? customType.trim() || undefined : undefined,
     }
     if (editingItem && onUpdate) onUpdate({ ...editingItem, ...input, status })
     else onCreate(input)
@@ -120,7 +128,7 @@ export function NewItemDialog({
       <DialogContent className='max-h-[calc(100dvh-2rem)] gap-0 overflow-x-hidden overflow-y-auto rounded-2xl p-0 sm:max-w-[620px]'>
         <DialogHeader className='border-b border-border px-6 py-5 pr-14'>
           <p className='text-[10px] font-semibold uppercase tracking-widest text-muted-foreground'>
-            CASO CASO-20260703-0089 · APOSENTADORIA POR TC
+            CASO {caseIdentifier} · {caseTitle}
           </p>
           <DialogTitle className='font-serif text-2xl font-semibold'>
             {editingItem ? 'Editar tarefa ou prazo' : 'Nova tarefa ou prazo'}
@@ -165,7 +173,10 @@ export function NewItemDialog({
                   key={label}
                   type='button'
                   variant='outline'
-                  onClick={() => setType(label)}
+                  onClick={() => {
+                    setType(label)
+                    if (label !== 'Outro') setCustomType('')
+                  }}
                   className={`h-14 justify-start gap-2 rounded-lg text-left ${type === label ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary' : ''}`}
                 >
                   <Icon name={icon} className='size-4' />
@@ -248,7 +259,15 @@ export function NewItemDialog({
                     selected={selectedDate}
                     onSelect={(date) => {
                       setSelectedDate(date)
-                      setPlannedDate(date ? date.toISOString().slice(0, 10) : '')
+                      setPlannedDate(
+                        date
+                          ? [
+                              date.getFullYear(),
+                              String(date.getMonth() + 1).padStart(2, '0'),
+                              String(date.getDate()).padStart(2, '0'),
+                            ].join('-')
+                          : '',
+                      )
                       setError('')
                       setIsCalendarOpen(false)
                     }}

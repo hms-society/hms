@@ -19,7 +19,15 @@ const typeClasses: Record<string, string> = {
   Outro: 'bg-muted text-muted-foreground',
 }
 
-export function TasksDeadlinesTab({ team = [] }: { team?: readonly CaseTeamMember[] }) {
+export function TasksDeadlinesTab({
+  caseIdentifier,
+  caseTitle,
+  team = [],
+}: {
+  caseIdentifier: string
+  caseTitle: string
+  team?: readonly CaseTeamMember[]
+}) {
   const [items, setItems] = useState<TaskDeadlineItem[]>([])
   const [filter, setFilter] = useState<Filter>('Todos')
   const [showCompleted, setShowCompleted] = useState(false)
@@ -157,6 +165,8 @@ export function TasksDeadlinesTab({ team = [] }: { team?: readonly CaseTeamMembe
         </div>
       </section>
       <NewItemDialog
+        caseIdentifier={caseIdentifier}
+        caseTitle={caseTitle}
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onCreate={createItem}
