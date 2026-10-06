@@ -14,7 +14,7 @@ describe('Get Consultation Document Selection Controller [GET /consultations/:co
     )
   })
   beforeEach(async () => fixture.resetDatabase())
-  afterAll(async () => fixture.close())
+  afterAll(async () => fixture?.close())
 
   it('rejects unauthenticated requests', async () => {
     await request(fixture.app.getHttpServer())

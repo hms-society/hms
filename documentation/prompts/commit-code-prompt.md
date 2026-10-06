@@ -113,7 +113,18 @@ misleading intermediate state.
 
 ---
 
+Web full integration evidence also belongs to `implement-spec`, which runs
+`test:integration` once per delivery. Reuse that record; do not rerun the full
+suite or an equivalent unfiltered Playwright command. Run only focused browser
+checks for missing or invalidated scenarios, and route missing full-suite
+records to `implement-spec`.
+
 ### 4. Validate the Changes
+
+For SDD delivery, reuse current validation recorded by `implement-spec`; run only
+missing or invalidated checks before committing. Never run `test:coverage` or
+otherwise enable coverage: `implement-spec` owns the single coverage run per
+workspace. Preserve its measured outcome and any subsequent focused corrections.
 
 Run the narrowest sufficient checks for the affected workspaces before committing.
 Use the scripts documented by the project, for example:

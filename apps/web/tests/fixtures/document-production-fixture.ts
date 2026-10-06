@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test'
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import type { ConsultationDocumentListItem } from '@hms/core/consultation/domain/structures'
+import { ROUTES } from '../../src/constants/routes'
 
 export const DOCUMENT_PRODUCTION_BACKEND = 'http://hms-api.test'
 export const CONSULTATION_ID = 'consultation-1'
@@ -15,8 +16,8 @@ const AUTHENTICATED_USER = {
 const AUTH_ACCESS_TOKEN =
   'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiI2ZWNiYzViMC1hMTQ1LTRlMGYtOTE2Ny0zMWI1NGZiODMxOGMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJleHAiOjQxMDAwMDAwMDB9.signature'
 
-type AuthFixture = {
-  auth: typeof AUTHENTICATED_USER
+type FixtureAuth = {
+  authFixture: typeof AUTHENTICATED_USER
 }
 
 const emptyContent = {
@@ -106,8 +107,8 @@ type ConsultationDocumentProductionState = {
   responseOverrides: Partial<Record<ConsultationResponseOperation, number>>
 }
 
-export type DocumentProductionFixture = {
-  documentProduction: DocumentProductionState
+export type FixtureDocumentProduction = {
+  documentProductionFixture: DocumentProductionState
 }
 
 function createConsultationVersion(
@@ -188,8 +189,8 @@ function createConsultationError(status: number) {
   } as const
 }
 
-export const test = base.extend<AuthFixture & DocumentProductionFixture>({
-  auth: [
+export const test = base.extend<FixtureAuth & FixtureDocumentProduction>({
+  authFixture: [
     async ({ page }, use) => {
       const now = new Date().toISOString()
 
@@ -235,17 +236,17 @@ export const test = base.extend<AuthFixture & DocumentProductionFixture>({
           }),
         })
       })
-      await page.goto('/login')
+      await page.goto(ROUTES.login)
       await page.getByLabel('Email:').fill(AUTHENTICATED_USER.email)
       await page.getByRole('textbox', { name: 'Senha' }).fill('playwright-password')
       await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
-      await page.waitForURL('**/home')
+      await page.waitForURL(new RegExp(`${ROUTES.home}$`))
 
       await use(AUTHENTICATED_USER)
     },
     { auto: true, scope: 'test' },
   ],
-  documentProduction: async ({ page }, use) => {
+  documentProductionFixture: async ({ page }, use) => {
     const state: DocumentProductionState = {
       details: structuredClone(documentSpecificationDetails),
       listRequests: 0,

@@ -20,7 +20,7 @@ export class WhatsappProvider implements IWhatsappProvider {
     const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
     const mode = this.envProvider.get('HMS_SERVER_APP_MODE')
 
-    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
+    const url = `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/${phoneNumberId}/messages`
 
     let templateName = 'hello_world'
     let languageCode = 'en_US'
@@ -88,7 +88,7 @@ export class WhatsappProvider implements IWhatsappProvider {
     const token = this.envProvider.get('WHATSAPP_API_TOKEN')
     const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
 
-    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
+    const url = `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/${phoneNumberId}/messages`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -144,7 +144,7 @@ export class WhatsappProvider implements IWhatsappProvider {
     const token = this.envProvider.get('WHATSAPP_API_TOKEN')
     const phoneNumberId = this.envProvider.get('WHATSAPP_PHONE_NUMBER_ID')
 
-    const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`
+    const url = `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/${phoneNumberId}/messages`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -197,7 +197,7 @@ export class WhatsappProvider implements IWhatsappProvider {
   ): Promise<{ buffer: Uint8Array; mimeType: string }> {
     const token = this.envProvider.get('WHATSAPP_API_TOKEN')
 
-    const metadataUrl = `https://graph.facebook.com/v25.0/${mediaId}`
+    const metadataUrl = `${this.envProvider.get('META_GRAPH_API_BASE_URL')}/${mediaId}`
     const metadataResponse = await fetch(metadataUrl, {
       headers: {
         Authorization: `Bearer ${token}`,

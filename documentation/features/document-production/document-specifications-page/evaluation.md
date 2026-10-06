@@ -40,11 +40,18 @@ feature.
 | `pnpm --filter server check:code` | passou, 262 arquivos |
 | `pnpm --filter web generate-routes` | passou com aviso não bloqueante sobre `routes/modelos-de-documentos/index.test.ts` |
 | `pnpm --filter web check:code` | passou com 6 warnings preexistentes fora da feature |
+| `pnpm --filter web check:lint` | passou; Biome verificou 587 arquivos |
+| `pnpm --filter web check:types` | passou |
+| `pnpm --filter web test` | passou; 119 arquivos / 510 testes, 3 skipped; um aviso existente de `requestSubmit` no jsdom |
 | `pnpm --filter server exec vitest run src/document-production/rest/controllers/tests/list-document-specifications.controller.test.ts` | passou, 7/7 |
 | `pnpm --filter server exec vitest run src/intake/rest/controllers/tests/list-intakes.controller.test.ts --reporter=verbose` | passou, 2/2; o resultado anterior `total: 3` não foi reproduzido |
 | `pnpm test` | passou nos 4 workspaces: Core 25 arquivos/110 testes, Validation 7/19, Server 30/90 e Web 39/164 |
 | `pnpm --filter web exec playwright test` | passou, 38/38; o teste mockado da feature alcançou a rota protegida e validou a query `search` |
+| `CI=1 pnpm --filter web exec playwright test --retries=0` | uma execução falhou sem reproduzir: a página não exibiu o heading e mostrou somente o shell de notificações/devtools. Depois, o arquivo focado passou 9/9 e a execução completa seguinte passou 50/50. Causa desconhecida; o rerun não é tratado como correção de produto. |
+| `CI=1 pnpm --filter web exec playwright test --retries=0` (rerun completo) | passou, 50/50; após o teste focado 9/9 e as correções já registradas em R-016, além da expectativa de origem/API no teste de Intake |
+| `pnpm --filter web exec playwright test tests/document-production/document-specifications-page.test.ts` | passou, 9/9 em 49,2 s; após corrigir a espera do teste de persistência da lista ordenada para `PATCH /document-specifications/spec-1/configuration` |
 | `pnpm build` | passou; server webpack e web Vite/Nitro concluídos; repetiu apenas o aviso do arquivo de teste na árvore de rotas |
+| `pnpm --filter web build` | passou; Vite/Nitro, 1.761 módulos; dois avisos preexistentes de descoberta de rotas para `src/routes/modelos-de-documentos/index.test.ts` e `src/routes/checklists/templates/index.test.ts` |
 | Browser real, sem `page.route` | preflight Docker/Auth/Server saudável; login fresco; rota, busca, filtro, URL, API 200 e viewport estreito validados |
 
 ## Juízes
@@ -72,6 +79,8 @@ preflight posteriores passaram.
 | R-013 | não bloqueante | configuração de geração de rotas | `index.test.ts` dentro de `routes/` gera aviso; build e geração passam; deve ser renomeado/excluído em manutenção futura |
 | R-014 | não bloqueante | serialização do snapshot | Snapshot omitiu conteúdo de duas células, mas API, `innerText`, estilos computados e DOM real confirmam os valores |
 | R-015 | classificado, não bloqueante | ambiente/sessão | Refresh token stale retornou 400 antes do login fresco; após autenticar novamente, requests da feature foram 200. Warning de state update aponta para `RootLayout`, fora do escopo |
+| R-016 | resolvido | expectativa desatualizada no Playwright de F4 | O teste de persistência da lista ordenada esperava `PATCH /document-specifications/spec-1/template`, mas, no modo de edição, `handleTemplateSave` persiste as alterações coordenadas pela operação `updateConfiguration`. A asserção foi corrigida para `/configuration`; o teste focado passou 9/9. |
+| R-017 | não reproduzido; causa desconhecida | falha intermitente no Playwright integrado | Uma execução de `CI=1 pnpm --filter web exec playwright test --retries=0` após as alterações de fixture/parser falhou porque a página não exibiu o heading e apresentou somente o shell de notificações/devtools. O arquivo focado passou 9/9 e a próxima execução completa passou 50/50. Nenhuma correção de produto foi atribuída a essa falha; preservar como evidência histórica e investigar se voltar a ocorrer. |
 | R-006 | ativo, não bloqueante | worktree | Alterações de Intake e documentação global permanecem fora do commit desta Spec e não serão revertidas nem incluídas especulativamente |
 
 ## Alinhamento documental e arquitetural
@@ -93,4 +102,5 @@ Antes de marcar a Spec como `completed`, é necessário obter CI verde no PR,
 resolver os checks bloqueantes do branch e registrar o hash do commit avaliado
 neste arquivo e na Spec. Até lá, o veredito operacional permanece
 `in_progress`, com a implementação da feature aceita e os findings acima
-classificados.
+classificados. As validações locais atuais estão verdes; os checks do PR ainda
+estão pendentes e não foram usados como evidência de conclusão.

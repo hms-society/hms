@@ -144,22 +144,23 @@ export class GenerateDocumentWorkflow implements IGenerateDocumentWorkflow {
       )
     }
 
-    const output = documentGenerationWorkflowOutputSchema.parse(result.result)
-    if (output.status === 'approved') {
+    const outcome = documentGenerationWorkflowOutputSchema.parse(result.result)
+
+    if (outcome.status === DocumentReviewDecision.Approved) {
       return {
-        status: output.status,
-        documentGenerationId: output.documentGenerationId,
-        documentVersionId: output.documentVersionId,
-        attemptsCount: output.attemptsCount,
-        pendingMarkersCount: output.pendingMarkers.length,
+        status: 'approved',
+        documentGenerationId: outcome.documentGenerationId,
+        documentVersionId: outcome.documentVersionId,
+        attemptsCount: outcome.attemptsCount,
+        pendingMarkersCount: outcome.pendingMarkers.length,
       }
     }
 
     return {
-      status: output.status,
-      documentGenerationId: output.documentGenerationId,
-      attemptsCount: output.attemptsCount,
-      findingsCount: output.findings.length,
+      status: 'failed',
+      documentGenerationId: outcome.documentGenerationId,
+      attemptsCount: outcome.attemptsCount,
+      findingsCount: outcome.findings.length,
     }
   }
 }

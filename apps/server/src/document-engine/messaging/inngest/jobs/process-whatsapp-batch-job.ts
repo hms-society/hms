@@ -9,10 +9,14 @@ import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import { WhatsappProvider } from '@/shared/communication/whatsapp.provider'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
+import { WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME } from '@/shared/messaging/inngest/integration-event-names'
 
-const whatsappDocumentBatchReceived = eventType('documents/whatsapp.batch.received', {
-  schema: z.record(z.string(), z.unknown()),
-})
+const whatsappDocumentBatchReceived = eventType(
+  WHATSAPP_DOCUMENT_BATCH_RECEIVED_EVENT_NAME,
+  {
+    schema: z.record(z.string(), z.unknown()),
+  },
+)
 
 @Injectable()
 export class ProcessWhatsappBatchJob extends InngestJob {

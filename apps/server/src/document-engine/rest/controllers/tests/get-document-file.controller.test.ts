@@ -1,33 +1,78 @@
-import { beforeAll, afterAll, describe, expect, it } from 'vitest'
-import { Test, type TestingModule } from '@nestjs/testing'
-import { type INestApplication } from '@nestjs/common'
+import { randomUUID } from 'node:crypto'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
+import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { DocumentBatchChannel } from '@hms/core/document-engine/domain/structures'
 
-import { SharedModule } from '@/shared/shared.module'
-import { DocumentsModule } from '@/document-engine/database/documents.module'
+import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
+import { LocalSupabaseStorageFixture } from '@/shared/rest/tests/local-supabase-storage-fixture'
+import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 
-describe('GetDocumentFileController', () => {
-  let app: INestApplication
-
+describe('Get Document File Controller [GET /documents/files/:fileId, GET /documents/files/:fileId/content]', () => {
+  let fixture: DocumentEngineModuleFixture
+  let storage: StorageProvider
+  let storageFixture: LocalSupabaseStorageFixture
+  const uploadedPaths: string[] = []
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [SharedModule, DocumentsModule],
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    await app.init()
+    storageFixture = await LocalSupabaseStorageFixture.start()
+    fixture = await DocumentEngineModuleFixture.register(undefined, (builder) =>
+      storageFixture.configure(builder),
+    )
+    storage = fixture.app.get<StorageProvider>(STORAGE_PROVIDER)
   })
-
+  beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => {
-    await app.close()
+    try {
+      for (const path of uploadedPaths) await storage?.remove(path)
+    } finally {
+      try {
+        await fixture?.close()
+      } finally {
+        await storageFixture?.close()
+      }
+    }
   })
 
-  it('GET /documents/files/:fileId', async () => {
-    const fileId = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+  it('returns metadata from PostgreSQL and bytes from local Supabase Storage', async () => {
+    const userId = randomUUID()
+    const clientId = randomUUID()
+    await fixture.seedUserAndClient(userId, clientId)
+    const storagePath = `tests/${randomUUID()}/document.pdf`
+    await storage.upload(storagePath, Buffer.from('document bytes'), 'application/pdf')
+    uploadedPaths.push(storagePath)
+    const batch = await fixture.documentBatchesRepository.add({
+      readableId: `LOTE-${randomUUID()}`,
+      channel: DocumentBatchChannel.InternalUpload,
+      sender: 'lawyer@hms.com',
+      inTriageBox: false,
+      clientId,
+      createdBy: userId,
+      status: 'identified',
+      files: [
+        {
+          storagePath,
+          originalName: 'document.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 14,
+        },
+      ],
+    })
+    const fileId = batch.files?.[0]?.id
+    expect(fileId).toBeDefined()
+    const metadata = await request(fixture.app.getHttpServer())
+      .get(`/documents/files/${fileId}`)
+      .expect(200)
+    expect(metadata.body).toMatchObject({ id: fileId, storagePath })
+    const content = await request(fixture.app.getHttpServer())
+      .get(`/documents/files/${fileId}/content`)
+      .expect(200)
+    expect(content.headers['content-type']).toContain('application/pdf')
+    expect(content.body).toEqual(Buffer.from('document bytes'))
+  })
 
-    const response = await request(app.getHttpServer()).get(`/documents/files/${fileId}`)
-
-    expect(response.status).not.toBe(404)
-    expect(response.body).toBeDefined()
+  it('returns not found for an unknown file', async () => {
+    await request(fixture.app.getHttpServer())
+      .get(`/documents/files/${randomUUID()}`)
+      .expect(404)
   })
 })

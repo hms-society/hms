@@ -441,7 +441,7 @@ rules:
     evidence:
       - apps/web/src/ui/document-production/widgets/pages/document-specification-page/index.tsx
       - use-document-specification-page.test.ts — canSaveModel e isTemplateEmpty
-      - document-specifications.index.test.tsx — fluxo de criação com POST e PATCH
+      - document-specifications-page.test.ts — fluxo de criação com POST e PATCH
   - id: BP-04
     rule: um único Salvar modelo persiste configuração e template; no modo de
       edição, cada fronteira só é atualizada quando está suja e o rascunho é
@@ -449,7 +449,7 @@ rules:
     evidence:
       - apps/web/src/ui/document-production/widgets/pages/document-specification-page/use-document-specification-page.ts
       - use-document-specification-page.test.ts — salvamento conjunto
-      - apps/web/tests/routes/document-production/document-specifications.index.test.tsx
+      - apps/web/tests/document-production/document-specifications-page.test.ts
   - id: BP-05
     rule: Disponível exige template textual válido; aplicação jurídica exige áreas
       e temas ativos compatíveis, enquanto aplicação global não mantém associações
@@ -466,7 +466,7 @@ rules:
       - apps/web/src/ui/document-production/widgets/pages/document-specification-page/use-document-specification-page.ts
       - apps/web/src/ui/document-production/widgets/pages/document-specification-page/variable-picker
       - use-document-specification-page.test.ts — rename/remove e tokens
-      - document-specification-page.test.tsx — criação, edição e remoção de variável
+      - document-specification-page.test.ts — criação, edição e remoção de variável
   - id: BP-07
     rule: remover um modelo exige confirmação explícita; alterações não salvas
       bloqueiam saída somente no modo de edição, não no modo de criação
@@ -538,7 +538,7 @@ evidence:
   - `pnpm test`: Core 25 arquivos/110 testes, Validation 7/19, Server 30/90 e
     Web 39/164, todos passed
   - `pnpm build`: Server webpack, Web client/SSR/Nitro, todos passed
-  - `pnpm --filter web test:integration tests/routes/document-production/document-specifications.index.test.tsx`:
+  - `pnpm --filter web test:integration tests/document-production/document-specifications-page.test.ts`:
     rerun 6/6 passed; a primeira execução teve uma falha de visibilidade no
     carregamento inicial e passou integralmente na repetição
   - preflight: Auth, banco, Storage e API local saudáveis; bootstrap do Nest
@@ -636,7 +636,7 @@ scope_allowlist:
   - `apps/web/src/ui/document-production/**`
   - `apps/web/src/ui/shared/widgets/components/{anchor,page-title,table-surface}/**`
   - `apps/web/tests/fixtures/document-production-fixture.ts`
-  - `apps/web/tests/routes/document-production/**`
+  - `apps/web/tests/document-production/**`
   - feature `spec.md`, `plan.md` e `evaluation.md`
 unrelated_preserved_user_changes:
   - `.codex/skills/create-pr/SKILL.md`
@@ -733,7 +733,7 @@ evidence:
     conhecidos foram classificados como não bloqueantes
   - `pnpm build`: Server webpack e Web client/SSR/Nitro passed
   - `pnpm --filter web test:integration
-    tests/routes/document-production/document-specifications.index.test.tsx`:
+    tests/document-production/document-specifications-page.test.ts`:
     6/6 passed após o teste passar a aceitar explicitamente o dirty guard ao
     trocar de Configuração para Template
   - correção QG-02: o teste unitário do editor passou a fornecer as APIs

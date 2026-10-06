@@ -3,6 +3,7 @@ import type {
   DocumentPackagesRepository,
   PackageDocumentsRepository,
 } from '../../../document-production/interfaces'
+import { DocumentGenerationRequestedEvent } from '../../../document-production/domain/events'
 import type { IntakesRepository } from '../../../intake/interfaces'
 import { ClientFaker } from '../../../identity/domain/entities/fakers'
 import type { ClientsRepository } from '../../../identity/interfaces'
@@ -116,7 +117,7 @@ describe('Generate Consultation Document Use Case', () => {
     ).resolves.toEqual({ documentGenerationId: generationId, documentId })
     expect(broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document.generation-requested',
+        name: DocumentGenerationRequestedEvent._NAME,
         payload: expect.objectContaining({
           documentGenerationId: generationId,
           documentId,

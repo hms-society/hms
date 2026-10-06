@@ -213,24 +213,25 @@ and isolate it from the feature change.
 Route behavior is tested with Playwright under:
 
 ```text
-apps/web/tests/routes/
+apps/web/tests/
 ```
 
 Organize route suites by bounded module, then name the file after the feature or
 route behavior:
 
 ```text
-apps/web/tests/routes/
+apps/web/tests/
 ├── identity/
-│   ├── colaboradores.index.test.tsx
-│   └── colaboradores.$colaboradorId.test.tsx
+│   ├── collaborators-page.test.ts
+│   └── collaborator-details-page.test.ts
 └── intake/
-    └── intake.novo.test.tsx
+    └── new-intake-page.test.ts
 ```
 
-When a feature exposes multiple route files, keep one test file per route file:
-`<route-file>.test.tsx`. This keeps list-route behavior separate from dynamic
-detail-route behavior and makes a failing route boundary immediately visible.
+When a feature exposes multiple route files, keep one page integration test per
+route file, named `<page-name>-page.test.ts`. This keeps list-route behavior
+separate from dynamic detail-route behavior and makes a failing route boundary
+immediately visible.
 
 The first directory is the domain module that owns the route, not a translation
 of the URL segment. Collaborators belong to `identity` because identity owns
@@ -338,7 +339,7 @@ For route, authentication, form, search, or REST changes, also run the focused
 browser integration suite:
 
 ```bash
-pnpm --filter web test:integration tests/routes/<module>/<feature>.test.tsx
+pnpm --filter web test:integration tests/<module>/<page-name>-page.test.ts
 ```
 
 Do not skip the focused browser suite merely because unit tests pass. Record

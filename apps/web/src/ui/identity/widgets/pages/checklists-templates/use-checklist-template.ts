@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChecklistDocumentType } from '@hms/core/case-management/domain/structures'
+import type { ChecklistTemplate } from '@hms/core/case-management/domain/entities'
 import type { ChecklistDocument, DocumentFileType, LegalArea } from './types'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 const CHECKLIST_TEMPLATES_QUERY_KEY = ['case-management', 'checklist-templates'] as const
 const LEGAL_AREAS_QUERY_KEY = ['legal-catalog', 'areas'] as const
+const EMPTY_CHECKLIST_TEMPLATES: readonly ChecklistTemplate[] = []
 
 export function useChecklistsTemplates(initialAreaId?: string) {
   const { caseManagementService, legalCatalogService } = useRestContext()
@@ -33,7 +35,7 @@ export function useChecklistsTemplates(initialAreaId?: string) {
   })
 
   const {
-    data: checklistTemplates = [],
+    data: checklistTemplates = EMPTY_CHECKLIST_TEMPLATES,
     error: checklistTemplatesError,
     isLoading: isLoadingChecklistTemplates,
   } = useQuery({

@@ -18,25 +18,24 @@ describe('DocumentProductionSeeder', () => {
         }))
       }),
     }
-    const documentsRepository = {
-      addMany: vi.fn(async (documents) =>
-        documents.map((document, index) => ({ ...document, id: `document-${index}` })),
-      ),
-    }
-    const documentPackagesRepository = {
-      add: vi.fn(async (documentPackage) => documentPackage),
-    }
-    const packageDocumentsRepository = {
-      addMany: vi.fn(async (packageDocuments) => packageDocuments),
-    }
-
     const seeder = new DocumentProductionSeeder(
-      {} as never,
+      { add: vi.fn(), addMany: vi.fn(), removeAll: vi.fn() } as never,
       specificationsRepository as never,
-      {} as never,
-      documentsRepository as never,
-      documentPackagesRepository as never,
-      packageDocumentsRepository as never,
+      { add: vi.fn(), removeAll: vi.fn() } as never,
+      {
+        addMany: vi.fn(async (documents: readonly unknown[]) => documents),
+        removeAll: vi.fn(),
+      } as never,
+      {
+        add: vi.fn(async (documentPackage: { id: string }) => documentPackage),
+        addMany: vi.fn(async (documents: readonly unknown[]) => documents),
+        removeAll: vi.fn(),
+      } as never,
+      {
+        add: vi.fn(),
+        addMany: vi.fn(async (documents: readonly unknown[]) => documents),
+        removeAll: vi.fn(),
+      } as never,
     )
 
     const result = await seeder.run({
@@ -52,12 +51,14 @@ describe('DocumentProductionSeeder', () => {
           name: 'Aposentadoria',
         },
       ],
-      consultationId: 'consultation-id',
+      consultationId: '00000000-0000-4000-8000-000000000101',
     })
 
-    const model = seededSpecifications.find(({ name }) => name === 'Procuração')
+    const powerOfAttorneyModel = seededSpecifications.find(
+      ({ name }) => name === 'Procuração',
+    )
 
-    expect(model).toMatchObject({
+    expect(powerOfAttorneyModel).toMatchObject({
       application: {
         scope: 'legal_context',
         moment: 'consultation',
@@ -71,7 +72,7 @@ describe('DocumentProductionSeeder', () => {
         }),
       ]),
     })
-    expect(JSON.stringify(model?.content)).toContain('{cliente_nome}')
+    expect(JSON.stringify(powerOfAttorneyModel?.content)).toContain('{cliente_nome}')
     expect(seededSpecifications).toHaveLength(3)
     expect(result.specifications).toHaveLength(3)
   })
