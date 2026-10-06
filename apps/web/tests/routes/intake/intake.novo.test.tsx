@@ -42,8 +42,9 @@ async function linkExistingClient(page: Page) {
 async function selectLawyer(page: Page) {
   await page.getByRole('button', { name: 'Advogado *' }).click()
   const dialog = page.getByRole('dialog')
-  await expect(dialog.getByRole('button', { name: 'Advogado de teste' })).toBeVisible()
-  await dialog.getByRole('button', { name: 'Advogado de teste' }).click()
+  const lawyerOption = dialog.getByRole('option', { name: 'Advogado de teste' })
+  await expect(lawyerOption).toBeVisible()
+  await lawyerOption.click()
   await dialog.getByRole('button', { name: 'Selecionar advogado' }).click()
   await expect(dialog).toBeHidden()
 }
