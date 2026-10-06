@@ -227,12 +227,39 @@ Builder and Reviewer reports are inputs, not official evidence. The Orchestrator
 diff, commands, browser behavior, and findings. `evaluation.md` is updated after every material
 implementation or validation change, and affected earlier evidence is marked stale.
 
-During implementation, the Orchestrator and Builders monitor added TypeScript LOCs. When substantive
-changes exceed the advisory threshold of ~1,200 LOC (excluding generated files, test snapshots, and
-fixtures), the agent reports the volume, evaluates which completed task is ready for publication,
-and suggests opening a Small PR for `develop` before continuing with dependent slices.
-
 ## 6. Integrated validation
+
+### Single coverage owner
+
+Only `implement-spec` runs `test:coverage` locally in SDD, once per affected Core, Server,
+or Web workspace per delivery after focused checks pass. Evaluation records the
+attempt and report. Resumes, corrections, amendments, commits, conclusion retries,
+and PR updates do not grant another run; failed or interrupted attempts count.
+Builders and reviewers use focused tests without coverage. Later stages reuse
+current validation and rerun only missing or invalidated checks without coverage.
+Keep coverage historical after implementation changes, and resolve failures with
+current tests without claiming regenerated percentages. Missing coverage evidence
+routes to `implement-spec`. CI independently runs coverage and every applicable
+quality gate on each current PR head; the local single-run limit does not apply
+to CI. A separate local coverage refresh requires an explicit user request.
+
+
+### Single Web integration owner
+
+Only `implement-spec` runs the full Web `test:integration` suite locally, once per delivery
+when applicable. Record every attempt, its outcome, and artifacts in Evaluation. An attempt
+uses the one-run allowance only when the suite completed and produced usable results and
+artifacts for the full scenario set. A failed or interrupted attempt without complete usable
+evidence does not consume the allowance; retry only after recording and correcting its cause
+or recovering the failed environment. A completed run with failing scenarios does consume the
+allowance: preserve its results as historical and resolve failures with current focused
+Playwright CLI tests for affected routes and scenarios, without relabeling the full run as
+green. Resumes, corrections, amendments, and publication retries reuse valid completed-suite
+evidence. Local conclusion, commit, and publication must not repeat a completed full suite
+through `test:integration` or an equivalent unfiltered command. Missing complete evidence
+routes to `implement-spec`. A separate full integration refresh after a valid completed run
+requires an explicit user request. CI independently runs the full integration suite on each
+applicable PR head. Required real-service browser and acceptance checks still apply.
 
 Run the exact Core, Validation, Server, Web, database, architecture, build, integration, and
 browser sensors required by the Spec and [`../tooling.md`](../tooling.md). Build is part of the

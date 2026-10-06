@@ -113,8 +113,32 @@ The application and core workspaces use Vitest for automated tests.
 - `pnpm test` runs the test task across all workspaces through Turborepo.
 
 Server REST integration tests use Testcontainers and are configured with
-`fileParallelism: false` so each module fixture can own an isolated database
-without competing container startups.
+`fileParallelism: false`. Vitest global setup starts PostgreSQL and Supabase Auth
+once per run. Each database fixture clones a migrated template into an isolated
+database; each file starts with cleared Auth users and Mailpit messages. Global
+teardown stops the run-owned containers. Inngest fixtures keep dedicated function
+registrations. This avoids repeating container startup and migrations for every
+controller file while preserving real service coverage.
+
+Run container-backed server suites sequentially across commands as well as within
+Vitest. Several simultaneous Vitest processes bypass `fileParallelism: false`
+and can trigger Docker port-binding timeouts. Confirm the service startup error
+before classifying a failure as infrastructure-related, then rerun only the
+affected files sequentially. Record both the initial failure and the rerun; a
+focused passing rerun does not turn the original full run into a green run.
+
+### Web integration in SDD
+
+Only `implement-spec` runs `pnpm --filter web test:integration` locally, once per delivery
+when applicable, after focused browser checks pass. Record the attempt, outcome,
+measured implementation, and artifacts in Evaluation. Failed or interrupted
+attempts count; resumes and corrections do not reset the allowance. Later fixes
+use focused Playwright CLI tests for affected routes and scenarios. Conclusion,
+commit, and publication reuse the local full-suite evidence. CI independently
+runs the full Web integration suite on every applicable PR head. A separate local
+full refresh requires an explicit user request.
+Continue to validate required real REST/Auth, viewport, keyboard, console/network,
+and acceptance behavior; label earlier full-suite results historical after changes.
 
 ### Test coverage reports
 
@@ -143,12 +167,56 @@ evidence; they do not establish that an acceptance criterion is complete.
 | Web floor | 46.8% | 45.3% | 43.7% | 48.3% |
 | Longer-term target | 85% | 80% | 85% | 85% |
 
-The Core, Server, and Web PR workflows run their own coverage commands. When a
-coverage summary is available, they write a GitHub Actions job summary and
-create or update a coverage comment on internal pull requests, even if the
-coverage command fails. They upload the full report as an artifact retained for
-14 days. Pull requests from forks receive the job summary and artifact without
-the comment.
+Latest local measurements, taken on 2026-10-03, are separate from those reference
+floors and do not change the configured thresholds:
+
+| Workspace | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| Core | 72.62% | 62.93% | 72.15% | 76.25% |
+| Server | 66.92% | 53.53% | 74.61% | 68.27% |
+| Web | 46.99% | 45.40% | 43.92% | 48.47% |
+
+Core completed with 129 files and 417 tests passing. Web completed with 100 files,
+371 tests passing, and 3 skipped on the full rerun after a dialog test timeout.
+The latest Server coverage run completed with 122 files passing and 3 Storage
+files failing: 270 tests passed and 3 failed because global service setup left
+its temporary Auth URL in the environment. Global setup now restores the
+original environment before workers start. All 11 tests across the 3 affected
+Storage files, Auth sign-in, and parameterized document-exception review passed
+on a focused rerun. The full coverage suite was not rerun after that correction;
+the Server percentages above belong to the failing full run.
+
+When reporting coverage, read each workspace's
+`coverage/coverage-summary.json` and state the measurement date, test outcome,
+and whether the command ran the complete suite or a subset. Check artifact
+freshness: a saved report may predate the current changes, and Vitest clears old
+artifacts when a new coverage run starts. Label old reports as the latest saved
+measurement rather than current coverage. A failing run can still emit coverage;
+report its failures alongside the percentages.
+
+Use focused tests for routine changes. A request to refresh whole-workspace
+coverage requires a complete coverage run; focused coverage cannot replace that
+measurement. Stop repeating broad coverage once it has produced the requested
+report unless a concrete remaining risk requires another run. Server's full
+coverage run on 2026-10-03 decreased from 38m 6s to 14m 43s after reusing
+run-owned PostgreSQL and Auth services, about 61% faster. The latter command took
+14m 55s of wall time including command startup and shutdown. These are local
+measurements, not GitHub Actions job durations; the faster full run had the 3
+Storage failures described above, corrected and verified in a focused rerun.
+
+In local SDD execution, only `implement-spec` runs coverage, once per affected workspace per
+delivery. Record the attempt and report in Evaluation, including failed or
+interrupted attempts. Resumes, corrections, amendments, commits, and conclusion
+retries reuse that record. Later corrections use focused tests without coverage;
+label the original percentages historical when the measured implementation has
+changed. A separate coverage refresh requires an explicit user request.
+
+Core, Server, and Web PR workflows independently run tests with coverage and all
+applicable quality gates on each current PR head. Web CI also runs its full
+integration suite. CI publishes coverage summaries, PR comments, and report
+artifacts. The local single-run policy does not limit CI. `conclude-spec`,
+`commit-code`, and `create-pr` reuse implementation evidence and run only missing
+or invalidated local checks without coverage.
 
 ## CI/CD — GitHub Actions and Coolify
 
