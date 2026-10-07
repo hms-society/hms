@@ -122,11 +122,11 @@ export function AddTeamMemberDialog({
                   </div>
                 </PopoverTrigger>
                 <PopoverContent
-                  className='w-[var(--radix-popover-trigger-width)] p-0 rounded-xl max-h-[250px]'
+                  className='w-[var(--radix-popover-trigger-width)] max-h-[min(70vh,360px)] overflow-hidden rounded-xl p-0'
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <Command shouldFilter={false}>
-                    <CommandList>
+                    <CommandList className='max-h-[min(60vh,320px)]'>
                       <CommandEmpty>
                         {isLoadingCollaborators
                           ? 'Buscando...'
