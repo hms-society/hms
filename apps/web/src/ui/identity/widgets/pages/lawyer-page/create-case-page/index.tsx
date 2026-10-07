@@ -3,7 +3,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createCaseSchema, type CreateCaseData } from '@hms/validation/case-management'
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
-import { useIntakesQuery } from '@/ui/intake/widgets/pages/intakes-page/use-intakes-query'
+import { useIntakesListQuery } from '@/ui/intake/hooks/use-intakes-list-query'
 import { useCreateCaseMutation } from './use-create-case-mutation'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
@@ -62,7 +62,7 @@ export function CreateCasePage() {
   const [intakeOpen, setIntakeOpen] = useState(false)
   const [intakeSearch, setIntakeSearch] = useState('')
   const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false)
-  const intakesQuery = useIntakesQuery({
+  const intakesQuery = useIntakesListQuery({
     page: 1,
     pageSize: 10,
     search: intakeSearch,

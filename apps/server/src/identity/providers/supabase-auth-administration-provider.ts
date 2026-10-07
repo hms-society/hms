@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import type { AuthAdministrationProvider } from '@hms/core/identity/interfaces'
 import type {
@@ -17,6 +17,7 @@ const SUPABASE_LONG_TERM_BAN_DURATION = '876000h'
 
 @Injectable()
 export class SupabaseAuthAdministrationProvider implements AuthAdministrationProvider {
+  private readonly logger = new Logger(SupabaseAuthAdministrationProvider.name)
   private readonly supabase: SupabaseClient
 
   constructor(@Inject(EnvProvider) private readonly envProvider: EnvProvider) {
@@ -86,6 +87,9 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
         page,
         perPage: USERS_PAGE_SIZE,
       })
+
+      console.log(data)
+      console.error(error)
 
       if (error) {
         this.throwAuthError(error, 'Não foi possível consultar os usuários do Auth.')
@@ -197,6 +201,25 @@ export class SupabaseAuthAdministrationProvider implements AuthAdministrationPro
 
   private throwAuthError(error: unknown, fallbackMessage: string): never {
     const authError = this.getAuthError(error)
+    const candidate = error as { status?: unknown; message?: unknown } | null
+    const serviceRoleKey = this.envProvider.get('SUPABASE_SERVICE_ROLE_KEY')
+    const message =
+      typeof candidate?.message === 'string'
+        ? candidate.message
+            .split(serviceRoleKey || '\u0000')
+            .join('[REDACTED]')
+            .replace(
+              /Bearer\s+\S+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_secret_[A-Za-z0-9_-]+/gi,
+              '[REDACTED]',
+            )
+        : undefined
+
+    this.logger.error({
+      operation: fallbackMessage,
+      status: typeof candidate?.status === 'number' ? candidate.status : undefined,
+      code: authError.code,
+      message,
+    })
 
     if (authError.code === 'email_exists') {
       throw new ConflictError(

@@ -9,6 +9,7 @@ export const ROUTES = {
   resetPassword: '/redefinir-senha',
   invite: '/convite',
   attendant: '/atendimento',
+  attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyerSchedule: '/agenda',
   lawyer: '/advogado',
@@ -17,11 +18,15 @@ export const ROUTES = {
   lawyerCommunication: '/advogado/comunicacao',
   lawyerCases: '/advogado/meus-casos',
   lawyerCaseDetails: '/advogado/meus-casos/$caseId',
+  lawyerCasePiece: '/advogado/meus-casos/$caseId/pecas/$documentId',
+  lawyerCasePieceEditor: '/advogado/meus-casos/$caseId/pecas/$documentId/editor',
+  lawyerCasePieceReview: '/advogado/meus-casos/$caseId/pecas/$documentId/revisao',
   lawyerCaseCreation: '/advogado/meus-casos/novo-caso',
   lawyerCaseChecklistItem: '/advogado/meus-casos/$caseId/checklist/$checklistItemId',
   clients: '/clientes',
   clientDetails: '/clientes/$clienteId',
   collaborators: '/colaboradores',
+  collaboratorDetails: '/colaboradores/$colaboradorId',
   thirdParties: '/terceiros',
   auditLogs: '/auditoria',
   documentBatch: '/lotes-documentos',
@@ -56,6 +61,14 @@ export function buildConsultationDocumentsPath(consultationId: string): string {
 
 export function buildConsultationPath(consultationId: string): string {
   return ROUTES.consultation.replace('$consultationId', consultationId)
+}
+
+export function buildClientDetailsPath(clienteId: string): string {
+  return ROUTES.clientDetails.replace('$clienteId', clienteId)
+}
+
+export function buildCollaboratorDetailsPath(colaboradorId: string): string {
+  return ROUTES.collaboratorDetails.replace('$colaboradorId', colaboradorId)
 }
 
 export function buildConsultationDocumentVersionPath(params: {

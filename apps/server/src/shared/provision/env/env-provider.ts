@@ -15,17 +15,16 @@ export const envSchema = z.object({
   ),
   HMS_SERVER_APP_MODE: z.enum(['dev', 'prod', 'stg']),
   HMS_WEB_APP_URL: z.string(),
-  OLLAMA_AI_MODEL: z.string().min(1).default('qwen3.5:2b'),
-  OLLAMA_VISION_AI_MODEL: z.string().min(1).default('qwen2.5vl:3b'),
-  OLLAMA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(900_000),
-  AI_PROVIDER: z.enum(['ollama', 'openai', 'gemini']).default('ollama'),
-  OPENAI_API_KEY: optionalEnvString,
-  OPENAI_AI_MODEL: optionalEnvString,
-  OPENAI_VISION_AI_MODEL: optionalEnvString,
+  AI_PROVIDER: z.enum(['gemini', 'openrouter']).default('openrouter'),
   GEMINI_API_KEY: optionalEnvString,
   GEMINI_AI_MODEL: optionalEnvString,
   GEMINI_VISION_AI_MODEL: optionalEnvString,
   OPENROUTER_API_KEY: optionalEnvString,
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url().optional(),
+  ),
+
   SUPABASE_URL: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   DOCUMENSO_URL: z.preprocess(
@@ -35,6 +34,7 @@ export const envSchema = z.object({
   HMS_USER_SEED_PASSWORD: z.string().min(6).optional(),
   INNGEST_DEV: z.enum(['0', '1']).default('0'),
   INNGEST_BASE_URL: z.string().url().optional(),
+  INNGEST_API_BASE_URL: z.url().default('https://api.inngest.com'),
   INNGEST_API_KEY: z.preprocess(
     (value) => (value === '' ? undefined : value),
     z.string().min(1).optional(),
@@ -52,6 +52,7 @@ export const envSchema = z.object({
   WHATSAPP_START_WINDOW_TEMPLATE_NAME: z.string().default('inicio_atendimento_ola'),
   META_APP_ID: z.string().default(''),
   META_APP_SECRET: z.string().default(''),
+  META_GRAPH_API_BASE_URL: z.url().default('https://graph.facebook.com/v25.0'),
   NGROK_DOMAIN: z.string().optional(),
   SUPABASE_STORAGE_BUCKET: z.preprocess(
     (value) => (value === '' ? undefined : value),

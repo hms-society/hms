@@ -194,7 +194,7 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 
 - **Status/owner:** `completed` — `builder_web`
 - **Depends/parallel:** Depends on F6-T2 and F6-T3; parallel with F5. F7 owns real-service/authenticated browser evidence.
-- **Paths:** Colocated widget/hook tests; `apps/web/tests/routes/agenda/consultas.test.ts`; generated `apps/web/src/routeTree.gen.ts` only through route generation; feature test fixtures and mocked HTTP contract setup.
+- **Paths:** Colocated widget/hook tests; `apps/web/tests/agenda/consultas.test.ts`; generated `apps/web/src/routeTree.gen.ts` only through route generation; feature test fixtures and mocked HTTP contract setup.
 - **Contract:** RF-01–RF-04, RF-08; CA-01–CA-04, CA-08–CA-09; Spec widget tree, route contract and widget-testing boundary.
 - **Outcome:** Web tests exercise the complete route/widget tree with mocked transport clearly scoped to isolated coverage, generated route metadata is current, and keyboard/narrow viewport behavior is executable.
 - **Rules:** `documentation/rules/ui-layer-rules.md`; `documentation/rules/web-app-routing-rules.md`; `documentation/rules/widget-testing-rules.md`; `documentation/rules/rest-layer-rules.md`; `documentation/tooling.md`; use repository Playwright CLI, not Playwright MCP.

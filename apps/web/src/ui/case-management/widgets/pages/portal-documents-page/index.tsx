@@ -409,7 +409,9 @@ export function PortalDocumentsPage({ caseId, portalToken }: PortalDocumentsPage
         protocol={uploadResult?.protocol}
         error={uploadMutation.error?.message}
         onOpenChange={handleDialogChange}
-        onSubmit={(file) => uploadMutation.mutateAsync(file).then(() => undefined)}
+        onSubmit={async (file) => {
+          uploadMutation.mutate(file)
+        }}
       />
     </main>
   )

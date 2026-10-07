@@ -50,6 +50,12 @@ importers:
       '@mastra/core':
         specifier: 1.57.0
         version: 1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3)
+      '@mastra/observability':
+        specifier: 1.18.3
+        version: 1.18.3(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)
+      '@mastra/otel-bridge':
+        specifier: 1.5.13
+        version: 1.5.13(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(@opentelemetry/auto-instrumentations-node@0.79.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1)))(@opentelemetry/sdk-node@0.222.0(@opentelemetry/api@1.9.1))(zod@4.4.3)
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.27(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -159,6 +165,9 @@ importers:
       supertest:
         specifier: ^7.0.0
         version: 7.2.2
+      testcontainers:
+        specifier: ^12.0.4
+        version: 12.0.4
       ts-loader:
         specifier: ^9.5.2
         version: 9.6.2(typescript@5.9.2)(webpack@5.106.2(@swc/core@1.15.43)(esbuild@0.28.1))
@@ -258,6 +267,9 @@ importers:
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
+      docx-preview:
+        specifier: ^0.4.1
+        version: 0.4.1
       lucide-react:
         specifier: ^0.545.0
         version: 0.545.0(react@19.2.7)
@@ -1563,6 +1575,32 @@ packages:
     engines: {node: '>=22.13.0'}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
+
+  '@mastra/observability@1.18.3':
+    resolution: {integrity: sha512-WYw3gouK3c1U3dvpi6M56duRUyVlx94vE1Qs1OfETOgGXiFdW9AyO64YIchQmD+mqKpVxIq1ASvEssRHMag45Q==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      '@mastra/core': '>=1.16.0-0 <2.0.0-0'
+      zod: ^3.25.0 || ^4.0.0
+
+  '@mastra/otel-bridge@1.5.13':
+    resolution: {integrity: sha512-Uk901y7/csjCvm4dN69Wz10cS0txlU5ftw6dcr/1TbZ0mTVAXmwmQfqc1gORno5sG8ymUHiA8oJokiIiRd4ANA==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      '@mastra/core': '>=1.16.0-0 <2.0.0-0'
+      '@opentelemetry/auto-instrumentations-node': '>=0.50.0'
+      '@opentelemetry/sdk-node': '>=0.50.0'
+    peerDependenciesMeta:
+      '@opentelemetry/auto-instrumentations-node':
+        optional: true
+      '@opentelemetry/sdk-node':
+        optional: true
+
+  '@mastra/otel-exporter@1.4.4':
+    resolution: {integrity: sha512-r5hBzwvg5sZzX9tsJq/WKOTgcXBE6d0b3l1StpaN5IC6otZrLSdg7KFq/pxCTnq3y9c0YyIK8jvgw3Cz0CaZWQ==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      '@mastra/core': '>=1.16.0-0 <2.0.0-0'
 
   '@mastra/schema-compat@1.3.5':
     resolution: {integrity: sha512-9CdBZZ2Fb8q6Ms4r6hs0msH8MTmVn99Zrc+i8BnNNuqKlIrywIoH3BghmPr5VsvkBUx7u/GjdYAsJ6i9nPcZZA==}
@@ -5350,6 +5388,9 @@ packages:
     resolution: {integrity: sha512-avsq/xk4YPIrn0CgleX5bjT9Y8IT1p9PxrNQ++RBQ2WEyFfHCTDsT9kmyxz+H/axnjAwg8wJWEIuPGOUuNupiA==}
     engines: {node: '>= 14.17'}
 
+  docx-preview@0.4.1:
+    resolution: {integrity: sha512-Dv4g+LeE0swHpPvNC0lAT0YsR5Zq5pAxw7d3vHQ8EChBLgIrqqe9VPL5nVt2HBJap8bEZbXUI0TJob7kBeNU9w==}
+
   docx@9.7.1:
     resolution: {integrity: sha512-ilXFf9Moz47ABjFpDiA5s1w9lpb4EFSp7+5iiJSbfyYDM+bpZdAgLlSr7fW4aXhVe/E+F6QCv0EvRVFEd5CsWg==}
     engines: {node: '>=10'}
@@ -5642,10 +5683,6 @@ packages:
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
-
-  eventsource-parser@3.1.0:
-    resolution: {integrity: sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==}
-    engines: {node: '>=18.0.0'}
 
   eventsource-parser@3.1.1:
     resolution: {integrity: sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ==}
@@ -7637,7 +7674,7 @@ packages:
 
   serialize-error-cjs@0.1.4:
     resolution: {integrity: sha512-6a6dNqipzbCPlTFgztfNP2oG+IGcflMe/01zSzGrQcxGMKbIjOemBBD85pH92klWaJavAUWxAh9Z0aU28zxW6A==}
-    deprecated: Rolling release, please update to 0.2.0
+    deprecated: Rolling release, please update to 0.3.0
 
   seroval-plugins@1.5.6:
     resolution: {integrity: sha512-HXuLAX2pu/UByPpaeo/TaMfvMIi+1QqIoPJYCcAtU8QkVNwgR6MPlGuCQTErV1JwraaMbYaWVIBX7mppzGLATQ==}
@@ -9796,6 +9833,48 @@ snapshots:
       - utf-8-validate
       - workflow
 
+  '@mastra/observability@1.18.3(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)':
+    dependencies:
+      '@mastra/core': 1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3)
+      zod: 4.4.3
+
+  '@mastra/otel-bridge@1.5.13(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(@opentelemetry/auto-instrumentations-node@0.79.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1)))(@opentelemetry/sdk-node@0.222.0(@opentelemetry/api@1.9.1))(zod@4.4.3)':
+    dependencies:
+      '@mastra/core': 1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3)
+      '@mastra/observability': 1.18.3(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)
+      '@mastra/otel-exporter': 1.4.4(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.221.0
+    optionalDependencies:
+      '@opentelemetry/auto-instrumentations-node': 0.79.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))
+      '@opentelemetry/sdk-node': 0.222.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - zod
+
+  '@mastra/otel-exporter@1.4.4(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)':
+    dependencies:
+      '@mastra/core': 1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3)
+      '@mastra/observability': 1.18.3(@mastra/core@1.57.0(@bufbuild/protobuf@2.13.0)(@grpc/grpc-js@1.14.4)(express@5.2.1)(rxjs@7.8.2)(zod@4.4.3))(zod@4.4.3)
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.221.0
+      '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-logs': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-node': 2.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.43.0
+    optionalDependencies:
+      '@grpc/grpc-js': 1.14.4
+      '@opentelemetry/exporter-logs-otlp-grpc': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-logs-otlp-http': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-logs-otlp-proto': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-trace-otlp-grpc': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-trace-otlp-http': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-trace-otlp-proto': 0.221.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-zipkin': 2.11.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - zod
+
   '@mastra/schema-compat@1.3.5(zod@4.4.3)':
     dependencies:
       json-schema-to-zod: 2.8.1
@@ -9815,7 +9894,7 @@ snapshots:
       cors: 2.8.6
       cross-spawn: 7.0.6
       eventsource: 3.0.7
-      eventsource-parser: 3.1.0
+      eventsource-parser: 3.1.1
       express: 5.2.1
       express-rate-limit: 8.5.2(express@5.2.1)
       hono: 4.12.27
@@ -9837,7 +9916,7 @@ snapshots:
       cors: 2.8.6
       cross-spawn: 7.0.6
       eventsource: 3.0.7
-      eventsource-parser: 3.1.0
+      eventsource-parser: 3.1.1
       express: 5.2.1
       express-rate-limit: 8.5.2(express@5.2.1)
       hono: 4.12.27
@@ -13981,6 +14060,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  docx-preview@0.4.1:
+    dependencies:
+      jszip: 3.10.1
+
   docx@9.7.1:
     dependencies:
       '@types/node': 25.9.5
@@ -14221,8 +14304,6 @@ snapshots:
       - bare-abort-controller
 
   events@3.3.0: {}
-
-  eventsource-parser@3.1.0: {}
 
   eventsource-parser@3.1.1: {}
 

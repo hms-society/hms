@@ -4,14 +4,25 @@ description: Vitest and Testing Library rules for web widgets, layouts, hooks, m
 
 # Widget Testing Rules
 
-These rules apply to tests under `apps/web/src/ui` and the corresponding browser
-integration tests under `apps/web/tests`. They define which UI boundaries receive
-tests, how those tests are named, how dependencies are mocked, and the minimum
-evidence required before a widget is considered covered.
+These rules apply to tests under `apps/web/src/ui`. They define which UI
+boundaries receive tests, how those tests are named, how dependencies are mocked,
+and the minimum evidence required before a widget is considered covered. For
+Playwright integration tests under `apps/web/tests`, follow
+[`web-app-integration-testing-rules.md`](web-app-integration-testing-rules.md).
+
+## Query hooks are covered through their consumers
+
+Do not create standalone test files for query hooks. This includes hooks that
+wrap TanStack Query and feature hooks that combine query results with URL search
+state. Cover their user-visible behavior through the owning widget, page, or
+page-hook test boundary. Mock the nearest REST service or query dependency when
+needed to keep that consumer test focused and deterministic. Keep these tests in
+the consuming widget's `tests` directory; do not create a `hooks/tests` directory
+for query hook tests.
 
 ## Separate widget tests from hook tests
 
-Every widget with an owning hook has two complementary test boundaries:
+Every widget with an owning UI hook has two complementary test boundaries:
 
 1. The widget component test (`<widget>.test.tsx`) mocks the widget's own
    colocated hook and verifies that the component maps the hook state to
@@ -26,6 +37,10 @@ must not use the real owning hook as a substitute for the hook test, and a hook
 test must not render the component as a substitute for the component test. The
 widget test is intentionally isolated from query, mutation, router, context, and
 other hook implementation details.
+
+The query-hook exception above still applies: query hooks do not receive
+standalone hook tests. When query, URL, or pagination behavior must be verified,
+cover it at the consuming page or widget boundary.
 
 This isolated component test is structural boundary coverage: it proves that
 hook state maps to markup and that interactions delegate to the exposed
@@ -42,7 +57,7 @@ than internal JSX structure or implementation details.
 An internal widget receives its own pair of tests when it owns behavior or has a
 public prop contract. A pure structural child may be covered through its owner.
 For example, `AppLayout` may cover a purely structural `Sidebar` through
-`app-layout.test.tsx`, while a `Sidebar` with its own hook requires
+`app-layout.test.ts`, while a `Sidebar` with its own hook requires
 `sidebar.test.tsx` and `use-sidebar.test.ts`.
 
 Do not mock internal child widgets merely to make a widget test smaller. Render
@@ -89,7 +104,7 @@ row and one action does not cover the table.
 Place widget and hook tests in a colocated `tests` directory:
 
 ```text
-widgets/layouts/app-layout/tests/app-layout.test.tsx
+widgets/layouts/app-layout/tests/app-layout.test.ts
 widgets/layouts/app-layout/tests/use-app-layout.test.ts
 ```
 
@@ -142,11 +157,12 @@ fixtures, a previous URL, or a previous mock call count. When a test uses a
 factory for a controller or service mock, create a fresh factory result per
 test and override only the behavior under examination.
 
-## Hook tests cover hook-owned behavior
+## UI hook tests cover hook-owned behavior
 
-Use `renderHook` for application hooks. A hook test covers the state, derived
+Use `renderHook` for application UI hooks. A hook test covers the state, derived
 values, effects, and handlers owned by that hook. Use `act` when an operation
-updates React state.
+updates React state. Query hooks are excluded from standalone hook tests; verify
+their observable behavior through a consuming widget or page test.
 
 The hook under test is the only hook that should be real in its hook test. Mock
 its nearest HMS application dependencies, including domain query/action hooks,
@@ -157,10 +173,10 @@ Mock the nearest application abstraction rather than the third-party hook beneat
 it. For example, `useAppLayout` tests mock `useUrlPathname`, not TanStack Router's
 `useLocation`.
 
-When one application hook consumes another domain-specific hook, test the
-consumer by mocking the domain-specific hook. Test the lower hook separately for
-the behavior it owns. For example, a hook consuming `useIntakesQuery` should not
-reconstruct a `useQuery` result or test React Query itself.
+When one application UI hook consumes another domain-specific UI hook, test the
+consumer by mocking the domain-specific UI hook. Query hooks remain covered at
+the consuming widget or page boundary, not by separate query-hook test files.
+Do not reconstruct a generic `useQuery` result or test React Query itself.
 
 This rule applies to the hook layer. A consumer hook test should verify its
 complete state and action matrix, not only one happy-path mutation. Cover every
@@ -282,16 +298,10 @@ delegated to the application navigation wrapper with the canonical route. It doe
 not need to boot a real TanStack Router.
 
 Actual URL transitions, route loading, history behavior, and rendered destination
-pages belong to integration tests with the router configured.
-
-Route integration tests live under `apps/web/tests`, use the configured Playwright
-fixture, and must assert more than a successful HTTP stub. For each critical route
-flow, assert the final URL, visible destination state, protected redirect, and
-the outgoing request method/path/query/body that proves the UI-to-API contract.
-Mocking the backend with `page.route` is acceptable for deterministic browser
-tests, but it must not replace the isolated widget and hook coverage. Do not
-count a test as end-to-end if it never exercises the route's actual loader,
-middleware, or rendered destination.
+pages belong to integration tests with the router configured. Follow
+[`web-app-integration-testing-rules.md`](web-app-integration-testing-rules.md)
+for the layout, page, and API boundaries, Playwright assertions, and mocked versus
+real integration evidence.
 
 ## Completion criteria for a widget test suite
 

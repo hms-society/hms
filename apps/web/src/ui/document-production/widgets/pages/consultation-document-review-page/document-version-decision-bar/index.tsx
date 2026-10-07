@@ -48,7 +48,7 @@ function getDecisionPresentation(
       icon: 'refresh-cw',
       statusLabel: 'Gerando',
       status: 'generating',
-      iconClassName: 'animate-spin text-highlight-foreground',
+      iconClassName: 'animate-spin motion-reduce:animate-none text-highlight-foreground',
     }
   }
 
@@ -134,6 +134,8 @@ export const DocumentVersionDecisionBar = ({
     <section
       aria-label='Decisão da versão'
       data-state={viewModel.generationState}
+      aria-busy={viewModel.isGenerating}
+      aria-live='polite'
       className='flex flex-col gap-4 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5'
     >
       <div className='flex min-w-0 items-start gap-3'>
@@ -168,6 +170,11 @@ export const DocumentVersionDecisionBar = ({
             )}
           </div>
           <p className='text-sm text-muted-foreground'>{presentation.description}</p>
+          {viewModel.isInReview && (viewModel.pendingMarkersCount ?? 0) > 0 && (
+            <p className='text-sm text-destructive'>
+              Resolva as pendências do documento antes de aprovar esta versão.
+            </p>
+          )}
         </div>
       </div>
       <div className='flex flex-wrap gap-2 sm:justify-end'>
@@ -177,7 +184,7 @@ export const DocumentVersionDecisionBar = ({
             variant='destructive'
             size='sm'
             className={DECISION_ACTION_CLASS}
-            disabled={isCancellingGeneration}
+            disabled={isCancellingGeneration || isRegenerating}
             aria-busy={isCancellingGeneration}
             onClick={onCancelGeneration}
           >
@@ -246,7 +253,9 @@ export const DocumentVersionDecisionBar = ({
                   variant='default'
                   size='sm'
                   className={DECISION_ACTION_CLASS}
-                  disabled={isSubmittingDecision}
+                  disabled={
+                    isSubmittingDecision || (viewModel.pendingMarkersCount ?? 0) > 0
+                  }
                   onClick={onApprove}
                 >
                   <Icon name='check' /> Aprovar versão

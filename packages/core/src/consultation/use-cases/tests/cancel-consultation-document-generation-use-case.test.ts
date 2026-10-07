@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { DocumentGenerationFaker } from '../../../document-production/domain/entities/fakers'
+import { DocumentGenerationCancelledEvent } from '../../../document-production/domain/events'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
@@ -96,7 +97,7 @@ describe('Cancel Consultation Document Generation Use Case', () => {
     )
     expect(broker.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'document-production/document.generation-cancelled',
+        name: DocumentGenerationCancelledEvent._NAME,
         payload: expect.objectContaining({ documentGenerationId: generation.id }),
       }),
     )

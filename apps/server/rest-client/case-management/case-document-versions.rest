@@ -1,0 +1,63 @@
+@BASE_URL = http://localhost:3333
+@url = {{BASE_URL}}/cases
+
+# Manual smoke test for case-document version endpoints.
+# Run `pnpm seed` and start the API before executing these requests.
+# The manual and AI requests create persisted versions; use development data only.
+# The AI request enqueues Gemini generation when Gemini is the configured provider
+# and may consume external API quota. It is not run by CI.
+
+### Sign in as the seeded lawyer
+# @name signInAsSeededLawyer
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+### List case documents and inspect their versions
+# @prompt caseId Enter a case ID with an existing legal piece
+GET {{url}}/{{caseId}}/documents
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Request an AI-generated revision from an existing version
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the legal-piece document ID
+# @prompt sourceDocumentVersionId Enter the version ID to use as the revision baseline
+POST {{url}}/{{caseId}}/documents/{{documentId}}/versions/{{sourceDocumentVersionId}}/generations
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "instructions": "Revise a minuta a partir desta versão, preservando os fatos documentados e sem inventar informações."
+}
+### Create a manual version from an existing version
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the legal-piece document ID
+# @prompt sourceDocumentVersionId Enter the version ID to use as the manual-edit baseline
+POST {{url}}/{{caseId}}/documents/{{documentId}}/versions/{{sourceDocumentVersionId}}/manual
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Versão manual de teste — substitua pelo conteúdo integral revisado antes de usar em dados reais."
+          }
+        ]
+      }
+    ]
+  }
+}

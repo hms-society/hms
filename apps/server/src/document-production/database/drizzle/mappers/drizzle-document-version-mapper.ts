@@ -10,6 +10,7 @@ export class DrizzleDocumentVersionMapper {
       documentGenerationId: record.documentGenerationId ?? undefined,
       sourceDocumentVersionId: record.sourceDocumentVersionId ?? undefined,
       fileId: record.fileId,
+      storagePath: record.storagePath ?? undefined,
       versionNumber: record.versionNumber,
       source: record.source as DocumentVersion['source'],
       content: record.content,

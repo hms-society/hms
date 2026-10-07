@@ -82,7 +82,13 @@ describe('List Consultation Documents Use Case', () => {
         collaboratorId: 'admin-collaborator-id',
         collaboratorProfile: 'admin',
       }),
-    ).resolves.toEqual([{ document, versions: [version] }])
+    ).resolves.toEqual([
+      {
+        document,
+        documentSpecificationId: packageDocument.documentSpecificationId,
+        versions: [version],
+      },
+    ])
   })
 
   it('returns the latest active generation status for each document', async () => {
@@ -128,6 +134,13 @@ describe('List Consultation Documents Use Case', () => {
         collaboratorId: 'admin-collaborator-id',
         collaboratorProfile: 'admin',
       }),
-    ).resolves.toEqual([{ document, generationStatus: 'running', versions: [] }])
+    ).resolves.toEqual([
+      {
+        document,
+        documentSpecificationId: packageDocument.documentSpecificationId,
+        generationStatus: 'running',
+        versions: [],
+      },
+    ])
   })
 })

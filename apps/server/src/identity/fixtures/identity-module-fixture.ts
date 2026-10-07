@@ -1,6 +1,4 @@
-import { randomUUID } from 'node:crypto'
-import type { ExecutionContext, INestApplication, Type } from '@nestjs/common'
-import { UnauthorizedException } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
 import type {
   ClientConsentCreation,
   ClientCreation,
@@ -9,8 +7,6 @@ import type {
   User,
   UserCreation,
 } from '@hms/core/identity/domain/entities'
-import type { AuthUser } from '@hms/core/identity/domain/structures'
-import { AuthSessionFaker } from '@hms/core/identity/domain/structures/fakers'
 import type { AuthAdministrationProvider } from '@hms/core/identity/interfaces'
 import {
   ClientFaker,
@@ -21,8 +17,8 @@ import {
 import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
 import { CaseManagementDatabaseModule } from '@/case-management/database/case-management-database.module'
 import { AuthModule } from '@/identity/auth.module'
-import { IdentityAccessModule } from '@/identity/identity-access.module'
 import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
+import { IdentityAccessModule } from '@/identity/identity-access.module'
 import {
   DrizzleIntakeClientsRepository,
   DrizzleIntakeResponsiblesRepository,
@@ -34,24 +30,13 @@ import {
   DrizzleUsersRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
-import { ActiveAdminGuard, ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { ActiveAdminGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seeder'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
-
-const authAdministrationFixture: AuthAdministrationProvider = {
-  createUser: async (email) => ({ id: randomUUID(), email }),
-  removeUser: async () => undefined,
-  removeAllUsers: async () => undefined,
-  inviteUserByEmail: async (email) => ({ id: randomUUID(), email }),
-  resendInvitation: async (email) => ({ id: randomUUID(), email }),
-  findUserByEmail: async () => undefined,
-  setInvitationAttemptId: async () => undefined,
-  setUserBanned: async () => undefined,
-  revokeSession: async () => undefined,
-}
+import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 
 type NaturalClientCreation = Extract<ClientCreation, { type: 'natural' }>
 type AdministrativeCollaboratorCreation = Extract<
@@ -62,13 +47,15 @@ type AdministrativeCollaboratorCreation = Extract<
 export class IdentityModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
+    private readonly authFixture: SupabaseAuthFixture,
     private readonly clientsRepository: DrizzleClientsRepository,
     private readonly clientConsentsRepository: DrizzleClientConsentsRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly identitySeeder: IdentitySeeder,
     private readonly legalCatalogSeeder: LegalCatalogSeeder,
-    private readonly authentication: { user?: AuthUser },
+    private readonly accessTokens: Map<string, string>,
+    private readonly passwords: Map<string, string>,
   ) {}
 
   get app(): INestApplication {
@@ -87,84 +74,57 @@ export class IdentityModuleFixture {
     controller?: Type<unknown> | Type<unknown>[],
     applicationAccess = false,
   ) {
-    const authentication: { user?: AuthUser } = {}
-    const restFixture = await RestFixture.register(
-      {
-        imports: [
-          ...(applicationAccess ? [IdentityAccessModule] : []),
-          ...(applicationAccess ? [CaseManagementDatabaseModule] : []),
-          AuthModule,
-          IdentityDatabaseModule,
-          LegalCatalogModule,
-          ProvisionModule,
-        ],
-        controllers: controller
-          ? Array.isArray(controller)
-            ? controller
-            : [controller]
-          : [],
-        providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
-      },
-      (builder) => {
-        builder
-          .overrideProvider(IDENTITY_PROVIDERS.authAdministration)
-          .useValue(authAdministrationFixture)
-
-        if (applicationAccess) {
-          // Only external Supabase verification is controlled; real guards and DB run.
-          // biome-ignore lint/correctness/useHookAtTopLevel: Nest testing builder APIs are not React hooks.
-          return builder.overrideProvider(IDENTITY_PROVIDERS.auth).useValue({
-            getSession: async (token: string) =>
-              token === 'fixture-access-token' && authentication.user
-                ? AuthSessionFaker.fake({ user: authentication.user })
-                : null,
-          })
-        }
-
-        // biome-ignore lint/correctness/useHookAtTopLevel: Nest testing builder APIs are not React hooks.
-        return builder.overrideGuard(AuthGuard).useValue({
-          canActivate: (context: ExecutionContext) => {
-            const request = context.switchToHttp().getRequest<{
-              headers: { authorization?: string }
-              auth?: { accessToken: string; user: AuthUser }
-              user?: AuthUser
-              identity?: {
-                auth: { accessToken: string; user: AuthUser }
-                user: AuthUser
-              }
-            }>()
-
-            if (!authentication.user || !request.headers.authorization) {
-              throw new UnauthorizedException('Authentication token is required')
-            }
-
-            const auth = {
-              accessToken: 'fixture-access-token',
-              user: authentication.user,
-            }
-            request.user = authentication.user
-            request.auth = auth
-            request.identity = { auth, user: authentication.user }
-            return true
-          },
-        })
-      },
-    )
+    const authFixture = await SupabaseAuthFixture.register()
+    const accessTokens = new Map<string, string>()
+    const passwords = new Map<string, string>()
+    let restFixture: RestFixture
+    try {
+      restFixture = await RestFixture.register(
+        {
+          imports: [
+            ...(applicationAccess ? [IdentityAccessModule] : []),
+            ...(applicationAccess ? [CaseManagementDatabaseModule] : []),
+            AuthModule,
+            IdentityDatabaseModule,
+            LegalCatalogModule,
+            ProvisionModule,
+          ],
+          controllers: controller
+            ? Array.isArray(controller)
+              ? controller
+              : [controller]
+            : [],
+          providers: [DatetimeProvider, ActiveAdminGuard, ActiveCollaboratorGuard],
+        },
+        (builder) => authFixture.configure(builder),
+      )
+    } catch (error) {
+      await authFixture.close()
+      throw error
+    }
 
     return new IdentityModuleFixture(
       restFixture,
+      authFixture,
       restFixture.get(DrizzleClientsRepository),
       restFixture.get(DrizzleClientConsentsRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(IdentitySeeder),
       restFixture.get(LegalCatalogSeeder),
-      authentication,
+      accessTokens,
+      passwords,
     )
   }
 
   async registerUser(overrides: Partial<UserCreation> = {}) {
-    const draft = UserFaker.fake({ status: 'active', ...overrides })
+    const auth = await this.authFixture.createSignedInUser(overrides.email)
+    const draft = UserFaker.fake({
+      status: 'active',
+      ...overrides,
+      id: auth.user.id,
+      email: auth.user.email,
+    })
     const [user] = await this.usersRepository.addMany([
       {
         id: draft.id,
@@ -175,7 +135,25 @@ export class IdentityModuleFixture {
     ])
 
     if (!user) throw new Error('Test user was not created')
+    this.accessTokens.set(user.id, auth.accessToken)
+    this.passwords.set(user.id, auth.password)
     return user
+  }
+
+  async inviteCollaborator(email: string) {
+    const authAdministration = this.restFixture.get<AuthAdministrationProvider>(
+      IDENTITY_PROVIDERS.authAdministration,
+    )
+    const authUser = await authAdministration.inviteUserByEmail(
+      email,
+      'http://localhost:3000/auth/callback',
+    )
+    const [user] = await this.usersRepository.addMany([
+      { id: authUser.id, email, status: 'invited' },
+    ])
+    if (!user) throw new Error('Invited test user was not created')
+    const collaborator = await this.registerCollaborator(user, { profile: 'attendant' })
+    return { user, collaborator }
   }
 
   async registerCollaborator(
@@ -202,12 +180,20 @@ export class IdentityModuleFixture {
   }
 
   authenticateAs(user: User) {
-    this.authentication.user = { id: user.id, email: user.email }
-    return 'Bearer fixture-access-token'
+    const token = this.accessTokens.get(user.id)
+    if (!token) throw new Error('No Auth session was registered for the test user')
+    return `Bearer ${token}`
+  }
+
+  credentialsFor(user: User) {
+    const password = this.passwords.get(user.id)
+    if (!password)
+      throw new Error('No Auth credentials were registered for the test user')
+    return { identifier: user.email, password }
   }
 
   clearAuthentication() {
-    this.authentication.user = undefined
+    this.accessTokens.clear()
   }
 
   async registerClient(overrides: Partial<NaturalClientCreation> = {}) {
@@ -251,10 +237,16 @@ export class IdentityModuleFixture {
   }
 
   resetDatabase() {
+    this.accessTokens.clear()
+    this.passwords.clear()
     return this.restFixture.resetDatabase()
   }
 
-  close() {
-    return this.restFixture.close()
+  async close() {
+    try {
+      await this.restFixture.close()
+    } finally {
+      await this.authFixture.close()
+    }
   }
 }

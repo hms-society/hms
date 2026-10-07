@@ -1,6 +1,7 @@
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { Anchor } from '@/ui/shared/widgets/components/anchor'
 import type { ConsultationDocumentReviewViewModel } from '../use-consultation-document-review-page'
 
 export type ConsultationDocumentReviewHeaderProps = {
@@ -43,6 +44,16 @@ export const ConsultationDocumentReviewHeader = ({
         </div>
       </div>
       <div className='flex flex-wrap items-center gap-3'>
+        {viewModel.documentSpecificationId && (
+          <Anchor
+            route='documentSpecification'
+            params={{ documentSpecificationId: viewModel.documentSpecificationId }}
+            className='inline-flex min-h-9 items-center gap-1 rounded-md px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          >
+            <Icon name='file-text' className='shrink-0 h-3 w-3' />
+            <span>Ver modelo</span>
+          </Anchor>
+        )}
         <Button type='button' variant='ghost' size='sm' onClick={onHistory}>
           <Icon name='history' /> Ver versões
         </Button>

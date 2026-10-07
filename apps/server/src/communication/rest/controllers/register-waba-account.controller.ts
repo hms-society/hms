@@ -18,15 +18,16 @@ import type {
   UsersRepository,
   CollaboratorsRepository,
 } from '@hms/core/identity/interfaces'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 
 @Controller('communication/waba')
 @UseGuards(AuthGuard)
 export class RegisterWabaAccountController {
   constructor(
     private readonly registerWabaAccountUseCase: RegisterWabaAccountUseCase,
-    @Inject('USERS_REPOSITORY')
+    @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
-    @Inject('COLLABORATORS_REPOSITORY')
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaboratorsRepository: CollaboratorsRepository,
   ) {}
 

@@ -1,103 +1,57 @@
-import { describe, expect, it, vi } from 'vitest'
-import { RegisterWabaAccountController } from '../register-waba-account.controller'
-import { ForbiddenException } from '@nestjs/common'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import request from 'supertest'
 
-describe('RegisterWabaAccountController', () => {
-  const mockRegisterWabaAccountUseCase: any = {
-    execute: vi.fn(),
-  }
+import { CommunicationRestModuleFixture } from '@/communication/fixtures/communication-rest-module-fixture'
 
-  const mockUsersRepository: any = {
-    findById: vi.fn(),
-  }
+describe('Register Waba Account Controller [POST /communication/waba/embedded-signup/exchange]', () => {
+  let fixture: CommunicationRestModuleFixture
+  beforeAll(async () => {
+    fixture = await CommunicationRestModuleFixture.register()
+  }, 90_000)
+  beforeEach(async () => fixture.resetDatabase(), 30_000)
+  afterAll(async () => fixture?.close(), 30_000)
 
-  const mockCollaboratorsRepository: any = {
-    findByUserId: vi.fn(),
-  }
-
-  it('should allow Admin to exchange code and register WABA channel', async () => {
-    mockUsersRepository.findById.mockResolvedValue({
-      id: 'admin-user-id',
-      status: 'active',
-    })
-
-    mockCollaboratorsRepository.findByUserId.mockResolvedValue({
-      id: 'admin-collaborator-id',
-      userId: 'admin-user-id',
-      profile: 'admin',
-    })
-
-    mockRegisterWabaAccountUseCase.execute.mockResolvedValue({
-      id: 'channel-123',
-      wabaAccountId: 'waba_123',
-      phoneNumberId: 'phone_456',
+  it('exchanges a code with the local Meta protocol and stores a channel', async () => {
+    const admin = await fixture.createAdminSession()
+    const response = await request(fixture.app.getHttpServer())
+      .post('/communication/waba/embedded-signup/exchange')
+      .set('Authorization', admin.token)
+      .send({
+        lawyerId: admin.userId,
+        code: 'local-code',
+        wabaId: 'waba-local',
+        phoneNumberId: 'phone-local',
+      })
+    expect(response.status, JSON.stringify(response.body)).toBe(201)
+    expect(response.body).toMatchObject({
+      assignedLawyerId: admin.userId,
       displayPhoneNumber: '+5511999998888',
-      verifiedName: 'Advocacia HMS',
-      qualityRating: 'GREEN',
-      assignedLawyerId: 'lawyer-uuid-123',
-      status: 'active',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
-
-    const controller = new RegisterWabaAccountController(
-      mockRegisterWabaAccountUseCase,
-      mockUsersRepository,
-      mockCollaboratorsRepository,
-    )
-
-    const req = {
-      user: { id: 'admin-user-id' },
-    }
-
-    const body = {
-      lawyerId: '123e4567-e89b-12d3-a456-426614174000',
-      code: 'valid_meta_code',
-      wabaId: 'waba_123',
-      phoneNumberId: 'phone_456',
-    }
-
-    const response = await controller.handle(body, req)
-
-    expect(response.id).toBe('channel-123')
-    expect(response.status).toBe('active')
-    expect(mockRegisterWabaAccountUseCase.execute).toHaveBeenCalledWith({
-      lawyerId: '123e4567-e89b-12d3-a456-426614174000',
-      code: 'valid_meta_code',
-      wabaId: 'waba_123',
-      phoneNumberId: 'phone_456',
-    })
-  })
-
-  it('should throw ForbiddenException for non-Admin users', async () => {
-    mockUsersRepository.findById.mockResolvedValue({
-      id: 'lawyer-user-id',
       status: 'active',
     })
-
-    mockCollaboratorsRepository.findByUserId.mockResolvedValue({
-      id: 'lawyer-collaborator-id',
-      userId: 'lawyer-user-id',
-      profile: 'lawyer', // Non-admin profile
-    })
-
-    const controller = new RegisterWabaAccountController(
-      mockRegisterWabaAccountUseCase,
-      mockUsersRepository,
-      mockCollaboratorsRepository,
+    expect(fixture.metaFixture.requests.map(({ method }) => method)).toEqual(
+      expect.arrayContaining(['GET', 'GET']),
     )
+    expect(fixture.metaFixture.requests[0]?.path).toContain('client_id=local-meta-app-id')
+    expect(fixture.metaFixture.requests[0]?.path).toContain(
+      'client_secret=local-meta-app-secret',
+    )
+    expect(await fixture.channelsRepository.findById(response.body.id)).toMatchObject({
+      assignedLawyerId: admin.userId,
+      phoneNumberId: 'phone-local',
+    })
+  }, 30_000)
 
-    const req = {
-      user: { id: 'lawyer-user-id' },
-    }
-
-    const body = {
-      lawyerId: '123e4567-e89b-12d3-a456-426614174000',
-      code: 'valid_meta_code',
-      wabaId: 'waba_123',
-      phoneNumberId: 'phone_456',
-    }
-
-    await expect(controller.handle(body, req)).rejects.toThrow(ForbiddenException)
-  })
+  it('rejects a non-admin collaborator', async () => {
+    const token = await fixture.createSession()
+    await request(fixture.app.getHttpServer())
+      .post('/communication/waba/embedded-signup/exchange')
+      .set('Authorization', token)
+      .send({
+        lawyerId: '00000000-0000-4000-8000-000000000001',
+        code: 'local-code',
+        wabaId: 'waba-local',
+        phoneNumberId: 'phone-local',
+      })
+      .expect(403)
+  }, 30_000)
 })

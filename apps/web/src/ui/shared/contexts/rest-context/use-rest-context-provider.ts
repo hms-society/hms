@@ -11,6 +11,7 @@ import { ConsultationService } from '@/rest/services/consultation-service'
 import { DocumentProductionService } from '@/rest/services/document-production-service'
 import { DocumentValidationService } from '@/rest/services/document-validation-service'
 import { DynamicFormService } from '@/rest/services/dynamic-form-service'
+import { CaseDocumentProductionService } from '@/rest/services/case-document-production-service'
 import { IdentityService } from '@/rest/services/identity-service'
 import { IntakeService } from '@/rest/services/intake-service'
 import { LegalCatalogService } from '@/rest/services/legal-catalog-service'
@@ -59,5 +60,6 @@ export function useRestContextProvider(): RestContextValue {
     documentValidationService: DocumentValidationService(restClient),
     dynamicFormService: DynamicFormService(restClient),
     auditLogsService: AuditLogsService(restClient),
+    caseDocumentProductionService: CaseDocumentProductionService(restClient),
   }
 }

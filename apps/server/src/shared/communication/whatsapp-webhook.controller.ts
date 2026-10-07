@@ -17,6 +17,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
+import { WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME } from '@/shared/messaging/inngest/integration-event-names'
 
 @Controller('integrations/whatsapp/webhook')
 @RouteAccess('public')
@@ -101,7 +102,7 @@ export class WhatsappWebhookController {
 
     try {
       await this.inngest.send({
-        name: 'whatsapp/event.received',
+        name: WHATSAPP_WEBHOOK_RECEIVED_EVENT_NAME,
         data: payload,
       })
     } catch (error) {

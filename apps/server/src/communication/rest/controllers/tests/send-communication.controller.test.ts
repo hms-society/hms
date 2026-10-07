@@ -1,84 +1,47 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { BadRequestException, NotFoundException } from '@nestjs/common'
-import { SendCommunicationController } from '../send-communication.controller'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import request from 'supertest'
 
-describe('SendCommunicationController', () => {
-  let controller: SendCommunicationController
-  let drizzleClientMock: any
-  let whatsappProviderMock: any
-  let envProviderMock: any
+import { CommunicationRestModuleFixture } from '@/communication/fixtures/communication-rest-module-fixture'
 
-  beforeEach(() => {
-    whatsappProviderMock = {
-      sendTemplateMessage: vi
-        .fn()
-        .mockResolvedValue({ externalMessageId: 'meta-msg-123' }),
-      sendTextMessage: vi.fn().mockResolvedValue({ externalMessageId: 'meta-msg-456' }),
-    }
+describe('Send Communication Controller [POST /communications/send]', () => {
+  let fixture: CommunicationRestModuleFixture
+  beforeAll(async () => {
+    fixture = await CommunicationRestModuleFixture.register()
+  })
+  beforeEach(async () => fixture.resetDatabase())
+  afterAll(async () => fixture?.close())
 
-    envProviderMock = {
-      get: vi.fn().mockImplementation((key: string) => {
-        if (key === 'WHATSAPP_START_WINDOW_TEMPLATE_NAME') {
-          return 'inicio_atendimento_ola'
-        }
-        return undefined
+  it('sends through the local Meta protocol and persists the message', async () => {
+    const token = await fixture.createSession()
+    const client = await fixture.createClient()
+    const response = await request(fixture.app.getHttpServer())
+      .post('/communications/send')
+      .set('Authorization', token)
+      .send({ clientId: client.id, channel: 'whatsapp', content: 'Olá' })
+      .expect(201)
+    expect(response.body.externalId).toBe('local-message-id')
+    expect(fixture.metaFixture.requests).toContainEqual(
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.objectContaining({ type: 'text', to: client.phone }),
       }),
-    }
+    )
+    expect(await fixture.messagesRepository.findById(response.body.id)).toMatchObject({
+      clientId: client.id,
+      content: 'Olá',
+    })
   })
 
-  it('rejects type: template for non-whatsapp channels', async () => {
-    drizzleClientMock = {
-      requireDatabase: vi.fn().mockReturnValue({}),
-    }
-    controller = new SendCommunicationController(
-      drizzleClientMock,
-      whatsappProviderMock,
-      envProviderMock,
-    )
-
-    await expect(
-      controller.handle(
-        {
-          clientId: '00000000-0000-0000-0000-000000000001',
-          content: 'Olá',
-          channel: 'email',
-          type: 'template',
-        },
-        { user: { id: 'user-1', email: 'admin@hms.com' } },
-      ),
-    ).rejects.toThrow(BadRequestException)
-  })
-
-  it('throws NotFoundException if client does not exist', async () => {
-    const selectMock = vi.fn().mockReturnThis()
-    const fromMock = vi.fn().mockReturnThis()
-    const whereMock = vi.fn().mockReturnThis()
-    const limitMock = vi.fn().mockResolvedValue([])
-
-    drizzleClientMock = {
-      requireDatabase: vi.fn().mockReturnValue({
-        select: selectMock,
-        from: fromMock,
-        where: whereMock,
-        limit: limitMock,
-      }),
-    }
-
-    controller = new SendCommunicationController(
-      drizzleClientMock,
-      whatsappProviderMock,
-      envProviderMock,
-    )
-
-    await expect(
-      controller.handle(
-        {
-          clientId: '00000000-0000-0000-0000-000000000001',
-          content: 'Olá',
-          channel: 'whatsapp',
-        },
-        { user: { id: 'user-1', email: 'admin@hms.com' } },
-      ),
-    ).rejects.toThrow(NotFoundException)
+  it('rejects a missing client through PostgreSQL lookup', async () => {
+    const token = await fixture.createSession()
+    await request(fixture.app.getHttpServer())
+      .post('/communications/send')
+      .set('Authorization', token)
+      .send({
+        clientId: '00000000-0000-4000-8000-000000000001',
+        channel: 'whatsapp',
+        content: 'Olá',
+      })
+      .expect(404)
   })
 })

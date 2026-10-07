@@ -1,0 +1,15 @@
+import { createFileRoute } from '@tanstack/react-router'
+
+import { PieceWorkflowRoutePage } from '@/ui/identity/widgets/pages/lawyer-page/piece-workflow-route-page'
+
+export const Route = createFileRoute(
+  '/advogado/meus-casos/$caseId/pecas/$documentId/revisao',
+)({
+  component: RouteComponent,
+  ssr: false,
+})
+
+function RouteComponent() {
+  const { caseId, documentId } = Route.useParams()
+  return <PieceWorkflowRoutePage mode='review' caseId={caseId} documentId={documentId} />
+}

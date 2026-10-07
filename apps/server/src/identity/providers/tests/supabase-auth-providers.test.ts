@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Logger } from '@nestjs/common'
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 
 import { SupabaseAuthAdministrationProvider } from '@/identity/providers/supabase-auth-administration-provider'
@@ -166,6 +167,35 @@ describe('SupabaseAuthAdministrationProvider', () => {
     expect(listUsers).toHaveBeenNthCalledWith(2, { page: 2, perPage: 1000 })
     expect(adminDeleteUser).toHaveBeenNthCalledWith(1, 'first-page-user')
     expect(adminDeleteUser).toHaveBeenNthCalledWith(2, 'second-page-user')
+  })
+
+  it('logs Auth diagnostics without credentials and aborts deletion on listing failure', async () => {
+    const log = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined)
+    listUsers.mockResolvedValueOnce({
+      data: null,
+      error: {
+        status: 401,
+        code: 'bad_jwt',
+        message: 'Invalid key header.payload.signature Bearer private-token',
+        headers: { authorization: 'private-token' },
+      },
+    })
+    const provider = new SupabaseAuthAdministrationProvider(createEnvProvider())
+
+    try {
+      await expect(provider.removeAllUsers()).rejects.toMatchObject({
+        message: 'Não foi possível consultar os usuários do Auth.',
+      })
+      expect(adminDeleteUser).not.toHaveBeenCalled()
+      expect(log).toHaveBeenCalledWith({
+        operation: 'Não foi possível consultar os usuários do Auth.',
+        status: 401,
+        code: 'bad_jwt',
+        message: 'Invalid key [REDACTED] [REDACTED]',
+      })
+    } finally {
+      log.mockRestore()
+    }
   })
 
   it('resends an invitation through the Supabase invite e-mail operation', async () => {

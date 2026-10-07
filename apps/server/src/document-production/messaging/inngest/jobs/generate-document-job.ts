@@ -16,6 +16,7 @@ import { DOCUMENT_PRODUCTION_WORKFLOWS } from '@/document-production/constants/d
 import { InngestClient } from '@/shared/messaging/inngest/inngest-client'
 import { InngestJob } from '@/shared/messaging/inngest/inngest-job'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { observeAiJob } from '@/shared/ai/mastra/observe-ai-job'
 
 const documentGenerationRequestedEvent = eventType(
   DocumentGenerationRequestedEvent._NAME,
@@ -94,16 +95,24 @@ export class GenerateDocumentJob extends InngestJob {
           }
         },
       },
-      async ({ event, step }) =>
+      async ({ event, step, runId }) =>
         step.run('generate-document', () =>
-          workflow.run({
-            documentGenerationId: event.data.documentGenerationId,
-            documentId: event.data.documentId,
-            documentSpecificationVersionId: event.data.documentSpecificationVersionId,
-            requestedByCollaboratorId: event.data.requestedByCollaboratorId,
-            instructions: event.data.instructions,
-            source: event.data.source,
-          }),
+          observeAiJob(
+            {
+              'hms.inngest.run_id': runId,
+              'hms.document.generation_id': event.data.documentGenerationId,
+              'hms.document.id': event.data.documentId,
+            },
+            () =>
+              workflow.run({
+                documentGenerationId: event.data.documentGenerationId,
+                documentId: event.data.documentId,
+                documentSpecificationVersionId: event.data.documentSpecificationVersionId,
+                requestedByCollaboratorId: event.data.requestedByCollaboratorId,
+                instructions: event.data.instructions,
+                source: event.data.source,
+              }),
+          ),
         ),
     )
   }

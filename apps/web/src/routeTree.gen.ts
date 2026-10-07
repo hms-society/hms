@@ -55,7 +55,11 @@ import { Route as ConsultasConsultationIdIndexRouteImport } from './routes/consu
 import { Route as ConsultasConsultationIdFichaAtendimentoRouteImport } from './routes/consultas/$consultationId/ficha-atendimento'
 import { Route as ThirdPartyPortalCasesCaseIdRouteImport } from './routes/third-party-portal/cases/$caseId'
 import { Route as ConsultasConsultationIdDocumentosIndexRouteImport } from './routes/consultas/$consultationId/documentos/index'
+import { Route as AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteImport } from './routes/advogado/meus-casos/$caseId/pecas/$documentId/route'
 import { Route as AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport } from './routes/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
+import { Route as AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRouteImport } from './routes/advogado/meus-casos/$caseId/pecas/$documentId/index'
+import { Route as AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRouteImport } from './routes/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+import { Route as AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRouteImport } from './routes/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
 import { Route as ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport } from './routes/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -300,11 +304,35 @@ const ConsultasConsultationIdDocumentosIndexRoute =
     path: '/documentos/',
     getParentRoute: () => ConsultasConsultationIdRouteRoute,
   } as any)
+const AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute =
+  AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteImport.update({
+    id: '/pecas/$documentId',
+    path: '/pecas/$documentId',
+    getParentRoute: () => AdvogadoMeusCasosCaseIdRoute,
+  } as any)
 const AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute =
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport.update({
     id: '/meus-casos_/$caseId/checklist/$checklistItemId',
     path: '/meus-casos/$caseId/checklist/$checklistItemId',
     getParentRoute: () => AdvogadoRouteRoute,
+  } as any)
+const AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute =
+  AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute,
+  } as any)
+const AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute =
+  AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRouteImport.update({
+    id: '/editor',
+    path: '/editor',
+    getParentRoute: () => AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute,
+  } as any)
+const AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute =
+  AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRouteImport.update({
+    id: '/revisao',
+    path: '/revisao',
+    getParentRoute: () => AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute,
   } as any)
 const ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute =
   ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRouteImport.update(
@@ -351,7 +379,7 @@ export interface FileRoutesByFullPath {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/terceiros/': typeof TerceirosIndexRoute
-  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRouteWithChildren
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
@@ -362,8 +390,12 @@ export interface FileRoutesByFullPath {
   '/configuracoes/areas-tipos-demanda/': typeof ConfiguracoesAreasTiposDemandaIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteWithChildren
   '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/editor': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/revisao': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -397,7 +429,7 @@ export interface FileRoutesByTo {
   '/pedir-redefinir-senha': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha': typeof RedefinirSenhaIndexRoute
   '/terceiros': typeof TerceirosIndexRoute
-  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRouteWithChildren
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
@@ -409,7 +441,10 @@ export interface FileRoutesByTo {
   '/consultas/$consultationId': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos': typeof ConsultasConsultationIdDocumentosIndexRoute
   '/advogado/meus-casos/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/editor': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/revisao': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -448,7 +483,7 @@ export interface FileRoutesById {
   '/pedir-redefinir-senha/': typeof PedirRedefinirSenhaIndexRoute
   '/redefinir-senha/': typeof RedefinirSenhaIndexRoute
   '/terceiros/': typeof TerceirosIndexRoute
-  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRoute
+  '/advogado/meus-casos/$caseId': typeof AdvogadoMeusCasosCaseIdRouteWithChildren
   '/advogado/meus-casos/novo-caso': typeof AdvogadoMeusCasosNovoCasoRoute
   '/cliente/meus-casos/$caseId': typeof ClienteMeusCasosCaseIdRoute
   '/consultas/$consultationId/ficha-atendimento': typeof ConsultasConsultationIdFichaAtendimentoRoute
@@ -459,8 +494,12 @@ export interface FileRoutesById {
   '/configuracoes/areas-tipos-demanda/': typeof ConfiguracoesAreasTiposDemandaIndexRoute
   '/consultas/$consultationId/': typeof ConsultasConsultationIdIndexRoute
   '/consultas/$consultationId/documentos/': typeof ConsultasConsultationIdDocumentosIndexRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteWithChildren
   '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/editor': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/revisao': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute
   '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': typeof ConsultasConsultationIdDocumentosDocumentIdVersoesDocumentVersionIdRoute
+  '/advogado/meus-casos/$caseId/pecas/$documentId/': typeof AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -511,8 +550,12 @@ export interface FileRouteTypes {
     | '/configuracoes/areas-tipos-demanda/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId'
     | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -558,7 +601,10 @@ export interface FileRouteTypes {
     | '/consultas/$consultationId'
     | '/consultas/$consultationId/documentos'
     | '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId'
   id:
     | '__root__'
     | '/'
@@ -607,8 +653,12 @@ export interface FileRouteTypes {
     | '/configuracoes/areas-tipos-demanda/'
     | '/consultas/$consultationId/'
     | '/consultas/$consultationId/documentos/'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId'
     | '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
     | '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
+    | '/advogado/meus-casos/$caseId/pecas/$documentId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -965,12 +1015,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsultasConsultationIdDocumentosIndexRouteImport
       parentRoute: typeof ConsultasConsultationIdRouteRoute
     }
+    '/advogado/meus-casos/$caseId/pecas/$documentId': {
+      id: '/advogado/meus-casos/$caseId/pecas/$documentId'
+      path: '/pecas/$documentId'
+      fullPath: '/advogado/meus-casos/$caseId/pecas/$documentId'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteImport
+      parentRoute: typeof AdvogadoMeusCasosCaseIdRoute
+    }
     '/advogado/meus-casos_/$caseId/checklist/$checklistItemId': {
       id: '/advogado/meus-casos_/$caseId/checklist/$checklistItemId'
       path: '/meus-casos/$caseId/checklist/$checklistItemId'
       fullPath: '/advogado/meus-casos/$caseId/checklist/$checklistItemId'
       preLoaderRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRouteImport
       parentRoute: typeof AdvogadoRouteRoute
+    }
+    '/advogado/meus-casos/$caseId/pecas/$documentId/': {
+      id: '/advogado/meus-casos/$caseId/pecas/$documentId/'
+      path: '/'
+      fullPath: '/advogado/meus-casos/$caseId/pecas/$documentId/'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRouteImport
+      parentRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute
+    }
+    '/advogado/meus-casos/$caseId/pecas/$documentId/editor': {
+      id: '/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+      path: '/editor'
+      fullPath: '/advogado/meus-casos/$caseId/pecas/$documentId/editor'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRouteImport
+      parentRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute
+    }
+    '/advogado/meus-casos/$caseId/pecas/$documentId/revisao': {
+      id: '/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
+      path: '/revisao'
+      fullPath: '/advogado/meus-casos/$caseId/pecas/$documentId/revisao'
+      preLoaderRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRouteImport
+      parentRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute
     }
     '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId': {
       id: '/consultas/$consultationId/documentos/$documentId/versoes/$documentVersionId'
@@ -982,9 +1060,45 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteChildren {
+  AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute
+  AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute
+  AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute
+}
+
+const AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteChildren: AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteChildren =
+  {
+    AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute:
+      AdvogadoMeusCasosCaseIdPecasDocumentIdEditorRoute,
+    AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute:
+      AdvogadoMeusCasosCaseIdPecasDocumentIdRevisaoRoute,
+    AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute:
+      AdvogadoMeusCasosCaseIdPecasDocumentIdIndexRoute,
+  }
+
+const AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteWithChildren =
+  AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute._addFileChildren(
+    AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteChildren,
+  )
+
+interface AdvogadoMeusCasosCaseIdRouteChildren {
+  AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute: typeof AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteWithChildren
+}
+
+const AdvogadoMeusCasosCaseIdRouteChildren: AdvogadoMeusCasosCaseIdRouteChildren =
+  {
+    AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRoute:
+      AdvogadoMeusCasosCaseIdPecasDocumentIdRouteRouteWithChildren,
+  }
+
+const AdvogadoMeusCasosCaseIdRouteWithChildren =
+  AdvogadoMeusCasosCaseIdRoute._addFileChildren(
+    AdvogadoMeusCasosCaseIdRouteChildren,
+  )
+
 interface AdvogadoRouteRouteChildren {
   AdvogadoComunicacaoRoute: typeof AdvogadoComunicacaoRoute
-  AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRoute
+  AdvogadoMeusCasosCaseIdRoute: typeof AdvogadoMeusCasosCaseIdRouteWithChildren
   AdvogadoMeusCasosNovoCasoRoute: typeof AdvogadoMeusCasosNovoCasoRoute
   AdvogadoMeusCasosIndexRoute: typeof AdvogadoMeusCasosIndexRoute
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute: typeof AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute
@@ -992,7 +1106,7 @@ interface AdvogadoRouteRouteChildren {
 
 const AdvogadoRouteRouteChildren: AdvogadoRouteRouteChildren = {
   AdvogadoComunicacaoRoute: AdvogadoComunicacaoRoute,
-  AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRoute,
+  AdvogadoMeusCasosCaseIdRoute: AdvogadoMeusCasosCaseIdRouteWithChildren,
   AdvogadoMeusCasosNovoCasoRoute: AdvogadoMeusCasosNovoCasoRoute,
   AdvogadoMeusCasosIndexRoute: AdvogadoMeusCasosIndexRoute,
   AdvogadoMeusCasosCaseIdChecklistChecklistItemIdRoute:
@@ -1134,12 +1248,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

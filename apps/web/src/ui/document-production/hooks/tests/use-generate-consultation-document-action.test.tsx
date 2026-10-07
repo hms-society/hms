@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
@@ -25,6 +25,41 @@ describe('useGenerateConsultationDocumentAction', () => {
     useRestContextMock.mockReturnValue({
       consultationDocumentProductionService,
     } as never)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it.each([
+    'completed',
+    'failed',
+    'cancelled',
+  ] as const)('keeps regeneration pending while the list still reports the previous %s status', async (baselineStatus) => {
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    })
+    const listKey = consultationDocumentQueryKeys.list('consultation-1')
+    queryClient.setQueryData(listKey, [
+      { id: 'document-1', versions: [], generationStatus: baselineStatus },
+    ])
+    vi.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined)
+    consultationDocumentProductionService.generateDocument.mockResolvedValue(
+      new RestResponse({ statusCode: 202 }),
+    )
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    const { result, unmount } = renderHook(
+      () => useGenerateConsultationDocumentAction('consultation-1'),
+      { wrapper },
+    )
+
+    await act(async () => {
+      await result.current.generateDocument({ documentId: 'document-1' })
+    })
+
+    expect(result.current.isGeneratingDocument).toBe(false)
+    expect(result.current.pendingDocumentIds).toEqual(['document-1'])
+    unmount()
   })
 
   it('shows the document as pending before an active query is cancelled', async () => {
