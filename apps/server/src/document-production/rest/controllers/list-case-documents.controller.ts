@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Query,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common'
@@ -27,6 +28,7 @@ import { CaseDocumentResponseDto } from '@/document-production/rest/dtos'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
+import { selectDocumentFileVersion } from './select-document-file-version'
 
 @Controller('cases')
 @ApiTags('Case Document Production')
@@ -64,16 +66,13 @@ export class ListCaseDocumentsController {
   async handleFile(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Param('documentId', new ParseUUIDPipe()) documentId: string,
+    @Query('versionId') versionId?: string,
   ) {
     this.logger.log(`Solicitando arquivo da peça ${documentId} do caso ${caseId}`)
     const item = (await this.useCase.execute({ caseId })).find(
       ({ document }) => document.id === documentId,
     )
-    const version = item?.versions.reduce<(typeof item.versions)[number] | undefined>(
-      (latest, candidate) =>
-        !latest || candidate.versionNumber > latest.versionNumber ? candidate : latest,
-      undefined,
-    )
+    const version = selectDocumentFileVersion(item?.versions ?? [], versionId)
     if (!version?.storagePath) {
       this.logger.warn(
         `Versão ${version?.id ?? 'inexistente'} sem storagePath para peça ${documentId}`,

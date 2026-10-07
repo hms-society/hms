@@ -7,6 +7,7 @@ import { useState } from 'react'
 
 import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
+import { CasePiecesTab } from './case-pieces-tab'
 import { OverviewTab } from './overview-tab'
 import { PortalAccessDialog } from './portal-access-dialog'
 import { useMyCasePage } from './use-my-case-page'
@@ -17,6 +18,7 @@ export type CasoDetalheChecklistPageProps = {
 
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
   const [isPortalPickerOpen, setIsPortalPickerOpen] = useState(false)
+  const [isNewPieceDialogOpen, setIsNewPieceDialogOpen] = useState(false)
   const {
     activeTab,
     caseClientName,
@@ -48,6 +50,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     thirdParties,
     setActiveTab,
   } = useMyCasePage({ caseId })
+  const dossierApproved = Boolean(caseDetails?.dossierGate.homologatedAt)
 
   return (
     <div className='flex w-full flex-col gap-5 pb-10 font-sans mt-5'>
@@ -120,7 +123,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
               <Icon name='link' className='size-3' />
               {isGeneratingPortalLink ? 'Gerando link...' : 'Gerar link para terceiro'}
             </Button>
-            <Button size='xs' className='rounded-full'>
+            <Button
+              size='xs'
+              className='rounded-full'
+              disabled={!dossierApproved}
+              onClick={() => {
+                setActiveTab('pecas')
+                setIsNewPieceDialogOpen(true)
+              }}
+            >
               <Icon name='plus' className='size-3' />
               Nova peça
             </Button>
@@ -184,9 +195,9 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <TabsTrigger
             value='pecas'
             className='w-full justify-center py-3 text-[13px]'
-            disabled
+            disabled={!dossierApproved}
           >
-            <Icon name='lock' className='size-3.5' />
+            {!dossierApproved ? <Icon name='lock' className='size-3.5' /> : null}
             Peças
           </TabsTrigger>
           <TabsTrigger value='prazos' className='w-full justify-center py-3 text-[13px]'>
@@ -238,7 +249,15 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
           <ChecklistDossierTab
             activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
+            caseDetails={caseDetails}
             checklist={checklistItems}
+          />
+        </TabsContent>
+        <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
+          <CasePiecesTab
+            dossierApproved={dossierApproved}
+            caseId={caseUuid}
+            openNewPieceDialog={isNewPieceDialogOpen}
           />
         </TabsContent>
       </Tabs>
