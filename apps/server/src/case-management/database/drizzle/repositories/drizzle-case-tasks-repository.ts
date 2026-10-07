@@ -116,7 +116,12 @@ export class DrizzleCaseTasksRepository
     return updatedRecord ? this.hydrate(updatedRecord) : undefined
   }
 
-  async remove(caseTaskId: string, expectedVersion: number, deletedAt: Date, updatedAt: Date) {
+  async remove(
+    caseTaskId: string,
+    expectedVersion: number,
+    deletedAt: Date,
+    updatedAt: Date,
+  ) {
     const [record] = await this.database
       .update(caseTaskModel)
       .set({ deletedAt, updatedAt, version: sql`${caseTaskModel.version} + 1` })
@@ -150,7 +155,10 @@ export class DrizzleCaseTasksRepository
     const caseTaskIds = records.map((record) => record.id)
     const [assignees, reminders] = await Promise.all([
       this.database
-        .select({ caseTaskId: caseTaskAssigneeModel.caseTaskId, collaboratorId: caseTaskAssigneeModel.collaboratorId })
+        .select({
+          caseTaskId: caseTaskAssigneeModel.caseTaskId,
+          collaboratorId: caseTaskAssigneeModel.collaboratorId,
+        })
         .from(caseTaskAssigneeModel)
         .where(inArray(caseTaskAssigneeModel.caseTaskId, caseTaskIds)),
       this.database
@@ -166,7 +174,10 @@ export class DrizzleCaseTasksRepository
       assigneeIdsByTask.set(assignee.caseTaskId, taskAssigneeIds)
     }
 
-    const remindersByTask = new Map<string, ReturnType<DrizzleCaseTaskMapper['toReminderDomain']>[]>()
+    const remindersByTask = new Map<
+      string,
+      ReturnType<DrizzleCaseTaskMapper['toReminderDomain']>[]
+    >()
     for (const reminder of reminders) {
       const taskReminders = remindersByTask.get(reminder.caseTaskId) ?? []
       taskReminders.push(this.mapper.toReminderDomain(reminder))
@@ -186,6 +197,7 @@ export class DrizzleCaseTasksRepository
     return {
       caseId: caseTask.caseId,
       type: caseTask.type,
+      title: caseTask.title,
       customType: caseTask.customType,
       description: caseTask.description,
       plannedDate: caseTask.plannedDate,
@@ -193,6 +205,7 @@ export class DrizzleCaseTasksRepository
       status: caseTask.status,
       createdById: caseTask.createdById,
       source: caseTask.source,
+      blocksCaseClosure: caseTask.blocksCaseClosure,
       completionNote: caseTask.completionNote,
       completedAt: caseTask.completedAt,
       completedById: caseTask.completedById,
@@ -206,9 +219,9 @@ export class DrizzleCaseTasksRepository
     collaboratorIds: readonly string[],
   ) {
     if (collaboratorIds.length === 0) return
-    await database.insert(caseTaskAssigneeModel).values(
-      collaboratorIds.map((collaboratorId) => ({ caseTaskId, collaboratorId })),
-    )
+    await database
+      .insert(caseTaskAssigneeModel)
+      .values(collaboratorIds.map((collaboratorId) => ({ caseTaskId, collaboratorId })))
   }
 
   private async insertReminders(
@@ -218,7 +231,11 @@ export class DrizzleCaseTasksRepository
   ) {
     if (reminders.length === 0) return
     await database.insert(caseTaskReminderModel).values(
-      reminders.map((reminder) => ({ caseTaskId, daysBefore: reminder.daysBefore })),
+      reminders.map((reminder) => ({
+        caseTaskId,
+        value: reminder.value,
+        unit: reminder.unit,
+      })),
     )
   }
 

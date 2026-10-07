@@ -5,6 +5,7 @@ import type { CaseTaskSource, CaseTaskStatus, CaseTaskType } from '../structures
 export type CaseTask = Entity & {
   caseId: string
   type: CaseTaskType
+  title: string
   customType?: string
   description: string
   plannedDate: string
@@ -18,6 +19,7 @@ export type CaseTask = Entity & {
   deletedAt?: Date
   version: number
   source: CaseTaskSource
+  blocksCaseClosure: boolean
   completionNote?: string
   lastReminderAt?: Date
   assigneeIds: readonly string[]

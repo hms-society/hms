@@ -1,6 +1,7 @@
 export type CaseTaskReminder = {
   id: string
-  daysBefore: number
+  value: number
+  unit: 'minutes' | 'hours' | 'days'
   sentAt?: Date
   createdAt: Date
 }

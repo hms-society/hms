@@ -2,12 +2,19 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { BadRequestError } from '#shared/domain/errors'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import type { CaseTask, CaseTaskReminderCreation } from '../domain/entities'
-import { CaseTaskSource, CaseTaskStatus, CaseTaskType } from '../domain/structures'
+import {
+  assertValidCaseTaskDate,
+  CaseTaskSource,
+  CaseTaskStatus,
+  CaseTaskType,
+  normalizeCaseTaskTime,
+} from '../domain/structures'
 import type { DatetimeProvider } from '#shared/interfaces'
 
 type Request = {
   caseId: string
   type: CaseTask['type']
+  title: string
   customType?: string
   description: string
   plannedDate: string
@@ -17,6 +24,7 @@ type Request = {
   reminders?: readonly CaseTaskReminderCreation[]
   source?: CaseTask['source']
   completionNote?: string
+  blocksCaseClosure?: boolean
 }
 
 export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
@@ -28,23 +36,28 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
 
   async execute(request: Request): Promise<CaseTask> {
     const description = request.description.trim()
+    const title = request.title.trim()
     const customType = request.customType?.trim() || undefined
     const assigneeIds = [...new Set(request.assigneeIds ?? [])]
     const now = this.datetimeProvider.now()
 
-    this.validateRequest(request, description, customType, now)
+    this.validateRequest(request, title, description, customType, assigneeIds, now)
+    const plannedTime = normalizeCaseTaskTime(request.type, request.plannedTime)
     await this.ensureActiveAssignees(request.caseId, assigneeIds)
 
     return this.caseTasksRepository.add({
       caseId: request.caseId,
       type: request.type,
+      title,
       customType,
       description,
       plannedDate: request.plannedDate,
-      plannedTime: request.plannedTime,
+      plannedTime,
       status: CaseTaskStatus.ToDo,
       createdById: request.createdById,
       source: request.source ?? CaseTaskSource.Manual,
+      blocksCaseClosure:
+        request.type === CaseTaskType.InternalTask && request.blocksCaseClosure === true,
       completionNote: request.completionNote?.trim() || undefined,
       assigneeIds,
       reminders: request.reminders ?? [],
@@ -67,26 +80,32 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
 
   private validateRequest(
     request: Request,
+    title: string,
     description: string,
     customType: string | undefined,
+    assigneeIds: readonly string[],
     now: Date,
   ) {
+    if (!title) {
+      throw new BadRequestError('O título é obrigatório.')
+    }
+
     if (!description) {
       throw new BadRequestError('A descrição é obrigatória.')
+    }
+
+    if (assigneeIds.length === 0) {
+      throw new BadRequestError('Informe ao menos um responsável.')
+    }
+
+    if (assigneeIds.length > 1) {
+      throw new BadRequestError('A tarefa deve ter apenas um responsável.')
     }
 
     if (request.type === CaseTaskType.Other && !customType) {
       throw new BadRequestError('Informe o tipo personalizado do item.')
     }
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(request.plannedDate)) {
-      throw new BadRequestError('A data prevista deve estar no formato AAAA-MM-DD.')
-    }
-
-    const plannedDate = new Date(`${request.plannedDate}T00:00:00.000Z`)
-    const currentDate = new Date(now.toISOString().slice(0, 10) + 'T00:00:00.000Z')
-    if (Number.isNaN(plannedDate.getTime()) || plannedDate < currentDate) {
-      throw new BadRequestError('A data prevista não pode ser anterior à data atual.')
-    }
+    assertValidCaseTaskDate(request.plannedDate, now)
   }
 }

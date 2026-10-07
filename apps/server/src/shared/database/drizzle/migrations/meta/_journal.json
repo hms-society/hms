@@ -442,6 +442,20 @@
       "when": 1791320277416,
       "tag": "0059_concerned_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1791408252352,
+      "tag": "0060_amused_major_mapleleaf",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1791408378863,
+      "tag": "0061_clever_retro_girl",
+      "breakpoints": true
     }
   ]
 }

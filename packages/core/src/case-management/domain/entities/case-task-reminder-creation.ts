@@ -1,3 +1,4 @@
 export type CaseTaskReminderCreation = {
-  daysBefore: number
+  value: number
+  unit: 'minutes' | 'hours' | 'days'
 }

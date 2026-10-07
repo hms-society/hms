@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   check,
+  boolean,
   date,
   index,
   integer,
@@ -24,6 +25,7 @@ export const caseTaskModel = pgTable(
       .notNull()
       .references(() => legalCaseModel.id, { onDelete: 'cascade' }),
     type: caseTaskTypeModel('type').notNull(),
+    title: text('title').notNull(),
     customType: text('custom_type'),
     description: text('description').notNull(),
     plannedDate: date('planned_date', { mode: 'string' }).notNull(),
@@ -41,6 +43,7 @@ export const caseTaskModel = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
     version: integer('version').default(1).notNull(),
     source: caseTaskSourceModel('source').default('manual').notNull(),
+    blocksCaseClosure: boolean('blocks_case_closure').default(false).notNull(),
     completionNote: text('completion_note'),
     lastReminderAt: timestamp('last_reminder_at', {
       withTimezone: true,
@@ -51,12 +54,18 @@ export const caseTaskModel = pgTable(
     index('case_tasks_case_id_idx').on(table.caseId),
     index('case_tasks_case_planned_date_idx').on(table.caseId, table.plannedDate),
     index('case_tasks_deleted_at_idx').on(table.deletedAt),
-    check('case_tasks_description_not_blank_check', sql`char_length(btrim(${table.description})) > 0`),
+    check(
+      'case_tasks_description_not_blank_check',
+      sql`char_length(btrim(${table.description})) > 0`,
+    ),
     check(
       'case_tasks_custom_type_check',
       sql`${table.type} <> 'other' OR (${table.customType} IS NOT NULL AND char_length(btrim(${table.customType})) > 0)`,
     ),
     check('case_tasks_version_check', sql`${table.version} > 0`),
-    check('case_tasks_updated_after_created_check', sql`${table.updatedAt} >= ${table.createdAt}`),
+    check(
+      'case_tasks_updated_after_created_check',
+      sql`${table.updatedAt} >= ${table.createdAt}`,
+    ),
   ],
 )

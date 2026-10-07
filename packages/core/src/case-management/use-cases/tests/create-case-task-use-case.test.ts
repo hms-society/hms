@@ -30,17 +30,20 @@ describe('Create Case Task Use Case', () => {
       createdById: 'creator-1',
       assigneeIds: ['member-1'],
     })
-    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue(['member-1'])
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'member-1',
+    ])
     caseTasksRepository.add.mockResolvedValue(createdTask)
 
     const result = await useCase.execute({
       caseId: 'case-1',
       type: CaseTaskType.InternalTask,
+      title: 'Revisar contestação',
       description: 'Revisar contestação',
       plannedDate: '2026-10-20',
       createdById: 'creator-1',
       assigneeIds: ['member-1'],
-      reminders: [{ daysBefore: 3 }],
+      reminders: [{ value: 3, unit: 'days' }],
     })
 
     expect(result).toBe(createdTask)
@@ -50,7 +53,7 @@ describe('Create Case Task Use Case', () => {
         status: CaseTaskStatus.ToDo,
         source: CaseTaskSource.Manual,
         assigneeIds: ['member-1'],
-        reminders: [{ daysBefore: 3 }],
+        reminders: [{ value: 3, unit: 'days' }],
       }),
     )
   })
@@ -63,6 +66,7 @@ describe('Create Case Task Use Case', () => {
       useCase.execute({
         caseId: 'case-1',
         type: CaseTaskType.InternalTask,
+        title: 'Revisar contestação',
         description: 'Revisar contestação',
         plannedDate: '2026-10-20',
         createdById: 'creator-1',
@@ -75,18 +79,103 @@ describe('Create Case Task Use Case', () => {
 
   it('requires a custom label for the other type and a non-empty description', async () => {
     const useCase = createUseCase()
-    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([])
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'member-1',
+    ])
 
     await expect(
       useCase.execute({
         caseId: 'case-1',
         type: CaseTaskType.Other,
+        title: 'Outro item',
         description: '  ',
+        plannedDate: '2026-10-20',
+        createdById: 'creator-1',
+        assigneeIds: ['member-1'],
+        reminders: [],
+      }),
+    ).rejects.toThrow('descrição é obrigatória')
+  })
+
+  it('requires a non-empty title and at least one responsible', async () => {
+    const useCase = createUseCase()
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([])
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: '  ',
+        description: 'Descrição válida',
         plannedDate: '2026-10-20',
         createdById: 'creator-1',
         assigneeIds: [],
         reminders: [],
       }),
-    ).rejects.toThrow('descrição é obrigatória')
+    ).rejects.toThrow('título é obrigatório')
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: 'Tarefa válida',
+        description: 'Descrição válida',
+        plannedDate: '2026-10-20',
+        createdById: 'creator-1',
+        assigneeIds: [],
+        reminders: [],
+      }),
+    ).rejects.toThrow('responsável')
+  })
+
+  it('rejects more than one responsible', async () => {
+    const useCase = createUseCase()
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: 'Tarefa válida',
+        description: 'Descrição válida',
+        plannedDate: '2026-10-20',
+        createdById: 'creator-1',
+        assigneeIds: ['member-1', 'member-2'],
+        reminders: [],
+      }),
+    ).rejects.toThrow('apenas um responsável')
+  })
+
+  it('applies type-specific temporal rules', async () => {
+    const useCase = createUseCase()
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'member-1',
+    ])
+    caseTasksRepository.add.mockResolvedValue(CaseTaskFaker.fake())
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.Hearing,
+        title: 'Audiência',
+        description: 'Audiência do caso',
+        plannedDate: '2026-10-20',
+        createdById: 'creator-1',
+        assigneeIds: ['member-1'],
+        reminders: [],
+      }),
+    ).rejects.toThrow('exigem horário')
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: 'Tarefa',
+        description: 'Data inválida',
+        plannedDate: '2026-02-31',
+        createdById: 'creator-1',
+        assigneeIds: ['member-1'],
+        reminders: [],
+      }),
+    ).rejects.toThrow('data prevista é inválida')
   })
 })

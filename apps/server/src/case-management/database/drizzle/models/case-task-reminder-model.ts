@@ -1,5 +1,14 @@
 import { sql } from 'drizzle-orm'
-import { check, index, integer, pgTable, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import {
+  check,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 import { caseTaskModel } from '@/case-management/database/drizzle/models/case-task-model'
 
@@ -10,7 +19,8 @@ export const caseTaskReminderModel = pgTable(
     caseTaskId: uuid('case_task_id')
       .notNull()
       .references(() => caseTaskModel.id, { onDelete: 'cascade' }),
-    daysBefore: integer('days_before').notNull(),
+    value: integer('value').notNull(),
+    unit: text('unit').notNull(),
     sentAt: timestamp('sent_at', { withTimezone: true, mode: 'date' }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
@@ -19,9 +29,10 @@ export const caseTaskReminderModel = pgTable(
   (table) => [
     uniqueIndex('case_task_reminders_task_days_before_uidx').on(
       table.caseTaskId,
-      table.daysBefore,
+      table.value,
+      table.unit,
     ),
     index('case_task_reminders_task_id_idx').on(table.caseTaskId),
-    check('case_task_reminders_days_before_check', sql`${table.daysBefore} > 0`),
+    check('case_task_reminders_value_check', sql`${table.value} > 0`),
   ],
 )

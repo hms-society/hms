@@ -4,6 +4,7 @@ import type { CaseTaskSource, CaseTaskStatus, CaseTaskType } from '../structures
 export type CaseTaskCreation = {
   caseId: string
   type: CaseTaskType
+  title: string
   customType?: string
   description: string
   plannedDate: string
@@ -11,6 +12,7 @@ export type CaseTaskCreation = {
   status: CaseTaskStatus
   createdById: string
   source: CaseTaskSource
+  blocksCaseClosure: boolean
   completionNote?: string
   assigneeIds: readonly string[]
   reminders: readonly CaseTaskReminderCreation[]

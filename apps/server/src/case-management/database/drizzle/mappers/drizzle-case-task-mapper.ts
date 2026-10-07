@@ -3,7 +3,11 @@ import type {
   CaseTask,
   CaseTaskReminder,
 } from '@hms/core/case-management/domain/entities'
-import type { CaseTaskSource, CaseTaskStatus, CaseTaskType } from '@hms/core/case-management/domain/structures'
+import type {
+  CaseTaskSource,
+  CaseTaskStatus,
+  CaseTaskType,
+} from '@hms/core/case-management/domain/structures'
 
 import type {
   DrizzleCaseTask,
@@ -37,7 +41,8 @@ export class DrizzleCaseTaskMapper {
   toReminderDomain(record: DrizzleCaseTaskReminder): CaseTaskReminder {
     return {
       id: record.id,
-      daysBefore: record.daysBefore,
+      value: record.value,
+      unit: record.unit as 'minutes' | 'hours' | 'days',
       sentAt: record.sentAt ?? undefined,
       createdAt: record.createdAt,
     }

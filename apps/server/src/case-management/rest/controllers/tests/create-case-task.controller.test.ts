@@ -38,10 +38,11 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       .post(`/cases/${legalCase.id}/tasks`)
       .send({
         type: 'internal_task',
+        title: 'Review the case response',
         description: 'Review the case response',
         plannedDate: '2099-01-15',
         assigneeIds: [collaborator.collaboratorId],
-        reminders: [{ daysBefore: 3 }],
+        reminders: [{ value: 3, unit: 'days' }],
       })
       .expect(201)
 
@@ -52,7 +53,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       status: 'to_do',
       createdById: collaborator.collaboratorId,
       assigneeIds: [collaborator.collaboratorId],
-      reminders: [expect.objectContaining({ daysBefore: 3 })],
+      reminders: [expect.objectContaining({ value: 3, unit: 'days' })],
       version: 1,
     })
     expect(await fixture.findCaseTask(response.body.id)).toMatchObject({
@@ -74,6 +75,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       .post(`/cases/${legalCase.id}/tasks`)
       .send({
         type: 'internal_task',
+        title: 'Should not be created',
         description: 'Should not be created',
         plannedDate: '2099-01-15',
         assigneeIds: ['11111111-1111-4111-8111-111111111111'],

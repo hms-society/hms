@@ -2,7 +2,12 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { BadRequestError, ConflictError, NotFoundError } from '#shared/domain/errors'
 import type { CaseTask, CaseTaskUpdate } from '../domain/entities'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
-import { CaseTaskStatus, CaseTaskType } from '../domain/structures'
+import {
+  assertValidCaseTaskDate,
+  CaseTaskStatus,
+  CaseTaskType,
+  normalizeCaseTaskTime,
+} from '../domain/structures'
 import type { DatetimeProvider } from '#shared/interfaces'
 
 type Request = CaseTaskUpdate & {
@@ -38,24 +43,57 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       if (!changes.description) throw new BadRequestError('A descrição é obrigatória.')
     }
 
+    if (changes.title !== undefined) {
+      changes.title = changes.title.trim()
+      if (!changes.title) throw new BadRequestError('O título é obrigatório.')
+    }
+
+    if (
+      changes.blocksCaseClosure !== undefined &&
+      currentTask.type !== CaseTaskType.InternalTask
+    ) {
+      throw new BadRequestError(
+        'Somente tarefas internas podem impedir o encerramento do caso.',
+      )
+    }
+
     const nextType = changes.type ?? currentTask.type
     const nextCustomType =
-      changes.customType === undefined ? currentTask.customType : changes.customType?.trim()
+      changes.customType === undefined
+        ? currentTask.customType
+        : changes.customType?.trim()
     if (nextType === CaseTaskType.Other && !nextCustomType) {
       throw new BadRequestError('Informe o tipo personalizado do item.')
     }
 
+    const nextBlocksCaseClosure =
+      changes.blocksCaseClosure ?? currentTask.blocksCaseClosure
+    if (nextBlocksCaseClosure && nextType !== CaseTaskType.InternalTask) {
+      throw new BadRequestError(
+        'Somente tarefas internas podem impedir o encerramento do caso.',
+      )
+    }
+
     if (changes.plannedDate !== undefined) {
       const now = this.datetimeProvider.now()
-      const plannedDate = new Date(`${changes.plannedDate}T00:00:00.000Z`)
-      const currentDate = new Date(now.toISOString().slice(0, 10) + 'T00:00:00.000Z')
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(changes.plannedDate) || plannedDate < currentDate) {
-        throw new BadRequestError('A data prevista não pode ser anterior à data atual.')
-      }
+      assertValidCaseTaskDate(changes.plannedDate, now)
+    }
+
+    if (changes.plannedTime !== undefined || changes.type !== undefined) {
+      changes.plannedTime = normalizeCaseTaskTime(
+        nextType,
+        changes.plannedTime === undefined
+          ? currentTask.plannedTime
+          : (changes.plannedTime ?? undefined),
+      )
     }
 
     if (changes.assigneeIds) {
       const assigneeIds = [...new Set(changes.assigneeIds)]
+      if (assigneeIds.length === 0)
+        throw new BadRequestError('Informe ao menos um responsável.')
+      if (assigneeIds.length > 1)
+        throw new BadRequestError('A tarefa deve ter apenas um responsável.')
       const activeAssigneeIds =
         await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(
           request.caseId,
@@ -70,7 +108,10 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     }
 
     const now = this.datetimeProvider.now()
-    if (changes.status === CaseTaskStatus.Completed && currentTask.status !== CaseTaskStatus.Completed) {
+    if (
+      changes.status === CaseTaskStatus.Completed &&
+      currentTask.status !== CaseTaskStatus.Completed
+    ) {
       changes.completedAt = now
       changes.completedById = request.actorId
     }

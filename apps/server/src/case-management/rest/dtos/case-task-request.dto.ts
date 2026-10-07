@@ -15,27 +15,31 @@ const caseTaskSourceSchema = z.enum(['manual', 'automation', 'import'])
 const caseTaskStatusSchema = z.enum(['to_do', 'in_progress', 'completed'])
 
 const reminderSchema = z.object({
-  daysBefore: z.number().int().positive(),
+  value: z.number().int().positive(),
+  unit: z.enum(['minutes', 'hours', 'days']),
 })
 
 export const createCaseTaskSchema = z.object({
   type: caseTaskTypeSchema,
+  title: z.string().trim().min(1),
   customType: z.string().trim().optional(),
   description: z.string().trim().min(1),
   plannedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  plannedTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional(),
-  assigneeIds: z.array(z.string().uuid()).default([]),
+  plannedTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .optional(),
+  assigneeIds: z.array(z.string().uuid()).min(1).max(1),
+  blocksCaseClosure: z.boolean().optional(),
   reminders: z.array(reminderSchema).default([]),
   source: caseTaskSourceSchema.optional(),
   completionNote: z.string().trim().optional(),
 })
 
-export const updateCaseTaskSchema = createCaseTaskSchema
-  .partial()
-  .extend({
-    version: z.number().int().positive(),
-    status: caseTaskStatusSchema.optional(),
-  })
+export const updateCaseTaskSchema = createCaseTaskSchema.partial().extend({
+  version: z.number().int().positive(),
+  status: caseTaskStatusSchema.optional(),
+})
 
 export const deleteCaseTaskSchema = z.object({
   version: z.number().int().positive(),

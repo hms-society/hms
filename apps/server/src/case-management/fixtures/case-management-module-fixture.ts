@@ -7,7 +7,10 @@ import type {
   LegalCase,
   LegalCaseCreation,
 } from '@hms/core/case-management/domain/entities'
-import { CaseTaskFaker, LegalCaseFaker } from '@hms/core/case-management/domain/entities/fakers'
+import {
+  CaseTaskFaker,
+  LegalCaseFaker,
+} from '@hms/core/case-management/domain/entities/fakers'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import {
   ClientFaker,
@@ -298,6 +301,7 @@ export class CaseManagementModuleFixture {
     return this.caseTasksRepository.add({
       caseId: task.caseId,
       type: task.type,
+      title: task.title,
       customType: task.customType,
       description: task.description,
       plannedDate: task.plannedDate,
@@ -305,12 +309,13 @@ export class CaseManagementModuleFixture {
       status: task.status,
       createdById: task.createdById,
       source: task.source,
+      blocksCaseClosure: task.blocksCaseClosure,
       completionNote: task.completionNote,
       completedAt: task.completedAt,
       completedById: task.completedById,
       lastReminderAt: task.lastReminderAt,
       assigneeIds: task.assigneeIds,
-      reminders: task.reminders.map(({ daysBefore }) => ({ daysBefore })),
+      reminders: task.reminders.map(({ value, unit }) => ({ value, unit })),
     })
   }
 

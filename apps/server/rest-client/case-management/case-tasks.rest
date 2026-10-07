@@ -13,10 +13,11 @@ Content-Type: application/json
 
 {
   "type": "internal_task",
+  "title": "Review the case response",
   "description": "Review the case response",
   "plannedDate": "2026-10-20",
-  "assigneeIds": [],
-  "reminders": [{ "daysBefore": 3 }]
+  "assigneeIds": ["00000000-0000-0000-0000-000000000003"],
+  "reminders": [{ "value": 3, "unit": "days" }]
 }
 
 ### Update case task
