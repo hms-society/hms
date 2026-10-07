@@ -42,11 +42,11 @@ ON CONFLICT ("id") DO NOTHING;
 --> statement-breakpoint
 
 INSERT INTO "audit_events" (
-  "id", "occurred_at", "entity_type", "entity_id", "action", "origin", "status", "metadata"
+  "id", "occurred_at", "entity_type", "entity_id", "action", "origin", "status", "ip_address", "metadata"
 )
 SELECT
   l."id", l."data_hora", 'external_access', l."documento_id", 'access_denied', 'integration', 'failure',
-  jsonb_build_object('ip_address', l."ip_origem", 'token_used', l."token_utilizado", 'reason', l."motivo_negativa", 'source_table', 'logs_acesso_externo')
+  l."ip_origem", jsonb_build_object('reason', l."motivo_negativa", 'source_table', 'logs_acesso_externo')
 FROM "logs_acesso_externo" l
 ON CONFLICT ("id") DO NOTHING;
 --> statement-breakpoint
@@ -122,10 +122,10 @@ CREATE OR REPLACE FUNCTION "sync_external_access_log_to_audit_events"()
 RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   INSERT INTO "audit_events" (
-    "id", "occurred_at", "entity_type", "entity_id", "action", "origin", "status", "metadata"
+    "id", "occurred_at", "entity_type", "entity_id", "action", "origin", "status", "ip_address", "metadata"
   ) VALUES (
     NEW."id", NEW."data_hora", 'external_access', NEW."documento_id", 'access_denied', 'integration', 'failure',
-    jsonb_build_object('ip_address', NEW."ip_origem", 'token_used', NEW."token_utilizado", 'reason', NEW."motivo_negativa", 'source_table', 'logs_acesso_externo')
+    NEW."ip_origem", jsonb_build_object('reason', NEW."motivo_negativa", 'source_table', 'logs_acesso_externo')
   ) ON CONFLICT ("id") DO NOTHING;
   RETURN NEW;
 END;

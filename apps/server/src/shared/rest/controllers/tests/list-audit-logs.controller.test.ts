@@ -55,6 +55,16 @@ describe('ListAuditLogsController', () => {
     })
   })
 
+  it('rejects an invalid actor UUID', async () => {
+    const controller = new ListAuditLogsController(makeRepository() as never)
+
+    await expect(
+      controller.handle({ actorId: 'abc' }, { profile: 'admin' } as never),
+    ).rejects.toMatchObject({
+      message: 'actorId must be a valid UUID.',
+    })
+  })
+
   it('returns not found when the details do not exist', async () => {
     const repository = makeRepository()
     repository.findById.mockResolvedValue(undefined)

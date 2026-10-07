@@ -45,6 +45,20 @@ describe('ExportAuditLogsController', () => {
       message: 'Only administrators and compliance supervisors can export audit logs.',
     })
   })
+
+  it('rejects an invalid actor UUID', async () => {
+    const controller = new ExportAuditLogsController(makeRepository() as never)
+
+    await expect(
+      controller.handle(
+        { actorId: 'abc' },
+        collaborator('admin'),
+        makeResponse() as never,
+      ),
+    ).rejects.toMatchObject({
+      message: 'actorId must be a valid UUID.',
+    })
+  })
 })
 
 function collaborator(profile: 'admin' | 'lawyer'): CollaboratorSummary {

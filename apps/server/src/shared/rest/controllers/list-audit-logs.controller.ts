@@ -53,6 +53,9 @@ const entityTypes: readonly AuditEventEntityType[] = [
   'audit_log_export',
 ]
 
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 @Controller('audit-logs')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
@@ -132,12 +135,20 @@ export class ListAuditLogsController {
       limit,
       from,
       to,
-      actorId: query.actorId,
+      actorId: this.parseUuid(query.actorId, 'actorId'),
       action: query.action,
       entityType: this.parseEnum(query.entityType, entityTypes, 'entityType'),
       origin: this.parseEnum(query.origin, Object.values(AuditOrigins), 'origin'),
       status: this.parseEnum(query.status, ['success', 'failure'], 'status'),
     }
+  }
+
+  private parseUuid(value: string | undefined, name: string) {
+    if (!value) return undefined
+    if (!uuidPattern.test(value)) {
+      throw new BadRequestException(`${name} must be a valid UUID.`)
+    }
+    return value
   }
 
   private parsePositiveInteger(
