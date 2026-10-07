@@ -260,6 +260,8 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             caseIdentifier={displayCaseId}
             caseTitle={caseTitle}
             team={caseDetails?.team ?? []}
+          />
+        </TabsContent>
         <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
           <CasePiecesTab
             dossierApproved={dossierApproved}
