@@ -31,5 +31,20 @@ export const AuditLogsService = (restClient: RestClient): AuditLogsRestService =
     getDetails(auditLogId: string) {
       return restClient.get<AuditEvent>(`/audit-logs/${auditLogId}`)
     },
+
+    export(request: AuditLogsListRequest & { format: 'csv' | 'json' }) {
+      const params = new URLSearchParams({
+        format: request.format,
+      })
+      if (request.from) params.set('from', request.from)
+      if (request.to) params.set('to', request.to)
+      if (request.entityType) params.set('entityType', request.entityType)
+      if (request.actorId) params.set('actorId', request.actorId)
+      if (request.action) params.set('action', request.action)
+      if (request.origin) params.set('origin', request.origin)
+      if (request.status) params.set('status', request.status)
+
+      return restClient.getFile(`/audit-logs/export?${params.toString()}`)
+    },
   }
 }

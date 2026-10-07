@@ -70,9 +70,11 @@ function makeRepository(): AuditLogsRepository & {
   list: ReturnType<typeof vi.fn>
   findById: ReturnType<typeof vi.fn>
 } {
-  return {
-    list: vi.fn().mockResolvedValue({ data: [], total: 0 }),
-    findById: vi.fn(),
+  const list = vi.fn().mockResolvedValue({ data: [], total: 0 })
+  const findById = vi.fn()
+  return { list, findById } as unknown as AuditLogsRepository & {
+    list: ReturnType<typeof vi.fn>
+    findById: ReturnType<typeof vi.fn>
   }
 }
 

@@ -29,4 +29,7 @@ export type AuditLogsListResponse = {
 export interface AuditLogsService {
   list(request: AuditLogsListRequest): Promise<RestResponse<AuditLogsListResponse>>
   getDetails(auditLogId: string): Promise<RestResponse<AuditEvent>>
+  export(
+    request: AuditLogsListRequest & { format: 'csv' | 'json' },
+  ): Promise<RestResponse<Blob>>
 }

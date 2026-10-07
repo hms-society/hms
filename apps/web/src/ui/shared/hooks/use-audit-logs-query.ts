@@ -14,6 +14,8 @@ export function useAuditLogsQuery(request: AuditLogsListRequest) {
     refetch,
   } = useQuery({
     queryKey: [...AUDIT_LOGS_QUERY_KEY, request],
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
     queryFn: async function fetchAuditLogs() {
       const response = await auditLogsService.list(request)
       if (response.isFailure) response.throwError()

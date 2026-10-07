@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import type { AuditEvent, AuditEventEntityType } from '@hms/core/shared/domain/structures'
 import type {
+  AuditLogExportRecord,
   AuditLogsRepository,
   ListAuditLogsQuery,
   PaginatedAuditEvents,
@@ -44,6 +45,22 @@ export class DrizzleAuditLogsRepository
     return events.find((event) => event.id === id)
   }
 
+  async recordExport(record: AuditLogExportRecord): Promise<void> {
+    await this.database.insert(auditLogModel).values({
+      idUsuario: record.actorId,
+      perfilUsuario: record.actorProfile,
+      entidade: 'audit_log_export',
+      idEntidade: record.actorId,
+      campoAlterado: 'exported',
+      valorAnterior: null,
+      valorNovo: JSON.stringify({
+        format: record.format,
+        filters: record.filters,
+        exportedCount: record.exportedCount,
+      }),
+    })
+  }
+
   private async loadEvents(): Promise<AuditEvent[]> {
     const [globalLogs, documentLogs, validationLogs, exceptionLogs, externalLogs] =
       await Promise.all([
@@ -63,6 +80,8 @@ export class DrizzleAuditLogsRepository
         entityType: this.entityType(log.entidade),
         entityId: log.idEntidade,
         action: log.campoAlterado,
+        origin: log.perfilUsuario === 'system' ? ('system' as const) : ('human' as const),
+        status: 'success' as const,
         beforeData: this.parseJson(log.valorAnterior),
         afterData: this.parseJson(log.valorNovo),
       })),
@@ -73,6 +92,8 @@ export class DrizzleAuditLogsRepository
         entityType: 'document' as const,
         entityId: log.documentoId,
         action: 'access_classification_changed',
+        origin: 'human' as const,
+        status: 'success' as const,
         beforeData: log.valorAnterior,
         afterData: log.valorNovo,
       })),
@@ -83,6 +104,7 @@ export class DrizzleAuditLogsRepository
         entityType: 'document_validation' as const,
         entityId: log.documentFileId,
         action: log.action,
+        origin: this.validationOrigin(log.action, log.actorId ?? undefined),
         status: [
           'processing_failure',
           'illegible',
@@ -106,6 +128,8 @@ export class DrizzleAuditLogsRepository
         entityType: 'document_exception' as const,
         entityId: log.documentExceptionId,
         action: log.action,
+        origin: log.userId ? ('human' as const) : ('system' as const),
+        status: 'success' as const,
         metadata: this.toJsonValue(log.metadata),
       })),
       ...externalLogs.map((log) => ({
@@ -115,6 +139,7 @@ export class DrizzleAuditLogsRepository
         entityId: log.documentoId,
         action: log.motivoNegativa ? 'access_denied' : 'accessed',
         status: log.motivoNegativa ? ('failure' as const) : ('success' as const),
+        origin: 'integration' as const,
         ipAddress: log.ipOrigem,
         metadata: this.toJsonValue({ reason: log.motivoNegativa }),
       })),
@@ -153,6 +178,11 @@ export class DrizzleAuditLogsRepository
     return knownTypes.includes(value as AuditEventEntityType)
       ? (value as AuditEventEntityType)
       : 'permission'
+  }
+
+  private validationOrigin(action: string, actorId?: string) {
+    if (action === 'ai_correction_recorded') return 'ai' as const
+    return actorId ? ('human' as const) : ('system' as const)
   }
 
   private parseJson(value: string | null): AuditEvent['beforeData'] {

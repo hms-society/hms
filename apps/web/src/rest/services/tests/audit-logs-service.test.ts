@@ -32,6 +32,23 @@ describe('AuditLogsService', () => {
 
     expect(restClient.get).toHaveBeenCalledWith('/audit-logs/event-1')
   })
+
+  it('requests an audit export with the selected format and filters', async () => {
+    const restClient = makeRestClient()
+    const service = AuditLogsService(restClient)
+
+    await service.export({
+      page: 1,
+      limit: 20,
+      format: 'json',
+      entityType: 'third_party',
+      status: 'success',
+    })
+
+    expect(restClient.getFile).toHaveBeenCalledWith(
+      '/audit-logs/export?format=json&entityType=third_party&status=success',
+    )
+  })
 })
 
 function makeRestClient(): RestClient {

@@ -9,6 +9,12 @@ import { AuditFilterSelect } from '@/ui/shared/widgets/components/audit-filter-s
 import { AuditLogDetailBlock } from '@/ui/shared/widgets/components/audit-log-detail-block'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/ui/shadcn/dropdown-menu'
 import { Input } from '@/ui/shadcn/input'
 import {
   Sheet,
@@ -63,14 +69,19 @@ export const AuditLogsPage = (_props: AuditLogsPageProps) => {
     entityType,
     handleActionChange,
     handleEntityTypeChange,
+    handleExport,
+    handleEventExport,
     handleFromChange,
     handleOriginChange,
     handleStatusChange,
     handleToChange,
     getActionLabel,
     getEntityLabel,
+    getOriginLabel,
     isLoadingAuditLog,
     isLoadingAuditLogs,
+    isExporting,
+    exportError,
     origin,
     from,
     page,
@@ -89,15 +100,44 @@ export const AuditLogsPage = (_props: AuditLogsPageProps) => {
         <p className='mb-2 text-xs font-semibold tracking-[0.16em] text-brand-accent'>
           GOVERNANÇA
         </p>
-        <h1
-          id='audit-logs-page-title'
-          className='font-serif text-4xl font-medium text-brand'
-        >
-          Auditoria
-        </h1>
-        <p className='mt-2 max-w-2xl text-sm text-muted-foreground'>
-          Consulte os eventos operacionais registrados na plataforma.
-        </p>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+          <div>
+            <h1
+              id='audit-logs-page-title'
+              className='font-serif text-4xl font-medium text-brand'
+            >
+              Auditoria
+            </h1>
+            <p className='mt-2 max-w-2xl text-sm text-muted-foreground'>
+              Consulte os eventos operacionais registrados na plataforma.
+            </p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className='rounded-full'
+                variant='outline'
+                disabled={isExporting}
+                aria-label='Baixar auditoria'
+              >
+                <Icon name='download' /> Baixar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onSelect={() => void handleExport('csv')}>
+                <Icon name='download' className='size-4' /> Baixar CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => void handleExport('json')}>
+                <Icon name='download' className='size-4' /> Baixar JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {exportError && (
+          <p role='alert' className='mt-3 text-sm text-destructive'>
+            Não foi possível exportar os eventos.
+          </p>
+        )}
       </header>
 
       <section className='grid gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-6'>
@@ -194,16 +234,20 @@ export const AuditLogsPage = (_props: AuditLogsPageProps) => {
             Nenhum evento encontrado.
           </div>
         ) : (
-          <div className='overflow-x-auto'>
-            <Table className='min-w-[58rem]'>
+          <div className='w-full'>
+            <Table
+              className='w-full table-auto [&_td]:px-3 [&_th]:px-3 lg:[&_td]:px-4 lg:[&_th]:px-4'
+              containerClassName='overflow-x-hidden'
+            >
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Entidade</TableHead>
-                  <TableHead>Ação</TableHead>
-                  <TableHead>Origem</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ator</TableHead>
+                  <TableHead className='hidden lg:table-cell'>Data</TableHead>
+                  <TableHead className='hidden lg:table-cell'>Entidade</TableHead>
+                  <TableHead className='hidden lg:table-cell'>Ação</TableHead>
+                  <TableHead className='hidden sm:table-cell'>Origem</TableHead>
+                  <TableHead className='w-24'>Status</TableHead>
+                  <TableHead className='w-28'>Responsável</TableHead>
+                  <TableHead className='w-32 text-right'>Download</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -220,19 +264,23 @@ export const AuditLogsPage = (_props: AuditLogsPageProps) => {
                       }
                     }}
                   >
-                    <TableCell>{formatDate(event.occurredAt)}</TableCell>
-                    <TableCell>{getEntityLabel(event.entityType)}</TableCell>
-                    <TableCell className='font-medium'>
+                    <TableCell className='hidden lg:table-cell'>
+                      {formatDate(event.occurredAt)}
+                    </TableCell>
+                    <TableCell className='hidden truncate lg:table-cell'>
+                      {getEntityLabel(event.entityType)}
+                    </TableCell>
+                    <TableCell className='hidden truncate font-medium lg:table-cell'>
                       {getActionLabel(event.action)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='hidden sm:table-cell'>
                       {event.origin === AuditEventOrigin.Ai ? (
                         <Badge variant='info'>IA</Badge>
                       ) : (
-                        (event.origin ?? '—')
+                        getOriginLabel(event.origin)
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='truncate'>
                       <Badge
                         variant={
                           event.status === AuditEventStatus.Success
@@ -243,8 +291,41 @@ export const AuditLogsPage = (_props: AuditLogsPageProps) => {
                         {event.status === AuditEventStatus.Success ? 'Sucesso' : 'Falha'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      className='w-32 max-w-32 overflow-hidden text-ellipsis whitespace-nowrap'
+                      title={event.actorProfile ?? event.actorId ?? 'Sistema'}
+                    >
                       {event.actorProfile ?? event.actorId ?? 'Sistema'}
+                    </TableCell>
+                    <TableCell>
+                      <div className='flex justify-end gap-1.5'>
+                        <Button
+                          type='button'
+                          size='xs'
+                          variant='outline'
+                          className='rounded-full'
+                          onClick={(clickEvent) => {
+                            clickEvent.stopPropagation()
+                            handleEventExport('csv', event)
+                          }}
+                          onKeyDown={(keyboardEvent) => keyboardEvent.stopPropagation()}
+                        >
+                          CSV
+                        </Button>
+                        <Button
+                          type='button'
+                          size='xs'
+                          variant='outline'
+                          className='rounded-full'
+                          onClick={(clickEvent) => {
+                            clickEvent.stopPropagation()
+                            handleEventExport('json', event)
+                          }}
+                          onKeyDown={(keyboardEvent) => keyboardEvent.stopPropagation()}
+                        >
+                          JSON
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

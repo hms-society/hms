@@ -7,6 +7,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 import { DatabaseHealthWatchdog } from '@/shared/rest/database-health-watchdog'
 import {
   CheckHealthController,
+  ExportAuditLogsController,
   ListAuditLogsController,
   ListDynamicFormsController,
 } from '@/shared/rest/controllers'
@@ -16,6 +17,7 @@ import {
   controllers: [
     CheckHealthController,
     ListDynamicFormsController,
+    ExportAuditLogsController,
     ListAuditLogsController,
   ],
   providers: [DatabaseHealthWatchdog],

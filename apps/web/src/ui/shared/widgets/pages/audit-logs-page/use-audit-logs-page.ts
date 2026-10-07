@@ -1,4 +1,5 @@
 import type {
+  AuditEvent,
   AuditEventEntityType,
   AuditEventOrigin,
   AuditEventStatus,
@@ -7,6 +8,7 @@ import { useState } from 'react'
 
 import { useAuditLogDetailsQuery } from '@/ui/shared/hooks/use-audit-log-details-query'
 import { useAuditLogsQuery } from '@/ui/shared/hooks/use-audit-logs-query'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 const PAGE_SIZE = 20
 
@@ -19,6 +21,9 @@ export function useAuditLogsPage() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [selectedAuditLogId, setSelectedAuditLogId] = useState<string>()
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportError, setExportError] = useState<Error | null>(null)
+  const { auditLogsService } = useRestContext()
   const request = {
     page,
     limit: PAGE_SIZE,
@@ -65,6 +70,59 @@ export function useAuditLogsPage() {
   function handleToChange(value: string) {
     setTo(value)
     resetPage()
+  }
+
+  async function handleExport(format: 'csv' | 'json') {
+    setIsExporting(true)
+    setExportError(null)
+    try {
+      const response = await auditLogsService.export({ ...request, format })
+      if (response.isFailure) response.throwError()
+      const url = URL.createObjectURL(response.body)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `audit-logs.${format}`
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      setExportError(error instanceof Error ? error : new Error('Export failed'))
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  function handleEventExport(format: 'csv' | 'json', event: AuditEvent) {
+    const content =
+      format === 'json'
+        ? JSON.stringify(event, null, 2)
+        : [
+            'id,occurredAt,actorId,actorProfile,entityType,entityId,action,origin,status',
+            [
+              event.id,
+              new Date(event.occurredAt).toISOString(),
+              event.actorId ?? '',
+              event.actorProfile ?? '',
+              event.entityType,
+              event.entityId ?? '',
+              event.action,
+              event.origin ?? '',
+              event.status,
+            ]
+              .map((value) => {
+                const normalized = String(value)
+                return /[",\n]/.test(normalized)
+                  ? `"${normalized.replaceAll('"', '""')}"`
+                  : normalized
+              })
+              .join(','),
+          ].join('\n')
+    const contentType = format === 'json' ? 'application/json' : 'text/csv'
+    const url = URL.createObjectURL(new Blob([content], { type: contentType }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `audit-log-${event.id}.${format}`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   function formatTechnicalLabel(value: string) {
@@ -123,6 +181,17 @@ export function useAuditLogsPage() {
     return labels[value] ?? formatTechnicalLabel(value)
   }
 
+  function getOriginLabel(value: string | undefined) {
+    const labels: Record<string, string> = {
+      human: 'Humano',
+      system: 'Sistema',
+      ai: 'IA',
+      integration: 'Integração',
+    }
+
+    return value ? (labels[value] ?? formatTechnicalLabel(value)) : '—'
+  }
+
   const filteredAuditLogs = (() => {
     const normalizedSearch = action.trim().toLocaleLowerCase()
     if (!normalizedSearch) return auditLogs
@@ -148,14 +217,19 @@ export function useAuditLogsPage() {
     entityType,
     handleActionChange,
     handleEntityTypeChange,
+    handleExport,
+    handleEventExport,
     handleFromChange,
     handleOriginChange,
     handleStatusChange,
     handleToChange,
     getActionLabel,
     getEntityLabel,
+    getOriginLabel,
     isLoadingAuditLog,
     isLoadingAuditLogs,
+    isExporting,
+    exportError,
     page,
     refetch,
     selectedAuditLogId,
