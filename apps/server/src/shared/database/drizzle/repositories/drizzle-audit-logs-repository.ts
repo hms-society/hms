@@ -90,8 +90,8 @@ export class DrizzleAuditLogsRepository
       action: row.action,
       origin: row.origin as AuditEvent['origin'],
       status: row.status as AuditEvent['status'],
-      beforeData: row.beforeData as AuditEvent['beforeData'],
-      afterData: row.afterData as AuditEvent['afterData'],
+      beforeData: this.parseAuditData(row.beforeData),
+      afterData: this.parseAuditData(row.afterData),
       metadata: row.metadata as AuditEvent['metadata'],
       ipAddress: row.ipAddress ?? undefined,
       justification: row.justification ?? undefined,
@@ -118,5 +118,22 @@ export class DrizzleAuditLogsRepository
     return knownTypes.includes(value as AuditEventEntityType)
       ? (value as AuditEventEntityType)
       : 'permission'
+  }
+
+  private parseAuditData(value: unknown): AuditEvent['beforeData'] {
+    if (
+      value &&
+      typeof value === 'object' &&
+      'value' in value &&
+      typeof value.value === 'string'
+    ) {
+      try {
+        return JSON.parse(value.value) as AuditEvent['beforeData']
+      } catch {
+        return value.value
+      }
+    }
+
+    return value as AuditEvent['beforeData']
   }
 }
