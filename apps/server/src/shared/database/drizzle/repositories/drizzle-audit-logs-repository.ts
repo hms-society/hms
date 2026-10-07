@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { and, count, desc, eq, gte, lte } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 import type { AuditEvent, AuditEventEntityType } from '@hms/core/shared/domain/structures'
 import type {
   AuditLogExportRecord,
@@ -10,12 +12,7 @@ import type {
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { auditLogModel } from '@/identity/database/drizzle/models/audit-model'
-import {
-  documentAuditModel,
-  documentExternalAccessLogModel,
-} from '@/document-production/database/drizzle/models/document-security-model'
-import { documentExceptionAuditLogModel } from '@/document-engine/database/drizzle/models/document-exception-audit-log-model'
-import { documentValidationLogModel } from '@/document-engine/database/drizzle/models/document-validation-log-model'
+import { auditEventModel } from '@/shared/database/drizzle/models/audit-event-model'
 
 @Injectable()
 export class DrizzleAuditLogsRepository
@@ -28,21 +25,42 @@ export class DrizzleAuditLogsRepository
   }
 
   async list(query: ListAuditLogsQuery): Promise<PaginatedAuditEvents> {
-    const events = await this.loadEvents()
-    const filtered = events
-      .filter((event) => this.matchesQuery(event, query))
-      .sort((left, right) => right.occurredAt.getTime() - left.occurredAt.getTime())
-
     const offset = (query.page - 1) * query.limit
+    const conditions: SQL[] = []
+    if (query.from) conditions.push(gte(auditEventModel.occurredAt, query.from))
+    if (query.to) conditions.push(lte(auditEventModel.occurredAt, query.to))
+    if (query.entityType)
+      conditions.push(eq(auditEventModel.entityType, query.entityType))
+    if (query.actorId) conditions.push(eq(auditEventModel.actorId, query.actorId))
+    if (query.action) conditions.push(eq(auditEventModel.action, query.action))
+    if (query.origin) conditions.push(eq(auditEventModel.origin, query.origin))
+    if (query.status) conditions.push(eq(auditEventModel.status, query.status))
+    const where = conditions.length ? and(...conditions) : undefined
+    const [rows, [{ total }]] = await Promise.all([
+      this.database
+        .select()
+        .from(auditEventModel)
+        .where(where)
+        .orderBy(desc(auditEventModel.occurredAt))
+        .limit(query.limit)
+        .offset(offset),
+      this.database.select({ total: count() }).from(auditEventModel).where(where),
+    ])
+
     return {
-      data: filtered.slice(offset, offset + query.limit),
-      total: filtered.length,
+      data: rows.map((row) => this.mapAuditEvent(row)),
+      total: Number(total),
     }
   }
 
   async findById(id: string): Promise<AuditEvent | undefined> {
-    const events = await this.loadEvents()
-    return events.find((event) => event.id === id)
+    const [event] = await this.database
+      .select()
+      .from(auditEventModel)
+      .where(eq(auditEventModel.id, id))
+      .limit(1)
+
+    return event ? this.mapAuditEvent(event) : undefined
   }
 
   async recordExport(record: AuditLogExportRecord): Promise<void> {
@@ -61,101 +79,23 @@ export class DrizzleAuditLogsRepository
     })
   }
 
-  private async loadEvents(): Promise<AuditEvent[]> {
-    const [globalLogs, documentLogs, validationLogs, exceptionLogs, externalLogs] =
-      await Promise.all([
-        this.database.select().from(auditLogModel),
-        this.database.select().from(documentAuditModel),
-        this.database.select().from(documentValidationLogModel),
-        this.database.select().from(documentExceptionAuditLogModel),
-        this.database.select().from(documentExternalAccessLogModel),
-      ])
-
-    return [
-      ...globalLogs.map((log) => ({
-        id: log.id,
-        occurredAt: log.timestamp,
-        actorId: log.idUsuario,
-        actorProfile: log.perfilUsuario,
-        entityType: this.entityType(log.entidade),
-        entityId: log.idEntidade,
-        action: log.campoAlterado,
-        origin: log.perfilUsuario === 'system' ? ('system' as const) : ('human' as const),
-        status: 'success' as const,
-        beforeData: this.parseJson(log.valorAnterior),
-        afterData: this.parseJson(log.valorNovo),
-      })),
-      ...documentLogs.map((log) => ({
-        id: log.id,
-        occurredAt: log.createdAt,
-        actorId: log.usuarioResponsavelId,
-        entityType: 'document' as const,
-        entityId: log.documentoId,
-        action: 'access_classification_changed',
-        origin: 'human' as const,
-        status: 'success' as const,
-        beforeData: log.valorAnterior,
-        afterData: log.valorNovo,
-      })),
-      ...validationLogs.map((log) => ({
-        id: log.id,
-        occurredAt: log.createdAt,
-        actorId: log.actorId ?? undefined,
-        entityType: 'document_validation' as const,
-        entityId: log.documentFileId,
-        action: log.action,
-        origin: this.validationOrigin(log.action, log.actorId ?? undefined),
-        status: [
-          'processing_failure',
-          'illegible',
-          'incomplete',
-          'duplicate',
-          'not_corresponding',
-        ].includes(log.status ?? '')
-          ? ('failure' as const)
-          : ('success' as const),
-        metadata: this.toJsonValue({
-          decision: log.decision,
-          reason: log.reason,
-          message: log.message,
-          metadata: log.metadata,
-        }),
-      })),
-      ...exceptionLogs.map((log) => ({
-        id: log.id,
-        occurredAt: log.createdAt,
-        actorId: log.userId,
-        entityType: 'document_exception' as const,
-        entityId: log.documentExceptionId,
-        action: log.action,
-        origin: log.userId ? ('human' as const) : ('system' as const),
-        status: 'success' as const,
-        metadata: this.toJsonValue(log.metadata),
-      })),
-      ...externalLogs.map((log) => ({
-        id: log.id,
-        occurredAt: log.dataHora,
-        entityType: 'external_access' as const,
-        entityId: log.documentoId,
-        action: log.motivoNegativa ? 'access_denied' : 'accessed',
-        status: log.motivoNegativa ? ('failure' as const) : ('success' as const),
-        origin: 'integration' as const,
-        ipAddress: log.ipOrigem,
-        metadata: this.toJsonValue({ reason: log.motivoNegativa }),
-      })),
-    ]
-  }
-
-  private matchesQuery(event: AuditEvent, query: ListAuditLogsQuery) {
-    return (
-      (!query.from || event.occurredAt >= query.from) &&
-      (!query.to || event.occurredAt <= query.to) &&
-      (!query.entityType || event.entityType === query.entityType) &&
-      (!query.actorId || event.actorId === query.actorId) &&
-      (!query.action || event.action === query.action) &&
-      (!query.origin || event.origin === query.origin) &&
-      (!query.status || event.status === query.status)
-    )
+  private mapAuditEvent(row: typeof auditEventModel.$inferSelect): AuditEvent {
+    return {
+      id: row.id,
+      occurredAt: row.occurredAt,
+      actorId: row.actorId ?? undefined,
+      actorProfile: row.actorProfile ?? undefined,
+      entityType: this.entityType(row.entityType),
+      entityId: row.entityId ?? undefined,
+      action: row.action,
+      origin: row.origin as AuditEvent['origin'],
+      status: row.status as AuditEvent['status'],
+      beforeData: row.beforeData as AuditEvent['beforeData'],
+      afterData: row.afterData as AuditEvent['afterData'],
+      metadata: row.metadata as AuditEvent['metadata'],
+      ipAddress: row.ipAddress ?? undefined,
+      justification: row.justification ?? undefined,
+    }
   }
 
   private entityType(value: string): AuditEventEntityType {
@@ -178,27 +118,5 @@ export class DrizzleAuditLogsRepository
     return knownTypes.includes(value as AuditEventEntityType)
       ? (value as AuditEventEntityType)
       : 'permission'
-  }
-
-  private validationOrigin(action: string, actorId?: string) {
-    if (action === 'ai_correction_recorded') return 'ai' as const
-    return actorId ? ('human' as const) : ('system' as const)
-  }
-
-  private parseJson(value: string | null): AuditEvent['beforeData'] {
-    if (!value) return undefined
-    try {
-      return JSON.parse(value) as AuditEvent['beforeData']
-    } catch {
-      return value
-    }
-  }
-
-  private toJsonValue(value: unknown): AuditEvent['metadata'] {
-    try {
-      return JSON.parse(JSON.stringify(value)) as AuditEvent['metadata']
-    } catch {
-      return undefined
-    }
   }
 }

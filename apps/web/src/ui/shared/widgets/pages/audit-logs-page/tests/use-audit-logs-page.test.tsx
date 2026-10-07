@@ -58,9 +58,16 @@ describe('useAuditLogsPage', () => {
     await waitFor(() => expect(result.current.auditLogs).toHaveLength(2))
     act(() => result.current.handleActionChange('permissão'))
 
-    expect(result.current.auditLogs.map((event) => event.id)).toEqual([
-      'event-third-party',
-    ])
+    await waitFor(() =>
+      expect(result.current.auditLogs.map((event) => event.id)).toEqual([
+        'event-third-party',
+      ]),
+    )
+    await waitFor(() =>
+      expect(auditLogsService.list).toHaveBeenLastCalledWith(
+        expect.objectContaining({ action: 'permission_granted' }),
+      ),
+    )
   })
 
   it('downloads an individual event as CSV', async () => {
