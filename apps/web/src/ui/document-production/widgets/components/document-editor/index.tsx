@@ -11,7 +11,11 @@ export {
   isAllowedDocumentTemplateHref,
   parseDocumentTemplateContent,
 } from './use-document-editor'
-export type { DocumentEditorProps } from './use-document-editor'
+export type {
+  DocumentEditorActions,
+  DocumentEditorProps,
+  PendingMarkerReplacement,
+} from './use-document-editor'
 
 export const DocumentEditor = ({
   content,

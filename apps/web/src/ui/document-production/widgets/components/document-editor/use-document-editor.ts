@@ -21,11 +21,16 @@ export type DocumentEditorProps = {
   content: DocumentTemplateContent
   onChange: (content: DocumentTemplateContent) => void
   editable?: boolean
-  onEditorReady?: (insert: (name: string) => void) => void
+  onEditorReady?: (actions: DocumentEditorActions) => void
   onFocus?: () => void
   ariaLabel?: string
   emptyState?: ReactNode
   highlightedTerms?: readonly string[]
+}
+
+export type PendingMarkerReplacement = { marker: string; value: string }
+export type DocumentEditorActions = ((name: string) => void) & {
+  replacePendingMarkers: (replacements: readonly PendingMarkerReplacement[]) => void
 }
 
 export const DOCUMENT_TEMPLATE_LINK_OPTIONS = {
@@ -241,11 +246,32 @@ export function useDocumentEditor({
 
   useEffect(
     function exposeVariableInsertion() {
-      if (editor && onEditorReady)
-        onEditorReady(function insertVariable(name: string) {
+      if (editor && onEditorReady) {
+        const insertVariable = ((name: string) => {
           if (!editable) return
           editor.chain().focus().insertContent(`{{${name}}}`).run()
-        })
+        }) as DocumentEditorActions
+        insertVariable.replacePendingMarkers = (replacements) => {
+          const replaceNodeText = (node: any): any => {
+            if (typeof node.text === 'string') {
+              const replacedText = replacements.reduce(
+                (text, { marker, value }) => text.split(marker).join(value),
+                node.text,
+              )
+              return {
+                ...node,
+                text: replacedText,
+              }
+            }
+            if (!node.content) return node
+            return { ...node, content: node.content.map(replaceNodeText) }
+          }
+          editor.commands.setContent(replaceNodeText(editor.getJSON()), {
+            emitUpdate: true,
+          })
+        }
+        onEditorReady(insertVariable)
+      }
     },
     [editable, editor, onEditorReady],
   )
