@@ -61,7 +61,7 @@ describe('Delete Case Task Controller [DELETE /cases/:caseId/tasks/:caseTaskId]'
     })
 
     await request(fixture.app.getHttpServer())
-      .delete('/cases/' + legalCase.id + '/tasks/' + task.id)
+      .delete(`/cases/${legalCase.id}/tasks/${task.id}`)
       .send({ version: task.version })
       .expect(400)
 

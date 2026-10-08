@@ -1,4 +1,12 @@
-import { Body, Delete, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Delete,
+  HttpStatus,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiBody, ApiResponse } from '@nestjs/swagger'
 import { DeleteCaseTaskUseCase } from '@hms/core/case-management/use-cases'
 import type { CaseTasksRepository } from '@hms/core/case-management/interfaces'
@@ -43,7 +51,10 @@ export class DeleteCaseTaskController {
   handle(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Param('caseTaskId', new ParseUUIDPipe()) caseTaskId: string,
-    @Body(new ZodValidationPipe(deleteCaseTaskSchema)) body: Omit<RequestBody, 'caseId' | 'caseTaskId'>,
+    @Body(new ZodValidationPipe(deleteCaseTaskSchema)) body: Omit<
+      RequestBody,
+      'caseId' | 'caseTaskId'
+    >,
   ) {
     return this.useCase.execute({ ...body, caseId, caseTaskId })
   }

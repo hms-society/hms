@@ -33,7 +33,7 @@ export const CaseManagementService = (
     },
 
     deleteCaseTask(caseId, taskId, request) {
-      return restClient.delete<CaseTask>('/cases/' + caseId + '/tasks/' + taskId, request)
+      return restClient.delete<CaseTask>(`/cases/${caseId}/tasks/${taskId}`, request)
     },
 
     createLegalCase(request) {
