@@ -29,6 +29,7 @@ export type AuditEventEntityType =
   | 'document_validation'
   | 'document_exception'
   | 'audit_log_export'
+  | (string & {})
 
 export type AuditEventJsonValue =
   | string

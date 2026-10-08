@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { and, count, desc, eq, gte, lte } from 'drizzle-orm'
+import { and, count, desc, eq, gte, ilike, lte } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 import type { AuditEvent, AuditEventEntityType } from '@hms/core/shared/domain/structures'
 import type {
@@ -32,7 +32,10 @@ export class DrizzleAuditLogsRepository
     if (query.entityType)
       conditions.push(eq(auditEventModel.entityType, query.entityType))
     if (query.actorId) conditions.push(eq(auditEventModel.actorId, query.actorId))
-    if (query.action) conditions.push(eq(auditEventModel.action, query.action))
+    if (query.action) {
+      const escapedAction = query.action.replace(/[\\%_]/g, '\\$&')
+      conditions.push(ilike(auditEventModel.action, `%${escapedAction}%`))
+    }
     if (query.origin) conditions.push(eq(auditEventModel.origin, query.origin))
     if (query.status) conditions.push(eq(auditEventModel.status, query.status))
     const where = conditions.length ? and(...conditions) : undefined
@@ -99,25 +102,7 @@ export class DrizzleAuditLogsRepository
   }
 
   private entityType(value: string): AuditEventEntityType {
-    const knownTypes: AuditEventEntityType[] = [
-      'intake',
-      'case',
-      'document',
-      'piece',
-      'checklist',
-      'task',
-      'deadline',
-      'permission',
-      'client',
-      'third_party',
-      'external_access',
-      'document_validation',
-      'document_exception',
-      'audit_log_export',
-    ]
-    return knownTypes.includes(value as AuditEventEntityType)
-      ? (value as AuditEventEntityType)
-      : 'permission'
+    return value as AuditEventEntityType
   }
 
   private parseAuditData(value: unknown): AuditEvent['beforeData'] {

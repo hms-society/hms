@@ -62,6 +62,8 @@ describe('Audit logs HTTP endpoints', () => {
       .expect(200)
       .expect(({ body }) => {
         expect(body.total).toBe(1)
+        expect(body.page).toBe(1)
+        expect(body.limit).toBe(20)
         expect(body.data[0]).toMatchObject({
           entityType: 'third_party',
           action: 'permission_granted',

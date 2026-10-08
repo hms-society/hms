@@ -89,7 +89,8 @@ export class ListAuditLogsController {
     this.ensureAuditAccess(collaborator)
 
     const parsed = this.parseQuery(query)
-    return this.useCase.execute(parsed)
+    const result = await this.useCase.execute(parsed)
+    return { ...result, page: parsed.page, limit: parsed.limit }
   }
 
   @Get(':id')

@@ -29,7 +29,7 @@ describe('useAuditLogsPage', () => {
     )
   }
 
-  it('filters the loaded events using translated entity and action labels', async () => {
+  it('sends the complete action search term to the backend', async () => {
     auditLogsService.list.mockResolvedValue({
       isFailure: false,
       body: {
@@ -56,7 +56,7 @@ describe('useAuditLogsPage', () => {
     const { result } = renderHook(() => useAuditLogsPage(), { wrapper })
 
     await waitFor(() => expect(result.current.auditLogs).toHaveLength(2))
-    act(() => result.current.handleActionChange('permissão'))
+    act(() => result.current.handleActionChange('permission'))
 
     await waitFor(() =>
       expect(result.current.auditLogs.map((event) => event.id)).toEqual([
@@ -65,7 +65,7 @@ describe('useAuditLogsPage', () => {
     )
     await waitFor(() =>
       expect(auditLogsService.list).toHaveBeenLastCalledWith(
-        expect.objectContaining({ action: 'permission_granted' }),
+        expect.objectContaining({ action: 'permission' }),
       ),
     )
   })

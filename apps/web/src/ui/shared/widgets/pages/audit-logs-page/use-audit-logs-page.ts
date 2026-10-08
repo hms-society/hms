@@ -11,31 +11,6 @@ import { useAuditLogsQuery } from '@/ui/shared/hooks/use-audit-logs-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 
 const PAGE_SIZE = 20
-const ACTION_LABELS: Record<string, string> = {
-  created: 'Criado',
-  updated: 'Atualizado',
-  deleted: 'Excluído',
-  validated: 'Validado',
-  rejected: 'Rejeitado',
-  requested: 'Solicitado',
-  revoked: 'Revogado',
-  exported: 'Exportado',
-  granted: 'Concedido',
-  permission_granted: 'Permissão concedida',
-  permission_revoked: 'Permissão revogada',
-  metadata_captured: 'Metadados capturados',
-  decision_recorded: 'Decisão registrada',
-  ai_correction_recorded: 'Correção por IA registrada',
-  resend_requested: 'Reenvio solicitado',
-  REQUESTED: 'Solicitado',
-  APPROVED: 'Aprovado',
-  REJECTED: 'Rejeitado',
-  EXPIRED: 'Expirado',
-  processing_failure: 'Falha no processamento',
-  deactivated: 'Inativado',
-  reactivated: 'Reativado',
-}
-
 export function useAuditLogsPage() {
   const [page, setPage] = useState(1)
   const [entityType, setEntityType] = useState<AuditEventEntityType | ''>('')
@@ -48,15 +23,7 @@ export function useAuditLogsPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<Error | null>(null)
   const { auditLogsService } = useRestContext()
-  const actionQuery = (() => {
-    const normalized = action.trim().toLocaleLowerCase()
-    if (!normalized) return undefined
-
-    const match = Object.entries(ACTION_LABELS).find(([technical, label]) =>
-      [technical, label].some((value) => value.toLocaleLowerCase().includes(normalized)),
-    )
-    return match?.[0] ?? action.trim()
-  })()
+  const actionQuery = action.trim() || undefined
   const request = {
     page,
     limit: PAGE_SIZE,
