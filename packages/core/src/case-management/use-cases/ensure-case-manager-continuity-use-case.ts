@@ -66,7 +66,7 @@ export class EnsureCaseManagerContinuityUseCase
     request: EnsureCaseManagerContinuityRequest,
   ) {
     const fingerprint = eligibilityChangeFingerprint(request)
-    const pending = []
+    const pending: typeof cases = []
     for (const entry of cases) {
       if (!entry.legalCase) continue
       const previous = await scope.cases.caseTeamOperationsRepository.findByKey(
