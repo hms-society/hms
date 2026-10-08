@@ -56,6 +56,7 @@ export function NewItemDialog({
     [team],
   )
   const [type, setType] = useState<TaskDeadlineType>('Publicação')
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [plannedDate, setPlannedDate] = useState('')
   const [selectedDate, setSelectedDate] = useState<Date>()
@@ -69,6 +70,7 @@ export function NewItemDialog({
   useEffect(() => {
     if (!open) return
     setType(editingItem?.type ?? 'Publicação')
+    setTitle(editingItem?.title ?? '')
     setDescription(editingItem?.description ?? '')
     setPlannedDate(editingItem?.plannedDate ?? '')
     setPlannedTime(editingItem?.plannedTime ?? '')
@@ -86,6 +88,7 @@ export function NewItemDialog({
   const submit = () => {
     if (
       !description.trim() ||
+      !title.trim() ||
       !plannedDate ||
       !selectedAssigneeId ||
       (type === 'Outro' && !customType.trim())
@@ -95,9 +98,10 @@ export function NewItemDialog({
     }
     const input = {
       type,
+      title: title.trim(),
       description: description.trim(),
       plannedDate,
-      plannedTime,
+      plannedTime: plannedTime || undefined,
       people: assignableMembers
         .filter((member) => member.collaboratorId === selectedAssigneeId)
         .map((member) => member.name),
@@ -108,6 +112,7 @@ export function NewItemDialog({
     if (editingItem && onUpdate) onUpdate({ ...editingItem, ...input, status })
     else onCreate(input)
     setDescription('')
+    setTitle('')
     setPlannedDate('')
     setSelectedDate(undefined)
     setPlannedTime('')
@@ -210,6 +215,21 @@ export function NewItemDialog({
               )}
             </div>
           )}
+          <label className='flex flex-col gap-2 text-sm font-semibold'>
+            <span>
+              Título <span className='text-destructive'>*</span>
+            </span>
+            <input
+              aria-label='Título'
+              placeholder='Informe o título da tarefa ou prazo'
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setError('')
+              }}
+              className='h-10 rounded-lg border border-border bg-background px-3 text-sm font-normal placeholder:text-muted-foreground/55'
+            />
+          </label>
           <label className='flex flex-col gap-2 text-sm font-semibold'>
             <span>
               Descrição <span className='text-destructive'>*</span>

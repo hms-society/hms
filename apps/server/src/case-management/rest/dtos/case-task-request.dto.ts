@@ -19,16 +19,21 @@ const reminderSchema = z.object({
   unit: z.enum(['minutes', 'hours', 'days']),
 })
 
+const optionalPlannedTimeSchema = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .optional(),
+)
+
 export const createCaseTaskSchema = z.object({
   type: caseTaskTypeSchema,
   title: z.string().trim().min(1),
   customType: z.string().trim().optional(),
   description: z.string().trim().min(1),
   plannedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  plannedTime: z
-    .string()
-    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
-    .optional(),
+  plannedTime: optionalPlannedTimeSchema,
   assigneeIds: z.array(z.string().uuid()).min(1).max(1),
   blocksCaseClosure: z.boolean().optional(),
   reminders: z.array(reminderSchema).default([]),

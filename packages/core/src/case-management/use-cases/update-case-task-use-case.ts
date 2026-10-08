@@ -29,6 +29,9 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     if (!currentTask || currentTask.caseId !== request.caseId) {
       throw new NotFoundError('Tarefa ou prazo não encontrado.')
     }
+    if (currentTask.status === CaseTaskStatus.Completed) {
+      throw new BadRequestError('Tarefas concluídas não podem ser editadas.')
+    }
 
     const {
       caseId: _caseId,

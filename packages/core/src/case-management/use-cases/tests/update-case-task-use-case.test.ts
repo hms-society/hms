@@ -132,4 +132,32 @@ describe('Update Case Task Use Case', () => {
       }),
     ).rejects.toThrow('Somente tarefas internas')
   })
+
+  it('rejects edits to a completed task', async () => {
+    const caseTasksRepository: MockProxy<CaseTasksRepository> =
+      mock<CaseTasksRepository>()
+    const caseMembersRepository: MockProxy<CaseMembersRepository> =
+      mock<CaseMembersRepository>()
+    const datetimeProvider: MockProxy<DatetimeProvider> = mock<DatetimeProvider>()
+    const currentTask = CaseTaskFaker.fake({
+      caseId: 'case-1',
+      status: CaseTaskStatus.Completed,
+    })
+    caseTasksRepository.findById.mockResolvedValue(currentTask)
+
+    await expect(
+      new UpdateCaseTaskUseCase(
+        caseTasksRepository,
+        caseMembersRepository,
+        datetimeProvider,
+      ).execute({
+        caseId: 'case-1',
+        caseTaskId: currentTask.id,
+        actorId: 'collaborator-1',
+        version: currentTask.version,
+        description: 'Tentativa de alteração',
+      }),
+    ).rejects.toThrow('Tarefas concluídas não podem ser editadas.')
+    expect(caseTasksRepository.replace).not.toHaveBeenCalled()
+  })
 })

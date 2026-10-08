@@ -41,6 +41,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
         title: 'Review the case response',
         description: 'Review the case response',
         plannedDate: '2099-01-15',
+        plannedTime: '',
         assigneeIds: [collaborator.collaboratorId],
         reminders: [{ value: 3, unit: 'days' }],
       })
@@ -79,6 +80,34 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
         description: 'Should not be created',
         plannedDate: '2099-01-15',
         assigneeIds: ['11111111-1111-4111-8111-111111111111'],
+      })
+      .expect(400)
+  })
+
+  it('rejects more than one responsible collaborator', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
+
+    await request(fixture.app.getHttpServer())
+      .post(`/cases/${legalCase.id}/tasks`)
+      .send({
+        type: 'internal_task',
+        title: 'Tarefa inválida',
+        description: 'Uma tarefa não pode ter dois responsáveis',
+        plannedDate: '2099-01-15',
+        assigneeIds: [collaborator.collaboratorId, collaborator.collaboratorId],
       })
       .expect(400)
   })

@@ -1,5 +1,6 @@
 import type { UseCase } from '#shared/interfaces/use-case'
-import { ConflictError, NotFoundError } from '#shared/domain/errors'
+import { BadRequestError, ConflictError, NotFoundError } from '#shared/domain/errors'
+import { CaseTaskStatus } from '../domain/structures'
 import type { CaseTask } from '../domain/entities'
 import type { CaseTasksRepository } from '../interfaces'
 import type { DatetimeProvider } from '#shared/interfaces'
@@ -20,6 +21,9 @@ export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
     const currentTask = await this.caseTasksRepository.findById(request.caseTaskId)
     if (!currentTask || currentTask.caseId !== request.caseId) {
       throw new NotFoundError('Tarefa ou prazo não encontrado.')
+    }
+    if (currentTask.status === CaseTaskStatus.Completed) {
+      throw new BadRequestError('Tarefas concluídas não podem ser excluídas.')
     }
 
     const now = this.datetimeProvider.now()
