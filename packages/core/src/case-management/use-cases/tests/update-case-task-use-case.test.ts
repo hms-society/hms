@@ -172,4 +172,35 @@ describe('Update Case Task Use Case', () => {
     ).rejects.toThrow('Tarefas concluídas não podem ser editadas.')
     expect(caseTasksRepository.replace).not.toHaveBeenCalled()
   })
+
+  it('rejects duplicate reminders before persistence', async () => {
+    const caseTasksRepository: MockProxy<CaseTasksRepository> =
+      mock<CaseTasksRepository>()
+    const caseMembersRepository: MockProxy<CaseMembersRepository> =
+      mock<CaseMembersRepository>()
+    const datetimeProvider: MockProxy<DatetimeProvider> = mock<DatetimeProvider>()
+    const currentTask = CaseTaskFaker.fake({ caseId: 'case-1', version: 2 })
+    caseTasksRepository.findById.mockResolvedValue(currentTask)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'collaborator-1',
+    ])
+
+    await expect(
+      new UpdateCaseTaskUseCase(
+        caseTasksRepository,
+        caseMembersRepository,
+        datetimeProvider,
+      ).execute({
+        caseId: 'case-1',
+        caseTaskId: currentTask.id,
+        actorId: 'collaborator-1',
+        version: currentTask.version,
+        reminders: [
+          { value: 3, unit: 'days' },
+          { value: 3, unit: 'days' },
+        ],
+      }),
+    ).rejects.toThrow('Não é permitido repetir o mesmo lembrete.')
+    expect(caseTasksRepository.replace).not.toHaveBeenCalled()
+  })
 })

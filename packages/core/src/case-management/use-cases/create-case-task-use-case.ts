@@ -4,6 +4,7 @@ import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import type { CaseTask, CaseTaskReminderCreation } from '../domain/entities'
 import {
   assertValidCaseTaskDate,
+  assertUniqueCaseTaskReminders,
   CaseTaskSource,
   CaseTaskStatus,
   CaseTaskType,
@@ -42,6 +43,7 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     const now = this.datetimeProvider.now()
 
     this.validateRequest(request, title, description, customType, assigneeIds, now)
+    assertUniqueCaseTaskReminders(request.reminders ?? [])
     const plannedTime = normalizeCaseTaskTime(request.type, request.plannedTime)
     await this.ensureActiveCaseMembers(request.caseId, [
       request.createdById,

@@ -9,6 +9,7 @@ import type { CaseTask, CaseTaskUpdate } from '../domain/entities'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import {
   assertValidCaseTaskDate,
+  assertUniqueCaseTaskReminders,
   CaseTaskStatus,
   CaseTaskType,
   normalizeCaseTaskTime,
@@ -92,6 +93,10 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     if (changes.plannedDate !== undefined) {
       const now = this.datetimeProvider.now()
       assertValidCaseTaskDate(changes.plannedDate, now)
+    }
+
+    if (changes.reminders !== undefined) {
+      assertUniqueCaseTaskReminders(changes.reminders)
     }
 
     if (changes.plannedTime !== undefined || changes.type !== undefined) {

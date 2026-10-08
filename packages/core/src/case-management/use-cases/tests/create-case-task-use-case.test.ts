@@ -80,6 +80,31 @@ describe('Create Case Task Use Case', () => {
     expect(caseTasksRepository.add).not.toHaveBeenCalled()
   })
 
+  it('rejects duplicate reminders before persistence', async () => {
+    const useCase = createUseCase()
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
+      'member-1',
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: 'Lembretes duplicados',
+        description: 'Não deve persistir lembretes duplicados',
+        plannedDate: '2026-10-20',
+        createdById: 'creator-1',
+        assigneeIds: ['member-1'],
+        reminders: [
+          { value: 3, unit: 'days' },
+          { value: 3, unit: 'days' },
+        ],
+      }),
+    ).rejects.toThrow('Não é permitido repetir o mesmo lembrete.')
+    expect(caseTasksRepository.add).not.toHaveBeenCalled()
+  })
+
   it('rejects creating a task when the creator is not an active case member', async () => {
     const useCase = createUseCase()
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([

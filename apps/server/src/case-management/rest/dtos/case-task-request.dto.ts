@@ -19,6 +19,21 @@ const reminderSchema = z.object({
   unit: z.enum(['minutes', 'hours', 'days']),
 })
 
+const remindersSchema = z.array(reminderSchema).superRefine((reminders, context) => {
+  const seen = new Set<string>()
+  for (const [index, reminder] of reminders.entries()) {
+    const key = `${reminder.value}:${reminder.unit}`
+    if (seen.has(key)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Não é permitido repetir o mesmo lembrete.',
+        path: [index],
+      })
+    }
+    seen.add(key)
+  }
+})
+
 const optionalPlannedTimeSchema = z.preprocess(
   (value) => (value === '' ? undefined : value),
   z
@@ -36,7 +51,7 @@ export const createCaseTaskSchema = z.object({
   plannedTime: optionalPlannedTimeSchema,
   assigneeIds: z.array(z.string().uuid()).min(1).max(1),
   blocksCaseClosure: z.boolean().optional(),
-  reminders: z.array(reminderSchema).default([]),
+  reminders: remindersSchema.default([]),
   source: caseTaskSourceSchema.optional(),
   completionNote: z.string().trim().optional(),
 })

@@ -32,3 +32,16 @@ export function assertValidCaseTaskDate(plannedDate: string, now: Date) {
     throw new BadRequestError('A data prevista não pode ser anterior à data atual.')
   }
 }
+
+export function assertUniqueCaseTaskReminders(
+  reminders: readonly { value: number; unit: string }[],
+) {
+  const seen = new Set<string>()
+  for (const reminder of reminders) {
+    const key = `${reminder.value}:${reminder.unit}`
+    if (seen.has(key)) {
+      throw new BadRequestError('Não é permitido repetir o mesmo lembrete.')
+    }
+    seen.add(key)
+  }
+}

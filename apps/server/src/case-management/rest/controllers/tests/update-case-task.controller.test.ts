@@ -118,4 +118,40 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
       version: task.version,
     })
   })
+
+  it('rejects duplicate reminders and preserves the task', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
+    const task = await fixture.registerCaseTask(legalCase.id, {
+      createdById: collaborator.collaboratorId,
+    })
+
+    await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/tasks/${task.id}`)
+      .send({
+        version: task.version,
+        reminders: [
+          { value: 3, unit: 'days' },
+          { value: 3, unit: 'days' },
+        ],
+      })
+      .expect(400)
+
+    expect(await fixture.findCaseTask(task.id)).toMatchObject({
+      id: task.id,
+      version: task.version,
+    })
+  })
 })

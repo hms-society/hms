@@ -139,4 +139,36 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       })
       .expect(400)
   })
+
+  it('rejects duplicate reminders before persistence', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
+
+    await request(fixture.app.getHttpServer())
+      .post(`/cases/${legalCase.id}/tasks`)
+      .send({
+        type: 'internal_task',
+        title: 'Lembretes duplicados',
+        description: 'Não deve persistir lembretes duplicados',
+        plannedDate: '2099-01-15',
+        assigneeIds: [collaborator.collaboratorId],
+        reminders: [
+          { value: 3, unit: 'days' },
+          { value: 3, unit: 'days' },
+        ],
+      })
+      .expect(400)
+  })
 })
