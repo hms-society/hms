@@ -21,6 +21,7 @@ describe('List My Legal Cases Use Case', () => {
         publicCode: 'CASO-20260825-0001',
         title: 'Revisao contratual',
         status: 'documentation',
+        teamVersion: 0,
         clientName: 'Cliente HMS Teste',
         legalArea: 'Cível',
         legalTopic: 'Contratos',
