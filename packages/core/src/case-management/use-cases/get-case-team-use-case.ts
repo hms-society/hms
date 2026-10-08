@@ -9,7 +9,7 @@ import type {
   LegalCasesRepository,
 } from '../interfaces'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
-import { UserStatus, CollaboratorProfile } from '#identity/domain/structures'
+import { UserStatus, CollaboratorProfile } from '#shared/domain/structures'
 
 export type CaseActorRequest = { caseId: string; actorId: string }
 

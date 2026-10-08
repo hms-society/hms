@@ -1,4 +1,4 @@
-import type { CollaboratorProfile } from '@hms/core/identity/domain/structures'
+import type { CollaboratorProfile } from '@hms/core/shared/domain/structures'
 import type { CaseMemberRole } from './case-member-role'
 import type { CaseTeamRole } from './case-team-role'
 
