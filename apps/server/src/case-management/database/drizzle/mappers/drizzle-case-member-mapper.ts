@@ -6,6 +6,10 @@ import type { DrizzleCaseMember } from '@/case-management/database/drizzle/types
 @Injectable()
 export class DrizzleCaseMemberMapper {
   toDomain(record: DrizzleCaseMember): CaseMember {
-    return record
+    return {
+      ...record,
+      removedAt: record.removedAt ?? undefined,
+      removedBy: record.removedBy ?? undefined,
+    }
   }
 }

@@ -325,17 +325,9 @@ export class DrizzleCollaboratorsRepository
       filters.push(ne(userModel.id, query.excludeUserId))
     }
 
-    if (query.search) {
-      const searchFilter = or(
-        ilike(collaboratorModel.professionalName, `%${query.search}%`),
-        ilike(userModel.email, `%${query.search}%`),
-      )
-      if (searchFilter) filters.push(searchFilter)
-    }
-    if (query.profile) filters.push(eq(collaboratorModel.profile, query.profile))
-    if (query.excludeProfiles && query.excludeProfiles.length > 0) {
-      filters.push(notInArray(collaboratorModel.profile, [...query.excludeProfiles]))
-    }
+    const searchFilter = this.buildSearchFilter(query)
+    if (searchFilter) filters.push(searchFilter)
+    this.appendProfileFilters(filters, query)
     if (query.jobTitle) {
       filters.push(
         sql`lower(btrim(${collaboratorModel.jobTitle})) = lower(btrim(${query.jobTitle}))`,
@@ -344,6 +336,28 @@ export class DrizzleCollaboratorsRepository
     if (query.status) filters.push(eq(userModel.status, query.status))
 
     return filters.length > 0 ? and(...filters) : undefined
+  }
+
+  private buildSearchFilter(query: CollaboratorListQuery): SQL | undefined {
+    if (!query.search) return undefined
+
+    const nameFilter = ilike(collaboratorModel.professionalName, `%${query.search}%`)
+    return query.nameOnlySearch
+      ? nameFilter
+      : or(nameFilter, ilike(userModel.email, `%${query.search}%`))
+  }
+
+  private appendProfileFilters(filters: SQL[], query: CollaboratorListQuery) {
+    if (query.profile) filters.push(eq(collaboratorModel.profile, query.profile))
+    if (query.profiles && query.profiles.length > 0) {
+      filters.push(inArray(collaboratorModel.profile, [...query.profiles]))
+    }
+    if (query.excludeProfiles && query.excludeProfiles.length > 0) {
+      filters.push(notInArray(collaboratorModel.profile, [...query.excludeProfiles]))
+    }
+    if (query.excludeCollaboratorIds && query.excludeCollaboratorIds.length > 0) {
+      filters.push(notInArray(collaboratorModel.id, [...query.excludeCollaboratorIds]))
+    }
   }
 
   private async loadRecord(collaborator: typeof collaboratorModel.$inferSelect) {
