@@ -112,8 +112,9 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       .expect(403)
   })
 
-  it('rejects more than one responsible collaborator', async () => {
+  it('creates a task with multiple responsible collaborators', async () => {
     const collaborator = await fixture.registerCollaborator()
+    const secondCollaborator = await fixture.registerCollaborator()
     const legalCase = await fixture.registerLegalCase({
       clientId: collaborator.clientId,
       legalAreaId: collaborator.legalAreaId,
@@ -126,18 +127,29 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
         role: CaseMemberRole.Lawyer,
         isPrimary: true,
       },
+      {
+        caseId: legalCase.id,
+        collaboratorId: secondCollaborator.collaboratorId,
+        role: CaseMemberRole.Paralegal,
+        isPrimary: false,
+      },
     ])
 
-    await request(fixture.app.getHttpServer())
+    const response = await request(fixture.app.getHttpServer())
       .post(`/cases/${legalCase.id}/tasks`)
       .send({
         type: 'internal_task',
         title: 'Tarefa inválida',
-        description: 'Uma tarefa não pode ter dois responsáveis',
+        description: 'Tarefa com responsáveis da equipe',
         plannedDate: '2099-01-15',
-        assigneeIds: [collaborator.collaboratorId, collaborator.collaboratorId],
+        assigneeIds: [collaborator.collaboratorId, secondCollaborator.collaboratorId],
       })
-      .expect(400)
+      .expect(201)
+
+    expect(response.body.assigneeIds).toEqual([
+      collaborator.collaboratorId,
+      secondCollaborator.collaboratorId,
+    ])
   })
 
   it('rejects duplicate reminders before persistence', async () => {
