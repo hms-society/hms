@@ -112,9 +112,8 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       .expect(403)
   })
 
-  it('creates a task with multiple responsible collaborators', async () => {
+  it('deduplicates repeated responsible collaborator ids', async () => {
     const collaborator = await fixture.registerCollaborator()
-    const secondCollaborator = await fixture.registerCollaborator()
     const legalCase = await fixture.registerLegalCase({
       clientId: collaborator.clientId,
       legalAreaId: collaborator.legalAreaId,
@@ -127,29 +126,20 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
         role: CaseMemberRole.Lawyer,
         isPrimary: true,
       },
-      {
-        caseId: legalCase.id,
-        collaboratorId: secondCollaborator.collaboratorId,
-        role: CaseMemberRole.Paralegal,
-        isPrimary: false,
-      },
     ])
 
     const response = await request(fixture.app.getHttpServer())
       .post(`/cases/${legalCase.id}/tasks`)
       .send({
         type: 'internal_task',
-        title: 'Tarefa inválida',
-        description: 'Tarefa com responsáveis da equipe',
+        title: 'Tarefa com responsável repetido',
+        description: 'IDs repetidos devem ser persistidos uma única vez',
         plannedDate: '2099-01-15',
-        assigneeIds: [collaborator.collaboratorId, secondCollaborator.collaboratorId],
+        assigneeIds: [collaborator.collaboratorId, collaborator.collaboratorId],
       })
       .expect(201)
 
-    expect(response.body.assigneeIds).toEqual([
-      collaborator.collaboratorId,
-      secondCollaborator.collaboratorId,
-    ])
+    expect(response.body.assigneeIds).toEqual([collaborator.collaboratorId])
   })
 
   it('rejects duplicate reminders before persistence', async () => {
