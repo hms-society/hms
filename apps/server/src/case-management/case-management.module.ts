@@ -23,11 +23,18 @@ import {
   ApprovePendingMessageController,
   CancelPendingController,
   HomologateCaseDossierController,
+  GetCaseTeamController,
+  ListCaseTeamCandidatesController,
+  AddCaseTeamMemberController,
+  ChangeCaseTeamMemberRoleController,
+  ListCaseTeamHistoryController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
+import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 
 @Module({
   imports: [
@@ -36,6 +43,8 @@ import { IntakeDatabaseModule } from '@/intake/database'
     IntakeDatabaseModule,
     DocumentsDatabaseModule,
     ProvisionModule,
+    CaseIdentityTransactionModule,
+    LegalCatalogModule,
   ],
   controllers: [
     AddCaseChecklistComplementaryItemController,
@@ -43,6 +52,7 @@ import { IntakeDatabaseModule } from '@/intake/database'
     CreateLegalCaseController,
     ListCaseChecklistController,
     ListMyLegalCasesController,
+    ListCaseTeamCandidatesController,
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     HomologateCaseDossierController,
@@ -59,6 +69,10 @@ import { IntakeDatabaseModule } from '@/intake/database'
     EditPendingMessageController,
     ApprovePendingMessageController,
     CancelPendingController,
+    GetCaseTeamController,
+    AddCaseTeamMemberController,
+    ChangeCaseTeamMemberRoleController,
+    ListCaseTeamHistoryController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

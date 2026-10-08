@@ -35,6 +35,7 @@ import { LegalCatalogSeeder } from '@/legal-catalog/database/legal-catalog-seede
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 
@@ -84,6 +85,7 @@ export class IdentityModuleFixture {
           imports: [
             ...(applicationAccess ? [IdentityAccessModule] : []),
             ...(applicationAccess ? [CaseManagementDatabaseModule] : []),
+            ...(applicationAccess ? [CaseIdentityTransactionModule] : []),
             AuthModule,
             IdentityDatabaseModule,
             LegalCatalogModule,

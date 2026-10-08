@@ -3,6 +3,7 @@ import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {
   CaseChecklistItemCreation,
   CaseMemberCreation,
+  CaseTeamHistoryCreation,
   LegalCase,
   LegalCaseCreation,
 } from '@hms/core/case-management/domain/entities'
@@ -23,6 +24,7 @@ import {
   DrizzlePendingsRepository,
   DrizzleCasePortalAccessGrantsRepository,
   DrizzleChecklistTemplatesRepository,
+  DrizzleCaseTeamHistoriesRepository,
 } from '@/case-management/database/drizzle/repositories'
 import {
   DrizzleClientsRepository,
@@ -43,6 +45,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
 
 type RegisteredCollaborator = {
   collaboratorId: string
@@ -56,6 +59,14 @@ type RegisteredCollaborator = {
   legalTopicName: string
 }
 
+type CollaboratorProfile =
+  | 'lawyer'
+  | 'admin'
+  | 'attendant'
+  | 'supervisor'
+  | 'paralegal'
+  | 'intern'
+
 export class CaseManagementModuleFixture {
   private constructor(
     private readonly restFixture: RestFixture,
@@ -64,6 +75,7 @@ export class CaseManagementModuleFixture {
     private readonly caseMembersRepository: DrizzleCaseMembersRepository,
     private readonly pendingsRepository: DrizzlePendingsRepository,
     private readonly grantsRepository: DrizzleCasePortalAccessGrantsRepository,
+    private readonly caseTeamHistoriesRepository: DrizzleCaseTeamHistoriesRepository,
     private readonly templatesRepository: DrizzleChecklistTemplatesRepository,
     private readonly usersRepository: DrizzleUsersRepository,
     private readonly collaboratorsRepository: DrizzleCollaboratorsRepository,
@@ -89,43 +101,13 @@ export class CaseManagementModuleFixture {
     const auth = await authFixture.createSignedInUser()
     const authUser: AuthUser = { id: auth.user.id, email: auth.user.email }
     const currentCollaborator: { value?: RegisteredCollaborator } = {}
-    let restFixture: RestFixture
-    try {
-      restFixture = await RestFixture.register(
-        {
-          imports: [
-            IdentityModule,
-            IdentityAccessModule,
-            LegalCatalogModule,
-            CaseManagementDatabaseModule,
-            IntakeDatabaseModule,
-            ...(configure ? [DocumentsDatabaseModule, ProvisionModule] : []),
-          ],
-          controllers: controller ? [controller] : [],
-        },
-        (builder) => {
-          const authenticatedBuilder = authFixture.configure(builder)
-          return configure?.(authenticatedBuilder) ?? authenticatedBuilder
-        },
-        (app) => {
-          app.use(
-            (
-              request: {
-                headers: { authorization?: string }
-              },
-              _response: unknown,
-              next: () => void,
-            ) => {
-              request.headers.authorization = `Bearer ${auth.accessToken}`
-              next()
-            },
-          )
-        },
+    const restFixture =
+      await CaseManagementModuleFixture.registerCaseManagementRestFixture(
+        authFixture,
+        auth.accessToken,
+        controller,
+        configure,
       )
-    } catch (error) {
-      await authFixture.close()
-      throw error
-    }
 
     return new CaseManagementModuleFixture(
       restFixture,
@@ -134,6 +116,7 @@ export class CaseManagementModuleFixture {
       restFixture.get(DrizzleCaseMembersRepository),
       restFixture.get(DrizzlePendingsRepository),
       restFixture.get(DrizzleCasePortalAccessGrantsRepository),
+      restFixture.get(DrizzleCaseTeamHistoriesRepository),
       restFixture.get(DrizzleChecklistTemplatesRepository),
       restFixture.get(DrizzleUsersRepository),
       restFixture.get(DrizzleCollaboratorsRepository),
@@ -149,54 +132,17 @@ export class CaseManagementModuleFixture {
   }
 
   async registerCollaborator(
-    overrides: {
-      profile?: 'lawyer' | 'admin' | 'attendant' | 'supervisor' | 'paralegal' | 'intern'
-    } = {},
+    overrides: { profile?: CollaboratorProfile } = {},
   ): Promise<RegisteredCollaborator> {
-    const [legalArea] = await this.legalAreasRepository.addMany([
-      { name: 'Cível', active: true },
-    ])
-    if (!legalArea) throw new Error('Legal area fixture was not created')
-
-    const [legalTopic] = await this.legalTopicsRepository.addMany([
-      { legalAreaId: legalArea.id, name: 'Contratos', active: true },
-    ])
-    if (!legalTopic) throw new Error('Legal topic fixture was not created')
-
-    const clientDraft = ClientFaker.fake({ name: 'Cliente HMS Teste' })
-    const client = await this.clientsRepository.add({
-      type: 'natural',
-      name: clientDraft.type === 'natural' ? clientDraft.name : 'Cliente HMS Teste',
-      taxId:
-        clientDraft.type === 'natural' ? clientDraft.taxId : ClientFaker.fake().taxId,
-      phone: clientDraft.phone,
-      email: clientDraft.email,
-      address: clientDraft.address,
-    })
-    if (!client) throw new Error('Client fixture was not created')
-
-    const [user] = await this.usersRepository.addMany([
-      UserFaker.fake({
-        id: this.authUser.id,
-        email: this.authUser.email,
-        status: 'active',
-      }),
-    ])
-    if (!user) throw new Error('User fixture was not created')
-
-    const collaborator = await this.collaboratorsRepository.add({
-      userId: user.id,
-      professionalName: 'Advogado de desenvolvimento',
-      jobTitle: 'Advogado',
-      profile: (overrides.profile ?? 'lawyer') as any,
-      legalExpertises: [
-        {
-          legalAreaId: legalArea.id,
-          legalTopicIds: [legalTopic.id],
-        },
-      ],
-    })
-    if (!collaborator) throw new Error('Collaborator fixture was not created')
+    const { legalArea, legalTopic } = await this.createDefaultLegalCatalog()
+    const client = await this.createDefaultClient()
+    const user = await this.createSignedInFixtureUser()
+    const collaborator = await this.createTestCollaborator(
+      user.id,
+      legalArea.id,
+      legalTopic.id,
+      overrides.profile,
+    )
 
     const registeredCollaborator = {
       collaboratorId: collaborator.id,
@@ -212,6 +158,89 @@ export class CaseManagementModuleFixture {
     }
     this.currentCollaborator.value = registeredCollaborator
     return registeredCollaborator
+  }
+
+  private async createDefaultLegalCatalog() {
+    const [legalArea] = await this.legalAreasRepository.addMany([
+      { name: 'Cível', active: true },
+    ])
+    if (!legalArea) throw new Error('Legal area fixture was not created')
+
+    const [legalTopic] = await this.legalTopicsRepository.addMany([
+      { legalAreaId: legalArea.id, name: 'Contratos', active: true },
+    ])
+    if (!legalTopic) throw new Error('Legal topic fixture was not created')
+
+    return { legalArea, legalTopic }
+  }
+
+  private async createDefaultClient() {
+    const draft = ClientFaker.fake({ name: 'Cliente HMS Teste' })
+    const client = await this.clientsRepository.add({
+      type: 'natural',
+      name: draft.type === 'natural' ? draft.name : 'Cliente HMS Teste',
+      taxId: draft.type === 'natural' ? draft.taxId : ClientFaker.fake().taxId,
+      phone: draft.phone,
+      email: draft.email,
+      address: draft.address,
+    })
+    if (!client) throw new Error('Client fixture was not created')
+    return client
+  }
+
+  private async createSignedInFixtureUser() {
+    const [user] = await this.usersRepository.addMany([
+      UserFaker.fake({
+        id: this.authUser.id,
+        email: this.authUser.email,
+        status: 'active',
+      }),
+    ])
+    if (!user) throw new Error('User fixture was not created')
+    return user
+  }
+
+  private async createTestCollaborator(
+    userId: string,
+    legalAreaId: string,
+    legalTopicId: string,
+    profile: CollaboratorProfile = 'lawyer',
+  ) {
+    const collaborator = await this.collaboratorsRepository.add({
+      userId,
+      professionalName: 'Advogado de desenvolvimento',
+      jobTitle: 'Advogado',
+      profile: profile as any,
+      legalExpertises: [{ legalAreaId, legalTopicIds: [legalTopicId] }],
+    })
+    if (!collaborator) throw new Error('Collaborator fixture was not created')
+    return collaborator
+  }
+
+  async registerAdditionalCollaborator(
+    overrides: { profile?: CollaboratorProfile } = {},
+  ) {
+    const base = this.currentCollaborator.value ?? (await this.registerCollaborator())
+    const userDraft = UserFaker.fake({ status: 'active' })
+    const [user] = await this.usersRepository.addMany([userDraft])
+    if (!user) throw new Error('Additional user fixture was not created')
+    const collaborator = await this.collaboratorsRepository.add({
+      userId: user.id,
+      professionalName: 'Colaborador elegível de teste',
+      jobTitle: 'Advogado',
+      profile: (overrides.profile ?? 'lawyer') as any,
+      legalExpertises: [
+        { legalAreaId: base.legalAreaId, legalTopicIds: [base.legalTopicId] },
+      ],
+    })
+    if (!collaborator) throw new Error('Additional collaborator fixture was not created')
+    return {
+      collaboratorId: collaborator.id,
+      professionalName: collaborator.professionalName,
+      profile: collaborator.profile,
+      legalAreaId: base.legalAreaId,
+      legalTopicId: base.legalTopicId,
+    }
   }
 
   async registerIntake(clientId: string) {
@@ -258,18 +287,31 @@ export class CaseManagementModuleFixture {
   }
 
   registerCaseMembers(
-    members: Array<
-      Pick<CaseMemberCreation, 'caseId' | 'collaboratorId' | 'role' | 'isPrimary'>
-    >,
+    members: Array<Pick<CaseMemberCreation, 'caseId' | 'collaboratorId' | 'role'>>,
   ) {
     return this.caseMembersRepository.addMany(
       members.map((member) => ({
         assignedAt: new Date('2026-08-25T12:00:00.000Z'),
         assignedBy: this.authUser.id,
-        permission: 'visualização',
+        archivedLegacy: false,
         ...member,
       })),
     )
+  }
+
+  findCaseMembers(caseId: string) {
+    return this.caseMembersRepository.listByCaseId(caseId)
+  }
+
+  registerCaseTeamHistory(input: CaseTeamHistoryCreation) {
+    return this.caseTeamHistoriesRepository.add(input)
+  }
+
+  listCaseTeamHistory(caseId: string) {
+    return this.caseTeamHistoriesRepository.listByCaseId(caseId, {
+      page: 1,
+      pageSize: 50,
+    })
   }
 
   registerCaseChecklistItems(checklistItems: readonly CaseChecklistItemCreation[]) {
@@ -367,9 +409,62 @@ export class CaseManagementModuleFixture {
       legalTopicId: draft.legalTopicId,
       title: draft.title,
       status: draft.status,
+      teamVersion: draft.teamVersion,
       checklistCompletedAt: draft.checklistCompletedAt,
       checklistCompletedBy: draft.checklistCompletedBy,
       openedAt: draft.openedAt,
+    }
+  }
+
+  private static caseManagementImports(includeDocuments: boolean): Type<unknown>[] {
+    return [
+      IdentityModule,
+      IdentityAccessModule,
+      LegalCatalogModule,
+      CaseManagementDatabaseModule,
+      CaseIdentityTransactionModule,
+      IntakeDatabaseModule,
+      ProvisionModule,
+      ...(includeDocuments ? [DocumentsDatabaseModule] : []),
+    ]
+  }
+
+  private static authenticateRequests(accessToken: string) {
+    return (app: INestApplication) => {
+      app.use(
+        (
+          request: { headers: { authorization?: string } },
+          _response: unknown,
+          next: () => void,
+        ) => {
+          request.headers.authorization = `Bearer ${accessToken}`
+          next()
+        },
+      )
+    }
+  }
+
+  private static async registerCaseManagementRestFixture(
+    authFixture: SupabaseAuthFixture,
+    accessToken: string,
+    controller?: Type<unknown>,
+    configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+  ) {
+    try {
+      return await RestFixture.register(
+        {
+          imports: CaseManagementModuleFixture.caseManagementImports(Boolean(configure)),
+          controllers: controller ? [controller] : [],
+        },
+        (builder) => {
+          const authenticatedBuilder = authFixture.configure(builder)
+          return configure?.(authenticatedBuilder) ?? authenticatedBuilder
+        },
+        CaseManagementModuleFixture.authenticateRequests(accessToken),
+      )
+    } catch (error) {
+      await authFixture.close()
+      throw error
     }
   }
 }

@@ -1,6 +1,6 @@
 import { AppError } from '#shared/domain/errors'
 import type { LegalCase } from '../domain/entities'
-import { CaseMemberRole, LegalCaseStatus } from '../domain/structures'
+import { CaseMemberLegacyRole, LegalCaseStatus } from '../domain/structures'
 import type { LegalCasesRepository } from '../interfaces'
 import type { IntakesRepository } from '../../intake/interfaces'
 
@@ -53,12 +53,13 @@ export class CreateLegalCaseUseCase {
           legalTopicId,
           description,
           status: LegalCaseStatus.Documentation,
+          teamVersion: 0,
           openedAt,
         },
         team: [
           {
             collaboratorId: actorId,
-            role: CaseMemberRole.LeadLawyer,
+            role: CaseMemberLegacyRole.LeadLawyer,
             permission: 'execução',
             isPrimary: true,
             assignedAt: openedAt,
@@ -66,7 +67,7 @@ export class CreateLegalCaseUseCase {
           },
           ...team.map((member) => ({
             collaboratorId: member.collaboratorId,
-            role: member.role as CaseMemberRole,
+            role: member.role as CaseMemberLegacyRole,
             permission: member.permission,
             isPrimary: false,
             assignedAt: openedAt,
