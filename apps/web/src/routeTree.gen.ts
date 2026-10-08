@@ -20,6 +20,7 @@ import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comun
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
+import { Route as AuditoriaIndexRouteImport } from './routes/auditoria/index'
 import { Route as CaixaDeDocumentosIndexRouteImport } from './routes/caixa-de-documentos/index'
 import { Route as CaixaDeDocumentosFileIdRouteImport } from './routes/caixa-de-documentos/$fileId'
 import { Route as ClienteMensagensRouteImport } from './routes/cliente/mensagens'
@@ -115,6 +116,11 @@ const AtendimentoDashboardRoute = AtendimentoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AtendimentoRouteRoute,
+} as any)
+const AuditoriaIndexRoute = AuditoriaIndexRouteImport.update({
+  id: '/auditoria/',
+  path: '/auditoria/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CaixaDeDocumentosIndexRoute = CaixaDeDocumentosIndexRouteImport.update({
   id: '/caixa-de-documentos/',
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
+  '/auditoria/': typeof AuditoriaIndexRoute
   '/caixa-de-documentos/': typeof CaixaDeDocumentosIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByTo {
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda': typeof AgendaIndexRoute
+  '/auditoria': typeof AuditoriaIndexRoute
   '/caixa-de-documentos': typeof CaixaDeDocumentosIndexRoute
   '/clientes': typeof ClientesIndexRoute
   '/colaboradores': typeof ColaboradoresIndexRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/modelos-de-documentos/$documentSpecificationId': typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   '/modelos-de-documentos/novo': typeof ModelosDeDocumentosNovoRoute
   '/agenda/': typeof AgendaIndexRoute
+  '/auditoria/': typeof AuditoriaIndexRoute
   '/caixa-de-documentos/': typeof CaixaDeDocumentosIndexRoute
   '/clientes/': typeof ClientesIndexRoute
   '/colaboradores/': typeof ColaboradoresIndexRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda/'
+    | '/auditoria/'
     | '/caixa-de-documentos/'
     | '/clientes/'
     | '/colaboradores/'
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda'
+    | '/auditoria'
     | '/caixa-de-documentos'
     | '/clientes'
     | '/colaboradores'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/modelos-de-documentos/$documentSpecificationId'
     | '/modelos-de-documentos/novo'
     | '/agenda/'
+    | '/auditoria/'
     | '/caixa-de-documentos/'
     | '/clientes/'
     | '/colaboradores/'
@@ -663,6 +675,7 @@ export interface RootRouteChildren {
   LotesDocumentosFileIdRoute: typeof LotesDocumentosFileIdRoute
   ModelosDeDocumentosDocumentSpecificationIdRoute: typeof ModelosDeDocumentosDocumentSpecificationIdRoute
   ModelosDeDocumentosNovoRoute: typeof ModelosDeDocumentosNovoRoute
+  AuditoriaIndexRoute: typeof AuditoriaIndexRoute
   CaixaDeDocumentosIndexRoute: typeof CaixaDeDocumentosIndexRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ColaboradoresIndexRoute: typeof ColaboradoresIndexRoute
@@ -756,6 +769,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/atendimento/dashboard'
       preLoaderRoute: typeof AtendimentoDashboardRouteImport
       parentRoute: typeof AtendimentoRouteRoute
+    }
+    '/auditoria/': {
+      id: '/auditoria/'
+      path: '/auditoria'
+      fullPath: '/auditoria/'
+      preLoaderRoute: typeof AuditoriaIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/caixa-de-documentos/': {
       id: '/caixa-de-documentos/'
@@ -1209,6 +1229,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelosDeDocumentosDocumentSpecificationIdRoute:
     ModelosDeDocumentosDocumentSpecificationIdRoute,
   ModelosDeDocumentosNovoRoute: ModelosDeDocumentosNovoRoute,
+  AuditoriaIndexRoute: AuditoriaIndexRoute,
   CaixaDeDocumentosIndexRoute: CaixaDeDocumentosIndexRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ColaboradoresIndexRoute: ColaboradoresIndexRoute,
@@ -1227,3 +1248,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

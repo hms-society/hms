@@ -1,4 +1,5 @@
 export * from './save-file-input'
+export * from './audit-event'
 export * from './ai-suggestion'
 export * from './ai-suggestion-status'
 export * from './dynamic-form-answer'
