@@ -49,14 +49,40 @@ export class EnsureCaseManagerContinuityUseCase
       status: request.nextStatus,
     }
     const cases = await this.findAffectedCases(scope, request.collaboratorId)
-    await this.ensureSuccessorManagers(scope, cases, request)
+    const pendingCases = await this.filterPreviouslyAppliedChanges(scope, cases, request)
+    await this.ensureSuccessorManagers(scope, pendingCases, request)
     await this.recordEligibilityChanges(
       scope,
-      cases,
+      pendingCases,
       request,
       previousEligibility,
       nextEligibility,
     )
+  }
+
+  private async filterPreviouslyAppliedChanges(
+    scope: CaseIdentityTransactionScope,
+    cases: Awaited<ReturnType<EnsureCaseManagerContinuityUseCase['findAffectedCases']>>,
+    request: EnsureCaseManagerContinuityRequest,
+  ) {
+    const fingerprint = eligibilityChangeFingerprint(request)
+    const pending = []
+    for (const entry of cases) {
+      if (!entry.legalCase) continue
+      const previous = await scope.cases.caseTeamOperationsRepository.findByKey(
+        entry.legalCase.id,
+        request.actorId,
+        request.operationId,
+      )
+      if (!previous) {
+        pending.push(entry)
+        continue
+      }
+      if (previous.fingerprint !== fingerprint) {
+        throw new ConflictError('A chave da operação já foi usada com outro conteúdo.')
+      }
+    }
+    return pending
   }
 
   private async findAffectedCases(
@@ -115,6 +141,7 @@ export class EnsureCaseManagerContinuityUseCase
     previousEligibility: CaseEligibilitySnapshot,
     nextEligibility: CaseEligibilitySnapshot,
   ): Promise<void> {
+    const fingerprint = eligibilityChangeFingerprint(request)
     for (const { membership, legalCase } of cases) {
       if (!legalCase) continue
       const version = await scope.cases.legalCasesRepository.replaceTeamVersion(
@@ -135,7 +162,31 @@ export class EnsureCaseManagerContinuityUseCase
         nextEligibility,
         operationId: request.operationId,
       }
-      await scope.cases.caseTeamHistoriesRepository.add(history)
+      const recordedHistory = await scope.cases.caseTeamHistoriesRepository.add(history)
+      await scope.cases.caseTeamOperationsRepository.add({
+        caseId: legalCase.id,
+        actorId: request.actorId,
+        operationId: request.operationId,
+        fingerprint,
+        result: {
+          caseId: legalCase.id,
+          membershipId: membership.id,
+          teamVersion: version,
+          historyId: recordedHistory.id,
+        },
+        createdAt: history.occurredAt,
+      })
     }
   }
+}
+
+function eligibilityChangeFingerprint(
+  request: EnsureCaseManagerContinuityRequest,
+): string {
+  return JSON.stringify({
+    action: 'eligibility_changed',
+    collaboratorId: request.collaboratorId,
+    nextProfile: request.nextProfile,
+    nextStatus: request.nextStatus,
+  })
 }
