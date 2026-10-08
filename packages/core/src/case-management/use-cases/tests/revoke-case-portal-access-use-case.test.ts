@@ -81,6 +81,7 @@ function legalCaseSummary(): LegalCaseSummary {
     publicCode: `CASE-${faker.string.numeric(4)}`,
     title: 'Caso de teste',
     status: 'documentation',
+    teamVersion: 0,
     clientName: 'Cliente de teste',
     legalArea: 'Direito civil',
     legalTopic: 'Contratos',

@@ -15,8 +15,8 @@ import type {
   DocumentSpecificationsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
-import { CollaboratorProfile } from '../../identity/domain/structures'
-import type { CollaboratorProfile as CollaboratorProfileValue } from '../../identity/domain/structures'
+import { CollaboratorProfile } from '#shared/domain/structures'
+import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import type { ClientsRepository } from '../../identity/interfaces'
 import {
   CaseChecklistGateDecision,

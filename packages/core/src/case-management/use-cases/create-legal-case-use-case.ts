@@ -53,6 +53,7 @@ export class CreateLegalCaseUseCase {
           legalTopicId,
           description,
           status: LegalCaseStatus.Documentation,
+          teamVersion: 0,
           openedAt,
         },
         team: [

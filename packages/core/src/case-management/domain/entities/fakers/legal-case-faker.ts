@@ -16,6 +16,7 @@ export class LegalCaseFaker {
       legalTopicId: faker.string.uuid(),
       title: faker.lorem.sentence(),
       status: LegalCaseStatus.Documentation,
+      teamVersion: 0,
       checklistCompletedAt: undefined,
       checklistCompletedBy: undefined,
       checklistGate: {

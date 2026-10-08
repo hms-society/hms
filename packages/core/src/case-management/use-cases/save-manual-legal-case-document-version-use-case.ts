@@ -18,8 +18,8 @@ import type {
   IdProvider,
 } from '../../shared/interfaces'
 import { FindDocumentPendingMarkersUseCase } from '../../document-production/use-cases'
-import { CollaboratorProfile } from '../../identity/domain/structures'
-import type { CollaboratorProfile as CollaboratorProfileValue } from '../../identity/domain/structures'
+import { CollaboratorProfile } from '#shared/domain/structures'
+import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-document-generation-error'
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
 import type { LegalCasesRepository } from '../interfaces'
