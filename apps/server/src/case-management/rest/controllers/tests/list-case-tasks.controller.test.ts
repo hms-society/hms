@@ -3,6 +3,7 @@ import request from 'supertest'
 
 import { CaseManagementModuleFixture } from '@/case-management/fixtures/case-management-module-fixture'
 import { ListCaseTasksController } from '@/case-management/rest/controllers/list-case-tasks.controller'
+import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 
 describe('List Case Tasks Controller [GET /cases/:caseId/tasks]', () => {
   let fixture: CaseManagementModuleFixture
@@ -28,6 +29,14 @@ describe('List Case Tasks Controller [GET /cases/:caseId/tasks]', () => {
     })
     const firstTask = await fixture.registerCaseTask(firstCase.id)
     await fixture.registerCaseTask(secondCase.id)
+    await fixture.registerCaseMembers([
+      {
+        caseId: firstCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
 
     const response = await request(fixture.app.getHttpServer())
       .get(`/cases/${firstCase.id}/tasks`)

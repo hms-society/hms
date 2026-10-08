@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiResponse } from '@nestjs/swagger'
 import { DeleteCaseTaskUseCase } from '@hms/core/case-management/use-cases'
-import type { CaseTasksRepository } from '@hms/core/case-management/interfaces'
+import type {
+  CaseMembersRepository,
+  CaseTasksRepository,
+} from '@hms/core/case-management/interfaces'
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
@@ -20,6 +23,8 @@ import {
   CaseTaskResponseDto,
 } from '@/case-management/rest/dtos'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
+import { CurrentCollaborator } from '@/identity/decorators'
+import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
 
@@ -33,10 +38,16 @@ export class DeleteCaseTaskController {
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseTasks)
     caseTasksRepository: CaseTasksRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
+    caseMembersRepository: CaseMembersRepository,
     @Inject(DatetimeProvider)
     datetimeProvider: DatetimeProvider,
   ) {
-    this.useCase = new DeleteCaseTaskUseCase(caseTasksRepository, datetimeProvider)
+    this.useCase = new DeleteCaseTaskUseCase(
+      caseTasksRepository,
+      caseMembersRepository,
+      datetimeProvider,
+    )
   }
 
   @Delete(':caseId/tasks/:caseTaskId')
@@ -55,7 +66,13 @@ export class DeleteCaseTaskController {
       RequestBody,
       'caseId' | 'caseTaskId'
     >,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    return this.useCase.execute({ ...body, caseId, caseTaskId })
+    return this.useCase.execute({
+      ...body,
+      caseId,
+      caseTaskId,
+      actorId: collaborator.collaboratorId,
+    })
   }
 }

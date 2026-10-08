@@ -1,19 +1,26 @@
 import type { UseCase } from '#shared/interfaces/use-case'
-import { BadRequestError, ConflictError, NotFoundError } from '#shared/domain/errors'
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '#shared/domain/errors'
 import { CaseTaskStatus } from '../domain/structures'
 import type { CaseTask } from '../domain/entities'
-import type { CaseTasksRepository } from '../interfaces'
+import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import type { DatetimeProvider } from '#shared/interfaces'
 
 type Request = {
   caseId: string
   caseTaskId: string
+  actorId: string
   version: number
 }
 
 export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
   constructor(
     private readonly caseTasksRepository: CaseTasksRepository,
+    private readonly caseMembersRepository: CaseMembersRepository,
     private readonly datetimeProvider: DatetimeProvider,
   ) {}
 
@@ -21,6 +28,13 @@ export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
     const currentTask = await this.caseTasksRepository.findById(request.caseTaskId)
     if (!currentTask || currentTask.caseId !== request.caseId) {
       throw new NotFoundError('Tarefa ou prazo não encontrado.')
+    }
+    const activeMembers =
+      await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(request.caseId, [
+        request.actorId,
+      ])
+    if (activeMembers.length !== 1) {
+      throw new ForbiddenError('O usuário não possui acesso a este caso.')
     }
     if (currentTask.status === CaseTaskStatus.Completed) {
       throw new BadRequestError('Tarefas concluídas não podem ser excluídas.')

@@ -29,6 +29,14 @@ describe('Delete Case Task Controller [DELETE /cases/:caseId/tasks/:caseTaskId]'
       legalTopicId: collaborator.legalTopicId,
     })
     const task = await fixture.registerCaseTask(legalCase.id)
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
 
     const response = await request(fixture.app.getHttpServer())
       .delete(`/cases/${legalCase.id}/tasks/${task.id}`)
