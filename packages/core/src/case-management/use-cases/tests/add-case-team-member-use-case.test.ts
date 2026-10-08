@@ -6,7 +6,7 @@ import type { DatetimeProvider } from '#shared/interfaces'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
 import type { CaseMember } from '../../domain/entities'
-import { CaseMemberRole } from '../../domain/structures'
+import { CaseTeamRole } from '../../domain/structures'
 import type { CaseTeamScope } from '../../interfaces/case-team-scope'
 import { AddCaseTeamMemberUseCase } from '../add-case-team-member-use-case'
 
@@ -24,7 +24,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId,
       collaboratorId: actorId,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
       assignedAt: at,
       assignedBy: actorId,
       archivedLegacy: false,
@@ -34,7 +34,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       ...currentManager,
       id: '00000000-0000-4000-8000-000000000006',
       collaboratorId: targetId,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     }
     cases.legalCasesRepository.findById.mockResolvedValue(legalCase)
     cases.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
@@ -69,7 +69,7 @@ describe('AddCaseTeamMemberUseCase', () => {
         caseId,
         actorId,
         collaboratorId: targetId,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
         expectedTeamVersion: 4,
         operationId,
       }),
@@ -84,7 +84,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       expect.objectContaining({
         caseId,
         collaboratorId: targetId,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
         archivedLegacy: false,
         assignedAt: at,
         assignedBy: actorId,
@@ -141,7 +141,7 @@ describe('AddCaseTeamMemberUseCase', () => {
         caseId,
         actorId,
         collaboratorId: targetId,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
         expectedTeamVersion: 0,
         operationId,
         reason: 'Correção explícita de equipe',
@@ -159,7 +159,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId,
       collaboratorId: targetId,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
       assignedAt: at,
       assignedBy: actorId,
       archivedLegacy: false,
@@ -193,7 +193,7 @@ describe('AddCaseTeamMemberUseCase', () => {
         caseId,
         actorId,
         collaboratorId: targetId,
-        role: CaseMemberRole.Manager,
+        role: CaseTeamRole.Manager,
         expectedTeamVersion: 0,
         operationId,
       }),
@@ -226,7 +226,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       caseId,
       actorId,
       collaboratorId: targetId,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
       expectedTeamVersion: 2,
       operationId,
     }
@@ -295,7 +295,7 @@ describe('AddCaseTeamMemberUseCase', () => {
     const fingerprint = JSON.stringify({
       action: 'add',
       collaboratorId: targetId,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
       reason: undefined,
       expectedTeamVersion: 2,
     })
@@ -313,7 +313,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       caseId,
       actorId,
       collaboratorId: targetId,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
       expectedTeamVersion: 2,
       operationId,
     }
@@ -372,7 +372,7 @@ describe('AddCaseTeamMemberUseCase', () => {
       caseId,
       actorId,
       collaboratorId: targetId,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
       expectedTeamVersion: 0,
       operationId,
     }

@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import type {
   CaseCollaboratorsProvider,
-  CaseMembersRepository,
+  CaseTeamMembersRepository,
   LegalCasesRepository,
 } from '../../interfaces'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseMemberRole } from '../../domain/structures'
+import { CaseTeamRole } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { PaginationResponse } from '#shared/responses/pagination-response'
@@ -20,13 +20,13 @@ import {
 describe('List Case Team Candidates Use Case', () => {
   let collaborators: ReturnType<typeof mock<CaseCollaboratorsProvider>>
   let cases: ReturnType<typeof mock<LegalCasesRepository>>
-  let members: ReturnType<typeof mock<CaseMembersRepository>>
+  let members: ReturnType<typeof mock<CaseTeamMembersRepository>>
   let useCase: ListCaseTeamCandidatesUseCase
 
   beforeEach(() => {
     collaborators = mock<CaseCollaboratorsProvider>()
     cases = mock<LegalCasesRepository>()
-    members = mock<CaseMembersRepository>()
+    members = mock<CaseTeamMembersRepository>()
     useCase = new ListCaseTeamCandidatesUseCase(collaborators, cases, members)
     collaborators.findById.mockResolvedValue({
       collaboratorId: TEST_ACTOR_ID,
@@ -41,7 +41,7 @@ describe('List Case Team Candidates Use Case', () => {
     const manager = CaseMemberFaker.fake({
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const current = CaseMemberFaker.fake({
       caseId: TEST_CASE_ID,
@@ -86,7 +86,7 @@ describe('List Case Team Candidates Use Case', () => {
       CaseMemberFaker.fake({
         caseId: TEST_CASE_ID,
         collaboratorId: TEST_ACTOR_ID,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
       }),
     )
 

@@ -34,7 +34,6 @@ describe('GetThirdPartyPortalCaseUseCase', () => {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       title: legalCase.title,
-      teamVersion: legalCase.teamVersion,
       clientName: 'Cliente do portal',
       status: legalCase.status,
       intakeId: legalCase.intakeId,

@@ -1,16 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import {
-  and,
-  desc,
-  eq,
-  gte,
-  inArray,
-  isNull,
-  lt,
-  sql,
-} from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from 'drizzle-orm'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import {

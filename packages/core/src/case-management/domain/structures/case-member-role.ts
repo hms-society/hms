@@ -1,6 +1,9 @@
 export const CaseMemberRole = {
-  Manager: 'manager',
-  Collaborator: 'collaborator',
+  LeadLawyer: 'lead_lawyer',
+  Lawyer: 'lawyer',
+  Paralegal: 'paralegal',
+  Supervisor: 'supervisor',
+  Intern: 'intern',
 } as const
 
 export type CaseMemberRole = (typeof CaseMemberRole)[keyof typeof CaseMemberRole]

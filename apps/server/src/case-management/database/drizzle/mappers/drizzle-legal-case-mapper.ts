@@ -34,5 +34,4 @@ export class DrizzleLegalCaseMapper {
       updatedAt: record.updatedAt,
     }
   }
-
 }

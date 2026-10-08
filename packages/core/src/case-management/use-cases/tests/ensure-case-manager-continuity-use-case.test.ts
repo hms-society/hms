@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
 import {
-  CaseMemberRole,
+  CaseTeamRole,
   CaseTeamHistoryKind,
   LegalCaseStatus,
 } from '../../domain/structures'
@@ -41,7 +41,7 @@ describe('Ensure Case Manager Continuity Use Case', () => {
       id: 'membership-1',
       caseId: 'case-1',
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     identity.collaboratorsRepository.findById.mockResolvedValue(collaborator)
     identity.usersRepository.findById.mockResolvedValue(user)
@@ -74,25 +74,25 @@ describe('Ensure Case Manager Continuity Use Case', () => {
     const manager = CaseMemberFaker.fake({
       caseId: 'case-1',
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const secondManager = CaseMemberFaker.fake({
       id: 'membership-2',
       caseId: 'case-2',
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const firstSuccessor = CaseMemberFaker.fake({
       id: 'successor-1',
       caseId: 'case-1',
       collaboratorId: 'successor-collaborator',
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const secondSuccessor = CaseMemberFaker.fake({
       id: 'successor-2',
       caseId: 'case-2',
       collaboratorId: 'second-successor-collaborator',
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const firstLegalCase = LegalCaseFaker.fake({
       id: 'case-1',

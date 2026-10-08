@@ -1,10 +1,10 @@
 import { mock } from 'vitest-mock-extended'
 import type { CaseTeamScope } from '../../interfaces/case-team-scope'
-import type { CaseMembersRepository } from '../../interfaces/case-members-repository'
+import type { CaseTeamMembersRepository } from '../../interfaces/case-team-members-repository'
 import type { CaseTeamHistoriesRepository } from '../../interfaces/case-team-histories-repository'
 import type { CaseTeamOperationsRepository } from '../../interfaces/case-team-operations-repository'
 import type { CaseCollaboratorsProvider } from '../../interfaces/case-collaborators-provider'
-import type { LegalCasesRepository } from '../../interfaces/legal-cases-repository'
+import type { CaseTeamLegalCasesRepository } from '../../interfaces/case-team-legal-cases-repository'
 import type { CollaboratorsRepository } from '#identity/interfaces/collaborators-repository'
 import type { UsersRepository } from '#identity/interfaces/users-repository'
 import type { CollaboratorRegistrationAttemptsRepository } from '#identity/interfaces/collaborator-registration-attempts-repository'
@@ -19,8 +19,8 @@ export const TEST_CASE_ID = '00000000-0000-4000-8000-000000000003'
 export const TEST_OPERATION_ID = '00000000-0000-4000-8000-000000000004'
 
 export function createCaseTeamScopeMocks() {
-  const legalCasesRepository = mock<LegalCasesRepository>()
-  const caseMembersRepository = mock<CaseMembersRepository>()
+  const legalCasesRepository = mock<CaseTeamLegalCasesRepository>()
+  const caseMembersRepository = mock<CaseTeamMembersRepository>()
   const caseTeamHistoriesRepository = mock<CaseTeamHistoriesRepository>()
   const caseTeamOperationsRepository = mock<CaseTeamOperationsRepository>()
   const caseCollaboratorsProvider = mock<CaseCollaboratorsProvider>()

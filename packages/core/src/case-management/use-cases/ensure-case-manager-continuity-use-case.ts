@@ -7,7 +7,7 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
-import { CaseTeamHistoryKind, CaseMemberRole } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
 import type { CaseEligibilitySnapshot } from '../domain/structures'
 import type { CaseTeamHistoryCreation } from '../domain/entities'
 import type { EnsureCaseManagerContinuityRequest } from './ensure-case-manager-continuity-request'
@@ -67,7 +67,7 @@ export class EnsureCaseManagerContinuityUseCase
       await scope.cases.caseMembersRepository.listByCollaboratorId(collaboratorId)
     const activeManagers = memberships.filter(
       (member) =>
-        member.role === CaseMemberRole.Manager &&
+        member.role === CaseTeamRole.Manager &&
         !member.removedAt &&
         !member.archivedLegacy,
     )
@@ -90,7 +90,7 @@ export class EnsureCaseManagerContinuityUseCase
       const managers = members.filter(
         (candidate) =>
           candidate.id !== membership.id &&
-          candidate.role === CaseMemberRole.Manager &&
+          candidate.role === CaseTeamRole.Manager &&
           !candidate.removedAt &&
           !candidate.archivedLegacy,
       )
@@ -119,7 +119,7 @@ export class EnsureCaseManagerContinuityUseCase
       if (!legalCase) continue
       const version = await scope.cases.legalCasesRepository.replaceTeamVersion(
         legalCase.id,
-        legalCase.teamVersion,
+        legalCase.teamVersion ?? 0,
       )
       const history: CaseTeamHistoryCreation = {
         caseId: legalCase.id,

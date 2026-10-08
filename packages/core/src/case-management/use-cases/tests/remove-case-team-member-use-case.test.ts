@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../../domain/structures'
+import { CaseTeamRole, CaseTeamHistoryKind } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { RemoveCaseTeamMemberUseCase } from '../remove-case-team-member-use-case'
 import {
@@ -31,13 +31,13 @@ describe('Remove Case Team Member Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const target = CaseMemberFaker.fake({
       id: '00000000-0000-4000-8000-000000000006',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
@@ -89,7 +89,7 @@ describe('Remove Case Team Member Use Case', () => {
         actorId: TEST_ACTOR_ID,
         kind: CaseTeamHistoryKind.Removed,
         teamVersion: 3,
-        previousRole: CaseMemberRole.Manager,
+        previousRole: CaseTeamRole.Manager,
       }),
     )
   })
@@ -100,7 +100,7 @@ describe('Remove Case Team Member Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
@@ -165,13 +165,13 @@ describe('Remove Case Team Member Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: '00000000-0000-4000-8000-000000000007',
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const target = CaseMemberFaker.fake({
       id: '00000000-0000-4000-8000-000000000006',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseCollaboratorsProvider.findById.mockImplementation(async (id) =>
