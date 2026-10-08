@@ -170,4 +170,46 @@ describe('Get Case Team Use Case', () => {
       canManage: false,
     })
   })
+
+  it('reports the total from the projected members when a collaborator is missing', async () => {
+    const manager = CaseMemberFaker.fake({
+      id: 'membership-1',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_ACTOR_ID,
+      role: CaseTeamRole.Manager,
+    })
+    const missingCollaborator = CaseMemberFaker.fake({
+      id: 'membership-2',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_TARGET_ID,
+      role: CaseTeamRole.Collaborator,
+    })
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: TEST_CASE_ID }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue([
+      manager,
+      missingCollaborator,
+    ])
+    mocks.caseCollaboratorsProvider.findById.mockImplementation(
+      async (collaboratorId) => {
+        if (collaboratorId === TEST_TARGET_ID) return undefined
+        return {
+          collaboratorId,
+          professionalName: 'Gestor',
+          email: 'manager@example.com',
+          profile: CollaboratorProfile.Lawyer,
+          status: UserStatus.Active,
+        }
+      },
+    )
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).resolves.toMatchObject({
+      total: 1,
+      activeManagerCount: 1,
+      members: [{ membershipId: manager.id }],
+    })
+  })
 })

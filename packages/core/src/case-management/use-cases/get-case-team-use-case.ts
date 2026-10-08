@@ -42,13 +42,14 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
         this.caseCollaboratorsProvider.findById(member.collaboratorId),
       ),
     )
+    const projectedMembers = projectCurrentMembers(currentMembers, profiles)
     return {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       status: legalCase.status,
       teamVersion: legalCase.teamVersion ?? 0,
-      members: projectCurrentMembers(currentMembers, profiles),
-      total: currentMembers.length,
+      members: projectedMembers,
+      total: projectedMembers.length,
       activeManagerCount: countEligibleManagers(currentMembers, profiles),
       canManage:
         legalCase.status !== LegalCaseStatus.Closed &&
