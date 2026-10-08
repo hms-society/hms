@@ -2,7 +2,7 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeam } from '../domain/structures'
 import type { CaseMember } from '../domain/entities'
-import { CaseTeamRole } from '../domain/structures'
+import { CaseTeamRole, LegalCaseStatus } from '../domain/structures'
 import type {
   CaseTeamMembersRepository,
   CaseCollaboratorsProvider,
@@ -51,8 +51,9 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
       total: currentMembers.length,
       activeManagerCount: countEligibleManagers(currentMembers, profiles),
       canManage:
-        actor.profile === CollaboratorProfile.Admin ||
-        actorMembership?.role === CaseTeamRole.Manager,
+        legalCase.status !== LegalCaseStatus.Closed &&
+        (actor.profile === CollaboratorProfile.Admin ||
+          actorMembership?.role === CaseTeamRole.Manager),
       requiresAdministrativeReason: actor.profile === CollaboratorProfile.Admin,
     }
   }

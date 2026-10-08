@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseTeamRole } from '../../domain/structures'
+import { CaseTeamRole, LegalCaseStatus } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { GetCaseTeamUseCase } from '../get-case-team-use-case'
@@ -127,6 +127,47 @@ describe('Get Case Team Use Case', () => {
       activeManagerCount: 0,
       canManage: true,
       requiresAdministrativeReason: true,
+    })
+  })
+
+  it.each([
+    { profile: CollaboratorProfile.Admin, role: undefined },
+    { profile: CollaboratorProfile.Lawyer, role: CaseTeamRole.Manager },
+  ])('does not grant management capability for a closed case to $profile', async ({
+    profile,
+    role,
+  }) => {
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        id: TEST_CASE_ID,
+        status: LegalCaseStatus.Closed,
+      }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue(
+      role
+        ? [
+            CaseMemberFaker.fake({
+              id: 'membership-1',
+              caseId: TEST_CASE_ID,
+              collaboratorId: TEST_ACTOR_ID,
+              role,
+            }),
+          ]
+        : [],
+    )
+    mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Ator',
+      email: 'actor@example.com',
+      profile,
+      status: UserStatus.Active,
+    })
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).resolves.toMatchObject({
+      status: LegalCaseStatus.Closed,
+      canManage: false,
     })
   })
 })
