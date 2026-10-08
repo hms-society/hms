@@ -1,6 +1,6 @@
 {
-  "id": "113687b7-0160-499a-9b53-39e781a24243",
-  "prevId": "dc6a5dc0-6792-4933-990e-0697e618fac2",
+  "id": "45b9b321-6283-4ce4-b856-65bed9c67e17",
+  "prevId": "4d011c50-87ef-4c42-ac22-bab3e758f004",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -5739,6 +5739,450 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.case_tasks": {
+      "name": "case_tasks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "case_task_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "custom_type": {
+          "name": "custom_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planned_date": {
+          "name": "planned_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planned_time": {
+          "name": "planned_time",
+          "type": "time(0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "case_task_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'to_do'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by_id": {
+          "name": "created_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_by_id": {
+          "name": "completed_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "source": {
+          "name": "source",
+          "type": "case_task_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'manual'"
+        },
+        "blocks_case_closure": {
+          "name": "blocks_case_closure",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "completion_note": {
+          "name": "completion_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reminder_at": {
+          "name": "last_reminder_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "case_tasks_case_id_idx": {
+          "name": "case_tasks_case_id_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_tasks_case_planned_date_idx": {
+          "name": "case_tasks_case_planned_date_idx",
+          "columns": [
+            {
+              "expression": "case_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "planned_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_tasks_deleted_at_idx": {
+          "name": "case_tasks_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_tasks_case_id_cases_id_fk": {
+          "name": "case_tasks_case_id_cases_id_fk",
+          "tableFrom": "case_tasks",
+          "tableTo": "cases",
+          "columnsFrom": [
+            "case_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "case_tasks_description_not_blank_check": {
+          "name": "case_tasks_description_not_blank_check",
+          "value": "char_length(btrim(\"case_tasks\".\"description\")) > 0"
+        },
+        "case_tasks_custom_type_check": {
+          "name": "case_tasks_custom_type_check",
+          "value": "\"case_tasks\".\"type\" <> 'other' OR (\"case_tasks\".\"custom_type\" IS NOT NULL AND char_length(btrim(\"case_tasks\".\"custom_type\")) > 0)"
+        },
+        "case_tasks_version_check": {
+          "name": "case_tasks_version_check",
+          "value": "\"case_tasks\".\"version\" > 0"
+        },
+        "case_tasks_updated_after_created_check": {
+          "name": "case_tasks_updated_after_created_check",
+          "value": "\"case_tasks\".\"updated_at\" >= \"case_tasks\".\"created_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.case_task_assignees": {
+      "name": "case_task_assignees",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_task_id": {
+          "name": "case_task_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "collaborator_id": {
+          "name": "collaborator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "case_task_assignees_task_collaborator_uidx": {
+          "name": "case_task_assignees_task_collaborator_uidx",
+          "columns": [
+            {
+              "expression": "case_task_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "collaborator_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_task_assignees_task_id_idx": {
+          "name": "case_task_assignees_task_id_idx",
+          "columns": [
+            {
+              "expression": "case_task_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_task_assignees_collaborator_id_idx": {
+          "name": "case_task_assignees_collaborator_id_idx",
+          "columns": [
+            {
+              "expression": "collaborator_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_task_assignees_case_task_id_case_tasks_id_fk": {
+          "name": "case_task_assignees_case_task_id_case_tasks_id_fk",
+          "tableFrom": "case_task_assignees",
+          "tableTo": "case_tasks",
+          "columnsFrom": [
+            "case_task_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.case_task_reminders": {
+      "name": "case_task_reminders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "case_task_id": {
+          "name": "case_task_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "case_task_reminders_task_days_before_uidx": {
+          "name": "case_task_reminders_task_days_before_uidx",
+          "columns": [
+            {
+              "expression": "case_task_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "value",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "unit",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "case_task_reminders_task_id_idx": {
+          "name": "case_task_reminders_task_id_idx",
+          "columns": [
+            {
+              "expression": "case_task_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "case_task_reminders_case_task_id_case_tasks_id_fk": {
+          "name": "case_task_reminders_case_task_id_case_tasks_id_fk",
+          "tableFrom": "case_task_reminders",
+          "tableTo": "case_tasks",
+          "columnsFrom": [
+            "case_task_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "case_task_reminders_value_check": {
+          "name": "case_task_reminders_value_check",
+          "value": "\"case_task_reminders\".\"value\" > 0"
+        }
+      },
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -6038,6 +6482,36 @@
         "not_corresponding",
         "processing_failure",
         "resend_requested"
+      ]
+    },
+    "public.case_task_source": {
+      "name": "case_task_source",
+      "schema": "public",
+      "values": [
+        "manual",
+        "automation",
+        "import"
+      ]
+    },
+    "public.case_task_status": {
+      "name": "case_task_status",
+      "schema": "public",
+      "values": [
+        "to_do",
+        "in_progress",
+        "completed"
+      ]
+    },
+    "public.case_task_type": {
+      "name": "case_task_type",
+      "schema": "public",
+      "values": [
+        "process_deadline",
+        "hearing",
+        "publication",
+        "internal_task",
+        "delivery",
+        "other"
       ]
     }
   },

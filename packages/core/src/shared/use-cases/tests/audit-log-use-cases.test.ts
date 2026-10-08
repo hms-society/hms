@@ -1,0 +1,115 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { mock, type MockProxy } from 'vitest-mock-extended'
+
+import type { AuditEvent } from '../../domain/structures'
+import type { AuditLogExportWriter, AuditLogsRepository } from '../../interfaces'
+import { ExportAuditLogsUseCase } from '../export-audit-logs-use-case'
+import { GetAuditLogDetailsUseCase } from '../get-audit-log-details-use-case'
+import { ListAuditLogsUseCase } from '../list-audit-logs-use-case'
+
+describe('Audit log use cases', () => {
+  let repository: MockProxy<AuditLogsRepository>
+  let exportWriter: MockProxy<AuditLogExportWriter>
+
+  beforeEach(() => {
+    repository = mock<AuditLogsRepository>()
+    exportWriter = mock<AuditLogExportWriter>()
+  })
+
+  it('lists audit events with the requested filters and pagination', async () => {
+    const result = { data: [makeEvent()], total: 1 }
+    repository.list.mockResolvedValue(result)
+    const query = {
+      page: 2,
+      limit: 10,
+      entityType: 'third_party' as const,
+      origin: 'human' as const,
+      status: 'success' as const,
+    }
+
+    await expect(new ListAuditLogsUseCase(repository).execute(query)).resolves.toEqual(
+      result,
+    )
+    expect(repository.list).toHaveBeenCalledWith(query)
+  })
+
+  it('returns the selected audit event details', async () => {
+    const event = makeEvent()
+    repository.findById.mockResolvedValue(event)
+
+    await expect(
+      new GetAuditLogDetailsUseCase(repository).execute({ id: event.id }),
+    ).resolves.toEqual(event)
+    expect(repository.findById).toHaveBeenCalledWith(event.id)
+  })
+
+  it('preserves an absent audit event result', async () => {
+    repository.findById.mockResolvedValue(undefined)
+
+    await expect(
+      new GetAuditLogDetailsUseCase(repository).execute({ id: 'missing' }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('exports CSV and records the extraction event with its filters', async () => {
+    const event = makeEvent()
+    repository.list.mockResolvedValue({ data: [event], total: 1 })
+    const useCase = new ExportAuditLogsUseCase(repository, exportWriter)
+
+    await expect(
+      useCase.execute({
+        query: { action: 'permission_granted' },
+        format: 'csv',
+        actorId: 'actor-exporter',
+        actorProfile: 'admin',
+      }),
+    ).resolves.toMatchObject({
+      contentType: 'text/csv',
+      fileName: 'audit-logs.csv',
+    })
+
+    expect(exportWriter.recordExport).toHaveBeenCalledWith({
+      actorId: 'actor-exporter',
+      actorProfile: 'admin',
+      format: 'csv',
+      filters: expect.objectContaining({ action: 'permission_granted' }),
+      exportedCount: 1,
+    })
+  })
+
+  it('exports JSON across multiple pages', async () => {
+    const firstEvent = makeEvent()
+    const secondEvent = { ...makeEvent(), id: 'event-2' }
+    repository.list
+      .mockResolvedValueOnce({ data: [firstEvent], total: 2 })
+      .mockResolvedValueOnce({ data: [secondEvent], total: 2 })
+    const useCase = new ExportAuditLogsUseCase(repository, exportWriter)
+
+    const result = await useCase.execute({
+      query: {},
+      format: 'json',
+      actorId: 'actor-exporter',
+      actorProfile: 'supervisor',
+    })
+
+    expect(result.contentType).toBe('application/json')
+    expect(JSON.parse(result.content)).toHaveLength(2)
+    expect(repository.list).toHaveBeenNthCalledWith(2, { page: 2, limit: 100 })
+  })
+})
+
+function makeEvent(): AuditEvent {
+  return {
+    id: 'event-1',
+    occurredAt: new Date('2026-10-06T12:00:00.000Z'),
+    actorId: 'actor-1',
+    actorProfile: 'admin',
+    entityType: 'third_party',
+    entityId: 'third-party-1',
+    action: 'permission_granted',
+    origin: 'human',
+    status: 'success',
+    beforeData: null,
+    afterData: { permission: 'view_case_status' },
+  }
+}

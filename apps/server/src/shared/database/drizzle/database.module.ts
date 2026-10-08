@@ -8,6 +8,7 @@ import { DynamicFormsSeeder } from '@/shared/database/dynamic-forms-seeder'
 import { DrizzleDynamicFormMapper } from '@/shared/database/drizzle/mappers'
 import { DrizzleDynamicFormsRepository } from '@/shared/database/drizzle/repositories'
 import { DrizzleAiSuggestionsRepository } from '@/shared/database/drizzle/repositories/drizzle-ai-suggestions-repository'
+import { DrizzleAuditLogsRepository } from '@/shared/database/drizzle/repositories/drizzle-audit-logs-repository'
 
 @Module({
   providers: [
@@ -15,6 +16,7 @@ import { DrizzleAiSuggestionsRepository } from '@/shared/database/drizzle/reposi
     ...databaseProviders,
     DrizzleDynamicFormMapper,
     DrizzleDynamicFormsRepository,
+    DrizzleAuditLogsRepository,
     DrizzleAiSuggestionsRepository,
     DynamicFormsSeeder,
     {
@@ -30,6 +32,7 @@ import { DrizzleAiSuggestionsRepository } from '@/shared/database/drizzle/reposi
     DrizzleClient,
     DRIZZLE,
     DYNAMIC_FORMS_REPOSITORIES.dynamicForms,
+    DrizzleAuditLogsRepository,
     AI_SUGGESTIONS_REPOSITORIES.aiSuggestions,
     DynamicFormsSeeder,
   ],

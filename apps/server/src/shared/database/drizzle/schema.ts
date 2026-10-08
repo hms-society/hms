@@ -13,6 +13,7 @@ export * from '@/shared/database/drizzle/models/dynamic-form-model'
 export * from '@/shared/database/drizzle/models/ai-suggestion-model'
 export * from '@/shared/database/drizzle/models/ai-error-model'
 export * from '@/shared/database/drizzle/models/ai-block-model'
+export * from '@/shared/database/drizzle/models/audit-event-model'
 
 export * from '@/shared/database/drizzle/schema/scheduling'
 export * from '@/document-engine/database/drizzle/models/index'

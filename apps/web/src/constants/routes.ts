@@ -28,6 +28,7 @@ export const ROUTES = {
   collaborators: '/colaboradores',
   collaboratorDetails: '/colaboradores/$colaboradorId',
   thirdParties: '/terceiros',
+  auditLogs: '/auditoria',
   documentBatch: '/lotes-documentos',
   documentViewer: '/lotes-documentos/$fileId',
   documentInbox: '/caixa-de-documentos',
