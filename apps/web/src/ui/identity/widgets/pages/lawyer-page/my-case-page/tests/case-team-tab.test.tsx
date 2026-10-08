@@ -82,6 +82,8 @@ describe('case team tab', () => {
 
     expect(screen.getByRole('heading', { name: 'Equipe do caso' })).toBeDefined()
     expect(useCaseTeamRosterMock).toHaveBeenCalledWith('case-1')
-    expect(screen.queryByRole('button', { name: /adicionar|remover|alterar/i })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: /adicionar|remover|alterar/i }),
+    ).toBeNull()
   })
 })

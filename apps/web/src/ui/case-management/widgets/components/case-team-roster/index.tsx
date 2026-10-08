@@ -23,10 +23,7 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
     <section className='min-w-0 space-y-4' aria-labelledby='case-team-roster-title'>
       <header className='flex flex-wrap items-center justify-between gap-3'>
         <div>
-          <h2
-            id='case-team-roster-title'
-            className='font-serif text-lg font-semibold'
-          >
+          <h2 id='case-team-roster-title' className='font-serif text-lg font-semibold'>
             Equipe do caso
           </h2>
           <p className='text-sm text-muted-foreground'>
