@@ -59,6 +59,37 @@ describe('Create Case Task Use Case', () => {
     )
   })
 
+  it('assigns dated events to every active case member', async () => {
+    const useCase = createUseCase()
+    const createdTask = CaseTaskFaker.fake({
+      caseId: 'case-1',
+      type: CaseTaskType.Hearing,
+      createdById: 'creator-1',
+      assigneeIds: ['creator-1', 'member-1', 'member-2'],
+    })
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId
+      .mockResolvedValueOnce(['creator-1'])
+      .mockResolvedValueOnce(['creator-1', 'member-1', 'member-2'])
+    caseTasksRepository.add.mockResolvedValue(createdTask)
+
+    await useCase.execute({
+      caseId: 'case-1',
+      type: CaseTaskType.Hearing,
+      title: 'Audiência de instrução',
+      description: 'Participação da equipe na audiência',
+      plannedDate: '2026-10-20',
+      plannedTime: '10:00',
+      createdById: 'creator-1',
+      reminders: [],
+    })
+
+    expect(caseTasksRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assigneeIds: ['creator-1', 'member-1', 'member-2'],
+      }),
+    )
+  })
+
   it('rejects an assignee who is not an active member of the case', async () => {
     const useCase = createUseCase()
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([

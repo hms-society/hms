@@ -108,7 +108,15 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       )
     }
 
-    if (changes.assigneeIds) {
+    const nextTypeIsCollective = nextType !== CaseTaskType.InternalTask
+    if (nextTypeIsCollective) {
+      changes.assigneeIds = [
+        ...(await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(
+          request.caseId,
+          [],
+        )),
+      ]
+    } else if (changes.assigneeIds) {
       const assigneeIds = [...new Set(changes.assigneeIds)]
       if (assigneeIds.length === 0)
         throw new BadRequestError('Informe ao menos um responsável.')

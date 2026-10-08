@@ -49,7 +49,7 @@ export const createCaseTaskSchema = z.object({
   description: z.string().trim().min(1),
   plannedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   plannedTime: optionalPlannedTimeSchema,
-  assigneeIds: z.array(z.string().uuid()).min(1).max(1),
+  assigneeIds: z.array(z.string().uuid()).optional(),
   blocksCaseClosure: z.boolean().optional(),
   reminders: remindersSchema.default([]),
   source: caseTaskSourceSchema.optional(),

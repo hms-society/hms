@@ -39,16 +39,19 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     const description = request.description.trim()
     const title = request.title.trim()
     const customType = request.customType?.trim() || undefined
-    const assigneeIds = [...new Set(request.assigneeIds ?? [])]
+    let assigneeIds = [...new Set(request.assigneeIds ?? [])]
     const now = this.datetimeProvider.now()
 
     this.validateRequest(request, title, description, customType, assigneeIds, now)
     assertUniqueCaseTaskReminders(request.reminders ?? [])
     const plannedTime = normalizeCaseTaskTime(request.type, request.plannedTime)
-    await this.ensureActiveCaseMembers(request.caseId, [
+    const activeCaseMemberIds = await this.ensureActiveCaseMembers(request.caseId, [
       request.createdById,
       ...assigneeIds,
     ])
+    if (request.type !== CaseTaskType.InternalTask) {
+      assigneeIds = [...activeCaseMemberIds]
+    }
 
     return this.caseTasksRepository.add({
       caseId: request.caseId,
@@ -72,7 +75,7 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
   private async ensureActiveCaseMembers(
     caseId: string,
     collaboratorIds: readonly string[],
-  ) {
+  ): Promise<readonly string[]> {
     const uniqueCollaboratorIds = [...new Set(collaboratorIds)]
     const activeAssigneeIds =
       await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(
@@ -89,6 +92,8 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
         'Todos os responsáveis devem pertencer à equipe ativa do caso.',
       )
     }
+
+    return this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(caseId, [])
   }
 
   private validateRequest(
@@ -107,11 +112,11 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       throw new BadRequestError('A descrição é obrigatória.')
     }
 
-    if (assigneeIds.length === 0) {
+    if (request.type === CaseTaskType.InternalTask && assigneeIds.length === 0) {
       throw new BadRequestError('Informe ao menos um responsável.')
     }
 
-    if (assigneeIds.length > 1) {
+    if (request.type === CaseTaskType.InternalTask && assigneeIds.length > 1) {
       throw new BadRequestError('A tarefa deve ter apenas um responsável.')
     }
 

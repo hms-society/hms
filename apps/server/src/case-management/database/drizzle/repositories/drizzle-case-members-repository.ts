@@ -39,16 +39,16 @@ export class DrizzleCaseMembersRepository
     caseId: string,
     collaboratorIds: readonly string[],
   ) {
-    if (collaboratorIds.length === 0) return []
-
     const records = await this.database
       .select({ collaboratorId: caseMemberModel.collaboratorId })
       .from(caseMemberModel)
       .where(
-        and(
-          eq(caseMemberModel.caseId, caseId),
-          inArray(caseMemberModel.collaboratorId, [...collaboratorIds]),
-        ),
+        collaboratorIds.length === 0
+          ? eq(caseMemberModel.caseId, caseId)
+          : and(
+              eq(caseMemberModel.caseId, caseId),
+              inArray(caseMemberModel.collaboratorId, [...collaboratorIds]),
+            ),
       )
 
     return records.map((record) => record.collaboratorId)
