@@ -1,7 +1,7 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import type { PaginationResponse } from '#shared/responses/pagination-response'
-import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
+import { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
 import type {
   CaseEligibleCollaborator,
   CaseTeamCandidatesQuery,

@@ -6,7 +6,7 @@ import type {
 import type { UseCase } from '#shared/interfaces/use-case'
 import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
+import { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
 import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
 import type { CaseEligibilitySnapshot } from '../domain/structures'
 import type { CaseTeamHistoryCreation } from '../domain/entities'
@@ -66,7 +66,7 @@ export class EnsureCaseManagerContinuityUseCase
     request: EnsureCaseManagerContinuityRequest,
   ) {
     const fingerprint = eligibilityChangeFingerprint(request)
-    const pending = []
+    const pending: typeof cases = []
     for (const entry of cases) {
       if (!entry.legalCase) continue
       const previous = await scope.cases.caseTeamOperationsRepository.findByKey(

@@ -3,7 +3,6 @@ import type {
   LegalCaseCreation,
   LegalCaseSummary,
   CaseMemberCreation,
-  CaseTeamMemberCreation,
 } from '../domain/entities'
 import type { CaseChecklistGate, LegalCaseStatus } from '../domain/structures'
 
@@ -23,7 +22,7 @@ export type HomologateDossierRepositoryParams = {
 
 export type CreateCaseWithTeamParams = {
   legalCase: Omit<LegalCaseCreation, 'publicCode'>
-  team: Array<Omit<CaseMemberCreation, 'caseId'> | Omit<CaseTeamMemberCreation, 'caseId'>>
+  team: Array<Omit<CaseMemberCreation, 'caseId'>>
 }
 
 export interface LegalCasesRepository {

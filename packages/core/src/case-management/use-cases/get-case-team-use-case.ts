@@ -2,14 +2,15 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeam } from '../domain/structures'
 import type { CaseMember } from '../domain/entities'
-import { CaseTeamRole } from '../domain/structures'
+import { CaseTeamRole, LegalCaseStatus } from '../domain/structures'
 import type {
   CaseTeamMembersRepository,
   CaseCollaboratorsProvider,
   LegalCasesRepository,
 } from '../interfaces'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
-import { UserStatus, CollaboratorProfile } from '#identity/domain/structures'
+import { UserStatus, CollaboratorProfile } from '#shared/domain/structures'
+import { isEligibleCaseCollaborator } from './case-team-mutation-helpers'
 
 export type CaseActorRequest = { caseId: string; actorId: string }
 
@@ -42,17 +43,20 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
         this.caseCollaboratorsProvider.findById(member.collaboratorId),
       ),
     )
+    const projectedMembers = projectCurrentMembers(currentMembers, profiles)
     return {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       status: legalCase.status,
       teamVersion: legalCase.teamVersion ?? 0,
-      members: projectCurrentMembers(currentMembers, profiles),
-      total: currentMembers.length,
+      members: projectedMembers,
+      total: projectedMembers.length,
       activeManagerCount: countEligibleManagers(currentMembers, profiles),
       canManage:
-        actor.profile === CollaboratorProfile.Admin ||
-        actorMembership?.role === CaseTeamRole.Manager,
+        legalCase.status !== LegalCaseStatus.Closed &&
+        (actor.profile === CollaboratorProfile.Admin ||
+          (actorMembership?.role === CaseTeamRole.Manager &&
+            isEligibleCaseCollaborator(actor.profile, actor.status))),
       requiresAdministrativeReason: actor.profile === CollaboratorProfile.Admin,
     }
   }
@@ -102,13 +106,9 @@ function countEligibleManagers(
 }
 
 function isLegalProfile(profile: string): boolean {
-  return (
-    profile === CollaboratorProfile.Lawyer ||
-    profile === CollaboratorProfile.Paralegal ||
-    profile === CollaboratorProfile.Supervisor
-  )
+  return isEligibleCaseCollaborator(profile, UserStatus.Active)
 }
 
 function isEligibleProfile(profile?: string, status?: string): boolean {
-  return status === UserStatus.Active && Boolean(profile && isLegalProfile(profile))
+  return isEligibleCaseCollaborator(profile ?? '', status ?? '')
 }
