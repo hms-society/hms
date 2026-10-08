@@ -10,8 +10,8 @@ import type {
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
 import { CancelDocumentGenerationUseCase } from '../../document-production/use-cases/cancel-document-generation-use-case'
-import { CollaboratorProfile } from '../../identity/domain/structures'
-import type { CollaboratorProfile as CollaboratorProfileValue } from '../../identity/domain/structures'
+import { CollaboratorProfile } from '#shared/domain/structures'
+import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../shared/interfaces'
 import { CaseChecklistGateDecision, LegalCaseStatus } from '../domain/structures'
 import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-document-generation-error'

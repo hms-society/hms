@@ -317,6 +317,7 @@ function fakeLegalCaseSummary(
     publicCode: legalCase.publicCode,
     title: legalCase.title,
     status: legalCase.status,
+    teamVersion: legalCase.teamVersion,
     clientName: 'Cliente HMS',
     legalArea: 'Cível',
     legalTopic: 'Contratos',
