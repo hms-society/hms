@@ -41,7 +41,7 @@ export class DrizzleAuditLogsRepository
         .select()
         .from(auditEventModel)
         .where(where)
-        .orderBy(desc(auditEventModel.occurredAt))
+        .orderBy(desc(auditEventModel.occurredAt), desc(auditEventModel.id))
         .limit(query.limit)
         .offset(offset),
       this.database.select({ total: count() }).from(auditEventModel).where(where),
