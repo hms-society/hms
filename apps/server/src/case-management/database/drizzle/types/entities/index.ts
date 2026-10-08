@@ -1,5 +1,7 @@
 export * from './drizzle-case-checklist-item'
 export * from './drizzle-case-member'
+export * from './drizzle-case-team-history'
+export * from './drizzle-case-team-operation'
 export * from './drizzle-checklist-template'
 export * from './drizzle-checklist-template-item'
 export * from './drizzle-legal-case'

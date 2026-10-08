@@ -1,10 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Optional } from '@nestjs/common'
 import type { CaseMembersRepository } from '@hms/core/case-management/interfaces'
 
 import { DrizzleCaseMemberMapper } from '@/case-management/database/drizzle/mappers'
 import { caseMemberModel } from '@/case-management/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+import { and, eq } from 'drizzle-orm'
+import type { Database } from '@/shared/database/drizzle/drizzle-client'
+
+type CaseManagementDatabaseExecutor = Parameters<
+  Parameters<Database['transaction']>[0]
+>[0]
 
 @Injectable()
 export class DrizzleCaseMembersRepository
@@ -15,8 +21,60 @@ export class DrizzleCaseMembersRepository
     drizzle: DrizzleClient,
     @Inject(DrizzleCaseMemberMapper)
     private readonly caseMemberMapper: DrizzleCaseMemberMapper,
+    @Optional() private readonly executor?: CaseManagementDatabaseExecutor,
   ) {
     super(drizzle)
+  }
+
+  protected get database() {
+    return this.executor ?? this.drizzleClient.requireDatabase()
+  }
+
+  async findByCaseAndCollaborator(caseId: string, collaboratorId: string) {
+    const [member] = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(
+        and(
+          eq(caseMemberModel.caseId, caseId),
+          eq(caseMemberModel.collaboratorId, collaboratorId),
+        ),
+      )
+      .limit(1)
+    return member ? this.caseMemberMapper.toDomain(member) : undefined
+  }
+
+  async listByCaseId(caseId: string) {
+    const members = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(eq(caseMemberModel.caseId, caseId))
+    return members.map((member) => this.caseMemberMapper.toDomain(member))
+  }
+
+  async listByCollaboratorId(collaboratorId: string) {
+    const members = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(eq(caseMemberModel.collaboratorId, collaboratorId))
+    return members.map((member) => this.caseMemberMapper.toDomain(member))
+  }
+
+  async replace(
+    membershipId: string,
+    changes: Parameters<CaseMembersRepository['replace']>[1],
+  ) {
+    const [member] = await this.database
+      .update(caseMemberModel)
+      .set({
+        ...changes,
+        removedAt: changes.removedAt ?? null,
+        removedBy: changes.removedBy ?? null,
+      })
+      .where(eq(caseMemberModel.id, membershipId))
+      .returning()
+    if (!member) throw new Error('Case member disappeared while updating.')
+    return this.caseMemberMapper.toDomain(member)
   }
 
   async addMany(

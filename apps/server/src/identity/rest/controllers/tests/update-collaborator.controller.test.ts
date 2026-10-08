@@ -9,7 +9,7 @@ import { DrizzleCollaboratorsRepository } from '@/identity/database/drizzle/repo
 describe('Update Collaborator Controller [PATCH /collaborators/:collaboratorId]', () => {
   let fixture: IdentityModuleFixture
   beforeAll(async () => {
-    fixture = await IdentityModuleFixture.register(UpdateCollaboratorController)
+    fixture = await IdentityModuleFixture.register(UpdateCollaboratorController, true)
   })
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture?.close())

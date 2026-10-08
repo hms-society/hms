@@ -1,12 +1,11 @@
 import { sql } from 'drizzle-orm'
 import {
-  boolean,
   index,
   pgTable,
   timestamp,
   uniqueIndex,
   uuid,
-  varchar,
+  boolean,
 } from 'drizzle-orm/pg-core'
 
 import { caseMemberRoleModel } from '@/case-management/database/drizzle/models/case-member-role-model'
@@ -21,12 +20,13 @@ export const caseMemberModel = pgTable(
       .references(() => legalCaseModel.id, { onDelete: 'cascade' }),
     collaboratorId: uuid('collaborator_id').notNull(),
     role: caseMemberRoleModel('role').notNull(),
-    permission: varchar('permission', { length: 50 }).default('visualização').notNull(),
-    isPrimary: boolean('is_primary').default(false).notNull(),
     assignedAt: timestamp('assigned_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
     assignedBy: uuid('assigned_by').notNull(),
+    removedAt: timestamp('removed_at', { withTimezone: true, mode: 'date' }),
+    removedBy: uuid('removed_by'),
+    archivedLegacy: boolean('archived_legacy').default(false).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
       .defaultNow()
       .notNull(),
@@ -38,8 +38,8 @@ export const caseMemberModel = pgTable(
     ),
     index('case_members_case_id_idx').on(table.caseId),
     index('case_members_collaborator_id_idx').on(table.collaboratorId),
-    uniqueIndex('case_members_one_primary_per_case_uidx')
+    index('case_members_active_case_id_idx')
       .on(table.caseId)
-      .where(sql`${table.isPrimary} = true`),
+      .where(sql`${table.removedAt} IS NULL AND ${table.archivedLegacy} = false`),
   ],
 )
