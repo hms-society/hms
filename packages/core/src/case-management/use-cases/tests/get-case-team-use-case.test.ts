@@ -171,6 +171,31 @@ describe('Get Case Team Use Case', () => {
     })
   })
 
+  it('rejects an ineligible Manager from viewing the team', async () => {
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: TEST_CASE_ID }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue([
+      CaseMemberFaker.fake({
+        id: 'membership-1',
+        caseId: TEST_CASE_ID,
+        collaboratorId: TEST_ACTOR_ID,
+        role: CaseTeamRole.Manager,
+      }),
+    ])
+    mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Estagiário',
+      email: 'intern@example.com',
+      profile: CollaboratorProfile.Intern,
+      status: UserStatus.Active,
+    })
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+  })
+
   it('reports the total from the projected members when a collaborator is missing', async () => {
     const manager = CaseMemberFaker.fake({
       id: 'membership-1',

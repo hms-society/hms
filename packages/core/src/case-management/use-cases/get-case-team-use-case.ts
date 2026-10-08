@@ -10,6 +10,7 @@ import type {
 } from '../interfaces'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { UserStatus, CollaboratorProfile } from '#shared/domain/structures'
+import { isEligibleCaseCollaborator } from './case-team-mutation-helpers'
 
 export type CaseActorRequest = { caseId: string; actorId: string }
 
@@ -54,7 +55,8 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
       canManage:
         legalCase.status !== LegalCaseStatus.Closed &&
         (actor.profile === CollaboratorProfile.Admin ||
-          actorMembership?.role === CaseTeamRole.Manager),
+          (actorMembership?.role === CaseTeamRole.Manager &&
+            isEligibleCaseCollaborator(actor.profile, actor.status))),
       requiresAdministrativeReason: actor.profile === CollaboratorProfile.Admin,
     }
   }
@@ -104,13 +106,9 @@ function countEligibleManagers(
 }
 
 function isLegalProfile(profile: string): boolean {
-  return (
-    profile === CollaboratorProfile.Lawyer ||
-    profile === CollaboratorProfile.Paralegal ||
-    profile === CollaboratorProfile.Supervisor
-  )
+  return isEligibleCaseCollaborator(profile, UserStatus.Active)
 }
 
 function isEligibleProfile(profile?: string, status?: string): boolean {
-  return status === UserStatus.Active && Boolean(profile && isLegalProfile(profile))
+  return isEligibleCaseCollaborator(profile ?? '', status ?? '')
 }
