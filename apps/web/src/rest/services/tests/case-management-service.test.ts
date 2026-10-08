@@ -4,6 +4,15 @@ import type { RestClient } from '@hms/core/shared/interfaces'
 import { CaseManagementService } from '../case-management-service'
 
 describe('CaseManagementService', () => {
+  it('gets the current team for a case', async () => {
+    const restClient = makeRestClient()
+    const service = CaseManagementService(restClient)
+
+    await service.getCaseTeam('case-1')
+
+    expect(restClient.get).toHaveBeenCalledWith('/cases/case-1/team')
+  })
+
   it('generates a case portal link with upload permission', async () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)
