@@ -111,10 +111,7 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     }
 
     const now = this.datetimeProvider.now()
-    if (
-      changes.status === CaseTaskStatus.Completed &&
-      currentTask.status !== CaseTaskStatus.Completed
-    ) {
+    if (changes.status === CaseTaskStatus.Completed) {
       changes.completedAt = now
       changes.completedById = request.actorId
     }
