@@ -1,4 +1,4 @@
-import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
+import { CaseTeamRole } from '@hms/core/case-management/domain/structures'
 import { z } from 'zod'
 import { uuidSchema } from '../../shared/schemas/uuid-schema'
 
@@ -12,11 +12,11 @@ export const caseTeamMutationSchema = z
 
 export const addCaseTeamMemberSchema = caseTeamMutationSchema.extend({
   collaboratorId: uuidSchema,
-  role: z.enum(CaseMemberRole),
+  role: z.enum(CaseTeamRole),
 })
 
 export const changeCaseTeamMemberRoleSchema = caseTeamMutationSchema.extend({
-  role: z.enum(CaseMemberRole),
+  role: z.enum(CaseTeamRole),
 })
 
 export const removeCaseTeamMemberSchema = caseTeamMutationSchema

@@ -6,7 +6,7 @@ import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
 import {
-  CaseMemberRole,
+  CaseTeamRole,
   type CaseTeamHistoryKind,
   LegalCaseStatus,
 } from '../domain/structures'
@@ -124,7 +124,7 @@ async function resolveMutationReplay(
 ): Promise<CaseTeamMutationPreparation> {
   const replay = await findReplay(scope, request, context.fingerprint)
   if (replay) return { replay }
-  if (legalCase.teamVersion !== request.expectedTeamVersion) {
+  if ((legalCase.teamVersion ?? 0) !== request.expectedTeamVersion) {
     throw new ConflictError('A equipe mudou. Atualize e confirme novamente.')
   }
   return { context }
@@ -214,7 +214,7 @@ function isActiveManager(member: CaseMember | undefined): boolean {
     member &&
       !member.removedAt &&
       !member.archivedLegacy &&
-      member.role === CaseMemberRole.Manager,
+      member.role === CaseTeamRole.Manager,
   )
 }
 

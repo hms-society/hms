@@ -2,9 +2,9 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeam } from '../domain/structures'
 import type { CaseMember } from '../domain/entities'
-import { CaseMemberRole } from '../domain/structures'
+import { CaseTeamRole } from '../domain/structures'
 import type {
-  CaseMembersRepository,
+  CaseTeamMembersRepository,
   CaseCollaboratorsProvider,
   LegalCasesRepository,
 } from '../interfaces'
@@ -16,7 +16,7 @@ export type CaseActorRequest = { caseId: string; actorId: string }
 export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
-    private readonly caseMembersRepository: CaseMembersRepository,
+    private readonly caseMembersRepository: CaseTeamMembersRepository,
     private readonly caseCollaboratorsProvider: CaseCollaboratorsProvider,
   ) {}
 
@@ -46,13 +46,13 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
       status: legalCase.status,
-      teamVersion: legalCase.teamVersion,
+      teamVersion: legalCase.teamVersion ?? 0,
       members: projectCurrentMembers(currentMembers, profiles),
       total: currentMembers.length,
       activeManagerCount: countEligibleManagers(currentMembers, profiles),
       canManage:
         actor.profile === CollaboratorProfile.Admin ||
-        actorMembership?.role === CaseMemberRole.Manager,
+        actorMembership?.role === CaseTeamRole.Manager,
       requiresAdministrativeReason: actor.profile === CollaboratorProfile.Admin,
     }
   }
@@ -69,7 +69,7 @@ function ensureActorCanViewTeam(
 }
 
 function projectCurrentMembers(
-  members: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
+  members: Awaited<ReturnType<CaseTeamMembersRepository['listByCaseId']>>,
   profiles: Awaited<ReturnType<CaseCollaboratorsProvider['findById']>>[],
 ) {
   return members.flatMap((member, index) => {
@@ -91,12 +91,12 @@ function projectCurrentMembers(
 }
 
 function countEligibleManagers(
-  members: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
+  members: Awaited<ReturnType<CaseTeamMembersRepository['listByCaseId']>>,
   profiles: Awaited<ReturnType<CaseCollaboratorsProvider['findById']>>[],
 ): number {
   return members.filter(
     (member, index) =>
-      member.role === CaseMemberRole.Manager &&
+      member.role === CaseTeamRole.Manager &&
       isEligibleProfile(profiles[index]?.profile, profiles[index]?.status),
   ).length
 }

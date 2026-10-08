@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../../domain/structures'
+import { CaseTeamRole, CaseTeamHistoryKind } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ChangeCaseTeamMemberRoleUseCase } from '../change-case-team-member-role-use-case'
 import {
@@ -31,13 +31,13 @@ describe('Change Case Team Member Role Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const target = CaseMemberFaker.fake({
       id: '00000000-0000-4000-8000-000000000006',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     })
     const history = { id: 'history-1' } as never
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
@@ -45,7 +45,7 @@ describe('Change Case Team Member Role Use Case', () => {
     mocks.caseMembersRepository.listByCaseId.mockResolvedValue([manager, target])
     mocks.caseMembersRepository.replace.mockResolvedValue({
       ...target,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
       collaboratorId: id,
@@ -63,7 +63,7 @@ describe('Change Case Team Member Role Use Case', () => {
         caseId: TEST_CASE_ID,
         actorId: TEST_ACTOR_ID,
         membershipId: target.id,
-        role: CaseMemberRole.Manager,
+        role: CaseTeamRole.Manager,
         expectedTeamVersion: 3,
         operationId: TEST_OPERATION_ID,
         reason: '   ',
@@ -77,7 +77,7 @@ describe('Change Case Team Member Role Use Case', () => {
 
     expect(mocks.caseMembersRepository.replace).toHaveBeenCalledWith(
       target.id,
-      expect.objectContaining({ role: CaseMemberRole.Manager }),
+      expect.objectContaining({ role: CaseTeamRole.Manager }),
     )
     expect(mocks.legalCasesRepository.replaceTeamVersion).toHaveBeenCalledWith(
       TEST_CASE_ID,
@@ -88,8 +88,8 @@ describe('Change Case Team Member Role Use Case', () => {
         caseId: TEST_CASE_ID,
         membershipId: target.id,
         kind: CaseTeamHistoryKind.RoleChanged,
-        previousRole: CaseMemberRole.Collaborator,
-        nextRole: CaseMemberRole.Manager,
+        previousRole: CaseTeamRole.Collaborator,
+        nextRole: CaseTeamRole.Manager,
         teamVersion: 4,
         occurredAt: TEST_AT,
         reason: undefined,
@@ -103,7 +103,7 @@ describe('Change Case Team Member Role Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
@@ -122,7 +122,7 @@ describe('Change Case Team Member Role Use Case', () => {
         caseId: TEST_CASE_ID,
         actorId: TEST_ACTOR_ID,
         membershipId: manager.id,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
         expectedTeamVersion: 3,
         operationId: TEST_OPERATION_ID,
       }),
@@ -139,20 +139,20 @@ describe('Change Case Team Member Role Use Case', () => {
       id: '00000000-0000-4000-8000-000000000005',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const target = CaseMemberFaker.fake({
       id: '00000000-0000-4000-8000-000000000006',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseMembersRepository.findByCaseAndCollaborator.mockResolvedValue(actor)
     mocks.caseMembersRepository.listByCaseId.mockResolvedValue([actor, target])
     mocks.caseMembersRepository.replace.mockResolvedValue({
       ...target,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     })
     mocks.legalCasesRepository.replaceTeamVersion.mockResolvedValue(4)
     mocks.caseTeamHistoriesRepository.add.mockResolvedValue({ id: 'history-1' } as never)
@@ -169,7 +169,7 @@ describe('Change Case Team Member Role Use Case', () => {
         caseId: TEST_CASE_ID,
         actorId: TEST_ACTOR_ID,
         membershipId: target.id,
-        role: CaseMemberRole.Collaborator,
+        role: CaseTeamRole.Collaborator,
         expectedTeamVersion: 3,
         operationId: TEST_OPERATION_ID,
       }),
@@ -181,7 +181,7 @@ describe('Change Case Team Member Role Use Case', () => {
 
     expect(mocks.caseMembersRepository.replace).toHaveBeenCalledWith(
       target.id,
-      expect.objectContaining({ role: CaseMemberRole.Collaborator }),
+      expect.objectContaining({ role: CaseTeamRole.Collaborator }),
     )
   })
 
@@ -191,7 +191,7 @@ describe('Change Case Team Member Role Use Case', () => {
       id: TEST_TARGET_ID,
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
     mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
@@ -204,7 +204,7 @@ describe('Change Case Team Member Role Use Case', () => {
     mocks.caseMembersRepository.listByCaseId.mockResolvedValue([target])
     mocks.caseMembersRepository.replace.mockResolvedValue({
       ...target,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     mocks.legalCasesRepository.replaceTeamVersion.mockResolvedValue(4)
     mocks.caseTeamHistoriesRepository.add.mockResolvedValue({ id: 'history-1' } as never)
@@ -214,7 +214,7 @@ describe('Change Case Team Member Role Use Case', () => {
         caseId: TEST_CASE_ID,
         actorId: TEST_ACTOR_ID,
         membershipId: TEST_TARGET_ID,
-        role: CaseMemberRole.Manager,
+        role: CaseTeamRole.Manager,
         expectedTeamVersion: 3,
         operationId: TEST_OPERATION_ID,
         reason: '  ok  ',

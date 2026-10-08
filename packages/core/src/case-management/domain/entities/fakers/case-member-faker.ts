@@ -10,7 +10,7 @@ export class CaseMemberFaker {
       id: faker.string.uuid(),
       caseId: faker.string.uuid(),
       collaboratorId: faker.string.uuid(),
-      role: CaseMemberRole.Collaborator,
+      role: CaseMemberRole.Lawyer,
       assignedAt,
       assignedBy: faker.string.uuid(),
       archivedLegacy: false,
