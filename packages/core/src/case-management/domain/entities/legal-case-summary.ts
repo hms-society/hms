@@ -7,7 +7,7 @@ export type LegalCaseSummary = Pick<Entity, 'id'> & {
   publicCode: string
   title: string
   status: LegalCaseStatus
-  teamVersion: number
+  teamVersion?: number
   clientName: string
   legalArea: string
   legalTopic: string

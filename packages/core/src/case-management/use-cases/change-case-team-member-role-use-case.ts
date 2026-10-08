@@ -4,7 +4,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { ChangeCaseTeamMemberRoleRequest } from './change-case-team-member-role-request'
 import {
@@ -72,7 +72,7 @@ export class ChangeCaseTeamMemberRoleUseCase
     scope: CaseTeamScope,
     caseId: string,
     target: CaseMember,
-    nextRole: CaseMemberRole,
+    nextRole: CaseTeamRole,
   ): Promise<void> {
     const active = (await scope.caseMembersRepository.listByCaseId(caseId)).filter(
       (member) => !member.removedAt && !member.archivedLegacy,
@@ -82,12 +82,12 @@ export class ChangeCaseTeamMemberRoleUseCase
         scope.caseCollaboratorsProvider.findById(member.collaboratorId),
       ),
     )
-    if (target.role !== CaseMemberRole.Manager || nextRole === CaseMemberRole.Manager)
+    if (target.role !== CaseTeamRole.Manager || nextRole === CaseTeamRole.Manager)
       return
     const anotherManager = active.some(
       (member, index) =>
         member.id !== target.id &&
-        member.role === CaseMemberRole.Manager &&
+        member.role === CaseTeamRole.Manager &&
         collaborators[index] !== undefined &&
         isEligibleCaseCollaborator(
           collaborators[index].profile,

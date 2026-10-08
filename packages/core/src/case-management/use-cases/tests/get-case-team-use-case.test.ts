@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseMemberRole } from '../../domain/structures'
+import { CaseTeamRole } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { GetCaseTeamUseCase } from '../get-case-team-use-case'
@@ -29,13 +29,13 @@ describe('Get Case Team Use Case', () => {
       id: 'membership-1',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseMemberRole.Manager,
+      role: CaseTeamRole.Manager,
     })
     const collaborator = CaseMemberFaker.fake({
       id: 'membership-2',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseMemberRole.Collaborator,
+      role: CaseTeamRole.Collaborator,
     })
     const removed = CaseMemberFaker.fake({
       id: 'membership-3',
@@ -73,13 +73,13 @@ describe('Get Case Team Use Case', () => {
         {
           membershipId: manager.id,
           collaboratorId: TEST_ACTOR_ID,
-          role: CaseMemberRole.Manager,
+          role: CaseTeamRole.Manager,
           isEligible: true,
         },
         {
           membershipId: collaborator.id,
           collaboratorId: TEST_TARGET_ID,
-          role: CaseMemberRole.Collaborator,
+          role: CaseTeamRole.Collaborator,
           isEligible: true,
         },
       ],

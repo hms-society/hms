@@ -2,7 +2,7 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeamHistory } from '../domain/entities'
-import type { CaseMembersRepository, CaseCollaboratorsProvider, CaseTeamHistoriesRepository, LegalCasesRepository } from '../interfaces'
+import type { CaseTeamMembersRepository, CaseCollaboratorsProvider, CaseTeamHistoriesRepository, LegalCasesRepository } from '../interfaces'
 import type { ListCaseTeamHistoryRequest } from './list-case-team-history-request'
 import type { PaginationResponse } from '#shared/responses/pagination-response'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
@@ -10,7 +10,7 @@ import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 export class ListCaseTeamHistoryUseCase implements UseCase<ListCaseTeamHistoryRequest, PaginationResponse<CaseTeamHistory>> {
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
-    private readonly caseMembersRepository: CaseMembersRepository,
+    private readonly caseMembersRepository: CaseTeamMembersRepository,
     private readonly historiesRepository: CaseTeamHistoriesRepository,
     private readonly collaboratorsProvider: CaseCollaboratorsProvider,
   ) {}

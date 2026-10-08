@@ -1,10 +1,10 @@
 import type { Entity } from '#shared/domain/entities/entity'
-import type { CaseMemberLegacyRole, CaseMemberRole } from '../structures'
+import type { CaseMemberRole, CaseTeamRole } from '../structures'
 
 export type CaseMember = Entity & {
   caseId: string
   collaboratorId: string
-  role: CaseMemberRole | CaseMemberLegacyRole
+  role: CaseMemberRole | CaseTeamRole
   /** Legacy fields remain available while existing case creation is migrated. */
   permission?: string
   isPrimary?: boolean

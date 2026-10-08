@@ -2,9 +2,9 @@ import type { CaseIdentityTransaction } from '#shared/interfaces/case-identity-t
 import type { DatetimeProvider, UseCase } from '#shared/interfaces'
 import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import type { CaseMember, CaseMemberCreation } from '../domain/entities'
+import type { CaseMember, CaseTeamMemberCreation } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { AddCaseTeamMemberRequest } from './add-case-team-member-request'
 import {
@@ -59,7 +59,7 @@ export class AddCaseTeamMemberUseCase
   private async ensureManagerRemains(
     scope: CaseTeamScope,
     caseId: string,
-    role: CaseMemberRole,
+    role: CaseTeamRole,
   ): Promise<void> {
     const members = await scope.caseMembersRepository.listByCaseId(caseId)
     const active = members.filter((member) => !member.removedAt && !member.archivedLegacy)
@@ -70,14 +70,14 @@ export class AddCaseTeamMemberUseCase
     )
     const hasManager = active.some(
       (member, index) =>
-        member.role === CaseMemberRole.Manager &&
+        member.role === CaseTeamRole.Manager &&
         collaborators[index] !== undefined &&
         isEligibleCaseCollaborator(
           collaborators[index].profile,
           collaborators[index].status,
         ),
     )
-    if (!hasManager && role !== CaseMemberRole.Manager) {
+    if (!hasManager && role !== CaseTeamRole.Manager) {
       throw new ConflictError('O Caso precisa manter um Gestor elegível.')
     }
   }
@@ -97,7 +97,7 @@ export class AddCaseTeamMemberUseCase
         removedBy: undefined,
       })
     }
-    const creation: CaseMemberCreation = {
+    const creation: CaseTeamMemberCreation = {
       caseId: request.caseId,
       collaboratorId: request.collaboratorId,
       role: request.role,
