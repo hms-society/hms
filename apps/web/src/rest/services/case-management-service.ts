@@ -7,6 +7,7 @@ import type {
   Pending,
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
+import type { CaseTeam } from '@hms/core/case-management/domain/structures'
 import type {
   CasePortalAccessSummary,
   GrantCasePortalAccessResponse,
@@ -78,6 +79,10 @@ export const CaseManagementService = (
 
     getLegalCaseDetails(caseId) {
       return restClient.get<LegalCaseSummary>(`/cases/${caseId}`)
+    },
+
+    getCaseTeam(caseId) {
+      return restClient.get<CaseTeam>(`/cases/${caseId}/team`)
     },
 
     grantCasePortalAccess(caseId, request) {
