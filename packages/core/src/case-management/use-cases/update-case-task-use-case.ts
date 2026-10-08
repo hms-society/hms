@@ -1,5 +1,10 @@
 import type { UseCase } from '#shared/interfaces/use-case'
-import { BadRequestError, ConflictError, NotFoundError } from '#shared/domain/errors'
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '#shared/domain/errors'
 import type { CaseTask, CaseTaskUpdate } from '../domain/entities'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import {
@@ -28,6 +33,13 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     const currentTask = await this.caseTasksRepository.findById(request.caseTaskId)
     if (!currentTask || currentTask.caseId !== request.caseId) {
       throw new NotFoundError('Tarefa ou prazo não encontrado.')
+    }
+    const activeMembers =
+      await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(request.caseId, [
+        request.actorId,
+      ])
+    if (!activeMembers.includes(request.actorId)) {
+      throw new ForbiddenError('O usuário não possui acesso a este caso.')
     }
     if (currentTask.status === CaseTaskStatus.Completed) {
       throw new BadRequestError('Tarefas concluídas não podem ser editadas.')

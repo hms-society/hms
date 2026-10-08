@@ -96,4 +96,26 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
       version: task.version,
     })
   })
+
+  it('rejects updating a task when the authenticated collaborator is not a case member', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+    const task = await fixture.registerCaseTask(legalCase.id, {
+      createdById: collaborator.collaboratorId,
+    })
+
+    await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/tasks/${task.id}`)
+      .send({ version: task.version, description: 'Alteração indevida' })
+      .expect(403)
+
+    expect(await fixture.findCaseTask(task.id)).toMatchObject({
+      description: task.description,
+      version: task.version,
+    })
+  })
 })

@@ -1,5 +1,5 @@
 import type { UseCase } from '#shared/interfaces/use-case'
-import { BadRequestError } from '#shared/domain/errors'
+import { BadRequestError, ForbiddenError } from '#shared/domain/errors'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
 import type { CaseTask, CaseTaskReminderCreation } from '../domain/entities'
 import {
@@ -43,7 +43,10 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
 
     this.validateRequest(request, title, description, customType, assigneeIds, now)
     const plannedTime = normalizeCaseTaskTime(request.type, request.plannedTime)
-    await this.ensureActiveAssignees(request.caseId, assigneeIds)
+    await this.ensureActiveCaseMembers(request.caseId, [
+      request.createdById,
+      ...assigneeIds,
+    ])
 
     return this.caseTasksRepository.add({
       caseId: request.caseId,
@@ -64,14 +67,22 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     })
   }
 
-  private async ensureActiveAssignees(caseId: string, assigneeIds: readonly string[]) {
+  private async ensureActiveCaseMembers(
+    caseId: string,
+    collaboratorIds: readonly string[],
+  ) {
+    const uniqueCollaboratorIds = [...new Set(collaboratorIds)]
     const activeAssigneeIds =
       await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(
         caseId,
-        assigneeIds,
+        uniqueCollaboratorIds,
       )
 
-    if (activeAssigneeIds.length !== assigneeIds.length) {
+    if (!activeAssigneeIds.includes(collaboratorIds[0] ?? '')) {
+      throw new ForbiddenError('O usuário não possui acesso a este caso.')
+    }
+
+    if (collaboratorIds.slice(1).some((id) => !activeAssigneeIds.includes(id))) {
       throw new BadRequestError(
         'Todos os responsáveis devem pertencer à equipe ativa do caso.',
       )

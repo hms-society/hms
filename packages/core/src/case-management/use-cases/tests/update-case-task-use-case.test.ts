@@ -24,9 +24,9 @@ describe('Update Case Task Use Case', () => {
     })
     datetimeProvider.now.mockReturnValue(now)
     caseTasksRepository.findById.mockResolvedValue(currentTask)
-    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
-      'member-1',
-    ])
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId
+      .mockResolvedValueOnce(['collaborator-1'])
+      .mockResolvedValueOnce(['member-1'])
     caseTasksRepository.replace.mockResolvedValue(updatedTask)
 
     const result = await new UpdateCaseTaskUseCase(
@@ -66,6 +66,9 @@ describe('Update Case Task Use Case', () => {
       CaseTaskFaker.fake({ caseId: 'case-1', version: 2 }),
     )
     caseTasksRepository.replace.mockResolvedValue(undefined)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'collaborator-1',
+    ])
 
     await expect(
       new UpdateCaseTaskUseCase(
@@ -90,6 +93,9 @@ describe('Update Case Task Use Case', () => {
     const datetimeProvider: MockProxy<DatetimeProvider> = mock<DatetimeProvider>()
     const currentTask = CaseTaskFaker.fake({ caseId: 'case-1', version: 2 })
     caseTasksRepository.findById.mockResolvedValue(currentTask)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'collaborator-1',
+    ])
 
     await expect(
       new UpdateCaseTaskUseCase(
@@ -117,6 +123,9 @@ describe('Update Case Task Use Case', () => {
       type: CaseTaskType.Publication,
     })
     caseTasksRepository.findById.mockResolvedValue(currentTask)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'collaborator-1',
+    ])
 
     await expect(
       new UpdateCaseTaskUseCase(
@@ -144,6 +153,9 @@ describe('Update Case Task Use Case', () => {
       status: CaseTaskStatus.Completed,
     })
     caseTasksRepository.findById.mockResolvedValue(currentTask)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'collaborator-1',
+    ])
 
     await expect(
       new UpdateCaseTaskUseCase(

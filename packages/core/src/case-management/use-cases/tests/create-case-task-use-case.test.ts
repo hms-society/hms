@@ -31,6 +31,7 @@ describe('Create Case Task Use Case', () => {
       assigneeIds: ['member-1'],
     })
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
       'member-1',
     ])
     caseTasksRepository.add.mockResolvedValue(createdTask)
@@ -60,7 +61,9 @@ describe('Create Case Task Use Case', () => {
 
   it('rejects an assignee who is not an active member of the case', async () => {
     const useCase = createUseCase()
-    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([])
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
+    ])
 
     await expect(
       useCase.execute({
@@ -77,9 +80,32 @@ describe('Create Case Task Use Case', () => {
     expect(caseTasksRepository.add).not.toHaveBeenCalled()
   })
 
+  it('rejects creating a task when the creator is not an active case member', async () => {
+    const useCase = createUseCase()
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
+      'member-1',
+    ])
+
+    await expect(
+      useCase.execute({
+        caseId: 'case-1',
+        type: CaseTaskType.InternalTask,
+        title: 'Revisar contestação',
+        description: 'Revisar contestação',
+        plannedDate: '2026-10-20',
+        createdById: 'outsider-1',
+        assigneeIds: ['member-1'],
+        reminders: [],
+      }),
+    ).rejects.toThrow('O usuário não possui acesso a este caso.')
+    expect(caseTasksRepository.add).not.toHaveBeenCalled()
+  })
+
   it('requires a custom label for the other type and a non-empty description', async () => {
     const useCase = createUseCase()
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
       'member-1',
     ])
 
@@ -148,6 +174,7 @@ describe('Create Case Task Use Case', () => {
   it('applies type-specific temporal rules', async () => {
     const useCase = createUseCase()
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      'creator-1',
       'member-1',
     ])
     caseTasksRepository.add.mockResolvedValue(CaseTaskFaker.fake())

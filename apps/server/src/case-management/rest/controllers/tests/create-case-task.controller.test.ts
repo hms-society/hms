@@ -71,6 +71,14 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       legalAreaId: collaborator.legalAreaId,
       legalTopicId: collaborator.legalTopicId,
     })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: CaseMemberRole.Lawyer,
+        isPrimary: true,
+      },
+    ])
 
     await request(fixture.app.getHttpServer())
       .post(`/cases/${legalCase.id}/tasks`)
@@ -82,6 +90,26 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
         assigneeIds: ['11111111-1111-4111-8111-111111111111'],
       })
       .expect(400)
+  })
+
+  it('rejects creation when the authenticated collaborator is not a case member', async () => {
+    const collaborator = await fixture.registerCollaborator()
+    const legalCase = await fixture.registerLegalCase({
+      clientId: collaborator.clientId,
+      legalAreaId: collaborator.legalAreaId,
+      legalTopicId: collaborator.legalTopicId,
+    })
+
+    await request(fixture.app.getHttpServer())
+      .post(`/cases/${legalCase.id}/tasks`)
+      .send({
+        type: 'internal_task',
+        title: 'Should not be created',
+        description: 'Should not be created',
+        plannedDate: '2099-01-15',
+        assigneeIds: ['11111111-1111-4111-8111-111111111111'],
+      })
+      .expect(403)
   })
 
   it('rejects more than one responsible collaborator', async () => {
