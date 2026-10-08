@@ -82,8 +82,21 @@ export class ChangeCaseTeamMemberRoleUseCase
         scope.caseCollaboratorsProvider.findById(member.collaboratorId),
       ),
     )
-    if (target.role !== CaseTeamRole.Manager || nextRole === CaseTeamRole.Manager)
-      return
+    const targetIndex = active.findIndex((member) => member.id === target.id)
+    const targetCollaborator = collaborators[targetIndex]
+    if (
+      nextRole === CaseTeamRole.Manager &&
+      (!targetCollaborator ||
+        !isEligibleCaseCollaborator(
+          targetCollaborator.profile,
+          targetCollaborator.status,
+        ))
+    ) {
+      throw new ConflictError(
+        'Somente um colaborador jurídico ativo e elegível pode ser Gestor.',
+      )
+    }
+    if (target.role !== CaseTeamRole.Manager || nextRole === CaseTeamRole.Manager) return
     const anotherManager = active.some(
       (member, index) =>
         member.id !== target.id &&

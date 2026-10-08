@@ -133,6 +133,48 @@ describe('Change Case Team Member Role Use Case', () => {
     expect(mocks.caseTeamHistoriesRepository.add).not.toHaveBeenCalled()
   })
 
+  it('rejects promoting an ineligible collaborator to Manager without writing', async () => {
+    const legalCase = LegalCaseFaker.fake({ id: TEST_CASE_ID, teamVersion: 3 })
+    const manager = CaseMemberFaker.fake({
+      id: '00000000-0000-4000-8000-000000000005',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_ACTOR_ID,
+      role: CaseTeamRole.Manager,
+    })
+    const target = CaseMemberFaker.fake({
+      id: '00000000-0000-4000-8000-000000000006',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_TARGET_ID,
+      role: CaseTeamRole.Collaborator,
+    })
+    mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
+    mocks.caseMembersRepository.findByCaseAndCollaborator.mockResolvedValue(manager)
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue([manager, target])
+    mocks.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
+      collaboratorId: id,
+      professionalName: 'Colaborador',
+      email: `${id}@example.com`,
+      profile:
+        id === TEST_ACTOR_ID ? CollaboratorProfile.Lawyer : CollaboratorProfile.Intern,
+      status: UserStatus.Active,
+    }))
+
+    await expect(
+      useCase.execute({
+        caseId: TEST_CASE_ID,
+        actorId: TEST_ACTOR_ID,
+        membershipId: target.id,
+        role: CaseTeamRole.Manager,
+        expectedTeamVersion: 3,
+        operationId: TEST_OPERATION_ID,
+      }),
+    ).rejects.toThrow('Somente um colaborador jurídico ativo e elegível pode ser Gestor.')
+
+    expect(mocks.caseMembersRepository.replace).not.toHaveBeenCalled()
+    expect(mocks.legalCasesRepository.replaceTeamVersion).not.toHaveBeenCalled()
+    expect(mocks.caseTeamHistoriesRepository.add).not.toHaveBeenCalled()
+  })
+
   it('allows demoting a Manager while another eligible Manager remains', async () => {
     const legalCase = LegalCaseFaker.fake({ id: TEST_CASE_ID, teamVersion: 3 })
     const actor = CaseMemberFaker.fake({
@@ -194,13 +236,14 @@ describe('Change Case Team Member Role Use Case', () => {
       role: CaseTeamRole.Collaborator,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(legalCase)
-    mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
-      collaboratorId: TEST_ACTOR_ID,
-      professionalName: 'Admin',
-      email: 'admin@example.com',
-      profile: CollaboratorProfile.Admin,
+    mocks.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
+      collaboratorId: id,
+      professionalName: id === TEST_ACTOR_ID ? 'Admin' : 'Advogado',
+      email: `${id}@example.com`,
+      profile:
+        id === TEST_ACTOR_ID ? CollaboratorProfile.Admin : CollaboratorProfile.Lawyer,
       status: UserStatus.Active,
-    })
+    }))
     mocks.caseMembersRepository.listByCaseId.mockResolvedValue([target])
     mocks.caseMembersRepository.replace.mockResolvedValue({
       ...target,
