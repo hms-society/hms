@@ -1,6 +1,5 @@
 import type {
   LegalCase,
-  LegalCaseSummary,
   LegalCaseCreation,
   CaseMemberCreation,
 } from '../domain/entities'
@@ -31,7 +30,6 @@ export interface LegalCasesRepository {
   completeChecklist(caseId: string, completedBy: string): Promise<LegalCase | undefined>
   findById(caseId: string): Promise<LegalCase | undefined>
   findByIntakeId(intakeId: string): Promise<LegalCase | undefined>
-  getCaseDetails(caseId: string): Promise<LegalCaseSummary | undefined>
   replaceTeamVersion(caseId: string, expectedTeamVersion: number): Promise<number>
   listByTeamMember(
     collaboratorId: string,

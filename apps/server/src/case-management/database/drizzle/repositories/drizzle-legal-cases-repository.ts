@@ -144,59 +144,6 @@ export class DrizzleLegalCasesRepository
     return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
   }
 
-  async getCaseDetails(
-    caseId: string,
-  ): ReturnType<LegalCasesRepository['getCaseDetails']> {
-    const [assignedCase] = await this.database
-      .select({
-        id: legalCaseModel.id,
-        intakeId: legalCaseModel.intakeId,
-        publicCode: legalCaseModel.publicCode,
-        title: legalCaseModel.title,
-        status: legalCaseModel.status,
-        clientName: sql<string>`coalesce(${clientModel.name}, ${clientModel.legalName}, ${clientModel.tradeName})`,
-        legalArea: legalAreaModel.name,
-        legalTopic: legalTopicModel.name,
-        openedAt: legalCaseModel.openedAt,
-        updatedAt: legalCaseModel.updatedAt,
-        checklistGateDecision: legalCaseModel.checklistGateDecision,
-        checklistGateDecidedAt: legalCaseModel.checklistGateDecidedAt,
-        checklistGateDecidedBy: legalCaseModel.checklistGateDecidedBy,
-        checklistGateRemarks: legalCaseModel.checklistGateRemarks,
-        dossierGateHomologatedAt: legalCaseModel.dossierGateHomologatedAt,
-        dossierGateHomologatedBy: legalCaseModel.dossierGateHomologatedBy,
-      })
-      .from(legalCaseModel)
-      .innerJoin(clientModel, eq(clientModel.id, legalCaseModel.clientId))
-      .innerJoin(legalAreaModel, eq(legalAreaModel.id, legalCaseModel.legalAreaId))
-      .innerJoin(legalTopicModel, eq(legalTopicModel.id, legalCaseModel.legalTopicId))
-      .where(eq(legalCaseModel.id, caseId))
-      .limit(1)
-
-    if (!assignedCase) return undefined
-
-    const teamMembers = await this.database
-      .select({
-        caseId: caseMemberModel.caseId,
-        collaboratorId: caseMemberModel.collaboratorId,
-        name: collaboratorModel.professionalName,
-        role: caseMemberModel.role,
-        permission: caseMemberModel.permission,
-        isPrimary: caseMemberModel.isPrimary,
-      })
-      .from(caseMemberModel)
-      .innerJoin(
-        collaboratorModel,
-        eq(collaboratorModel.id, caseMemberModel.collaboratorId),
-      )
-      .where(eq(caseMemberModel.caseId, caseId))
-
-    return {
-      ...this.legalCaseMapper.toDomain(assignedCase),
-      team: teamMembers,
-    }
-  }
-
   async replaceTeamVersion(caseId: string, expectedTeamVersion: number): Promise<number> {
     const [updated] = await this.database
       .update(legalCaseModel)
