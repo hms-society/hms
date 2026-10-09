@@ -35,8 +35,7 @@ describe('Review Case Document Version Controller [PATCH /cases/:caseId/document
       {
         caseId: legalCase.id,
         collaboratorId: reviewer.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 
@@ -81,8 +80,7 @@ describe('Review Case Document Version Controller [PATCH /cases/:caseId/document
       {
         caseId: legalCase.id,
         collaboratorId: creator.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 
