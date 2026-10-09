@@ -17,4 +17,5 @@ export interface ThirdPartiesRepository {
   findByTaxId(
     taxId: TaxId<'cnpj' | 'official_registration' | 'other_national_document'>,
   ): Promise<ThirdParty | undefined>
+  removeAll(): Promise<void>
 }

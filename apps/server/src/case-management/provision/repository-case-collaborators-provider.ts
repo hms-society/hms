@@ -25,6 +25,20 @@ export class RepositoryCaseCollaboratorsProvider implements CaseCollaboratorsPro
     }
   }
 
+  async findByIds(
+    collaboratorIds: readonly string[],
+  ): Promise<readonly CaseEligibleCollaborator[]> {
+    const collaborators =
+      await this.collaboratorsRepository.findSummariesByIds(collaboratorIds)
+    return collaborators.map((collaborator) => ({
+      collaboratorId: collaborator.collaboratorId,
+      professionalName: collaborator.professionalName,
+      email: collaborator.email,
+      profile: collaborator.profile,
+      status: collaborator.status,
+    }))
+  }
+
   async listEligible(
     query: Parameters<CaseCollaboratorsProvider['listEligible']>[0],
     excludeCollaboratorIds: readonly string[] = [],

@@ -10,6 +10,7 @@ import {
   DrizzleCasePortalAccessGrantMapper,
   DrizzleCaseTeamHistoryMapper,
   DrizzleCaseTeamOperationMapper,
+  DrizzleCaseTaskMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseChecklistItemsRepository,
@@ -21,6 +22,7 @@ import {
   DrizzlePendingsRepository,
   DrizzleCaseTeamHistoriesRepository,
   DrizzleCaseTeamOperationsRepository,
+  DrizzleCaseTasksRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -38,6 +40,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     DrizzleChecklistTemplateMapper,
     DrizzleLegalCaseMapper,
     DrizzleCasePortalAccessGrantMapper,
+    DrizzleCaseTaskMapper,
     DrizzleCaseChecklistItemsRepository,
     DrizzleCaseMembersRepository,
     DrizzleCaseTeamHistoriesRepository,
@@ -51,6 +54,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
       useExisting: DrizzleCasePortalAccessGrantsRepository,
     },
     DrizzlePendingsRepository,
+    DrizzleCaseTasksRepository,
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
       useExisting: DrizzleCaseChecklistItemsRepository,
@@ -83,6 +87,10 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
       provide: CASE_MANAGEMENT_REPOSITORIES.pendings,
       useExisting: DrizzlePendingsRepository,
     },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseTasks,
+      useExisting: DrizzleCaseTasksRepository,
+    },
     CaseManagementSeeder,
     CaseManagementTransactionScopeProvider,
   ],
@@ -96,6 +104,8 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
     CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants,
     CASE_MANAGEMENT_REPOSITORIES.pendings,
+    CASE_MANAGEMENT_REPOSITORIES.caseTasks,
+    CaseCollaboratorsProvisionModule,
     CaseManagementSeeder,
     CaseManagementTransactionScopeProvider,
   ],

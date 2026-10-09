@@ -6,6 +6,7 @@ export interface ClientsRepository {
   addMany(clients: ClientCreation[]): Promise<Client[]>
   removeAll(): Promise<void>
   findById(clientId: string): Promise<Client | undefined>
+  findByIds(clientIds: readonly string[]): Promise<readonly Client[]>
   findByTaxId(taxId: TaxId): Promise<Client | undefined>
   findByPhone(phone: string): Promise<Client[]>
   replace(

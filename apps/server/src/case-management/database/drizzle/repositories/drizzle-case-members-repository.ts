@@ -1,11 +1,11 @@
 import { Inject, Injectable, Optional } from '@nestjs/common'
 import type { CaseMembersRepository } from '@hms/core/case-management/interfaces'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 
 import { DrizzleCaseMemberMapper } from '@/case-management/database/drizzle/mappers'
 import { caseMemberModel } from '@/case-management/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
-import { and, eq } from 'drizzle-orm'
 import type { Database } from '@/shared/database/drizzle/drizzle-client'
 
 type CaseManagementDatabaseExecutor = Parameters<
@@ -52,6 +52,16 @@ export class DrizzleCaseMembersRepository
     return members.map((member) => this.caseMemberMapper.toDomain(member))
   }
 
+  async listByCaseIds(caseIds: readonly string[]) {
+    if (caseIds.length === 0) return []
+
+    const members = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(inArray(caseMemberModel.caseId, [...caseIds]))
+    return members.map((member) => this.caseMemberMapper.toDomain(member))
+  }
+
   async listByCollaboratorId(collaboratorId: string) {
     const members = await this.database
       .select()
@@ -90,6 +100,27 @@ export class DrizzleCaseMembersRepository
     return createdCaseMembers.map((caseMember) =>
       this.caseMemberMapper.toDomain(caseMember),
     )
+  }
+
+  async findActiveCollaboratorIdsByCaseId(
+    caseId: string,
+    collaboratorIds: readonly string[],
+  ) {
+    const records = await this.database
+      .select({ collaboratorId: caseMemberModel.collaboratorId })
+      .from(caseMemberModel)
+      .where(
+        and(
+          eq(caseMemberModel.caseId, caseId),
+          isNull(caseMemberModel.removedAt),
+          eq(caseMemberModel.archivedLegacy, false),
+          ...(collaboratorIds.length > 0
+            ? [inArray(caseMemberModel.collaboratorId, [...collaboratorIds])]
+            : []),
+        ),
+      )
+
+    return records.map((record) => record.collaboratorId)
   }
 
   async removeAll(): Promise<void> {

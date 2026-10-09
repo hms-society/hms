@@ -24,3 +24,7 @@ export { ListCaseTeamCandidatesController } from './list-case-team-candidates.co
 export { AddCaseTeamMemberController } from './add-case-team-member.controller'
 export { ChangeCaseTeamMemberRoleController } from './change-case-team-member-role.controller'
 export { ListCaseTeamHistoryController } from './list-case-team-history.controller'
+export { CreateCaseTaskController } from './create-case-task.controller'
+export { ListCaseTasksController } from './list-case-tasks.controller'
+export { UpdateCaseTaskController } from './update-case-task.controller'
+export { DeleteCaseTaskController } from './delete-case-task.controller'

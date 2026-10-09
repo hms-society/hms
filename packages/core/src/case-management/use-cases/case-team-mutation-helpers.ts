@@ -2,11 +2,11 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { BadRequestError } from '#shared/domain/errors/bad-request-error'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
+import { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
 import {
-  CaseTeamRole,
+  CaseMemberRole,
   type CaseTeamHistoryKind,
   LegalCaseStatus,
 } from '../domain/structures'
@@ -214,7 +214,7 @@ function isActiveManager(member: CaseMember | undefined): boolean {
     member &&
       !member.removedAt &&
       !member.archivedLegacy &&
-      member.role === CaseTeamRole.Manager,
+      member.role === CaseMemberRole.Manager,
   )
 }
 

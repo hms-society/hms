@@ -2,7 +2,6 @@ import type { Entity } from '#shared/domain/entities/entity'
 import type {
   CaseEligibilitySnapshot,
   CaseMemberRole,
-  CaseTeamRole,
   CaseTeamHistoryKind,
 } from '../structures'
 
@@ -14,8 +13,8 @@ export type CaseTeamHistory = Entity & {
   kind: CaseTeamHistoryKind
   occurredAt: Date
   teamVersion: number
-  previousRole?: CaseMemberRole | CaseTeamRole
-  nextRole?: CaseMemberRole | CaseTeamRole
+  previousRole?: CaseMemberRole
+  nextRole?: CaseMemberRole
   previousEligibility?: CaseEligibilitySnapshot
   nextEligibility?: CaseEligibilitySnapshot
   reason?: string

@@ -5,6 +5,7 @@ export interface LegalTopicsRepository {
   findAllByLegalAreaId(legalAreaId: string): Promise<LegalTopic[]>
   findActiveByLegalAreaId(legalAreaId: string): Promise<LegalTopic[]>
   findById(legalTopicId: string): Promise<LegalTopic | undefined>
+  findByIds(legalTopicIds: readonly string[]): Promise<readonly LegalTopic[]>
   findByLegalAreaIdAndName(
     legalAreaId: string,
     name: string,

@@ -157,6 +157,39 @@ describe('useChecklistDossierTab', () => {
     expect(result.current.isDecisionReasonDialogOpen).toBe(false)
   })
 
+  it('enables dossier homologation when an approved checklist exception covers pending items', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          caseDetails: {
+            id: 'case-1',
+            status: 'ready_for_legal_production',
+            checklistGate: {
+              decision: CaseChecklistGateDecision.ApprovedWithException,
+              remarks: 'Procuração dispensada por justificativa aprovada.',
+            },
+            dossierGate: {},
+          } as never,
+          checklist: [{ id: '1', title: 'Procuração', status: 'solicitado' }],
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.isChecklistComplete).toBe(false))
+    expect(result.current.canHomologateDossier).toBe(true)
+  })
+
   it('requires a decision reason before submitting justified decisions', async () => {
     const queryClient = new QueryClient({
       defaultOptions: {

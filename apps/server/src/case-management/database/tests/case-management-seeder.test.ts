@@ -56,6 +56,11 @@ const createSeeder = () => {
       clearCalls.push('team-operations')
     }),
   }
+  const caseTasksRepository = {
+    removeAll: vi.fn(async () => {
+      clearCalls.push('case-tasks')
+    }),
+  }
   const caseChecklistItemsRepository = {
     addMany: vi.fn(async (seeds: readonly unknown[]) => seeds),
     removeAll: vi.fn(async () => {
@@ -84,12 +89,14 @@ const createSeeder = () => {
       caseChecklistItemsRepository as never,
       checklistTemplatesRepository as never,
       checklistTemplateItemsRepository as never,
+      caseTasksRepository as never,
     ),
     repositories: {
       legalCasesRepository,
       caseMembersRepository,
       caseTeamHistoriesRepository,
       caseTeamOperationsRepository,
+      caseTasksRepository,
       caseChecklistItemsRepository,
       checklistTemplatesRepository,
       checklistTemplateItemsRepository,
@@ -107,12 +114,14 @@ describe('CaseManagementSeeder', () => {
     expect(clearCalls).toEqual([
       'team-histories',
       'team-operations',
+      'case-tasks',
       'checklist-items',
       'case-members',
       'legal-cases',
     ])
     expect(repositories.caseTeamHistoriesRepository.removeAll).toHaveBeenCalledOnce()
     expect(repositories.caseTeamOperationsRepository.removeAll).toHaveBeenCalledOnce()
+    expect(repositories.caseTasksRepository.removeAll).toHaveBeenCalledOnce()
     expect(repositories.caseChecklistItemsRepository.removeAll).toHaveBeenCalledOnce()
     expect(repositories.caseMembersRepository.removeAll).toHaveBeenCalledOnce()
     expect(repositories.legalCasesRepository.removeAll).toHaveBeenCalledOnce()

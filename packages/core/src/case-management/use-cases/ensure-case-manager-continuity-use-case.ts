@@ -6,8 +6,8 @@ import type {
 import type { UseCase } from '#shared/interfaces/use-case'
 import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
-import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
+import { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
+import { CaseTeamHistoryKind, CaseMemberRole } from '../domain/structures'
 import type { CaseEligibilitySnapshot } from '../domain/structures'
 import type { CaseTeamHistoryCreation } from '../domain/entities'
 import type { EnsureCaseManagerContinuityRequest } from './ensure-case-manager-continuity-request'
@@ -66,7 +66,7 @@ export class EnsureCaseManagerContinuityUseCase
     request: EnsureCaseManagerContinuityRequest,
   ) {
     const fingerprint = eligibilityChangeFingerprint(request)
-    const pending = []
+    const pending: typeof cases = []
     for (const entry of cases) {
       if (!entry.legalCase) continue
       const previous = await scope.cases.caseTeamOperationsRepository.findByKey(
@@ -93,7 +93,7 @@ export class EnsureCaseManagerContinuityUseCase
       await scope.cases.caseMembersRepository.listByCollaboratorId(collaboratorId)
     const activeManagers = memberships.filter(
       (member) =>
-        member.role === CaseTeamRole.Manager &&
+        member.role === CaseMemberRole.Manager &&
         !member.removedAt &&
         !member.archivedLegacy,
     )
@@ -116,7 +116,7 @@ export class EnsureCaseManagerContinuityUseCase
       const managers = members.filter(
         (candidate) =>
           candidate.id !== membership.id &&
-          candidate.role === CaseTeamRole.Manager &&
+          candidate.role === CaseMemberRole.Manager &&
           !candidate.removedAt &&
           !candidate.archivedLegacy,
       )
