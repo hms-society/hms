@@ -18,7 +18,8 @@ permissions:
 
 concurrency:
   group: hermes-code-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  # Let an in-flight review finish and set its label before a new push is checked.
+  cancel-in-progress: false
 
 jobs:
   review:
@@ -31,6 +32,7 @@ jobs:
 
     steps:
       - name: Check if already reviewed by Hermes
+        id: review_gate
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,10 +44,14 @@ jobs:
           labels="$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json labels --jq '.labels[].name')"
           if grep -q '^hermes-reviewed$' <<< "$labels"; then
             echo "Pull Request #$PR_NUMBER já foi revisada pelo Hermes (label hermes-reviewed presente). Ignorando."
+            echo 'should_review=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          echo 'should_review=true' >> "$GITHUB_OUTPUT"
+
       - name: Checkout trusted base without PR code
+        if: steps.review_gate.outputs.should_review == 'true'
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
@@ -55,6 +61,7 @@ jobs:
           persist-credentials: true
 
       - name: Wait for HMS CI
+        if: steps.review_gate.outputs.should_review == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -116,6 +123,7 @@ jobs:
           exit 1
 
       - name: Prepare review context
+        if: steps.review_gate.outputs.should_review == 'true'
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -182,6 +190,7 @@ jobs:
           echo "Prepared $(wc -l < scoped-files.txt) changed file(s)."
 
       - name: Ask Hermes to review
+        if: steps.review_gate.outputs.should_review == 'true'
         id: hermes
         shell: bash
         env:
@@ -310,6 +319,7 @@ jobs:
           echo "Hermes returned $(jq '.findings | length' review.json) finding(s)."
 
       - name: Publish review conclusion
+        if: steps.review_gate.outputs.should_review == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -357,7 +367,7 @@ jobs:
           test "$published_marker" = 'true'
 
       - name: Mark PR as reviewed by Hermes
-        if: success()
+        if: success() && steps.review_gate.outputs.should_review == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
