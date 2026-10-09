@@ -102,7 +102,12 @@ export class ListCaseDocumentsController {
       const collaboratorIds = [
         ...new Set(
           documents.flatMap(({ versions }) =>
-            versions.map((version) => version.createdByCollaboratorId),
+            versions.flatMap((version) => [
+              version.createdByCollaboratorId,
+              ...(version.reviewedByCollaboratorId
+                ? [version.reviewedByCollaboratorId]
+                : []),
+            ]),
           ),
         ),
       ]
@@ -130,10 +135,16 @@ export class ListCaseDocumentsController {
       ({ document: item }) => item.id === documentId,
     )
     if (!document) return undefined
-    const summaries = await Promise.all(
-      document.versions.map((version) =>
-        this.collaborators.findSummaryById(version.createdByCollaboratorId),
+    const collaboratorIds = [
+      ...new Set(
+        document.versions.flatMap((version) => [
+          version.createdByCollaboratorId,
+          ...(version.reviewedByCollaboratorId ? [version.reviewedByCollaboratorId] : []),
+        ]),
       ),
+    ]
+    const summaries = await Promise.all(
+      collaboratorIds.map((id) => this.collaborators.findSummaryById(id)),
     )
     const names = new Map(
       summaries.flatMap((summary) =>

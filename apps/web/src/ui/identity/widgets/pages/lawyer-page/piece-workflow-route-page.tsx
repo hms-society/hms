@@ -30,29 +30,10 @@ type PieceWorkflowRoutePageProps = {
   adjustmentsRequested?: boolean
 }
 
-const reviewFindings = [
-  {
-    title: 'Tempo de contribuição divergente',
-    detail: 'Conferir o período informado na peça com o CNIS mais recente.',
-    category: 'Divergência',
-  },
-  {
-    title: 'Pedido subsidiário ausente',
-    detail: 'Verificar se cabe pedido subsidiário de reafirmação da DER.',
-    category: 'Lacuna',
-  },
-  {
-    title: 'Número do benefício anterior',
-    detail: 'Confirmar se existe benefício anterior registrado no dossiê.',
-    category: 'Dado faltante',
-  },
-]
-
 export function PieceWorkflowRoutePage({
   mode,
   caseId,
   documentId,
-  adjustmentsRequested = false,
 }: PieceWorkflowRoutePageProps) {
   const {
     document,
@@ -65,6 +46,9 @@ export function PieceWorkflowRoutePage({
     isReadOnlyVersion,
     isDiscardEditsDialogOpen,
     isAuthor,
+    isReviewPending,
+    reviewRequest,
+    isReviewerEligible = !isAuthor,
     isCheckingReviewer,
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
@@ -160,15 +144,22 @@ export function PieceWorkflowRoutePage({
               <h1 className='truncate font-serif text-lg font-semibold'>
                 {document.title}
               </h1>
-              <Badge variant={isReview ? 'info' : 'attention'}>
+              <Badge
+                variant={isReview && version.status !== 'rejected' ? 'info' : 'attention'}
+              >
                 {isReview
-                  ? 'Em revisão'
+                  ? version.status === 'rejected'
+                    ? 'Requer ajustes'
+                    : 'Submetido para revisão'
                   : isReadOnlyVersion
                     ? `Somente leitura · v${version.versionNumber}`
-                    : adjustmentsRequested
-                      ? `Ajustes solicitados · v${version.versionNumber}`
+                    : reviewRequest
+                      ? `Requer ajustes · v${version.versionNumber}`
                       : `Em elaboração · v${version.versionNumber}`}
               </Badge>
+              {isReviewPending ? (
+                <Badge variant='attention'>Pendente de ajustes</Badge>
+              ) : null}
             </div>
           </div>
         </div>
@@ -213,9 +204,7 @@ export function PieceWorkflowRoutePage({
                   onClick={handleOpenReview}
                 >
                   <Icon name='eye' />
-                  {adjustmentsRequested
-                    ? 'Resubmeter para revisão'
-                    : 'Submeter para revisão'}
+                  {reviewRequest ? 'Resubmeter para revisão' : 'Submeter para revisão'}
                 </Button>
               ) : null}
             </>
@@ -234,6 +223,16 @@ export function PieceWorkflowRoutePage({
             Gerando nova versão por IA… O histórico será atualizado automaticamente quando
             o processamento terminar.
           </span>
+        </div>
+      ) : null}
+
+      {isReview && isAuthor && version.status === 'in_review' ? (
+        <div
+          className='border-b border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary'
+          role='status'
+        >
+          <strong>Submetido para revisão</strong> — esta versão foi enviada para revisão
+          técnica.
         </div>
       ) : null}
 
@@ -270,23 +269,35 @@ export function PieceWorkflowRoutePage({
             <section>
               <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
               <p className='mt-1 text-xs text-muted-foreground'>
-                Apontamentos para conferência. A decisão é do revisor.
+                Apontamentos e solicitações reais desta versão.
               </p>
               <div className='mt-3 space-y-2'>
-                {reviewFindings.map((finding, index) => (
-                  <article
-                    key={finding.title}
-                    className='rounded-md border bg-muted/30 p-3'
-                  >
+                {version.status === 'in_review' ? (
+                  <article className='rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive'>
                     <div className='flex items-center justify-between gap-2'>
-                      <h3 className='text-sm font-medium'>
-                        {index + 1}. {finding.title}
-                      </h3>
-                      <Badge variant='attention'>{finding.category}</Badge>
+                      <h3 className='text-sm font-medium'>Submetido para revisão</h3>
+                      <Badge variant='info'>Em análise</Badge>
                     </div>
-                    <p className='mt-2 text-xs text-muted-foreground'>{finding.detail}</p>
+                    <p className='mt-2 text-xs'>
+                      A versão foi enviada pelo colaborador responsável e aguarda a
+                      decisão de um revisor elegível.
+                    </p>
                   </article>
-                ))}
+                ) : reviewRequest ? (
+                  <article className='rounded-md border border-destructive/30 bg-destructive/5 p-3'>
+                    <h3 className='text-sm font-medium'>Solicitação de ajustes</h3>
+                    <p className='mt-2 text-xs text-muted-foreground'>
+                      {version.reviewedByCollaboratorName
+                        ? `${version.reviewedByCollaboratorName}: `
+                        : ''}
+                      {reviewRequest}
+                    </p>
+                  </article>
+                ) : (
+                  <p className='rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground'>
+                    Nenhum alerta de revisão registrado para esta versão.
+                  </p>
+                )}
               </div>
             </section>
             <section className='border-t pt-4'>
@@ -297,13 +308,14 @@ export function PieceWorkflowRoutePage({
               </p>
             </section>
             <div className='mt-auto space-y-2 border-t pt-4'>
-              {isAuthor ? (
+              {!isReviewerEligible ? (
                 <p
                   role='alert'
                   className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
                 >
-                  Quem elaborou esta versão não pode revisá-la. Outro membro da equipe
-                  deve assumir a revisão técnica.
+                  {isAuthor
+                    ? 'Quem elaborou esta versão não pode revisá-la. Outro membro elegível deve assumir a revisão técnica.'
+                    : 'Apenas membros da equipe do caso, supervisores ou administradores podem decidir esta revisão técnica.'}
                 </p>
               ) : null}
               <label
@@ -313,6 +325,7 @@ export function PieceWorkflowRoutePage({
                 <Checkbox
                   id='review-responsibility-confirmation'
                   checked={isReviewConfirmed}
+                  disabled={!isReviewerEligible || isCheckingReviewer}
                   onCheckedChange={(checked) =>
                     handleReviewConfirmationChange(checked === true)
                   }
@@ -322,7 +335,7 @@ export function PieceWorkflowRoutePage({
               </label>
               <Button
                 className='w-full'
-                disabled={!isReviewConfirmed || isAuthor || isCheckingReviewer}
+                disabled={!isReviewerEligible || !isReviewConfirmed || isCheckingReviewer}
                 onClick={() => handleOpenReviewAction('approval')}
               >
                 <Icon name='check' /> Aprovar peça
@@ -330,14 +343,14 @@ export function PieceWorkflowRoutePage({
               <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
                 <Button
                   variant='outline'
-                  disabled={isAuthor || isCheckingReviewer}
+                  disabled={!isReviewerEligible || isCheckingReviewer}
                   onClick={() => handleOpenReviewAction('adjustments')}
                 >
                   Solicitar ajustes
                 </Button>
                 <Button
                   variant='destructive'
-                  disabled={isAuthor || isCheckingReviewer}
+                  disabled={!isReviewerEligible || isCheckingReviewer}
                   onClick={() => handleOpenReviewAction('block')}
                 >
                   Bloqueio
@@ -384,12 +397,18 @@ export function PieceWorkflowRoutePage({
             </div>
           </div>
           <aside className='border-l bg-card p-4'>
-            {adjustmentsRequested ? (
-              <div className='mt-3 rounded-md border border-attention bg-attention/20 p-3 text-sm'>
-                Ajustes solicitados pela revisão técnica. Faça as correções antes de
-                resubmeter a peça.
-              </div>
-            ) : null}
+            <section className='mb-5 border-b pb-4'>
+              <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
+              {reviewRequest ? (
+                <p className='mt-3 whitespace-pre-wrap break-words rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm'>
+                  {reviewRequest}
+                </p>
+              ) : (
+                <p className='mt-3 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground'>
+                  Nenhum alerta de revisão registrado para esta versão.
+                </p>
+              )}
+            </section>
             <h2 className='font-serif font-semibold'>
               Referências usadas na elaboração desta peça
             </h2>
@@ -487,6 +506,7 @@ export function PieceWorkflowRoutePage({
           documentTitle={document.title}
           casePublicCode={casePublicCode}
           versionNumber={version.versionNumber}
+          documentAuthorName={version.createdByCollaboratorName}
           onConfirm={handleConfirmReviewAction}
           onOpenChange={(open) => !open && handleCloseReviewAction()}
         />

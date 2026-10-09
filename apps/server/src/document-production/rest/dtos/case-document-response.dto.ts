@@ -26,6 +26,7 @@ class CaseDocumentVersionResponseDto {
   @ApiProperty({ format: 'uuid' }) createdByCollaboratorId!: string
   @ApiPropertyOptional() createdByCollaboratorName?: string
   @ApiPropertyOptional() reviewedAt?: Date
+  @ApiPropertyOptional() reviewedByCollaboratorName?: string
   @ApiPropertyOptional() rejectionReason?: string
   @ApiPropertyOptional() content?: DocumentVersion['content']
   @ApiPropertyOptional() storagePath?: string
@@ -73,6 +74,9 @@ export class CaseDocumentResponseDto {
           version.createdByCollaboratorId,
         ),
         reviewedAt: version.reviewedAt,
+        reviewedByCollaboratorName: input.collaboratorNames?.get(
+          version.reviewedByCollaboratorId ?? '',
+        ),
         rejectionReason: version.rejectionReason,
         content: version.content,
         storagePath: version.storagePath,

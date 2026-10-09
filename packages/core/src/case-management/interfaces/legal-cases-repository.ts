@@ -30,6 +30,7 @@ export interface LegalCasesRepository {
   addMany(legalCases: readonly LegalCaseCreation[]): Promise<readonly LegalCase[]>
   completeChecklist(caseId: string, completedBy: string): Promise<LegalCase | undefined>
   findById(caseId: string): Promise<LegalCase | undefined>
+  findByIntakeId(intakeId: string): Promise<LegalCase | undefined>
   getCaseDetails(caseId: string): Promise<LegalCaseSummary | undefined>
   listByTeamMember(
     collaboratorId: string,

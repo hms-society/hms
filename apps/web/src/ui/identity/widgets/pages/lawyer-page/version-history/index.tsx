@@ -66,7 +66,7 @@ function formatVersionStatus(status: string, historical: boolean) {
       approved: 'Aprovada',
       draft: 'Em elaboração',
       in_review: 'Em revisão',
-      rejected: 'Ajustes solicitados',
+      rejected: 'Requer ajustes',
       generating: 'Gerando',
       generation_failed: 'Falha na geração',
     }[status] ?? status

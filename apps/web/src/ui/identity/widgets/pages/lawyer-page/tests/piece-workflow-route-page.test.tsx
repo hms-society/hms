@@ -117,6 +117,8 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     isReadOnlyVersion: false,
     isDiscardEditsDialogOpen: false,
     isAuthor: false,
+    isReviewPending: false,
+    reviewRequest: undefined,
     isCheckingReviewer: false,
     isPendingVariableDialogOpen: false,
     isVersionDialogOpen: false,

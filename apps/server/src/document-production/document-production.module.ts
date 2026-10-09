@@ -24,6 +24,7 @@ import {
   SaveManualCaseDocumentVersionController,
   SaveEditableCaseDocumentVersionController,
   SubmitCaseDocumentVersionForReviewController,
+  ReviewCaseDocumentVersionController,
 } from '@/document-production/rest/controllers'
 
 @Module({
@@ -53,6 +54,7 @@ import {
     SaveManualCaseDocumentVersionController,
     SaveEditableCaseDocumentVersionController,
     SubmitCaseDocumentVersionForReviewController,
+    ReviewCaseDocumentVersionController,
   ],
   exports: [DocumentProductionMessagingModule],
 })

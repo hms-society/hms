@@ -15,6 +15,7 @@ export type CaseDocumentResponse = {
     createdByCollaboratorId: string
     createdByCollaboratorName?: string
     reviewedAt?: string
+    reviewedByCollaboratorName?: string
     rejectionReason?: string
     content?: DocumentTemplateContent
     storagePath?: string
@@ -125,6 +126,18 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
     return restClient.patch(
       `/cases/${caseId}/documents/${documentId}/versions/${versionId}/submit-review`,
       {},
+    )
+  },
+  reviewVersion(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+    decision: 'approved' | 'rejected',
+    rejectionReason?: string,
+  ): Promise<RestResponse<unknown>> {
+    return restClient.patch(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/review`,
+      { decision, ...(rejectionReason ? { rejectionReason } : {}) },
     )
   },
   generateRevision(

@@ -115,6 +115,21 @@ export function usePieceWorkflowRoutePage({
   const isAuthor = Boolean(
     version && currentCollaborator?.collaboratorId === version.createdByCollaboratorId,
   )
+  const isReviewPending = Boolean(isAuthor && version?.status === 'rejected')
+  const reviewRequest =
+    version?.status === 'rejected' ? version.rejectionReason?.trim() : undefined
+  const isPrivilegedReviewer =
+    currentCollaborator?.profile === 'admin' ||
+    currentCollaborator?.profile === 'supervisor'
+  const isCaseTeamMember = Boolean(
+    currentCollaborator &&
+      caseDetails?.team.some(
+        (member) => member.collaboratorId === currentCollaborator.collaboratorId,
+      ),
+  )
+  const isReviewerEligible = Boolean(
+    currentCollaborator && !isAuthor && (isPrivilegedReviewer || isCaseTeamMember),
+  )
 
   function serializeComparableContent(content: DocumentTemplateContent) {
     function normalize(value: unknown): unknown {
@@ -221,17 +236,38 @@ export function usePieceWorkflowRoutePage({
   function handleCloseReviewAction() {
     setReviewAction(null)
   }
-  function handleConfirmReviewAction() {
-    if (isAuthor) return
+  async function handleConfirmReviewAction(adjustmentComment?: string) {
+    if (!isReviewerEligible) return
+    if (!reviewAction || !version) return
+    const decision = reviewAction === 'approval' ? 'approved' : 'rejected'
+    const response = await caseDocumentProductionService.reviewVersion(
+      caseId,
+      documentId,
+      version.id,
+      decision,
+      reviewAction === 'adjustments'
+        ? adjustmentComment || 'Ajustes solicitados pelo revisor.'
+        : reviewAction === 'block'
+          ? 'Peça bloqueada pelo revisor.'
+          : undefined,
+    )
+    if (response.isFailure) {
+      setVersionActionError(response.errorMessage)
+      return
+    }
     if (reviewAction === 'adjustments')
       void navigateTo('lawyerCasePieceEditor', {
         params: { caseId, documentId },
         search: { reviewState: 'adjustments_requested' },
       })
     setReviewAction(null)
+    await queryClient.invalidateQueries({
+      queryKey: ['case-document', caseId, documentId],
+    })
+    await refetchDocument()
   }
   function handleOpenReviewAction(action: 'adjustments' | 'block' | 'approval') {
-    if (!isAuthor) setReviewAction(action)
+    if (isReviewerEligible) setReviewAction(action)
   }
   function handleReviewConfirmationChange(confirmed: boolean) {
     setIsReviewConfirmed(confirmed)
@@ -391,6 +427,8 @@ export function usePieceWorkflowRoutePage({
     await saveManualVersion(editedContent, editingSourceVersionId)
   }
 
+  const reviewEligibility: { isReviewerEligible?: boolean } = { isReviewerEligible }
+
   return {
     document,
     documentError,
@@ -408,6 +446,9 @@ export function usePieceWorkflowRoutePage({
     pendingGenerationVersion,
     versionActionError,
     isAuthor,
+    isReviewPending,
+    reviewRequest,
+    ...reviewEligibility,
     isCheckingReviewer: isLoadingCurrentCollaborator,
     saveState,
     isReviewConfirmed,

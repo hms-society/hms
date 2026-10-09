@@ -230,7 +230,7 @@ export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiec
     id: document.id,
     title: document.title,
     template: 'Modelo documental',
-    author: 'Solicitante atual',
+    author: currentVersion?.createdByCollaboratorName?.trim() || 'Solicitante atual',
     reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
     updatedAt: formatDate(currentVersion?.createdAt),
     status:
@@ -259,7 +259,7 @@ function formatVersionStatus(status: string | undefined, historical = false) {
       approved: 'Aprovada',
       draft: 'Em elaboração',
       in_review: 'Em revisão',
-      rejected: 'Rejeitada',
+      rejected: 'Requer ajustes',
       generating: 'Gerando',
       generation_failed: 'Falha na geração',
     }[normalizedStatus] ?? normalizedStatus
