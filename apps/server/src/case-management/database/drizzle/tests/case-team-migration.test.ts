@@ -39,7 +39,7 @@ const legacySchema = `
     ON case_members(case_id) WHERE is_primary = true;
 `
 
-describe('case team migration 0061', () => {
+describe('case team migration 0064', () => {
   let container: StartedPostgreSqlContainer
   let database: Sql
   let migrationSql: string
@@ -53,7 +53,7 @@ describe('case team migration 0061', () => {
     database = postgres(container.getConnectionUri())
     migrationSql = await readFile(
       new URL(
-        '../../../../shared/database/drizzle/migrations/0061_condemned_doomsday.sql',
+        '../../../../shared/database/drizzle/migrations/0064_dry_bushwacker.sql',
         import.meta.url,
       ),
       'utf8',

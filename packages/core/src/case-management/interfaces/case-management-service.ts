@@ -5,6 +5,8 @@ import type {
   LegalCaseSummary,
   Pending,
   AssistedMessage,
+  CaseTask,
+  CaseTaskUpdate,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
@@ -108,8 +110,39 @@ export type CreatePendingRequest = {
   details?: string
 }
 
+export type CreateCaseTaskRequest = {
+  type: CaseTask['type']
+  title: string
+  customType?: string
+  description: string
+  plannedDate: string
+  plannedTime?: string
+  assigneeIds: readonly string[]
+  blocksCaseClosure?: boolean
+  reminders: readonly {
+    value: number
+    unit: 'minutes' | 'hours' | 'days'
+  }[]
+}
+
 export interface CaseManagementService {
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
+
+  listCaseTasks(caseId: string): Promise<RestResponse<readonly CaseTask[]>>
+  createCaseTask(
+    caseId: string,
+    request: CreateCaseTaskRequest,
+  ): Promise<RestResponse<CaseTask>>
+  updateCaseTask(
+    caseId: string,
+    taskId: string,
+    request: CaseTaskUpdate & { version: number },
+  ): Promise<RestResponse<CaseTask>>
+  deleteCaseTask(
+    caseId: string,
+    taskId: string,
+    request: { version: number },
+  ): Promise<RestResponse<CaseTask>>
 
   addComplementaryChecklistItem(
     caseId: string,

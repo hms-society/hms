@@ -59,7 +59,7 @@ export class CreateLegalCaseUseCase {
         team: [
           {
             collaboratorId: actorId,
-            role: CaseMemberRole.LeadLawyer,
+            role: CaseMemberRole.Manager,
             permission: 'execução',
             isPrimary: true,
             assignedAt: openedAt,

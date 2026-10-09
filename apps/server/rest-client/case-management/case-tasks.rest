@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:3333
+@caseId = 00000000-0000-0000-0000-000000000001
+@caseTaskId = 00000000-0000-0000-0000-000000000002
+
+### List case tasks
+GET {{baseUrl}}/cases/{{caseId}}/tasks
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+
+### Create case task
+POST {{baseUrl}}/cases/{{caseId}}/tasks
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "type": "internal_task",
+  "title": "Review the case response",
+  "description": "Review the case response",
+  "plannedDate": "2026-10-20",
+  "assigneeIds": ["00000000-0000-0000-0000-000000000003"],
+  "reminders": [{ "value": 3, "unit": "days" }]
+}
+
+### Update case task
+PATCH {{baseUrl}}/cases/{{caseId}}/tasks/{{caseTaskId}}
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "version": 1,
+  "status": "in_progress",
+  "description": "Review the case response and supporting documents"
+}
+
+### Delete case task logically
+DELETE {{baseUrl}}/cases/{{caseId}}/tasks/{{caseTaskId}}
+Authorization: Bearer {{$dotenv HMS_REST_TOKEN}}
+Content-Type: application/json
+
+{
+  "version": 2
+}

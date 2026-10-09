@@ -24,7 +24,7 @@ describe('List My Legal Cases Controller [GET /cases/my]', () => {
       assignedCases.map((legalCase, index) => ({
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: index === 0 ? 'lead_lawyer' : 'lawyer',
+        role: index === 0 ? 'manager' : 'collaborator',
         isPrimary: index === 0,
       })),
     )
@@ -32,7 +32,7 @@ describe('List My Legal Cases Controller [GET /cases/my]', () => {
       {
         caseId: unassignedCase.id,
         collaboratorId: '5ec2a203-13ba-4321-8d5c-938ff62f6823',
-        role: 'lead_lawyer',
+        role: 'manager',
         isPrimary: true,
       },
     ])
@@ -55,8 +55,7 @@ describe('List My Legal Cases Controller [GET /cases/my]', () => {
         {
           collaboratorId: collaborator.collaboratorId,
           name: collaborator.professionalName,
-          role: 'lead_lawyer',
-          isPrimary: true,
+          role: 'manager',
         },
       ],
     })

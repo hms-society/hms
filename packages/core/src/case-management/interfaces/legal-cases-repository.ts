@@ -1,9 +1,7 @@
 import type {
   LegalCase,
   LegalCaseCreation,
-  LegalCaseSummary,
   CaseMemberCreation,
-  CaseTeamMemberCreation,
 } from '../domain/entities'
 import type { CaseChecklistGate, LegalCaseStatus } from '../domain/structures'
 
@@ -23,7 +21,7 @@ export type HomologateDossierRepositoryParams = {
 
 export type CreateCaseWithTeamParams = {
   legalCase: Omit<LegalCaseCreation, 'publicCode'>
-  team: Array<Omit<CaseMemberCreation, 'caseId'> | Omit<CaseTeamMemberCreation, 'caseId'>>
+  team: Array<Omit<CaseMemberCreation, 'caseId'>>
 }
 
 export interface LegalCasesRepository {
@@ -31,11 +29,11 @@ export interface LegalCasesRepository {
   addMany(legalCases: readonly LegalCaseCreation[]): Promise<readonly LegalCase[]>
   completeChecklist(caseId: string, completedBy: string): Promise<LegalCase | undefined>
   findById(caseId: string): Promise<LegalCase | undefined>
-  getCaseDetails(caseId: string): Promise<LegalCaseSummary | undefined>
+  replaceTeamVersion(caseId: string, expectedTeamVersion: number): Promise<number>
   listByTeamMember(
     collaboratorId: string,
     clientId?: string,
-  ): Promise<readonly LegalCaseSummary[]>
+  ): Promise<readonly LegalCase[]>
   reviewChecklistGate(
     params: ReviewChecklistGateRepositoryParams,
   ): Promise<LegalCase | undefined>

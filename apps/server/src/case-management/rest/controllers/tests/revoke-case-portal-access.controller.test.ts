@@ -25,7 +25,7 @@ describe('Revoke Case Portal Access Controller [DELETE /cases/:caseId/portal-acc
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: 'lead_lawyer',
+        role: 'manager',
         isPrimary: true,
       },
     ])

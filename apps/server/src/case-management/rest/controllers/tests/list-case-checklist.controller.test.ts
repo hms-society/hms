@@ -28,7 +28,7 @@ describe('List Case Checklist Controller [GET /cases/:caseId/checklist]', () => 
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.LeadLawyer,
+        role: CaseMemberRole.Manager,
         isPrimary: true,
       },
     ])

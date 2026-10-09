@@ -1,4 +1,4 @@
-import type { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
+import type { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
 
 export type EnsureCaseManagerContinuityRequest = {
   collaboratorId: string

@@ -21,6 +21,13 @@ describe('Get Legal Case Details Controller [GET /cases/:id]', () => {
       legalAreaId: collaborator.legalAreaId,
       legalTopicId: collaborator.legalTopicId,
     })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: 'manager',
+      },
+    ])
     const response = await request(fixture.app.getHttpServer())
       .get(`/cases/${legalCase.id}`)
       .expect(200)
@@ -29,7 +36,13 @@ describe('Get Legal Case Details Controller [GET /cases/:id]', () => {
       clientName: collaborator.clientName,
       legalArea: collaborator.legalAreaName,
       legalTopic: collaborator.legalTopicName,
-      team: [],
+      team: [
+        {
+          collaboratorId: collaborator.collaboratorId,
+          name: collaborator.professionalName,
+          role: 'manager',
+        },
+      ],
     })
   })
 })

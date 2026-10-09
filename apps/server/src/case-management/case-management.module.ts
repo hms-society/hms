@@ -28,6 +28,10 @@ import {
   AddCaseTeamMemberController,
   ChangeCaseTeamMemberRoleController,
   ListCaseTeamHistoryController,
+  CreateCaseTaskController,
+  ListCaseTasksController,
+  UpdateCaseTaskController,
+  DeleteCaseTaskController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -73,6 +77,10 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     AddCaseTeamMemberController,
     ChangeCaseTeamMemberRoleController,
     ListCaseTeamHistoryController,
+    CreateCaseTaskController,
+    ListCaseTasksController,
+    UpdateCaseTaskController,
+    DeleteCaseTaskController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

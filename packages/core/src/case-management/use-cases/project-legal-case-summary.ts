@@ -1,9 +1,10 @@
 import type { LegalCaseSummary, LegalCaseTeamMemberSummary } from '../domain/entities'
 import type { LegalCase } from '../domain/entities'
-import type { CaseCollaboratorsProvider, CaseTeamMembersRepository } from '../interfaces'
+import type { CaseCollaboratorsProvider, CaseMembersRepository } from '../interfaces'
 import type { ClientsRepository } from '#identity/interfaces/clients-repository'
 import type { LegalAreasRepository } from '../../legal-catalog/interfaces/legal-areas-repository'
 import type { LegalTopicsRepository } from '../../legal-catalog/interfaces/legal-topics-repository'
+import { NotFoundError } from '#shared/domain/errors/not-found-error'
 
 export async function projectLegalCaseSummary(
   legalCase: LegalCase,
@@ -11,7 +12,7 @@ export async function projectLegalCaseSummary(
     clientsRepository: ClientsRepository
     legalAreasRepository: LegalAreasRepository
     legalTopicsRepository: LegalTopicsRepository
-    caseMembersRepository: CaseTeamMembersRepository
+    caseMembersRepository: CaseMembersRepository
     collaboratorsProvider: CaseCollaboratorsProvider
   },
 ): Promise<LegalCaseSummary> {
@@ -22,7 +23,7 @@ export async function projectLegalCaseSummary(
     dependencies.caseMembersRepository.listByCaseId(legalCase.id),
   ])
   if (!client || !area || !topic) {
-    throw new Error('Os dados de apresentação do Caso não foram encontrados.')
+    throw new NotFoundError('Os dados de apresentação do Caso não foram encontrados.')
   }
 
   const team = await projectTeam(memberships, dependencies)
@@ -47,7 +48,7 @@ export async function projectLegalCaseSummary(
 }
 
 async function projectTeam(
-  memberships: Awaited<ReturnType<CaseTeamMembersRepository['listByCaseId']>>,
+  memberships: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
   dependencies: { collaboratorsProvider: CaseCollaboratorsProvider },
 ): Promise<LegalCaseTeamMemberSummary[]> {
   const active = memberships.filter(

@@ -1,7 +1,4 @@
-import type {
-  CollaboratorProfile,
-  UserStatus,
-} from '@hms/core/identity/domain/structures'
+import type { CollaboratorProfile, UserStatus } from '@hms/core/shared/domain/structures'
 
 export type CaseEligibilitySnapshot = {
   readonly profile: CollaboratorProfile

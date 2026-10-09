@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseTeamRole } from '../../domain/structures'
+import { CaseMemberRole, LegalCaseStatus } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { GetCaseTeamUseCase } from '../get-case-team-use-case'
@@ -29,13 +29,13 @@ describe('Get Case Team Use Case', () => {
       id: 'membership-1',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseTeamRole.Manager,
+      role: CaseMemberRole.Manager,
     })
     const collaborator = CaseMemberFaker.fake({
       id: 'membership-2',
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_TARGET_ID,
-      role: CaseTeamRole.Collaborator,
+      role: CaseMemberRole.Collaborator,
     })
     const removed = CaseMemberFaker.fake({
       id: 'membership-3',
@@ -73,13 +73,13 @@ describe('Get Case Team Use Case', () => {
         {
           membershipId: manager.id,
           collaboratorId: TEST_ACTOR_ID,
-          role: CaseTeamRole.Manager,
+          role: CaseMemberRole.Manager,
           isEligible: true,
         },
         {
           membershipId: collaborator.id,
           collaboratorId: TEST_TARGET_ID,
-          role: CaseTeamRole.Collaborator,
+          role: CaseMemberRole.Collaborator,
           isEligible: true,
         },
       ],
@@ -127,6 +127,114 @@ describe('Get Case Team Use Case', () => {
       activeManagerCount: 0,
       canManage: true,
       requiresAdministrativeReason: true,
+    })
+  })
+
+  it.each([
+    { profile: CollaboratorProfile.Admin, role: undefined },
+    { profile: CollaboratorProfile.Lawyer, role: CaseMemberRole.Manager },
+  ])('does not grant management capability for a closed case to $profile', async ({
+    profile,
+    role,
+  }) => {
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        id: TEST_CASE_ID,
+        status: LegalCaseStatus.Closed,
+      }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue(
+      role
+        ? [
+            CaseMemberFaker.fake({
+              id: 'membership-1',
+              caseId: TEST_CASE_ID,
+              collaboratorId: TEST_ACTOR_ID,
+              role,
+            }),
+          ]
+        : [],
+    )
+    mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Ator',
+      email: 'actor@example.com',
+      profile,
+      status: UserStatus.Active,
+    })
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).resolves.toMatchObject({
+      status: LegalCaseStatus.Closed,
+      canManage: false,
+    })
+  })
+
+  it('rejects an ineligible Manager from viewing the team', async () => {
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: TEST_CASE_ID }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue([
+      CaseMemberFaker.fake({
+        id: 'membership-1',
+        caseId: TEST_CASE_ID,
+        collaboratorId: TEST_ACTOR_ID,
+        role: CaseMemberRole.Manager,
+      }),
+    ])
+    mocks.caseCollaboratorsProvider.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Estagiário',
+      email: 'intern@example.com',
+      profile: CollaboratorProfile.Intern,
+      status: UserStatus.Active,
+    })
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+  })
+
+  it('reports the total from the projected members when a collaborator is missing', async () => {
+    const manager = CaseMemberFaker.fake({
+      id: 'membership-1',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_ACTOR_ID,
+      role: CaseMemberRole.Manager,
+    })
+    const missingCollaborator = CaseMemberFaker.fake({
+      id: 'membership-2',
+      caseId: TEST_CASE_ID,
+      collaboratorId: TEST_TARGET_ID,
+      role: CaseMemberRole.Collaborator,
+    })
+    mocks.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: TEST_CASE_ID }),
+    )
+    mocks.caseMembersRepository.listByCaseId.mockResolvedValue([
+      manager,
+      missingCollaborator,
+    ])
+    mocks.caseCollaboratorsProvider.findById.mockImplementation(
+      async (collaboratorId) => {
+        if (collaboratorId === TEST_TARGET_ID) return undefined
+        return {
+          collaboratorId,
+          professionalName: 'Gestor',
+          email: 'manager@example.com',
+          profile: CollaboratorProfile.Lawyer,
+          status: UserStatus.Active,
+        }
+      },
+    )
+
+    await expect(
+      useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
+    ).resolves.toMatchObject({
+      total: 1,
+      activeManagerCount: 1,
+      members: [{ membershipId: manager.id }],
     })
   })
 })

@@ -5,7 +5,6 @@ import type {
   CollaboratorUpdate,
 } from '../domain/entities'
 import type { CollaboratorListQuery } from '../domain/structures'
-import type { CollaboratorProfile } from '../domain/structures/collaborator-profile'
 import type { PaginationResponse } from '#shared/responses/pagination-response.ts'
 
 export interface CollaboratorsRepository {
@@ -20,10 +19,6 @@ export interface CollaboratorsRepository {
   ): Promise<Collaborator | undefined>
   removeById(collaboratorId: string): Promise<void>
   removeAll(): Promise<void>
-  list(
-    query: CollaboratorListQuery & {
-      readonly profiles?: readonly CollaboratorProfile[]
-    },
-  ): Promise<PaginationResponse<CollaboratorSummary>>
+  list(query: CollaboratorListQuery): Promise<PaginationResponse<CollaboratorSummary>>
   listAvailableJobTitles(): Promise<readonly string[]>
 }

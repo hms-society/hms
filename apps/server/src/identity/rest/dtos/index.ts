@@ -1,6 +1,7 @@
 export * from './auth-session-response.dto'
 export * from './client-details-response.dto'
 export * from './collaborator-summary-response.dto'
+export * from './collaborator-professional-profile-response.dto'
 export * from './collaborators-page-response.dto'
 export * from './register-collaborator-request.dto'
 export * from './update-collaborator-request.dto'

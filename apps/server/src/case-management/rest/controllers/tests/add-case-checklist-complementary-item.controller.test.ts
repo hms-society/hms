@@ -30,7 +30,7 @@ describe('Add Case Checklist Complementary Item Controller [POST /cases/:caseId/
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.LeadLawyer,
+        role: CaseMemberRole.Manager,
         isPrimary: true,
       },
     ])
