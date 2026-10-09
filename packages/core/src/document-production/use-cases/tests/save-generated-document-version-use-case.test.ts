@@ -190,6 +190,43 @@ describe('Save Generated Document Version Use Case', () => {
     )
   })
 
+  it('keeps consultation document versions available for review', async () => {
+    const generation = DocumentGenerationFaker.fake({
+      status: 'running',
+      source: { type: 'consultation', id: 'consultation-id', data: {} },
+    })
+    const bytes = new Uint8Array([1])
+    const savedVersion = DocumentVersionFaker.fake({ status: 'in_review' })
+    generationsRepository.findById.mockResolvedValue(generation)
+    versionsRepository.findByDocumentGenerationId.mockResolvedValue(undefined)
+    versionsRepository.findLatestByDocumentId.mockResolvedValue(undefined)
+    documentFileExporter.export.mockResolvedValue({
+      content: bytes,
+      contentType: 'application/docx',
+      extension: 'docx',
+    })
+    fileStorageProvider.save.mockResolvedValue({
+      id: savedVersion.fileId,
+      filePath: 'path',
+      fileName: 'file.docx',
+      contentType: 'application/docx',
+      sizeInBytes: 1,
+      createdAt: new Date(),
+    })
+    datetimeProvider.now.mockReturnValue(savedVersion.createdAt)
+    versionsRepository.add.mockResolvedValue(savedVersion)
+
+    await useCase.execute({
+      documentGenerationId: generation.id,
+      content: { type: 'doc' },
+      pendingMarkers: [],
+    })
+
+    expect(versionsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'in_review' }),
+    )
+  })
+
   it('raises a not-found error when the generation does not exist', async () => {
     generationsRepository.findById.mockResolvedValue(undefined)
 
