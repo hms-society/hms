@@ -1,6 +1,5 @@
 import type {
   CaseEligibleCollaborator,
-  CaseTeam,
   CaseTeamCandidatesQuery,
   CaseTeamMutationResult,
 } from '../domain/structures'
@@ -13,7 +12,6 @@ import type { RemoveCaseTeamMemberRequest } from '../use-cases/remove-case-team-
 import type { CaseManagementService } from './case-management-service'
 
 export interface CaseTeamManagementService extends CaseManagementService {
-  getCaseTeam(caseId: string): Promise<RestResponse<CaseTeam>>
   listCaseTeamCandidates(
     query: CaseTeamCandidatesQuery,
     caseId?: string,

@@ -10,6 +10,7 @@ import type {
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
+  CaseTeam,
   ChecklistDocumentType,
 } from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
@@ -163,6 +164,8 @@ export interface CaseManagementService {
   ): Promise<RestResponse<ChecklistTemplate>>
 
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
+
+  getCaseTeam(caseId: string): Promise<RestResponse<CaseTeam>>
 
   grantCasePortalAccess(
     caseId: string,

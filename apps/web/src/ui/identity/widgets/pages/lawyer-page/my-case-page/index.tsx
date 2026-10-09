@@ -2,6 +2,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
+import { CaseTeamRoster } from '@/ui/case-management/widgets/components/case-team-roster'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { useState } from 'react'
 
@@ -176,13 +177,16 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
       <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
         <TabsList
           variant='line'
-          className='grid w-full grid-cols-2 items-center gap-x-0 gap-y-1 text-[14px] sm:grid-cols-4 xl:grid-cols-7'
+          className='grid w-full grid-cols-2 items-center gap-x-0 gap-y-1 text-[14px] sm:grid-cols-4 xl:grid-cols-8'
         >
           <TabsTrigger
             value='visao-geral'
             className='w-full justify-center py-3 text-[13px]'
           >
             Visão Geral
+          </TabsTrigger>
+          <TabsTrigger value='equipe' className='w-full justify-center py-3 text-[13px]'>
+            Equipe
           </TabsTrigger>
           <TabsTrigger
             value='checklist'
@@ -253,6 +257,10 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             caseDetails={caseDetails}
             checklist={checklistItems}
           />
+        </TabsContent>
+
+        <TabsContent value='equipe' className='mt-4 flex flex-col gap-4'>
+          <CaseTeamRoster caseId={caseUuid} />
         </TabsContent>
 
         <TabsContent value='prazos' className='mt-4 flex flex-col gap-4'>
