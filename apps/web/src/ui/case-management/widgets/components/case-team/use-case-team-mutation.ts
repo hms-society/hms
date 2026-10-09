@@ -230,6 +230,7 @@ function canChangeMember(caseTeam: CaseTeam | undefined, member: CaseTeamMember)
   return Boolean(
     caseTeam?.canManage &&
       caseTeam.status !== LegalCaseStatus.Closed &&
+      member.isEligible &&
       !(member.role === CaseMemberRole.Manager && caseTeam.activeManagerCount === 1),
   )
 }

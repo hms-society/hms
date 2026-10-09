@@ -1,5 +1,10 @@
+import { useRef } from 'react'
 import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 
+import { MemberActions } from '@/ui/case-management/widgets/components/case-team/team-member-row/member-actions'
+import { TeamMutationDialog } from '@/ui/case-management/widgets/components/case-team/team-mutation-dialog'
+import { CaseTeamMemberSelector } from '@/ui/case-management/widgets/components/case-team-member-selector'
+import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import {
@@ -17,7 +22,30 @@ export type CaseTeamRosterProps = {
 }
 
 export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
-  const { error, handleRetry, isLoading, members, total } = useCaseTeamRoster(caseId)
+  const addMemberButtonRef = useRef<HTMLButtonElement>(null)
+  const {
+    canManageActiveTeam,
+    caseTeam,
+    error,
+    handleBeginRemoval,
+    handleBeginRoleChange,
+    handleCloseSelector,
+    handleConfirmMutation,
+    handleOpenSelector,
+    handlePendingMutationOpenChange,
+    handleReasonChange,
+    handleRetry,
+    handleSelectCandidate,
+    hasVersionConflict,
+    isLoading,
+    isMutationPending,
+    isSelectorOpen,
+    members,
+    mutationError,
+    pendingMutation,
+    reason,
+    total,
+  } = useCaseTeamRoster(caseId)
 
   return (
     <section className='min-w-0 space-y-4' aria-labelledby='case-team-roster-title'>
@@ -33,9 +61,21 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
             Integrantes com acesso ativo e seus níveis de atuação.
           </p>
         </div>
-        <Badge variant='secondary' className='rounded-full'>
-          {total} {total === 1 ? 'integrante ativo' : 'integrantes ativos'}
-        </Badge>
+        <div className='flex flex-wrap items-center gap-3'>
+          <Badge variant='secondary' className='rounded-full'>
+            {total} {total === 1 ? 'integrante ativo' : 'integrantes ativos'}
+          </Badge>
+          {canManageActiveTeam && (
+            <Button
+              ref={addMemberButtonRef}
+              type='button'
+              className='rounded-full'
+              onClick={handleOpenSelector}
+            >
+              <Icon name='list-plus' className='size-4' /> Adicionar colaborador
+            </Button>
+          )}
+        </div>
       </header>
 
       {error ? (
@@ -52,19 +92,22 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
         </div>
       ) : (
         <div className='overflow-x-auto rounded-xl border border-border bg-card'>
-          <Table className='min-w-[540px]'>
+          <Table className='min-w-[620px]'>
             <TableHeader className='bg-secondary text-secondary-foreground'>
               <TableRow>
                 <TableHead>Integrante</TableHead>
                 <TableHead>Nível</TableHead>
                 <TableHead>Status do vínculo</TableHead>
+                <TableHead className='w-12'>
+                  <span className='sr-only'>Ações</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={3}
+                    colSpan={4}
                     className='py-8 text-center text-muted-foreground'
                   >
                     Carregando equipe…
@@ -73,7 +116,7 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
               ) : members.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={3}
+                    colSpan={4}
                     className='py-8 text-center text-muted-foreground'
                   >
                     Nenhum integrante ativo foi encontrado.
@@ -96,6 +139,18 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
                         Ativo
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      <MemberActions
+                        member={member}
+                        canManage={canManageActiveTeam}
+                        isLastManager={
+                          member.role === CaseMemberRole.Manager &&
+                          caseTeam?.activeManagerCount === 1
+                        }
+                        onChangeRole={() => handleBeginRoleChange(member)}
+                        onRemove={() => handleBeginRemoval(member)}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -103,6 +158,24 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
           </Table>
         </div>
       )}
+      <CaseTeamMemberSelector
+        open={canManageActiveTeam && isSelectorOpen}
+        caseId={caseId}
+        triggerRef={addMemberButtonRef}
+        onClose={handleCloseSelector}
+        onSelect={handleSelectCandidate}
+      />
+      <TeamMutationDialog
+        caseTeam={canManageActiveTeam ? caseTeam : undefined}
+        mutation={canManageActiveTeam ? pendingMutation : null}
+        reason={reason}
+        error={mutationError}
+        hasVersionConflict={hasVersionConflict}
+        isPending={isMutationPending}
+        onOpenChange={handlePendingMutationOpenChange}
+        onReasonChange={handleReasonChange}
+        onConfirm={() => void handleConfirmMutation()}
+      />
     </section>
   )
 }
