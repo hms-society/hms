@@ -1,5 +1,4 @@
-import type { CollaboratorProfile } from '@hms/core/identity/domain/structures'
-import type { CaseMemberLegacyRole } from './case-member-legacy-role'
+import type { CollaboratorProfile } from '@hms/core/shared/domain/structures'
 import type { CaseMemberRole } from './case-member-role'
 
 export type CaseTeamMember = {
@@ -8,7 +7,7 @@ export type CaseTeamMember = {
   professionalName: string
   email: string
   profile: CollaboratorProfile
-  role: CaseMemberRole | CaseMemberLegacyRole
+  role: CaseMemberRole
   assignedAt: Date
   isEligible: boolean
 }

@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { CaseTask } from '@hms/core/case-management/domain/entities'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 
@@ -20,19 +22,32 @@ const typeClasses: Record<string, string> = {
 }
 
 export function TasksDeadlinesTab({
+  caseId,
   caseIdentifier,
   caseTitle,
   team = [],
 }: {
+  caseId: string
   caseIdentifier: string
   caseTitle: string
   team?: readonly CaseTeamMember[]
 }) {
+  const { caseManagementService } = useRestContext()
   const [items, setItems] = useState<TaskDeadlineItem[]>([])
   const [filter, setFilter] = useState<Filter>('Todos')
   const [showCompleted, setShowCompleted] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<TaskDeadlineItem>()
+  useEffect(() => {
+    let cancelled = false
+    void caseManagementService.listCaseTasks(caseId).then((response) => {
+      if (cancelled || response.isFailure) return
+      setItems(response.body.map((task) => mapCaseTaskToItem(task, team)))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [caseId, caseManagementService, team])
   const matchesFilter = (item: TaskDeadlineItem) =>
     filter === 'Todos' ||
     (filter === 'Prazos'
@@ -42,24 +57,42 @@ export function TasksDeadlinesTab({
   const openItemsCount = items.filter((item) => !item.completed).length
   const completedItems = items.filter((item) => item.completed && matchesFilter(item))
   const completedItemsCount = items.filter((item) => item.completed).length
-  const createItem = (input: CreateTaskDeadlineInput) =>
-    setItems((current) => [
-      ...current,
-      {
-        ...input,
-        id: crypto.randomUUID(),
-        status: 'A fazer',
-        completed: false,
-      },
-    ])
-  const updateItem = (item: TaskDeadlineItem) =>
+  const createItem = async (input: CreateTaskDeadlineInput) => {
+    const response = await caseManagementService.createCaseTask(caseId, {
+      ...input,
+      type: toApiType(input.type),
+      reminders: [],
+      assigneeIds: input.assigneeIds ?? [],
+    })
+    if (response.isFailure) return
+    setItems((current) => [...current, mapCaseTaskToItem(response.body, team)])
+  }
+  const updateItem = async (item: TaskDeadlineItem) => {
+    const response = await caseManagementService.updateCaseTask(caseId, item.id, {
+      version: item.version ?? 1,
+      title: item.title,
+      description: item.description,
+      type: toApiType(item.type),
+      plannedDate: item.plannedDate,
+      plannedTime: item.plannedTime,
+      assigneeIds: item.assigneeIds ?? [],
+      status: toApiStatus(item.status),
+    })
+    if (response.isFailure) return
     setItems((current) =>
       current.map((currentItem) =>
-        currentItem.id === item.id
-          ? { ...item, completed: item.status === 'Concluída' }
-          : currentItem,
+        currentItem.id === item.id ? mapCaseTaskToItem(response.body, team) : currentItem,
       ),
     )
+  }
+  const deleteItem = async (item: TaskDeadlineItem) => {
+    if (item.completed || !window.confirm('Excluir esta tarefa ou prazo?')) return
+    const response = await caseManagementService.deleteCaseTask(caseId, item.id, {
+      version: item.version ?? 1,
+    })
+    if (response.isFailure) return
+    setItems((current) => current.filter((currentItem) => currentItem.id !== item.id))
+  }
   return (
     <div className='flex flex-col gap-4'>
       <header className='flex flex-col gap-3 rounded-lg border border-border bg-secondary p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between'>
@@ -137,6 +170,7 @@ export function TasksDeadlinesTab({
                 setEditingItem(selectedItem)
                 setIsCreateOpen(true)
               }}
+              onDelete={deleteItem}
             />
           ))}
         </div>
@@ -162,6 +196,7 @@ export function TasksDeadlinesTab({
                   setEditingItem(selectedItem)
                   setIsCreateOpen(true)
                 }}
+                onDelete={deleteItem}
               />
             ))}
         </div>
@@ -178,6 +213,63 @@ export function TasksDeadlinesTab({
       />
     </div>
   )
+}
+
+function toApiType(type: TaskDeadlineItem['type']) {
+  return {
+    'Prazo processual': 'process_deadline',
+    Audiência: 'hearing',
+    Publicação: 'publication',
+    'Tarefa interna': 'internal_task',
+    Entrega: 'delivery',
+    Outro: 'other',
+  }[type] as
+    | 'process_deadline'
+    | 'hearing'
+    | 'publication'
+    | 'internal_task'
+    | 'delivery'
+    | 'other'
+}
+
+function toApiStatus(status: string) {
+  return { 'A fazer': 'to_do', 'Em andamento': 'in_progress', Concluída: 'completed' }[
+    status
+  ] as 'to_do' | 'in_progress' | 'completed'
+}
+
+function mapCaseTaskToItem(
+  task: CaseTask,
+  team: readonly CaseTeamMember[],
+): TaskDeadlineItem {
+  const type = {
+    process_deadline: 'Prazo processual',
+    hearing: 'Audiência',
+    publication: 'Publicação',
+    internal_task: 'Tarefa interna',
+    delivery: 'Entrega',
+    other: 'Outro',
+  }[task.type] as TaskDeadlineItem['type']
+  return {
+    id: task.id,
+    type,
+    title: task.title,
+    description: task.description,
+    plannedDate: task.plannedDate,
+    plannedTime: task.plannedTime,
+    people: (task.assigneeIds ?? []).map(
+      (assigneeId) =>
+        team.find((member) => member.collaboratorId === assigneeId)?.name ?? assigneeId,
+    ),
+    assigneeIds: task.assigneeIds,
+    status:
+      { to_do: 'A fazer', in_progress: 'Em andamento', completed: 'Concluída' }[
+        task.status
+      ] ?? task.status,
+    completed: task.status === 'completed',
+    customType: task.customType,
+    version: task.version,
+  }
 }
 
 function SummaryStat({
@@ -205,9 +297,11 @@ function SummaryStat({
 function TaskRow({
   item,
   onEdit,
+  onDelete,
 }: {
   item: TaskDeadlineItem
   onEdit: (item: TaskDeadlineItem) => void
+  onDelete: (item: TaskDeadlineItem) => void
 }) {
   const displayType = item.customType ?? item.type
   return (
@@ -246,6 +340,15 @@ function TaskRow({
           onClick={() => onEdit(item)}
         >
           <Icon name='pencil' className='size-4 text-muted-foreground' />
+        </Button>
+        <Button
+          aria-label={`Excluir ${item.title}`}
+          variant='ghost'
+          size='icon-xs'
+          disabled={item.completed}
+          onClick={() => onDelete(item)}
+        >
+          <Icon name='trash-2' className='size-4 text-destructive' />
         </Button>
       </div>
     </article>

@@ -7,7 +7,7 @@ import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { clientModel, auditLogModel } from '@/identity/database/drizzle/models'
 import { DrizzleClientMapper } from '@/identity/database/drizzle/mappers'
 import { intakeModel } from '@/intake/database'
-import { type SQL, and, desc, eq, or, ilike, sql } from 'drizzle-orm'
+import { type SQL, and, desc, eq, inArray, or, ilike, sql } from 'drizzle-orm'
 
 @Injectable()
 export class DrizzleClientsRepository
@@ -54,6 +54,17 @@ export class DrizzleClientsRepository
       .limit(1)
 
     return client ? this.clientMapper.toDomain(client) : undefined
+  }
+
+  async findByIds(clientIds: readonly string[]): Promise<readonly Client[]> {
+    if (clientIds.length === 0) return []
+
+    const records = await this.database
+      .select()
+      .from(clientModel)
+      .where(inArray(clientModel.id, [...clientIds]))
+
+    return records.map((client) => this.clientMapper.toDomain(client))
   }
 
   async findByTaxId(taxId: Client['taxId']): Promise<Client | undefined> {

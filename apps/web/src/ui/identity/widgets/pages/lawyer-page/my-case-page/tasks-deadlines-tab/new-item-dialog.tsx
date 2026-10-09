@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ptBR } from 'date-fns/locale'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { CollaboratorAvatar } from '@/ui/identity/widgets/components/collaborator-avatar'
 import { Button } from '@/ui/shadcn/button'
 import { Calendar } from '@/ui/shadcn/calendar'
 import {
@@ -50,17 +51,12 @@ export function NewItemDialog({
   onUpdate?: (item: TaskDeadlineItem) => void
   team: readonly CaseTeamMember[]
 }) {
-  const lawyers = useMemo(
-    () =>
-      team.filter((member) => member.role === 'lead_lawyer' || member.role === 'lawyer'),
+  const assignableMembers = useMemo(
+    () => team.filter((member) => member.role !== 'supervisor'),
     [team],
   )
-  const lawyerIds = useMemo(
-    () =>
-      lawyers.flatMap((member) => (member.collaboratorId ? [member.collaboratorId] : [])),
-    [lawyers],
-  )
   const [type, setType] = useState<TaskDeadlineType>('Publicação')
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [plannedDate, setPlannedDate] = useState('')
   const [selectedDate, setSelectedDate] = useState<Date>()
@@ -70,64 +66,59 @@ export function NewItemDialog({
   const [alerts, setAlerts] = useState<string[]>([])
   const [error, setError] = useState('')
   const [status, setStatus] = useState('A fazer')
-  const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([])
-  const assigneesInitialized = useRef(false)
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState('')
   useEffect(() => {
-    if (!open) {
-      assigneesInitialized.current = false
-      return
-    }
+    if (!open) return
     setType(editingItem?.type ?? 'Publicação')
+    setTitle(editingItem?.title ?? '')
     setDescription(editingItem?.description ?? '')
     setPlannedDate(editingItem?.plannedDate ?? '')
     setPlannedTime(editingItem?.plannedTime ?? '')
     setStatus(editingItem?.status ?? 'A fazer')
     setCustomType(editingItem?.customType ?? '')
-    setAlerts(editingItem?.alerts ?? [])
+    setAlerts([...(editingItem?.alerts ?? [])])
     setError('')
-    setSelectedAssigneeIds(editingItem?.assigneeIds ?? [])
-    assigneesInitialized.current = Boolean(editingItem)
+    setSelectedAssigneeId(editingItem?.assigneeIds?.[0] ?? '')
     setSelectedDate(
       editingItem?.plannedDate
         ? new Date(`${editingItem.plannedDate}T12:00:00`)
         : undefined,
     )
   }, [editingItem, open])
-  useEffect(() => {
-    if (!open || editingItem || assigneesInitialized.current || lawyerIds.length === 0)
-      return
-    setSelectedAssigneeIds(lawyerIds)
-    assigneesInitialized.current = true
-  }, [editingItem, lawyerIds, open])
   const submit = () => {
-    if (!description.trim() || !plannedDate || (type === 'Outro' && !customType.trim())) {
+    if (
+      !description.trim() ||
+      !title.trim() ||
+      !plannedDate ||
+      !selectedAssigneeId ||
+      (type === 'Outro' && !customType.trim())
+    ) {
       setError('Preencha os campos obrigatórios para continuar.')
       return
     }
     const input = {
       type,
+      title: title.trim(),
       description: description.trim(),
       plannedDate,
-      plannedTime,
-      people: lawyers
-        .filter(
-          (member) =>
-            member.collaboratorId && selectedAssigneeIds.includes(member.collaboratorId),
-        )
+      plannedTime: plannedTime || undefined,
+      people: assignableMembers
+        .filter((member) => member.collaboratorId === selectedAssigneeId)
         .map((member) => member.name),
-      assigneeIds: selectedAssigneeIds,
+      assigneeIds: selectedAssigneeId ? [selectedAssigneeId] : [],
       alerts,
       customType: type === 'Outro' ? customType.trim() || undefined : undefined,
     }
     if (editingItem && onUpdate) onUpdate({ ...editingItem, ...input, status })
     else onCreate(input)
     setDescription('')
+    setTitle('')
     setPlannedDate('')
     setSelectedDate(undefined)
     setPlannedTime('')
     setCustomType('')
     setAlerts([])
-    setSelectedAssigneeIds([])
+    setSelectedAssigneeId('')
     setError('')
     onOpenChange(false)
   }
@@ -226,6 +217,21 @@ export function NewItemDialog({
           )}
           <label className='flex flex-col gap-2 text-sm font-semibold'>
             <span>
+              Título <span className='text-destructive'>*</span>
+            </span>
+            <input
+              aria-label='Título'
+              placeholder='Informe o título da tarefa ou prazo'
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setError('')
+              }}
+              className='h-10 rounded-lg border border-border bg-background px-3 text-sm font-normal placeholder:text-muted-foreground/55'
+            />
+          </label>
+          <label className='flex flex-col gap-2 text-sm font-semibold'>
+            <span>
               Descrição <span className='text-destructive'>*</span>
             </span>
             <textarea
@@ -310,36 +316,40 @@ export function NewItemDialog({
               Uma ou mais pessoas da equipe do caso serão notificadas.
             </p>
             <div className='mt-2 rounded-lg border border-border px-3 py-2 text-sm'>
-              {lawyers.length === 0 ? (
+              {assignableMembers.length === 0 ? (
                 <p className='text-xs text-muted-foreground'>
                   Nenhum integrante disponível na equipe deste caso.
                 </p>
               ) : (
                 <div className='flex flex-col gap-2'>
-                  {lawyers.map((member) => {
+                  {assignableMembers.map((member) => {
                     const collaboratorId = member.collaboratorId
                     if (!collaboratorId) return null
-                    const selected = selectedAssigneeIds.includes(collaboratorId)
+                    const selected = selectedAssigneeId === collaboratorId
 
                     return (
                       <label
                         key={collaboratorId}
-                        className='flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted'
+                        className='flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 hover:bg-muted'
                       >
                         <input
-                          type='checkbox'
+                          type='radio'
+                          name='task-assignee'
                           checked={selected}
-                          onChange={() =>
-                            setSelectedAssigneeIds((current) =>
-                              selected
-                                ? current.filter((id) => id !== collaboratorId)
-                                : [...current, collaboratorId],
-                            )
-                          }
+                          onChange={() => setSelectedAssigneeId(collaboratorId)}
                         />
-                        <span>{member.name}</span>
-                        <span className='ml-auto text-xs text-muted-foreground'>
-                          {member.role}
+                        <CollaboratorAvatar
+                          name={member.name}
+                          colorSeed={collaboratorId}
+                          className='size-9'
+                        />
+                        <span className='flex min-w-0 flex-1 flex-col'>
+                          <span className='truncate text-sm font-medium'>
+                            {member.name}
+                          </span>
+                          <span className='text-xs text-muted-foreground'>
+                            {member.role}
+                          </span>
                         </span>
                       </label>
                     )

@@ -75,13 +75,18 @@ beforeEach(() => {
 })
 
 describe('case team tab', () => {
-  it('opens the read-only roster from the legal case detail', () => {
+  it('opens the read-only roster from the legal case detail', async () => {
     render(<CasoDetalheChecklistPage caseId='case-1' />)
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Equipe' }))
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Equipe' }), {
+      button: 0,
+      ctrlKey: false,
+    })
 
-    expect(screen.getByRole('heading', { name: 'Equipe do caso' })).toBeDefined()
+    expect(await screen.findByRole('heading', { name: 'Equipe do caso' })).toBeDefined()
     expect(useCaseTeamRosterMock).toHaveBeenCalledWith('case-1')
-    expect(screen.queryByRole('button', { name: /adicionar|remover|alterar/i })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: /adicionar|remover|alterar/i }),
+    ).toBeNull()
   })
 })

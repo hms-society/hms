@@ -4,6 +4,7 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  CaseTask,
   Pending,
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
@@ -20,6 +21,22 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
+    listCaseTasks(caseId) {
+      return restClient.get<readonly CaseTask[]>(`/cases/${caseId}/tasks`)
+    },
+
+    createCaseTask(caseId, request) {
+      return restClient.post<CaseTask>(`/cases/${caseId}/tasks`, request)
+    },
+
+    updateCaseTask(caseId, taskId, request) {
+      return restClient.patch<CaseTask>(`/cases/${caseId}/tasks/${taskId}`, request)
+    },
+
+    deleteCaseTask(caseId, taskId, request) {
+      return restClient.delete<CaseTask>(`/cases/${caseId}/tasks/${taskId}`, request)
+    },
+
     createLegalCase(request) {
       return restClient.post<LegalCase>('/cases', request)
     },

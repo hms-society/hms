@@ -94,6 +94,29 @@ export class DrizzleCollaboratorsRepository
       : undefined
   }
 
+  async findSummariesByIds(
+    collaboratorIds: readonly string[],
+  ): Promise<readonly CollaboratorSummary[]> {
+    if (collaboratorIds.length === 0) return []
+
+    const records = await this.database
+      .select({ collaborator: collaboratorModel, user: userModel })
+      .from(collaboratorModel)
+      .innerJoin(userModel, eq(userModel.id, collaboratorModel.userId))
+      .where(inArray(collaboratorModel.id, [...collaboratorIds]))
+
+    const legalExpertises = await this.loadExpertises(
+      records.map(({ collaborator }) => collaborator.id),
+    )
+    return records.map(({ collaborator, user }) =>
+      this.collaboratorMapper.toSummary({
+        collaborator,
+        user,
+        legalExpertises: legalExpertises.get(collaborator.id) ?? [],
+      }),
+    )
+  }
+
   async findByUserId(userId: string): Promise<Collaborator | undefined> {
     const [collaborator] = await this.database
       .select()

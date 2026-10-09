@@ -2,7 +2,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { BadRequestError } from '#shared/domain/errors/bad-request-error'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
+import { CollaboratorProfile, UserStatus } from '#shared/domain/structures'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
 import {
@@ -124,7 +124,7 @@ async function resolveMutationReplay(
 ): Promise<CaseTeamMutationPreparation> {
   const replay = await findReplay(scope, request, context.fingerprint)
   if (replay) return { replay }
-  if (legalCase.teamVersion !== request.expectedTeamVersion) {
+  if ((legalCase.teamVersion ?? 0) !== request.expectedTeamVersion) {
     throw new ConflictError('A equipe mudou. Atualize e confirme novamente.')
   }
   return { context }

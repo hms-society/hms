@@ -5,23 +5,15 @@ import type {
   LegalCaseSummary,
   Pending,
   AssistedMessage,
+  CaseTask,
+  CaseTaskUpdate,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
+  CaseTeam,
   ChecklistDocumentType,
 } from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
-import type {
-  CaseEligibleCollaborator,
-  CaseTeam,
-  CaseTeamCandidatesQuery,
-  CaseTeamMutationResult,
-} from '../domain/structures'
-import type { CaseTeamHistory } from '../domain/entities'
-import type { PaginationResponse } from '#shared/responses/pagination-response'
-import type { AddCaseTeamMemberRequest } from '../use-cases/add-case-team-member-request'
-import type { ChangeCaseTeamMemberRoleRequest } from '../use-cases/change-case-team-member-role-request'
-import type { RemoveCaseTeamMemberRequest } from '../use-cases/remove-case-team-member-request'
 
 export type ReviewCaseChecklistGateRequest = {
   decision: CaseChecklistGateDecision
@@ -119,32 +111,39 @@ export type CreatePendingRequest = {
   details?: string
 }
 
+export type CreateCaseTaskRequest = {
+  type: CaseTask['type']
+  title: string
+  customType?: string
+  description: string
+  plannedDate: string
+  plannedTime?: string
+  assigneeIds: readonly string[]
+  blocksCaseClosure?: boolean
+  reminders: readonly {
+    value: number
+    unit: 'minutes' | 'hours' | 'days'
+  }[]
+}
+
 export interface CaseManagementService {
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
-  getCaseTeam(caseId: string): Promise<RestResponse<CaseTeam>>
-  listCaseTeamCandidates(
-    query: CaseTeamCandidatesQuery,
-    caseId?: string,
-  ): Promise<RestResponse<PaginationResponse<CaseEligibleCollaborator>>>
-  addCaseTeamMember(
+
+  listCaseTasks(caseId: string): Promise<RestResponse<readonly CaseTask[]>>
+  createCaseTask(
     caseId: string,
-    request: Omit<AddCaseTeamMemberRequest, 'actorId' | 'caseId'>,
-  ): Promise<RestResponse<CaseTeamMutationResult>>
-  changeCaseTeamMemberRole(
+    request: CreateCaseTaskRequest,
+  ): Promise<RestResponse<CaseTask>>
+  updateCaseTask(
     caseId: string,
-    membershipId: string,
-    request: Omit<ChangeCaseTeamMemberRoleRequest, 'actorId' | 'caseId' | 'membershipId'>,
-  ): Promise<RestResponse<CaseTeamMutationResult>>
-  removeCaseTeamMember(
+    taskId: string,
+    request: CaseTaskUpdate & { version: number },
+  ): Promise<RestResponse<CaseTask>>
+  deleteCaseTask(
     caseId: string,
-    membershipId: string,
-    request: Omit<RemoveCaseTeamMemberRequest, 'actorId' | 'caseId' | 'membershipId'>,
-  ): Promise<RestResponse<CaseTeamMutationResult>>
-  listCaseTeamHistory(
-    caseId: string,
-    page: number,
-    pageSize: number,
-  ): Promise<RestResponse<PaginationResponse<CaseTeamHistory>>>
+    taskId: string,
+    request: { version: number },
+  ): Promise<RestResponse<CaseTask>>
 
   addComplementaryChecklistItem(
     caseId: string,
@@ -165,6 +164,8 @@ export interface CaseManagementService {
   ): Promise<RestResponse<ChecklistTemplate>>
 
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
+
+  getCaseTeam(caseId: string): Promise<RestResponse<CaseTeam>>
 
   grantCasePortalAccess(
     caseId: string,

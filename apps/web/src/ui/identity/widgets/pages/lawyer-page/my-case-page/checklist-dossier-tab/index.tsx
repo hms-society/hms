@@ -98,6 +98,11 @@ export const ChecklistDossierTab = ({
   })
 
   const { exceptions } = useListCaseDocumentExceptionsQuery(caseId)
+  const hasApprovedDocumentException = exceptions.some(
+    (exception) => exception.status === 'APPROVED',
+  )
+  const hasAuthorizedException =
+    checklistGateLabel === 'Aprovado com exceção' && hasApprovedDocumentException
 
   const { currentCollaborator } = useCurrentCollaboratorQuery()
   const { approveException, isApprovingException } =
@@ -533,7 +538,7 @@ export const ChecklistDossierTab = ({
             {isHomologatingDossier ? 'Homologando dossiê…' : 'Homologar dossiê'}
           </Button>
         )}
-        {pendingItemsCount > 0 && (
+        {pendingItemsCount > 0 && !hasAuthorizedException && (
           <p className='text-[14px] text-muted-foreground'>
             {pendingItemsCount} itens ainda exigem validação ou exceção autorizada antes
             do avanço de fase.

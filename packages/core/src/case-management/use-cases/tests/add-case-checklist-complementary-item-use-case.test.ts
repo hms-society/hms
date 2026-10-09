@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import type { LegalCaseSummary } from '../../domain/entities'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
 import { AddCaseChecklistComplementaryItemUseCase } from '../add-case-checklist-complementary-item-use-case'
@@ -24,7 +23,7 @@ describe('Add Case Checklist Complementary Item Use Case', () => {
     const caseId = '00000000-0000-4000-8000-000000000501'
     const collaboratorId = '00000000-0000-4000-8000-000000000502'
     legalCasesRepository.listByTeamMember.mockResolvedValue([
-      fakeLegalCaseSummary({ id: caseId }),
+      fakeLegalCase({ id: caseId }),
     ])
     checklistItemsRepository.addMany.mockResolvedValue([
       {
@@ -58,26 +57,6 @@ describe('Add Case Checklist Complementary Item Use Case', () => {
   })
 })
 
-function fakeLegalCaseSummary(
-  overrides: Partial<LegalCaseSummary> = {},
-): LegalCaseSummary {
-  const legalCase = LegalCaseFaker.fake(overrides)
-
-  return {
-    id: legalCase.id,
-    intakeId: legalCase.intakeId,
-    publicCode: legalCase.publicCode,
-    title: legalCase.title,
-    status: legalCase.status,
-    teamVersion: legalCase.teamVersion,
-    clientName: 'Cliente HMS',
-    legalArea: 'Cível',
-    legalTopic: 'Contratos',
-    openedAt: legalCase.openedAt,
-    updatedAt: legalCase.updatedAt,
-    checklistGate: legalCase.checklistGate,
-    dossierGate: legalCase.dossierGate,
-    team: [],
-    ...overrides,
-  }
+function fakeLegalCase(overrides: Parameters<typeof LegalCaseFaker.fake>[0] = {}) {
+  return LegalCaseFaker.fake(overrides)
 }

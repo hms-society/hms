@@ -4,7 +4,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import type { CaseMember, CaseMemberCreation } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseMemberRole } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { AddCaseTeamMemberRequest } from './add-case-team-member-request'
 import {

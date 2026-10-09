@@ -4,7 +4,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseMemberRole, CaseTeamHistoryKind } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseMemberRole } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { ChangeCaseTeamMemberRoleRequest } from './change-case-team-member-role-request'
 import {
@@ -82,8 +82,21 @@ export class ChangeCaseTeamMemberRoleUseCase
         scope.caseCollaboratorsProvider.findById(member.collaboratorId),
       ),
     )
-    if (target.role !== CaseMemberRole.Manager || nextRole === CaseMemberRole.Manager)
-      return
+    const targetIndex = active.findIndex((member) => member.id === target.id)
+    const targetCollaborator = collaborators[targetIndex]
+    if (
+      nextRole === CaseMemberRole.Manager &&
+      (!targetCollaborator ||
+        !isEligibleCaseCollaborator(
+          targetCollaborator.profile,
+          targetCollaborator.status,
+        ))
+    ) {
+      throw new ConflictError(
+        'Somente um colaborador jurídico ativo e elegível pode ser Gestor.',
+      )
+    }
+    if (target.role !== CaseMemberRole.Manager || nextRole === CaseMemberRole.Manager) return
     const anotherManager = active.some(
       (member, index) =>
         member.id !== target.id &&

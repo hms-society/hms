@@ -127,6 +127,9 @@ describe('Ensure Case Manager Continuity Use Case', () => {
       async (_caseId, expectedTeamVersion) => expectedTeamVersion + 1,
     )
     cases.caseTeamHistoriesRepository.add.mockResolvedValue({ id: 'history-1' } as never)
+    cases.caseTeamOperationsRepository.add.mockResolvedValue({
+      id: 'operation-1',
+    } as never)
 
     await expect(
       useCase.executeWithin(
@@ -170,6 +173,135 @@ describe('Ensure Case Manager Continuity Use Case', () => {
         operationId: TEST_OPERATION_ID,
       }),
     )
+    expect(cases.caseTeamOperationsRepository.findByKey).toHaveBeenCalledWith(
+      'case-1',
+      TEST_ACTOR_ID,
+      TEST_OPERATION_ID,
+    )
+    expect(cases.caseTeamOperationsRepository.add).toHaveBeenCalledTimes(2)
+    expect(cases.caseTeamOperationsRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        actorId: TEST_ACTOR_ID,
+        operationId: TEST_OPERATION_ID,
+        fingerprint: JSON.stringify({
+          action: 'eligibility_changed',
+          collaboratorId: TEST_TARGET_ID,
+          nextProfile: CollaboratorProfile.Intern,
+          nextStatus: UserStatus.Active,
+        }),
+        result: {
+          caseId: 'case-1',
+          membershipId: manager.id,
+          teamVersion: 9,
+          historyId: 'history-1',
+        },
+        createdAt: TEST_AT,
+      }),
+    )
+  })
+
+  it('replays a completed operation without incrementing versions or duplicating history', async () => {
+    const collaborator = CollaboratorFaker.legal({ id: TEST_TARGET_ID, userId: 'user-1' })
+    const manager = CaseMemberFaker.fake({
+      id: 'membership-1',
+      caseId: 'case-1',
+      collaboratorId: TEST_TARGET_ID,
+      role: CaseMemberRole.Manager,
+    })
+    identity.collaboratorsRepository.findById.mockResolvedValue(collaborator)
+    identity.usersRepository.findById.mockResolvedValue(
+      UserFaker.fake({ id: collaborator.userId, status: UserStatus.Active }),
+    )
+    cases.caseMembersRepository.listByCollaboratorId.mockResolvedValue([manager])
+    cases.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: 'case-1', teamVersion: 9 }),
+    )
+    cases.caseTeamOperationsRepository.findByKey.mockResolvedValue({
+      id: 'operation-record',
+      caseId: 'case-1',
+      actorId: TEST_ACTOR_ID,
+      operationId: TEST_OPERATION_ID,
+      fingerprint: JSON.stringify({
+        action: 'eligibility_changed',
+        collaboratorId: TEST_TARGET_ID,
+        nextProfile: CollaboratorProfile.Intern,
+        nextStatus: UserStatus.Active,
+      }),
+      result: {
+        caseId: 'case-1',
+        membershipId: manager.id,
+        teamVersion: 9,
+        historyId: 'history-1',
+      },
+      createdAt: TEST_AT,
+    })
+
+    await expect(
+      useCase.executeWithin(
+        { cases: cases.scope, identity: identity.scope },
+        {
+          collaboratorId: TEST_TARGET_ID,
+          nextProfile: CollaboratorProfile.Intern,
+          nextStatus: UserStatus.Active,
+          actorId: TEST_ACTOR_ID,
+          operationId: TEST_OPERATION_ID,
+        },
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(cases.legalCasesRepository.replaceTeamVersion).not.toHaveBeenCalled()
+    expect(cases.caseTeamHistoriesRepository.add).not.toHaveBeenCalled()
+    expect(cases.caseTeamOperationsRepository.add).not.toHaveBeenCalled()
+  })
+
+  it('rejects reusing an operation key with different eligibility changes', async () => {
+    const collaborator = CollaboratorFaker.legal({ id: TEST_TARGET_ID, userId: 'user-1' })
+    const manager = CaseMemberFaker.fake({
+      id: 'membership-1',
+      caseId: 'case-1',
+      collaboratorId: TEST_TARGET_ID,
+      role: CaseMemberRole.Manager,
+    })
+    identity.collaboratorsRepository.findById.mockResolvedValue(collaborator)
+    identity.usersRepository.findById.mockResolvedValue(
+      UserFaker.fake({ id: collaborator.userId, status: UserStatus.Active }),
+    )
+    cases.caseMembersRepository.listByCollaboratorId.mockResolvedValue([manager])
+    cases.legalCasesRepository.findById.mockResolvedValue(
+      LegalCaseFaker.fake({ id: 'case-1', teamVersion: 9 }),
+    )
+    cases.caseTeamOperationsRepository.findByKey.mockResolvedValue({
+      id: 'operation-record',
+      caseId: 'case-1',
+      actorId: TEST_ACTOR_ID,
+      operationId: TEST_OPERATION_ID,
+      fingerprint: 'different-request',
+      result: {
+        caseId: 'case-1',
+        membershipId: manager.id,
+        teamVersion: 9,
+        historyId: 'history-1',
+      },
+      createdAt: TEST_AT,
+    })
+
+    await expect(
+      useCase.executeWithin(
+        { cases: cases.scope, identity: identity.scope },
+        {
+          collaboratorId: TEST_TARGET_ID,
+          nextProfile: CollaboratorProfile.Intern,
+          nextStatus: UserStatus.Disabled,
+          actorId: TEST_ACTOR_ID,
+          operationId: TEST_OPERATION_ID,
+        },
+      ),
+    ).rejects.toThrow('A chave da operação já foi usada com outro conteúdo.')
+
+    expect(cases.legalCasesRepository.replaceTeamVersion).not.toHaveBeenCalled()
+    expect(cases.caseTeamHistoriesRepository.add).not.toHaveBeenCalled()
+    expect(cases.caseTeamOperationsRepository.add).not.toHaveBeenCalled()
   })
 
   it('supports a caller-owned transaction scope without starting another transaction', async () => {

@@ -123,7 +123,9 @@ describe('CaseTeamRoster', () => {
     expect(screen.getByText('beatriz@example.test')).toBeDefined()
     expect(screen.getByText('Gestor')).toBeDefined()
     expect(screen.getByText('Ativo')).toBeDefined()
-    expect(screen.queryByRole('button', { name: /adicionar|remover|alterar/i })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: /adicionar|remover|alterar/i }),
+    ).toBeNull()
   })
 
   it('wires candidate selection and member role/removal actions for managers', () => {

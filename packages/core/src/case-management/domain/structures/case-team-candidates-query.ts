@@ -1,4 +1,4 @@
-import type { CollaboratorProfile } from '@hms/core/identity/domain/structures'
+import type { CollaboratorProfile } from '@hms/core/shared/domain/structures'
 
 export type CaseTeamCandidatesQuery = {
   search?: string
