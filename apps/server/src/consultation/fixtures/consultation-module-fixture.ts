@@ -26,6 +26,7 @@ import { vi, type Mock } from 'vitest'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
 import { DocumentProductionProvisionModule } from '@/document-production/provision/document-production-provision.module'
@@ -99,6 +100,7 @@ export class ConsultationModuleFixture {
         {
           imports: [
             IdentityModule,
+            CaseManagementDatabaseModule,
             LegalCatalogModule,
             IntakeDatabaseModule,
             SchedulingDatabaseModule,
