@@ -41,7 +41,15 @@ describe('Get Case Team Use Case', () => {
       id: 'membership-3',
       caseId: TEST_CASE_ID,
       collaboratorId: 'removed-id',
+      role: CaseMemberRole.Manager,
       removedAt: new Date(),
+    })
+    const archived = CaseMemberFaker.fake({
+      id: 'membership-4',
+      caseId: TEST_CASE_ID,
+      collaboratorId: 'archived-id',
+      role: CaseMemberRole.Manager,
+      archivedLegacy: true,
     })
     mocks.legalCasesRepository.findById.mockResolvedValue(
       LegalCaseFaker.fake({ id: TEST_CASE_ID, teamVersion: 5 }),
@@ -50,6 +58,7 @@ describe('Get Case Team Use Case', () => {
       manager,
       collaborator,
       removed,
+      archived,
     ])
     mocks.caseCollaboratorsProvider.findById.mockImplementation(
       async (collaboratorId) => ({
