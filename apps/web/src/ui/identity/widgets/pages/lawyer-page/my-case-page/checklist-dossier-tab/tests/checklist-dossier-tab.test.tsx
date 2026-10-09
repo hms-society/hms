@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ChecklistDossierTab } from '..'
 import { useChecklistDossierTab } from '../use-checklist-dossier-tab'
+import { useListCaseDocumentExceptionsQuery } from '@/ui/document-engine/hooks/use-list-case-document-exceptions-query'
 
 vi.mock('../use-checklist-dossier-tab', () => ({
   useChecklistDossierTab: vi.fn(),
@@ -127,6 +128,31 @@ describe('ChecklistDossierTab', () => {
       ],
       isReviewDisabled: false,
     })
+  })
+
+  it('hides the pending validation message when an approved exception unlocks the dossier', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        canHomologateDossier: true,
+        checklistGateLabel: 'Aprovado com exceção',
+      }),
+    )
+
+    vi.mocked(useListCaseDocumentExceptionsQuery).mockReturnValue({
+      exceptions: [{ id: 'exception-1', status: 'APPROVED' }],
+    } as never)
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[{ id: '1', title: 'Procuração', status: 'solicitado' }]}
+      />,
+    )
+
+    expect(
+      screen.queryByText(/itens ainda exigem validação ou exceção autorizada/i),
+    ).toBeNull()
   })
 
   it('keeps checklist review actions disabled while case data is mocked', () => {

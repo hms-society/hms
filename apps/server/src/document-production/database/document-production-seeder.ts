@@ -123,6 +123,138 @@ const PENDING_MARKERS_TEMPLATE = {
   ],
 } as const satisfies DocumentTemplateSeed
 
+export const UNIVERSAL_RETIREMENT_TEMPLATE = {
+  name: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+  description:
+    'Modelo universal de requerimento administrativo previdenciário. Fatos, períodos contributivos e documentos devem ser preenchidos e conferidos para cada requerente antes da submissão.',
+  moment: 'legal_production' as const,
+  legalAreaName: 'Previdenciário',
+  legalTopicName: 'Aposentadoria',
+  content: {
+    type: 'doc',
+    content: [
+      {
+        type: 'heading',
+        attrs: { level: 1, textAlign: 'center' },
+        content: [{ type: 'text', text: 'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: 'REQUERIMENTO ADMINISTRATIVO DE BENEFÍCIO PREVIDENCIÁRIO' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Requerente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NIT/PIS/PASEP: {{nit_requerente}}' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Endereço: {{endereco_requerente}}' }],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'I — DO OBJETO' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'O(A) requerente acima identificado(a) solicita a análise de seu histórico previdenciário e a concessão do benefício {{beneficio_requerido}}, caso sejam preenchidos os requisitos legais aplicáveis. Requer, ainda, a análise do benefício mais vantajoso eventualmente cabível, conforme os elementos comprovados no processo administrativo.' }],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'II — DO HISTÓRICO CONTRIBUTIVO E DOS DOCUMENTOS' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'O histórico contributivo deverá ser conferido a partir do CNIS e dos documentos apresentados. Os períodos cuja análise é solicitada são: {{periodos_contributivos}}.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Documentos que instruem este requerimento: {{documentos_apresentados}}. A relação deve refletir exclusivamente os arquivos efetivamente juntados.' }],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'III — DA ANÁLISE DO PEDIDO' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Requer-se a apuração dos requisitos previdenciários pertinentes, incluindo tempo de contribuição e carência quando aplicáveis, com consideração dos registros do CNIS e dos documentos apresentados. Eventuais divergências ou períodos não computados devem ser examinados individualmente, sem presumir como comprovado período que não esteja apoiado nos elementos dos autos.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Se os elementos indicarem mais de uma regra possível, requer-se a análise das hipóteses cabíveis na data relevante e a indicação fundamentada da opção mais vantajosa, acompanhada da memória de cálculo.' }],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'IV — DOS REQUERIMENTOS' }],
+      },
+      {
+        type: 'orderedList',
+        content: [
+          'o recebimento e o processamento do presente requerimento;',
+          'a análise do CNIS e dos documentos efetivamente apresentados, com exame dos períodos indicados;',
+          'a apuração dos requisitos e das regras previdenciárias aplicáveis, com memória de cálculo;',
+          'a concessão do benefício requerido, se comprovado o preenchimento dos requisitos;',
+          'caso sejam necessários elementos adicionais, a indicação objetiva das informações ou documentos pendentes;',
+          'a emissão de decisão fundamentada, com identificação dos períodos considerados e não considerados.',
+        ].map((text) => ({
+          type: 'listItem' as const,
+          content: [{ type: 'paragraph' as const, content: [{ type: 'text' as const, text }] }],
+        })),
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Termos em que, pede deferimento.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: '{{municipio}}, {{data_documento}}.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: '__________________________________' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: '{{nome_requerente}} | Requerente' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: 'Representante, se houver: {{nome_representante}} | OAB/{{uf_oab}} {{numero_oab}}' }],
+      },
+    ],
+  } as unknown as DocumentTemplateContent,
+  variables: [
+    { label: 'Nome do requerente', technicalName: 'nome_requerente' },
+    { label: 'CPF do requerente', technicalName: 'cpf_requerente' },
+    { label: 'NIT/PIS/PASEP', technicalName: 'nit_requerente' },
+    { label: 'Endereço do requerente', technicalName: 'endereco_requerente' },
+    { label: 'Benefício requerido', technicalName: 'beneficio_requerido' },
+    { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
+    { label: 'Documentos apresentados', technicalName: 'documentos_apresentados' },
+    { label: 'Município', technicalName: 'municipio' },
+    { label: 'Data do documento', technicalName: 'data_documento' },
+    { label: 'Nome do representante', technicalName: 'nome_representante' },
+    { label: 'UF da OAB', technicalName: 'uf_oab' },
+    { label: 'Número da OAB', technicalName: 'numero_oab' },
+  ],
+} as const
+
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 
 const SEEDED_GENERATION_IDS = [
@@ -201,6 +333,32 @@ export class DocumentProductionSeeder {
     )
     const specifications =
       await this.specificationsRepository.addMany(specificationCreations)
+    const retirementArea = references.legalAreas.find(
+      ({ name }) => name === UNIVERSAL_RETIREMENT_TEMPLATE.legalAreaName,
+    )
+    const retirementTopic = references.legalTopics.find(
+      ({ legalAreaId, name }) =>
+        legalAreaId === retirementArea?.id &&
+        name === UNIVERSAL_RETIREMENT_TEMPLATE.legalTopicName,
+    )
+    const universalRetirementSpecification = await this.specificationsRepository.add({
+      name: UNIVERSAL_RETIREMENT_TEMPLATE.name,
+      description: UNIVERSAL_RETIREMENT_TEMPLATE.description,
+      content: UNIVERSAL_RETIREMENT_TEMPLATE.content,
+      variables: [...UNIVERSAL_RETIREMENT_TEMPLATE.variables],
+      application: retirementArea && retirementTopic
+        ? {
+            scope: 'legal_context',
+            moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
+            legalAreaIds: [retirementArea.id],
+            legalTopicIdsByArea: { [retirementArea.id]: [retirementTopic.id] },
+          }
+        : {
+            scope: 'global',
+            moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
+          },
+      status: 'available',
+    })
     const documentCreations: DocumentCreation[] = specifications.map((specification) => {
       const template = templates.find(({ name }) => name === specification.name)
       if (!template) {
@@ -275,6 +433,7 @@ export class DocumentProductionSeeder {
 
     return {
       specifications,
+      universalRetirementSpecification,
       documents,
       documentPackage,
       packageDocuments,

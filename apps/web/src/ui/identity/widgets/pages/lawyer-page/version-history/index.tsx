@@ -21,7 +21,7 @@ export const VersionHistory = ({
   selectedVersionId = currentVersionId,
   onSelectVersion,
 }: VersionHistoryProps) => (
-  <aside className='border-r bg-card p-3'>
+  <aside className='h-full border-r bg-card p-3'>
     <h2 className='mb-3 font-serif font-semibold'>Versões</h2>
     <div className='space-y-2'>
       {[...versions].reverse().map((version) => (
