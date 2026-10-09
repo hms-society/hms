@@ -101,7 +101,7 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
-      status: 'in_review',
+      status: 'draft',
     })
     generationsRepository.findById.mockResolvedValue(generation)
     versionsRepository.findByDocumentGenerationId.mockResolvedValue(undefined)
@@ -147,7 +147,7 @@ describe('Save Generated Document Version Use Case', () => {
       pendingMarkers,
       createdByCollaboratorId: generation.requestedByCollaboratorId,
       createdAt: now,
-      status: 'in_review',
+      status: 'draft',
     })
     expect(savedVersion.content).toEqual(content)
     expect(savedVersion.pendingMarkers).toEqual(pendingMarkers)

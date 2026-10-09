@@ -3,6 +3,7 @@ import { Icon, type IconName } from '@/ui/shared/widgets/components/icon'
 
 export type DocumentStatusChipStatus =
   | 'not_generated'
+  | 'draft'
   | 'in_review'
   | 'rejected'
   | 'approved'
@@ -26,6 +27,11 @@ const POSITIVE_STATUS_CLASS = 'border-primary/30 bg-highlight text-highlight-for
 const DESTRUCTIVE_STATUS_CLASS = 'border-destructive/30 bg-card text-destructive'
 
 const STATUS_PRESENTATIONS: Record<DocumentStatusChipStatus, StatusPresentation> = {
+  draft: {
+    icon: 'pencil',
+    className: 'border-border bg-background text-foreground',
+    label: 'Em elaboração',
+  },
   not_generated: {
     icon: 'file-text',
     className: 'border-border bg-background text-foreground',

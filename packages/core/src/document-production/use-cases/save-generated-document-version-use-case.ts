@@ -89,7 +89,7 @@ export class SaveGeneratedDocumentVersionUseCase
         pendingMarkers: request.pendingMarkers,
         createdByCollaboratorId: generation.requestedByCollaboratorId,
         createdAt: this.datetimeProvider.now(),
-        status: DocumentVersionStatus.InReview,
+        status: DocumentVersionStatus.Draft,
       })
     } catch (error) {
       await this.fileStorageProvider.remove(file.id)

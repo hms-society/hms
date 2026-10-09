@@ -13,6 +13,7 @@ export type CaseDocumentResponse = {
     status: string
     createdAt: string
     createdByCollaboratorId: string
+    createdByCollaboratorName?: string
     reviewedAt?: string
     rejectionReason?: string
     content?: DocumentTemplateContent
@@ -103,6 +104,27 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
     return restClient.post(
       `/cases/${caseId}/documents/${documentId}/versions/${sourceVersionId}/manual`,
       { content },
+    )
+  },
+  saveEditableVersion(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+    content: DocumentTemplateContent,
+  ): Promise<RestResponse<unknown>> {
+    return restClient.patch(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}`,
+      content,
+    )
+  },
+  submitVersionForReview(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+  ): Promise<RestResponse<unknown>> {
+    return restClient.patch(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/submit-review`,
+      {},
     )
   },
   generateRevision(

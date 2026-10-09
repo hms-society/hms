@@ -93,6 +93,8 @@ beforeEach(() => {
     saveManualVersion: vi
       .fn()
       .mockResolvedValue(new RestResponse({ body: { id: 'new-version-id' } })),
+    saveEditableVersion: vi.fn().mockResolvedValue(new RestResponse({ body: {} })),
+    submitVersionForReview: vi.fn().mockResolvedValue(new RestResponse({ body: {} })),
     generateRevision: vi.fn().mockResolvedValue(
       new RestResponse({
         body: { documentGenerationId: 'generation-2', documentId: DOCUMENT_ID },
@@ -202,6 +204,36 @@ describe('usePieceWorkflowRoutePage', () => {
     )
   })
 
+  it('creates and opens a new version when starting manual editing', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    const { result } = renderHook(
+      () =>
+        usePieceWorkflowRoutePage({
+          mode: 'editor',
+          caseId: CASE_ID,
+          documentId: DOCUMENT_ID,
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
+    act(() => result.current.handleStartManualVersion(VERSION_ID))
+
+    await waitFor(() => expect(result.current.isVersionDialogOpen).toBe(false))
+    const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+      CASE_ID,
+      DOCUMENT_ID,
+      VERSION_ID,
+      initialContent,
+    )
+  })
+
   it('asks before discarding unsaved edits when selecting another version', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -302,7 +334,7 @@ describe('usePieceWorkflowRoutePage', () => {
     )
   })
 
-  it('saves edits as a new manual version before navigating back to the case', async () => {
+  it('saves edits in the current version before navigating back to the case', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     })
@@ -327,7 +359,7 @@ describe('usePieceWorkflowRoutePage', () => {
     })
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
-    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+    expect(caseDocumentProductionService.saveEditableVersion).toHaveBeenCalledWith(
       CASE_ID,
       DOCUMENT_ID,
       VERSION_ID,

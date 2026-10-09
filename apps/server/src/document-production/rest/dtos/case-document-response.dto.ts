@@ -24,6 +24,7 @@ class CaseDocumentVersionResponseDto {
   @ApiProperty() status!: DocumentVersion['status']
   @ApiProperty() createdAt!: Date
   @ApiProperty({ format: 'uuid' }) createdByCollaboratorId!: string
+  @ApiPropertyOptional() createdByCollaboratorName?: string
   @ApiPropertyOptional() reviewedAt?: Date
   @ApiPropertyOptional() rejectionReason?: string
   @ApiPropertyOptional() content?: DocumentVersion['content']
@@ -55,6 +56,7 @@ export class CaseDocumentResponseDto {
     document: Document
     versions: readonly DocumentVersion[]
     generation?: DocumentGeneration
+    collaboratorNames?: ReadonlyMap<string, string>
   }): CaseDocumentResponseDto {
     return {
       id: input.document.id,
@@ -67,6 +69,9 @@ export class CaseDocumentResponseDto {
         status: version.status,
         createdAt: version.createdAt,
         createdByCollaboratorId: version.createdByCollaboratorId,
+        createdByCollaboratorName: input.collaboratorNames?.get(
+          version.createdByCollaboratorId,
+        ),
         reviewedAt: version.reviewedAt,
         rejectionReason: version.rejectionReason,
         content: version.content,

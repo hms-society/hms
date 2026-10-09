@@ -68,6 +68,7 @@ export function PieceWorkflowRoutePage({
     isCheckingReviewer,
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
+    isStartingManualVersion,
     isGeneratingRevision,
     pendingGenerationVersion,
     versionActionError,
@@ -161,7 +162,7 @@ export function PieceWorkflowRoutePage({
               </h1>
               <Badge variant={isReview ? 'info' : 'attention'}>
                 {isReview
-                  ? `Em revisão · v${version.versionNumber}`
+                  ? 'Em revisão'
                   : isReadOnlyVersion
                     ? `Somente leitura · v${version.versionNumber}`
                     : adjustmentsRequested
@@ -538,7 +539,7 @@ export function PieceWorkflowRoutePage({
           open={isVersionDialogOpen}
           versions={document.versions}
           currentVersionId={currentVersion?.id ?? version.id}
-          isGenerating={isGeneratingRevision}
+          isGenerating={isGeneratingRevision || isStartingManualVersion}
           error={versionActionError}
           onOpenChange={handleVersionDialogOpenChange}
           onStartManual={handleStartManualVersion}

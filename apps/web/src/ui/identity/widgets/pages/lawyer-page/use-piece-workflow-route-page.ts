@@ -44,6 +44,7 @@ export function usePieceWorkflowRoutePage({
   const [isPendingVariableDialogOpen, setIsPendingVariableDialogOpen] = useState(false)
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false)
   const [isGeneratingRevision, setIsGeneratingRevision] = useState(false)
+  const [isStartingManualVersion, setIsStartingManualVersion] = useState(false)
   const [pendingGenerationVersion, setPendingGenerationVersion] = useState<{
     id: string
     versionNumber: number
@@ -172,23 +173,48 @@ export function usePieceWorkflowRoutePage({
 
   async function handleBackToCase() {
     if (mode === 'editor' && editedContent && editingSourceVersionId) {
-      const sourceContent = editingSourceVersion?.content ?? version?.content
-      if (
-        sourceContent &&
-        serializeComparableContent(editedContent) ===
-          serializeComparableContent(sourceContent)
-      ) {
-        setEditedContent(null)
-        setEditingSourceVersionId(null)
-        setSaveState('saved')
-      } else if (!(await saveManualVersion(editedContent, editingSourceVersionId))) return
+      const response = await caseDocumentProductionService.saveEditableVersion(
+        caseId,
+        documentId,
+        editingSourceVersionId,
+        editedContent,
+      )
+      if (response.isFailure) {
+        setSaveState('error')
+        return
+      }
+      setEditedContent(null)
+      setEditingSourceVersionId(null)
+      setSaveState('saved')
+      await queryClient.invalidateQueries({
+        queryKey: ['case-document', caseId, documentId],
+      })
+      await refetchDocument()
     }
     await navigateTo('lawyerCaseDetails', { params: { caseId } })
   }
 
   async function handleOpenReview() {
     if (editedContent && editingSourceVersionId) {
-      if (!(await saveManualVersion(editedContent, editingSourceVersionId))) return
+      setVersionActionError(
+        'Salve explicitamente a nova versão antes de abrir a revisão técnica.',
+      )
+      return
+    }
+    if (version?.status === 'draft') {
+      const response = await caseDocumentProductionService.submitVersionForReview(
+        caseId,
+        documentId,
+        version.id,
+      )
+      if (response.isFailure) {
+        setVersionActionError('Não foi possível enviar o documento para revisão.')
+        return
+      }
+      await queryClient.invalidateQueries({
+        queryKey: ['case-document', caseId, documentId],
+      })
+      await refetchDocument()
     }
     void navigateTo('lawyerCasePieceReview', { params: { caseId, documentId } })
   }
@@ -269,15 +295,14 @@ export function usePieceWorkflowRoutePage({
   async function handleOpenVersionDialog() {
     setVersionActionError(undefined)
     if (editedContent && editingSourceVersionId) {
-      const savedVersionId = await saveManualVersion(
-        editedContent,
-        editingSourceVersionId,
+      setVersionActionError(
+        'Salve explicitamente a nova versão antes de abrir o histórico.',
       )
-      if (!savedVersionId) return
+      return
     }
     setIsVersionDialogOpen(true)
   }
-  function handleStartManualVersion(sourceVersionId: string) {
+  async function handleStartManualVersion(sourceVersionId: string) {
     if (editedContent) {
       setVersionActionError(
         'Salve as alterações atuais como nova versão antes de iniciar outra edição.',
@@ -295,23 +320,37 @@ export function usePieceWorkflowRoutePage({
       )
       return
     }
-    setEditingSourceVersionId(sourceVersionId)
-    setSelectedVersionId(sourceVersionId)
+    setIsStartingManualVersion(true)
+    setVersionActionError(undefined)
+    const response = await caseDocumentProductionService.saveManualVersion(
+      caseId,
+      documentId,
+      sourceVersionId,
+      sourceVersion.content,
+    )
+    if (response.isFailure) {
+      setIsStartingManualVersion(false)
+      setVersionActionError('Não foi possível criar a nova versão manual.')
+      return
+    }
+    const newVersionId = response.body.id
+    await queryClient.invalidateQueries({
+      queryKey: ['case-document', caseId, documentId],
+    })
+    await refetchDocument()
+    setEditingSourceVersionId(newVersionId)
+    setSelectedVersionId(newVersionId)
     setSaveState('saved')
+    setIsStartingManualVersion(false)
     setIsVersionDialogOpen(false)
   }
   async function handleGenerateRevision(sourceVersionId: string, instructions: string) {
-    let revisionSourceVersionId = sourceVersionId
+    const revisionSourceVersionId = sourceVersionId
     if (editedContent && editingSourceVersionId) {
-      const savedVersionId = await saveManualVersion(
-        editedContent,
-        editingSourceVersionId,
+      setVersionActionError(
+        'Salve explicitamente a nova versão antes de solicitar uma geração por IA.',
       )
-      if (!savedVersionId) {
-        setVersionActionError('Não foi possível salvar a versão atual antes da geração.')
-        return
-      }
-      revisionSourceVersionId = savedVersionId
+      return
     }
     setIsGeneratingRevision(true)
     setVersionActionError(undefined)
@@ -364,6 +403,7 @@ export function usePieceWorkflowRoutePage({
     isDiscardEditsDialogOpen,
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
+    isStartingManualVersion,
     isGeneratingRevision,
     pendingGenerationVersion,
     versionActionError,
