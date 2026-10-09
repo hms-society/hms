@@ -142,7 +142,8 @@ export function useChecklistDossierTab({
       (checklistGateDecision === CaseChecklistGateDecision.Approved ||
         checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException) &&
       persistedCase?.status === LegalCaseStatus.ReadyForLegalProduction &&
-      isChecklistComplete,
+      (isChecklistComplete ||
+        checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException),
   )
   const decisionReasonDialog = pendingDecision
     ? DECISION_DIALOG_COPY[pendingDecision]

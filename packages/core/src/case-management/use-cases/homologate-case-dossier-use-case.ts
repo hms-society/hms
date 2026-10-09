@@ -48,9 +48,12 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
 
     const items = await this.checklistItems.listByCaseId(caseId)
     const requiredItems = items.filter((item) => item.isRequired)
+    const hasApprovedException =
+      legalCase.checklistGate.decision === CaseChecklistGateDecision.ApprovedWithException
     const hasPendingRequiredItem =
-      requiredItems.length === 0 ||
-      requiredItems.some((item) => item.status !== CaseChecklistItemStatus.Validated)
+      !hasApprovedException &&
+      (requiredItems.length === 0 ||
+        requiredItems.some((item) => item.status !== CaseChecklistItemStatus.Validated))
     if (hasPendingRequiredItem) {
       throw new CaseChecklistGateReviewError(
         'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de validação.',

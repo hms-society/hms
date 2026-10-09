@@ -1,22 +1,80 @@
-                                             DOCUMENTO FICTÍCIO - TESTE - SEM VALIDADE LEGAL
+%PDF-1.4
+%���� ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R /F3 4 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
+>>
+endobj
+5 0 obj
+<<
+/Contents 9 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 8 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
 
-COMPROVANTE DE PROTOCOLO FICTÍCIO
+>> 
+  /Type /Page
+>>
+endobj
+6 0 obj
+<<
+/PageMode /UseNone /Pages 8 0 R /Type /Catalog
+>>
+endobj
+7 0 obj
+<<
+/Author (anonymous) /CreationDate (D:20260925150821+00'00') /Creator (anonymous) /Keywords () /ModDate (D:20260925150821+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (unspecified) /Title (untitled) /Trapped /False
+>>
+endobj
+8 0 obj
+<<
+/Count 1 /Kids [ 5 0 R ] /Type /Pages
+>>
+endobj
+9 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ] /Length 996
+>>
+stream
+Gatn%96Zgi'Z]rsMRuQ&RW71?FD$j1G`E!/1b1HeZ)'t+!k/(&]mp;DD&/Z<*$5+Jn%Rr,JDubMT2>sbi5>>P!TW,,J4Us$?\%I'IZ0^G*1Z-m-2)G3BSS?5j3J%l8ifdrX`%bu?)B4$g^"IS:o90Q5D>Sp2uU%(T6q.jk>OSV9MO[k"IpG#h2Um3bDj,ekK.0sS'5,>\=Y++>O]C[J+nuZ)U[,l%acZ@5)n[BdEI2RJg`(ds.]=:[`qbb+8aWtdYQ*f#0&>`\^6?'WOH-7^$!KNRR(4aqqfh,>bL`&[d\'sosD(M!Zch+Pd!PY"FWGBLX#%Q:YK4HpTUG>6L$HpdlcA272c@s)LRG_as9.<_ef\6(lC;1?]m7kWk:LmEK#h)E>,DB&8,DXLTh&XMG&?iI;jku9#:0Z-Eu[$P_r;r8<B,LCE3e-%q3[;Zj44T&T&NOZHcS4U*+r*dU9b'bp6t]]rgb)dls1F)jknVd!Ljed=90<PE^Yi/_bCD8VL"k5$fbQQN>Ah_4!'E9$^(p7*2]e7=L%c=GG54E17@_jHLKsA=M9&j$:2i$KHr"\MDaHVp6D7j]G2(jc/-Gg`N`^S+17!EEC'Q0(_nd`Y+'`ZXJ5N&_nP`>'Yq1GS^X^U'+[Dhd^CN9ZKEH^@L?HQe48G<[8h.ncBaW4Z%R%j]PS/0?<.]$\pa:3&+#cD:+,=e&#e(W4P("RCVYAG+^(.AZ!J3NB-*H(o<mY@XYZG&E&k9`^LPq6]kGqPjaAs].[FLi>c<a3#;6[3=M/k+t;!mW&_N_b9XTCH5IXT^'R1Ra@ZSJpN-tO[#u7YgYUcE*n>,o_tYhefDYZ_SIO?-rEU%9VdKY:f4MtUIhJK$_"IH`+,XrBSXlen>b!P$0.GJpcS36og1?B(.Oi4Q$qEcW"7^)qSHi.)],[_S43ik#=)rP5$2t.hF\uZ@-fKi(r9]ZKXAt`EfQ>tgm(@5=igDAVIu-kUFA7)4@.X].BLtu~>endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000061 00000 n 
+0000000112 00000 n 
+0000000219 00000 n 
+0000000331 00000 n 
+0000000446 00000 n 
+0000000649 00000 n 
+0000000717 00000 n 
+0000000978 00000 n 
+0000001037 00000 n 
+trailer
+<<
+/ID 
+[<b00ebb69d9e86f3453b0e571a9d36998><b00ebb69d9e86f3453b0e571a9d36998>]
+% ReportLab generated PDF document -- digest (opensource)
 
-Confirmação simulada de recebimento de requerimento - apenas para testes
-
-DADOS DO PROTOCOLO          Vinicius Lopes Machado
-                            123.456.789-09
-  Titular                   123.45678.90-1
-  CPF                       Aposentadoria por tempo de contribuição
-  NIT/PIS/PASEP             15/01/2026
-  Benefício solicitado      2026.0115.987654
-  Data de entrada (DER)     987.654.321-0
-  Número de protocolo       Requerimento recebido (fictício)
-  Número do benefício (NB)
-  Situação
-
-Este comprovante é inteiramente fictício e simula apenas o formato de um protocolo para fins de teste de extração de dados e
-OCR.
-
-Amostra sintética para teste de OCR; não é documento oficial.                                 Página 1
-
+/Info 7 0 R
+/Root 6 0 R
+/Size 10
+>>
+startxref
+2123
+%%EOF

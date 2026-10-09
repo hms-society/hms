@@ -49,21 +49,30 @@ describe('Homologate Case Dossier Use Case', () => {
     })
   })
 
-  it('does not homologate while a required checklist item is pending', async () => {
+  it('homologates with an approved exception while an authorized required item is pending', async () => {
     const legalCase = LegalCaseFaker.fake({
-      checklistGate: { decision: CaseChecklistGateDecision.ApprovedWithException },
+      checklistGate: {
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        remarks: 'Documento dispensado por decisão do gestor.',
+      },
       status: LegalCaseStatus.ReadyForLegalProduction,
+    })
+    const homologatedCase = LegalCaseFaker.fake({
+      ...legalCase,
+      dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer-1' },
+      status: LegalCaseStatus.LegalProduction,
     })
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
     checklistItems.listByCaseId.mockResolvedValue([
       { isRequired: true, status: CaseChecklistItemStatus.Pending } as never,
     ])
+    cases.homologateDossier.mockResolvedValue(homologatedCase)
 
     await expect(
       useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
-    ).rejects.toThrow('documentos obrigatórios')
-    expect(cases.homologateDossier).not.toHaveBeenCalled()
+    ).resolves.toBe(homologatedCase)
+    expect(cases.homologateDossier).toHaveBeenCalled()
   })
 
   it('requires a successful checklist decision before dossier homologation', async () => {
