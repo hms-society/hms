@@ -8,6 +8,7 @@ export interface CaseMembersRepository {
     collaboratorId: string,
   ): Promise<CaseMember | undefined>
   listByCaseId(caseId: string): Promise<readonly CaseMember[]>
+  listByCaseIds(caseIds: readonly string[]): Promise<readonly CaseMember[]>
   listByCollaboratorId(collaboratorId: string): Promise<readonly CaseMember[]>
   replace(membershipId: string, changes: CaseMemberUpdate): Promise<CaseMember>
   findActiveCollaboratorIdsByCaseId(

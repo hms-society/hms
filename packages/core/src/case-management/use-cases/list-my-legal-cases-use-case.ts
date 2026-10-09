@@ -8,7 +8,7 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import type { ClientsRepository } from '../../identity/interfaces/clients-repository'
 import type { LegalAreasRepository } from '../../legal-catalog/interfaces/legal-areas-repository'
 import type { LegalTopicsRepository } from '../../legal-catalog/interfaces/legal-topics-repository'
-import { projectLegalCaseSummary } from './project-legal-case-summary'
+import { projectLegalCaseSummaries } from './project-legal-case-summary'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { UserStatus } from '#shared/domain/structures'
 
@@ -29,7 +29,10 @@ export class ListMyLegalCasesUseCase
     private readonly collaboratorsProvider: CaseCollaboratorsProvider,
   ) {}
 
-  async execute({ collaboratorId, clientId }: Request): Promise<readonly LegalCaseSummary[]> {
+  async execute({
+    collaboratorId,
+    clientId,
+  }: Request): Promise<readonly LegalCaseSummary[]> {
     const collaborator = await this.collaboratorsProvider.findById(collaboratorId)
     if (!collaborator || collaborator.status !== UserStatus.Active) {
       throw new ForbiddenError('Acesso jurídico ao Caso não autorizado.')
@@ -38,16 +41,12 @@ export class ListMyLegalCasesUseCase
       collaboratorId,
       clientId,
     )
-    return Promise.all(
-      legalCases.map((legalCase) =>
-        projectLegalCaseSummary(legalCase, {
-          clientsRepository: this.clientsRepository,
-          legalAreasRepository: this.legalAreasRepository,
-          legalTopicsRepository: this.legalTopicsRepository,
-          caseMembersRepository: this.caseMembersRepository,
-          collaboratorsProvider: this.collaboratorsProvider,
-        }),
-      ),
-    )
+    return projectLegalCaseSummaries(legalCases, {
+      clientsRepository: this.clientsRepository,
+      legalAreasRepository: this.legalAreasRepository,
+      legalTopicsRepository: this.legalTopicsRepository,
+      caseMembersRepository: this.caseMembersRepository,
+      collaboratorsProvider: this.collaboratorsProvider,
+    })
   }
 }

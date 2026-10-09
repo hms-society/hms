@@ -10,6 +10,7 @@ import type { PaginationResponse } from '#shared/responses/pagination-response.t
 export interface CollaboratorsRepository {
   findById(collaboratorId: string): Promise<Collaborator | undefined>
   findSummaryById(collaboratorId: string): Promise<CollaboratorSummary | undefined>
+  findSummariesByIds(collaboratorIds: readonly string[]): Promise<readonly CollaboratorSummary[]>
   findByUserId(userId: string): Promise<Collaborator | undefined>
   findSummaryByUserId(userId: string): Promise<CollaboratorSummary | undefined>
   add(collaborator: CollaboratorCreation): Promise<Collaborator | undefined>

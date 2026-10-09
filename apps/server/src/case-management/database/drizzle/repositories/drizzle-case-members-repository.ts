@@ -52,6 +52,16 @@ export class DrizzleCaseMembersRepository
     return members.map((member) => this.caseMemberMapper.toDomain(member))
   }
 
+  async listByCaseIds(caseIds: readonly string[]) {
+    if (caseIds.length === 0) return []
+
+    const members = await this.database
+      .select()
+      .from(caseMemberModel)
+      .where(inArray(caseMemberModel.caseId, [...caseIds]))
+    return members.map((member) => this.caseMemberMapper.toDomain(member))
+  }
+
   async listByCollaboratorId(collaboratorId: string) {
     const members = await this.database
       .select()

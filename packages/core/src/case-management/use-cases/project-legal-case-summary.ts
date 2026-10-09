@@ -6,70 +6,106 @@ import type { LegalAreasRepository } from '../../legal-catalog/interfaces/legal-
 import type { LegalTopicsRepository } from '../../legal-catalog/interfaces/legal-topics-repository'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 
-export async function projectLegalCaseSummary(
-  legalCase: LegalCase,
-  dependencies: {
-    clientsRepository: ClientsRepository
-    legalAreasRepository: LegalAreasRepository
-    legalTopicsRepository: LegalTopicsRepository
-    caseMembersRepository: CaseMembersRepository
-    collaboratorsProvider: CaseCollaboratorsProvider
-  },
-): Promise<LegalCaseSummary> {
-  const [client, area, topic, memberships] = await Promise.all([
-    dependencies.clientsRepository.findById(legalCase.clientId),
-    dependencies.legalAreasRepository.findById(legalCase.legalAreaId),
-    dependencies.legalTopicsRepository.findById(legalCase.legalTopicId),
-    dependencies.caseMembersRepository.listByCaseId(legalCase.id),
-  ])
-  if (!client || !area || !topic) {
-    throw new NotFoundError('Os dados de apresentação do Caso não foram encontrados.')
-  }
-
-  const team = await projectTeam(memberships, dependencies)
-  const clientName = getClientName(client)
-
-  return {
-    id: legalCase.id,
-    intakeId: legalCase.intakeId,
-    publicCode: legalCase.publicCode,
-    title: legalCase.title,
-    status: legalCase.status,
-    teamVersion: legalCase.teamVersion ?? 0,
-    clientName,
-    legalArea: area.name,
-    legalTopic: topic.name,
-    openedAt: legalCase.openedAt,
-    updatedAt: legalCase.updatedAt,
-    checklistGate: legalCase.checklistGate,
-    dossierGate: legalCase.dossierGate,
-    team,
-  }
+type ProjectionDependencies = {
+  clientsRepository: ClientsRepository
+  legalAreasRepository: LegalAreasRepository
+  legalTopicsRepository: LegalTopicsRepository
+  caseMembersRepository: CaseMembersRepository
+  collaboratorsProvider: CaseCollaboratorsProvider
 }
 
-async function projectTeam(
-  memberships: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
-  dependencies: { collaboratorsProvider: CaseCollaboratorsProvider },
-): Promise<LegalCaseTeamMemberSummary[]> {
-  const active = memberships.filter(
+export async function projectLegalCaseSummary(
+  legalCase: LegalCase,
+  dependencies: ProjectionDependencies,
+): Promise<LegalCaseSummary> {
+  const [summary] = await projectLegalCaseSummaries([legalCase], dependencies)
+  if (!summary) throw new Error('Legal case summary projection returned no result.')
+  return summary
+}
+
+export async function projectLegalCaseSummaries(
+  legalCases: readonly LegalCase[],
+  dependencies: ProjectionDependencies,
+): Promise<readonly LegalCaseSummary[]> {
+  if (legalCases.length === 0) return []
+
+  const [clients, areas, topics, memberships] = await Promise.all([
+    dependencies.clientsRepository.findByIds(
+      unique(legalCases.map(({ clientId }) => clientId)),
+    ),
+    dependencies.legalAreasRepository.findByIds(
+      unique(legalCases.map(({ legalAreaId }) => legalAreaId)),
+    ),
+    dependencies.legalTopicsRepository.findByIds(
+      unique(legalCases.map(({ legalTopicId }) => legalTopicId)),
+    ),
+    dependencies.caseMembersRepository.listByCaseIds(
+      unique(legalCases.map(({ id }) => id)),
+    ),
+  ])
+
+  const clientsById = new Map(clients.map((client) => [client.id, client]))
+  const areasById = new Map(areas.map((area) => [area.id, area]))
+  const topicsById = new Map(topics.map((topic) => [topic.id, topic]))
+  const activeMemberships = memberships.filter(
     (membership) => !membership.removedAt && !membership.archivedLegacy,
   )
-  const team = await Promise.all(
-    active.map(async (membership) => {
-      const collaborator = await dependencies.collaboratorsProvider.findById(
-        membership.collaboratorId,
-      )
-      if (!collaborator) return undefined
-      return {
+  const collaboratorIds = unique(
+    activeMemberships.map(({ collaboratorId }) => collaboratorId),
+  )
+  const collaborators = collaboratorIds.length
+    ? await dependencies.collaboratorsProvider.findByIds(collaboratorIds)
+    : []
+  const collaboratorsById = new Map(
+    collaborators.map((collaborator) => [collaborator.collaboratorId, collaborator]),
+  )
+  const membershipsByCaseId = new Map<string, (typeof activeMemberships)[number][]>()
+  for (const membership of activeMemberships) {
+    const current = membershipsByCaseId.get(membership.caseId) ?? []
+    current.push(membership)
+    membershipsByCaseId.set(membership.caseId, current)
+  }
+
+  return legalCases.map((legalCase) => {
+    const client = clientsById.get(legalCase.clientId)
+    const area = areasById.get(legalCase.legalAreaId)
+    const topic = topicsById.get(legalCase.legalTopicId)
+    if (!client || !area || !topic) {
+      throw new NotFoundError('Os dados de apresentação do Caso não foram encontrados.')
+    }
+
+    const team: LegalCaseTeamMemberSummary[] = []
+    for (const membership of membershipsByCaseId.get(legalCase.id) ?? []) {
+      const collaborator = collaboratorsById.get(membership.collaboratorId)
+      if (!collaborator) continue
+      team.push({
         collaboratorId: collaborator.collaboratorId,
         name: collaborator.professionalName,
         role: membership.role,
-      } satisfies LegalCaseTeamMemberSummary
-    }),
-  )
-  return team.filter(
-    (member): member is LegalCaseTeamMemberSummary => member !== undefined,
-  )
+      })
+    }
+
+    return {
+      id: legalCase.id,
+      intakeId: legalCase.intakeId,
+      publicCode: legalCase.publicCode,
+      title: legalCase.title,
+      status: legalCase.status,
+      teamVersion: legalCase.teamVersion ?? 0,
+      clientName: getClientName(client),
+      legalArea: area.name,
+      legalTopic: topic.name,
+      openedAt: legalCase.openedAt,
+      updatedAt: legalCase.updatedAt,
+      checklistGate: legalCase.checklistGate,
+      dossierGate: legalCase.dossierGate,
+      team,
+    }
+  })
+}
+
+function unique(values: readonly string[]): string[] {
+  return [...new Set(values)]
 }
 
 function getClientName(
