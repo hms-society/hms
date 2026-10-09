@@ -3,6 +3,7 @@ export { GrantClientConsentController } from '@/identity/rest/controllers/grant-
 export { CompleteSignInController } from '@/identity/rest/controllers/complete-sign-in.controller'
 export { GetCurrentCollaboratorController } from '@/identity/rest/controllers/get-current-collaborator.controller'
 export { GetCollaboratorController } from '@/identity/rest/controllers/get-collaborator.controller'
+export { GetCollaboratorProfessionalProfileController } from '@/identity/rest/controllers/get-collaborator-professional-profile.controller'
 export { ListCollaboratorsController } from '@/identity/rest/controllers/list-collaborators.controller'
 export { ListLawyersController } from '@/identity/rest/controllers/list-lawyers.controller'
 export { ListCollaboratorJobTitlesController } from '@/identity/rest/controllers/list-collaborator-job-titles.controller'
