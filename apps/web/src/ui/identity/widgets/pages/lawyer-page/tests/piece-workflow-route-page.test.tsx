@@ -121,6 +121,7 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     isPendingVariableDialogOpen: false,
     isVersionDialogOpen: false,
     isGeneratingRevision: false,
+    pendingGenerationVersion: null,
     versionActionError: undefined,
     isReviewConfirmed: false,
     mode: 'editor',

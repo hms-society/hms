@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentTemplateContent } from '@hms/core/document-production/domain/structures'
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
@@ -44,6 +44,11 @@ export function usePieceWorkflowRoutePage({
   const [isPendingVariableDialogOpen, setIsPendingVariableDialogOpen] = useState(false)
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false)
   const [isGeneratingRevision, setIsGeneratingRevision] = useState(false)
+  const [pendingGenerationVersion, setPendingGenerationVersion] = useState<{
+    id: string
+    versionNumber: number
+    createdAt: string
+  } | null>(null)
   const [versionActionError, setVersionActionError] = useState<string | undefined>()
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
   const {
@@ -55,6 +60,15 @@ export function usePieceWorkflowRoutePage({
   } = useQuery({
     queryKey: ['case-document', caseId, documentId],
     queryFn: () => caseDocumentProductionService.getDocument(caseId, documentId),
+    refetchInterval: (query) => {
+      const versions = query.state.data?.body?.versions ?? []
+      const generationStatus = query.state.data?.body?.generation?.status
+      return generationStatus === 'pending' ||
+        generationStatus === 'running' ||
+        versions.some((item) => item.status === 'generating')
+        ? 3000
+        : false
+    },
   })
   const { data: caseDetails } = useQuery({
     queryKey: ['case-details', caseId],
@@ -65,6 +79,17 @@ export function usePieceWorkflowRoutePage({
     },
   })
   const document = documentResponse?.body
+  useEffect(() => {
+    if (!pendingGenerationVersion || !document) return
+    const generationFinished =
+      document.generation?.status === 'completed' ||
+      document.generation?.status === 'failed' ||
+      document.generation?.status === 'cancelled' ||
+      document.versions.some(
+        (item) => item.versionNumber >= pendingGenerationVersion.versionNumber,
+      )
+    if (generationFinished) setPendingGenerationVersion(null)
+  }, [document, pendingGenerationVersion])
   const currentVersion = document?.versions.reduce<
     (typeof document.versions)[number] | undefined
   >(
@@ -301,6 +326,13 @@ export function usePieceWorkflowRoutePage({
         setVersionActionError(response.errorMessage)
         return
       }
+      const nextVersionNumber =
+        Math.max(...(document?.versions.map((item) => item.versionNumber) ?? [0])) + 1
+      setPendingGenerationVersion({
+        id: response.body.documentGenerationId,
+        versionNumber: nextVersionNumber,
+        createdAt: new Date().toISOString(),
+      })
       setIsVersionDialogOpen(false)
       setSelectedVersionId(null)
       await queryClient.invalidateQueries({
@@ -333,6 +365,7 @@ export function usePieceWorkflowRoutePage({
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
     isGeneratingRevision,
+    pendingGenerationVersion,
     versionActionError,
     isAuthor,
     isCheckingReviewer: isLoadingCurrentCollaborator,

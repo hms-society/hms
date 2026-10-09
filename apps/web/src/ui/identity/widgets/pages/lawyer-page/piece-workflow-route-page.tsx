@@ -69,6 +69,7 @@ export function PieceWorkflowRoutePage({
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
     isGeneratingRevision,
+    pendingGenerationVersion,
     versionActionError,
     isReviewConfirmed,
     reviewAction,
@@ -121,6 +122,25 @@ export function PieceWorkflowRoutePage({
   }
 
   const isReview = mode === 'review'
+  const isVersionGenerating = Boolean(
+    isGeneratingRevision ||
+      pendingGenerationVersion ||
+      document.generation?.status === 'pending' ||
+      document.generation?.status === 'running' ||
+      document.versions.some((item) => item.status === 'generating'),
+  )
+  const versionsForHistory = pendingGenerationVersion
+    ? [
+        ...document.versions,
+        {
+          id: pendingGenerationVersion.id,
+          versionNumber: pendingGenerationVersion.versionNumber,
+          status: 'generating',
+          createdAt: pendingGenerationVersion.createdAt,
+          rejectionReason: undefined,
+        },
+      ]
+    : document.versions
   const currentContent = editedContent ?? version.content
 
   return (
@@ -202,11 +222,25 @@ export function PieceWorkflowRoutePage({
         </div>
       </header>
 
+      {isVersionGenerating ? (
+        <div
+          className='flex items-center gap-3 border-b border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary'
+          role='status'
+          aria-live='polite'
+        >
+          <Icon name='refresh-cw' className='size-4 animate-spin' />
+          <span>
+            Gerando nova versão por IA… O histórico será atualizado automaticamente quando
+            o processamento terminar.
+          </span>
+        </div>
+      ) : null}
+
       {isReview ? (
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_minmax(280px,320px)]'>
           <div className='min-w-0'>
             <VersionHistory
-              versions={document.versions}
+              versions={versionsForHistory}
               currentVersionId={currentVersion?.id ?? version.id}
               selectedVersionId={version.id}
             />
@@ -315,7 +349,7 @@ export function PieceWorkflowRoutePage({
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[240px_minmax(0,1fr)_minmax(280px,300px)]'>
           <div className='min-w-0'>
             <VersionHistory
-              versions={document.versions}
+              versions={versionsForHistory}
               currentVersionId={currentVersion?.id ?? version.id}
               selectedVersionId={version.id}
               onSelectVersion={handleSelectVersion}
