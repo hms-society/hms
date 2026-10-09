@@ -1,21 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common'
-import type {
-  LegalCaseSummary,
-  LegalCaseTeamMemberSummary,
-} from '@hms/core/case-management/domain/entities'
+import { Inject, Injectable, Optional } from '@nestjs/common'
 import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
-import { and, desc, eq, inArray, isNull, sql, gte, lt } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from 'drizzle-orm'
 
 import { DrizzleLegalCaseMapper } from '@/case-management/database/drizzle/mappers'
 import {
   caseMemberModel,
   legalCaseModel,
 } from '@/case-management/database/drizzle/models'
-import { clientModel, collaboratorModel } from '@/identity/database/drizzle/models'
-import { legalAreaModel, legalTopicModel } from '@/legal-catalog/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
+import type { Database } from '@/shared/database/drizzle/drizzle-client'
+import { ConflictError } from '@hms/core/shared/domain/errors'
+
+type CaseManagementDatabaseExecutor = Parameters<
+  Parameters<Database['transaction']>[0]
+>[0]
 
 @Injectable()
 export class DrizzleLegalCasesRepository
@@ -26,8 +26,13 @@ export class DrizzleLegalCasesRepository
     drizzle: DrizzleClient,
     @Inject(DrizzleLegalCaseMapper)
     private readonly legalCaseMapper: DrizzleLegalCaseMapper,
+    @Optional() private readonly executor?: CaseManagementDatabaseExecutor,
   ) {
     super(drizzle)
+  }
+
+  protected get database() {
+    return this.executor ?? this.drizzleClient.requireDatabase()
   }
 
   async createCaseWithTeam({
@@ -36,7 +41,7 @@ export class DrizzleLegalCasesRepository
   }: Parameters<LegalCasesRepository['createCaseWithTeam']>[0]): ReturnType<
     LegalCasesRepository['createCaseWithTeam']
   > {
-    return await this.database.transaction(async (tx) => {
+    const create = async (tx: CaseManagementDatabaseExecutor) => {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(1001)`)
 
       const startOfDay = new Date(legalCase.openedAt)
@@ -55,10 +60,7 @@ export class DrizzleLegalCasesRepository
         )
 
       const casesToday = result.count
-      const nextSequence = casesToday + 1
-      const dateStr = legalCase.openedAt.toISOString().slice(0, 10).replaceAll('-', '')
-      const sequenceStr = nextSequence.toString().padStart(4, '0')
-      const publicCode = `CASO-${dateStr}-${sequenceStr}`
+      const publicCode = this.createPublicCaseCode(legalCase.openedAt, casesToday)
 
       const [createdLegalCase] = await tx
         .insert(legalCaseModel)
@@ -74,7 +76,10 @@ export class DrizzleLegalCasesRepository
       }
 
       return this.legalCaseMapper.toDomain(createdLegalCase)
-    })
+    }
+    return this.executor
+      ? create(this.executor)
+      : this.drizzleClient.requireDatabase().transaction(create)
   }
 
   async addMany(
@@ -127,76 +132,20 @@ export class DrizzleLegalCasesRepository
     return legalCase ? this.legalCaseMapper.toDomain(legalCase) : undefined
   }
 
-  async getCaseDetails(
-    caseId: string,
-  ): ReturnType<LegalCasesRepository['getCaseDetails']> {
-    const [assignedCase] = await this.database
-      .select({
-        id: legalCaseModel.id,
-        intakeId: legalCaseModel.intakeId,
-        publicCode: legalCaseModel.publicCode,
-        title: legalCaseModel.title,
-        status: legalCaseModel.status,
-        clientName: sql<string>`coalesce(${clientModel.name}, ${clientModel.legalName}, ${clientModel.tradeName})`,
-        legalArea: legalAreaModel.name,
-        legalTopic: legalTopicModel.name,
-        openedAt: legalCaseModel.openedAt,
-        updatedAt: legalCaseModel.updatedAt,
-        checklistGateDecision: legalCaseModel.checklistGateDecision,
-        checklistGateDecidedAt: legalCaseModel.checklistGateDecidedAt,
-        checklistGateDecidedBy: legalCaseModel.checklistGateDecidedBy,
-        checklistGateRemarks: legalCaseModel.checklistGateRemarks,
-        dossierGateHomologatedAt: legalCaseModel.dossierGateHomologatedAt,
-        dossierGateHomologatedBy: legalCaseModel.dossierGateHomologatedBy,
-      })
-      .from(legalCaseModel)
-      .innerJoin(clientModel, eq(clientModel.id, legalCaseModel.clientId))
-      .innerJoin(legalAreaModel, eq(legalAreaModel.id, legalCaseModel.legalAreaId))
-      .innerJoin(legalTopicModel, eq(legalTopicModel.id, legalCaseModel.legalTopicId))
-      .where(eq(legalCaseModel.id, caseId))
-      .limit(1)
-
-    if (!assignedCase) return undefined
-
-    const teamMembers = await this.database
-      .select({
-        caseId: caseMemberModel.caseId,
-        collaboratorId: caseMemberModel.collaboratorId,
-        name: collaboratorModel.professionalName,
-        role: caseMemberModel.role,
-        permission: caseMemberModel.permission,
-        isPrimary: caseMemberModel.isPrimary,
-      })
-      .from(caseMemberModel)
-      .innerJoin(
-        collaboratorModel,
-        eq(collaboratorModel.id, caseMemberModel.collaboratorId),
+  async replaceTeamVersion(caseId: string, expectedTeamVersion: number): Promise<number> {
+    const [updated] = await this.database
+      .update(legalCaseModel)
+      .set({ teamVersion: sql`${legalCaseModel.teamVersion} + 1` })
+      .where(
+        and(
+          eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.teamVersion, expectedTeamVersion),
+        ),
       )
-      .where(eq(caseMemberModel.caseId, caseId))
-
-    return {
-      id: assignedCase.id,
-      intakeId: assignedCase.intakeId,
-      publicCode: assignedCase.publicCode,
-      title: assignedCase.title,
-      status: assignedCase.status,
-      clientName: assignedCase.clientName,
-      legalArea: assignedCase.legalArea,
-      legalTopic: assignedCase.legalTopic,
-      openedAt: assignedCase.openedAt,
-      updatedAt: assignedCase.updatedAt,
-      checklistGate: {
-        decision: assignedCase.checklistGateDecision ?? undefined,
-        decidedAt: assignedCase.checklistGateDecidedAt ?? undefined,
-        decidedBy: assignedCase.checklistGateDecidedBy ?? undefined,
-        remarks: assignedCase.checklistGateRemarks ?? undefined,
-      },
-      dossierGate: {
-        homologatedAt: assignedCase.dossierGateHomologatedAt ?? undefined,
-        homologatedBy: assignedCase.dossierGateHomologatedBy ?? undefined,
-      },
-      team: teamMembers,
-    }
+      .returning({ teamVersion: legalCaseModel.teamVersion })
+    if (!updated)
+      throw new ConflictError('A equipe mudou. Atualize e confirme novamente.')
+    return updated.teamVersion
   }
 
   async listByTeamMember(
@@ -204,96 +153,21 @@ export class DrizzleLegalCasesRepository
     clientId?: string,
   ): ReturnType<LegalCasesRepository['listByTeamMember']> {
     const assignedCases = await this.database
-      .select({
-        id: legalCaseModel.id,
-        intakeId: legalCaseModel.intakeId,
-        publicCode: legalCaseModel.publicCode,
-        title: legalCaseModel.title,
-        status: legalCaseModel.status,
-        clientName: sql<string>`coalesce(${clientModel.name}, ${clientModel.legalName}, ${clientModel.tradeName})`,
-        legalArea: legalAreaModel.name,
-        legalTopic: legalTopicModel.name,
-        openedAt: legalCaseModel.openedAt,
-        updatedAt: legalCaseModel.updatedAt,
-        checklistGateDecision: legalCaseModel.checklistGateDecision,
-        checklistGateDecidedAt: legalCaseModel.checklistGateDecidedAt,
-        checklistGateDecidedBy: legalCaseModel.checklistGateDecidedBy,
-        checklistGateRemarks: legalCaseModel.checklistGateRemarks,
-        dossierGateHomologatedAt: legalCaseModel.dossierGateHomologatedAt,
-        dossierGateHomologatedBy: legalCaseModel.dossierGateHomologatedBy,
-      })
+      .select({ legalCase: legalCaseModel })
       .from(legalCaseModel)
-      .innerJoin(clientModel, eq(clientModel.id, legalCaseModel.clientId))
-      .innerJoin(legalAreaModel, eq(legalAreaModel.id, legalCaseModel.legalAreaId))
-      .innerJoin(legalTopicModel, eq(legalTopicModel.id, legalCaseModel.legalTopicId))
-      .leftJoin(caseMemberModel, eq(caseMemberModel.caseId, legalCaseModel.id))
-      .where(
+      .innerJoin(
+        caseMemberModel,
         and(
-          clientId ? undefined : eq(caseMemberModel.collaboratorId, collaboratorId),
-          clientId ? eq(legalCaseModel.clientId, clientId) : undefined,
+          eq(caseMemberModel.caseId, legalCaseModel.id),
+          eq(caseMemberModel.collaboratorId, collaboratorId),
+          isNull(caseMemberModel.removedAt),
+          eq(caseMemberModel.archivedLegacy, false),
         ),
       )
+      .where(clientId ? eq(legalCaseModel.clientId, clientId) : undefined)
       .orderBy(desc(legalCaseModel.openedAt))
 
-    const uniqueAssignedCases = Array.from(
-      new Map(assignedCases.map((legalCase) => [legalCase.id, legalCase])).values(),
-    )
-
-    if (uniqueAssignedCases.length === 0) return []
-
-    const caseIds = uniqueAssignedCases.map(({ id }) => id)
-    const teamMembers = await this.database
-      .select({
-        caseId: caseMemberModel.caseId,
-        collaboratorId: caseMemberModel.collaboratorId,
-        name: collaboratorModel.professionalName,
-        role: caseMemberModel.role,
-        isPrimary: caseMemberModel.isPrimary,
-      })
-      .from(caseMemberModel)
-      .innerJoin(
-        collaboratorModel,
-        eq(collaboratorModel.id, caseMemberModel.collaboratorId),
-      )
-      .where(inArray(caseMemberModel.caseId, caseIds))
-
-    const teamMembersByCaseId = new Map<string, LegalCaseTeamMemberSummary[]>()
-    for (const teamMember of teamMembers) {
-      const caseTeam = teamMembersByCaseId.get(teamMember.caseId) ?? []
-      caseTeam.push({
-        collaboratorId: teamMember.collaboratorId,
-        name: teamMember.name,
-        role: teamMember.role,
-        isPrimary: teamMember.isPrimary,
-      })
-      teamMembersByCaseId.set(teamMember.caseId, caseTeam)
-    }
-
-    return uniqueAssignedCases.map(
-      (legalCase): LegalCaseSummary => ({
-        id: legalCase.id,
-        intakeId: legalCase.intakeId,
-        publicCode: legalCase.publicCode,
-        title: legalCase.title,
-        status: legalCase.status,
-        clientName: legalCase.clientName,
-        legalArea: legalCase.legalArea,
-        legalTopic: legalCase.legalTopic,
-        openedAt: legalCase.openedAt,
-        updatedAt: legalCase.updatedAt,
-        checklistGate: {
-          decision: legalCase.checklistGateDecision ?? undefined,
-          decidedAt: legalCase.checklistGateDecidedAt ?? undefined,
-          decidedBy: legalCase.checklistGateDecidedBy ?? undefined,
-          remarks: legalCase.checklistGateRemarks ?? undefined,
-        },
-        dossierGate: {
-          homologatedAt: legalCase.dossierGateHomologatedAt ?? undefined,
-          homologatedBy: legalCase.dossierGateHomologatedBy ?? undefined,
-        },
-        team: teamMembersByCaseId.get(legalCase.id) ?? [],
-      }),
-    )
+    return assignedCases.map(({ legalCase }) => this.legalCaseMapper.toDomain(legalCase))
   }
 
   async reviewChecklistGate({
@@ -357,5 +231,11 @@ export class DrizzleLegalCasesRepository
       .returning()
 
     return updatedCase ? this.legalCaseMapper.toDomain(updatedCase) : undefined
+  }
+
+  private createPublicCaseCode(openedAt: Date, dailyCaseCount: number) {
+    const date = openedAt.toISOString().slice(0, 10).replaceAll('-', '')
+    const sequence = (dailyCaseCount + 1).toString().padStart(4, '0')
+    return `CASO-${date}-${sequence}`
   }
 }

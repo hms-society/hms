@@ -3,7 +3,7 @@ import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeamHistory } from '../domain/entities'
 import type {
-  CaseTeamMembersRepository,
+  CaseMembersRepository,
   CaseCollaboratorsProvider,
   CaseTeamHistoriesRepository,
   LegalCasesRepository,
@@ -17,7 +17,7 @@ export class ListCaseTeamHistoryUseCase
 {
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
-    private readonly caseMembersRepository: CaseTeamMembersRepository,
+    private readonly caseMembersRepository: CaseMembersRepository,
     private readonly historiesRepository: CaseTeamHistoriesRepository,
     private readonly collaboratorsProvider: CaseCollaboratorsProvider,
   ) {}

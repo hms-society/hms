@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseTeamRole, CaseTeamHistoryKind } from '../../domain/structures'
+import { CaseMemberRole, CaseTeamHistoryKind } from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { PaginationResponse } from '#shared/responses/pagination-response'
@@ -30,7 +30,7 @@ describe('List Case Team History Use Case', () => {
     const member = CaseMemberFaker.fake({
       caseId: TEST_CASE_ID,
       collaboratorId: TEST_ACTOR_ID,
-      role: CaseTeamRole.Collaborator,
+      role: CaseMemberRole.Collaborator,
     })
     const item: CaseTeamHistory = {
       id: 'history-1',
@@ -41,7 +41,7 @@ describe('List Case Team History Use Case', () => {
       kind: CaseTeamHistoryKind.Added,
       occurredAt: new Date('2026-10-01T10:00:00.000Z'),
       teamVersion: 1,
-      nextRole: CaseTeamRole.Collaborator,
+      nextRole: CaseMemberRole.Collaborator,
     }
     const page = new PaginationResponse([item], 2, 10, 11, 2)
     mocks.legalCasesRepository.findById.mockResolvedValue(

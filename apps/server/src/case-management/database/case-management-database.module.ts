@@ -8,6 +8,8 @@ import {
   DrizzleChecklistTemplateMapper,
   DrizzleLegalCaseMapper,
   DrizzleCasePortalAccessGrantMapper,
+  DrizzleCaseTeamHistoryMapper,
+  DrizzleCaseTeamOperationMapper,
   DrizzleCaseTaskMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
@@ -18,16 +20,22 @@ import {
   DrizzleLegalCasesRepository,
   DrizzleCasePortalAccessGrantsRepository,
   DrizzlePendingsRepository,
+  DrizzleCaseTeamHistoriesRepository,
+  DrizzleCaseTeamOperationsRepository,
   DrizzleCaseTasksRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
+import { CaseManagementTransactionScopeProvider } from '@/case-management/database/drizzle/case-management-transaction-scope-provider'
+import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/case-collaborators-provision.module'
 
 @Module({
-  imports: [SharedDatabaseModule],
+  imports: [SharedDatabaseModule, CaseCollaboratorsProvisionModule],
   providers: [
     DrizzleCaseChecklistItemMapper,
     DrizzleCaseMemberMapper,
+    DrizzleCaseTeamHistoryMapper,
+    DrizzleCaseTeamOperationMapper,
     DrizzleChecklistTemplateItemMapper,
     DrizzleChecklistTemplateMapper,
     DrizzleLegalCaseMapper,
@@ -35,6 +43,8 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     DrizzleCaseTaskMapper,
     DrizzleCaseChecklistItemsRepository,
     DrizzleCaseMembersRepository,
+    DrizzleCaseTeamHistoriesRepository,
+    DrizzleCaseTeamOperationsRepository,
     DrizzleChecklistTemplateItemsRepository,
     DrizzleChecklistTemplatesRepository,
     DrizzleLegalCasesRepository,
@@ -52,6 +62,14 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseMembers,
       useExisting: DrizzleCaseMembersRepository,
+    },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseTeamHistories,
+      useExisting: DrizzleCaseTeamHistoriesRepository,
+    },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations,
+      useExisting: DrizzleCaseTeamOperationsRepository,
     },
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
@@ -74,17 +92,22 @@ import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
       useExisting: DrizzleCaseTasksRepository,
     },
     CaseManagementSeeder,
+    CaseManagementTransactionScopeProvider,
   ],
   exports: [
     CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
     CASE_MANAGEMENT_REPOSITORIES.caseMembers,
+    CASE_MANAGEMENT_REPOSITORIES.caseTeamHistories,
+    CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations,
     CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
     CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
     CASE_MANAGEMENT_REPOSITORIES.casePortalAccessGrants,
     CASE_MANAGEMENT_REPOSITORIES.pendings,
     CASE_MANAGEMENT_REPOSITORIES.caseTasks,
+    CaseCollaboratorsProvisionModule,
     CaseManagementSeeder,
+    CaseManagementTransactionScopeProvider,
   ],
 })
 export class CaseManagementDatabaseModule {}

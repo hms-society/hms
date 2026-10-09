@@ -29,8 +29,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 
@@ -75,8 +74,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 
@@ -123,8 +121,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 
@@ -153,8 +150,7 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.Lawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Collaborator,
       },
     ])
 

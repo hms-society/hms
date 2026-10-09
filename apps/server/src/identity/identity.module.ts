@@ -35,9 +35,16 @@ import {
 } from '@/identity/rest/controllers'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
+import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
 
 @Module({
-  imports: [AuthModule, IdentityDatabaseModule, LegalCatalogModule, ProvisionModule],
+  imports: [
+    AuthModule,
+    IdentityDatabaseModule,
+    LegalCatalogModule,
+    ProvisionModule,
+    CaseIdentityTransactionModule,
+  ],
   providers: [ActiveAdminGuard, ActiveCollaboratorGuard],
   controllers: [
     GetClientController,

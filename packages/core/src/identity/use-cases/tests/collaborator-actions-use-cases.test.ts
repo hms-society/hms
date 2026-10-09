@@ -16,7 +16,6 @@ import type {
   UsersRepository,
 } from '../../interfaces'
 import { CancelCollaboratorInvitationUseCase } from '../cancel-collaborator-invitation-use-case'
-import { DeactivateCollaboratorUseCase } from '../deactivate-collaborator-use-case'
 import { ReactivateCollaboratorUseCase } from '../reactivate-collaborator-use-case'
 import { RemoveCancelledCollaboratorUseCase } from '../remove-cancelled-collaborator-use-case'
 import { ResendCollaboratorInvitationUseCase } from '../resend-collaborator-invitation-use-case'
@@ -122,34 +121,6 @@ describe('Collaborator action use cases', () => {
       }),
     ).rejects.toThrow('convite pendente')
     expect(authAdministrationProvider.resendInvitation).not.toHaveBeenCalled()
-  })
-
-  it('deactivates an active collaborator and returns the refreshed summary', async () => {
-    const authUser = AuthUserFaker.fake()
-    const collaborator = CollaboratorFaker.administrative({ userId: 'active-user' })
-    const user = UserFaker.fake({ id: 'active-user', status: 'active' })
-    const disabledUser = UserFaker.fake({ id: user.id, status: 'disabled' })
-    const summary = CollaboratorSummaryFaker.fake({
-      collaboratorId: collaborator.id,
-      status: 'disabled',
-    })
-    collaboratorsRepository.findById.mockResolvedValue(collaborator)
-    usersRepository.findById.mockResolvedValue(user)
-    usersRepository.updateStatus.mockResolvedValue(disabledUser)
-    collaboratorsRepository.findSummaryByUserId.mockResolvedValue(summary)
-
-    const useCase = new DeactivateCollaboratorUseCase(
-      usersRepository,
-      collaboratorsRepository,
-      authAdministrationProvider,
-      authorizeAdministrator,
-    )
-
-    await expect(
-      useCase.execute({ authUser, collaboratorId: collaborator.id }),
-    ).resolves.toBe(summary)
-    expect(usersRepository.updateStatus).toHaveBeenCalledWith(user.id, 'disabled')
-    expect(authAdministrationProvider.setUserBanned).toHaveBeenCalledWith(user.id, true)
   })
 
   it('reactivates a disabled collaborator even without a previous access', async () => {

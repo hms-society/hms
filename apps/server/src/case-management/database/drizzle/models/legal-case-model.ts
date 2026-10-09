@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   check,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -24,6 +25,7 @@ export const legalCaseModel = pgTable(
     title: text('title').notNull(),
     description: text('description'),
     status: legalCaseStatusModel('status').default('documentation').notNull(),
+    teamVersion: integer('team_version').default(0).notNull(),
     checklistCompletedAt: timestamp('checklist_completed_at', {
       withTimezone: true,
       mode: 'date',

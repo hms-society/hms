@@ -25,8 +25,7 @@ describe('Grant Case Portal Access Controller [POST /cases/:caseId/portal-access
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: 'lead_lawyer',
-        isPrimary: true,
+        role: 'manager',
       },
     ])
     const thirdParty = await fixture.registerThirdParty(collaborator.collaboratorId)
