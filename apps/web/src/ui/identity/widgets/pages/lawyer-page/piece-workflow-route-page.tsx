@@ -145,12 +145,20 @@ export function PieceWorkflowRoutePage({
                 {document.title}
               </h1>
               <Badge
-                variant={isReview && version.status !== 'rejected' ? 'info' : 'attention'}
+                variant={
+                  isReview && version.status === 'approved'
+                    ? 'success'
+                    : isReview && version.status !== 'rejected'
+                      ? 'info'
+                      : 'attention'
+                }
               >
                 {isReview
-                  ? version.status === 'rejected'
-                    ? 'Requer ajustes'
-                    : 'Submetido para revisão'
+                  ? version.status === 'approved'
+                    ? 'Aprovada'
+                    : version.status === 'rejected'
+                      ? 'Requer ajustes'
+                      : 'Submetido para revisão'
                   : isReadOnlyVersion
                     ? `Somente leitura · v${version.versionNumber}`
                     : reviewRequest
@@ -266,97 +274,114 @@ export function PieceWorkflowRoutePage({
             </div>
           </div>
           <aside className='flex min-w-0 flex-col gap-4 border-t bg-card p-4 xl:border-l xl:border-t-0'>
-            <section>
-              <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
-              <p className='mt-1 text-xs text-muted-foreground'>
-                Apontamentos e solicitações reais desta versão.
-              </p>
-              <div className='mt-3 space-y-2'>
-                {version.status === 'in_review' ? (
-                  <article className='rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive'>
-                    <div className='flex items-center justify-between gap-2'>
-                      <h3 className='text-sm font-medium'>Submetido para revisão</h3>
-                      <Badge variant='info'>Em análise</Badge>
-                    </div>
-                    <p className='mt-2 text-xs'>
-                      A versão foi enviada pelo colaborador responsável e aguarda a
-                      decisão de um revisor elegível.
-                    </p>
-                  </article>
-                ) : reviewRequest ? (
-                  <article className='rounded-md border border-destructive/30 bg-destructive/5 p-3'>
-                    <h3 className='text-sm font-medium'>Solicitação de ajustes</h3>
-                    <p className='mt-2 text-xs text-muted-foreground'>
-                      {version.reviewedByCollaboratorName
-                        ? `${version.reviewedByCollaboratorName}: `
-                        : ''}
-                      {reviewRequest}
-                    </p>
-                  </article>
-                ) : (
-                  <p className='rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground'>
-                    Nenhum alerta de revisão registrado para esta versão.
+            {version.status === 'approved' ? (
+              <div
+                role='status'
+                className='flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-badge-success-border bg-badge-success p-6 text-center text-badge-success-foreground'
+              >
+                <Icon name='check' className='size-8' />
+                <p className='font-medium'>Documento revisado com sucesso</p>
+              </div>
+            ) : (
+              <>
+                <section>
+                  <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
+                  <p className='mt-1 text-xs text-muted-foreground'>
+                    Apontamentos e solicitações reais desta versão.
                   </p>
-                )}
-              </div>
-            </section>
-            <section className='border-t pt-4'>
-              <h2 className='font-serif font-semibold'>Revisões dos membros</h2>
-              <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
-                Comentários e histórico de revisão serão exibidos aqui quando disponíveis
-                para esta versão.
-              </p>
-            </section>
-            <div className='mt-auto space-y-2 border-t pt-4'>
-              {!isReviewerEligible ? (
-                <p
-                  role='alert'
-                  className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
-                >
-                  {isAuthor
-                    ? 'Quem elaborou esta versão não pode revisá-la. Outro membro elegível deve assumir a revisão técnica.'
-                    : 'Apenas membros da equipe do caso, supervisores ou administradores podem decidir esta revisão técnica.'}
-                </p>
-              ) : null}
-              <label
-                htmlFor='review-responsibility-confirmation'
-                className='flex items-start gap-2 rounded-md border border-primary/50 bg-primary/10 p-3 text-xs'
-              >
-                <Checkbox
-                  id='review-responsibility-confirmation'
-                  checked={isReviewConfirmed}
-                  disabled={!isReviewerEligible || isCheckingReviewer}
-                  onCheckedChange={(checked) =>
-                    handleReviewConfirmationChange(checked === true)
-                  }
-                />
-                Confirmo minha responsabilidade técnica sobre o conteúdo desta peça e sua
-                aptidão para protocolo ou entrega.
-              </label>
-              <Button
-                className='w-full'
-                disabled={!isReviewerEligible || !isReviewConfirmed || isCheckingReviewer}
-                onClick={() => handleOpenReviewAction('approval')}
-              >
-                <Icon name='check' /> Aprovar peça
-              </Button>
-              <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-                <Button
-                  variant='outline'
-                  disabled={!isReviewerEligible || isCheckingReviewer}
-                  onClick={() => handleOpenReviewAction('adjustments')}
-                >
-                  Solicitar ajustes
-                </Button>
-                <Button
-                  variant='destructive'
-                  disabled={!isReviewerEligible || isCheckingReviewer}
-                  onClick={() => handleOpenReviewAction('block')}
-                >
-                  Bloqueio
-                </Button>
-              </div>
-            </div>
+                  <div className='mt-3 space-y-2'>
+                    {version.status === 'in_review' ? (
+                      <article className='rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive'>
+                        <div className='flex items-center justify-between gap-2'>
+                          <h3 className='text-sm font-medium'>Submetido para revisão</h3>
+                          <Badge variant='info'>Em análise</Badge>
+                        </div>
+                        <p className='mt-2 text-xs'>
+                          A versão foi enviada pelo colaborador responsável e aguarda a
+                          decisão de um revisor elegível.
+                        </p>
+                      </article>
+                    ) : reviewRequest ? (
+                      <article className='rounded-md border border-destructive/30 bg-destructive/5 p-3'>
+                        <h3 className='text-sm font-medium'>Solicitação de ajustes</h3>
+                        <p className='mt-2 text-xs text-muted-foreground'>
+                          {version.reviewedByCollaboratorName
+                            ? `${version.reviewedByCollaboratorName}: `
+                            : ''}
+                          {reviewRequest}
+                        </p>
+                      </article>
+                    ) : (
+                      <p className='rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground'>
+                        Nenhum alerta de revisão registrado para esta versão.
+                      </p>
+                    )}
+                  </div>
+                </section>
+                <section className='border-t pt-4'>
+                  <h2 className='font-serif font-semibold'>Revisões dos membros</h2>
+                  <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
+                    Comentários e histórico de revisão serão exibidos aqui quando
+                    disponíveis para esta versão.
+                  </p>
+                </section>
+                <div className='mt-auto space-y-2 border-t pt-4'>
+                  {isAuthor || !isReviewerEligible ? (
+                    <p
+                      role='alert'
+                      className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
+                    >
+                      {isAuthor
+                        ? 'O criador do documento não pode participar da revisão técnica. Outro membro elegível deve assumir a revisão.'
+                        : 'Apenas membros da equipe do caso, supervisores ou administradores podem decidir esta revisão técnica.'}
+                    </p>
+                  ) : null}
+                  <label
+                    htmlFor='review-responsibility-confirmation'
+                    className='flex items-start gap-2 rounded-md border border-primary/50 bg-primary/10 p-3 text-xs'
+                  >
+                    <Checkbox
+                      id='review-responsibility-confirmation'
+                      checked={isReviewConfirmed}
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onCheckedChange={(checked) =>
+                        handleReviewConfirmationChange(checked === true)
+                      }
+                    />
+                    Confirmo minha responsabilidade técnica sobre o conteúdo desta peça e
+                    sua aptidão para protocolo ou entrega.
+                  </label>
+                  <Button
+                    className='w-full'
+                    disabled={
+                      isAuthor ||
+                      !isReviewerEligible ||
+                      !isReviewConfirmed ||
+                      isCheckingReviewer
+                    }
+                    onClick={() => handleOpenReviewAction('approval')}
+                  >
+                    <Icon name='check' /> Aprovar peça
+                  </Button>
+                  <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                    <Button
+                      variant='outline'
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onClick={() => handleOpenReviewAction('adjustments')}
+                    >
+                      Solicitar ajustes
+                    </Button>
+                    <Button
+                      variant='destructive'
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onClick={() => handleOpenReviewAction('block')}
+                    >
+                      Bloqueio
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </aside>
         </section>
       ) : (
@@ -512,13 +537,6 @@ export function PieceWorkflowRoutePage({
         />
       ) : null}
 
-      {!isReview ? (
-        <div className='border-t bg-card px-4 py-3 text-right'>
-          <Button variant='outline' onClick={handleBackToCase}>
-            Voltar para peças
-          </Button>
-        </div>
-      ) : null}
       {!isReview && currentContent ? (
         <PendingVariableValuesDialog
           open={isPendingVariableDialogOpen}

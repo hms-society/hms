@@ -90,6 +90,7 @@ export class CaseManagementModuleFixture {
   static async register(
     controller?: Type<unknown>,
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+    additionalImports: Type<unknown>[] = [],
   ) {
     const authFixture = await SupabaseAuthFixture.register()
     const auth = await authFixture.createSignedInUser()
@@ -105,6 +106,7 @@ export class CaseManagementModuleFixture {
             LegalCatalogModule,
             CaseManagementDatabaseModule,
             IntakeDatabaseModule,
+            ...additionalImports,
             ...(configure ? [DocumentsDatabaseModule, ProvisionModule] : []),
           ],
           controllers: controller ? [controller] : [],

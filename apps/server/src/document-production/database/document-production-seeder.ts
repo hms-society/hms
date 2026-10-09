@@ -301,6 +301,146 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
   ],
 } as const
 
+export const UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE = {
+  name: 'Recurso Administrativo Previdenciário — Modelo Universal',
+  description:
+    'Modelo de recurso administrativo previdenciário para contestar decisão do INSS. Motivos, documentos e pedidos devem ser adaptados e conferidos para cada requerente antes do protocolo.',
+  moment: 'legal_production' as const,
+  content: {
+    type: 'doc',
+    content: [
+      {
+        type: 'heading',
+        attrs: { level: 1, textAlign: 'center' },
+        content: [
+          { type: 'text', text: 'AO CONSELHO DE RECURSOS DA PREVIDÊNCIA SOCIAL' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: 'RECURSO ADMINISTRATIVO PREVIDENCIÁRIO' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [
+          {
+            type: 'text',
+            text: 'Recorrente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NB: {{numero_beneficio}}',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Processo administrativo: {{numero_processo}}' }],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'I — DA DECISÃO RECORRIDA' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [
+          {
+            type: 'text',
+            text: 'O(A) recorrente apresenta recurso contra a decisão que {{resumo_decisao}}, comunicada em {{data_ciencia}}. A tempestividade e os demais pressupostos devem ser conferidos com base nos registros do processo administrativo.',
+          },
+        ],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'II — DOS FUNDAMENTOS' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [
+          {
+            type: 'text',
+            text: '{{fundamentos_recurso}}',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [
+          {
+            type: 'text',
+            text: 'Os documentos que acompanham o recurso são: {{documentos_apresentados}}. A argumentação deve corresponder aos fatos e às provas efetivamente constantes dos autos.',
+          },
+        ],
+      },
+      {
+        type: 'heading',
+        attrs: { level: 2, textAlign: 'left' },
+        content: [{ type: 'text', text: 'III — DOS PEDIDOS' }],
+      },
+      {
+        type: 'orderedList',
+        content: [
+          'o conhecimento do recurso, se preenchidos os pressupostos de admissibilidade;',
+          'a análise dos fundamentos e documentos efetivamente apresentados;',
+          'a reforma da decisão recorrida para {{pedido_principal}}, se comprovados os requisitos aplicáveis;',
+          'subsidiariamente, a realização das diligências necessárias para esclarecer os pontos indicados;',
+          'a emissão de decisão fundamentada, com análise individual dos argumentos e documentos.',
+        ].map((text) => ({
+          type: 'listItem' as const,
+          content: [
+            { type: 'paragraph' as const, content: [{ type: 'text' as const, text }] },
+          ],
+        })),
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: 'Termos em que, pede deferimento.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'left' },
+        content: [{ type: 'text', text: '{{municipio}}, {{data_documento}}.' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [{ type: 'text', text: '__________________________________' }],
+      },
+      {
+        type: 'paragraph',
+        attrs: { textAlign: 'center' },
+        content: [
+          {
+            type: 'text',
+            text: '{{nome_representante}} | OAB/{{uf_oab}} {{numero_oab}}',
+          },
+        ],
+      },
+    ],
+  } as unknown as DocumentTemplateContent,
+  variables: [
+    { label: 'Nome do requerente', technicalName: 'nome_requerente' },
+    { label: 'CPF do requerente', technicalName: 'cpf_requerente' },
+    { label: 'Número do benefício', technicalName: 'numero_beneficio' },
+    { label: 'Número do processo administrativo', technicalName: 'numero_processo' },
+    { label: 'Resumo da decisão recorrida', technicalName: 'resumo_decisao' },
+    { label: 'Data da ciência da decisão', technicalName: 'data_ciencia' },
+    { label: 'Fundamentos do recurso', technicalName: 'fundamentos_recurso' },
+    { label: 'Documentos apresentados', technicalName: 'documentos_apresentados' },
+    { label: 'Pedido principal', technicalName: 'pedido_principal' },
+    { label: 'Município', technicalName: 'municipio' },
+    { label: 'Data do documento', technicalName: 'data_documento' },
+    { label: 'Nome do representante', technicalName: 'nome_representante' },
+    { label: 'UF da OAB', technicalName: 'uf_oab' },
+    { label: 'Número da OAB', technicalName: 'numero_oab' },
+  ],
+} as const
+
 const DOCUMENT_PRODUCTION_PACKAGE_ID = '00000000-0000-4000-8000-000000000301'
 
 const SEEDED_GENERATION_IDS = [
@@ -406,6 +546,26 @@ export class DocumentProductionSeeder {
             },
       status: 'available',
     })
+    const universalRetirementAppealSpecification =
+      await this.specificationsRepository.add({
+        name: UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.name,
+        description: UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.description,
+        content: UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.content,
+        variables: [...UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.variables],
+        application:
+          retirementArea && retirementTopic
+            ? {
+                scope: 'legal_context',
+                moment: UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.moment,
+                legalAreaIds: [retirementArea.id],
+                legalTopicIdsByArea: { [retirementArea.id]: [retirementTopic.id] },
+              }
+            : {
+                scope: 'global',
+                moment: UNIVERSAL_RETIREMENT_APPEAL_TEMPLATE.moment,
+              },
+        status: 'available',
+      })
     const documentCreations: DocumentCreation[] = specifications.map((specification) => {
       const template = templates.find(({ name }) => name === specification.name)
       if (!template) {
@@ -481,6 +641,7 @@ export class DocumentProductionSeeder {
     return {
       specifications,
       universalRetirementSpecification,
+      universalRetirementAppealSpecification,
       documents,
       documentPackage,
       packageDocuments,

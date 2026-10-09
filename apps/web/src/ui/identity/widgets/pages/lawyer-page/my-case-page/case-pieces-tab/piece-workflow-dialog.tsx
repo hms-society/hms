@@ -313,7 +313,10 @@ export function ReviewActionDialog({
                 checked={confirmed}
                 onCheckedChange={(value) => setConfirmed(value === true)}
               />
-              <Label htmlFor='piece-approval-responsibility' className='cursor-pointer'>
+              <Label
+                htmlFor='piece-approval-responsibility'
+                className='block min-w-0 flex-1 cursor-pointer whitespace-normal leading-relaxed'
+              >
                 <strong className='block'>Confirmação obrigatória</strong>
                 Confirmo minha responsabilidade técnica pela aprovação desta peça.
               </Label>

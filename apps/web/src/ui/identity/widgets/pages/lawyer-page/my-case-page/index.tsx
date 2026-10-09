@@ -1,11 +1,12 @@
 import { Icon } from '@/ui/shared/widgets/components/icon'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { useState } from 'react'
 
-import { CASE_STAGES, CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from './case-page-data'
+import { CASE_TIMELINE, getCaseStages } from './case-page-data'
 import { ChecklistDossierTab } from './checklist-dossier-tab'
 import { CasePiecesTab } from './case-pieces-tab'
 import { OverviewTab } from './overview-tab'
@@ -20,6 +21,7 @@ export type CasoDetalheChecklistPageProps = {
 export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPageProps) => {
   const [isPortalPickerOpen, setIsPortalPickerOpen] = useState(false)
   const [isNewPieceDialogOpen, setIsNewPieceDialogOpen] = useState(false)
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
   const {
     activeTab,
     caseClientName,
@@ -52,6 +54,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
     setActiveTab,
   } = useMyCasePage({ caseId })
   const dossierApproved = Boolean(caseDetails?.dossierGate.homologatedAt)
+  const caseStages = getCaseStages(caseDetails?.status)
 
   return (
     <div className='flex w-full flex-col gap-5 pb-10 font-sans mt-5'>
@@ -140,36 +143,52 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </div>
 
         <div className='mt-5 flex w-full flex-wrap items-center gap-x-5 gap-y-3 overflow-hidden border-t border-border pt-4'>
-          {CASE_STAGES.map((stage, index) => (
-            <div key={stage.label} className='flex min-w-fit items-center'>
-              <div
-                className={`flex items-center gap-2 text-[14px] font-semibold ${
-                  stage.isActive ? 'text-primary' : 'text-muted-foreground opacity-60'
-                }`}
-              >
+          {caseStages.map((stage, index) => {
+            const isCompleted = stage.status === 'Concluída'
+
+            return (
+              <div key={stage.label} className='flex min-w-fit items-center'>
                 <div
-                  className={`flex size-8 items-center justify-center rounded-full ${
+                  className={`flex items-center gap-2 text-[14px] font-semibold ${
                     stage.isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-background'
+                      ? 'text-primary'
+                      : isCompleted
+                        ? 'text-badge-success-foreground'
+                        : 'text-muted-foreground opacity-60'
                   }`}
                 >
-                  <Icon name={stage.icon} className='size-3.5' />
+                  <div
+                    className={`flex size-8 items-center justify-center rounded-full ${
+                      stage.isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : isCompleted
+                          ? 'bg-badge-success text-badge-success-foreground'
+                          : 'border border-border bg-background'
+                    }`}
+                  >
+                    <Icon name={stage.icon} className='size-3.5' />
+                  </div>
+                  <span className='flex flex-col'>
+                    {stage.label}
+                    {stage.status && (
+                      <span
+                        className={`text-[14px] font-normal ${
+                          isCompleted
+                            ? 'text-badge-success-foreground'
+                            : 'text-primary/70'
+                        }`}
+                      >
+                        {stage.status}
+                      </span>
+                    )}
+                  </span>
                 </div>
-                <span className='flex flex-col'>
-                  {stage.label}
-                  {stage.status && (
-                    <span className='text-[14px] font-normal text-primary/70'>
-                      {stage.status}
-                    </span>
-                  )}
-                </span>
+                {index < caseStages.length - 1 && (
+                  <div className='mx-2 hidden h-px w-10 bg-border lg:block' />
+                )}
               </div>
-              {index < CASE_STAGES.length - 1 && (
-                <div className='mx-2 hidden h-px w-10 bg-border lg:block' />
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -226,11 +245,12 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
 
         <TabsContent value='visao-geral' className='mt-4 flex flex-col gap-4'>
           <OverviewTab
+            caseId={caseUuid}
             checklist={checklistItems}
             completionPercentage={completionPercentage}
             mandatoryItemsCount={mandatoryItemsCount}
             pendingItemsCount={pendingItemsCount}
-            tasks={CASE_TASKS}
+            currentCollaboratorId={currentCollaborator?.collaboratorId}
             team={
               caseDetails?.team?.map((member) => ({
                 collaboratorId: member.collaboratorId,
@@ -243,12 +263,12 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
             timeline={CASE_TIMELINE}
             validatedItemsCount={validatedItemsCount}
             onOpenChecklist={handleOpenChecklistTab}
+            onOpenTasks={() => setActiveTab('prazos')}
           />
         </TabsContent>
 
         <TabsContent value='checklist' className='mt-4 flex flex-col gap-4'>
           <ChecklistDossierTab
-            activities={MOCK_ACTIVITIES}
             caseId={caseUuid}
             caseDetails={caseDetails}
             checklist={checklistItems}

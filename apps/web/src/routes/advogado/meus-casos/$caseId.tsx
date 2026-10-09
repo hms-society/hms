@@ -4,6 +4,9 @@ import { CasoDetalheChecklistPage } from '@/ui/identity/widgets/pages/lawyer-pag
 
 export const Route = createFileRoute('/advogado/meus-casos/$caseId')({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>): { tab?: 'pecas' } => {
+    return search.tab === 'pecas' ? { tab: 'pecas' } : {}
+  },
 })
 
 function RouteComponent() {

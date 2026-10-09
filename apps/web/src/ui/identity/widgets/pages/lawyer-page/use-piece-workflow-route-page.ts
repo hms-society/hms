@@ -100,6 +100,13 @@ export function usePieceWorkflowRoutePage({
   )
   const version =
     document?.versions.find((item) => item.id === selectedVersionId) ?? currentVersion
+  const documentCreatorId = document?.versions.reduce<
+    (typeof document.versions)[number] | undefined
+  >(
+    (oldest, candidate) =>
+      !oldest || candidate.versionNumber < oldest.versionNumber ? candidate : oldest,
+    undefined,
+  )?.createdByCollaboratorId
   const isReadOnlyVersion = Boolean(
     mode === 'editor' && version && currentVersion && version.id !== currentVersion.id,
   )
@@ -113,7 +120,10 @@ export function usePieceWorkflowRoutePage({
       serializedContent.includes(variable.marker),
     ) ?? []
   const isAuthor = Boolean(
-    version && currentCollaborator?.collaboratorId === version.createdByCollaboratorId,
+    version &&
+      currentCollaborator &&
+      (currentCollaborator.collaboratorId === version.createdByCollaboratorId ||
+        currentCollaborator.collaboratorId === documentCreatorId),
   )
   const isReviewPending = Boolean(isAuthor && version?.status === 'rejected')
   const reviewRequest =
@@ -206,7 +216,10 @@ export function usePieceWorkflowRoutePage({
       })
       await refetchDocument()
     }
-    await navigateTo('lawyerCaseDetails', { params: { caseId } })
+    await navigateTo('lawyerCaseDetails', {
+      params: { caseId },
+      search: { tab: 'pecas' },
+    })
   }
 
   async function handleOpenReview() {

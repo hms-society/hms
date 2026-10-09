@@ -216,11 +216,42 @@ beforeEach(() => {
 })
 
 describe('PieceWorkflowRoutePage', () => {
+  it('shows the successful review state instead of review alerts and actions after approval', () => {
+    const pageState = buildPageState()
+    const sourceVersion = pageState.document?.versions.find(
+      (version) => version.id === VERSION_ID,
+    )
+    if (!sourceVersion)
+      throw new Error('Expected the current version in the test fixture')
+    const approvedVersion = { ...sourceVersion, status: 'approved' as const }
+    usePieceWorkflowRoutePageMock.mockReturnValue({
+      ...pageState,
+      mode: 'review',
+      version: approvedVersion,
+      currentVersion: approvedVersion,
+    })
+
+    render(
+      <PieceWorkflowRoutePage mode='review' caseId={CASE_ID} documentId={DOCUMENT_ID} />,
+    )
+
+    expect(screen.getByRole('status').textContent).toContain(
+      'Documento revisado com sucesso',
+    )
+    expect(screen.getByText('Aprovada')).not.toBeNull()
+    expect(screen.queryByText('Alertas de revisão')).toBeNull()
+    expect(screen.queryByText('Revisões dos membros')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Aprovar peça' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Solicitar ajustes' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Bloqueio' })).toBeNull()
+  })
+
   it('prevents the author from deciding the technical review', () => {
     usePieceWorkflowRoutePageMock.mockReturnValue({
       ...buildPageState(),
       mode: 'review',
       isAuthor: true,
+      isReviewerEligible: true,
       isReviewConfirmed: true,
     })
 
@@ -229,7 +260,7 @@ describe('PieceWorkflowRoutePage', () => {
     )
 
     expect(screen.getByRole('alert').textContent).toContain(
-      'Quem elaborou esta versão não pode revisá-la',
+      'O criador do documento não pode participar da revisão técnica',
     )
     expect(
       screen.getByRole('button', { name: 'Aprovar peça' }).hasAttribute('disabled'),
@@ -240,6 +271,7 @@ describe('PieceWorkflowRoutePage', () => {
     expect(
       screen.getByRole('button', { name: 'Bloqueio' }).hasAttribute('disabled'),
     ).toBe(true)
+    expect(screen.getByRole('checkbox').hasAttribute('disabled')).toBe(true)
   })
 
   it('allows a different reviewer to decide after confirming responsibility', () => {
@@ -305,7 +337,7 @@ describe('PieceWorkflowRoutePage', () => {
     expect(screen.getByRole('heading', { name: 'Elaborar nova versão' })).not.toBeNull()
     expect(screen.getByRole('button', { name: /Edição manual/ })).not.toBeNull()
     expect(screen.getByRole('button', { name: /Geração por IA/ })).not.toBeNull()
-    expect(screen.getByRole('button', { name: 'Abrir no editor' })).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Iniciar edição manual' })).not.toBeNull()
   })
 
   it('lets the user select a version from the history list', () => {
