@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { CaseMembersRepository } from '@hms/core/case-management/interfaces'
+import { and, eq, inArray } from 'drizzle-orm'
 
 import { DrizzleCaseMemberMapper } from '@/case-management/database/drizzle/mappers'
 import { caseMemberModel } from '@/case-management/database/drizzle/models'
@@ -32,6 +33,25 @@ export class DrizzleCaseMembersRepository
     return createdCaseMembers.map((caseMember) =>
       this.caseMemberMapper.toDomain(caseMember),
     )
+  }
+
+  async findActiveCollaboratorIdsByCaseId(
+    caseId: string,
+    collaboratorIds: readonly string[],
+  ) {
+    const records = await this.database
+      .select({ collaboratorId: caseMemberModel.collaboratorId })
+      .from(caseMemberModel)
+      .where(
+        collaboratorIds.length === 0
+          ? eq(caseMemberModel.caseId, caseId)
+          : and(
+              eq(caseMemberModel.caseId, caseId),
+              inArray(caseMemberModel.collaboratorId, [...collaboratorIds]),
+            ),
+      )
+
+    return records.map((record) => record.collaboratorId)
   }
 
   async removeAll(): Promise<void> {

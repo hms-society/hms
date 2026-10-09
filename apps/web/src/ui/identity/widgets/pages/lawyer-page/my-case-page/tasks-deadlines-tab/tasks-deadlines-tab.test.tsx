@@ -1,12 +1,28 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/ui/shared/hooks/use-rest-context', () => ({
+  useRestContext: () => ({
+    caseManagementService: {
+      listCaseTasks: vi.fn().mockResolvedValue({ isFailure: false, body: [] }),
+      createCaseTask: vi.fn(),
+      updateCaseTask: vi.fn(),
+    },
+  }),
+}))
 
 import { TasksDeadlinesTab } from './index'
 import { NewItemDialog } from './new-item-dialog'
 
 describe('TasksDeadlinesTab', () => {
   it('renders an empty case task list without seeded items', () => {
-    render(<TasksDeadlinesTab caseIdentifier='CASE-TEST' caseTitle='Caso de teste' />)
+    render(
+      <TasksDeadlinesTab
+        caseId='case-id'
+        caseIdentifier='CASE-TEST'
+        caseTitle='Caso de teste'
+      />,
+    )
 
     expect(screen.getByText('Prazos e tarefas')).toBeTruthy()
     expect(screen.getByText('Nenhum item cadastrado neste caso.')).toBeTruthy()
@@ -14,7 +30,13 @@ describe('TasksDeadlinesTab', () => {
   })
 
   it('opens the new item modal and creates a publication locally', () => {
-    render(<TasksDeadlinesTab caseIdentifier='CASE-TEST' caseTitle='Caso de teste' />)
+    render(
+      <TasksDeadlinesTab
+        caseId='case-id'
+        caseIdentifier='CASE-TEST'
+        caseTitle='Caso de teste'
+      />,
+    )
 
     fireEvent.click(screen.getAllByRole('button', { name: /Novo item/ })[0])
     expect(screen.getByRole('dialog')).toBeTruthy()
