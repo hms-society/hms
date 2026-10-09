@@ -4,7 +4,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseTeamHistoryKind, CaseTeamRole } from '../domain/structures'
+import { CaseTeamHistoryKind, CaseMemberRole } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { ChangeCaseTeamMemberRoleRequest } from './change-case-team-member-role-request'
 import {
@@ -72,7 +72,7 @@ export class ChangeCaseTeamMemberRoleUseCase
     scope: CaseTeamScope,
     caseId: string,
     target: CaseMember,
-    nextRole: CaseTeamRole,
+    nextRole: CaseMemberRole,
   ): Promise<void> {
     const active = (await scope.caseMembersRepository.listByCaseId(caseId)).filter(
       (member) => !member.removedAt && !member.archivedLegacy,
@@ -85,7 +85,7 @@ export class ChangeCaseTeamMemberRoleUseCase
     const targetIndex = active.findIndex((member) => member.id === target.id)
     const targetCollaborator = collaborators[targetIndex]
     if (
-      nextRole === CaseTeamRole.Manager &&
+      nextRole === CaseMemberRole.Manager &&
       (!targetCollaborator ||
         !isEligibleCaseCollaborator(
           targetCollaborator.profile,
@@ -96,11 +96,11 @@ export class ChangeCaseTeamMemberRoleUseCase
         'Somente um colaborador jurídico ativo e elegível pode ser Gestor.',
       )
     }
-    if (target.role !== CaseTeamRole.Manager || nextRole === CaseTeamRole.Manager) return
+    if (target.role !== CaseMemberRole.Manager || nextRole === CaseMemberRole.Manager) return
     const anotherManager = active.some(
       (member, index) =>
         member.id !== target.id &&
-        member.role === CaseTeamRole.Manager &&
+        member.role === CaseMemberRole.Manager &&
         collaborators[index] !== undefined &&
         isEligibleCaseCollaborator(
           collaborators[index].profile,

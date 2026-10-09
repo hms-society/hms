@@ -6,10 +6,10 @@ import type {
   CaseEligibleCollaborator,
   CaseTeamCandidatesQuery,
 } from '../domain/structures'
-import { CaseTeamRole } from '../domain/structures'
+import { CaseMemberRole } from '../domain/structures'
 import type {
   CaseCollaboratorsProvider,
-  CaseTeamMembersRepository,
+  CaseMembersRepository,
   LegalCasesRepository,
 } from '../interfaces'
 import { LegalCaseNotFoundError } from '../domain/errors'
@@ -26,7 +26,7 @@ export class ListCaseTeamCandidatesUseCase
   constructor(
     private readonly caseCollaboratorsProvider: CaseCollaboratorsProvider,
     private readonly legalCasesRepository: LegalCasesRepository,
-    private readonly caseMembersRepository: CaseTeamMembersRepository,
+    private readonly caseMembersRepository: CaseMembersRepository,
   ) {}
 
   async execute(
@@ -86,7 +86,7 @@ export class ListCaseTeamCandidatesUseCase
       !membership ||
       membership.removedAt ||
       membership.archivedLegacy ||
-      membership.role !== CaseTeamRole.Manager
+      membership.role !== CaseMemberRole.Manager
     ) {
       throw new ForbiddenError('Somente o Gestor do Caso pode selecionar integrantes.')
     }

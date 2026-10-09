@@ -2,9 +2,9 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeam } from '../domain/structures'
 import type { CaseMember } from '../domain/entities'
-import { CaseTeamRole, LegalCaseStatus } from '../domain/structures'
+import { CaseMemberRole, LegalCaseStatus } from '../domain/structures'
 import type {
-  CaseTeamMembersRepository,
+  CaseMembersRepository,
   CaseCollaboratorsProvider,
   LegalCasesRepository,
 } from '../interfaces'
@@ -17,7 +17,7 @@ export type CaseActorRequest = { caseId: string; actorId: string }
 export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
-    private readonly caseMembersRepository: CaseTeamMembersRepository,
+    private readonly caseMembersRepository: CaseMembersRepository,
     private readonly caseCollaboratorsProvider: CaseCollaboratorsProvider,
   ) {}
 
@@ -55,7 +55,7 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
       canManage:
         legalCase.status !== LegalCaseStatus.Closed &&
         (actor.profile === CollaboratorProfile.Admin ||
-          (actorMembership?.role === CaseTeamRole.Manager &&
+          (actorMembership?.role === CaseMemberRole.Manager &&
             isEligibleCaseCollaborator(actor.profile, actor.status))),
       requiresAdministrativeReason: actor.profile === CollaboratorProfile.Admin,
     }
@@ -73,7 +73,7 @@ function ensureActorCanViewTeam(
 }
 
 function projectCurrentMembers(
-  members: Awaited<ReturnType<CaseTeamMembersRepository['listByCaseId']>>,
+  members: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
   profiles: Awaited<ReturnType<CaseCollaboratorsProvider['findById']>>[],
 ) {
   return members.flatMap((member, index) => {
@@ -95,12 +95,12 @@ function projectCurrentMembers(
 }
 
 function countEligibleManagers(
-  members: Awaited<ReturnType<CaseTeamMembersRepository['listByCaseId']>>,
+  members: Awaited<ReturnType<CaseMembersRepository['listByCaseId']>>,
   profiles: Awaited<ReturnType<CaseCollaboratorsProvider['findById']>>[],
 ): number {
   return members.filter(
     (member, index) =>
-      member.role === CaseTeamRole.Manager &&
+      member.role === CaseMemberRole.Manager &&
       isEligibleProfile(profiles[index]?.profile, profiles[index]?.status),
   ).length
 }

@@ -4,7 +4,7 @@ import { ConflictError } from '#shared/domain/errors/conflict-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
 import type { CaseMember } from '../domain/entities'
 import type { CaseTeamMutationResult } from '../domain/structures'
-import { CaseTeamRole, CaseTeamHistoryKind } from '../domain/structures'
+import { CaseMemberRole, CaseTeamHistoryKind } from '../domain/structures'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
 import type { RemoveCaseTeamMemberRequest } from './remove-case-team-member-request'
 import {
@@ -72,14 +72,14 @@ export class RemoveCaseTeamMemberUseCase
     const anotherManager = active.some(
       (member, index) =>
         member.id !== target.id &&
-        member.role === CaseTeamRole.Manager &&
+        member.role === CaseMemberRole.Manager &&
         collaborators[index] !== undefined &&
         isEligibleCaseCollaborator(
           collaborators[index].profile,
           collaborators[index].status,
         ),
     )
-    if (target.role === CaseTeamRole.Manager && !anotherManager) {
+    if (target.role === CaseMemberRole.Manager && !anotherManager) {
       throw new ConflictError('O Caso precisa manter pelo menos um Gestor elegível.')
     }
   }

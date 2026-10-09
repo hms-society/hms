@@ -1,7 +1,7 @@
 import type {
   LegalCase,
-  LegalCaseCreation,
   LegalCaseSummary,
+  LegalCaseCreation,
   CaseMemberCreation,
 } from '../domain/entities'
 import type { CaseChecklistGate, LegalCaseStatus } from '../domain/structures'
@@ -32,10 +32,11 @@ export interface LegalCasesRepository {
   findById(caseId: string): Promise<LegalCase | undefined>
   findByIntakeId(intakeId: string): Promise<LegalCase | undefined>
   getCaseDetails(caseId: string): Promise<LegalCaseSummary | undefined>
+  replaceTeamVersion(caseId: string, expectedTeamVersion: number): Promise<number>
   listByTeamMember(
     collaboratorId: string,
     clientId?: string,
-  ): Promise<readonly LegalCaseSummary[]>
+  ): Promise<readonly LegalCase[]>
   reviewChecklistGate(
     params: ReviewChecklistGateRepositoryParams,
   ): Promise<LegalCase | undefined>

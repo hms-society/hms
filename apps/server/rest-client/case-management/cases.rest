@@ -29,6 +29,22 @@ GET {{url}}/my
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### List operational metadata for all cases as Admin
+GET {{url}}/admin/list?page=1&pageSize=50
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
 ### List case checklist
 # @prompt caseId Enter the case ID to inspect
 GET {{url}}/{{caseId}}/checklist

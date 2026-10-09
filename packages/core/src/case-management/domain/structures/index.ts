@@ -1,5 +1,4 @@
 export * from './case-member-role'
-export * from './case-team-role'
 export * from './case-eligibility-snapshot'
 export * from './case-team-history-kind'
 export * from './case-team-member'

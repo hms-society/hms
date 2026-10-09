@@ -23,6 +23,7 @@ import {
   DrizzleIntakeResponsiblesRepository,
 } from '@/identity/database/drizzle/repositories'
 import { IdentitySeeder } from '@/identity/database/identity-seeder'
+import { IdentityTransactionScopeProvider } from '@/identity/database/drizzle/identity-transaction-scope-provider'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 
 @Module({
@@ -45,6 +46,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleIntakeResponsiblesRepository,
     DrizzleThirdPartiesRepository,
     DrizzleThirdPartyAuditLogsRepository,
+    IdentityTransactionScopeProvider,
     {
       provide: IDENTITY_REPOSITORIES.clients,
       useExisting: DrizzleClientsRepository,
@@ -78,6 +80,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
       useExisting: DrizzleThirdPartyAuditLogsRepository,
     },
     IdentitySeeder,
+    IdentityTransactionScopeProvider,
   ],
   exports: [
     IdentityUsersDatabaseModule,
@@ -91,6 +94,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     IDENTITY_REPOSITORIES.thirdParties,
     IDENTITY_REPOSITORIES.thirdPartyAuditLogs,
     IdentitySeeder,
+    IdentityTransactionScopeProvider,
   ],
 })
 export class IdentityDatabaseModule {}

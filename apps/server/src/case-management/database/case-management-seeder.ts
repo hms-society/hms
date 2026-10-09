@@ -12,6 +12,8 @@ import {
 import type { CaseChecklistItemCreation } from '@hms/core/case-management/domain/entities'
 import type {
   CaseMembersRepository,
+  CaseTeamHistoriesRepository,
+  CaseTeamOperationsRepository,
   CaseChecklistItemsRepository,
   ChecklistTemplateItemsRepository,
   ChecklistTemplatesRepository,
@@ -40,6 +42,10 @@ export class CaseManagementSeeder {
     private readonly legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
     private readonly caseMembersRepository: CaseMembersRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseTeamHistories)
+    private readonly caseTeamHistoriesRepository: CaseTeamHistoriesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations)
+    private readonly caseTeamOperationsRepository: CaseTeamOperationsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplates)
@@ -51,6 +57,8 @@ export class CaseManagementSeeder {
   ) {}
 
   async clear() {
+    await this.caseTeamHistoriesRepository.removeAll()
+    await this.caseTeamOperationsRepository.removeAll()
     await this.caseTasksRepository.removeAll()
     await this.caseChecklistItemsRepository.removeAll()
     await this.caseMembersRepository.removeAll()
@@ -66,13 +74,43 @@ export class CaseManagementSeeder {
       throw new AppError('Case management seed requirements are not met')
     }
 
+    const { checklistTemplate, checklistTemplateItems } =
+      await this.createChecklistTemplate(references)
+
+    const legalCases = await this.legalCasesRepository.addMany(
+      this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
+    )
+
+    const checklistItems = await this.caseChecklistItemsRepository.addMany(
+      this.createChecklistItemSeeds(legalCases, checklistTemplateItems),
+    )
+
+    const caseMembers = await this.caseMembersRepository.addMany(
+      this.createCaseMemberSeeds({
+        actorId: references.actorId,
+        legalCases,
+        lawyerIds: references.lawyerIds,
+        paralegalIds: references.paralegalIds,
+        supervisorIds: references.supervisorIds,
+      }),
+    )
+
+    return {
+      legalCases,
+      caseMembers,
+      checklistTemplate,
+      checklistTemplateItems,
+      checklistItems,
+    }
+  }
+
+  private async createChecklistTemplate(references: CaseManagementSeedReferences) {
     const checklistTemplate = await this.checklistTemplatesRepository.add({
       legalAreaId: references.legalAreaId,
       name: 'Checklist padrão de documentos',
       isActive: true,
       updatedBy: references.actorId,
     })
-
     const checklistTemplateItems = await this.checklistTemplateItemsRepository.addMany([
       {
         checklistTemplateId: checklistTemplate.id,
@@ -100,32 +138,7 @@ export class CaseManagementSeeder {
       },
     ])
 
-    const legalCases = await this.legalCasesRepository.addMany(
-      this.createLegalCaseSeeds(references.contractedIntakes.slice(0, 8)),
-    )
-
-    const checklistItems = await this.caseChecklistItemsRepository.addMany(
-      this.createChecklistItemSeeds(legalCases, checklistTemplateItems),
-    )
-
-    const caseMembers = await this.caseMembersRepository.addMany(
-      this.createCaseMemberSeeds({
-        actorId: references.actorId,
-        legalCases,
-        lawyerIds: references.lawyerIds,
-        paralegalIds: references.paralegalIds,
-        supervisorIds: references.supervisorIds,
-        internIds: references.internIds,
-      }),
-    )
-
-    return {
-      legalCases,
-      caseMembers,
-      checklistTemplate,
-      checklistTemplateItems,
-      checklistItems,
-    }
+    return { checklistTemplate, checklistTemplateItems }
   }
 
   private createChecklistItemSeeds(
@@ -162,6 +175,7 @@ export class CaseManagementSeeder {
         legalTopicId: intake.legalTopicId,
         title: this.getTitleByIntake(intake, index),
         status: LegalCaseStatus.Documentation,
+        teamVersion: 0,
         openedAt,
       }
     })
@@ -173,14 +187,12 @@ export class CaseManagementSeeder {
     lawyerIds,
     paralegalIds,
     supervisorIds,
-    internIds,
   }: {
     actorId: string
     legalCases: readonly LegalCase[]
     lawyerIds: readonly string[]
     paralegalIds: readonly string[]
     supervisorIds: readonly string[]
-    internIds: readonly string[]
   }): CaseMemberCreation[] {
     if (lawyerIds.length === 0) {
       throw new AppError('At least one lawyer is required to seed case teams')
@@ -198,50 +210,37 @@ export class CaseManagementSeeder {
         {
           caseId: legalCase.id,
           collaboratorId: leadLawyerId,
-          role: CaseMemberRole.LeadLawyer,
-          isPrimary: true,
-          permission: 'edição',
+          role: CaseMemberRole.Manager,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
+          archivedLegacy: false,
         },
         ...supportingLawyerIds.map((collaboratorId) => ({
           caseId: legalCase.id,
           collaboratorId,
-          role: CaseMemberRole.Lawyer,
-          isPrimary: false,
-          permission: 'edição',
+          role: CaseMemberRole.Collaborator,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
+          archivedLegacy: false,
         })),
         ...this.pickCollaboratorIds(paralegalIds, caseIndex, 1).map((collaboratorId) => ({
           caseId: legalCase.id,
           collaboratorId,
-          role: CaseMemberRole.Paralegal,
-          isPrimary: false,
-          permission: 'edição',
+          role: CaseMemberRole.Collaborator,
           assignedAt: legalCase.openedAt,
           assignedBy: actorId,
+          archivedLegacy: false,
         })),
         ...this.pickCollaboratorIds(supervisorIds, caseIndex, 1).map(
           (collaboratorId) => ({
             caseId: legalCase.id,
             collaboratorId,
-            role: CaseMemberRole.Supervisor,
-            isPrimary: false,
-            permission: 'visualização',
+            role: CaseMemberRole.Collaborator,
             assignedAt: legalCase.openedAt,
             assignedBy: actorId,
+            archivedLegacy: false,
           }),
         ),
-        ...this.pickCollaboratorIds(internIds, caseIndex, 1).map((collaboratorId) => ({
-          caseId: legalCase.id,
-          collaboratorId,
-          role: CaseMemberRole.Intern,
-          isPrimary: false,
-          permission: 'visualização',
-          assignedAt: legalCase.openedAt,
-          assignedBy: actorId,
-        })),
       ] satisfies CaseMemberCreation[]
 
       return teamMembers

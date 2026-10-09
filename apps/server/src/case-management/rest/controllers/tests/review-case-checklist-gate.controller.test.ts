@@ -33,8 +33,7 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.LeadLawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Manager,
       },
     ])
 
@@ -84,8 +83,7 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.LeadLawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Manager,
       },
     ])
 
@@ -113,8 +111,7 @@ describe('Review Case Checklist Gate Controller [PATCH /cases/:caseId/checklist-
       {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
-        role: CaseMemberRole.LeadLawyer,
-        isPrimary: true,
+        role: CaseMemberRole.Manager,
       },
     ])
 

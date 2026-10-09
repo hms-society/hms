@@ -16,6 +16,7 @@ export class DrizzleLegalCaseMapper {
       title: record.title,
       description: record.description ?? undefined,
       status: record.status,
+      teamVersion: record.teamVersion,
       checklistCompletedAt: record.checklistCompletedAt ?? undefined,
       checklistCompletedBy: record.checklistCompletedBy ?? undefined,
       checklistGate: {

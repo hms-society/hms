@@ -2,7 +2,8 @@ import { faker } from '@faker-js/faker'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import type { CasePortalAccessGrant, LegalCaseSummary } from '../../domain/entities'
+import type { CasePortalAccessGrant, LegalCase } from '../../domain/entities'
+import { LegalCaseFaker } from '../../domain/entities/fakers'
 import type {
   CasePortalAccessGrantsRepository,
   LegalCasesRepository,
@@ -73,22 +74,6 @@ function grantFixture(caseId: string): CasePortalAccessGrant {
   }
 }
 
-function legalCaseSummary(): LegalCaseSummary {
-  const now = new Date()
-  return {
-    id: faker.string.uuid(),
-    intakeId: faker.string.uuid(),
-    publicCode: `CASE-${faker.string.numeric(4)}`,
-    title: 'Caso de teste',
-    status: 'documentation',
-    teamVersion: 0,
-    clientName: 'Cliente de teste',
-    legalArea: 'Direito civil',
-    legalTopic: 'Contratos',
-    openedAt: now,
-    updatedAt: now,
-    checklistGate: {},
-    dossierGate: {},
-    team: [],
-  }
+function legalCaseSummary(): LegalCase {
+  return LegalCaseFaker.fake()
 }
