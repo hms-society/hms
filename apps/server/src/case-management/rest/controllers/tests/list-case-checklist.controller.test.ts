@@ -29,7 +29,6 @@ describe('List Case Checklist Controller [GET /cases/:caseId/checklist]', () => 
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Manager,
-        isPrimary: true,
       },
     ])
     await fixture.registerCaseChecklistItems([

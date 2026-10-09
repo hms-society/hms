@@ -34,7 +34,6 @@ describe('Delete Case Task Controller [DELETE /cases/:caseId/tasks/:caseTaskId]'
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
 
@@ -60,7 +59,6 @@ describe('Delete Case Task Controller [DELETE /cases/:caseId/tasks/:caseTaskId]'
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
     const task = await fixture.registerCaseTask(legalCase.id, {

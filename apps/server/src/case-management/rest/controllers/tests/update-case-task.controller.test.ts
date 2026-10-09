@@ -33,7 +33,6 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
     const task = await fixture.registerCaseTask(legalCase.id, {
@@ -74,7 +73,6 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
     const task = await fixture.registerCaseTask(legalCase.id, {
@@ -131,7 +129,6 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
     const task = await fixture.registerCaseTask(legalCase.id, {

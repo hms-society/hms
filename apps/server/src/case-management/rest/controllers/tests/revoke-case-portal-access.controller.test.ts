@@ -26,7 +26,6 @@ describe('Revoke Case Portal Access Controller [DELETE /cases/:caseId/portal-acc
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: 'manager',
-        isPrimary: true,
       },
     ])
     const grant = await fixture.registerPortalGrant(

@@ -34,7 +34,6 @@ describe('List Case Tasks Controller [GET /cases/:caseId/tasks]', () => {
         caseId: firstCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: CaseMemberRole.Collaborator,
-        isPrimary: true,
       },
     ])
 

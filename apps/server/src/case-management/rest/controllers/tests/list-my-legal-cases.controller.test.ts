@@ -25,7 +25,6 @@ describe('List My Legal Cases Controller [GET /cases/my]', () => {
         caseId: legalCase.id,
         collaboratorId: collaborator.collaboratorId,
         role: index === 0 ? 'manager' : 'collaborator',
-        isPrimary: index === 0,
       })),
     )
     await fixture.registerCaseMembers([
@@ -33,7 +32,6 @@ describe('List My Legal Cases Controller [GET /cases/my]', () => {
         caseId: unassignedCase.id,
         collaboratorId: '5ec2a203-13ba-4321-8d5c-938ff62f6823',
         role: 'manager',
-        isPrimary: true,
       },
     ])
 
