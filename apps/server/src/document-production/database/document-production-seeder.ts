@@ -136,17 +136,29 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
       {
         type: 'heading',
         attrs: { level: 1, textAlign: 'center' },
-        content: [{ type: 'text', text: 'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS' }],
+        content: [
+          { type: 'text', text: 'AO INSTITUTO NACIONAL DO SEGURO SOCIAL — INSS' },
+        ],
       },
       {
         type: 'paragraph',
         attrs: { textAlign: 'center' },
-        content: [{ type: 'text', text: 'REQUERIMENTO ADMINISTRATIVO DE BENEFÍCIO PREVIDENCIÁRIO' }],
+        content: [
+          {
+            type: 'text',
+            text: 'REQUERIMENTO ADMINISTRATIVO DE BENEFÍCIO PREVIDENCIÁRIO',
+          },
+        ],
       },
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'Requerente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NIT/PIS/PASEP: {{nit_requerente}}' }],
+        content: [
+          {
+            type: 'text',
+            text: 'Requerente: {{nome_requerente}} | CPF: {{cpf_requerente}} | NIT/PIS/PASEP: {{nit_requerente}}',
+          },
+        ],
       },
       {
         type: 'paragraph',
@@ -161,22 +173,39 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'O(A) requerente acima identificado(a) solicita a análise de seu histórico previdenciário e a concessão do benefício {{beneficio_requerido}}, caso sejam preenchidos os requisitos legais aplicáveis. Requer, ainda, a análise do benefício mais vantajoso eventualmente cabível, conforme os elementos comprovados no processo administrativo.' }],
+        content: [
+          {
+            type: 'text',
+            text: 'O(A) requerente acima identificado(a) solicita a análise de seu histórico previdenciário e a concessão do benefício {{beneficio_requerido}}, caso sejam preenchidos os requisitos legais aplicáveis. Requer, ainda, a análise do benefício mais vantajoso eventualmente cabível, conforme os elementos comprovados no processo administrativo.',
+          },
+        ],
       },
       {
         type: 'heading',
         attrs: { level: 2, textAlign: 'left' },
-        content: [{ type: 'text', text: 'II — DO HISTÓRICO CONTRIBUTIVO E DOS DOCUMENTOS' }],
+        content: [
+          { type: 'text', text: 'II — DO HISTÓRICO CONTRIBUTIVO E DOS DOCUMENTOS' },
+        ],
       },
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'O histórico contributivo deverá ser conferido a partir do CNIS e dos documentos apresentados. Os períodos cuja análise é solicitada são: {{periodos_contributivos}}.' }],
+        content: [
+          {
+            type: 'text',
+            text: 'O histórico contributivo deverá ser conferido a partir do CNIS e dos documentos apresentados. Os períodos cuja análise é solicitada são: {{periodos_contributivos}}.',
+          },
+        ],
       },
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'Documentos que instruem este requerimento: {{documentos_apresentados}}. A relação deve refletir exclusivamente os arquivos efetivamente juntados.' }],
+        content: [
+          {
+            type: 'text',
+            text: 'Documentos que instruem este requerimento: {{documentos_apresentados}}. A relação deve refletir exclusivamente os arquivos efetivamente juntados.',
+          },
+        ],
       },
       {
         type: 'heading',
@@ -186,12 +215,22 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'Requer-se a apuração dos requisitos previdenciários pertinentes, incluindo tempo de contribuição e carência quando aplicáveis, com consideração dos registros do CNIS e dos documentos apresentados. Eventuais divergências ou períodos não computados devem ser examinados individualmente, sem presumir como comprovado período que não esteja apoiado nos elementos dos autos.' }],
+        content: [
+          {
+            type: 'text',
+            text: 'Requer-se a apuração dos requisitos previdenciários pertinentes, incluindo tempo de contribuição e carência quando aplicáveis, com consideração dos registros do CNIS e dos documentos apresentados. Eventuais divergências ou períodos não computados devem ser examinados individualmente, sem presumir como comprovado período que não esteja apoiado nos elementos dos autos.',
+          },
+        ],
       },
       {
         type: 'paragraph',
         attrs: { textAlign: 'left' },
-        content: [{ type: 'text', text: 'Se os elementos indicarem mais de uma regra possível, requer-se a análise das hipóteses cabíveis na data relevante e a indicação fundamentada da opção mais vantajosa, acompanhada da memória de cálculo.' }],
+        content: [
+          {
+            type: 'text',
+            text: 'Se os elementos indicarem mais de uma regra possível, requer-se a análise das hipóteses cabíveis na data relevante e a indicação fundamentada da opção mais vantajosa, acompanhada da memória de cálculo.',
+          },
+        ],
       },
       {
         type: 'heading',
@@ -209,7 +248,9 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
           'a emissão de decisão fundamentada, com identificação dos períodos considerados e não considerados.',
         ].map((text) => ({
           type: 'listItem' as const,
-          content: [{ type: 'paragraph' as const, content: [{ type: 'text' as const, text }] }],
+          content: [
+            { type: 'paragraph' as const, content: [{ type: 'text' as const, text }] },
+          ],
         })),
       },
       {
@@ -235,7 +276,12 @@ export const UNIVERSAL_RETIREMENT_TEMPLATE = {
       {
         type: 'paragraph',
         attrs: { textAlign: 'center' },
-        content: [{ type: 'text', text: 'Representante, se houver: {{nome_representante}} | OAB/{{uf_oab}} {{numero_oab}}' }],
+        content: [
+          {
+            type: 'text',
+            text: 'Representante, se houver: {{nome_representante}} | OAB/{{uf_oab}} {{numero_oab}}',
+          },
+        ],
       },
     ],
   } as unknown as DocumentTemplateContent,
@@ -346,17 +392,18 @@ export class DocumentProductionSeeder {
       description: UNIVERSAL_RETIREMENT_TEMPLATE.description,
       content: UNIVERSAL_RETIREMENT_TEMPLATE.content,
       variables: [...UNIVERSAL_RETIREMENT_TEMPLATE.variables],
-      application: retirementArea && retirementTopic
-        ? {
-            scope: 'legal_context',
-            moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
-            legalAreaIds: [retirementArea.id],
-            legalTopicIdsByArea: { [retirementArea.id]: [retirementTopic.id] },
-          }
-        : {
-            scope: 'global',
-            moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
-          },
+      application:
+        retirementArea && retirementTopic
+          ? {
+              scope: 'legal_context',
+              moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
+              legalAreaIds: [retirementArea.id],
+              legalTopicIdsByArea: { [retirementArea.id]: [retirementTopic.id] },
+            }
+          : {
+              scope: 'global',
+              moment: UNIVERSAL_RETIREMENT_TEMPLATE.moment,
+            },
       status: 'available',
     })
     const documentCreations: DocumentCreation[] = specifications.map((specification) => {
