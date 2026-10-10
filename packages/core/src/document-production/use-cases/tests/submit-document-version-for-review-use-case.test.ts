@@ -3,15 +3,14 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import type { CaseMembersRepository } from '../../../case-management/interfaces'
 import { DocumentVersionFaker } from '../../domain/entities/fakers'
-import type { DocumentTemplateContent } from '../../domain/structures'
 import type {
   DocumentPackagesRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../interfaces'
-import { SaveEditableDocumentVersionUseCase } from '../save-editable-document-version-use-case'
+import { SubmitDocumentVersionForReviewUseCase } from '../submit-document-version-for-review-use-case'
 
-describe('Save Editable Document Version Use Case', () => {
+describe('Submit Document Version For Review Use Case', () => {
   const caseId = 'case-id'
   const documentId = 'document-id'
   const collaboratorId = 'collaborator-id'
@@ -19,14 +18,14 @@ describe('Save Editable Document Version Use Case', () => {
   let packagesRepository: MockProxy<DocumentPackagesRepository>
   let packageDocumentsRepository: MockProxy<PackageDocumentsRepository>
   let caseMembersRepository: MockProxy<CaseMembersRepository>
-  let useCase: SaveEditableDocumentVersionUseCase
+  let useCase: SubmitDocumentVersionForReviewUseCase
 
   beforeEach(() => {
     versionsRepository = mock<DocumentVersionsRepository>()
     packagesRepository = mock<DocumentPackagesRepository>()
     packageDocumentsRepository = mock<PackageDocumentsRepository>()
     caseMembersRepository = mock<CaseMembersRepository>()
-    useCase = new SaveEditableDocumentVersionUseCase(
+    useCase = new SubmitDocumentVersionForReviewUseCase(
       versionsRepository,
       packagesRepository,
       packageDocumentsRepository,
@@ -34,24 +33,17 @@ describe('Save Editable Document Version Use Case', () => {
     )
   })
 
-  it('recalculates pending markers from edited content', async () => {
-    const currentVersion = DocumentVersionFaker.fake({
+  it('submits a version only for an active member of its case', async () => {
+    const version = DocumentVersionFaker.fake({
       documentId,
       createdByCollaboratorId: collaboratorId,
-      pendingMarkers: [{ marker: '{resolved_placeholder}' }],
+      status: 'draft',
     })
-    const content = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Updated: {remaining_placeholder}' }],
-        },
-      ],
-    } as unknown as DocumentTemplateContent
-    const savedVersion = DocumentVersionFaker.fake({ content })
-    versionsRepository.findById.mockResolvedValue(currentVersion)
-    versionsRepository.saveEditableContent.mockResolvedValue(savedVersion)
+    versionsRepository.findById.mockResolvedValue(version)
+    versionsRepository.submitForReview.mockResolvedValue({
+      ...version,
+      status: 'in_review',
+    })
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
       collaboratorId,
     ])
@@ -64,47 +56,49 @@ describe('Save Editable Document Version Use Case', () => {
       useCase.execute({
         caseId,
         documentId,
-        documentVersionId: currentVersion.id,
+        documentVersionId: version.id,
         collaboratorId,
-        content,
       }),
-    ).resolves.toBe(savedVersion)
+    ).resolves.toMatchObject({ status: 'in_review' })
 
-    expect(versionsRepository.saveEditableContent).toHaveBeenCalledWith(
-      currentVersion.id,
-      collaboratorId,
-      content,
-      [{ marker: '{remaining_placeholder}' }],
+    expect(caseMembersRepository.findActiveCollaboratorIdsByCaseId).toHaveBeenCalledWith(
+      caseId,
+      [collaboratorId],
     )
   })
 
-  it('rejects editing when the collaborator is no longer an active case member', async () => {
-    const currentVersion = DocumentVersionFaker.fake({
+  it('rejects submitting when the collaborator is no longer an active case member', async () => {
+    const version = DocumentVersionFaker.fake({
       documentId,
       createdByCollaboratorId: collaboratorId,
+      status: 'draft',
     })
-    versionsRepository.findById.mockResolvedValue(currentVersion)
+    versionsRepository.findById.mockResolvedValue(version)
+    versionsRepository.submitForReview.mockResolvedValue({
+      ...version,
+      status: 'in_review',
+    })
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([])
 
     await expect(
       useCase.execute({
         caseId,
         documentId,
-        documentVersionId: currentVersion.id,
+        documentVersionId: version.id,
         collaboratorId,
-        content: {} as DocumentTemplateContent,
       }),
     ).rejects.toThrow()
 
-    expect(versionsRepository.saveEditableContent).not.toHaveBeenCalled()
+    expect(versionsRepository.submitForReview).not.toHaveBeenCalled()
   })
 
-  it('rejects editing when the route document does not own the version', async () => {
-    const currentVersion = DocumentVersionFaker.fake({
+  it('rejects submitting a version outside the requested case document', async () => {
+    const version = DocumentVersionFaker.fake({
       documentId: 'another-document-id',
       createdByCollaboratorId: collaboratorId,
+      status: 'draft',
     })
-    versionsRepository.findById.mockResolvedValue(currentVersion)
+    versionsRepository.findById.mockResolvedValue(version)
     caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
       collaboratorId,
     ])
@@ -117,12 +111,38 @@ describe('Save Editable Document Version Use Case', () => {
       useCase.execute({
         caseId,
         documentId,
-        documentVersionId: currentVersion.id,
+        documentVersionId: version.id,
         collaboratorId,
-        content: {} as DocumentTemplateContent,
       }),
     ).rejects.toThrow()
 
-    expect(versionsRepository.saveEditableContent).not.toHaveBeenCalled()
+    expect(versionsRepository.submitForReview).not.toHaveBeenCalled()
+  })
+
+  it('rejects submitting a document that is not in the requested case package', async () => {
+    const version = DocumentVersionFaker.fake({
+      documentId,
+      createdByCollaboratorId: collaboratorId,
+      status: 'draft',
+    })
+    versionsRepository.findById.mockResolvedValue(version)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      collaboratorId,
+    ])
+    packagesRepository.findByContext.mockResolvedValue({ id: 'package-id' } as never)
+    packageDocumentsRepository.findByDocumentPackageId.mockResolvedValue([
+      { documentId: 'another-document-id' },
+    ] as never)
+
+    await expect(
+      useCase.execute({
+        caseId,
+        documentId,
+        documentVersionId: version.id,
+        collaboratorId,
+      }),
+    ).rejects.toThrow()
+
+    expect(versionsRepository.submitForReview).not.toHaveBeenCalled()
   })
 })
