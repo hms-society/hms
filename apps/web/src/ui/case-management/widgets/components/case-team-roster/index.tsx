@@ -163,7 +163,7 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
         onSelect={handleSelectCandidate}
       />
       <TeamMutationDialog
-        caseTeam={canManageActiveTeam ? caseTeam : undefined}
+        caseTeam={canManageActiveTeam ? (caseTeam ?? undefined) : undefined}
         mutation={canManageActiveTeam ? pendingMutation : null}
         reason={reason}
         error={mutationError}

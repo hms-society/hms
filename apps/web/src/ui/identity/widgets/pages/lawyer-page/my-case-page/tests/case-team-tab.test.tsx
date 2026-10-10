@@ -70,8 +70,9 @@ beforeEach(() => {
     handleRetry: vi.fn(),
     isLoading: false,
     members: [],
+    reason: '',
     total: 0,
-  })
+  } as never)
 })
 
 describe('case team tab', () => {

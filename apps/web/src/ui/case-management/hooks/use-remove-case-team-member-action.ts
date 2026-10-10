@@ -1,4 +1,4 @@
-import type { CaseManagementService as ICaseManagementService } from '@hms/core/case-management/interfaces'
+import type { CaseTeamManagementService as ICaseManagementService } from '@hms/core/case-management/interfaces'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'

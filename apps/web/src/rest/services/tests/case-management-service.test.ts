@@ -4,6 +4,26 @@ import type { RestClient } from '@hms/core/shared/interfaces'
 import { CaseManagementService } from '../case-management-service'
 
 describe('CaseManagementService', () => {
+  it('sends team candidate filters and mutation requests to their routes', async () => {
+    const restClient = makeRestClient()
+    const service = CaseManagementService(restClient)
+
+    await service.listCaseTeamCandidates(
+      { page: 2, pageSize: 25, search: 'Ana', profile: 'lawyer' },
+      'case-1',
+    )
+    await service.addCaseTeamMember('case-1', {} as never)
+    await service.changeCaseTeamMemberRole('case-1', 'member-1', {} as never)
+    await service.removeCaseTeamMember('case-1', 'member-1', {} as never)
+
+    expect(restClient.get).toHaveBeenCalledWith(
+      '/cases/team-candidates?page=2&pageSize=25&search=Ana&profile=lawyer&caseId=case-1',
+    )
+    expect(restClient.post).toHaveBeenCalledWith('/cases/case-1/team', {})
+    expect(restClient.patch).toHaveBeenCalledWith('/cases/case-1/team/member-1/role', {})
+    expect(restClient.delete).toHaveBeenCalledWith('/cases/case-1/team/member-1', {})
+  })
+
   it('gets the current team for a case', async () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)
