@@ -8,9 +8,12 @@ import { useCaseTeamRoster } from '../use-case-team-roster'
 vi.mock('@/ui/case-management/hooks/use-case-team-query', () => ({
   useCaseTeamQuery: vi.fn(),
 }))
-vi.mock('@/ui/case-management/widgets/components/case-team/use-case-team-mutation', () => ({
-  useCaseTeamMutation: vi.fn(),
-}))
+vi.mock(
+  '@/ui/case-management/widgets/components/case-team/use-case-team-mutation',
+  () => ({
+    useCaseTeamMutation: vi.fn(),
+  }),
+)
 
 const useCaseTeamQueryMock = vi.mocked(useCaseTeamQuery)
 const useCaseTeamMutationMock = vi.mocked(useCaseTeamMutation)

@@ -4,27 +4,30 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CaseTeamRoster } from '..'
 import { useCaseTeamRoster } from '../use-case-team-roster'
 
-vi.mock('@/ui/case-management/widgets/components/case-team/team-member-row/member-actions', () => ({
-  MemberActions: ({
-    canManage,
-    onChangeRole,
-    onRemove,
-  }: {
-    canManage: boolean
-    onChangeRole: () => void
-    onRemove: () => void
-  }) =>
-    canManage ? (
-      <div>
-        <button type='button' onClick={onChangeRole}>
-          Alterar acesso
-        </button>
-        <button type='button' onClick={onRemove}>
-          Remover colaborador
-        </button>
-      </div>
-    ) : null,
-}))
+vi.mock(
+  '@/ui/case-management/widgets/components/case-team/team-member-row/member-actions',
+  () => ({
+    MemberActions: ({
+      canManage,
+      onChangeRole,
+      onRemove,
+    }: {
+      canManage: boolean
+      onChangeRole: () => void
+      onRemove: () => void
+    }) =>
+      canManage ? (
+        <div>
+          <button type='button' onClick={onChangeRole}>
+            Alterar acesso
+          </button>
+          <button type='button' onClick={onRemove}>
+            Remover colaborador
+          </button>
+        </div>
+      ) : null,
+  }),
+)
 vi.mock('@/ui/case-management/widgets/components/case-team-member-selector', () => ({
   CaseTeamMemberSelector: ({
     open,
@@ -48,7 +51,13 @@ vi.mock('@/ui/case-management/widgets/components/case-team-member-selector', () 
     ) : null,
 }))
 vi.mock('@/ui/case-management/widgets/components/case-team/team-mutation-dialog', () => ({
-  TeamMutationDialog: ({ mutation, onConfirm }: { mutation: unknown; onConfirm: () => void }) =>
+  TeamMutationDialog: ({
+    mutation,
+    onConfirm,
+  }: {
+    mutation: unknown
+    onConfirm: () => void
+  }) =>
     mutation ? (
       <button type='button' onClick={onConfirm}>
         Confirmar alteração
@@ -134,52 +143,54 @@ describe('CaseTeamRoster', () => {
     const handleBeginRoleChange = vi.fn()
     const handleBeginRemoval = vi.fn()
     const handleConfirmMutation = vi.fn()
-    useCaseTeamRosterMock.mockReturnValue(createRosterState({
-      canManageActiveTeam: true,
-      caseTeam: {
-        caseId: 'case-1',
-        status: 'documentation',
-        members: [],
-        total: 1,
-        canManage: true,
-        activeManagerCount: 2,
-        requiresAdministrativeReason: false,
-      },
-      error: null,
-      handleBeginRemoval,
-      handleBeginRoleChange,
-      handleCloseSelector: vi.fn(),
-      handleConfirmMutation,
-      handleOpenSelector,
-      handlePendingMutationOpenChange: vi.fn(),
-      handleReasonChange: vi.fn(),
-      handleRetry: vi.fn(),
-      handleSelectCandidate,
-      hasVersionConflict: false,
-      isLoading: false,
-      isMutationPending: false,
-      isSelectorOpen: true,
-      members: [
-        {
-          membershipId: 'membership-1',
-          collaboratorId: 'collaborator-1',
-          professionalName: 'Beatriz Oliveira',
-          email: 'beatriz@example.test',
-          profile: 'lawyer',
-          role: 'manager',
-          assignedAt: new Date('2026-01-01T00:00:00.000Z'),
-          isEligible: true,
+    useCaseTeamRosterMock.mockReturnValue(
+      createRosterState({
+        canManageActiveTeam: true,
+        caseTeam: {
+          caseId: 'case-1',
+          status: 'documentation',
+          members: [],
+          total: 1,
+          canManage: true,
+          activeManagerCount: 2,
+          requiresAdministrativeReason: false,
         },
-      ],
-      mutationError: null,
-      pendingMutation: {
-        kind: 'role',
-        member: { membershipId: 'membership-1' },
-        role: 'collaborator',
-      },
-      reason: '',
-      total: 1,
-    }))
+        error: null,
+        handleBeginRemoval,
+        handleBeginRoleChange,
+        handleCloseSelector: vi.fn(),
+        handleConfirmMutation,
+        handleOpenSelector,
+        handlePendingMutationOpenChange: vi.fn(),
+        handleReasonChange: vi.fn(),
+        handleRetry: vi.fn(),
+        handleSelectCandidate,
+        hasVersionConflict: false,
+        isLoading: false,
+        isMutationPending: false,
+        isSelectorOpen: true,
+        members: [
+          {
+            membershipId: 'membership-1',
+            collaboratorId: 'collaborator-1',
+            professionalName: 'Beatriz Oliveira',
+            email: 'beatriz@example.test',
+            profile: 'lawyer',
+            role: 'manager',
+            assignedAt: new Date('2026-01-01T00:00:00.000Z'),
+            isEligible: true,
+          },
+        ],
+        mutationError: null,
+        pendingMutation: {
+          kind: 'role',
+          member: { membershipId: 'membership-1' },
+          role: 'collaborator',
+        },
+        reason: '',
+        total: 1,
+      }),
+    )
 
     render(<CaseTeamRoster caseId='case-1' />)
 
@@ -201,5 +212,4 @@ describe('CaseTeamRoster', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirmar alteração' }))
     expect(handleConfirmMutation).toHaveBeenCalledOnce()
   })
-
 })
