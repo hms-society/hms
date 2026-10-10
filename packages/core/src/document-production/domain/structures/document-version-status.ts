@@ -1,4 +1,5 @@
 export const DocumentVersionStatus = {
+  Draft: 'draft',
   InReview: 'in_review',
   Approved: 'approved',
   Rejected: 'rejected',

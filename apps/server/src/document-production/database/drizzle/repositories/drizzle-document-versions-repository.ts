@@ -127,7 +127,23 @@ export class DrizzleDocumentVersionsRepository
         and(
           eq(documentVersionModel.id, documentVersionId),
           eq(documentVersionModel.createdByCollaboratorId, collaboratorId),
-          eq(documentVersionModel.status, 'in_review'),
+          inArray(documentVersionModel.status, ['draft', 'in_review']),
+        ),
+      )
+      .returning()
+
+    return record ? this.mapper.toDomain(record) : undefined
+  }
+
+  async submitForReview(documentVersionId: string, collaboratorId: string) {
+    const [record] = await this.database
+      .update(documentVersionModel)
+      .set({ status: 'in_review' })
+      .where(
+        and(
+          eq(documentVersionModel.id, documentVersionId),
+          eq(documentVersionModel.createdByCollaboratorId, collaboratorId),
+          eq(documentVersionModel.status, 'draft'),
         ),
       )
       .returning()

@@ -22,6 +22,7 @@ const useCurrentCollaboratorQueryMock = vi.mocked(useCurrentCollaboratorQuery)
 const useNavigationMock = vi.mocked(useNavigation)
 const useRestContextMock = vi.mocked(useRestContext)
 let getDocumentMock: ReturnType<typeof vi.fn>
+let getCaseDetailsMock: ReturnType<typeof vi.fn>
 
 const CASE_ID = 'case-id'
 const DOCUMENT_ID = 'document-id'
@@ -93,19 +94,18 @@ beforeEach(() => {
     saveManualVersion: vi
       .fn()
       .mockResolvedValue(new RestResponse({ body: { id: 'new-version-id' } })),
+    saveEditableVersion: vi.fn().mockResolvedValue(new RestResponse({ body: {} })),
+    submitVersionForReview: vi.fn().mockResolvedValue(new RestResponse({ body: {} })),
     generateRevision: vi.fn().mockResolvedValue(
       new RestResponse({
         body: { documentGenerationId: 'generation-2', documentId: DOCUMENT_ID },
       }),
     ),
   }
-  const caseManagementService = {
-    getLegalCaseDetails: vi
-      .fn()
-      .mockResolvedValue(
-        new RestResponse({ body: { publicCode: 'CASO-20260925-0002' } }),
-      ),
-  }
+  getCaseDetailsMock = vi
+    .fn()
+    .mockResolvedValue(new RestResponse({ body: { publicCode: 'CASO-20260925-0002' } }))
+  const caseManagementService = { getLegalCaseDetails: getCaseDetailsMock }
 
   useCurrentCollaboratorQueryMock.mockReturnValue({
     currentCollaborator: null,
@@ -146,6 +146,49 @@ describe('usePieceWorkflowRoutePage', () => {
 
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
     expect(result.current.isReadOnlyVersion).toBe(false)
+  })
+
+  it('prevents the document creator from reviewing a later version by another author', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    const documentCreatorId = 'other-collaborator-id'
+    useCurrentCollaboratorQueryMock.mockReturnValue({
+      currentCollaborator: {
+        collaboratorId: documentCreatorId,
+        professionalName: 'Criador do documento',
+        email: 'creator@example.com',
+        profile: 'lawyer',
+        status: 'active',
+        legalExpertises: [],
+      },
+      currentCollaboratorError: null,
+      isLoadingCurrentCollaborator: false,
+    })
+    getCaseDetailsMock.mockResolvedValue(
+      new RestResponse({
+        body: {
+          publicCode: 'CASO-20260925-0002',
+          team: [{ collaboratorId: documentCreatorId }],
+        },
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        usePieceWorkflowRoutePage({
+          mode: 'review',
+          caseId: CASE_ID,
+          documentId: DOCUMENT_ID,
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.isAuthor).toBe(true))
+    expect(result.current.isReviewerEligible).toBe(false)
   })
 
   it('loads the selected historical version as read-only content', async () => {
@@ -194,11 +237,45 @@ describe('usePieceWorkflowRoutePage', () => {
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
     act(() => result.current.handleSelectVersion(OLDER_VERSION_ID))
 
-    act(() => result.current.handleStartManualVersion(OLDER_VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(OLDER_VERSION_ID)
+    })
 
     expect(result.current.isReadOnlyVersion).toBe(true)
     expect(result.current.versionActionError).toBe(
       'Somente a versão atual pode ser aberta para edição manual.',
+    )
+  })
+
+  it('creates and opens a new version when starting manual editing', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    const { result } = renderHook(
+      () =>
+        usePieceWorkflowRoutePage({
+          mode: 'editor',
+          caseId: CASE_ID,
+          documentId: DOCUMENT_ID,
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
+
+    await waitFor(() => expect(result.current.isVersionDialogOpen).toBe(false))
+    const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+      CASE_ID,
+      DOCUMENT_ID,
+      VERSION_ID,
+      initialContent,
     )
   })
 
@@ -269,7 +346,7 @@ describe('usePieceWorkflowRoutePage', () => {
     expect(result.current.version?.id).toBe(OLDER_VERSION_ID)
   })
 
-  it('does not create a version when returning without a real edit', async () => {
+  it('does not save unchanged content again when returning to the case', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     })
@@ -287,7 +364,9 @@ describe('usePieceWorkflowRoutePage', () => {
     )
 
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
-    act(() => result.current.handleStartManualVersion(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
     act(() => result.current.handleChangeContent(initialContent))
 
     await act(async () => {
@@ -295,14 +374,21 @@ describe('usePieceWorkflowRoutePage', () => {
     })
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
-    expect(caseDocumentProductionService.saveManualVersion).not.toHaveBeenCalled()
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledTimes(1)
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+      CASE_ID,
+      DOCUMENT_ID,
+      VERSION_ID,
+      initialContent,
+    )
+    expect(caseDocumentProductionService.saveEditableVersion).not.toHaveBeenCalled()
     expect(useNavigationMock.mock.results[0].value.navigateTo).toHaveBeenCalledWith(
       'lawyerCaseDetails',
-      { params: { caseId: CASE_ID } },
+      { params: { caseId: CASE_ID }, search: { tab: 'pecas' } },
     )
   })
 
-  it('saves edits as a new manual version before navigating back to the case', async () => {
+  it('saves edits in the current version before navigating back to the case', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     })
@@ -327,7 +413,7 @@ describe('usePieceWorkflowRoutePage', () => {
     })
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
-    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+    expect(caseDocumentProductionService.saveEditableVersion).toHaveBeenCalledWith(
       CASE_ID,
       DOCUMENT_ID,
       VERSION_ID,
@@ -335,7 +421,7 @@ describe('usePieceWorkflowRoutePage', () => {
     )
     expect(useNavigationMock.mock.results[0].value.navigateTo).toHaveBeenCalledWith(
       'lawyerCaseDetails',
-      { params: { caseId: CASE_ID } },
+      { params: { caseId: CASE_ID }, search: { tab: 'pecas' } },
     )
   })
 
@@ -382,15 +468,25 @@ describe('usePieceWorkflowRoutePage', () => {
     )
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
 
-    act(() => result.current.handleStartManualVersion(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
     act(() => result.current.handleChangeContent(editedContent))
     await act(async () => result.current.handleSaveNewVersion())
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
-    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenNthCalledWith(
+      1,
       CASE_ID,
       DOCUMENT_ID,
       VERSION_ID,
+      initialContent,
+    )
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenNthCalledWith(
+      2,
+      CASE_ID,
+      DOCUMENT_ID,
+      'new-version-id',
       editedContent,
     )
   })
@@ -413,7 +509,9 @@ describe('usePieceWorkflowRoutePage', () => {
     )
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
 
-    act(() => result.current.handleStartManualVersion(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
     await act(async () => {
       await result.current.handleGenerateRevision(VERSION_ID, 'Atualize os pedidos.')
     })
@@ -428,7 +526,7 @@ describe('usePieceWorkflowRoutePage', () => {
     expect(result.current.versionActionError).toBeUndefined()
   })
 
-  it('saves the current draft automatically before opening the new-version flow', async () => {
+  it('requires saving the current draft before opening the new-version flow', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     })
@@ -445,38 +543,29 @@ describe('usePieceWorkflowRoutePage', () => {
       { wrapper },
     )
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
-    act(() => result.current.handleStartManualVersion(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
     act(() => result.current.handleChangeContent(editedContent))
 
     await act(async () => result.current.handleOpenVersionDialog())
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
+    expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledTimes(1)
     expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
       CASE_ID,
       DOCUMENT_ID,
       VERSION_ID,
-      editedContent,
+      initialContent,
     )
-    expect(result.current.editedContent).toBeNull()
-    expect(result.current.isVersionDialogOpen).toBe(true)
-
-    await act(async () => {
-      await result.current.handleGenerateRevision(
-        'new-version-id',
-        'Inclua um pedido adicional.',
-      )
-    })
-
-    expect(caseDocumentProductionService.generateRevision).toHaveBeenCalledWith(
-      CASE_ID,
-      DOCUMENT_ID,
-      'new-version-id',
-      'Inclua um pedido adicional.',
+    expect(result.current.editedContent).toEqual(editedContent)
+    expect(result.current.isVersionDialogOpen).toBe(false)
+    expect(result.current.versionActionError).toBe(
+      'Salve explicitamente a nova versão antes de abrir o histórico.',
     )
-    expect(result.current.versionActionError).toBeUndefined()
   })
 
-  it('saves an edited draft before generating an AI revision from that saved version', async () => {
+  it('requires explicitly saving an edited draft before generating an AI revision', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     })
@@ -493,29 +582,26 @@ describe('usePieceWorkflowRoutePage', () => {
       { wrapper },
     )
     await waitFor(() => expect(result.current.version?.id).toBe(VERSION_ID))
-    act(() => result.current.handleStartManualVersion(VERSION_ID))
+    await act(async () => {
+      await result.current.handleStartManualVersion(VERSION_ID)
+    })
     act(() => result.current.handleChangeContent(editedContent))
 
-    await act(async () => {
-      await result.current.handleGenerateRevision(
-        VERSION_ID,
-        'Inclua um pedido adicional.',
-      )
-    })
+    await act(async () =>
+      result.current.handleGenerateRevision(VERSION_ID, 'Inclua um pedido adicional.'),
+    )
 
     const { caseDocumentProductionService } = useRestContextMock.mock.results[0].value
     expect(caseDocumentProductionService.saveManualVersion).toHaveBeenCalledWith(
       CASE_ID,
       DOCUMENT_ID,
       VERSION_ID,
-      editedContent,
+      initialContent,
     )
-    expect(caseDocumentProductionService.generateRevision).toHaveBeenCalledWith(
-      CASE_ID,
-      DOCUMENT_ID,
-      'new-version-id',
-      'Inclua um pedido adicional.',
+    expect(caseDocumentProductionService.generateRevision).not.toHaveBeenCalled()
+    expect(result.current.editedContent).toEqual(editedContent)
+    expect(result.current.versionActionError).toBe(
+      'Salve explicitamente a nova versão antes de solicitar uma geração por IA.',
     )
-    expect(result.current.versionActionError).toBeUndefined()
   })
 })

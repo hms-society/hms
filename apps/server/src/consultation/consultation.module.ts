@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database/case-management-database.module'
 import { ConsultationMessagingModule } from '@/consultation/messaging/consultation-messaging.module'
 import {
   GenerateConsultationDocumentController,
@@ -38,6 +39,7 @@ import { SchedulingDatabaseModule } from '@/scheduling/database/scheduling-datab
     IntakeDatabaseModule,
     SchedulingDatabaseModule,
     ConsultationDatabaseModule,
+    CaseManagementDatabaseModule,
     ConsultationMessagingModule,
     DocumentProductionDatabaseModule,
     DocumentProductionProvisionModule,

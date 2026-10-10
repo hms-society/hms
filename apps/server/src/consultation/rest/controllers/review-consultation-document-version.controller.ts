@@ -9,6 +9,10 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { ConsultationsRepository } from '@hms/core/consultation/interfaces'
+import type {
+  CaseMembersRepository,
+  LegalCasesRepository,
+} from '@hms/core/case-management/interfaces'
 import { ReviewConsultationDocumentVersionUseCase } from '@hms/core/consultation/use-cases'
 import type {
   DocumentPackagesRepository,
@@ -20,6 +24,7 @@ import { reviewDocumentVersionSchema } from '@hms/validation/document-production
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CONSULTATION_REPOSITORIES } from '@/consultation/constants/consultation-repositories'
+import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { ConsultationsController } from '@/consultation/decorators'
 import { ReviewConsultationDocumentVersionResponseDto } from '@/consultation/rest/dtos'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -49,6 +54,10 @@ export class ReviewConsultationDocumentVersionController {
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
     versionsRepository: DocumentVersionsRepository,
     datetimeProvider: DatetimeProvider,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
+    legalCasesRepository: LegalCasesRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
+    caseMembersRepository: CaseMembersRepository,
   ) {
     this.useCase = new ReviewConsultationDocumentVersionUseCase(
       consultationsRepository,
@@ -56,6 +65,8 @@ export class ReviewConsultationDocumentVersionController {
       packageDocumentsRepository,
       versionsRepository,
       datetimeProvider,
+      legalCasesRepository,
+      caseMembersRepository,
     )
   }
 

@@ -205,7 +205,8 @@ type ReviewActionDialogProps = {
   documentTitle?: string
   casePublicCode?: string
   versionNumber?: number
-  onConfirm?: () => void
+  documentAuthorName?: string
+  onConfirm?: (comment?: string) => void
 }
 
 export function ReviewActionDialog({
@@ -215,10 +216,12 @@ export function ReviewActionDialog({
   documentTitle = 'Peça jurídica',
   casePublicCode,
   versionNumber,
+  documentAuthorName,
   onConfirm,
 }: ReviewActionDialogProps) {
   const [confirmed, setConfirmed] = useState(false)
   const [adjustmentComment, setAdjustmentComment] = useState('')
+  const [adjustmentConfirmed, setAdjustmentConfirmed] = useState(false)
   const isBlock = kind === 'block'
   const isApproval = kind === 'approval'
   const title = isBlock
@@ -310,7 +313,10 @@ export function ReviewActionDialog({
                 checked={confirmed}
                 onCheckedChange={(value) => setConfirmed(value === true)}
               />
-              <Label htmlFor='piece-approval-responsibility' className='cursor-pointer'>
+              <Label
+                htmlFor='piece-approval-responsibility'
+                className='block min-w-0 flex-1 cursor-pointer whitespace-normal leading-relaxed'
+              >
                 <strong className='block'>Confirmação obrigatória</strong>
                 Confirmo minha responsabilidade técnica pela aprovação desta peça.
               </Label>
@@ -325,7 +331,7 @@ export function ReviewActionDialog({
           <div className='mt-5 space-y-3'>
             <p className='flex items-start gap-2 rounded-lg bg-secondary p-3 text-xs text-secondary-foreground'>
               <Icon name='arrow-left' className='mt-0.5 size-4 shrink-0 text-primary' />A
-              peça retornará para Dra. Mariana Lopes com status Ajustes solicitados.
+              peça retornará para {documentAuthorName ?? 'o colaborador responsável'}.
             </p>
             <div className='space-y-1.5'>
               <Label htmlFor='piece-adjustment-comment' className='text-sm font-semibold'>
@@ -344,6 +350,17 @@ export function ReviewActionDialog({
               <div className='flex justify-between gap-3 text-xs text-muted-foreground'>
                 <span>Campo obrigatório para devolver a peça.</span>
                 <span aria-live='polite'>{adjustmentComment.length}/1000</span>
+              </div>
+              <div className='flex items-start gap-2 rounded-lg border border-primary p-3 text-xs'>
+                <Checkbox
+                  id='piece-adjustment-confirmation'
+                  checked={adjustmentConfirmed}
+                  onCheckedChange={(value) => setAdjustmentConfirmed(value === true)}
+                />
+                <Label htmlFor='piece-adjustment-confirmation' className='cursor-pointer'>
+                  Confirmo o envio deste pedido de ajustes ao colaborador responsável pela
+                  elaboração da peça.
+                </Label>
               </div>
             </div>
           </div>
@@ -364,10 +381,12 @@ export function ReviewActionDialog({
             className={`rounded-full px-4 ${isBlock ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}`}
             disabled={
               (isApproval && !confirmed) ||
-              (!isApproval && !isBlock && adjustmentComment.trim().length === 0)
+              (!isApproval &&
+                !isBlock &&
+                (adjustmentComment.trim().length === 0 || !adjustmentConfirmed))
             }
             onClick={() => {
-              onConfirm?.()
+              onConfirm?.(!isApproval && !isBlock ? adjustmentComment.trim() : undefined)
               onOpenChange(false)
             }}
           >

@@ -1,5 +1,9 @@
 import type { DatetimeProvider } from '#shared/interfaces/datetime-provider'
 import type { UseCase } from '#shared/interfaces/use-case'
+import type {
+  CaseMembersRepository,
+  LegalCasesRepository,
+} from '../../case-management/interfaces'
 
 import type { DocumentVersion } from '../../document-production/domain/entities'
 import {
@@ -26,6 +30,7 @@ import {
   ConsultationNotFoundError,
   ConsultationPackageConfirmationError,
 } from '../domain/errors'
+import { DocumentVersionReviewAccessDeniedError } from '../../document-production/domain/errors'
 import type { ConsultationsRepository } from '../interfaces'
 
 type Request = {
@@ -49,6 +54,8 @@ export class ReviewConsultationDocumentVersionUseCase
     private readonly packageDocumentsRepository: PackageDocumentsRepository,
     private readonly versionsRepository: DocumentVersionsRepository,
     private readonly datetimeProvider: DatetimeProvider,
+    private readonly legalCasesRepository?: LegalCasesRepository,
+    private readonly caseMembersRepository?: CaseMembersRepository,
   ) {}
 
   async execute(request: Request): Promise<DocumentVersion> {
@@ -56,10 +63,33 @@ export class ReviewConsultationDocumentVersionUseCase
       request.consultationId,
     )
     if (!consultation) throw new ConsultationNotFoundError()
-    if (
-      request.reviewedByCollaboratorProfile !== CollaboratorProfile.Admin &&
-      consultation.assignedLawyerId !== request.reviewedByCollaboratorId
-    ) {
+    const version = await this.versionsRepository.findById(request.documentVersionId)
+    if (!version || version.documentId !== request.documentId) {
+      throw new ConsultationDocumentNotFoundError()
+    }
+    if (version.createdByCollaboratorId === request.reviewedByCollaboratorId) {
+      throw new DocumentVersionReviewAccessDeniedError()
+    }
+
+    const isPrivilegedReviewer =
+      request.reviewedByCollaboratorProfile === CollaboratorProfile.Admin ||
+      request.reviewedByCollaboratorProfile === CollaboratorProfile.Supervisor
+    const legalCase = this.legalCasesRepository
+      ? await this.legalCasesRepository.findByIntakeId(consultation.intakeId)
+      : undefined
+    const isCaseMember =
+      legalCase && this.caseMembersRepository
+        ? (
+            await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(
+              legalCase.id,
+              [request.reviewedByCollaboratorId],
+            )
+          ).includes(request.reviewedByCollaboratorId)
+        : false
+    const isLegacyAssignedLawyer =
+      !this.legalCasesRepository &&
+      consultation.assignedLawyerId === request.reviewedByCollaboratorId
+    if (!isPrivilegedReviewer && !isCaseMember && !isLegacyAssignedLawyer) {
       throw new ConsultationDocumentAccessDeniedError()
     }
 
@@ -76,11 +106,6 @@ export class ReviewConsultationDocumentVersionUseCase
     const packageDocuments =
       await this.packageDocumentsRepository.findByDocumentPackageId(documentPackage.id)
     if (!packageDocuments.some((item) => item.documentId === request.documentId)) {
-      throw new ConsultationDocumentNotFoundError()
-    }
-
-    const version = await this.versionsRepository.findById(request.documentVersionId)
-    if (!version || version.documentId !== request.documentId) {
       throw new ConsultationDocumentNotFoundError()
     }
 

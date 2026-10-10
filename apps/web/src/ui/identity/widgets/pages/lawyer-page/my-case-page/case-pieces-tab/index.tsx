@@ -218,13 +218,21 @@ function formatDate(value?: string) {
 }
 
 export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiece {
+  const currentVersion =
+    document.versions.find((version) => version.id === document.currentVersionId) ??
+    document.versions.reduce<(typeof document.versions)[number] | undefined>(
+      (latest, version) =>
+        !latest || version.versionNumber > latest.versionNumber ? version : latest,
+      undefined,
+    )
+
   return {
     id: document.id,
     title: document.title,
     template: 'Modelo documental',
-    author: 'Solicitante atual',
+    author: currentVersion?.createdByCollaboratorName?.trim() || 'Solicitante atual',
     reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
-    updatedAt: formatDate(document.versions[0]?.createdAt),
+    updatedAt: formatDate(currentVersion?.createdAt),
     status:
       document.generation?.status === 'pending' ||
       document.generation?.status === 'running'
@@ -232,28 +240,28 @@ export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiec
         : document.generation?.status === 'failed' ||
             document.generation?.status === 'cancelled'
           ? 'Falha na geração'
-          : document.versions[0]?.status === 'approved'
-            ? 'Aprovada'
-            : 'Em revisão técnica',
+          : formatVersionStatus(currentVersion?.status),
     versions: document.versions.map((version) => ({
       id: version.id,
       label: `v${version.versionNumber}`,
-      title: formatVersionStatus(version.status),
-      author: 'Colaborador responsável',
+      title: formatVersionStatus(version.status, version.id !== currentVersion?.id),
+      author: version.createdByCollaboratorName ?? 'Colaborador responsável',
       timestamp: formatDate(version.createdAt),
       meta: version.rejectionReason,
     })),
   }
 }
 
-function formatVersionStatus(status: string) {
-  return (
+function formatVersionStatus(status: string | undefined, historical = false) {
+  const normalizedStatus = status ?? 'draft'
+  const label =
     {
       approved: 'Aprovada',
+      draft: 'Em elaboração',
       in_review: 'Em revisão',
-      rejected: 'Rejeitada',
+      rejected: 'Requer ajustes',
       generating: 'Gerando',
       generation_failed: 'Falha na geração',
-    }[status] ?? status
-  )
+    }[normalizedStatus] ?? normalizedStatus
+  return historical ? 'Histórica' : label
 }
