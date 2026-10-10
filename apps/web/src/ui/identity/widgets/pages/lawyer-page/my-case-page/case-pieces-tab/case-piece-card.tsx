@@ -4,6 +4,16 @@ import { Button } from '@/ui/shadcn/button'
 
 import type { CasePiece } from './types'
 
+function getStatusBadgeVariant(status: string) {
+  if (status === 'Aprovada') return 'success'
+  if (status === 'Requer ajustes' || status === 'Pendente de ajustes') return 'attention'
+  if (status === 'Em revisão' || status === 'Gerando minuta' || status === 'Gerando') {
+    return 'info'
+  }
+  if (status === 'Falha na geração') return 'destructive'
+  return 'secondary'
+}
+
 export type CasePieceCardProps = {
   piece: CasePiece
   onOpenReview?: () => void
@@ -35,7 +45,10 @@ export function CasePieceCard({
           <div className='min-w-0'>
             <div className='flex flex-wrap items-center gap-2'>
               <h2 className='text-sm font-semibold text-foreground'>{piece.title}</h2>
-              <Badge variant='attention' className='h-5 rounded-full px-2 text-[11px]'>
+              <Badge
+                variant={getStatusBadgeVariant(piece.status)}
+                className='h-5 rounded-full px-2 text-[11px]'
+              >
                 {piece.status}
               </Badge>
             </div>
@@ -73,7 +86,7 @@ export function CasePieceCard({
               className='flex items-center gap-3 py-2 first:pt-0 last:pb-0'
             >
               <Badge
-                variant={index === 0 ? 'success' : 'secondary'}
+                variant={index === 0 ? getStatusBadgeVariant(version.title) : 'secondary'}
                 className='h-6 min-w-8 justify-center rounded-md px-1.5 text-[11px]'
               >
                 {version.label}

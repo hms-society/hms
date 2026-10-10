@@ -22,6 +22,9 @@ import {
   GetCaseDocumentGenerationContextController,
   GenerateCaseDocumentController,
   SaveManualCaseDocumentVersionController,
+  SaveEditableCaseDocumentVersionController,
+  SubmitCaseDocumentVersionForReviewController,
+  ReviewCaseDocumentVersionController,
 } from '@/document-production/rest/controllers'
 
 @Module({
@@ -49,6 +52,9 @@ import {
     GetCaseDocumentGenerationContextController,
     GenerateCaseDocumentController,
     SaveManualCaseDocumentVersionController,
+    SaveEditableCaseDocumentVersionController,
+    SubmitCaseDocumentVersionForReviewController,
+    ReviewCaseDocumentVersionController,
   ],
   exports: [DocumentProductionMessagingModule],
 })

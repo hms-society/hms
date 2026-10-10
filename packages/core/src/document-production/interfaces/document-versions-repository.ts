@@ -16,6 +16,10 @@ export interface DocumentVersionsRepository {
     content: DocumentVersion['content'],
     pendingMarkers: DocumentVersion['pendingMarkers'],
   ): Promise<DocumentVersion | undefined>
+  submitForReview(
+    documentVersionId: string,
+    collaboratorId: string,
+  ): Promise<DocumentVersion | undefined>
   review(
     documentVersionId: string,
     status: Extract<DocumentVersionStatus, 'approved' | 'rejected'>,

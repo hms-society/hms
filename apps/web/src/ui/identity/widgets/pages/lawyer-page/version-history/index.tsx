@@ -34,21 +34,18 @@ export const VersionHistory = ({
           onClick={() => onSelectVersion?.(version.id)}
           className={`w-full rounded-md border p-3 text-left text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default ${version.id === selectedVersionId ? 'border-primary bg-highlight/70' : 'border-border hover:bg-muted/50'}`}
         >
-          <div className='flex items-center justify-between gap-2'>
-            <span className='font-semibold'>
+          <div className='flex min-w-0 items-center justify-between gap-2'>
+            <span className='shrink-0 whitespace-nowrap font-semibold'>
               v{version.versionNumber}{' '}
               {version.id === currentVersionId ? (
                 <span className='font-normal text-muted-foreground'>(Atual)</span>
               ) : null}
             </span>
-            <Badge variant={version.id === currentVersionId ? 'success' : 'secondary'}>
-              {{
-                approved: 'Aprovada',
-                in_review: 'Em revisão',
-                rejected: 'Ajustes solicitados',
-                generating: 'Gerando',
-                generation_failed: 'Falha na geração',
-              }[version.status] ?? version.status}
+            <Badge
+              variant={version.id === currentVersionId ? 'success' : 'secondary'}
+              className='min-w-0 max-w-[65%] whitespace-normal text-right leading-tight'
+            >
+              {formatVersionStatus(version.status, version.id !== currentVersionId)}
             </Badge>
           </div>
           <time dateTime={version.createdAt} className='mt-1 block text-muted-foreground'>
@@ -62,3 +59,17 @@ export const VersionHistory = ({
     </div>
   </aside>
 )
+
+function formatVersionStatus(status: string, historical: boolean) {
+  const label =
+    {
+      approved: 'Aprovada',
+      draft: 'Em elaboração',
+      in_review: 'Em revisão',
+      rejected: 'Requer ajustes',
+      generating: 'Gerando',
+      generation_failed: 'Falha na geração',
+    }[status] ?? status
+
+  return historical ? 'Histórica' : label
+}

@@ -14,6 +14,6 @@ export type CasePiece = {
   author: string
   reviewer: string
   updatedAt: string
-  status: 'Em revisão técnica' | 'Aprovada' | 'Gerando minuta' | 'Falha na geração'
+  status: string
   versions: CasePieceVersion[]
 }

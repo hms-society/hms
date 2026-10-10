@@ -41,5 +41,6 @@ describe('VersionHistory', () => {
         .getByRole('button', { name: 'Visualizar versão v2' })
         .getAttribute('aria-pressed'),
     ).toBe('false')
+    expect(screen.getByText('Histórica')).toBeDefined()
   })
 })

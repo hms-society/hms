@@ -36,7 +36,7 @@ describe('usePieceFilePreview', () => {
       caseDocumentProductionService: { getDocumentFile: getDocumentFileMock },
     } as unknown as ReturnType<typeof useRestContext>)
 
-    renderHook(
+    const { result } = renderHook(
       () =>
         usePieceFilePreview({
           caseId: 'case-1',
@@ -52,6 +52,8 @@ describe('usePieceFilePreview', () => {
         'document-1',
         'version-2',
       )
+      expect(result.current.fileQuery.isSuccess).toBe(true)
+      expect(result.current.fileUrl).toBe('blob:document-version')
     })
   })
 })

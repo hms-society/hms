@@ -30,29 +30,10 @@ type PieceWorkflowRoutePageProps = {
   adjustmentsRequested?: boolean
 }
 
-const reviewFindings = [
-  {
-    title: 'Tempo de contribuição divergente',
-    detail: 'Conferir o período informado na peça com o CNIS mais recente.',
-    category: 'Divergência',
-  },
-  {
-    title: 'Pedido subsidiário ausente',
-    detail: 'Verificar se cabe pedido subsidiário de reafirmação da DER.',
-    category: 'Lacuna',
-  },
-  {
-    title: 'Número do benefício anterior',
-    detail: 'Confirmar se existe benefício anterior registrado no dossiê.',
-    category: 'Dado faltante',
-  },
-]
-
 export function PieceWorkflowRoutePage({
   mode,
   caseId,
   documentId,
-  adjustmentsRequested = false,
 }: PieceWorkflowRoutePageProps) {
   const {
     document,
@@ -65,10 +46,15 @@ export function PieceWorkflowRoutePage({
     isReadOnlyVersion,
     isDiscardEditsDialogOpen,
     isAuthor,
+    isReviewPending,
+    reviewRequest,
+    isReviewerEligible = !isAuthor,
     isCheckingReviewer,
     isPendingVariableDialogOpen,
     isVersionDialogOpen,
+    isStartingManualVersion,
     isGeneratingRevision,
+    pendingGenerationVersion,
     versionActionError,
     isReviewConfirmed,
     reviewAction,
@@ -121,6 +107,25 @@ export function PieceWorkflowRoutePage({
   }
 
   const isReview = mode === 'review'
+  const isVersionGenerating = Boolean(
+    isGeneratingRevision ||
+      pendingGenerationVersion ||
+      document.generation?.status === 'pending' ||
+      document.generation?.status === 'running' ||
+      document.versions.some((item) => item.status === 'generating'),
+  )
+  const versionsForHistory = pendingGenerationVersion
+    ? [
+        ...document.versions,
+        {
+          id: pendingGenerationVersion.id,
+          versionNumber: pendingGenerationVersion.versionNumber,
+          status: 'generating',
+          createdAt: pendingGenerationVersion.createdAt,
+          rejectionReason: undefined,
+        },
+      ]
+    : document.versions
   const currentContent = editedContent ?? version.content
 
   return (
@@ -139,15 +144,30 @@ export function PieceWorkflowRoutePage({
               <h1 className='truncate font-serif text-lg font-semibold'>
                 {document.title}
               </h1>
-              <Badge variant={isReview ? 'info' : 'attention'}>
+              <Badge
+                variant={
+                  isReview && version.status === 'approved'
+                    ? 'success'
+                    : isReview && version.status !== 'rejected'
+                      ? 'info'
+                      : 'attention'
+                }
+              >
                 {isReview
-                  ? `Em revisão · v${version.versionNumber}`
+                  ? version.status === 'approved'
+                    ? 'Aprovada'
+                    : version.status === 'rejected'
+                      ? 'Requer ajustes'
+                      : 'Submetido para revisão'
                   : isReadOnlyVersion
                     ? `Somente leitura · v${version.versionNumber}`
-                    : adjustmentsRequested
-                      ? `Ajustes solicitados · v${version.versionNumber}`
+                    : reviewRequest
+                      ? `Requer ajustes · v${version.versionNumber}`
                       : `Em elaboração · v${version.versionNumber}`}
               </Badge>
+              {isReviewPending ? (
+                <Badge variant='attention'>Pendente de ajustes</Badge>
+              ) : null}
             </div>
           </div>
         </div>
@@ -192,9 +212,7 @@ export function PieceWorkflowRoutePage({
                   onClick={handleOpenReview}
                 >
                   <Icon name='eye' />
-                  {adjustmentsRequested
-                    ? 'Resubmeter para revisão'
-                    : 'Submeter para revisão'}
+                  {reviewRequest ? 'Resubmeter para revisão' : 'Submeter para revisão'}
                 </Button>
               ) : null}
             </>
@@ -202,11 +220,35 @@ export function PieceWorkflowRoutePage({
         </div>
       </header>
 
+      {isVersionGenerating ? (
+        <div
+          className='flex items-center gap-3 border-b border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary'
+          role='status'
+          aria-live='polite'
+        >
+          <Icon name='refresh-cw' className='size-4 animate-spin' />
+          <span>
+            Gerando nova versão por IA… O histórico será atualizado automaticamente quando
+            o processamento terminar.
+          </span>
+        </div>
+      ) : null}
+
+      {isReview && isAuthor && version.status === 'in_review' ? (
+        <div
+          className='border-b border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary'
+          role='status'
+        >
+          <strong>Submetido para revisão</strong> — esta versão foi enviada para revisão
+          técnica.
+        </div>
+      ) : null}
+
       {isReview ? (
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_minmax(280px,320px)]'>
           <div className='min-w-0'>
             <VersionHistory
-              versions={document.versions}
+              versions={versionsForHistory}
               currentVersionId={currentVersion?.id ?? version.id}
               selectedVersionId={version.id}
             />
@@ -232,90 +274,121 @@ export function PieceWorkflowRoutePage({
             </div>
           </div>
           <aside className='flex min-w-0 flex-col gap-4 border-t bg-card p-4 xl:border-l xl:border-t-0'>
-            <section>
-              <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
-              <p className='mt-1 text-xs text-muted-foreground'>
-                Apontamentos para conferência. A decisão é do revisor.
-              </p>
-              <div className='mt-3 space-y-2'>
-                {reviewFindings.map((finding, index) => (
-                  <article
-                    key={finding.title}
-                    className='rounded-md border bg-muted/30 p-3'
+            {version.status === 'approved' ? (
+              <div
+                role='status'
+                className='flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-badge-success-border bg-badge-success p-6 text-center text-badge-success-foreground'
+              >
+                <Icon name='check' className='size-8' />
+                <p className='font-medium'>Documento revisado com sucesso</p>
+              </div>
+            ) : (
+              <>
+                <section>
+                  <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
+                  <p className='mt-1 text-xs text-muted-foreground'>
+                    Apontamentos e solicitações reais desta versão.
+                  </p>
+                  <div className='mt-3 space-y-2'>
+                    {version.status === 'in_review' ? (
+                      <article className='rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive'>
+                        <div className='flex items-center justify-between gap-2'>
+                          <h3 className='text-sm font-medium'>Submetido para revisão</h3>
+                          <Badge variant='info'>Em análise</Badge>
+                        </div>
+                        <p className='mt-2 text-xs'>
+                          A versão foi enviada pelo colaborador responsável e aguarda a
+                          decisão de um revisor elegível.
+                        </p>
+                      </article>
+                    ) : reviewRequest ? (
+                      <article className='rounded-md border border-destructive/30 bg-destructive/5 p-3'>
+                        <h3 className='text-sm font-medium'>Solicitação de ajustes</h3>
+                        <p className='mt-2 text-xs text-muted-foreground'>
+                          {version.reviewedByCollaboratorName
+                            ? `${version.reviewedByCollaboratorName}: `
+                            : ''}
+                          {reviewRequest}
+                        </p>
+                      </article>
+                    ) : (
+                      <p className='rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground'>
+                        Nenhum alerta de revisão registrado para esta versão.
+                      </p>
+                    )}
+                  </div>
+                </section>
+                <section className='border-t pt-4'>
+                  <h2 className='font-serif font-semibold'>Revisões dos membros</h2>
+                  <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
+                    Comentários e histórico de revisão serão exibidos aqui quando
+                    disponíveis para esta versão.
+                  </p>
+                </section>
+                <div className='mt-auto space-y-2 border-t pt-4'>
+                  {isAuthor || !isReviewerEligible ? (
+                    <p
+                      role='alert'
+                      className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
+                    >
+                      {isAuthor
+                        ? 'O criador do documento não pode participar da revisão técnica. Outro membro elegível deve assumir a revisão.'
+                        : 'Apenas membros da equipe do caso, supervisores ou administradores podem decidir esta revisão técnica.'}
+                    </p>
+                  ) : null}
+                  <label
+                    htmlFor='review-responsibility-confirmation'
+                    className='flex items-start gap-2 rounded-md border border-primary/50 bg-primary/10 p-3 text-xs'
                   >
-                    <div className='flex items-center justify-between gap-2'>
-                      <h3 className='text-sm font-medium'>
-                        {index + 1}. {finding.title}
-                      </h3>
-                      <Badge variant='attention'>{finding.category}</Badge>
-                    </div>
-                    <p className='mt-2 text-xs text-muted-foreground'>{finding.detail}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-            <section className='border-t pt-4'>
-              <h2 className='font-serif font-semibold'>Revisões dos membros</h2>
-              <p className='mt-2 rounded-md border bg-muted/30 p-3 text-xs'>
-                Comentários e histórico de revisão serão exibidos aqui quando disponíveis
-                para esta versão.
-              </p>
-            </section>
-            <div className='mt-auto space-y-2 border-t pt-4'>
-              {isAuthor ? (
-                <p
-                  role='alert'
-                  className='rounded-md border border-attention bg-attention/20 p-3 text-xs'
-                >
-                  Quem elaborou esta versão não pode revisá-la. Outro membro da equipe
-                  deve assumir a revisão técnica.
-                </p>
-              ) : null}
-              <label
-                htmlFor='review-responsibility-confirmation'
-                className='flex items-start gap-2 rounded-md border border-primary/50 bg-primary/10 p-3 text-xs'
-              >
-                <Checkbox
-                  id='review-responsibility-confirmation'
-                  checked={isReviewConfirmed}
-                  onCheckedChange={(checked) =>
-                    handleReviewConfirmationChange(checked === true)
-                  }
-                />
-                Confirmo minha responsabilidade técnica sobre o conteúdo desta peça e sua
-                aptidão para protocolo ou entrega.
-              </label>
-              <Button
-                className='w-full'
-                disabled={!isReviewConfirmed || isAuthor || isCheckingReviewer}
-                onClick={() => handleOpenReviewAction('approval')}
-              >
-                <Icon name='check' /> Aprovar peça
-              </Button>
-              <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-                <Button
-                  variant='outline'
-                  disabled={isAuthor || isCheckingReviewer}
-                  onClick={() => handleOpenReviewAction('adjustments')}
-                >
-                  Solicitar ajustes
-                </Button>
-                <Button
-                  variant='destructive'
-                  disabled={isAuthor || isCheckingReviewer}
-                  onClick={() => handleOpenReviewAction('block')}
-                >
-                  Bloqueio
-                </Button>
-              </div>
-            </div>
+                    <Checkbox
+                      id='review-responsibility-confirmation'
+                      checked={isReviewConfirmed}
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onCheckedChange={(checked) =>
+                        handleReviewConfirmationChange(checked === true)
+                      }
+                    />
+                    Confirmo minha responsabilidade técnica sobre o conteúdo desta peça e
+                    sua aptidão para protocolo ou entrega.
+                  </label>
+                  <Button
+                    className='w-full'
+                    disabled={
+                      isAuthor ||
+                      !isReviewerEligible ||
+                      !isReviewConfirmed ||
+                      isCheckingReviewer
+                    }
+                    onClick={() => handleOpenReviewAction('approval')}
+                  >
+                    <Icon name='check' /> Aprovar peça
+                  </Button>
+                  <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                    <Button
+                      variant='outline'
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onClick={() => handleOpenReviewAction('adjustments')}
+                    >
+                      Solicitar ajustes
+                    </Button>
+                    <Button
+                      variant='destructive'
+                      disabled={isAuthor || !isReviewerEligible || isCheckingReviewer}
+                      onClick={() => handleOpenReviewAction('block')}
+                    >
+                      Bloqueio
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </aside>
         </section>
       ) : (
         <section className='grid min-h-0 min-w-0 w-full max-w-full flex-1 grid-cols-1 xl:grid-cols-[240px_minmax(0,1fr)_minmax(280px,300px)]'>
           <div className='min-w-0'>
             <VersionHistory
-              versions={document.versions}
+              versions={versionsForHistory}
               currentVersionId={currentVersion?.id ?? version.id}
               selectedVersionId={version.id}
               onSelectVersion={handleSelectVersion}
@@ -349,12 +422,18 @@ export function PieceWorkflowRoutePage({
             </div>
           </div>
           <aside className='border-l bg-card p-4'>
-            {adjustmentsRequested ? (
-              <div className='mt-3 rounded-md border border-attention bg-attention/20 p-3 text-sm'>
-                Ajustes solicitados pela revisão técnica. Faça as correções antes de
-                resubmeter a peça.
-              </div>
-            ) : null}
+            <section className='mb-5 border-b pb-4'>
+              <h2 className='font-serif font-semibold'>Alertas de revisão</h2>
+              {reviewRequest ? (
+                <p className='mt-3 whitespace-pre-wrap break-words rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm'>
+                  {reviewRequest}
+                </p>
+              ) : (
+                <p className='mt-3 rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground'>
+                  Nenhum alerta de revisão registrado para esta versão.
+                </p>
+              )}
+            </section>
             <h2 className='font-serif font-semibold'>
               Referências usadas na elaboração desta peça
             </h2>
@@ -452,18 +531,12 @@ export function PieceWorkflowRoutePage({
           documentTitle={document.title}
           casePublicCode={casePublicCode}
           versionNumber={version.versionNumber}
+          documentAuthorName={version.createdByCollaboratorName}
           onConfirm={handleConfirmReviewAction}
           onOpenChange={(open) => !open && handleCloseReviewAction()}
         />
       ) : null}
 
-      {!isReview ? (
-        <div className='border-t bg-card px-4 py-3 text-right'>
-          <Button variant='outline' onClick={handleBackToCase}>
-            Voltar para peças
-          </Button>
-        </div>
-      ) : null}
       {!isReview && currentContent ? (
         <PendingVariableValuesDialog
           open={isPendingVariableDialogOpen}
@@ -504,7 +577,7 @@ export function PieceWorkflowRoutePage({
           open={isVersionDialogOpen}
           versions={document.versions}
           currentVersionId={currentVersion?.id ?? version.id}
-          isGenerating={isGeneratingRevision}
+          isGenerating={isGeneratingRevision || isStartingManualVersion}
           error={versionActionError}
           onOpenChange={handleVersionDialogOpenChange}
           onStartManual={handleStartManualVersion}

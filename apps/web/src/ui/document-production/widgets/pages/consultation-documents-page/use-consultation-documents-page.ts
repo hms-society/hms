@@ -22,6 +22,7 @@ export type ConsultationDocumentsPageProps = {
 
 export type ConsultationDocumentStatus =
   | 'not_generated'
+  | 'draft'
   | 'in_review'
   | 'rejected'
   | 'approved'
@@ -51,6 +52,11 @@ export type ConsultationDocumentViewModel = {
 }
 
 function getVersionStatusViewModel(status: ConsultationDocumentVersionSummary['status']) {
+  if (status === 'draft') {
+    return {
+      statusLabel: 'Em elaboração',
+    }
+  }
   if (status === 'in_review') {
     return {
       statusLabel: 'Em revisão',
