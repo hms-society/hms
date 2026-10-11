@@ -5,6 +5,7 @@ import { AppError } from '@hms/core/shared/domain/errors'
 import { DocumentWriterAgent } from '@/document-production/ai/mastra/agents/document-writer-agent'
 import { DocumentReviewerAgent } from '@/document-production/ai/mastra/agents/document-reviewer-agent'
 import { DocumentImageAnalyzerAgent } from '@/document-engine/ai/mastra/agents/document-image-analyzer-agent'
+import { DocumentJsonOrganizerAgent } from '@/document-engine/ai/mastra/agents/document-json-organizer-agent'
 import { EnvProvider } from '@/shared/provision/env/env-provider'
 
 const MODELS = [
@@ -79,6 +80,10 @@ describe('Document drafting model resolution', () => {
     expect(new DocumentReviewerAgent(envProvider).model).toMatchObject({
       providerId: 'openrouter',
       modelId: 'deepseek/deepseek-v4-flash',
+    })
+    expect(new DocumentJsonOrganizerAgent(envProvider).model).toMatchObject({
+      providerId: 'openrouter',
+      modelId: 'google/gemini-3.8-flash',
     })
   })
 

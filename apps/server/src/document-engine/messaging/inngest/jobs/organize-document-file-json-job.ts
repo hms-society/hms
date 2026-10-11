@@ -21,10 +21,10 @@ const documentFileJsonOrganizationRequested = eventType(
 )
 
 @Injectable()
-export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
+export class OrganizeDocumentFileJsonJob extends InngestJob {
   static readonly ID = 'document-engine/organize-document-file-json-with-ollama'
   readonly function: InngestFunction.Like
-  private readonly logger = new Logger(OrganizeDocumentFileJsonWithOllamaJob.name)
+  private readonly logger = new Logger(OrganizeDocumentFileJsonJob.name)
 
   constructor(
     inngest: InngestClient,
@@ -36,8 +36,8 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
 
     this.function = this.inngest.createFunction(
       {
-        id: OrganizeDocumentFileJsonWithOllamaJob.ID,
-        name: 'Organize Document File JSON With Ollama',
+        id: OrganizeDocumentFileJsonJob.ID,
+        name: 'Organize Document File JSON with AI',
         triggers: [documentFileJsonOrganizationRequested],
       },
       async ({ event, step }) => {
@@ -66,7 +66,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
           }
         }
 
-        const ollamaResult = await step.run(
+        const organizationResult = await step.run(
           'generate-document-json-with-ollama',
           async () =>
             this.generateSuggestion({
@@ -75,12 +75,12 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
             }),
         )
 
-        if (!ollamaResult.captured) {
+        if (!organizationResult.captured) {
           return step.run('record-document-json-organization-failure', async () =>
             this.recordProcessingFailure({
               documentFileId: event.data.documentFileId,
               hashSha256: event.data.hashSha256,
-              reason: ollamaResult.reason,
+              reason: organizationResult.reason,
               fallbackSuggestion: currentDocument.aiSuggestion,
               fallbackExtractedFields: currentDocument.extractedFields,
               fallbackMissingFields: currentDocument.missingFields,
@@ -108,7 +108,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
             }
           }
 
-          const { suggestion } = ollamaResult
+          const { suggestion } = organizationResult
           const hasVerifiedFields = suggestion.extractedFields.length > 0
           const status = latestDocument.checklistLink?.checklistItemId
             ? DocumentValidationStatus.AwaitingValidation
@@ -130,7 +130,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
               ...this.getPreservedSuggestionContext(latestDocument.aiSuggestion),
               suggestedStatus: status,
               confidenceLabel: hasVerifiedFields
-                ? 'Organizado pelo Ollama — confira os campos'
+                ? 'Organizado pela IA — confira os campos'
                 : 'Campos não confirmados — revisão manual',
               evidence: suggestion.evidence,
               metadata: {
@@ -140,7 +140,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
                 textLength: extractedTextFull.length,
                 extractedTextFull,
               },
-              ollamaJsonOrganizationCaptured: hasVerifiedFields,
+              aiJsonOrganizationCaptured: hasVerifiedFields,
             },
           })
 
@@ -172,7 +172,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       const text = response.text
 
       if (typeof text !== 'string' || text.trim().length === 0) {
-        return { captured: false, reason: 'ollama_empty_response' }
+        return { captured: false, reason: 'ai_empty_response' }
       }
 
       const suggestion = documentJsonOrganizationSchema.parse(
@@ -202,7 +202,7 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       const reason =
         error instanceof Error && error.message.trim().length > 0
           ? error.message.trim().slice(0, 180)
-          : 'ollama_unknown_error'
+          : 'ai_unknown_error'
       this.logger.warn(
         JSON.stringify({
           event: 'document_json_organization_failed',
@@ -276,9 +276,9 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
         confidenceLabel: 'Falha no processamento automático',
         failureReason: this.getProcessingFailureReason(input.reason),
         failureInstruction:
-          'Verifique se o modelo local do Ollama está disponível e tente processar o documento novamente.',
+          'Verifique a disponibilidade do serviço de IA e tente processar o documento novamente.',
         metadata: input.metadata,
-        ollamaJsonOrganizationCaptured: false,
+        aiJsonOrganizationCaptured: false,
       },
     })
 
@@ -490,15 +490,22 @@ export class OrganizeDocumentFileJsonWithOllamaJob extends InngestJob {
       document.status !== DocumentValidationStatus.Processing &&
       document.status !== DocumentValidationStatus.ProcessingFailure &&
       (document.extractedFields.length > 0 ||
-        document.aiSuggestion?.ollamaJsonOrganizationCaptured === true)
+        this.hasOrganizationAlreadyCaptured(document.aiSuggestion))
     )
   }
 
   private shouldSkipSuccessfulOrganization(document: DocumentValidationDocument) {
     return (
-      document.aiSuggestion?.ollamaJsonOrganizationCaptured === true ||
+      this.hasOrganizationAlreadyCaptured(document.aiSuggestion) ||
       document.humanCorrection !== undefined ||
       document.reviewedAt !== undefined
+    )
+  }
+
+  private hasOrganizationAlreadyCaptured(aiSuggestion?: Record<string, unknown>) {
+    return (
+      aiSuggestion?.aiJsonOrganizationCaptured === true ||
+      aiSuggestion?.ollamaJsonOrganizationCaptured === true
     )
   }
 }

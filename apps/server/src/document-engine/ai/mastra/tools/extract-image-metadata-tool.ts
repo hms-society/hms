@@ -33,6 +33,9 @@ const outputSchema = z.object({
 })
 export type ExtractImageInput = z.infer<typeof inputSchema>
 export type ExtractImageOutput = z.infer<typeof outputSchema>
+export type ImageTextExtraction =
+  | { success: true; text: string }
+  | { success: false; reason: string }
 
 @Injectable()
 export class ExtractImageTool {
@@ -45,7 +48,8 @@ export class ExtractImageTool {
   constructor(private readonly imageAnalyzerAgent: DocumentImageAnalyzerAgent) {
     this.function = createTool({
       id: 'extract-image-metadata',
-      description: 'Extract text from an image document with a local vision model.',
+      description:
+        'Extract text from an image document with the configured vision model.',
       inputSchema,
       outputSchema,
       strict: true,
@@ -104,11 +108,11 @@ export class ExtractImageTool {
     })
   }
 
-  private async extractText(
+  async extractText(
     contentBase64: string,
     mimeType: string,
     documentFileId: string,
-  ) {
+  ): Promise<ImageTextExtraction> {
     const startedAt = Date.now()
 
     try {
@@ -173,7 +177,7 @@ Do not merge adjacent rows, summarize, infer, correct, or omit repeated labels.`
     }
   }
 
-  private buildProcessingFailureSuggestion(reason: string) {
+  buildProcessingFailureSuggestion(reason: string) {
     return {
       suggestedStatus: DocumentValidationStatus.ProcessingFailure,
       confidence: 0,
@@ -183,7 +187,7 @@ Do not merge adjacent rows, summarize, infer, correct, or omit repeated labels.`
       evidence: [],
       failureReason: reason,
       failureInstruction:
-        'Verifique se o modelo local de visão está disponível e tente processar o documento novamente.',
+        'Verifique a configuração do provedor de visão e tente processar o documento novamente.',
     }
   }
 

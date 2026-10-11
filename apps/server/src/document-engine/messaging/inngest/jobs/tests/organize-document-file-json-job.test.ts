@@ -8,11 +8,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { DocumentEngineModuleFixture } from '@/document-engine/fixtures/document-engine-module-fixture'
 import { InngestFixture } from '@/shared/messaging/inngest/fixtures/inngest-fixture'
-import { OrganizeDocumentFileJsonWithOllamaJob } from '../organize-document-file-json-with-ollama-job'
+import { OrganizeDocumentFileJsonJob } from '../organize-document-file-json-job'
 
 const HASH = 'a388cba9c4ec5b2a9bdbe8327e3a46d67e7261cc698f24ce4b7185041cbf4cd3'
 
-describe('OrganizeDocumentFileJsonWithOllamaJob', () => {
+describe('OrganizeDocumentFileJsonJob', () => {
   let inngestFixture: InngestFixture
   let documentEngineFixture: DocumentEngineModuleFixture
 
@@ -32,7 +32,7 @@ describe('OrganizeDocumentFileJsonWithOllamaJob', () => {
               }),
             }),
           }
-          const job = new OrganizeDocumentFileJsonWithOllamaJob(
+          const job = new OrganizeDocumentFileJsonJob(
             client,
             agent as never,
             documentEngineFixture.documentValidationsRepository,
