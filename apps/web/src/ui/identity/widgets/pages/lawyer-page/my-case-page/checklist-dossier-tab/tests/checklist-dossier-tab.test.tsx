@@ -75,6 +75,8 @@ function createController(
     handleFilterByCase: vi.fn(),
     handleHomologateDossier: vi.fn(),
     hasChecklistDecision: false,
+    isChecklistApproved: false,
+    isDossierHomologated: false,
     handleOpenChecklistItemDetail: vi.fn(),
     handleOpenValidationDesk: vi.fn(),
     handleRejectOnMerit: vi.fn(),
@@ -130,6 +132,7 @@ describe('ChecklistDossierTab', () => {
     expect(screen.getByText('Checklist pendente')).toBeTruthy()
     expect(screen.getByText('Dossiê pendente')).toBeTruthy()
     expect(screen.getByText('Escrita bloqueada')).toBeTruthy()
+    expect(screen.getByRole('img', { name: 'Checklist aprovado: Pendente' })).toBeTruthy()
     expect(screen.getByText('1 de 2 obrigatórios - 50%')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /aprovar com exceção/i }))
@@ -150,6 +153,7 @@ describe('ChecklistDossierTab', () => {
       createController({
         canHomologateDossier: true,
         checklistGateLabel: 'Aprovado com exceção',
+        isChecklistApproved: true,
       }),
     )
 
@@ -165,6 +169,9 @@ describe('ChecklistDossierTab', () => {
       />,
     )
 
+    expect(
+      screen.getByRole('img', { name: 'Checklist aprovado: Concluído' }),
+    ).toBeTruthy()
     expect(
       screen.queryByText(/itens ainda exigem validação ou exceção autorizada/i),
     ).toBeNull()
@@ -230,7 +237,8 @@ describe('ChecklistDossierTab', () => {
     )
 
     expect(screen.getByText('CNIS')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Ver documento' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Ver documento' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Abrir CNIS' })).toBeNull()
     expect(screen.queryByRole('button', { name: /aprovar checklist/i })).toBeNull()
     expect(screen.queryByRole('button', { name: /adicionar item/i })).toBeNull()
     expect(

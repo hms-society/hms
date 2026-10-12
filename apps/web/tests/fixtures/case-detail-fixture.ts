@@ -33,14 +33,6 @@ export const ADMIN: CaseActor = {
   profile: 'admin',
   status: 'active',
 }
-export const PARLEGAL: CaseActor = {
-  collaboratorId: '00000000-0000-4000-8000-000000000080',
-  professionalName: 'Paralegal HMS',
-  email: 'paralegal@example.test',
-  profile: 'paralegal',
-  status: 'active',
-}
-
 export const TEAM_MEMBER = {
   membershipId: 'membership-1',
   collaboratorId: COLLABORATOR_ID,
@@ -66,11 +58,8 @@ type FixtureOptions = {
   canManageTeam?: boolean
   requiresAdministrativeReason?: boolean
   members?: (typeof TEAM_MEMBER)[]
-  createStatus?: number
   caseTeamStatus?: number
   myCasesStatus?: number
-  adminCasesStatus?: number
-  adminCasesEmpty?: boolean
   checklistStatus?: number
 }
 
@@ -195,6 +184,13 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
           totalPages: 0,
         }),
       )
+      return
+    }
+    if (
+      [`/cases/${CASE_ID}/tasks`, `/cases/${CASE_ID}/documents`].includes(pathname) &&
+      request.method() === 'GET'
+    ) {
+      await route.fulfill(json([]))
       return
     }
     if (pathname === '/cases/my') {

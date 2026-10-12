@@ -137,6 +137,10 @@ export function useChecklistDossierTab({
       persistedCase.status === LegalCaseStatus.LegalProduction,
   )
   const hasChecklistDecision = Boolean(checklistGateDecision)
+  const isChecklistApproved =
+    checklistGateDecision === CaseChecklistGateDecision.Approved ||
+    checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException
+  const isDossierHomologated = Boolean(persistedCase?.dossierGate.homologatedAt)
   const canHomologateDossier = Boolean(
     !persistedCase?.dossierGate.homologatedAt &&
       (checklistGateDecision === CaseChecklistGateDecision.Approved ||
@@ -222,6 +226,7 @@ export function useChecklistDossierTab({
   }
 
   function handleValidateChecklistItem(itemId: string) {
+    if (isReviewDisabled) return
     const checklistItem = displayChecklistItems.find((item) => item.id === itemId)
 
     if (checklistItem?.documentFileId) {
@@ -255,6 +260,7 @@ export function useChecklistDossierTab({
   }
 
   function handleOpenChecklistItemDetail(itemId: string) {
+    if (isReviewDisabled) return
     return navigateTo('lawyerCaseChecklistItem', {
       params: { caseId, checklistItemId: itemId },
     })
@@ -367,6 +373,8 @@ export function useChecklistDossierTab({
     isReviewDisabled,
     isHomologatingDossier: homologationMutation.isPending,
     hasChecklistDecision,
+    isChecklistApproved,
+    isDossierHomologated,
     isReviewingChecklistGate:
       mutation.isPending || addComplementaryItemMutation.isPending,
     mandatoryItemsCount,

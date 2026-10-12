@@ -23,6 +23,10 @@ export const ChecklistDossierView = (props: ChecklistDossierViewProps) => (
     />
     <ChecklistSection readOnly={props.readOnly} state={props.controller.state} />
     <DossierSection
+      label={props.controller.state.isDossierHomologated ? 'Homologado' : 'Pendente'}
+      checklistApproved={props.controller.state.isChecklistApproved}
+      homologated={props.controller.state.isDossierHomologated}
+      productionReleased={props.controller.state.canStartLegalWriting}
       pendingItemsCount={
         props.controller.hasAuthorizedException
           ? 0

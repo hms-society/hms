@@ -32,9 +32,8 @@ export const CasoDetalheChecklistPage = ({
       />
       <Tabs value={state.activeTab} onValueChange={state.setActiveTab} className='w-full'>
         <CaseTabNavigation
-          dossierApproved={
-            !isAdministrator && Boolean(state.caseDetails?.dossierGate?.homologatedAt)
-          }
+          dossierApproved={Boolean(state.caseDetails?.dossierGate?.homologatedAt)}
+          readOnly={isAdministrator}
           pendingItemsCount={state.pendingItemsCount}
         />
         <CaseTabPanels

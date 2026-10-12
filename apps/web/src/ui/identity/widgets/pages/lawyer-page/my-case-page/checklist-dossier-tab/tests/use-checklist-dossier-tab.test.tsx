@@ -268,6 +268,8 @@ describe('useChecklistDossierTab', () => {
       expect(result.current.canStartLegalWriting).toBe(true)
     })
     expect(result.current.dossierGateLabel).toBe('Dossiê homologado')
+    expect(result.current.isChecklistApproved).toBe(true)
+    expect(result.current.isDossierHomologated).toBe(true)
     expect(result.current.checklistGateAuditLabel).toContain('collaborator-2')
     expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
       decision: CaseChecklistGateDecision.Approved,
@@ -319,10 +321,11 @@ describe('useChecklistDossierTab', () => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     )
 
-    const { result } = renderHook(
-      () =>
+    const { result, rerender } = renderHook(
+      ({ readOnly }) =>
         useChecklistDossierTab({
           caseId: 'case-1',
+          isReviewDisabled: readOnly,
           checklist: [
             { id: '1', title: 'Procuração', status: 'validado' },
             {
@@ -332,11 +335,16 @@ describe('useChecklistDossierTab', () => {
             },
           ],
         }),
-      { wrapper },
+      { wrapper, initialProps: { readOnly: true } },
     )
 
     expect(result.current.validatedItemsCount).toBe(1)
     expect(result.current.isChecklistComplete).toBe(false)
+    act(() => result.current.handleValidateChecklistItem('2'))
+    expect(result.current.validatedItemsCount).toBe(1)
+    expect(result.current.actionFeedback).toBeNull()
+    expect(navigateTo).not.toHaveBeenCalled()
+    rerender({ readOnly: false })
 
     act(() => {
       result.current.handleValidateChecklistItem('2')

@@ -40,7 +40,7 @@ export function CasePiecesTab({
     refetch,
   } = useQuery({
     queryKey: ['case-documents', caseId],
-    enabled: dossierApproved && Boolean(caseId),
+    enabled: (readOnly || dossierApproved) && Boolean(caseId),
     queryFn: async () => {
       if (!caseId) return []
       const response = await caseDocumentProductionService.listDocuments(caseId)
@@ -88,7 +88,7 @@ export function CasePiecesTab({
         </p>
       </div>
       <DossierGateBanner approved={dossierApproved} />
-      {dossierApproved ? (
+      {readOnly || dossierApproved ? (
         <>
           {isLoading ? (
             <p className='rounded-md border border-border p-4 text-sm text-muted-foreground'>

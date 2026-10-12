@@ -54,28 +54,24 @@ export const CaseTabPanels = (props: CaseTabPanelsProps) => (
         readOnly={props.isAdministrator}
       />
     </TabsContent>
-    {!props.isAdministrator && (
-      <>
-        <TabsContent value='prazos' className='mt-4 flex flex-col gap-4'>
-          <TasksDeadlinesTab
-            caseId={props.caseUuid}
-            caseIdentifier={props.caseDetails?.publicCode ?? 'Carregando...'}
-            caseTitle={props.caseDetails?.title ?? 'Carregando...'}
-            team={props.caseDetails?.team ?? []}
-            readOnly={props.isAdministrator}
-          />
-        </TabsContent>
-        <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
-          <CasePiecesTab
-            dossierApproved={Boolean(props.caseDetails?.dossierGate?.homologatedAt)}
-            caseId={props.caseUuid}
-            openNewPieceDialog={props.openNewPieceDialog}
-            onNewPieceDialogOpenChange={props.onNewPieceDialogOpenChange}
-            readOnly={props.isAdministrator}
-          />
-        </TabsContent>
-      </>
-    )}
+    <TabsContent value='prazos' className='mt-4 flex flex-col gap-4'>
+      <TasksDeadlinesTab
+        caseId={props.caseUuid}
+        caseIdentifier={props.caseDetails?.publicCode ?? 'Carregando...'}
+        caseTitle={props.caseDetails?.title ?? 'Carregando...'}
+        team={props.caseDetails?.team ?? []}
+        readOnly={props.isAdministrator}
+      />
+    </TabsContent>
+    <TabsContent value='pecas' className='mt-4 flex flex-col gap-4'>
+      <CasePiecesTab
+        dossierApproved={Boolean(props.caseDetails?.dossierGate?.homologatedAt)}
+        caseId={props.caseUuid}
+        openNewPieceDialog={props.openNewPieceDialog}
+        onNewPieceDialogOpenChange={props.onNewPieceDialogOpenChange}
+        readOnly={props.isAdministrator}
+      />
+    </TabsContent>
     <TabsContent value='equipe' className='mt-4 flex flex-col gap-4'>
       <CaseTeamRoster caseId={props.caseUuid} />
     </TabsContent>

@@ -28,6 +28,16 @@ vi.mock('../checklist-dossier-tab', () => ({
     <div>{readOnly ? 'Checklist somente leitura' : 'Checklist editável'}</div>
   ),
 }))
+vi.mock('../tasks-deadlines-tab', () => ({
+  TasksDeadlinesTab: ({ readOnly }: { readOnly: boolean }) => (
+    <div>Prazos {String(readOnly)}</div>
+  ),
+}))
+vi.mock('../case-pieces-tab', () => ({
+  CasePiecesTab: ({ readOnly }: { readOnly: boolean }) => (
+    <div>Peças {String(readOnly)}</div>
+  ),
+}))
 vi.mock('@/ui/case-management/widgets/components/case-team-roster', () => ({
   CaseTeamRoster: ({ caseId }: { caseId: string }) => <div>Equipe {caseId}</div>,
 }))
@@ -440,84 +450,42 @@ describe('Case detail presentation widgets', () => {
     expect(screen.getByRole('tab', { name: 'Equipe' })).toBeTruthy()
   })
 
-  it('renders overview, read-only checklist, and team tab panels for administrators', () => {
-    let activeTab = 'visao-geral'
+  it('renders all supported administrator panels without granting editing', () => {
+    const props = {
+      isAdministrator: true,
+      caseUuid: 'case-1',
+      caseDetails: legalCase,
+      checklistItems: checklist,
+      completionPercentage: 50,
+      mandatoryItemsCount: 2,
+      pendingItemsCount: 1,
+      validatedItemsCount: 1,
+      onOpenChecklist: vi.fn(),
+      openNewPieceDialog: false,
+      onNewPieceDialogOpenChange: vi.fn(),
+    }
     const { rerender } = render(
-      <Tabs value={activeTab} onValueChange={(value) => (activeTab = value)}>
-        <CaseTabPanels
-          isAdministrator
-          caseUuid='case-1'
-          caseDetails={legalCase}
-          checklistItems={checklist}
-          completionPercentage={50}
-          mandatoryItemsCount={2}
-          pendingItemsCount={1}
-          validatedItemsCount={1}
-          onOpenChecklist={vi.fn()}
-          openNewPieceDialog={false}
-          onNewPieceDialogOpenChange={vi.fn()}
-        />
+      <Tabs value='visao-geral'>
+        <CaseTabPanels {...props} />
       </Tabs>,
     )
     expect(screen.getByText('Beatriz Oliveira')).toBeTruthy()
-    expect(screen.getByText('Checklist Documental')).toBeTruthy()
-
-    activeTab = 'checklist'
+    for (const [tab, content] of [
+      ['checklist', 'Checklist somente leitura'],
+      ['prazos', 'Prazos true'],
+      ['pecas', 'Peças true'],
+      ['equipe', 'Equipe case-1'],
+    ]) {
+      rerender(
+        <Tabs value={tab}>
+          <CaseTabPanels {...props} />
+        </Tabs>,
+      )
+      expect(screen.getByText(content)).toBeTruthy()
+    }
     rerender(
-      <Tabs value={activeTab} onValueChange={(value) => (activeTab = value)}>
-        <CaseTabPanels
-          isAdministrator
-          caseUuid='case-1'
-          caseDetails={legalCase}
-          checklistItems={checklist}
-          completionPercentage={50}
-          mandatoryItemsCount={2}
-          pendingItemsCount={1}
-          validatedItemsCount={1}
-          onOpenChecklist={vi.fn()}
-          openNewPieceDialog={false}
-          onNewPieceDialogOpenChange={vi.fn()}
-        />
-      </Tabs>,
-    )
-    expect(screen.getByText('Checklist somente leitura')).toBeTruthy()
-
-    activeTab = 'equipe'
-    rerender(
-      <Tabs value={activeTab} onValueChange={(value) => (activeTab = value)}>
-        <CaseTabPanels
-          isAdministrator
-          caseUuid='case-1'
-          caseDetails={legalCase}
-          checklistItems={checklist}
-          completionPercentage={50}
-          mandatoryItemsCount={2}
-          pendingItemsCount={1}
-          validatedItemsCount={1}
-          onOpenChecklist={vi.fn()}
-          openNewPieceDialog={false}
-          onNewPieceDialogOpenChange={vi.fn()}
-        />
-      </Tabs>,
-    )
-    expect(screen.getByText('Equipe case-1')).toBeTruthy()
-
-    activeTab = 'checklist'
-    rerender(
-      <Tabs value={activeTab} onValueChange={(value) => (activeTab = value)}>
-        <CaseTabPanels
-          isAdministrator={false}
-          caseUuid='case-2'
-          caseDetails={undefined}
-          checklistItems={[]}
-          completionPercentage={0}
-          mandatoryItemsCount={0}
-          pendingItemsCount={0}
-          validatedItemsCount={0}
-          onOpenChecklist={vi.fn()}
-          openNewPieceDialog={false}
-          onNewPieceDialogOpenChange={vi.fn()}
-        />
+      <Tabs value='checklist'>
+        <CaseTabPanels {...props} isAdministrator={false} />
       </Tabs>,
     )
     expect(screen.getByText('Checklist editável')).toBeTruthy()

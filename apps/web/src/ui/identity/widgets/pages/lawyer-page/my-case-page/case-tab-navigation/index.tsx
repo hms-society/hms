@@ -12,12 +12,14 @@ const LAWYER_TABS = [
 
 export type CaseTabNavigationProps = {
   dossierApproved: boolean
+  readOnly?: boolean
   pendingItemsCount: number
 }
 
 export const CaseTabNavigation = ({
   pendingItemsCount,
   dossierApproved,
+  readOnly = false,
 }: CaseTabNavigationProps) => (
   <TabsList
     variant='line'
@@ -27,10 +29,10 @@ export const CaseTabNavigation = ({
       <TabsTrigger
         key={tab.value}
         value={tab.value}
-        disabled={'locked' in tab && tab.locked && !dossierApproved}
+        disabled={'locked' in tab && tab.locked && !dossierApproved && !readOnly}
         className='w-full justify-center gap-2 py-3 text-[13px]'
       >
-        {'locked' in tab && tab.locked && !dossierApproved && (
+        {'locked' in tab && tab.locked && !dossierApproved && !readOnly && (
           <Icon name='lock' className='size-3.5' />
         )}
         {'users' in tab && tab.users && <Icon name='users' className='size-4' />}

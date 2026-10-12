@@ -17,7 +17,7 @@ export const ChecklistItemActions = ({
   onValidate,
 }: ChecklistItemActionsProps) => (
   <div className='flex shrink-0 items-center gap-2 self-end md:self-center'>
-    {item.documentFileId && (
+    {!readOnly && item.documentFileId && (
       <Button
         variant='brand'
         size='xs'
@@ -28,12 +28,10 @@ export const ChecklistItemActions = ({
           name={getChecklistActionIcon(item.status, Boolean(item.documentName))}
           className='size-3'
         />
-        {readOnly
-          ? 'Ver documento'
-          : getChecklistActionLabel(item.status, Boolean(item.documentName))}
+        {getChecklistActionLabel(item.status, Boolean(item.documentName))}
       </Button>
     )}
-    {(!readOnly || item.documentFileId) && (
+    {!readOnly && (
       <Button
         variant='outline'
         size='icon-xs'
