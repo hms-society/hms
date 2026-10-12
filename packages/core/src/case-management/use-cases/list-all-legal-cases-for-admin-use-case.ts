@@ -1,3 +1,6 @@
+import type { Client } from '#identity/domain/entities'
+import type { LegalArea, LegalTopic } from '#legal-catalog/domain/entities'
+import type { CaseEligibleCollaborator } from '../domain/structures'
 import type { LegalCaseOperationalRecord } from '../domain/entities'
 import type { LegalCaseOperationalSummary } from '../domain/entities'
 import { CollaboratorProfile } from '#identity/domain/structures'
@@ -17,6 +20,13 @@ import { PaginationResponse } from '#shared/responses/pagination-response'
 type Request = {
   collaboratorProfile: CollaboratorProfile
   query: AdminCasesQuery
+}
+
+type PageMetadata = {
+  clients: Map<string, Client>
+  areas: Map<string, LegalArea>
+  topics: Map<string, LegalTopic>
+  managers: Map<string, CaseEligibleCollaborator>
 }
 
 export class ListAllLegalCasesForAdminUseCase
@@ -46,9 +56,7 @@ export class ListAllLegalCasesForAdminUseCase
       search,
     }
     const casesPage = await this.legalCasesRepository.listOperationalRecords(recordsQuery)
-    const items = await Promise.all(
-      casesPage.items.map((legalCase) => this.projectSummary(legalCase)),
-    )
+    const items = casesPage.items.length ? await this.projectPage(casesPage.items) : []
 
     return new PaginationResponse(
       items,
@@ -59,23 +67,40 @@ export class ListAllLegalCasesForAdminUseCase
     )
   }
 
-  private async projectSummary(
-    legalCase: LegalCaseOperationalRecord,
-  ): Promise<LegalCaseOperationalSummary> {
-    const [client, legalArea, legalTopic] = await Promise.all([
-      this.clientsRepository.findById(legalCase.clientId),
-      this.legalAreasRepository.findById(legalCase.legalAreaId),
-      this.legalTopicsRepository.findById(legalCase.legalTopicId),
+  private async projectPage(cases: readonly LegalCaseOperationalRecord[]) {
+    const [clients, areas, topics, managers] = await Promise.all([
+      this.clientsRepository.findByIds([
+        ...new Set(cases.map(({ clientId }) => clientId)),
+      ]),
+      this.legalAreasRepository.findByIds([
+        ...new Set(cases.map(({ legalAreaId }) => legalAreaId)),
+      ]),
+      this.legalTopicsRepository.findByIds([
+        ...new Set(cases.map(({ legalTopicId }) => legalTopicId)),
+      ]),
+      this.collaboratorsProvider.findByIds([
+        ...new Set(cases.flatMap(({ managerCollaboratorIds }) => managerCollaboratorIds)),
+      ]),
     ])
+    const metadata: PageMetadata = {
+      clients: new Map(clients.map((client) => [client.id, client])),
+      areas: new Map(areas.map((area) => [area.id, area])),
+      topics: new Map(topics.map((topic) => [topic.id, topic])),
+      managers: new Map(managers.map((manager) => [manager.collaboratorId, manager])),
+    }
+    return cases.map((legalCase) => this.projectSummary(legalCase, metadata))
+  }
+
+  private projectSummary(
+    legalCase: LegalCaseOperationalRecord,
+    metadata: PageMetadata,
+  ): LegalCaseOperationalSummary {
+    const client = metadata.clients.get(legalCase.clientId)
+    const legalArea = metadata.areas.get(legalCase.legalAreaId)
+    const legalTopic = metadata.topics.get(legalCase.legalTopicId)
     if (!client || !legalArea || !legalTopic) {
       throw new AppError('Os metadados operacionais do Caso não foram encontrados.')
     }
-
-    const managers = await Promise.all(
-      legalCase.managerCollaboratorIds.map((collaboratorId) =>
-        this.collaboratorsProvider.findById(collaboratorId),
-      ),
-    )
 
     return {
       id: legalCase.id,
@@ -86,9 +111,10 @@ export class ListAllLegalCasesForAdminUseCase
       legalArea: legalArea.name,
       legalTopic: legalTopic.name,
       status: legalCase.status,
-      managerNames: managers.flatMap((manager) =>
-        manager ? [manager.professionalName] : [],
-      ),
+      managerNames: legalCase.managerCollaboratorIds.flatMap((collaboratorId) => {
+        const manager = metadata.managers.get(collaboratorId)
+        return manager ? [manager.professionalName] : []
+      }),
       updatedAt: legalCase.updatedAt,
     }
   }
