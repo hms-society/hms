@@ -111,6 +111,62 @@ describe('Create Legal Case Controller [POST /cases]', () => {
     ).toBe(1)
   })
 
+  it.each([
+    'same payload',
+    'different Intake',
+  ] as const)('handles concurrent requests with the same operation key (%s) without partial writes', async (scenario) => {
+    const creator = await fixture.registerCollaborator()
+    const firstIntake = await fixture.registerIntake(creator.clientId)
+    const secondIntake =
+      scenario === 'same payload'
+        ? firstIntake
+        : await fixture.registerIntake(creator.clientId)
+    const firstPayload = {
+      title: 'Concurrent opening',
+      intakeId: firstIntake.id,
+      legalAreaId: creator.legalAreaId,
+      legalTopicId: creator.legalTopicId,
+      team: [],
+      initialManagerCollaboratorId: creator.collaboratorId,
+      operationId: randomUUID(),
+    }
+    const payloads = [firstPayload, { ...firstPayload, intakeId: secondIntake.id }]
+    const responses = await Promise.all(
+      payloads.map((payload) =>
+        request(fixture.app.getHttpServer()).post('/cases').send(payload),
+      ),
+    )
+    expect(responses.map(({ status }) => status).sort()).toEqual(
+      scenario === 'same payload' ? [201, 201] : [201, 409],
+    )
+    const winnerIndex = responses.findIndex(({ status }) => status === 201)
+    const winner = responses[winnerIndex]
+    expect(winner).toBeDefined()
+    const winnerPayload = payloads[winnerIndex]
+    if (!winner || !winnerPayload) throw new Error('No opening winner')
+    expect(await fixture.findCasesByIntakeId(winnerPayload.intakeId)).toEqual([
+      { id: winner.body.id },
+    ])
+    expect(await fixture.findCaseMembers(winner.body.id)).toHaveLength(1)
+    expect((await fixture.listCaseTeamHistory(winner.body.id)).total).toBe(1)
+    const retry = await request(fixture.app.getHttpServer())
+      .post('/cases')
+      .send(winnerPayload)
+      .expect(201)
+    expect(retry.body.id).toBe(winner.body.id)
+    if (scenario === 'same payload') {
+      expect(responses[0]?.body.id).toBe(responses[1]?.body.id)
+    } else {
+      const loserIndex = winnerIndex === 0 ? 1 : 0
+      const loserPayload = payloads[loserIndex]
+      if (!loserPayload) throw new Error('No conflicting opening payload')
+      expect(responses[loserIndex]?.body.message).toBe(
+        'A chave da operação já foi usada com outro conteúdo.',
+      )
+      expect(await fixture.findCasesByIntakeId(loserPayload.intakeId)).toEqual([])
+    }
+  })
+
   it('rejects case creation for attendant profile', async () => {
     const collaborator = await fixture.registerCollaborator({ profile: 'attendant' })
     const intake = await fixture.registerIntake(collaborator.clientId)

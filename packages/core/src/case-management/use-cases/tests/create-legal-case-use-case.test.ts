@@ -309,6 +309,24 @@ describe('Create Legal Case Use Case', () => {
     ).rejects.toBeInstanceOf(ConflictError)
   })
 
+  it('maps a wrapped concurrent creation operation conflict after transaction rollback', async () => {
+    const failure = new Error('Query failed', {
+      cause: { constraint_name: 'case_creation_operations_actor_key_uidx' },
+    })
+    cases.caseCreationOperationsRepository.add.mockRejectedValue(failure)
+    const result = useCase.execute(request)
+    await expect(result).rejects.toThrow(
+      'A chave da operação já foi usada com outro conteúdo.',
+    )
+    await expect(result).rejects.toBeInstanceOf(ConflictError)
+  })
+
+  it('propagates an unrelated creation operation failure', async () => {
+    const failure = new Error('Operation storage unavailable')
+    cases.caseCreationOperationsRepository.add.mockRejectedValue(failure)
+    await expect(useCase.execute(request)).rejects.toBe(failure)
+  })
+
   it('propagates a history failure from the transaction without recording success', async () => {
     const failure = new Error('History unavailable')
     cases.caseTeamHistoriesRepository.add.mockRejectedValue(failure)

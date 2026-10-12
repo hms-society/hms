@@ -45,8 +45,15 @@ export class CreateLegalCaseUseCase
     private readonly datetimeProvider: DatetimeProvider,
   ) {}
 
-  execute(request: CreateLegalCaseRequest): Promise<LegalCase> {
-    return this.transaction.run(({ cases }) => this.createWithin(cases, request))
+  async execute(request: CreateLegalCaseRequest): Promise<LegalCase> {
+    try {
+      return await this.transaction.run(({ cases }) => this.createWithin(cases, request))
+    } catch (error) {
+      if (this.hasConstraintFailure(error, ['case_creation_operations_actor_key_uidx'])) {
+        throw new ConflictError('A chave da operação já foi usada com outro conteúdo.')
+      }
+      throw error
+    }
   }
 
   private async createWithin(
@@ -156,7 +163,12 @@ export class CreateLegalCaseUseCase
         })),
       })
     } catch (error) {
-      if (this.isUniqueCaseConstraintError(error)) {
+      if (
+        this.hasConstraintFailure(error, [
+          'cases_intake_id_uidx',
+          'case_members_case_collaborator_uidx',
+        ])
+      ) {
         throw new ConflictError(
           'O Intake já possui Caso ou a equipe inicial conflita com um vínculo existente.',
         )
@@ -188,15 +200,16 @@ export class CreateLegalCaseUseCase
     }
   }
 
-  private isUniqueCaseConstraintError(
+  private hasConstraintFailure(
     error: unknown,
+    constraints: string[],
     seen = new Set<unknown>(),
   ): boolean {
     if (seen.has(error)) return false
     seen.add(error)
     return (
-      this.hasCaseCreationConstraint(error) ||
-      this.isUniqueCaseConstraintError(this.getFailureCause(error), seen)
+      this.matchesConstraint(error, constraints) ||
+      this.hasConstraintFailure(this.getFailureCause(error), constraints, seen)
     )
   }
 
@@ -204,9 +217,8 @@ export class CreateLegalCaseUseCase
     return (error as CaseCreationFailure | undefined)?.cause
   }
 
-  private hasCaseCreationConstraint(error: unknown): boolean {
+  private matchesConstraint(error: unknown, constraints: string[]): boolean {
     const failure = error as CaseCreationFailure | undefined
-    const constraints = ['cases_intake_id_uidx', 'case_members_case_collaborator_uidx']
     const message = typeof failure?.message === 'string' ? failure.message : ''
     return constraints.some(
       (constraint) =>
