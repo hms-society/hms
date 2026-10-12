@@ -30,6 +30,9 @@ export function useAnalysisFormPanel({
     currentDecision === 'duplicate' &&
     document.status === 'duplicate' &&
     document.reviewedAt !== undefined
+  const hasExtractedInformation = document.extractedFields.some(
+    (field) => !field.isMissing && field.value.trim().length > 0,
+  )
 
   const savedDecisionNotice = getSavedDecisionNotice(currentDecision, document)
 
@@ -43,6 +46,7 @@ export function useAnalysisFormPanel({
 
   return {
     isDuplicateAlreadyConfirmed,
+    hasExtractedInformation,
     savedDecisionNotice,
     handleOpenDuplicateDocument,
   }

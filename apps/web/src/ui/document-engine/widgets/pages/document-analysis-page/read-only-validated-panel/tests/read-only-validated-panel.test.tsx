@@ -41,4 +41,17 @@ describe('ReadOnlyValidatedPanel', () => {
     ).toBeDefined()
     expect(screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/)).toBeNull()
   })
+
+  it('shows the no-extraction notice instead of an empty fields section', () => {
+    const document = DocumentValidationDocumentFaker.fake({ extractedFields: [] })
+
+    render(<ReadOnlyValidatedPanel document={document} />)
+
+    expect(
+      screen.getByText(
+        'A IA não conseguiu extrair nenhuma informação do documento recebido.',
+      ),
+    ).toBeDefined()
+    expect(screen.queryByText('Campos extraídos')).toBeNull()
+  })
 })

@@ -68,6 +68,7 @@ describe('AnalysisFormPanel', () => {
   beforeEach(() => {
     useAnalysisFormPanelMock.mockReturnValue({
       isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: true,
       savedDecisionNotice: null,
       handleOpenDuplicateDocument: vi.fn(),
     })
@@ -82,6 +83,7 @@ describe('AnalysisFormPanel', () => {
     const handleOpenDuplicateDocument = vi.fn()
     useAnalysisFormPanelMock.mockReturnValue({
       isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: true,
       savedDecisionNotice: null,
       handleOpenDuplicateDocument,
     })
@@ -108,6 +110,7 @@ describe('AnalysisFormPanel', () => {
   it('does not allow confirming an already reviewed duplicate again', () => {
     useAnalysisFormPanelMock.mockReturnValue({
       isDuplicateAlreadyConfirmed: true,
+      hasExtractedInformation: true,
       savedDecisionNotice: {
         title: 'Duplicidade já confirmada',
         description:
@@ -133,6 +136,7 @@ describe('AnalysisFormPanel', () => {
   it('shows saved not linked notice without a save action', () => {
     useAnalysisFormPanelMock.mockReturnValue({
       isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: true,
       savedDecisionNotice: {
         title: 'Decisão salva: não vinculado',
         description:
@@ -157,5 +161,63 @@ describe('AnalysisFormPanel', () => {
       'Registrado por Advogado de desenvolvimento',
     )
     expect(screen.queryByRole('button', { name: 'Salvar decisão' })).toBeNull()
+  })
+
+  it('explains when AI extracted no information instead of showing an empty section', () => {
+    useAnalysisFormPanelMock.mockReturnValue({
+      isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: false,
+      savedDecisionNotice: null,
+      handleOpenDuplicateDocument: vi.fn(),
+    })
+
+    renderPanel(vi.fn(), { extractedFields: [] }, 'not_linked')
+
+    expect(
+      screen.getByText(
+        'A IA não conseguiu extrair nenhuma informação do documento recebido.',
+      ),
+    ).toBeDefined()
+    expect(screen.queryByText('Dados extraídos')).toBeNull()
+  })
+
+  it('shows extracted information when the AI returned field values', () => {
+    useAnalysisFormPanelMock.mockReturnValue({
+      isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: true,
+      savedDecisionNotice: null,
+      handleOpenDuplicateDocument: vi.fn(),
+    })
+
+    renderPanel(
+      vi.fn(),
+      { extractedFields: [{ label: 'Nome', value: 'Adriana Aparecida da Silva' }] },
+      'not_linked',
+    )
+
+    expect(screen.getByText('Dados extraídos')).toBeDefined()
+    expect(
+      screen.queryByText(
+        'A IA não conseguiu extrair nenhuma informação do documento recebido.',
+      ),
+    ).toBeNull()
+  })
+
+  it('shows the no-extraction notice for every decision state', () => {
+    useAnalysisFormPanelMock.mockReturnValue({
+      isDuplicateAlreadyConfirmed: false,
+      hasExtractedInformation: false,
+      savedDecisionNotice: null,
+      handleOpenDuplicateDocument: vi.fn(),
+    })
+
+    renderPanel(vi.fn(), { extractedFields: [] }, 'validate')
+
+    expect(
+      screen.getByText(
+        'A IA não conseguiu extrair nenhuma informação do documento recebido.',
+      ),
+    ).toBeDefined()
+    expect(screen.queryByText('Campos extraídos')).toBeNull()
   })
 })

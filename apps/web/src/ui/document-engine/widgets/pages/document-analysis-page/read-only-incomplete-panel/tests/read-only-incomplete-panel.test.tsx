@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import { DocumentValidationDocumentFaker } from '@hms/core/document-engine/domain/entities/fakers'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
@@ -7,6 +7,10 @@ import { DocumentValidationStatus } from '@hms/core/document-engine/domain/struc
 import { ReadOnlyIncompletePanel } from '..'
 
 describe('ReadOnlyIncompletePanel', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   it('renders the recorded resend decision as read-only', () => {
     render(
       <ReadOnlyIncompletePanel
@@ -29,5 +33,20 @@ describe('ReadOnlyIncompletePanel', () => {
     expect(screen.queryByText(/4d70cfbf-cae3-4f15-8365-e951f9fcb9e4/)).toBeNull()
     expect(screen.getByText('Data de emissão')).toBeDefined()
     expect(screen.getAllByText('Somente leitura')).toHaveLength(2)
+  })
+
+  it('shows the no-extraction notice instead of an empty fields section', () => {
+    render(
+      <ReadOnlyIncompletePanel
+        document={DocumentValidationDocumentFaker.fake({ extractedFields: [] })}
+      />,
+    )
+
+    expect(
+      screen.getByText(
+        'A IA não conseguiu extrair nenhuma informação do documento recebido.',
+      ),
+    ).toBeDefined()
+    expect(screen.queryByText('Campos extraídos')).toBeNull()
   })
 })
