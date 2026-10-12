@@ -67,9 +67,19 @@ export class OrganizeDocumentFileJsonJob extends InngestJob {
         }
 
         if (!this.shouldSkipSuccessfulOrganization(currentDocument)) {
-          await step.run('mark-document-file-processing', async () =>
-            this.validationsRepository.recordProcessing(event.data.documentFileId),
+          const processingDocument = await step.run(
+            'mark-document-file-processing',
+            async () =>
+              this.validationsRepository.recordProcessing(event.data.documentFileId),
           )
+
+          if (this.shouldSkipSuccessfulOrganization(processingDocument)) {
+            return {
+              skipped: true,
+              reason: 'analysis_already_completed',
+              documentFileId: event.data.documentFileId,
+            }
+          }
         }
 
         const organizationResult = await step.run(
