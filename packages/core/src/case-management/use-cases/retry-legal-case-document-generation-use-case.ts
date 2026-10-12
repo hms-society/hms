@@ -10,7 +10,6 @@ import type {
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
 import { CancelDocumentGenerationUseCase } from '../../document-production/use-cases/cancel-document-generation-use-case'
-import { CollaboratorProfile } from '#shared/domain/structures'
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../shared/interfaces'
 import { CaseChecklistGateDecision, LegalCaseStatus } from '../domain/structures'
@@ -18,6 +17,8 @@ import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-do
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
 import type { LegalCase } from '../domain/entities'
 import type { LegalCasesRepository } from '../interfaces'
+import type { CaseAccessProvider } from '../interfaces'
+import { CaseAccessIntent } from '../domain/structures'
 
 type Request = {
   caseId: string
@@ -30,6 +31,12 @@ type Response = {
   documentGenerationId: string
   documentId: string
 }
+type PackageDocument = Awaited<
+  ReturnType<PackageDocumentsRepository['findByDocumentPackageId']>
+>[number]
+type Generation = NonNullable<
+  Awaited<ReturnType<DocumentGenerationsRepository['findLatestByDocumentId']>>
+>
 
 export class RetryLegalCaseDocumentGenerationUseCase
   implements UseCase<Request, Response>
@@ -42,31 +49,52 @@ export class RetryLegalCaseDocumentGenerationUseCase
     private readonly broker: Broker,
     private readonly datetime: DatetimeProvider,
     private readonly ids: IdProvider,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(request: Request): Promise<Response> {
     const legalCase = await this.cases.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
-    await this.assertCaseAccess(request, legalCase.id)
+    await this.caseAccessProvider.authorize({
+      caseId: legalCase.id,
+      actorId: request.requestedByCollaboratorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
     this.assertDossierReady(legalCase)
+    const packageDocument = await this.findPackageDocument(legalCase, request.documentId)
+    const previousGeneration = await this.findRetryableGeneration(
+      legalCase,
+      packageDocument,
+      request.documentId,
+    )
+    return this.publishRetry(request, previousGeneration)
+  }
 
+  private async findPackageDocument(
+    legalCase: LegalCase,
+    documentId: string,
+  ): Promise<PackageDocument> {
     const documentPackage = await this.packages.findByContext({
       type: 'case',
       caseId: legalCase.id,
     })
     if (!documentPackage) throw new LegalCaseNotFoundError()
-
     const packageDocuments = await this.packageDocuments.findByDocumentPackageId(
       documentPackage.id,
     )
     const packageDocument = packageDocuments.find(
-      ({ documentId }) => documentId === request.documentId,
+      (item) => item.documentId === documentId,
     )
     if (!packageDocument) throw new LegalCaseNotFoundError()
+    return packageDocument
+  }
 
-    const previousGeneration = await this.generations.findLatestByDocumentId(
-      request.documentId,
-    )
+  private async findRetryableGeneration(
+    legalCase: LegalCase,
+    packageDocument: PackageDocument,
+    documentId: string,
+  ): Promise<Generation> {
+    const previousGeneration = await this.generations.findLatestByDocumentId(documentId)
     if (
       previousGeneration?.source.type !== 'case' ||
       previousGeneration.source.id !== legalCase.id ||
@@ -80,7 +108,6 @@ export class RetryLegalCaseDocumentGenerationUseCase
         'Esta peça já possui uma geração concluída e não pode ser gerada novamente.',
       )
     }
-
     if (
       previousGeneration.status === DocumentGenerationStatus.Pending ||
       previousGeneration.status === DocumentGenerationStatus.Running
@@ -92,7 +119,13 @@ export class RetryLegalCaseDocumentGenerationUseCase
       )
       await cancelGeneration.execute({ documentGenerationId: previousGeneration.id })
     }
+    return previousGeneration
+  }
 
+  private async publishRetry(
+    request: Request,
+    previousGeneration: Generation,
+  ): Promise<Response> {
     const documentGenerationId = this.ids.generate()
     const occurredAt = this.datetime.now()
     const instructions = this.getGenerationInstructions(previousGeneration.source)
@@ -109,17 +142,6 @@ export class RetryLegalCaseDocumentGenerationUseCase
     )
 
     return { documentGenerationId, documentId: request.documentId }
-  }
-
-  private async assertCaseAccess(request: Request, caseId: string): Promise<void> {
-    if (request.requestedByCollaboratorProfile === CollaboratorProfile.Admin) return
-
-    const assignedCases = await this.cases.listByTeamMember(
-      request.requestedByCollaboratorId,
-    )
-    if (!assignedCases.some((assignedCase) => assignedCase.id === caseId)) {
-      throw new LegalCaseNotFoundError()
-    }
   }
 
   private assertDossierReady(legalCase: LegalCase): void {

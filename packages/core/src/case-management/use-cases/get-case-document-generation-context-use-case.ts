@@ -12,7 +12,15 @@ import {
   CaseChecklistItemStatus,
   LegalCaseStatus,
 } from '../domain/structures'
-import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
+import type {
+  CaseAccessProvider,
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '../interfaces'
+import { CaseAccessIntent } from '../domain/structures'
+import type { LegalCase } from '../domain/entities'
+import type { DocumentValidationRecord } from '../../document-engine/domain/entities'
+import type { DocumentSpecificationListRecord } from '../../document-production/domain/structures'
 
 type Request = { caseId: string; collaboratorId: string; isAdmin?: boolean }
 
@@ -40,18 +48,18 @@ export class GetCaseDocumentGenerationContextUseCase
     private readonly checklistItems: CaseChecklistItemsRepository,
     private readonly validations: DocumentValidationsRepository,
     private readonly specifications: DocumentSpecificationsRepository,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseDocumentGenerationContext> {
     const legalCase = await this.cases.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
 
-    if (!request.isAdmin) {
-      const assignedCases = await this.cases.listByTeamMember(request.collaboratorId)
-      if (!assignedCases.some((assignedCase) => assignedCase.id === request.caseId)) {
-        throw new LegalCaseNotFoundError()
-      }
-    }
+    await this.caseAccessProvider.authorize({
+      caseId: legalCase.id,
+      actorId: request.collaboratorId,
+      intent: CaseAccessIntent.ReadContent,
+    })
 
     const [checklistItems, validationPage, specificationPage] = await Promise.all([
       this.checklistItems.listByCaseId(legalCase.id),
@@ -67,53 +75,12 @@ export class GetCaseDocumentGenerationContextUseCase
       }),
     ])
 
-    const documents = checklistItems.flatMap((item) => {
-      if (
-        item.status !== CaseChecklistItemStatus.Validated ||
-        !item.documentFileId ||
-        !item.validatedAt ||
-        !item.validatedBy
-      )
-        return []
-      const validation = validationPage.find(
-        (candidate) =>
-          candidate.id === item.documentFileId &&
-          candidate.status === DocumentValidationStatus.Valid &&
-          candidate.reviewedAt &&
-          candidate.reviewedBy &&
-          candidate.checklistLink?.caseId === legalCase.id &&
-          candidate.checklistLink.checklistItemId === item.id,
-      )
-      const reviewedAt = validation?.reviewedAt
-      const reviewedBy = validation?.reviewedBy
-      if (!validation || !reviewedAt || !reviewedBy) return []
-      return [
-        {
-          id: validation.id,
-          checklistItemId: item.id,
-          label: item.title,
-          fileName: validation.fileName,
-          validationStatus: CaseChecklistItemStatus.Validated,
-          reviewedAt,
-          reviewedBy,
-        },
-      ]
-    })
-
-    const models = specificationPage.items
-      .filter(
-        (specification) =>
-          specification.application.scope === 'global' ||
-          (specification.application.legalAreaIds.includes(legalCase.legalAreaId) &&
-            (
-              specification.application.legalTopicIdsByArea[legalCase.legalAreaId] ?? []
-            ).includes(legalCase.legalTopicId)),
-      )
-      .map(({ documentSpecificationId, name, description }) => ({
-        id: documentSpecificationId,
-        name,
-        description,
-      }))
+    const documents = this.projectValidatedDocuments(
+      checklistItems,
+      validationPage,
+      legalCase.id,
+    )
+    const models = this.projectCompatibleModels(specificationPage.items, legalCase)
 
     return {
       case: {
@@ -124,13 +91,90 @@ export class GetCaseDocumentGenerationContextUseCase
       models,
       documents,
       checklistGateDecision: legalCase.checklistGate.decision,
-      canGenerate:
-        (legalCase.checklistGate.decision === CaseChecklistGateDecision.Approved ||
-          legalCase.checklistGate.decision ===
-            CaseChecklistGateDecision.ApprovedWithException) &&
-        (legalCase.status === LegalCaseStatus.ReadyForLegalProduction ||
-          legalCase.status === LegalCaseStatus.LegalProduction) &&
-        Boolean(legalCase.dossierGate.homologatedAt),
+      canGenerate: this.canGenerate(legalCase),
     }
+  }
+
+  private projectValidatedDocuments(
+    items: Awaited<ReturnType<CaseChecklistItemsRepository['listByCaseId']>>,
+    validations: readonly DocumentValidationRecord[],
+    caseId: string,
+  ): CaseDocumentGenerationContext['documents'] {
+    const documents: CaseDocumentGenerationContext['documents'][number][] = []
+    for (const item of items) {
+      if (!this.hasValidatedFile(item)) continue
+      const validation = this.findReviewedValidation(item, validations, caseId)
+      if (!validation?.reviewedAt || !validation.reviewedBy) continue
+      documents.push({
+        id: validation.id,
+        checklistItemId: item.id,
+        label: item.title,
+        fileName: validation.fileName,
+        validationStatus: CaseChecklistItemStatus.Validated,
+        reviewedAt: validation.reviewedAt,
+        reviewedBy: validation.reviewedBy,
+      })
+    }
+    return documents
+  }
+
+  private hasValidatedFile(
+    item: Awaited<ReturnType<CaseChecklistItemsRepository['listByCaseId']>>[number],
+  ): boolean {
+    return (
+      item.status === CaseChecklistItemStatus.Validated &&
+      Boolean(item.documentFileId && item.validatedAt && item.validatedBy)
+    )
+  }
+
+  private findReviewedValidation(
+    item: Awaited<ReturnType<CaseChecklistItemsRepository['listByCaseId']>>[number],
+    validations: readonly DocumentValidationRecord[],
+    caseId: string,
+  ): DocumentValidationRecord | undefined {
+    return validations.find(
+      (candidate) =>
+        candidate.id === item.documentFileId &&
+        candidate.status === DocumentValidationStatus.Valid &&
+        Boolean(candidate.reviewedAt && candidate.reviewedBy) &&
+        candidate.checklistLink?.caseId === caseId &&
+        candidate.checklistLink.checklistItemId === item.id,
+    )
+  }
+
+  private projectCompatibleModels(
+    specifications: readonly DocumentSpecificationListRecord[],
+    legalCase: LegalCase,
+  ): CaseDocumentGenerationContext['models'] {
+    return specifications
+      .filter((specification) => this.isCompatibleSpecification(specification, legalCase))
+      .map(({ documentSpecificationId, name, description }) => ({
+        id: documentSpecificationId,
+        name,
+        description,
+      }))
+  }
+
+  private isCompatibleSpecification(
+    specification: DocumentSpecificationListRecord,
+    legalCase: LegalCase,
+  ): boolean {
+    if (specification.application.scope === 'global') return true
+    return (
+      specification.application.legalAreaIds.includes(legalCase.legalAreaId) &&
+      (
+        specification.application.legalTopicIdsByArea[legalCase.legalAreaId] ?? []
+      ).includes(legalCase.legalTopicId)
+    )
+  }
+
+  private canGenerate(legalCase: LegalCase): boolean {
+    const approvedGate =
+      legalCase.checklistGate.decision === CaseChecklistGateDecision.Approved ||
+      legalCase.checklistGate.decision === CaseChecklistGateDecision.ApprovedWithException
+    const productionStage =
+      legalCase.status === LegalCaseStatus.ReadyForLegalProduction ||
+      legalCase.status === LegalCaseStatus.LegalProduction
+    return approvedGate && productionStage && Boolean(legalCase.dossierGate.homologatedAt)
   }
 }

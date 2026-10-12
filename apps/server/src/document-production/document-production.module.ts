@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { IdentityModule } from '@/identity/identity.module'
 import { CaseManagementDatabaseModule } from '@/case-management/database'
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
 import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
 import { ConsultationDatabaseModule } from '@/consultation/database/consultation-database.module'
 import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
@@ -19,6 +20,8 @@ import {
   UpdateDocumentSpecificationTemplateController,
   UpdateDocumentAccessClassificationController,
   ListCaseDocumentsController,
+  GetCaseDocumentController,
+  DownloadCaseDocumentController,
   GetCaseDocumentGenerationContextController,
   GenerateCaseDocumentController,
   SaveManualCaseDocumentVersionController,
@@ -28,6 +31,7 @@ import {
   imports: [
     IdentityModule,
     CaseManagementDatabaseModule,
+    CaseManagementAccessModule,
     LegalCatalogModule,
     ConsultationDatabaseModule,
     DocumentProductionDatabaseModule,
@@ -46,6 +50,8 @@ import {
     UpdateDocumentSpecificationTemplateController,
     UpdateDocumentAccessClassificationController,
     ListCaseDocumentsController,
+    GetCaseDocumentController,
+    DownloadCaseDocumentController,
     GetCaseDocumentGenerationContextController,
     GenerateCaseDocumentController,
     SaveManualCaseDocumentVersionController,

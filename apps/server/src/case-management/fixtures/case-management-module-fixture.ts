@@ -1,3 +1,4 @@
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
 import type { INestApplication, Type } from '@nestjs/common'
 import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {
@@ -456,6 +457,7 @@ export class CaseManagementModuleFixture {
       IdentityAccessModule,
       LegalCatalogModule,
       CaseManagementDatabaseModule,
+      CaseManagementAccessModule,
       CaseIdentityTransactionModule,
       IntakeDatabaseModule,
       ProvisionModule,

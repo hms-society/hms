@@ -1,3 +1,4 @@
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
 import { Module } from '@nestjs/common'
 
 import { CaseManagementDatabaseModule } from '@/case-management/database'
@@ -45,6 +46,7 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
   imports: [
     IdentityModule,
     CaseManagementDatabaseModule,
+    CaseManagementAccessModule,
     IntakeDatabaseModule,
     DocumentsDatabaseModule,
     ProvisionModule,

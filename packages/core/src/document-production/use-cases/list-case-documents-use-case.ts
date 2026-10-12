@@ -1,5 +1,8 @@
 import type { UseCase } from '#shared/interfaces/use-case'
 import type { LegalCasesRepository } from '../../case-management/interfaces'
+import type { CaseAccessProvider } from '../../case-management/interfaces/case-access-provider'
+import { CaseAccessIntent } from '../../case-management/domain/structures/case-access-intent'
+import type { ListCaseDocumentsRequest } from '../domain/structures'
 import type { Document, DocumentGeneration, DocumentVersion } from '../domain/entities'
 import type {
   DocumentGenerationsRepository,
@@ -9,7 +12,7 @@ import type {
   PackageDocumentsRepository,
 } from '../interfaces'
 
-type Request = { caseId: string }
+type Request = ListCaseDocumentsRequest
 export type ListCaseDocumentsResponse = readonly {
   document: Document
   versions: readonly DocumentVersion[]
@@ -21,6 +24,7 @@ export class ListCaseDocumentsUseCase
 {
   constructor(
     private readonly cases: LegalCasesRepository,
+    private readonly caseAccessProvider: CaseAccessProvider,
     private readonly packages: DocumentPackagesRepository,
     private readonly packageDocuments: PackageDocumentsRepository,
     private readonly documents: DocumentsRepository,
@@ -28,7 +32,13 @@ export class ListCaseDocumentsUseCase
     private readonly generations: DocumentGenerationsRepository,
   ) {}
 
-  async execute({ caseId }: Request): Promise<ListCaseDocumentsResponse> {
+  async execute({ caseId, actorId }: Request): Promise<ListCaseDocumentsResponse> {
+    await this.caseAccessProvider.authorize({
+      caseId,
+      actorId,
+      intent: CaseAccessIntent.ReadContent,
+    })
+
     const legalCase = await this.cases.findById(caseId)
     if (!legalCase) return []
     const documentPackage = await this.packages.findByContext({ type: 'case', caseId })
