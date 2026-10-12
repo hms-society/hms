@@ -67,7 +67,10 @@ export async function requireCaseReaderMiddleware<
     collaboratorResponse.isFailure ||
     collaboratorResponse.body.status !== UserStatus.Active
   ) {
-    if (collaboratorResponse.isFailure && collaboratorResponse.statusCode >= 500) {
+    if (
+      collaboratorResponse.isFailure &&
+      (collaboratorResponse.statusCode === 0 || collaboratorResponse.statusCode >= 500)
+    ) {
       throw new AppError('Não foi possível verificar seu perfil.')
     }
     throw redirect({ to: ROUTES.home })

@@ -153,7 +153,7 @@ describe('requireCaseReaderMiddleware', () => {
     )
 
     const result = requireCaseReaderMiddleware({ params: { caseId: 'case-1' } })
-    if (response.statusCode >= 500) {
+    if (response.statusCode === 0 || response.statusCode >= 500) {
       await expect(result).rejects.toMatchObject({
         message: 'Não foi possível verificar seu perfil.',
       })
