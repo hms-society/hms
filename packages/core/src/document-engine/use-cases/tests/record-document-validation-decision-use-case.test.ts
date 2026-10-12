@@ -128,11 +128,13 @@ describe('Record Document Validation Decision Use Case', () => {
       caseId: ownerCaseId,
       actorId: 'collaborator-1',
       intent: 'write_content',
+      expectedClientId: document.clientId,
     })
     expect(caseAccessProvider.authorize).toHaveBeenNthCalledWith(2, {
       caseId: targetCaseId,
       actorId: 'collaborator-1',
       intent: 'write_content',
+      expectedClientId: document.clientId,
     })
     expect(caseAccessProvider.authorize.mock.invocationCallOrder[1]).toBeLessThan(
       documentValidationsRepository.recordDecision.mock.invocationCallOrder[0],

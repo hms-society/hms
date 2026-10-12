@@ -16,6 +16,7 @@ export type AuthorizeCaseAccessRequest = {
   caseId: string
   actorId: string
   intent: CaseAccessIntentType
+  expectedClientId?: string
 }
 
 export class AuthorizeCaseAccessUseCase
@@ -51,7 +52,17 @@ async function authorizeCaseRequest(
 ): Promise<void> {
   const { legalCase, actor } = await loadCaseAccessContext(dependencies, request)
   if (isAdminRead(actor.profile, request.intent)) return
-  return authorizeMemberIntent(dependencies, request, legalCase, actor.profile)
+  await authorizeMemberIntent(dependencies, request, legalCase, actor.profile)
+  ensureExpectedClientMatchesCase(request, legalCase.clientId)
+}
+
+function ensureExpectedClientMatchesCase(
+  request: AuthorizeCaseAccessRequest,
+  caseClientId: string,
+) {
+  if (request.expectedClientId && request.expectedClientId !== caseClientId) {
+    throw new ForbiddenError('O documento não pertence ao cliente do Caso.')
+  }
 }
 
 async function loadCaseAccessContext(

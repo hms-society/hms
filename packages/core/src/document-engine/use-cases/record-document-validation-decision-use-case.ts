@@ -81,18 +81,25 @@ export class RecordDocumentValidationDecisionUseCase {
   ) {
     const ownerCaseId = currentDocument.checklistLink?.caseId
     const targetCaseId = request.caseId ?? ownerCaseId
-    if (ownerCaseId) await this.authorizeCaseWrite(ownerCaseId, actorId)
+    const expectedClientId = currentDocument.clientId
+    if (ownerCaseId) {
+      await this.authorizeCaseWrite(ownerCaseId, actorId, expectedClientId)
+    }
     if (targetCaseId && targetCaseId !== ownerCaseId) {
-      await this.authorizeCaseWrite(targetCaseId, actorId)
+      await this.authorizeCaseWrite(targetCaseId, actorId, expectedClientId)
     }
   }
 
-  private authorizeCaseWrite(caseId: string, actorId: string) {
-    return this.caseAccessProvider.authorize({
+  private authorizeCaseWrite(caseId: string, actorId: string, expectedClientId?: string) {
+    const request: Parameters<CaseAccessProvider['authorize']>[0] = {
       caseId,
       actorId,
       intent: CaseAccessIntent.WriteContent,
-    })
+    }
+    if (expectedClientId) {
+      request.expectedClientId = expectedClientId
+    }
+    return this.caseAccessProvider.authorize(request)
   }
 
   private async applyDecision(

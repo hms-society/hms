@@ -187,4 +187,37 @@ describe('Authorize Case Access Use Case', () => {
       ).rejects.toBeInstanceOf(ForbiddenError)
     }
   })
+
+  it('denies writing when the expected client does not own the Case', async () => {
+    legalCases.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        id: TEST_CASE_ID,
+        clientId: 'case-client',
+        status: LegalCaseStatus.Documentation,
+      }),
+    )
+    collaborators.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Manager',
+      email: 'manager@example.com',
+      profile: CollaboratorProfile.Lawyer,
+      status: UserStatus.Active,
+    })
+    members.findByCaseAndCollaborator.mockResolvedValue(
+      CaseMemberFaker.fake({
+        caseId: TEST_CASE_ID,
+        collaboratorId: TEST_ACTOR_ID,
+        role: CaseMemberRole.Manager,
+      }),
+    )
+
+    await expect(
+      useCase.execute({
+        caseId: TEST_CASE_ID,
+        actorId: TEST_ACTOR_ID,
+        intent: CaseAccessIntent.WriteContent,
+        expectedClientId: 'document-client',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+  })
 })
