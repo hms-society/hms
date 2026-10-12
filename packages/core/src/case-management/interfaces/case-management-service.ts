@@ -1,3 +1,5 @@
+import type { CreateLegalCaseRequest } from '../use-cases/create-legal-case-request'
+import type { CaseOpeningSource } from '../domain/structures'
 import type {
   CaseChecklistItem,
   ChecklistTemplate,
@@ -91,18 +93,6 @@ export type ReplaceChecklistTemplateRequest = {
   }[]
 }
 
-export type CreateLegalCaseRequest = {
-  title: string
-  intakeId: string
-  legalAreaId: string
-  legalTopicId: string
-  team: Array<{
-    collaboratorId: string
-    role: string
-    permission: string
-  }>
-}
-
 export type CreatePendingRequest = {
   checklistItemId: string
   documentFileId?: string
@@ -127,7 +117,10 @@ export type CreateCaseTaskRequest = {
 }
 
 export interface CaseManagementService {
-  createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
+  getCaseOpeningSource(intakeId: string): Promise<RestResponse<CaseOpeningSource>>
+  createLegalCase(
+    request: Omit<CreateLegalCaseRequest, 'actorId'>,
+  ): Promise<RestResponse<LegalCase>>
 
   listCaseTasks(caseId: string): Promise<RestResponse<readonly CaseTask[]>>
   createCaseTask(

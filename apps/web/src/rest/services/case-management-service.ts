@@ -10,6 +10,7 @@ import type {
 } from '@hms/core/case-management/domain/entities'
 import type {
   CaseEligibleCollaborator,
+  CaseOpeningSource,
   CaseTeam,
   CaseTeamMutationResult,
 } from '@hms/core/case-management/domain/structures'
@@ -41,6 +42,10 @@ export const CaseManagementService = (
 
     deleteCaseTask(caseId, taskId, request) {
       return restClient.delete<CaseTask>(`/cases/${caseId}/tasks/${taskId}`, request)
+    },
+
+    getCaseOpeningSource(intakeId) {
+      return restClient.get<CaseOpeningSource>(`/cases/opening-sources/${intakeId}`)
     },
 
     createLegalCase(request) {

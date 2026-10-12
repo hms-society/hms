@@ -1,22 +1,25 @@
 import { z } from 'zod'
+import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
+import { uuidSchema } from '../../shared/schemas/uuid-schema'
 
-export const teamMemberSchema = z.object({
-  collaboratorId: z.string().min(1, 'Selecione um membro'),
-  role: z.enum(['lead_lawyer', 'lawyer', 'paralegal', 'supervisor', 'intern'], {
-    message: 'Função inválida',
-  }),
-  permission: z.enum(['execução', 'visualização', 'edição'], {
-    message: 'Permissão inválida',
-  }),
-})
+export const teamMemberSchema = z
+  .object({
+    collaboratorId: uuidSchema,
+    role: z.enum(CaseMemberRole),
+  })
+  .strict()
 
-export const createCaseSchema = z.object({
-  title: z.string().min(1, 'O título do caso é obrigatório'),
-  intakeId: z.string().min(1, 'Selecione uma triagem de origem'),
-  legalAreaId: z.string().min(1, 'Selecione uma área do direito'),
-  legalTopicId: z.string().min(1, 'Selecione um tema'),
-  description: z.string().optional(),
-  team: z.array(teamMemberSchema),
-})
+export const createCaseSchema = z
+  .object({
+    title: z.string().trim().min(1),
+    intakeId: uuidSchema,
+    legalAreaId: uuidSchema,
+    legalTopicId: uuidSchema,
+    description: z.string().optional(),
+    initialManagerCollaboratorId: uuidSchema,
+    team: z.array(teamMemberSchema),
+    operationId: uuidSchema,
+  })
+  .strict()
 
 export type CreateCaseData = z.infer<typeof createCaseSchema>
