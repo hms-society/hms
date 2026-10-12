@@ -2,7 +2,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { Button } from '@/ui/shadcn/button'
-import { CaseTeamRoster } from '@/ui/case-management/widgets/components/case-team-roster'
+import { CaseTeam } from '@/ui/case-management/widgets/components/case-team'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs'
 import { useState } from 'react'
 
@@ -260,7 +260,7 @@ export const CasoDetalheChecklistPage = ({ caseId }: CasoDetalheChecklistPagePro
         </TabsContent>
 
         <TabsContent value='equipe' className='mt-4 flex flex-col gap-4'>
-          <CaseTeamRoster caseId={caseUuid} />
+          <CaseTeam caseId={caseUuid} />
         </TabsContent>
 
         <TabsContent value='prazos' className='mt-4 flex flex-col gap-4'>

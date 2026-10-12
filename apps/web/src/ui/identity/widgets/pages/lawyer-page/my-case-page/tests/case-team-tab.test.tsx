@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useCaseTeamRoster } from '@/ui/case-management/widgets/components/case-team-roster/use-case-team-roster'
+import { useCaseTeam } from '@/ui/case-management/widgets/components/case-team/use-case-team'
 import { CasoDetalheChecklistPage } from '..'
 import { useMyCasePage } from '../use-my-case-page'
 
@@ -18,13 +18,12 @@ vi.mock('../case-pieces-tab', () => ({ CasePiecesTab: () => null }))
 vi.mock('../overview-tab', () => ({ OverviewTab: () => null }))
 vi.mock('../portal-access-dialog', () => ({ PortalAccessDialog: () => null }))
 vi.mock('../tasks-deadlines-tab', () => ({ TasksDeadlinesTab: () => null }))
-vi.mock(
-  '@/ui/case-management/widgets/components/case-team-roster/use-case-team-roster',
-  () => ({ useCaseTeamRoster: vi.fn() }),
-)
+vi.mock('@/ui/case-management/widgets/components/case-team/use-case-team', () => ({
+  useCaseTeam: vi.fn(),
+}))
 
 const useMyCasePageMock = vi.mocked(useMyCasePage)
-const useCaseTeamRosterMock = vi.mocked(useCaseTeamRoster)
+const useCaseTeamMock = vi.mocked(useCaseTeam)
 
 afterEach(cleanup)
 
@@ -64,19 +63,36 @@ beforeEach(() => {
       setActiveTab,
     } as never
   })
-  useCaseTeamRosterMock.mockReturnValue({
-    caseTeam: null,
-    error: null,
-    handleRetry: vi.fn(),
-    isLoading: false,
-    members: [],
+  useCaseTeamMock.mockReturnValue({
+    caseTeam: {
+      status: 'documentation',
+      total: 0,
+      activeManagerCount: 0,
+      canManage: false,
+      members: [],
+    },
+    canManageTeam: false,
+    isClosed: false,
+    isLoadingCaseTeam: false,
+    caseTeamError: null,
+    isSelectorOpen: false,
+    pendingMutation: null,
     reason: '',
-    total: 0,
+    mutationError: null,
+    isMutationPending: false,
+    hasVersionConflict: false,
+    handleReasonChange: vi.fn(),
+    handleConfirmMutation: vi.fn(),
+    handleOpenSelector: vi.fn(),
+    handlePendingMutationOpenChange: vi.fn(),
+    handleRetryCaseTeam: vi.fn(),
+    handleCloseSelector: vi.fn(),
+    handleSelectCandidate: vi.fn(),
   } as never)
 })
 
-describe('case team tab', () => {
-  it('opens the read-only roster from the legal case detail', async () => {
+describe('CasoDetalheChecklistPage team tab', () => {
+  it('opens the current team without management actions for a collaborator', async () => {
     render(<CasoDetalheChecklistPage caseId='case-1' />)
 
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Equipe' }), {
@@ -85,7 +101,7 @@ describe('case team tab', () => {
     })
 
     expect(await screen.findByRole('heading', { name: 'Equipe do caso' })).toBeDefined()
-    expect(useCaseTeamRosterMock).toHaveBeenCalledWith('case-1')
+    expect(useCaseTeamMock).toHaveBeenCalledWith('case-1')
     expect(
       screen.queryByRole('button', { name: /adicionar|remover|alterar/i }),
     ).toBeNull()
