@@ -34,9 +34,9 @@ describe('List Case Document Exceptions Controller [GET /cases/:caseId/document-
   })
 
   it('returns only exceptions for the requested case', async () => {
-    const caseId = randomUUID()
-    const otherCaseId = randomUUID()
-    const actorId = randomUUID()
+    const caseId = (await fixture.createCaseWithCurrentCollaborator()).id
+    const otherCaseId = (await fixture.createCaseWithCurrentCollaborator(false)).id
+    const actorId = fixture.authenticatedUserId ?? ''
     const expected = await repository.create({
       caseId,
       type: DocumentExceptionType.DISPENSA_DEFINITIVA,
@@ -65,10 +65,10 @@ describe('List Case Document Exceptions Controller [GET /cases/:caseId/document-
     ])
   })
 
-  it('forbids a collaborator without an allowed profile', async () => {
-    await fixture.setCollaboratorProfile('attendant')
+  it('forbids a collaborator without current Case membership', async () => {
+    const caseId = (await fixture.createCaseWithCurrentCollaborator(false)).id
     await request(fixture.app.getHttpServer())
-      .get(`/cases/${randomUUID()}/document-exceptions`)
+      .get(`/cases/${caseId}/document-exceptions`)
       .expect(403)
   })
 })

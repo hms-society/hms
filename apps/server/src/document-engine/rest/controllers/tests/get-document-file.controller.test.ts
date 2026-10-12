@@ -12,11 +12,15 @@ describe('Get Document File Controller [GET /documents/files/:fileId, GET /docum
   let fixture: DocumentEngineModuleFixture
   let storage: StorageProvider
   let storageFixture: LocalSupabaseStorageFixture
+  let userId: string
   const uploadedPaths: string[] = []
   beforeAll(async () => {
     storageFixture = await LocalSupabaseStorageFixture.start()
-    fixture = await DocumentEngineModuleFixture.register(undefined, (builder) =>
-      storageFixture.configure(builder),
+    userId = randomUUID()
+    fixture = await DocumentEngineModuleFixture.registerAuthenticated(
+      undefined,
+      userId,
+      (builder) => storageFixture.configure(builder),
     )
     storage = fixture.app.get<StorageProvider>(STORAGE_PROVIDER)
   })
@@ -34,7 +38,6 @@ describe('Get Document File Controller [GET /documents/files/:fileId, GET /docum
   })
 
   it('returns metadata from PostgreSQL and bytes from local Supabase Storage', async () => {
-    const userId = randomUUID()
     const clientId = randomUUID()
     await fixture.seedUserAndClient(userId, clientId)
     const storagePath = `tests/${randomUUID()}/document.pdf`
