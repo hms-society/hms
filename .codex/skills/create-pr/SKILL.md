@@ -10,16 +10,16 @@ description: >
 # Create or Update Pull Requests
 
 Publish authorized HMS delivery through coherent, size-compliant GitHub PRs.
-Follow [Git Workflow Rules](../../../documentation/rules/git-workflow-rules.md),
-[Commit Rules](../../../documentation/rules/commit-rules.md), [SDD Workflow](../../../documentation/sdd.md),
-[Tooling](../../../documentation/tooling.md) and the repository `gh-cli` skill. Use authenticated `gh`,
+Follow [Git Workflow Rules](../rules/git-workflow-rules.md),
+[Commit Rules](../rules/commit-rules.md), [SDD Workflow](../sdd.md),
+[Tooling](../tooling.md) and the repository [gh-cli skill](../../.codex/skills/gh-cli/SKILL.md). Use authenticated `gh`,
 preserve user work and update existing delivery PRs instead of creating duplicates.
 
 ## Authority and readiness
 
 Read the implemented Spec or Bug Report, Evaluation, current diff and applicable
 Rules. Feature Evaluation uses the
-[canonical template](../../../documentation/prompts/implement-spec-prompt.md#evaluation-template); **Progress** separates
+[canonical template](implement-spec-prompt.md#evaluation-template); **Progress** separates
 implementation from verification and **Check Results** records actual required
 Automated, Manual and Visual checks plus baseline project checks. Verify current
 candidate/environment/selection/artifacts; preserve failed and historical proof.
@@ -83,7 +83,7 @@ through `create-spec` before publishing; do not create a separate execution plan
 2. Find existing delivery PRs, including closed ones, using real Spec/Jira terms.
 3. Synchronize the authorized delivery branch with fetched `origin/develop`,
    preserving local changes. If a merge conflicts, invoke
-   [resolve-merge-conflicts](../../../documentation/prompts/resolve-merge-conflicts-prompt.md), then inspect its
+   [resolve-merge-conflicts](resolve-merge-conflicts-prompt.md), then inspect its
    resolutions/validation and finish the merge only under existing commit authority.
 4. Review the resulting diff and size; reuse the correct existing PR or publish
    every required slice. Record scope, dependency and current check results.

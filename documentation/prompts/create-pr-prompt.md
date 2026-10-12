@@ -8,7 +8,7 @@ description: Publish or update coherent HMS delivery PRs with current Spec and V
 Publish authorized HMS delivery through coherent, size-compliant GitHub PRs.
 Follow [Git Workflow Rules](../rules/git-workflow-rules.md),
 [Commit Rules](../rules/commit-rules.md), [SDD Workflow](../sdd.md),
-[Tooling](../tooling.md) and the repository `gh-cli` skill. Use authenticated `gh`,
+[Tooling](../tooling.md) and the repository [gh-cli skill](../../.codex/skills/gh-cli/SKILL.md). Use authenticated `gh`,
 preserve user work and update existing delivery PRs instead of creating duplicates.
 
 ## Authority and readiness
