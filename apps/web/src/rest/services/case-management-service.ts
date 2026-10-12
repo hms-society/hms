@@ -1,4 +1,4 @@
-import type { CaseManagementService as CaseManagementRestService } from '@hms/core/case-management/interfaces'
+import type { CaseTeamManagementService as CaseManagementRestService } from '@hms/core/case-management/interfaces'
 import type {
   CaseChecklistItem,
   ChecklistTemplate,
@@ -8,7 +8,12 @@ import type {
   Pending,
   AssistedMessage,
 } from '@hms/core/case-management/domain/entities'
-import type { CaseTeam } from '@hms/core/case-management/domain/structures'
+import type {
+  CaseEligibleCollaborator,
+  CaseTeam,
+  CaseTeamMutationResult,
+} from '@hms/core/case-management/domain/structures'
+import type { CaseTeamHistory } from '@hms/core/case-management/domain/entities'
 import type {
   CasePortalAccessSummary,
   GrantCasePortalAccessResponse,
@@ -16,6 +21,7 @@ import type {
   ThirdPartyPortalCaseResponse,
 } from '@hms/core/case-management/interfaces'
 import type { RestClient } from '@hms/core/shared/interfaces'
+import type { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
 
 export const CaseManagementService = (
   restClient: RestClient,
@@ -100,6 +106,43 @@ export const CaseManagementService = (
 
     getCaseTeam(caseId) {
       return restClient.get<CaseTeam>(`/cases/${caseId}/team`)
+    },
+
+    listCaseTeamCandidates(query, caseId) {
+      const params = new URLSearchParams({
+        page: String(query.page),
+        pageSize: String(query.pageSize),
+      })
+      if (query.search) params.set('search', query.search)
+      if (query.profile) params.set('profile', query.profile)
+      if (caseId) params.set('caseId', caseId)
+      return restClient.get<PaginationResponse<CaseEligibleCollaborator>>(
+        `/cases/team-candidates?${params}`,
+      )
+    },
+
+    addCaseTeamMember(caseId, request) {
+      return restClient.post<CaseTeamMutationResult>(`/cases/${caseId}/team`, request)
+    },
+
+    changeCaseTeamMemberRole(caseId, membershipId, request) {
+      return restClient.patch<CaseTeamMutationResult>(
+        `/cases/${caseId}/team/${membershipId}/role`,
+        request,
+      )
+    },
+
+    removeCaseTeamMember(caseId, membershipId, request) {
+      return restClient.delete<CaseTeamMutationResult>(
+        `/cases/${caseId}/team/${membershipId}`,
+        request,
+      )
+    },
+
+    listCaseTeamHistory(caseId, page, pageSize) {
+      return restClient.get<PaginationResponse<CaseTeamHistory>>(
+        `/cases/${caseId}/team/history?page=${page}&pageSize=${pageSize}`,
+      )
     },
 
     grantCasePortalAccess(caseId, request) {
