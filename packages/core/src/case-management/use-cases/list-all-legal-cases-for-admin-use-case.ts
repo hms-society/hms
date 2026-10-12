@@ -1,5 +1,6 @@
 import type { Client } from '#identity/domain/entities'
-import type { LegalArea, LegalTopic } from '#legal-catalog/domain/entities'
+import type { LegalArea } from '../../legal-catalog/domain/entities/legal-area'
+import type { LegalTopic } from '../../legal-catalog/domain/entities/legal-topic'
 import type { CaseEligibleCollaborator } from '../domain/structures'
 import type { LegalCaseOperationalRecord } from '../domain/entities'
 import type { LegalCaseOperationalSummary } from '../domain/entities'
