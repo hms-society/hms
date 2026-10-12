@@ -36,6 +36,13 @@ export function CasePieceCard({
             <div className='flex flex-wrap items-center gap-2'>
               <h2 className='text-sm font-semibold text-foreground'>{piece.title}</h2>
               <Badge variant='attention' className='h-5 rounded-full px-2 text-[11px]'>
+                {piece.status === 'Gerando minuta' ? (
+                  <Icon
+                    name='refresh-cw'
+                    className='size-3 animate-spin'
+                    aria-hidden='true'
+                  />
+                ) : null}
                 {piece.status}
               </Badge>
             </div>
