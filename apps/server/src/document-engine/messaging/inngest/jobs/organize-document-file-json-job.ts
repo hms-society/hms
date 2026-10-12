@@ -66,6 +66,12 @@ export class OrganizeDocumentFileJsonJob extends InngestJob {
           }
         }
 
+        if (!this.shouldSkipSuccessfulOrganization(currentDocument)) {
+          await step.run('mark-document-file-processing', async () =>
+            this.validationsRepository.recordProcessing(event.data.documentFileId),
+          )
+        }
+
         const organizationResult = await step.run(
           'generate-document-json-with-ollama',
           async () =>
@@ -494,7 +500,11 @@ export class OrganizeDocumentFileJsonJob extends InngestJob {
     )
   }
 
-  private shouldSkipSuccessfulOrganization(document: DocumentValidationDocument) {
+  private shouldSkipSuccessfulOrganization(document: {
+    aiSuggestion?: DocumentValidationDocument['aiSuggestion']
+    humanCorrection?: DocumentValidationDocument['humanCorrection']
+    reviewedAt?: DocumentValidationDocument['reviewedAt'] | string
+  }) {
     return (
       this.hasOrganizationAlreadyCaptured(document.aiSuggestion) ||
       document.humanCorrection !== undefined ||
