@@ -1,3 +1,6 @@
+import type { LegalCaseOperationalSummary } from '../domain/entities'
+import type { AdminCasesQuery } from '../domain/structures'
+import type { PaginationResponse } from '#shared/responses/pagination-response'
 import type {
   CaseChecklistItem,
   ChecklistTemplate,
@@ -127,6 +130,9 @@ export type CreateCaseTaskRequest = {
 }
 
 export interface CaseManagementService {
+  listAllCasesForAdmin(
+    query: AdminCasesQuery,
+  ): Promise<RestResponse<PaginationResponse<LegalCaseOperationalSummary>>>
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
 
   listCaseTasks(caseId: string): Promise<RestResponse<readonly CaseTask[]>>

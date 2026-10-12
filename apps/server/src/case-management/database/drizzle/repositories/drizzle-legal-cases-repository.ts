@@ -1,5 +1,10 @@
+import { PaginationResponse } from '@hms/core/shared/responses/pagination-response'
+import { asc, ilike, or, type SQL } from 'drizzle-orm'
 import { Inject, Injectable, Optional } from '@nestjs/common'
-import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 import { and, desc, eq, gte, inArray, isNull, lt, sql } from 'drizzle-orm'
 
@@ -237,5 +242,94 @@ export class DrizzleLegalCasesRepository
     const date = openedAt.toISOString().slice(0, 10).replaceAll('-', '')
     const sequence = (dailyCaseCount + 1).toString().padStart(4, '0')
     return `CASO-${date}-${sequence}`
+  }
+  async listOperationalRecords({
+    matchingClientIds,
+    page,
+    pageSize,
+    search,
+  }: Parameters<LegalCasesRepository['listOperationalRecords']>[0]) {
+    const offset = (page - 1) * pageSize
+    const searchFilters = search
+      ? [
+          ilike(legalCaseModel.publicCode, `%${search}%`),
+          ilike(legalCaseModel.title, `%${search}%`),
+          ...(matchingClientIds.length
+            ? [inArray(legalCaseModel.clientId, matchingClientIds)]
+            : []),
+        ]
+      : []
+    const whereClause = searchFilters.length ? or(...searchFilters) : undefined
+    const [{ total }] = await this.database
+      .select({ total: sql<number>`cast(count(${legalCaseModel.id}) as integer)` })
+      .from(legalCaseModel)
+      .where(whereClause)
+
+    const cases = await this.findOperationalCases(whereClause, pageSize, offset)
+    const managersByCase = await this.findManagerIdsByCase(cases.map(({ id }) => id))
+
+    const items = cases.map((legalCase) =>
+      this.legalCaseMapper.toOperationalRecord({
+        ...legalCase,
+        managerCollaboratorIds: managersByCase.get(legalCase.id) ?? [],
+      }),
+    )
+    return new PaginationResponse(
+      items,
+      page,
+      pageSize,
+      total,
+      Math.ceil(total / pageSize),
+    )
+  }
+
+  private findOperationalCases(
+    whereClause: SQL | undefined,
+    pageSize: number,
+    offset: number,
+  ) {
+    return this.database
+      .select({
+        id: legalCaseModel.id,
+        publicCode: legalCaseModel.publicCode,
+        title: legalCaseModel.title,
+        status: legalCaseModel.status,
+        clientId: legalCaseModel.clientId,
+        legalAreaId: legalCaseModel.legalAreaId,
+        legalTopicId: legalCaseModel.legalTopicId,
+        updatedAt: legalCaseModel.updatedAt,
+      })
+      .from(legalCaseModel)
+      .where(whereClause)
+      .orderBy(desc(legalCaseModel.updatedAt), asc(legalCaseModel.id))
+      .limit(pageSize)
+      .offset(offset)
+  }
+
+  private async findManagerIdsByCase(caseIds: string[]) {
+    if (caseIds.length === 0) return new Map<string, string[]>()
+
+    const managerRows = await this.database
+      .select({
+        caseId: caseMemberModel.caseId,
+        collaboratorId: caseMemberModel.collaboratorId,
+      })
+      .from(caseMemberModel)
+      .where(
+        and(
+          inArray(caseMemberModel.caseId, caseIds),
+          eq(caseMemberModel.role, CaseMemberRole.Manager),
+          isNull(caseMemberModel.removedAt),
+          eq(caseMemberModel.archivedLegacy, false),
+        ),
+      )
+
+    const managersByCase = new Map<string, string[]>()
+    for (const manager of managerRows) {
+      const caseManagers = managersByCase.get(manager.caseId) ?? []
+      caseManagers.push(manager.collaboratorId)
+      managersByCase.set(manager.caseId, caseManagers)
+    }
+    return managersByCase
   }
 }
