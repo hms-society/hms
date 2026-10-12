@@ -272,7 +272,7 @@ describe('Record Document Validation Decision Controller [PATCH /document-valida
         caseId: legalCase.id,
         checklistRequirementId: checklistItem?.id,
       })
-      .expect(500)
+      .expect(403)
 
     await expect(checklistItems.listByCaseId(legalCase.id)).resolves.toEqual([
       expect.objectContaining({
