@@ -69,7 +69,9 @@ describe('CasoDetalheChecklistPage', () => {
     expect(screen.getByRole('tab', { name: /Checklist & Dossiê/ })).toBeTruthy()
     expect(screen.getByRole('tab', { name: 'Prazos & Tarefas' })).toBeTruthy()
     expect(screen.getByRole('tab', { name: 'Equipe' })).toBeTruthy()
-    expect(screen.getByRole('tab', { name: 'Peças' }).hasAttribute('disabled')).toBe(false)
+    expect(screen.getByRole('tab', { name: 'Peças' }).hasAttribute('disabled')).toBe(
+      false,
+    )
     expect(screen.queryByRole('tab', { name: 'Andamentos' })).toBeNull()
     expect(screen.queryByRole('tab', { name: 'Comunicações' })).toBeNull()
     expect(screen.queryByRole('tab', { name: 'Encerramento' })).toBeNull()
