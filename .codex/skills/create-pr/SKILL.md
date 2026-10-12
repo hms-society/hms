@@ -12,7 +12,9 @@ description: >
 Publish authorized HMS delivery through coherent, size-compliant GitHub PRs.
 Follow [Git Workflow Rules](../../../documentation/rules/git-workflow-rules.md),
 [Commit Rules](../../../documentation/rules/commit-rules.md), [SDD Workflow](../../../documentation/sdd.md),
-[Tooling](../../../documentation/tooling.md) and the repository [gh-cli skill](../gh-cli/SKILL.md). Use authenticated `gh`,
+[Tooling](../../../documentation/tooling.md) and the local `gh-cli` skill supplied by the agent environment. That skill is
+not a tracked repository artifact; do not infer it is unavailable from the Git
+tree or require a new repository copy. Use authenticated `gh`,
 preserve user work and update existing delivery PRs instead of creating duplicates.
 
 ## Authority and readiness
