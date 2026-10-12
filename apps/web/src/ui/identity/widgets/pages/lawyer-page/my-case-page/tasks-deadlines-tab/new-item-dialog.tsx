@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 import { ptBR } from 'date-fns/locale'
 
 import { Icon } from '@/ui/shared/widgets/components/icon'
@@ -52,7 +53,12 @@ export function NewItemDialog({
   team: readonly CaseTeamMember[]
 }) {
   const assignableMembers = useMemo(
-    () => team.filter((member) => member.role !== 'supervisor'),
+    () =>
+      team.filter(
+        (member) =>
+          member.role === CaseMemberRole.Manager ||
+          member.role === CaseMemberRole.Collaborator,
+      ),
     [team],
   )
   const [type, setType] = useState<TaskDeadlineType>('Publicação')

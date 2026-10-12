@@ -3,7 +3,10 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CaseChecklistGateDecision } from '@hms/core/case-management/domain/structures'
+import {
+  CaseChecklistGateDecision,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { RestResponse } from '@hms/core/shared/responses/rest-response'
 
@@ -218,6 +221,89 @@ describe('useChecklistDossierTab', () => {
 
     expect(result.current.reasonError).toBe('Informe o motivo da decisão.')
     expect(caseManagementService.reviewChecklistGate).not.toHaveBeenCalled()
+
+    act(() => result.current.handleRemarksChange('Motivo incluído.'))
+
+    expect(result.current.reasonError).toBeNull()
+  })
+
+  it('approves without a reason and unlocks legal writing after dossier homologation', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.reviewChecklistGate.mockResolvedValue(
+      new RestResponse({
+        body: {
+          id: 'case-1',
+          status: LegalCaseStatus.LegalProduction,
+          checklistGate: {
+            decision: CaseChecklistGateDecision.Approved,
+            decidedBy: 'collaborator-2',
+            decidedAt: '2026-08-25T12:00:00.000Z',
+            remarks: null,
+          },
+          dossierGate: { homologatedAt: '2026-08-26T12:00:00.000Z' },
+        },
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () => useChecklistDossierTab({ caseId: 'case-1', checklist: [] }),
+      { wrapper },
+    )
+
+    expect(result.current.decisionReasonDialog.title).toBe('Deseja aprovar com exceção?')
+
+    await act(async () => result.current.handleApproveChecklist())
+
+    await waitFor(() => {
+      expect(result.current.checklistGateLabel).toBe('Aprovado')
+      expect(result.current.canStartLegalWriting).toBe(true)
+    })
+    expect(result.current.dossierGateLabel).toBe('Dossiê homologado')
+    expect(result.current.checklistGateAuditLabel).toContain('collaborator-2')
+    expect(caseManagementService.reviewChecklistGate).toHaveBeenCalledWith('case-1', {
+      decision: CaseChecklistGateDecision.Approved,
+      remarks: undefined,
+    })
+  })
+
+  it('surfaces a checklist gate review failure without clearing the decision', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.reviewChecklistGate.mockRejectedValue(
+      new Error('Serviço de revisão indisponível.'),
+    )
+
+    const { result } = renderHook(
+      () => useChecklistDossierTab({ caseId: 'case-1', checklist: [] }),
+      { wrapper },
+    )
+
+    act(() => result.current.handleApproveWithException())
+    act(() => result.current.handleRemarksChange('Exceção justificada.'))
+    await act(async () => {
+      await result.current.handleConfirmDecisionReason().catch(() => undefined)
+    })
+
+    await waitFor(() =>
+      expect(result.current.error?.message).toBe('Serviço de revisão indisponível.'),
+    )
+    expect(result.current.isDecisionReasonDialogOpen).toBe(true)
   })
 
   it('validates a pending document from the checklist action and records the validator', () => {

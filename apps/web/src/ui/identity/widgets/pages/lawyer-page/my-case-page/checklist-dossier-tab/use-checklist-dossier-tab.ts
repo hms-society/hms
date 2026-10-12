@@ -393,21 +393,14 @@ function getChecklistGateReviewerName(
   return decidedBy
 }
 
-function formatChecklistGateDecisionDate(value: Date | string) {
-  const date = new Date(value)
-  const day = new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric',
-  }).format(date)
-  const time = new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Sao_Paulo',
-  }).format(date)
+const CHECKLIST_GATE_DECISION_DATE_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+  timeZone: 'America/Sao_Paulo',
+})
 
-  return `${day} ${time}`
+function formatChecklistGateDecisionDate(value: Date | string) {
+  return CHECKLIST_GATE_DECISION_DATE_FORMATTER.format(new Date(value)).replace(',', '')
 }
 
 function formatChecklistValidationTime(date: Date) {

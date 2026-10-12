@@ -12,6 +12,7 @@ export type CasePieceCardProps = {
   onRetry?: () => void
   isRetrying?: boolean
   retryError?: string
+  readOnly?: boolean
 }
 
 export function CasePieceCard({
@@ -22,9 +23,11 @@ export function CasePieceCard({
   onRetry,
   isRetrying = false,
   retryError,
+  readOnly = false,
 }: CasePieceCardProps) {
   const canRetry =
-    piece.status === 'Gerando minuta' || piece.status === 'Falha na geração'
+    !readOnly &&
+    (piece.status === 'Gerando minuta' || piece.status === 'Falha na geração')
   return (
     <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
       <header className='flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between'>
@@ -92,6 +95,7 @@ export function CasePieceCard({
                   variant='ghost'
                   size='icon-xs'
                   aria-label={`Visualizar ${version.label}`}
+                  disabled={readOnly}
                   onClick={onOpenReview}
                 >
                   <Icon name='eye' className='size-3.5' />
@@ -128,23 +132,27 @@ export function CasePieceCard({
               {isRetrying ? 'Enviando...' : 'Gerar novamente'}
             </Button>
           ) : null}
-          <Button
-            size='xs'
-            className='rounded-full'
-            disabled={!piece.versions.length}
-            onClick={onOpenReview}
-          >
-            <Icon name='eye' className='size-3' /> Abrir revisão técnica
-          </Button>
-          <Button
-            variant='outline'
-            size='xs'
-            className='rounded-full'
-            disabled={!piece.versions.length}
-            onClick={onOpenEditor}
-          >
-            <Icon name='pencil' className='size-3' /> Abrir no editor
-          </Button>
+          {!readOnly && (
+            <>
+              <Button
+                size='xs'
+                className='rounded-full'
+                disabled={!piece.versions.length}
+                onClick={onOpenReview}
+              >
+                <Icon name='eye' className='size-3' /> Abrir revisão técnica
+              </Button>
+              <Button
+                variant='outline'
+                size='xs'
+                className='rounded-full'
+                disabled={!piece.versions.length}
+                onClick={onOpenEditor}
+              >
+                <Icon name='pencil' className='size-3' /> Abrir no editor
+              </Button>
+            </>
+          )}
         </div>
         <span className='text-right text-[11px] text-muted-foreground'>
           {piece.status === 'Aprovada'
