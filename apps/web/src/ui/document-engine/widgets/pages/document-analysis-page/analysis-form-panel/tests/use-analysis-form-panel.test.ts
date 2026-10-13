@@ -12,7 +12,7 @@ describe('useAnalysisFormPanel', () => {
       useAnalysisFormPanel({
         form: { setValue } as never,
         currentDecision: 'duplicate',
-        document: { status: 'awaiting_validation' } as never,
+        document: { status: 'awaiting_validation', extractedFields: [] } as never,
         onOpenDocument,
       }),
     )
@@ -38,6 +38,7 @@ describe('useAnalysisFormPanel', () => {
           reviewedBy: 'reviewer-id-1',
           reviewedByName: 'Atendente HMS',
           reviewedAt: new Date('2026-09-10T12:00:00.000Z'),
+          extractedFields: [],
         } as never,
         onOpenDocument: vi.fn(),
       }),
@@ -60,12 +61,14 @@ describe('useAnalysisFormPanel', () => {
           status: 'not_linked',
           reviewedByName: 'Advogado de desenvolvimento',
           reviewedAt: new Date('2026-09-10T12:00:00.000Z'),
+          extractedFields: [],
         } as never,
         onOpenDocument: vi.fn(),
       }),
     )
 
     expect(result.current.isDuplicateAlreadyConfirmed).toBe(false)
+    expect(result.current.hasExtractedInformation).toBe(false)
     expect(result.current.savedDecisionNotice?.title).toBe('Decisão salva: não vinculado')
     expect(result.current.savedDecisionNotice?.description).toContain(
       'Registrado por Advogado de desenvolvimento',

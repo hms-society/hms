@@ -3,6 +3,7 @@ import type { DocumentValidationDocument } from '@hms/core/document-engine/domai
 import { Badge } from '@/ui/shadcn/badge'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ExtractedFields } from '../extracted-fields'
+import { NoExtractedDataNotice } from '../no-extracted-data-notice'
 
 export type ReadOnlyIncompletePanelProps = {
   document: DocumentValidationDocument
@@ -107,12 +108,21 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
         </div>
 
         <div className='flex flex-col gap-3'>
-          <div className='flex flex-col gap-2'>
-            <span className='flex items-center gap-1 self-end font-sans text-[10px] text-muted-foreground'>
-              <Icon name='lock' className='size-3' /> Somente leitura
-            </span>
-            <ExtractedFields title='Campos extraídos' fields={document.extractedFields} />
-          </div>
+          {document.extractedFields.some(
+            (field) => !field.isMissing && field.value.trim().length > 0,
+          ) ? (
+            <div className='flex flex-col gap-2'>
+              <span className='flex items-center gap-1 self-end font-sans text-[10px] text-muted-foreground'>
+                <Icon name='lock' className='size-3' /> Somente leitura
+              </span>
+              <ExtractedFields
+                title='Campos extraídos'
+                fields={document.extractedFields}
+              />
+            </div>
+          ) : (
+            <NoExtractedDataNotice />
+          )}
           <div className='flex flex-col gap-3'>
             {document.missingFields.length > 0 && (
               <div className='flex items-start gap-3 rounded-md border border-[#FDECC8] bg-[#FFF8EB] p-3'>

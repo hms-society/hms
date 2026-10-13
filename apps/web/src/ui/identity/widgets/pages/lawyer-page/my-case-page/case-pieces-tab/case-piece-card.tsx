@@ -49,6 +49,13 @@ export function CasePieceCard({
                 variant={getStatusBadgeVariant(piece.status)}
                 className='h-5 rounded-full px-2 text-[11px]'
               >
+                {piece.status === 'Gerando minuta' ? (
+                  <Icon
+                    name='refresh-cw'
+                    className='size-3 animate-spin'
+                    aria-hidden='true'
+                  />
+                ) : null}
                 {piece.status}
               </Badge>
             </div>
