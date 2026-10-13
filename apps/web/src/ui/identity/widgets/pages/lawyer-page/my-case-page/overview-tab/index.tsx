@@ -8,31 +8,49 @@ import {
   getChecklistIconClasses,
   getChecklistRowClasses,
 } from '../checklist-style'
-import type { CaseTask, CaseTeamMember, CaseTimelineItem, ChecklistItem } from '../types'
+import type { CaseTeamMember, CaseTimelineItem, ChecklistItem } from '../types'
+
+import { useOverviewTab } from './use-overview-tab'
 
 export type OverviewTabProps = {
+  caseId: string
   checklist: ChecklistItem[]
   completionPercentage: number
   mandatoryItemsCount: number
   pendingItemsCount: number
-  tasks: CaseTask[]
+  currentCollaboratorId?: string
   team: CaseTeamMember[]
   timeline: CaseTimelineItem[]
   validatedItemsCount: number
   onOpenChecklist: () => void
+  onOpenTasks?: () => void
 }
 
 export const OverviewTab = ({
+  caseId,
   checklist,
   completionPercentage,
   mandatoryItemsCount,
   pendingItemsCount,
-  tasks,
+  currentCollaboratorId,
   team,
   timeline,
   validatedItemsCount,
   onOpenChecklist,
+  onOpenTasks,
 }: OverviewTabProps) => {
+  const {
+    documentPendings,
+    documentPendingsError,
+    isLoadingDocumentPendings,
+    caseTasksError,
+    isLoadingCaseTasks,
+    priorityItems,
+    handleOpenChecklistItem,
+  } = useOverviewTab({
+    caseId,
+    currentCollaboratorId,
+  })
   const hasChecklistItems = mandatoryItemsCount > 0
   const isChecklistComplete = hasChecklistItems && pendingItemsCount === 0
   const checklistProgressLabel = `${validatedItemsCount} de ${mandatoryItemsCount} - ${completionPercentage}%`
@@ -174,42 +192,153 @@ export const OverviewTab = ({
             <h2 className='font-serif text-lg font-semibold text-foreground'>
               Pendências e Tarefas
             </h2>
-            <Button variant='link' size='xs' className='h-auto px-0 text-primary'>
+            <Button
+              variant='link'
+              size='xs'
+              className='h-auto px-0 text-primary'
+              disabled={!onOpenTasks}
+              onClick={onOpenTasks}
+            >
               Ver todas
             </Button>
           </div>
           <div className='flex flex-col gap-2'>
-            {tasks.map((task) => (
-              <div
-                key={task.title}
-                className='flex flex-col gap-3 rounded-md border border-border bg-background px-3 py-3 md:flex-row md:items-center md:justify-between'
+            {isLoadingCaseTasks ? (
+              <p className='rounded-md border border-border bg-background px-3 py-4 text-sm text-muted-foreground'>
+                Carregando tarefas e prazos…
+              </p>
+            ) : caseTasksError ? (
+              <p
+                role='alert'
+                className='rounded-md border border-border bg-background px-3 py-4 text-sm text-destructive'
               >
-                <div className='flex min-w-0 items-start gap-3'>
-                  <div className='flex size-8 shrink-0 items-center justify-center rounded-md bg-highlight text-primary'>
-                    <Icon name={task.icon} className='size-4' />
+                Não foi possível carregar tarefas e prazos.
+              </p>
+            ) : priorityItems.length > 0 ? (
+              priorityItems.map((task) => (
+                <div
+                  key={task.id}
+                  className='flex flex-col gap-3 rounded-md border border-border bg-background px-3 py-3 md:flex-row md:items-center md:justify-between'
+                >
+                  <div className='flex min-w-0 items-start gap-3'>
+                    <div className='flex size-8 shrink-0 items-center justify-center rounded-md bg-highlight text-primary'>
+                      <Icon
+                        name={
+                          task.type === 'internal_task' ? 'list-checks' : 'calendar-clock'
+                        }
+                        className='size-4'
+                      />
+                    </div>
+                    <div className='flex min-w-0 flex-col gap-0.5'>
+                      <span className='text-[14px] font-semibold text-foreground'>
+                        {task.title}
+                      </span>
+                      <span className='text-[14px] text-muted-foreground'>
+                        {task.description || task.typeLabel}
+                        {task.assigneeIds.length > 0
+                          ? ` · ${task.isAssignedToCurrentUser ? 'Atribuída a você' : 'Atribuída à equipe'}`
+                          : ''}
+                      </span>
+                    </div>
                   </div>
-                  <div className='flex min-w-0 flex-col gap-0.5'>
-                    <span className='text-[14px] font-semibold text-foreground'>
-                      {task.title}
+                  <div className='flex shrink-0 items-center gap-2 self-start md:self-center'>
+                    <span className='text-xs text-muted-foreground'>
+                      {task.plannedDateLabel}
                     </span>
-                    <span className='text-[14px] text-muted-foreground'>
-                      {task.description} · {task.assignee}
-                    </span>
+                    <Badge
+                      variant={
+                        task.isOverdue
+                          ? 'destructive'
+                          : task.blocksCaseClosure
+                            ? 'attention'
+                            : 'secondary'
+                      }
+                      className='h-6 rounded-full px-3 text-[12px]'
+                    >
+                      {task.isOverdue
+                        ? 'Atrasado'
+                        : task.blocksCaseClosure
+                          ? 'Impeditiva'
+                          : task.statusLabel}
+                    </Badge>
                   </div>
                 </div>
-                <Badge
-                  variant={task.status === 'Em aberto' ? 'secondary' : 'attention'}
-                  className='h-6 self-start rounded-full px-3 text-[12px] md:self-center'
+              ))
+            ) : (
+              <p className='rounded-md border border-border bg-background px-3 py-4 text-sm text-muted-foreground'>
+                Nenhuma tarefa ou prazo requer atenção neste momento.
+              </p>
+            )}
+          </div>
+          <div className='flex flex-col gap-2 border-t border-border pt-3'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Pendências documentais
+            </h3>
+            {isLoadingDocumentPendings ? (
+              <p className='text-sm text-muted-foreground'>
+                Carregando pendências documentais…
+              </p>
+            ) : documentPendingsError ? (
+              <p role='alert' className='text-sm text-destructive'>
+                Não foi possível carregar as pendências documentais.
+              </p>
+            ) : documentPendings.length > 0 ? (
+              documentPendings.map((pending) => (
+                <article
+                  key={pending.id}
+                  className='flex flex-col gap-2 rounded-md border border-border bg-background p-3 sm:flex-row sm:items-start sm:justify-between'
                 >
-                  {task.status}
-                </Badge>
-              </div>
-            ))}
+                  <div className='flex min-w-0 items-start gap-2'>
+                    <Icon
+                      name='triangle-alert'
+                      className='mt-0.5 size-4 shrink-0 text-primary'
+                    />
+                    <div className='min-w-0'>
+                      <p className='text-sm font-semibold text-foreground'>
+                        {pending.title}
+                      </p>
+                      <p className='break-words text-sm text-muted-foreground'>
+                        {pending.reasonLabel}
+                        {pending.documentFileName ? ` · ${pending.documentFileName}` : ''}
+                      </p>
+                      {pending.messageStatusLabel ? (
+                        <p className='mt-1 flex items-center gap-1 text-xs text-muted-foreground'>
+                          <Icon
+                            name='message-square-text'
+                            className='size-3.5 shrink-0'
+                          />
+                          {pending.messageStatusLabel}
+                        </p>
+                      ) : null}
+                      {pending.messagePreview ? (
+                        <p className='mt-1 break-words text-xs text-muted-foreground'>
+                          {pending.messagePreview}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <Button
+                    variant='link'
+                    size='xs'
+                    className='h-auto shrink-0 justify-start px-0 text-primary'
+                    onClick={() => handleOpenChecklistItem(pending.checklistItemId)}
+                  >
+                    Ver documento
+                    <Icon name='arrow-right' className='size-3' />
+                  </Button>
+                </article>
+              ))
+            ) : (
+              <p className='text-sm text-muted-foreground'>
+                {caseId
+                  ? 'Nenhuma pendência documental ativa.'
+                  : 'Vínculo do caso indisponível para consultar pendências documentais.'}
+              </p>
+            )}
           </div>
           <div className='flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-[14px] text-muted-foreground'>
             <Icon name='shield-check' className='size-3.5 text-primary' />
-            Nenhum prazo processual crítico. Prazos passam a ser monitorados após o
-            protocolo.
+            Priorização baseada nos prazos e tarefas ativos deste caso.
           </div>
         </section>
       </div>

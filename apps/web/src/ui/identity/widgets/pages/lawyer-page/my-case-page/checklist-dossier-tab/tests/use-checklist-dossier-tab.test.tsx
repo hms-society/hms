@@ -38,6 +38,9 @@ describe('useChecklistDossierTab', () => {
   const documentValidationService = {
     listDocuments: vi.fn(),
   }
+  const documentService = {
+    listCaseExceptions: vi.fn(),
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -52,6 +55,7 @@ describe('useChecklistDossierTab', () => {
     useRestContextMock.mockReturnValue({
       caseManagementService,
       documentValidationService,
+      documentService,
     } as never)
     useNavigationMock.mockReturnValue({
       navigateTo,
@@ -84,6 +88,146 @@ describe('useChecklistDossierTab', () => {
         statusCode: 200,
       }),
     )
+    documentService.listCaseExceptions.mockResolvedValue(
+      new RestResponse({
+        body: [],
+        statusCode: 200,
+      }),
+    )
+  })
+
+  it('composes documentary activity from persisted checklist, review, decision, and homologation data', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+    caseManagementService.listCaseChecklist.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'checklist-item-1',
+            caseId: 'case-1',
+            templateItemKey: 'identity',
+            title: 'Documento de identidade',
+            isRequired: true,
+            status: 'validated',
+            validatedAt: '2026-10-08T15:00:00.000Z',
+            validatedBy: 'collaborator-1',
+            createdAt: '2026-10-07T12:00:00.000Z',
+            updatedAt: '2026-10-08T15:00:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+    documentValidationService.listDocuments.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'document-1',
+            batchId: 'batch-1',
+            fileName: 'identidade.pdf',
+            mimeType: 'application/pdf',
+            sizeBytes: 100,
+            storagePath: 'documents/identidade.pdf',
+            status: DocumentValidationStatus.Valid,
+            channel: 'email',
+            sender: 'cliente@example.com',
+            receivedAt: '2026-10-08T14:00:00.000Z',
+            createdAt: '2026-10-08T14:00:00.000Z',
+            reviewedAt: '2026-10-08T15:00:00.000Z',
+            reviewedBy: 'collaborator-1',
+            reviewedByName: 'João Pedro',
+            extractedFields: [],
+            missingFields: [],
+            checklistLink: { caseId: 'case-1', checklistItemId: 'checklist-item-1' },
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+    documentService.listCaseExceptions.mockResolvedValue(
+      new RestResponse({
+        body: [
+          {
+            id: 'exception-1',
+            caseId: 'case-1',
+            type: 'DISPENSA_DEFINITIVA',
+            status: 'APPROVED',
+            justification: 'Documento dispensado conforme decisão registrada.',
+            createdBy: 'collaborator-1',
+            reviewedBy: 'collaborator-1',
+            createdAt: '2026-10-07T13:00:00.000Z',
+            updatedAt: '2026-10-08T18:00:00.000Z',
+          },
+        ],
+        statusCode: 200,
+      }),
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          caseDetails: {
+            id: 'case-1',
+            status: 'legal_production',
+            checklistGate: {
+              decision: CaseChecklistGateDecision.Approved,
+              decidedAt: '2026-10-08T16:00:00.000Z',
+              decidedBy: 'collaborator-1',
+            },
+            dossierGate: {
+              homologatedAt: '2026-10-08T17:00:00.000Z',
+              homologatedBy: 'collaborator-1',
+            },
+          } as never,
+          checklist: [],
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.activities).toHaveLength(7))
+    expect(result.current.activities.map(({ title }) => title)).toEqual([
+      'Exceção aprovada',
+      'Dossiê homologado',
+      'Checklist aprovado',
+      'Item validado',
+      'Documento validado',
+      'Exceção documental solicitada',
+      'Item incluído no checklist',
+    ])
+    expect(result.current.activities[0].description).toContain('João Pedro')
+    expect(result.current.activities[0].description).toContain('08/10/2026')
+    expect(result.current.activities[4].description).toContain('identidade.pdf')
+  })
+
+  it('returns no activities when no persisted documentary milestones are available', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+
+    const { result } = renderHook(
+      () =>
+        useChecklistDossierTab({
+          caseId: 'case-1',
+          checklist: [{ id: 'fallback', title: 'Mock item', status: 'solicitado' }],
+        }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.activities).toEqual([]))
   })
 
   afterEach(() => {

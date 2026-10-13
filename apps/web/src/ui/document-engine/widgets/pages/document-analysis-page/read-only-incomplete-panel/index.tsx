@@ -75,33 +75,35 @@ export const ReadOnlyIncompletePanel = ({ document }: ReadOnlyIncompletePanelPro
               <Icon name='lock' className='size-3' /> Somente leitura
             </span>
           </div>
-          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-            <div className='flex flex-col gap-1.5'>
-              <span className='font-sans text-xs text-muted-foreground'>Caso</span>
-              <div className='flex min-h-10 min-w-0 items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 font-sans text-sm text-foreground'>
-                <Icon
-                  name='briefcase'
-                  className='mt-0.5 size-4 shrink-0 text-muted-foreground'
-                />
-                <span className='line-clamp-2 min-w-0 break-words'>
-                  {document.checklistLink?.caseLabel ?? 'Caso não informado'}
-                </span>
+          <div className='@container'>
+            <dl className='grid grid-cols-1 gap-3 @2xl:grid-cols-2'>
+              <div className='flex min-w-0 flex-col gap-1.5'>
+                <dt className='font-sans text-xs text-muted-foreground'>Caso</dt>
+                <dd className='flex min-h-10 min-w-0 items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 font-sans text-sm text-foreground'>
+                  <Icon
+                    name='briefcase'
+                    className='mt-0.5 size-4 shrink-0 text-muted-foreground'
+                  />
+                  <span className='min-w-0 break-words'>
+                    {document.checklistLink?.caseLabel ?? 'Caso não informado'}
+                  </span>
+                </dd>
               </div>
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <span className='font-sans text-xs text-muted-foreground'>
-                Item do checklist
-              </span>
-              <div className='flex min-h-10 min-w-0 items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 font-sans text-sm text-foreground'>
-                <Icon
-                  name='list-checks'
-                  className='mt-0.5 size-4 shrink-0 text-muted-foreground'
-                />
-                <span className='line-clamp-2 min-w-0 break-words'>
-                  {document.checklistLink?.checklistItemLabel ?? 'Item não informado'}
-                </span>
+              <div className='flex min-w-0 flex-col gap-1.5'>
+                <dt className='font-sans text-xs text-muted-foreground'>
+                  Item do checklist
+                </dt>
+                <dd className='flex min-h-10 min-w-0 items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 font-sans text-sm text-foreground'>
+                  <Icon
+                    name='list-checks'
+                    className='mt-0.5 size-4 shrink-0 text-muted-foreground'
+                  />
+                  <span className='min-w-0 break-words'>
+                    {document.checklistLink?.checklistItemLabel ?? 'Item não informado'}
+                  </span>
+                </dd>
               </div>
-            </div>
+            </dl>
           </div>
         </div>
 

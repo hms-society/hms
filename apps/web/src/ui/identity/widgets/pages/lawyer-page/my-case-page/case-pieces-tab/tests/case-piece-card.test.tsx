@@ -21,5 +21,31 @@ describe('CasePieceCard', () => {
 
     const status = screen.getByText('Gerando minuta')
     expect(status.parentElement?.querySelector('.animate-spin')).not.toBeNull()
+    expect(status.getAttribute('data-variant')).toBe('info')
+  })
+
+  it.each([
+    ['Aprovada', 'success'],
+    ['Requer ajustes', 'attention'],
+    ['Em revisão', 'info'],
+    ['Falha na geração', 'destructive'],
+    ['Em elaboração', 'secondary'],
+  ])('uses the %s color for that status', (status, variant) => {
+    render(
+      <CasePieceCard
+        piece={{
+          id: 'piece-1',
+          title: 'Petição inicial',
+          template: 'Modelo universal',
+          author: 'Advogado',
+          reviewer: 'Revisor',
+          updatedAt: '12:00',
+          status,
+          versions: [],
+        }}
+      />,
+    )
+
+    expect(screen.getByText(status).getAttribute('data-variant')).toBe(variant)
   })
 })

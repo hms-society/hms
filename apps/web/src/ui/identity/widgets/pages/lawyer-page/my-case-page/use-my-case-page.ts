@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { useSearch } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -88,7 +89,13 @@ export function useMyCasePage({ caseId }: UseMyCasePageParams) {
     },
   })
 
-  const [activeTab, setActiveTab] = useState('visao-geral')
+  const { tab } = useSearch({ from: '/advogado/meus-casos/$caseId' })
+  const [activeTab, setActiveTab] = useState(tab ?? 'visao-geral')
+
+  useEffect(() => {
+    if (tab) setActiveTab(tab)
+  }, [tab])
+
   const { data: legalCases = [] } = useQuery({
     queryKey: ['case-management', 'my-cases'],
     queryFn: async () => {
