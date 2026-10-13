@@ -239,6 +239,10 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
       )
       return
     }
+    if (pathname === `/cases/${CASE_ID}/tasks` && request.method() === 'GET') {
+      await route.fulfill(json([]))
+      return
+    }
     if (pathname === '/cases/team-candidates') {
       const profileFilter = url.searchParams.get('profile')
       const search = url.searchParams.get('search')?.toLowerCase()
