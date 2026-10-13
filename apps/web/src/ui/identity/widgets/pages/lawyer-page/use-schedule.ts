@@ -14,7 +14,7 @@ export function useConsultation() {
   const collaboratorId = currentCollaborator?.collaboratorId
   const scheduleQueryKey = ['schedule', collaboratorId] as const
 
-  const { schedule, isLoading, isError, error } = useSchedule()
+  const { schedule, isLoading, isError, error, refetch } = useSchedule()
   const [duration, setDuration] = useState<'30min' | '45min' | '1h'>('45min')
 
   async function getOrCreateScheduleId(): Promise<string> {
@@ -134,6 +134,7 @@ export function useConsultation() {
     isLoading,
     isError,
     error,
+    refetch,
     updateAvailability: updateAvailabilityMutation.mutateAsync,
     isUpdatingAvailability: updateAvailabilityMutation.isPending,
     addBlock: addBlockMutation.mutateAsync,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
+import { ArrowLeft, Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -309,13 +309,25 @@ export const Schedule = () => {
 
   return (
     <div className='flex flex-col gap-6 max-w-5xl pt-4 md:pt-8 px-4 sm:px-6 w-full mx-auto pb-10'>
-      <div className='flex flex-col gap-1'>
-        <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
-          Configurar agenda
-        </h1>
-        <p className='text-muted-foreground font-sans text-[13px] sm:text-[14px]'>
-          Defina sua disponibilidade semanal, duração de consulta e bloqueios
-        </p>
+      <div className='flex flex-col gap-4'>
+        <Button
+          asChild
+          className='w-fit rounded-none px-0 text-primary hover:bg-transparent hover:text-primary/80'
+          variant='ghost'
+        >
+          <a href='/agenda'>
+            <ArrowLeft className='size-4' aria-hidden='true' />
+            Voltar para o calendário
+          </a>
+        </Button>
+        <div className='flex flex-col gap-1'>
+          <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
+            Configurar agenda
+          </h1>
+          <p className='text-muted-foreground font-sans text-[13px] sm:text-[14px]'>
+            Defina sua disponibilidade semanal, duração de consulta e bloqueios
+          </p>
+        </div>
       </div>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
