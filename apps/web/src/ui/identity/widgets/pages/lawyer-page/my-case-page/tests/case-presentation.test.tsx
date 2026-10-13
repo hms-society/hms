@@ -15,7 +15,6 @@ import { MyCasePortalAccess } from '../my-case-portal-access'
 import { ChecklistDocumentList } from '../overview-tab/checklist-document-list'
 import { ChecklistProgressCard } from '../overview-tab/checklist-progress-card'
 import { OverviewTab } from '../overview-tab'
-import { TasksPanel } from '../overview-tab/tasks-panel'
 import { TeamCard } from '../overview-tab/team-card'
 import { TimelineCard } from '../overview-tab/timeline-card'
 import type { ChecklistItem } from '../types'
@@ -183,32 +182,15 @@ describe('Case detail presentation widgets', () => {
     expect(onOpenChecklist).toHaveBeenCalledOnce()
   })
 
-  it('covers the overview next-action branches and renders each case section', () => {
+  it('covers the overview next-action branches', () => {
     const onOpenChecklist = vi.fn()
     const props = {
       checklist,
       completionPercentage: 50,
       mandatoryItemsCount: 2,
       pendingItemsCount: 2,
-      tasks: [
-        {
-          title: 'Conferir documentos',
-          description: 'Revisar o envio',
-          assignee: 'Você',
-          status: 'Em aberto',
-          icon: 'list-checks' as const,
-        },
-      ],
-      team: [
-        {
-          collaboratorId: 'member-1',
-          name: 'Beatriz Oliveira',
-          role: CaseMemberRole.Manager,
-        },
-      ],
-      timeline: [
-        { icon: 'users' as const, title: 'Equipe definida', description: 'Hoje' },
-      ],
+      team: [],
+      timeline: [],
       validatedItemsCount: 1,
       onOpenChecklist,
     }
@@ -218,10 +200,6 @@ describe('Case detail presentation widgets', () => {
       screen.getByText('Próxima ação: completar a documentação do caso'),
     ).toBeTruthy()
     expect(screen.getByText(/2 documentos obrigatórios/)).toBeTruthy()
-    expect(screen.getByText('Dados do Caso')).toBeTruthy()
-    expect(screen.getByText('Prazos e tarefas prioritários')).toBeTruthy()
-    expect(screen.getByText('Equipe do Caso')).toBeTruthy()
-    expect(screen.getByText('Linha do Tempo')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Abrir checklist' }))
 
     rerender(<OverviewTab {...props} pendingItemsCount={1} />)
@@ -241,9 +219,6 @@ describe('Case detail presentation widgets', () => {
         mandatoryItemsCount={0}
         pendingItemsCount={0}
         checklist={[]}
-        tasks={[]}
-        team={[]}
-        timeline={[]}
       />,
     )
     expect(
@@ -251,9 +226,6 @@ describe('Case detail presentation widgets', () => {
     ).toBeTruthy()
     expect(
       screen.getByText('Nenhum item de checklist foi encontrado para este caso.'),
-    ).toBeTruthy()
-    expect(
-      screen.getByText('Nenhuma tarefa ou prazo requer atenção neste momento.'),
     ).toBeTruthy()
     expect(onOpenChecklist).toHaveBeenCalledOnce()
   })
@@ -292,33 +264,6 @@ describe('Case detail presentation widgets', () => {
     expect(screen.getByText('Documento recebido')).toBeTruthy()
     rerender(<TimelineCard timeline={[]} />)
     expect(screen.getByRole('heading', { name: 'Linha do Tempo' })).toBeTruthy()
-  })
-
-  it('renders task status variants and empty tasks', () => {
-    const { rerender } = render(
-      <TasksPanel
-        tasks={[
-          {
-            title: 'Tarefa aberta',
-            description: 'Ação pendente',
-            assignee: 'Você',
-            status: 'Em aberto',
-            icon: 'list-checks',
-          },
-          {
-            title: 'Tarefa aguardando',
-            description: 'Aprovação necessária',
-            assignee: 'Equipe',
-            status: 'Aguardando aprovação',
-            icon: 'message-square-text',
-          },
-        ]}
-      />,
-    )
-    expect(screen.getByText('Tarefa aberta')).toBeTruthy()
-    expect(screen.getByText('Aguardando aprovação')).toBeTruthy()
-    rerender(<TasksPanel tasks={[]} />)
-    expect(screen.getByRole('heading', { name: 'Pendências e Tarefas' })).toBeTruthy()
   })
 
   it('covers administrator header loading, unavailable, and populated states', () => {
