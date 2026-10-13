@@ -2,6 +2,7 @@ import type { Client, ClientCreation, ClientUpdate } from '../domain/entities'
 import type { TaxId } from '../domain/structures'
 
 export interface ClientsRepository {
+  findIdsByName(search: string): Promise<readonly string[]>
   add(client: ClientCreation): Promise<Client | undefined>
   addMany(clients: ClientCreation[]): Promise<Client[]>
   removeAll(): Promise<void>

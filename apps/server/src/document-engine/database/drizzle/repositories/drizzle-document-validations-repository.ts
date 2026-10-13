@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, isNull, ne, sql } from 'drizzle-orm'
 import type {
   DocumentValidationDocument,
   DocumentValidationDuplicateMatch,
@@ -208,7 +208,12 @@ export class DrizzleDocumentValidationsRepository
         status: DocumentValidationStatus.Processing,
         aiConfidence: 0,
       })
-      .where(eq(documentBatchFileModel.id, documentFileId))
+      .where(
+        and(
+          eq(documentBatchFileModel.id, documentFileId),
+          isNull(documentBatchFileModel.reviewedAt),
+        ),
+      )
 
     return this.findRequiredByFileId(documentFileId)
   }

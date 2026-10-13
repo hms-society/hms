@@ -153,6 +153,25 @@ describe('DocumentAnalysisPage', () => {
     expect(screen.getByTestId('request-resend-modal').textContent).toContain('closed')
   })
 
+  it('keeps the processing state visible while the document is being organized', () => {
+    useDocumentAnalysisMock.mockReturnValue(
+      getDocumentAnalysisController({
+        documentView: {
+          ...getDocumentAnalysisController().documentView,
+          status: 'Em processamento',
+        },
+      }),
+    )
+
+    render(<DocumentAnalysisPage fileId={document.id} />)
+
+    expect(
+      screen.getByRole('heading', { name: 'Documento em processamento' }),
+    ).toBeDefined()
+    expect(screen.queryByTestId('analysis-form-panel')).toBeNull()
+    expect(screen.queryByTestId('read-only-validated-panel')).toBeNull()
+  })
+
   it('renders the read-only widget after the document is validated', () => {
     render(<DocumentAnalysisPage fileId={document.id} />)
 

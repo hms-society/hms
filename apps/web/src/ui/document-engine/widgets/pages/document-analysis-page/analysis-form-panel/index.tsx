@@ -8,6 +8,7 @@ import { Icon } from '@/ui/shared/widgets/components/icon'
 import { ChecklistLinkFields } from '../checklist-link-fields'
 import { EditableExtractedFields } from '../editable-extracted-fields'
 import { IllegibleDecisionState } from '../illegible-decision-state'
+import { NoExtractedDataNotice } from '../no-extracted-data-notice'
 import {
   useAnalysisFormPanel,
   type AnalysisFormPanelProps,
@@ -26,6 +27,7 @@ export const AnalysisFormPanel = ({
 }: AnalysisFormPanelProps) => {
   const {
     isDuplicateAlreadyConfirmed,
+    hasExtractedInformation,
     savedDecisionNotice,
     handleOpenDuplicateDocument,
   } = useAnalysisFormPanel({
@@ -103,7 +105,9 @@ export const AnalysisFormPanel = ({
                 somente se o documento estiver apto para validação.
               </p>
               <ChecklistLinkFields form={form} document={document} />
-              <EditableExtractedFields title='Campos extraídos' form={form} />
+              {hasExtractedInformation && (
+                <EditableExtractedFields title='Campos extraídos' form={form} />
+              )}
             </div>
           )}
 
@@ -120,7 +124,9 @@ export const AnalysisFormPanel = ({
                 </span>
               </div>
               <ChecklistLinkFields form={form} document={document} />
-              <EditableExtractedFields title='Dados extraídos' form={form} />
+              {hasExtractedInformation ? (
+                <EditableExtractedFields title='Dados extraídos' form={form} />
+              ) : null}
             </div>
           )}
 
@@ -305,6 +311,8 @@ export const AnalysisFormPanel = ({
               </Field>
             </div>
           )}
+
+          {!hasExtractedInformation && <NoExtractedDataNotice />}
         </div>
 
         <footer className='mt-auto flex items-center justify-end gap-3 border-t border-border bg-card p-5'>
