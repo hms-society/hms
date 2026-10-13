@@ -102,6 +102,7 @@ export class CaseManagementModuleFixture {
   static async register(
     controller?: Type<unknown>,
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+    additionalImports: Type<unknown>[] = [],
   ) {
     const authFixture = await SupabaseAuthFixture.register()
     const auth = await authFixture.createSignedInUser()
@@ -113,6 +114,7 @@ export class CaseManagementModuleFixture {
         auth.accessToken,
         controller,
         configure,
+        additionalImports,
       )
 
     return new CaseManagementModuleFixture(
@@ -450,7 +452,10 @@ export class CaseManagementModuleFixture {
     }
   }
 
-  private static caseManagementImports(includeDocuments: boolean): Type<unknown>[] {
+  private static caseManagementImports(
+    includeDocuments: boolean,
+    additionalImports: Type<unknown>[],
+  ): Type<unknown>[] {
     return [
       IdentityModule,
       IdentityAccessModule,
@@ -460,6 +465,7 @@ export class CaseManagementModuleFixture {
       IntakeDatabaseModule,
       ProvisionModule,
       ...(includeDocuments ? [DocumentsDatabaseModule] : []),
+      ...additionalImports,
     ]
   }
 
@@ -483,11 +489,15 @@ export class CaseManagementModuleFixture {
     accessToken: string,
     controller?: Type<unknown>,
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+    additionalImports: Type<unknown>[] = [],
   ) {
     try {
       return await RestFixture.register(
         {
-          imports: CaseManagementModuleFixture.caseManagementImports(Boolean(configure)),
+          imports: CaseManagementModuleFixture.caseManagementImports(
+            Boolean(configure),
+            additionalImports,
+          ),
           controllers: controller ? [controller] : [],
         },
         (builder) => {

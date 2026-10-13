@@ -117,13 +117,13 @@ export const DocumentFilePreview = ({
                   file={fileUrl}
                   onLoadSuccess={({ numPages: totalPages }) => setNumPages(totalPages)}
                   loading={
-                    <div className='flex flex-col items-center gap-2 py-10 text-muted-foreground'>
+                    <div className='absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground'>
                       <Icon name='refresh-cw' className='size-8 animate-spin' />
                       <span className='font-sans text-sm'>Renderizando PDF...</span>
                     </div>
                   }
                   error={
-                    <div className='flex flex-col items-center gap-2 py-10 text-destructive'>
+                    <div className='absolute inset-0 flex flex-col items-center justify-center gap-2 text-destructive'>
                       <Icon name='triangle-alert' className='size-8' />
                       <span className='font-sans text-sm'>
                         Não foi possível renderizar o PDF.

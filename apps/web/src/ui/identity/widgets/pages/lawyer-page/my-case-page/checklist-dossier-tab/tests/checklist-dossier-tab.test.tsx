@@ -46,6 +46,7 @@ function createController(
   const isChecklistComplete = overrides.isChecklistComplete ?? false
   return {
     actionFeedback: null,
+    activities: [],
     canStartLegalWriting: false,
     canHomologateDossier: false,
     checklistGateAuditLabel: undefined,
@@ -120,7 +121,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[
           { id: '1', title: 'Procuração', status: 'validado' },
@@ -163,7 +163,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'solicitado' }]}
       />,
@@ -187,7 +186,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
         isReviewDisabled
@@ -281,7 +279,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[
           { id: '1', title: 'Procuração', status: 'validado' },
@@ -319,7 +316,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '2', title: 'CNIS', status: 'solicitado' }]}
       />,
@@ -340,7 +336,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
       />,
@@ -351,6 +346,33 @@ describe('ChecklistDossierTab', () => {
     expect(
       screen.getByText('Decisão registrada por João Pedro em 24/08/2026 09:00'),
     ).toBeTruthy()
+  })
+
+  it('renders persisted documentary activity from its controller and explains when none is available', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        activities: [
+          {
+            id: 'dossier-homologated',
+            icon: 'check-circle-2',
+            title: 'Dossiê homologado',
+            description: 'Por João Pedro em 08/10/2026 14:00',
+          },
+        ],
+      }),
+    )
+
+    const { rerender } = render(<ChecklistDossierTab caseId='case-1' checklist={[]} />)
+
+    expect(screen.getByText('Dossiê homologado')).toBeDefined()
+    expect(screen.getByText('Por João Pedro em 08/10/2026 14:00')).toBeDefined()
+
+    useChecklistDossierTabMock.mockReturnValue(createController())
+    rerender(<ChecklistDossierTab caseId='case-1' checklist={[]} />)
+
+    expect(
+      screen.getByText(/Ainda não há atividades documentais registradas para este caso/),
+    ).toBeDefined()
   })
 
   it('delegates support actions and renders visible action feedback', () => {
@@ -371,7 +393,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
       />,
@@ -412,7 +433,6 @@ describe('ChecklistDossierTab', () => {
 
     render(
       <ChecklistDossierTab
-        activities={[]}
         caseId='case-1'
         checklist={[{ id: '1', title: 'Procuração', status: 'validado' }]}
       />,

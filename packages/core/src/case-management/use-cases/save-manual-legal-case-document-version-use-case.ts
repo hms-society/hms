@@ -123,7 +123,7 @@ export class SaveManualLegalCaseDocumentVersionUseCase
         pendingMarkers,
         createdByCollaboratorId: request.createdByCollaboratorId,
         createdAt: this.datetime.now(),
-        status: DocumentVersionStatus.InReview,
+        status: DocumentVersionStatus.Draft,
       })
     } catch (error) {
       await this.storage.remove(file.id)

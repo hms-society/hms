@@ -30,7 +30,11 @@ export type ConsultationDocumentReviewPageProps = {
   documentVersionId: string
 }
 
-export type ConsultationDocumentReviewStatus = 'in_review' | 'approved' | 'rejected'
+export type ConsultationDocumentReviewStatus =
+  | 'draft'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
 export type ConsultationDocumentReviewGenerationState = 'idle' | 'generating' | 'failed'
 
 type ErrorWithStatus = Error & { statusCode?: number }
@@ -100,6 +104,7 @@ function getSourceLabel(source: DocumentVersionSource) {
 }
 
 function getStatusLabel(status: ConsultationDocumentReviewStatus) {
+  if (status === DocumentVersionStatus.Draft) return 'Em elaboração'
   if (status === DocumentVersionStatus.InReview) return 'Em revisão'
   if (status === DocumentVersionStatus.Rejected) return 'Rejeitado'
   return 'Aprovado'

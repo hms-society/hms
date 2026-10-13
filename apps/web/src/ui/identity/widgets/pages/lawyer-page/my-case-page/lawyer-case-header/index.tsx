@@ -13,6 +13,7 @@ export type LawyerCaseHeaderProps = {
   isGeneratingPortalLink: boolean
   onOpenPortal: () => void
   dossierApproved: boolean
+  caseStatus?: string
   onOpenNewPiece: () => void
 }
 
@@ -61,6 +62,6 @@ export const LawyerCaseHeader = (props: LawyerCaseHeaderProps) => (
         />
       </div>
     </div>
-    <CaseStageProgress />
+    <CaseStageProgress caseStatus={props.caseStatus} />
   </section>
 )

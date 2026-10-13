@@ -33,6 +33,17 @@ vi.mock('../tasks-deadlines-tab', () => ({
     <div>Prazos {String(readOnly)}</div>
   ),
 }))
+vi.mock('../overview-tab/use-overview-tab', () => ({
+  useOverviewTab: () => ({
+    documentPendings: [],
+    documentPendingsError: null,
+    isLoadingDocumentPendings: false,
+    caseTasksError: null,
+    isLoadingCaseTasks: false,
+    priorityItems: [],
+    handleOpenChecklistItem: vi.fn(),
+  }),
+}))
 vi.mock('../case-pieces-tab', () => ({
   CasePiecesTab: ({ readOnly }: { readOnly: boolean }) => (
     <div>Peças {String(readOnly)}</div>
@@ -208,7 +219,7 @@ describe('Case detail presentation widgets', () => {
     ).toBeTruthy()
     expect(screen.getByText(/2 documentos obrigatórios/)).toBeTruthy()
     expect(screen.getByText('Dados do Caso')).toBeTruthy()
-    expect(screen.getByText('Pendências e Tarefas')).toBeTruthy()
+    expect(screen.getByText('Prazos e tarefas prioritários')).toBeTruthy()
     expect(screen.getByText('Equipe do Caso')).toBeTruthy()
     expect(screen.getByText('Linha do Tempo')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Abrir checklist' }))
@@ -242,9 +253,7 @@ describe('Case detail presentation widgets', () => {
       screen.getByText('Nenhum item de checklist foi encontrado para este caso.'),
     ).toBeTruthy()
     expect(
-      screen.getByText(
-        'Nenhum prazo processual crítico. Prazos passam a ser monitorados após o protocolo.',
-      ),
+      screen.getByText('Nenhuma tarefa ou prazo requer atenção neste momento.'),
     ).toBeTruthy()
     expect(onOpenChecklist).toHaveBeenCalledOnce()
   })

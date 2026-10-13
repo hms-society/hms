@@ -5,7 +5,10 @@ import type {
   CaseTeamMember,
   CaseTimelineItem,
 } from './types'
-import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 
 export const MOCK_ACTIVITIES: ActivityItem[] = [
   {
@@ -107,6 +110,24 @@ export const CASE_STAGES: CaseStage[] = [
   { icon: 'chart-line', label: 'Execução' },
   { icon: 'check', label: 'Encerramento' },
 ]
+
+export const getCaseStages = (caseStatus?: string): CaseStage[] => {
+  const isInLegalProduction = caseStatus === LegalCaseStatus.LegalProduction
+  const activeStageIndex = isInLegalProduction ? 1 : 0
+
+  return CASE_STAGES.map((stage, index) => {
+    if (index === 0 && isInLegalProduction) {
+      return {
+        ...stage,
+        icon: 'check',
+        status: 'Concluída',
+        isActive: false,
+      }
+    }
+
+    return { ...stage, isActive: index === activeStageIndex }
+  })
+}
 
 export const TEAM_MEMBERS = CASE_TEAM.map(({ className, initials }) => ({
   className,

@@ -12,12 +12,14 @@ export type CaseTabPanelsProps = {
   isAdministrator: boolean
   caseUuid: string
   caseDetails?: LegalCaseSummary
+  currentCollaboratorId?: string
   checklistItems: ChecklistItem[]
   completionPercentage: number
   mandatoryItemsCount: number
   pendingItemsCount: number
   validatedItemsCount: number
   onOpenChecklist: () => void
+  onOpenTasks?: () => void
   openNewPieceDialog: boolean
   onNewPieceDialogOpenChange: (open: boolean) => void
 }
@@ -26,11 +28,13 @@ export const CaseTabPanels = (props: CaseTabPanelsProps) => (
   <>
     <TabsContent value='visao-geral' className='mt-4 flex flex-col gap-4'>
       <OverviewTab
+        caseId={props.caseUuid}
         checklist={props.checklistItems}
         completionPercentage={props.completionPercentage}
         mandatoryItemsCount={props.mandatoryItemsCount}
         pendingItemsCount={props.pendingItemsCount}
         tasks={CASE_TASKS}
+        currentCollaboratorId={props.currentCollaboratorId}
         team={
           props.caseDetails?.team?.map((member) => ({
             collaboratorId: member.collaboratorId,
@@ -43,6 +47,7 @@ export const CaseTabPanels = (props: CaseTabPanelsProps) => (
         timeline={CASE_TIMELINE}
         validatedItemsCount={props.validatedItemsCount}
         onOpenChecklist={props.onOpenChecklist}
+        onOpenTasks={props.onOpenTasks}
       />
     </TabsContent>
     <TabsContent value='checklist' className='mt-4 flex flex-col gap-4'>

@@ -32,7 +32,7 @@ export const documentVersionModel = pgTable(
       .notNull(),
     createdByCollaboratorId: uuid('created_by_collaborator_id').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
-    status: text('status').notNull().default('in_review'),
+    status: text('status').notNull().default('draft'),
     reviewedByCollaboratorId: uuid('reviewed_by_collaborator_id'),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true, mode: 'date' }),
     rejectionReason: text('rejection_reason'),
@@ -42,11 +42,11 @@ export const documentVersionModel = pgTable(
     check('document_versions_source_check', sql`${table.source} in ('ai', 'manual')`),
     check(
       'document_versions_status_check',
-      sql`${table.status} in ('in_review', 'approved', 'rejected')`,
+      sql`${table.status} in ('draft', 'in_review', 'approved', 'rejected')`,
     ),
     check(
       'document_versions_review_metadata_check',
-      sql`(${table.status} = 'in_review' AND ${table.reviewedByCollaboratorId} IS NULL AND ${table.reviewedAt} IS NULL AND ${table.rejectionReason} IS NULL) OR (${table.status} = 'approved' AND ${table.reviewedByCollaboratorId} IS NOT NULL AND ${table.reviewedAt} IS NOT NULL AND ${table.rejectionReason} IS NULL) OR (${table.status} = 'rejected' AND ${table.reviewedByCollaboratorId} IS NOT NULL AND ${table.reviewedAt} IS NOT NULL AND ${table.rejectionReason} IS NOT NULL AND length(btrim(${table.rejectionReason})) > 0)`,
+      sql`(${table.status} = 'draft' AND ${table.reviewedByCollaboratorId} IS NULL AND ${table.reviewedAt} IS NULL AND ${table.rejectionReason} IS NULL) OR (${table.status} = 'in_review' AND ${table.reviewedByCollaboratorId} IS NULL AND ${table.reviewedAt} IS NULL AND ${table.rejectionReason} IS NULL) OR (${table.status} = 'approved' AND ${table.reviewedByCollaboratorId} IS NOT NULL AND ${table.reviewedAt} IS NOT NULL AND ${table.rejectionReason} IS NULL) OR (${table.status} = 'rejected' AND ${table.reviewedByCollaboratorId} IS NOT NULL AND ${table.reviewedAt} IS NOT NULL AND ${table.rejectionReason} IS NOT NULL AND length(btrim(${table.rejectionReason})) > 0)`,
     ),
     check(
       'document_versions_content_check',

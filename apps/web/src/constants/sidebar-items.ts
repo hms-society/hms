@@ -55,6 +55,7 @@ export const SIDEBAR_ITEMS: SidebarItems = {
     { label: 'Dashboard', route: 'home', icon: 'layout-dashboard' },
     { label: 'Intakes', route: 'intakes', icon: 'inbox' },
     { label: 'Consultas', route: 'attendantConsultations', icon: 'monitor' },
+    { label: 'Casos', route: 'adminCases', icon: 'briefcase-business' },
     { label: 'Colaboradores', route: 'collaborators', icon: 'users' },
     { label: 'Terceiros', route: 'thirdParties', icon: 'briefcase-business' },
     { label: 'Auditoria', route: 'auditLogs', icon: 'history' },

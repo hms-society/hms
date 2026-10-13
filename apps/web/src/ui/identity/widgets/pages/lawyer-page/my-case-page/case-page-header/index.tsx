@@ -30,6 +30,7 @@ export const CasePageHeader = ({
       isGeneratingPortalLink={state.isGeneratingPortalLink}
       onOpenPortal={onOpenPortal}
       dossierApproved={Boolean(state.caseDetails?.dossierGate?.homologatedAt)}
+      caseStatus={state.caseDetails?.status}
       onOpenNewPiece={onOpenNewPiece}
     />
   )

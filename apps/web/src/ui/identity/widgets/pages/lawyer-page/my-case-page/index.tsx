@@ -9,15 +9,17 @@ import { useMyCasePage } from './use-my-case-page'
 export type CasoDetalheChecklistPageProps = {
   caseId?: string
   isAdministrator?: boolean
+  initialTab?: string
 }
 
 export const CasoDetalheChecklistPage = ({
   caseId,
   isAdministrator = false,
+  initialTab,
 }: CasoDetalheChecklistPageProps) => {
   const [isPortalPickerOpen, setIsPortalPickerOpen] = useState(false)
   const [isNewPieceDialogOpen, setIsNewPieceDialogOpen] = useState(false)
-  const state = useMyCasePage({ caseId, isAdministrator })
+  const state = useMyCasePage({ caseId, isAdministrator, initialTab })
 
   return (
     <div className='mt-5 flex w-full flex-col gap-5 pb-10 font-sans'>
@@ -40,12 +42,14 @@ export const CasoDetalheChecklistPage = ({
           isAdministrator={isAdministrator}
           caseUuid={state.caseUuid}
           caseDetails={state.caseDetails}
+          currentCollaboratorId={state.currentCollaboratorId}
           checklistItems={state.checklistItems}
           completionPercentage={state.completionPercentage}
           mandatoryItemsCount={state.mandatoryItemsCount}
           pendingItemsCount={state.pendingItemsCount}
           validatedItemsCount={state.validatedItemsCount}
           onOpenChecklist={state.handleOpenChecklistTab}
+          onOpenTasks={() => state.setActiveTab('prazos')}
           openNewPieceDialog={isNewPieceDialogOpen}
           onNewPieceDialogOpenChange={setIsNewPieceDialogOpen}
         />

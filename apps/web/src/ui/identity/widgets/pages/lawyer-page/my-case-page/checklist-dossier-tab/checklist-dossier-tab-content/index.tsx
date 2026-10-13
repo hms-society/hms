@@ -4,11 +4,19 @@ import { useChecklistDossierTabContent } from './use-checklist-dossier-tab-conte
 
 export type ChecklistDossierTabContentProps = ChecklistDossierTabProps
 
-export const ChecklistDossierTabContent = (props: ChecklistDossierTabContentProps) => (
-  <ChecklistDossierView
-    activities={props.activities}
-    controller={useChecklistDossierTabContent(props)}
-    readOnly={Boolean(props.readOnly)}
-    reviewDisabledReason={props.reviewDisabledReason}
-  />
-)
+export const ChecklistDossierTabContent = (props: ChecklistDossierTabContentProps) => {
+  const controller = useChecklistDossierTabContent(props)
+
+  return (
+    <ChecklistDossierView
+      activities={
+        controller.state.activities.length > 0
+          ? controller.state.activities
+          : (props.activities ?? [])
+      }
+      controller={controller}
+      readOnly={Boolean(props.readOnly)}
+      reviewDisabledReason={props.reviewDisabledReason}
+    />
+  )
+}

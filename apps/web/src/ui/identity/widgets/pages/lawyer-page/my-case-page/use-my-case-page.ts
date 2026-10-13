@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useCaseTeamQuery } from '@/ui/case-management/hooks/use-case-team-query'
 import { useMyCasePageAccess } from './use-my-case-page-access'
@@ -10,9 +10,14 @@ import { useMyCasePortalActions } from './use-my-case-portal-actions'
 export type UseMyCasePageParams = {
   caseId?: string
   isAdministrator?: boolean
+  initialTab?: string
 }
 
-export function useMyCasePage({ caseId, isAdministrator = false }: UseMyCasePageParams) {
+export function useMyCasePage({
+  caseId,
+  isAdministrator = false,
+  initialTab = 'visao-geral',
+}: UseMyCasePageParams) {
   const { caseManagementService, identityService } = useRestContext()
   const access = useMyCasePageAccess(isAdministrator)
   const caseUuid = caseId ?? '00000000-0000-4000-8000-000000000089'
@@ -39,7 +44,11 @@ export function useMyCasePage({ caseId, isAdministrator = false }: UseMyCasePage
     isAdministrator,
     caseManagementService,
   })
-  const [activeTab, setActiveTab] = useState('visao-geral')
+  const [activeTab, setActiveTab] = useState(initialTab)
+
+  useEffect(() => {
+    setActiveTab(initialTab)
+  }, [initialTab])
 
   return {
     ...portalState,
@@ -51,6 +60,7 @@ export function useMyCasePage({ caseId, isAdministrator = false }: UseMyCasePage
     caseTeamError: caseTeamQuery.caseTeamError,
     isLoadingCaseTeam: caseTeamQuery.isLoadingCaseTeam,
     canLoadLegalContent: access.canLoadLegalContent,
+    currentCollaboratorId: access.currentCollaborator?.collaboratorId,
     displayCaseId: legalData.caseDetails?.publicCode ?? 'Carregando...',
     thirdParties: portalData.thirdParties,
     setActiveTab,
