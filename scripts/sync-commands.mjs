@@ -105,6 +105,18 @@ function getPromptBody(content) {
   return lines.slice(end + 1).join('\n')
 }
 
+function rebaseMarkdownLinks(content, source, destination) {
+  return content.replace(/(\]\()([^\s)]+)(\))/g, (match, before, target, after) => {
+    if (/^(?:[a-z][a-z\d+.-]*:|\/|#)/i.test(target)) return match
+    const [path, fragment] = target.split('#')
+    const resolved = resolve(dirname(source), path)
+    // Leave illustrative links in templates untouched; rebase real local sources.
+    if (!existsSync(resolved)) return match
+    const rebased = relative(dirname(destination), resolved).split('\\').join('/')
+    return `${before}${rebased}${fragment === undefined ? '' : `#${fragment}`}${after}`
+  })
+}
+
 function linkOrCopy(source, destination) {
   const relativeSource = relative(dirname(destination), source).split('\\').join('/')
   rmSync(destination, { force: true })
@@ -114,7 +126,7 @@ function linkOrCopy(source, destination) {
   } catch {
     writeFileSync(
       destination,
-      `<!-- Auto-generated from ${relativePath(source)} (symlink not available) -->\n\n${readFileSync(source, 'utf8')}`,
+      `<!-- Auto-generated from ${relativePath(source)} (symlink not available) -->\n\n${rebaseMarkdownLinks(readFileSync(source, 'utf8'), source, destination)}`,
     )
     console.log(`copied:  ${relativePath(destination)} <- ${relativePath(source)}`)
   }
@@ -125,7 +137,7 @@ function writeSkill(source, name) {
   const destination = join(skillDirectory, 'SKILL.md')
   const content = readFileSync(source, 'utf8')
   const description = getPromptDescription(content)
-  const body = getPromptBody(content)
+  const body = rebaseMarkdownLinks(getPromptBody(content), source, destination)
   const descriptionLine = description ? `description: >\n  ${description}\n` : ''
   const skillContent =
     `---\nname: ${name}\n${descriptionLine}---\n\n` +
@@ -140,7 +152,7 @@ function main() {
   if (!existsSync(PROMPTS_DIR))
     throw new Error(`Prompt directory not found: ${PROMPTS_DIR}`)
   const prompts = readdirSync(PROMPTS_DIR)
-    .filter((filename) => filename.endsWith('.md'))
+    .filter((filename) => filename.endsWith('.md') && filename !== 'README.md')
     .sort()
     .map((filename) => join(PROMPTS_DIR, filename))
   if (!prompts.length) throw new Error("No prompts found in 'documentation/prompts/*.md'")

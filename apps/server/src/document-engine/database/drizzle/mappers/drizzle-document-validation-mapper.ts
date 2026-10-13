@@ -34,7 +34,13 @@ export class DrizzleDocumentValidationMapper {
       missingFields: this.toStringList(record.missingFields),
       checklistLink: {
         caseId: record.caseId ?? undefined,
+        caseLabel:
+          record.caseLabel ?? (aiSuggestion.caseLabel as string | undefined) ?? undefined,
         checklistItemId: record.checklistItemId ?? undefined,
+        checklistItemLabel:
+          record.checklistItemLabel ??
+          (aiSuggestion.checklistItemLabel as string | undefined) ??
+          undefined,
       },
       duplicateMatch: this.toDuplicateMatch(record, aiSuggestion),
       failure: this.toFailure(aiSuggestion),

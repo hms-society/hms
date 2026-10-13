@@ -10,7 +10,7 @@ export class DocumentImageAnalyzerAgent extends MastraAgent<'document-image-anal
       {
         id: 'document-image-analyzer',
         name: 'Document Image Analyzer',
-        model: 'deepseek/deepseek-v4-flash',
+        model: 'deepseek/deepseek-v4.1-flash',
         vision: true,
         instructions: `You transcribe readable text from document images.
 

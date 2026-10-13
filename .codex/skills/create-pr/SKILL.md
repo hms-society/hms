@@ -1,7 +1,7 @@
 ---
 name: create-pr
 description: >
-  Publish or update a HMS delivery pull request with Jira ticket and SDD traceability, current validation evidence, and saved design-reference coverage.
+  Publish or update coherent HMS delivery PRs with current Spec and Verification Contract traceability and current-head CI.
 ---
 
 <!-- Auto-generated from documentation/prompts/create-pr-prompt.md -->
@@ -9,104 +9,36 @@ description: >
 
 # Create or Update Pull Requests
 
-Publish an HMS delivery through one or more coherent, size-compliant GitHub pull requests.
-Use `gh`, preserve the user's worktree and update existing delivery PRs instead of creating
-duplicates.
+Publish authorized HMS delivery through coherent, size-compliant GitHub PRs.
+Follow [Git Workflow Rules](../../../documentation/rules/git-workflow-rules.md),
+[Commit Rules](../../../documentation/rules/commit-rules.md), [SDD Workflow](../../../documentation/sdd.md),
+[Tooling](../../../documentation/tooling.md) and the local `gh-cli` skill supplied by the agent environment. That skill is
+not a tracked repository artifact; do not infer it is unavailable from the Git
+tree or require a new repository copy. Use authenticated `gh`,
+preserve user work and update existing delivery PRs instead of creating duplicates.
 
-Web full integration evidence also belongs to `implement-spec`, which runs
-`test:integration` once per delivery. Reuse that record; do not rerun the full
-suite or an equivalent unfiltered Playwright command. Run only focused browser
-checks for missing or invalidated scenarios, and route missing full-suite
-records to `implement-spec`.
+## Authority and readiness
 
-## Inputs and authority
+Read the implemented Spec or Bug Report, Evaluation, current diff and applicable
+Rules. Feature Evaluation uses the
+[canonical template](../../../documentation/prompts/implement-spec-prompt.md#evaluation-template); **Progress** separates
+implementation from verification and **Check Results** records actual required
+Automated, Manual and Visual checks plus baseline project checks. Verify current
+candidate/environment/selection/artifacts; preserve failed and historical proof.
+The Spec owns revision history; Evaluation does not repeat revision metadata.
 
-Read the implemented Spec or Bug Report, Plan when present, `evaluation.md`, actual diff,
-`documentation/rules/sdd-rules.md`, `documentation/tooling.md`, applicable Rules and
-`documentation/rules/commit-rules.md`. For a feature delivery, confirm that the Evaluation
-uses the canonical Evaluation template embedded in `implement-spec` and that its evidence is
-current for the exact Spec revision.
-Preserve only actual Jira ticket or direct-request traceability; do not invent external
-records.
+Require authorization to commit, push and create/update the PR; reuse authority
+already provided. Standalone use invokes `commit-code` for pending scoped changes,
+then resumes publication. Calls from `conclude-spec` reuse its prepared commits.
+Do not mutate external Jira/Confluence state or merge/deploy as a side effect.
 
-Require explicit authority to commit, push and create or update the PR. Standalone use may
-invoke `commit-code` for pending scoped changes; when called by `conclude-spec`, reuse its
-prepared commits.
+Every delivery PR is ready for review, unless the user requested a draft. Use
+`gh pr ready <number>` for an existing draft under the normal readiness policy,
+and verify `isDraft` before reporting publication.
 
-## Pull request readiness policy
+## Inspect and preserve scope
 
-Every pull request opened or updated by this workflow must be ready for review, never draft.
-Create PRs with `draft: false` (or the equivalent `gh` behavior), and if an existing delivery
-PR is draft, run `gh pr ready <number>` before returning its publication metadata. Do not leave
-a delivery PR in draft status unless the user explicitly changes this repository policy.
-
-## Pull request size and splitting policy
-
-`.github/workflows/check-pr-size.yml` is the authoritative size gate for delivery PRs. Match
-its calculation exactly: compare `origin/<base>...HEAD`, count only added lines in `.ts`,
-`.tsx`, `.mts` and `.cts` files, and keep every PR at or below 5,000 added lines. Recalculate
-the count after any branch merge or correction before publishing or updating a PR.
-
-Coherence is mandatory whenever a delivery is split: the split must follow real product,
-technical or dependency boundaries, and every resulting PR must be a reviewable, traceable
-slice with a clear outcome. The line limit determines when splitting is required; it never
-determines where to cut the work.
-
-- If the complete delivery is at or below 5,000 added TypeScript lines, publish one coherent
-  PR.
-- If it exceeds 5,000 lines, split it before publication into slices that each remain at or
-  below 5,000 lines. Every slice must remain coherent; never cut files or behavior into
-  arbitrary line-count fragments.
-- Every slice uses `develop` as its PR base. Never open a PR targeting another personal or
-  slice branch.
-- For dependent slices (e.g. Task 2 created while Task 1 is awaiting merge), open the PR targeting
-  `develop` with the `stacked-pr` label (`gh pr create --base develop --label "stacked-pr"`). Once
-  the predecessor slice merges into `develop`, merge `origin/develop` into the dependent branch,
-  push, and remove the `stacked-pr` label (`gh pr edit <number> --remove-label "stacked-pr"`).
-- Record each slice's scope, predecessor dependency, and covered `RF-*`/`CA-*` criteria in the
-  delivery artifacts and PR body.
-- If no coherent partition satisfies the limit, stop publication and route the delivery back
-  through `create-plan` or `create-spec` rather than publishing an oversized or arbitrary PR.
-
-When splitting is required, publish or update every slice in the same task and return metadata
-for every delivery PR. Every slice remains ready for review and must satisfy the same traceability,
-validation and CI requirements as a single-PR delivery.
-
-## Pull request language policy
-
-Every pull request opened or updated by this workflow must be written in Brazilian Portuguese
-(pt-BR). This applies to the title, section headings, objective, traceability, implementation
-summary, business-rule explanation, manual and automated validation, limitations, and every
-other prose field authored by the workflow. Keep file paths, commands, code identifiers, Jira
-keys, URLs, product names, and other technical literals unchanged when translating them.
-
-Before publishing or returning an existing pull request, inspect its complete title and body
-and translate any workflow-authored English prose into pt-BR. Do not treat an already-open PR
-as compliant merely because its latest comment is in pt-BR.
-
-Treat language compliance as a blocking publication gate, not as a stylistic preference. Immediately
-before returning, run `gh pr view <number> --json title,body` for every PR and inspect both fields in
-full. Correct the PR with `gh pr edit` when any workflow-authored prose remains outside pt-BR. The
-title must also follow the pt-BR noun-phrase rule below: Conventional Commit prefixes such as
-`feat:`, `fix:`, `refactor:` and `docs:` do not make an English title compliant and must not be used.
-Do not return PR metadata until this final language audit passes for every PR in the delivery.
-
-## Mandatory workflow invocation
-
-This prompt is a publication workflow, not a replacement for the commit or conclusion
-workflows. When pending implementation changes require a commit, invoke `commit-code`
-before publishing. After the commit is created, **invoke `create-pr` again** (including when
-the current prompt is being resumed by `conclude-spec`) so the PR metadata, body, head SHA
-and traceability are refreshed through this workflow. Do not create commits or edit PR
-metadata ad hoc while claiming that `commit-code` or `create-pr` was invoked.
-
-When `conclude-spec` calls this prompt, return the exact PR number, URL, base, head SHA and
-check URLs for every delivery PR to `conclude-spec`; do not return while publication is only
-partially complete.
-
-## Delivery inspection
-
-Before publication, inspect the complete worktree and delivery history:
+Inspect complete staged/unstaged/untracked changes and delivery history:
 
 ```bash
 git status --short
@@ -117,172 +49,148 @@ git diff --cached
 git log -10 --format='%h %s'
 ```
 
-Identify staged, unstaged and untracked files; generated artifacts, migrations, seeds and
-configuration; affected workspaces; unrelated user-owned changes; and secrets or local data
-that must not enter the PR. Keep unrelated changes in place and out of commits. If the
-relationship between a file and the delivery is ambiguous, stop and report it instead of
-including the file speculatively.
+Identify affected workspaces, generated files, migrations, lockfiles, seeds and
+configuration. Exclude secrets/local data and unrelated or inherited user changes;
+leave them intact. Resolve ownership from the task and diff; if it remains
+ambiguous, exclude the file and explain the uncertainty rather than ship it.
 
-## Branch and PR preparation
+## Size, slicing and branches
 
-1. Inspect status and staged/unstaged changes. Preserve unrelated or user-owned work.
-2. Fetch the real integration branch without changing the worktree and inspect open and closed
-   PRs for the delivery, for example:
+`.github/workflows/check-pr-size.yml` owns the hard size gate: compare
+`origin/<base>...HEAD` and count **added** lines in `.ts`, `.tsx`, `.mts`, `.cts`.
+Every PR must remain at or below 5,000. Match CI's calculation without applying
+the exclusions used by the separate advisory 1,200-line reminder. Recalculate
+after synchronization or corrections.
 
-   ```bash
-   git fetch origin develop --prune
-   gh pr list --state all --search "<Spec or Jira terms>"
-   ```
+Calculate the partition from actual diffs and dependency closure, not workspace
+addition totals alone. Record each slice's exact paths, TypeScript additions,
+predecessors and verification before committing. Each published branch must
+compile and preserve its selected behavior with its own tree. An oversized stack
+cannot be made compliant by reporting only its final commit's additions. When a
+later slice needs an unmerged predecessor and the cumulative diff exceeds 5,000,
+prepare that slice locally and publish it after the predecessor reaches `develop`;
+do not change the PR base or weaken the size gate to publish it early.
 
-4. Use `develop`/`origin/develop` as the integration base for all PRs without exception.
-5. Before calculating the publication diff or creating/updating a PR, update the delivery branch
-   with the fetched `origin/develop` (`git merge origin/develop`). For dependent slices created
-   from a predecessor slice branch, open the PR targeting `develop` with the `stacked-pr` label.
-   Once the predecessor merges into `develop`, merge `origin/develop` into the dependent branch,
-   push, and remove the `stacked-pr` label. Every branch must contain the history required by
-   `develop`; require explicit commit authority for any merge commit.
-6. If updating a delivery branch starts a merge with unresolved conflicts, immediately invoke
-   [`resolve-merge-conflicts`](resolve-merge-conflicts-prompt.md). Do not resolve conflicts
-   directly in this publication workflow. Let the conflict workflow inspect and resolve the
-   paths, stage its resolutions and run applicable validation. If it requests user guidance,
-   stop publication and relay the conflicted paths, competing changes and required decision;
-   do not push or create/update the PR until the conflict is resolved.
-7. After the conflict workflow returns, review its staged resolutions and validation evidence.
-   Complete the in-progress merge only with the explicit merge/commit authority required above,
-   then review the resulting diff. Recalculate the publication diff and size against the PR base.
-8. If delivery PRs exist, update the relevant heads and bodies. Otherwise create one PR or the
-   size-compliant PR set required by the splitting policy.
+Publish one coherent PR when within the cap. Otherwise partition along real
+product, technical or dependency boundaries, including each slice's tests and
+`RF-*`/`CA-*` scope. Do not split arbitrary file/line fragments. Every feature
+slice targets `develop`, including a branch derived from an unmerged predecessor.
+A dependent PR uses `stacked-pr`; after predecessor merge, merge
+`origin/develop`, push and remove the label. Its cumulative diff against
+`develop` must also satisfy the cap. If no valid partition exists, adjust the
+delivery approach within its contract or route a consequential scope change
+through `create-spec` before publishing; do not create a separate execution plan.
 
-Do not use destructive Git operations, bypass hooks, create accidental dependent branches
-or mix unrelated work. For composed deliveries, document every base and dependency and
-validate each slice and the integrated result. Do not split arbitrarily to satisfy a line
-count; every separate PR must represent a coherent product/technical slice with a real
-semantic boundary or an explicit dependency required by the size policy.
+1. Fetch without changing user work: `git fetch origin develop --prune`.
+2. Find existing delivery PRs, including closed ones, using real Spec/Jira terms.
+3. Synchronize the authorized delivery branch with fetched `origin/develop`,
+   preserving local changes. If a merge conflicts, invoke
+   [resolve-merge-conflicts](../../../documentation/prompts/resolve-merge-conflicts-prompt.md), then inspect its
+   resolutions/validation and finish the merge only under existing commit authority.
+4. Review the resulting diff and size; reuse the correct existing PR or publish
+   every required slice. Record scope, dependency and current check results.
 
-## Validation evidence
+Never rewrite history, force-push, broadly stage or bypass hooks without the
+specific authorization required by repository instructions.
 
-Use the current Spec/evaluation evidence and run only additional repository-approved checks
-needed to validate publication state. Never replace exact workspace commands from
-`documentation/tooling.md` with assumed generic commands.
+Use an isolated worktree for each delivery slice when splitting a shared candidate.
+Store task worktrees under the repository-root `.worktrees/` directory, excluded
+from version control using a local ignore when necessary. Use descriptive branch
+names and honor the user's naming preference; a `codex/` prefix is not required.
+Inspect existing worktrees before reusing paths or branches. Preserve the canonical
+checkout's merge, staging and unrelated changes. Copy only ignored or untracked
+local environment files; never copy tracked environment templates as local data.
+Coordinate shared services and serialize fixture-backed integration commands.
 
-Before publication, verify the current candidate passes the `implement-spec` conformance gate:
-the exact Spec revision is frozen, every changed path is within the recorded Builder scope, the
-required file/widget tree and contracts match, and no affected evidence is stale. If any check
-fails, stop publication and route the correction through `implement-spec`; do not repair the
-implementation directly in the PR workflow.
+## Verification and generated output
 
-For design-backed UI, use the saved Spec design bundle—not live Pencil—and include an independent
-comparison for every supplied screenshot and every required supplemental screenshot:
+Reuse valid implementation results. New commits, review roles and publication
+metadata alone do not justify rerunning broad local suites. Follow Tooling for
+failed/missing/affected checks; route missing integrated evidence and actual
+implementation discrepancies to `implement-spec`, then resume publication after
+Evaluation is `ready`. Required check failures must be fixed, not hidden by an
+exit code from a different selection. Retain a failing full-suite result even
+when its affected focused scenarios later pass. CI runs its full configured gates
+independently on each PR head.
 
-- route/state and exact saved reference path or source node ID from `design/manifest.md`;
-- target viewport;
-- Playwright MCP manual result;
-- implementation screenshot/comparison path;
-- one direct comparison for each supplied and required supplemental reference, recording
-  structure, content, hierarchy, spacing, dimensions, tokens, interaction/state and responsive
-  differences;
-- accessibility/DOM observations and resolved visual findings.
+Compare the Behavior/Technical Contracts, Create/Modify/Delete commitments,
+exclusions and applicable Rules with the diff. Exact contractual paths and
+signatures govern conformance; ordinary implementation layout choices do not
+require an exhaustive predetermined file tree.
 
-The visual evidence must enumerate every supplied screenshot and every required supplemental
-screenshot suggested by the Spec creator or added to close a documented state/viewport gap. Each
-entry must name the original reference, exact viewport/state, transient implementation capture
-or CI artifact identifier and direct comparison result, including missing, extra, altered or
-mismatched elements. Do not publish a
-design-backed PR when a required reference lacks an independent comparison or when a required
-supplemental screenshot decision remains unresolved.
+For design-backed UI, confirm Visual Check Results name each required saved
+reference and state/viewport, inspected implementation screenshot and concrete
+comparison. Use Playwright CLI for concise Manual journeys and rendered captures;
+label mocked transport coverage and require real services when contracted.
+Console/network, responsive, keyboard, focus and accessibility outcomes must
+have explicit dispositions. Required supplemental reference decisions remain
+blocking until resolved. Do not recapture valid unaffected states for publication.
 
-Review migrations, generated artifacts and lockfile changes when affected. Do not claim a
-check, manual flow, review or deployment that was not observed. For server-backed or database
-changes, verify the real request/response and relevant persistence, authorization, tenant or
-provider result; mocked transport is not proof of server behavior. Record environment limits,
-failed attempts and omitted commands in `evaluation.md` without converting them into passing
-evidence.
+When affected, compare migration/snapshot/journal history with `develop`, resolve
+number collisions, run the documented generation/verification commands and inspect
+SQL/metadata against the contract. Confirm generated routes, exports, lockfiles
+and seeds are current and included only when required. Do not hand-edit generated
+output to conceal a mismatch or reset shared data to prepare publication.
 
-## Generated artifacts and migrations
+## Title, language and body
 
-When the delivery changes persistence or generated output:
+Write authored prose in Brazilian Portuguese (pt-BR), retaining commands, paths,
+identifiers, product names and URLs. The title is a concise pt-BR noun phrase,
+without Conventional Commit prefix or fabricated issue key. Read the complete
+existing title/body and correct stale workflow-authored prose when updating.
 
-- compare migration files, snapshots and journals with `origin/develop`;
-- resolve migration-number collisions explicitly and preserve prior journal entries;
-- run the repository-documented generation or verification command once, using its exact
-  argument syntax;
-- review the generated SQL and metadata against the Spec before publication;
-- verify seeds, generated routes, lockfiles and other derived files are current and included
-  only when required by the delivery.
+Match `.github/pull_request_template.md` headings and order:
 
-Never hand-edit generated artifacts to conceal a mismatch, and never treat a failed generation
-attempt or unavailable Docker/Testcontainers environment as a passing check.
+| Section | Required content |
+| --- | --- |
+| Objetivo | Concrete problem and resulting behavior, selected scope/exclusions. |
+| Rastreabilidade | Actual Jira keys/URLs or none, canonical PRD, Spec/revision or direct maintenance, Evaluation, covered `RF-*`/`CA-*` and predecessor/`stacked-pr` dependency. |
+| Escopo técnico | Create/Modify/Delete table for affected boundaries and concrete paths; previous/new business behavior, permissions, public contracts or persistence and the reason, or an explicit no-change statement. |
+| Verificação | Actual Automated, Manual and Visual check IDs, applicable baseline commands/procedures, observed outcomes and artifacts/limits; explain retained candidate evidence and current-head CI. |
+| Documentação e limitações | Documentation alignment, open findings, pending/blocked checks, relevant historical failures, explicit waivers and partial delivery or none. |
 
-For every implementation or visual discrepancy found during PR preparation, immediately record
-the finding, invalidate its dependent evidence, invoke `implement-spec`, and continue the
-current delivery automatically after the correction returns Evaluation to `ready`. Do not ask
-the user whether an in-Contract discrepancy should be fixed.
+Keep meaningful Manual prerequisites, concise executable steps and observed
+results in the verification table or brief supporting prose. Include contracted
+viewports/keyboard paths and Visual comparisons for UI. Link Evaluation for full
+commands/artifact details and identify real Auth/REST versus mocked coverage.
+Do not add mandatory Manual subsections or a separate Visual evidence section.
+Remove unused placeholders and state inapplicable checks honestly. Root
+`pnpm lint`/`pnpm check-types` omit application script names; root `pnpm validate`
+is not a full delivery gate. Use actual workspace commands recorded in Evaluation
+rather than default generic checkboxes.
 
-## PR contract
+Keep the body concise, with enough detail to reproduce its claims. Do not add a
+generic Changelog, duplicate the Spec, fabricate approvals/results, or introduce
+a separate Visual evidence section. Write the exact multiline body to a temporary
+file and use `gh pr create/edit --body-file` rather than shell-interpolated prose.
 
-Include these exact sections in this order matching `.github/pull_request_template.md`:
+## Publish, CI and return
 
-- **🎯 Objetivo** — problem, expected outcome, scope and explicit exclusions;
-- **🎫 Tickets Jira Relacionados** — real Jira keys/URLs and their relationship, or `Nenhum`;
-- **📜 Rastreabilidade de PRD e Spec** — canonical Confluence PRD URL, Jira tickets, Spec, Plan,
-  exact revision, delivery boundary, and covered `RF-*`/`CA-*` criteria. This workflow does
-  not change Jira or Confluence;
-- **🛠️ Módulos e Caminhos Específicos Afetados** — checkboxes for affected modules (`apps/web`, `apps/server`, `packages/core`, `supabase`) and concrete changed paths;
-- **💼 Alterações em Regras de Negócio** — only when behavior, validation, authorization or workflow
-  changed; state the previous behavior, new behavior, reason and evidence. If no business behavior
-  changed, write `Nenhuma — não há alteração de comportamento, validação, autorização ou workflow`;
-- **🧪 Testes Manuais** — structured sub-sections: `⚙️ Pré-requisitos e Ambiente`, `📝 Passos para Reprodução`, `✅ Resultado Esperado` and `📱 Responsividade e Acessibilidade`. Point to `evaluation.md` for exact commands and artifact identifiers;
-- **⚡ Validação Automatizada e Qualidade** — checklist of checks (`pnpm test`, `pnpm check-types`, `pnpm check`), exact commands and observed results;
-- **⚠️ Limitações Conhecidas** — explicit non-blocking gaps, or `Nenhuma`.
+Push the scoped authorized branch, create/update the PR, and attach every created
+or actively updated task PR using `codex_app.attach_artifact` when available.
+Read back each PR's full title/body, `baseRefName`, `headRefOid`, `isDraft` and
+`statusCheckRollup`. Verify language, scope, base, size and dependencies.
 
-When UI changes, summarize the visual validation result and link the detailed state/viewport
-comparisons in `evaluation.md`; do not create a separate `Visual evidence` PR section.
+Keep delivery active until every applicable check on each current PR head passes.
+Do not finish publication while applicable workflows are pending. Inspect each
+failure, fix the owning slice in its worktree, and keep task-owned fixes aligned
+with the canonical checkout without overwriting unrelated work or staging. Push
+corrections, fetch and synchronize the current `develop` base when needed, then
+recalculate the complete PR diff and wait for CI on the new head. CI evidence is
+bound to the exact head SHA and is invalidated by later changes to that head.
+Use actual checked-in workflow path filters; check expected missing workflows and
+report verified inapplicability for skipped checks. Poll `gh pr checks` and current
+PR metadata. Pending/cancelled/older-head checks and local results are not a pass.
+Inspect failures with `gh run view <run-id> --log-failed`.
 
-Do not add a generic `Changelog`, `Impact and compatibility` or `Observations` section. Do not
-invent Jira keys, Spec requirements, test results or human approvals. Before publishing,
-review the three sections above for concrete layer ownership, business decisions and
-reproducible manual coverage; if any is only a generic summary, expand it before returning
-the PR metadata. Keep the body concise enough to review; it is a traceability and validation
-summary, not a copy of the full diff.
+Route reproducible in-contract failures through `implement-spec`, then
+`commit-code` and this publication workflow. Repeat current-head CI after pushing
+corrections; reuse valid local results and follow Tooling for affected reruns.
+Same-SHA reruns require evidence of a transient failure. Record original failures
+and reruns; do not claim green CI while required checks are missing or failing.
+Report a concrete external blocker if it prevents progress.
 
-Use a short pt-BR noun-phrase title without a Conventional Commit prefix or fabricated issue key.
-For a bug fix, include the evidence-based cause and correction.
-
-## Publish and return
-
-Push the prepared branch and create or update the PR. Then obtain the actual delivery metadata:
-
-```bash
-gh pr view <number> --json number,url,headRefName,baseRefName,commits,statusCheckRollup
-```
-
-### CI completion and correction loop
-
-Reuse the local coverage evidence recorded by `implement-spec`; do not rerun
-coverage locally during publication. CI independently runs coverage, integration
-tests, and every applicable quality gate on the current PR head. The local
-single-run limit does not apply to CI. Corrections use focused local tests
-without coverage and preserve the original local coverage measurement.
-
-After creating or updating a PR and pushing its head, keep the delivery active until every
-applicable CI check for the latest head SHA has completed successfully. Poll `gh pr checks`
-and `gh pr view <number> --json commits,statusCheckRollup`; queued, pending, or in-progress
-checks are not complete. Assess the results for the current head only, since a new push
-starts a new validation cycle.
-
-For every failed check, inspect its GitHub Actions logs with `gh run view <run-id> --log-failed`,
-identify the cause, correct failures within the authorized delivery scope, and run the failed
-workflow command locally when available. Commit and push each correction, then wait for the
-new head's full CI set and repeat this loop until all applicable checks pass. Rerun a failed
-workflow only after confirming it failed transiently or was canceled; do not treat a rerun as
-a fix for a reproducible failure. If an applicable check is skipped by an explicit workflow
-condition, verify and report why it was not required. Do not report the PR as validated while
-any applicable check is pending, running, or failing. If an external blocker prevents a check
-from completing, report the exact blocker and leave the validation state explicit.
-
-Return one record per PR containing its URL, number, base, head, head SHA, dependency order,
-changed-path summary and current check/review state after the CI completion and correction loop.
-Do not merge or deploy.
-
-Reviewer comments may arrive later. They are handled by `resolve-pr-pendencies`, not by this
-workflow.
+Return each PR's URL/number, base/head/head SHA, dependency, changed scope and
+current terminal check/review state. Return these records to `conclude-spec`
+when invoked there; Evaluation's **Delivery** stores final publication/CI facts.
+Later reviewer comments use `resolve-pr-pendencies`. Do not merge or deploy.

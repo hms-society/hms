@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, desc, eq, ne } from 'drizzle-orm'
+import { and, desc, eq, isNull, ne } from 'drizzle-orm'
 import type {
   DocumentValidationHumanCorrection,
   DocumentValidationRecord as DocumentValidationRecordProjection,
@@ -14,6 +14,10 @@ import type {
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
+import {
+  caseChecklistItemModel,
+  legalCaseModel,
+} from '@/case-management/database/drizzle/models'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { documentBatchFileModel, documentBatchModel } from '../models'
@@ -39,11 +43,18 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
+      )
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
       )
       .$dynamic()
 
@@ -62,6 +73,8 @@ export class DrizzleDocumentValidationsRepository
       this.mapper.toDomain({
         ...record.file,
         batch: record.batch,
+        caseLabel: record.caseLabel,
+        checklistItemLabel: record.checklistItemLabel,
       }),
     )
   }
@@ -73,11 +86,18 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
+      )
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
       )
       .where(eq(documentBatchFileModel.id, documentFileId))
 
@@ -88,6 +108,8 @@ export class DrizzleDocumentValidationsRepository
     return this.mapper.toDomain({
       ...record.file,
       batch: record.batch,
+      caseLabel: record.caseLabel,
+      checklistItemLabel: record.checklistItemLabel,
     })
   }
 
@@ -99,11 +121,18 @@ export class DrizzleDocumentValidationsRepository
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
+        caseLabel: legalCaseModel.title,
+        checklistItemLabel: caseChecklistItemModel.title,
       })
       .from(documentBatchFileModel)
       .innerJoin(
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
+      )
+      .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
+      .leftJoin(
+        caseChecklistItemModel,
+        eq(documentBatchFileModel.checklistItemId, caseChecklistItemModel.id),
       )
       .where(
         and(
@@ -121,6 +150,8 @@ export class DrizzleDocumentValidationsRepository
     return this.mapper.toDomain({
       ...record.file,
       batch: record.batch,
+      caseLabel: record.caseLabel,
+      checklistItemLabel: record.checklistItemLabel,
     })
   }
 
@@ -155,7 +186,12 @@ export class DrizzleDocumentValidationsRepository
         status: DocumentValidationStatus.Processing,
         aiConfidence: 0,
       })
-      .where(eq(documentBatchFileModel.id, documentFileId))
+      .where(
+        and(
+          eq(documentBatchFileModel.id, documentFileId),
+          isNull(documentBatchFileModel.reviewedAt),
+        ),
+      )
 
     return this.findRequiredByFileId(documentFileId)
   }
