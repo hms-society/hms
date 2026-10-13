@@ -1,4 +1,8 @@
-import { InvalidBlockedPeriodError, ScheduleNotFoundError } from '../errors'
+import {
+  BlockedPeriodConflictError,
+  InvalidBlockedPeriodError,
+  ScheduleNotFoundError,
+} from '../errors'
 import type { BlockedPeriod } from '../entities'
 import type { SchedulesRepository } from '../../interfaces/schedules-repository'
 import type { CalendarDate } from '../structures'
@@ -23,6 +27,17 @@ export class AddBlockedPeriodUseCase {
 
     if (!isCalendarDate(startsOn) || !isCalendarDate(endsOn) || endsOn < startsOn) {
       throw new InvalidBlockedPeriodError()
+    }
+
+    const blockedPeriods =
+      await this.schedulesRepository.findBlockedPeriodsByScheduleId(scheduleId)
+    const isExactDuplicate = blockedPeriods.some(
+      (blockedPeriod) =>
+        blockedPeriod.startsOn === startsOn && blockedPeriod.endsOn === endsOn,
+    )
+
+    if (isExactDuplicate) {
+      throw new BlockedPeriodConflictError()
     }
 
     return this.schedulesRepository.createBlockedPeriod({

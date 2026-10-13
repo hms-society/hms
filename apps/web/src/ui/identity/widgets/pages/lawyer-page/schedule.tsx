@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -25,6 +25,73 @@ const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'saturday', name: 'Sábado', active: false, slots: [] },
   { id: 'sunday', name: 'Domingo', active: false, slots: [] },
 ]
+
+const WEEKDAY_NAMES: Record<string, string> = {
+  monday: 'Segunda-feira',
+  tuesday: 'Terça-feira',
+  wednesday: 'Quarta-feira',
+  thursday: 'Quinta-feira',
+  friday: 'Sexta-feira',
+  saturday: 'Sábado',
+  sunday: 'Domingo',
+}
+
+type ScheduleDay = (typeof DEFAULT_WEEKLY_AVAILABILITY)[number]
+
+function normalizeWeeklyAvailability(
+  rawAvailability: unknown,
+  useDefaultDays: boolean,
+): ScheduleDay[] {
+  const rawDays = Array.isArray(rawAvailability) ? rawAvailability : []
+  if (rawDays.length === 0 && !useDefaultDays) {
+    return DEFAULT_WEEKLY_AVAILABILITY.map((day) => ({
+      ...day,
+      active: false,
+      slots: [],
+    }))
+  }
+
+  const daysById = new Map(
+    rawDays.map((day: any) => {
+      const id = day.id ?? day.weekday
+      const slots =
+        day.slots ??
+        (day.timeRanges ?? []).map((range: any) => ({
+          start: range.start ?? range.startsAt,
+          end: range.end ?? range.endsAt,
+        }))
+
+      return [
+        id,
+        {
+          id,
+          name: day.name ?? WEEKDAY_NAMES[id] ?? id,
+          active: day.active ?? slots.length > 0,
+          slots,
+        },
+      ]
+    }),
+  )
+
+  return DEFAULT_WEEKLY_AVAILABILITY.map(
+    (defaultDay) =>
+      daysById.get(defaultDay.id) ??
+      (rawDays.length === 0 && useDefaultDays
+        ? defaultDay
+        : { ...defaultDay, active: false, slots: [] }),
+  )
+}
+
+function toWeeklyAvailabilityPayload(days: ScheduleDay[]) {
+  return days.map((day) => ({
+    weekday: day.id,
+    active: day.active,
+    timeRanges: day.slots.map((slot) => ({
+      startsAt: slot.start,
+      endsAt: slot.end,
+    })),
+  }))
+}
 
 function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
   if (!startsOn || startsOn.includes('NaN') || startsOn === 'Data inválida') {
@@ -89,9 +156,24 @@ export const Schedule = () => {
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
-  const weeklyAvailability =
-    rawAvailability.length > 0 ? rawAvailability : DEFAULT_WEEKLY_AVAILABILITY
+  const normalizedWeeklyAvailability = normalizeWeeklyAvailability(
+    rawAvailability,
+    !schedule,
+  )
+  const [weeklyAvailabilityDraft, setWeeklyAvailabilityDraft] = useState<
+    ScheduleDay[] | null
+  >(null)
+  const weeklyAvailability = weeklyAvailabilityDraft ?? normalizedWeeklyAvailability
   const blockedPeriods = schedule?.blockedPeriods ?? []
+  const scheduleId = schedule?.id ?? null
+  const previousScheduleId = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (previousScheduleId.current !== scheduleId) {
+      previousScheduleId.current = scheduleId
+      setWeeklyAvailabilityDraft(null)
+    }
+  }, [scheduleId])
 
   const currentDuration =
     schedule?.appointmentDurationInMinutes ??
@@ -99,13 +181,15 @@ export const Schedule = () => {
     45
 
   const handleToggleDay = async (dayId: string, currentActive: boolean) => {
-    const updated = weeklyAvailability.map((day: any) =>
+    const updated = weeklyAvailability.map((day) =>
       day.id === dayId ? { ...day, active: !currentActive } : day,
     )
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao atualizar dia:', error)
     }
   }
@@ -120,7 +204,7 @@ export const Schedule = () => {
   const handleAddSlot = async () => {
     if (!selectedDayId) return
 
-    const updated = weeklyAvailability.map((day: any) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === selectedDayId) {
         const currentSlots = day.slots ?? []
         return {
@@ -131,17 +215,19 @@ export const Schedule = () => {
       }
       return day
     })
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
       setModalOpen(false)
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao adicionar intervalo:', error)
     }
   }
 
   const handleRemoveSlot = async (dayId: string, slotIndex: number) => {
-    const updated = weeklyAvailability.map((day: any) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === dayId) {
         const newSlots = (day.slots ?? []).filter(
           (_: any, idx: number) => idx !== slotIndex,
@@ -153,10 +239,12 @@ export const Schedule = () => {
       }
       return day
     })
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao remover intervalo:', error)
     }
   }

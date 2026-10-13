@@ -21,12 +21,13 @@ describe('Schedule', () => {
         appointmentDurationInMinutes: 45,
         weeklyAvailability: [
           {
-            id: 'monday',
-            name: 'Segunda-feira',
-            active: true,
-            slots: [{ start: '09:00', end: '12:00' }],
+            weekday: 'monday',
+            timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
           },
-          { id: 'saturday', name: 'Sábado', active: false, slots: [] },
+          {
+            weekday: 'tuesday',
+            timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
+          },
         ],
         blockedPeriods: [
           {
@@ -72,10 +73,12 @@ describe('Schedule', () => {
 
     fireEvent.click(screen.getAllByRole('switch')[0])
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
-    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual([
-      expect.objectContaining({ id: 'monday', active: false }),
-      expect.objectContaining({ id: 'saturday', active: false }),
-    ])
+    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ weekday: 'monday', active: false }),
+        expect.objectContaining({ weekday: 'tuesday', active: true }),
+      ]),
+    )
   })
 
   it('adds and removes weekly slots', async () => {
@@ -91,11 +94,10 @@ describe('Schedule', () => {
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
     expect(updateAvailabilityMock.mock.calls[0][0][0]).toEqual(
       expect.objectContaining({
-        id: 'monday',
-        active: true,
-        slots: [
-          { start: '09:00', end: '12:00' },
-          { start: '08:00', end: '12:00' },
+        weekday: 'monday',
+        timeRanges: [
+          { startsAt: '09:00', endsAt: '12:00' },
+          { startsAt: '08:00', endsAt: '12:00' },
         ],
       }),
     )
@@ -105,7 +107,30 @@ describe('Schedule', () => {
       .filter((button) => button.querySelector('svg.lucide-x'))
     fireEvent.click(removeButtons[0])
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledTimes(2))
-    expect(updateAvailabilityMock.mock.calls[1][0][0].slots).toEqual([])
+    expect(updateAvailabilityMock.mock.calls[1][0][0].timeRanges).toEqual([
+      { startsAt: '08:00', endsAt: '12:00' },
+    ])
+  })
+
+  it('renders every day and changes only the selected day', async () => {
+    render(<Schedule />)
+
+    expect(screen.getByText('Segunda-feira')).toBeTruthy()
+    expect(screen.getByText('Terça-feira')).toBeTruthy()
+    expect(screen.getByText('Domingo')).toBeTruthy()
+
+    fireEvent.click(screen.getAllByRole('switch')[0])
+    await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
+
+    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual(
+      expect.arrayContaining([
+        {
+          weekday: 'tuesday',
+          active: true,
+          timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
+        },
+      ]),
+    )
   })
 
   it('adds a block with a trimmed reason and removes an existing block', async () => {
