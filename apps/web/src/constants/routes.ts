@@ -12,6 +12,7 @@ export const ROUTES = {
   attendantDashboard: '/atendimento/dashboard',
   attendantConsultations: '/atendimento/consultas',
   lawyerSchedule: '/agenda',
+  lawyerScheduleConfiguration: '/agenda/configurar',
   lawyer: '/advogado',
   lawyerConsultations: '/advogado/consultas',
   consultation: '/consultas/$consultationId',
