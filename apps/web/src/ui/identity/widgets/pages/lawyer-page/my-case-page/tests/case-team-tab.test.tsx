@@ -7,11 +7,15 @@ import { CasoDetalheChecklistPage } from '..'
 import { useMyCasePage } from '../use-my-case-page'
 
 vi.mock('../use-my-case-page', () => ({ useMyCasePage: vi.fn() }))
+vi.mock('@/ui/identity/hooks/use-current-collaborator-query', () => ({
+  useCurrentCollaboratorQuery: vi.fn(() => ({ currentCollaborator: null })),
+}))
 vi.mock('../case-page-data', () => ({
   CASE_STAGES: [],
   CASE_TASKS: [],
   CASE_TIMELINE: [],
   MOCK_ACTIVITIES: [],
+  getCaseStages: () => [],
 }))
 vi.mock('../checklist-dossier-tab', () => ({ ChecklistDossierTab: () => null }))
 vi.mock('../case-pieces-tab', () => ({ CasePiecesTab: () => null }))

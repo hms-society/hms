@@ -52,6 +52,11 @@ export function ElaborateDocumentVersionDialog({
     setMode('manual')
   }, [currentVersionId, open])
 
+  function handleModeChange(nextMode: 'manual' | 'ai') {
+    setMode(nextMode)
+    if (nextMode === 'manual') setSourceVersionId(currentVersionId)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -65,36 +70,41 @@ export function ElaborateDocumentVersionDialog({
         <fieldset disabled={isGenerating} className='min-w-0 space-y-4'>
           <legend className='mb-2 text-sm font-medium'>Versão-base</legend>
           <div className='max-h-48 space-y-2 overflow-y-auto'>
-            {[...versions].reverse().map((version) => (
-              <label
-                key={version.id}
-                className={`flex cursor-pointer items-center gap-3 rounded-md border p-3 ${sourceVersionId === version.id ? 'border-primary bg-highlight/50' : ''}`}
-              >
-                <input
-                  type='radio'
-                  name='source-document-version'
-                  value={version.id}
-                  checked={sourceVersionId === version.id}
-                  onChange={() => setSourceVersionId(version.id)}
-                />
-                <span className='min-w-0 flex-1'>
-                  <span className='block font-medium'>
-                    Versão v{version.versionNumber}
+            {[...versions].reverse().map((version) => {
+              const isManualSource = mode === 'manual' && version.id !== currentVersionId
+
+              return (
+                <label
+                  key={version.id}
+                  className={`flex items-center gap-3 rounded-md border p-3 ${isManualSource ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${sourceVersionId === version.id ? 'border-primary bg-highlight/50' : ''}`}
+                >
+                  <input
+                    type='radio'
+                    name='source-document-version'
+                    value={version.id}
+                    checked={sourceVersionId === version.id}
+                    disabled={isManualSource}
+                    onChange={() => setSourceVersionId(version.id)}
+                  />
+                  <span className='min-w-0 flex-1'>
+                    <span className='block font-medium'>
+                      Versão v{version.versionNumber}
+                    </span>
+                    <span className='block text-xs text-muted-foreground'>
+                      {new Date(version.createdAt).toLocaleString('pt-BR')}
+                    </span>
                   </span>
-                  <span className='block text-xs text-muted-foreground'>
-                    {new Date(version.createdAt).toLocaleString('pt-BR')}
-                  </span>
-                </span>
-                {version.id === currentVersionId ? <Badge>Atual</Badge> : null}
-              </label>
-            ))}
+                  {version.id === currentVersionId ? <Badge>Atual</Badge> : null}
+                </label>
+              )
+            })}
           </div>
           <div className='grid gap-2 sm:grid-cols-2'>
             <button
               type='button'
               aria-pressed={mode === 'manual'}
               className={`rounded-md border p-3 text-left ${mode === 'manual' ? 'border-primary bg-highlight/50' : ''}`}
-              onClick={() => setMode('manual')}
+              onClick={() => handleModeChange('manual')}
             >
               <span className='flex items-center gap-2 font-medium'>
                 <Icon name='pencil' /> Edição manual
@@ -107,7 +117,7 @@ export function ElaborateDocumentVersionDialog({
               type='button'
               aria-pressed={mode === 'ai'}
               className={`rounded-md border p-3 text-left ${mode === 'ai' ? 'border-primary bg-highlight/50' : ''}`}
-              onClick={() => setMode('ai')}
+              onClick={() => handleModeChange('ai')}
             >
               <span className='flex items-center gap-2 font-medium'>
                 <Icon name='sparkles' /> Geração por IA
@@ -154,7 +164,7 @@ export function ElaborateDocumentVersionDialog({
               disabled={!sourceVersionId}
               onClick={() => onStartManual(sourceVersionId)}
             >
-              <Icon name='pencil' /> Abrir no editor
+              <Icon name='pencil' /> Iniciar edição manual
             </Button>
           ) : (
             <Button

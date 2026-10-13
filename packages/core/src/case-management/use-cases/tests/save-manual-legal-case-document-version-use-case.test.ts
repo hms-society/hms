@@ -113,7 +113,7 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
       sourceDocumentVersionId: sourceVersion.id,
       versionNumber: 2,
       source: 'manual',
-      status: 'in_review',
+      status: 'draft',
     })
     versions.add.mockResolvedValue(savedVersion)
 
@@ -133,7 +133,7 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
         sourceDocumentVersionId: sourceVersion.id,
         versionNumber: 2,
         source: 'manual',
-        status: 'in_review',
+        status: 'draft',
       }),
     )
     expect(storage.save).toHaveBeenCalledWith(
@@ -149,7 +149,7 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
         sourceDocumentVersionId: sourceVersion.id,
         content,
         pendingMarkers: [{ marker: '{cliente_nome}' }],
-        status: 'in_review',
+        status: 'draft',
       }),
     )
   })

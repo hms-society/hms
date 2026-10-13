@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import type { CollaboratorsRepository } from '@hms/core/identity/interfaces'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
@@ -26,6 +27,7 @@ import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-m
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { CaseDocumentResponseDto } from '@/document-production/rest/dtos'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { selectDocumentFileVersion } from './select-document-file-version'
@@ -49,6 +51,8 @@ export class ListCaseDocumentsController {
     versions: DocumentVersionsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
+    private readonly collaborators: CollaboratorsRepository,
     @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
   ) {
     this.useCase = new ListCaseDocumentsUseCase(
@@ -94,9 +98,31 @@ export class ListCaseDocumentsController {
   @Get(':caseId/documents')
   @ApiResponse({ status: HttpStatus.OK, type: [CaseDocumentResponseDto] })
   handle(@Param('caseId', new ParseUUIDPipe()) caseId: string) {
-    return this.useCase
-      .execute({ caseId })
-      .then((documents) => documents.map(CaseDocumentResponseDto.fromDomain))
+    return this.useCase.execute({ caseId }).then(async (documents) => {
+      const collaboratorIds = [
+        ...new Set(
+          documents.flatMap(({ versions }) =>
+            versions.flatMap((version) => [
+              version.createdByCollaboratorId,
+              ...(version.reviewedByCollaboratorId
+                ? [version.reviewedByCollaboratorId]
+                : []),
+            ]),
+          ),
+        ),
+      ]
+      const summaries = await Promise.all(
+        collaboratorIds.map((id) => this.collaborators.findSummaryById(id)),
+      )
+      const names = new Map(
+        summaries.flatMap((summary) =>
+          summary ? [[summary.collaboratorId, summary.professionalName] as const] : [],
+        ),
+      )
+      return documents.map((document) =>
+        CaseDocumentResponseDto.fromDomain({ ...document, collaboratorNames: names }),
+      )
+    })
   }
 
   @Get(':caseId/documents/:documentId')
@@ -108,6 +134,23 @@ export class ListCaseDocumentsController {
     const document = (await this.useCase.execute({ caseId })).find(
       ({ document: item }) => item.id === documentId,
     )
-    return document ? CaseDocumentResponseDto.fromDomain(document) : undefined
+    if (!document) return undefined
+    const collaboratorIds = [
+      ...new Set(
+        document.versions.flatMap((version) => [
+          version.createdByCollaboratorId,
+          ...(version.reviewedByCollaboratorId ? [version.reviewedByCollaboratorId] : []),
+        ]),
+      ),
+    ]
+    const summaries = await Promise.all(
+      collaboratorIds.map((id) => this.collaborators.findSummaryById(id)),
+    )
+    const names = new Map(
+      summaries.flatMap((summary) =>
+        summary ? [[summary.collaboratorId, summary.professionalName] as const] : [],
+      ),
+    )
+    return CaseDocumentResponseDto.fromDomain({ ...document, collaboratorNames: names })
   }
 }
