@@ -11,7 +11,10 @@ import {
 } from '@nestjs/common'
 import { AddBlockedPeriodUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type { CalendarDate } from '@hms/core/scheduling/domain/structures'
-import type { SchedulesRepository } from '@hms/core/scheduling/interfaces'
+import type {
+  AppointmentsRepository,
+  SchedulesRepository,
+} from '@hms/core/scheduling/interfaces'
 
 import { SCHEDULING_REPOSITORIES } from '@/scheduling/constants/scheduling-repositories'
 
@@ -20,6 +23,8 @@ export class SchedulesController {
   constructor(
     @Inject(SCHEDULING_REPOSITORIES.schedules)
     private readonly schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.appointments)
+    private readonly appointmentsRepository: AppointmentsRepository,
     private readonly addBlockedPeriodUseCase: AddBlockedPeriodUseCase,
   ) {}
 
@@ -68,6 +73,14 @@ export class SchedulesController {
   async updateTimeZone(@Body() body: { scheduleId: string; timeZone: string }) {
     assertValidTimeZone(body.timeZone)
     return this.schedulesRepository.updateTimeZone(body.scheduleId, body.timeZone)
+  }
+
+  @Get(':scheduleId/future-appointments')
+  async hasFutureAppointments(@Param('scheduleId') scheduleId: string) {
+    return {
+      hasFutureAppointments:
+        await this.appointmentsRepository.hasFutureScheduled(scheduleId),
+    }
   }
   @Post('blocked-periods')
   async addBlockedPeriod(

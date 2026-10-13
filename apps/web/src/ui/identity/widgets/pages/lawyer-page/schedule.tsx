@@ -21,6 +21,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/shadcn/alert-dialog'
 import { useConsultation } from './use-schedule'
 
 const DEFAULT_WEEKLY_AVAILABILITY = [
@@ -158,6 +168,7 @@ export const Schedule = () => {
     isUpdatingDuration,
     updateTimeZone,
     isUpdatingTimeZone,
+    hasFutureAppointments,
     updateAvailability,
     isUpdatingAvailability,
     addBlock,
@@ -177,6 +188,9 @@ export const Schedule = () => {
   const [blockReason, setBlockReason] = useState('')
   const [blockError, setBlockError] = useState<string | null>(null)
   const [timeZoneDraft, setTimeZoneDraft] = useState('America/Sao_Paulo')
+  const [pendingTimeZone, setPendingTimeZone] = useState<string | null>(null)
+  const [isTimeZoneConfirmationOpen, setIsTimeZoneConfirmationOpen] = useState(false)
+  const [isCheckingFutureAppointments, setIsCheckingFutureAppointments] = useState(false)
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
@@ -207,6 +221,46 @@ export const Schedule = () => {
     schedule?.appointmentDurationInMinutes ??
     (schedule as any)?.defaultDurationMinutes ??
     45
+
+  const persistTimeZone = async (timeZone: string) => {
+    const previousTimeZone = timeZoneDraft
+    setTimeZoneDraft(timeZone)
+    try {
+      await updateTimeZone(timeZone)
+    } catch {
+      setTimeZoneDraft(previousTimeZone)
+    }
+  }
+
+  const handleTimeZoneChange = async (timeZone: string) => {
+    if (timeZone === timeZoneDraft || isCheckingFutureAppointments) return
+
+    setIsCheckingFutureAppointments(true)
+    try {
+      if (await hasFutureAppointments()) {
+        setPendingTimeZone(timeZone)
+        setIsTimeZoneConfirmationOpen(true)
+        return
+      }
+
+      await persistTimeZone(timeZone)
+    } finally {
+      setIsCheckingFutureAppointments(false)
+    }
+  }
+
+  const handleConfirmTimeZoneChange = async () => {
+    if (!pendingTimeZone) return
+
+    await persistTimeZone(pendingTimeZone)
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
+
+  const handleCancelTimeZoneChange = () => {
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
 
   const handleToggleDay = async (dayId: string, currentActive: boolean) => {
     const updated = weeklyAvailability.map((day) =>
@@ -413,16 +467,8 @@ export const Schedule = () => {
         </div>
         <Select
           value={timeZoneDraft}
-          onValueChange={async (value: string) => {
-            const previousTimeZone = timeZoneDraft
-            setTimeZoneDraft(value)
-            try {
-              await updateTimeZone(value)
-            } catch {
-              setTimeZoneDraft(previousTimeZone)
-            }
-          }}
-          disabled={isUpdatingTimeZone}
+          onValueChange={handleTimeZoneChange}
+          disabled={isUpdatingTimeZone || isCheckingFutureAppointments}
         >
           <SelectTrigger className='w-full sm:max-w-sm'>
             <SelectValue placeholder='Selecione o fuso horário' />
@@ -436,6 +482,32 @@ export const Schedule = () => {
           </SelectContent>
         </Select>
       </div>
+
+      <AlertDialog
+        open={isTimeZoneConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelTimeZoneChange()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterar fuso horário da agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Existem consultas futuras nesta agenda. A alteração muda a forma como os
+              horários são exibidos para novos agendamentos, mas não desloca o instante
+              das consultas já confirmadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelTimeZoneChange}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmTimeZoneChange}>
+              Confirmar alteração
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>

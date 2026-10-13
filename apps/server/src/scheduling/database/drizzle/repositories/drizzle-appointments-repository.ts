@@ -83,4 +83,20 @@ export class DrizzleAppointmentsRepository
 
     return record ? this.mapper.toDomain(record) : undefined
   }
+
+  async hasFutureScheduled(scheduleId: string, from = new Date()) {
+    const [record] = await this.database
+      .select({ id: appointmentModel.id })
+      .from(appointmentModel)
+      .where(
+        and(
+          eq(appointmentModel.scheduleId, scheduleId),
+          eq(appointmentModel.status, 'scheduled'),
+          gt(appointmentModel.endsAt, from),
+        ),
+      )
+      .limit(1)
+
+    return Boolean(record)
+  }
 }

@@ -96,6 +96,13 @@ export function useConsultation() {
     },
   })
 
+  async function hasFutureAppointments(): Promise<boolean> {
+    const scheduleId = await getOrCreateScheduleId()
+    const response = await schedulingService.hasFutureAppointments(scheduleId)
+    if (response.isFailure) response.throwError()
+    return response.body?.hasFutureAppointments ?? false
+  }
+
   const addBlockMutation = useMutation({
     mutationFn: async (payload: {
       startDate: string
@@ -158,5 +165,6 @@ export function useConsultation() {
     isUpdatingDuration: updateDurationMutation.isPending,
     updateTimeZone: updateTimeZoneMutation.mutateAsync,
     isUpdatingTimeZone: updateTimeZoneMutation.isPending,
+    hasFutureAppointments,
   }
 }

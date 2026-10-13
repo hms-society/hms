@@ -49,5 +49,10 @@ export const SchedulingService = (restClient: ReturnType<typeof AxiosRestClient>
     async updateTimeZone(scheduleId: string, timeZone: string) {
       return restClient.put<any>('/schedules/time-zone', { scheduleId, timeZone })
     },
+    async hasFutureAppointments(scheduleId: string) {
+      return restClient.get<{ hasFutureAppointments: boolean }>(
+        `/schedules/${scheduleId}/future-appointments`,
+      )
+    },
   }
 }
