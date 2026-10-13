@@ -5,8 +5,6 @@ import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 import type { LegalCaseSummary } from '@hms/core/case-management/domain/entities'
 import { AdministratorCaseHeader } from '../administrator-case-header'
 import { CasePageHeader } from '../case-page-header'
-import { CaseStageProgress } from '../case-stage-progress'
-import { CaseSummaryFacts } from '../case-summary-facts'
 import { CaseTabNavigation } from '../case-tab-navigation'
 import { CaseTabPanels } from '../case-tab-panels'
 import { LawyerCaseHeader } from '../lawyer-case-header'
@@ -297,6 +295,7 @@ describe('Case detail presentation widgets', () => {
     )
     expect(screen.getByRole('heading', { name: 'Caso de teste' })).toBeTruthy()
     expect(screen.getByText('Prioridade: Normal')).toBeTruthy()
+    expect(screen.getByText('Cível')).toBeTruthy()
     expect(screen.getAllByText('Documentação').length).toBeGreaterThan(0)
     expect(screen.getByText('Produção Jurídica')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Gerar link para terceiro' }))
@@ -371,24 +370,6 @@ describe('Case detail presentation widgets', () => {
       />,
     )
     expect(screen.getByRole('heading', { name: 'Caso de teste' })).toBeTruthy()
-
-    rerender(
-      <CaseSummaryFacts
-        publicCode='CASO-1'
-        legalArea='Trabalhista'
-        clientName='Cliente da ficha'
-      />,
-    )
-    expect(screen.getByText('CASO-1')).toBeTruthy()
-    expect(screen.getByText('Trabalhista')).toBeTruthy()
-    expect(screen.getByText('Cliente da ficha')).toBeTruthy()
-  })
-
-  it('renders the stage progression', () => {
-    render(<CaseStageProgress />)
-    expect(screen.getAllByText('Documentação').length).toBeGreaterThan(0)
-    expect(screen.getByText('Protocolo / Entrega')).toBeTruthy()
-    expect(screen.getByText('Encerramento')).toBeTruthy()
   })
 
   it('renders navigation count and locked tab', () => {
