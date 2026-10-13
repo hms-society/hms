@@ -149,6 +149,40 @@ describe('Schedule', () => {
     await waitFor(() => expect(removeBlockMock).toHaveBeenCalledWith('block-1'))
   })
 
+  it('shows a validation message and does not submit an inverted date range', () => {
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Adicionar bloqueio/ }))
+    const dateInputs = document.querySelectorAll<HTMLInputElement>('input[type="date"]')
+    fireEvent.change(dateInputs[0], { target: { value: '2026-12-20' } })
+    fireEvent.change(dateInputs[1], { target: { value: '2026-12-10' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar bloqueio' }))
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'A data final deve ser igual ou posterior à data inicial.',
+    )
+    expect(addBlockMock).not.toHaveBeenCalled()
+    expect(dateInputs[1].getAttribute('min')).toBe('2026-12-20')
+  })
+
+  it('submits a one-day blocked period when both dates are equal', async () => {
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Adicionar bloqueio/ }))
+    const dateInputs = document.querySelectorAll<HTMLInputElement>('input[type="date"]')
+    fireEvent.change(dateInputs[0], { target: { value: '2026-12-15' } })
+    fireEvent.change(dateInputs[1], { target: { value: '2026-12-15' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar bloqueio' }))
+
+    await waitFor(() =>
+      expect(addBlockMock).toHaveBeenCalledWith({
+        startDate: '2026-12-15',
+        endDate: '2026-12-15',
+        reason: 'Bloqueio de agenda',
+      }),
+    )
+  })
+
   it('uses the default weekly schedule and date fallbacks when schedule is empty', () => {
     useConsultationMock.mockReturnValue({ ...useConsultationMock(), schedule: undefined })
 

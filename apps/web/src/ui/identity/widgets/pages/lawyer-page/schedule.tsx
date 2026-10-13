@@ -85,6 +85,7 @@ export const Schedule = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
+  const [blockError, setBlockError] = useState<string | null>(null)
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
@@ -164,15 +165,27 @@ export const Schedule = () => {
     setStartDate('')
     setEndDate('')
     setBlockReason('')
+    setBlockError(null)
     setModalBlockOpen(true)
   }
 
   const handleAddBlock = async () => {
-    if (!startDate) return
+    if (!startDate) {
+      setBlockError('Informe a data inicial do bloqueio.')
+      return
+    }
+
+    const normalizedEndDate = endDate || startDate
+    if (normalizedEndDate < startDate) {
+      setBlockError('A data final deve ser igual ou posterior à data inicial.')
+      return
+    }
+
+    setBlockError(null)
     try {
       await addBlock({
         startDate,
-        endDate: endDate || startDate,
+        endDate: normalizedEndDate,
         reason: blockReason.trim() || 'Bloqueio de agenda',
       })
 
@@ -180,8 +193,13 @@ export const Schedule = () => {
       setStartDate('')
       setEndDate('')
       setBlockReason('')
+      setBlockError(null)
     } catch (error) {
-      console.error('Erro ao adicionar bloqueio:', error)
+      setBlockError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível criar o bloqueio. Tente novamente.',
+      )
     }
   }
 
@@ -477,10 +495,23 @@ export const Schedule = () => {
                 <Input
                   type='date'
                   value={endDate}
+                  min={startDate || undefined}
+                  aria-invalid={Boolean(blockError)}
+                  aria-describedby={blockError ? 'blocked-period-error' : undefined}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>
+
+            {blockError ? (
+              <p
+                id='blocked-period-error'
+                role='alert'
+                className='text-sm text-destructive'
+              >
+                {blockError}
+              </p>
+            ) : null}
 
             <div className='flex flex-col gap-2'>
               <Label className='text-[13px] text-foreground'>

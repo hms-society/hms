@@ -41,9 +41,9 @@ import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
     DrizzleClientConsentsRepository,
     DrizzleCollaboratorRegistrationAttemptsRepository,
     DrizzleIdentityTransaction,
+    DrizzleThirdPartiesRepository,
     DrizzleIntakeClientsRepository,
     DrizzleIntakeResponsiblesRepository,
-    DrizzleThirdPartiesRepository,
     DrizzleThirdPartyAuditLogsRepository,
     {
       provide: IDENTITY_REPOSITORIES.clients,
