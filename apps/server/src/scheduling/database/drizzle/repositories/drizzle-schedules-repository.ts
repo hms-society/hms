@@ -30,6 +30,7 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
         schedulesToAdd.map((schedule) => ({
           id: schedule.id,
           collaboratorId: schedule.collaboratorId,
+          timeZone: schedule.timeZone,
           defaultDurationMinutes: schedule.appointmentDurationInMinutes,
           weeklyAvailability: schedule.weeklyAvailability,
           createdAt: schedule.createdAt,
@@ -123,6 +124,7 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
       .insert(schedules)
       .values({
         collaboratorId: data.collaboratorId,
+        timeZone: data.timeZone,
         defaultDurationMinutes: data.defaultDurationMinutes,
         weeklyAvailability: data.weeklyAvailability,
       })
@@ -172,6 +174,18 @@ export class DrizzleSchedulesRepository implements SchedulesRepository {
         defaultDurationMinutes,
         updatedAt: new Date(),
       })
+      .where(eq(schedules.id, scheduleId))
+      .returning()
+
+    return updated
+      ? this.mapToScheduleDomain({ ...updated, blockedPeriods: [] })
+      : undefined
+  }
+
+  async updateTimeZone(scheduleId: string, timeZone: string) {
+    const [updated] = await this.db
+      .update(schedules)
+      .set({ timeZone, updatedAt: new Date() })
       .where(eq(schedules.id, scheduleId))
       .returning()
 

@@ -8,6 +8,13 @@ import { Switch } from '@/ui/shadcn/switch'
 import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -36,7 +43,21 @@ const WEEKDAY_NAMES: Record<string, string> = {
   sunday: 'Domingo',
 }
 
-type ScheduleDay = (typeof DEFAULT_WEEKLY_AVAILABILITY)[number]
+const TIME_ZONES = [
+  { value: 'America/Sao_Paulo', label: 'Brasília (UTC−03:00)' },
+  { value: 'America/Manaus', label: 'Manaus (UTC−04:00)' },
+  { value: 'America/Rio_Branco', label: 'Rio Branco (UTC−05:00)' },
+  { value: 'America/Noronha', label: 'Fernando de Noronha (UTC−02:00)' },
+  { value: 'UTC', label: 'UTC (UTC±00:00)' },
+]
+
+type ScheduleSlot = { start: string; end: string }
+type ScheduleDay = {
+  id: string
+  name: string
+  active: boolean
+  slots: ScheduleSlot[]
+}
 
 function normalizeWeeklyAvailability(
   rawAvailability: unknown,
@@ -135,6 +156,8 @@ export const Schedule = () => {
     isLoading,
     updateDuration,
     isUpdatingDuration,
+    updateTimeZone,
+    isUpdatingTimeZone,
     updateAvailability,
     isUpdatingAvailability,
     addBlock,
@@ -153,6 +176,7 @@ export const Schedule = () => {
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
   const [blockError, setBlockError] = useState<string | null>(null)
+  const [timeZoneDraft, setTimeZoneDraft] = useState('America/Sao_Paulo')
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
@@ -174,6 +198,10 @@ export const Schedule = () => {
       setWeeklyAvailabilityDraft(null)
     }
   }, [scheduleId])
+
+  useEffect(() => {
+    setTimeZoneDraft(schedule?.timeZone ?? 'America/Sao_Paulo')
+  }, [schedule?.timeZone])
 
   const currentDuration =
     schedule?.appointmentDurationInMinutes ??
@@ -372,6 +400,41 @@ export const Schedule = () => {
             )
           })}
         </div>
+      </div>
+
+      <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-3'>
+        <div className='flex flex-col gap-1'>
+          <span className='text-[14px] font-semibold text-foreground'>
+            Fuso horário da agenda
+          </span>
+          <span className='text-[12px] text-muted-foreground'>
+            Usado para calcular e exibir os horários das consultas.
+          </span>
+        </div>
+        <Select
+          value={timeZoneDraft}
+          onValueChange={async (value: string) => {
+            const previousTimeZone = timeZoneDraft
+            setTimeZoneDraft(value)
+            try {
+              await updateTimeZone(value)
+            } catch {
+              setTimeZoneDraft(previousTimeZone)
+            }
+          }}
+          disabled={isUpdatingTimeZone}
+        >
+          <SelectTrigger className='w-full sm:max-w-sm'>
+            <SelectValue placeholder='Selecione o fuso horário' />
+          </SelectTrigger>
+          <SelectContent>
+            {TIME_ZONES.map((timeZone) => (
+              <SelectItem key={timeZone.value} value={timeZone.value}>
+                {timeZone.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>

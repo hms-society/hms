@@ -10,6 +10,7 @@ const useConsultationMock = vi.mocked(useConsultation)
 
 describe('Schedule', () => {
   const updateDurationMock = vi.fn()
+  const updateTimeZoneMock = vi.fn()
   const updateAvailabilityMock = vi.fn()
   const addBlockMock = vi.fn()
   const removeBlockMock = vi.fn()
@@ -41,6 +42,8 @@ describe('Schedule', () => {
       isLoading: false,
       updateDuration: updateDurationMock,
       isUpdatingDuration: false,
+      updateTimeZone: updateTimeZoneMock,
+      isUpdatingTimeZone: false,
       updateAvailability: updateAvailabilityMock,
       isUpdatingAvailability: false,
       addBlock: addBlockMock,
@@ -51,6 +54,7 @@ describe('Schedule', () => {
       setDuration: vi.fn(),
       isError: false,
       error: null,
+      refetch: vi.fn(),
     })
   })
 

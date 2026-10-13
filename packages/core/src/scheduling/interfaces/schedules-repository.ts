@@ -12,6 +12,7 @@ export type CreateScheduleInput = {
   collaboratorId: string
   defaultDurationMinutes: number
   weeklyAvailability: unknown
+  timeZone: string
 }
 
 export interface SchedulesRepository {
@@ -29,6 +30,7 @@ export interface SchedulesRepository {
     scheduleId: string,
     defaultDurationMinutes: number,
   ): Promise<Schedule | undefined>
+  updateTimeZone(scheduleId: string, timeZone: string): Promise<Schedule | undefined>
   createBlockedPeriod(data: CreateBlockedPeriodInput): Promise<BlockedPeriod>
   deleteBlockedPeriod(id: string): Promise<void>
 }

@@ -449,6 +449,13 @@
       "when": 1791414000000,
       "tag": "0060_backfill_audit_events",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1792000000000,
+      "tag": "0061_add_schedule_time_zone",
+      "breakpoints": true
     }
   ]
 }

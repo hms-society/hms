@@ -30,6 +30,7 @@ export function useConsultation() {
         collaboratorId,
         defaultDurationMinutes: 45,
         weeklyAvailability: [],
+        timeZone: 'America/Sao_Paulo',
       })
 
       if (createResponse.isFailure) {
@@ -76,6 +77,18 @@ export function useConsultation() {
         response.throwError()
       }
 
+      return response.body
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: scheduleQueryKey })
+    },
+  })
+
+  const updateTimeZoneMutation = useMutation({
+    mutationFn: async (timeZone: string) => {
+      const scheduleId = await getOrCreateScheduleId()
+      const response = await schedulingService.updateTimeZone(scheduleId, timeZone)
+      if (response.isFailure) response.throwError()
       return response.body
     },
     onSuccess: () => {
@@ -143,5 +156,7 @@ export function useConsultation() {
     isRemovingBlock: removeBlockMutation.isPending,
     updateDuration: updateDurationMutation.mutateAsync,
     isUpdatingDuration: updateDurationMutation.isPending,
+    updateTimeZone: updateTimeZoneMutation.mutateAsync,
+    isUpdatingTimeZone: updateTimeZoneMutation.isPending,
   }
 }

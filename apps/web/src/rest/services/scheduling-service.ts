@@ -4,6 +4,7 @@ export type CreateScheduleRequest = {
   collaboratorId: string
   defaultDurationMinutes: number
   weeklyAvailability: unknown
+  timeZone: string
 }
 
 export type AddBlockRequest = {
@@ -44,6 +45,9 @@ export const SchedulingService = (restClient: ReturnType<typeof AxiosRestClient>
         scheduleId,
         defaultDurationMinutes,
       })
+    },
+    async updateTimeZone(scheduleId: string, timeZone: string) {
+      return restClient.put<any>('/schedules/time-zone', { scheduleId, timeZone })
     },
   }
 }

@@ -63,6 +63,7 @@ describe('ReserveIntakeAppointmentJob', () => {
       collaboratorId: LAWYER_ID,
       defaultDurationMinutes: 60,
       weeklyAvailability: [],
+      timeZone: 'America/Sao_Paulo',
     })
 
     await inngestFixture.client.send({

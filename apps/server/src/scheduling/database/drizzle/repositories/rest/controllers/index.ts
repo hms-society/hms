@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Inject } from '@nestjs/common'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common'
 import { AddBlockedPeriodUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type { CalendarDate } from '@hms/core/scheduling/domain/structures'
 import type { SchedulesRepository } from '@hms/core/scheduling/interfaces'
@@ -25,9 +35,12 @@ export class SchedulesController {
       collaboratorId: string
       defaultDurationMinutes: number
       weeklyAvailability: unknown
+      timeZone?: string
     },
   ) {
-    return this.schedulesRepository.createSchedule(body)
+    const timeZone = body.timeZone ?? 'America/Sao_Paulo'
+    assertValidTimeZone(timeZone)
+    return this.schedulesRepository.createSchedule({ ...body, timeZone })
   }
 
   @Put('availability')
@@ -49,6 +62,12 @@ export class SchedulesController {
       body.scheduleId,
       body.defaultDurationMinutes,
     )
+  }
+
+  @Put('time-zone')
+  async updateTimeZone(@Body() body: { scheduleId: string; timeZone: string }) {
+    assertValidTimeZone(body.timeZone)
+    return this.schedulesRepository.updateTimeZone(body.scheduleId, body.timeZone)
   }
   @Post('blocked-periods')
   async addBlockedPeriod(
@@ -72,5 +91,13 @@ export class SchedulesController {
   async removeBlockedPeriod(@Param('id') id: string) {
     await this.schedulesRepository.deleteBlockedPeriod(id)
     return { success: true }
+  }
+}
+
+function assertValidTimeZone(timeZone: string) {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone }).format()
+  } catch {
+    throw new BadRequestException('Informe um fuso horário válido.')
   }
 }

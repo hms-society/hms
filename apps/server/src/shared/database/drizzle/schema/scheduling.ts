@@ -4,6 +4,7 @@ import { relations } from 'drizzle-orm'
 export const schedules = pgTable('schedules', {
   id: uuid('id').defaultRandom().primaryKey(),
   collaboratorId: uuid('collaborator_id').notNull().unique(),
+  timeZone: text('time_zone').notNull().default('America/Sao_Paulo'),
   defaultDurationMinutes: integer('default_duration_minutes').default(45).notNull(),
   weeklyAvailability: jsonb('weekly_availability').notNull().default([]),
   createdAt: timestamp('created_at').defaultNow().notNull(),
