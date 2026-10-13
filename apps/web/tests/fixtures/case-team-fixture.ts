@@ -326,6 +326,10 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
       await route.fulfill(json(caseSummary))
       return
     }
+    if (pathname === `/cases/${CASE_ID}/tasks` && request.method() === 'GET') {
+      await route.fulfill(json([]))
+      return
+    }
     if (pathname === `/cases/${CASE_ID}/checklist` && request.method() === 'GET') {
       if (options.checklistStatus && options.checklistStatus !== 200) {
         await route.fulfill({
