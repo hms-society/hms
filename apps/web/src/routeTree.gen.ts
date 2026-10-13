@@ -18,7 +18,6 @@ import { Route as ConsultasRouteRouteImport } from './routes/consultas/route'
 import { Route as IntakesRouteRouteImport } from './routes/intakes/route'
 import { Route as AdvogadoComunicacaoRouteImport } from './routes/advogado/comunicacao'
 import { Route as AgendaIndexRouteImport } from './routes/agenda/index'
-import { Route as AgendaConfigurarRouteImport } from './routes/agenda/configurar'
 import { Route as AtendimentoConsultasRouteImport } from './routes/atendimento/consultas'
 import { Route as AtendimentoDashboardRouteImport } from './routes/atendimento/dashboard'
 import { Route as AuditoriaIndexRouteImport } from './routes/auditoria/index'
@@ -106,11 +105,6 @@ const AdvogadoComunicacaoRoute = AdvogadoComunicacaoRouteImport.update({
 const AgendaIndexRoute = AgendaIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AgendaRouteRoute,
-} as any)
-const AgendaConfigurarRoute = AgendaConfigurarRouteImport.update({
-  id: '/configurar',
-  path: '/configurar',
   getParentRoute: () => AgendaRouteRoute,
 } as any)
 const AtendimentoConsultasRoute = AtendimentoConsultasRouteImport.update({
@@ -359,7 +353,6 @@ export interface FileRoutesByFullPath {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/agenda/configurar': typeof AgendaConfigurarRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -410,7 +403,6 @@ export interface FileRoutesByTo {
   '/atendimento': typeof AtendimentoRouteRouteWithChildren
   '/cliente': typeof ClienteRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/agenda/configurar': typeof AgendaConfigurarRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -465,7 +457,6 @@ export interface FileRoutesById {
   '/intakes': typeof IntakesRouteRouteWithChildren
   '/consultas/$consultationId': typeof ConsultasConsultationIdRouteRouteWithChildren
   '/advogado/comunicacao': typeof AdvogadoComunicacaoRoute
-  '/agenda/configurar': typeof AgendaConfigurarRoute
   '/atendimento/consultas': typeof AtendimentoConsultasRoute
   '/atendimento/dashboard': typeof AtendimentoDashboardRoute
   '/caixa-de-documentos/$fileId': typeof CaixaDeDocumentosFileIdRoute
@@ -522,7 +513,6 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
-    | '/agenda/configurar'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -573,7 +563,6 @@ export interface FileRouteTypes {
     | '/atendimento'
     | '/cliente'
     | '/advogado/comunicacao'
-    | '/agenda/configurar'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -627,7 +616,6 @@ export interface FileRouteTypes {
     | '/intakes'
     | '/consultas/$consultationId'
     | '/advogado/comunicacao'
-    | '/agenda/configurar'
     | '/atendimento/consultas'
     | '/atendimento/dashboard'
     | '/caixa-de-documentos/$fileId'
@@ -766,13 +754,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/agenda/'
       preLoaderRoute: typeof AgendaIndexRouteImport
-      parentRoute: typeof AgendaRouteRoute
-    }
-    '/agenda/configurar': {
-      id: '/agenda/configurar'
-      path: '/configurar'
-      fullPath: '/agenda/configurar'
-      preLoaderRoute: typeof AgendaConfigurarRouteImport
       parentRoute: typeof AgendaRouteRoute
     }
     '/atendimento/consultas': {
@@ -1137,12 +1118,10 @@ const AdvogadoRouteRouteWithChildren = AdvogadoRouteRoute._addFileChildren(
 )
 
 interface AgendaRouteRouteChildren {
-  AgendaConfigurarRoute: typeof AgendaConfigurarRoute
   AgendaIndexRoute: typeof AgendaIndexRoute
 }
 
 const AgendaRouteRouteChildren: AgendaRouteRouteChildren = {
-  AgendaConfigurarRoute: AgendaConfigurarRoute,
   AgendaIndexRoute: AgendaIndexRoute,
 }
 
