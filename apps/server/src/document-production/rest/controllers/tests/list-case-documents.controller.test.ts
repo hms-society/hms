@@ -9,7 +9,6 @@ import {
 import { DrizzleCollaboratorsRepository } from '@/identity/database/drizzle/repositories'
 import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
 import { ListCaseDocumentsController } from '@/document-production/rest/controllers'
-import { selectDocumentFileVersion } from '@/document-production/rest/controllers/select-document-file-version'
 
 describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => {
   let fixture: DocumentProductionModuleFixture
@@ -33,10 +32,6 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
       .expect(403)
     await request(fixture.app.getHttpServer())
       .get(`/cases/${legalCase.id}/documents/40000000-0000-4000-8000-000000000001`)
-      .set('Authorization', fixture.authenticateAs(lawyer))
-      .expect(403)
-    await request(fixture.app.getHttpServer())
-      .get(`/cases/${legalCase.id}/documents/40000000-0000-4000-8000-000000000001/file`)
       .set('Authorization', fixture.authenticateAs(lawyer))
       .expect(403)
   })
@@ -120,22 +115,5 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
         ],
       }),
     ])
-  })
-})
-
-describe('selectDocumentFileVersion', () => {
-  it('selects the requested version instead of the latest version', () => {
-    const requestedVersion = DocumentVersionFaker.fake({
-      id: 'version-1',
-      versionNumber: 1,
-    })
-    const latestVersion = DocumentVersionFaker.fake({
-      id: 'version-2',
-      versionNumber: 2,
-    })
-
-    expect(
-      selectDocumentFileVersion([requestedVersion, latestVersion], 'version-1'),
-    ).toBe(requestedVersion)
   })
 })

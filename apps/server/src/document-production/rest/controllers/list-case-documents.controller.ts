@@ -3,12 +3,8 @@ import {
   Get,
   HttpStatus,
   Inject,
-  Logger,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
-  Query,
-  StreamableFile,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
@@ -26,7 +22,6 @@ import type {
 } from '@hms/core/document-production/interfaces'
 import { ListCaseDocumentsUseCase } from '@hms/core/document-production/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
-import type { StorageProvider } from '@hms/core/shared/interfaces'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
@@ -34,15 +29,12 @@ import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constant
 import { CaseDocumentResponseDto } from '@/document-production/rest/dtos'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
-import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
-import { selectDocumentFileVersion } from './select-document-file-version'
 
 @Controller('cases')
 @ApiTags('Case Document Production')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ListCaseDocumentsController {
-  private readonly logger = new Logger(ListCaseDocumentsController.name)
   private readonly useCase: ListCaseDocumentsUseCase
 
   constructor(
@@ -59,7 +51,6 @@ export class ListCaseDocumentsController {
     @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaborators: CollaboratorsRepository,
-    @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
   ) {
     this.useCase = new ListCaseDocumentsUseCase(
       cases,
@@ -70,40 +61,6 @@ export class ListCaseDocumentsController {
       versions,
       generations,
     )
-  }
-
-  @Get(':caseId/documents/:documentId/file')
-  @ApiResponse({ status: HttpStatus.OK, description: 'Arquivo da peça documental' })
-  async handleFile(
-    @Param('caseId', new ParseUUIDPipe()) caseId: string,
-    @Param('documentId', new ParseUUIDPipe()) documentId: string,
-    @CurrentCollaborator() collaborator: CollaboratorSummary,
-    @Query('versionId') versionId?: string,
-  ) {
-    this.logger.log(`Solicitando arquivo da peça ${documentId} do caso ${caseId}`)
-    const item = (
-      await this.useCase.execute({
-        caseId,
-        actorId: collaborator.collaboratorId,
-      })
-    ).find(({ document }) => document.id === documentId)
-    const version = selectDocumentFileVersion(item?.versions ?? [], versionId)
-    if (!version?.storagePath) {
-      this.logger.warn(
-        `Versão ${version?.id ?? 'inexistente'} sem storagePath para peça ${documentId}`,
-      )
-      throw new NotFoundException(
-        'O arquivo desta versão ainda não está associado ao Storage.',
-      )
-    }
-
-    this.logger.log(`Baixando ${version.storagePath}`)
-    const content = await this.storageProvider.download(version.storagePath)
-    this.logger.log(`Arquivo lido do Storage (${content.byteLength} bytes)`)
-    const mimeType = version.storagePath.endsWith('.pdf')
-      ? 'application/pdf'
-      : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    return new StreamableFile(Buffer.from(content), { type: mimeType })
   }
 
   @Get(':caseId/documents')
