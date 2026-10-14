@@ -87,6 +87,12 @@ describe('Schedule', () => {
     expect(addSlotButton).toBeTruthy()
     if (addSlotButton) fireEvent.click(addSlotButton)
     expect(screen.getByRole('dialog')).toBeTruthy()
+
+    // Configura um horário não sobreposto válido (ex: 14:00 - 18:00)
+    const inputs = screen.getAllByDisplayValue(/^(08:00|12:00)$/)
+    fireEvent.change(inputs[0], { target: { value: '14:00' } })
+    fireEvent.change(inputs[1], { target: { value: '18:00' } })
+
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar intervalo' }))
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
     expect(updateAvailabilityMock.mock.calls[0][0][0]).toEqual(
@@ -95,7 +101,7 @@ describe('Schedule', () => {
         active: true,
         slots: [
           { start: '09:00', end: '12:00' },
-          { start: '08:00', end: '12:00' },
+          { start: '14:00', end: '18:00' },
         ],
       }),
     )
@@ -106,6 +112,71 @@ describe('Schedule', () => {
     fireEvent.click(removeButtons[0])
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledTimes(2))
     expect(updateAvailabilityMock.mock.calls[1][0][0].slots).toEqual([])
+  })
+
+  // CT-030: Rejeitar sobreposição
+  it('blocks overlapping slot and displays error message (CT-030)', async () => {
+    render(<Schedule />)
+
+    const addSlotButton = screen
+      .getAllByRole('button')
+      .find((button) => button.querySelector('svg.lucide-plus'))
+    if (addSlotButton) fireEvent.click(addSlotButton)
+
+    // Intervalo existente na segunda-feira: 09:00 - 12:00
+    // Tenta adicionar 11:00 - 13:00 (sobreposição)
+    const inputs = screen.getAllByDisplayValue(/^(08:00|12:00)$/)
+    fireEvent.change(inputs[0], { target: { value: '11:00' } })
+    fireEvent.change(inputs[1], { target: { value: '13:00' } })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar intervalo' }))
+
+    expect(await screen.findByText('Os horários não podem se sobrepor')).toBeTruthy()
+    expect(updateAvailabilityMock).not.toHaveBeenCalled()
+  })
+
+  // CT-031: Rejeitar contenção
+  it('blocks contained slot and displays error message (CT-031)', async () => {
+    render(<Schedule />)
+
+    const addSlotButton = screen
+      .getAllByRole('button')
+      .find((button) => button.querySelector('svg.lucide-plus'))
+    if (addSlotButton) fireEvent.click(addSlotButton)
+
+    // Intervalo existente na segunda-feira: 09:00 - 12:00
+    // Tenta adicionar 10:00 - 11:00 (totalmente contido)
+    const inputs = screen.getAllByDisplayValue(/^(08:00|12:00)$/)
+    fireEvent.change(inputs[0], { target: { value: '10:00' } })
+    fireEvent.change(inputs[1], { target: { value: '11:00' } })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar intervalo' }))
+
+    expect(await screen.findByText('Os horários não podem se sobrepor')).toBeTruthy()
+    expect(updateAvailabilityMock).not.toHaveBeenCalled()
+  })
+
+  // Auto-merge adjacent slots
+  it('automatically merges adjacent slots when boundaries touch', async () => {
+    render(<Schedule />)
+
+    const addSlotButton = screen
+      .getAllByRole('button')
+      .find((button) => button.querySelector('svg.lucide-plus'))
+    if (addSlotButton) fireEvent.click(addSlotButton)
+
+    // Intervalo existente na segunda-feira: 09:00 - 12:00
+    // Tenta adicionar 12:00 - 14:00 (adjacente)
+    const inputs = screen.getAllByDisplayValue(/^(08:00|12:00)$/)
+    fireEvent.change(inputs[0], { target: { value: '12:00' } })
+    fireEvent.change(inputs[1], { target: { value: '14:00' } })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar intervalo' }))
+
+    await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
+    expect(updateAvailabilityMock.mock.calls[0][0][0].slots).toEqual([
+      { start: '09:00', end: '14:00' },
+    ])
   })
 
   it('adds a block with a trimmed reason and removes an existing block', async () => {

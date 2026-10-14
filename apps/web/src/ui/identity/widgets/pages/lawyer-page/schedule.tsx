@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
+import { Timer, CalendarDays, Plus, Trash2, Loader2, X, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+
+import { validateAndMergeSlot } from '@hms/validation/scheduling'
 
 import { Button } from '@/ui/shadcn/button'
 import { Switch } from '@/ui/shadcn/switch'
@@ -80,6 +82,7 @@ export const Schedule = () => {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('12:00')
+  const [slotError, setSlotError] = useState<string | null>(null)
 
   const [modalBlockOpen, setModalBlockOpen] = useState(false)
   const [startDate, setStartDate] = useState('')
@@ -113,19 +116,33 @@ export const Schedule = () => {
     setSelectedDayId(dayId)
     setStartTime('08:00')
     setEndTime('12:00')
+    setSlotError(null)
     setModalOpen(true)
   }
 
   const handleAddSlot = async () => {
     if (!selectedDayId) return
 
+    const targetDay = weeklyAvailability.find((d: any) => d.id === selectedDayId)
+    const existingSlots = targetDay?.slots ?? []
+
+    const validation = validateAndMergeSlot(
+      existingSlots,
+      { start: startTime, end: endTime },
+      currentDuration,
+    )
+
+    if (!validation.success) {
+      setSlotError(validation.error)
+      return
+    }
+
     const updated = weeklyAvailability.map((day: any) => {
       if (day.id === selectedDayId) {
-        const currentSlots = day.slots ?? []
         return {
           ...day,
           active: true,
-          slots: [...currentSlots, { start: startTime, end: endTime }],
+          slots: validation.slots,
         }
       }
       return day
@@ -134,6 +151,7 @@ export const Schedule = () => {
     try {
       await updateAvailability(updated)
       setModalOpen(false)
+      setSlotError(null)
     } catch (error) {
       console.error('Erro ao adicionar intervalo:', error)
     }
@@ -404,24 +422,42 @@ export const Schedule = () => {
             </DialogTitle>
           </DialogHeader>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 py-4'>
-            <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário inicial</Label>
-              <Input
-                type='time'
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+          <div className='flex flex-col gap-4 py-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Horário inicial</Label>
+                <Input
+                  type='time'
+                  value={startTime}
+                  onChange={(e) => {
+                    setStartTime(e.target.value)
+                    setSlotError(null)
+                  }}
+                />
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Horário final</Label>
+                <Input
+                  type='time'
+                  value={endTime}
+                  onChange={(e) => {
+                    setEndTime(e.target.value)
+                    setSlotError(null)
+                  }}
+                />
+              </div>
             </div>
 
-            <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário final</Label>
-              <Input
-                type='time'
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
-            </div>
+            {slotError && (
+              <div
+                role='alert'
+                className='flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm font-medium'
+              >
+                <AlertCircle className='size-4 shrink-0' />
+                <span>{slotError}</span>
+              </div>
+            )}
           </div>
 
           <DialogFooter className='pt-4 border-t border-border flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3'>

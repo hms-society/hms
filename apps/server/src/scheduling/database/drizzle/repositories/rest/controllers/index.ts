@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Inject } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Inject,
+  BadRequestException,
+} from '@nestjs/common'
+import { weeklyAvailabilitySchema } from '@hms/validation/scheduling'
 import { AddBlockedPeriodUseCase } from '@hms/core/scheduling/domain/use-cases'
 import type { CalendarDate } from '@hms/core/scheduling/domain/structures'
 import type { SchedulesRepository } from '@hms/core/scheduling/interfaces'
@@ -35,9 +46,18 @@ export class SchedulesController {
     @Body()
     body: { scheduleId: string; weeklyAvailability: unknown },
   ) {
+    const parseResult = weeklyAvailabilitySchema.safeParse(body.weeklyAvailability)
+
+    if (!parseResult.success) {
+      const firstIssue = parseResult.error.issues[0]
+      throw new BadRequestException(
+        firstIssue?.message ?? 'Disponibilidade semanal inválida',
+      )
+    }
+
     return this.schedulesRepository.updateWeeklyAvailability(
       body.scheduleId,
-      body.weeklyAvailability,
+      parseResult.data,
     )
   }
   @Put('duration')
