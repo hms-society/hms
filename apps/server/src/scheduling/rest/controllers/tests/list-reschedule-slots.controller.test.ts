@@ -25,4 +25,29 @@ describe('List Reschedule Slots Controller [GET /scheduling/appointments/:id/slo
 
     expect(response.body.length).toBeGreaterThan(0)
   })
+
+  it('offers the slot of a cancelled appointment again', async () => {
+    const { user, collaborator } = await fixture.registerAdmin()
+    const { collaborator: lawyer } = await fixture.registerLawyer()
+    const scheduled = await fixture.seedAppointment(lawyer.id, collaborator.id)
+    const cancelled = await fixture.seedAppointment(lawyer.id, collaborator.id)
+
+    await request(fixture.app.getHttpServer())
+      .patch(`/scheduling/appointments/${cancelled.appointment.id}/cancel`)
+      .send({ expectedRevision: cancelled.appointment.updatedAt.toISOString() })
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(200)
+
+    const response = await request(fixture.app.getHttpServer())
+      .get(`/scheduling/appointments/${scheduled.appointment.id}/slots`)
+      .query({ date: '2030-01-14' })
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(200)
+
+    expect(response.body).toContainEqual(
+      expect.objectContaining({
+        startsAt: scheduled.appointment.startsAt.toISOString(),
+      }),
+    )
+  })
 })

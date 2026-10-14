@@ -117,6 +117,7 @@ export class RescheduleAppointmentUseCase
         new Date(request.startsAt.getTime() - 86_400_000),
         new Date(endsAt.getTime() + 86_400_000),
         [schedule.id],
+        { statuses: ['scheduled'] },
       )
       if (
         request.startsAt <= this.datetimeProvider.now() ||

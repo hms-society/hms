@@ -73,6 +73,32 @@ describe('Scheduling calendar read controllers', () => {
     )
   })
 
+  it('keeps cancelled appointments visible in calendar history', async () => {
+    const { user, collaborator: admin } = await fixture.registerAdmin()
+    const { collaborator: lawyer } = await fixture.registerLawyer()
+    const seeded = await fixture.seedAppointment(lawyer.id, admin.id)
+
+    await request(fixture.app.getHttpServer())
+      .patch(`/scheduling/appointments/${seeded.appointment.id}/cancel`)
+      .send({ expectedRevision: seeded.appointment.updatedAt.toISOString() })
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(200)
+
+    const calendar = await request(fixture.app.getHttpServer())
+      .get('/scheduling/calendar')
+      .query({ view: 'week', date: '2030-01-14', event: 'cancelled' })
+      .set('Authorization', fixture.authenticateAs(user))
+      .expect(200)
+
+    expect(calendar.body).toContainEqual(
+      expect.objectContaining({
+        kind: 'appointment',
+        appointmentId: seeded.appointment.id,
+        status: 'cancelled',
+      }),
+    )
+  })
+
   it('hides another lawyer appointment from a lawyer actor', async () => {
     const { user: firstUser, collaborator: firstLawyer } = await fixture.registerLawyer()
     const { user: secondUser, collaborator: secondLawyer } =

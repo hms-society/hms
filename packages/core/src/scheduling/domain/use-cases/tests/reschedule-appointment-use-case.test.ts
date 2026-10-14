@@ -104,6 +104,12 @@ describe('Reschedule Appointment Use Case', () => {
 
     expect(result.appointmentId).toBe(appointment.id)
     expect(appointmentsRepository.addChange).toHaveBeenCalledTimes(1)
+    expect(appointmentsRepository.listOverlapping).toHaveBeenCalledWith(
+      expect.any(Date),
+      expect.any(Date),
+      [schedule.id],
+      { statuses: ['scheduled'] },
+    )
     const change = appointmentsRepository.addChange.mock.calls[0][0]
     expect(change.resultingRevision.getTime()).toBeGreaterThan(revision.getTime())
     expect(lockOrder).toEqual([`schedule:${schedule.id}`, 'appointment'])
