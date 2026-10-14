@@ -21,13 +21,13 @@ export class DownloadDocumentFileUseCase {
 
   async execute({ fileId, actorId }: Request): Promise<FileContent> {
     const validation = await this.documentValidationsRepository.findByFileId(fileId)
-    if (validation?.checklistLink?.caseId) {
-      await this.caseAccessProvider.authorize({
-        caseId: validation.checklistLink.caseId,
-        actorId,
-        intent: CaseAccessIntent.ReadContent,
-      })
-    }
+    if (!validation?.checklistLink?.caseId) throw new DocumentFileNotFoundError()
+    await this.caseAccessProvider.authorize({
+      caseId: validation.checklistLink.caseId,
+      actorId,
+      intent: CaseAccessIntent.ReadContent,
+      ...(validation.clientId ? { expectedClientId: validation.clientId } : {}),
+    })
 
     const file = await this.documentBatchesRepository.findFileById(fileId)
     if (!file) throw new DocumentFileNotFoundError()

@@ -51,7 +51,10 @@ async function authorizeCaseRequest(
   request: AuthorizeCaseAccessRequest,
 ): Promise<void> {
   const { legalCase, actor } = await loadCaseAccessContext(dependencies, request)
-  if (isAdminRead(actor.profile, request.intent)) return
+  if (isAdminRead(actor.profile, request.intent)) {
+    ensureExpectedClientMatchesCase(request, legalCase.clientId)
+    return
+  }
   await authorizeMemberIntent(dependencies, request, legalCase, actor.profile)
   ensureExpectedClientMatchesCase(request, legalCase.clientId)
 }

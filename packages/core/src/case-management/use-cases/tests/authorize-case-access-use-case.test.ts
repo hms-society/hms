@@ -158,7 +158,11 @@ describe('Authorize Case Access Use Case', () => {
 
   it('allows active Admins to read without membership but denies all access intents that write', async () => {
     legalCases.findById.mockResolvedValue(
-      LegalCaseFaker.fake({ id: TEST_CASE_ID, status: LegalCaseStatus.Documentation }),
+      LegalCaseFaker.fake({
+        id: TEST_CASE_ID,
+        clientId: 'case-client',
+        status: LegalCaseStatus.Documentation,
+      }),
     )
     collaborators.findById.mockResolvedValue({
       collaboratorId: TEST_ACTOR_ID,
@@ -176,6 +180,14 @@ describe('Authorize Case Access Use Case', () => {
         intent: CaseAccessIntent.ReadContent,
       }),
     ).resolves.toBeUndefined()
+    await expect(
+      useCase.execute({
+        caseId: TEST_CASE_ID,
+        actorId: TEST_ACTOR_ID,
+        intent: CaseAccessIntent.ReadContent,
+        expectedClientId: 'different-client',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
 
     for (const intent of [
       CaseAccessIntent.WriteContent,

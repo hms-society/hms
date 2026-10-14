@@ -29,6 +29,7 @@ describe('Download Document File Use Case', () => {
     validations.findByFileId.mockResolvedValue(
       DocumentValidationDocumentFaker.fake({
         id: 'file-1',
+        clientId: 'client-1',
         checklistLink: { caseId: 'case-1' },
       }),
     )
@@ -54,6 +55,7 @@ describe('Download Document File Use Case', () => {
       caseId: 'case-1',
       actorId: 'collaborator-1',
       intent: 'read_content',
+      expectedClientId: 'client-1',
     })
     expect(access.authorize.mock.invocationCallOrder[0]).toBeLessThan(
       storage.download.mock.invocationCallOrder[0],
@@ -76,26 +78,16 @@ describe('Download Document File Use Case', () => {
     expect(storage.download).not.toHaveBeenCalled()
   })
 
-  it('does not require case authorization when validation has no case link', async () => {
+  it('does not expose file metadata or bytes when validation has no case link', async () => {
     validations.findByFileId.mockResolvedValue(
       DocumentValidationDocumentFaker.fake({ id: 'file-1', checklistLink: undefined }),
     )
-    batches.findFileById.mockResolvedValue({
-      id: 'file-1',
-      batchId: 'batch-1',
-      storagePath: 'private/file.pdf',
-      originalName: 'file.pdf',
-      mimeType: 'application/pdf',
-      sizeBytes: 4,
-      createdAt: new Date(),
-    })
-    storage.download.mockResolvedValue(new Uint8Array([1]))
-
-    await useCase.execute({ fileId: 'file-1', actorId: 'collaborator-1' })
-
+    await expect(
+      useCase.execute({ fileId: 'file-1', actorId: 'collaborator-1' }),
+    ).rejects.toThrow(DocumentFileNotFoundError)
     expect(access.authorize).not.toHaveBeenCalled()
-    expect(batches.findFileById).toHaveBeenCalledWith('file-1')
-    expect(storage.download).toHaveBeenCalledWith('private/file.pdf')
+    expect(batches.findFileById).not.toHaveBeenCalled()
+    expect(storage.download).not.toHaveBeenCalled()
   })
 
   it('fails when the file is missing before downloading from storage', async () => {
