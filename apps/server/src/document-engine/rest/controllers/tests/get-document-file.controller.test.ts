@@ -37,7 +37,7 @@ describe('Get Document File Controller [GET /documents/files/:fileId, GET /docum
     }
   })
 
-  it('returns metadata from PostgreSQL and bytes from local Supabase Storage', async () => {
+  it('returns metadata but withholds bytes for a file not linked to a case', async () => {
     const clientId = randomUUID()
     await fixture.seedUserAndClient(userId, clientId)
     const storagePath = `tests/${randomUUID()}/document.pdf`
@@ -66,11 +66,9 @@ describe('Get Document File Controller [GET /documents/files/:fileId, GET /docum
       .get(`/documents/files/${fileId}`)
       .expect(200)
     expect(metadata.body).toMatchObject({ id: fileId, storagePath })
-    const content = await request(fixture.app.getHttpServer())
+    await request(fixture.app.getHttpServer())
       .get(`/documents/files/${fileId}/content`)
-      .expect(200)
-    expect(content.headers['content-type']).toContain('application/pdf')
-    expect(content.body).toEqual(Buffer.from('document bytes'))
+      .expect(404)
   })
 
   it('returns not found for an unknown file', async () => {
