@@ -1,15 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { Mocked } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { mock, type MockProxy } from 'vitest-mock-extended'
 import { RequestDocumentExceptionUseCase } from '../request-document-exception-use-case'
 import type { DocumentExceptionsRepository } from '../../interfaces/document-exceptions-repository'
 import type { DocumentExceptionAuditLogsRepository } from '../../interfaces/document-exception-audit-logs-repository'
 import type { DocumentException } from '../../domain/entities/document-exception'
 import { DocumentExceptionStatus, DocumentExceptionType } from '../../domain/structures'
+import type { CaseAccessProvider } from '../../../case-management/interfaces/case-access-provider'
 
 describe('RequestDocumentExceptionUseCase', () => {
   let useCase: RequestDocumentExceptionUseCase
-  let exceptionsRepositoryMock: Mocked<DocumentExceptionsRepository>
-  let auditLogsRepositoryMock: Mocked<DocumentExceptionAuditLogsRepository>
+  let exceptionsRepositoryMock: MockProxy<DocumentExceptionsRepository>
+  let auditLogsRepositoryMock: MockProxy<DocumentExceptionAuditLogsRepository>
+  let caseAccessProvider: MockProxy<CaseAccessProvider>
 
   const mockException: DocumentException = {
     id: 'exc-123',
@@ -26,21 +28,17 @@ describe('RequestDocumentExceptionUseCase', () => {
   }
 
   beforeEach(() => {
-    exceptionsRepositoryMock = {
-      create: vi.fn().mockResolvedValue(mockException),
-      findById: vi.fn(),
-      updateStatus: vi.fn(),
-      hasExpiredExceptionsForCase: vi.fn(),
-      findExpiredProvisionalAcceptances: vi.fn(),
-    } as unknown as Mocked<DocumentExceptionsRepository>
+    exceptionsRepositoryMock = mock<DocumentExceptionsRepository>()
+    exceptionsRepositoryMock.create.mockResolvedValue(mockException)
 
-    auditLogsRepositoryMock = {
-      create: vi.fn().mockResolvedValue(undefined),
-    } as unknown as Mocked<DocumentExceptionAuditLogsRepository>
+    auditLogsRepositoryMock = mock<DocumentExceptionAuditLogsRepository>()
+    auditLogsRepositoryMock.create.mockResolvedValue(undefined)
+    caseAccessProvider = mock<CaseAccessProvider>()
 
     useCase = new RequestDocumentExceptionUseCase(
       exceptionsRepositoryMock,
       auditLogsRepositoryMock,
+      caseAccessProvider,
     )
   })
 
@@ -55,6 +53,11 @@ describe('RequestDocumentExceptionUseCase', () => {
     })
 
     expect(result).toEqual(mockException)
+    expect(caseAccessProvider.authorize).toHaveBeenCalledWith({
+      caseId: 'case-789',
+      actorId: 'user-001',
+      intent: 'manage_document_exception',
+    })
     expect(exceptionsRepositoryMock.create).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: 'doc-456',

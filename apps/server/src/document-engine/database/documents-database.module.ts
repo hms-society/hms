@@ -14,6 +14,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { DOCUMENT_ENGINE_REPOSITORIES } from '../rest/controllers/request-document-exception.controller'
 import { DrizzleDocumentBatchMapper } from './drizzle/mappers/drizzle-document-batch-mapper'
+import { DrizzleDocumentValidationMapper } from './drizzle/mappers/drizzle-document-validation-mapper'
 import { DrizzleDocumentBatchesRepository } from './drizzle/repositories/document-batches-repository'
 import { DrizzleDailyCountersRepository } from './drizzle/repositories/daily-counters-repository'
 import { DrizzleDocumentValidationLogsRepository } from './drizzle/repositories/drizzle-document-validation-logs-repository'
@@ -31,6 +32,7 @@ import { RealDocumentsSeeder } from './real-documents-seeder'
   ],
   providers: [
     DrizzleDocumentBatchMapper,
+    DrizzleDocumentValidationMapper,
     DrizzleDailyCountersRepository,
     DrizzleDocumentBatchesRepository,
     DrizzleDocumentValidationsRepository,
