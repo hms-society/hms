@@ -303,6 +303,7 @@ test('shows a team access error after the server returns 403 on the protected re
     failedResponses.every(
       ({ pathname, status }) => pathname === `/cases/${CASE_ID}/team` && status === 403,
     ),
+    `Unexpected failed REST responses: ${JSON.stringify(failedResponses)}`,
   ).toBe(true)
   expect(state.browserErrors).toEqual([])
   expect(
