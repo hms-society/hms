@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import { CaseManagementAccessModule } from '@/case-management/access'
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { legalCaseModel } from '@/case-management/database/drizzle/models'
 import type { INestApplication, Type } from '@nestjs/common'
@@ -474,6 +475,7 @@ export class CaseManagementModuleFixture {
       IdentityAccessModule,
       LegalCatalogModule,
       CaseManagementDatabaseModule,
+      CaseManagementAccessModule,
       CaseManagementProvisionModule,
       CaseIdentityTransactionModule,
       IntakeDatabaseModule,

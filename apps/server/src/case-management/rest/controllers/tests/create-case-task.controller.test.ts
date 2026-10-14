@@ -169,4 +169,29 @@ describe('Create Case Task Controller [POST /cases/:caseId/tasks]', () => {
       })
       .expect(400)
   })
+  it('denies task create for an Admin without membership despite broad read access', async () => {
+    const admin = await fixture.registerCollaborator({ profile: 'admin' })
+    const legalCase = await fixture.registerLegalCase({
+      clientId: admin.clientId,
+      legalAreaId: admin.legalAreaId,
+      legalTopicId: admin.legalTopicId,
+    })
+    const task = await fixture.registerCaseTask(legalCase.id)
+    await request(fixture.app.getHttpServer())
+      .post(`/cases/${legalCase.id}/tasks`)
+      .send({
+        type: 'internal_task',
+        title: 'Unauthorized creation',
+        description: 'Should not be created',
+        plannedDate: '2099-01-15',
+        assigneeIds: [admin.collaboratorId],
+      })
+      .expect(403)
+    expect(await fixture.findCaseTask(task.id)).toMatchObject({
+      id: task.id,
+      title: task.title,
+      version: task.version,
+    })
+    expect(await fixture.findCaseMembers(legalCase.id)).toEqual([])
+  })
 })
