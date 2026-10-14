@@ -183,11 +183,24 @@ export class ConsultationModuleFixture {
 
   async registerUnauthorizedCollaborator() {
     const user = await this.registerUser()
+    const [legalArea] = await this.legalAreasRepository.addMany([
+      { name: 'Direito do Trabalho sem acesso', active: true },
+    ])
+    if (!legalArea) throw new Error('Test legal area was not created')
+    const [legalTopic] = await this.legalTopicsRepository.addMany([
+      {
+        legalAreaId: legalArea.id,
+        name: 'Contratos sem acesso',
+        active: true,
+      },
+    ])
+    if (!legalTopic) throw new Error('Test legal topic was not created')
     const collaborator = await this.collaboratorsRepository.add({
       userId: user.id,
-      professionalName: 'Colaborador sem acesso',
-      jobTitle: 'Cliente',
-      profile: 'client',
+      professionalName: 'Advogado sem acesso',
+      jobTitle: 'Advogado',
+      profile: 'lawyer',
+      legalExpertises: [{ legalAreaId: legalArea.id, legalTopicIds: [legalTopic.id] }],
     })
     if (!collaborator) throw new Error('Test unauthorized collaborator was not created')
     return { user, collaborator }
